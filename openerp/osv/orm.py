@@ -51,6 +51,8 @@ def transfer_field_to_modifiers(field, modifiers):
 # Need the context to evaluate the invisible attribute on tree views.
 # For non-tree views, the context shouldn't be given.
 def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False):
+    if context is None:
+        context = {}
     if node.get('attrs'):
         if 'uid' in context and 'uid' in node.get('attrs'):	
             modifiers.update(eval(node.get('attrs'),  context ))
