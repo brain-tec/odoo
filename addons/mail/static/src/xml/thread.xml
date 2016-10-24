@@ -172,6 +172,9 @@
     <t t-name="mail.Attachment">
         <div t-attf-class="o_attachment #{attachment.upload ? 'o_attachment_uploading' : ''}" t-att-title="attachment.name">
             <a class="o_image" t-att-href='attachment.url' target="_blank" t-att-data-mimetype="attachment.mimetype" t-attf-data-src="/web/image/#{attachment.id}/100x80">
+                <t t-if="attachment.mimetype.match('gif|jpe|jpg|png')">
+                    <img t-attf-src="/web/image/#{attachment.id}/100x80" />
+                </t>
                 <span class='o_attachment_name'><t t-esc='attachment.name'/></span>
             </a>
             <t t-if="editable">
