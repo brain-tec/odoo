@@ -59,6 +59,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="Accounts" t-as="account">
+                            <t t-set="currency" t-value="account['currency_id']"/>
                             <tr style="font-weight: bold;">
                                 <td colspan="6">
                                     <span style="color: white;" t-esc="'..'"/>
@@ -74,7 +75,9 @@
                                 <td class="text-right">
                                     <span t-esc="account['balance']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
                                 </td>
-                                <td groups="base.group_multi_currency"/>
+                                <td t-if="currency != res_company.currency_id" class="text-right" groups="base.group_multi_currency">
+                                    <span t-esc="account['amount_currency']" t-esc-options='{"widget": "monetary", "display_currency": "currency"}'/>
+                                </td>
                             </tr>
                             <tr t-foreach="account['move_lines']" t-as="line">
                                 <td><span t-esc="line['ldate']"/></td>
@@ -92,9 +95,8 @@
                                 <td class="text-right">
                                     <span t-esc="line['balance']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
                                 </td>
-                                <td class="text-right" groups="base.group_multi_currency">
-                                    <span t-esc="line['amount_currency'] if line['amount_currency'] > 0.00 else ''"/>
-                                    <span t-esc="line['currency_code'] if line['amount_currency'] > 0.00 else ''"/>
+                                <td t-if="currency != res_company.currency_id" class="text-right" groups="base.group_multi_currency">
+                                    <span t-esc="line['amount_currency']" t-esc-options='{"widget": "monetary", "display_currency": "currency"}'/>
                                 </td>
                             </tr>
                         </t>
