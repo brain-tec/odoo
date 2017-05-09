@@ -126,6 +126,9 @@ class MrpProduction(models.Model):
         ('none', 'None')], string='Availability',
         compute='_compute_availability', store=True)
 
+    unreserve_visible = fields.Boolean(
+        'Inventory Unreserve Visible', compute='_compute_unreserve_visible',
+        help='Technical field to check when we can unreserve')
     post_visible = fields.Boolean(
         'Inventory Post Visible', compute='_compute_post_visible',
         help='Technical field to check when we can post')
@@ -192,6 +195,14 @@ class MrpProduction(models.Model):
                 partial_list = [x.partially_available and x.state in ('waiting', 'confirmed', 'assigned') for x in order.move_raw_ids]
                 assigned_list = [x.state in ('assigned', 'done', 'cancel') for x in order.move_raw_ids]
                 order.availability = (all(assigned_list) and 'assigned') or (any(partial_list) and 'partially_available') or 'waiting'
+
+    @api.depends('state', 'move_raw_ids.reserved_quant_ids')
+    def _compute_unreserve_visible(self):
+        for order in self:
+            if order.state in ['done', 'cancel'] or not order.move_raw_ids.mapped('reserved_quant_ids'):
+                order.unreserve_visible = False
+            else:
+                order.unreserve_visible = True
 
     @api.multi
     @api.depends('move_raw_ids.quantity_done', 'move_finished_ids.quantity_done')
@@ -296,6 +307,7 @@ class MrpProduction(models.Model):
             'production_id': self.id,
             'origin': self.name,
             'group_id': self.procurement_group_id.id,
+            'propagate': self.propagate,
         })
         move.action_confirm()
         return move
@@ -323,6 +335,7 @@ class MrpProduction(models.Model):
         data = {
             'name': self.name,
             'date': self.date_planned_start,
+            'date_expected': self.date_planned_start,
             'bom_line_id': bom_line.id,
             'product_id': bom_line.product_id.id,
             'product_uom_qty': quantity,
@@ -398,7 +411,7 @@ class MrpProduction(models.Model):
             quantity = order.product_uom_id._compute_quantity(order.product_qty, order.bom_id.product_uom_id) / order.bom_id.product_qty
             boms, lines = order.bom_id.explode(order.product_id, quantity, picking_type=order.bom_id.picking_type_id)
             order._generate_workorders(boms)
-        orders_to_plan.write({'state': 'planned'})
+        return orders_to_plan.write({'state': 'planned'})
 
     @api.multi
     def _generate_workorders(self, exploded_boms):
@@ -466,10 +479,10 @@ class MrpProduction(models.Model):
             production.workorder_ids.filtered(lambda x: x.state != 'cancel').action_cancel()
 
             finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
-            production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')).action_cancel()
-            finish_moves.action_cancel()
+            raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+            (finish_moves | raw_moves).action_cancel()
 
-            procurements = ProcurementOrder.search([('move_dest_id', 'in', finish_moves.ids)])
+            procurements = ProcurementOrder.search([('move_dest_id', 'in', (finish_moves | raw_moves).ids)])
             if procurements:
                 procurements.cancel()
 
@@ -479,18 +492,17 @@ class MrpProduction(models.Model):
         self.write({'state': 'cancel'})
         return True
 
-    @api.multi
     def _cal_price(self, consumed_moves):
+        self.ensure_one()
         return True
 
     @api.multi
     def post_inventory(self):
         for order in self:
-            moves_to_do = order.move_raw_ids
+            moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             moves_to_do.action_done()
-            #order.move_finished_ids.filtered(lambda x: x.state not in ('done','cancel')).move_validate()
             order._cal_price(moves_to_do)
-            moves_to_finish = order.move_finished_ids
+            moves_to_finish = order.move_finished_ids.filtered(lambda x: x.state not in ('done','cancel'))
             moves_to_finish.action_done()
             for move in moves_to_finish:
                 #Group quants by lots
@@ -528,17 +540,19 @@ class MrpProduction(models.Model):
         moves_to_cancel.action_cancel()
         self.write({'state': 'done', 'date_finished': fields.Datetime.now()})
         self.env["procurement.order"].search([('production_id', 'in', self.ids)]).check()
-        self.write({'state': 'done'})
+        return self.write({'state': 'done'})
 
     @api.multi
     def do_unreserve(self):
         for production in self:
             production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')).do_unreserve()
+        return True
 
     @api.multi
     def button_unreserve(self):
         self.ensure_one()
         self.do_unreserve()
+        return True
 
     @api.multi
     def button_scrap(self):

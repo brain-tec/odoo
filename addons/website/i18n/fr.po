@@ -28,6 +28,7 @@
 # lucasdeliege <deliegelucas@gmail.com>, 2016
 # Valentin Thirion <valentin@medineo.be>, 2016
 # Daniel & Delphine <dd2013@leschoupinous.net>, 2016
+# Fred Gilson <fgi@odoo.com>, 2016
 # Loic <loic.richard2@gmail.com>, 2016
 # Olivier Dony <odo@odoo.com>, 2016
 # Nicolas JEUDY <nicolas@sudokeys.com>, 2016
@@ -3506,7 +3507,7 @@ msgstr "Customisation illimitée"
 #: model:ir.ui.view,arch_db:website.publish_short
 #, python-format
 msgid "Unpublished"
-msgstr ""
+msgstr "Non publié"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -3552,7 +3553,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website.website_planner
 msgid "Use the <i>Customize</i> menu to change the look of your theme:"
 msgstr ""
-"Utilisez le menu <i>Customiser</i> pour changer le look de votre thème:"
+"Utilisez le menu <i>Personnaliser</i> pour changer le look de votre thème:"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -4306,7 +4307,7 @@ msgstr "nom"
 #: model:ir.ui.view,arch_db:website.user_navbar
 #, python-format
 msgid "or Edit Master"
-msgstr "ou Edit master"
+msgstr "ou modifier la source"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner

@@ -1086,7 +1086,7 @@ msgstr "Postalamalar"
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_maintenance_request
 msgid "Maintenance Requests"
-msgstr ""
+msgstr "Bakım Talepleri"
 
 #. module: mass_mailing
 #: model:res.groups,name:mass_mailing.group_mass_mailing_campaign
@@ -1533,7 +1533,7 @@ msgstr "Örnek Posta Gönder"
 #. module: mass_mailing
 #: model:mail.mass_mailing.stage,name:mass_mailing.campaign_stage_1
 msgid "Schedule"
-msgstr "Ajanda"
+msgstr "Planla"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mail_mass_mailing_schedule_date
@@ -1604,24 +1604,24 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_campaign_form
 msgid "Send new A/B Testing Mass Mailing"
-msgstr ""
+msgstr "Yeni A/B Test Toplu Epostası Gönder"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_campaign_form
 msgid "Send new Mass Mailing"
-msgstr ""
+msgstr "Yeni Toplu EPosta Gönder"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid "Send to All"
-msgstr "Tümünü Gönder"
+msgstr "Hepsine Gönder"
 
 #. module: mass_mailing
 #: code:addons/mass_mailing/models/mass_mailing.py:439
 #: selection:mail.mass_mailing,state:0
 #, python-format
 msgid "Sending"
-msgstr ""
+msgstr "Gönderiyor"
 
 #. module: mass_mailing
 #: code:addons/mass_mailing/models/mass_mailing.py:439

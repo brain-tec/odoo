@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-11 13:04+0000\n"
-"PO-Revision-Date: 2017-01-11 13:04+0000\n"
+"POT-Creation-Date: 2017-02-14 10:20+0000\n"
+"PO-Revision-Date: 2017-02-14 10:20+0000\n"
 "Last-Translator: Олег <pehotaolega.ru@mail.ru>, 2016\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
@@ -555,7 +555,7 @@ msgstr ""
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span title=\"Balance in Odoo\">Balance in GL</span>"
-msgstr "<span title=\"Balance in Odoo\">Balans in GB</span>"
+msgstr "<span title=\"Balance in Odoo\">Saldo in GB</span>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -580,6 +580,16 @@ msgid ""
 msgstr ""
 "<span>(*) Deze configuratie is gerelateerd aan het bedrijf waarmee je "
 "ingelogd bent.</span>"
+
+#. module: account
+#: model:ir.ui.view,arch_db:account.account_invoice_report_duplicate
+msgid "<span>invoice</span>"
+msgstr "<span>factuur</span>"
+
+#. module: account
+#: model:ir.ui.view,arch_db:account.account_invoice_report_duplicate
+msgid "<span>refund</span>"
+msgstr "<span>credit factuur</span>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_invoice_report_duplicate
@@ -614,7 +624,7 @@ msgstr "<span>handelingen</span>"
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span>Reconciliation</span>"
-msgstr "<span>Afpunting</span>"
+msgstr "<span>Afletteren</span>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -658,7 +668,7 @@ msgstr ""
 #. module: account
 #: model:ir.ui.view,arch_db:account.report_overdue_document
 msgid "<strong>Balance :</strong>"
-msgstr "<strong>Balans :</strong>"
+msgstr "<strong>Saldo:</strong>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_planner
@@ -769,7 +779,7 @@ msgstr "<strong>Aanbetaling ticketten</strong>"
 #. module: account
 #: model:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Description:</strong>"
-msgstr "<strong>Omschrijving:</strong>"
+msgstr "<strong>Referentie:</strong>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.report_trialbalance
@@ -1106,7 +1116,7 @@ msgstr ""
 #: code:addons/account/models/account_move.py:731
 #, python-format
 msgid "A reconciliation must involve at least 2 move lines."
-msgstr "Een afpunting moet minstens 2 mutatieregels hebben."
+msgstr "Een aflettering moet minstens 2 mutatieregels hebben."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:867
@@ -1626,7 +1636,7 @@ msgstr "Geavanceerde instellingen"
 #: model:ir.ui.menu,name:account.menu_finance_entries
 #: model:res.groups,name:account.group_account_manager
 msgid "Adviser"
-msgstr "Auditeur"
+msgstr "Controller"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_include_base_amount
@@ -2399,7 +2409,7 @@ msgstr "Behoort bij het huidige bedrijf van de gebruiker"
 #: model:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model:ir.ui.view,arch_db:account.invoice_supplier_form
 msgid "Bill"
-msgstr "Rekening"
+msgstr "Factuur"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.invoice_supplier_form
@@ -2927,10 +2937,17 @@ msgstr "Sluiten"
 
 #. module: account
 #. openerp-web
-#: code:addons/account/static/src/xml/account_reconciliation.xml:227
+#: code:addons/account/static/src/xml/account_reconciliation.xml:229
 #, python-format
 msgid "Close the statement"
 msgstr "Afschrift afsluiten"
+
+#. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_reconciliation.xml:228
+#, python-format
+msgid "Close the statements"
+msgstr "Afschriften afsluiten"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_date_done
@@ -4359,7 +4376,7 @@ msgstr "Februari"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position_state_ids
 msgid "Federal States"
-msgstr "Federale staten"
+msgstr "Federale staten/Provincies"
 
 #. module: account
 #: selection:account.journal,bank_statements_source:0
@@ -4999,12 +5016,12 @@ msgstr ""
 "Als u 'Afronden per regel' kiest dan wordt voor elke BTW het bedrag eerst "
 "berekend en afgerond voor elke inkooporder-, verkooporder en factuurregel en"
 " vervolgens worden deze afgeronde bedragen opgeteld, wat leidt tot het "
-"totale bedrag voor deze BTW. Als u 'Globaal Afrond' dan wordt voor elke BTW "
-"het bedrag berekend voor elke  inkooporder-, verkooporder en factuurregel, "
-"dan zullen deze bedragen worden opgeteld en uiteindelijk wordt dit totale "
-"BTW bedrag afgerond. Als u verkoopt met prijzen inclusief BTW, moet u kiezen"
-" voor 'Afronden per regel', omdat u er zeker van wilt zijn dat de som van uw"
-" regels gelijk zijn aan het totale bedrag met BTW."
+"totale bedrag voor deze BTW. Als u 'Afronden over totaal' kiest dan wordt "
+"voor elke BTW het bedrag berekend voor elke  inkooporder-, verkooporder en "
+"factuurregel, dan zullen deze bedragen worden opgeteld en uiteindelijk wordt"
+" dit totale BTW bedrag afgerond. Als u verkoopt met prijzen inclusief BTW, "
+"moet u kiezen voor 'Afronden per regel', omdat u er zeker van wilt zijn dat "
+"de som van uw regels gelijk zijn aan het totale bedrag met BTW."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_config_settings_tax_calculation_rounding_method
@@ -5020,7 +5037,7 @@ msgstr ""
 "Afronden per regel: voor elke factuurregel wordt eerst het BTW-bedrag berekend\n"
 "en afgerond. Daarna worden de afgeronde bedragen opgeteld wat resulteert in het\n"
 "BTW totaalbedrag. \n"
-"Globaal afronden: voor elke factuurregel wordt het BTW-bedrag berekend en deze bedragen worden bij elkaar opgeteld. Op het einde wordt het totale BTW-bedrag afgerond.\n"
+"Over totaal afronden: voor elke factuurregel wordt het BTW-bedrag berekend en deze bedragen worden bij elkaar opgeteld. Op het einde wordt het totale BTW-bedrag afgerond.\n"
 "Als u verkoopt met prijzen inclusief BTW, moet u kiezen voor 'afronden per regel', omdat u zeker wilt zijn dat de subtotalen van uw inclusief BTW regels gelijk zijn aan het totale bedrag met BTW."
 
 #. module: account
@@ -5193,7 +5210,7 @@ msgstr "Inclusief eerste balans"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_analytic
 msgid "Include in Analytic Cost"
-msgstr "In kostenplaatsen inbegrijpen"
+msgstr "Opnemen in kostenplaatsen"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_price_include
@@ -5858,7 +5875,7 @@ msgstr "Open houden"
 #: model:ir.ui.view,arch_db:account.report_journal
 #, python-format
 msgid "Label"
-msgstr "Label"
+msgstr "Omschrijving"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_description
@@ -6180,7 +6197,7 @@ msgstr "Blokkeerdatum"
 #: model:ir.model.fields,field_description:account.field_account_config_settings_period_lock_date
 #: model:ir.model.fields,field_description:account.field_res_company_period_lock_date
 msgid "Lock Date for Non-Advisers"
-msgstr "Blokkeerdatum voor niet adviseurs"
+msgstr "Blokkeerdatum voor iedereen behalve de controller"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.view_account_config_settings
@@ -6273,6 +6290,8 @@ msgid "Managing bank fees"
 msgstr "Beheren van bankkosten"
 
 #. module: account
+#: model:account.payment.method,name:account.account_payment_method_manual_in
+#: model:account.payment.method,name:account.account_payment_method_manual_out
 #: model:ir.model.fields,field_description:account.field_account_invoice_tax_manual
 msgid "Manual"
 msgstr "Handmatig"
@@ -6624,9 +6643,9 @@ msgid ""
 "No users, including Advisers, can edit accounts prior to and inclusive of "
 "this date. Use it for fiscal year locking for example."
 msgstr ""
-"Geen enkele gebruiker, ook geen auditeurs, kunnen rekeningen wijzigen voor "
-"deze datum, met inbegrip van de dag zelf. U kunt dit bijvoorbeeld gebruiken "
-"om uw fiscaal jaar te vergrendelen."
+"Geen enkele gebruiker, ook geen controllers, kunnen rekeningen wijzigen voor"
+" deze datum, met inbegrip van de dag zelf. U kunt dit bijvoorbeeld gebruiken"
+" om uw fiscaal jaar te vergrendelen."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_chart_template_code_digits
@@ -6906,9 +6925,9 @@ msgid ""
 "of this date. Use it for period locking inside an open fiscal year, for "
 "example."
 msgstr ""
-"Enkel gebruikers met de rol 'Auditeur' kunnen rekeningen wijzigen voor deze "
-"datum, met inbegrip van de dag zelf. U kunt dit bijvoorbeeld gebruiken om "
-"een periode binnen een open fiscaal jaar te vergrendelen."
+"Enkel gebruikers met de rol 'Controller' kunnen rekeningen wijzigen voor "
+"deze datum, met inbegrip van de dag zelf. U kunt dit bijvoorbeeld gebruiken "
+"om een periode binnen een open fiscaal jaar te vergrendelen."
 
 #. module: account
 #: selection:account.invoice,state:0 selection:account.invoice.report,state:0
@@ -6929,7 +6948,7 @@ msgstr "Open betaling"
 #: code:addons/account/static/src/js/account_reconciliation_widgets.js:2060
 #, python-format
 msgid "Open balance"
-msgstr "Openbalans"
+msgstr "Open balans"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_cashbox_line_number
@@ -7035,13 +7054,13 @@ msgstr "Voorraadafname rekening voor voorraadwaardering"
 #. module: account
 #: model:ir.ui.view,arch_db:account.account_planner
 msgid "Outstanding Transactions"
-msgstr "Uitstaande transacties"
+msgstr "Openstaande posten"
 
 #. module: account
 #: code:addons/account/models/account_invoice.py:116
 #, python-format
 msgid "Outstanding credits"
-msgstr "Uitstaande inkomsten"
+msgstr "Openstaande credits/betalingen"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_outstanding_credits_debits_widget
@@ -7541,7 +7560,7 @@ msgstr "Plus vaste activa"
 #. module: account
 #: model:ir.ui.view,arch_db:account.view_account_form
 msgid "Plus Net Profit"
-msgstr "Plus netto winst"
+msgstr "Plus nettowinst"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.view_account_form
@@ -8203,7 +8222,7 @@ msgstr "Omkering mutatie"
 #: model:ir.ui.view,arch_db:account.view_account_move_reversal
 #, python-format
 msgid "Reverse Moves"
-msgstr "T"
+msgstr "Boeking omkeren"
 
 #. module: account
 #: selection:account.financial.report,sign:0
@@ -8238,7 +8257,7 @@ msgstr "Controleer de lijst van beschikbare valuta (van de"
 #. module: account
 #: selection:res.company,tax_calculation_rounding_method:0
 msgid "Round Globally"
-msgstr "Globaal afronden"
+msgstr "Over totaal afronden"
 
 #. module: account
 #: selection:res.company,tax_calculation_rounding_method:0
@@ -8840,7 +8859,7 @@ msgstr "BTW omschrijving"
 #. module: account
 #: model:ir.ui.view,arch_db:account.report_invoice_document
 msgid "Tax Excluded Price"
-msgstr "Prijs exclusief BTW"
+msgstr "Bedrag"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_tax_group_id
@@ -8871,7 +8890,7 @@ msgstr "Vervangingstabel BTW"
 #: model:ir.model.fields,field_description:account.field_account_tax_name
 #: model:ir.model.fields,field_description:account.field_account_tax_template_name
 msgid "Tax Name"
-msgstr "Toeslagnaam"
+msgstr "BTW naam"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_template_type_tax_use
@@ -9310,7 +9329,7 @@ msgstr "De reeks voor dagboek %s werd niet bepaald. Definieer de reeks."
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal_code
 msgid "The journal entries of this journal will be named using this prefix."
-msgstr "De boekingen van dit dagboek worden genaamd met de prefix."
+msgstr "De boekingen van dit dagboek worden aangeduid met deze prefix."
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.view_payment_term_form
@@ -9733,6 +9752,17 @@ msgstr ""
 "voor de gekozen vergelijkingscriteria."
 
 #. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_reconciliation.xml:273
+#, python-format
+msgid ""
+"This move's amount is higher than the transaction's amount. Click to "
+"register a partial payment and keep the payment balance open."
+msgstr ""
+"Het regelbedrag is hoger dan het bedrag van het afschrift. Klik hier om "
+"gedeeltelijk af te letteren en het resterende bedrag open te laten staan."
+
+#. module: account
 #: model:ir.model.fields,help:account.field_accounting_report_debit_credit
 msgid ""
 "This option allows you to get more details about the way your balances are "
@@ -10076,6 +10106,13 @@ msgstr "Soort"
 #, python-format
 msgid "Undistributed Profits/Losses"
 msgstr "Uitgekeerde winsten/verliezen"
+
+#. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_reconciliation.xml:278
+#, python-format
+msgid "Undo the partial reconciliation."
+msgstr "Maak gedeeltelijk afletteren ongedaan"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_line_price_unit
@@ -10667,7 +10704,7 @@ msgid ""
 msgstr ""
 "De datum %s is vergrendeld. U kunt geen boekingen voor deze datum "
 "toevoegen/wijzigen. Controleer de instellingen of vraag iemand met de rol "
-"'Auditeur'"
+"'Controller'"
 
 #. module: account
 #: code:addons/account/models/account_invoice.py:938
@@ -10696,7 +10733,7 @@ msgid ""
 "You cannot change the value of the reconciliation on this account as it "
 "already has some moves"
 msgstr ""
-"U kunt de waarde van deze aflettering op dit grootboek niet veranderen "
+"U kunt de waarde van deze aflettering op dit grootboek niet wijzigen "
 "aangezien reeds boekingen zijn gemaakt"
 
 #. module: account

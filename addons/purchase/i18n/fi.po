@@ -8,7 +8,7 @@
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2016
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2016
 # salmemik <salmemik@gmail.com>, 2016
-# Timo Koukkari <timo.koukkari@seamk.fi>, 2016
+# Timo Koukkari <ti.ko@netikka.fi>, 2016
 # Sanna Edelman <direct@generare.com>, 2016
 # Pekko Tuomisto <pekko.tuomisto@web-veistamo.fi>, 2016
 # Svante Suominen <svante.suominen@web-veistamo.fi>, 2016
@@ -208,7 +208,7 @@ msgstr "<strong>Tilausviitteenne</strong>"
 #. module: purchase
 #: model:res.groups,name:purchase.group_warning_purchase
 msgid "A warning can be set on a product or a customer (Purchase)"
-msgstr ""
+msgstr "Varoitus voidaan asettaa tuotteelle tai asiakkaalle (ostot)"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_account_invoice_purchase_id
@@ -271,6 +271,8 @@ msgstr ""
 msgid ""
 "An informative or blocking warning can be set on a product or a customer"
 msgstr ""
+"Informatiivinen tai estävä varoitus voidaan asettaa tuotteelle tai "
+"asiakkaalle"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_account_analytic_id
@@ -1043,7 +1045,7 @@ msgstr "Tuoteryhmät"
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_category_id
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Product Category"
-msgstr "Tuote kategoria"
+msgstr "Tuotekategoria"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_unit_quantity
@@ -1104,7 +1106,7 @@ msgstr "Käyttöönota kaksivaiheinen hankintojen hyväksyminen"
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_product_normal_action_puchased
 msgid "Purchasable Products"
-msgstr ""
+msgstr "Ostettavat tuotteet"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_procurement_management

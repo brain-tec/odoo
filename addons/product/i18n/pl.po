@@ -18,17 +18,17 @@
 # zieloo <zieloo@gmail.com>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0c\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-29 14:00+0000\n"
-"PO-Revision-Date: 2016-09-29 14:00+0000\n"
+"POT-Creation-Date: 2017-04-26 13:35+0000\n"
+"PO-Revision-Date: 2017-04-26 13:35+0000\n"
 "Last-Translator: zieloo <zieloo@gmail.com>, 2016\n"
 "Language-Team: Polish (https://www.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: pl\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>=14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #. module: product
 #: selection:product.pricelist.item,applied_on:0
@@ -667,17 +667,13 @@ msgid "Companies"
 msgstr "Firmy"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_price_history_company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item_company_id
 #: model:ir.model.fields,field_description:product.field_product_product_company_id
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo_company_id
 #: model:ir.model.fields,field_description:product.field_product_template_company_id
 msgid "Company"
-msgstr "Firma"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_price_history_company_id
-msgid "Company id"
 msgstr "Firma"
 
 #. module: product
@@ -1403,7 +1399,7 @@ msgstr "Kategoria wewnętrzna"
 #: model:ir.model.fields,field_description:product.field_product_product_default_code
 #: model:ir.model.fields,field_description:product.field_product_template_default_code
 msgid "Internal Reference"
-msgstr "Odnośnik wewnątrzny"
+msgstr "Odnośnik wewnętrzny"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product_barcode

@@ -1,22 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * mass_mailing
-#
+# 
 # Translators:
+# Martin Trigaux <mat@odoo.com>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-10-10 08:44+0000\n"
-"PO-Revision-Date: 2016-01-06 08:49+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Latvian (http://www.transifex.com/odoo/odoo-9/language/lv/)\n"
-"Language: lv\n"
+"PO-Revision-Date: 2016-10-10 08:44+0000\n"
+"Last-Translator: Martin Trigaux <mat@odoo.com>, 2017\n"
+"Language-Team: Latvian (https://www.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
-"2);\n"
+"Language: lv\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_comparison_table
@@ -60,8 +60,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
 msgid ""
 "&amp;nbsp;\n"
-"                                        <span class=\"fa fa-compass fa-2x "
-"text-delta\"/>\n"
+"                                        <span class=\"fa fa-compass fa-2x text-delta\"/>\n"
 "                                        &amp;nbsp;"
 msgstr ""
 
@@ -69,8 +68,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
 msgid ""
 "&amp;nbsp;\n"
-"                                        <span class=\"fa fa-credit-card "
-"fa-2x text-delta\"/>\n"
+"                                        <span class=\"fa fa-credit-card fa-2x text-delta\"/>\n"
 "                                        &amp;nbsp;"
 msgstr ""
 
@@ -78,8 +76,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
 msgid ""
 "&amp;nbsp;\n"
-"                                        <span class=\"fa fa-smile-o fa-2x "
-"text-delta\"/>\n"
+"                                        <span class=\"fa fa-smile-o fa-2x text-delta\"/>\n"
 "                                        &amp;nbsp;"
 msgstr ""
 
@@ -96,88 +93,8 @@ msgstr ""
 #. module: mass_mailing
 #: model:mail.template,body_html:mass_mailing.newsletter_template
 msgid ""
-"<div class=\"snippet_row bg-color\" style=\"padding:0px;width:600px;margin:"
-"auto;background: #ffffff repeat top /100%\">\n"
-"                <table cellpadding=\"0\" cellspacing=\"0\" style=\"border-"
-"collapse:collapse\" width=\"100%\"><tbody><tr><td style=\"padding:10px 10px "
-"10px 5px\" valign=\"center\" width=\"270\"> <a style=\"text-decoration:none"
-"\" href=\"http://www.example.com\"><strong>My Company</strong></a> </td><td "
-"style=\"padding:10px 15px 10px 10px;vertical-align:middle\" valign=\"center"
-"\" width=\"270\"><table align=\"right\" border=\"0\" cellpadding=\"0\" "
-"cellspacing=\"0\" style=\"border-collapse:collapse\"><tbody><tr><td align="
-"\"right\"><a href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-"
-"facebook-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td><td align="
-"\"right\" style=\"padding-left:5px\"><a href=\"https://www.facebook.com/Odoo"
-"\"><span class=\"fa fa-google-plus-square fa-2x\" style=\"color:#44B7B7;\"></"
-"span></a></td><td align=\"right\" style=\"padding-left:5px\"><a href="
-"\"https://www.facebook.com/Odoo\"><span class=\"fa fa-linkedin-square fa-2x"
-"\" style=\"color:#44B7B7;\"></span></a></td><td align=\"right\" style="
-"\"padding-left:5px\"><a href=\"https://www.facebook.com/Odoo\"><span class="
-"\"fa fa-twitter-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td></"
-"tr></tbody></table></td></tr></tbody></table></div><div style=\"padding:0px;"
-"width:600px;margin:auto;background-color:#44B7B7;color:#168484\"><table "
-"cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;background-color:"
-"inherit;border-collapse:collapse;color:inherit\"><tbody><tr><td class="
-"\"col_mv bg-color\" style=\"text-align:left; padding-left:20px;vertical-"
-"align:middle;font-size:14px\"><p style=\"margin:0;font-size:20px;color:#fff"
-"\">You get a 20% discount for signing up!</p><p style=\"margin:0\">Discount "
-"Code: <strong>45A9E77DGW8455</strong></p></td><td class=\"col_mv bg-color\" "
-"style=\"padding:20px;text-align:center;vertical-align:middle\">  <span class="
-"\"fa fa-6x fa-ticket\"></span>  </td></tr></tbody></table></div><div class="
-"\"snippet_row bg-color\" style=\"padding:0;width:600px;max-width:600px;"
-"margin:0 auto;background: #fff repeat top /100%;color:#168484\"><table style="
-"\"width:100%;text-align:justify;margin:0 auto;inherit;border-collapse:"
-"collapse;color:inherit\"><tbody><tr><td style=\"padding:10px 30px;font-"
-"size:14px;line-height:20px\"><p style=\"margin:0\">Dear ${object.name}</p><p "
-"style=\"margin:0\">Great stories have personality. Consider telling a great "
-"story that provides personality. Writing a story with personality for "
-"potential clients will assist with making a relationship connection. This "
-"shows up in small quirks like word choices or phrases. Write from your point "
-"of view, not from someone else's experience.<br></p><p style="
-"\"margin:0\">Great stories are for everyone even when only written for just "
-"one person. If you try to write with a wide general audience in mind, your "
-"story will ring false and be bland. No one will be interested. Write for one "
-"person. If it’s genuine for the one, it’s genuine for the rest.</p><p style="
-"\"margin:0\">Kind Regards,</p><p style=\"margin:0\">Michael Fletcher</p></"
-"td></tr></tbody></table></div><div style=\"padding:0;width:600px;max-"
-"width:600px;margin:0 auto\"><table style=\"width:100%;text-align:justify;"
-"margin:0 auto;background-color:inherit;border-collapse:collapse"
-"\"><tbody><tr><td class=\"col_mv bg-color\" style=\"padding:10px 0;"
-"background-color:#168484;color:#fff\"><table style=\"border-collapse:"
-"collapse;background-color:inherit\"><tbody><tr><td rowspan=\"2\" style="
-"\"padding-left:10px\">  <span class=\"fa fa-check fa-3x\"></span>  </td><td "
-"style=\"padding-left:10px;color:#fff;font-size:14px\"><p style=\"font-weight:"
-"bold;font-size:18px;margin:0 0 3px 0\">Step 1:</p><p style="
-"\"margin:0\">Place Order</p></td></tr></tbody></table></td><td class="
-"\"col_mv bg-color\" style=\"padding:10px 0;background-color:#FFFFFF;color:"
-"#808080\"><table style=\"border-collapse:collapse;background-color:inherit"
-"\"><tbody><tr><td rowspan=\"2\" style=\"padding-left:10px\">  <span class="
-"\"fa fa-truck fa-3x\"></span>  </td><td style=\"padding-left:10px;color:"
-"#808080;font-size:14px\"><p style=\"font-weight:bold;font-size:18px;margin:0 "
-"0 3px 0\">Step 2:</p><p style=\"margin:0\">Shipping</p></td></tr></tbody></"
-"table></td><td class=\"col_mv bg-color\" style=\"padding:10px 0;background-"
-"color:#FFFFFF;color:#808080\"><table style=\"border-collapse:collapse;"
-"background-color:inherit\"><tbody><tr><td rowspan=\"2\" style=\"padding-"
-"left:10px\">  <span class=\"fa fa-dollar fa-3x\"></span>  </td><td style="
-"\"padding-left:10px;color:#808080;font-size:14px\"><p style=\"font-weight:"
-"bold;font-size:18px;margin:0 0 3px 0\">Step 3:</p><p style="
-"\"margin:0\">Payment</p></td></tr></tbody></table></td></tr></tbody></"
-"table></div><div class=\"snippet_row bg-color\" style=\"padding:0px;"
-"width:600px;margin:auto;background: #414141 repeat top /100%;color:"
-"#44B7B7\"><div style=\"padding:10px\"><table cellpadding=\"0\" cellspacing="
-"\"0\" style=\"margin: 0 auto;width:100%;border-collapse:collapse;color:"
-"inherit;color:inherit\"><tbody><tr><td style=\"text-align:center\"> <a style="
-"\"text-decoration: none;\" href=\"https://www.facebook.com/Odoo\"><span "
-"class=\"fa fa-facebook-square fa-2x\"></span></a><a style=\"text-decoration: "
-"none;\" href=\"https://plus.google.com/+Odooapps\"><span class=\"fa fa-"
-"google-plus-square fa-2x\"></span></a><a style=\"text-decoration: none;\" "
-"href=\"https://www.linkedin.com/company/odoo\"><span class=\"fa fa-linkedin-"
-"square fa-2x\"></span></a><a style=\"text-decoration: none;\" href=\"https://"
-"twitter.com/Odoo\"><span class=\"fa fa-twitter-square fa-2x\"></span></a> </"
-"td></tr><tr><td style=\"font-size:12px;text-align:center;padding-top:10px;"
-"padding-bottom:5px\"> <a href=\"/unsubscribe_from_list\" style=\"color:"
-"#44B7B7\">Unsubscribe</a>|<a href=\"/page/contactus\" style=\"color:"
-"#44B7B7\">Contact</a> </td></tr></tbody></table></div>\n"
+"<div class=\"snippet_row bg-color\" style=\"padding:0px;width:600px;margin:auto;background: #ffffff repeat top /100%\">\n"
+"                <table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse\" width=\"100%\"><tbody><tr><td style=\"padding:10px 10px 10px 5px\" valign=\"center\" width=\"270\"> <a style=\"text-decoration:none\" href=\"http://www.example.com\"><strong>My Company</strong></a> </td><td style=\"padding:10px 15px 10px 10px;vertical-align:middle\" valign=\"center\" width=\"270\"><table align=\"right\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse\"><tbody><tr><td align=\"right\"><a href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-facebook-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td><td align=\"right\" style=\"padding-left:5px\"><a href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-google-plus-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td><td align=\"right\" style=\"padding-left:5px\"><a href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-linkedin-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td><td align=\"right\" style=\"padding-left:5px\"><a href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-twitter-square fa-2x\" style=\"color:#44B7B7;\"></span></a></td></tr></tbody></table></td></tr></tbody></table></div><div style=\"padding:0px;width:600px;margin:auto;background-color:#44B7B7;color:#168484\"><table cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;background-color:inherit;border-collapse:collapse;color:inherit\"><tbody><tr><td class=\"col_mv bg-color\" style=\"text-align:left; padding-left:20px;vertical-align:middle;font-size:14px\"><p style=\"margin:0;font-size:20px;color:#fff\">You get a 20% discount for signing up!</p><p style=\"margin:0\">Discount Code: <strong>45A9E77DGW8455</strong></p></td><td class=\"col_mv bg-color\" style=\"padding:20px;text-align:center;vertical-align:middle\">  <span class=\"fa fa-6x fa-ticket\"></span>  </td></tr></tbody></table></div><div class=\"snippet_row bg-color\" style=\"padding:0;width:600px;max-width:600px;margin:0 auto;background: #fff repeat top /100%;color:#168484\"><table style=\"width:100%;text-align:justify;margin:0 auto;inherit;border-collapse:collapse;color:inherit\"><tbody><tr><td style=\"padding:10px 30px;font-size:14px;line-height:20px\"><p style=\"margin:0\">Dear ${object.name}</p><p style=\"margin:0\">Great stories have personality. Consider telling a great story that provides personality. Writing a story with personality for potential clients will assist with making a relationship connection. This shows up in small quirks like word choices or phrases. Write from your point of view, not from someone else's experience.<br></p><p style=\"margin:0\">Great stories are for everyone even when only written for just one person. If you try to write with a wide general audience in mind, your story will ring false and be bland. No one will be interested. Write for one person. If it’s genuine for the one, it’s genuine for the rest.</p><p style=\"margin:0\">Kind Regards,</p><p style=\"margin:0\">Michael Fletcher</p></td></tr></tbody></table></div><div style=\"padding:0;width:600px;max-width:600px;margin:0 auto\"><table style=\"width:100%;text-align:justify;margin:0 auto;background-color:inherit;border-collapse:collapse\"><tbody><tr><td class=\"col_mv bg-color\" style=\"padding:10px 0;background-color:#168484;color:#fff\"><table style=\"border-collapse:collapse;background-color:inherit\"><tbody><tr><td rowspan=\"2\" style=\"padding-left:10px\">  <span class=\"fa fa-check fa-3x\"></span>  </td><td style=\"padding-left:10px;color:#fff;font-size:14px\"><p style=\"font-weight:bold;font-size:18px;margin:0 0 3px 0\">Step 1:</p><p style=\"margin:0\">Place Order</p></td></tr></tbody></table></td><td class=\"col_mv bg-color\" style=\"padding:10px 0;background-color:#FFFFFF;color:#808080\"><table style=\"border-collapse:collapse;background-color:inherit\"><tbody><tr><td rowspan=\"2\" style=\"padding-left:10px\">  <span class=\"fa fa-truck fa-3x\"></span>  </td><td style=\"padding-left:10px;color:#808080;font-size:14px\"><p style=\"font-weight:bold;font-size:18px;margin:0 0 3px 0\">Step 2:</p><p style=\"margin:0\">Shipping</p></td></tr></tbody></table></td><td class=\"col_mv bg-color\" style=\"padding:10px 0;background-color:#FFFFFF;color:#808080\"><table style=\"border-collapse:collapse;background-color:inherit\"><tbody><tr><td rowspan=\"2\" style=\"padding-left:10px\">  <span class=\"fa fa-dollar fa-3x\"></span>  </td><td style=\"padding-left:10px;color:#808080;font-size:14px\"><p style=\"font-weight:bold;font-size:18px;margin:0 0 3px 0\">Step 3:</p><p style=\"margin:0\">Payment</p></td></tr></tbody></table></td></tr></tbody></table></div><div class=\"snippet_row bg-color\" style=\"padding:0px;width:600px;margin:auto;background: #414141 repeat top /100%;color:#44B7B7\"><div style=\"padding:10px\"><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto;width:100%;border-collapse:collapse;color:inherit;color:inherit\"><tbody><tr><td style=\"text-align:center\"> <a style=\"text-decoration: none;\" href=\"https://www.facebook.com/Odoo\"><span class=\"fa fa-facebook-square fa-2x\"></span></a><a style=\"text-decoration: none;\" href=\"https://plus.google.com/+Odooapps\"><span class=\"fa fa-google-plus-square fa-2x\"></span></a><a style=\"text-decoration: none;\" href=\"https://www.linkedin.com/company/odoo\"><span class=\"fa fa-linkedin-square fa-2x\"></span></a><a style=\"text-decoration: none;\" href=\"https://twitter.com/Odoo\"><span class=\"fa fa-twitter-square fa-2x\"></span></a> </td></tr><tr><td style=\"font-size:12px;text-align:center;padding-top:10px;padding-bottom:5px\"> <a href=\"/unsubscribe_from_list\" style=\"color:#44B7B7\">Unsubscribe</a>|<a href=\"/page/contactus\" style=\"color:#44B7B7\">Contact</a> </td></tr></tbody></table></div>\n"
 "            </div>"
 msgstr ""
 
@@ -226,8 +143,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_discount2
-msgid ""
-"<small>CODE</small>:   <strong class=\"o_code h3\">45A9E77DGW8455</strong>"
+msgid "<small>CODE</small>:   <strong class=\"o_code h3\">45A9E77DGW8455</strong>"
 msgstr ""
 
 #. module: mass_mailing
@@ -325,7 +241,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_account_analytic_account
 msgid "Analytic Account"
-msgstr ""
+msgstr "Analītiskais Konts"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mass_mailing_configuration
@@ -351,7 +267,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_maintenance_equipment_category
 msgid "Asset Category"
-msgstr ""
+msgstr "Pamatlīdzekļu kategorija"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -366,7 +282,7 @@ msgstr "Pielikumi"
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_event_registration
 msgid "Attendee"
-msgstr ""
+msgstr "Dalībnieks"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_comparison_table
@@ -610,8 +526,7 @@ msgstr "Izveides mēnesis"
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_event
 msgid ""
 "Cyber-threats continue to increase.<br/>\n"
-"                                The discussion will examine how to develop "
-"new norms and integrate them into EU"
+"                                The discussion will examine how to develop new norms and integrate them into EU"
 msgstr ""
 
 #. module: mass_mailing
@@ -730,7 +645,8 @@ msgstr "Filtrs"
 
 #. module: mass_mailing
 #: code:addons/mass_mailing/models/mass_mailing.py:439
-#: selection:mail.mass_mailing,state:0 selection:mail.statistics.report,state:0
+#: selection:mail.mass_mailing,state:0
+#: selection:mail.statistics.report,state:0
 #, python-format
 msgid "Draft"
 msgstr "Melnraksts"
@@ -779,7 +695,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_hr_employee
 msgid "Employee"
-msgstr ""
+msgstr "Darbinieks"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
@@ -799,7 +715,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_event_event
 msgid "Event"
-msgstr ""
+msgstr "Notikums"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mail_mail_statistics_exception
@@ -834,6 +750,12 @@ msgid "Failed"
 msgstr "Neizdevās"
 
 #. module: mass_mailing
+#: model:mail.mass_mailing,name:mass_mailing.mass_mail_1
+#: model:utm.source,name:mass_mailing.mass_mail_1_utm_source
+msgid "First Newsletter"
+msgstr ""
+
+#. module: mass_mailing
 #: selection:mail.mass_mailing,reply_to_mode:0
 msgid "Followers of leads/applicants"
 msgstr ""
@@ -866,15 +788,15 @@ msgstr ""
 msgid ""
 "Great stories are for everyone even when only written for just one person. "
 "If you try to write with a wide general audience in mind, your story will "
-"ring false and be bland. No one will be interested. Write for one person. If "
-"it’s genuine for the one, it’s genuine for the rest."
+"ring false and be bland. No one will be interested. Write for one person. If"
+" it’s genuine for the one, it’s genuine for the rest."
 msgstr ""
 
 #. module: mass_mailing
 #: model:mail.mass_mailing,body_html:mass_mailing.mass_mail_1
 msgid ""
-"Great stories have personality. Consider telling a great story that provides "
-"personality. Writing a story with personality for potential clients will "
+"Great stories have personality. Consider telling a great story that provides"
+" personality. Writing a story with personality for potential clients will "
 "assist with making a relationship connection. This shows up in small quirks "
 "like word choices or phrases. Write from your point of view, not from "
 "someone else's experience.<br>"
@@ -917,8 +839,8 @@ msgstr "ID"
 #: model:ir.model.fields,help:mass_mailing.field_mail_mail_statistics_mail_mail_id_int
 msgid ""
 "ID of the related mail_mail. This field is an integer field because the "
-"related mail_mail can be deleted separately from its statistics. However the "
-"ID is needed for several action and controllers."
+"related mail_mail can be deleted separately from its statistics. However the"
+" ID is needed for several action and controllers."
 msgstr ""
 
 #. module: mass_mailing
@@ -938,19 +860,19 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_fleet_vehicle
 msgid "Information on a vehicle"
-msgstr ""
+msgstr "Informācija par transportlīdzekli"
 
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_hr_job
 msgid "Job Position"
-msgstr ""
+msgstr "Amats"
 
 #. module: mass_mailing
 #: model:mail.mass_mailing.list,popup_content:mass_mailing.mass_mail_list_1
 #: model:mail.mass_mailing.list,popup_content:mass_mailing.mass_mail_list_2
 msgid ""
-"Join our Marketing newsletter and get <strong>this white paper instantly</"
-"strong>"
+"Join our Marketing newsletter and get <strong>this white paper "
+"instantly</strong>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1068,8 +990,8 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.actions.act_window,help:mass_mailing.action_email_template_marketing
 msgid ""
-"Mail templates are meant to design e-mails that can be used for several mass "
-"mailing campaigns."
+"Mail templates are meant to design e-mails that can be used for several mass"
+" mailing campaigns."
 msgstr ""
 
 #. module: mass_mailing
@@ -1129,8 +1051,7 @@ msgstr ""
 #: model:ir.actions.act_window,help:mass_mailing.action_view_mass_mailing_lists
 msgid ""
 "Mailing lists allows you to to manage customers and\n"
-"                    contacts easily and to send to mailings in a single "
-"click."
+"                    contacts easily and to send to mailings in a single click."
 msgstr ""
 
 #. module: mass_mailing
@@ -1296,7 +1217,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_comparison_table
 msgid "More"
-msgstr ""
+msgstr "Vairāk"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_event
@@ -1312,7 +1233,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_header_text_social
 msgid "My Company"
-msgstr ""
+msgstr "Mans uzņēmums"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mail_mass_mailing_contact_name
@@ -1416,7 +1337,7 @@ msgstr "Iestatījumi"
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
 msgid "Order"
-msgstr ""
+msgstr "Maksājuma uzdevums"
 
 #. module: mass_mailing
 #: selection:mail.mail.statistics,state:0
@@ -1436,7 +1357,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_res_partner
 msgid "Partner"
-msgstr ""
+msgstr "Partneris"
 
 #. module: mass_mailing
 #: model:mail.mass_mailing,body_html:mass_mailing.mass_mail_1
@@ -1518,7 +1439,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_event
 msgid "Registration"
-msgstr ""
+msgstr "Reģistrācija"
 
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_campaign_form
@@ -1610,6 +1531,12 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mail_statistics_report_scheduled_date
 msgid "Scheduled date"
+msgstr ""
+
+#. module: mass_mailing
+#: model:mail.mass_mailing,name:mass_mailing.mass_mail_2
+#: model:utm.source,name:mass_mailing.mass_mail_2_utm_source
+msgid "Second Newsletter"
 msgstr ""
 
 #. module: mass_mailing
@@ -1726,6 +1653,11 @@ msgid "Source"
 msgstr "Avots"
 
 #. module: mass_mailing
+#: model:ir.model.fields,field_description:mass_mailing.field_mail_mass_mailing_name
+msgid "Source Name"
+msgstr "Avota nosaukums"
+
+#. module: mass_mailing
 #: selection:mail.mass_mailing,reply_to_mode:0
 msgid "Specified Email Address"
 msgstr ""
@@ -1838,10 +1770,8 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_paragraph
 msgid ""
-"The open source model of Odoo has allowed us to leverage thousands of "
-"developers and\n"
-"                                business experts to build hundreds of apps "
-"in just a few years."
+"The open source model of Odoo has allowed us to leverage thousands of developers and\n"
+"                                business experts to build hundreds of apps in just a few years."
 msgstr ""
 
 #. module: mass_mailing
@@ -1868,8 +1798,8 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mail_mass_mailing_campaign_source_id
 msgid ""
-"This is the link source, e.g. Search Engine, another domain,or name of email "
-"list"
+"This is the link source, e.g. Search Engine, another domain,or name of email"
+" list"
 msgstr ""
 
 #. module: mass_mailing
@@ -1945,8 +1875,8 @@ msgstr "Lietotājs"
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_discount1
 msgid ""
 "We are continuing to grow and we miss seeing you be a part of it! We've "
-"increased store hours and have lot's of new brands available. To welcome you "
-"back please accept this 20% discount on you next purchase by clicking the "
+"increased store hours and have lot's of new brands available. To welcome you"
+" back please accept this 20% discount on you next purchase by clicking the "
 "button."
 msgstr ""
 
@@ -1961,8 +1891,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_paragraph
 msgid ""
 "With strong technical foundations, Odoo's framework is unique.\n"
-"                                It provides top notch usability that scales "
-"across all apps."
+"                                It provides top notch usability that scales across all apps."
 msgstr ""
 
 #. module: mass_mailing
@@ -1976,10 +1905,8 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.s_mail_block_two_cols
 msgid ""
 "Write one paragraph describing your product,\n"
-"                                    services or a specific feature. To be "
-"successful\n"
-"                                    your content needs to be useful to your "
-"readers."
+"                                    services or a specific feature. To be successful\n"
+"                                    your content needs to be useful to your readers."
 msgstr ""
 
 #. module: mass_mailing

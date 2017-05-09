@@ -12,13 +12,15 @@
 # Hoang Loc Le Huu <loclhh@gmail.com>, 2016
 # sao sang <saosangmo@yahoo.com>, 2016
 # PHAM QUOC MY <mypham2802@gmail.com>, 2016
+# Tuan Tran <tmtuan.projects@gmail.com>, 2017
+# Su Pham Nghiep Vu <nghiepvusupham58@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-14 13:41+0000\n"
 "PO-Revision-Date: 2016-12-14 13:41+0000\n"
-"Last-Translator: PHAM QUOC MY <mypham2802@gmail.com>, 2016\n"
+"Last-Translator: Su Pham Nghiep Vu <nghiepvusupham58@gmail.com>, 2017\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1258,7 +1260,7 @@ msgstr ""
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor7
 msgid "Consulting"
-msgstr ""
+msgstr "Tư vấn"
 
 #. module: crm
 #: model:ir.ui.view,arch_db:crm.crm_planner
@@ -1374,7 +1376,7 @@ msgstr "Tạo Cơ hội"
 #. module: crm
 #: model:ir.ui.view,arch_db:crm.crm_planner
 msgid "Create Vendors"
-msgstr ""
+msgstr "Tạo Nhà cung cấp"
 
 #. module: crm
 #. openerp-web
@@ -1628,7 +1630,7 @@ msgstr ""
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor5
 msgid "Design"
-msgstr ""
+msgstr "Thiết kế"
 
 #. module: crm
 #: model:ir.ui.view,arch_db:crm.crm_planner
@@ -2169,7 +2171,7 @@ msgstr ""
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor4
 msgid "Information"
-msgstr ""
+msgstr "Thông tin"
 
 #. module: crm
 #. openerp-web
@@ -2801,7 +2803,7 @@ msgstr ""
 #: code:addons/crm/static/src/js/web_planner_crm.js:34
 #, python-format
 msgid "Negotiation"
-msgstr ""
+msgstr "Đàm phán"
 
 #. module: crm
 #. openerp-web
@@ -3152,7 +3154,7 @@ msgstr "Tùy chọn"
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor8
 msgid "Other"
-msgstr ""
+msgstr "Khác"
 
 #. module: crm
 #: model:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
@@ -3373,7 +3375,7 @@ msgstr ""
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor1
 msgid "Product"
-msgstr ""
+msgstr "Sản phẩm"
 
 #. module: crm
 #. openerp-web
@@ -3432,7 +3434,7 @@ msgstr ""
 #: code:addons/crm/static/src/js/web_planner_crm.js:26
 #, python-format
 msgid "Quotation sent"
-msgstr ""
+msgstr "Báo giá đã gửi"
 
 #. module: crm
 #. openerp-web
@@ -3687,7 +3689,7 @@ msgstr "Trình tự"
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor3
 msgid "Services"
-msgstr ""
+msgstr "Các dịch vụ"
 
 #. module: crm
 #. openerp-web
@@ -3912,7 +3914,7 @@ msgstr "Từ khóa"
 #. module: crm
 #: sql_constraint:crm.lead.tag:0
 msgid "Tag name already exists !"
-msgstr ""
+msgstr "Nội dung này đã có rồi!"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_tag_ids
@@ -4173,7 +4175,7 @@ msgstr "Tracking"
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor6
 msgid "Training"
-msgstr ""
+msgstr "Đào tạo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report_lead_type

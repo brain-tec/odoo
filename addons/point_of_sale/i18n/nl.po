@@ -12,10 +12,10 @@
 # Cas Vissers <casvissers@brahoo.nl>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0c\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-22 13:48+0000\n"
-"PO-Revision-Date: 2016-12-22 13:48+0000\n"
+"POT-Creation-Date: 2017-02-13 09:53+0000\n"
+"PO-Revision-Date: 2017-02-13 09:53+0000\n"
 "Last-Translator: Cas Vissers <casvissers@brahoo.nl>, 2016\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
@@ -425,7 +425,7 @@ msgstr "Open de kassalade automatisch"
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session_journal_ids
 #: model:ir.ui.view,arch_db:point_of_sale.view_pos_config_form
 msgid "Available Payment Methods"
-msgstr "Beschikbare betaalmethoden."
+msgstr "Beschikbare betaalwijzes"
 
 #. module: point_of_sale
 #: model:ir.ui.view,arch_db:point_of_sale.product_template_search_view_pos
@@ -596,7 +596,7 @@ msgstr "Kassa"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config_iface_cashdrawer
 msgid "Cashdrawer"
-msgstr "Kassa"
+msgstr "Kassalade"
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/barcode_rule.py:16
@@ -1685,7 +1685,7 @@ msgstr "Beheer layaliteitprogramma's met punten en beloningen voor klanten"
 #. module: point_of_sale
 #: model:res.groups,name:point_of_sale.group_pos_manager
 msgid "Manager"
-msgstr "Beheerder"
+msgstr "Manager"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_category_image_medium
@@ -2288,7 +2288,6 @@ msgstr "Kassa orders"
 #. module: point_of_sale
 #: model:ir.actions.act_window,name:point_of_sale.action_pos_config_kanban
 #: model:ir.actions.act_window,name:point_of_sale.action_pos_config_pos
-#: model:ir.model,name:point_of_sale.model_pos_order
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_config_id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session_config_id
 #: model:ir.model.fields,field_description:point_of_sale.field_report_pos_order_config_id
@@ -2329,7 +2328,7 @@ msgstr "Kassa instellingen"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config_group_pos_manager_id
 msgid "Point of Sale Manager Group"
-msgstr "Kassa beheerder groep"
+msgstr "Kassa manager groep"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config_name
@@ -2337,6 +2336,7 @@ msgid "Point of Sale Name"
 msgstr "Kassa naam"
 
 #. module: point_of_sale
+#: model:ir.model,name:point_of_sale.model_pos_order
 #: model:ir.ui.view,arch_db:point_of_sale.view_pos_order_search
 #: model:ir.ui.view,arch_db:point_of_sale.view_pos_pos_form
 msgid "Point of Sale Orders"
@@ -2525,7 +2525,7 @@ msgstr "Producten"
 #: model:ir.model,name:point_of_sale.model_pos_category
 #: model:ir.model.fields,field_description:point_of_sale.field_report_pos_order_pos_categ_id
 msgid "Public Category"
-msgstr "Publieke categorie"
+msgstr "Openbare categorie"
 
 #. module: point_of_sale
 #: model:ir.actions.act_window,name:point_of_sale.action_pos_box_in
@@ -2852,7 +2852,7 @@ msgstr "Sessies"
 #: code:addons/point_of_sale/static/src/js/screens.js:1141
 #, python-format
 msgid "Set Customer"
-msgstr "Klant instellen"
+msgstr "Selecteer klant"
 
 #. module: point_of_sale
 #. openerp-web
@@ -3185,8 +3185,8 @@ msgid ""
 "The payment input will behave similarily to bank payment input, and will be "
 "prefilled with the exact due amount"
 msgstr ""
-"De betalingsinput gedraagt zich gelijkaardig zoals bankafschrift input en "
-"wordt automatisch ingevuld met het exacte verschuldigde bedrag"
+"De betalingsingave gedraagt zich gelijkwaardig aan de bankafschrift ingave "
+"en wordt automatisch ingevuld met het exacte verschuldigde bedrag"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_order_config_id
@@ -3338,7 +3338,7 @@ msgid ""
 "This cashbox line is used by default when opening or closing a balance for "
 "this point of sale"
 msgstr ""
-"Deze kassa lijn wordt standaard gebruikt bij het openen of sluiten van een "
+"Deze kassa regel wordt standaard gebruikt bij het openen of sluiten van een "
 "balans voor deze kassa."
 
 #. module: point_of_sale
@@ -3454,7 +3454,7 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_product_template_pos_categ_id
 msgid "Those categories are used to group similar products for point of sale."
 msgstr ""
-"De categorieën worden gebruikt om gelijkaardige producten te groeperen bij "
+"De categorieën worden gebruikt om gelijkwaardige producten te groeperen bij "
 "de kassa."
 
 #. module: point_of_sale

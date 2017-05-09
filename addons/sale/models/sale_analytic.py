@@ -12,7 +12,19 @@ class SaleOrderLine(models.Model):
         lines = {}
         if not domain:
             # To filter on analyic lines linked to an expense
-            domain = [('so_line', 'in', self.ids), ('amount', '<=', 0.0)]
+            expense_type_id = self.env.ref('account.data_account_type_expenses', raise_if_not_found=False)
+            expense_type_id = expense_type_id and expense_type_id.id
+            domain = [
+                ('so_line', 'in', self.ids),
+                '|',
+                    ('amount', '<', 0),
+                    '&',
+                        ('amount', '=', 0),
+                        '|',
+                            ('move_id', '=', False),
+                            ('move_id.account_id.user_type_id', '=', expense_type_id)
+            ]
+
         data = self.env['account.analytic.line'].read_group(
             domain,
             ['so_line', 'unit_amount', 'product_uom_id'], ['product_uom_id', 'so_line'], lazy=False
@@ -90,11 +102,8 @@ class AccountAnalyticLine(models.Model):
         result = dict(vals or {})
         so_line = result.get('so_line', False) or self.so_line
         if not so_line and self.account_id and self.product_id and (self.product_id.expense_policy != 'no'):
-            order = self.env['sale.order'].search([('project_id', '=', self.account_id.id)], limit=1)
-            if order and order.state != 'sale':
-                raise UserError(_('The Sale Order %s linked to the Analytic Account must be validated before registering expenses.') % order.name)
-
-            order = self.env['sale.order'].search([('project_id', '=', self.account_id.id), ('state', '=', 'sale')], limit=1)
+            order_in_sale = self.env['sale.order'].search([('project_id', '=', self.account_id.id), ('state', '=', 'sale')], limit=1)
+            order = order_in_sale or self.env['sale.order'].search([('project_id', '=', self.account_id.id)], limit=1)
             if not order:
                 return result
             price = self._get_invoice_price(order)
@@ -106,6 +115,8 @@ class AccountAnalyticLine(models.Model):
             if so_lines:
                 result.update({'so_line': so_lines[0].id})
             else:
+                if order.state != 'sale':
+                    raise UserError(_('The Sale Order %s linked to the Analytic Account must be validated before registering expenses.') % order.name)
                 order_line_vals = self._get_sale_order_line_vals(order, price)
                 if order_line_vals:
                     so_line = self.env['sale.order.line'].create(order_line_vals)
@@ -136,7 +147,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def unlink(self):
-        so_lines = self.mapped('so_line')
+        so_lines = self.sudo().mapped('so_line')
         res = super(AccountAnalyticLine, self).unlink()
-        so_lines.with_context(force_so_lines=so_lines).sudo()._compute_analytic()
+        so_lines.with_context(force_so_lines=so_lines)._compute_analytic()
         return res

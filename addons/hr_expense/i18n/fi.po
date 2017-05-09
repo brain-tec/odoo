@@ -86,7 +86,7 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "<strong>Date:</strong>"
-msgstr ""
+msgstr "<strong>Pvm:</strong>"
 
 #. module: hr_expense
 #: model:ir.ui.view,arch_db:hr_expense.report_expense_sheet
@@ -146,7 +146,7 @@ msgstr "Kirjanpito"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet_accounting_date
 msgid "Accounting Date"
-msgstr ""
+msgstr "Kirjauspäivä"
 
 #. module: hr_expense
 #: model:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
@@ -540,7 +540,7 @@ msgstr ""
 #: model:product.product,name:hr_expense.product_product_fixed_cost
 #: model:product.template,name:hr_expense.product_product_fixed_cost_product_template
 msgid "Expenses"
-msgstr "menot"
+msgstr "Kulut"
 
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.hr_expense_action
@@ -673,7 +673,7 @@ msgstr "Hotellimajoitus"
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_department
 msgid "Hr Department"
-msgstr ""
+msgstr "HR-osasto"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_expense_register_payment_wizard

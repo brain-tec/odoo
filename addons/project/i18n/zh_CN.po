@@ -4,13 +4,16 @@
 # 
 # Translators:
 # Jeffery CHEN <jeffery9@gmail.com>, 2016
+# 卓忆科技 <zhanghao@jointd.com>, 2016
+# liAnGjiA <liangjia@qq.com>, 2016
+# Bo Cao <cao.poobo@hotmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-10-10 08:42+0000\n"
 "PO-Revision-Date: 2016-10-10 08:42+0000\n"
-"Last-Translator: Jeffery CHEN <jeffery9@gmail.com>, 2016\n"
+"Last-Translator: Bo Cao <cao.poobo@hotmail.com>, 2016\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -138,7 +141,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user_opening_days
 msgid "# Days to Assign"
-msgstr ""
+msgstr "# 分配的天数"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user_closing_days
@@ -187,7 +190,7 @@ msgstr "- Odoo团队"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "1. Learn about Tasks, Issues and Timesheets."
-msgstr "1. 学习Tasks,Issues和Timesheets."
+msgstr "1. 学习任务,问题和计工单."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -455,7 +458,7 @@ msgstr ""
 msgid ""
 "<span>(*) This configuration is related to the company you're logged "
 "into.</span>"
-msgstr "<span>（*）这个配置是你登录到公司相关。< /span>"
+msgstr "<span>( * )此配置与您登录的公司有关</span>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -993,7 +996,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_project_kanban
 msgid "Add/remove from favorite"
-msgstr ""
+msgstr "从最爱添加/移除"
 
 #. module: project
 #. openerp-web
@@ -1030,7 +1033,7 @@ msgstr "别名"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_alias_domain
 msgid "Alias domain"
-msgstr "别名网域"
+msgstr "别名域"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_alias_model_id
@@ -1227,7 +1230,7 @@ msgstr ""
 #: model:project.task,legend_done:project.project_task_7
 #: model:project.task.type,legend_done:project.project_stage_1
 msgid "Buzz or set as done"
-msgstr "Buzz or set as done"
+msgstr "Buzz或设置已完成"
 
 #. module: project
 #: model:ir.filters,name:project.filter_task_report_responsible
@@ -2151,12 +2154,12 @@ msgstr "进行中"
 #: code:addons/project/static/src/js/web_planner_project.js:79
 #, python-format
 msgid "Incoming"
-msgstr "将要来的"
+msgstr "入向"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.edit_project
 msgid "Incoming Emails create"
-msgstr "收到的邮件创建"
+msgstr "入向邮件创建"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_planned_hours
@@ -2437,7 +2440,7 @@ msgstr "在雇员质检更加有效的沟通"
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_project_project_filter
 msgid "My Favorites"
-msgstr ""
+msgstr "我的收藏夹"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_task_search_form
@@ -2763,7 +2766,7 @@ msgstr "项目别名"
 #: model:ir.model.fields,field_description:project.field_account_analytic_account_project_count
 #: model:ir.model.fields,field_description:project.field_project_project_project_count
 msgid "Project Count"
-msgstr "项目计数"
+msgstr "项目个数"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_config_settings
@@ -2902,7 +2905,7 @@ msgstr "记录线索ID"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Red: the Task is blocked (there's a problem)"
-msgstr "红：任务卡住了（有议题存在）"
+msgstr "红色：任务受阻(有问题了)"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_code
@@ -3184,7 +3187,7 @@ msgstr "任务活动"
 #: model:mail.message.subtype,name:project.mt_project_task_blocked
 #: model:mail.message.subtype,name:project.mt_task_blocked
 msgid "Task Blocked"
-msgstr "延期的任务"
+msgstr "受阻的任务"
 
 #. module: project
 #: model:mail.message.subtype,name:project.mt_project_task_new
@@ -3234,7 +3237,7 @@ msgstr "受阻的任务"
 #. module: project
 #: selection:project.config.settings,module_pad:0
 msgid "Task description is plain text"
-msgstr ""
+msgstr "任务描述就是一个很平常的文本"
 
 #. module: project
 #. openerp-web
@@ -3531,7 +3534,7 @@ msgstr "总剩余时间，任务执行者可定期重估"
 #. module: project
 #: selection:project.config.settings,module_rating_project:0
 msgid "Track customer satisfaction on tasks"
-msgstr ""
+msgstr "允许在项目发行完成后激活客户评级"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_task_project_user_search

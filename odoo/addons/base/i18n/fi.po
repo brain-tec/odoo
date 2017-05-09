@@ -10,7 +10,7 @@
 # Miku Laitinen <miku.laitinen@gmail.com>, 2016
 # Veikko Väätäjä <veikko.vaataja@gmail.com>, 2016
 # Kimmo Lehtonen <leban@netzionale.com>, 2016
-# Timo Koukkari <timo.koukkari@seamk.fi>, 2016
+# Timo Koukkari <ti.ko@netikka.fi>, 2016
 # Marko Happonen <marko.happonen@sprintit.fi>, 2016
 # Svante Suominen <svante.suominen@web-veistamo.fi>, 2016
 # Kari Lindgren <karisatu@gmail.com>, 2016
@@ -22,8 +22,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-14 15:54+0000\n"
-"PO-Revision-Date: 2016-11-14 15:54+0000\n"
+"POT-Creation-Date: 2017-01-27 11:58+0000\n"
+"PO-Revision-Date: 2017-01-27 11:58+0000\n"
 "Last-Translator: artol <arto.leskinen@tek.fi>, 2017\n"
 "Language-Team: Finnish (https://www.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
@@ -4387,7 +4387,7 @@ msgstr "Toimet"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
 msgid "Add Delivery Costs to Online Sales"
-msgstr ""
+msgstr "Lisää toimituskulut verkkomyyntiin"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_header
@@ -4985,6 +4985,12 @@ msgid "Automatic Installation"
 msgstr "Automaattinen asennus"
 
 #. module: base
+#: code:addons/base/module/module.py:650
+#, python-format
+msgid "Automatic install of downloaded Apps is currently disabled."
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_translation_state
 msgid ""
 "Automatically set to let administators find new terms that might need to be "
@@ -5472,8 +5478,8 @@ msgstr "Konfiguraatiota ei voi monistaa!"
 #. module: base
 #: code:addons/base/ir/ir_model.py:549
 #, python-format
-msgid "Cannot rename field to %s, because that field already exists!"
-msgstr "Ei voi muuttaa kentän nimeä %s, koska se kenttä on jo olemassa!"
+msgid "Cannot rename/delete fields that are still present in views:"
+msgstr ""
 
 #. module: base
 #: code:addons/base/res/res_lang.py:219
@@ -7962,6 +7968,19 @@ msgid "Field `%(field_name)s` does not exist"
 msgstr "Kenttää '%(field_name)s' ei ole olemassa"
 
 #. module: base
+#: code:addons/base/ir/ir_model.py:298
+#, python-format
+msgid ""
+"Field names can only contain characters, digits and underscores (up to 63)."
+msgstr ""
+
+#. module: base
+#: code:addons/base/ir/ir_model.py:307
+#, python-format
+msgid "Field names must be unique per model."
+msgstr ""
+
+#. module: base
 #: model:ir.actions.act_window,name:base.action_model_fields
 #: model:ir.model,name:base.model_ir_model_fields
 #: model:ir.model.fields,field_description:base.field_ir_model_field_id
@@ -8292,7 +8311,7 @@ msgstr "Täydellinen tiedostopolku"
 #: selection:ir.actions.act_window,target:0
 #: selection:ir.actions.client,target:0
 msgid "Full Screen"
-msgstr ""
+msgstr "Kokosivu"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_logging_func
@@ -8893,7 +8912,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_model_fields_form
 #: model:ir.ui.view,arch_db:base.view_model_form
 msgid "How to define a computed field"
-msgstr ""
+msgstr "Kuinka määritellä laskettu kenttä"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment_survey
@@ -11465,6 +11484,8 @@ msgid ""
 "                a customer: discussions, history of business opportunities,\n"
 "                documents, etc."
 msgstr ""
+"Odoossa asiakastietojen seuraaminen on helppoa: keskustelut, mahdollisuudet,"
+" dokumentit, jne."
 
 #. module: base
 #: model:ir.actions.act_window,help:base.action_partner_supplier_form
@@ -13129,7 +13150,7 @@ msgstr "Myynnit ja ostot"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_expense
 msgid "Sales Expense"
-msgstr ""
+msgstr "Myyntikulut"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sales_team
@@ -14873,6 +14894,13 @@ msgstr "Poistettavat"
 #: selection:ir.module.module.dependency,state:0
 msgid "To be upgraded"
 msgstr "Päivitettävät"
+
+#. module: base
+#: code:addons/base/module/module.py:651
+#, python-format
+msgid ""
+"To enable it, make sure this directory exists and is writable on the server:"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_actions_todo_tree

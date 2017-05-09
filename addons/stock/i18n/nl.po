@@ -1254,7 +1254,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_line_product_qty
 msgid "Checked Quantity"
-msgstr "Controleer hoeveelheid"
+msgstr "Getelde hoeveelheid"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_partially_available
@@ -2624,7 +2624,7 @@ msgstr ""
 "in de ontwikkelde delen van de wereld. IJs kan worden gekocht in grote dozen"
 " van supermarkten en kruidenierszaken, in kleinere hoeveelheden van "
 "ijswinkels, en in individuele porties van kleine ijswagens of bestelwagens "
-"bij publieke evenementen."
+"bij openbare evenementen."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant_name
@@ -2878,7 +2878,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_exhausted
 msgid "Include Exhausted Products"
-msgstr "Voeg uitgeputte productie toe"
+msgstr "Inclusief producten met nul voorraad"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_product_product_incoming_qty
@@ -3725,7 +3725,7 @@ msgstr "Beheer meerdere magazijnen"
 #. module: stock
 #: model:res.groups,name:stock.group_stock_manager
 msgid "Manager"
-msgstr "Beheerder"
+msgstr "Manager"
 
 #. module: stock
 #: selection:stock.location.path,auto:0
@@ -4089,8 +4089,8 @@ msgid ""
 "Number of days after the orderpoint is triggered to receive the products or "
 "to order to the vendor"
 msgstr ""
-"Aantal dagen na het orderpunt is afgegaan om producten te ontvangen of een "
-"order te maken bij de leverancier"
+"Aantal dagen nadat de aanvulregel is uitgevoerd om producten te ontvangen of"
+" een order te maken bij de leverancier"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location_path_delay
@@ -5236,7 +5236,7 @@ msgstr "Aantal te late pickings"
 #: model:ir.ui.view,arch_db:stock.view_move_search
 #: model:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Ready"
-msgstr "Klaar"
+msgstr "Gereed"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_product_qty
@@ -7286,7 +7286,7 @@ msgstr ""
 "Wij handelen het hele importproces voor u \n"
 "af: u hoeft enkel het CSV-bestand met al\n"
 "uw productgegevens naar uw Odoo project-\n"
-"beheerder te versturen."
+"manager te versturen."
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -7465,7 +7465,7 @@ msgid ""
 "may deactivate this product."
 msgstr ""
 "Het is niet mogelijk de maateenheid van een product te wijzigen welke al is "
-"gebruikt in een voorraad mutatie. Indien u de maateenheid wilt veranderen, "
+"gebruikt in een voorraad mutatie. Indien u de maateenheid wilt wijzigen, "
 "kunt u dit product de-activeren."
 
 #. module: stock

@@ -5,14 +5,16 @@
 # Translators:
 # Jeffery CHEN <jeffery9@gmail.com>, 2016
 # Yuan Xulei <hi@yxl.name>, 2016
+# liAnGjiA <liangjia@qq.com>, 2016
 # Ted Wang <feiyuwang2012@gmail.com>, 2016
+# Bo Cao <cao.poobo@hotmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-11-14 15:53+0000\n"
 "PO-Revision-Date: 2016-11-14 15:53+0000\n"
-"Last-Translator: Ted Wang <feiyuwang2012@gmail.com>, 2016\n"
+"Last-Translator: Bo Cao <cao.poobo@hotmail.com>, 2017\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -147,8 +149,8 @@ msgid ""
 "${object.company_id.name} ${object.state in ('draft', 'sent') and "
 "'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })"
 msgstr ""
-"${object.company_id.name} ${object.state in ('draft', 'sent') and '报价单' or "
-"'订单'} (单号 ${object.name or 'n/a' })"
+"${object.company_id.name} ${object.state in ('draft', 'sent') and "
+"'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })"
 
 #. module: sale
 #: model:mail.template,subject:sale.mail_template_data_notification_email_sale_order
@@ -428,7 +430,7 @@ msgstr "预收: %s"
 #. module: sale
 #: selection:sale.config.settings,sale_pricelist_setting:0
 msgid "Advanced pricing based on formulas (discounts, margins, rounding)"
-msgstr "基于公式(打折、毛利、舍入)的高级定价"
+msgstr "高级定价基于公式(打折、毛利、舍入)"
 
 #. module: sale
 #: selection:sale.config.settings,group_warning_sale:0
@@ -766,7 +768,7 @@ msgstr "送货地址"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_customer_lead
 msgid "Delivery Lead Time"
-msgstr "交货时间"
+msgstr "交货前置时间"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_account_invoice_partner_shipping_id
@@ -856,7 +858,7 @@ msgstr "在销售订单和发票中显示国际贸易术语"
 #. module: sale
 #: selection:sale.config.settings,module_sale_margin:0
 msgid "Display margins on quotations and sales orders"
-msgstr "在报价单和销售订单中显示利润"
+msgstr "在报价单和销售订单显示毛利"
 
 #. module: sale
 #: selection:sale.config.settings,group_sale_layout:0
@@ -1331,21 +1333,21 @@ msgstr "不在报告显示国际贸易术语"
 #. module: sale
 #: selection:sale.config.settings,group_product_variant:0
 msgid "No variants on products"
-msgstr "产品无任何变型"
+msgstr "产品无任何变体"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_quotations_salesteams
 msgid ""
 "Note that once a Quotation becomes a Sale Order, it will be moved\n"
 "                from the Quotations list to the Sales Order list."
-msgstr ""
+msgstr "注意一旦报价转为销售订单，它将从报价单列表移动到销售订单列表中。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_quotations
 msgid ""
 "Note that once a Quotation becomes a Sale Order, it will be moved\n"
 "            from the Quotations list to the Sales Order list."
-msgstr ""
+msgstr "注意一旦报价转为销售订单，它将从报价单列表移动到销售订单列表中。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.act_res_partner_2_sale_order
@@ -1641,7 +1643,7 @@ msgstr "产品模板"
 #: model:ir.ui.menu,name:sale.menu_product
 #: model:ir.ui.menu,name:sale.menu_products
 msgid "Product Variants"
-msgstr "产品变型"
+msgstr "产品变体"
 
 #. module: sale
 #: model:ir.ui.menu,name:sale.menu_product_template_action
@@ -1655,7 +1657,7 @@ msgstr "产品"
 msgid ""
 "Products can have several attributes, defining variants (Example: size, "
 "color,...)"
-msgstr "产品可以有好几个属性，通过不同属性来定义不同的产品变体型(属性如: 尺寸, 颜色.....)"
+msgstr "产品可以有好几个属性，通过不同属性来定义不同的产品变体(属性如: 尺寸, 颜色.....)"
 
 #. module: sale
 #: selection:sale.config.settings,group_uom:0
@@ -1736,7 +1738,7 @@ msgstr "报价单已确认"
 #: model:mail.message.subtype,name:sale.mt_order_sent
 #: model:mail.message.subtype,name:sale.mt_salesteam_order_sent
 msgid "Quotation sent"
-msgstr "报价单已送出"
+msgstr "报价单送出"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_quotations
@@ -1762,7 +1764,7 @@ msgstr "报价单分析"
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.sale_order_view_search_inherit_quotation
 msgid "Quotations Sent"
-msgstr "已发送报价单"
+msgstr "报价单送出"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.act_res_partner_2_sale_order
@@ -1952,7 +1954,7 @@ msgstr "待开发票销售"
 #. module: sale
 #: selection:sale.config.settings,module_sale_margin:0
 msgid "Salespeople do not need to view margins when quoting"
-msgstr "销售人员在报价时不需要查看利润率"
+msgstr "销售人员在报价时不需要查看毛利"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_salesman_id
@@ -2247,7 +2249,7 @@ msgid ""
 "the Invoice Analysis report in the Accounting application."
 msgstr ""
 "这个报表会对你的报价单和销售订单进行分析。分析检查你的销售收入，并且按照不同的标准分组（业务员，合作伙伴，产品等）。用这个报表对还没有开票的销售订单进行分析。"
-" 如果你想分析你的周转，你应该用会计模块里的发票分析报表。"
+" 如果你想分析你的营业额，你应该用会计模块里的发票分析报表。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_order_report_quotation_salesteam
@@ -2259,7 +2261,7 @@ msgid ""
 "Invoice Analysis report in the Accounting application."
 msgstr ""
 "这个报表会对你的报价单和销售订单进行分析。检查你的销售收入，并且按照不同的标准排序（业务员，业务伙伴，产品等）。用这个报表对还没有开票的销售订单进行分析。"
-" 如果你想分析你的周转，你应该用会计模块里的发票分析报表功能。"
+" 如果你想分析你的营业额，你应该用会计模块里的发票分析报表功能。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_order_report_so_salesteam
@@ -2271,7 +2273,7 @@ msgid ""
 "Invoice Analysis report in the Accounting application."
 msgstr ""
 "这个报表会对你的销售订单进行分析。分析检查你的销售收入，并且按照不同的标准分组（业务员，业务伙伴，产品等）进行排序。用这个报表对还没有开票的销售订单进行分析。"
-" 如果你想分析你的周转，你应该用会计模块里的发票分析报表。"
+" 如果你想分析你的营业额，你应该用会计模块里的发票分析报表。"
 
 #. module: sale
 #: selection:product.template,track_service:0
@@ -2479,14 +2481,14 @@ msgstr ""
 msgid ""
 "Your next actions should flow efficiently: confirm the Quotation\n"
 "                to a Sale Order, then create the Invoice and collect the Payment."
-msgstr ""
+msgstr "你的下一步行动应该为：确认报价单并转为销售订单，然后创建发票和收取款项。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_quotations
 msgid ""
 "Your next actions should flow efficiently: confirm the Quotation\n"
 "            to a Sale Order, then create the Invoice and collect the Payment."
-msgstr ""
+msgstr "你的下一步行动应该为：确认报价单并转为销售订单，然后创建发票和收取款项。"
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.act_res_partner_2_sale_order
