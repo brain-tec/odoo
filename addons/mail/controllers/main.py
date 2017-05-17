@@ -110,15 +110,9 @@ class MailController(http.Controller):
 
     @http.route('/mail/read_followers', type='json', auth='user')
     def read_followers(self, follower_ids):
-        formatted_follower_ids = []
-        for f in follower_ids:
-            if type(f) == list:
-                formatted_follower_ids.extend(f)
-            else:
-                formatted_follower_ids.append(f)
         result = []
         is_editable = request.env.user.has_group('base.group_no_one')
-        for follower in request.env['mail.followers'].browse(formatted_follower_ids):
+        for follower in request.env['mail.followers'].browse(follower_ids):
             result.append({
                 'id': follower.id,
                 'name': follower.partner_id.name or follower.channel_id.name,

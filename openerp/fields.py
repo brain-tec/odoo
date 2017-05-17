@@ -932,7 +932,13 @@ class Field(object):
         elif self.compute:
             # this is either a non-stored computed field, or a stored computed
             # field in onchange mode
-            if self.recursive:
+            # hack by meja1
+            # this makes that only the current record is the one to recompute all its functional fields
+            # and not all of the records in the cache.
+            # The context is set in Vendor Bills window action
+            compute_only_active_record = env.context.get('compute_only_active_record', False)
+            if self.recursive or compute_only_active_record:
+            # end hack
                 self.compute_value(record)
             else:
                 recs = record._in_cache_without(self)
