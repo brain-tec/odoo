@@ -946,7 +946,7 @@ class AccountMoveLine(models.Model):
         second_line_dict = self._prepare_writeoff_second_line_values(vals)
 
         # Create the move
-        writeoff_move = self.env['account.move'].create({
+        writeoff_move = self.env['account.move'].with_context(apply_taxes=True).create({
             'journal_id': vals['journal_id'],
             'date': vals['date'],
             'state': 'draft',
