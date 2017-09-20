@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import partial
 
 import psycopg2
+import pytz
 
 from odoo import api, fields, models, tools, _
 from odoo.tools import float_is_zero
@@ -161,6 +162,7 @@ class PosOrder(models.Model):
             'origin': self.name,
             'account_id': self.partner_id.property_account_receivable_id.id,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
+            'company_id': self.company_id.id,
             'type': 'out_invoice',
             'reference': self.name,
             'partner_id': self.partner_id.id,
@@ -207,7 +209,7 @@ class PosOrder(models.Model):
         have_to_group_by = session and session.config_id.group_by or False
         rounding_method = session and session.config_id.company_id.tax_calculation_rounding_method
 
-        for order in self.filtered(lambda o: not o.account_move or order.state == 'paid'):
+        for order in self.filtered(lambda o: not o.account_move or o.state == 'paid'):
             current_company = order.sale_journal.company_id
             account_def = IrProperty.get(
                 'property_account_receivable_id', 'res.partner')
@@ -292,7 +294,8 @@ class PosOrder(models.Model):
                 taxes = line.tax_ids_after_fiscal_position.filtered(lambda t: t.company_id.id == current_company.id)
                 if not taxes:
                     continue
-                for tax in taxes.compute_all(line.price_unit * (100.0 - line.discount) / 100.0, cur, line.qty)['taxes']:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                for tax in taxes.compute_all(price, cur, line.qty)['taxes']:
                     insert_data('tax', {
                         'name': _('Tax') + ' ' + tax['name'],
                         'product_id': line.product_id.id,
@@ -610,11 +613,11 @@ class PosOrder(models.Model):
                     'location_id': location_id,
                     'location_dest_id': destination_id,
                 }
-                pos_qty = any([x.qty > 0 for x in order.lines])
+                pos_qty = any([x.qty > 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if pos_qty:
                     order_picking = Picking.create(picking_vals.copy())
                     order_picking.message_post(body=message)
-                neg_qty = any([x.qty < 0 for x in order.lines])
+                neg_qty = any([x.qty < 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if neg_qty:
                     return_vals = picking_vals.copy()
                     return_vals.update({
@@ -625,7 +628,7 @@ class PosOrder(models.Model):
                     return_picking = Picking.create(return_vals)
                     return_picking.message_post(body=message)
 
-            for line in order.lines.filtered(lambda l: l.product_id.type in ['product', 'consu']):
+            for line in order.lines.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not float_is_zero(l.qty, precision_digits=l.product_id.uom_id.rounding)):
                 moves |= Move.create({
                     'name': line.name,
                     'product_uom': line.product_id.uom_id.id,
@@ -648,7 +651,10 @@ class PosOrder(models.Model):
 
             # when the pos.config has no picking_type_id set only the moves will be created
             if moves and not return_picking and not order_picking:
-                moves.action_assign()
+                tracked_moves = moves.filtered(lambda move: move.product_id.tracking != 'none')
+                untracked_moves = moves - tracked_moves
+                tracked_moves.action_confirm()
+                untracked_moves.action_assign()
                 moves.filtered(lambda m: m.state in ['confirmed', 'waiting']).force_assign()
                 moves.filtered(lambda m: m.product_id.tracking == 'none').action_done()
 
@@ -657,10 +663,17 @@ class PosOrder(models.Model):
     def _force_picking_done(self, picking):
         """Force picking in order to be set as done."""
         self.ensure_one()
-        picking.action_assign()
+        contains_tracked_products = any([(product_id.tracking != 'none') for product_id in self.lines.mapped('product_id')])
+
+        # do not reserve for tracked products, the user will have manually specified the serial/lot numbers
+        if contains_tracked_products:
+            picking.action_confirm()
+        else:
+            picking.action_assign()
+
         picking.force_assign()
         self.set_pack_operation_lot(picking)
-        if not any([(x.product_id.tracking != 'none') for x in picking.pack_operation_ids]):
+        if not contains_tracked_products:
             picking.action_done()
 
     def set_pack_operation_lot(self, picking=None):
@@ -674,7 +687,7 @@ class PosOrder(models.Model):
                 qty = 0
                 qty_done = 0
                 pack_lots = []
-                pos_pack_lots = PosPackOperationLot.search([('order_id', '=',  order.id), ('product_id', '=', pack_operation.product_id.id)])
+                pos_pack_lots = PosPackOperationLot.search([('order_id', '=', order.id), ('product_id', '=', pack_operation.product_id.id)])
                 pack_lot_names = [pos_pack.lot_name for pos_pack in pos_pack_lots]
 
                 if pack_lot_names:
@@ -691,7 +704,7 @@ class PosOrder(models.Model):
                     qty_done = pack_operation.product_qty
                 pack_operation.write({'pack_lot_ids': map(lambda x: (0, 0, x), pack_lots), 'qty_done': qty_done})
 
-    def add_payment(self, data):
+    def _prepare_bank_statement_line_payment_values(self, data):
         """Create a new payment for the order"""
         args = {
             'amount': data['amount'],
@@ -736,8 +749,16 @@ class PosOrder(models.Model):
             'journal_id': journal_id,
             'ref': self.session_id.name,
         })
+
+        return args
+
+    def add_payment(self, data):
+        """Create a new payment for the order"""
+        args = self._prepare_bank_statement_line_payment_values(data)
+        context = dict(self.env.context)
+        context.pop('pos_session_id', False)
         self.env['account.bank.statement.line'].with_context(context).create(args)
-        return statement_id
+        return args.get('statement_id', False)
 
     @api.multi
     def refund(self):
@@ -802,7 +823,7 @@ class PosOrderLine(models.Model):
     def create(self, values):
         if values.get('order_id') and not values.get('name'):
             # set name based on the sequence specified on the config
-            config_id = self.env['pos.order'].browse(values['order_id']).session_id.config_id.id
+            config_id = self.order_id.browse(values['order_id']).session_id.config_id.id
             # HACK: sequence created in the same transaction as the config
             # cf TODO master is pos.config create
             # remove me saas-15
@@ -826,20 +847,14 @@ class PosOrderLine(models.Model):
     @api.depends('price_unit', 'tax_ids', 'qty', 'discount', 'product_id')
     def _compute_amount_line_all(self):
         for line in self:
-            currency = line.order_id.pricelist_id.currency_id
-            taxes = line.tax_ids.filtered(lambda tax: tax.company_id.id == line.order_id.company_id.id)
-            fiscal_position_id = line.order_id.fiscal_position_id
-            if fiscal_position_id:
-                taxes = fiscal_position_id.map_tax(taxes, line.product_id, line.order_id.partner_id)
+            fpos = line.order_id.fiscal_position_id
+            tax_ids_after_fiscal_position = fpos.map_tax(line.tax_ids, line.product_id, line.order_id.partner_id) if fpos else line.tax_ids
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            line.price_subtotal = line.price_subtotal_incl = price * line.qty
-            if taxes:
-                taxes = taxes.compute_all(price, currency, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
-                line.price_subtotal = taxes['total_excluded']
-                line.price_subtotal_incl = taxes['total_included']
-
-            line.price_subtotal = currency.round(line.price_subtotal)
-            line.price_subtotal_incl = currency.round(line.price_subtotal_incl)
+            taxes = tax_ids_after_fiscal_position.compute_all(price, line.order_id.pricelist_id.currency_id, line.qty, product=line.product_id, partner=line.order_id.partner_id)
+            line.update({
+                'price_subtotal_incl': taxes['total_included'],
+                'price_subtotal': taxes['total_excluded'],
+            })
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -851,8 +866,10 @@ class PosOrderLine(models.Model):
             price = self.order_id.pricelist_id.get_product_price(
                 self.product_id, self.qty or 1.0, self.order_id.partner_id)
             self._onchange_qty()
-            self.price_unit = price
-            self.tax_ids = self.product_id.taxes_id
+            self.tax_ids = self.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
+            fpos = self.order_id.fiscal_position_id
+            tax_ids_after_fiscal_position = fpos.map_tax(self.tax_ids, self.product_id, self.order_id.partner_id) if fpos else self.tax_ids
+            self.price_unit = self.env['account.tax']._fix_tax_included_price_company(price, self.product_id.taxes_id, tax_ids_after_fiscal_position, self.company_id)
 
     @api.onchange('qty', 'discount', 'price_unit', 'tax_ids')
     def _onchange_qty(self):
@@ -896,7 +913,9 @@ class ReportSaleDetails(models.AbstractModel):
         if not configs:
             configs = self.env['pos.config'].search([])
 
-        today = fields.Datetime.from_string(fields.Date.context_today(self))
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
+        today = user_tz.localize(fields.Datetime.from_string(fields.Date.context_today(self)))
+        today = today.astimezone(pytz.timezone('UTC'))
         if date_start:
             date_start = fields.Datetime.from_string(date_start)
         else:
