@@ -4,6 +4,95 @@
 __import__('os').environ['TZ'] = 'UTC'
 __import__('pkg_resources').declare_namespace('odoo.addons')
 import odoo
+from odoo.modules.module import get_module_path
+
+load_module_graph_original = odoo.modules.loading.load_module_graph
+
+
+def load_module_graph(cr, graph, status=None, perform_checks=True,
+                      skip_modules=None, report=None):
+
+    loaded_modules, processed_modules = load_module_graph_original(
+        cr, graph, status=status, perform_checks=perform_checks,
+        skip_modules=skip_modules, report=report)
+
+    # TODO: is this really needed
+    __import__('odoo.addons.bt_autoupdate.models.ir_module_module')
+
+    tracking = odoo.tools.config.get('installation_tracking', default='hash')
+
+    if processed_modules:
+
+        for processed_module in processed_modules:
+
+            module_id = graph[processed_module].id
+            module_directory = get_module_path(processed_module)
+
+            args = {
+                'id': module_id,
+                'md5': '',
+                'origin': '',
+                'branch': '',
+                'commit': '',
+                'diff': '',
+            }
+
+            if tracking == 'hash' or tracking == 'git':
+                args['md5'] = odoo.addons.bt_autoupdate.models.\
+                    ir_module_module.get_md5_of_directory(module_directory)
+
+            if tracking == 'git':
+
+                cmd = "git config --get remote.origin.url"
+                args['origin'] = odoo.addons.bt_autoupdate.models.\
+                    ir_module_module.get_git(module_directory, cmd)
+
+                cmd = "git symbolic-ref --short HEAD"
+                args['branch'] = odoo.addons.bt_autoupdate.models.\
+                    ir_module_module.get_git(module_directory, cmd)
+
+                cmd = "git rev-parse --verify HEAD"
+                args['commit'] = odoo.addons.bt_autoupdate.models.\
+                    ir_module_module.get_git(module_directory, cmd)
+
+                # we add new files to the staging area and reset this step
+                # afterwards. Maybe we reset to much, but hey, this should run
+                # only on server and there shouldn't be any code change at all
+                cmd = "git add -NA; git diff; git reset HEAD"
+                args['diff'] = odoo.addons.bt_autoupdate.models.\
+                    ir_module_module.get_git(module_directory, cmd)
+
+            # check if columns exists in database
+            cr.execute("SELECT column_name FROM information_schema.columns "
+                       "WHERE table_name='ir_module_module' and "
+                       "column_name='md5'")
+
+            vals = cr.fetchall()
+            if not vals:
+
+                # create the missing fields
+                # especially in case a new database is created from
+                # /web/database/manager
+                cr.execute("ALTER TABLE ir_module_module "
+                           "ADD git_diff text, "
+                           "ADD git_origin varchar, "
+                           "ADD md5 varchar, "
+                           "ADD git_branch varchar, "
+                           "ADD git_commit varchar")
+
+            # now write in the new fields
+            cr.execute("UPDATE ir_module_module SET "
+                       "md5=%(md5)s, "
+                       "git_origin=%(origin)s,"
+                       "git_branch=%(branch)s,"
+                       "git_commit=%(commit)s,"
+                       "git_diff=%(diff)s "
+                       "WHERE id=%(id)s" , args)
+
+    return loaded_modules, processed_modules
+
+odoo.modules.loading.load_module_graph = load_module_graph
 
 if __name__ == "__main__":
     odoo.cli.main()
+    
