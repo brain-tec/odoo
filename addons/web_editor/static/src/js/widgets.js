@@ -547,7 +547,7 @@ var getCssSelectors = function(filter) {
     var sheets = document.styleSheets;
     for(var i = 0; i < sheets.length; i++) {
         var rules;
-        if (sheets[i].rules) {
+        if (sheets[i].hasOwnProperty('rules')) {
             rules = sheets[i].rules;
         } else {
             //try...catch because Firefox not able to enumerate document.styleSheets[].cssRules[] for cross-domain stylesheets.
