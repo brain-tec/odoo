@@ -469,10 +469,22 @@ THE SOFTWARE.
                         clsName += ' today';
                     }
                 }
+                /* PATCH: Alvaro - Set gray as the background of some week days -- define the color within your code
                 if (picker.options.daysOfWeekDisabled) {
                     for (i = 0; i < picker.options.daysOfWeekDisabled.length; i++) {
                         if (prevMonth.day() === picker.options.daysOfWeekDisabled[i]) {
                             clsName += ' disabled';
+                            break;
+                        }
+                    }
+                }
+                row.append('<td class="day' + clsName + '">' + prevMonth.date() + '</td>');
+                */
+
+                if (picker.options.daysOfWeekGreyed) {
+                    for (i = 0; i < picker.options.daysOfWeekGreyed.length; i++) {
+                        if (prevMonth.day() === picker.options.daysOfWeekGreyed[i]) {
+                            clsName += ' greyed';
                             break;
                         }
                     }
