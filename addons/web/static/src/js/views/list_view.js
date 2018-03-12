@@ -444,6 +444,26 @@ var ListView = View.extend({
                     self.no_result();
                 }
                 reloaded.resolve();
+                /* t9064: The following Patch is applied to:
+                 * css fix column headings so that wile scrolling down the first line stays
+                 */
+                if (!self.x2m) {
+                    var $table = self.$el.find('table');
+                    $.each($table, function (index, value) {
+                        //Make a clone of our table
+                        var $fixedColumn = $(value).clone().insertBefore($(value)).css('position', 'fixed');
+
+                        //Remove everything except for first row
+                        $fixedColumn.find('tbody,tfoot').remove();
+
+                        //Match the width of the columns to that of the original table's
+                        $fixedColumn.find('th').each(function (i, elem) {
+                            $(this).width($(value).find('th:eq(' + i + ')').width());
+                        });
+                        // removing the SelectAll
+                        $($fixedColumn.find('th')[0]).find('div').remove();
+                    });
+                }
             });
         });
         this.do_push_state({
@@ -478,7 +498,7 @@ var ListView = View.extend({
             }
             record.trigger('change', record);
 
-            /* When a record is reloaded, there is a rendering lag because of the addition/suppression of 
+            /* When a record is reloaded, there is a rendering lag because of the addition/suppression of
             a table row. Since the list view editable need to wait for the end of this rendering lag before
             computing the position of the editable fields, a 100ms delay is added. */
             var def = $.Deferred();
@@ -902,7 +922,7 @@ ListView.List = Class.extend({
      *
      * @constructs instance.web.ListView.List
      * @extends instance.web.Class
-     * 
+     *
      * @param {Object} opts display options, identical to those of :js:class:`instance.web.ListView`
      */
     init: function (group, opts) {
@@ -999,7 +1019,7 @@ ListView.List = Class.extend({
                       field = $target.closest('td').data('field'),
                        $row = $target.closest('tr'),
                   record_id = self.row_id($row);
-                
+
                 if ($target.attr('disabled')) {
                     return;
                 }
@@ -1405,7 +1425,7 @@ ListView.Groups = Class.extend({
                     }
                     group_label = _.str.escapeHTML(group_label);
                 }
-                    
+
                 // group_label is html-clean (through format or explicit
                 // escaping if format failed), can inject straight into HTML
                 $group_column.html(_.str.sprintf("%s (%d)",
@@ -1802,7 +1822,7 @@ var MetaColumn = Column.extend({
     }
 });
 // to do: do this in a better way (communicate with view_list_editable)
-ListView.MetaColumn = MetaColumn;  
+ListView.MetaColumn = MetaColumn;
 
 var ColumnButton = Column.extend({
     /**
