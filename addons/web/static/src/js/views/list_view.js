@@ -449,20 +449,22 @@ var ListView = View.extend({
                  */
                 if (!self.x2m) {
                     var $table = self.$el.find('table');
-                    $.each($table, function (index, value) {
-                        //Make a clone of our table
-                        var $fixedColumn = $(value).clone().insertBefore($(value)).css('position', 'fixed');
+                    if ($table.find('th').find('div')[0]) {
+                        $.each($table, function (index, value) {
+                            //Make a clone of our table
+                            var $fixedColumn = $(value).clone().insertBefore($(value)).css('position', 'fixed');
 
-                        //Remove everything except for first row
-                        $fixedColumn.find('tbody,tfoot').remove();
+                            //Remove everything except for first row
+                            $fixedColumn.find('tbody,tfoot').remove();
 
-                        //Match the width of the columns to that of the original table's
-                        $fixedColumn.find('th').each(function (i, elem) {
-                            $(this).width($(value).find('th:eq(' + i + ')').width());
+                            //Match the width of the columns to that of the original table's
+                            $fixedColumn.find('th').each(function (i, elem) {
+                                $(this).width($(value).find('th:eq(' + i + ')').width());
+                            });
+                            // removing the SelectAll
+                            $($fixedColumn.find('th')[0]).find('div').remove();
                         });
-                        // removing the SelectAll
-                        $($fixedColumn.find('th')[0]).find('div').remove();
-                    });
+                    }
                 }
             });
         });
