@@ -444,25 +444,57 @@ var ListView = View.extend({
                     self.no_result();
                 }
                 reloaded.resolve();
-                /* t9064: The following Patch is applied to:
+                /* HdM - t9064: The following Patch is applied to:
                  * css fix column headings so that wile scrolling down the first line stays
                  */
                 if (!self.x2m) {
                     var $table = self.$el.find('table');
                     if ($table.find('th').find('div')[0]) {
-                        $.each($table, function (index, value) {
-                            //Make a clone of our table
-                            var $fixedColumn = $(value).clone().insertBefore($(value)).css('position', 'fixed');
+                        var $fixedColumn;
+                        var width_value;
+                        var hdm_fixed_table = false;
+                        $table.parent().on('scroll', function(e) {
+                            if (hdm_fixed_table) {
+                                $fixedColumn.find('tr').scrollLeft(e.currentTarget.scrollLeft);
+                            }
+                        });
+                        $('div.o_content').on('scroll', function(e) {
+                            if (!hdm_fixed_table) {
+                                // Make a clone of our table
+                                $fixedColumn = $table.clone().insertBefore($table).css({
+                                    'position': 'fixed',
+                                    'z-index': 100,
+                                    'width': 'initial',
+                                    'overflow': 'scroll'
+                                });
+                                hdm_fixed_table = true;
 
-                            //Remove everything except for first row
-                            $fixedColumn.find('tbody,tfoot').remove();
+                                // Remove everything except for first row
+                                $fixedColumn.addClass('hdm-fixed-table');
+                                $fixedColumn.find('tbody,tfoot').remove();
 
-                            //Match the width of the columns to that of the original table's
-                            $fixedColumn.find('th').each(function (i, elem) {
-                                $(this).width($(value).find('th:eq(' + i + ')').width());
-                            });
-                            // removing the SelectAll
-                            $($fixedColumn.find('th')[0]).find('div').remove();
+                                // Match the width of the columns to that of the original table's
+                                // The value of m2m and o2m is dynamic depending on the content
+                                // But our headers are frozen, so we make the whole columns frozen
+                                // in order to match columns in all the cases
+                                $fixedColumn.find('th').each(function (i, elem) {
+                                    width_value = $table.find('th:eq(' + i + ')').css('width');
+                                    $table.find('th:eq(' + i + ')').css({
+                                        'min-width': width_value,
+                                        'max-width': width_value,
+                                        'width': width_value
+                                    });
+                                    $(this).css({
+                                        'min-width': width_value,
+                                        'max-width': width_value,
+                                        'width': width_value
+                                    });
+                                });
+                                // Making the click on selectAll work as the default one
+                                $fixedColumn.find('thead .o_list_record_selector input').click(function () {
+                                    $table.find('thead .o_list_record_selector input').trigger('click');
+                                });
+                            }
                         });
                     }
                 }
