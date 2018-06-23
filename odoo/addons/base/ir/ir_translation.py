@@ -158,7 +158,8 @@ class IrTranslationImport(object):
         cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
                        SELECT name, lang, res_id, src, type, value, module, state, comments
                        FROM %s AS ti
-                       WHERE NOT EXISTS(SELECT 1 FROM ONLY %s AS irt WHERE %s);
+                       WHERE NOT EXISTS(SELECT 1 FROM ONLY %s AS irt WHERE %s)
+                       ON CONFLICT DO NOTHING;
                    """ % (self._model_table, self._table, self._model_table, find_expr),
                    (tuple(src_relevant_fields), tuple(src_relevant_fields)))
 
@@ -275,8 +276,8 @@ class IrTranslation(models.Model):
             cr.execute('CREATE INDEX ir_translation_src_md5 ON ir_translation (md5(src))')
             cr.commit()
 
-        if 'ir_translation_ltn' not in indexes:
-            cr.execute('CREATE INDEX ir_translation_ltn ON ir_translation (name, lang, type)')
+        if 'ir_translation_unique' not in indexes:
+            cr.execute('CREATE INDEX ir_translation_unique ON ir_translation (type, name, lang, res_id, md5(src))')
             cr.commit()
         return res
 
