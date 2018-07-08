@@ -69,6 +69,9 @@ def _message_post_helper(res_model='', res_id=None, message='', token='', token_
 =======
     kw.pop('csrf_token', None)
     kw.pop('attachment_ids', None)
+<<<<<<< HEAD
+>>>>>>> 6033439... [IMP] website_mail: allow per-module override of token_field
+=======
 >>>>>>> 6033439... [IMP] website_mail: allow per-module override of token_field
     return res.with_context({'mail_create_nosubscribe': nosubscribe}).message_post(body=message,
                                                                                    message_type=kw.pop('message_type', False) or "comment",
