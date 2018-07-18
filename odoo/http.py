@@ -1496,6 +1496,7 @@ def db_filter(dbs, httprequest=None):
     d, _, r = h.partition('.')
     if d == "www" and r:
         d = r.partition('.')[0]
+    d, h = re.escape(d), re.escape(h)
     r = odoo.tools.config['dbfilter'].replace('%h', h).replace('%d', d)
     dbs = [i for i in dbs if re.match(r, i)]
     return dbs
