@@ -20,9 +20,11 @@ _logger = logging.getLogger(__name__)
 
 class ChannelPartner(models.Model):
     _name = 'mail.channel.partner'
+    _inherit = ['mail.blacklist.mixin']
     _description = 'Listeners of a Channel'
     _table = 'mail_channel_partner'
     _rec_name = 'partner_id'
+    _primary_email = ['partner_email']
 
     partner_id = fields.Many2one('res.partner', string='Recipient', ondelete='cascade')
     partner_email = fields.Char('Email', related='partner_id.email')
@@ -337,13 +339,15 @@ class Channel(models.Model):
 
     @api.multi
     def _notify_email_recipients(self, message, recipient_ids):
+        # Excluded Blacklisted
+        whitelist = self.env['res.partner'].sudo().search([('id', 'in', recipient_ids), ('is_blacklisted', '=', False)])
         # real mailing list: multiple recipients (hidden by X-Forge-To)
         if self.alias_domain and self.alias_name:
             return {
-                'email_to': ','.join(formataddr((partner.name, partner.email)) for partner in self.env['res.partner'].sudo().browse(recipient_ids)),
+                'email_to': ','.join(formataddr((partner.name, partner.email)) for partner in whitelist),
                 'recipient_ids': [],
             }
-        return super(Channel, self)._notify_email_recipients(message, recipient_ids)
+        return super(Channel, self)._notify_email_recipients(message, whitelist.ids)
 
     def _extract_moderation_values(self, message_type, **kwargs):
         """ This method is used to compute moderation status before the creation
@@ -675,7 +679,7 @@ class Channel(models.Model):
             'is_minimized': minimized
         }
         domain = [('partner_id', '=', self.env.user.partner_id.id), ('channel_id.uuid', '=', uuid)]
-        channel_partners = self.env['mail.channel.partner'].search(domain)
+        channel_partners = self.env['mail.channel.partner'].search(domain, limit=1)
         channel_partners.write(values)
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_partners.channel_id.channel_info()[0])
 
@@ -828,6 +832,9 @@ class Channel(models.Model):
             WHERE C.uuid = %s""", (uuid,))
         return self._cr.dictfetchall()
 
+    def _channel_fetch_listeners_where_clause(self, uuid):
+        return ("C.uuid = %s", (uuid,))
+
     @api.multi
     def channel_fetch_preview(self):
         """ Return the last message of the given channels """
@@ -888,7 +895,8 @@ class Channel(models.Model):
             if self.public == 'private':
                 msg += _(" This channel is private. People must be invited to join it.")
         else:
-            channel_partners = self.env['mail.channel.partner'].search([('partner_id', '!=', partner.id), ('channel_id', '=', self.id)])
+            all_channel_partners = self.env['mail.channel.partner'].with_context(active_test=False)
+            channel_partners = all_channel_partners.search([('partner_id', '!=', partner.id), ('channel_id', '=', self.id)])
             msg = _("You are in a private conversation with <b>@%s</b>.") % (channel_partners[0].partner_id.name if channel_partners else _('Anonymous'))
         msg += _("""<br><br>
             Type <b>@username</b> to mention someone, and grab his attention.<br>

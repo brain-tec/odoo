@@ -91,19 +91,10 @@ action = {
 
     <!-- Add link to theme install in default customize modal -->
     <template id="customize_modal" inherit_id="website.theme_customize" priority="1">
-        <xpath expr="//*[hasclass('modal-header')]" position="inside">
-            <a href="/web#action=website_theme_install.theme_install_kanban_action">See themes here</a>
+        <xpath expr="//div" position="replace">
+            <div>
+                Please <a href="/web#action=website_theme_install.theme_install_kanban_action">install a theme</a> to customize your website.
+            </div>
         </xpath>
-    </template>
-    <!-- ONBOARDING -->
-    <template id="onboarding_website_theme_step">
-        <t t-call="base.onboarding_step">
-            <t t-set="title">Website Theme</t>
-            <t t-set="description">Select a theme for your wonderful website.</t>
-            <t t-set="btn_text">Let's start!</t>
-            <t t-set="method" t-value="'action_open_website_theme_selector'" />
-            <t t-set="model" t-value="'res.company'" />
-            <t t-set="done" t-value="company.website_theme_onboarding_done" />
-        </t>
     </template>
 </odoo>

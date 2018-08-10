@@ -5,24 +5,26 @@
     <template id="report_assets_common">
         <t t-call="web._assets_helpers"/>
 
+        <!-- FIXME remove web_editor / portal / website dependency ..? -->
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/primary_variables.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/secondary_variables.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/bootstrap_overridden.scss"/>
+
         <t t-call="web._assets_bootstrap"/>
         <link href="/base/static/src/css/description.css" rel="stylesheet" type="text/css"/>
 
+        <!-- FIXME remove web_editor / portal / website dependency ..? -->
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/web_editor.common.scss"/>
-
-        <!-- FIXME remove website / portal dependency ..? -->
         <link rel="stylesheet" type="text/scss" href="/portal/static/src/scss/portal.scss"/>
         <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/website.scss"/>
 
         <link href="/web/static/lib/fontawesome/css/font-awesome.css" rel="stylesheet" type="text/css"/>
-
 
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/report.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/layout_standard.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/layout_background.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/layout_boxed.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/layout_clean.scss"/>
-
     </template>
 
     <template id="report_assets_pdf">
@@ -76,7 +78,7 @@
                     <script t-if="enable_editor and inline_mode" type="text/javascript" src="/web_editor/static/src/js/inline.js"></script>
                 </t>
             </head>
-            <body class="container">
+            <body t-att-class="'container' if not full_width else 'container-fluid'">
                 <div id="wrapwrap">
                     <main>
                         <t t-raw="0"/>
@@ -188,7 +190,7 @@
                     <li t-if="company.phone" class="list-inline-item"><i class="fa fa-phone" role="img" aria-label="Phone" title="Phone"/> <span t-field="company.phone"/></li>
                     <li t-if="company.email" class="list-inline-item"><i class="fa fa-at" role="img" aria-label="Email" title="Email"/> <span t-field="company.email"/></li>
                     <li t-if="company.website" class="list-inline-item"><i class="fa fa-globe" role="img" aria-label="Website" title="Website"/> <span t-field="company.website"/></li>
-                    <li t-if="company.vat" class="list-inline-item"><i class="fa fa-building-o" role="img" aria-label="Fiscal number"/><t t-esc="company.country_id.vat_label or 'TIN'"/>: <span t-field="company.vat"/></li>
+                    <li t-if="company.vat" class="list-inline-item"><i class="fa fa-building-o" role="img" aria-label="Fiscal number"/><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                 </ul>
                 <div t-field="company.report_footer"/>
                 <div t-if="not type_html" class="text-muted">
@@ -228,7 +230,7 @@
                     <li t-if="company.phone" class="list-inline-item">Tel: <span t-field="company.phone"/></li>
                     <li t-if="company.email" class="list-inline-item">Mail: <span t-field="company.email"/></li>
                     <li t-if="company.website" class="list-inline-item">Web: <span t-field="company.website"/></li>
-                    <li t-if="company.vat" class="list-inline-item"><t t-esc="company.country_id.vat_label or 'TIN'"/>: <span t-field="company.vat"/></li>
+                    <li t-if="company.vat" class="list-inline-item"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                 </ul>
                 <div t-field="company.report_footer"/>
                 <div t-if="not type_html">
@@ -247,7 +249,7 @@
                 <div class="col-5 offset-1" name="company_address">
                     <ul class="list-unstyled">
                         <strong><li t-if="company.name"><span t-field="company.name"/></li></strong>
-                        <li t-if="company.vat"><t t-esc="company.country_id.vat_label or 'TIN'"/>: <span t-field="company.vat"/></li>
+                        <li t-if="company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                         <li t-if="company.phone">Tel: <span t-field="company.phone"/></li>
                         <li t-if="company.email"><span t-field="company.email"/></li>
                         <li t-if="company.website"><span t-field="company.website"/></li>
@@ -315,7 +317,7 @@
                     <li t-if="company.phone" class="list-inline-item">Phone: <span t-field="company.phone"/></li>
                     <li t-if="company.email" class="list-inline-item">Email: <span t-field="company.email"/></li>
                     <li t-if="company.website" class="list-inline-item">Web: <span t-field="company.website"/></li>
-                    <li t-if="company.vat" class="list-inline-item"><t t-esc="company.country_id.vat_label or 'TIN'"/>: <span t-field="company.vat"/></li>
+                    <li t-if="company.vat" class="list-inline-item"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                 </ul>
 
                 <div name="financial_infos">

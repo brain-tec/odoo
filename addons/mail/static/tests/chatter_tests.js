@@ -409,6 +409,7 @@ QUnit.test('kanban activity widget with an activity', function (assert) {
 
     // mark activity as done
     $record.find('.o_mark_as_done').click();
+    $record.find('.o_activity_popover_done').click();
     $record = kanban.$('.o_kanban_record').first(); // the record widget has been reset
     assert.strictEqual(rpcCount, 5, 'should have done an RPC to mark activity as done, and a read');
     assert.ok($record.find('.o_mail_activity .o_activity_color_default:not(.o_activity_color_today)').length,
@@ -416,6 +417,63 @@ QUnit.test('kanban activity widget with an activity', function (assert) {
     assert.strictEqual($record.find('.o_mail_activity.show').length, 1,
         "dropdown should remain open when marking an activity as done");
     assert.strictEqual($record.find('.o_no_activity').length, 1, "should have no activity scheduled");
+
+    kanban.destroy();
+});
+
+QUnit.test('kanban activity widget popover test', function (assert) {
+    assert.expect(3);
+
+    this.data.partner.records[0].activity_ids = [1];
+    this.data.partner.records[0].activity_state = 'today';
+    this.data['mail.activity'].records = [{
+        id: 1,
+        display_name: "An activity",
+        date_deadline: moment().format("YYYY-MM-DD"), // now
+        state: "today",
+        user_id: 2,
+        create_user_id: 2,
+        activity_type_id: 1,
+    }];
+    var rpcCount = 0;
+    var kanban = createView({
+        View: KanbanView,
+        model: 'partner',
+        data: this.data,
+        arch: '<kanban>' +
+                    '<field name="activity_state"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                        '<div><field name="activity_ids" widget="kanban_activity"/></div>' +
+                    '</t></templates>' +
+                '</kanban>',
+        mockRPC: function (route, args) {
+            if (route === '/web/dataset/call_kw/mail.activity/action_done_schedule_next') {
+                rpcCount++;
+
+                var current_ids = this.data.partner.records[0].activity_ids;
+                var done_ids = args.args[0];
+                this.data.partner.records[0].activity_ids = _.difference(current_ids, done_ids);
+                this.data.partner.records[0].activity_state = false;
+                return $.when();
+            }
+            return this._super(route, args);
+        },
+    });
+
+    var $record = kanban.$('.o_kanban_record').first();
+
+    $record.find('.o_activity_btn').click();
+
+    // Click on button and see popover no RPC call
+    $record.find('.o_mark_as_done').click();
+    assert.equal(rpcCount, 0, "");
+    // Click on discard no RPC call
+    $record.find('.o_activity_popover_discard').click();
+    assert.equal(rpcCount, 0, "");
+    // Click on button and then on done and schedule next
+    // RPC call
+    $record.find('.o_activity_popover_done_next').click();
+    assert.equal(rpcCount, 1, "");
 
     kanban.destroy();
 });
@@ -1137,7 +1195,7 @@ QUnit.test('form activity widget with another x2many field in view', function (a
 });
 
 QUnit.test('form activity widget: schedule next activity', function (assert) {
-    assert.expect(5);
+    assert.expect(4);
     this.data.partner.records[0].activity_ids = [1];
     this.data.partner.records[0].activity_state = 'today';
     this.data['mail.activity'].records = [{
@@ -1150,7 +1208,6 @@ QUnit.test('form activity widget: schedule next activity', function (assert) {
         activity_type_id: 2,
     }];
 
-    var checkReadArgs = false;
     var form = createView({
         View: FormView,
         model: 'partner',
@@ -1167,35 +1224,17 @@ QUnit.test('form activity widget: schedule next activity', function (assert) {
             '</form>',
         res_id: 2,
         mockRPC: function (route, args) {
-            if (route === '/web/dataset/call_kw/mail.activity/action_feedback') {
-                assert.ok(_.isEqual(args.args[0], [1]), "should call 'action_feedback' for id 1");
+            if (route === '/web/dataset/call_kw/mail.activity/action_done_schedule_next') {
+                assert.ok(_.isEqual(args.args[0], [1]), "should call 'action_done_schedule_next' for id 1");
                 assert.strictEqual(args.kwargs.feedback, 'everything is ok',
                     "the feedback should be sent correctly");
-                return $.when();
-            }
-            if (args.method === 'read' && args.model === 'partner' && checkReadArgs) {
-                assert.deepEqual(args.args[1], ['activity_ids', 'message_ids', 'display_name'],
-                    "should only read the mail fields");
+                return $.when('test_result');
             }
             return this._super.apply(this, arguments);
         },
         intercepts: {
             do_action: function (event) {
-                assert.deepEqual(event.data.action, {
-                    context: {
-                        default_res_id: 2,
-                        default_res_model: "partner",
-                        default_previous_activity_type_id: 2,
-                    },
-                    res_id: false,
-                    res_model: 'mail.activity',
-                    type: 'ir.actions.act_window',
-                    target: "new",
-                    view_mode: "form",
-                    view_type: "form",
-                    views: [[false, "form"]],
-                }, "should do a do_action with correct parameters");
-                checkReadArgs = true; // should re-read the activities when closing the dialog
+                assert.strictEqual(event.data.action,'test_result' , "should do a do_action with correct parameters");
                 event.data.options.on_close();
             },
         },
