@@ -135,19 +135,20 @@ class Task(models.Model):
         for task in self:
             task.subtask_effective_hours = sum(child_task.effective_hours + child_task.subtask_effective_hours for child_task in task.child_ids)
 
+    # ---------------------------------------------------------
+    # ORM
+    # ---------------------------------------------------------
+
     @api.multi
     def write(self, values):
-        result = super(Task, self).write(values)
-        # reassign project_id on related timesheet lines
-        if 'project_id' in values:
-            project_id = values.get('project_id')
-            # a timesheet must have an analytic account (and a project)
-            if self and not project_id:
+        # a timesheet must have an analytic account (and a project)
+        if 'project_id' in values and self and not values.get('project_id'):
                 raise UserError(_('This task must be part of a project because they some timesheets are linked to it.'))
-            account_id = self.env['project.project'].browse(project_id).sudo().analytic_account_id
-            self.sudo().mapped('timesheet_ids').write({
-                'project_id': project_id,
-                'account_id': account_id.id,
-                'company_id': account_id.company_id.id,
-            })
+        return super(Task, self).write(values)
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        """ Set the correct label for `unit_amount`, depending on company UoM """
+        result = super(Task, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        result['arch'] = self.env['account.analytic.line']._apply_timesheet_label(result['arch'])
         return result

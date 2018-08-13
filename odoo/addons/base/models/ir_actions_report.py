@@ -311,16 +311,17 @@ class IrActionsReport(models.Model):
 
         # Retrieve bodies
         for node in root.xpath(match_klass.format('article')):
-            body = layout.render(dict(subst=False, body=lxml.html.tostring(node), base_url=base_url))
-            bodies.append(body)
-            oemodelnode = node.find(".//*[@data-oe-model='%s']" % self.model)
-            if oemodelnode is not None:
-                res_id = oemodelnode.get('data-oe-id')
-                if res_id:
-                    res_id = int(res_id)
+            if node.get('data-oe-model') == self.model:
+                body = layout.render(dict(subst=False, body=lxml.html.tostring(node), base_url=base_url))
+                bodies.append(body)
+                res_ids.append(int(node.get('data-oe-id', False)))
             else:
-                res_id = False
-            res_ids.append(res_id)
+                _logger.warning("The report's template '%s' does not contains the attributes 'data-oe-model' and  'data-oe-id' on the container (with class 'article')", self.name)
+                raise UserError(_("The report's template is wrong, please contact your administrator"))
+
+        if not bodies:
+            _logger.warning("The report's template '%s' does not contains the container with the class 'article'", self.name)
+            raise UserError(_("The report's template is wrong, please contact your administrator"))
 
         # Get paperformat arguments set in the root html tag. They are prioritized over
         # paperformat-record arguments.
@@ -403,6 +404,9 @@ class IrActionsReport(models.Model):
                 else:
                     message = _('Wkhtmltopdf failed (error code: %s). Message: %s')
                 raise UserError(message % (str(process.returncode), err[-1000:]))
+            else:
+                if err:
+                    _logger.warning('wkhtmltopdf: %s' % err)
         except:
             raise
 
@@ -454,7 +458,7 @@ class IrActionsReport(models.Model):
         if values is None:
             values = {}
 
-        context = dict(self.env.context, inherit_branding=True)  # Tell QWeb to brand the generated html
+        context = dict(self.env.context, inherit_branding=values.get('enable_editor'))
 
         # Browse the user instead of using the sudo self.env.user
         user = self.env['res.users'].browse(self.env.uid)
@@ -468,7 +472,7 @@ class IrActionsReport(models.Model):
         values.update(
             time=time,
             context_timestamp=lambda t: fields.Datetime.context_timestamp(self.with_context(tz=user.tz), t),
-            editable=True,
+            editable=values.get('enable_editor'),
             user=user,
             res_company=user.company_id,
             website=website,
@@ -568,6 +572,12 @@ class IrActionsReport(models.Model):
 
     @api.multi
     def render_qweb_pdf(self, res_ids=None, data=None):
+        if not data:
+            data = {}
+
+        # remove editor feature in pdf generation
+        data.update(enable_editor=False)
+
         # In case of test environment without enough workers to perform calls to wkhtmltopdf,
         # fallback to render_html.
         if tools.config['test_enable']:
@@ -675,11 +685,13 @@ class IrActionsReport(models.Model):
             data = report_model._get_report_values(docids, data=data)
         else:
             docs = self.env[self.model].browse(docids)
-            data = {
+            if not data:
+                data = {}
+            data.update({
                 'doc_ids': docids,
                 'doc_model': self.model,
                 'docs': docs,
-            }
+            })
         return data
 
     @api.multi
@@ -698,7 +710,7 @@ class IrActionsReport(models.Model):
         :param report_name: Name of the template to generate an action for
         """
         discard_logo_check = self.env.context.get('discard_logo_check')
-        if (self.env.uid == SUPERUSER_ID) and ((not self.env.user.company_id.external_report_layout) or (not discard_logo_check and not self.env.user.company_id.logo)) and config:
+        if (self.env.uid == SUPERUSER_ID) and ((not self.env.user.company_id.external_report_layout_id) or (not discard_logo_check and not self.env.user.company_id.logo)) and config:
             template = self.env.ref('base.view_company_report_form_with_print') if self.env.context.get('from_transient_model', False) else self.env.ref('base.view_company_report_form')
             return {
                 'name': _('Choose Your Document Layout'),

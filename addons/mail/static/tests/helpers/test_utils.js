@@ -6,7 +6,6 @@ var BusService = require('bus.BusService');
 var Discuss = require('mail.Discuss');
 var MailService = require('mail.Service');
 
-var AbstractService = require('web.AbstractService');
 var AbstractStorageService = require('web.AbstractStorageService');
 var Class = require('web.Class');
 var ControlPanel = require('web.ControlPanel');
@@ -26,9 +25,13 @@ var Widget = require('web.Widget');
  * This is async due to mail_manager/mail_service that needs to be ready.
  *
  * @param {Object} params
+ * @param {Object} options
+ * @param {boolean} options.phantomjs if set, rendering of non-empty thread will
+ *   use 'block' display instead of 'flex', because phantomjs sucks with flexbox
+ *   TODO: remove this option when we no longer use phantomJS
  * @return {$.Promise} resolved with the discuss widget
  */
-function createDiscuss(params) {
+function createDiscuss(params, options) {
     var Parent = Widget.extend({
         do_push_state: function () {},
     });
@@ -38,7 +41,7 @@ function createDiscuss(params) {
             'mail.message,false,search': '<search/>',
         },
     }));
-    var discuss = new Discuss(parent, params);
+    var discuss = new Discuss(parent, params, options);
     discuss.set_cp_bus(new Widget());
     var selector = params.debug ? 'body' : '#qunit-fixture';
     var controlPanel = new ControlPanel(parent);
@@ -67,6 +70,7 @@ var MockMailService = Class.extend({
         return BusService.extend({
             _poll: function () {}, // Do nothing
             isOdooFocused: function () { return true; },
+            updateOption: function () {},
         });
     },
     mail_service: function () {
