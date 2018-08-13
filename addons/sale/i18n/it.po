@@ -16,15 +16,17 @@
 # Monica Parvanova <monicaparvanova@gmail.com>, 2016
 # Giovanni Perteghella <giovanni@perteghella.org>, 2016
 # Giuliano Lotta <giuliano.lotta@gmail.com>, 2016
+# Simone Rubino <simone.rubino@agilebg.com>, 2018
 # Luigi Di Naro <gigidn@gmail.com>, 2018
 # maiolif <maiolif@mgftools.com>, 2018
+# Léonie Bouchat <lbo@odoo.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-08 13:18+0000\n"
 "PO-Revision-Date: 2018-03-08 13:18+0000\n"
-"Last-Translator: maiolif <maiolif@mgftools.com>, 2018\n"
+"Last-Translator: Léonie Bouchat <lbo@odoo.com>, 2018\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -80,7 +82,7 @@ msgstr ""
 "% set access_action = object.with_context(force_website=True).get_access_action()\n"
 "% set doc_name = 'offerta' if object.state in ('draft', 'sent') else 'conferma ordine'\n"
 "% set is_online = access_action and access_action['type'] == 'ir.actions.act_url'\n"
-"% set access_name = is_online and object.template_id and doc_name == 'offerta' and 'Accetta e paga %s online' % doc_name oppure 'Visualizza %s' % doc_name\n"
+"% set access_name = is_online and object.template_id and doc_name == 'offerta' and 'Accetta e paga %s online' % doc_name or 'Visualizza %s' % doc_name\n"
 "% set access_url = is_online and access_action['url'] or None\n"
 "\n"
 "% if object.partner_id.parent_id:\n"
@@ -101,7 +103,7 @@ msgstr ""
 "    <center>\n"
 "        <a href=\"${access_url}\" style=\"background-color: #1abc9c; padding: 20px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;\" class=\"o_default_snippet_text\">${access_name}</a>\n"
 "        <br/><br/>\n"
-"        <span style=\"color:#888888\">(oppure vedi il PDF allegato)</span>\n"
+"        <span style=\"color:#888888\">(oppure visualizza il PDF allegato)</span>\n"
 "    </center>\n"
 "    <br/>\n"
 "% endif\n"
@@ -428,6 +430,11 @@ msgid "Allows you to specify an analytic account on sales orders."
 msgstr "Permette di specificare un conto analitico sugli ordini di vendita."
 
 #. module: sale
+#: model:ir.ui.view,arch_db:sale.report_invoice_layouted
+msgid "Amount"
+msgstr "Importo"
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team_sales_to_invoice_amount
 msgid "Amount of sales to invoice"
 msgstr "Valore delle vendite da fatturare"
@@ -496,7 +503,7 @@ msgstr "Messaggio di blocco"
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_configuration_search_view
 msgid "Breaks Page"
-msgstr ""
+msgstr "Interruzioni di pagina"
 
 #. module: sale
 #: model:ir.filters,name:sale.filter_isale_report_product
@@ -1156,6 +1163,8 @@ msgid ""
 "It is forbidden to modify the following fields in a locked order:\n"
 "%s"
 msgstr ""
+"È vietato modificare i campi seguenti in un ordine bloccato:\n"
+"%s"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv___last_update
@@ -1196,6 +1205,8 @@ msgid ""
 "Let's create a new quotation.<br/><i>Note that colored buttons usually "
 "points to the next logical actions in any screen.</i>"
 msgstr ""
+"Creiamo un nuovo preventivo.<br/><i>Nota che i bottoni colorati solitamente "
+"indicano la prossima azione in ogni videata.</i>"
 
 #. module: sale
 #. openerp-web
@@ -1240,6 +1251,9 @@ msgid ""
 "the date automatically based on the template if online quotation is "
 "installed."
 msgstr ""
+"Definizione manuale della data di scadenza del tuo preventivo (offerta), o "
+"definizione automatica in base al modello se il preventivo online è "
+"installato."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_config_settings_module_sale_margin
@@ -1389,6 +1403,8 @@ msgstr ""
 #, python-format
 msgid "Once your quotation is ready, you can save, print or send it by email."
 msgstr ""
+"Una volta che il tuo preventivo è pronto, puoi salvarlo, stamparlo o "
+"mandarlo per email. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_config_settings_module_website_quote
@@ -1465,6 +1481,8 @@ msgid ""
 "Ordered Quantity: Invoice based on the quantity the customer ordered.\n"
 "Delivered Quantity: Invoiced based on the quantity the vendor delivered (time or deliveries)."
 msgstr ""
+"Quantità ordinata: fattura in base alla quantità ordinata dal cliente.\n"
+"Quantità consegnata: fattura in base alla quantità che il fornitore ha consegnato (tempo o consegna) "
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_product_search
@@ -1498,7 +1516,7 @@ msgstr ""
 #: code:addons/sale/static/src/js/tour.js:13
 #, python-format
 msgid "Organize your sales activities with the <b>Sales app</b>."
-msgstr ""
+msgstr "Organizza le tue attività di vendita nella <b>app Vendite</b>."
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_form
@@ -1570,12 +1588,12 @@ msgstr "Prezzo ridotto"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_price_reduce_taxexcl
 msgid "Price Reduce Tax excl"
-msgstr ""
+msgstr "Prezzo ridotto al netto delle imposte"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_price_reduce_taxinc
 msgid "Price Reduce Tax inc"
-msgstr ""
+msgstr "Prezzo ridotto tasse incluse"
 
 #. module: sale
 #: model:ir.model,name:sale.model_product_pricelist
@@ -2107,12 +2125,12 @@ msgstr "Mostra il prezzo pubblico e lo sconto al cliente"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_config_settings_group_show_price_subtotal
 msgid "Show subtotal"
-msgstr ""
+msgstr "Mostrare subtotale"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_config_settings_group_show_price_total
 msgid "Show total"
-msgstr ""
+msgstr "Mostrare totale"
 
 #. module: sale
 #: selection:sale.config.settings,group_uom:0
@@ -2438,7 +2456,7 @@ msgstr "Usa i listini per gestire i prezzi ai clienti"
 #: code:addons/sale/static/src/js/tour.js:69
 #, python-format
 msgid "Use the breadcrumbs to <b>go back to preceeding screens</b>."
-msgstr ""
+msgstr "Usa le breadcrumbs per <b>tornare agli schermi precedenti</b>."
 
 #. module: sale
 #. openerp-web
@@ -2446,6 +2464,7 @@ msgstr ""
 #, python-format
 msgid "Use this menu to access quotations, sales orders and customers."
 msgstr ""
+"Usa questo menu per accedere ai preventivi, ordini di vendita e clienti."
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -2500,6 +2519,8 @@ msgid ""
 "Write the name of your customer to create one on the fly, or select an "
 "existing one."
 msgstr ""
+"Scrivi il nome del tuo cliente per crearne uno direttamente o seleziona un "
+"cliente esistente."
 
 #. module: sale
 #. openerp-web
@@ -2515,6 +2536,8 @@ msgid ""
 "You can not delete a sent quotation or a sales order! Try to cancel it "
 "before."
 msgstr ""
+"Non è possibile eliminare un preventivo inviato o un ordine di vendita! "
+"Prova ad annullarlo prima. "
 
 #. module: sale
 #: code:addons/sale/models/sale.py:883
@@ -2532,11 +2555,13 @@ msgid ""
 "You can select all orders and invoice them in batch, or check\n"
 "                every order and invoice them one by one."
 msgstr ""
+"Puoi selezionare tutti gli ordini e fatturarli in batch o selezionare\n"
+"ogni ordine e fatturarli uno per uno."
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_orders_to_invoice
 msgid "You will find here all orders that are ready to be invoiced."
-msgstr ""
+msgstr "Troverai qui tutti gli ordini che sono pronti per essere fatturati. "
 
 #. module: sale
 #: model:ir.actions.act_window,help:sale.action_quotations

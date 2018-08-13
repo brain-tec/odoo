@@ -288,10 +288,10 @@ class StockMove(models.Model):
                     if propagated_date_field:
                         current_date = datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
                         new_date = datetime.strptime(vals.get(propagated_date_field), DEFAULT_SERVER_DATETIME_FORMAT)
-                        delta = relativedelta.relativedelta(new_date, current_date)
-                        if abs(delta.days) >= move.company_id.propagation_minimum_delta:
+                        delta_days = (new_date - current_date).total_seconds() / 86400
+                        if abs(delta_days) >= move.company_id.propagation_minimum_delta:
                             old_move_date = datetime.strptime(move.move_dest_id.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
-                            new_move_date = (old_move_date + relativedelta.relativedelta(days=delta.days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                            new_move_date = (old_move_date + relativedelta.relativedelta(days=delta_days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                             propagated_changes_dict['date_expected'] = new_move_date
                     #For pushed moves as well as for pulled moves, propagate by recursive call of write().
                     #Note that, for pulled moves we intentionally don't propagate on the procurement.
@@ -411,7 +411,7 @@ class StockMove(models.Model):
         self.product_uom_qty = 1.0
         return {'domain': {'product_uom': [('category_id', '=', product.uom_id.category_id.id)]}}
 
-    @api.onchange('date')
+    @api.onchange('date_expected')
     def onchange_date(self):
         if self.date_expected:
             self.date = self.date_expected
@@ -532,7 +532,7 @@ class StockMove(models.Model):
             'name': self.rule_id and self.rule_id.name or "/",
             'origin': origin,
             'company_id': self.company_id.id,
-            'date_planned': self.date,
+            'date_planned': self.date_expected,
             'product_id': self.product_id.id,
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id,
@@ -938,6 +938,10 @@ class StockMove(models.Model):
             new_move_prop = self.move_dest_id.split(qty)
             new_move.write({'move_dest_id': new_move_prop})
 
+    def _prepare_move_split_vals(self, defaults):
+        # hook to add values in default vals in other modules
+        return defaults
+
     @api.multi
     def split(self, qty, restrict_lot_id=False, restrict_partner_id=False):
         """ Splits qty from move move into a new move
@@ -967,6 +971,9 @@ class StockMove(models.Model):
             'move_dest_id': self.move_dest_id.id,
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
+
+        defaults = self._prepare_move_split_vals(defaults)
+
         if restrict_partner_id:
             defaults['restrict_partner_id'] = restrict_partner_id
 

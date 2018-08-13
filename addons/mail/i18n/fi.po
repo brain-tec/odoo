@@ -216,6 +216,10 @@ msgid ""
 "object.parent_id.subject) or (object.parent_id and "
 "object.parent_id.record_name and 'Re: %s' % object.parent_id.record_name)}"
 msgstr ""
+"${object.subject or (object.record_name and 'Re: %s' % object.record_name) "
+"or (object.parent_id and object.parent_id.subject and 'Re: %s' % "
+"object.parent_id.subject) or (object.parent_id and "
+"object.parent_id.record_name and 'Re: %s' % object.parent_id.record_name)}"
 
 #. module: mail
 #. openerp-web
@@ -2485,14 +2489,14 @@ msgstr ""
 #. module: mail
 #: selection:mail.channel,channel_type:0
 msgid "Livechat Conversation"
-msgstr ""
+msgstr "Livechat-keskustelu"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/js/chatter.js:38
 #, python-format
 msgid "Log"
-msgstr "Loki"
+msgstr "Tallenna"
 
 #. module: mail
 #. openerp-web

@@ -8,6 +8,7 @@
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2016
 # Bernard <bernard@abv.bg>, 2016
 # kalatchev, 2016
+# Maria Boyadjieva <marabo2000@gmail.com>, 2016
 # Anton Vassilev, 2016
 # Albena Mincheva <albena_vicheva@abv.bg>, 2018
 msgid ""
@@ -123,11 +124,12 @@ msgid ""
 "<span><i>Pending</i>... The order will be validated after the "
 "payment.</span>"
 msgstr ""
+"<span><i>Висяща</i>... Поръчката ще бъде валидирана след плащането.</span>"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_acquirer_journal_id
 msgid "Account journal used for automatic payment reconciliation."
-msgstr ""
+msgstr "Журнал на сметка, използван за автоматично обединяване на плащания."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction_acquirer_id
@@ -343,7 +345,7 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_acquirer_sequence
 msgid "Determine the display order"
-msgstr "Определя реда на показване"
+msgstr "Определете реда на показване"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_display_name
@@ -365,7 +367,7 @@ msgstr ""
 #. module: payment
 #: selection:payment.transaction,state:0
 msgid "Draft"
-msgstr "Проект"
+msgstr "Чернова"
 
 #. module: payment
 #: model:ir.ui.view,arch_db:payment.transaction_form
@@ -601,7 +603,7 @@ msgstr ""
 #. module: payment
 #: selection:payment.acquirer,save_token:0
 msgid "Never"
-msgstr ""
+msgstr "Никога"
 
 #. module: payment
 #: selection:payment.acquirer,auto_confirm:0
@@ -635,7 +637,7 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_auto_confirm
 msgid "Order Confirmation"
-msgstr ""
+msgstr "Потвърждаване на поръчка"
 
 #. module: payment
 #: model:ir.model,name:payment.model_res_partner
@@ -671,7 +673,7 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_journal_id
 msgid "Payment Journal"
-msgstr ""
+msgstr "Журнал за плащанията"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction_payment_token_id

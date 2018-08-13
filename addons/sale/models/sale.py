@@ -334,6 +334,9 @@ class SaleOrder(models.Model):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         invoices = {}
         references = {}
+        invoices_origin = {}
+        invoices_name = {}
+
         for order in self:
             group_key = order.id if grouped else (order.partner_invoice_id.id, order.currency_id.id)
             for line in order.order_line.sorted(key=lambda l: l.qty_to_invoice < 0):
@@ -344,13 +347,14 @@ class SaleOrder(models.Model):
                     invoice = inv_obj.create(inv_data)
                     references[invoice] = order
                     invoices[group_key] = invoice
+                    invoices_origin[group_key] = [invoice.origin]
+                    invoices_name[group_key] = [invoice.name]
                 elif group_key in invoices:
-                    vals = {}
-                    if order.name not in invoices[group_key].origin.split(', '):
-                        vals['origin'] = invoices[group_key].origin + ', ' + order.name
-                    if order.client_order_ref and order.client_order_ref not in invoices[group_key].name.split(', ') and order.client_order_ref != invoices[group_key].name:
-                        vals['name'] = invoices[group_key].name + ', ' + order.client_order_ref
-                    invoices[group_key].write(vals)
+                    if order.name not in invoices_origin[group_key]:
+                        invoices_origin[group_key].append(order.name)
+                    if order.client_order_ref and order.client_order_ref not in invoices_name[group_key]:
+                        invoices_name[group_key].append(order.client_order_ref)
+
                 if line.qty_to_invoice > 0:
                     line.invoice_line_create(invoices[group_key].id, line.qty_to_invoice)
                 elif line.qty_to_invoice < 0 and final:
@@ -359,6 +363,10 @@ class SaleOrder(models.Model):
             if references.get(invoices.get(group_key)):
                 if order not in references[invoices[group_key]]:
                     references[invoice] = references[invoice] | order
+
+        for group_key in invoices:
+            invoices[group_key].write({'name': ', '.join(invoices_name[group_key]),
+                                       'origin': ', '.join(invoices_origin[group_key])})
 
         if not invoices:
             raise UserError(_('There is no invoicable line.'))
@@ -651,7 +659,7 @@ class SaleOrderLine(models.Model):
             if line.state != 'sale' or not line.product_id._need_procurement():
                 continue
             qty = 0.0
-            for proc in line.procurement_ids:
+            for proc in line.procurement_ids.filtered(lambda r: r.state != 'cancel'):
                 qty += proc.product_qty
             if float_compare(qty, line.product_uom_qty, precision_digits=precision) >= 0:
                 continue
@@ -857,11 +865,11 @@ class SaleOrderLine(models.Model):
         # TO DO: move me in master/saas-16 on sale.order
         if self.order_id.pricelist_id.discount_policy == 'with_discount':
             return product.with_context(pricelist=self.order_id.pricelist_id.id).price
-        final_price, rule_id = self.order_id.pricelist_id.get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
-        context_partner = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order)
-        base_price, currency_id = self.with_context(context_partner)._get_real_price_currency(self.product_id, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
+        product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
+        final_price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
+        base_price, currency_id = self.with_context(product_context)._get_real_price_currency(product, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
         if currency_id != self.order_id.pricelist_id.currency_id.id:
-            base_price = self.env['res.currency'].browse(currency_id).with_context(context_partner).compute(base_price, self.order_id.pricelist_id.currency_id)
+            base_price = self.env['res.currency'].browse(currency_id).with_context(product_context).compute(base_price, self.order_id.pricelist_id.currency_id)
         # negative discounts (= surcharge) are included in the display price
         return max(base_price, final_price)
 
@@ -999,23 +1007,32 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')
     def _onchange_discount(self):
-        self.discount = 0.0
         if not (self.product_id and self.product_uom and
                 self.order_id.partner_id and self.order_id.pricelist_id and
                 self.order_id.pricelist_id.discount_policy == 'without_discount' and
                 self.env.user.has_group('sale.group_discount_per_so_line')):
             return
 
-        context_partner = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order)
-        pricelist_context = dict(context_partner, uom=self.product_uom.id)
+        self.discount = 0.0
+        product = self.product_id.with_context(
+            lang=self.order_id.partner_id.lang,
+            partner=self.order_id.partner_id.id,
+            quantity=self.product_uom_qty,
+            date=self.order_id.date_order,
+            pricelist=self.order_id.pricelist_id.id,
+            uom=self.product_uom.id,
+            fiscal_position=self.env.context.get('fiscal_position')
+        )
 
-        price, rule_id = self.order_id.pricelist_id.with_context(pricelist_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
-        new_list_price, currency_id = self.with_context(context_partner)._get_real_price_currency(self.product_id, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
+        product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
+
+        price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
+        new_list_price, currency_id = self.with_context(product_context)._get_real_price_currency(product, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
 
         if new_list_price != 0:
             if self.order_id.pricelist_id.currency_id.id != currency_id:
                 # we need new_list_price in the same currency as price, which is in the SO's pricelist's currency
-                new_list_price = self.env['res.currency'].browse(currency_id).with_context(context_partner).compute(new_list_price, self.order_id.pricelist_id.currency_id)
+                new_list_price = self.env['res.currency'].browse(currency_id).with_context(product_context).compute(new_list_price, self.order_id.pricelist_id.currency_id)
             discount = (new_list_price - price) / new_list_price * 100
             if discount > 0:
                 self.discount = discount

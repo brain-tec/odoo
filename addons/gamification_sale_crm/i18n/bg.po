@@ -4,14 +4,16 @@
 # 
 # Translators:
 # Martin Trigaux, 2016
+# Maria Boyadjieva <marabo2000@gmail.com>, 2016
 # Albena Mincheva <albena_vicheva@abv.bg>, 2018
+# Boris Stefanov <borkata@gmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-07 08:56+0000\n"
 "PO-Revision-Date: 2016-09-07 08:56+0000\n"
-"Last-Translator: Albena Mincheva <albena_vicheva@abv.bg>, 2018\n"
+"Last-Translator: Boris Stefanov <borkata@gmail.com>, 2018\n"
 "Language-Team: Bulgarian (https://www.transifex.com/odoo/teams/41243/bg/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,7 +24,7 @@ msgstr ""
 #. module: gamification_sale_crm
 #: model:gamification.goal.definition,name:gamification_sale_crm.definition_crm_nbr_customer_refunds
 msgid "Customer Refunds"
-msgstr "Обезщетения на клиенти"
+msgstr "Кредитно известие на клиент"
 
 #. module: gamification_sale_crm
 #: model:gamification.goal.definition,name:gamification_sale_crm.definition_crm_lead_delay_close
@@ -32,7 +34,7 @@ msgstr "Дни до затваряне на сделката"
 #. module: gamification_sale_crm
 #: model:gamification.challenge,name:gamification_sale_crm.challenge_crm_marketing
 msgid "Lead Acquisition"
-msgstr "Водещо придобиване"
+msgstr "Придобиване на лийдове"
 
 #. module: gamification_sale_crm
 #: model:gamification.challenge,name:gamification_sale_crm.challenge_crm_sale
@@ -65,12 +67,12 @@ msgstr "Платени поръчки за продажби"
 #: model:gamification.challenge.line,name:gamification_sale_crm.line_crm_marketing2
 #: model:gamification.goal.definition,name:gamification_sale_crm.definition_crm_lead_delay_open
 msgid "Time to Qualify a Lead"
-msgstr "Време за квалифициране на идеите"
+msgstr "Време да квалифицирате лийд"
 
 #. module: gamification_sale_crm
 #: model:gamification.goal.definition,name:gamification_sale_crm.definition_crm_tot_customer_refunds
 msgid "Total Customer Refunds"
-msgstr ""
+msgstr "Общо кредитни известия на клиент"
 
 #. module: gamification_sale_crm
 #: model:gamification.challenge.line,name:gamification_sale_crm.line_crm_sale1
@@ -81,7 +83,7 @@ msgstr "Общо фактурирани"
 #. module: gamification_sale_crm
 #: model:gamification.goal.definition,name:gamification_sale_crm.definition_crm_tot_paid_sale_order
 msgid "Total Paid Sales Orders"
-msgstr "Общо плати поръчки за продажби"
+msgstr "Платени общо поръчки за продажби"
 
 #. module: gamification_sale_crm
 #: model:gamification.challenge.line,definition_suffix:gamification_sale_crm.line_crm_marketing2
@@ -99,7 +101,7 @@ msgstr "фактури"
 #: model:gamification.challenge.line,definition_suffix:gamification_sale_crm.line_crm_marketing1
 #: model:gamification.goal.definition,suffix:gamification_sale_crm.definition_crm_nbr_new_leads
 msgid "leads"
-msgstr "идеи"
+msgstr "Лийдове"
 
 #. module: gamification_sale_crm
 #: model:gamification.challenge.line,definition_suffix:gamification_sale_crm.line_crm_marketing3
@@ -111,4 +113,4 @@ msgstr "възможности"
 #: model:gamification.goal.definition,suffix:gamification_sale_crm.definition_crm_nbr_paid_sale_order
 #: model:gamification.goal.definition,suffix:gamification_sale_crm.definition_crm_nbr_sale_order_created
 msgid "orders"
-msgstr ""
+msgstr "поръчки"

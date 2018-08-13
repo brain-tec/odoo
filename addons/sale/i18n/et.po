@@ -127,7 +127,7 @@ msgstr "${object.subject}"
 #: model:ir.ui.view,arch_db:sale.report_invoice_layouted
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "&amp;bull;"
-msgstr ""
+msgstr "&amp;bull;"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_form
@@ -366,6 +366,11 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_account_config_settings_group_analytic_account_for_sales
 msgid "Allows you to specify an analytic account on sales orders."
 msgstr ""
+
+#. module: sale
+#: model:ir.ui.view,arch_db:sale.report_invoice_layouted
+msgid "Amount"
+msgstr "Summa"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team_sales_to_invoice_amount
@@ -1365,7 +1370,7 @@ msgstr "Tellitud kogus"
 #: model:ir.ui.view,arch_db:sale.view_order_form
 #, python-format
 msgid "Ordered Quantity"
-msgstr ""
+msgstr "Tellitud kogus"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_product_product_invoice_policy

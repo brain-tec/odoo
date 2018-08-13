@@ -18,7 +18,7 @@ class MrpProduction(models.Model):
                 return get_parent_move(move.move_dest_id)
             return move
         for production in self:
-            move = get_parent_move(production.move_finished_ids[0])
+            move = get_parent_move(production.move_finished_ids[:1])
             production.sale_name = move.procurement_id and move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.order_id.name or False
             production.sale_ref = move.procurement_id and move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.order_id.client_order_ref or False
 
@@ -95,10 +95,7 @@ class AccountInvoiceLine(models.Model):
                 qty_done = sum([x.uom_id._compute_quantity(x.quantity, x.product_id.uom_id) for x in s_line.invoice_lines if x.invoice_id.state in ('open', 'paid')])
                 quantity = self.uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
                 # Put moves in fixed order by date executed
-                moves = self.env['stock.move']
-                for procurement in s_line.procurement_ids:
-                    moves |= procurement.move_ids
-                moves.sorted(lambda x: x.date)
+                moves = s_line.mapped('procurement_ids.move_ids').sorted(lambda x: x.date)
                 # Go through all the moves and do nothing until you get to qty_done
                 # Beyond qty_done we need to calculate the average of the price_unit
                 # on the moves we encounter.

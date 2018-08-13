@@ -868,7 +868,7 @@ class ProcurementRule(models.Model):
 class ProcurementOrder(models.Model):
     _inherit = 'procurement.order'
 
-    purchase_line_id = fields.Many2one('purchase.order.line', string='Purchase Order Line')
+    purchase_line_id = fields.Many2one('purchase.order.line', string='Purchase Order Line', copy=False)
     purchase_id = fields.Many2one(related='purchase_line_id.order_id', string='Purchase Order')
 
     @api.multi
@@ -917,10 +917,23 @@ class ProcurementOrder(models.Model):
 
     @api.multi
     def _check(self):
-        if self.purchase_line_id:
+        if self.rule_id.action == 'buy':
+            # In case Phantom BoM splits only into procurements
             if not self.move_ids:
+                if self.purchase_line_id and self.purchase_line_id.order_id.state not in ('purchase', 'done', 'cancel'):
+                    return False
+                else:
+                    return True
+            move_all_done_or_cancel = all(move.state in ['done', 'cancel'] for move in self.move_ids)
+            move_all_cancel = all(move.state == 'cancel' for move in self.move_ids)
+            if not move_all_done_or_cancel:
                 return False
-            return all(move.state in ('done', 'cancel') for move in self.move_ids) and any(move.state == 'done' for move in self.move_ids)
+            elif move_all_done_or_cancel and not move_all_cancel:
+                return True
+            else:
+                self.message_post(body=_('All stock moves have been cancelled for this procurement.'))
+                self.write({'state': 'cancel'})
+                return False
         return super(ProcurementOrder, self)._check()
 
     def _get_purchase_schedule_date(self):
@@ -985,7 +998,7 @@ class ProcurementOrder(models.Model):
         self.ensure_one()
         schedule_date = self._get_purchase_schedule_date()
         purchase_date = self._get_purchase_order_date(schedule_date)
-        fpos = self.env['account.fiscal.position'].with_context(company_id=self.company_id.id).get_fiscal_position(partner.id)
+        fpos = self.env['account.fiscal.position'].with_context(force_company=self.company_id.id).get_fiscal_position(partner.id)
 
         gpo = self.rule_id.group_propagation_option
         group = (gpo == 'fixed' and self.rule_id.group_id.id) or \
@@ -1049,7 +1062,7 @@ class ProcurementOrder(models.Model):
             if not po:
                 vals = procurement._prepare_purchase_order(partner)
                 po = self.env['purchase.order'].create(vals)
-                name = (procurement.group_id and (procurement.group_id.name + ":") or "") + (procurement.name != "/" and procurement.name or procurement.move_dest_id.raw_material_production_id and procurement.move_dest_id.raw_material_production_id.name or "")
+                name = (procurement.group_id and (procurement.group_id.name + ":") or "") + (procurement.name != "/" and procurement.name or "")
                 message = _("This purchase order has been created from: <a href=# data-oe-model=procurement.order data-oe-id=%d>%s</a>") % (procurement.id, name)
                 po.message_post(body=message)
                 cache[domain] = po
@@ -1062,7 +1075,7 @@ class ProcurementOrder(models.Model):
                         po.write({'origin': po.origin})
                 else:
                     po.write({'origin': procurement.origin})
-                name = (self.group_id and (self.group_id.name + ":") or "") + (self.name != "/" and self.name or self.move_dest_id.raw_material_production_id and self.move_dest_id.raw_material_production_id.name or "")
+                name = (self.group_id and (self.group_id.name + ":") or "") + (self.name != "/" and self.name or "")
                 message = _("This purchase order has been modified from: <a href=# data-oe-model=procurement.order data-oe-id=%d>%s</a>") % (procurement.id, name)
                 po.message_post(body=message)
             if po:

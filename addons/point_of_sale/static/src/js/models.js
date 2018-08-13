@@ -221,7 +221,7 @@ exports.PosModel = Backbone.Model.extend({
         fields: ['id', 'journal_ids','name','user_id','config_id','start_at','stop_at','sequence_number','login_number'],
         domain: function(self){ return [['state','=','opened'],['user_id','=',session.uid]]; },
         loaded: function(self,pos_sessions){
-            self.pos_session = pos_sessions[0]; 
+            self.pos_session = pos_sessions[0];
         },
     },{
         model: 'pos.config',
@@ -241,6 +241,8 @@ exports.PosModel = Backbone.Model.extend({
 
             self.db.set_uuid(self.config.uuid);
             self.cashier = self.get_cashier();
+            // We need to do it here, since only then the local storage has the correct uuid
+            self.db.save('pos_session_id', self.pos_session.id);
 
             var orders = self.db.get_orders();
             for (var i = 0; i < orders.length; i++) {
@@ -255,6 +257,7 @@ exports.PosModel = Backbone.Model.extend({
             // we attribute a role to the user, 'cashier' or 'manager', depending
             // on the group the user belongs. 
             var pos_users = [];
+            var current_cashier = self.get_cashier();
             for (var i = 0; i < users.length; i++) {
                 var user = users[i];
                 for (var j = 0; j < user.groups_id.length; j++) {
@@ -272,6 +275,9 @@ exports.PosModel = Backbone.Model.extend({
                 // replace the current user with its updated version
                 if (user.id === self.user.id) {
                     self.user = user;
+                }
+                if (user.id === current_cashier.id) {
+                    self.set_cashier(user);
                 }
             }
             self.users = pos_users; 
@@ -573,6 +579,10 @@ exports.PosModel = Backbone.Model.extend({
 
     // returns the user who is currently the cashier for this point of sale
     get_cashier: function(){
+        // reset the cashier to the current user if session is new
+        if (this.db.load('pos_session_id') !== this.pos_session.id) {
+            this.set_cashier(this.user);
+        }
         return this.db.get_cashier() || this.cashier || this.user;
     },
     // changes the current cashier
@@ -1152,7 +1162,8 @@ exports.Orderline = Backbone.Model.extend({
                 if (unit.rounding) {
                     this.quantity    = round_pr(quant, unit.rounding);
                     var decimals = this.pos.dp['Product Unit of Measure'];
-                    this.quantityStr = formats.format_value(round_di(this.quantity, decimals), { type: 'float', digits: [69, decimals]});
+                    this.quantity = round_di(this.quantity, decimals)
+                    this.quantityStr = formats.format_value(this.quantity, { type: 'float', digits: [69, decimals]});
                 } else {
                     this.quantity    = round_pr(quant, 1);
                     this.quantityStr = this.quantity.toFixed(0);

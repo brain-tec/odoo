@@ -60,7 +60,7 @@ _unlink = logging.getLogger(__name__ + '.unlink')
 regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
-onchange_v7 = re.compile(r"^(\w+)\((.*)\)$")
+onchange_v7 = re.compile(r"^([a-zA-Z]\w+)\((.*)\)$")
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
@@ -1735,31 +1735,38 @@ class BaseModel(object):
         """
         orderby_terms = []
         groupby_terms = [gb['qualified_field'] for gb in annotated_groupbys]
-        groupby_fields = [gb['groupby'] for gb in annotated_groupbys]
         if not orderby:
             return groupby_terms, orderby_terms
 
         self._check_qorder(orderby)
+
+        # when a field is grouped as 'foo:bar', both orderby='foo' and
+        # orderby='foo:bar' generate the clause 'ORDER BY "foo:bar"'
+        groupby_fields = {
+            gb[key]: gb['groupby']
+            for gb in annotated_groupbys
+            for key in ('field', 'groupby')
+        }
         for order_part in orderby.split(','):
             order_split = order_part.split()
             order_field = order_split[0]
             if order_field == 'id' or order_field in groupby_fields:
-
                 if self._fields[order_field.split(':')[0]].type == 'many2one':
                     order_clause = self._generate_order_by(order_part, query).replace('ORDER BY ', '')
                     if order_clause:
                         orderby_terms.append(order_clause)
                         groupby_terms += [order_term.split()[0] for order_term in order_clause.split(',')]
                 else:
-                    order = '"%s" %s' % (order_field, '' if len(order_split) == 1 else order_split[1])
-                    orderby_terms.append(order)
+                    order_split[0] = '"%s"' % groupby_fields.get(order_field, order_field)
+                    orderby_terms.append(' '.join(order_split))
             elif order_field in aggregated_fields:
-                order_split[0] = '"' + order_field + '"'
+                order_split[0] = '"%s"' % order_field
                 orderby_terms.append(' '.join(order_split))
             else:
                 # Cannot order by a field that will not appear in the results (needs to be grouped or aggregated)
                 _logger.warn('%s: read_group order by `%s` ignored, cannot sort on empty columns (not grouped/aggregated)',
                              self._name, order_part)
+
         return groupby_terms, orderby_terms
 
     @api.model
@@ -2727,6 +2734,7 @@ class BaseModel(object):
                 #  - copy inherited fields iff their original field is copied
                 fields[name] = field.new(
                     inherited=True,
+                    inherited_field=field,
                     related=(parent_field, name),
                     related_sudo=False,
                     copy=field.copy,
@@ -2843,7 +2851,7 @@ class BaseModel(object):
             try:
                 field.setup_full(self)
             except Exception:
-                if partial and field.manual:
+                if partial and field.base_field.manual:
                     # Something goes wrong when setup a manual field.
                     # This can happen with related fields using another manual many2one field
                     # that hasn't been loaded because the comodel does not exist yet.
@@ -4080,6 +4088,15 @@ class BaseModel(object):
                     if table not in query.tables:
                         query.tables.append(table)
 
+        if self._transient:
+            # One single implicit access rule for transient models: owner only!
+            # This is ok because we assert that TransientModels always have
+            # log_access enabled, so that 'create_uid' is always there.
+            domain = [('create_uid', '=', self._uid)]
+            tquery = self._where_calc(domain, active_test=False)
+            apply_rule(tquery.where_clause, tquery.where_clause_params, tquery.tables)
+            return
+
         # apply main rules on the object
         Rule = self.env['ir.rule']
         where_clause, where_params, tables = Rule.domain_get(self._name, mode)
@@ -4226,10 +4243,6 @@ class BaseModel(object):
         :return: a list of record ids or an integer (if count is True)
         """
         self.sudo(access_rights_uid or self._uid).check_access_rights('read')
-
-        # For transient models, restrict access to the current user, except for the super-user
-        if self.is_transient() and self._log_access and self._uid != SUPERUSER_ID:
-            args = expression.AND(([('create_uid', '=', self._uid)], args or []))
 
         query = self._where_calc(args)
         self._apply_ir_rules(query, 'read')
@@ -4403,7 +4416,7 @@ class BaseModel(object):
         vals = self.copy_data(default)[0]
         # To avoid to create a translation in the lang of the user, copy_translation will do it
         new = self.with_context(lang=None).create(vals)
-        self.copy_translations(new)
+        self.with_context(from_copy_translation=True).copy_translations(new)
         return new
 
     @api.multi

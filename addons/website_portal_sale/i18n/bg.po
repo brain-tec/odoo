@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2016
+# Maria Boyadjieva <marabo2000@gmail.com>, 2016
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2016
 # kalatchev, 2016
 # Iliana Ilieva <i.ilieva@sunservice-bg.com>, 2016
@@ -83,7 +84,7 @@ msgid ""
 " fa-clock-o\"/> Waiting</span>"
 msgstr ""
 "<span class=\"label label-info orders_label_text_align\"><i class=\"fa fa-fw"
-" fa-clock-o\"/> Чакащо</span>"
+" fa-clock-o\"/> Изакащ</span>"
 
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_orders
@@ -165,7 +166,7 @@ msgstr "<strong>Единична Цена</strong>"
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_invoices
 msgid "Amount Due"
-msgstr ""
+msgstr "Дължима сума"
 
 #. module: website_portal_sale
 #: code:addons/website_portal_sale/controllers/main.py:181
@@ -221,7 +222,7 @@ msgstr ""
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.orders_followup
 msgid "Order"
-msgstr "Ред"
+msgstr "Поръчка"
 
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_orders
@@ -288,7 +289,7 @@ msgstr "Няма фактури за вашия потребител."
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_home_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_orders
 msgid "There are currently no orders for your account."
-msgstr "Няма поръчки за вашия потребител."
+msgstr "Понастоящем няма поръчки по Вашата сметка."
 
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_home_sale
@@ -322,7 +323,7 @@ msgstr "Вашите Фактури и Плащания"
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_home_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_orders
 msgid "Your Orders"
-msgstr "Вашите Поръчки"
+msgstr "Вашите поръчки"
 
 #. module: website_portal_sale
 #: model:ir.ui.view,arch_db:website_portal_sale.portal_my_home_sale

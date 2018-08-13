@@ -3,8 +3,8 @@
 # * mrp
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2016
-# Antonio Trueba <atgayol@gmail.com>, 2016
+# Martin Trigaux, 2016
+# Antonio Trueba, 2016
 # oihane <oihanecruce@gmail.com>, 2016
 # Pedro M. Baeza <pedro.baeza@gmail.com>, 2016
 # Jesús Alan Ramos Rodríguez <alan.ramos@jarsa.com.mx>, 2016
@@ -2293,6 +2293,11 @@ msgid "Quantity To Produce"
 msgstr "Cantidad para producir"
 
 #. module: mrp
+#: model:ir.model.fields,field_description:mrp.field_stock_move_quantity_done_store
+msgid "Quantity done store"
+msgstr ""
+
+#. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter_batch_size
 msgid "Quantity to Process"
 msgstr "Cantidad a procesar"
@@ -2941,6 +2946,11 @@ msgstr ""
 "Tiempo en minutos. Es el tiempo utilizado en modo manual, o el tiempo "
 "estimado la primera vez, cuando todavía no ha habido ninguna órden de "
 "trabajo."
+
+#. module: mrp
+#: model:ir.ui.view,arch_db:mrp.mrp_production_workcenter_form_view_inherit
+msgid "Time the currently logged user spent on this workorder."
+msgstr ""
 
 #. module: mrp
 #: model:ir.ui.view,arch_db:mrp.mrp_production_form_view

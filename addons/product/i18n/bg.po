@@ -6,6 +6,7 @@
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2016
 # kalatchev, 2016
 # Martin Trigaux, 2016
+# Maria Boyadjieva <marabo2000@gmail.com>, 2016
 # Todor Mladenov <tmladenov@dir.bg>, 2016
 # Vladimir Petrov <vladimir.petrov@gmail.com>, 2016
 # Iliana Ilieva <i.ilieva@sunservice-bg.com>, 2016
@@ -175,15 +176,15 @@ msgid ""
 "                        will delete and recreate existing variants and lead\n"
 "                        to the loss of their possible customizations."
 msgstr ""
-"<strong>Предупреждение</strong>:добавяне или изтриване на атрибути ще изтрие"
-" съществуващите варианти и ще доведе до загуба на техните възможни "
-"персонализации."
+"<strong>Предупреждение</strong>:добавянето или изтриването на характеристики"
+" ще изтрие и създаде повторно съществуващи варианти и ще доведе до загуба на"
+" техните възможни персонализации."
 
 #. module: product
 #: code:addons/product/models/product.py:167 sql_constraint:product.product:0
 #, python-format
 msgid "A barcode can only be assigned to one product !"
-msgstr "Един баркод може да се асоциира само с един продукт!"
+msgstr "Един баркод може да се разпределя само към един продукт!"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category_type
@@ -209,6 +210,9 @@ msgid ""
 "This description will be copied to every Purchase Order, Receipt and Vendor "
 "Bill/Refund."
 msgstr ""
+"Описание на продукта, който желаете да споделите с Вашите доставчици. Това "
+"описание ще бъде копирано на всяка поръчка за покупка, квитанция и фактура "
+"за покупка/кредитно известие."
 
 #. module: product
 #: model:product.product,website_description:product.product_product_9
@@ -336,7 +340,7 @@ msgstr "Архивирани"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo_sequence
 msgid "Assigns the priority to the list of product vendor."
-msgstr "Слага приоритет към списъка на доставчика на продукти."
+msgstr "Определя приоритета към списъка на доставчика на продукти."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_line_attribute_id
@@ -852,13 +856,13 @@ msgid ""
 "Default Unit of Measure used for purchase orders. It must be in the same "
 "category than the default unit of measure."
 msgstr ""
-"По подразбиране мер. ед. използвани при нареждане за закупуване. Трябва да "
-"бъде в същата категория като мер. ед. по подразбиране."
+"Мерна единица по подразбиране, изолзвана при поръчка за покупка. Трябва да "
+"бъде в същата категория като мерната единица по подразбиране."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo_delay
 msgid "Delivery Lead Time"
-msgstr "Време за доставка"
+msgstr "Време за доставка на лийдове"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product_description
@@ -883,7 +887,7 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_attribute_sequence
 #: model:ir.model.fields,help:product.field_product_attribute_value_sequence
 msgid "Determine the display order"
-msgstr "Определя реда на показване"
+msgstr "Определете реда на показване"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_display_name
@@ -946,7 +950,7 @@ msgstr "Крайна дата на цената от този доставчик
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item_date_end
 msgid "Ending valid for the pricelist item validation"
-msgstr "Край на срока за валидиране на елемента за ценообразуване"
+msgstr "Краен срока за валидиране на реда за ценообразуване"
 
 #. module: product
 #: code:addons/product/models/product.py:43
@@ -982,7 +986,7 @@ msgid ""
 "Error! You cannot assign the Main Pricelist as Other Pricelist in PriceList "
 "Item!"
 msgstr ""
-"Грешка! Не можете да зададете главния ценоразпис като друг ценоразпис в "
+"Грешка! Не можете да определите главния ценоразпис като друг ценоразпис в "
 "ценовата листа!"
 
 #. module: product
@@ -1142,8 +1146,7 @@ msgid ""
 "the picking order and is mainly used if you use the EDI module."
 msgstr ""
 "Предоставя различни начини за пакетиране на един и същ продукт. Това не се "
-"отразява на нареждане за товарене и се използва главно, ако използвате "
-"модула EDI."
+"отразява на пикинг поръчката и се използва главно, ако прилагате модула EDI."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item_sequence
@@ -1458,6 +1461,9 @@ msgid ""
 "receipt of the products in your warehouse. Used by the scheduler for "
 "automatic computation of the purchase order planning."
 msgstr ""
+"Времето на лийдовете в дни между потвърждаването на поръчката за покупка и "
+"квитанцията за продуктите във Вашия склад. Използвано от графика за "
+"автоматично изчисляване планирането на поръчката за покупка."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category_parent_left
@@ -1499,7 +1505,7 @@ msgstr "Управление на няколко мерни единици"
 #. module: product
 #: model:res.groups,name:product.group_pricelist_item
 msgid "Manage Pricelist Items"
-msgstr "Управление на ценови листи"
+msgstr "Управлявайте редовете на ценовите листи"
 
 #. module: product
 #: model:res.groups,name:product.group_stock_packaging
@@ -1810,7 +1816,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:product.product_pricelist_view
 #: model:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Pricelist Items"
-msgstr "Ценова листа"
+msgstr "Редове ценова листа"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_name
@@ -1825,7 +1831,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product_pricelist_item_ids
 msgid "Pricelist item ids"
-msgstr ""
+msgstr "Ред ценова листа - идентификации"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_pricelist_action2
@@ -2282,6 +2288,8 @@ msgid ""
 "Soft covers are available separately in blue, green or orange. Pick a color "
 "to match your style."
 msgstr ""
+"Меки корици са налични поотделно в синьо, зелено или оранжево. Изберете си "
+"цвят, който да подхожда на стила Ви."
 
 #. module: product
 #: model:product.category,name:product.product_category_4

@@ -169,7 +169,7 @@ class WebsiteEventController(http.Controller):
             'event': event,
             'main_object': event,
             'range': range,
-            'registrable': event._is_event_registrable()
+            'registrable': event.sudo()._is_event_registrable()
         }
         return request.render("website_event.event_description_full", values)
 
@@ -255,6 +255,6 @@ class WebsiteEventController(http.Controller):
                 Attendees._prepare_attendee_values(registration))
 
         return request.render("website_event.registration_complete", {
-            'attendees': Attendees,
+            'attendees': Attendees.sudo(),
             'event': event,
         })

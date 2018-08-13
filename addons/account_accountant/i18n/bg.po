@@ -3,6 +3,7 @@
 # * account_accountant
 # 
 # Translators:
+# Maria Boyadjieva <marabo2000@gmail.com>, 2017
 # kirily <kiril@teracomp.eu>, 2017
 msgid ""
 msgstr ""
@@ -23,7 +24,7 @@ msgstr ""
 #: code:addons/account_accountant/static/src/js/tour.js:18
 #, python-format
 msgid "Let's start with a new customer invoice."
-msgstr "Нека да започнем с нова клиентска фактура."
+msgstr "Нека стартираме с нова фактура за продажба."
 
 #. module: account_accountant
 #. openerp-web
@@ -34,7 +35,7 @@ msgid ""
 "clicking here."
 msgstr ""
 "Готови ли сте да откриете новото си любимо <b>счетоводно приложение</b>? "
-"Започнете като кликнете тук."
+"Започнете като натиснете бутона тук."
 
 #. module: account_accountant
 #. openerp-web
@@ -56,4 +57,4 @@ msgid ""
 "to get a Profit &amp; Loss statement or view the Balance Sheet.</i>"
 msgstr ""
 "  &; 1\n"
-"Вашите отчети са налични в реално време. <i>Не е необходимо да приключвате фискалната година, за да видите печалбата &amp; Отчет за загубите или да прегледате баланса.</i>"
+"Вашите отчети са налични в реално време. <i>Не е необходимо да приключвате фискалната година, за да имате представа за печалбата &amp; извлечението за загубите или за да прегледате диаграмата с баланса.</i>"

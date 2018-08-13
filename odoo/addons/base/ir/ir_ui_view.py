@@ -379,6 +379,12 @@ actual arch.
         self.clear_caches()
         return super(View, self).write(self._compute_defaults(vals))
 
+    def unlink(self):
+        # if in uninstall mode and has children views, emulate an ondelete cascade
+        if self.env.context.get('_force_unlink', False) and self.mapped('inherit_children_ids'):
+            self.mapped('inherit_children_ids').unlink()
+        super(View, self).unlink()
+
     @api.multi
     def toggle(self):
         """ Switches between enabled and disabled statuses
@@ -1156,7 +1162,7 @@ actual arch.
         query = """SELECT max(v.id)
                      FROM ir_ui_view v
                 LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
-                    WHERE md.module NOT IN (SELECT name FROM ir_module_module)
+                    WHERE md.module IN (SELECT name FROM ir_module_module) IS NOT TRUE
                       AND v.model = %s
                       AND v.active = true
                  GROUP BY coalesce(v.inherit_id, v.id)"""

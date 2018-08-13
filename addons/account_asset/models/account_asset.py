@@ -333,6 +333,8 @@ class AccountAssetAsset(models.Model):
                 'target': 'current',
                 'res_id': move_ids[0],
             }
+        # Fallback, as if we just clicked on the smartbutton
+        return self.open_entries()
 
     @api.multi
     def set_to_draft(self):
@@ -411,7 +413,7 @@ class AccountAssetAsset(models.Model):
     @api.model
     def create(self, vals):
         asset = super(AccountAssetAsset, self.with_context(mail_create_nolog=True)).create(vals)
-        asset.compute_depreciation_board()
+        asset.sudo().compute_depreciation_board()
         return asset
 
     @api.multi

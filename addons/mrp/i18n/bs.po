@@ -3,7 +3,7 @@
 # * mrp
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2016
+# Martin Trigaux, 2016
 # Bole <bole@dajmi5.com>, 2016
 # Boško Stojaković <bluesoft83@gmail.com>, 2016
 msgid ""
@@ -2253,6 +2253,11 @@ msgid "Quantity To Produce"
 msgstr "Količina za proizvodnju"
 
 #. module: mrp
+#: model:ir.model.fields,field_description:mrp.field_stock_move_quantity_done_store
+msgid "Quantity done store"
+msgstr ""
+
+#. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter_batch_size
 msgid "Quantity to Process"
 msgstr "Količina za obraditi"
@@ -2885,6 +2890,11 @@ msgstr "Vrijeme u minutama za postavljanje."
 msgid ""
 "Time in minutes. Is the time used in manual mode, or the first time supposed"
 " in real time when there are not any work orders yet."
+msgstr ""
+
+#. module: mrp
+#: model:ir.ui.view,arch_db:mrp.mrp_production_workcenter_form_view_inherit
+msgid "Time the currently logged user spent on this workorder."
 msgstr ""
 
 #. module: mrp

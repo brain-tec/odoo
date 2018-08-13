@@ -11,13 +11,15 @@
 # Prawit Boonthue <prawit.boonthue@gmail.com>, 2016
 # Rockers <sumorock@hotmail.com>, 2016
 # Winyoo Kongkavitool <winyoo@tinnakorn.com>, 2017
+# Somchart Jabsung <jabsung.s@gmail.com>, 2018
+# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-08 13:18+0000\n"
 "PO-Revision-Date: 2018-03-08 13:18+0000\n"
-"Last-Translator: Winyoo Kongkavitool <winyoo@tinnakorn.com>, 2017\n"
+"Last-Translator: Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2018\n"
 "Language-Team: Thai (https://www.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -88,7 +90,7 @@ msgstr "# ของรายการ"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv_count
 msgid "# of Orders"
-msgstr ""
+msgstr "# ของใบสั่งขาย"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report_product_uom_qty
@@ -247,7 +249,7 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Payment Terms:</strong>"
-msgstr ""
+msgstr "<strong>เงื่อนไขชำระเงิน:</strong>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -258,13 +260,13 @@ msgstr "<strong>พนักงานขาย:</strong>"
 #: model:ir.ui.view,arch_db:sale.report_invoice_document_inherit_sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Shipping address:</strong>"
-msgstr ""
+msgstr "<strong>สถานที่จัดส่ง:</strong>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_invoice_layouted
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Subtotal: </strong>"
-msgstr ""
+msgstr "<strong>ยอดรวม</strong>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -279,7 +281,7 @@ msgstr "<strong>ทั้งหมด</strong>"
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Your Reference:</strong>"
-msgstr ""
+msgstr "<strong>เอกสารอ้างอิง</strong>"
 
 #. module: sale
 #: selection:sale.config.settings,sale_pricelist_setting:0
@@ -361,6 +363,11 @@ msgstr "ยอมให้เลือกและใส่ข้อมูลห
 #: model:ir.model.fields,help:sale.field_account_config_settings_group_analytic_account_for_sales
 msgid "Allows you to specify an analytic account on sales orders."
 msgstr "ยอมให้ตั้งบัญชีวิเคราะห์ตามคำสั่งซื้อ"
+
+#. module: sale
+#: model:ir.ui.view,arch_db:sale.report_invoice_layouted
+msgid "Amount"
+msgstr "จำนวน"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team_sales_to_invoice_amount
@@ -1183,7 +1190,7 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_sales_order_filter
 msgid "My Orders"
-msgstr ""
+msgstr "คำสั่งขายของฉัน"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_sales_order_line_filter

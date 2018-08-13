@@ -3322,7 +3322,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/client_action.xml:48
 #, python-format
 msgid "Open chat"
-msgstr ""
+msgstr "Deschide conversație"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_partner_opt_out
@@ -4603,7 +4603,7 @@ msgstr "Cine poate urmări activitățile grupului?"
 #: code:addons/mail/static/src/xml/composer.xml:18
 #, python-format
 msgid "Write something..."
-msgstr "Scriere ceva..."
+msgstr "Scrie ceva..."
 
 #. module: mail
 #. openerp-web

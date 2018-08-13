@@ -878,7 +878,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:account.account_planner
 msgid ""
 "<strong>There are three different levels of access rights in Odoo:</strong>"
-msgstr ""
+msgstr "<strong> Det finns tre nivåer av behörigheter i Odoo:</strong>"
 
 #. module: account
 #: model:ir.ui.view,arch_db:account.report_overdue_document
@@ -1479,6 +1479,11 @@ msgstr "Adress"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard_tax_id
 msgid "Adjustment Tax"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard_adjustment_type
+msgid "Adjustment Type"
 msgstr ""
 
 #. module: account
@@ -5874,7 +5879,7 @@ msgstr "Nivå"
 #: model:account.financial.report,name:account.account_financial_report_liability0
 #: model:account.financial.report,name:account.account_financial_report_liabilitysum0
 msgid "Liability"
-msgstr "Ansvar"
+msgstr "Skuld"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_invoice_move_id

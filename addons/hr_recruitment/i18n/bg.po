@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2016
 # kalatchev, 2016
+# Maria Boyadjieva <marabo2000@gmail.com>, 2016
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2016
 # preslav <hackerz99999@gmail.com>, 2016
 # Anton Vassilev, 2016
@@ -277,7 +278,7 @@ msgstr "Архивирани"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_date_open
 msgid "Assigned"
-msgstr "Присвоено"
+msgstr "Разпределен/определен"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_attachment_ids
@@ -1016,7 +1017,7 @@ msgstr "Следващо действие"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_date_action
 msgid "Next Action Date"
-msgstr ""
+msgstr "Дата на следващо действие"
 
 #. module: hr_recruitment
 #: model:ir.ui.view,arch_db:hr_recruitment.view_crm_case_jobs_filter
@@ -1516,7 +1517,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:hr_recruitment.view_crm_case_jobs_filter
 #: model:ir.ui.view,arch_db:hr_recruitment.view_hr_recruitment_report_search
 msgid "Unassigned"
-msgstr "Незаето"
+msgstr "Неразпределен"
 
 #. module: hr_recruitment
 #: model:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
