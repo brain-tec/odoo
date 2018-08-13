@@ -702,6 +702,7 @@ class Database(http.Controller):
     @http.route('/web/database/restore', type='http', auth="none", methods=['POST'], csrf=False)
     def restore(self, master_pwd, backup_file, name, copy=False):
         try:
+            odoo.service.db.check_super(master_pwd)
             data = base64.b64encode(backup_file.read())
             dispatch_rpc('db', 'restore', [master_pwd, name, data, str2bool(copy)])
             return http.local_redirect('/web/database/manager')
