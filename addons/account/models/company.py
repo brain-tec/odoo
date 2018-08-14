@@ -16,7 +16,7 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     def _get_invoice_reference_types(self):
-        return [('invoice_number', _('Based on Invoice Number')), ('partner', _('Based on Partner')), ('none', _('Free Communication'))]
+        return [('invoice_number', _('Based on Invoice Number')), ('partner', _('Based on Customer'))]
 
     #TODO check all the options/fields are in the views (settings + company form view)
     fiscalyear_last_day = fields.Integer(default=31, required=True)
@@ -64,7 +64,7 @@ Best Regards,'''))
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
     invoice_reference_type = fields.Selection(string='Default Communication Type', selection='_get_invoice_reference_types',
-                                              default='none', help='You can set here the default communication that will appear on customer invoices, once validated, to help the customer to refer to that particular invoice when making the payment.')
+                                              default='invoice_number', help='You can set here the default communication that will appear on customer invoices, once validated, to help the customer to refer to that particular invoice when making the payment.')
     account_sanitize_invoice_ref = fields.Boolean(string="Sanitize Invoice References", default=True, help="Whether or not customer invoices and vendor bills should automatically correct their reference they are maximum 140 characters long, consist only of latin characters, contain no '//' sequence, and have no leading or trailing /. (these are the SEPA criteria for payment communications)")
 
     qr_code = fields.Boolean(string='Display SEPA QR code')
@@ -172,15 +172,6 @@ Best Regards,'''))
             # The user attempts to set a lock date for advisors prior to the lock date for users
             if period_lock_date < fiscalyear_lock_date:
                 raise ValidationError(_('You cannot define stricter conditions on advisors than on users. Please make sure that the lock date on advisor is set before the lock date for users.'))
-
-    @api.model
-    def _verify_fiscalyear_last_day(self, company_id, last_day, last_month):
-        company = self.browse(company_id)
-        last_day = last_day or (company and company.fiscalyear_last_day) or 31
-        last_month = last_month or (company and company.fiscalyear_last_month) or 12
-        current_year = datetime.now().year
-        last_day_of_month = calendar.monthrange(current_year, last_month)[1]
-        return last_day > last_day_of_month and last_day_of_month or last_day
 
     @api.multi
     def compute_fiscalyear_dates(self, current_date):

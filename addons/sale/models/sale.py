@@ -118,6 +118,8 @@ class SaleOrder(models.Model):
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
     origin = fields.Char(string='Source Document', help="Reference of the document that generated this sales order request.")
     client_order_ref = fields.Char(string='Customer Reference', copy=False)
+    reference = fields.Char(string='Payment Ref.', copy=False,
+        help='The payment communication of this sale order.')
     state = fields.Selection([
         ('draft', 'Quotation'),
         ('sent', 'Quotation Sent'),
@@ -508,6 +510,9 @@ class SaleOrder(models.Model):
         for group_key in invoices:
             invoices[group_key].write({'name': ', '.join(invoices_name[group_key]),
                                        'origin': ', '.join(invoices_origin[group_key])})
+            sale_orders = references[invoices[group_key]]
+            if len(sale_orders) == 1:
+                invoices[group_key].reference = sale_orders.reference
 
         if not invoices:
             raise UserError(_('There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
@@ -1201,7 +1206,7 @@ class SaleOrderLine(models.Model):
                         amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
             line.untaxed_amount_invoiced = amount_invoiced
 
-    @api.depends('state', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
+    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
     def _compute_untaxed_amount_to_invoice(self):
         """ Total of remaining amount to invoice on the sale order line (taxes excl.) as
                 total_sol - amount already invoiced
@@ -1217,12 +1222,12 @@ class SaleOrderLine(models.Model):
                 # zero. It causes problem for expense line (e.i.: ordered qty = 0, deli qty = 4,
                 # price_unit = 20 ; subtotal is zero), but when you can invoice the line, you see an
                 # amount and not zero. Since we compute untaxed amount, we can use directly the price
-                # unit without using `compute_all()` method on taxes.
+                # reduce (to include discount) without using `compute_all()` method on taxes.
                 price_subtotal = 0.0
                 if line.product_id.invoice_policy == 'delivery':
-                    price_subtotal = line.price_unit * line.qty_delivered
+                    price_subtotal = line.price_reduce * line.qty_delivered
                 else:
-                    price_subtotal = line.price_unit * line.product_uom_qty
+                    price_subtotal = line.price_reduce * line.product_uom_qty
 
                 amount_to_invoice = price_subtotal - line.untaxed_amount_invoiced
             line.untaxed_amount_to_invoice = amount_to_invoice
@@ -1338,10 +1343,7 @@ class SaleOrderLine(models.Model):
                 self.product_id = False
                 return result
 
-        name = product.name_get()[0][1]
-        if product.description_sale:
-            name += '\n' + product.description_sale
-        vals['name'] = name
+        vals.update(name=self.get_sale_order_line_multiline_description_sale(product))
 
         self._compute_tax_id()
 
@@ -1481,3 +1483,12 @@ class SaleOrderLine(models.Model):
     def _is_delivery(self):
         self.ensure_one()
         return False
+
+    def get_sale_order_line_multiline_description_sale(self, product):
+        """ Compute a default multiline description for this sales order line.
+        This method exists so it can be overridden in other modules to change how the default name is computed.
+        In general only the product is used to compute the name, and this method would not be necessary (we could directly override the method in product).
+        BUT in event_sale we need to know specifically the sales order line as well as the product to generate the name:
+            the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).
+        """
+        return product.get_product_multiline_description_sale()

@@ -7,10 +7,14 @@ var Domain = require('web.Domain');
 var DropdownMenu = require('web.DropdownMenu');
 var search_filters = require('web.search_filters');
 var time = require('web.time');
+var TimeRangeMenuOptions = require('web.TimeRangeMenuOptions');
 
 var QWeb = core.qweb;
 var _t = core._t;
 
+var PERIOD_OPTIONS = TimeRangeMenuOptions.PeriodOptions;
+
+var DEFAULT_PERIOD = 'this_month';
 
 var FiltersMenu = DropdownMenu.extend({
     custom_events: {
@@ -43,6 +47,7 @@ var FiltersMenu = DropdownMenu.extend({
      *      defaultOptionId: string refers to an optionId (optional)
      *      currentOptionId: string refers to an optionId that is activated if item is active (optional)
      *   }
+     * @param {Object[]} periodOptions determines the options available for filter with date attribute
      * @param {Object} fields 'field_get' of a model: mapping from field name
      * to an object with its properties
      */
@@ -50,21 +55,8 @@ var FiltersMenu = DropdownMenu.extend({
         // determines where the filter menu is displayed and its style
         this.isMobile = config.device.isMobile;
         // determines list of options used by filter of type 'date'
-        this.periodOptions = [
-            {description: _t('Today'), optionId: 'today', groupId: 1},
-            {description: _t('This Week'), optionId: 'this_week', groupId: 1},
-            {description: _t('This Month'), optionId: 'this_month', groupId: 1},
-            {description: _t('This Quarter'), optionId: 'this_quarter', groupId: 1},
-            {description: _t('This Year'), optionId: 'this_year', groupId: 1},
-            {description: _t('Yesterday'), optionId: 'yesterday', groupId: 2},
-            {description: _t('Last Week'), optionId: 'last_week', groupId: 2},
-            {description: _t('Last Month'), optionId: 'last_month', groupId: 2},
-            {description: _t('Last Quarter'), optionId: 'last_quarter', groupId: 2},
-            {description: _t('Last Year'), optionId: 'last_year', groupId: 2},
-            {description: _t('Last 7 Days'), optionId: 'last_7_days', groupId: 3},
-            {description: _t('Last 30 Days'), optionId: 'last_30_days', groupId: 3},
-            {description: _t('Last 365 Days'), optionId: 'last_365_days', groupId: 3},
-        ];
+        this.periodOptions = PERIOD_OPTIONS;
+        this.defaultOptionId = DEFAULT_PERIOD;
         // determines when the 'Add custom filter' submenu is open
         this.generatorMenuIsOpen = false;
         this.propositions = [];
@@ -157,9 +149,6 @@ var FiltersMenu = DropdownMenu.extend({
         if (item.isPeriod) {
             item.options = this.periodOptions;
         }
-        // super has to be called here because we need to add options to groupby
-        // before to call it since some keys in a groupby are initialized using
-        // the keys 'options' and 'defaultOptionId'
         this._super.apply(this, arguments);
     },
     /**
