@@ -79,9 +79,11 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         {name: 'separator', label: _lt("Separator:"), value: ''},
         {name: 'quoting', label: _lt("Text Delimiter:"), value: '"'}
     ],
-    parse_opts: [
+    parse_opts_formats: [
         {name: 'date_format', label: _lt("Date Format:"), value: ''},
         {name: 'datetime_format', label: _lt("Datetime Format:"), value: ''},
+    ],
+    parse_opts_separators: [
         {name: 'float_thousand_separator', label: _lt("Thousands Separator:"), value: ','},
         {name: 'float_decimal_separator', label: _lt("Decimal Separator:"), value: '.'}
     ],
@@ -280,19 +282,18 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         var options = {
             headers: this.$('input.oe_import_has_header').prop('checked'),
             advanced: this.$('input.oe_import_advanced_mode').prop('checked'),
-            keep_matches: this.do_not_change_match
+            keep_matches: this.do_not_change_match,
+            name_create_enabled_fields: {},
         };
         _(this.opts).each(function (opt) {
             options[opt.name] =
                 self.$('input.oe_import_' + opt.name).val();
         });
-        _(this.parse_opts).each(function (opt) {
-            if (opt.name === 'date_format' || opt.name === 'datetime_format') {
-                options[opt.name] = time.moment_to_strftime_format(self.$('input.oe_import_' + opt.name).val());
-            }
-            else {
-                options[opt.name] = self.$('input.oe_import_' + opt.name).val();
-            }
+        _(this.parse_opts_formats).each(function (opt) {
+            options[opt.name] = time.moment_to_strftime_format(self.$('input.oe_import_' + opt.name).val());
+        });
+        _(this.parse_opts_separators).each(function (opt) {
+            options[opt.name] = self.$('input.oe_import_' + opt.name).val();
         });
         options['fields'] = [];
         if (this.do_not_change_match) {
@@ -301,6 +302,12 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
             }).get();
         }
         this.do_not_change_match = false;
+        this.$('input.o_import_create_option').each(function () {
+            var field = this.getAttribute('field');
+            if (field) {
+                options.name_create_enabled_fields[field] = this.checked;
+            }
+        });
         return options;
     },
 
@@ -402,6 +409,24 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         };
         $fields.each(function (k,v) {
             var filtered_data = self.generate_fields_completion(result, k);
+
+            var $thing = $();
+            var bind = function (d) {};
+            if (session.debug) {
+                $thing = $(QWeb.render('ImportView.create_record_option')).insertAfter(v).hide();
+                bind = function (data) {
+                    switch (data.type) {
+                    case 'many2one': case 'many2many':
+                        $thing.find('input').attr('field', data.id);
+                        $thing.show();
+                        break;
+                    default:
+                        $thing.find('input').attr('field', '').prop('checked', false);
+                        $thing.hide();
+                    }
+                }
+            }
+
             $(v).select2({
                 allowClear: true,
                 minimumInputLength: 0,
@@ -413,11 +438,15 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
                         return;
                     }
 
-                    callback(item_finder(default_value));
+                    var data = item_finder(default_value);
+                    bind(data);
+                    callback(data);
                 },
                 placeholder: _t('Don\'t import'),
                 width: 'resolve',
                 dropdownCssClass: 'oe_import_selector'
+            }).on('change', function (e) {
+                bind(item_finder(e.currentTarget.value));
             });
         });
     },
@@ -448,7 +477,8 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
                 collection.push({
                     id: id,
                     text: label,
-                    required: field.required
+                    required: field.required,
+                    type: field.type
                 });
 
             }
@@ -521,6 +551,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         var columns = this.$('.oe_import_grid-header .oe_import_grid-cell .o_import_header_name').map(function () {
             return $(this).text().trim().toLowerCase() || false;
         }).get();
+
         var tracking_disable = 'tracking_disable' in kwargs ? kwargs.tracking_disable : !this.$('#oe_import_tracking').prop('checked')
         var defer_parent_store = 'defer_parent_store' in kwargs ? kwargs.defer_parent_store : !!this.$('#oe_import_deferparentstore').prop('checked')
         delete kwargs.tracking_disable;
