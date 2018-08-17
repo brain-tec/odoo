@@ -37,7 +37,7 @@ var ThreadField = AbstractField.extend({
         this.dp = new concurrency.DropPrevious();
 
         this._threadWidget = new ThreadWidget(this, {
-            displayOrder: ThreadWidget.ORDER.ASC,
+            displayOrder: ThreadWidget.ORDER.DESC,
             displayDocumentLinks: false,
             displayMarkAsRead: false,
             squashCloseMessages: false,
@@ -197,7 +197,7 @@ var ThreadField = AbstractField.extend({
         var self = this;
         this.call('mail_service', 'joinChannel', channelID).then(function () {
             // Execute Discuss with 'channel' as default channel
-            self.do_action('mail.mail_channel_action_client_chat', { active_id: channelID });
+            self.do_action('mail.action_discuss', { active_id: channelID });
         });
     },
     /**

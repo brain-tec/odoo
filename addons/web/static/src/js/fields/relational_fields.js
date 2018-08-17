@@ -126,7 +126,7 @@ var FieldMany2One = AbstractField.extend({
         this.nodeOptions = _.defaults(this.nodeOptions, {
             quick_create: true,
         });
-        this.noOpen = ('noOpen' in options || {}) ? options.noOpen : this.nodeOptions.no_open;
+        this.noOpen = 'noOpen' in (options || {}) ? options.noOpen : this.nodeOptions.no_open;
         this.m2o_value = this._formatValue(this.value);
         // 'recordParams' is a dict of params used when calling functions
         // 'getDomain' and 'getContext' on this.record
@@ -1315,6 +1315,7 @@ var FieldOne2Many = FieldX2Many.extend({
             fields_view: this.attrs.views && this.attrs.views.form,
             parentID: this.value.id,
             viewInfo: this.view,
+            deletable: this.activeActions.delete,
         }));
     },
 
@@ -1375,9 +1376,9 @@ var FieldOne2Many = FieldX2Many.extend({
      */
     _onOpenRecord: function (ev) {
         // we don't want interference with the components upstream.
+        var self = this;
         ev.stopPropagation();
 
-        var self = this;
         var id = ev.data.id;
         var onSaved = function (record) {
             if (_.some(self.value.data, {id: record.id})) {
@@ -1398,6 +1399,10 @@ var FieldOne2Many = FieldX2Many.extend({
         this._openFormDialog({
             id: id,
             on_saved: onSaved,
+            on_remove: function () {
+                self._setValue({operation: 'DELETE', ids: [id]});
+            },
+            deletable: this.activeActions.delete,
             readonly: this.mode === 'readonly',
         });
     },
@@ -1464,7 +1469,11 @@ var FieldMany2Many = FieldX2Many.extend({
                 self._setValue({operation: 'TRIGGER_ONCHANGE'}, {forceChange: true});
                 self.trigger_up('reload', {db_id: ev.data.id});
             },
+            on_remove: function () {
+                self._setValue({operation: 'FORGET', ids: [ev.data.id]});
+            },
             readonly: this.mode === 'readonly',
+            deletable: this.activeActions.delete,
             string: this.string,
         });
     },
