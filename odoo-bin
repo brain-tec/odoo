@@ -10,11 +10,11 @@ load_module_graph_original = odoo.modules.loading.load_module_graph
 
 
 def load_module_graph(cr, graph, status=None, perform_checks=True,
-                      skip_modules=None, report=None):
+                      skip_modules=None, report=None, models_to_check=None):
 
     loaded_modules, processed_modules = load_module_graph_original(
         cr, graph, status=status, perform_checks=perform_checks,
-        skip_modules=skip_modules, report=report)
+        skip_modules=skip_modules, report=report, models_to_check=models_to_check)
 
     # TODO: is this really needed
     __import__('odoo.addons.bt_autoupdate.models.ir_module_module')
