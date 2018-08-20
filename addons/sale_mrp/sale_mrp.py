@@ -35,7 +35,9 @@ class SaleOrderLine(models.Model):
         # nothing policy. A product can have several BoMs, we don't know which one was used when the
         # delivery was created.
         bom_delivered = {}
-        bom = self.env['mrp.bom']._bom_find(product=self.product_id)
+        company = self.env.user.company_id
+        ctx_company = {'company_id': self.env.user.company_id}
+        bom = self.env['mrp.bom'].with_context(**ctx_company)._bom_find(product=self.product_id, company_id=company.id)
         if bom and bom.type == 'phantom':
             bom_delivered[bom.id] = False
             product_uom_qty_bom = self.product_uom._compute_quantity(self.product_uom_qty, bom.product_uom_id) / bom.product_qty
