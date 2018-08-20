@@ -139,7 +139,7 @@
         <xpath expr="//div[hasclass('product_price')]" position="inside">
             <input name="product_id" t-att-value="product.product_variant_id.id" type="hidden" />
             <t t-if="len(product.product_variant_ids) == 1">
-                <a role="button" class="btn btn-secondary btn-sm a-submit" aria-label="Shopping cart" title="Shopping cart">
+                <a href="#" role="button" class="btn btn-secondary btn-sm a-submit" aria-label="Shopping cart" title="Shopping cart">
                     <span class="fa fa-shopping-cart" />
                 </a>
             </t>
@@ -270,11 +270,13 @@
     <template id="categories_recursive" name="Category list">
         <li class="nav-item">
             <a t-att-href="keep('/shop/category/' + slug(c), category=0)" t-attf-class="nav-link#{' active' if c.id == int(category or 0) else ''}">
-                <span t-field="c.name"/> <span t-if="not c.website_published" class="text-danger">(Unpublished)</span>
+                <span t-field="c.name"/>
             </a>
             <ul t-if="c.child_id" class="nav nav-pills flex-column nav-hierarchy">
                 <t t-foreach="c.child_id" t-as="c">
-                    <t t-call="website_sale.categories_recursive" />
+                    <t t-if="not search or c.id in search_categories_ids">
+                        <t t-call="website_sale.categories_recursive" />
+                    </t>
                 </t>
             </ul>
         </li>
@@ -307,7 +309,9 @@
             <a t-att-href="keep('/shop/category/' + slug(categ), category=0)" t-attf-class="nav-link#{' active' if categ.id == int(category or 0) else ''}" t-field="categ.name"></a>
             <ul t-if="categ.child_id" class="nav nav-pills flex-column nav-hierarchy" t-att-style="'display:block;' if categ.id in parent_category_ids else 'display:none;'">
                 <t t-foreach="categ.child_id" t-as="categ">
-                    <t t-call="website_sale.option_collapse_categories_recursive" />
+                    <t t-if="not search or c.id in search_categories_ids">
+                        <t t-call="website_sale.option_collapse_categories_recursive" />
+                    </t>
                 </t>
             </ul>
         </li>
