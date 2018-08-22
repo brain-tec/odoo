@@ -1457,6 +1457,97 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('text fields in edit mode, no vertical resize', function (assert) {
+        assert.expect(1);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="txt"/>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+
+        var $textarea = form.$('textarea:first');
+
+        assert.strictEqual($textarea.css('resize'), 'none',
+            "should not have vertical resize");
+
+        form.destroy();
+    });
+
+    QUnit.test('text fields in editable list have correct height', function (assert) {
+        assert.expect(2);
+
+        this.data.partner.records[0].txt = "a\nb\nc\nd\ne\nf";
+
+        var list = createView({
+            View: ListView,
+            model: 'partner',
+            data: this.data,
+            arch: '<list editable="top">' +
+                    '<field name="foo"/>' +
+                    '<field name="txt"/>' +
+                '</list>',
+        });
+
+        // Click to enter edit: in this test we specifically do not set
+        // the focus on the textarea by clicking on another column.
+        // The main goal is to test the resize is actually triggered in this
+        // particular case.
+        list.$('.o_data_cell:first').click();
+        var $textarea = list.$('textarea:first');
+
+        // make sure the correct data is there
+        assert.strictEqual($textarea.val(), this.data.partner.records[0].txt);
+
+        // make sure there is no scroll bar
+        assert.strictEqual($textarea.innerHeight(), $textarea[0].scrollHeight,
+            "textarea should not have a scroll bar");
+
+        list.destroy();
+    });
+
+    QUnit.test('text fields in edit mode should resize on reset', function (assert) {
+        assert.expect(1);
+
+        this.data.partner.fields.foo.type = 'text';
+
+        this.data.partner.onchanges = {
+            bar: function (obj) {
+                obj.foo = 'a\nb\nc\nd\ne\nf';
+            },
+        };
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="bar"/>' +
+                    '<field name="foo"/>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        // edit the form
+        // trigger a textarea reset (through onchange) by clicking the box
+        // then check there is no scroll bar
+        form.$buttons.find('.o_form_button_edit').click();
+
+        form.$('div[name="bar"] input').click();
+
+        var $textarea = form.$('textarea:first');
+        assert.strictEqual($textarea.innerHeight(), $textarea[0].scrollHeight,
+            "textarea should not have a scroll bar");
+
+        form.destroy();
+    });
+
     QUnit.test('text field translatable', function (assert) {
         assert.expect(3);
 

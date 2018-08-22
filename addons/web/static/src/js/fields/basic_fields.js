@@ -114,7 +114,7 @@ var DebouncedField = AbstractField.extend({
      */
     commitChanges: function () {
         if (this._isDirty && this.mode === 'edit') {
-            this._doAction();
+            return this._doAction();
         }
     },
 
@@ -135,7 +135,7 @@ var DebouncedField = AbstractField.extend({
         // do anything (commitChanges ensures that if it has local changes, they
         // are triggered up before the widget is destroyed, if necessary).
         if (!this.isDestroyed()) {
-            this._setValue(this._getValue());
+            return this._setValue(this._getValue());
         }
     },
     /**
@@ -1066,7 +1066,17 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
         }
         return this._super();
     },
-
+    /**
+     * Override to force a resize of the textarea when its value has changed
+     *
+     * @override
+     */
+    reset: function () {
+        var self = this;
+        return $.when(this._super.apply(this, arguments)).then(function () {
+            self.$input.trigger('change');
+        });
+    },
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
