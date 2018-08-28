@@ -816,7 +816,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                         // Special case 'id' field, do not save this field
                         // on 'create' : save all non readonly fields
                         // on 'edit' : save non readonly modified fields
-                        if (!f.get("readonly")) {
+                        if (!f.get("readonly") || f.options.send_to_server) {
                             values[f.name] = f.get_value(true);
                         } else {
                             readonly_values[f.name] = f.get_value(true);
@@ -1185,7 +1185,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
         return this.fields[field_name].get_value();
     },
     compute_domain: function(expression) {
-        return data.compute_domain(expression, this.fields);
+    	var parent_fields = null;
+    	if (this.dataset.parent_view) {
+    		parent_fields = this.dataset.parent_view.get_fields_values();
+    	}
+        return data.compute_domain(expression, this.fields, parent_fields);
     },
     _build_view_fields_values: function() {
         var a_dataset = this.dataset;
