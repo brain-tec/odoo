@@ -362,6 +362,7 @@
         t-attf-style="#{(view.fonts || view.colors) ? view.style_for(record) : ''}"
         t-attf-class="#{view.compute_decoration_classnames(record)}">
     <t t-set="asData" t-value="record.toForm().data"/>
+    <t t-set="parent_fields" t-value="view.dataset.parent_view.get_fields_values()" t-if="view.dataset.parent_view"></t>
     <t t-foreach="columns" t-as="column">
         <td t-if="column.meta"> </td>
     </t>
@@ -375,7 +376,7 @@
     <t t-foreach="columns" t-as="column">
         <t t-set="number" t-value="column.type === 'integer' or column.type == 'float' or column.type == 'monetary'"/>
         <t t-set="text" t-value="column.type === 'text'"/>
-        <t t-set="modifiers" t-value="column.modifiers_for(asData)"/>
+        <t t-set="modifiers" t-value="column.modifiers_for(asData, parent_fields)"/>
         <td t-if="!column.meta and column.invisible !== '1'" t-att-title="column.help"
             t-attf-class="#{modifiers.readonly ? 'o_readonly' : ''} #{number ? 'o_list_number' : ''} #{text ? 'o_list_text' : ''} #{column.id === 'sequence' ? 'o_handle_cell' : ''} #{column.tag === 'button' ? 'o_list_button' : ''}"
             t-att-data-field="column.id"

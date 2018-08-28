@@ -1054,7 +1054,7 @@ var CompoundDomain = Class.extend({
     },
 });
 
-function compute_domain (expr, fields) {
+function compute_domain (expr, fields, parent_fields) {
     if (! (expr instanceof Array))
         return !! expr;
     var stack = [];
@@ -1079,15 +1079,39 @@ function compute_domain (expr, fields) {
             }
         }
 
-        var field = fields[ex[0]];
-        if (!field) {
-            throw new Error(_.str.sprintf(
-                _t("Unknown field %s in domain %s"),
-                ex[0], JSON.stringify(expr)));
+        //var field = fields[ex[0]];
+        //if (!field) {
+        //    throw new Error(_.str.sprintf(
+        //        _t("Unknown field %s in domain %s"),
+        //        ex[0], JSON.stringify(expr)));
+        //}
+        //var field_value = field.get_value ? field.get_value() : field.value;
+        //var op = ex[1];
+        //var val = ex[2];
+        var field_value = null;
+        var op = null;
+        var val = null;
+        var splitted = ex[0].split('.')
+        if(parent_fields && splitted.length > 1 && _.str.trim(splitted[0]) === "parent"){
+            field_value = parent_fields[_.str.trim(splitted[1])];
+            if(field_value == undefined){
+                throw new Error(_.str.sprintf(
+                    _t("Unknown field %s of parent in domain %s"),
+                    ex[0], JSON.stringify(expr)));
+            }
+            op = ex[1];
+            val = ex[2];
+        }else{
+            var field = fields[ex[0]];
+            if (!field) {
+                throw new Error(_.str.sprintf(
+                    _t("Unknown field %s in domain %s"),
+                    ex[0], JSON.stringify(expr)));
+            }
+            field_value = field.get_value ? fields[ex[0]].get_value() : fields[ex[0]].value;
+            op = ex[1];
+            val = ex[2];
         }
-        var field_value = field.get_value ? field.get_value() : field.value;
-        var op = ex[1];
-        var val = ex[2];
 
         switch (op.toLowerCase()) {
             case '=':
