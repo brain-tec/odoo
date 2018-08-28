@@ -722,6 +722,10 @@ actual arch.
         of those information in the architecture.
 
         """
+
+        if not self._context.get('uid', False):
+            self = self.with_context(uid=self._uid)
+
         result = False
         fields = {}
         children = True
