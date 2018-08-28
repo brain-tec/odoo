@@ -9491,7 +9491,7 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
-    QUnit.test('one2many with sequence field, fetch name_get from empty list', function (assert) {
+    QUnit.test('one2many with sequence field, fetch name_get from empty list, field text', function (assert) {
         // There was a bug where a RPC would fail because no route was set.
         // The scenario is:
         // - create a new parent model, which has a one2many
@@ -9501,6 +9501,11 @@ QUnit.module('relational_fields', {
         // - reorder the lines with the handle
         // -> This will call a resequence, which calls a name_get.
         // -> With the bug that would fail, if it's ok the test will pass.
+
+        // This test will also make sure lists with
+        // FieldText (turtle_description) can be reordered with a handle.
+        // More specifically this will trigger a reset on a FieldText
+        // while the field is not in editable mode.
         assert.expect(4);
 
         this.data.turtle.fields.turtle_int.default = 10;
@@ -9521,6 +9526,7 @@ QUnit.module('relational_fields', {
                             '<field name="turtle_int" widget="handle"/>' +
                             '<field name="turtle_foo"/>' +
                             '<field name="not_required_product_id"/>' +
+                            '<field name="turtle_description" widget="text"/>' +
                         '</tree>' +
                     '</field>' +
                 '</form>',
@@ -9832,8 +9838,8 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
-    QUnit.test('add a line custom control editable', function (assert) {
-        assert.expect(4);
+    QUnit.test('o2m add a line custom control create editable', function (assert) {
+        assert.expect(5);
 
         var form = createView({
             View: FormView,
@@ -9862,8 +9868,10 @@ QUnit.module('relational_fields', {
         });
 
         // new controls correctly added
-        assert.strictEqual($('.o_field_x2many_list_row_add').length, 1);
-        assert.strictEqual($('.o_field_x2many_list_row_add').text(), "Add foodAdd pizzaAdd pasta");
+        var $td = form.$('.o_field_x2many_list_row_add');
+        assert.strictEqual($td.length, 1);
+        assert.strictEqual($td.closest('tr').find('td').length, 1);
+        assert.strictEqual($td.text(), "Add foodAdd pizzaAdd pasta");
 
         // click add food
         // check it's empty
@@ -9882,8 +9890,8 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
-    QUnit.test('add a line custom control non-editable', function (assert) {
-        assert.expect(5);
+    QUnit.test('o2m add a line custom control create non-editable', function (assert) {
+        assert.expect(6);
 
         var form = createView({
             View: FormView,
@@ -9912,8 +9920,10 @@ QUnit.module('relational_fields', {
         });
 
         // new controls correctly added
-        assert.strictEqual($('.o_field_x2many_list_row_add').length, 1);
-        assert.strictEqual($('.o_field_x2many_list_row_add').text(), "Add foodAdd pizzaAdd pasta");
+        var $td = form.$('.o_field_x2many_list_row_add');
+        assert.strictEqual($td.length, 1);
+        assert.strictEqual($td.closest('tr').find('td').length, 1);
+        assert.strictEqual($td.text(), "Add foodAdd pizzaAdd pasta");
 
         // click add food
         // check it's empty
@@ -9934,6 +9944,32 @@ QUnit.module('relational_fields', {
         form.$('.o_field_x2many_list_row_add a:eq(2)').click();
         $('.modal .modal-footer .btn-primary:first').click();
         assert.strictEqual($('.o_data_cell').text(), "pizzapasta");
+
+        form.destroy();
+    });
+
+    QUnit.test('o2m add a line custom control create align with handle', function (assert) {
+        assert.expect(3);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:
+                '<form string="Partners">' +
+                    '<field name="p">' +
+                        '<tree>' +
+                            '<field name="int_field" widget="handle"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+        });
+
+        // controls correctly added, at one column offset when handle is present
+        var $tr = form.$('.o_field_x2many_list_row_add').closest('tr');
+        assert.strictEqual($tr.find('td').length, 2);
+        assert.strictEqual($tr.find('td:eq(0)').text(), "");
+        assert.strictEqual($tr.find('td:eq(1)').text(), "Add a line");
 
         form.destroy();
     });

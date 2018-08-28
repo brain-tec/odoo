@@ -5823,7 +5823,7 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:609
 #, python-format
-msgid "Adresse separator"
+msgid "Adress separator"
 msgstr ""
 
 #. module: base
@@ -7079,12 +7079,8 @@ msgid "Cancel Journal Entries"
 msgstr ""
 
 #. module: base
-#: model:ir.ui.view,arch_db:base.module_view_kanban
-msgid "Cancel UnInstall"
-msgstr ""
-
-#. module: base
 #: model:ir.ui.view,arch_db:base.module_form
+#: model:ir.ui.view,arch_db:base.module_view_kanban
 msgid "Cancel Uninstall"
 msgstr ""
 
@@ -17679,7 +17675,7 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:609
 #, python-format
-msgid "Separator use to split the addresse from the display_name."
+msgid "Separator use to split the address from the display_name."
 msgstr ""
 
 #. module: base
