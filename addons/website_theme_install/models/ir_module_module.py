@@ -48,6 +48,7 @@ class IrModuleModule(models.Model):
         for attach in self._get_module_data('theme.ir.attachment'):
             already_create = loaded['attachments'].filtered(lambda x: x.key == attach.key)
             new_attach = {
+                'key': attach.key,
                 'public': True,
                 'res_model': 'ir.ui.view',
                 'type': 'url',
@@ -144,6 +145,7 @@ class IrModuleModule(models.Model):
 
     @api.multi
     def button_choose_theme(self):
+        self.ensure_one()
         website = self.env['website'].get_current_website()
 
         # Unload previous theme
@@ -156,6 +158,9 @@ class IrModuleModule(models.Model):
         next_action = False
         if self.state != 'installed':
             next_action = self.button_immediate_install()
+            # reload registry to check if 'theme.utils'._<theme_name>_post_copy exists e.g.
+            self.env.reset()
+            self = self.env()[self._name].browse(self.id)
 
         # Copy new theme from template table to real table
         self._copy_theme_on_website(website)

@@ -49,8 +49,15 @@ class Website(models.Model):
         def_lang = self.env['res.lang'].search([('code', '=', lang_code)], limit=1)
         return def_lang.id if def_lang else self._active_languages()[0]
 
-    def _default_social_twitter(self):
-        return self.env.ref('base.main_company').social_twitter
+    name = fields.Char('Website Name', required=True)
+    domain = fields.Char('Website Domain')
+    country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
+                                         string='Country Groups', help='Used when multiple websites have the same domain.')
+    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id, required=True)
+    language_ids = fields.Many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages', default=_active_languages)
+    default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
+    default_lang_code = fields.Char("Default language code", related='default_lang_id.code', store=True)
+    auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
 
     def _default_social_facebook(self):
         return self.env.ref('base.main_company').social_facebook
@@ -67,15 +74,11 @@ class Website(models.Model):
     def _default_social_googleplus(self):
         return self.env.ref('base.main_company').social_googleplus
 
-    name = fields.Char('Website Name', required=True)
-    domain = fields.Char('Website Domain')
-    country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
-                                         string='Country Groups', help='Used when multiple websites have the same domain.')
-    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id, required=True)
-    language_ids = fields.Many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages', default=_active_languages)
-    default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
-    default_lang_code = fields.Char("Default language code", related='default_lang_id.code', store=True)
-    auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
+    def _default_social_instagram(self):
+        return self.env.ref('base.main_company').social_instagram
+
+    def _default_social_twitter(self):
+        return self.env.ref('base.main_company').social_twitter
 
     social_twitter = fields.Char('Twitter Account', default=_default_social_twitter)
     social_facebook = fields.Char('Facebook Account', default=_default_social_facebook)
@@ -83,6 +86,7 @@ class Website(models.Model):
     social_linkedin = fields.Char('LinkedIn Account', default=_default_social_linkedin)
     social_youtube = fields.Char('Youtube Account', default=_default_social_youtube)
     social_googleplus = fields.Char('Google+ Account', default=_default_social_googleplus)
+    social_instagram = fields.Char('Instagram Account', default=_default_social_instagram)
 
     google_analytics_key = fields.Char('Google Analytics Key')
     google_management_client_id = fields.Char('Google Client ID')
@@ -134,15 +138,6 @@ class Website(models.Model):
             # invalidate the caches from static node at compile time
             self.env['ir.qweb'].clear_caches()
         return result
-
-    @api.onchange('company_id')
-    def _onchange_company_id(self):
-        self.social_twitter = self.company_id.social_twitter
-        self.social_facebook = self.company_id.social_facebook
-        self.social_github = self.company_id.social_github
-        self.social_linkedin = self.company_id.social_linkedin
-        self.social_youtube = self.company_id.social_youtube
-        self.social_googleplus = self.company_id.social_googleplus
 
     # ----------------------------------------------------------
     # Page Management
@@ -386,16 +381,6 @@ class Website(models.Model):
 
         return dependencies
 
-    # removed by 3c9e6c89e7207636c1bdab4ed8118c0c1089d43e
-    # @api.model
-    # def page_exists(self, name, module='website'):
-    #     try:
-    #         name = (name or "").replace("/website.", "").replace("/", "")
-    #         if not name:
-    #             return False
-    #         return self.env.ref('%s.%s' % module, name)
-    #     except Exception:
-    #         return False
 
     # ----------------------------------------------------------
     # Languages
