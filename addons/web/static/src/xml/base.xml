@@ -272,7 +272,7 @@
         <a role="menuitem" href="#" data-action="fvg" class="dropdown-item">Fields View Get</a>
         <t t-if="can_edit">
             <a role="menuitem" href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="view.fieldsView.view_id" class="dropdown-item">
-                Edit View: <t t-esc="controller.viewName"/>
+                Edit View: <t t-esc="view.displayName"/>
             </a>
             <a t-if="searchview and searchview.$el.is(':visible')" role="menuitem" href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="action.searchFieldsView.view_id" class="dropdown-item">Edit SearchView</a>
         </t>
@@ -1130,13 +1130,13 @@
 </t>
 
 <div t-name="web.TimeRangeMenu" class="btn-group o_dropdown">
-    <button class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle o_time_range_menu_button" data-toggle="dropdown"
+    <button t-att-class="'o_dropdown_toggler_btn btn btn-secondary dropdown-toggle o_time_range_menu_button' + (widget.isMobile ? ' o-no-caret' : '')" data-toggle="dropdown"
         aria-expanded="false" tabindex="-1">
-        <span class="fa fa-calendar"/> Time Ranges <span class="caret"/>
+        <span class="fa fa-calendar"/> Time Ranges <span t-att-class="widget.symbol"/>
     </button>
     <div class="dropdown-menu o_dropdown_menu o_time_range_menu" role="menu">
         <div class="dropdown-item-text">
-            <label for="date_field_selector">Date Field</label>
+            <label for="date_field_selector">Based On</label>
             <select id="date_field_selector" class="o_input o_date_field_selector">
                 <t t-foreach="widget.dateFields" t-as="field">
                     <t t-if="widget.dateField.name === field.name">
@@ -1153,19 +1153,24 @@
             </select>
         </div>
         <div class="dropdown-item-text">
-            <label for="time_range_selector">Date Range</label>
+            <label for="time_range_selector">Range</label>
             <select id="time_range_selector" class="o_input o_time_range_selector">
-                <t t-foreach="widget.periodOptions" t-as="option">
-                    <t t-if="widget.timeRangeId === option.optionId">
-                        <option t-att-value="option.optionId" selected="selected">
-                            <t t-esc="option.description"/>
-                        </option>
-                    </t>
-                    <t t-else="">
-                        <option t-att-value="option.optionId">
-                            <t t-esc="option.description"/>
-                        </option>
-                    </t>
+                <t t-foreach="widget.periodGroups" t-as="group">
+                    <optgroup t-if="group !== 1"/>
+                        <t t-foreach="widget.periodOptions" t-as="option">
+                            <t t-if="option.groupId === group">
+                                <t t-if="widget.timeRangeId === option.optionId">
+                                    <option t-att-value="option.optionId" selected="selected">
+                                        <t t-esc="option.description"/>
+                                    </option>
+                                </t>
+                                <t t-else="">
+                                    <option t-att-value="option.optionId">
+                                        <t t-esc="option.description"/>
+                                    </option>
+                                </t>
+                            </t>
+                        </t>
                 </t>
             </select>
         </div>
