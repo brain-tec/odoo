@@ -17,6 +17,7 @@ import platform
 import re
 import requests
 import shutil
+import signal
 import subprocess
 import tempfile
 import threading
@@ -419,12 +420,23 @@ class ChromeBrowser():
         self.chrome_process = None
         self.screencast_frames = []
         self._chrome_start()
+        self._find_websocket()
         self._logger.info('Websocket url found: %s', self.ws_url)
         self._open_websocket()
         self._logger.info('Enable chrome headless console log notification')
         self._websocket_send('Runtime.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
+        self.sigxcpu_handler = None
+        if os.name == 'posix':
+            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
+            signal.signal(signal.SIGXCPU, self.signal_handler)
+
+    def signal_handler(self, sig, frame):
+        if sig == signal.SIGXCPU:
+            _logger.info('CPU time limit reached, stopping Chrome and shutting down')
+            self.stop()
+            os._exit(0)
 
     def stop(self):
         if self.chrome_process is not None:
@@ -437,6 +449,9 @@ class ChromeBrowser():
         if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
             self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
             shutil.rmtree(self.user_data_dir)
+        # Restore previous signal handler
+        if self.sigxcpu_handler and os.name == 'posix':
+            signal.signal(signal.SIGXCPU, self.sigxcpu_handler)
 
     @property
     def executable(self):
@@ -487,9 +502,16 @@ class ChromeBrowser():
         except OSError:
             raise unittest.SkipTest("%s not found" % cmd[0])
         self._logger.info('Chrome pid: %s', self.chrome_process.pid)
+
+    def _find_websocket(self):
         version = self._json_command('version')
         self._logger.info('Browser version: %s', version['Browser'])
-        infos = self._json_command('')[0]  # Infos about the first tab
+        try:
+            infos = self._json_command('')[0]  # Infos about the first tab
+        except IndexError:
+            self._logger.warning('No tab found in Chrome')
+            self.stop()
+            raise unittest.SkipTest('No tab found in Chrome')
         self.ws_url = infos['webSocketDebuggerUrl']
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
 
@@ -835,6 +857,9 @@ class HttpCase(TransactionCase):
 
         If neither are done before timeout test fails.
         """
+        # increase timeout if coverage is running
+        if any(f.filename.endswith('/coverage/execfile.py') for f in inspect.stack()  if f.filename):
+            timeout = timeout * 1.5
         self.start_browser(self._logger)
 
         try:
