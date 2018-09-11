@@ -336,10 +336,14 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             compute='_compute_display_name'))
 
         if self._log_access:
-            add('create_uid', fields.Many2one('res.users', string='Created by', automatic=True))
-            add('create_date', fields.Datetime(string='Created on', automatic=True))
-            add('write_uid', fields.Many2one('res.users', string='Last Updated by', automatic=True))
-            add('write_date', fields.Datetime(string='Last Updated on', automatic=True))
+            add('create_uid', fields.Many2one(
+                'res.users', string='Created by', automatic=True, readonly=True))
+            add('create_date', fields.Datetime(
+                string='Created on', automatic=True, readonly=True))
+            add('write_uid', fields.Many2one(
+                'res.users', string='Last Updated by', automatic=True, readonly=True))
+            add('write_date', fields.Datetime(
+                string='Last Updated on', automatic=True, readonly=True))
             last_modified_name = 'compute_concurrency_field_with_access'
         else:
             last_modified_name = 'compute_concurrency_field'
@@ -3211,7 +3215,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         bad_names = {'id', 'parent_path'}
         if self._log_access:
-            bad_names.update(LOG_ACCESS_COLUMNS)
+            # the superuser can set log_access fields while loading registry
+            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
+                bad_names.update(LOG_ACCESS_COLUMNS)
 
         # distribute fields into sets for various purposes
         store_vals = {}
@@ -3329,10 +3335,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 other_fields.append(field)
 
         if self._log_access:
-            columns.append(('write_uid', '%s', self._uid))
-            columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
-            updated.append('write_uid')
-            updated.append('write_date')
+            if 'write_uid' not in vals:
+                columns.append(('write_uid', '%s', self._uid))
+                updated.append('write_uid')
+            if 'write_date' not in vals:
+                columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
+                updated.append('write_date')
 
         # mark fields to recompute (the ones that depend on old values)
         self.modified(vals)
@@ -3428,7 +3436,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         bad_names = {'id', 'parent_path'}
         if self._log_access:
-            bad_names.update(LOG_ACCESS_COLUMNS)
+            # the superuser can set log_access fields while loading registry
+            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
+                bad_names.update(LOG_ACCESS_COLUMNS)
         unknown_names = set()
 
         # classify fields for each record
@@ -3513,7 +3523,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # If a field is not stored, its inverse method will probably
                 # write on its dependencies, which will invalidate the field on
                 # all records. We therefore inverse the field record by record.
-                if all(field.store for field in fields):
+                if all(field.store or field.company_dependent for field in fields):
                     batches = [rec_vals]
                 else:
                     batches = [[rec_data] for rec_data in rec_vals]
@@ -3565,13 +3575,14 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         for data in data_list:
             # determine column values
-            columns = list(columns0)
-            for name, val in sorted(data['stored'].items()):
+            stored = data['stored']
+            columns = [column for column in columns0 if column[0] not in stored]
+            for name, val in sorted(stored.items()):
                 field = self._fields[name]
                 assert field.store
 
                 if field.column_type:
-                    col_val = field.convert_to_column(val, self, data['stored'])
+                    col_val = field.convert_to_column(val, self, stored)
                     columns.append((name, field.column_format, col_val))
                     if field.translate is True:
                         translated_fields.add(field)
@@ -4963,6 +4974,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def __le__(self, other):
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise TypeError("Mixing apples and oranges: %s <= %s" % (self, other))
+        # these are much cheaper checks than a proper subset check, so
+        # optimise for checking if a null or singleton are subsets of a
+        # recordset
+        if not self or self in other:
+            return True
         return set(self._ids) <= set(other._ids)
 
     def __gt__(self, other):
@@ -4973,6 +4989,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def __ge__(self, other):
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise TypeError("Mixing apples and oranges: %s >= %s" % (self, other))
+        if not other or other in self:
+            return True
         return set(self._ids) >= set(other._ids)
 
     def __int__(self):
@@ -5101,9 +5119,16 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 if path == 'id':
                     target0 = self
                 else:
-                    env = self.env(user=SUPERUSER_ID, context={'active_test': False})
-                    target0 = env[model_name].search([(path, 'in', self.ids)])
-                    target0 = target0.with_env(self.env)
+                    Model = self.env[model_name]
+                    f = Model._fields.get(path)
+                    if f and f.store and f.type not in ('one2many', 'many2many'):
+                        # path is direct (not dotted), stored, and inline -> optimise to raw sql
+                        self.env.cr.execute("SELECT id FROM %s WHERE %s in %%s" % (Model._table, path), [tuple(self.ids)])
+                        target0 = Model.browse(i for [i] in self.env.cr.fetchall())
+                    else:
+                        env = self.env(user=SUPERUSER_ID, context={'active_test': False})
+                        target0 = env[model_name].search([(path, 'in', self.ids)])
+                        target0 = target0.with_env(self.env)
                 # prepare recomputation for each field on linked records
                 for field in stored:
                     # discard records to not recompute for field
