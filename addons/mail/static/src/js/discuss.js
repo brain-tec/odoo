@@ -432,14 +432,16 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
                 this.messagesSeparatorPosition = messageID || 'top';
             }
         }
+        var hasThreadMessages = this._thread.hasMessages({domain: this.domain});
         return {
             displayLoadMore: !this._thread.isAllHistoryLoaded(this.domain),
             displayMarkAsRead: this._thread.getID() === 'mailbox_inbox',
+            domain: this.domain,
             messagesSeparatorPosition: this.messagesSeparatorPosition,
             squashCloseMessages: this._thread.getType() !== 'mailbox' &&
                                     !this._thread.isMassMailing(),
-            displayEmptyThread: !this._thread.hasMessages() && !this.domain.length,
-            displayNoMatchFound: !this._thread.hasMessages() && this.domain.length,
+            displayEmptyThread: !hasThreadMessages && !this.domain.length,
+            displayNoMatchFound: !hasThreadMessages && !!this.domain.length,
             displaySubjectOnMessages: this._thread.isMassMailing() ||
                 this._thread.getID() === 'mailbox_inbox' ||
                 this._thread.getID() === 'mailbox_moderation',
@@ -659,7 +661,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         this.searchview = new SearchView(this, this.dataset, this.fields_view, options);
         return this.alive(this.searchview.appendTo($('<div>')))
             .then(function () {
-                self.$searchview_buttons = self.searchview.$buttons.contents();
+                self.$searchview_buttons = self.searchview.$buttons;
                 // manually call do_search to generate the initial domain and filter
                 // the messages in the default thread
                 self.searchview.do_search();

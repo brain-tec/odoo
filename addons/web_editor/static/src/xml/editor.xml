@@ -85,7 +85,7 @@
             <input t-if="widget.options.res_id" type="hidden" name="res_id" t-att-value="widget.options.res_id"/>
             <input t-if="widget.options.res_model" type="hidden" name="res_model" t-att-value="widget.options.res_model"/>
             <div class="card">
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="form-inline">
                         <input type="file" class="d-none" name="upload" t-att-accept="widget.accept" multiple="multiple"/>
                         <input type="hidden" name="disable_optimization" value=""/>
@@ -250,7 +250,6 @@
                     <label class="col-form-label col-md-3">Size</label>
                     <div class="col-md-9">
                         <select name="link_style_size" class="form-control link-style">
-                            <option value="xs">Extra Small</option>
                             <option value="sm">Small</option>
                             <option value="" selected="selected">Medium</option>
                             <option value="lg">Large</option>
@@ -260,7 +259,7 @@
                 <div class="form-group row">
                     <label class="col-form-label col-md-3">Style</label>
                     <div class="col-md-9">
-                        <select name="link_style_shape" class="form-control link-shape">
+                        <select name="link_style_shape" class="form-control link-style">
                             <option value="" selected="selected">Default</option>
                             <option value="outline">Outline</option>
                             <option value="rounded-circle">Rounded</option>
