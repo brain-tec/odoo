@@ -287,6 +287,7 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         project_template2 = self.env['project.project'].create({
             'name': 'Second Project TEMPLATE for services',
             'allow_timesheets': True,
+            'active': False,  # this template is archived
         })
         Stage = self.env['project.task.type'].with_context(default_project_id=project_template2.id)
         stage1_tmpl2 = Stage.create({
@@ -366,6 +367,11 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         self.assertFalse(so_line4.project_id, "Line4 should not have create a project, since line1 already create an empty project")
         self.assertTrue(so_line4.task_id, "Line4 should have create a new task, even if no project created.")
         self.assertTrue(so_line5.project_id, "Line5 should have create a project based on template B")
+
+        # check all generated project should be active, even if the template is not
+        self.assertTrue(so_line1.project_id.active, "Project of Line1 should be active")
+        self.assertTrue(so_line2.project_id.active, "Project of Line2 should be active")
+        self.assertTrue(so_line5.project_id.active, "Project of Line5 should be active")
 
         # check generated stuff are correct
         self.assertTrue(so_line1.project_id in self.project_template_state.project_ids, "Stage 1 from template B should be part of project from so line 1")
@@ -469,3 +475,28 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         self.sale_order.action_done()
         with self.assertRaises(UserError):
             sale_order_line.write({'product_uom_qty': 20})
+
+    def test_copy_billable_project_and_task(self):
+        sale_order_line = self.env['sale.order.line'].create({
+            'order_id': self.sale_order.id,
+            'name': self.product_delivery_timesheet3.name,
+            'product_id': self.product_delivery_timesheet3.id,
+            'product_uom_qty': 5,
+            'product_uom': self.product_delivery_timesheet3.uom_id.id,
+            'price_unit': self.product_delivery_timesheet3.list_price
+        })
+        self.sale_order.action_confirm()
+        task = self.env['project.task'].search([('sale_line_id', '=', sale_order_line.id)])
+        project = sale_order_line.project_id
+
+        # copy the project
+        project_copy = project.copy()
+        self.assertFalse(project_copy.sale_line_id, "Duplicatinga project should erase its Sale line")
+        self.assertFalse(project_copy.sale_order_id, "Duplicatinga project should erase its Sale order")
+        self.assertEqual(project_copy.billable_type, 'no', "Duplicatinga project should reset its billable type to none billable")
+        self.assertEqual(len(project.tasks), len(project_copy.tasks), "Copied project must have the same number of tasks")
+        self.assertFalse(project_copy.tasks.mapped('sale_line_id'), "The tasks of the duplicated project should not have a Sale Line set.")
+
+        # copy the task
+        task_copy = task.copy()
+        self.assertEqual(task.sale_line_id, task_copy.sale_line_id, "Duplicatinga task should keep its Sale line")

@@ -149,6 +149,7 @@ class Website(models.Model):
 
         new_homepage_view = '''<t name="Homepage" t-name="website.homepage%s">
         <t t-call="website.layout">
+            <t t-set="pageName" t-value="'homepage'"/>
             <div id="wrap" class="oe_structure oe_empty"/>
             </t>
         </t>''' % (self.id)
@@ -675,10 +676,16 @@ class SeoMetadata(models.AbstractModel):
     _name = 'website.seo.metadata'
     _description = 'SEO metadata'
 
+    is_seo_optimized = fields.Boolean("SEO optimized", compute='_compute_is_seo_optimized')
     website_meta_title = fields.Char("Website meta title", translate=True)
     website_meta_description = fields.Text("Website meta description", translate=True)
     website_meta_keywords = fields.Char("Website meta keywords", translate=True)
     website_meta_og_img = fields.Char("Website opengraph image")
+
+    @api.multi
+    def _compute_is_seo_optimized(self):
+        for record in self:
+            record.is_seo_optimized = record.website_meta_title and record.website_meta_description and record.website_meta_keywords
 
     def _default_website_meta(self):
         """ This method will return default meta information. It return the dict
@@ -942,14 +949,10 @@ class Page(models.Model):
             'name': data['name'],
             'url': url,
             'is_published': data['website_published'],
-            'website_id': False if data['share_page_info'] else website.id,
             'website_indexed': data['website_indexed'],
             'date_publish': data['date_publish'] or None,
             'is_homepage': data['is_homepage'],
         }
-        # toggle is hidden to prevent user to unshare a page
-        if 'share_page_info' in data:
-            w_vals['website_id'] = False if data['share_page_info'] else website.id
         page.with_context(no_cow=True).write(w_vals)
 
         # Create redirect if needed

@@ -33,6 +33,10 @@
         }
     }
 
+    .close:hover, .close:focus {
+        color: white;
+    }
+
 
     .nav {
         padding: 0;
@@ -166,6 +170,7 @@
     .o_tooltip_container {
         display: inline-flex;
         align-items: center;
+        transition: opacity 1s linear;
 
         > .o_tooltip {
             @include o-position-absolute;
