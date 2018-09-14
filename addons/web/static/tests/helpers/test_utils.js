@@ -373,7 +373,7 @@ function patchDate(year, month, day, hours, minutes, seconds) {
  *   up in the init process of the view, because there are no other way to do it
  *   after this method returns. Some events ('call_service', "load_views",
  *   "get_session", "load_filters") have a special treatment beforehand.
- * @param {web.AbstractService[]} [params.services] list of services to load in
+ * @param {Object} [params.services={}] list of services to load in
  *   addition to the ajax service. For instance, if a test needs the local
  *   storage service in order to work, it can provide a mock version of it.
  * @param {boolean} [debounce=true] set to false to completely remove the
@@ -388,6 +388,7 @@ function patchDate(year, month, day, hours, minutes, seconds) {
  */
 function addMockEnvironment(widget, params) {
     var Server = MockServer;
+    params.services = params.services || {};
     if (params.mockRPC) {
         Server = MockServer.extend({_performRpc: params.mockRPC});
     }
@@ -403,7 +404,6 @@ function addMockEnvironment(widget, params) {
         archs: params.archs,
         currentDate: params.currentDate,
         debug: params.debug,
-        services: params.services,
         widget: widget,
     });
 
@@ -494,18 +494,18 @@ function addMockEnvironment(widget, params) {
     // Dispatch service calls
     // Note: some services could call other services at init,
     // Which is why we have to init services after that
-    var services = {ajax: null}; // mocked ajax service already loaded
+    var services = {};
     intercept(widget, 'call_service', function (ev) {
         var args, result;
-        if (ev.data.service === 'ajax') {
-            // ajax service is already mocked by the server
-            var route = ev.data.args[0];
-            args = ev.data.args[1];
-            result = mockServer.performRpc(route, args);
-        } else if (services[ev.data.service]) {
+        if (services[ev.data.service]) {
             var service = services[ev.data.service];
             args = (ev.data.args || []);
             result = service[ev.data.method].apply(service, args);
+        } else if (ev.data.service === 'ajax') {
+            // use ajax service that is mocked by the server
+            var route = ev.data.args[0];
+            args = ev.data.args[1];
+            result = mockServer.performRpc(route, args);
         }
         ev.data.callback(result);
     });
@@ -560,6 +560,9 @@ function addMockEnvironment(widget, params) {
     // Deploy services
     var done = false;
     var servicesToDeploy = _.clone(params.services);
+    if (!servicesToDeploy.ajax) {
+        services.ajax = null; // use mocked ajax from mocked server
+    }
     while (!done) {
         var serviceName = _.findKey(servicesToDeploy, function (Service) {
             return !_.some(Service.prototype.dependencies, function (depName) {
