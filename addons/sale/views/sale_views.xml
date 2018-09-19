@@ -236,6 +236,7 @@
                     <button name="action_confirm"
                         string="Confirm" type="object"
                         attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <button name="preview_sale_order" type="object" string="Preview"/>
                     <button name="action_quotation_send" type="object" string="Send PRO-FORMA Invoice" groups="sale.group_proforma_sales" attrs="{'invisible': ['|', ('state', '=', 'draft'), ('invoice_count','&gt;=',1)]}" context="{'proforma': True}"/>
                     <button name="print_quotation" string="Print" type="object" states="sent,sale" class="o_sale_print"/>
                     <button name="action_quotation_send" string="Send by Email" type="object" states="sent,sale"/>
@@ -543,6 +544,8 @@
                                     <field name="user_id"/>
                                     <field name="team_id" options="{'no_create': True}"/>
                                     <field name="client_order_ref"/>
+                                    <field name="require_signature"/>
+                                    <field name="require_payment"/>
                                     <field name="reference" readonly="1" attrs="{'invisible': [('reference', '=', False)]}"/>
                                     <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                     <field name="analytic_account_id" context="{'default_partner_id':partner_invoice_id, 'default_name':name}" attrs="{'readonly': [('invoice_count','!=',0),('state','=','sale')]}" groups="analytic.group_analytic_accounting" force_save="1"/>
@@ -600,8 +603,6 @@
                     <field name="order_line" string="Product" filter_domain="[('order_line.product_id.name', 'ilike', self)]"/>
                     <filter string="My Orders" domain="[('user_id','=',uid)]" name="my_sale_orders_filter"/>
                     <separator/>
-                    <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
-                    <separator/>
                     <filter string="My Activities" name="activities_my"
                         domain="[('activity_ids.user_id', '=', uid)]"/>
                     <separator/>
@@ -628,14 +629,14 @@
             <field name="mode">primary</field>
             <field name="inherit_id" ref="sale.view_sales_order_filter"/>
             <field name="arch" type="xml">
-                <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
+                <xpath expr="//filter[@name='my_sale_orders_filter']" position="replace">
                     <separator/>
-                    <filter string="Quotations" name="draft" domain="[('state','=','draft')]"/>
-                    <filter string="Quotations Sent" name="sent" domain="[('state','=','sent')]"/>
-                    <filter string="Sales" name="sales" domain="[('state','in',('sale','done'))]"/>
+                    <filter string="My Quotations" name="my_quotation" domain="[('state','=','draft'), ('user_id','=',uid)]"/>
                     <separator/>
-                    <filter string="Creation Date" name="filter_create_date" date="create_date"/>
-                    <filter string="Expiration Date" name="filter_validity_date" date="validity_date"/>
+                    <filter string="Quotations" name="draft" domain="[('state','in',('draft', 'sent'))]"/>
+                    <filter string="Sales Orders" name="sales" domain="[('state','in',('sale','done'))]"/>
+                    <separator/>
+                    <filter string="Order Date" name="filter_order_date" date="date_order"/>
                 </xpath>
             </field>
         </record>
@@ -647,12 +648,11 @@
             <field name="inherit_id" ref="sale.view_sales_order_filter"/>
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
-                    <filter string="To Invoice" name="to_invoice" domain="[('invoice_status','=','to invoice')]" />
-                    <filter string="Upselling" name="upselling" domain="[('invoice_status','=','upselling')]" />
-                </xpath>
-                <xpath expr="//filter[@name='activities_upcoming_all']" position="after">
                     <separator/>
-                    <filter string="Confirmation Date" name="confirmation_date_filter" date="confirmation_date"/>
+                    <filter string="To Invoice" name="to_invoice" domain="[('invoice_status','=','to invoice')]" />
+                    <filter string="To Upsell" name="upselling" domain="[('invoice_status','=','upselling')]" />
+                    <separator/>
+                    <filter string="Order Date" name="order_date" date="date_order"/>
                 </xpath>
             </field>
         </record>
@@ -787,6 +787,7 @@
             <field name="view_id" ref="view_quotation_tree_with_onboarding"/>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
             <field name="search_view_id" ref="sale_order_view_search_inherit_quotation"/>
+            <field name="context">{'search_default_my_quotation': 1}</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                 Create a new quotation, the first step of a new sale!
@@ -801,6 +802,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">sale.order</field>
             <field name="search_view_id" ref="sale_order_view_search_inherit_quotation"/>
+            <field name="context">{'search_default_my_quotation': 1}</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                 Create a new quotation, the first step of a new sale!
