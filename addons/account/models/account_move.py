@@ -1313,6 +1313,9 @@ class AccountMoveLine(models.Model):
                             ctx['date'] = vals['date']
                         temp['currency_id'] = bank.currency_id.id
                         temp['amount_currency'] = bank.company_id.currency_id.with_context(ctx).compute(tax_vals['amount'], bank.currency_id, round=True)
+                    if vals.get('tax_exigible'):
+                        temp['tax_exigible'] = True
+                        temp['account_id'] = tax.cash_basis_account.id or account_id
                     tax_lines_vals.append(temp)
 
         #Toggle the 'tax_exigible' field to False in case it is not yet given and the tax in 'tax_line_id' or one of
@@ -1884,8 +1887,11 @@ class AccountPartialReconcile(models.Model):
             if rec.full_reconcile_id:
                 full_to_unlink |= rec.full_reconcile_id
         #reverse the tax basis move created at the reconciliation time
-        move = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self._ids)])
-        move.reverse_moves()
+        for move in self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self._ids)]):
+            if move.date > (move.company_id.period_lock_date or '0000-00-00'):
+                move.reverse_moves(date=move.date)
+            else:
+                move.reverse_moves()
         res = super(AccountPartialReconcile, self).unlink()
         if full_to_unlink:
             full_to_unlink.unlink()

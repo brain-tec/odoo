@@ -89,8 +89,8 @@ class SaleOrder(models.Model):
 
     @api.model
     def get_empty_list_help(self, help):
-        if help:
-            return '<p class=''oe_view_nocontent_create''">%s</p>' % (help)
+        if help and help.find("oe_view_nocontent_create") == -1:
+            return '<p class="oe_view_nocontent_create">%s</p>' % (help)
         return super(SaleOrder, self).get_empty_list_help(help)
 
     def _get_default_access_token(self):
@@ -111,6 +111,11 @@ class SaleOrder(models.Model):
         """
         for order in self:
             order.order_line._compute_tax_id()
+
+    @api.multi
+    def _get_payment_type(self):
+        self.ensure_one()
+        return 'form'
 
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
     origin = fields.Char(string='Source Document', help="Reference of the document that generated this sales order request.")
@@ -542,10 +547,17 @@ class SaleOrder(models.Model):
 
     @api.multi
     def action_confirm(self):
+        if self._get_forbidden_state_confirm() & set(self.mapped('state')):
+            raise UserError(_(
+                'It is not allowed to confirm an order in the following states: %s'
+            ) % (', '.join(self._get_forbidden_state_confirm())))
         self._action_confirm()
         if self.env['ir.config_parameter'].sudo().get_param('sale.auto_done_setting'):
             self.action_done()
         return True
+
+    def _get_forbidden_state_confirm(self):
+        return {'done', 'cancel'}
 
     @api.multi
     def _create_analytic_account(self, prefix=None):
