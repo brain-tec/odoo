@@ -16,6 +16,7 @@ PRINT_ENDPOINT = '/iap/snailmail/1/print'
 
 class SnailmailLetter(models.Model):
     _name = 'snailmail.letter'
+    _description = 'Snailmail Letter'
 
     user_id = fields.Many2one('res.users', 'User sending the letter')
     model = fields.Char('Model', required=True)
@@ -126,6 +127,7 @@ class SnailmailLetter(models.Model):
         }
         """
         account_token = self.env['iap.account'].get('snailmail').account_token
+        dbuuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
         documents = []
 
         batch = len(self) > 1
@@ -185,6 +187,7 @@ class SnailmailLetter(models.Model):
 
         return {
             'account_token': account_token,
+            'dbuuid': dbuuid,
             'documents': documents,
             'options': {
                 'color': self and self[0].color,

@@ -46,7 +46,7 @@ class Repair(models.Model):
     partner_id = fields.Many2one(
         'res.partner', 'Customer',
         index=True, states={'confirmed': [('readonly', True)]},
-        help='Choose partner for whom the order will be invoiced and delivered.')
+        help='Choose partner for whom the order will be invoiced and delivered. You can find a partner by its Name, TIN, Email or Internal Reference.')
     address_id = fields.Many2one(
         'res.partner', 'Delivery Address',
         domain="[('parent_id','=',partner_id)]",
@@ -497,7 +497,7 @@ class Repair(models.Model):
 
 class RepairLine(models.Model):
     _name = 'repair.line'
-    _description = 'Repair Line'
+    _description = 'Repair Line (parts)'
 
     name = fields.Text('Description', required=True)
     repair_id = fields.Many2one(
@@ -613,7 +613,7 @@ class RepairLine(models.Model):
 
 class RepairFee(models.Model):
     _name = 'repair.fee'
-    _description = 'Repair Fees Line'
+    _description = 'Repair Fees'
 
     repair_id = fields.Many2one(
         'repair.order', 'Repair Order Reference',

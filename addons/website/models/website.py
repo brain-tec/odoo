@@ -435,7 +435,7 @@ class Website(models.Model):
     # ----------------------------------------------------------
 
     @api.model
-    def get_current_website(self):
+    def get_current_website(self, fallback=True):
         if request and request.session.get('force_website_id'):
             return self.browse(request.session['force_website_id'])
 
@@ -446,15 +446,17 @@ class Website(models.Model):
         if country:
             country_id = request.env['res.country'].search([('code', '=', country)], limit=1).id
 
-        website_id = self._get_current_website_id(domain_name, country_id)
+        website_id = self._get_current_website_id(domain_name, country_id, fallback=fallback)
         return self.browse(website_id)
 
     @tools.cache('domain_name', 'country_id')
-    def _get_current_website_id(self, domain_name, country_id):
+    def _get_current_website_id(self, domain_name, country_id, fallback=True):
         # sort on country_group_ids so that we fall back on a generic website (empty country_group_ids)
         websites = self.search([('domain', '=', domain_name)]).sorted('country_group_ids')
 
         if not websites:
+            if not fallback:
+                return False
             return self.search([], limit=1).id
         elif len(websites) == 1:
             return websites.id
@@ -755,6 +757,7 @@ class SeoMetadata(models.AbstractModel):
 class WebsiteMultiMixin(models.AbstractModel):
 
     _name = 'website.multi.mixin'
+    _description = 'Multi Website Mixin'
 
     website_id = fields.Many2one('website', string='Website', help='Restrict publishing to this website.')
 
@@ -771,6 +774,7 @@ class WebsiteMultiMixin(models.AbstractModel):
 class WebsitePublishedMixin(models.AbstractModel):
 
     _name = "website.published.mixin"
+    _description = 'Website Published Mixin'
 
     website_published = fields.Boolean('Visible on current website', related='is_published')
     is_published = fields.Boolean('Is published')
@@ -803,6 +807,7 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
 
     _name = 'website.published.multi.mixin'
     _inherit = ['website.published.mixin', 'website.multi.mixin']
+    _description = 'Multi Website Published Mixin'
 
     website_published = fields.Boolean(compute='_compute_website_published',
                                        inverse='_inverse_website_published',
