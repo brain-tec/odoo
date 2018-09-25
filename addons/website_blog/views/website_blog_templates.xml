@@ -72,10 +72,12 @@
                             </a>
                         </div>
                         <div class="text-muted">
-                            <span class="fa fa-tags" role="img" aria-label="Tags" title="Tags"/>
-                            <span t-field="post.website_meta_keywords"/>
-                            <span t-if="editable and not post.website_meta_keywords" class="badge badge-danger">
-                                No keywords defined!
+                            <span t-if="editable or post.tag_ids" class="fa fa-tags" role="img" aria-label="Tags" title="Tags"/>
+                            <t t-foreach="post.tag_ids" t-as="one_tag">
+                              <a class="badge badge-primary mr8" t-attf-href="#{blog_url('', ['blog', 'post'], blog=post.blog_id, tag=one_tag.id)}" t-esc="one_tag.name"/>
+                            </t>
+                            <span t-if="editable and not post.tag_ids" class="badge badge-danger">
+                                No tags defined!
                             </span>
                         </div>
                         <div class="text-muted" t-if="len(post.message_ids) &gt; 0">
@@ -545,9 +547,12 @@
 </template>
 
 <!-- User Navbar -->
-<template id="content_new_blogpost" inherit_id="website.user_navbar">
-    <xpath expr="//div[@id='o_new_content_menu_choices']//ul" position="inside">
-        <li groups="website.group_website_designer"><a href="#" data-action="new_blog_post"><i class="fa fa-rss"/><p>New Blog Post</p></a></li>
+<template id="user_navbar_inherit_website_blog" inherit_id="website.user_navbar">
+    <xpath expr="//div[@id='o_new_content_menu_choices']//div[@name='module_website_blog']" position="attributes">
+        <attribute name="name"/>
+        <attribute name="t-att-data-module-id"/>
+        <attribute name="t-att-data-module-shortdesc"/>
+        <attribute name="groups">website.group_website_designer</attribute>
     </xpath>
 </template>
 

@@ -469,7 +469,7 @@ class Website(models.Model):
 
     def _force_website(self, website_id):
         if request:
-            request.session['force_website_id'] = website_id and int(website_id)
+            request.session['force_website_id'] = website_id and str(website_id).isdigit() and int(website_id)
 
     @api.model
     def is_publisher(self):
@@ -801,6 +801,9 @@ class WebsitePublishedMixin(models.AbstractModel):
             'url': self.website_url,
             'target': 'self',
         }
+
+    def create_and_get_website_url(self, **kwargs):
+        return self.create(kwargs).website_url
 
 
 class WebsitePublishedMultiMixin(WebsitePublishedMixin):

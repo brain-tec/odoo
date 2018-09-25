@@ -107,7 +107,6 @@ class ProductPublicCategory(models.Model):
 
 class ProductTemplate(models.Model):
     _inherit = ["product.template", "website.seo.metadata", 'website.published.multi.mixin', 'rating.mixin']
-    _order = 'is_published desc, website_sequence desc, name'
     _name = 'product.template'
     _mail_post_access = 'read'
 
@@ -215,20 +214,6 @@ class Product(models.Model):
     def website_publish_button(self):
         self.ensure_one()
         return self.product_tmpl_id.website_publish_button()
-
-
-class ProductAttribute(models.Model):
-    _inherit = "product.attribute"
-
-    type = fields.Selection([('radio', 'Radio'), ('select', 'Select'), ('color', 'Color')], default='radio')
-
-
-class ProductAttributeValue(models.Model):
-    _inherit = "product.attribute.value"
-
-    html_color = fields.Char(string='HTML Color Index', oldname='color', help="Here you can set a "
-                             "specific HTML color index (e.g. #ff0000) to display the color on the website if the "
-                             "attibute type is 'Color'.")
 
 
 class ProductImage(models.Model):
