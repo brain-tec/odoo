@@ -235,9 +235,11 @@ class res_partner(osv.osv):
         return [('id','in',map(itemgetter(0), res))]
 
     def _credit_search(self, cr, uid, obj, name, args, context=None):
+        context['all_fiscalyear'] = True
         return self._asset_difference_search(cr, uid, obj, name, 'receivable', args, context=context)
 
     def _debit_search(self, cr, uid, obj, name, args, context=None):
+        context['all_fiscalyear'] = True
         return self._asset_difference_search(cr, uid, obj, name, 'payable', args, context=context)
 
     def _invoice_total(self, cr, uid, ids, field_name, arg, context=None):
