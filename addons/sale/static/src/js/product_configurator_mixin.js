@@ -46,7 +46,7 @@ var ProductConfiguratorMixin = {
      * - The new total price
      * - The need of adding a "custom value" input
      *
-     * @param {MouseEvent}
+     * @param {MouseEvent} ev
      */
     onChangeVariant: function (ev) {
         var self = this;
@@ -220,8 +220,8 @@ var ProductConfiguratorMixin = {
     getNoVariantAttributeValues: function ($container) {
         var noVariantAttributeValues = [];
         var variantsValuesSelectors = [
-            'input.never.js_variant_change:checked',
-            'select.never.js_variant_change'
+            'input.no_variant.js_variant_change:checked',
+            'select.no_variant.js_variant_change'
         ];
 
         $container.find(variantsValuesSelectors.join(',')).each(function (){
@@ -246,7 +246,7 @@ var ProductConfiguratorMixin = {
     },
 
     /**
-     * Will return the list of selected product.product.attribute.value ids
+     * Will return the list of selected product.template.attribute.value ids
      * For the modal, the "main product"'s attribute values are stored in the
      * "unchanged_value_ids" data
      *

@@ -365,7 +365,7 @@ return AbstractRenderer.extend({
                 }
             }
 
-            if (!tickValues) {
+            if (!tickValues.length) {
                 tickValues = graphData.map(function (d, i) {
                     return i;
                 });
@@ -415,6 +415,13 @@ return AbstractRenderer.extend({
             }
         }
 
+        // Delete first and last label because there is no enough space because
+        // of the tiny margins.
+        if (ticksLabels.length > 3) {
+            ticksLabels[0] = [];
+            ticksLabels[ticksLabels.length - 1] = [];
+        }
+
         var $svgContainer = $('<div/>', {class: 'o_graph_svg_container'});
         this.$el.append($svgContainer);
         var svg = d3.select($svgContainer[0]).append('svg');
@@ -450,7 +457,7 @@ return AbstractRenderer.extend({
         chart(svg);
 
         // Bigger line (stroke-width 1.5 is hardcoded in nv.d3)
-        $svgContainer.find('.nvd3 .nv-groups g.nv-group').css('stroke-width', '3px')
+        $svgContainer.find('.nvd3 .nv-groups g.nv-group').css('stroke-width', '2px')
 
         return chart;
     },

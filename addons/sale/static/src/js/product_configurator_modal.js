@@ -33,16 +33,16 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
      * @param {integer} params.pricelistId
      * @param {boolean} params.isWebsite If we're on a web shop page, we need some
      *   custom behavior
-     * @param {string} okButtonText The text to apply on the "ok" button, typically
+     * @param {string} params.okButtonText The text to apply on the "ok" button, typically
      * "Add" for the sale order and "Proceed to checkout" on the web shop
-     * @param {string} cancelButtonText same as "params.okButtonText" but
+     * @param {string} params.cancelButtonText same as "params.okButtonText" but
      *   for the cancel button
-     * @param {Object} rootProduct The root product of the optional products window
-     * @param {integer} rootProduct.product_id
-     * @param {integer} rootProduct.quantity
-     * @param {Array} rootProduct.variant_values
-     * @param {Array} rootProduct.product_custom_variant_values
-     * @param {Array} rootProduct.no_variant_attribute_values
+     * @param {Object} params.rootProduct The root product of the optional products window
+     * @param {integer} params.rootProduct.product_id
+     * @param {integer} params.rootProduct.quantity
+     * @param {Array} params.rootProduct.variant_values
+     * @param {Array} params.rootProduct.product_custom_attribute_values
+     * @param {Array} params.rootProduct.no_variant_attribute_values
      */
     init: function (parent, params) {
         var self = this;
@@ -153,11 +153,6 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
      * The root product is added on top of the list.
      *
      * @public
-     * @returns {Array} products
-     * @returns {integer} products.product_id
-     * @returns {integer} products.quantity
-     * @returns {Array} products.product_custom_variant_values
-     * @returns {Array} products.no_variant_attribute_values
      */
     getSelectedProducts: function () {
         var self = this;
@@ -181,7 +176,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
             products.push({
                 product_id: parseInt($item.find('input.product_id').val()),
                 quantity: quantity,
-                product_custom_variant_values: productCustomVariantValues,
+                product_custom_attribute_values: productCustomVariantValues,
                 no_variant_attribute_values: noVariantAttributeValues
             });
         });
@@ -206,14 +201,14 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
             .attr("src", "/web/image/product.product/" + productId + "/image_medium");
 
         if (this.rootProduct &&
-                (this.rootProduct.product_custom_variant_values ||
+                (this.rootProduct.product_custom_attribute_values ||
                  this.rootProduct.no_variant_attribute_values)) {
             var $productDescription = $modalContent
                 .find('.main_product')
                 .find('td.td-product_name div.text-muted.small');
             var description = $productDescription.html();
 
-            $.each(this.rootProduct.product_custom_variant_values, function (){
+            $.each(this.rootProduct.product_custom_attribute_values, function (){
                 description += '<br/>' + this.attribute_value_name + ': ' + this.custom_value;
             });
 
