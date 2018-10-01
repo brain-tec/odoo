@@ -126,7 +126,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _serve_attachment(cls):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        domain = [('type', '=', 'binary'), ('url', '=', request.httprequest.path)]
+        domain = cls._get_serve_attachment_domain()
         fields = ['__last_update', 'datas', 'name', 'mimetype', 'checksum']
         attach = env['ir.attachment'].search_read(domain, fields)
         if attach:
@@ -151,6 +151,10 @@ class IrHttp(models.AbstractModel):
             response.mimetype = attach[0]['mimetype'] or 'application/octet-stream'
             response.data = base64.b64decode(datas)
             return response
+
+    @classmethod
+    def _get_serve_attachment_domain(cls):
+        return [('type', '=', 'binary'), ('url', '=', request.httprequest.path)]
 
     @classmethod
     def _serve_fallback(cls, exception):
@@ -298,15 +302,17 @@ class IrHttp(models.AbstractModel):
             obj = cls._xmlid_to_obj(env, xmlid)
         if access_mode:
             obj = cls.check_access_mode(env, id, access_mode, model, access_token=access_token, related_id=related_id)
-        elif id and model == 'ir.attachment' and access_token:
-            obj = env[model].sudo().browse(int(id))
-            if not consteq(obj.access_token or '', access_token):
-                return (403, [], None)
         elif id and model in env.registry:
             obj = env[model].browse(int(id))
         # obj exists
         if not obj or not obj.exists() or field not in obj:
             return (404, [], None)
+
+        # access token grant access
+        if model == 'ir.attachment' and access_token:
+            obj = obj.sudo()
+            if not consteq(obj.access_token or '', access_token):
+                return (403, [], None)
 
         # check read access
         try:

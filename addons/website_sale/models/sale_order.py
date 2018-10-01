@@ -17,8 +17,9 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
 
     website_order_line = fields.One2many(
-        'sale.order.line', 'order_id',
-        string='Order Lines displayed on Website', readonly=True,
+        'sale.order.line',
+        compute='_compute_website_order_line',
+        string='Order Lines displayed on Website',
         help='Order Lines to be displayed on the website. They should not be used for computation purpose.',
     )
     cart_quantity = fields.Integer(compute='_compute_cart_info', string='Cart Quantity')
@@ -28,6 +29,10 @@ class SaleOrder(models.Model):
     website_id = fields.Many2one('website', related='partner_id.website_id', string='Website',
                                  help='Website through which this order was placed.',
                                  store=True, readonly=True)
+
+    @api.one
+    def _compute_website_order_line(self):
+        self.website_order_line = self.order_line
 
     @api.multi
     @api.depends('website_order_line.product_uom_qty', 'website_order_line.product_id')
@@ -176,7 +181,7 @@ class SaleOrder(models.Model):
 
             no_variant_attribute_values = kwargs.get('no_variant_attribute_values')
             if no_variant_attribute_values:
-                values['product_no_variant_attribute_values'] = [
+                values['product_no_variant_attribute_value_ids'] = [
                     (6, 0, [int(attribute['value']) for attribute in no_variant_attribute_values])
                 ]
 
