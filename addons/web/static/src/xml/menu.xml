@@ -109,6 +109,12 @@
     </t>
 </t>
 
+<t t-extend="UserMenu.Actions">
+    <t t-jquery=".dropdown-divider" t-operation="before">
+        <a href="#" data-menu="shortcuts" class="dropdown-item d-none d-md-inline-block">Shortcuts</a>
+    </t>
+</t>
+
 <div t-name="UserMenu.shortcuts">
     <div class="container-fluid">
         <div class="row">
@@ -192,15 +198,6 @@
                             </td>
                             <td>
                                 <span class="o_key">Control</span> + <span class="o_key">Alt</span> + <span class="o_key">n</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="left">Open app menu</td>
-                            <td>
-                                <span class="o_key">Alt</span> + <span class="o_key">h</span>
-                            </td>
-                            <td>
-                                <span class="o_key">Control</span> + <span class="o_key">Alt</span> + <span class="o_key">h</span>
                             </td>
                         </tr>
 

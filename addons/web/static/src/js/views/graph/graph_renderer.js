@@ -68,6 +68,16 @@ return AbstractRenderer.extend({
         this._super.apply(this, arguments);
         this.isInDOM = false;
     },
+    /**
+     * @override
+     * @param {Object} state
+     * @param {Object} params
+     */
+    updateState: function (state, params) {
+        this.isComparison = !!state.comparisonData;
+        this.stacked = this.isComparison ? false : params.stacked;
+        return this._super.apply(this, arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -252,7 +262,7 @@ return AbstractRenderer.extend({
             return;
         }
         if (all_zero) {
-            if (this.isEmbedded) {
+            if (this.isEmbedded || this.isComparison) {
                 // add fake data to display an empty pie chart
                 data = [{
                     x : "No data" ,
