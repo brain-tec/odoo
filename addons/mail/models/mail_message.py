@@ -724,6 +724,10 @@ class Message(models.Model):
             values['record_name'] = self._get_record_name(values)
 
         message = super(Message, self).create(values)
+
+        if values.get('attachment_ids'):
+            message.attachment_ids.check(mode='read')
+
         message._invalidate_documents()
 
         if not self.env.context.get('message_create_from_mail_mail'):
@@ -743,6 +747,9 @@ class Message(models.Model):
         if 'model' in vals or 'res_id' in vals:
             self._invalidate_documents()
         res = super(Message, self).write(vals)
+        if vals.get('attachment_ids'):
+            for mail in self:
+                mail.attachment_ids.check(mode='read')
         self._invalidate_documents()
         return res
 
