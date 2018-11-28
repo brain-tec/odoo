@@ -32,12 +32,6 @@
             <field name="company_id"></field>
         </record>
 
-        <record id="location_procurement" model="stock.location">
-            <field name="name">Procurements</field>
-            <field name="location_id" ref="stock_location_locations_virtual"/>
-            <field name="usage">procurement</field>
-            <field name="company_id"></field>
-        </record>
         <record id="stock_location_suppliers" model="stock.location">
             <field name="name">Vendors</field>
             <field name="location_id" ref="stock_location_locations_partner"/>
@@ -103,6 +97,7 @@
             <field name="padding">5</field>
             <field name="number_next">1</field>
             <field name="number_increment">1</field>
+            <field name="company_id"></field>
         </record>
 
         <record id="sequence_stock_scrap" model="ir.sequence">
