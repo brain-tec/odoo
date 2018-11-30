@@ -33,7 +33,6 @@ from lxml import etree, html
 
 from odoo.models import BaseModel
 from odoo.osv.expression import normalize_domain
-from odoo.tools import pycompat
 from odoo.tools import single_email_re
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
@@ -355,10 +354,9 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
         doc = self._testMethodDoc
         return doc and ' '.join(l.strip() for l in doc.splitlines() if not l.isspace()) or None
 
-    if not pycompat.PY2:
-        # turns out this thing may not be quite as useful as we thought...
-        def assertItemsEqual(self, a, b, msg=None):
-            self.assertCountEqual(a, b, msg=None)
+    # turns out this thing may not be quite as useful as we thought...
+    def assertItemsEqual(self, a, b, msg=None):
+        self.assertCountEqual(a, b, msg=None)
 
 
 class TransactionCase(BaseCase):
@@ -1091,7 +1089,7 @@ class Form(object):
         if isinstance(view, BaseModel):
             assert view._name == 'ir.ui.view', "the view parameter must be a view id, xid or record, got %s" % view
             view_id = view.id
-        elif isinstance(view, pycompat.string_types):
+        elif isinstance(view, str):
             view_id = env.ref(view).id
         else:
             view_id = view or False

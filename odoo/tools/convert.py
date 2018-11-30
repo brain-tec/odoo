@@ -128,7 +128,7 @@ def _eval_xml(self, node, env):
                 # So funny story: in Python 3, bytes(n: int) returns a
                 # bytestring of n nuls. In Python 2 it obviously returns the
                 # stringified number, which is what we're expecting here
-                s = s.replace(found, pycompat.text_type(self.idref[id]))
+                s = s.replace(found, str(self.idref[id]))
             s = s.replace('%%', '%') # Quite weird but it's for (somewhat) backward compatibility sake
             return s
 
@@ -250,8 +250,8 @@ form: module.record_id""" % (xml_id,)
                 modcnt = self.env['ir.module.module'].search_count([('name', '=', module), ('state', '=', 'installed')])
                 assert modcnt == 1, """The ID "%s" refers to an uninstalled module""" % (xml_id,)
 
-    def _tag_delete(self, rec, _data_node):
-        d_model = rec["model"]
+    def _tag_delete(self, rec):
+        d_model = rec.get("model")
         records = self.env[d_model]
 
         d_search = rec.get("search")
@@ -575,7 +575,7 @@ form: module.record_id""" % (xml_id,)
                         f_val = int(f_val)
                     elif model._fields[f_name].type in ['float', 'monetary']:
                         f_val = float(f_val)
-                    elif model._fields[f_name].type == 'boolean' and isinstance(f_val, pycompat.string_types):
+                    elif model._fields[f_name].type == 'boolean' and isinstance(f_val, str):
                         f_val = str2bool(f_val)
             res[f_name] = f_val
 
@@ -793,7 +793,7 @@ def convert_xml_import(cr, module, xmlfile, idref=None, mode='init', noupdate=Fa
         _logger.info(ustr(relaxng.error_log.last_error))
         raise
 
-    if isinstance(xmlfile, pycompat.string_types):
+    if isinstance(xmlfile, str):
         xml_filename = xmlfile
     else:
         xml_filename = xmlfile.name

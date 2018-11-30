@@ -496,7 +496,7 @@ class Field(MetaField('DummyField', (object,), {})):
             deps = getattr(func, '_depends', ())
             return deps(model) if callable(deps) else deps
 
-        if isinstance(self.compute, pycompat.string_types):
+        if isinstance(self.compute, str):
             # if the compute method has been overridden, concatenate all their _depends
             self.depends = tuple(
                 dep
@@ -517,7 +517,7 @@ class Field(MetaField('DummyField', (object,), {})):
     def _setup_related_full(self, model):
         """ Setup the attributes of a related field. """
         # fix the type of self.related if necessary
-        if isinstance(self.related, pycompat.string_types):
+        if isinstance(self.related, str):
             self.related = tuple(self.related.split('.'))
 
         # determine the chain of fields, and make sure they are all set up
@@ -604,7 +604,7 @@ class Field(MetaField('DummyField', (object,), {})):
         for name in self.related[:-1]:
             values = [first(value[name]) for value in values]
         # assign final values to records
-        for record, value in pycompat.izip(records, values):
+        for record, value in zip(records, values):
             record[self.name] = value[self.related_field.name]
 
     def _inverse_related(self, records):
@@ -791,7 +791,7 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Convert ``value`` from the ``write`` format to the SQL format. """
         if value is None or value is False:
             return None
-        return pycompat.to_native(value)
+        return pycompat.to_text(value)
 
     def convert_to_cache(self, value, record, validate=True):
         """ Convert ``value`` to the cache format; ``value`` may come from an
@@ -1028,7 +1028,7 @@ class Field(MetaField('DummyField', (object,), {})):
         for field in fields:
             for record in records:
                 cache.set(record, field, field.convert_to_cache(False, record, validate=False))
-        if isinstance(self.compute, pycompat.string_types):
+        if isinstance(self.compute, str):
             getattr(records, self.compute)()
         else:
             self.compute(records)
@@ -1062,7 +1062,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     # HACK: if result is in the wrong cache, copy values
                     if recs.env != env:
                         computed = record._field_computed[self]
-                        for source, target in pycompat.izip(recs, recs.with_env(env)):
+                        for source, target in zip(recs, recs.with_env(env)):
                             try:
                                 values = {f.name: source[f.name] for f in computed}
                                 target._cache.update(target._convert_to_cache(values, validate=False))
@@ -1100,14 +1100,14 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
-        if isinstance(self.inverse, pycompat.string_types):
+        if isinstance(self.inverse, str):
             getattr(records, self.inverse)()
         else:
             self.inverse(records)
 
     def determine_domain(self, records, operator, value):
         """ Return a domain representing a condition on ``self``. """
-        if isinstance(self.search, pycompat.string_types):
+        if isinstance(self.search, str):
             return getattr(records, self.search)(operator, value)
         else:
             return self.search(records, operator, value)
@@ -1735,9 +1735,7 @@ class Datetime(Field):
 # http://initd.org/psycopg/docs/usage.html#binary-adaptation
 # Received data is returned as buffer (in Python 2) or memoryview (in Python 3).
 _BINARY = memoryview
-if pycompat.PY2:
-    #pylint: disable=buffer-builtin,undefined-variable
-    _BINARY = buffer
+
 
 class Binary(Field):
     type = 'binary'
@@ -1773,14 +1771,14 @@ class Binary(Field):
         if isinstance(value, bytes):
             return psycopg2.Binary(value)
         try:
-            return psycopg2.Binary(pycompat.text_type(value).encode('ascii'))
+            return psycopg2.Binary(str(value).encode('ascii'))
         except UnicodeEncodeError:
             raise UserError(_("ASCII characters are required for %s in %s") % (value, self.name))
 
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, _BINARY):
             return bytes(value)
-        if isinstance(value, pycompat.integer_types) and \
+        if isinstance(value, int) and \
                 (record._context.get('bin_size') or
                  record._context.get('bin_size_' + self.name)):
             # If the client requests only the size of the field, we return that
@@ -1912,7 +1910,7 @@ class Selection(Field):
             translated according to context language
         """
         selection = self.selection
-        if isinstance(selection, pycompat.string_types):
+        if isinstance(selection, str):
             return getattr(env[self.model_name], selection)()
         if callable(selection):
             return selection(env[self.model_name])
@@ -1929,7 +1927,7 @@ class Selection(Field):
     def get_values(self, env):
         """ return a list of the possible values """
         selection = self.selection
-        if isinstance(selection, pycompat.string_types):
+        if isinstance(selection, str):
             selection = getattr(env[self.model_name], selection)()
         elif callable(selection):
             selection = selection(env[self.model_name])
@@ -1980,7 +1978,7 @@ class Reference(Selection):
         if isinstance(value, BaseModel):
             if not validate or (value._name in self.get_values(record.env) and len(value) <= 1):
                 return process(value._name, value.id) if value else False
-        elif isinstance(value, pycompat.string_types):
+        elif isinstance(value, str):
             res_model, res_id = value.split(',')
             if record.env[res_model].browse(int(res_id)).exists():
                 return process(res_model, int(res_id))
@@ -2166,6 +2164,26 @@ class Many2one(_Relational):
         return super(Many2one, self).convert_to_onchange(value, record, names)
 
 
+class _RelationalMultiUpdate(object):
+    """ A getter to update the value of an x2many field, without reading its
+        value until necessary.
+    """
+    __slots__ = ['record', 'field', 'value']
+
+    def __init__(self, record, field, value):
+        self.record = record
+        self.field = field
+        self.value = value
+
+    def __call__(self):
+        # determine the current field's value, and update it in cache only
+        record, field, value = self.record, self.field, self.value
+        cache = record.env.cache
+        cache.remove(record, field)
+        val = field.convert_to_cache(record[field.name] | value, record, validate=False)
+        cache.set(record, field, val)
+        return val
+
 
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
@@ -2177,7 +2195,12 @@ class _RelationalMulti(_Relational):
         """ Update the cached value of ``self`` for ``records`` with ``value``. """
         cache = records.env.cache
         for record in records:
-            if cache.contains(record, self):
+            special = cache.get_special(record, self)
+            if isinstance(special, _RelationalMultiUpdate):
+                # include 'value' in the existing _RelationalMultiUpdate; this
+                # avoids reading the field's value (which may be large)
+                special.value |= value
+            elif cache.contains(record, self):
                 try:
                     val = self.convert_to_cache(record[self.name] | value, record, validate=False)
                     cache.set(record, self, val)
@@ -2185,17 +2208,7 @@ class _RelationalMulti(_Relational):
                     # delay the failure until the field is necessary
                     cache.set_failed(record, [self], exc)
             else:
-                cache.set_special(record, self, self._update_getter(record, value))
-
-    def _update_getter(self, record, value):
-        def getter():
-            # determine the current field's value, and update it in cache only
-            cache = record.env.cache
-            cache.remove(record, self)
-            val = self.convert_to_cache(record[self.name] | value, record, validate=False)
-            cache.set(record, self, val)
-            return val
-        return getter
+                cache.set_special(record, self, _RelationalMultiUpdate(record, self, value))
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: tuple(ids)
@@ -2309,7 +2322,7 @@ class _RelationalMulti(_Relational):
             self.depends += tuple(
                 self.name + '.' + arg[0]
                 for arg in self.domain
-                if isinstance(arg, (tuple, list)) and isinstance(arg[0], pycompat.string_types)
+                if isinstance(arg, (tuple, list)) and isinstance(arg[0], str)
             )
 
 
@@ -2708,7 +2721,7 @@ class Many2many(_RelationalMulti):
             if to_create:
                 # create lines in batch, and link them
                 lines = comodel.create([vals for ids, vals in to_create])
-                for line, (ids, vals) in pycompat.izip(lines, to_create):
+                for line, (ids, vals) in zip(lines, to_create):
                     relation_add(ids, line.id)
 
             if to_delete:

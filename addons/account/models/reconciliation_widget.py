@@ -3,7 +3,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.tools import pycompat
 from odoo.tools.misc import formatLang
 
 
@@ -30,7 +29,7 @@ class AccountReconciliation(models.AbstractModel):
         AccountMoveLine = self.env['account.move.line']
         ctx = dict(self._context, force_price_include=False)
 
-        for st_line, datum in pycompat.izip(st_lines, data):
+        for st_line, datum in zip(st_lines, data):
             payment_aml_rec = AccountMoveLine.browse(datum.get('payment_aml_ids', []))
 
             for aml_dict in datum.get('counterpart_aml_dicts', []):
@@ -143,12 +142,19 @@ class AccountReconciliation(models.AbstractModel):
                 bank_statements_left += line.statement_id
 
                 amls = aml_ids and self.env['account.move.line'].browse(aml_ids)
-                results['lines'].append({
+                line_vals = {
                     'st_line': self._get_statement_line(line),
                     'reconciliation_proposition': aml_ids and self._prepare_move_lines(amls) or [],
                     'model_id': matching_amls[line.id].get('model') and matching_amls[line.id]['model'].id,
                     'write_off': matching_amls[line.id].get('status') == 'write_off',
-                })
+                }
+                if not line.partner_id and partner_map.get(line.id):
+                    partner = self.env['res.partner'].browse(partner_map[line.id])
+                    line_vals.update({
+                        'partner_id': partner.id,
+                        'partner_name': partner.name,
+                    })
+                results['lines'].append(line_vals)
 
         return results
 
@@ -332,7 +338,11 @@ class AccountReconciliation(models.AbstractModel):
             rec_prop = aml_ids and self.env['account.move.line'].browse(aml_ids) or self._get_move_line_reconciliation_proposition(account.id, partner_id)
             row['reconciliation_proposition'] = self._prepare_move_lines(rec_prop, target_currency=currency)
             row['company_id'] = account.company_id.id
-        return rows
+
+        # Return the partners with a reconciliation proposition first, since they are most likely to
+        # be reconciled.
+        return [r for r in rows if r['reconciliation_proposition']] + [r for r in rows if not r['reconciliation_proposition']]
+
 
     @api.model
     def process_move_lines(self, data):

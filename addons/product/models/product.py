@@ -9,7 +9,7 @@ from odoo.osv import expression
 
 from odoo.addons import decimal_precision as dp
 
-from odoo.tools import float_compare, pycompat
+from odoo.tools import float_compare
 
 
 class ProductCategory(models.Model):
@@ -165,11 +165,11 @@ class ProductProduct(models.Model):
             quantity = self._context.get('quantity', 1.0)
 
             # Support context pricelists specified as display_name or ID for compatibility
-            if isinstance(pricelist_id_or_name, pycompat.string_types):
+            if isinstance(pricelist_id_or_name, str):
                 pricelist_name_search = self.env['product.pricelist'].name_search(pricelist_id_or_name, operator='=', limit=1)
                 if pricelist_name_search:
                     pricelist = self.env['product.pricelist'].browse([pricelist_name_search[0][0]])
-            elif isinstance(pricelist_id_or_name, pycompat.integer_types):
+            elif isinstance(pricelist_id_or_name, int):
                 pricelist = self.env['product.pricelist'].browse(pricelist_id_or_name)
 
             if pricelist:
@@ -268,7 +268,7 @@ class ProductProduct(models.Model):
 
     @api.one
     def _set_image_value(self, value):
-        if isinstance(value, pycompat.text_type):
+        if isinstance(value, str):
             value = value.encode('ascii')
         image = tools.image_resize_image_big(value)
         if self.product_tmpl_id.image:
@@ -308,7 +308,7 @@ class ProductProduct(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         products = super(ProductProduct, self.with_context(create_product_product=True)).create(vals_list)
-        for product, vals in pycompat.izip(products, vals_list):
+        for product, vals in zip(products, vals_list):
             # When a unique variant is created from tmpl then the standard price is set by _set_standard_price
             if not (self.env.context.get('create_from_tmpl') and len(product.product_tmpl_id.product_variant_ids) == 1):
                 product._set_standard_price(vals.get('standard_price') or 0.0)
@@ -627,7 +627,7 @@ class ProductPackaging(models.Model):
     name = fields.Char('Package Type', required=True)
     sequence = fields.Integer('Sequence', default=1, help="The first in the sequence is the default one.")
     product_id = fields.Many2one('product.product', string='Product')
-    qty = fields.Float('Contained Quantity', help="The total number of products you can have per pallet or box.")
+    qty = fields.Float('Contained Quantity', help="Quantity of products contained in the packaging.")
     barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification.")
     product_uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', readonly=True)
 

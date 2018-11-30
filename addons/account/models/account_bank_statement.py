@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.osv import expression
-from odoo.tools import float_is_zero, pycompat
+from odoo.tools import float_is_zero
 from odoo.tools import float_compare, float_round, float_repr
 from odoo.tools.misc import formatLang, format_date
 from odoo.exceptions import UserError, ValidationError
@@ -324,6 +324,16 @@ class AccountBankStatementLine(models.Model):
         if self.amount_currency != 0 and self.amount == 0:
             raise ValidationError(_('If "Amount Currency" is specified, then "Amount" must be as well.'))
 
+    @api.constrains('currency_id', 'journal_id')
+    def _check_currency_id(self):
+        for line in self:
+            if not line.currency_id:
+                continue
+
+            statement_currency = line.journal_id.currency_id or line.company_id.currency_id
+            if line.currency_id == statement_currency:
+                raise ValidationError(_('The currency of the bank statement line must be different than the statement currency.'))
+
     @api.model
     def create(self, vals):
         line = super(AccountBankStatementLine, self).create(vals)
@@ -528,10 +538,10 @@ class AccountBankStatementLine(models.Model):
         for aml_dict in counterpart_aml_dicts:
             if aml_dict['move_line'].reconciled:
                 raise UserError(_('A selected move line was already reconciled.'))
-            if isinstance(aml_dict['move_line'], pycompat.integer_types):
+            if isinstance(aml_dict['move_line'], int):
                 aml_dict['move_line'] = aml_obj.browse(aml_dict['move_line'])
         for aml_dict in (counterpart_aml_dicts + new_aml_dicts):
-            if aml_dict.get('tax_ids') and isinstance(aml_dict['tax_ids'][0], pycompat.integer_types):
+            if aml_dict.get('tax_ids') and isinstance(aml_dict['tax_ids'][0], int):
                 # Transform the value in the format required for One2many and Many2many fields
                 aml_dict['tax_ids'] = [(4, id, None) for id in aml_dict['tax_ids']]
         if any(line.journal_entry_ids for line in self):
@@ -657,7 +667,13 @@ class AccountBankStatementLine(models.Model):
 
         #create the res.partner.bank if needed
         if self.account_number and self.partner_id and not self.bank_account_id:
-            self.bank_account_id = self.env['res.partner.bank'].create({'acc_number': self.account_number, 'partner_id': self.partner_id.id}).id
+            bank_account = self.env['res.partner.bank'].search(
+                [('acc_number', '=', self.account_number), ('partner_id', '=', self.partner_id.id)])
+            if not bank_account:
+                bank_account = self.env['res.partner.bank'].create({
+                    'acc_number': self.account_number, 'partner_id': self.partner_id.id
+                })
+            self.bank_account_id = bank_account
 
         counterpart_moves.assert_balanced()
         return counterpart_moves
