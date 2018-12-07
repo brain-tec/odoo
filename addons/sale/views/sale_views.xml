@@ -958,7 +958,7 @@
             <field name="arch" type="xml">
                 <button name="toggle_active" position="before">
                     <button class="oe_stat_button" name="action_view_sales"
-                        type="object" icon="fa-signal" groups="sales_team.group_sale_salesman" help="Sold in the last 365 days">
+                        type="object" icon="fa-signal" groups="sales_team.group_sale_salesman" help="Sold in the last 365 days" attrs="{'invisible': [('sale_ok', '=', False)]}">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
                                 <field name="sales_count" widget="statinfo" nolabel="1" class="mr4"/>
@@ -986,7 +986,7 @@
             <field name="arch" type="xml">
                 <button name="toggle_active" position="before">
                     <button class="oe_stat_button" name="action_view_sales"
-                        type="object" icon="fa-signal" groups="sales_team.group_sale_salesman" help="Sold in the last 365 days">
+                        type="object" icon="fa-signal" groups="sales_team.group_sale_salesman" help="Sold in the last 365 days" attrs="{'invisible': [('sale_ok', '=', False)]}">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
                                 <field name="sales_count" widget="statinfo" nolabel="1" class="mr4"/>
@@ -1239,8 +1239,8 @@
             <field name="name">Sales Analysis</field>
             <field name="res_model">sale.report</field>
             <field name="view_mode">graph</field>
-            <field name="domain">[('state','not in',('draft','cancel')),('team_id', '=', active_id)]</field>
-            <field name="context">{'search_default_order_month':1}</field>
+            <field name="domain">[('state','not in',('draft','cancel'))]</field>
+            <field name="context">{'search_default_Sales': 1, 'time_ranges': {'field':'confirmation_date', 'range':'last_30_days'}, 'search_default_team_id': [active_id]}</field>
             <field name="help">This report performs analysis on your sales orders. Analysis check your sales revenues and sort it by different group criteria (salesman, partner, product, etc.) Use this report to perform analysis on sales not having invoiced yet. If you want to analyse your turnover, you should use the Invoice Analysis report in the Accounting application.</field>
         </record>
 
@@ -1248,8 +1248,8 @@
             <field name="name">Invoices Analysis</field>
             <field name="res_model">account.invoice.report</field>
             <field name="view_mode">graph</field>
-            <field name="domain">[('team_id', '=', active_id),('state', 'not in', ['draft', 'cancel'])]</field>
-            <field name="context">{'search_default_month':1}</field>
+            <field name="domain">[('state', 'not in', ['draft', 'cancel'])]</field>
+            <field name="context">{'search_default_month':1, 'search_default_team_id': [active_id]}</field>
             <field name="help">From this report, you can have an overview of the amount invoiced to your customer. The search tool can also be used to personalise your Invoices reports and so, match this analysis to your needs.</field>
         </record>
 </odoo>

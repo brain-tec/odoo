@@ -132,22 +132,24 @@ class ImLivechatChannel(models.Model):
         return self.sudo().user_ids.filtered(lambda user: user.im_status == 'online')
 
     @api.model
-    def get_mail_channel(self, livechat_channel_id, anonymous_name):
+    def get_mail_channel(self, livechat_channel_id, anonymous_name, user_id=None, country_id=None):
         """ Return a mail.channel given a livechat channel. It creates one with a connected operator, or return false otherwise
             :param livechat_channel_id : the identifier if the im_livechat.channel
             :param anonymous_name : the name of the anonymous person of the channel
+            :param user_id : the id of the logged in visitor, if any
+            :param country_code : the country of the anonymous person of the channel
             :type livechat_channel_id : int
             :type anonymous_name : str
             :return : channel header
             :rtype : dict
         """
         # get the avalable user of the channel
-        users = self.sudo().browse(livechat_channel_id).get_available_users()
-        if len(users) == 0:
+        operators = self.sudo().browse(livechat_channel_id).get_available_users()
+        if len(operators) == 0:
             return False
         # choose the res.users operator and get its partner id
-        user = random.choice(users)
-        operator_partner_id = user.partner_id.id
+        operator = random.choice(operators)
+        operator_partner_id = random.choice(operators).partner_id.id
         # partner to add to the mail.channel
         channel_partner_to_add = [(4, operator_partner_id)]
         if self.env.user and self.env.user.active:  # valid session user (not public)
@@ -155,14 +157,16 @@ class ImLivechatChannel(models.Model):
         # create the session, and add the link with the given channel
         mail_channel = self.env["mail.channel"].with_context(mail_create_nosubscribe=False).sudo().create({
             'channel_partner_ids': channel_partner_to_add,
+            'livechat_operator_id': operator_partner_id,
             'livechat_channel_id': livechat_channel_id,
-            'anonymous_name': anonymous_name,
+            'anonymous_name': False if user_id else anonymous_name,
+            'country_id': country_id,
             'channel_type': 'livechat',
-            'name': ', '.join([anonymous_name, user.name]),
+            'name': ', '.join([self.env['res.users'].browse(user_id).name if user_id else anonymous_name, operator.livechat_username if operator.livechat_username else operator.name]),
             'public': 'private',
             'email_send': False,
         })
-        return mail_channel.sudo().with_context(im_livechat_operator_partner_id=operator_partner_id).channel_info()[0]
+        return mail_channel.sudo().channel_info()[0]
 
     @api.model
     def get_channel_infos(self, channel_id):
