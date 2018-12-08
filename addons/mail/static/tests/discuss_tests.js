@@ -1,11 +1,9 @@
 odoo.define('mail.discuss_test', function (require) {
 "use strict";
 
-var Discuss = require('mail.Discuss');
 var mailTestUtils = require('mail.testUtils');
 
 var concurrency = require('web.concurrency');
-var SearchView = require('web.SearchView');
 var testUtils = require('web.test_utils');
 
 var createDiscuss = mailTestUtils.createDiscuss;
@@ -108,7 +106,7 @@ QUnit.test('basic rendering', function (assert) {
 });
 
 QUnit.test('searchview options visibility', function (assert) {
-    assert.expect(4);
+    assert.expect(5);
     var done = assert.async();
 
     createDiscuss({
@@ -119,17 +117,17 @@ QUnit.test('searchview options visibility', function (assert) {
         services: this.services,
     })
     .then(function (discuss) {
-        var $searchviewOptions = $('.o_search_options > div');
-        var $searchviewOptionsToggler = $('.o_searchview_more.fa.fa-search-minus');
-        assert.strictEqual($searchviewOptions.length, 1,
+        assert.containsOnce(discuss, '.o_control_panel .o_search_options',
             "should have search options");
-        assert.strictEqual($searchviewOptionsToggler.length, 1,
+        assert.hasClass(discuss.$('.o_control_panel .o_searchview_more.fa'), 'fa-search-minus',
             "should have a button to toggle search options");
-        assert.strictEqual($searchviewOptions.css('display'), 'block',
-            "search options should be visible by default");
 
-        testUtils.dom.click($searchviewOptionsToggler);
-        assert.strictEqual($searchviewOptions.css('display'), 'none',
+        assert.isVisible(discuss.$('.o_control_panel .o_search_options'),
+            "search options should be visible by default");
+        testUtils.dom.click(discuss.$('.o_control_panel .o_searchview_more.fa'));
+        assert.hasClass(discuss.$('.o_control_panel .o_searchview_more.fa'), 'fa-search-plus',
+            "should have a button to toggle search options");
+        assert.isNotVisible(discuss.$('.o_control_panel .o_search_options'),
             "search options should be hidden after clicking on search option toggler");
 
         discuss.destroy();
@@ -181,7 +179,7 @@ QUnit.test('searchview filter messages', function (assert) {
 
         // interact with searchview so that there is only once message
         $('.o_searchview_input').val("ab").trigger('keyup');
-        $('.o_searchview').trigger($.Event('keydown', { which: $.ui.keyCode.ENTER }));
+        $('.o_searchview_input_container').trigger($.Event('keydown', { which: $.ui.keyCode.ENTER }));
 
         assert.strictEqual($('.o_searchview_facet').length, 1,
             "the searchview should have a facet");
@@ -193,7 +191,7 @@ QUnit.test('searchview filter messages', function (assert) {
         // interact with search view so that there are no matching messages
         testUtils.dom.click($('.o_facet_remove'));
         $('.o_searchview_input').val("abcd").trigger('keyup');
-        $('.o_searchview').trigger($.Event('keydown', { which: $.ui.keyCode.ENTER }));
+        $('.o_searchview_input_container').trigger($.Event('keydown', { which: $.ui.keyCode.ENTER }));
 
         assert.strictEqual($('.o_searchview_facet').length, 1,
             "the searchview should have a facet");
@@ -798,87 +796,6 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
     });
 });
 
-QUnit.test('do not crash when destroyed before start is completed', function (assert) {
-    assert.expect(3);
-    var discuss;
-
-    testUtils.mock.patch(Discuss, {
-        init: function () {
-            discuss = this;
-            this._super.apply(this, arguments);
-        },
-    });
-
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
-        mockRPC: function (route, args) {
-            if (args.method) {
-                assert.step(args.method);
-            }
-            var result = this._super.apply(this, arguments);
-            if (args.method === 'message_fetch') {
-                discuss.destroy();
-            }
-            return result;
-        },
-    });
-
-    assert.verifySteps([
-        "load_views",
-        "message_fetch"
-    ]);
-
-    testUtils.mock.unpatch(Discuss);
-});
-
-QUnit.test('do not crash when destroyed between start en end of _renderSearchView', function (assert) {
-    assert.expect(2);
-    var discuss;
-
-    testUtils.mock.patch(Discuss, {
-        init: function () {
-            discuss = this;
-            this._super.apply(this, arguments);
-        },
-    });
-
-    var def = $.Deferred();
-
-    testUtils.mock.patch(SearchView, {
-        willStart: function () {
-            var result = this._super.apply(this, arguments);
-            return def.then($.when(result));
-        },
-    });
-
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
-        mockRPC: function (route, args) {
-            if (args.method) {
-                assert.step(args.method);
-            }
-            return this._super.apply(this, arguments);
-        },
-    });
-
-    discuss.destroy();
-    def.resolve();
-    assert.verifySteps([
-        "load_views",
-    ]);
-
-    testUtils.mock.unpatch(Discuss);
-    testUtils.mock.unpatch(SearchView);
-});
-
 QUnit.test('confirm dialog when administrator leave (not chat) channel', function (assert) {
     assert.expect(2);
     var done = assert.async();
@@ -906,6 +823,10 @@ QUnit.test('confirm dialog when administrator leave (not chat) channel', functio
     })
     .then(function (discuss) {
         // Unsubscribe on MyChannel as administrator
+        // The unpin icon is only shown when hovering on sidebar item.
+        // helpter dom.click needs the element to be visible, hence the
+        // hack on display of this icon.
+        discuss.$('.o_mail_partner_unpin').css('display', 'block');
         testUtils.dom.click(discuss.$('.o_mail_partner_unpin'));
 
         assert.strictEqual($('.modal-dialog').length, 1,
@@ -1213,6 +1134,349 @@ QUnit.test('reply to message from inbox', function (assert) {
         testUtils.dom.click($composer.find('.o_composer_button_send'));
 
         assert.verifySteps(['message_post']);
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('discard replying to message from inbox', function (assert) {
+    var done = assert.async();
+    assert.expect(4);
+
+    var self = this;
+    this.data['mail.message'].records = [{
+        author_id: [5, 'Demo User'],
+        body: '<p>test 1</p>',
+        id: 1,
+        needaction: true,
+        needaction_partner_ids: [3],
+        res_id: 100,
+        model: 'some.document',
+        record_name: 'SomeDocument',
+    }];
+    this.data.initMessaging = {
+        needaction_inbox_counter: 1,
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        session: { partner_id: 3 },
+        mockRPC: function (route, args) {
+            if (args.method === 'message_post') {
+                assert.step(args.method);
+                assert.strictEqual(args.model, 'some.document',
+                    "should post message to correct document model");
+                assert.strictEqual(args.args[0], 100,
+                    "should post message to correct document ID");
+
+                self.data['mail.message'].records.push({
+                    author_id: [3, 'Me'],
+                    body: args.kwargs.body,
+                    id: 2,
+                    res_id: 100,
+                    model: 'some.document',
+                    record_name: 'SomeDocument',
+                });
+                return $.when(2);
+            }
+            return this._super.apply(this, arguments);
+        },
+    })
+    .then(function (discuss) {
+        testUtils.dom.click(discuss.$('.o_thread_message_reply'));
+        assert.containsOnce(discuss, '.o_thread_selected_message',
+            "should have a message selected");
+
+        var $composer = discuss.$('.o_thread_composer_extended');
+        assert.containsOnce($composer, '.o_composer_button_discard',
+            "should have button to discard replying to message");
+
+        testUtils.dom.click($composer.find('.o_composer_button_discard'));
+        assert.isNotVisible($composer,
+            "extended composer should become hidden on discard");
+        assert.containsNone(discuss, '.o_thread_selected_message',
+            "should not longer have a message selected");
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('no quick search channels in the sidebar with less than 20 channels', function (assert) {
+    assert.expect(3);
+    var done = assert.async();
+
+    var channelsData = [];
+    _.each(_.range(0, 19), function (num) {
+        channelsData.push({
+            id: num,
+            channel_type: "channel",
+            name: "Channel" + num,
+        });
+    });
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: channelsData,
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+    })
+    .then(function (discuss) {
+        var $sidebar = discuss.$('.o_mail_discuss_sidebar');
+
+        var $channelsSidebar = $sidebar.find('.o_mail_discuss_sidebar_channels');
+        assert.strictEqual($channelsSidebar.length, 1,
+            "should show channels and dms in sidebar");
+        assert.strictEqual($channelsSidebar.find('.o_mail_discuss_item').length, 19,
+            "should show 19 channels in sidebar");
+        assert.strictEqual(discuss.$('.o_discuss_sidebar_quick_search').length, 0,
+            "should not display a quick search");
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('quick search channels in the sidebar with more than 20 channels', function (assert) {
+    assert.expect(7);
+    var done = assert.async();
+
+    var channelsData = [];
+    var channelANum = 15;
+    _.each(_.range(0, channelANum), function (num) {
+        var channel = {
+            id: num,
+            channel_type: "channel",
+            name: "ChannelA" + num,
+        };
+        channelsData.push(channel);
+    });
+    var channelBNum = 5;
+    _.each(_.range(0, channelBNum), function (num) {
+        var channel = {
+            id: channelANum + num,
+            channel_type: "channel",
+            name: "ChannelB" + num,
+        };
+        channelsData.push(channel);
+    });
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: channelsData,
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+    })
+    .then(function (discuss) {
+        var $sidebar = discuss.$('.o_mail_discuss_sidebar');
+
+        var $channelsSidebar = $sidebar.find('.o_mail_discuss_sidebar_channels');
+        assert.strictEqual($channelsSidebar.length, 1,
+            "should show channels in sidebar");
+        assert.strictEqual($channelsSidebar.find('.o_mail_discuss_item').length, 20,
+            "should show 20 channels in sidebar");
+        assert.strictEqual(discuss.$('.o_discuss_sidebar_quick_search').length, 1,
+            "should display a quick search");
+
+        discuss.$('.o_discuss_sidebar_quick_search input').val('channelA').trigger('input');
+        $channelsSidebar = $sidebar.find('.o_mail_discuss_sidebar_channels');
+        assert.strictEqual($channelsSidebar.find('.o_mail_discuss_item').length, 15,
+            "should now show 15 channels in sidebar");
+
+        discuss.$('.o_discuss_sidebar_quick_search input').val('channelB').trigger('input');
+
+        $channelsSidebar = $sidebar.find('.o_mail_discuss_sidebar_channels');
+        assert.strictEqual($channelsSidebar.find('.o_mail_discuss_item').length, 5,
+            "should now show 5 channels in sidebar");
+
+        discuss.$('.o_discuss_sidebar_quick_search input').val('channelB4').trigger('input');
+
+        $channelsSidebar = $sidebar.find('.o_mail_discuss_sidebar_channels');
+        assert.strictEqual($channelsSidebar.find('.o_mail_discuss_item').length, 1,
+            "should now show a single channel in sidebar");
+        assert.strictEqual($channelsSidebar.find('.o_thread_name').text().replace(/\s/g, ''),
+            '#ChannelB4',
+            "should have searched the correct channel B4");
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('select emoji replaces cursor position', function (assert) {
+    assert.expect(5);
+    var done = assert.async();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: [{
+                id: 1,
+                channel_type: "channel",
+                name: "general",
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+    })
+    .then(function (discuss) {
+        var $general = discuss.$('.o_mail_discuss_sidebar')
+            .find('.o_mail_discuss_item[data-thread-id=1]');
+        assert.strictEqual($general.length, 1,
+            "should have the channel item with id 1");
+        assert.hasAttrValue($general, 'title', 'general',
+            "should have the title 'general'");
+
+        // click on general
+        testUtils.dom.click($general);
+
+        // general uses basic composer, so this is the 1st composer
+        // (2nd composer is hidden)
+        var $composer = discuss.$('.o_composer_text_field').first();
+
+        testUtils.fields.editInput($composer, 'abcdefgh');
+
+        assert.strictEqual($composer.val(), "abcdefgh");
+
+        // cursor position: ab|cd|efgh (selecting c and d)
+        $composer[0].setSelectionRange(2, 4);
+
+        testUtils.dom.click(discuss.$('.o_composer_button_emoji'));
+        testUtils.dom.click(discuss.$('.o_mail_emoji[data-emoji=":)"]'));
+
+        assert.strictEqual($composer.val(), "ab :) efgh",
+            "should have inserted emoji ");
+
+        testUtils.dom.click(discuss.$('.o_composer_button_emoji'));
+        testUtils.dom.click(discuss.$('.o_mail_emoji[data-emoji=":)"]'));
+
+        assert.strictEqual($composer.val(), "ab :)  :) efgh",
+            "should have inserted emoji after previously inserted emoji");
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('rename DM conversation', function (assert) {
+    assert.expect(11);
+    var done = assert.async();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_direct_message: [{
+                id: 1,
+                channel_type: "chat",
+                create_uid: 3,
+                direct_partner: [{
+                    id: 7,
+                    im_status: 'online',
+                    name: 'Demo User',
+                }],
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        session: { partner_id: 3 },
+        mockRPC: function (route, args) {
+            if (args.method === 'channel_set_custom_name') {
+                assert.step(args.method);
+                assert.strictEqual(args.args[0], 1);
+                assert.strictEqual(args.kwargs.name, "Demo");
+                return $.when("Demo");
+            }
+            return this._super.apply(this, arguments);
+        },
+    })
+    .then(function (discuss) {
+        var $dm = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
+        assert.isVisible($dm, "should display DM in the discuss sidebar");
+        assert.strictEqual($dm.find('.o_thread_name').text().trim(), "Demo User");
+
+        // The settings icon is only shown when hovering on sidebar item.
+        // helpter dom.click needs the element to be visible, hence the
+        // hack on display of this icon.
+        discuss.$('.o_mail_channel_settings').css('display', 'block');
+        testUtils.dom.click(discuss.$('.o_mail_channel_settings'));
+
+        assert.isVisible($('.modal-dialog'));
+        assert.strictEqual($('.modal-title').text(), "Rename conversation");
+        assert.isVisible($('.o_mail_discuss_rename_channel_input'));
+        assert.strictEqual($('.o_mail_discuss_rename_channel_input').val(), "Demo User");
+
+        testUtils.fields.editInput($('.o_mail_discuss_rename_channel_input'), "Demo");
+        testUtils.dom.click($('.o_mail_conversation_rename'));
+        $dm = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
+        assert.verifySteps(['channel_set_custom_name']);
+        assert.strictEqual($dm.find('.o_thread_name').text().trim(), "Demo");
+
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('custom-named DM conversation', function (assert) {
+    assert.expect(2);
+    var done = assert.async();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_direct_message: [{
+                id: 1,
+                channel_type: "chat",
+                create_uid: 3,
+                direct_partner: [{
+                    id: 7,
+                    im_status: 'online',
+                    name: 'Demo User',
+                }],
+                custom_channel_name: 'My Buddy',
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        session: { partner_id: 3 },
+    })
+    .then(function (discuss) {
+        var $dm = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
+        assert.isVisible($dm, "should display DM in the discuss sidebar");
+        assert.strictEqual($dm.find('.o_thread_name').text().trim(), "My Buddy");
 
         discuss.destroy();
         done();
