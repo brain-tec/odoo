@@ -735,6 +735,37 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
+    QUnit.test('properly load default record', function (assert) {
+        assert.expect(5);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                return this._super.apply(this, arguments);
+            },
+        });
+        actionManager.loadState({
+            action: 3,
+            id: "",  // might happen with bbq and id=& in URL
+            model: 'partner',
+            view_type: 'form',
+        });
+
+        assert.containsOnce(actionManager, '.o_form_view',
+            "should have rendered a form view");
+
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            'default_get',
+        ]);
+
+        actionManager.destroy();
+    });
+
     QUnit.test('load requested view for act window actions', function (assert) {
         assert.expect(6);
 
@@ -2092,6 +2123,22 @@ QUnit.module('ActionManager', {
             '/web/dataset/search_read',
         ]);
 
+        actionManager.destroy();
+    });
+
+    QUnit.test('sidebar is present in list view', function (assert) {
+        assert.expect(2);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+        actionManager.doAction(3);
+
+        assert.isNotVisible(actionManager.$('.o_cp_sidebar button.o_dropdown_toggler_btn:contains("Action")'));
+        testUtils.dom.clickFirst(actionManager.$('input.custom-control-input'));
+        assert.isVisible(actionManager.$('.o_cp_sidebar button.o_dropdown_toggler_btn:contains("Action")'));
         actionManager.destroy();
     });
 
