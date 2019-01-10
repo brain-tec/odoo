@@ -52,7 +52,7 @@
             <div t-field="forum.welcome_message"/>
         </div>
 
-        <div class="container mt16 mb32">
+        <div class="container mt16 mb32 o_wforum_navbar_container">
             <div class="navbar navbar-expand-md navbar-light">
                 <a class="navbar-brand" t-attf-href="/forum/#{slug(forum)}">
                     <span t-field="forum.name"/>
@@ -243,6 +243,9 @@
                         <t t-esc="question.child_count"/>
                         <t t-if="question.child_count&lt;=1">Answer</t>
                         <t t-else="">Answers</t>
+                    </a>
+                    <a t-attf-href="/forum/#{ slug(forum) }/question/#{ slug(question) }">
+                        <span class="ml-4 mr-1 fa fa-star"></span><span t-field="question.favourite_count"/> <t t-if="question.views&lt;=1">Favorite</t><t t-else="">Favorites</t>
                     </a>
                     <t t-if="question.state == 'flagged'" class="text-black">
                         <i class="fa fa-flag ml-4 mr4"/>
@@ -665,7 +668,8 @@
                         <t t-set="post" t-value="question"/>
                         <div class="mt-1">
                             <a t-attf-data-href="/forum/#{slug(question.forum_id)}/question/#{slug(question)}/toggle_favourite" aria-label="Toggle favorite status" title="Toggle favorite status"
-                                t-attf-class="favourite_question no-decoration fa fa-star #{question.user_favourite and 'forum_favourite_question' or ''}"/>
+                                t-attf-class="favourite_question no-decoration fa fa-star #{question.user_favourite and 'forum_favourite_question' or ''}"/><br/>
+                            <t t-esc="question.favourite_count"/>
                         </div>
                     </t>
                 </div>
@@ -756,11 +760,11 @@
                                 <t t-set="icon" t-value="'fa-check'"/>
                                 <t t-set="karma" t-value="not question.can_moderate and question.forum_id.karma_moderate or 0"/>
                             </t>
-                            <a t-if="question.active" t-attf-style="#{not question.can_flag and 'display:none;' or ''}"
+                            <a t-if="question.active" href="#" t-attf-style="#{not question.can_flag and 'display:none;' or ''}"
                                 t-attf-class="flag px-3 py-2 #{not question.can_flag and 'karma_required' or ''}"
                                 t-attf-data-karma="#{not question.can_flag and question.forum_id.karma_flag or 0}"
                                 t-attf-data-href="/forum/#{slug(forum)}/post/#{slug(question)}/flag" title="Flag"
-                                ><i t-attf-class="text-primary fa #{not question.can_flag and 'karma_required fa-flag-o' or 'fa-flag'}"/>
+                                ><i t-attf-class="fa #{not question.can_flag and 'karma_required fa-flag-o' or 'fa-flag'}"/>
                             </a>
                         </div>
                     </div>
@@ -982,7 +986,6 @@
                         <div class="mt-2"><span t-field="message.body" class="oe_no_empty text-dark"/></div>
                     </small>
                 </div>
-                
             </div>
             <div class="css_editable_mode_hidden">
                 <form t-attf-id="comment#{ object._name.replace('.','') + '-' + str(object.id) }" class="collapse oe_comment_grey js_website_submit_form"
