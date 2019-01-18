@@ -7,7 +7,8 @@ import werkzeug
 from datetime import datetime
 from math import ceil
 
-from odoo import fields, http, SUPERUSER_ID
+from odoo import fields, http
+from odoo.addons.base.models.ir_ui_view import keep_query
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import ustr
@@ -136,10 +137,10 @@ class Survey(http.Controller):
             answer_sudo = survey_sudo._create_answer(user=request.env.user, test_entry=True)
         except:
             return werkzeug.utils.redirect('/')
-        return request.redirect('/survey/start/%s?token=%s' % (survey_sudo.id, answer_sudo.token))
+        return request.redirect('/survey/start/%s?%s' % (survey_sudo.id, keep_query('*', token=answer_sudo.token)))
 
     @http.route('/survey/start/<int:survey_id>', type='http', auth='public', website=True)
-    def survey_start(self, survey_id, token=None, email=False):
+    def survey_start(self, survey_id, token=None, email=False, **post):
         """ Start a survey by providing a token linked to an answer or generate
         a new token if access is allowed """
         access_data = self._get_access_data(survey_id, token, ensure_token=False)
@@ -170,7 +171,7 @@ class Survey(http.Controller):
             return request.redirect('/survey/fill/%s/%s' % (survey_sudo.id, answer_sudo.token))
 
     @http.route('/survey/fill/<int:survey_id>/<string:token>', type='http', auth='public', website=True)
-    def survey_display_page(self, survey_id, token, prev=None):
+    def survey_display_page(self, survey_id, token, prev=None, **post):
         access_data = self._get_access_data(survey_id, token, ensure_token=True)
         if access_data['validity_code'] is not True:
             return self._redirect_with_error(access_data, access_data['validity_code'])
@@ -204,7 +205,7 @@ class Survey(http.Controller):
             return request.render("survey.403", {'survey': survey_sudo})
 
     @http.route('/survey/prefill/<int:survey_id>/<string:token>', type='http', auth='public', website=True)
-    def survey_get_answers(self, survey_id, token, page_id=None):
+    def survey_get_answers(self, survey_id, token, page_id=None, **post):
         """ TDE NOTE: original comment: # AJAX prefilling of a survey -> AJAX / http ?? """
         access_data = self._get_access_data(survey_id, token, ensure_token=True)
         if access_data['validity_code'] is not True:
@@ -248,7 +249,7 @@ class Survey(http.Controller):
         return json.dumps(ret, default=str)
 
     @http.route('/survey/scores/<int:survey_id>/<string:token>', type='http', auth='public', website=True)
-    def survey_get_scores(self, survey_id, token, page_id=None):
+    def survey_get_scores(self, survey_id, token, page_id=None, **post):
         """ TDE NOTE: original comment: # AJAX scores loading for quiz correction mode -> AJAX / http ?? """
         access_data = self._get_access_data(survey_id, token, ensure_token=True)
         if access_data['validity_code'] is not True:
