@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
-	
+
     <!--=================-->
     <!-- Edition Dialogs -->
     <!--=================-->
@@ -263,7 +263,7 @@
                         <input type="text" name="label" class="form-control" id="o_link_dialog_label_input" required="required" t-att-value="widget.data.text"/>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row o_url_input">
                     <label class="col-form-label col-md-3" for="o_link_dialog_url_input">URL or Email</label>
                     <div class="col-md-9">
                         <input type="text" name="url" class="form-control" id="o_link_dialog_url_input" required="required"/>
@@ -282,7 +282,7 @@
                 <div class="form-group row">
                     <label class="col-form-label col-md-3">Style</label>
                     <div class="col-md-9">
-                        <select name="link_style_shape" class="form-control link-shape">
+                        <select name="link_style_shape" class="form-control link-style">
                             <option value="" selected="selected">Default</option>
                             <option value="outline">Outline</option>
                             <option value="rounded-circle">Rounded</option>

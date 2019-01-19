@@ -11,9 +11,9 @@ var _t = core._t;
  */
 var LinkDialog = Dialog.extend({
     template: 'wysiwyg.widgets.link',
-    xmlDependencies: Dialog.prototype.xmlDependencies.concat(
-        ['/web_editor/static/src/xml/editor.xml']
-    ),
+    xmlDependencies: (Dialog.prototype.xmlDependencies || []).concat([
+        '/web_editor/static/src/xml/wysiwyg.xml'
+    ]),
     events: _.extend({}, Dialog.prototype.events || {}, {
         'input': '_onAnyChange',
         'change': '_onAnyChange',
@@ -40,10 +40,10 @@ var LinkDialog = Dialog.extend({
 
         this.data = linkInfo || {};
         this.needLabel = linkInfo.needLabel;
-        this.data.iniClassName = linkInfo.className;
+        this.data.iniClassName = linkInfo.className || '';
         var allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         var allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
-        this.data.className = linkInfo.className
+        this.data.className = this.data.iniClassName
             .replace(allBtnClassSuffixes, ' ')
             .replace(allBtnShapes, ' ');
     },
@@ -208,9 +208,10 @@ var LinkDialog = Dialog.extend({
     /**
      * @private
      */
-    _onURLInput: function (ev) {
-        $(ev.currentTarget).closest('.form-group').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
-        var isLink = $(ev.currentTarget).val().indexOf('@') < 0;
+    _onURLInput: function () {
+        var $linkUrlInput = this.$('#o_link_dialog_url_input');
+        $linkUrlInput.closest('.form-group').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
+        var isLink = $linkUrlInput.val().indexOf('@') < 0;
         this.$('input[name="is_new_window"]').closest('.form-group').toggleClass('d-none', !isLink);
     },
 });
