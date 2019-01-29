@@ -560,6 +560,9 @@ class Field(MetaField('DummyField', (object,), {})):
         if self.inherited and field.required:
             self.required = True
 
+        if self.inherited:
+            self._modules.update(field._modules)
+
     def traverse_related(self, record):
         """ Traverse the fields of the related field `self` except for the last
         one, and return it as a pair `(last_record, last_field)`. """
@@ -1856,6 +1859,7 @@ class Selection(Field):
     <field-incremental-definition>`.
     """
     type = 'selection'
+    column_type = ('varchar', pg_varchar())
     _slots = {
         'selection': None,              # [(value, string), ...], function or method name
         'validate': True,               # whether validating upon write
@@ -1864,18 +1868,12 @@ class Selection(Field):
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
 
-    @property
-    def column_type(self):
-        if (self.selection and
-                isinstance(self.selection, list) and
-                isinstance(self.selection[0][0], int)):
-            return ('int4', 'integer')
-        else:
-            return ('varchar', pg_varchar())
-
     def _setup_regular_base(self, model):
         super(Selection, self)._setup_regular_base(model)
         assert self.selection is not None, "Field %s without selection" % self
+        if isinstance(self.selection, list):
+            assert all(isinstance(v, str) for v, _ in self.selection), \
+                "Field %s with non-str value in selection" % self
 
     def _setup_related_full(self, model):
         super(Selection, self)._setup_related_full(model)
