@@ -1023,6 +1023,9 @@ attributes:
   the list view)
 ``class``
   adds HTML classes to the root HTML element of the Kanban view
+``examples``
+  shows examples link on quick create of column, when clicked examples will
+  be displayed in popup
 ``group_create``
   whether the "Add a new column" bar is visible or not. Default: true.
 ``group_delete``
