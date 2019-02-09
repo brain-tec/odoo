@@ -63,6 +63,7 @@ var db = {
             {id: 287, code: 101200, name: "101200 Account Receivable", company_id: 1},
             {id: 288, code: 101300, name: "101300 Tax Paid", company_id: 1},
             {id: 308, code: 101401, name: "101401 Bank", company_id: 1},
+            {id: 499, code: 499001, name: "499001 Suspense Account", company_id: 1},
             {id: 500, code: 500, name: "500 Account", company_id: 1},
             {id: 501, code: 501, name: "501 Account", company_id: 1},
             {id: 502, code: 502, name: "502 Account", company_id: 1},
@@ -474,7 +475,7 @@ var auto_reconciliation = {
 };
 
 var data_for_manual_reconciliation_widget = {
-    '[null,null]': {
+    '[[],null]': {
         'customers': [
             {'account_id': 287, 'partner_name': "Agrolait", 'reconciliation_proposition': [], 'currency_id': 3, 'max_date': "2017-02-14 12:30:31", 'last_time_entries_checked': null, 'account_code': "101200", 'partner_id': 8, 'account_name': "101200 Account Receivable", 'mode': "customers"},
             {'account_id': 7, 'partner_name': "Camptocamp", 'reconciliation_proposition': [], 'currency_id': 3, 'max_date': "2017-02-13 14:24:55", 'last_time_entries_checked': null, 'account_code': "101200", 'partner_id': 12, 'account_name': "101200 Account Receivable", 'mode': "customers"}
@@ -553,7 +554,7 @@ var session = {
 
 var options = {
     context: {
-        statement_ids: [4]
+        statement_line_ids: [4]
     },
     params: {
         limitMoveLines: 5,
@@ -1622,7 +1623,7 @@ QUnit.module('account', {
         assert.expect(5);
 
         // tweak the data to fit our needs
-        this.params.data_for_manual_reconciliation_widget['[283, null, "", 0, 6]'] = _.extend({}, this.params.data_for_manual_reconciliation_widget['[null,null]']);
+        this.params.data_for_manual_reconciliation_widget['[283, null, "", 0, 6]'] = _.extend({}, this.params.data_for_manual_reconciliation_widget['[[],null]']);
         this.params.data_for_manual_reconciliation_widget['[283, null, "", 0, 6]'].accounts[0].reconciliation_proposition = [
             {account_id: 283, account_type: "other", amount_currency_str: "", currency_id: false, date_maturity: "2017-03-18", date: "2017-02-16",
              total_amount_str: "$ 500.00", partner_id: 8, account_name: "101000 Current Assets", name: "INV/2017/0987", partner_name: "Agrolait",
@@ -1731,7 +1732,7 @@ QUnit.module('account', {
     QUnit.test('Tax on account receivable', function(assert){
         assert.expect(21);
 
-        this.params.data_for_manual_reconciliation_widget['[null,null]'].accounts = [];
+        this.params.data_for_manual_reconciliation_widget['[[],null]'].accounts = [];
         var clientAction = new ReconciliationClientAction.ManualAction(null, this.params.options);
         testUtils.addMockEnvironment(clientAction, {
             data: this.params.data,
@@ -1852,6 +1853,66 @@ QUnit.module('account', {
             "Tax line has the correct right amount");
 
         // Reconcile
+        widget.$("button.o_reconcile.btn.btn-primary:first").click();
+        assert.ok(true, "No error in reconciliation");
+
+        clientAction.destroy();
+    });
+    
+    QUnit.test('Reconcile temporarily and ask to check', function(assert){
+        assert.expect(4);
+        this.params.options.context['to_check'] = true;
+        var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
+
+        testUtils.mock.addMockEnvironment(clientAction, {
+            data: this.params.data,
+            session: {
+                currencies: {
+                    3: {
+                        digits: [69, 2],
+                        position: "before",
+                        symbol: "$"
+                    }
+                }
+            },
+        });
+        clientAction.appendTo($('#qunit-fixture'));
+        var widget = clientAction.widgets[0];
+
+        // Add a line as proposition
+        // open the first line
+        widget.$('.accounting_view tfoot td.cell_label').click()
+
+        var $reconcileForm = widget.$(".create");
+        $reconcileForm.find('.create_account_id input').val('499001 Suspense Account').keydown().keyup()
+        $reconcileForm.find('.create_account_id input').click();
+        $('.ui-autocomplete .ui-menu-item a:contains(499001 Suspense Account)')
+            .trigger('mouseover')
+            .trigger('click');
+        
+        assert.equal($("button.o_validate.btn.btn-secondary.text-warning:first").length, 0, "should not display reconcile button in orange");
+        $reconcileForm.find('.create_to_check input').click()
+        assert.equal($("button.o_validate.btn.btn-secondary.text-warning:first").length, 1, "should display reconcile button in orange");
+
+        testUtils.mock.intercept(clientAction, 'call_service', function (event) {
+            assert.deepEqual(event.data.args[1].args,
+                [[5],[{partner_id: 8,
+                        counterpart_aml_dicts: [],
+                        payment_aml_ids: [],
+                        new_aml_dicts: [{account_id: 499,
+                            credit: 1175,
+                            debit: 0,
+                            analytic_tag_ids: [[6, null, []]],
+                            name: 'SAJ/2014/002 and SAJ/2014/003',
+                        }],
+                        to_check: true,
+                }]],
+                "Should call process_bank_statement_line with to_check set to true");
+            var def = $.Deferred();
+            def.abort = function () {};
+            event.data.callback(def);
+        });
+
         widget.$("button.o_reconcile.btn.btn-primary:first").click();
         assert.ok(true, "No error in reconciliation");
 
