@@ -144,12 +144,23 @@ var SlideUploadDialog = Dialog.extend({
                 'mime_type': this.file.type,
                 'datas': this.file.data
             });
-        } else if (/^image\/.*/.test(this.file.type)) {
+        } else if (values['slide_type'] === 'webpage') {
             _.extend(values, {
-                'slide_type': 'infographic',
-                'mime_type': this.file.type === 'image/svg+xml' ? 'image/png' : this.file.type,
-                'datas': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data
+                'mime_type': 'text/html',
+                'image': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data,
             });
+        } else if (/^image\/.*/.test(this.file.type)) {
+            if (values['slide_type'] === 'presentation') {
+                _.extend(values, {
+                    'slide_type': 'infographic',
+                    'mime_type': this.file.type === 'image/svg+xml' ? 'image/png' : this.file.type,
+                    'datas': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data
+                });
+            } else {
+                _.extend(values, {
+                    'image': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data,
+                });
+            }
         }
         return values;
     },
@@ -224,15 +235,18 @@ var SlideUploadDialog = Dialog.extend({
      * @param {bool}  true for multiple selection box, false for single selection
      * @param {Function} Function to fetch data from remote location should return $.deferred object
      * resolved data should be array of object with id and name. eg. [{'id': id, 'name': 'text'}, ...]
+     * @param {String} [nameKey='name'] (optional) the name key of the returned record
+     *   ('name' if not provided)
      * @returns {Object} select2 wrapper object
     */
-    _select2Wrapper: function (tag, multi, fetchFNC) {
-        return {
+    _select2Wrapper: function (tag, multi, fetchFNC, nameKey) {
+        nameKey = nameKey || 'name';
+
+        var values = {
             width: '100%',
             placeholder: tag,
             allowClear: true,
             formatNoMatches: false,
-            multiple: multi,
             selection_data: false,
             fetch_rpc_fnc: fetchFNC,
             formatSelection: function (data) {
@@ -262,8 +276,8 @@ var SlideUploadDialog = Dialog.extend({
                 var that = this,
                     tags = {results: []};
                 _.each(data, function (obj) {
-                    if (that.matcher(query.term, obj.name)) {
-                        tags.results.push({id: obj.id, text: obj.name});
+                    if (that.matcher(query.term, obj[nameKey])) {
+                        tags.results.push({id: obj.id, text: obj[nameKey]});
                     }
                 });
                 query.callback(tags);
@@ -282,6 +296,12 @@ var SlideUploadDialog = Dialog.extend({
                 }
             }
         };
+
+        if (multi) {
+            values['multiple'] = true;
+        }
+
+        return values;
     },
     /**
      * Init the data relative to the support slide type to upload
@@ -347,9 +367,12 @@ var SlideUploadDialog = Dialog.extend({
         }
     },
     _onChangeSlideUpload: function (ev) {
+        var self = this;
         this._alertRemove();
 
-        var self = this;
+        var $input = $(ev.currentTarget);
+        var preventOnchange = $input.data('preventOnchange');
+
         var file = ev.target.files[0];
         var isImage = /^image\/.*/.test(file.type);
         var loaded = false;
@@ -440,9 +463,11 @@ var SlideUploadDialog = Dialog.extend({
             };
         }
 
-        var input = file.name;
-        var inputVal = input.substr(0, input.lastIndexOf('.')) || input;
-        this._formSetFieldValue('name', inputVal);
+        if (!preventOnchange) {
+            var input = file.name;
+            var inputVal = input.substr(0, input.lastIndexOf('.')) || input;
+            this._formSetFieldValue('name', inputVal);
+        }
     },
     _onChangeSlideUrl: function (ev) {
         var self = this;
@@ -540,6 +565,9 @@ sAnimations.registry.websiteSlidesUpload = sAnimations.Class.extend({
     },
 });
 
-return SlideUploadDialog;
+return {
+    SlideUploadDialog: SlideUploadDialog,
+    websiteSlidesUpload: sAnimations.registry.websiteSlidesUpload
+};
 
 });
