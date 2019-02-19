@@ -22,9 +22,11 @@ class HrEmployee(models.Model):
 
     @api.multi
     def generate_benefit(self, date_start, date_stop):
-
         date_start = date_start.replace(tzinfo=pytz.utc)
         date_stop = date_stop.replace(tzinfo=pytz.utc)
+        attendance_type = self.env.ref('hr_payroll.benefit_type_attendance')
+        vals_list = []
+        leaves = self.env['hr.leave']
 
         for employee in self:
 
@@ -36,11 +38,10 @@ class HrEmployee(models.Model):
                     r.date_to.replace(tzinfo=pytz.utc) >= date_start
                 )
             global_leaves = employee.resource_calendar_id.global_leave_ids
-            for calendar_leave in emp_leaves | global_leaves:
-                hr_leave = calendar_leave.holiday_id
-                hr_leave.copy_to_benefits()
 
-            new_benefits = self.env['hr.benefit']
+            employee_leaves = (emp_leaves | global_leaves).mapped('holiday_id')
+            vals_list.extend(employee_leaves._get_benefits_values())
+
             for contract in employee._get_contracts(date_start, date_stop):
 
                 date_start_benefits = max(date_start, datetime.combine(contract.date_start, datetime.min.time()).replace(tzinfo=pytz.utc))
@@ -51,14 +52,15 @@ class HrEmployee(models.Model):
                 attendances = calendar._work_intervals(date_start_benefits, date_stop_benefits, resource=resource)
                 # Attendances
                 for interval in attendances:
-                    benefit_type_id = interval[2].mapped('benefit_type_id')[:1] or self.env.ref('hr_payroll.benefit_type_attendance')
-                    new_benefits |= self.env['hr.benefit'].safe_duplicate_create({
+                    benefit_type_id = interval[2].mapped('benefit_type_id')[:1] or attendance_type
+                    vals_list += [{
                         'name': "%s: %s" % (benefit_type_id.name, employee.name),
                         'date_start': interval[0].astimezone(pytz.utc),
                         'date_stop': interval[1].astimezone(pytz.utc),
                         'benefit_type_id': benefit_type_id.id,
                         'employee_id': employee.id,
                         'state': 'confirmed',
-                    })
+                    }]
 
-            new_benefits.compute_conflicts_leaves_to_approve()
+        new_benefits = self.env['hr.benefit']._safe_duplicate_create(vals_list, date_start, date_stop)
+        new_benefits._compute_conflicts_leaves_to_approve()
