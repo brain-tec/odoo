@@ -1303,6 +1303,11 @@ take the following attributes:
     will be displayed while hovering each time slot to create a new record in
     that slot, and if ``edit`` is enabled, a "magnifying glass" button will be
     displayed to plan records into that time slot.
+``offset``
+  Depending on the scale, the number of units to add to today to compute the
+  default period. Examples: An offset of +1 in default_scale week will open the
+  gantt view for next week, and an offset of -2 in default_scale month will open
+  the gantt view of 2 months ago.
 ``progress``
   name of a field providing the completion percentage for the record's event,
   between 0 and 100
@@ -1350,6 +1355,9 @@ take the following attributes:
   * ``week``
   * ``month``
   * ``year``
+``scales``
+  comma-separated list of allowed scales for this view. By default, all scales
+  are allowed. For possible scale values to use in this list, see ``default_scale``.
 
 ``templates``
   defines the :ref:`reference/qweb` template ``gantt-popover`` which is used
