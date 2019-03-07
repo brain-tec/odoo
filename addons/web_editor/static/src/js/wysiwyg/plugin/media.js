@@ -54,7 +54,14 @@ var MediaPlugin = AbstractPlugin.extend({
         this.context.invoke('editor.saveRange');
         var media = this.context.invoke('editor.restoreTarget');
 
-        var mediaDialog = new weWidgets.MediaDialog(this.options.parent, {},
+        var $mediaParent = $(media).parent();
+        if ($mediaParent.hasClass('media_iframe_video')) {
+            media = $mediaParent[0];
+            $mediaParent = $mediaParent.parent();
+        }
+        var mediaDialog = new weWidgets.MediaDialog(this.options.parent, {
+            onlyImages: $mediaParent.data('oeField') === 'image' || $mediaParent.data('oeType') === 'image',
+        },
             $(media).clone()[0]
         );
 
@@ -86,7 +93,7 @@ var MediaPlugin = AbstractPlugin.extend({
      * @param {Node} target
      */
     update: function (target) {
-        if (!target) {
+        if (!target || !dom.isMedia(target)) {
             return;
         }
         if (!this.options.displayPopover(target)) {
