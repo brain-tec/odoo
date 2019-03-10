@@ -86,7 +86,7 @@ var MediaPlugin = AbstractPlugin.extend({
      * @param {Node} target
      */
     update: function (target) {
-        if (!target) {
+        if (!target || !dom.isMedia(target)) {
             return;
         }
         if (!this.options.displayPopover(target)) {
@@ -455,7 +455,7 @@ var MediaPlugin = AbstractPlugin.extend({
             this.showImageDialog();
         }
     },
-    /** 
+    /**
      * @private
      **/
     _onKeydown: function () {
@@ -813,7 +813,7 @@ var ImagePlugin = AbstractMediaPlugin.extend({
                 });
             }
         }).get();
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Add the image popovers' buttons:
