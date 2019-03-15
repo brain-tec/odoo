@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import re
-import unittest
 
 import odoo.tests
 from odoo.tools import mute_logger
@@ -52,7 +51,8 @@ class TestWebsiteResetViews(odoo.tests.HttpCase):
     def test_02_reset_specific_view_controller(self):
         total_views = self.View.search_count([('type', '=', 'qweb')])
         # Trigger COW then break the QWEB XML on it
-        break_view(self.test_view.with_context(website_id=1))
+        # `t-att-data="not.exist"` will test the case where exception.html contains branding
+        break_view(self.test_view.with_context(website_id=1), to='<p t-att-data="not.exist" />')
         self.assertEqual(total_views + 1, self.View.search_count([('type', '=', 'qweb')]), "Missing COW view")
         self.fix_it('/test_view')
 
@@ -95,7 +95,6 @@ class TestWebsiteResetViews(odoo.tests.HttpCase):
         self.assertEqual(total_views + 1, self.View.search_count([('type', '=', 'qweb')]), "Missing COW view (2)")
         self.fix_it('/test_view')
 
-    @unittest.skip("broken test. Temporary deactivated")
     @mute_logger('odoo.addons.website.models.ir_http')
     def test_07_reset_page_view_complete_flow(self):
         self.do_test('test_reset_page_view_complete_flow_part1')

@@ -8,7 +8,6 @@ var sAnimations = require('website.content.snippets.animation');
 var _t = core._t;
 
 var SelectBox = Widget.extend({
-    xmlDependencies: ['/website_links/static/src/xml/recent_link.xml'],
     events: {
         'change': '_onChange',
     },
@@ -107,6 +106,7 @@ var SelectBox = Widget.extend({
 
 var RecentLinkBox = Widget.extend({
     template: 'website_links.RecentLink',
+    xmlDependencies: ['/website_links/static/src/xml/recent_link.xml'],
     events: {
         'click .btn_shorten_url_clipboard': '_toggleCopyButton',
         'click .o_website_links_edit_code': '_editCode',
@@ -366,7 +366,7 @@ sAnimations.registry.websiteLinks = sAnimations.Class.extend({
         defs.push(sourceSelect.attachTo($('#source-select')));
 
         // Recent Links Widgets
-        this.recentLinks = new RecentLinks();
+        this.recentLinks = new RecentLinks(this);
         defs.push(this.recentLinks.appendTo($('#o_website_links_recent_links')));
         this.recentLinks.getRecentLinks('newest');
 
@@ -460,6 +460,7 @@ sAnimations.registry.websiteLinks = sAnimations.Class.extend({
      * @param {Event} ev
      */
     _onFormSubmit: function (ev) {
+        var self = this;
         ev.preventDefault();
 
         if ($('#btn_shorten_url').hasClass('btn-copy')) {
@@ -511,7 +512,7 @@ sAnimations.registry.websiteLinks = sAnimations.Class.extend({
                 $('#generated_tracked_link').html(link.short_url);
                 $('#generated_tracked_link').css('display', 'inline');
 
-                this.recentLinks._addLink(link);
+                self.recentLinks._addLink(link);
 
                 // Clean URL and UTM selects
                 $('#campaign-select').select2('val', '');
