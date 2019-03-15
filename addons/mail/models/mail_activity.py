@@ -78,7 +78,6 @@ class MailActivityType(models.Model):
     initial_res_model_id = fields.Many2one('ir.model', 'Initial model', compute="_compute_initial_res_model_id", store=False,
             help='Technical field to keep trace of the model at the beginning of the edition for UX related behaviour')
     res_model_change = fields.Boolean(string="Model has change", help="Technical field for UX related behaviour", default=False, store=False)
-    is_master_data = fields.Boolean(string="Master data", help="This field is used to prevent master data from the deletion.")
 
     @api.onchange('res_model_id')
     def _onchange_res_model_id(self):
@@ -91,9 +90,8 @@ class MailActivityType(models.Model):
 
     @api.multi
     def unlink(self):
-        for activity_type in self:
-            if activity_type.is_master_data:
-                raise exceptions.ValidationError("You can not delete activity type that are used as master data.")
+        if any(self.get_external_id().values()):
+            raise exceptions.ValidationError("You can not delete activity type that are used as master data.")
         return super(MailActivityType, self).unlink()
 
 
@@ -149,8 +147,8 @@ class MailActivity(models.Model):
         ('today', 'Today'),
         ('planned', 'Planned')], 'State',
         compute='_compute_state')
-    recommended_activity_type_id = fields.Many2one('mail.activity.type', string="Recommended Activity Type")
-    previous_activity_type_id = fields.Many2one('mail.activity.type', string='Previous Activity Type')
+    recommended_activity_type_id = fields.Many2one('mail.activity.type', string="Recommended Activity Type", readonly=True)
+    previous_activity_type_id = fields.Many2one('mail.activity.type', string='Previous Activity Type', readonly=True)
     has_recommended_activities = fields.Boolean(
         'Next activities available',
         compute='_compute_has_recommended_activities',
@@ -296,6 +294,12 @@ class MailActivity(models.Model):
                     activity.user_id.display_name)
             else:
                 try:
+                    target_user = activity.user_id
+                    target_record = self.env[activity.res_model].browse(activity.res_id)
+                    if hasattr(target_record, 'company_id') and (
+                        target_record.company_id != target_user.company_id and (
+                            len(target_user.company_ids) > 1)):
+                        return  # in that case we skip the check, assuming it would fail because of the company
                     model.browse(activity.res_id).check_access_rule('read')
                 except exceptions.AccessError:
                     raise exceptions.UserError(
