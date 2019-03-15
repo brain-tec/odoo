@@ -6,7 +6,6 @@
             <field name="name">Order Upsell</field>
             <field name="icon">fa-line-chart</field>
             <field name="res_model_id" ref="sale.model_sale_order"/>
-            <field name="is_master_data">True</field>
         </record>
 
         <!-- Sale-related subtypes for messaging / Chatter -->
@@ -57,7 +56,7 @@
     </data>
     <!-- Template and notification section -->
     <data noupdate="1">
-        <template id="" inherit_id="mail.mail_notification_paynow" name="oezirhgoi">
+        <template id="mail_notification_paynow_online" inherit_id="mail.mail_notification_paynow" name="oezirhgoi">
             <xpath expr="//t[@t-set='access_name']" position="after">
                 <t t-if="record._name == 'sale.order'">
                     <t t-if="record.has_to_be_signed(include_draft=True)">

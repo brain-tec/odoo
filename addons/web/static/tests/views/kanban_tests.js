@@ -4847,7 +4847,7 @@ QUnit.module('Views', {
         }
     });
 
-    QUnit.test('test displaying image (URL)', function (assert) {
+    QUnit.test('test displaying image (URL, image field not set)', function (assert) {
         assert.expect(1);
 
         var kanban = createView({
@@ -4895,6 +4895,39 @@ QUnit.module('Views', {
         var placeholders = kanban.$('img[data-src$="/web/static/src/img/placeholder.png"]');
         assert.strictEqual(placeholders.length, this.data.partner.records.length - 1,
             "partner with no image should display the placeholder");
+
+        kanban.destroy();
+    });
+
+    QUnit.test('test displaying image (for another record)', function (assert) {
+        assert.expect(2);
+
+        var kanban = createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test">' +
+                      '<field name="id"/>' +
+                      '<field name="image"/>' +
+                      '<templates><t t-name="kanban-box"><div>' +
+                          '<img t-att-src="kanban_image(\'partner\', \'image\', 1)"/>' +
+                      '</div></t></templates>' +
+                  '</kanban>',
+            mockRPC: function (route, args) {
+                if (route === 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACAA==') {
+                    assert.ok("The view's image should have been fetched.");
+                    return $.when();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        // the field image is set, but we request the image for a specific id
+        // -> for the record matching the ID, the base64 should be returned
+        // -> for all the other records, the image should be displayed by url
+        var imageOnRecord = kanban.$('img[data-src*="/web/image"][data-src*="&id=1"]');
+        assert.strictEqual(imageOnRecord.length, this.data.partner.records.length - 1,
+            "display image by url when requested for another record");
 
         kanban.destroy();
     });
@@ -5263,6 +5296,116 @@ QUnit.module('Views', {
         delete fieldRegistry.map.asyncWidget;
     });
 
+    QUnit.test('asynchronous rendering of a field widget with display attr', function (assert) {
+        assert.expect(3);
+
+        var fooFieldDef = $.Deferred();
+        var FieldChar = fieldRegistry.get('char');
+        fieldRegistry.add('asyncwidget', FieldChar.extend({
+            willStart: function () {
+                return fooFieldDef;
+            },
+            start: function () {
+                this.$el.html('LOADED');
+            },
+        }));
+
+        var kanbanController;
+        testUtils.createAsyncView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test"><templates><t t-name="kanban-box">' +
+                        '<div><field name="foo" display="right" widget="asyncwidget"/></div>' +
+                '</t></templates></kanban>',
+        }).then(function (kanban) {
+            kanbanController = kanban;
+        });
+
+        assert.containsNone(document.body, '.o_kanban_record');
+
+        fooFieldDef.resolve();
+        assert.strictEqual(kanbanController.$('.o_kanban_record').text(),
+            "LOADEDLOADEDLOADEDLOADED");
+        assert.hasClass(kanbanController.$('.o_kanban_record:first .o_field_char'), 'float-right');
+
+        kanbanController.destroy();
+        delete fieldRegistry.map.asyncWidget;
+    });
+
+    QUnit.test('asynchronous rendering of a widget', function (assert) {
+        assert.expect(2);
+
+        var widgetDef = $.Deferred();
+        widgetRegistry.add('asyncwidget', Widget.extend({
+            willStart: function () {
+                return widgetDef;
+            },
+            start: function () {
+                this.$el.html('LOADED');
+            },
+        }));
+
+        var kanbanController;
+        testUtils.createAsyncView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test"><templates><t t-name="kanban-box">' +
+                        '<div><widget name="asyncwidget"/></div>' +
+                '</t></templates></kanban>',
+        }).then(function (kanban) {
+            kanbanController = kanban;
+        });
+
+        assert.containsNone(document.body, '.o_kanban_record');
+
+        widgetDef.resolve();
+        assert.strictEqual(kanbanController.$('.o_kanban_record .o_widget').text(),
+            "LOADEDLOADEDLOADEDLOADED");
+
+        kanbanController.destroy();
+        delete widgetRegistry.map.asyncWidget;
+    });
+
+    QUnit.test('update kanban with asynchronous field widget', function (assert) {
+        assert.expect(3);
+
+        var fooFieldDef = $.Deferred();
+        var FieldChar = fieldRegistry.get('char');
+        fieldRegistry.add('asyncwidget', FieldChar.extend({
+            willStart: function () {
+                return fooFieldDef;
+            },
+            start: function () {
+                this.$el.html('LOADED');
+            },
+        }));
+
+        var kanban = testUtils.createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test"><templates><t t-name="kanban-box">' +
+                        '<div><field name="foo" widget="asyncwidget"/></div>' +
+                '</t></templates></kanban>',
+            domain: [['id', '=', '0']], // no record matches this domain
+        });
+
+        assert.containsNone(kanban, '.o_kanban_record:not(.o_kanban_ghost)');
+
+        kanban.update({domain: []}); // this rendering will be async
+
+        assert.containsNone(kanban, '.o_kanban_record:not(.o_kanban_ghost)');
+
+        fooFieldDef.resolve();
+
+        assert.strictEqual(kanban.$('.o_kanban_record').text(),
+            "LOADEDLOADEDLOADEDLOADED");
+
+        kanban.destroy();
+        delete widgetRegistry.map.asyncWidget;
+    });
 });
 
 });
