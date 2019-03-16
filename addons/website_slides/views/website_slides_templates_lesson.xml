@@ -191,9 +191,10 @@
                     t-att-href="'/slides/slide/%s' % (slug(previous_slide)) if previous_slide else '#'">
                     <i class="fa fa-chevron-left mr-2"></i> Prev
                 </a>
-                <a t-att-class="'btn btn-primary border text-white %s' % ('disabled' if slide.question_ids or channel_progress[slide.id].get('completed') else '')"
-                    role="button" t-att-aria-disabled="'true' if slide.question_ids or channel_progress[slide.id].get('completed') else None"
-                    t-att-href="'#' if slide.question_ids or channel_progress[slide.id].get('completed') else '/slides/slide/%s/set_completed?%s' % (slide.id, 'next_slide_id=%s' % (next_slide.id) if next_slide else '')">
+                <t t-set="allow_done_btn" t-value="slide.slide_type in ['infographic', 'presentation', 'document', 'webpage'] and not slide.question_ids and not channel_progress[slide.id].get('completed')"/>
+                <a t-att-class="'btn btn-primary border text-white %s' % ('disabled' if not allow_done_btn else '')"
+                    role="button" t-att-aria-disabled="'true' if not allow_done_btn else None"
+                    t-att-href="'/slides/slide/%s/set_completed?%s' % (slide.id, 'next_slide_id=%s' % (next_slide.id) if next_slide else '') if allow_done_btn else '#'">
                     Set Done
                 </a>
                 <a t-att-class="'btn btn-light border %s' % ('disabled' if not next_slide else '')"
@@ -237,19 +238,21 @@
                 </t>
             </div>
 
-            <span class="text-muted font-weight-bold mr-3">Rating</span>
-            <div class="text-muted border-left pl-3">
-                <div class="o_wslides_js_slide_like mr-2">
-                    <span class="o_wslides_js_slide_like_up" tabindex="0" data-toggle="popover" t-att-data-slide-id="slide.id">
-                        <i class="fa fa-thumbs-up fa-1x" role="img" aria-label="Likes" title="Likes"></i>
-                        <span t-esc="slide.likes"/>
-                    </span>
-                    <span class="o_wslides_js_slide_like_down ml-3" tabindex="0" data-toggle="popover" t-att-data-slide-id="slide.id">
-                        <i class="fa fa-thumbs-down fa-1x" role="img" aria-label="Dislikes" title="Dislikes"></i>
-                        <span t-esc="slide.dislikes"/>
-                    </span>
+            <t t-if="slide.channel_id.allow_comment and slide.channel_id.channel_type == 'documentation'">
+                <span class="text-muted font-weight-bold mr-3">Rating</span>
+                <div class="text-muted border-left pl-3">
+                    <div class="o_wslides_js_slide_like mr-2">
+                        <span t-att-class="('o_wslides_js_slide_like_up %s') % ('disabled' if not (slide_access['can_access'] and slide_access['can_vote']) else '')" tabindex="0" data-toggle="popover" t-att-data-slide-id="slide.id">
+                            <i class="fa fa-thumbs-up fa-1x" role="img" aria-label="Likes" title="Likes"></i>
+                            <span t-esc="slide.likes"/>
+                        </span>
+                        <span t-att-class="('o_wslides_js_slide_like_down ml-3 %s') % ('disabled' if not (slide_access['can_access'] and slide_access['can_vote']) else '')" tabindex="0" data-toggle="popover" t-att-data-slide-id="slide.id">
+                            <i class="fa fa-thumbs-down fa-1x" role="img" aria-label="Dislikes" title="Dislikes"></i>
+                            <span t-esc="slide.dislikes"/>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </t>
         </div>
     </div>
     <div class="row mb-5">
@@ -287,8 +290,7 @@
             <div role="tabpanel" t-att-class="comments and 'tab-pane fade in show active' or 'tab-pane fade'" id="discuss">
                 <t t-call="portal.message_thread">
                     <t t-set="object" t-value="slide"/>
-                    <t t-set="hash" t-value="message_post_hash"/>
-                    <t t-set="pid" t-value="message_post_pid"/>
+                    <t t-set="disable_composer" t-value="not (slide_access['can_comment'] and slide.channel_id.allow_comment and slide.channel_id.channel_type == 'training')"/>
                     <t t-set="display_rating" t-value="False"/>
                 </t>
             </div>
