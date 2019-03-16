@@ -41,7 +41,15 @@
                         </div>
                     </div>
                 </nav>
+                <div class="o_wprofile_email_validation_container mb16 mt16">
+                    <t t-call="website_profile.email_validation_banner">
+                        <t t-set="redirect_url" t-value="'/slides'"/>
+                        <t t-set="send_validation_email_message" t-value="'Click here to send a verification email allowing you to participate to the eLearning.'"/>
+                        <t t-set="additional_validated_email_message" t-value="' You may now participate to our eLearning.'"/>
+                    </t>
+                </div>
             </div>
+
             <div class="container o_wslides_home_main">
                 <div class="row">
                     <div t-if="is_public_user" class="col-lg-3 order-3 order-lg-2">
@@ -206,6 +214,13 @@
                         </form>
                     </div>
                 </nav>
+                <div class="o_wprofile_email_validation_container mb16 mt16">
+                    <t t-call="website_profile.email_validation_banner">
+                        <t t-set="redirect_url" t-value="'/slides'"/>
+                        <t t-set="send_validation_email_message" t-value="'Click here to send a verification email allowing you to participate to the eLearning.'"/>
+                        <t t-set="additional_validated_email_message" t-value="' You may now participate to our eLearning.'"/>
+                    </t>
+                </div>
             </div>
             <div class="container o_wslides_home_main pb-5">
                 <div t-if="search_term and not channels" class="alert alert-info mb-5">
@@ -260,8 +275,8 @@
                     <t t-if="channel.is_member and channel.completed">
                         <span class="badge badge-pill badge-success pull-right py-1 px-2"><i class="fa fa-check"/> Completed</span>
                     </t>
-                    <div t-elif="channel.is_member" class="progress w-50" style="height: 4px;">
-                        <div class="progress-bar rounded" role="progressbar" t-att-aria-valuenow="channel.completion" aria-valuemin="0" aria-valuemax="100" t-attf-style="width:#{channel.completion}%;"/>
+                    <div t-elif="channel.is_member" class="progress w-50" style="height: 6px">
+                        <div class="progress-bar" role="progressbar" t-att-aria-valuenow="channel.completion" aria-valuemin="0" aria-valuemax="100" t-attf-style="width:#{channel.completion}%;"/>
                     </div>
                     <small t-else=""><b t-esc="channel.total_slides"/> steps</small>
                 </div>
@@ -383,5 +398,4 @@
         t-att-src="'/profile/avatar/%s?field=image_medium' % user.id"
         t-att-alt="user.name"/>
 </template>
-
 </data></odoo>

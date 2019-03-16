@@ -102,7 +102,7 @@ odoo.define('website_slides.fullscreen', function (require) {
                         if (totalTime && currentTime > totalTime - 30){
                             clearInterval(self.tid);
                             if (!self.slide.hasQuestion && !self.slide.completed){
-                                self.trigger_up('slide_completed', self.slide);
+                                self.trigger_up('slide_to_complete', self.slide);
                             }
                         }
                     }
@@ -177,11 +177,11 @@ odoo.define('website_slides.fullscreen', function (require) {
          * Greens up the bullet when the slide is completed
          *
          * @public
-         * @param {*} slide_id
+         * @param {Integer} slideId
          */
         setSlideCompleted: function (slideId) {
             var $elem = this.$('.fa-circle-thin[data-slide-id="'+slideId+'"]');
-            $elem.removeClass('fa-circle-thin').addClass('fa-check-circle text-success');
+            $elem.removeClass('fa-circle-thin').addClass('fa-check-circle text-success bg-white o_wslides_slide_completed rounded-circle');
         },
         /**
          * Updates the progressbar whenever a lesson is completed
@@ -235,6 +235,8 @@ odoo.define('website_slides.fullscreen', function (require) {
          * @param {*} ev
          */
         _onClickTab: function (ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
             var $elem = $(ev.currentTarget);
             var isQuiz = $elem.data('isQuiz');
             var slideID = parseInt($elem.data('id'));
@@ -250,12 +252,8 @@ odoo.define('website_slides.fullscreen', function (require) {
         _onChangeCurrentSlide: function () {
             var slide = this.get('slideEntry');
             this.$('.o_wslides_fs_sidebar_list_item.active').removeClass('active');
-            var selector = '.o_wslides_fs_sidebar_list_item[data-id='+slide.id+']';
-            if (slide.isQuiz) {
-                selector += '[data-is-quiz="1"]';
-            } else {
-                selector += '[data-is-quiz!="1"]';
-            }
+            var selector = '.o_wslides_fs_sidebar_list_item[data-id='+slide.id+'][data-is-quiz!="1"]';
+
             this.$(selector).addClass('active');
             this.trigger_up('change_slide', this.get('slideEntry'));
         },
@@ -291,9 +289,8 @@ odoo.define('website_slides.fullscreen', function (require) {
         },
         custom_events: {
             'change_slide': '_onChangeSlideRequest',
-            'toggle_sidebar': '_onToggleSidebar',
+            'slide_to_complete': '_onSlideToComplete',
             'slide_completed': '_onSlideCompleted',
-            'quiz_completed': '_onSlideCompleted',
             'slide_go_next': '_onSlideGoToNext',
         },
         /**
@@ -370,10 +367,16 @@ odoo.define('website_slides.fullscreen', function (require) {
         */
         _fetchSlideContent: function (){
             var slide = this.get('slide');
-            if (slide.type === 'webpage') {
+            if (slide.type === 'webpage' && !slide.isQuiz) {
                 return this._fetchHtmlContent();
             }
             return $.when();
+        },
+        _markAsCompleted: function (slideId, completion) {
+            var slide = findSlide(this.slides, {id: slideId});
+            slide.completed = true;
+            this.sidebar.setSlideCompleted(slide.id);
+            this.sidebar.updateProgressbar(completion);
         },
         /**
          * Extend the slide data list to add informations about rendering method, and other
@@ -425,7 +428,6 @@ odoo.define('website_slides.fullscreen', function (require) {
             var slide = this.get('slide');
             var $content = this.$('.o_wslides_fs_content');
             $content.empty();
-            $content.removeClass('bg-white'); // webpage case
 
             // display quiz slide, or quiz attached to a slide
             if (slide.type === 'quiz' || slide.isQuiz) {
@@ -440,8 +442,9 @@ odoo.define('website_slides.fullscreen', function (require) {
                 this.videoPlayer = new VideoPlayer(this, slide);
                 return this.videoPlayer.appendTo($content);
             } else if (slide.type === 'webpage'){
-                $(slide.htmlContent).appendTo($content);
-                $content.addClass('bg-white');
+                var $wpContainer = $('<div>').addClass('o_wslide_fs_webpage_content bg-white block w-100 overflow-auto');
+                $(slide.htmlContent).appendTo($wpContainer);
+                $content.append($wpContainer);
             }
             return $.when();
         },
@@ -462,9 +465,7 @@ odoo.define('website_slides.fullscreen', function (require) {
                         slide_id: slide.id,
                     }
                 }).then(function (data){
-                    slide.completed = true;
-                    self.sidebar.setSlideCompleted(slide.id);
-                    self.sidebar.updateProgressbar(data.channel_completion);
+                    self._markAsCompleted(slideId, data.channel_completion);
                 });
             }
             return $.when();
@@ -480,7 +481,7 @@ odoo.define('website_slides.fullscreen', function (require) {
          *
          * @private
          */
-        _onChangeSlide: function (){
+        _onChangeSlide: function () {
             var self = this;
             var slide = this.get('slide');
             return this._fetchSlideContent().then(function() { // update title and render content
@@ -508,12 +509,22 @@ odoo.define('website_slides.fullscreen', function (require) {
             this.set('slide', newSlide);
         },
         /**
+         * Triggered when subwidget has mark the slide as done, and the UI need to be adapted.
+         *
+         * @private
+         */
+        _onSlideCompleted: function (ev) {
+            var slide = ev.data.slide;
+            var completion = ev.data.completion;
+            this._markAsCompleted(slide.id, completion);
+        },
+        /**
          * Triggered when sub widget business is done and that slide
          * can now be marked as done.
          *
          * @private
          */
-        _onSlideCompleted: function (ev) {
+        _onSlideToComplete: function (ev) {
             if (!session.is_website_user) {  // no useless RPC call
                 var slideId = ev.data.id;
                 this._setCompleted(slideId);
@@ -534,8 +545,7 @@ odoo.define('website_slides.fullscreen', function (require) {
          */
         _onClickToggleSidebar: function (ev){
             ev.preventDefault();
-            this.$('.o_wslides_fs_sidebar').toggleClass('d-none');
-            this.$('.o_wslides_fs_content').toggleClass('col-10').toggleClass('col-12');
+            this.$('.o_wslides_fs_sidebar').toggleClass('o_wslides_fs_sidebar_hidden');
             this.$('.o_wslides_fs_toggle_sidebar').toggleClass('active');
         },
     });
