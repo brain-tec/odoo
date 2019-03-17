@@ -61,6 +61,9 @@ class WebsiteSlides(WebsiteProfile):
         return True
 
     def _set_completed_slide(self, slide, quiz_attempts_inc=False):
+        # quiz use their specific mechanism to be marked as done
+        if slide.slide_type == 'quiz' or slide.question_ids:
+            raise werkzeug.exceptions.Forbidden(_("Slide with questions must be marked as done when submitting all good answers "))
         if slide.website_published and slide.channel_id.is_member:
             slide.action_set_completed(quiz_attempts_inc=quiz_attempts_inc)
         return True
@@ -489,7 +492,7 @@ class WebsiteSlides(WebsiteProfile):
         # sidebar: update with user channel progress
         values['channel_progress'] = self._get_channel_progress(slide.channel_id, include_quiz=True)
 
-        if 'fullscreen' in kwargs:
+        if kwargs.get('fullscreen') == '1':
             return request.render("website_slides.slide_fullscreen", values)
         else:
             values['slide_access'] = slide.sudo(request.env.user)._get_slide_action_access()[slide.id]
@@ -644,7 +647,7 @@ class WebsiteSlides(WebsiteProfile):
             return fetch_res
         slide = fetch_res['slide']
 
-        if slide.user_membership_id.completed:
+        if slide.user_membership_id.sudo().completed:
             return {'error': 'slide_quiz_done'}
 
         all_questions = request.env['slide.question'].sudo().search([('slide_id', '=', slide.id)])
@@ -662,6 +665,7 @@ class WebsiteSlides(WebsiteProfile):
         rank_progress = {}
         if not user_bad_answers:
             slide._action_set_quiz_done()
+            slide.action_set_completed(quiz_attempts_inc=True)
             lower_bound = request.env.user.rank_id.karma_min
             upper_bound = request.env.user.next_rank_id.karma_min
             rank_progress = {
@@ -674,11 +678,12 @@ class WebsiteSlides(WebsiteProfile):
         return {
             'goodAnswers': user_good_answers.ids,
             'badAnswers': user_bad_answers.ids,
-            'completed': not user_bad_answers,
+            'completed': slide.user_membership_id.sudo().completed,
+            'channel_completion': slide.channel_id.completion,
             'quizKarmaWon': quiz_info['quiz_karma_won'],
             'quizKarmaGain': quiz_info['quiz_karma_gain'],
             'quizAttemptsCount': quiz_info['quiz_attempts_count'],
-            'rankProgress': rank_progress
+            'rankProgress': rank_progress,
         }
 
     # --------------------------------------------------
