@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
@@ -61,7 +63,7 @@ class MrpAbstractWorkorder(models.AbstractModel):
             # Remove or lower quantity on exisiting workorder lines
             if float_compare(qty_todo, 0.0, precision_rounding=rounding) < 0:
                 qty_todo = abs(qty_todo)
-                for workorder_line in move_workorder_lines:
+                for workorder_line in move_workorder_lines.sorted(key=lambda wl: wl.qty_reserved):
                     if float_compare(qty_todo, 0, precision_rounding=rounding) <= 0:
                         break
                     if float_compare(workorder_line.qty_to_consume, qty_todo, precision_rounding=rounding) <= 0:
@@ -73,27 +75,39 @@ class MrpAbstractWorkorder(models.AbstractModel):
                             line_values['to_delete'] = workorder_line
                     else:
                         new_val = workorder_line.qty_to_consume - qty_todo
+                        new_reserved = max(0, workorder_line.qty_reserved - qty_todo)
                         line_values['to_update'][workorder_line] = {
                             'qty_to_consume': new_val,
                             'qty_done': new_val,
-                            'qty_reserved': new_val,
+                            'qty_reserved': new_reserved,
                         }
                         qty_todo = 0
             else:
                 # Search among wo lines which one could be updated
-                for move_line in move_raw.move_line_ids:
-                    # Get workorder lines that match reservation.
-                    candidates = move_workorder_lines._find_candidate(move_line)
-                    for candidate in candidates:
-                        if float_compare(qty_todo, 0, precision_rounding=rounding) <= 0:
-                            break
-                        qty_to_add = move_line.product_uom_qty - candidate.qty_done
-                        line_values['to_update'][candidate] = {
-                            'qty_done': candidate.qty_done + qty_to_add,
-                            'qty_to_consume': candidate.qty_to_consume + qty_to_add,
-                            'qty_reserved': candidate.qty_reserved + qty_to_add,
+                qty_reserved_wl = defaultdict(float)
+                for workorder_line in move_workorder_lines.sorted(key=lambda wl: wl.qty_reserved, reverse=True):
+                    rounding = workorder_line.product_uom_id.rounding
+                    if float_compare(qty_todo, 0, precision_rounding=rounding) <= 0:
+                        break
+                    move_lines = workorder_line._get_move_lines()
+                    qty_reserved_wl[workorder_line.lot_id] += workorder_line.qty_reserved
+                    qty_reserved_remaining = sum(move_lines.mapped('product_uom_qty')) - sum(move_lines.mapped('qty_done')) - qty_reserved_wl[workorder_line.lot_id]
+                    if float_compare(qty_reserved_remaining, 0, precision_rounding=rounding) > 0:
+                        qty_to_add = min(qty_reserved_remaining, qty_todo)
+                        line_values['to_update'][workorder_line] = {
+                            'qty_done': workorder_line.qty_done + qty_to_add,
+                            'qty_to_consume': workorder_line.qty_to_consume + qty_to_add,
+                            'qty_reserved': workorder_line.qty_reserved + qty_to_add,
                         }
                         qty_todo -= qty_to_add
+                        qty_reserved_wl[workorder_line.lot_id] += qty_to_add
+
+                    if not workorder_line.qty_reserved and not workorder_line.lot_id and workorder_line.product_tracking != 'serial':
+                        line_values['to_update'][workorder_line] = {
+                            'qty_done': workorder_line.qty_done + qty_todo,
+                            'qty_to_consume': workorder_line.qty_to_consume + qty_todo,
+                        }
+                        qty_todo = 0
 
                 # if there are still qty_todo, create new wo lines
                 if float_compare(qty_todo, 0.0, precision_rounding=rounding) > 0:
@@ -122,18 +136,18 @@ class MrpAbstractWorkorder(models.AbstractModel):
                 line.lot_id == move_line.lot_id
             )
             if linked_wo_line:
-                if float_compare(sum(linked_wo_line.mapped('qty_to_consume')), move_line.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0:
-                    to_consume_in_line = min(qty_to_consume, move_line.product_uom_qty - sum(linked_wo_line.mapped('qty_to_consume')))
+                if float_compare(sum(linked_wo_line.mapped('qty_to_consume')), move_line.product_uom_qty - move_line.qty_done, precision_rounding=move.product_uom.rounding) < 0:
+                    to_consume_in_line = min(qty_to_consume, move_line.product_uom_qty - move_line.qty_done - sum(linked_wo_line.mapped('qty_to_consume')))
                 else:
                     continue
             else:
-                to_consume_in_line = min(qty_to_consume, move_line.product_uom_qty)
+                to_consume_in_line = min(qty_to_consume, move_line.product_uom_qty - move_line.qty_done)
             line = {
                 'move_id': move.id,
                 'product_id': move.product_id.id,
                 'product_uom_id': is_tracked and move.product_id.uom_id.id or move.product_uom.id,
                 'qty_to_consume': to_consume_in_line,
-                'qty_reserved': move_line.product_uom_qty,
+                'qty_reserved': to_consume_in_line,
                 'lot_id': move_line.lot_id.id,
                 'qty_done': to_consume_in_line
             }
@@ -196,7 +210,7 @@ class MrpAbstractWorkorder(models.AbstractModel):
         else:
             rounding = production_move.product_uom.rounding
             production_move._set_quantity_done(
-                production_move.quantity_done + float_round(self.qty_producing, precision_rounding=rounding)
+                float_round(self.qty_producing, precision_rounding=rounding)
             )
 
     def _update_raw_moves(self):
@@ -303,7 +317,7 @@ class MrpAbstractWorkorderLine(models.AbstractModel):
         # quantity into stock, we take the move location. Anyway, no
         # reservation is made, so it is still possible to change it afterwards.
         for quant in quants:
-            quantity = quant.reserved_quantity - quant.quantity
+            quantity = quant.quantity - quant.reserved_quantity
             rounding = quant.product_uom_id.rounding
             if (float_compare(quant.quantity, 0, precision_rounding=rounding) <= 0 or
                     float_compare(quantity, 0, precision_rounding=rounding) <= 0):
@@ -345,16 +359,9 @@ class MrpAbstractWorkorderLine(models.AbstractModel):
 
         return vals_list
 
-    def _find_candidate(self, move_line):
-        """ Method used in order to return move lines that match reservation.
-        The purpose is to update exisiting workorder line regarding the
-        reservation of the raw moves.
-        """
-        rounding = move_line.product_uom_id.rounding
-        return self.filtered(lambda line:
-            line.lot_id == move_line.lot_id and
-            float_compare(line.qty_done, move_line.product_uom_qty, precision_rounding=rounding) < 0 and
-            line.product_id == move_line.product_id)
+    def _get_move_lines(self):
+        return self.move_id.move_line_ids.filtered(lambda ml:
+        ml.lot_id == self.lot_id and ml.product_id == self.product_id)
 
     # To be implemented in specific model
     def _get_final_lot(self):
