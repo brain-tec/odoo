@@ -196,7 +196,7 @@
     overflow: auto;
 
     .dropdown-divider {display: none;} // hide the divider by default (no favorite)
-    .o-searchview-custom-private, .o-searchview-custom-public {
+    .o-searchview-custom-private, .o-searchview-custom-public, .o-searchview-custom-public-company, .o-searchview-custom-public-user-company {
         .o-remove-filter {
             @include o-position-absolute(50%, 12px);
             margin-top: -6px;
@@ -206,6 +206,18 @@
     .o-searchview-custom-public a:after {
         font-family: FontAwesome;
         content: "\f0c0";
+        margin-left: 5px;
+        font-weight: normal;
+    }
+    .o-searchview-custom-public-company a:after {
+        font-family: FontAwesome;
+        content: "\f19c" ;
+        margin-left: 5px;
+        font-weight: normal;
+    }
+    .o-searchview-custom-public-user-company a:after {
+        font-family: FontAwesome;
+        content: "\f0c0\00a0\f19c" ;
         margin-left: 5px;
         font-weight: normal;
     }

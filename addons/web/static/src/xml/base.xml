@@ -1371,6 +1371,12 @@
                 <label for="o_fav_menu_share_all_users" class="custom-control-label">Share with all users <span class="fa fa-users" role="img" aria-label="Users" title="Users"/></label>
             </div>
         </div>
+        <div role="menuitem" class="dropdown-item-text o_save_name">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" id="o_fav_menu_share_all_companies" class="custom-control-input"/>
+                <label for="o_fav_menu_share_all_companies" class="custom-control-label">Share with all companies <span class="fa fa-university" role="img" aria-label="Companies" title="Companies"/></label>
+            </div>
+        </div>
         <div class="dropdown-item-text o_save_name">
             <button type="button" class="btn btn-primary">Save</button>
         </div>
