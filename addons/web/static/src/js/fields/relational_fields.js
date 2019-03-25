@@ -496,7 +496,9 @@ var FieldMany2One = AbstractField.extend({
                 });
 
                 // search more... if more results than limit
-                if (values.length > self.limit) {
+                // This change is necessary because the functionality does not work in web_m2x_options (OCA/web).
+                // if (values.length > self.limit) {
+                if (values.length > self.limit || self.nodeOptions.search_more) {
                     values = values.slice(0, self.limit);
                     values.push({
                         label: _t("Search More..."),
