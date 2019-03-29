@@ -383,7 +383,7 @@ var FieldFloat = FieldChar.extend({
         }
         if (this.digits !== undefined && this.digits.length === 2) {
             value_ = utils.round_decimals(value_, this.digits[1]);
-        }
+        }        
         this._super(value_);
     }
 });
@@ -1060,7 +1060,7 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         this._super(field_manager, node);
         this.binary_value = false;
         this.useFileAPI = !!window.FileReader;
-        this.max_upload_size = 256 * 1024 * 1024; // 256Mo
+        this.max_upload_size = 25 * 1024 * 1024; // 25Mo
         if (!this.useFileAPI) {
             this.fileupload_id = _.uniqueId('o_fileupload');
             $(window).on(this.fileupload_id, function() {
@@ -1095,17 +1095,12 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                     this.do_warn(_t("File upload"), _.str.sprintf(msg, utils.human_size(this.max_upload_size)));
                     return false;
                 }
-                framework.blockUI();
                 var filereader = new FileReader();
-                filereader.onerror = function() {
-                    framework.unblockUI();
-                };
                 filereader.readAsDataURL(file);
                 filereader.onloadend = function(upload) {
                     var data = upload.target.result;
                     data = data.split(',')[1];
                     self.on_file_uploaded(file.size, file.name, file.type, data);
-                    framework.unblockUI();
                 };
             } else {
                 this.$('form.o_form_binary_form input[name=session_id]').val(this.session.session_id);
@@ -1327,7 +1322,7 @@ var FieldStatus = common.AbstractField.extend({
     render_value: function() {
         var self = this;
         var content = QWeb.render("FieldStatus.content", {
-            'widget': self,
+            'widget': self, 
             'value_folded': _.find(self.selection.folded, function(i){return i[0] === self.get('value');})
         });
         self.$el.html(content);
@@ -1516,7 +1511,7 @@ var FieldMonetary = FieldFloat.extend({
 
 /**
     This widget is intended to be used on stat button numeric fields.  It will display
-    the value   many2many and one2many. It is a read-only field that will
+    the value   many2many and one2many. It is a read-only field that will 
     display a simple string "<value of field> <label of the field>"
 */
 var StatInfo = common.AbstractField.extend({
