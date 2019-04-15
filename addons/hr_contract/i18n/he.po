@@ -229,7 +229,7 @@ msgstr "עובד"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__type_id
 msgid "Employee Category"
-msgstr ""
+msgstr "קטגוריית עובדים"
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_contract
@@ -545,6 +545,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"מצב על בסיס פעילויות\n"
+"איחור: תאריך היעד כבר חלף\n"
+"היום: תאריך הפעילות הוא היום\n"
+"מתוכנן: פעילויות עתידיות."
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__state

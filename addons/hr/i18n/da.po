@@ -9,18 +9,19 @@
 # JonathanStein <jstein@image.dk>, 2018
 # Jesper Carstensen <jc@danodoo.dk>, 2018
 # Pernille Kristensen <pernillekristensen1994@gmail.com>, 2018
-# Ejner Sønniksen <ejner@vkdata.dk>, 2018
 # lhmflexerp <lhm@flexerp.dk>, 2018
 # Martin Trigaux, 2019
+# Joe Hansen <joedalton2@yahoo.dk>, 2019
 # Sanne Kristensen <sanne@vkdata.dk>, 2019
+# Ejner Sønniksen <ejner@vkdata.dk>, 2019
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
+"POT-Creation-Date: 2019-04-12 12:19+0000\n"
 "PO-Revision-Date: 2018-08-24 09:18+0000\n"
-"Last-Translator: Sanne Kristensen <sanne@vkdata.dk>, 2019\n"
+"Last-Translator: Ejner Sønniksen <ejner@vkdata.dk>, 2019\n"
 "Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -649,6 +650,11 @@ msgid "Followers only"
 msgstr "Kun følgere"
 
 #. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
+msgid "Future Activities"
+msgstr "Fremtidige aktiviteter"
+
+#. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__gender
 msgid "Gender"
 msgstr "Køn"
@@ -900,6 +906,11 @@ msgstr "Sidst opdateret af"
 #: model:ir.model.fields,field_description:hr.field_hr_job__write_date
 msgid "Last Updated on"
 msgstr "Sidst opdateret den"
+
+#. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
+msgid "Late Activities"
+msgstr "Overskredede aktiviteter"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_marketing
@@ -1533,6 +1544,11 @@ msgid "Today"
 msgstr "I dag"
 
 #. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
+msgid "Today Activities"
+msgstr "Dagens aktiviteter"
+
+#. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__expected_employees
 msgid "Total Forecasted Employees"
 msgstr "Totalt forventet antal medarbejdere"
@@ -1891,6 +1907,9 @@ msgid ""
 "development teams for specific projects. You will become a technical expert "
 "of the product."
 msgstr ""
+"Du vil være ansvarlig for udvikling og forbedring af programmer. Du vil "
+"arbejde selvstændigt samt koordinere og overvåge små spredte udviklingshold "
+"for specifikke projekter. Du vil blive teknisk ekspert for produktet."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1930,7 +1949,7 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_developer
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "You will report to the head of R&amp;D"
-msgstr ""
+msgstr "Du vil referere til lederen af F&U"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_developer

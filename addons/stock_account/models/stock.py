@@ -304,7 +304,7 @@ class StockMove(models.Model):
         if qty_to_take_on_candidates == 0:
             move.write({
                 'value': -tmp_value if not quantity else move.value or -tmp_value,  # outgoing move are valued negatively
-                'price_unit': -tmp_value / move.product_qty,
+                'price_unit': -tmp_value / (move.product_qty or quantity),
             })
         elif qty_to_take_on_candidates > 0:
             last_fifo_price = new_standard_price or move.product_id.standard_price
@@ -562,7 +562,7 @@ class StockMove(models.Model):
         debit_value = self.company_id.currency_id.round(valuation_amount)
 
         # check that all data is correct
-        if self.company_id.currency_id.is_zero(debit_value):
+        if self.company_id.currency_id.is_zero(debit_value) and not self.env['ir.config_parameter'].sudo().get_param('stock_account.allow_zero_cost'):
             raise UserError(_("The cost of %s is currently equal to 0. Change the cost or the configuration of your product to avoid an incorrect valuation.") % (self.product_id.display_name,))
         credit_value = debit_value
 

@@ -60,6 +60,7 @@
 # Maie <m@maie.name>, 2019
 # keecome <7017511@qq.com>, 2019
 # liAnGjiA <liangjia@qq.com>, 2019
+# John An <johnxan@163.com>, 2019
 # 张宏奎 <zhanghongkui@inspur.com>, 2019
 # 
 msgid ""
@@ -10708,7 +10709,7 @@ msgstr "改变字段的模型是禁止的！"
 msgid ""
 "Changing the type of a field is not yet supported. Please drop it and create"
 " it again!"
-msgstr "还不支持更改字段的类型，请先删除该字段再重新创建。"
+msgstr "不允许更改字段类型，如需更改请先删除该字段再重新创建。"
 
 #. module: base
 #: selection:ir.property,type:0
@@ -25224,7 +25225,7 @@ msgstr ""
 #: code:addons/base/models/res_users.py:404
 #, python-format
 msgid "The user cannot have more than one user types."
-msgstr ""
+msgstr "一个用户不能有多种用户类型"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_filters__user_id
