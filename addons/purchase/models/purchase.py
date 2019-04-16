@@ -749,7 +749,7 @@ class PurchaseOrderLine(models.Model):
         if line.product_uom.id != line.product_id.uom_id.id:
             price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
         if order.currency_id != order.company_id.currency_id:
-            price_unit = order.currency_id.compute(price_unit, order.company_id.currency_id, round=False)
+            price_unit = order.currency_id.with_context(date=order.date_approve).compute(price_unit, order.company_id.currency_id, round=False)
         return price_unit
 
     @api.multi
@@ -769,7 +769,7 @@ class PurchaseOrderLine(models.Model):
             'name': self.name or '',
             'product_id': self.product_id.id,
             'product_uom': self.product_uom.id,
-            'date': self.order_id.date_order,
+            'date': self.order_id.date_approve,
             'date_expected': self.date_planned,
             'location_id': self.order_id.partner_id.property_stock_supplier.id,
             'location_dest_id': self.order_id._get_destination_location(),
@@ -999,7 +999,7 @@ class ProcurementRule(models.Model):
     def _get_purchase_order_date(self, product_id, product_qty, product_uom, values, partner, schedule_date):
         """Return the datetime value to use as Order Date (``date_order``) for the
            Purchase Order created to satisfy the given procurement. """
-        seller = product_id._select_seller(
+        seller = product_id.with_context(force_company=values['company_id'].id)._select_seller(
             partner_id=partner,
             quantity=product_qty,
             date=fields.Date.to_string(schedule_date),
@@ -1009,7 +1009,7 @@ class ProcurementRule(models.Model):
 
     def _update_purchase_order_line(self, product_id, product_qty, product_uom, values, line, partner):
         procurement_uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
-        seller = product_id._select_seller(
+        seller = product_id.with_context(force_company=values['company_id'].id)._select_seller(
             partner_id=partner,
             quantity=line.product_qty + procurement_uom_po_qty,
             date=line.order_id.date_order and line.order_id.date_order[:10],
