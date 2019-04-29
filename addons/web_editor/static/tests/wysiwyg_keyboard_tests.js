@@ -2103,6 +2103,142 @@ var keyboardTestsComplex = [{
             start: "h1:contents()[0]->15",
         },
     },
+    {
+        name: "in ul > li > ul > 1st li > empty p (other ul li ul before): BACKSPACE at start",
+        content: '<ul><li><p>1</p></li><li class="o_indent"><ul><li><p>2</p></li></ul><ul class="o_checklist"><li id="checklist-id-1"><p><br></p></li></ul></li><li><p>3</p></li></ul>',
+        steps: [{
+            start: "p:eq(2)->0",
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<ul><li><p>1</p></li><li class="o_indent"><ul><li><p>2</p></li></ul></li><li><p>3</p></li></ul>',
+            start: "p:eq(1):contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul > li > p > text (li > text before): BACKSPACE at start",
+        content: '<ul><li>1</li><li>2</li><li><p><br></p></li><li>3</li></ul>',
+        steps: [{
+            start: "p:contents()[0]->0",
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>2</p></li><li>3</li></ul>',
+            start: "p:contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul > li > p > text (li > text before): 3x BACKSPACE after first character",
+        content: '<ul><li>1</li><li>2</li><li><p>34</p></li><li>5</li></ul>',
+        steps: [{
+            start: "p:contents()[0]->1",
+            key: 'BACKSPACE',
+        }, {
+            key: 'BACKSPACE',
+        }, {
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>4</p></li><li>5</li></ul>',
+            start: "p:contents()[0]->0",
+        },
+    },
+    {
+        name: "in ul > li > text (li > p > text before): BACKSPACE at start",
+        content: '<ul><li>1</li><li><p>2</p></li><li>3</li><li>4</li></ul>',
+        steps: [{
+            start: "li:eq(2):contents()[0]->0",
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>23</p></li><li>4</li></ul>',
+            start: "p:contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul > li > text (li > p > text before): 3x BACKSPACE after first character",
+        content: '<ul><li>1</li><li><p>2</p></li><li>34</li><li>5</li></ul>',
+        steps: [{
+            start: "li:eq(2):contents()[0]->1",
+            key: 'BACKSPACE',
+        }, {
+            key: 'BACKSPACE',
+        }, {
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>4</p></li><li>5</li></ul>',
+            start: "p:contents()[0]->0",
+        },
+    },
+    {
+        name: "in ul > li > p > text (li > text after): DELETE at end",
+        content: '<ul><li>1</li><li><p><br></p></li><li>2</li><li>3</li></ul>',
+        steps: [{
+            start: "p->0",
+            key: 'DELETE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>2</p></li><li>3</li></ul>',
+            start: "p:contents()[0]->0",
+        },
+    },
+    {
+        name: "in ul > li > p > text (li > text after): 3x DELETE before last character",
+        content: '<ul><li>1</li><li><p>23</p></li><li>4</li><li>5</li></ul>',
+        steps: [{
+            start: "p:contents()[0]->1",
+            key: 'DELETE',
+        }, {
+            key: 'DELETE',
+        }, {
+            key: 'DELETE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>2</p></li><li>5</li></ul>',
+            start: "p:contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul > li > text (li > p > text after): DELETE at end",
+        content: '<ul><li>1</li><li>2</li><li><p>3</p></li><li>4</li></ul>',
+        steps: [{
+            start: "li:eq(1):contents()[0]->1",
+            key: 'DELETE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>23</p></li><li>4</li></ul>',
+            start: "p:contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul > li > text (li > p > text after): 3x DELETE before last character",
+        content: '<ul><li>1</li><li>23</li><li><p>4</p></li><li>5</li></ul>',
+        steps: [{
+            start: "li:eq(1):contents()[0]->1",
+            key: 'DELETE',
+        }, {
+            key: 'DELETE',
+        }, {
+            key: 'DELETE',
+        }],
+        test: {
+            content: '<ul><li>1</li><li><p>2</p></li><li>5</li></ul>',
+            start: "p:contents()[0]->1",
+        },
+    },
+    {
+        name: "in ul.list-group (div > p > text before): BACKSPACE at start",
+        content: '<div><p>1</p></div><ul class="list-group list-group-flush"><li class="list-group-item"><p><br></p></li></ul>',
+        steps: [{
+            start: "p:eq(1)->0",
+            key: 'BACKSPACE',
+        }],
+        test: {
+            content: '<div><p>1</p></div><ul class="list-group list-group-flush"><li class="list-group-item"><p><br></p></li></ul>',
+            start: "p:eq(1)->0",
+        },
+    },
 ];
 
 QUnit.test('Complex', function (assert) {
