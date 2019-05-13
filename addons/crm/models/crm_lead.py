@@ -50,7 +50,7 @@ class Lead(models.Model):
     _name = "crm.lead"
     _description = "Lead/Opportunity"
     _order = "priority desc,activity_date_deadline,id desc"
-    _inherit = ['mail.thread.cc', 'mail.activity.mixin', 'utm.mixin', 'format.address.mixin', 'mail.blacklist.mixin']
+    _inherit = ['mail.thread.cc', 'mail.thread.blacklist', 'mail.activity.mixin', 'utm.mixin', 'format.address.mixin']
     _primary_email = 'email_from'
 
     def _default_probability(self):
@@ -96,9 +96,6 @@ class Lead(models.Model):
     date_last_stage_update = fields.Datetime(string='Last Stage Update', index=True, default=fields.Datetime.now)
     date_conversion = fields.Datetime('Conversion Date', readonly=True)
 
-    # Messaging and marketing
-    message_bounce = fields.Integer('Bounce', help="Counter of the number of bounced emails for this contact", default=0)
-
     # Only used for type opportunity
     probability = fields.Float('Probability', group_operator="avg", default=lambda self: self._default_probability())
     planned_revenue = fields.Monetary('Expected Revenue', currency_field='company_currency', tracking=True)
@@ -124,7 +121,7 @@ class Lead(models.Model):
     mobile = fields.Char('Mobile')
     function = fields.Char('Job Position')
     title = fields.Many2one('res.partner.title')
-    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.user.company_id.id)
+    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company_id.id)
     meeting_count = fields.Integer('# Meetings', compute='_compute_meeting_count')
     lost_reason = fields.Many2one('crm.lost.reason', string='Lost Reason', index=True, tracking=True)
 
@@ -1082,7 +1079,7 @@ class Lead(models.Model):
 
         result['done']['target'] = self.env.user.target_sales_done
         result['won']['target'] = self.env.user.target_sales_won
-        result['currency_id'] = self.env.user.company_id.currency_id.id
+        result['currency_id'] = self.env.company_id.currency_id.id
 
         return result
 
@@ -1163,17 +1160,16 @@ class Lead(models.Model):
         return view_id
 
     @api.multi
-    def message_get_default_recipients(self):
-        return {
-            r.id : {'partner_ids': [],
-                    'email_to': r.email_normalized,
-                    'email_cc': False}
-            for r in self.sudo()
-        }
+    def _message_get_default_recipients(self):
+        return {r.id: {
+            'partner_ids': [],
+            'email_to': r.email_normalized,
+            'email_cc': False}
+            for r in self}
 
     @api.multi
-    def message_get_suggested_recipients(self):
-        recipients = super(Lead, self).message_get_suggested_recipients()
+    def _message_get_suggested_recipients(self):
+        recipients = super(Lead, self)._message_get_suggested_recipients()
         try:
             for lead in self:
                 if lead.partner_id:
@@ -1229,8 +1225,8 @@ class Lead(models.Model):
         return super(Lead, self)._message_post_after_hook(message, *args, **kwargs)
 
     @api.multi
-    def message_partner_info_from_emails(self, emails, link_mail=False):
-        result = super(Lead, self).message_partner_info_from_emails(emails, link_mail=link_mail)
+    def _message_partner_info_from_emails(self, emails, link_mail=False):
+        result = super(Lead, self)._message_partner_info_from_emails(emails, link_mail=link_mail)
         for partner_info in result:
             if not partner_info.get('partner_id') and (self.partner_name or self.contact_name):
                 emails = email_re.findall(partner_info['full_name'] or '')

@@ -178,7 +178,7 @@ class Project(models.Model):
         help="If the active field is set to False, it will allow you to hide the project without removing it.")
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of Projects.")
     partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, tracking=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company_id)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
     favorite_user_ids = fields.Many2many(
@@ -191,7 +191,7 @@ class Project(models.Model):
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
     resource_calendar_id = fields.Many2one(
         'resource.calendar', string='Working Time',
-        default=lambda self: self.env.user.company_id.resource_calendar_id.id,
+        default=lambda self: self.env.company_id.resource_calendar_id.id,
         help="Timetable working hours to adjust the gantt diagram report")
     type_ids = fields.Many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', string='Tasks Stages')
     task_count = fields.Integer(compute='_compute_task_count', string="Task Count")
@@ -458,7 +458,6 @@ class Task(models.Model):
     date_assign = fields.Datetime(string='Assigning Date', index=True, copy=False, readonly=True)
     date_deadline = fields.Date(string='Deadline', index=True, copy=False, tracking=True)
     date_last_stage_update = fields.Datetime(string='Last Stage Update',
-        default=fields.Datetime.now,
         index=True,
         copy=False,
         readonly=True)
@@ -481,7 +480,7 @@ class Task(models.Model):
     manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True, related_sudo=False)
     company_id = fields.Many2one('res.company',
         string='Company',
-        default=lambda self: self.env['res.company']._company_default_get())
+        default=lambda self: self.env.company_id)
     color = fields.Integer(string='Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True, related_sudo=False)
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
@@ -669,9 +668,10 @@ class Task(models.Model):
         # user_id change: update date_assign
         if vals.get('user_id'):
             vals['date_assign'] = fields.Datetime.now()
-        # Stage change: Update date_end if folded stage
+        # Stage change: Update date_end if folded stage and date_last_stage_update
         if vals.get('stage_id'):
             vals.update(self.update_date_end(vals['stage_id']))
+            vals['date_last_stage_update'] = fields.Datetime.now()
         task = super(Task, self.with_context(context)).create(vals)
         return task
 
@@ -841,7 +841,7 @@ class Task(models.Model):
 
         task = super(Task, self.with_context(create_context)).message_new(msg, custom_values=defaults)
         email_list = task.email_split(msg)
-        partner_ids = [p for p in task._find_partner_from_emails(email_list, force_create=False) if p]
+        partner_ids = [p.id for p in self.env['mail.thread']._mail_find_partner_from_emails(email_list, records=task, force_create=False) if p]
         task.message_subscribe(partner_ids)
         return task
 
@@ -849,13 +849,13 @@ class Task(models.Model):
     def message_update(self, msg, update_vals=None):
         """ Override to update the task according to the email. """
         email_list = self.email_split(msg)
-        partner_ids = [p for p in self._find_partner_from_emails(email_list, force_create=False) if p]
+        partner_ids = [p.id for p in self.env['mail.thread']._mail_find_partner_from_emails(email_list, records=self, force_create=False) if p]
         self.message_subscribe(partner_ids)
         return super(Task, self).message_update(msg, update_vals=update_vals)
 
     @api.multi
-    def message_get_suggested_recipients(self):
-        recipients = super(Task, self).message_get_suggested_recipients()
+    def _message_get_suggested_recipients(self):
+        recipients = super(Task, self)._message_get_suggested_recipients()
         for task in self:
             if task.partner_id:
                 reason = _('Customer Email') if task.partner_id.email else _('Customer')

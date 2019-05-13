@@ -110,7 +110,7 @@ class Applicant(models.Model):
             department = self.env['hr.department'].browse(self._context['default_department_id'])
             company_id = department.company_id.id
         if not company_id:
-            company_id = self.env['res.company']._company_default_get('hr.applicant')
+            company_id = self.env.company_id
         return company_id
 
     name = fields.Char("Subject / Application Name", required=True)
@@ -381,8 +381,8 @@ class Applicant(models.Model):
         return res
 
     @api.multi
-    def message_get_suggested_recipients(self):
-        recipients = super(Applicant, self).message_get_suggested_recipients()
+    def _message_get_suggested_recipients(self):
+        recipients = super(Applicant, self)._message_get_suggested_recipients()
         for applicant in self:
             if applicant.partner_id:
                 applicant._message_add_suggested_recipient(recipients, partner=applicant.partner_id, reason=_('Contact'))

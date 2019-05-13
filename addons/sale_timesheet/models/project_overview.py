@@ -26,7 +26,7 @@ class Project(models.Model):
         return values
 
     def _plan_prepare_values(self):
-        currency = self.env.user.company_id.currency_id
+        currency = self.env.company_id.currency_id
         uom_hour = self.env.ref('uom.product_uom_hour')
         hour_rounding = uom_hour.rounding
         billable_types = ['non_billable', 'non_billable_project', 'billable_time', 'billable_fixed']
@@ -194,7 +194,7 @@ class Project(models.Model):
                         rows_sale_line[sale_line_row_key][-1] = 0
 
         rows_sale_order = {}  # so -> [INFO, before, M1, M2, M3, Done, M3, M4, M5, After, Forecasted]
-        rows_sale_order_done_sold = dict.fromkeys(set(map_sol_so.values()) | set([None]), dict(sold=0.0, done=0.0))  # SO id -> {'sold':0.0, 'done': 0.0}
+        rows_sale_order_done_sold = {key : dict(sold=0.0, done=0.0) for key in set(map_sol_so.values()) | set([None])}  # SO id -> {'sold':0.0, 'done': 0.0}
         for row_key, row_sale_line in rows_sale_line.items():
             sale_order_id = row_key[0]
             # sale order row

@@ -338,12 +338,12 @@ class Channel(models.Model):
         return res
 
     @api.multi
-    def message_receive_bounce(self, email, partner, mail_id=None):
+    def _message_receive_bounce(self, email, partner, mail_id=None):
         """ Override bounce management to unsubscribe bouncing addresses """
         for p in partner:
             if p.message_bounce >= self.MAX_BOUNCE_LIMIT:
                 self._action_unfollow(p)
-        return super(Channel, self).message_receive_bounce(email, partner, mail_id=mail_id)
+        return super(Channel, self)._message_receive_bounce(email, partner, mail_id=mail_id)
 
     @api.multi
     def _notify_email_recipients(self, message, recipient_ids):
@@ -616,8 +616,9 @@ class Channel(models.Model):
                 if channel.channel_type == 'chat':
                     # direct_partner should be removed from channel info since we can find it from members and channel_type
                     # we keep it know to avoid change tests and javascript
-                    direct_partner = direct_channel_partners.filtered(lambda pc: pc.partner_id.id != self.env.user.partner_id.id)
-                    info['direct_partner'] = [partner_infos[direct_partner[0].partner_id.id]]
+                    direct_partner = channel_partners.filtered(lambda pc: pc.partner_id.id != self.env.user.partner_id.id)
+                    if direct_partner:
+                        info['direct_partner'] = [partner_infos[direct_partner[0].partner_id.id]]
                 # add needaction and unread counter, since the user is logged
                 info['message_needaction_counter'] = channel.message_needaction_counter
                 info['message_unread_counter'] = channel.message_unread_counter

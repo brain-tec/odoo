@@ -657,8 +657,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # read property as superuser, as the current user may not have access
         context = records.env.context
         if 'force_company' not in context:
-            field_id = records.env['ir.model.fields']._get_id(self.model_name, self.name)
-            company = records.env['res.company']._company_default_get(self.model_name, field_id)
+            company = records.env.company_id
             context = dict(context, force_company=company.id)
         Property = records.env(user=SUPERUSER_ID, context=context)['ir.property']
         values = Property.get_multi(self.name, self.model_name, records.ids)
@@ -669,8 +668,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # update property as superuser, as the current user may not have access
         context = records.env.context
         if 'force_company' not in context:
-            field_id = records.env['ir.model.fields']._get_id(self.model_name, self.name)
-            company = records.env['res.company']._company_default_get(self.model_name, field_id)
+            company = records.env.company_id
             context = dict(context, force_company=company.id)
         Property = records.env(user=SUPERUSER_ID, context=context)['ir.property']
         values = {
@@ -2266,8 +2264,8 @@ class _RelationalMulti(_Relational):
         elif isinstance(value, (list, tuple)):
             # value is a list/tuple of commands, dicts or record ids
             comodel = record.env[self.comodel_name]
-            # determine the value ids; by convention empty on new records
-            ids = OrderedSet(record[self.name].ids if record.id else ())
+            # determine the value ids
+            ids = OrderedSet(record[self.name]._ids)
             # modify ids with the commands
             for command in value:
                 if isinstance(command, (tuple, list)):
