@@ -30,6 +30,9 @@ MailManager.include({
     getImStatus: function (data) {
         var self = this;
         var partnerID = data.partnerID;
+        if (partnerID === this.getOdoobotID()[0]) {
+            return 'bot';
+        }
         if (!this._imStatus[partnerID]) {
             // Add to list to call it in next bus update or _fetchMissingImStatus
             this._imStatus[partnerID] = undefined;
@@ -84,9 +87,8 @@ MailManager.include({
             return $.when();
         }
         return this._rpc({
-            model: 'res.partner',
-            method: 'read',
-            args: [partnerIDs, ['id', 'im_status']],
+            route: '/longpolling/im_status',
+            params: { partner_ids: partnerIDs },
         }).then( function (results) {
             self.updateImStatus(results);
         });
