@@ -227,7 +227,8 @@ class Attendee(models.Model):
         """ Marks event invitation as Accepted. """
         result = self.write({'state': 'accepted'})
         for attendee in self:
-            attendee.event_id.message_post(body=_("%s has accepted invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
+            if attendee.event_id:
+                attendee.event_id.message_post(body=_("%s has accepted invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
         return result
 
     @api.multi
@@ -235,7 +236,8 @@ class Attendee(models.Model):
         """ Marks event invitation as Declined. """
         res = self.write({'state': 'declined'})
         for attendee in self:
-            attendee.event_id.message_post(body=_("%s has declined invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
+            if attendee.event_id:
+                attendee.event_id.message_post(body=_("%s has declined invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
         return res
 
 
@@ -1238,10 +1240,10 @@ class Meeting(models.Model):
         """ Compute rule string according to value type RECUR of iCalendar
             :return: string containing recurring rule (empty if no rule)
         """
-        if self.interval and self.interval < 0:
-            raise UserError(_('interval cannot be negative.'))
-        if self.count and self.count <= 0:
-            raise UserError(_('Event recurrence interval cannot be negative.'))
+        if self.interval <= 0:
+            raise UserError(_('The interval cannot be negative.'))
+        if self.end_type == 'count' and self.count <= 0:
+            raise UserError(_('The number of repetitions  cannot be negative.'))
 
         def get_week_string(freq):
             weekdays = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']

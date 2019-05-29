@@ -103,12 +103,12 @@ class EventEvent(models.Model):
         readonly=False, states={'done': [('readonly', True)]})
     company_id = fields.Many2one(
         'res.company', string='Company', change_default=True,
-        default=lambda self: self.env.company_id,
+        default=lambda self: self.env.company,
         required=False, readonly=False, states={'done': [('readonly', True)]})
     organizer_id = fields.Many2one(
         'res.partner', string='Organizer',
         tracking=True,
-        default=lambda self: self.env.company_id.partner_id)
+        default=lambda self: self.env.company.partner_id)
     event_type_id = fields.Many2one(
         'event.type', string='Category',
         readonly=False, states={'done': [('readonly', True)]},
@@ -167,7 +167,7 @@ class EventEvent(models.Model):
     is_online = fields.Boolean('Online Event')
     address_id = fields.Many2one(
         'res.partner', string='Location',
-        default=lambda self: self.env.company_id.partner_id,
+        default=lambda self: self.env.company.partner_id,
         readonly=False, states={'done': [('readonly', True)]},
         tracking=True)
     country_id = fields.Many2one('res.country', 'Country',  related='address_id.country_id', store=True, readonly=False)
@@ -503,7 +503,7 @@ class EventRegistration(models.Model):
             'email_cc': False}
             for r in self}
 
-    def _message_post_after_hook(self, message, *args, **kwargs):
+    def _message_post_after_hook(self, message, msg_vals):
         if self.email and not self.partner_id:
             # we consider that posting a message with a specified recipient (not a follower, a specific one)
             # on a document without customer means that it was created through the chatter using
@@ -515,7 +515,7 @@ class EventRegistration(models.Model):
                     ('email', '=', new_partner.email),
                     ('state', 'not in', ['cancel']),
                 ]).write({'partner_id': new_partner.id})
-        return super(EventRegistration, self)._message_post_after_hook(message, *args, **kwargs)
+        return super(EventRegistration, self)._message_post_after_hook(message, msg_vals)
 
     @api.multi
     def action_send_badge_email(self):

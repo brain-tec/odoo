@@ -66,7 +66,7 @@ class GoalDefinition(models.Model):
             items = []
 
             if goal.monetary:
-                items.append(self.env.company_id.currency_id.symbol or u'¤')
+                items.append(self.env.company.currency_id.symbol or u'¤')
             if goal.suffix:
                 items.append(goal.suffix)
 
@@ -222,12 +222,11 @@ class Goal(models.Model):
                            .get_email_template(self.id)
         body_html = self.env['mail.template'].with_context(template._context)\
             ._render_template(template.body_html, 'gamification.goal', self.id)
-        # TDE NOTE: should be a notification (see with xdo)
-        self.env['mail.thread'].message_post(
+        self.message_notify(
             body=body_html,
             partner_ids=[self.user_id.partner_id.id],
             subtype='mail.mt_comment',
-            notif_layout='mail.mail_notification_light',
+            email_layout_xmlid='mail.mail_notification_light',
         )
 
         return {'to_update': True}
