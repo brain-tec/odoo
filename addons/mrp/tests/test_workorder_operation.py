@@ -88,7 +88,6 @@ class TestWorkOrderProcess(TestMrpCommon):
         # --------------------
         inventory = self.env['stock.inventory'].create({
             'name': 'Inventory Product Table',
-            'filter': 'partial',
             'line_ids': [(0, 0, {
                 'product_id': product_table_sheet.id,
                 'product_uom_id': product_table_sheet.uom_id.id,
@@ -114,6 +113,7 @@ class TestWorkOrderProcess(TestMrpCommon):
                 'location_id': self.source_location_id
             })]
         })
+        inventory.action_start()
         inventory.action_validate()
 
         # Create work order
@@ -195,7 +195,6 @@ class TestWorkOrderProcess(TestMrpCommon):
         # --------------------
         inventory = self.env['stock.inventory'].create({
             'name': 'Inventory Product Table',
-            'filter': 'partial',
             'line_ids': [(0, 0, {
                 'product_id': product_table_sheet.id,
                 'product_uom_id': product_table_sheet.uom_id.id,
@@ -216,6 +215,7 @@ class TestWorkOrderProcess(TestMrpCommon):
                 'location_id': self.source_location_id
             })]
         })
+        inventory.action_start()
         inventory.action_validate()
 
         # Create work order
@@ -307,11 +307,11 @@ class TestWorkOrderProcess(TestMrpCommon):
         man_order = man_order_form.save()
         # reset quantities
         self.product_1.type = "product"
-        self.env['stock.change.product.qty'].create({
+        self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.product_1.id,
-            'new_quantity': 0.0,
+            'inventory_quantity': 0.0,
             'location_id': self.warehouse_1.lot_stock_id.id,
-        }).change_product_qty()
+        })
 
         (self.product_2 | self.product_4).write({
             'tracking': 'none',
@@ -344,7 +344,6 @@ class TestWorkOrderProcess(TestMrpCommon):
         # refuel stock
         inventory = self.env['stock.inventory'].create({
             'name': 'Inventory For Product C',
-            'filter': 'partial',
             'line_ids': [(0, 0, {
                 'product_id': self.product_2.id,
                 'product_uom_id': self.product_2.uom_id.id,
@@ -487,7 +486,6 @@ class TestWorkOrderProcess(TestMrpCommon):
         # --------------------
         inventory = self.env['stock.inventory'].create({
             'name': 'Inventory Product Table',
-            'filter': 'partial',
             'line_ids': [(0, 0, {
                 'product_id': product_charger.id,
                 'product_uom_id': product_charger.uom_id.id,
@@ -502,7 +500,7 @@ class TestWorkOrderProcess(TestMrpCommon):
                 'location_id': self.source_location_id
             })]
         })
-        # inventory.action_start()
+        inventory.action_start()
         inventory.action_validate()
 
         # Check consumed move status
@@ -662,7 +660,6 @@ class TestWorkOrderProcess(TestMrpCommon):
         # ----------------
         inventory = self.env['stock.inventory'].create({
             'name': 'Inventory Product B and C',
-            'filter': 'partial',
             'line_ids': [(0, 0, {
                 'product_id': product_B.id,
                 'product_uom_id': product_B.uom_id.id,
@@ -677,7 +674,7 @@ class TestWorkOrderProcess(TestMrpCommon):
                 'location_id': self.source_location_id
             })]
         })
-        # inventory.action_start()
+        inventory.action_start()
         inventory.action_validate()
 
         # Start Production ...
