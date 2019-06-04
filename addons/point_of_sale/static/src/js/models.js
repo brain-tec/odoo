@@ -181,7 +181,7 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'res.company',
-        fields: [ 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id' , 'country_id', 'tax_calculation_rounding_method'],
+        fields: [ 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id' , 'country_id', 'state_id', 'tax_calculation_rounding_method'],
         ids:    function(self){ return [self.user.company_id[0]]; },
         loaded: function(self,companies){ self.company = companies[0]; },
     },{
@@ -214,6 +214,12 @@ exports.PosModel = Backbone.Model.extend({
         loaded: function(self,partners){
             self.partners = partners;
             self.db.add_partners(partners);
+        },
+    },{
+        model:  'res.country.state',
+        fields: ['name', 'country_id'],
+        loaded: function(self,states){
+            self.states = states;
         },
     },{
         model:  'res.country',
@@ -262,10 +268,6 @@ exports.PosModel = Backbone.Model.extend({
                                     self.config.iface_scan_via_proxy   ||
                                     self.config.iface_cashdrawer       ||
                                     self.config.iface_customer_facing_display;
-
-            if (self.config.company_id[0] !== self.user.company_id[0]) {
-                throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));
-            }
 
             self.db.set_uuid(self.config.uuid);
             self.set_cashier(self.get_cashier());
@@ -345,7 +347,7 @@ exports.PosModel = Backbone.Model.extend({
                  'product_tmpl_id','tracking'],
         order:  _.map(['sequence','default_code','name'], function (name) { return {name: name}; }),
         domain: function(self){
-            var domain = [['sale_ok','=',true],['available_in_pos','=',true]];
+            var domain = [['sale_ok','=',true],['available_in_pos','=',true],'|',['company_id','=',self.config.company_id[0]],['company_id','=',false]];
             if (self.config.limit_categories &&  self.config.iface_available_categ_ids.length) {
                 domain.push(['pos_categ_id', 'in', self.config.iface_available_categ_ids]);
             }

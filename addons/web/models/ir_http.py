@@ -3,7 +3,7 @@
 import hashlib
 import json
 
-from odoo import models
+from odoo import api, models
 from odoo.http import request
 from odoo.tools import ustr
 
@@ -56,12 +56,21 @@ class Http(models.AbstractModel):
             "web.base.url": self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
             "show_effect": True,
             "display_switch_company_menu": user.has_group('base.group_multi_company') and len(user.company_ids) > 1,
-            "toggle_company": user.has_group('base.group_toggle_company'),
             "cache_hashes": {
                 "load_menus": hashlib.sha1(menu_json_utf8).hexdigest(),
                 "qweb": qweb_checksum,
                 "translations": hashlib.sha1(translations_json_utf8).hexdigest(),
             },
+        }
+
+    @api.model
+    def get_frontend_session_info(self):
+        return {
+            'is_admin': self.env.user._is_admin(),
+            'is_system': self.env.user._is_system(),
+            'is_website_user': self.env.user._is_public(),
+            'user_id': self.env.user.id,
+            'is_frontend': True,
         }
 
     def get_currencies(self):
