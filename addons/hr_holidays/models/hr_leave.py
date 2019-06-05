@@ -340,7 +340,7 @@ class HolidaysRequest(models.Model):
     def _onchange_type(self):
         if self.holiday_type == 'employee':
             if not self.employee_id:
-                self.employee_id = self.env.user.employee_ids[:1].id
+                self.employee_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1).id
             self.mode_company_id = False
             self.category_id = False
         elif self.holiday_type == 'company':
@@ -353,7 +353,7 @@ class HolidaysRequest(models.Model):
             self.mode_company_id = False
             self.category_id = False
             if not self.department_id:
-                self.department_id = self.env.user.employee_ids[:1].department_id.id
+                self.department_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1).department_id.id
         elif self.holiday_type == 'category':
             self.employee_id = False
             self.mode_company_id = False
@@ -384,11 +384,15 @@ class HolidaysRequest(models.Model):
         for holiday in self:
             holiday.number_of_days_display = holiday.number_of_days
 
+    def _get_calendar(self):
+        self.ensure_one()
+        return self.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+
     @api.multi
     @api.depends('number_of_days')
     def _compute_number_of_hours_display(self):
         for holiday in self:
-            calendar = holiday.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+            calendar = holiday._get_calendar()
             if holiday.date_from and holiday.date_to:
                 number_of_hours = calendar.get_work_hours_count(holiday.date_from, holiday.date_to)
                 holiday.number_of_hours_display = number_of_hours or (holiday.number_of_days * HOURS_PER_DAY)
