@@ -266,6 +266,11 @@ class HolidaysRequest(models.Model):
         self.request_unit_hours = False
         self.request_unit_custom = False
 
+    @api.onchange('user_id')
+    def _onchange_user_id(self):
+        if not self.out_of_office_message:
+            self.out_of_office_message = self.user_id.out_of_office_message
+
     @api.onchange('request_date_from_period', 'request_hour_from', 'request_hour_to',
                   'request_date_from', 'request_date_to',
                   'employee_id')
@@ -576,6 +581,10 @@ class HolidaysRequest(models.Model):
 
     @api.multi
     def write(self, values):
+        # Allow an employee to always write his own out of office message
+        if len(self) == 1 and values.keys() == {'out_of_office_message'} and self.employee_id.user_id == self.env.user:
+            return super(HolidaysRequest, self.sudo()).write(values)
+
         employee_id = values.get('employee_id', False)
         if not self.env.context.get('leave_fast_create') and values.get('state'):
             self._check_approval_update(values['state'])
