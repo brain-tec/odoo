@@ -314,7 +314,7 @@ class MrpBomLine(models.Model):
         if not self.parent_product_tmpl_id:
             return {}
         return {'domain': {'attribute_value_ids': [
-            ('id', 'in', self.parent_product_tmpl_id._get_valid_product_attribute_values().ids),
+            ('id', 'in', self.parent_product_tmpl_id.valid_product_attribute_value_ids.ids),
             ('attribute_id.create_variant', '!=', 'no_variant')
         ]}}
 
@@ -351,7 +351,6 @@ class MrpBomLine(models.Model):
             'view_id': attachment_view.id,
             'views': [(attachment_view.id, 'kanban'), (False, 'form')],
             'view_mode': 'kanban,tree,form',
-            'view_type': 'form',
             'help': _('''<p class="o_view_nocontent_smiling_face">
                         Upload files to your product
                     </p><p>
