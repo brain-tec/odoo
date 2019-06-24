@@ -489,7 +489,16 @@ class MailTemplate(models.Model):
                 values = results[res_id]
                 # body: add user signature, sanitize
                 if 'body_html' in fields and template.user_signature:
-                    signature = self.env.user.signature
+                    if self.env[template.model].browse(res_id).company_id:
+                        company_id = self.env[template.model].browse(
+                            res_id).company_id.id
+                    else:
+                        company_id = self.env.user.company_id.id
+                    res_users_obj_sudo = self.env[
+                        'res.users'].sudo().with_context(
+                        force_company=company_id)
+                    # compute signature
+                    signature = res_users_obj_sudo.browse(self.env.user.id).signature
                     if signature:
                         values['body_html'] = tools.append_content_to_html(values['body_html'], signature, plaintext=False)
                 if values.get('body_html'):

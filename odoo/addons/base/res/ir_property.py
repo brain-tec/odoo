@@ -17,6 +17,7 @@ TYPE2FIELD = {
     'date': 'value_datetime',
     'datetime': 'value_datetime',
     'selection': 'value_text',
+    'html': 'value_text',
 }
 
 
@@ -43,6 +44,7 @@ class Property(models.Model):
                              ('date', 'Date'),
                              ('datetime', 'DateTime'),
                              ('selection', 'Selection'),
+                             ('html', 'Html'),
                              ],
                             required=True,
                             default='many2one',
@@ -95,7 +97,7 @@ class Property(models.Model):
     @api.multi
     def get_by_record(self):
         self.ensure_one()
-        if self.type in ('char', 'text', 'selection'):
+        if self.type in ('char', 'text', 'selection', 'html'):
             return self.value_text
         elif self.type == 'float':
             return self.value_float
