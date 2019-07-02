@@ -414,7 +414,9 @@ class Product(models.Model):
     def action_open_quants(self):
         location_domain = self._get_domain_locations()[0]
         domain = expression.AND([[('product_id', 'in', self.ids)], location_domain])
-        self = self.with_context(hide_location=not self.user_has_groups('stock.group_stock_multi_locations'))
+        hide_location = not self.user_has_groups('stock.group_stock_multi_locations')
+        hide_lot = all([product.tracking == 'none' for product in self])
+        self = self.with_context(hide_location=hide_location, hide_lot=hide_lot)
 
         # If user have rights to write on quant, we define the view as editable.
         if self.user_has_groups('stock.group_stock_manager'):
@@ -427,15 +429,18 @@ class Product(models.Model):
                 )
                 if warehouse:
                     self = self.with_context(default_location_id=warehouse.lot_stock_id.id)
-            # Set default product id if quants concern only one product
-            if len(self) == 1:
-                self = self.with_context(
-                    default_product_id=self.id,
-                    single_product=True
-                )
-            else:
-                self = self.with_context(product_tmpl_id=self.product_tmpl_id.id)
+        # Set default product id if quants concern only one product
+        if len(self) == 1:
+            self = self.with_context(
+                default_product_id=self.id,
+                single_product=True
+            )
+        else:
+            self = self.with_context(product_tmpl_id=self.product_tmpl_id.id)
         return self.env['stock.quant']._get_quants_action(domain)
+
+    def action_update_quantity_on_hand(self):
+        return self.product_tmpl_id.with_context({'default_product_id': self.id}).action_update_quantity_on_hand()
 
     @api.model
     def get_theoretical_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, to_uom=None):
@@ -641,6 +646,25 @@ class ProductTemplate(models.Model):
 
     def action_open_quants(self):
         return self.product_variant_ids.action_open_quants()
+
+    def action_update_quantity_on_hand(self):
+        advanced_option_groups = [
+            'stock.group_stock_multi_locations',
+            'stock.group_production_lot',
+            'stock.group_tracking_owner',
+            'product.group_stock_packaging'
+        ]
+        if (self.env.user.user_has_groups(','.join(advanced_option_groups))):
+            return self.action_open_quants()
+        else:
+            default_product_id = len(self.product_variant_ids) == 1 and self.product_variant_id.id
+            action = self.env.ref('stock.action_change_product_quantity').read()[0]
+            action['context'] = dict(
+                self.env.context,
+                default_product_id=default_product_id,
+                default_product_tmpl_id=self.id
+            )
+            return action
 
     def action_view_related_putaway_rules(self):
         self.ensure_one()
