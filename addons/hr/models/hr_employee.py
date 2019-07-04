@@ -6,7 +6,7 @@ from random import choice
 from string import digits
 from werkzeug import url_encode
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
+from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, AccessError
 from odoo.modules.module import get_module_resource
 
@@ -158,7 +158,7 @@ class HrEmployeePrivate(models.Model):
     def get_formview_id(self, access_uid=None):
         """ Override this method in order to redirect many2one towards the right model depending on access_uid """
         if access_uid:
-            self_sudo = self.sudo(access_uid)
+            self_sudo = self.with_user(access_uid)
         else:
             self_sudo = self
 
@@ -172,7 +172,7 @@ class HrEmployeePrivate(models.Model):
         """ Override this method in order to redirect many2one towards the right model depending on access_uid """
         res = super(HrEmployeePrivate, self).get_formview_action(access_uid=access_uid)
         if access_uid:
-            self_sudo = self.sudo(access_uid)
+            self_sudo = self.with_user(access_uid)
         else:
             self_sudo = self
 
@@ -322,8 +322,8 @@ class HrEmployeePrivate(models.Model):
         to post messages as the correct user.
         """
         real_user = self.env.context.get('binary_field_real_user')
-        if self.env.user.id == SUPERUSER_ID and real_user:
-            self = self.sudo(real_user)
+        if self.env.is_superuser() and real_user:
+            self = self.with_user(real_user)
         return self
 
     def _message_log(self, **kwargs):

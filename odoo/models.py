@@ -1679,7 +1679,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         access_rights_uid = name_get_uid or self._uid
         ids = self._search(args, limit=limit, access_rights_uid=access_rights_uid)
         recs = self.browse(ids)
-        return lazy_name_get(recs.sudo(access_rights_uid))
+        return lazy_name_get(recs.with_user(access_rights_uid))
 
     @api.model
     def _add_missing_default_values(self, values):
@@ -2703,7 +2703,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for fname, field in self._fields.items():
             if allfields and fname not in allfields:
                 continue
-            if field.groups and not self.user_has_groups(field.groups):
+            if field.groups and not self.env.su and not self.user_has_groups(field.groups):
                 continue
 
             description = field.get_description(self.env)
@@ -2735,7 +2735,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         fields (as is if the fields is not falsy, or the readable/writable
         fields if fields is falsy).
         """
-        if self._uid == SUPERUSER_ID:
+        if self.env.su:
             return fields or list(self._fields)
 
         def valid(fname):
@@ -2922,7 +2922,7 @@ Fields:
             return
 
         env = self.env
-        cr, user, context = env.args
+        cr, user, context, su = env.args
 
         # make a query object for selecting ids, and apply security rules to it
         param_ids = object()
@@ -3103,7 +3103,7 @@ Fields:
            :raise UserError: * if current ir.rules do not permit this operation.
            :return: None if the operation is allowed
         """
-        if self._uid == SUPERUSER_ID:
+        if self.env.su:
             return
 
         invalid = self - self._filter_access_rules(operation)
@@ -3135,7 +3135,7 @@ Fields:
 
     def _filter_access_rules(self, operation):
         """ Return the subset of ``self`` for which ``operation`` is allowed. """
-        if self._uid == SUPERUSER_ID:
+        if self.env.su:
             return self
 
         if not self._ids:
@@ -3337,7 +3337,7 @@ Fields:
         bad_names = {'id', 'parent_path'}
         if self._log_access:
             # the superuser can set log_access fields while loading registry
-            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            if not(self.env.su and not self.pool.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
 
         # distribute fields into sets for various purposes
@@ -3579,7 +3579,7 @@ Fields:
         bad_names = {'id', 'parent_path'}
         if self._log_access:
             # the superuser can set log_access fields while loading registry
-            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            if not(self.env.su and not self.pool.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
         unknown_names = set()
 
@@ -3995,7 +3995,7 @@ Fields:
 
            :param query: the current query object
         """
-        if self._uid == SUPERUSER_ID:
+        if self.env.su:
             return
 
         def apply_rule(clauses, params, tables, parent_model=None):
@@ -4176,7 +4176,8 @@ Fields:
                                   (not for ir.rules, this is only for ir.model.access)
         :return: a list of record ids or an integer (if count is True)
         """
-        self.sudo(access_rights_uid or self._uid).check_access_rights('read')
+        model = self.with_user(access_rights_uid) if access_rights_uid else self
+        model.check_access_rights('read')
 
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
@@ -4813,14 +4814,12 @@ Fields:
         """
         return self._browse(env, self._ids, self._prefetch_ids)
 
-    def sudo(self, user=SUPERUSER_ID):
-        """ sudo([user=SUPERUSER])
+    def sudo(self, flag=True):
+        """ sudo([flag=True])
 
-        Returns a new version of this recordset attached to the provided
-        user.
-
-        By default this returns a ``SUPERUSER`` recordset, where access
-        control and record rules are bypassed.
+        Returns a new version of this recordset with superuser mode enabled or
+        disabled, depending on `flag`. The superuser mode does not change the
+        current user, and simply bypasses access rights checks.
 
         .. note::
 
@@ -4842,7 +4841,19 @@ Fields:
             The returned recordset has the same prefetch object as ``self``.
 
         """
-        return self.with_env(self.env(user=user))
+        if not isinstance(flag, bool):
+            _logger.warning("deprecated use of sudo(user), use with_user(user) instead", stack_info=True)
+            return self.with_user(flag)
+        return self.with_env(self.env(su=flag))
+
+    def with_user(self, user):
+        """ with_user(user)
+
+        Return a new version of this recordset attached to the given user, in
+        non-superuser mode, unless `user` is the superuser (by convention, the
+        superuser is always in superuser mode.)
+        """
+        return self.with_env(self.env(user=user, su=False))
 
     def with_context(self, *args, **kwargs):
         """ with_context([context][, **overrides]) -> records

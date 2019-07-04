@@ -659,7 +659,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if 'force_company' not in context:
             company = records.env.company
             context = dict(context, force_company=company.id)
-        Property = records.env(user=SUPERUSER_ID, context=context)['ir.property']
+        Property = records.env(context=context, su=True)['ir.property']
         values = Property.get_multi(self.name, self.model_name, records.ids)
         for record in records:
             record[self.name] = values.get(record.id)
@@ -670,7 +670,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if 'force_company' not in context:
             company = records.env.company
             context = dict(context, force_company=company.id)
-        Property = records.env(user=SUPERUSER_ID, context=context)['ir.property']
+        Property = records.env(context=context, su=True)['ir.property']
         values = {
             record.id: self.convert_to_write(record[self.name], record)
             for record in records
@@ -1124,7 +1124,7 @@ class Field(MetaField('DummyField', (object,), {})):
     def determine_draft_value(self, record):
         """ Determine the value of ``self`` for the given draft ``record``. """
         if self.compute:
-            if self.compute_sudo and record.env.uid != SUPERUSER_ID:
+            if self.compute_sudo and not record.env.su:
                 record_sudo = record.sudo()
                 copy_cache(record, record_sudo.env)
                 self.compute_value(record_sudo)
@@ -1824,7 +1824,7 @@ class Binary(Field):
             decoded_value = base64.b64decode(value)
             # Full mimetype detection
             if (guess_mimetype(decoded_value).startswith('image/svg') and
-                    not record.env.user._is_system()):
+                    not record.env.is_system()):
                 raise UserError(_("Only admins can upload SVG files."))
         if isinstance(value, bytes):
             return psycopg2.Binary(value)
@@ -2929,6 +2929,5 @@ def prefetch_value_ids(record, field):
 
 
 # imported here to avoid dependency cycle issues
-from odoo import SUPERUSER_ID
 from .exceptions import AccessError, MissingError, UserError
 from .models import check_pg_name, BaseModel, NewId, IdType

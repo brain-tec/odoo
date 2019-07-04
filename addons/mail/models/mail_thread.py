@@ -1044,7 +1044,7 @@ class MailThread(models.AbstractModel):
 
                 # disabled subscriptions during message_new/update to avoid having the system user running the
                 # email gateway become a follower of all inbound messages
-                MessageModel = Model.sudo(user_id).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
+                MessageModel = Model.with_user(user_id).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
                 if thread_id and hasattr(MessageModel, 'message_update'):
                     thread = MessageModel.browse(thread_id)
                     thread.message_update(message_dict)
@@ -1929,8 +1929,12 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         if author_id:
             author = self.env['res.partner'].sudo().browse(author_id)
-        else:
+        elif self.env.user.email:
             author = self.env.user.partner_id
+            author_id = author.id
+        else:
+            # the current user has no email address (like the public user)
+            author = self.env.user.browse(SUPERUSER_ID).partner_id
             author_id = author.id
 
         if not author.email:
@@ -2189,7 +2193,7 @@ class MailThread(models.AbstractModel):
         if msg_vals.get('tracking_value_ids', True) if msg_vals else bool(self): # could be tracking
             for tracking_value in self.env['mail.tracking.value'].sudo().search([('mail_message_id', '=', message.id)]):
                 groups = tracking_value.field_groups
-                if not groups or self.user_has_groups(groups):
+                if not groups or self.env.is_superuser() or self.user_has_groups(groups):
                     tracking.append((tracking_value.field_desc,
                                     tracking_value.get_old_display_value()[0],
                                     tracking_value.get_new_display_value()[0]))

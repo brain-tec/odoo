@@ -9,7 +9,7 @@ from operator import itemgetter
 from email.utils import formataddr
 from openerp.http import request
 
-from odoo import _, api, fields, models, modules, SUPERUSER_ID, tools
+from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
 from odoo.tools import groupby
@@ -352,7 +352,7 @@ class Message(models.Model):
         tracking_tree = dict.fromkeys(tracking_values.ids, False)
         for tracking in tracking_values:
             groups = tracking.field_groups
-            if not groups or self.user_has_groups(groups):
+            if not groups or self.env.is_superuser() or self.user_has_groups(groups):
                 message_to_tracking.setdefault(tracking.mail_message_id.id, list()).append(tracking.id)
                 tracking_tree[tracking.id] = {
                     'id': tracking.id,
@@ -637,7 +637,7 @@ class Message(models.Model):
         - otherwise: remove the id
         """
         # Rules do not apply to administrator
-        if self._uid == SUPERUSER_ID:
+        if self.env.is_superuser():
             return super(Message, self)._search(
                 args, offset=offset, limit=limit, order=order,
                 count=count, access_rights_uid=access_rights_uid)
@@ -658,7 +658,7 @@ class Message(models.Model):
         model_ids = {}
 
         # check read access rights before checking the actual rules on the given ids
-        super(Message, self.sudo(access_rights_uid or self._uid)).check_access_rights('read')
+        super(Message, self.with_user(access_rights_uid or self._uid)).check_access_rights('read')
 
         self._cr.execute("""
             SELECT DISTINCT m.id, m.model, m.res_id, m.author_id, m.message_type,
@@ -739,7 +739,7 @@ class Message(models.Model):
                     model_record_ids.setdefault(vals['model'], set()).add(vals['res_id'])
             return model_record_ids
 
-        if self._uid == SUPERUSER_ID:
+        if self.env.is_superuser():
             return
         # Non employees see only messages with a subtype (aka, not internal logs)
         if not self.env['res.users'].has_group('base.group_user'):

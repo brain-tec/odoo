@@ -579,7 +579,7 @@ class Partner(models.Model):
 
         result = True
         # To write in SUPERUSER on field is_company and avoid access rights problems.
-        if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.uid == SUPERUSER_ID:
+        if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.su:
             result = super(Partner, self.sudo()).write({'is_company': vals.get('is_company')})
             del vals['is_company']
         result = result and super(Partner, self).write(vals)
@@ -767,7 +767,7 @@ class Partner(models.Model):
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        self = self.sudo(name_get_uid or self.env.uid)
+        self = self.with_user(name_get_uid or self.env.uid)
         if args is None:
             args = []
         if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
