@@ -385,10 +385,11 @@ class MailTemplate(models.Model):
             if 'company_id' in self.env[model]._fields and record.company_id:
                 res_users_obj_sudo = self.env['res.users'].sudo().with_context(
                     force_company=record.company_id.id)
-                if record.user_id:
+                if 'user_id' in self.env[model]._fields and record.user_id:
                     object_user_signature = res_users_obj_sudo.browse(
                         record.user_id.id).signature
-                if record.create_uid:
+                if 'create_uid' in self.env[model]._fields and \
+                        record.create_uid:
                     object_create_user_signature = res_users_obj_sudo.browse(
                         record.create_uid.id).signature
                 current_user_signature = res_users_obj_sudo.browse(

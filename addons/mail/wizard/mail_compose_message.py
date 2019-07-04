@@ -355,7 +355,8 @@ class MailComposer(models.TransientModel):
             if template.mail_server_id:
                 values['mail_server_id'] = template.mail_server_id.id
             if template.user_signature and 'body_html' in values:
-                if self.env[model].browse(res_id).company_id:
+                if 'company_id' in self.env[model]._fields and \
+                        self.env[model].browse(res_id).company_id:
                     company_id = self.env[template.model].browse(
                         res_id).company_id.id
                 else:
