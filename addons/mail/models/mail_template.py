@@ -372,6 +372,34 @@ class MailTemplate(models.Model):
         }
         for res_id, record in res_to_rec.iteritems():
             variables['object'] = record
+            # object company dependent user signatures
+            object_create_user_signature = False
+            object_user_signature = False
+            if 'user_id' in self.env[model]._fields:
+                object_user_signature = record.user_id and \
+                    record.user_id.signature or False
+            if 'create_uid' in self.env[model]._fields:
+                object_create_user_signature = record.create_uid and \
+                    record.create_uid.signature or False
+            current_user_signature = self.env.user.signature or False
+            if 'company_id' in self.env[model]._fields and record.company_id:
+                res_users_obj_sudo = self.env['res.users'].sudo().with_context(
+                    force_company=record.company_id.id)
+                if 'user_id' in self.env[model]._fields and record.user_id:
+                    object_user_signature = res_users_obj_sudo.browse(
+                        record.user_id.id).signature
+                if 'create_uid' in self.env[model]._fields and \
+                        record.create_uid:
+                    object_create_user_signature = res_users_obj_sudo.browse(
+                        record.create_uid.id).signature
+                current_user_signature = res_users_obj_sudo.browse(
+                    self.env.user.id).signature
+
+            variables['object_user_signature'] = object_user_signature
+            variables['object_create_user_signature'] = \
+                object_create_user_signature
+            variables['current_user_signature'] = current_user_signature
+
             try:
                 render_result = template.render(variables)
             except Exception:
@@ -489,7 +517,16 @@ class MailTemplate(models.Model):
                 values = results[res_id]
                 # body: add user signature, sanitize
                 if 'body_html' in fields and template.user_signature:
-                    signature = self.env.user.signature
+                    if self.env[template.model].browse(res_id).company_id:
+                        company_id = self.env[template.model].browse(
+                            res_id).company_id.id
+                    else:
+                        company_id = self.env.user.company_id.id
+                    res_users_obj_sudo = self.env[
+                        'res.users'].sudo().with_context(
+                        force_company=company_id)
+                    # compute signature
+                    signature = res_users_obj_sudo.browse(self.env.user.id).signature
                     if signature:
                         values['body_html'] = tools.append_content_to_html(values['body_html'], signature, plaintext=False)
                 if values.get('body_html'):
