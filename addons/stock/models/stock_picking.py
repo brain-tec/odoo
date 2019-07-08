@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import namedtuple
-import json
 import time
 from datetime import date
 
@@ -54,7 +53,6 @@ class PickingType(models.Model):
         help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
 
     # Statistics for the kanban view
-    last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
     count_picking = fields.Integer(compute='_compute_picking_count')
@@ -65,18 +63,6 @@ class PickingType(models.Model):
     rate_picking_backorders = fields.Integer(compute='_compute_picking_count')
     barcode = fields.Char('Barcode', copy=False)
     company_id = fields.Many2one('res.company', 'Company', related='warehouse_id.company_id', store=True)
-
-    def _compute_last_done_picking(self):
-        for type in self:
-            tristates = []
-            for picking in self.env['stock.picking'].search([('picking_type_id', '=', type.id), ('state', '=', 'done')], order='date_done desc', limit=10):
-                if picking.date_done > picking.date:
-                    tristates.insert(0, {'tooltip': picking.name or '' + ": " + _('Late'), 'value': -1})
-                elif picking.backorder_id:
-                    tristates.insert(0, {'tooltip': picking.name or '' + ": " + _('Backorder exists'), 'value': 0})
-                else:
-                    tristates.insert(0, {'tooltip': picking.name or '' + ": " + _('OK'), 'value': 1})
-            type.last_done_picking = json.dumps(tristates)
 
     def _compute_picking_count(self):
         # TDE TODO count picking can be done using previous two
@@ -104,15 +90,9 @@ class PickingType(models.Model):
 
     def name_get(self):
         """ Display 'Warehouse_name: PickingType_name' """
-        # TDE TODO remove context key support + update purchase
         res = []
         for picking_type in self:
-            if self.env.context.get('special_shortened_wh_name'):
-                if picking_type.warehouse_id:
-                    name = picking_type.warehouse_id.name
-                else:
-                    name = _('Customer') + ' (' + picking_type.name + ')'
-            elif picking_type.warehouse_id:
+            if picking_type.warehouse_id:
                 name = picking_type.warehouse_id.name + ': ' + picking_type.name
             else:
                 name = picking_type.name
@@ -136,6 +116,11 @@ class PickingType(models.Model):
         elif self.code == 'outgoing':
             self.default_location_src_id = self.env.ref('stock.stock_location_stock').id
             self.default_location_dest_id = self.env.ref('stock.stock_location_customers').id
+        self.show_operations = self.code != 'incoming' and self.user_has_groups(
+            'stock.group_production_lot,'
+            'stock.group_stock_multi_locations,'
+            'stock.group_tracking_lot'
+        )
 
     def _get_action(self, action_xmlid):
         # TDE TODO check to have one view + custo in methods
