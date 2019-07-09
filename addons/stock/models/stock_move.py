@@ -7,7 +7,7 @@ from itertools import groupby
 from operator import itemgetter
 from re import search as regex_search, split as regex_split
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, SUPERUSER_ID
 from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
@@ -131,6 +131,7 @@ class StockMove(models.Model):
         help='The rescheduling is propagated to the next move.')
     propagate_date_minimum_delta = fields.Integer(string='Reschedule if Higher Than',
         help='The change must be higher than this value to be propagated')
+    delay_alert = fields.Boolean('Alert if Delay')
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type')
     inventory_id = fields.Many2one('stock.inventory', 'Inventory')
     move_line_ids = fields.One2many('stock.move.line', 'move_id')
@@ -401,7 +402,8 @@ class StockMove(models.Model):
         return res
 
     def write(self, vals):
-        # FIXME: pim fix your crap
+        # Handle the write on the initial demand by updating the reserved quantity and logging
+        # messages according to the state of the stock.move records.
         receipt_moves_to_reassign = self.env['stock.move']
         if 'product_uom_qty' in vals:
             for move in self.filtered(lambda m: m.state not in ('done', 'draft') and m.picking_id):
@@ -417,43 +419,85 @@ class StockMove(models.Model):
                 receipt_moves_to_reassign |= move_to_unreserve.filtered(lambda m: m.location_id.usage == 'supplier')
                 receipt_moves_to_reassign |= (self - move_to_unreserve).filtered(lambda m: m.location_id.usage == 'supplier' and m.state in ('partially_available', 'assigned'))
 
-        # TDE CLEANME: it is a gros bordel + tracking
-        Picking = self.env['stock.picking']
-
-        #propagation of expected date:
+        # Handle the propagation of `date_expected` and `date` fields.
         propagated_date_field = False
         if vals.get('date_expected'):
-            #propagate any manual change of the expected date
             propagated_date_field = 'date_expected'
-        elif (vals.get('state', '') == 'done' and vals.get('date')):
-            #propagate also any delta observed when setting the move as done
+        elif vals.get('state', '') == 'done' and vals.get('date'):
             propagated_date_field = 'date'
-
         if propagated_date_field:
-            #any propagation is (maybe) needed
+            new_date = vals.get(propagated_date_field)
             for move in self:
-                if move.move_dest_ids and move.propagate_date:
-                    new_date = vals.get(propagated_date_field)
-                    delta_days = (new_date - move.date_expected).total_seconds() / 86400
-                    if abs(delta_days) < move.propagate_date_minimum_delta:
-                        continue
-                    for move_dest in move.move_dest_ids:
-                        if move_dest.state not in ('done', 'cancel'):
-                            move_dest.date_expected += relativedelta.relativedelta(days=delta_days)
-        track_pickings = not self._context.get('mail_notrack') and any(field in vals for field in ['state', 'picking_id', 'partially_available'])
+                move_dest_ids = move.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
+                if not move_dest_ids:
+                    continue
+                delta_days = (new_date - move.date_expected).total_seconds() / 86400
+                if not move.propagate_date or abs(delta_days) < move.propagate_date_minimum_delta:
+                    move_dest_ids._delay_alert_log_activity('manual', move)
+                    continue
+                for move_dest in move_dest_ids:
+                    move_dest.date_expected += relativedelta.relativedelta(days=delta_days)
+                move_dest_ids._delay_alert_log_activity('auto', move)
+
+        # Manual tracking of the `state` field for the stock.picking records.
+        track_pickings = not self._context.get('mail_notrack') and any(field in vals for field in ['state', 'picking_id'])
         if track_pickings:
-            to_track_picking_ids = set([move.picking_id.id for move in self if move.picking_id])
+            to_track_picking_ids = {move.picking_id.id for move in self if move.picking_id}
             if vals.get('picking_id'):
                 to_track_picking_ids.add(vals['picking_id'])
             to_track_picking_ids = list(to_track_picking_ids)
-            pickings = Picking.browse(to_track_picking_ids)
+            pickings = self.env['stock.picking'].browse(to_track_picking_ids)
             initial_values = dict((picking.id, {'state': picking.state}) for picking in pickings)
+
         res = super(StockMove, self).write(vals)
+
         if track_pickings:
             pickings.message_track(pickings.fields_get(['state']), initial_values)
+
         if receipt_moves_to_reassign:
             receipt_moves_to_reassign._action_assign()
         return res
+
+    def _delay_alert_get_documents(self):
+        """Returns a list of recordset of the documents linked to the stock.move in `self` in order
+        to post the delay alert next activity. These documents are deduplicated. This method is meant
+        to be overriden by other modules, each of them adding an element by type of recordset on
+        this list.
+
+        :return: a list of recordset of the documents linked to `self`
+        :rtype: list
+        """
+        return list(self.mapped('picking_id'))
+
+    def _delay_alert_log_activity(self, mode, move_orig):
+        """Post a delay alert next activity on the documents linked to `self`. If the delay alert
+        is already present on the document, it isn't posted twice.
+
+        :param mode: 'auto' or 'manual' as a string
+        :param move_orig: the stock move triggering the delay alert on the next document
+        """
+        assert mode in ('auto', 'manual')
+
+        doc_orig = move_orig._delay_alert_get_documents()
+        documents = self.filtered(lambda m: m.delay_alert)._delay_alert_get_documents()
+        if not documents or not doc_orig:
+            return
+
+        if mode == 'auto':
+            msg = _("The scheduled date has been automatically updated due to a delay on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>.") % (doc_orig[0]._name, doc_orig[0].id, doc_orig[0].name)
+        else:
+            msg = _("The scheduled date should be updated due to a delay on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>.") % (doc_orig[0]._name, doc_orig[0].id, doc_orig[0].name)
+
+        # write the message on each document
+        for doc in documents:
+            if doc.activity_ids.filtered(lambda a: a.automated and doc_orig[0].name in a.note):
+                continue
+            doc.activity_schedule(
+                'mail.mail_activity_data_warning',
+                datetime.today().date(),
+                note=msg,
+                user_id=doc.user_id.id or SUPERUSER_ID
+            )
 
     def action_show_details(self):
         """ Returns an action that will open a form view (in a popup) allowing to work on all the
@@ -592,7 +636,8 @@ class StockMove(models.Model):
         return [
             'product_id', 'price_unit', 'product_packaging', 'procure_method',
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
-            'package_level_id'
+            'package_level_id', 'propagate_cancel', 'propagate_date', 'propagate_date_minimum_delta',
+            'delay_alert',
         ]
 
     @api.model
@@ -601,7 +646,8 @@ class StockMove(models.Model):
         return [
             move.product_id.id, move.price_unit, move.product_packaging.id, move.procure_method, 
             move.product_uom.id, move.restrict_partner_id.id, move.scrapped, move.origin_returned_move_id.id,
-            move.package_level_id.id
+            move.package_level_id.id, move.propagate_cancel, move.propagate_date, move.propagate_date_minimum_delta,
+            move.delay_alert,
         ]
 
     def _clean_merged(self):
