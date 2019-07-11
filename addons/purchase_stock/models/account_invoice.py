@@ -92,6 +92,9 @@ class AccountInvoice(models.Model):
                                 i_line.purchase_line_id.price_unit, inv.currency_id,
                                 company=po_company, date=inv.date or inv.date_invoice, round=False,
                             )
+                            valuation_price_unit = i_line.purchase_line_id.product_uom._compute_price(
+                                valuation_price_unit, i_line.uom_id
+                            )
 
                     interim_account_price = valuation_price_unit * line['quantity']
                     invoice_cur_prec = inv.currency_id.decimal_places
