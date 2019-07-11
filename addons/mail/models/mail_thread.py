@@ -290,9 +290,9 @@ class MailThread(models.AbstractModel):
                 subtype = thread._creation_subtype()
                 body = _('%s created') % doc_name
                 if subtype:  # if we have a sybtype, post message to notify users from _message_auto_subscribe
-                    thread.sudo().message_post(body=body, subtype_id=subtype.id, author_id=self.env.user.partner_id.id, )
+                    thread.sudo().message_post(body=body, subtype_id=subtype.id, author_id=self.env.user.partner_id.id)
                 else:
-                    thread._message_log(body=body)  # todo optimise email_from
+                    thread._message_log(body=body)
 
         # post track template if a tracked field changed
         if not self._context.get('mail_notrack'):
@@ -315,7 +315,7 @@ class MailThread(models.AbstractModel):
 
         # Track initial values of tracked fields
         track_self = self.with_lang()
-        
+
         tracked_fields = None
         if not self._context.get('mail_notrack'):
             tracked_fields = track_self._get_tracked_fields()
@@ -1929,17 +1929,17 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         if author_id:
             author = self.env['res.partner'].sudo().browse(author_id)
-        elif self.env.user.email:
+        else:
             author = self.env.user.partner_id
             author_id = author.id
-        else:
-            # the current user has no email address (like the public user)
-            author = self.env.user.browse(SUPERUSER_ID).partner_id
-            author_id = author.id
 
-        if not author.email:
+        if author.email:
+            email_from = author.email_formatted
+        elif self.env.su:
+            # superuser mode without author email -> probably public user; anyway we don't want to crash
+            email_from = False
+        else:
             raise exceptions.UserError(_("Unable to log message, please configure the sender's email address."))
-        email_from = author.email_formatted
 
         message_values = {
             'subject': subject,

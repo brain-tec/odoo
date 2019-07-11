@@ -247,7 +247,6 @@ class IrTranslation(models.Model):
         ''' the source term is stored on 'src' field '''
         return [('src', operator, value)]
 
-    @api.model_cr_context
     def _auto_init(self):
         res = super(IrTranslation, self)._auto_init()
         # Add separate md5 index on src (no size limit on values, and good performance).
@@ -759,8 +758,7 @@ class IrTranslation(models.Model):
         """ Return a cursor-like object for fast inserting translations """
         return IrTranslationImport(self)
 
-    @api.model_cr_context
-    def load_module_terms(self, modules, langs):
+    def _load_module_terms(self, modules, langs):
         """ Load PO files of the given modules for the given languages. """
         # make sure the given languages are active
         res_lang = self.env['res.lang'].sudo()
