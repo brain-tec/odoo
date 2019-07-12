@@ -584,9 +584,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     @classmethod
     def _init_constraints_onchanges(cls):
-        # store sql constraint error messages
-        for (key, _, msg) in cls._sql_constraints:
-            cls.pool._sql_error[cls._table + '_' + key] = msg
+        # store list of sql constraint qualified names
+        for (key, _, _) in cls._sql_constraints:
+            cls.pool._sql_constraints.add(cls._table + '_' + key)
 
         # reset properties memoized on cls
         cls._constraint_methods = BaseModel._constraint_methods
@@ -4670,6 +4670,21 @@ Fields:
         """ Inverse the value of the field ``active`` on the records in ``self``. """
         for record in self:
             record.active = not record.active
+
+    def action_archive(self):
+        """
+            Set active=False on a recordset, by calling toggle_active to take the
+            corresponding actions according to the model
+        """
+        return self.filtered(lambda record: record.active).toggle_active()
+
+    @api.multi
+    def action_unarchive(self):
+        """
+            Set active=True on a recordset, by calling toggle_active to take the
+            corresponding actions according to the model
+        """
+        return self.filtered(lambda record: not record.active).toggle_active()
 
     def _register_hook(self):
         """ stuff to do right after the registry is built """
