@@ -144,6 +144,12 @@ class HrEmployeePrivate(models.Model):
         return self.env['hr.employee.public'].browse(self.ids).read(fields, load=load)
 
     @api.model
+    def load_views(self, views, options=None):
+        if self.check_access_rights('read', raise_exception=False):
+            return super(HrEmployeePrivate, self).load_views(views, options=options)
+        return self.env['hr.employee.public'].load_views(views, options=options)
+
+    @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         """
             We override the _search because it is the method that checks the access rights
@@ -390,3 +396,9 @@ class HrEmployeePrivate(models.Model):
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *args, **kwargs):
         return super(HrEmployeePrivate, self._post_author()).message_post(*args, **kwargs)
+
+    def _sms_get_default_partners(self):
+        return self.mapped('user_partner_id')
+
+    def _sms_get_number_fields(self):
+        return ['mobile_phone']
