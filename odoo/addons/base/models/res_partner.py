@@ -87,7 +87,6 @@ class PartnerCategory(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('You can not create recursive tags.'))
 
-    @api.multi
     def name_get(self):
         """ Return the categories' display name, including their direct
             parent by default.
@@ -154,6 +153,7 @@ class Partner(models.Model):
     ref = fields.Char(string='Reference', index=True)
     lang = fields.Selection(_lang_get, string='Language', default=lambda self: self.env.lang,
                             help="All the emails and documents sent to this contact will be translated in this language.")
+    active_lang_count = fields.Integer(compute='_compute_active_lang_count')
     tz = fields.Selection(_tz_get, string='Timezone', default=lambda self: self._context.get('tz'),
                           help="When printing documents and exporting/importing data, time values are computed according to this timezone.\n"
                                "If the timezone is not set, UTC (Coordinated Universal Time) is used.\n"
@@ -252,6 +252,11 @@ class Partner(models.Model):
         names = dict(self.with_context(**diff).name_get())
         for partner in self:
             partner.display_name = names.get(partner.id)
+
+    def _compute_active_lang_count(self):
+        lang_count = len(self.env['res.lang'].get_installed())
+        for partner in self:
+            partner.active_lang_count = lang_count
 
     @api.depends('tz')
     def _compute_tz_offset(self):
@@ -363,7 +368,6 @@ class Partner(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('You cannot create recursive Partner hierarchies.'))
 
-    @api.multi
     def copy(self, default=None):
         self.ensure_one()
         chosen_name = default.get('name') if default else ''
@@ -432,7 +436,6 @@ class Partner(models.Model):
     def onchange_company_type(self):
         self.is_company = (self.company_type == 'company')
 
-    @api.multi
     def _update_fields_values(self, fields):
         """ Returns dict of write() values for synchronizing ``fields`` """
         values = {}
@@ -458,7 +461,6 @@ class Partner(models.Model):
         """Returns the list of address fields usable to format addresses."""
         return self._address_fields()
 
-    @api.multi
     def update_address(self, vals):
         addr_vals = {key: vals[key] for key in self._address_fields() if key in vals}
         if addr_vals:
@@ -473,7 +475,6 @@ class Partner(models.Model):
         extended by inheriting classes. """
         return ['vat', 'credit_limit']
 
-    @api.multi
     def _commercial_sync_from_company(self):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
         as if they were related fields """
@@ -482,7 +483,6 @@ class Partner(models.Model):
             sync_vals = commercial_partner._update_fields_values(self._commercial_fields())
             self.write(sync_vals)
 
-    @api.multi
     def _commercial_sync_to_children(self):
         """ Handle sync of commercial fields to descendants """
         commercial_partner = self.commercial_partner_id
@@ -493,7 +493,6 @@ class Partner(models.Model):
         sync_children._compute_commercial_partner()
         return sync_children.write(sync_vals)
 
-    @api.multi
     def _fields_sync(self, values):
         """ Sync commercial fields and address fields from company and to children after create/update,
         just as if those were all modeled as fields.related to the parent """
@@ -528,7 +527,6 @@ class Partner(models.Model):
             contacts = self.child_ids.filtered(lambda c: c.type == 'contact')
             contacts.update_address(values)
 
-    @api.multi
     def _handle_first_contact_creation(self):
         """ On creation of first contact for a company (or root) that has no address, assume contact address
         was meant to be company address """
@@ -547,7 +545,6 @@ class Partner(models.Model):
             website = url.replace(scheme='http').to_url()
         return website
 
-    @api.multi
     def write(self, vals):
         if vals.get('active') is False:
             for partner in self:
@@ -650,7 +647,6 @@ class Partner(models.Model):
             partner._handle_first_contact_creation()
         return partners
 
-    @api.multi
     def create_company(self):
         self.ensure_one()
         if self.company_name:
@@ -665,7 +661,6 @@ class Partner(models.Model):
             })
         return True
 
-    @api.multi
     def open_commercial_entity(self):
         """ Utility method used to add an "Open Company" button in partner views """
         self.ensure_one()
@@ -676,7 +671,6 @@ class Partner(models.Model):
                 'target': 'current',
                 'flags': {'form': {'action_buttons': True}}}
 
-    @api.multi
     def open_parent(self):
         """ Utility method used to add an "Open Parent" button in partner views """
         self.ensure_one()
@@ -715,7 +709,6 @@ class Partner(models.Model):
             name = "%s ‒ %s" % (name, partner.vat)
         return name
 
-    @api.multi
     def name_get(self):
         res = []
         for partner in self:
@@ -844,13 +837,11 @@ class Partner(models.Model):
             return False
         return base64.b64encode(res.content)
 
-    @api.multi
     def _email_send(self, email_from, subject, body, on_error=None):
         for partner in self.filtered('email'):
             tools.email_send(email_from, [partner.email], subject, body, on_error)
         return True
 
-    @api.multi
     def address_get(self, adr_pref=None):
         """ Find contacts/addresses of the right type(s) by doing a depth-first-search
         through descendants within company boundaries (stop at entities flagged ``is_company``)
@@ -911,7 +902,6 @@ class Partner(models.Model):
     def _get_address_format(self):
         return self.country_id.address_format or self._get_default_address_format()
 
-    @api.multi
     def _display_address(self, without_company=False):
 
         '''
@@ -975,7 +965,6 @@ class Partner(models.Model):
                     state = States.search(state_domain, limit=1)
                     vals['state_id'] = state.id  # replace state or remove it if not found
 
-    @api.multi
     def _get_country_name(self):
         return self.country_id.name or ''
 

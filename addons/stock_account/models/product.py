@@ -67,7 +67,6 @@ class ProductTemplate(models.Model):
     def _is_cost_method_standard(self):
         return self.categ_id.property_cost_method == 'standard'
 
-    @api.multi
     def _get_product_accounts(self):
         """ Add the stock accounts related to product to the result of super()
         @return: dictionary which contains information regarding stock accounts and super (income+expense accounts)
@@ -81,7 +80,6 @@ class ProductTemplate(models.Model):
         })
         return accounts
 
-    @api.multi
     def get_product_accounts(self, fiscal_pos=None):
         """ Add the stock journal related to product to the result of super()
         @return: dictionary which contains all needed information regarding stock accounts and journal and super (income+expense accounts)
@@ -677,8 +675,12 @@ class ProductCategory(models.Model):
                     continue
 
                 # Empty out the stock with the current cost method.
-                description = _("Costing method change for product category %s: from %s to %s.") \
-                    % (self.display_name, self.property_cost_method, new_cost_method)
+                if new_cost_method:
+                    description = _("Costing method change for product category %s: from %s to %s.") \
+                        % (self.display_name, self.property_cost_method, new_cost_method)
+                else:
+                    description = _("Valuation method change for product category %s: from %s to %s.") \
+                        % (self.display_name, self.property_valuation, new_valuation)
                 out_svl_vals_list, products_orig_quantity_svl, products = Product\
                     ._svl_empty_stock(description, product_category=product_category)
                 out_stock_valuation_layers = SVL.create(out_svl_vals_list)

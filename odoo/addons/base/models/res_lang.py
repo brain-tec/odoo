@@ -212,12 +212,19 @@ class Lang(models.Model):
         langs = self.with_context(active_test=True).search([])
         return sorted([(lang.code, lang.name) for lang in langs], key=itemgetter(1))
 
+    def toggle_active(self):
+        super().toggle_active()
+        # Automatically load translation
+        active_lang = [lang.code for lang in self.filtered(lambda l: l.active)]
+        if active_lang:
+            mods = self.env['ir.module.module'].search([('state', '=', 'installed')])
+            mods._update_translations(filter_lang=active_lang)
+
     @api.model_create_multi
     def create(self, vals_list):
         self.clear_caches()
         return super(Lang, self).create(vals_list)
 
-    @api.multi
     def write(self, vals):
         lang_codes = self.mapped('code')
         if 'code' in vals and any(code != vals['code'] for code in lang_codes):
@@ -232,7 +239,6 @@ class Lang(models.Model):
         self.clear_caches()
         return res
 
-    @api.multi
     def unlink(self):
         for language in self:
             if language.code == 'en_US':
@@ -246,7 +252,6 @@ class Lang(models.Model):
         self.clear_caches()
         return super(Lang, self).unlink()
 
-    @api.multi
     def format(self, percent, value, grouping=False, monetary=False):
         """ Format() will return the language-specific output for float values"""
         self.ensure_one()

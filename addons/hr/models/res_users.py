@@ -52,6 +52,8 @@ class User(models.Model):
     study_field = fields.Char(related='employee_id.study_field', readonly=False, related_sudo=False)
     study_school = fields.Char(related='employee_id.study_school', readonly=False, related_sudo=False)
     employee_count = fields.Integer(compute='_compute_employee_count')
+    hr_presence_state = fields.Selection(related='employee_id.hr_presence_state')
+    last_activity = fields.Date(related='employee_id.last_activity')
 
     @api.depends('employee_ids')
     def _compute_employee_count(self):
@@ -69,6 +71,8 @@ class User(models.Model):
             'employee_id',
             'employee_ids',
             'employee_parent_id',
+            'hr_presence_state',
+            'last_activity',
         ]
 
         hr_writable_fields = [
@@ -135,7 +139,6 @@ class User(models.Model):
             self = self.sudo()
         return super(User, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
 
-    @api.multi
     def write(self, vals):
         """
         Synchronize user and its related employee
@@ -174,7 +177,6 @@ class User(models.Model):
         for user in self:
             user.employee_id = self.env['hr.employee'].search([('id', 'in', user.employee_ids.ids), ('company_id', '=', user.company_id.id)], limit=1)
 
-    @api.multi
     def action_create_employee(self):
         self.ensure_one()
         self.env['hr.employee'].create(dict(

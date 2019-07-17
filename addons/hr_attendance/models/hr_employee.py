@@ -17,6 +17,20 @@ class HrEmployeeBase(models.AbstractModel):
     hours_last_month = fields.Float(compute='_compute_hours_last_month')
     hours_today = fields.Float(compute='_compute_hours_today')
 
+    def _compute_presence_state(self):
+        """
+        Override to include checkin/checkout in the presence state
+        Attendance has the second highest priority after login
+        """
+        super()._compute_presence_state()
+        employees = self.filtered(lambda employee: employee.hr_presence_state != 'present')
+        for employee in employees:
+            if employee.attendance_state == 'checked_out' and employee.hr_presence_state == 'to_define':
+                employee.hr_presence_state = 'absent'
+        for employee in employees:
+            if employee.attendance_state == 'checked_in':
+                employee.hr_presence_state = 'present'
+
     def _compute_hours_last_month(self):
         for employee in self:
             now = datetime.now()
@@ -74,7 +88,6 @@ class HrEmployeeBase(models.AbstractModel):
             return employee._attendance_action('hr_attendance.hr_attendance_action_kiosk_mode')
         return {'warning': _('No employee corresponding to barcode %(barcode)s') % {'barcode': barcode}}
 
-    @api.multi
     def attendance_manual(self, next_action, entered_pin=None):
         self.ensure_one()
         can_check_without_pin = not self.env.user.has_group('hr_attendance.group_hr_attendance_use_pin') or (self.user_id == self.env.user and entered_pin is None)
@@ -82,7 +95,6 @@ class HrEmployeeBase(models.AbstractModel):
             return self._attendance_action(next_action)
         return {'warning': _('Wrong PIN')}
 
-    @api.multi
     def _attendance_action(self, next_action):
         """ Changes the attendance of the employee.
             Returns an action to the check in/out message,
@@ -103,7 +115,6 @@ class HrEmployeeBase(models.AbstractModel):
         action_message['attendance'] = modified_attendance.read()[0]
         return {'action': action_message}
 
-    @api.multi
     def _attendance_action_change(self):
         """ Check In/Check Out action
             Check In: create a new attendance record
