@@ -139,12 +139,15 @@ class ProductPublicCategory(models.Model):
     _name = "product.public.category"
     _inherit = ["website.seo.metadata", "website.multi.mixin"]
     _description = "Website Product Category"
+    _parent_store = True
     _order = "sequence, name"
 
     name = fields.Char(required=True, translate=True)
     parent_id = fields.Many2one('product.public.category', string='Parent Category', index=True)
+    parent_path = fields.Char(index=True)
     child_id = fields.One2many('product.public.category', 'parent_id', string='Children Categories')
-    sequence = fields.Integer(help="Gives the sequence order when displaying a list of product categories.")
+    parents_and_self = fields.Many2many('product.public.category', compute='_compute_parents_and_self')
+    sequence = fields.Integer(help="Gives the sequence order when displaying a list of product categories.", index=True)
     # NOTE: there is no 'default image', because by default we don't show
     # thumbnails for categories. However if we have a thumbnail for at least one
     # category, then we display a default image on the other, so that the
@@ -160,6 +163,7 @@ class ProductPublicCategory(models.Model):
                                 help="Small-sized image of the category. It is automatically "
                                 "resized as a 64x64px image, with aspect ratio preserved. "
                                 "Use this field anywhere a small image is required.")
+    product_tmpl_ids = fields.Many2many('product.template', relation='product_public_category_product_template_rel')
 
     @api.model
     def create(self, vals):
@@ -178,13 +182,15 @@ class ProductPublicCategory(models.Model):
     def name_get(self):
         res = []
         for category in self:
-            names = [category.name]
-            parent_category = category.parent_id
-            while parent_category:
-                names.append(parent_category.name)
-                parent_category = parent_category.parent_id
-            res.append((category.id, ' / '.join(reversed(names))))
+            res.append((category.id, " / ".join(category.parents_and_self.mapped('name'))))
         return res
+
+    def _compute_parents_and_self(self):
+        for category in self:
+            if category.parent_path:
+                category.parents_and_self = self.env['product.public.category'].browse([int(p) for p in category.parent_path.split('/')[:-1]])
+            else:
+                category.parents_and_self = category
 
 
 class ProductTemplate(models.Model):
@@ -204,7 +210,7 @@ class ProductTemplate(models.Model):
     website_style_ids = fields.Many2many('product.style', string='Styles')
     website_sequence = fields.Integer('Website Sequence', help="Determine the display order in the Website E-commerce",
                                       default=lambda self: self._default_website_sequence())
-    public_categ_ids = fields.Many2many('product.public.category', string='Website Product Category',
+    public_categ_ids = fields.Many2many('product.public.category', relation='product_public_category_product_template_rel', string='Website Product Category',
                                         help="The product will be available in each mentioned e-commerce category. Go to"
                                         "Shop > Customize and enable 'E-commerce categories' to view all e-commerce categories.")
 

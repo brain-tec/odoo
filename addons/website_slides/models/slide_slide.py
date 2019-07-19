@@ -83,7 +83,7 @@ class SlideTag(models.Model):
 class Slide(models.Model):
     _name = 'slide.slide'
     _inherit = [
-        'mail.thread', 'rating.mixin',
+        'mail.thread',
         'image.mixin',
         'website.seo.metadata', 'website.published.mixin']
     _description = 'Slides'
@@ -96,9 +96,6 @@ class Slide(models.Model):
     }
     _order = 'category_sequence asc, sequence asc'
 
-    def _default_access_token(self):
-        return str(uuid.uuid4())
-
     # description
     name = fields.Char('Title', required=True, translate=True)
     active = fields.Boolean(default=True)
@@ -109,7 +106,6 @@ class Slide(models.Model):
     channel_id = fields.Many2one('slide.channel', string="Channel", required=True)
     category_id = fields.Many2one('slide.category', string="Category", domain="[('channel_id', '=', channel_id)]")
     tag_ids = fields.Many2many('slide.tag', 'rel_slide_tag', 'slide_id', 'tag_id', string='Tags')
-    access_token = fields.Char("Security Token", copy=False, default=_default_access_token)
     is_preview = fields.Boolean('Is Preview', default=False, help="The course is accessible by anyone : the users don't need to join the channel to access the content of the course.")
     completion_time = fields.Float('# Hours', default=1, digits=(10, 4))
     # subscribers
@@ -369,15 +365,15 @@ class Slide(models.Model):
             self.write({'access_token': self._default_access_token()})
         return self._sign_token(partner_id)
 
-    def _send_share_email(self, email):
+    def _send_share_email(self, email, fullscreen):
         # TDE FIXME: template to check
         mail_ids = []
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for record in self:
             if self.env.user.has_group('base.group_portal'):
-                mail_ids.append(self.channel_id.share_template_id.with_context(user=self.env.user, email=email, base_url=base_url).sudo().send_mail(record.id, notif_layout='mail.mail_notification_light', email_values={'email_from': self.env['res.company'].catchall or self.env['res.company'].email}))
+                mail_ids.append(self.channel_id.share_template_id.with_context(user=self.env.user, email=email, base_url=base_url, fullscreen=fullscreen).sudo().send_mail(record.id, notif_layout='mail.mail_notification_light', email_values={'email_from': self.env['res.company'].catchall or self.env['res.company'].email}))
             else:
-                mail_ids.append(self.channel_id.share_template_id.with_context(user=self.env.user, email=email, base_url=base_url).send_mail(record.id, notif_layout='mail.mail_notification_light'))
+                mail_ids.append(self.channel_id.share_template_id.with_context(user=self.env.user, email=email, base_url=base_url, fullscreen=fullscreen).send_mail(record.id, notif_layout='mail.mail_notification_light'))
         return mail_ids
 
     def action_like(self):
