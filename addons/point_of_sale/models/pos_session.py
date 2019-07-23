@@ -13,6 +13,7 @@ class PosSession(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     POS_SESSION_STATE = [
+        ('new_session', 'New Session'),
         ('opening_control', 'Opening Control'),  # method action_pos_session_open
         ('opened', 'In Progress'),               # method action_pos_session_closing_control
         ('closing_control', 'Closing Control'),  # method action_pos_session_close
@@ -41,7 +42,7 @@ class PosSession(models.Model):
             orders_to_reconcile.sudo()._reconcile_payments()
 
     company_id = fields.Many2one('res.company', related='config_id.company_id', string="Company", readonly=True)
-    
+
     config_id = fields.Many2one(
         'pos.config', string='Point of Sale',
         help="The physical point of sale you will use.",
@@ -62,7 +63,7 @@ class PosSession(models.Model):
     state = fields.Selection(
         POS_SESSION_STATE, string='Status',
         required=True, readonly=True,
-        index=True, copy=False, default='opening_control')
+        index=True, copy=False, default='new_session')
 
     sequence_number = fields.Integer(string='Order Sequence Number', help='A sequence number that is incremented with each order', default=1)
     login_number = fields.Integer(string='Login Sequence Number', help='A sequence number that is incremented each time a user resumes the pos session', default=0)
@@ -253,7 +254,7 @@ class PosSession(models.Model):
     def action_pos_session_open(self):
         # second browse because we need to refetch the data from the DB for cash_register_id
         # we only open sessions that haven't already been opened
-        for session in self.filtered(lambda session: session.state == 'opening_control'):
+        for session in self.filtered(lambda session: session.state in ('new_session', 'opening_control')):
             values = {}
             if not session.start_at:
                 values['start_at'] = fields.Datetime.now()
@@ -277,23 +278,18 @@ class PosSession(models.Model):
 
     def action_pos_session_validate(self):
         self._check_pos_session_balance()
-        self.action_pos_session_close()
+        return self.action_pos_session_close()
 
-    def action_pos_session_close(self):
-        # Close CashBox
-        for session in self:
-            company_id = session.config_id.company_id.id
-            ctx = dict(self.env.context, force_company=company_id, company_id=company_id, default_partner_type='customer')
-            ctx_notrack = dict(ctx, mail_notrack=True)
-            for st in session.statement_ids:
-                if abs(st.difference) > st.journal_id.amount_authorized_diff:
-                    # The pos manager can close statements with maximums.
-                    if not self.user_has_groups("point_of_sale.group_pos_manager"):
-                        raise UserError(_("Your ending balance is too different from the theoretical cash closing (%.2f), the maximum allowed is: %.2f. You can contact your manager to force it.") % (st.difference, st.journal_id.amount_authorized_diff))
-                if (st.journal_id.type not in ['bank', 'cash']):
-                    raise UserError(_("The journal type for your payment method should be bank or cash."))
-                st.with_context(ctx_notrack).sudo().button_confirm_bank()
-                session.activity_unlink(['point_of_sale.mail_activity_old_session'])
+    def _validate_session(self):
+        self.ensure_one()
+        company_id = self.config_id.company_id.id
+        ctx = dict(self.env.context, force_company=company_id, company_id=company_id, default_partner_type='customer')
+        ctx_notrack = dict(ctx, mail_notrack=True)
+        for st in self.statement_ids:
+            if (st.journal_id.type not in ['bank', 'cash']):
+                raise UserError(_("The journal type for your payment method should be bank or cash."))
+            st.with_context(ctx_notrack).sudo().button_confirm_bank()
+            self.activity_unlink(['point_of_sale.mail_activity_old_session'])
         self.with_context(ctx)._confirm_orders()
         self.write({'state': 'closed'})
         return {
@@ -302,6 +298,17 @@ class PosSession(models.Model):
             'tag': 'reload',
             'params': {'menu_id': self.env.ref('point_of_sale.menu_point_root').id},
         }
+
+    def action_pos_session_close(self):
+        # Close CashBox
+        for st in self.statement_ids:
+            if any(abs(st.difference) > self.config_id.amount_authorized_diff for st in self.statement_ids):
+                if not self.user_has_groups("point_of_sale.group_pos_manager"):
+                    raise UserError(_("Your ending balance is too different from the theoretical cash closing (%.2f), the maximum allowed is: %.2f. You can contact your manager to force it.") % (st.difference, self.config_id.amount_authorized_diff))
+                else:
+                    return self._warning_balance_closing()
+            else:
+                self._validate_session()
 
     def open_frontend_cb(self):
         if not self.ids:
@@ -315,32 +322,12 @@ class PosSession(models.Model):
             'url':   '/pos/web/',
         }
 
-    def open_cashbox(self):
+    def open_cashbox_pos(self):
         self.ensure_one()
-        context = dict(self._context)
-        balance_type = context.get('balance') or 'start'
-        context['bank_statement_id'] = self.cash_register_id.id
-        context['balance'] = balance_type
-        context['default_pos_id'] = self.config_id.id
-
-        action = {
-            'name': _('Cash Control'),
-            'view_mode': 'form',
-            'res_model': 'account.bank.statement.cashbox',
-            'view_id': self.env.ref('account.view_account_bnk_stmt_cashbox').id,
-            'type': 'ir.actions.act_window',
-            'context': context,
-            'target': 'new'
-        }
-
-        cashbox_id = None
-        if balance_type == 'start':
-            cashbox_id = self.cash_register_id.cashbox_start_id.id
-        else:
-            cashbox_id = self.cash_register_id.cashbox_end_id.id
-        if cashbox_id:
-            action['res_id'] = cashbox_id
-
+        action = self.cash_register_id.open_cashbox_id()
+        action['view_id'] = self.env.ref('point_of_sale.view_account_bnk_stmt_cashbox_footer').id
+        action['context']['pos_session_id'] = self.id
+        action['context']['default_pos_id'] = self.config_id.id
         return action
 
     def action_view_order(self):
@@ -363,6 +350,23 @@ class PosSession(models.Model):
                         user_id=session.user_id.id, note=_("Your PoS Session is open since ") + fields.Date.to_string(session.start_at)
                         + _(", we advise you to close it and to create a new one."))
 
+    def _warning_balance_closing(self):
+        self.ensure_one()
+
+        context = dict(self._context)
+        context['session_id'] = self.id
+
+        return {
+            'name': _('Balance control'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'closing.balance.confirm.wizard',
+            'view_id': self.env.ref('point_of_sale.closing_balance_confirm').id,
+            'type': 'ir.actions.act_window',
+            'context': context,
+            'target': 'new'
+        }
+
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
@@ -372,3 +376,11 @@ class ProcurementGroup(models.Model):
         self.env['pos.session']._alert_old_session()
         if use_new_cursor:
             self.env.cr.commit()
+
+class ClosingBalanceConfirm(models.TransientModel):
+    _name = 'closing.balance.confirm.wizard'
+    _description = 'This wizard is used to display a warning message if the manager wants to close a session with a too high difference between real and expected closing balance'
+
+    def confirm_closing_balance(self):
+        current_session =  self.env['pos.session'].browse(self._context['session_id'])
+        current_session._validate_session()
