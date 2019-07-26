@@ -32,6 +32,17 @@ class PaymentAcquirerAuthorize(models.Model):
 
     authorize_login = fields.Char(string='API Login Id', required_if_provider='authorize', groups='base.group_user')
     authorize_transaction_key = fields.Char(string='API Transaction Key', required_if_provider='authorize', groups='base.group_user')
+    authorize_signature_key = fields.Char(string='API Signature Key', groups='base.group_user', compute="_compute_auth_signature_key", inverse="_inverse_auth_signature_key")
+
+    def _compute_auth_signature_key(self):
+        ICP = self.env['ir.config_parameter'].sudo()
+        for acquirer in self.filtered(lambda a: a.provider == 'authorize'):
+            acquirer.authorize_signature_key = ICP.get_param('payment_authorize.signature_key_%s' % acquirer.id)
+
+    def _inverse_auth_signature_key(self):
+        ICP = self.env['ir.config_parameter'].sudo()
+        for acquirer in self.filtered(lambda a: a.provider == 'authorize'):
+            ICP.set_param('payment_authorize.signature_key_%s' % acquirer.id, acquirer.authorize_signature_key)
 
     def _authorize_generate_hashing(self, values):
         data = '^'.join([
@@ -40,7 +51,23 @@ class PaymentAcquirerAuthorize(models.Model):
             values['x_fp_timestamp'],
             values['x_amount'],
             values['x_currency_code']])
-        return hmac.new(str(values['x_trans_key']), data, hashlib.md5).hexdigest()
+
+        # [BACKWARD COMPATIBILITY, 2nd edition]
+        # The signature key is now '128-character hexadecimal format', while the
+        # transaction key was only 16-character.
+        # One of 2 things should have happened:
+        # 1/ the Transaction Key has been replaced with the Signature Key value (patch from March 2019)
+        #       => Use that to sign, but server-to-server won't work since it uses transaction key
+        #          as its credentials
+        # 2/ the Signature key is a new field (patch from July 2019)
+        #       => Use that field for the signature
+        if len(values['x_trans_key']) == 128 and not self.authorize_signature_key:
+            self.authorize_signature_key = values['x_trans_key']  # store in the correct field
+            return hmac.new(values['x_trans_key'].decode("hex"), data, hashlib.sha512).hexdigest().upper()
+        elif self.authorize_signature_key:
+            return hmac.new(self.authorize_signature_key.decode("hex"), data, hashlib.sha512).hexdigest().upper()
+        else:
+            return hmac.new(str(values['x_trans_key']), data, hashlib.md5).hexdigest()
 
     @api.multi
     def authorize_form_generate_values(self, values):
@@ -106,7 +133,7 @@ class TxAuthorize(models.Model):
     def _authorize_form_get_tx_from_data(self, data):
         """ Given a data dict coming from authorize, verify it and find the related
         transaction record. """
-        reference, trans_id, fingerprint = data.get('x_invoice_num'), data.get('x_trans_id'), data.get('x_MD5_Hash')
+        reference, trans_id, fingerprint = data.get('x_invoice_num'), data.get('x_trans_id'), data.get('x_SHA2_Hash') or data.get('x_MD5_Hash')
         if not reference or not trans_id or not fingerprint:
             error_msg = 'Authorize: received data with missing reference (%s) or trans_id (%s) or fingerprint (%s)' % (reference, trans_id, fingerprint)
             _logger.error(error_msg)
