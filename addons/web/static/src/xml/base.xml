@@ -1516,4 +1516,10 @@
     </button>
 </t>
 
+<t t-name="FieldColor">
+    <div>
+        <button class="o_field_color"></button>
+    </div>
+</t>
+
 </templates>

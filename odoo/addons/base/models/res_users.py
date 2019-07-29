@@ -1141,6 +1141,21 @@ class GroupsView(models.Model):
         return res
 
 
+class ModuleCategory(models.Model):
+    _inherit = "ir.module.category"
+
+    def write(self, values):
+        res = super().write(values)
+        if "name" in values:
+            self.env["res.groups"]._update_user_groups_view()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env["res.groups"]._update_user_groups_view()
+        return res
+
+
 class UsersView(models.Model):
     _inherit = 'res.users'
 
