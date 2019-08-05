@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
+from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.website.models import ir_http
 from odoo.tools.translate import html_translate
 from odoo.osv import expression
@@ -360,14 +361,14 @@ class ProductTemplate(models.Model):
         res = super(ProductTemplate, self)._default_website_meta()
         res['default_opengraph']['og:description'] = res['default_twitter']['twitter:description'] = self.description_sale
         res['default_opengraph']['og:title'] = res['default_twitter']['twitter:title'] = self.name
-        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = "/web/image/product.template/%s/image_1024" % (self.id)
+        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = self.env['website'].image_url(self, 'image_1024')
         res['default_meta_description'] = self.description_sale
         return res
 
     def _compute_website_url(self):
         super(ProductTemplate, self)._compute_website_url()
         for product in self:
-            product.website_url = "/shop/product/%s" % (product.id,)
+            product.website_url = "/shop/product/%s" % slug(product)
 
     # ---------------------------------------------------------
     # Rating Mixin API
