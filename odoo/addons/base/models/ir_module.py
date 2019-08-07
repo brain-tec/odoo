@@ -282,7 +282,7 @@ class Module(models.Model):
         ('GPL-3 or any later version', 'GPL-3 or later version'),
         ('AGPL-3', 'Affero GPL-3'),
         ('LGPL-3', 'LGPL Version 3'),
-        ('Other OSI approved licence', 'Other OSI Approved Licence'),
+        ('Other OSI approved licence', 'Other OSI Approved License'),
         ('OEEL-1', 'Odoo Enterprise Edition License v1.0'),
         ('OPL-1', 'Odoo Proprietary License v1.0'),
         ('Other proprietary', 'Other Proprietary')
@@ -878,8 +878,8 @@ class Module(models.Model):
 
     def _update_translations(self, filter_lang=None):
         if not filter_lang:
-            langs = self.env['res.lang'].search([])
-            filter_lang = [lang.code for lang in langs]
+            langs = self.env['res.lang'].get_installed()
+            filter_lang = [code for code, _ in langs]
         elif not isinstance(filter_lang, (list, tuple)):
             filter_lang = [filter_lang]
 
