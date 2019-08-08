@@ -62,9 +62,11 @@
             <field name="model">event.track</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
-                <calendar date_start="date" date_delay="duration" string="Event Tracks" color="location_id">
-                    <field name="name"/>
+                <calendar date_start="date" date_delay="duration" string="Event Tracks" color="location_id" event_limit="5">
+                    <field name="location_id"/>
                     <field name="event_id"/>
+                    <field name="partner_id" avatar_field="image_small"/>
+                    <field name="user_id" avatar_field="image_small"/>
                 </calendar>
             </field>
         </record>
@@ -90,6 +92,8 @@
                     <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
                         domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
                         ]"/>
+                    <filter string="Exception Activities" name="activities_exception"
+                        domain="[('activity_exception_decoration', '!=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Responsible" name="responsible" context="{'group_by': 'user_id'}"/>
                         <filter string="Stage" name="stage" context="{'group_by':'stage_id'}"/>
@@ -165,6 +169,7 @@
                     <field name="name"/>
                     <field name="active" invisible="1"/>
                     <field name="event_id"/>
+                    <field name="activity_exception_decoration" widget="activity_exception"/>
                 </tree>
             </field>
         </record>
