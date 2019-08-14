@@ -121,7 +121,7 @@ QUnit.module('Search View', {
             type: 'ir.actions.act_window',
             views: [[2, 'list']],
             search_view_id: [8, 'search'],
-        },{
+        }, {
             id: 12,
             name: 'Partners Action 12',
             res_model: 'partner',
