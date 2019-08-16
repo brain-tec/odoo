@@ -289,6 +289,18 @@ ListRenderer.include({
         return null;
     },
     /**
+     * Returns whether the list is in multiple record edition from a given record.
+     *
+     * @private
+     * @param {string} recordId
+     * @returns {boolean}
+     */
+    inMultipleRecordEdition: function (recordId) {
+        const record = this._getRecord(recordId) || {};
+        const recordIds = [...new Set([recordId, ...this.selection])];
+        return this.editable && recordIds.length > 1 && record.res_id;
+    },
+    /**
      * Removes the line associated to the given recordID (the index of the row
      * is found thanks to the old state), then updates the state.
      *
@@ -418,7 +430,6 @@ ListRenderer.include({
      *   user refuses to discard its changes.
      */
     unselectRow: function () {
-        var self = this;
         // Protect against calling this method when no row is selected
         if (this.currentRow === null) {
             return Promise.resolve();
@@ -427,17 +438,20 @@ ListRenderer.include({
         var recordWidgets = this.allFieldWidgets[recordID];
         toggleWidgets(true);
 
-        var prom = new Promise(function (resolve, reject) {
-            self.trigger_up('save_line', {
+        return new Promise((resolve, reject) => {
+            this.trigger_up('save_line', {
                 recordID: recordID,
                 onSuccess: resolve,
                 onFailure: reject,
             });
-        });
-        prom.guardedCatch(function() {
+        }).then(changedFields => {
+            // If any field has changed and if the list is in multiple edition,
+            // we send a truthy boolean to _selectRow to tell it not to select
+            // the following record.
+            return changedFields && changedFields.length && this.inMultipleRecordEdition(recordID);
+        }).guardedCatch(() => {
             toggleWidgets(false);
         });
-        return prom;
 
         function toggleWidgets(disabled) {
             _.each(recordWidgets, function (widget) {
@@ -605,16 +619,16 @@ ListRenderer.include({
         var self = this;
         if (!this.allRecordsIds) {
             // compute the flat array of all records ids only once
-            this.allRecordIds = [];
+            this.allRecordsIds = [];
             utils.traverse_records(this.state, function (data) {
-                self.allRecordIds.push(data.id);
+                self.allRecordsIds.push(data.id);
             });
         }
         var curRecordId = this._getRecordID(this.currentRow);
-        var curRecordIndex = this.allRecordIds.indexOf(curRecordId);
-        var prevRecordIndex = curRecordIndex === 0 ? this.allRecordIds.length - 1 : curRecordIndex - 1;
+        var curRecordIndex = this.allRecordsIds.indexOf(curRecordId);
+        var prevRecordIndex = curRecordIndex === 0 ? this.allRecordsIds.length - 1 : curRecordIndex - 1;
         this.commitChanges(curRecordId).then(function () {
-            var $prevRow = self._getRow(self.allRecordIds[prevRecordIndex]);
+            var $prevRow = self._getRow(self.allRecordsIds[prevRecordIndex]);
             var prevRowIndex = $prevRow.prop('rowIndex') - 1;
             self._selectCell(prevRowIndex, self.columns.length - 1, {inc: -1});
         });
@@ -992,7 +1006,10 @@ ListRenderer.include({
         var recordId = this._getRecordID(rowIndex);
         // To select a row, the currently selected one must be unselected first
         var self = this;
-        return this.unselectRow().then(function () {
+        return this.unselectRow().then(noSelectNext => {
+            if (noSelectNext) {
+                return Promise.resolve();
+            }
             if (!recordId) {
                 // The row to selected doesn't exist anymore (probably because
                 // an onchange triggered when unselecting the previous one
@@ -1035,7 +1052,10 @@ ListRenderer.include({
         ev.stopPropagation();
 
         var self = this;
-        var groupId = $(ev.target).data('group-id');
+        // This method can be called when selecting the parent of the link.
+        // We need to ensure that the link is the actual target
+        const target = ev.target.tagName !== 'A' ? ev.target.getElementsByTagName('A')[0] : ev.target;
+        const groupId = target.dataset.groupId;
         this.currentGroupId = groupId;
         this.unselectRow().then(function () {
             self.trigger_up('add_record', {
@@ -1155,6 +1175,10 @@ ListRenderer.include({
      */
     _onNavigationMove: function (ev) {
         var self = this;
+        // Don't stop the propagation when navigating up while not editing any row
+        if (this.currentRow === null && ev.data.direction === 'up') {
+            return;
+        }
         ev.stopPropagation(); // stop the event, the action is done by this renderer
         switch (ev.data.direction) {
             case 'previous':
@@ -1191,7 +1215,7 @@ ListRenderer.include({
                             var correspondingRow = self._getRow(recordId);
                             correspondingRow.children().eq(cellIndex).focus();
                         } else if (self.currentGroupId) {
-                                self.$('a[data-group-id=' + self.currentGroupId + ']').focus();
+                            self.$('a[data-group-id="' + self.currentGroupId + '"]').focus();
                         } else {
                             self.$('.o_field_x2many_list_row_add a:first').focus(); // FIXME
                         }

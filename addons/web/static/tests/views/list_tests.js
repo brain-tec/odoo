@@ -4448,7 +4448,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('editable list view: multi edition', async function (assert) {
-        assert.expect(19);
+        assert.expect(22);
 
         var list = await createView({
             View: ListView,
@@ -4491,23 +4491,65 @@ QUnit.module('Views', {
         assert.verifySteps(['default_get']);
 
         await testUtils.fields.editInput(list.$('.o_selected_row .o_field_widget[name=int_field]'), 123);
-        assert.containsNone($, '.modal', "the multi edition should not be triggered during creation");
+        assert.containsNone(document.body, '.modal', "the multi edition should not be triggered during creation");
 
         await testUtils.dom.click($('.o_list_button_save'));
         assert.verifySteps(['create', 'read']);
 
         // edit a field
+        // We deliberately unselect the first row to check the multi edit union (recordId + selectedRecordIds)
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_list_record_selector input'));
         await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(1)'));
         await testUtils.fields.editInput(list.$('.o_field_widget[name=int_field]'), 666);
-        assert.containsOnce($, '.modal', "there should be an opened modal");
-        assert.ok($('.modal').text().includes('2 valid'), "the number of records should be correctly displayed");
-
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
+        assert.containsOnce(document.body, '.modal', "modal appears when switching cells");
+        await testUtils.dom.click($('.modal .btn:contains(Cancel)'));
+        assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), 'yop10',
+            "changes have been discarded and row is back to readonly");
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(1)'));
+        await testUtils.fields.editInput(list.$('.o_field_widget[name=int_field]'), 666);
+        await testUtils.dom.click(list.$('.o_data_row:eq(1) .o_data_cell:eq(0)'));
+        assert.ok($('.modal').text().includes('2 selected records'), "the number of records should be correctly displayed");
         await testUtils.dom.click($('.modal .btn-primary'));
+        assert.containsNone(list, '.o_data_cell input.o_field_widget', "no field should be editable anymore");
         assert.verifySteps(['write', 'read']);
         assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), "yop666",
             "the first row should be updated");
         assert.strictEqual(list.$('.o_data_row:eq(1) .o_data_cell').text(), "blip666",
             "the second row should be updated");
+        assert.containsNone(list, '.o_data_cell input.o_field_widget', "no field should be editable anymore");
+
+        list.destroy();
+    });
+
+    QUnit.test('editable list view: multi edition error and cancellation handling', async function (assert) {
+        assert.expect(3);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom">' +
+                        '<field name="foo" required="1"/>' +
+                    '</tree>',
+        });
+
+        // select two records
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_list_record_selector input'));
+        await testUtils.dom.click(list.$('.o_data_row:eq(1) .o_list_record_selector input'));
+
+        // edit a line and cancel
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
+        await testUtils.fields.editInput(list.$('.o_selected_row .o_field_widget[name=foo]'), "abc");
+        await testUtils.dom.click($('.modal .btn:contains("Cancel")'));
+        assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), 'yop', "first cell should have discarded any change");
+
+        // edit a line with an invalid value
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
+        await testUtils.fields.editInput(list.$('.o_selected_row .o_field_widget[name=foo]'), "");
+        assert.containsOnce(document.body, '.modal', "there should be an opened modal");
+        await testUtils.dom.click($('.modal .btn-primary'));
+        assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), 'yop', "changes should be discarded");
 
         list.destroy();
     });
@@ -5883,14 +5925,15 @@ QUnit.module('Views', {
             },
         });
 
-        assert.ok(document.activeElement.classList.contains('o_searchview_input'), 'default focus should be in search view');
-        // switch focus to the create button in tests while it works on live
-        $('.o_list_button_add').focus();
-        assert.ok(document.activeElement.classList.contains('o_list_button_add'),
-            'focus should now be in create button');
+        assert.ok(document.activeElement.classList.contains('o_searchview_input'),
+            'default focus should be in search view');
         await testUtils.fields.triggerKeydown($(document.activeElement), 'down');
         assert.strictEqual(document.activeElement.tagName, 'INPUT',
             'focus should now be on the record selector');
+        await testUtils.fields.triggerKeydown($(document.activeElement), 'up');
+        assert.ok(document.activeElement.classList.contains('o_searchview_input'),
+            'focus should have come back to the search view');
+        await testUtils.fields.triggerKeydown($(document.activeElement), 'down');
         await testUtils.fields.triggerKeydown($(document.activeElement), 'down');
         assert.strictEqual(document.activeElement.tagName, 'INPUT',
             'focus should now be in first row input');
@@ -6268,6 +6311,28 @@ QUnit.module('Views', {
         await testUtils.fields.editAndTrigger(list.$('tr.o_selected_row input[name="foo"]'), 'pla', 'input');
         await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
         assert.containsN(list, 'tbody:nth(3) .o_data_row', 2);
+
+        list.destroy();
+    });
+
+    QUnit.test('add and discard a line through keyboard navigation without crashing', async function (assert) {
+        assert.expect(2);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom"><field name="foo" required="1"/></tree>',
+            groupBy: ['bar'],
+        });
+
+        await testUtils.dom.click(list.$('.o_group_header:first')); // open group
+        // Triggers ENTER on "Add a line" wrapper cell
+        await testUtils.fields.triggerKeydown(list.$('.o_group_field_row_add'), 'enter');
+        assert.containsN(list, 'tbody:nth(1) .o_data_row', 4, "new data row should be created");
+        await testUtils.dom.click(list.$buttons.find('.o_list_button_discard'));
+        // At this point, a crash manager should appear if no proper link targetting
+        assert.containsN(list, 'tbody:nth(1) .o_data_row', 3,"new data row should be discarded.");
 
         list.destroy();
     });

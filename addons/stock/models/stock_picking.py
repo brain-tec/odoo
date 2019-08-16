@@ -28,14 +28,15 @@ class PickingType(models.Model):
     name = fields.Char('Operation Type', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
-    sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence', required=True)
+    sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence')
+    sequence_code = fields.Char('Code', required=True)
     default_location_src_id = fields.Many2one(
         'stock.location', 'Default Source Location',
         help="This is the default source location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the supplier location on the partner. ")
     default_location_dest_id = fields.Many2one(
         'stock.location', 'Default Destination Location',
         help="This is the default destination location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the customer location on the partner. ")
-    code = fields.Selection([('incoming', 'Vendors'), ('outgoing', 'Customers'), ('internal', 'Internal')], 'Type of Operation', required=True)
+    code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Type of Operation', required=True)
     return_picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type for Returns')
     show_entire_packs = fields.Boolean('Move Entire Packages', help="If ticked, you will be able to select entire packages to move")
     warehouse_id = fields.Many2one(
@@ -67,6 +68,34 @@ class PickingType(models.Model):
     rate_picking_backorders = fields.Integer(compute='_compute_picking_count')
     barcode = fields.Char('Barcode', copy=False)
     company_id = fields.Many2one('res.company', 'Company', related='warehouse_id.company_id', store=True)
+
+    @api.model
+    def create(self, vals):
+        if 'sequence_id' not in vals or not vals['sequence_id']:
+            if vals['warehouse_id']:
+                wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
+                vals['sequence_id'] = self.env['ir.sequence'].create({
+                    'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
+                    'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
+                    'company_id': wh.company_id.id,
+                }).id
+            else:
+                vals['sequence_id'] = self.env['ir.sequence'].create({
+                    'name': _('Sequence') + ' ' + vals['sequence_code'],
+                    'prefix': vals['sequence_code'], 'padding': 5,
+                    'company_id': self.env.company.id,
+                }).id
+
+        picking_type = super(PickingType, self).create(vals)
+        return picking_type
+
+    @api.onchange('sequence_code')
+    def _onchange_sequence_code(self):
+        if self.sequence_id:
+            if self.warehouse_id:
+                self.sequence_id.prefix = self.warehouse_id.code + '/' + self.sequence_code
+            else:
+                self.sequence_id.prefix = self.sequence_code
 
     def _compute_picking_count(self):
         # TDE TODO count picking can be done using previous two
@@ -225,7 +254,7 @@ class Picking(models.Model):
         help="Products will be reserved first for the transfers with the highest priorities.")
     scheduled_date = fields.Datetime(
         'Scheduled Date', compute='_compute_scheduled_date', inverse='_set_scheduled_date', store=True,
-        index=True, tracking=True,
+        index=True, default=fields.Datetime.now, tracking=True,
         help="Scheduled time for the first part of the shipment to be processed. Setting manually a value here would set it as expected date for all the stock moves.")
     date = fields.Datetime(
         'Creation Date',
