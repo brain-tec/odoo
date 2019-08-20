@@ -97,6 +97,7 @@ class ProductProduct(models.Model):
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'product_id')
 
     @api.depends('stock_valuation_layer_ids')
+    @api.depends_context('to_date')
     def _compute_value_svl(self):
         """Compute `value_svl` and `quantity_svl`."""
         domain = [
@@ -107,10 +108,15 @@ class ProductProduct(models.Model):
             to_date = fields.Datetime.to_datetime(self.env.context['to_date'])
             domain.append(('create_date', '<=', to_date))
         groups = self.env['stock.valuation.layer'].read_group(domain, ['value:sum', 'quantity:sum'], ['product_id'])
+        products = self.browse()
         for group in groups:
             product = self.browse(group['product_id'][0])
             product.value_svl = group['value']
             product.quantity_svl = group['quantity']
+            products |= product
+        remaining = (self - products)
+        remaining.value_svl = 0
+        remaining.quantity_svl = 0
 
     # -------------------------------------------------------------------------
     # SVL creation helpers
@@ -620,23 +626,23 @@ class ProductCategory(models.Model):
         """)
     property_stock_journal = fields.Many2one(
         'account.journal', 'Stock Journal', company_dependent=True,
-        help="When doing real-time inventory valuation, this is the Accounting Journal in which entries will be automatically posted when stock moves are processed.")
+        help="When doing automated inventory valuation, this is the Accounting Journal in which entries will be automatically posted when stock moves are processed.")
     property_stock_account_input_categ_id = fields.Many2one(
         'account.account', 'Stock Input Account', company_dependent=True,
         domain=[('deprecated', '=', False)],
-        help="When doing real-time inventory valuation, counterpart journal items for all incoming stock moves will be posted in this account, unless "
-             "there is a specific valuation account set on the source location. This is the default value for all products in this category. It "
-             "can also directly be set on each product")
+        help="""When doing automated inventory valuation, counterpart journal items for all incoming stock moves will be posted in this account,
+                unless there is a specific valuation account set on the source location. This is the default value for all products in this category.
+                It can also directly be set on each product.""")
     property_stock_account_output_categ_id = fields.Many2one(
         'account.account', 'Stock Output Account', company_dependent=True,
         domain=[('deprecated', '=', False)],
-        help="When doing real-time inventory valuation, counterpart journal items for all outgoing stock moves will be posted in this account, unless "
-             "there is a specific valuation account set on the destination location. This is the default value for all products in this category. It "
-             "can also directly be set on each product")
+        help="""When doing automated inventory valuation, counterpart journal items for all outgoing stock moves will be posted in this account,
+                unless there is a specific valuation account set on the destination location. This is the default value for all products in this category.
+                It can also directly be set on each product.""")
     property_stock_valuation_account_id = fields.Many2one(
         'account.account', 'Stock Valuation Account', company_dependent=True,
         domain=[('deprecated', '=', False)],
-        help="When real-time inventory valuation is enabled on a product, this account will hold the current value of the products.",)
+        help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""",)
 
     @api.constrains('property_stock_valuation_account_id', 'property_stock_account_output_categ_id', 'property_stock_account_input_categ_id')
     def _check_valuation_accouts(self):

@@ -455,6 +455,12 @@ class Task(models.Model):
         return self.stage_find(project_id, [('fold', '=', False)])
 
     @api.model
+    def _default_company_id(self):
+        if self._context.get('default_project_id'):
+            return self.env['project.project'].browse(self._context['default_project_id']).company_id
+        return self.env.company
+
+    @api.model
     def _read_group_stage_ids(self, stages, domain, order):
         search_domain = [('id', 'in', stages.ids)]
         if 'default_project_id' in self.env.context:
@@ -508,7 +514,7 @@ class Task(models.Model):
         default=lambda self: self._get_default_partner(),
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True, related_sudo=False)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True, related_sudo=False)
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
@@ -540,7 +546,7 @@ class Task(models.Model):
         for task in self:
             attachment_ids = self.env['ir.attachment'].search([('res_id', '=', task.id), ('res_model', '=', 'project.task')]).ids
             message_attachment_ids = task.mapped('message_ids.attachment_ids').ids  # from mail_thread
-            task.attachment_ids = list(set(attachment_ids) - set(message_attachment_ids))
+            task.attachment_ids = [(6, 0, list(set(attachment_ids) - set(message_attachment_ids)))]
 
     @api.depends('create_date', 'date_end', 'date_assign')
     def _compute_elapsed(self):
@@ -555,12 +561,18 @@ class Task(models.Model):
                 duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_assign, compute_leaves=True)
                 task.working_hours_open = duration_data['hours']
                 task.working_days_open = duration_data['days']
+            else:
+                task.working_hours_open = 0.0
+                task.working_days_open = 0.0
 
             if task.date_end:
                 dt_date_end = fields.Datetime.from_string(task.date_end)
                 duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_end, compute_leaves=True)
                 task.working_hours_close = duration_data['hours']
                 task.working_days_close = duration_data['days']
+            else:
+                task.working_hours_close = 0.0
+                task.working_days_close = 0.0
 
         (self - task_linked_to_calendar).update(dict.fromkeys(
             ['working_hours_open', 'working_hours_close', 'working_days_open', 'working_days_close'], 0.0))
@@ -616,6 +628,8 @@ class Task(models.Model):
                 self.partner_id = self.project_id.partner_id
             if self.project_id not in self.stage_id.project_ids:
                 self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
+            # keep multi company consistency
+            self.company_id = self.project_id.company_id
         else:
             self.stage_id = False
 
@@ -624,6 +638,13 @@ class Task(models.Model):
         for task in self:
             if task.parent_id and task.child_ids:
                 raise ValidationError(_('Task %s cannot have several subtask levels.' % (task.name,)))
+
+    @api.constrains('company_id', 'project_id')
+    def _check_multi_company(self):
+        for task in self:
+            if task.project_id:
+                if task.project_id.company_id != task.company_id:
+                    raise ValidationError(_('Your task must beo in the same company as its project.'))
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):

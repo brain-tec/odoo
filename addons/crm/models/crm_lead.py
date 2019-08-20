@@ -192,7 +192,10 @@ class Lead(models.Model):
     @api.depends('date_open')
     def _compute_day_open(self):
         """ Compute difference between create date and open date """
-        for lead in self.filtered(lambda l: l.date_open and l.create_date):
+        leads = self.filtered(lambda l: l.date_open and l.create_date)
+        others = self - leads
+        others.day_open = None
+        for lead in leads:
             date_create = fields.Datetime.from_string(lead.create_date)
             date_open = fields.Datetime.from_string(lead.date_open)
             lead.day_open = abs((date_open - date_create).days)
@@ -200,7 +203,10 @@ class Lead(models.Model):
     @api.depends('date_closed')
     def _compute_day_close(self):
         """ Compute difference between current date and log date """
-        for lead in self.filtered(lambda l: l.date_closed and l.create_date):
+        leads = self.filtered(lambda l: l.date_closed and l.create_date)
+        others = self - leads
+        others.day_close = None
+        for lead in leads:
             date_create = fields.Datetime.from_string(lead.create_date)
             date_close = fields.Datetime.from_string(lead.date_closed)
             lead.day_close = abs((date_close - date_create).days)
@@ -560,21 +566,6 @@ class Lead(models.Model):
             'default_name': self.name,
         }
         return action
-
-    def close_dialog(self):
-        return {'type': 'ir.actions.act_window_close'}
-
-    def edit_dialog(self):
-        form_view = self.env.ref('crm.crm_case_form_view_oppor')
-        return {
-            'name': _('Opportunity'),
-            'res_model': 'crm.lead',
-            'res_id': self.id,
-            'views': [(form_view.id, 'form'),],
-            'type': 'ir.actions.act_window',
-            'target': 'inline',
-            'context': {'default_type': 'opportunity'}
-        }
 
     # ----------------------------------------
     # Business Methods
@@ -980,48 +971,17 @@ class Lead(models.Model):
                 lead.write(value)
         return True
 
-    def redirect_opportunity_view(self):
+    def redirect_lead_opportunity_view(self):
         self.ensure_one()
-        # Get opportunity views
-        form_view = self.env.ref('crm.crm_case_form_view_oppor')
-        tree_view = self.env.ref('crm.crm_case_tree_view_oppor')
         return {
-            'name': _('Opportunity'),
-            'view_mode': 'tree, form',
+            'name': _('Lead or Opportunity'),
+            'view_mode': 'form',
             'res_model': 'crm.lead',
-            'domain': [('type', '=', 'opportunity')],
+            'domain': [('type', '=', self.type)],
             'res_id': self.id,
             'view_id': False,
-            'views': [
-                (form_view.id, 'form'),
-                (tree_view.id, 'tree'),
-                (False, 'kanban'),
-                (False, 'calendar'),
-                (False, 'graph')
-            ],
             'type': 'ir.actions.act_window',
-            'context': {'default_type': 'opportunity'}
-        }
-
-    def redirect_lead_view(self):
-        self.ensure_one()
-        # Get lead views
-        form_view = self.env.ref('crm.crm_case_form_view_leads')
-        tree_view = self.env.ref('crm.crm_case_tree_view_leads')
-        return {
-            'name': _('Lead'),
-            'view_mode': 'tree, form',
-            'res_model': 'crm.lead',
-            'domain': [('type', '=', 'lead')],
-            'res_id': self.id,
-            'view_id': False,
-            'views': [
-                (form_view.id, 'form'),
-                (tree_view.id, 'tree'),
-                (False, 'calendar'),
-                (False, 'graph')
-            ],
-            'type': 'ir.actions.act_window',
+            'context': {'default_type': self.type}
         }
 
     @api.model
@@ -1235,13 +1195,6 @@ class Lead(models.Model):
         if leftover:
             res.update(super(Lead, leftover)._notify_get_reply_to(default=default, records=None, company=company, doc_names=doc_names))
         return res
-
-    def get_formview_id(self, access_uid=None):
-        if self.type == 'opportunity':
-            view_id = self.env.ref('crm.crm_case_form_view_oppor').id
-        else:
-            view_id = super(Lead, self).get_formview_id()
-        return view_id
 
     def _message_get_default_recipients(self):
         return {r.id: {
@@ -1546,6 +1499,7 @@ class Lead(models.Model):
         args = [sql.Identifier(field) for field in fields] * 2
 
         #   Build sql query in safe mode
+        self.flush(['probability', 'active'])
         query = """select probability, active, %s, count(probability) as count
                     from crm_lead l
                     where (probability = 0 or probability >= 100)
@@ -1581,6 +1535,7 @@ class Lead(models.Model):
 
     def _pls_update_frequency_table_tag(self, frequencies, team_id, pls_start_date):
         # get all tag_ids won / lost count
+        self.flush(['probability', 'active'])
         query = """select l.probability, l.active, t.id, count(l.probability) as count
                     from crm_lead_tag_rel rel
                     inner join crm_lead_tag t on rel.tag_id = t.id
@@ -1635,6 +1590,7 @@ class Lead(models.Model):
             str_fields = ", ".join(["{}"] * len(fields))
             args = [sql.Identifier(field) for field in fields]
             #   Build sql query in safe mode
+            self.flush(['probability'])
             query = """SELECT id, %s
                         FROM crm_lead l
                         WHERE probability > 0 AND probability < 100 AND active = True AND id in %%s order by team_id asc"""

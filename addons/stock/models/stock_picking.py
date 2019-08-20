@@ -89,13 +89,24 @@ class PickingType(models.Model):
         picking_type = super(PickingType, self).create(vals)
         return picking_type
 
-    @api.onchange('sequence_code')
-    def _onchange_sequence_code(self):
-        if self.sequence_id:
-            if self.warehouse_id:
-                self.sequence_id.prefix = self.warehouse_id.code + '/' + self.sequence_code
-            else:
-                self.sequence_id.prefix = self.sequence_code
+    def write(self, vals):
+        if 'sequence_code' in vals:
+            for picking_type in self:
+                if picking_type.warehouse_id:
+                    picking_type.sequence_id.write({
+                        'name': picking_type.warehouse_id.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
+                        'prefix': picking_type.warehouse_id.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
+                        'company_id': picking_type.warehouse_id.company_id.id,
+                    })
+                else:
+                    picking_type.sequence_id.write({
+                        'name': _('Sequence') + ' ' + vals['sequence_code'],
+                        'prefix': vals['sequence_code'], 'padding': 5,
+                        'company_id': picking_type.env.company.id,
+                    })
+
+        picking_type = super(PickingType, self).write(vals)
+        return picking_type
 
     def _compute_picking_count(self):
         # TDE TODO count picking can be done using previous two
@@ -1113,13 +1124,19 @@ class Picking(models.Model):
                 float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
                 and not ml.result_package_id
             )
+            if not move_line_ids:
+                move_line_ids = self.move_line_ids.filtered(lambda ml: float_compare(ml.product_uom_qty, 0.0,
+                                     precision_rounding=ml.product_uom_id.rounding) > 0 and float_compare(ml.qty_done, 0.0,
+                                     precision_rounding=ml.product_uom_id.rounding) == 0)
+                for line in move_line_ids:
+                    line.qty_done = line.product_uom_qty
             if move_line_ids:
                 res = self._pre_put_in_pack_hook(move_line_ids)
                 if not res:
                     res = self._put_in_pack(move_line_ids)
                 return res
             else:
-                raise UserError(_('You must first set the quantity you will put in the pack.'))
+                raise UserError(_('All the products currently reserved in the picking are already in a pack. Please add products to the picking to create a new pack.'))
 
     def button_scrap(self):
         self.ensure_one()
