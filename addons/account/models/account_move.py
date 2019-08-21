@@ -79,8 +79,7 @@ class AccountMove(models.Model):
     date = fields.Date(string='Date', required=True, index=True, readonly=True,
         states={'draft': [('readonly', False)]},
         default=fields.Date.context_today)
-    ref = fields.Char(string='Reference', copy=False, readonly=True,
-        states={'draft': [('readonly', False)]})
+    ref = fields.Char(string='Reference', copy=False)
     narration = fields.Text(string='Internal Note')
     state = fields.Selection(selection=[
             ('draft', 'Unposted'),
@@ -934,7 +933,6 @@ class AccountMove(models.Model):
                 sign = -1
             else:
                 sign = 1
-
             move.amount_untaxed = sign * (total_untaxed_currency if len(currencies) == 1 else total_untaxed)
             move.amount_tax = sign * (total_tax_currency if len(currencies) == 1 else total_tax)
             move.amount_total = sign * (total_currency if len(currencies) == 1 else total)
@@ -1122,6 +1120,7 @@ class AccountMove(models.Model):
                         'id': line.id,
                         'position': currency_id.position,
                         'digits': [69, move.currency_id.decimal_places],
+                        'payment_date': fields.Date.to_string(line.date), 
                     })
                 info['title'] = type_payment
                 move.invoice_outstanding_credits_debits_widget = json.dumps(info)
@@ -1853,7 +1852,7 @@ class AccountMove(models.Model):
                     raise UserError(_("The field 'Vendor' is required, please complete it to validate the Vendor Bill."))
 
             if move.is_invoice(include_receipts=True) and float_compare(move.amount_total, 0.0, precision_rounding=move.currency_id.rounding) < 0:
-                raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
+                raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead. Use the action menu to transform it into a credit note or refund."))
 
             # Handle case when the invoice_date is not set. In that case, the invoice_date is set at today and then,
             # lines are recomputed accordingly.
@@ -2013,6 +2012,29 @@ class AccountMove(models.Model):
             .with_context(active_ids=self.ids, active_model='account.move', active_id=self.id)\
             .action_register_payment()
 
+    def action_switch_invoice_into_refund_credit_note(self):
+        if any(move.type not in ('in_invoice', 'out_invoice') for move in self):
+            raise ValidationError(_("This action isn't available for this document."))
+        
+        for move in self:
+            move.type = move.type.replace('invoice', 'refund')       
+            reversed_move = move._reverse_move_vals({}, False)
+            new_invoice_line_ids = []
+            for cmd, virtualid, line_vals in reversed_move['line_ids']:
+                if not line_vals['exclude_from_invoice_tab']:
+                    new_invoice_line_ids.append((0, 0,line_vals))
+            if move.amount_total < 0:
+                # Inverse all invoice_line_ids
+                for cmd, virtualid, line_vals in new_invoice_line_ids:
+                    line_vals.update({
+                        'quantity' : -line_vals['quantity'],
+                        'amount_currency' : -line_vals['amount_currency'],
+                        'debit' : line_vals['credit'],
+                        'credit' : line_vals['debit']
+                    })
+            move.write({'invoice_line_ids' : [(5, 0, 0)]})
+            move.write({'invoice_line_ids' : new_invoice_line_ids})
+
     def _get_report_base_filename(self):
         if any(not move.is_invoice() for move in self):
             raise UserError(_("Only invoices could be printed."))
@@ -2146,9 +2168,9 @@ class AccountMoveLine(models.Model):
         help="The bank statement used for bank reconciliation")
 
     # ==== Tax fields ====
-    tax_ids = fields.Many2many('account.tax', string='Taxes')
+    tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount")
     tax_line_id = fields.Many2one('account.tax', string='Originator Tax', ondelete='restrict', store=True,
-        compute='_compute_tax_line_id')
+        compute='_compute_tax_line_id', help="Indicates that this journal item is a tax line")
     tax_group_id = fields.Many2one(related='tax_line_id.tax_group_id', string='Originator tax group',
         readonly=True, store=True,
         help='technical field for widget tax-group-custom-field')
@@ -2318,9 +2340,7 @@ class AccountMoveLine(models.Model):
             elif self.account_id.tax_ids:
                 tax_ids = self.account_id.tax_ids
             else:
-                tax_ids = self.env['account.tax']
-            if not tax_ids and not self.exclude_from_invoice_tab:
-                tax_ids = self.move_id.company_id.account_sale_tax_id
+                tax_ids = None
         elif self.move_id.is_purchase_document(include_receipts=True):
             # In invoice.
             if self.product_id.supplier_taxes_id:
@@ -2328,14 +2348,12 @@ class AccountMoveLine(models.Model):
             elif self.account_id.tax_ids:
                 tax_ids = self.account_id.tax_ids
             else:
-                tax_ids = self.env['account.tax']
-            if not tax_ids and not self.exclude_from_invoice_tab:
-                tax_ids = self.move_id.company_id.account_purchase_tax_id
+                tax_ids = None
         else:
             # Miscellaneous operation.
             tax_ids = self.account_id.tax_ids
 
-        if self.company_id:
+        if self.company_id and tax_ids:
             tax_ids = tax_ids.filtered(lambda tax: tax.company_id == self.company_id)
 
         fiscal_position = self.move_id.fiscal_position_id
@@ -2726,6 +2744,17 @@ class AccountMoveLine(models.Model):
             control_account_failed = journal.account_control_ids and account not in journal.account_control_ids
             if control_type_failed or control_account_failed:
                 raise UserError(_('You cannot use this general account in this journal, check the tab \'Entry Controls\' on the related journal.'))
+
+    @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
+    def _check_off_balance(self):
+        for line in self:
+            if line.account_id.internal_group == 'off_balance':
+                if any(a.internal_group != line.account_id.internal_group for a in line.move_id.line_ids.account_id):
+                    raise UserError(_('If you want to use "Off-Balance Sheet" accounts, all the accounts of the journal entry must be of this type'))
+                if line.tax_ids or line.tax_line_id:
+                    raise UserError(_('You cannot use taxes on lines with an Off-Balance account'))
+                if line.reconciled:
+                    raise UserError(_('Lines from "Off-Balance Sheet" accounts cannot be reconciled'))
 
     @api.constrains('tax_ids', 'tax_line_id')
     def _check_tax_lock_date1(self):

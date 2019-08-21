@@ -180,12 +180,13 @@ class SaleOrder(models.Model):
     signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
 
     commitment_date = fields.Datetime('Commitment Date',
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-        copy=False, readonly=True,
-        help="This is the delivery date promised to the customer. If set, the delivery order "
-             "will be scheduled based on this date rather than product lead times.")
+                                      states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+                                      copy=False, readonly=True,
+                                      help="This is the delivery date promised to the customer. "
+                                           "If set, the delivery order will be scheduled based on "
+                                           "this date rather than product lead times.")
     expected_date = fields.Datetime("Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
-        help="Delivery date you can promise to the customer, computed from product lead times and from the shipping policy of the order.")
+        help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
     amount_undiscounted = fields.Float('Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
 
     type_name = fields.Char('Type Name', compute='_compute_type_name')
@@ -444,7 +445,7 @@ class SaleOrder(models.Model):
                     ['|', ('name', operator, name), ('partner_id.name', operator, name)]
                 ])
                 order_ids = self._search(domain, limit=limit, access_rights_uid=name_get_uid)
-                return self.browse(order_ids).name_get()
+                return models.lazy_name_get(self.browse(order_ids).with_user(name_get_uid))
         return super(SaleOrder, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _prepare_invoice(self):
@@ -1072,7 +1073,7 @@ class SaleOrderLine(models.Model):
 
     def write(self, values):
         if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
-            raise UserError("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type.")
+            raise UserError(_("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type."))
 
         if 'product_uom_qty' in values:
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')

@@ -213,7 +213,7 @@ class PurchaseOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id_warning(self):
-        if not self.partner_id:
+        if not self.partner_id or not self.env.user.has_group('purchase.group_warning_purchase'):
             return
         warning = {}
         title = False
@@ -393,6 +393,8 @@ class PurchaseOrder(models.Model):
             'default_type': 'in_invoice',
             'default_purchase_id': self.id,
         }
+        if self.user_id:
+            result['context']['default_user_id'] = self.user_id.id
         # choose the view_mode accordingly
         if len(self.invoice_ids) > 1 and not create_bill:
             result['domain'] = "[('id', 'in', " + str(self.invoice_ids.ids) + ")]"
@@ -624,7 +626,7 @@ class PurchaseOrderLine(models.Model):
 
     @api.onchange('product_id')
     def onchange_product_id_warning(self):
-        if not self.product_id:
+        if not self.product_id or not self.env.user.has_group('purchase.group_warning_purchase'):
             return
         warning = {}
         title = False

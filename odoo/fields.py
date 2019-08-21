@@ -23,7 +23,7 @@ except ImportError:
 import psycopg2
 
 from .tools import float_repr, float_round, frozendict, html_sanitize, human_size, pg_varchar, \
-    ustr, OrderedSet, pycompat, sql, date_utils, unique, IterableGenerator, image_process
+    ustr, OrderedSet, pycompat, sql, date_utils, unique, IterableGenerator, image_process, merge_sequences
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
@@ -1995,10 +1995,18 @@ class Image(Binary):
 class Selection(Field):
     """
     :param selection: specifies the possible values for this field.
-        It is given as either a list of pairs (``value``, ``string``), or a
-        model method, or a method name.
+        It is given as either a list of pairs ``(value, label)``, or a model
+        method, or a method name.
+
     :param selection_add: provides an extension of the selection in the case
-        of an overridden field. It is a list of pairs (``value``, ``string``).
+        of an overridden field. It is a list of pairs ``(value, label)`` or
+        singletons ``(value,)``, where singleton values must appear in the
+        overridden selection. The new values are inserted in an order that is
+        consistent with the overridden selection and this list::
+
+            selection = [('a', 'A'), ('b', 'B')]
+            selection_add = [('c', 'C'), ('b',)]
+            > result = [('a', 'A'), ('c', 'C'), ('b', 'B')]
 
     The attribute ``selection`` is mandatory except in the case of
     :ref:`related fields <field-related>` or :ref:`field extensions
@@ -2029,16 +2037,38 @@ class Selection(Field):
 
     def _setup_attrs(self, model, name):
         super(Selection, self)._setup_attrs(model, name)
+
         # determine selection (applying 'selection_add' extensions)
+        values = None
+        labels = {}
+
         for field in reversed(resolve_mro(model, name, self._can_setup_from)):
             # We cannot use field.selection or field.selection_add here
             # because those attributes are overridden by ``_setup_attrs``.
             if 'selection' in field.args:
-                self.selection = field.args['selection']
+                selection = field.args['selection']
+                if isinstance(selection, list):
+                    if (
+                        values is not None
+                        and values != [kv[0] for kv in selection]
+                    ):
+                        _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead", self, selection)
+                    values = [kv[0] for kv in selection]
+                    labels.update(selection)
+                else:
+                    self.selection = selection
+
             if 'selection_add' in field.args:
-                # use an OrderedDict to update existing values
                 selection_add = field.args['selection_add']
-                self.selection = list(OrderedDict(self.selection + selection_add).items())
+                assert isinstance(selection_add, list), \
+                    "%s: selection_add=%r must be a list" % (self, selection_add)
+                assert values is not None, \
+                    "%s: selection_add=%r on non-list selection %r" % (self, selection_add, self.selection)
+                values = merge_sequences(values, [kv[0] for kv in selection_add])
+                labels.update(kv for kv in selection_add if len(kv) == 2)
+
+        if values is not None:
+            self.selection = [(value, labels[value]) for value in values]
 
     def _selection_modules(self, model):
         """ Return a mapping from selection values to modules defining each value. """
@@ -2055,8 +2085,9 @@ class Selection(Field):
                     for value, label in field.args['selection']:
                         value_modules[value].add(module)
             if 'selection_add' in field.args:
-                for value, label in field.args['selection_add']:
-                    value_modules[value].add(module)
+                for value_label in field.args['selection_add']:
+                    if len(value_label) > 1:
+                        value_modules[value_label[0]].add(module)
         return value_modules
 
     def _description_selection(self, env):
@@ -3003,6 +3034,7 @@ class Many2many(_RelationalMulti):
         'column2': None,                # column of table referring to comodel
         'auto_join': False,             # whether joins are generated upon search
         'limit': None,                  # optional limit to use upon read
+        'ondelete': None,               # optional ondelete for the column2 fkey
     }
 
     def __init__(self, comodel_name=Default, relation=Default, column1=Default,
@@ -3018,6 +3050,18 @@ class Many2many(_RelationalMulti):
 
     def _setup_regular_base(self, model):
         super(Many2many, self)._setup_regular_base(model)
+        # 3 cases:
+        # 1) The ondelete attribute is not defined, we assign it a sensible default
+        # 2) The ondelete attribute is defined and its definition makes sense
+        # 3) The ondelete attribute is explicitly defined as 'set null' for a m2m,
+        #    this is considered a programming error.
+        self.ondelete = self.ondelete or 'cascade'
+        if self.ondelete == 'set null':
+            raise ValueError(
+                "The m2m field %s of model %s declares its ondelete policy "
+                "as being 'set null'. Only 'restrict' and 'cascade' make sense."
+                % (self.name, model._name)
+            )
         if self.store:
             if not (self.relation and self.column1 and self.column2):
                 self._explicit = False
@@ -3073,8 +3117,8 @@ class Many2many(_RelationalMulti):
         if not self.manual:
             model.pool.post_init(model.env['ir.model.relation']._reflect_relation,
                                  model, self.relation, self._module)
+        comodel = model.env[self.comodel_name]
         if not sql.table_exists(cr, self.relation):
-            comodel = model.env[self.comodel_name]
             query = """
                 CREATE TABLE "{rel}" ("{id1}" INTEGER NOT NULL,
                                       "{id2}" INTEGER NOT NULL,
@@ -3087,18 +3131,25 @@ class Many2many(_RelationalMulti):
             _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
             model.pool.post_init(self.update_db_foreign_keys, model)
             return True
+        elif sql.table_kind(cr, comodel._table) != 'v' and self.ondelete != 'cascade':
+            # Fix foreign key references with ondelete, unless the targets are
+            # SQL views.
+            # This is needed because by default the ondelete of the column1
+            # fkey is set to 'cascade', but the relation on the opposite model
+            # can override it by defining ondelete for its column2 fkey.
+            sql.fix_foreign_key(cr, self.relation, self.column2, comodel._table, 'id', self.ondelete)
 
     def update_db_foreign_keys(self, model):
         """ Add the foreign keys corresponding to the field's relation table. """
         cr = model._cr
         comodel = model.env[self.comodel_name]
         reflect = model.env['ir.model.constraint']._reflect_constraint
-        # create foreign key references with ondelete=cascade, unless the targets are SQL views
+        # create foreign key references with ondelete, unless the targets are SQL views
         if sql.table_kind(cr, model._table) != 'v':
             sql.add_foreign_key(cr, self.relation, self.column1, model._table, 'id', 'cascade')
             reflect(model, '%s_%s_fkey' % (self.relation, self.column1), 'f', None, self._module)
         if sql.table_kind(cr, comodel._table) != 'v':
-            sql.add_foreign_key(cr, self.relation, self.column2, comodel._table, 'id', 'cascade')
+            sql.add_foreign_key(cr, self.relation, self.column2, comodel._table, 'id', self.ondelete)
             reflect(model, '%s_%s_fkey' % (self.relation, self.column2), 'f', None, self._module)
 
     def read(self, records):

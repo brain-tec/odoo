@@ -401,7 +401,7 @@ class Product(models.Model):
                 return {
                     'warning': {
                         'title': _('Warning!'),
-                        'message': _("You have products in stock that have no lot number.  You can assign serial numbers by doing an inventory.  ")}}
+                        'message': _("You have product(s) in stock that have no lot/serial number. You can assign lot/serial numbers by doing an inventory adjustment.")}}
 
     @api.model
     def view_header_get(self, view_id, view_type):
@@ -830,7 +830,9 @@ class UoM(models.Model):
         procurement_uom = self
         computed_qty = qty
         get_param = self.env['ir.config_parameter'].sudo().get_param
-        if procurement_uom.id != quant_uom.id and get_param('stock.propagate_uom') != '1':
+        if get_param('stock.propagate_uom') != '1':
             computed_qty = self._compute_quantity(qty, quant_uom, rounding_method='HALF-UP')
             procurement_uom = quant_uom
+        else:
+            computed_qty = self._compute_quantity(qty, procurement_uom, rounding_method='HALF-UP')
         return (computed_qty, procurement_uom)
