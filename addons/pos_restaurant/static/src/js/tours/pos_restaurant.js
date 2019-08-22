@@ -30,12 +30,7 @@ odoo.define('pos_reataurant.tour.synchronized_table_management', function (requi
             run: function() {
                 var orders = $('.order-sequence');
                 if (orders.length === order_count) {
-                    var fail = orders.toArray().some(function(order){
-                        return !order.firstChild.data.includes('S-');
-                    });
-                    if (fail) {
-                        throw "sync failed";
-                    }
+                    return
                 } else {
                     throw "sync failed";
                 }
@@ -92,7 +87,6 @@ odoo.define('pos_reataurant.tour.synchronized_table_management', function (requi
             trigger: '.label:contains(' + table_id +')',
             run: 'click',
         }];
-        steps = steps.concat(verify_sync());
         if (order_count !== null){
             steps = steps.concat(verify_orders_synced(order_count));
         }
@@ -172,18 +166,6 @@ odoo.define('pos_reataurant.tour.synchronized_table_management', function (requi
     steps = steps.concat(verify_sync());
     steps = steps.concat(open_table('T5', 1));
 
-    steps = steps.concat([{
-        content: "close the Point of Sale frontend",
-        trigger: ".header-button",
-    }, {
-        content: "confirm closing the frontend",
-        trigger: ".header-button",
-        run: function() {}, //it's a check,
-    }, {
-        content: "close the Point of Sale frontend",
-        trigger: ".header-button",
-    }]);
-
     Tour.register('pos_restaurant_sync', { test: true, url: '/pos/web' }, steps);
 
 
@@ -211,17 +193,6 @@ odoo.define('pos_reataurant.tour.synchronized_table_management', function (requi
         run: 'click',
     }]);
     steps = steps.concat(verify_sync());
-    steps = steps.concat([{
-        content: "close the Point of Sale frontend",
-        trigger: ".header-button",
-    }, {
-        content: "confirm closing the frontend",
-        trigger: ".header-button",
-        run: function() {}, //it's a check,
-    }, {
-        content: "close the Point of Sale frontend",
-        trigger: ".header-button",
-    }]);
 
     Tour.register('pos_restaurant_sync_second_login', { test: true, url: '/pos/web' }, steps);
 
