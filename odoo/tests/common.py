@@ -578,6 +578,17 @@ class ChromeBrowser():
             '--no-default-browser-check': '',
             '--no-first-run': '',
             '--disable-extensions': '',
+            '--disable-background-networking' : '',
+            '--disable-background-timer-throttling' : '',
+            '--disable-backgrounding-occluded-windows': '',
+            '--disable-renderer-backgrounding' : '',
+            '--disable-breakpad': '',
+            '--disable-client-side-phishing-detection': '',
+            '--disable-crash-reporter': '',
+            '--disable-default-apps': '',
+            '--disable-dev-shm-usage': '',
+            '--disable-device-discovery-notifications': '',
+            '--disable-namespace-sandbox': '',
             '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
             '--window-size': self.window_size,
@@ -620,22 +631,32 @@ class ChromeBrowser():
             version : get chrome and dev tools version
             protocol : get the full protocol
         """
-        self._logger.info("Issuing json command %s", command)
         command = os.path.join('json', command).strip('/')
-        while timeout > 0:
+        url = werkzeug.urls.url_join('http://%s:%s/' % (HOST, self.devtools_port), command)
+        self._logger.info("Issuing json command %s", url)
+        delay = 0.1
+        tries = 0
+        failure_info = None
+        while tries * delay < timeout:
+            if self.chrome_process.poll() is not None:
+                self._logger.error('Chrome crashed at startup with return code', self.chrome_process.returncode)
+                break
             try:
-                url = werkzeug.urls.url_join('http://%s:%s/' % (HOST, self.devtools_port), command)
-                self._logger.info('Url : %s', url)
                 r = requests.get(url, timeout=3)
                 if r.ok:
+                    self._logger.info("Json command result in %s", tries * delay)
                     return r.json()
                 return {'status_code': r.status_code}
-            except requests.ConnectionError:
-                time.sleep(0.1)
-                timeout -= 0.1
-            except requests.exceptions.ReadTimeout:
+            except requests.ConnectionError as e:
+                failure_info = str(e)
+                time.sleep(delay)
+                tries+=1
+            except requests.exceptions.ReadTimeout as e:
+                failure_info = str(e)
                 break
-        self._logger.error('Could not connect to chrome debugger')
+        self._logger.error('Could not connect to chrome debugger after %s tries, %ss' % (tries, delay))
+        if failure_info:
+            self._logger.info(failure_info)
         raise unittest.SkipTest("Cannot connect to chrome headless")
 
     def _open_websocket(self):
@@ -755,6 +776,12 @@ class ChromeBrowser():
         _id = self._websocket_send('Network.setCookie', params=params)
         return self._websocket_wait_id(_id)
 
+    def delete_cookie(self, name, **kwargs):
+        params = {kw:kwargs[kw] for kw in kwargs if kw in ['url', 'domain', 'path']}
+        params.update({'name': name})
+        _id = self._websocket_send('Network.deleteCookies', params=params)
+        return self._websocket_wait_id(_id) 
+
     def _wait_ready(self, ready_code, timeout=60):
         self._logger.info('Evaluate ready code "%s"', ready_code)
         awaited_result = {'result': {'type': 'boolean', 'value': True}}
@@ -849,8 +876,11 @@ class ChromeBrowser():
         if self.screencasts_dir and os.path.isdir(self.screencasts_frames_dir):
             shutil.rmtree(self.screencasts_frames_dir)
         self.screencast_frames = []
-        self._websocket_send('Page.stopLoading')
+        sl_id = self._websocket_send('Page.stopLoading')
+        self._websocket_wait_id(sl_id)
         self._logger.info('Deleting cookies and clearing local storage')
+        dc_id = self._websocket_send('Network.clearBrowserCache')
+        self._websocket_wait_id(dc_id)
         dc_id = self._websocket_send('Network.clearBrowserCookies')
         self._websocket_wait_id(dc_id)
         cl_id = self._websocket_send('Runtime.evaluate', params={'expression': 'localStorage.clear()'})
@@ -911,26 +941,26 @@ class HttpCase(TransactionCase):
             return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers)
         return self.opener.get(url, timeout=timeout, headers=headers)
 
-    def _wait_remaining_requests(self):
-        t0 = int(time.time())
-        for thread in threading.enumerate():
-            if thread.name.startswith('odoo.service.http.request.'):
-                join_retry_count = 10
-                while thread.isAlive():
-                    # Need a busyloop here as thread.join() masks signals
-                    # and would prevent the forced shutdown.
-                    thread.join(0.05)
-                    join_retry_count -= 1
-                    if join_retry_count < 0:
-                        self._logger.warning("Stop waiting for thread %s handling request for url %s",
-                                        thread.name, getattr(thread, 'url', '<UNKNOWN>'))
-                        break
-                    time.sleep(0.5)
-                    t1 = int(time.time())
-                    if t0 != t1:
-                        self._logger.info('remaining requests')
-                        odoo.tools.misc.dumpstacks()
-                        t0 = t1
+    def _wait_remaining_requests(self, timeout=10):
+
+        def get_http_request_threads():
+            return [t for t in threading.enumerate() if t.name.startswith('odoo.service.http.request.')]
+
+        start_time = time.time()
+        request_threads = get_http_request_threads()
+        self._logger.info('waiting for threads: %s', request_threads)
+
+        for thread in request_threads:
+            thread.join(timeout - (time.time() - start_time))
+
+        request_threads = get_http_request_threads()
+        for thread in request_threads:
+            self._logger.info("Stop waiting for thread %s handling request for url %s",
+                                    thread.name, getattr(thread, 'url', '<UNKNOWN>'))
+
+        if request_threads:
+            self._logger.info('remaining requests')
+            odoo.tools.misc.dumpstacks()
 
     def authenticate(self, user, password):
         # stay non-authenticated
@@ -1016,6 +1046,7 @@ class HttpCase(TransactionCase):
         finally:
             # clear browser to make it stop sending requests, in case we call
             # the method several times in a test method
+            self.browser.delete_cookie('session_id', domain=HOST)
             self.browser.clear()
             self._wait_remaining_requests()
 

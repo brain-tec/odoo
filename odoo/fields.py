@@ -998,7 +998,9 @@ class Field(MetaField('DummyField', (object,), {})):
         # update towrite
         if self.store:
             towrite = records.env.all.towrite[self.model_name]
-            column_value = self.convert_to_column(cache_value, records)
+            record = records[:1]
+            write_value = self.convert_to_write(cache_value, record)
+            column_value = self.convert_to_column(write_value, record)
             for record in records.filtered('id'):
                 towrite[record.id][self.name] = column_value
 
@@ -1435,12 +1437,13 @@ class _String(Field):
         # update towrite if modifying the source
         if update_column:
             towrite = records.env.all.towrite[self.model_name]
-            column_value = self.convert_to_column(cache_value, records)
-            for record in records.filtered('id'):
-                towrite[record.id][self.name] = column_value
-            if self.translate is True:
+            real_record_ids = [r.id for r in records if r.id]
+            for rid in real_record_ids:
+                # cache_value is already in database format
+                towrite[rid][self.name] = cache_value
+            if self.translate is True and real_record_ids:
                 tname = "%s,%s" % (records._name, self.name)
-                records.env['ir.translation']._set_source(tname, records.ids, value)
+                records.env['ir.translation']._set_source(tname, real_record_ids, value)
 
         if update_trans:
             if callable(self.translate):
@@ -2424,9 +2427,9 @@ class Many2one(_Relational):
         # update towrite
         if self.store:
             towrite = records.env.all.towrite[self.model_name]
-            write_value = self.convert_to_column(self.convert_to_write(cache_value, records), records)
             for record in records.filtered('id'):
-                towrite[record.id][self.name] = write_value
+                # cache_value is already in database format
+                towrite[record.id][self.name] = cache_value
 
         return records
 
@@ -2567,9 +2570,6 @@ class _RelationalMulti(_Relational):
                     cache.set(record, self, val)
                 else:
                     result = False
-            # DEEP FUCKING HACK TO FIX SOMEDAY: recs.env is different from
-            # records.env; we must trigger modifications in the original env
-            recs.env._protected = records.env._protected
             recs.modified([self.name])
 
         return result
