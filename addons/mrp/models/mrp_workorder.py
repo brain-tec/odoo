@@ -4,6 +4,7 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
+from math import floor
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -83,6 +84,7 @@ class MrpWorkorder(models.Model):
     duration_percent = fields.Integer(
         'Duration Deviation (%)', compute='_compute_duration',
         group_operator="avg", readonly=True, store=True)
+    progress = fields.Float('Progress Done (%)', digits=(16, 2), compute='_compute_progress')
 
     operation_id = fields.Many2one(
         'mrp.routing.workcenter', 'Operation')  # Should be used differently as BoM can change in the meantime
@@ -146,14 +148,6 @@ class MrpWorkorder(models.Model):
             'date_to': date_to,
         })
 
-    @api.onchange('date_planned_start')
-    def _onchange_date_planned_start(self):
-        if self.duration_expected:
-            time_delta = timedelta(minutes=self.duration_expected)
-        else:
-            time_delta = timedelta(hours=1)
-        self.update({'date_planned_finished': self.date_planned_start + time_delta})
-
     @api.onchange('finished_lot_id')
     def _onchange_finished_lot_id(self):
         """When the user changes the lot being currently produced, suggest
@@ -165,6 +159,12 @@ class MrpWorkorder(models.Model):
             line = previous_wo.finished_workorder_line_ids.filtered(lambda line: line.product_id == self.product_id and line.lot_id == self.finished_lot_id)
             if line:
                 self.qty_producing = line.qty_done
+
+    @api.onchange('date_planned_finished')
+    def _onchange_date_planned_finished(self):
+        if self.date_planned_start and self.date_planned_finished:
+            diff = self.date_planned_finished - self.date_planned_start
+            self.duration_expected = diff.total_seconds() / 60
 
     @api.depends('production_id.workorder_ids.finished_workorder_line_ids',
     'production_id.workorder_ids.finished_workorder_line_ids.qty_done',
@@ -231,6 +231,16 @@ class MrpWorkorder(models.Model):
                 order.duration_percent = 100 * (order.duration_expected - order.duration) / order.duration_expected
             else:
                 order.duration_percent = 0
+
+    @api.depends('duration', 'duration_expected', 'state')
+    def _compute_progress(self):
+        for order in self:
+            if order.state == 'done':
+                order.progress = 100
+            elif order.duration_expected:
+                order.progress = order.duration * 100 / order.duration_expected
+            else:
+                order.progress = 0
 
     def _compute_working_users(self):
         """ Checks whether the current user is working, all the users currently working and the last user that worked. """
