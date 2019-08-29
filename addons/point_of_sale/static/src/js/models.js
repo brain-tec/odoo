@@ -368,9 +368,14 @@ exports.PosModel = Backbone.Model.extend({
                  'product_tmpl_id','tracking'],
         order:  _.map(['sequence','default_code','name'], function (name) { return {name: name}; }),
         domain: function(self){
-            var domain = [['sale_ok','=',true],['available_in_pos','=',true],'|',['company_id','=',self.config.company_id[0]],['company_id','=',false]];
+            var domain = ['&', '&', ['sale_ok','=',true],['available_in_pos','=',true],'|',['company_id','=',self.config.company_id[0]],['company_id','=',false]];
             if (self.config.limit_categories &&  self.config.iface_available_categ_ids.length) {
+                domain.unshift('&');
                 domain.push(['pos_categ_id', 'in', self.config.iface_available_categ_ids]);
+            }
+            if (self.config.iface_tipproduct){
+              domain.unshift(['id', '=', self.config.tip_product_id[0]]);
+              domain.unshift('|');
             }
             return domain;
         },
@@ -2006,6 +2011,11 @@ exports.Orderline = Backbone.Model.extend({
     get_lst_price: function(){
         return this.product.lst_price;
     },
+    set_lst_price: function(price){
+      this.order.assert_editable();
+      this.product.lst_price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
+      this.trigger('change',this);
+    },
 });
 
 var OrderlineCollection = Backbone.Collection.extend({
@@ -2539,10 +2549,11 @@ exports.Order = Backbone.Model.extend({
             for (var i = 0; i < lines.length; i++) {
                 if (lines[i].get_product() === tip_product) {
                     lines[i].set_unit_price(tip);
+                    lines[i].set_lst_price(tip);
                     return;
                 }
             }
-            this.add_product(tip_product, {quantity: 1, price: tip });
+            this.add_product(tip_product, {quantity: 1, price: tip, lst_price: tip });
         }
     },
     set_pricelist: function (pricelist) {
@@ -2604,6 +2615,10 @@ exports.Order = Backbone.Model.extend({
 
         if(options.price !== undefined){
             line.set_unit_price(options.price);
+        }
+
+        if(options.lst_price !== undefined){
+            line.set_lst_price(options.lst_price);
         }
 
         //To substract from the unit price the included taxes mapped by the fiscal position
@@ -2772,7 +2787,9 @@ exports.Order = Backbone.Model.extend({
     get_total_discount: function() {
         return round_pr(this.orderlines.reduce((function(sum, orderLine) {
             sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-            sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+            if (orderLine.display_discount_policy() === 'without_discount'){
+                sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+            }
             return sum;
         }), 0), this.pos.currency.rounding);
     },
