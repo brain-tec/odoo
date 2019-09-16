@@ -52,15 +52,12 @@ class WebsiteBlog(http.Controller):
 
         return OrderedDict((year, [m for m in months]) for year, months in itertools.groupby(groups, lambda g: g['year']))
 
-    def _prepare_blog_values(self, blog=False, date_begin=False, date_end=False, tags=False, state=False, page=False):
+    def _prepare_blog_values(self, blogs, blog=False, date_begin=False, date_end=False, tags=False, state=False, page=False):
         """ Prepare all values to display the blogs index page or one specific blog"""
-
-        Blog = request.env['blog.blog']
         BlogPost = request.env['blog.post']
 
         # prepare domain
         domain = request.website.website_domain()
-        blogs = Blog.search(domain, order="create_date asc, id asc")
 
         if blog:
             domain += [('blog_id', '=', blog.id)]
@@ -70,6 +67,10 @@ class WebsiteBlog(http.Controller):
 
         active_tag_ids = tags and [unslug(tag)[1] for tag in tags.split(',')] or []
         if active_tag_ids:
+            fixed_tag_slug = ",".join(slug(t) for t in request.env['blog.tag'].browse(active_tag_ids))
+            if fixed_tag_slug != tags:
+                return request.redirect(request.httprequest.full_path.replace("/tag/%s/" % tags, "/tag/%s/" % fixed_tag_slug, 1), 301)
+
             domain += [('tag_ids', 'in', active_tag_ids)]
 
         if request.env.user.has_group('website.group_website_designer'):
@@ -89,7 +90,7 @@ class WebsiteBlog(http.Controller):
 
         # if blog, we show blog title, if use_cover and not fullwidth_cover we need pager + latest always
         offset = (page - 1) * self._blog_post_per_page
-        first_post = None
+        first_post = BlogPost
         if not blog:
             first_post = BlogPost.search(domain + [('website_published', '=', True)], order="post_date desc, id asc", limit=1)
             if use_cover and not fullwidth_cover:
@@ -109,16 +110,19 @@ class WebsiteBlog(http.Controller):
         tag_category = sorted(all_tags.mapped('category_id'), key=lambda category: category.name.upper())
         other_tags = sorted(all_tags.filtered(lambda x: not x.category_id), key=lambda tag: tag.name.upper())
 
+        # for performance prefetch the first post with the others
+        post_ids = (first_post | posts).ids
+
         return {
             'date_begin': date_begin,
             'date_end': date_end,
-            'first_post': first_post,
+            'first_post': first_post.with_prefetch(post_ids),
             'other_tags': other_tags,
             'tag_category': tag_category,
             'nav_list': self.nav_list(),
             'tags_list': self.tags_list,
             'pager': pager,
-            'posts': posts,
+            'posts': posts.with_prefetch(post_ids),
             'tag': tags,
             'active_tag_ids': active_tag_ids,
             'domain': domain,
@@ -143,12 +147,13 @@ class WebsiteBlog(http.Controller):
             raise werkzeug.exceptions.NotFound()
 
         blogs = Blog.search(request.website.website_domain(), order="create_date asc, id asc")
+
         if not blog and len(blogs) == 1:
             return werkzeug.utils.redirect('/blog/%s' % slug(blogs[0]), code=302)
 
         date_begin, date_end, state = opt.get('date_begin'), opt.get('date_end'), opt.get('state')
 
-        values = self._prepare_blog_values(blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page)
+        values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page)
 
         if blog:
             values['main_object'] = blog
@@ -213,14 +218,16 @@ class WebsiteBlog(http.Controller):
         blog_url = QueryURL('', ['blog', 'tag'], blog=blog_post.blog_id, tag=tag, date_begin=date_begin, date_end=date_end)
 
         if not blog_post.blog_id.id == blog.id:
-            return request.redirect("/blog/%s/post/%s" % (slug(blog_post.blog_id), slug(blog_post)))
+            return request.redirect("/blog/%s/post/%s" % (slug(blog_post.blog_id), slug(blog_post)), code=301)
 
         tags = request.env['blog.tag'].search([])
 
         # Find next Post
-        all_post = BlogPost.search([('blog_id', '=', blog.id)])
+        blog_post_domain = [('blog_id', '=', blog.id)]
         if not request.env.user.has_group('website.group_website_designer'):
-            all_post = all_post.filtered(lambda r: r.post_date <= fields.Datetime.now())
+            blog_post_domain += [('post_date', '<=', fields.Datetime.now())]
+
+        all_post = BlogPost.search(blog_post_domain)
 
         if blog_post not in all_post:
             return request.redirect("/blog/%s" % (slug(blog_post.blog_id)))

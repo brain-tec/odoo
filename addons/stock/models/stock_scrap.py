@@ -66,6 +66,8 @@ class StockScrap(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
+            if self.tracking == 'serial':
+                self.scrap_qty = 1
             self.product_uom_id = self.product_id.uom_id.id
             # Check if we can get a more precise location instead of
             # the default location (a location corresponding to where the
@@ -164,17 +166,19 @@ class StockScrap(models.Model):
         if float_compare(available_qty, scrap_qty, precision_digits=precision) >= 0:
             return self.do_scrap()
         else:
+            ctx = dict(self.env.context)
+            ctx.update({
+                'default_product_id': self.product_id.id,
+                'default_location_id': self.location_id.id,
+                'default_scrap_id': self.id
+            })
             return {
                 'name': _('Insufficient Quantity'),
                 'view_mode': 'form',
                 'res_model': 'stock.warn.insufficient.qty.scrap',
                 'view_id': self.env.ref('stock.stock_warn_insufficient_qty_scrap_form_view').id,
                 'type': 'ir.actions.act_window',
-                'context': {
-                    'default_product_id': self.product_id.id,
-                    'default_location_id': self.location_id.id,
-                    'default_scrap_id': self.id
-                },
+                'context': ctx,
                 'target': 'new'
             }
 

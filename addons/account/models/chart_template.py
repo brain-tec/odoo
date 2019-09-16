@@ -57,6 +57,7 @@ class AccountAccountTemplate(models.Model):
             "to define chart templates that extend another and complete it with few new accounts (You don't need to define the whole structure that is common to both several times).")
     tag_ids = fields.Many2many('account.account.tag', 'account_account_template_account_tag', string='Account tag', help="Optional tags you may want to assign for custom reporting")
     group_id = fields.Many2one('account.group')
+    root_id = fields.Many2one('account.root')
 
     @api.depends('name', 'code')
     def name_get(self):
@@ -652,10 +653,10 @@ class AccountChartTemplate(models.Model):
         sale_tax = self.env['account.tax.template'].search([('type_tax_use', '=', 'sale'), ('chart_template_id', 'in', all_parents)], limit=1)
         purchase_tax = self.env['account.tax.template'].search([('type_tax_use', '=', 'purchase'), ('chart_template_id', 'in', all_parents)], limit=1)
         for account_template in acc_template:
-            # Adding a tax by default on each income or expense account.
-            if account_template.user_type_id.internal_group == 'income':
+            # Adding a tax by default on each income or expense account, if they are not used for exchange difference.
+            if account_template.user_type_id.internal_group == 'income' and account_template != self.income_currency_exchange_account_id:
                 account_template.tax_ids = sale_tax
-            elif account_template.user_type_id.internal_group == 'expense':
+            elif account_template.user_type_id.internal_group == 'expense' and account_template != self.expense_currency_exchange_account_id:
                 account_template.tax_ids = purchase_tax
             code_main = account_template.code and len(account_template.code) or 0
             code_acc = account_template.code or ''

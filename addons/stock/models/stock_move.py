@@ -181,14 +181,16 @@ class StockMove(models.Model):
         if self.product_id:
             self.description_picking = self.product_id._get_description(self.picking_type_id)
 
-    @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots')
+    @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'picking_type_id.show_reserved', 'picking_type_id.show_operations')
     def _compute_display_assign_serial(self):
         for move in self:
             move.display_assign_serial = (
                 move.has_tracking == 'serial' and
+                move.state in ('partially_available', 'assigned') and
                 move.picking_type_id.use_create_lots and
-                not move.picking_type_id.show_reserved and
-                not move.picking_type_id.use_existing_lots
+                not move.picking_type_id.use_existing_lots and
+                move.picking_type_id.show_operations and
+                not move.picking_type_id.show_reserved
             )
 
     @api.depends('picking_id.is_locked')
@@ -1323,7 +1325,7 @@ class StockMove(models.Model):
         for result_package in moves_todo\
                 .mapped('move_line_ids.result_package_id')\
                 .filtered(lambda p: p.quant_ids and len(p.quant_ids) > 1):
-            if len(result_package.quant_ids.mapped('location_id')) > 1:
+            if len(result_package.quant_ids.filtered(lambda q: float_is_zero(abs(q.quantity) + abs(q.reserved_quantity), precision_rounding=q.product_uom_id.rounding)).mapped('location_id')) > 1:
                 raise UserError(_('You cannot move the same package content more than once in the same transfer or split the same package into two location.'))
         picking = moves_todo.mapped('picking_id')
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
