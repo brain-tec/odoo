@@ -855,7 +855,7 @@
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund'))]}">
                                         <field name="invoice_user_id"/>
                                         <field name="invoice_origin" string="Source Document"
-                                               attrs="{'invisible': [('type', '=', 'entry')]}"/>
+                                               attrs="{'invisible': [('invoice_origin', '=', False)]}"/>
                                     </group>
                                     <group string="Accounting"
                                            name="accounting_info_group"
@@ -1018,7 +1018,7 @@
         </record>
 
         <record id="action_accrual_entry" model="ir.actions.server">
-            <field name="name">Change Period</field>
+            <field name="name">Create Accrual Entry</field>
             <field name="model_id" ref="account.model_account_move_line"/>
             <field name="binding_model_id" ref="account.model_account_move_line"/>
             <field name="state">code</field>
