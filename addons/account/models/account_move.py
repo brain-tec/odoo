@@ -1334,26 +1334,23 @@ class AccountMove(models.Model):
                 raise UserError(message)
         return True
 
-    @api.multi
     def _check_tax_lock_date(self):
-        if not self:
-            return
-
-        self._cr.execute('''
-            SELECT move.id, company.tax_lock_date
-            FROM account_move move
-            JOIN account_journal journal ON journal.id = move.journal_id
-            JOIN res_company company ON company.id = journal.company_id
-            WHERE move.id IN %s
-            AND move.date < company.tax_lock_date
-        ''', [tuple(self.ids)])
-
-        query_res = self._cr.fetchone()
-        if query_res:
-            raise UserError(_('''
-                The operation is refused as it would impact an already issued tax statement.
-                Please change the journal entry date or the tax lock date set in the settings (%s) to proceed
-            ''' % query_res[1]))
+        for move in self:
+            if (
+                move.company_id.tax_lock_date
+                and move.date <= move.company_id.tax_lock_date
+                and any(
+                    line.tax_ids
+                    or line.tax_line_id
+                    or line.tag_ids.filtered(lambda x: x.applicability == "taxes")
+                    for line in move.line_ids
+                )
+            ):
+                raise UserError(
+                    _(
+                        "The operation is refused as it would impact an already issued tax statement. Please change the journal entry date or the tax lock date set in the settings ({}) to proceed"
+                    ).format(move.company_id.tax_lock_date or date.min)
+                )
 
     @api.multi
     def _check_move_consistency(self):
@@ -1363,6 +1360,7 @@ class AccountMove(models.Model):
                     raise UserError(_("Cannot create moves for different companies."))
 
         self._check_balanced()
+        self._check_tax_lock_date()
         self._check_fiscalyear_lock_date()
 
     # -------------------------------------------------------------------------
@@ -1736,6 +1734,13 @@ class AccountMove(models.Model):
         else:
             return abs(total_reconciled / total_amount)
 
+    def _get_reconciled_payments(self):
+        """Helper used to retrieve the reconciled payments on this journal entry"""
+        pay_term_line_ids = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        reconciled_amls = pay_term_line_ids.mapped('matched_debit_ids.debit_move_id') + \
+                          pay_term_line_ids.mapped('matched_credit_ids.credit_move_id')
+        return reconciled_amls.mapped('payment_id')
+
     @api.multi
     def _reverse_move_vals(self, default_values, cancel=True):
         ''' Reverse values passed as parameter being the copied values of the original journal entry.
@@ -1916,7 +1921,6 @@ class AccountMove(models.Model):
                 move.invoice_date = fields.Date.context_today(self)
                 move.with_context(check_move_validity=False)._onchange_invoice_date()
 
-        self._check_tax_lock_date()
         self._check_move_consistency()
         # Create the analytic lines in batch is faster as it leads to less cache invalidation.
         self.mapped('line_ids').create_analytic_lines()
@@ -1986,6 +1990,7 @@ class AccountMove(models.Model):
 
     @api.multi
     def button_cancel(self):
+        self._check_tax_lock_date()
         AccountMoveLine = self.env['account.move.line']
         excluded_move_ids = []
 
@@ -2048,6 +2053,7 @@ class AccountMove(models.Model):
         """
         if any(not move.is_invoice(include_receipts=True) for move in self):
             raise UserError(_("Only invoices could be printed."))
+        self._check_tax_lock_date()
 
         self.filtered(lambda inv: not inv.invoice_sent).write({'invoice_sent': True})
         if self.user_has_groups('account.group_account_invoice'):
@@ -2730,7 +2736,7 @@ class AccountMoveLine(models.Model):
                         else:
                             date = partial_line.credit_move_id.date if partial_line.debit_move_id == line else partial_line.debit_move_id.date
                             rate = line.currency_id.with_context(date=date).rate
-                        amount_residual_currency += sign_partial_line * partial_line.amount * rate
+                        amount_residual_currency += sign_partial_line * line.currency_id.round(partial_line.amount * rate)
 
             #computing the `reconciled` field.
             reconciled = False
@@ -2802,24 +2808,6 @@ class AccountMoveLine(models.Model):
             if control_type_failed or control_account_failed:
                 raise UserError(_('You cannot use this general account in this journal, check the tab \'Entry Controls\' on the related journal.'))
 
-    @api.constrains('tax_ids', 'tax_line_id')
-    def _check_tax_lock_date1(self):
-        for line in self:
-            if line.date <= (line.company_id.tax_lock_date or date.min):
-                raise ValidationError(
-                    _("The operation is refused as it would impact an already issued tax statement. " +
-                      "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
-                        line.company_id.tax_lock_date or date.min))
-
-    @api.constrains('credit', 'debit', 'date')
-    def _check_tax_lock_date2(self):
-        for line in self:
-            if (line.tax_ids or line.tax_line_id) and line.date <= (line.company_id.tax_lock_date or date.min):
-                raise ValidationError(
-                    _("The operation is refused as it would impact an already issued tax statement. " +
-                      "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
-                        line.company_id.tax_lock_date or date.min))
-
     @api.multi
     def _update_check(self):
         """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
@@ -2832,7 +2820,10 @@ class AccountMoveLine(models.Model):
                 raise UserError(_('You cannot do this modification on a reconciled entry. You can just change some non legal fields or you must unreconcile first.\n%s.') % err_msg)
             if line.move_id.id not in move_ids:
                 move_ids.add(line.move_id.id)
-        self.env['account.move'].browse(list(move_ids))._check_fiscalyear_lock_date()
+        if move_ids:
+            moves = self.env['account.move'].browse(list(move_ids))
+            moves._check_fiscalyear_lock_date()
+            moves._check_tax_lock_date()
         return True
 
     # -------------------------------------------------------------------------
@@ -2991,7 +2982,6 @@ class AccountMoveLine(models.Model):
     @api.multi
     def unlink(self):
         self._update_check()
-        self._check_tax_lock_date2()
         move_ids = set()
         for line in self:
             if line.move_id.id not in move_ids:
@@ -3025,6 +3015,11 @@ class AccountMoveLine(models.Model):
 
             # Suggest default value for debit / credit to balance the journal entry.
             balance = sum(line['debit'] - line['credit'] for line in move.line_ids)
+            # if we are here, line_ids is in context, so journal_id should also be.
+            journal = self.env['account.journal'].browse(self._context.get('default_journal_id') or self._context['journal_id'])
+            currency = journal.exists() and journal.company_id.currency_id
+            if currency:
+                balance = currency.round(balance)
             if balance < 0.0:
                 values.update({'debit': -balance})
             if balance > 0.0:

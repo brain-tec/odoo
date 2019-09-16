@@ -43,6 +43,8 @@
 # Melanie Bernard <mbe@odoo.com>, 2019
 # Eloïse Stilmant <est@odoo.com>, 2019
 # Fred Gilson <fgi@odoo.com>, 2019
+# gdp Odoo <gdp@odoo.com>, 2019
+# thomas quertinmont <tqu@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -243,7 +245,7 @@ msgstr "<i class=\"fa fa-arrow-right\"/> Ajouter des acquéreurs de paiement"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_buy_now
 msgid "<i class=\"fa fa-bolt\"/> Buy Now"
-msgstr ""
+msgstr "<i class=\"fa fa-bolt\"/> Acheter maintenant"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -314,7 +316,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 msgid "<i class=\"fa fa-shopping-cart\"/> Add to Cart"
-msgstr ""
+msgstr "<i class=\"fa fa-shopping-cart\"/> Ajouter au panier"
 
 #. module: website_sale
 #: code:addons/website_sale/models/crm_team.py:54
@@ -422,7 +424,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Confirmation Email</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Courriel de confirmation</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -702,6 +704,9 @@ msgid ""
 "Apply manual discounts on sales order lines or display discounts computed "
 "from pricelists (option to activate in the pricelist configuration)."
 msgstr ""
+"Appliquer les remises manuelles sur les lignes de commande client ou "
+"afficher les remises calculées à partir des listes de prix (option à activer"
+" dans la configuration des listes de prix)."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -1324,7 +1329,7 @@ msgstr "Donne l'ordre d'affichage d'une liste de catégories d'articles."
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Grant discounts on sales order lines"
-msgstr ""
+msgstr "Accorder des remises sur les lignes de commande client."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.add_grid_or_list_option
@@ -1870,7 +1875,7 @@ msgstr "Commandes/jour"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_image__image_original
 msgid "Original Image"
-msgstr ""
+msgstr "Image originale"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__parent_id
@@ -2380,6 +2385,8 @@ msgstr "Vendez en plusieurs devises"
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Sell variants of a product using attributes (size, color, etc.)"
 msgstr ""
+"Vendre les variantes d'un produit en utilisant les caractéristiques (taille,"
+" couleur, ect.)"
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.ir_actions_server_sale_cart_recovery_email

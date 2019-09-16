@@ -38,6 +38,7 @@
 # Marie Willemyns <mwi@odoo.com>, 2019
 # Martin Trigaux, 2019
 # MaxyMoos <maxence.groine@gmail.com>, 2019
+# Adrien Heyse <ahe@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -60,6 +61,8 @@ msgid ""
 "'Expenses - %s - %s' % (object.employee_id.name, (object.name).replace('/', "
 "''))"
 msgstr ""
+"'Frais - %s - %s' % (object.employee_id.name, (object.name).replace('/', "
+"''))"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
@@ -67,6 +70,8 @@ msgid ""
 "<i class=\"text-muted oe_edit_only\">Use this reference as a subject prefix "
 "when submitting by email.</i>"
 msgstr ""
+"Utiliser cette référence comme préfixe de sujet lors de l'envoi par email.<i"
+" class=\"text-muted oe_edit_only\">"
 
 #. module: hr_expense
 #. openerp-web
@@ -87,6 +92,8 @@ msgid ""
 "<p>Click on <b> Action Create Report </b> to submit selected expenses to "
 "your manager</p>"
 msgstr ""
+"<p>Cliquer sur <b> Action créer un rapport </b> pour soumettre des notes de "
+"frais sélectionnés à votre manager</p>"
 
 #. module: hr_expense
 #. openerp-web
@@ -292,7 +299,7 @@ msgstr "Référence de la facture"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__can_reset
 msgid "Can Reset"
-msgstr ""
+msgstr "Réinitialiser"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_product_product__can_be_expensed
@@ -513,7 +520,7 @@ msgstr "Ligne de frais"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee_public__expense_manager_id
 msgid "Expense Manager"
-msgstr ""
+msgstr "Manager des notes de frais"
 
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.hr_expense_product
@@ -750,7 +757,7 @@ msgstr "Département RH"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__is_multiple_currency
 msgid "Handle lines with different currencies"
-msgstr ""
+msgstr "Gère des lignes avec des devises différentes"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet_register_payment_wizard__hide_payment_method
@@ -1194,12 +1201,12 @@ msgstr "Article :"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "Product: not found"
-msgstr ""
+msgstr "Produit: non trouvé"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Employé public"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
@@ -1343,6 +1350,12 @@ msgid ""
 "will automatically be set. Type the expense amount in the mail subject to "
 "set it on the expense too."
 msgstr ""
+"Envoyez un courrier électronique à cet alias avec le reçu en pièce jointe "
+"pour créer une note de frais en un clic. Si le premier mot de l'objet du "
+"courrier contient la référence interne du produit ou le nom du produit, le "
+"produit correspondant sera automatiquement défini. Tapez le montant de la "
+"dépense dans l'objet du courrier pour le définir également sur la note de "
+"frais."
 
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.action_hr_expense_configuration
@@ -1372,7 +1385,7 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_product_product__can_be_expensed
 #: model:ir.model.fields,help:hr_expense.field_product_template__can_be_expensed
 msgid "Specify whether the product can be selected in an expense."
-msgstr ""
+msgstr "Indiquez si le produit peut être sélectionné dans une dépense."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_filter
@@ -1458,6 +1471,8 @@ msgid ""
 "Technical field used to know whether the field `partner_bank_account_id` "
 "needs to be required or not in the payments form views"
 msgstr ""
+"Champ technique utilisé pour savoir si le champ `partner_bank_account_id` "
+"doit être obligatoire ou non dans les vues du formulaire de paiement"
 
 #. module: hr_expense
 #. openerp-web
@@ -1607,7 +1622,7 @@ msgstr "Voir les Pièces Jointes"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "View Expense"
-msgstr ""
+msgstr "Voir la note de frais"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -1638,6 +1653,7 @@ msgstr "Historique de communication du site web"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "You can now submit it to the manager from the following link."
 msgstr ""
+"Vous pouvez maintenant le soumettre au responsable à partir du lien suivant."
 
 #. module: hr_expense
 #: code:addons/hr_expense/models/hr_expense.py:759
@@ -1695,6 +1711,8 @@ msgstr "Vous ne pouvez pas refuser vos propres notes de frais"
 #, python-format
 msgid "You cannot report expenses for different employees in the same report."
 msgstr ""
+"Vous ne pouvez pas déclarer les dépenses de différents employés dans le même"
+" rapport."
 
 #. module: hr_expense
 #: code:addons/hr_expense/models/hr_expense.py:183
@@ -1710,7 +1728,7 @@ msgstr "Votre dépense"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "Your expense has been successfully registered."
-msgstr ""
+msgstr "Votre note de frais a été enregistrée avec succès."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view

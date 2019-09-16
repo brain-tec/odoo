@@ -38,6 +38,8 @@
 # Laura Piraux <lap@odoo.com>, 2019
 # Aurélien Pillevesse <aurelienpillevesse@hotmail.fr>, 2019
 # Martin Trigaux, 2019
+# gdp Odoo <gdp@odoo.com>, 2019
+# thomas quertinmont <tqu@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -68,12 +70,12 @@ msgstr "&times;"
 #. module: survey
 #: model:ir.actions.report,print_report_name:survey.certification_report
 msgid "'Certification - %s' % (object.survey_id.display_name)"
-msgstr ""
+msgstr "'Certification - %s' % (object.survey_id.display_name)"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_header
 msgid "00:00"
-msgstr ""
+msgstr "00:00"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.403
@@ -144,6 +146,30 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Cher(e) ${object.partner_id.name or 'participant'}<br/><br/>\n"
+"        % if object.survey_id.certificate:\n"
+"            Vous avez été invité à passer une nouvelle certification.\n"
+"        % else:\n"
+"            Nous menons un sondage et votre réponse serait appréciée.\n"
+"        % endif\n"
+"        <div style=\"margin: 16px 0px 16px 0px;\">\n"
+"            <a href=\"${('%s?answer_token=%s' % (object.survey_id.public_url, object.token)) | safe}\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"                % if object.survey_id.certificate:\n"
+"                    Démarrer la Certification\n"
+"                % else:\n"
+"                    Démarrer le sondage\n"
+"                % endif\n"
+"            </a>\n"
+"        </div>\n"
+"        % if object.deadline:\n"
+"            Veuillez répondre au sondage avant le ${format_date(object.deadline)}.<br/><br/>\n"
+"        % endif\n"
+"        Merci pour votre participation.\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -271,6 +297,8 @@ msgid ""
 "<span attrs=\"{'invisible': [('is_attempts_limited', '=', False)]}\"> "
 "attempts</span>"
 msgstr ""
+"<span attrs=\"{'invisible': [('is_attempts_limited', '=', False)]}\"> "
+"tentatives</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
@@ -278,6 +306,8 @@ msgid ""
 "<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> "
 "minutes</span>"
 msgstr ""
+"<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> "
+"minutes</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
@@ -313,7 +343,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result_number
 msgid "<span class=\"badge badge-secondary only_left_radius\">Average </span>"
-msgstr ""
+msgstr "<span class=\"badge badge-secondary only_left_radius\">Moyenne </span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result_number
@@ -328,7 +358,7 @@ msgstr "<span class=\"badge badge-secondary only_left_radius\">Minimum </span>"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result_number
 msgid "<span class=\"badge badge-secondary only_left_radius\">Sum </span>"
-msgstr ""
+msgstr "<span class=\"badge badge-secondary only_left_radius\">Total </span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
@@ -338,17 +368,17 @@ msgstr "<span class=\"fa fa-filter\"/>  Filtres"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
 msgid "<span>Correct answer</span>:"
-msgstr ""
+msgstr "<span>Bonne réponse</span>:"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
 msgid "<span>Correct answers</span>:"
-msgstr ""
+msgstr "<span>Bonne réponses</span>:"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.retake_survey_button
 msgid "<span>Number of attemps left</span>:"
-msgstr ""
+msgstr "<span>Nombre de tentatives restantes</span>:"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_init
@@ -551,7 +581,7 @@ msgstr "Auteur"
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_invite__author_id
 msgid "Author of the message."
-msgstr ""
+msgstr "Auteur du message."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__certification_mail_template_id
@@ -563,7 +593,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model,name:survey.model_ir_autovacuum
 msgid "Automatic Vacuum"
-msgstr ""
+msgstr "Aspiration automatique"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
@@ -603,7 +633,7 @@ msgstr "Certificat"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_kanban
 msgid "Certification"
-msgstr ""
+msgstr "Certification"
 
 #. module: survey
 #: model:mail.template,report_name:survey.mail_template_certification

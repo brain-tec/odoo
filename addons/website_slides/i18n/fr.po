@@ -35,6 +35,9 @@
 # Nathan Grognet <ngr@odoo.com>, 2019
 # Hamid Darabi, 2019
 # Martin Trigaux, 2019
+# gdp Odoo <gdp@odoo.com>, 2019
+# Nicolas Roussey <nro@odoo.com>, 2019
+# thomas quertinmont <tqu@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -778,7 +781,7 @@ msgstr ""
 #. module: website_slides
 #: selection:slide.slide,slide_type:0
 msgid "Certification"
-msgstr ""
+msgstr "Certification"
 
 #. module: website_slides
 #: model:gamification.badge,name:website_slides.badge_data_certification
@@ -1015,7 +1018,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_search
 msgid "Course"
-msgstr ""
+msgstr "Cours"
 
 #. module: website_slides
 #. openerp-web
@@ -1199,7 +1202,7 @@ msgstr "Documentation"
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:63
 #, python-format
 msgid "Don't have an account ?"
-msgstr ""
+msgstr "Vous n'avez pas de compte ?"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__completed
@@ -1275,7 +1278,7 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_link__link
 msgid "External Link"
-msgstr ""
+msgstr "Lien externe"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -1851,7 +1854,7 @@ msgstr "Nouveau : ${object.slide_type} publié sur ${object.channel_id.name}"
 #: code:addons/website_slides/static/src/js/website_slides.editor.js:25
 #, python-format
 msgid "New Course"
-msgstr ""
+msgstr "Nouveau cours"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -2007,7 +2010,7 @@ msgstr "Options"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__image_original
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__image_original
 msgid "Original Image"
-msgstr ""
+msgstr "Image originale"
 
 #. module: website_slides
 #: model:slide.channel,name:website_slides.channel_public
@@ -3066,7 +3069,7 @@ msgstr ""
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:101
 #, python-format
 msgid "XP"
-msgstr ""
+msgstr "XP"
 
 #. module: website_slides
 #. openerp-web

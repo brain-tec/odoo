@@ -34,7 +34,6 @@
 # Richard Mathot <rim@odoo.com>, 2019
 # Adriana Ierfino <adriana.ierfino@savoirfairelinux.com>, 2019
 # Fabri Yohann <psn@fabri.pw>, 2019
-# Lucas Deliege <lud@odoo.com>, 2019
 # f5f0a0dac17dde787a1d812a6989680e, 2019
 # Laura Piraux <lap@odoo.com>, 2019
 # Nathan Noël <nathan070@me.com>, 2019
@@ -55,6 +54,8 @@
 # Jérôme Tanché <jerome.tanche@ouest-dsi.fr>, 2019
 # Eloïse Stilmant <est@odoo.com>, 2019
 # Jonathan Wynands <jwy@odoo.com>, 2019
+# Lucas Deliege <lud@odoo.com>, 2019
+# thomas quertinmont <tqu@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -78,6 +79,9 @@ msgid ""
 "customers or sales orders/invoices. The default value comes from the "
 "customer."
 msgstr ""
+" Les positions fiscales sont utilisées pour adapter les taxes et les comptes"
+" à des clients particuliers ou à des commandes/factures. La valeur par "
+"défaut provient du client."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__nbr
@@ -101,6 +105,8 @@ msgid ""
 "${object.company_id.name} ${(object.get_portal_last_transaction().state == "
 "'pending') and 'Pending Order' or 'Order'} (Ref ${object.name or 'n/a' })"
 msgstr ""
+"${object.company_id.name} ${(object.get_portal_last_transaction().state == "
+"'pending') and 'Pending Order' or 'Order'} (Ref ${object.name or 'n/a' })"
 
 #. module: sale
 #: model:mail.template,subject:sale.email_template_edi_sale
@@ -131,7 +137,7 @@ msgstr "&amp;times;"
 #. module: sale
 #: model:ir.actions.report,print_report_name:sale.action_report_pro_forma_invoice
 msgid "'PRO-FORMA - %s' % (object.name)"
-msgstr ""
+msgstr "'PRO-FORMA - %s' % (object.name)"
 
 #. module: sale
 #: model:ir.actions.report,print_report_name:sale.action_report_saleorder
@@ -139,6 +145,8 @@ msgid ""
 "(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
 "'Order - %s' % (object.name)"
 msgstr ""
+"(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
+"'Order - %s' % (object.name)"
 
 #. module: sale
 #: model:mail.template,body_html:sale.mail_template_sale_confirmation
@@ -419,7 +427,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Confirmation Email</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Courriel de confirmation</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -485,7 +493,7 @@ msgstr "<strong class=\"d-block mb-1\">Factures</strong>"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<strong class=\"d-block mb-1\">Shipping Address:</strong>"
-msgstr ""
+msgstr "<strong class=\"d-block mb-1\">Adresse de livraison:</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -496,7 +504,7 @@ msgstr "<strong class=\"mr16\">Sous-total</strong>"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "<strong class=\"text-muted\">Salesperson</strong>"
-msgstr ""
+msgstr "<strong class=\"text-muted\">Vendeur</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -516,7 +524,7 @@ msgstr "<strong>Date d'Expiration:</strong>"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Expiration:</strong>"
-msgstr ""
+msgstr "<strong>Echéance:</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -537,7 +545,7 @@ msgstr "<strong>Vendeur :</strong>"
 #: model_terms:ir.ui.view,arch_db:sale.report_invoice_document_inherit_sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Shipping Address:</strong>"
-msgstr ""
+msgstr "<strong>Adresse de livraison:</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -581,7 +589,7 @@ msgstr "<strong>Votre référence : </strong>"
 #. module: sale
 #: sql_constraint:sale.order:0
 msgid "A confirmed sales order requires a confirmation date."
-msgstr ""
+msgstr "Un bon de commande confirmé nécessite une date de confirmation."
 
 #. module: sale
 #: code:addons/sale/models/sale.py:833
@@ -608,6 +616,9 @@ msgid ""
 "         according to their invoicing policy (based on ordered or delivered "
 "quantity)."
 msgstr ""
+"Une facture standard est émise avec toutes les lignes de commande prêtes à "
+"être facturées, selon leur politique de facturation (basée sur la quantité "
+"commandée ou livrée)."
 
 #. module: sale
 #: code:addons/sale/models/sale.py:797
@@ -634,6 +645,9 @@ msgid ""
 "                when you want to sell extra hours because the initial\n"
 "                hours have already been used."
 msgstr ""
+"Un exemple typique est les heures de service prépayées,\n"
+"                lorsque vous voulez vendre des heures supplémentaires parce que le nombre initial d'heures\n"
+"                 heures ont déjà été utilisées."
 
 #. module: sale
 #: model:res.groups,name:sale.group_warning_sale
@@ -658,7 +672,7 @@ msgstr "Accepter &amp; Payer"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.mail_notification_paynow_online
 msgid "Accept &amp; Pay Quotation"
-msgstr ""
+msgstr "Acceptez &amp; Payez le devis"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -668,7 +682,7 @@ msgstr "Accepter et signer"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.mail_notification_paynow_online
 msgid "Accept &amp; Sign Quotation"
-msgstr ""
+msgstr "Acceptez &amp; Signez le devis"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
@@ -698,7 +712,7 @@ msgstr "Numéro de compte"
 #. module: sale
 #: model:ir.model,name:sale.model_account_reconciliation_widget
 msgid "Account Reconciliation widget"
-msgstr ""
+msgstr "outil de réconciliation de compte"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_advance_payment_inv__deposit_account_id
@@ -751,6 +765,8 @@ msgstr "Adresses des commandes"
 #: model:ir.model.fields,help:sale.field_product_template_attribute_value__is_custom
 msgid "Allow users to input custom values for this attribute value"
 msgstr ""
+"Autoriser les utilisateurs à saisir des valeurs personnalisées pour cette "
+"valeur d'attribut"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -815,6 +831,9 @@ msgid ""
 "Apply manual discounts on sales order lines or display discounts computed "
 "from pricelists (option to activate in the pricelist configuration)."
 msgstr ""
+"Appliquer les remises manuelles sur les lignes de commande client ou "
+"afficher les remises calculées à partir des listes de prix (option à activer"
+" dans la configuration des listes de prix)."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -839,7 +858,7 @@ msgstr "Compte des pièces jointes"
 #: model:ir.model,name:sale.model_product_attribute_value
 #: model:ir.model.fields,field_description:sale.field_product_attribute_custom_value__attribute_value_id
 msgid "Attribute Value"
-msgstr ""
+msgstr "Valeur de la caractéristique"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -860,6 +879,7 @@ msgstr "Facture automatique"
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Automatic email sent after the customer has signed or paid online"
 msgstr ""
+"Envoi automatique d'un e-mail après que le client ait signé ou payé en ligne"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_acquirer_onboarding_wizard__journal_name
@@ -871,14 +891,14 @@ msgstr "Nom de la banque"
 #: selection:payment.acquirer,so_reference_type:0
 #, python-format
 msgid "Based on Customer ID"
-msgstr ""
+msgstr "Basé sur l'ID client"
 
 #. module: sale
 #: code:addons/sale/models/payment.py:13
 #: selection:payment.acquirer,so_reference_type:0
 #, python-format
 msgid "Based on Document Reference"
-msgstr ""
+msgstr "Basé sur la référence du document"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
@@ -886,6 +906,8 @@ msgid ""
 "Beyond this date, the customer is no longer able to accept the quotation "
 "from the portal."
 msgstr ""
+"Au-delà de cette date, le client n'est plus en mesure d'accepter l'offre du "
+"portail."
 
 #. module: sale
 #: selection:product.template,sale_line_warn:0
@@ -1175,13 +1197,13 @@ msgstr "Pays du client"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__commercial_partner_id
 msgid "Customer Entity"
-msgstr ""
+msgstr "Entité Client"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__industry_id
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
 msgid "Customer Industry"
-msgstr ""
+msgstr "Secteur d'activité du client"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__access_url
@@ -1479,7 +1501,7 @@ msgstr "Connecteur Easypost"
 #: code:addons/sale/static/src/js/product_configurator_widget.js:73
 #, python-format
 msgid "Edit Configuration"
-msgstr ""
+msgstr "Editer la configuration"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__template_id
@@ -1490,7 +1512,7 @@ msgstr "Modèle de courriel"
 #. module: sale
 #: model:ir.model.fields,help:sale.field_res_config_settings__confirmation_template_id
 msgid "Email sent to the customer once the order is paid."
-msgstr ""
+msgstr "Email envoyé au client une fois que la commande est payée."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__expected_date
@@ -1505,6 +1527,9 @@ msgid ""
 " a validated expense can be re-invoice to a customer at its cost or sales "
 "price."
 msgstr ""
+"Les dépenses et les factures des fournisseurs peuvent être refacturées à un "
+"client. Avec cette option, une dépense validée peut être refacturée au "
+"client à son coût ou à son prix de vente."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__validity_date
@@ -1522,7 +1547,7 @@ msgstr "Filtres étendus"
 #: code:addons/sale/static/src/js/product_configurator_widget.js:50
 #, python-format
 msgid "External Link"
-msgstr ""
+msgstr "Lien externe"
 
 #. module: sale
 #: code:addons/sale/models/sale.py:1052
@@ -1558,7 +1583,7 @@ msgstr "Abonnés (Partenaires)"
 #. module: sale
 #: sql_constraint:sale.order.line:0
 msgid "Forbidden values on non-accountable sale order line"
-msgstr ""
+msgstr "Valeurs interdites sur la ligne de commande de vente non-comptable"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
@@ -1600,7 +1625,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Grant discounts on sales order lines"
-msgstr ""
+msgstr "Accorder des remises sur les lignes de commande client."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__weight
@@ -1633,6 +1658,9 @@ msgid ""
 "        specific HTML color index (e.g. #ff0000) to display the color if the\n"
 "        attribute type is 'Color'."
 msgstr ""
+"Ici, vous pouvez définir un\n"
+"        index de couleur HTML spécifique (e.g. #ff0000) pour afficher la couleur si la\n"
+"        valeur caractéristique est 'Couleur'."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1689,13 +1717,13 @@ msgstr ""
 #: code:addons/sale/models/product_template.py:165
 #, python-format
 msgid "Import Template for Products"
-msgstr ""
+msgstr "Import du template pour les articles"
 
 #. module: sale
 #: code:addons/sale/models/product_template.py:168
 #, python-format
 msgid "Import Template for Products (with several prices)"
-msgstr ""
+msgstr "Import du modèle pour les articles (avec plusieurs prix)"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1711,25 +1739,25 @@ msgstr "Compte de revenus"
 #: code:addons/sale/controllers/portal.py:205
 #, python-format
 msgid "Invalid order."
-msgstr ""
+msgstr "Commande invalide"
 
 #. module: sale
 #: code:addons/sale/controllers/portal.py:219
 #, python-format
 msgid "Invalid signature data."
-msgstr ""
+msgstr "Données de signature invalides."
 
 #. module: sale
 #: code:addons/sale/models/sale.py:816
 #, python-format
 msgid "Invalid token found! Token acquirer %s != %s"
-msgstr ""
+msgstr "Token trouvé invalid! Acquéreur du token %s != %s"
 
 #. module: sale
 #: code:addons/sale/models/sale.py:819
 #, python-format
 msgid "Invalid token found! Token partner %s != %s"
-msgstr ""
+msgstr "Token trouvé invalide! Partenaire du token %s != %s"
 
 #. module: sale
 #: code:addons/sale/models/account_invoice.py:82
@@ -1860,7 +1888,7 @@ msgstr "Facturation"
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Invoicing Address:"
-msgstr ""
+msgstr "Adresse de facturation:"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__invoice_policy
@@ -1878,7 +1906,7 @@ msgstr "Objectif de facturation"
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Invoicing and Shipping Address:"
-msgstr ""
+msgstr "Adresse de facturation et d'expédition:"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_is_follower
@@ -1894,7 +1922,7 @@ msgstr "Est un acompte"
 #: model:ir.model.fields,field_description:sale.field_product_attribute_value__is_custom
 #: model:ir.model.fields,field_description:sale.field_product_template_attribute_value__is_custom
 msgid "Is custom value"
-msgstr ""
+msgstr "Est une valeur caractéristique"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_expense
@@ -2008,7 +2036,7 @@ msgstr "Bloquer"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__auto_done_setting
 msgid "Lock Confirmed Sales"
-msgstr ""
+msgstr "Verrouiller les ventes confirmées"
 
 #. module: sale
 #: selection:sale.order,state:0
@@ -2114,7 +2142,7 @@ msgstr "Appliquer des routes spécifiques"
 #. module: sale
 #: sql_constraint:sale.order.line:0
 msgid "Missing required fields on accountable sale order line."
-msgstr ""
+msgstr "Champs manquants sur la ligne de commande de vente comptabilisée."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__multi_sales_price
@@ -2205,14 +2233,14 @@ msgstr "Pas de commandes à facturer trouvée"
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_orders_upselling
 msgid "No orders to upsell found"
-msgstr ""
+msgstr "Pas de commandes à upseller trouvée"
 
 #. module: sale
 #. openerp-web
 #: code:addons/sale/static/src/js/variant_mixin.js:452
 #, python-format
 msgid "Not available with %s"
-msgstr ""
+msgstr "Pas disponible avec %s"
 
 #. module: sale
 #: selection:res.company,sale_onboarding_order_confirmation_state:0
@@ -2341,6 +2369,8 @@ msgstr "Seul entier sera une valeur valide."
 #, python-format
 msgid "Open Sales app to send your first quotation in a few clicks."
 msgstr ""
+"Ouvrez l'application Sales pour envoyer votre premier devis en quelques "
+"clics."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_line_filter
@@ -2426,6 +2456,8 @@ msgid ""
 "Ordered Quantity: Invoice quantities ordered by the customer.\n"
 "Delivered Quantity: Invoice quantities delivered to the customer."
 msgstr ""
+"Quantité commandée: facturez les quantités commandées par le client.\n"
+"Quantité livrée: facturez les quantités livrées au client."
 
 #. module: sale
 #: selection:product.template,invoice_policy:0
@@ -2578,6 +2610,8 @@ msgstr "Conditions de règlement"
 #: model:ir.model.fields,help:sale.field_sale_order__payment_term_id
 msgid "Payment terms applies to all invoices issued from this order."
 msgstr ""
+"Les conditions de paiement s'appliquent à toutes les factures émises à "
+"partir de cette commande."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_acquirer_onboarding_wizard__paypal_seller_account
@@ -2599,6 +2633,7 @@ msgstr "Planifié"
 #, python-format
 msgid "Please define an accounting sales journal for the company %s (%s)."
 msgstr ""
+"Veuillez définir un journal comptable des ventes pour l'entreprise %s (%s)."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_url
@@ -2654,6 +2689,8 @@ msgid ""
 "Pricelist for current order. If you change the pricelist, only new lines "
 "will consider this pricelist."
 msgstr ""
+"Liste de prix pour la commande en cours. Si vous modifiez la liste de prix, "
+"seules les nouvelles lignes prendront en compte cette liste de prix."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_pricelist_setting
@@ -2721,7 +2758,7 @@ msgstr "Attribut de l'article"
 #. module: sale
 #: model:ir.model,name:sale.model_product_attribute_custom_value
 msgid "Product Attribute Custom Value"
-msgstr ""
+msgstr "Valeur caractéristique personnalisée du produit"
 
 #. module: sale
 #: model:ir.model,name:sale.model_product_template_attribute_value
@@ -2766,7 +2803,7 @@ msgstr "Variantes d'article"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_no_variant_attribute_value_ids
 msgid "Product attribute values that do not create variants"
-msgstr ""
+msgstr "Valeurs caractéristiques du produit qui ne créent pas de variantes"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -2785,7 +2822,7 @@ msgstr "Articles"
 #. module: sale
 #: model:ir.model,name:sale.model_report_sale_report_saleproforma
 msgid "Proforma Report"
-msgstr ""
+msgstr "Rapport proforma"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_line_tree
@@ -2873,7 +2910,7 @@ msgstr "Devis envoyé"
 #. module: sale
 #: sql_constraint:res.company:0
 msgid "Quotation Validity is required and must be greater than 0."
-msgstr ""
+msgstr "La validité de l'offre est requise et doit être supérieure à 0."
 
 #. module: sale
 #: model:mail.message.subtype,description:sale.mt_order_confirmed
@@ -2891,7 +2928,7 @@ msgstr "Devis envoyé"
 #: code:addons/sale/controllers/portal.py:161
 #, python-format
 msgid "Quotation viewed by customer %s"
-msgstr ""
+msgstr "Devis vu par le client %s"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_quotations
@@ -2937,7 +2974,7 @@ msgstr "Re-facturer les dépenses"
 #: model:ir.model.fields,field_description:sale.field_product_product__visible_expense_policy
 #: model:ir.model.fields,field_description:sale.field_product_template__visible_expense_policy
 msgid "Re-Invoice Policy visible"
-msgstr ""
+msgstr "Politique de refacturation visible"
 
 #. module: sale
 #: code:addons/sale/controllers/portal.py:54
@@ -2954,7 +2991,7 @@ msgstr "Référence du document qui a généré cette demande de commande."
 #. module: sale
 #: selection:sale.advance.payment.inv,advance_payment_method:0
 msgid "Regular invoice"
-msgstr ""
+msgstr "Facture normale"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -3016,6 +3053,8 @@ msgstr "Responsable"
 msgid ""
 "Revenue target for the current month (untaxed total of confirmed invoices)."
 msgstr ""
+"Objectif de revenu pour le mois en cours (total non taxé des factures "
+"confirmées)."
 
 #. module: sale
 #. openerp-web
@@ -3033,7 +3072,7 @@ msgstr "Nombre de bons de commande"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__group_warning_sale
 msgid "Sale Order Warnings"
-msgstr ""
+msgstr "Avertissements sur les commandes clients"
 
 #. module: sale
 #. openerp-web
@@ -3050,7 +3089,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Sale Warnings"
-msgstr ""
+msgstr "Avertissements de vente"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_company__sale_onboarding_payment_method
@@ -3197,12 +3236,12 @@ msgstr "Équipes commerciales"
 #: model:ir.model.fields,field_description:sale.field_res_partner__sale_warn
 #: model:ir.model.fields,field_description:sale.field_res_users__sale_warn
 msgid "Sales Warnings"
-msgstr ""
+msgstr "Avertissements de vente"
 
 #. module: sale
 #: model:ir.model,name:sale.model_report_all_channels_sales
 msgid "Sales by Channel (All in One)"
-msgstr ""
+msgstr "Ventes par canal (Tout en un)"
 
 #. module: sale
 #: selection:product.template,expense_policy:0
@@ -3230,18 +3269,18 @@ msgstr "Vendeur"
 #: code:addons/sale/models/res_company.py:59
 #, python-format
 msgid "Sample Order Line"
-msgstr ""
+msgstr "Modèle de ligne de commande"
 
 #. module: sale
 #: code:addons/sale/models/res_company.py:56
 #, python-format
 msgid "Sample Product"
-msgstr ""
+msgstr "Modèle de produit"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_onboarding_sample_quotation_step
 msgid "Sample Quotation"
-msgstr ""
+msgstr "Modèle de devis"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -3280,11 +3319,13 @@ msgstr "Sélectionnez un produit, ou créez-en un au vol."
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Select product attributes and optional products from the sales order"
 msgstr ""
+"Sélectionner les caractéristiques de l'article et les produits facultatifs "
+"dans la commande client."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Select specific invoice and delivery addresses"
-msgstr ""
+msgstr "Sélectionner des adresses de facturation et de livraison spécifiques"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_product_product__sale_line_warn
@@ -3315,6 +3356,8 @@ msgstr "Vendre les articles par multiple d'unité # par paquet"
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Sell variants of a product using attributes (size, color, etc.)"
 msgstr ""
+"Vendre les variantes d'un produit en utilisant les caractéristiques (taille,"
+" couleur, ect.)"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3324,7 +3367,7 @@ msgstr "Envoyer la facture PRO FORMA"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Send a product-specific email once the invoice is validated"
-msgstr ""
+msgstr "Envoyer un email spécifique quand la facture est payée"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_onboarding_sample_quotation_step
@@ -3334,7 +3377,7 @@ msgstr "Envoyer un devis pour tester le portail client."
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_open_sale_onboarding_sample_quotation
 msgid "Send a sample quotation"
-msgstr ""
+msgstr "Envoyer un exemple de devis"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3630,6 +3673,9 @@ msgid ""
 "You cannot register an expense on a locked Sales Order. Please create a new "
 "SO linked to this Analytic Account."
 msgstr ""
+"Le bon de commande %s lié au compte analytique %s est actuellement bloqué. "
+"Vous ne pouvez pas enregistrer de frais sur une commande client bloquée. "
+"Veuillez créer un nouveu bon de commande lié à ce compte analytique."
 
 #. module: sale
 #: code:addons/sale/models/account_move.py:73
@@ -3638,6 +3684,8 @@ msgid ""
 "The Sales Order %s linked to the Analytic Account %s must be validated "
 "before registering expenses."
 msgstr ""
+"Le bon de commande %s lié au compte analytique %s doit être validé avant "
+"d'enregistrer les dépenses."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_advance_payment_inv__amount
@@ -4103,7 +4151,7 @@ msgstr "Confirmer la commande"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.mail_notification_paynow_online
 msgid "View Quotation"
-msgstr ""
+msgstr "Visualiser le devis"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -4176,6 +4224,8 @@ msgstr "Mauvaise valeur saisie !"
 #: model:ir.model.fields,help:sale.field_sale_order_line__order_partner_id
 msgid "You can find a customer from their name, email, tax ID or reference."
 msgstr ""
+"Vous pouvez trouver un client à partir de son nom, email, numéro "
+"d'identification fiscale ou référence."
 
 #. module: sale
 #: code:addons/sale/models/sale.py:271

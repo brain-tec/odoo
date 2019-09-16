@@ -33,6 +33,8 @@
 # Rémi CAZENAVE <remi@le-filament.com>, 2019
 # Martin Trigaux, 2019
 # Aurélien Pillevesse <aurelienpillevesse@hotmail.fr>, 2019
+# Nicolas Roussey <nro@odoo.com>, 2019
+# thomas quertinmont <tqu@odoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # 
 msgid ""
@@ -167,6 +169,7 @@ msgstr ""
 #: sql_constraint:hr.employee:0
 msgid "A user cannot be linked to multiple employees in the same company."
 msgstr ""
+"Un utilisateur ne peut pas être lié à plusieurs employés de la même société."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_ip
@@ -261,7 +264,7 @@ msgstr "Sécurité d'alias de contact"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Allow employees to update their own data."
-msgstr ""
+msgstr "Autorisez les employés à mettre à jour leurs propres données."
 
 #. module: hr
 #: model:ir.actions.server,name:hr.hr_employee_action_toggle_active
@@ -294,12 +297,12 @@ msgstr "Partenaires authentifiés"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.mail_channel_view_form_
 msgid "Auto Subscribe Departments"
-msgstr ""
+msgstr "Abonnement automatique des département"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_mail_channel__subscription_department_ids
 msgid "Automatically subscribe members of those departments to the channel."
-msgstr ""
+msgstr "Abonnez automatiquement les membres de ces départements à ces canaux."
 
 #. module: hr
 #: selection:hr.employee,certificate:0
@@ -337,7 +340,7 @@ msgstr "Niveau du certificat"
 #. module: hr
 #: model:ir.actions.act_window,name:hr.res_users_action_my
 msgid "Change my Preferences"
-msgstr ""
+msgstr "Changer mes préférences"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -353,7 +356,7 @@ msgstr "Sous-départements"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Citizenship"
-msgstr ""
+msgstr "Citoyenneté"
 
 #. module: hr
 #: selection:hr.plan.activity.type,responsible:0
@@ -368,7 +371,7 @@ msgstr "Mentor"
 #: code:addons/hr/models/hr_plan.py:34
 #, python-format
 msgid "Coach of employee %s is not set."
-msgstr ""
+msgstr "Le Coach de l'employé %s n'est pas défini."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__color
@@ -465,7 +468,7 @@ msgstr "Créer un nouveau département"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 msgid "Create employee"
-msgstr ""
+msgstr "Créer un employé"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__create_uid
@@ -535,13 +538,13 @@ msgstr "Départements"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Departure"
-msgstr ""
+msgstr "Départ"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__departure_reason
 #: model:ir.model.fields,field_description:hr.field_hr_employee__departure_reason
 msgid "Departure Reason"
-msgstr ""
+msgstr "Raison du départ"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_departure_wizard
@@ -563,7 +566,7 @@ msgstr "Subordonnés directs"
 #. module: hr
 #: model:ir.model,name:hr.model_mail_channel
 msgid "Discussion Channel"
-msgstr ""
+msgstr "Canal de discussion"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__display_name
@@ -604,7 +607,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Emergency"
-msgstr ""
+msgstr "Urgence"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__emergency_contact
@@ -637,7 +640,7 @@ msgstr "Catégorie de l'employé"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_count
 msgid "Employee Count"
-msgstr ""
+msgstr "Nombre d'employés"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__google_drive_link
@@ -691,7 +694,7 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_country_id
 msgid "Employee's Country"
-msgstr ""
+msgstr "Pays de l'employé"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -777,7 +780,7 @@ msgstr "Champ d’étude"
 #: selection:hr.departure.wizard,departure_reason:0
 #: selection:hr.employee,departure_reason:0
 msgid "Fired"
-msgstr ""
+msgstr "Licensié"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_follower_ids
@@ -835,7 +838,7 @@ msgstr "Département RH"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_mail_channel__subscription_department_ids
 msgid "HR Departments"
-msgstr ""
+msgstr "Départements RH"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -1089,7 +1092,7 @@ msgstr "Gestionnaire"
 #: code:addons/hr/models/hr_plan.py:40
 #, python-format
 msgid "Manager of employee %s is not set."
-msgstr ""
+msgstr "Le responsable de l'employé %s n'est pas défini."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -1157,7 +1160,7 @@ msgstr "Messages"
 #: code:addons/hr/static/src/xml/hr_templates.xml:4
 #, python-format
 msgid "My Profile"
-msgstr ""
+msgstr "Mon profile"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__name
@@ -1378,7 +1381,7 @@ msgstr ""
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_config_plan_plan
 msgid "Plans"
-msgstr ""
+msgstr "Plans"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_mail_alias__alias_contact
@@ -1421,12 +1424,12 @@ msgstr "Informations personnelles"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__phone
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_phone
 msgid "Private Phone"
-msgstr ""
+msgstr "Numéro de téléphone privé"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Employé public"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.action_hr_job
@@ -1453,7 +1456,7 @@ msgstr "Utilisateur lié"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_ids
 msgid "Related employee"
-msgstr ""
+msgstr "Employé associé"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__user_id
@@ -1475,7 +1478,7 @@ msgstr "Exigences"
 #: selection:hr.departure.wizard,departure_reason:0
 #: selection:hr.employee,departure_reason:0
 msgid "Resigned"
-msgstr ""
+msgstr "A démissioné"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__resource_id
@@ -1498,7 +1501,7 @@ msgstr "Responsable"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_plan_activity_type__responsible_id
 msgid "Responsible Person"
-msgstr ""
+msgstr "Personne responsable"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_user_id
@@ -1509,7 +1512,7 @@ msgstr "Responsable"
 #: selection:hr.departure.wizard,departure_reason:0
 #: selection:hr.employee,departure_reason:0
 msgid "Retired"
-msgstr ""
+msgstr "Pensionné"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__sinid
@@ -1949,6 +1952,9 @@ msgid ""
 "You are only allowed to update your preferences. Please contact a HR officer"
 " to update other informations."
 msgstr ""
+"Vous êtes uniquement autorisé à mettre à jour vos préférences. Veuillez "
+"contacter un responsable des ressources humaines pour mettre à jour d'autres"
+" informations."
 
 #. module: hr
 #: code:addons/hr/models/hr_department.py:44
