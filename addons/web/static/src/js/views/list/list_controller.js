@@ -708,6 +708,7 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} ev
      */
     _onToggleGroup: function (ev) {
+        ev.stopPropagation();
         var self = this;
         this.model
             .toggleGroup(ev.data.group.id)
