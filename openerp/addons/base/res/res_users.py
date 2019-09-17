@@ -117,7 +117,6 @@ class res_groups(osv.osv):
                 raise UserError(_('The name of the group can not start with "-"'))
         res = super(res_groups, self).write(cr, uid, ids, vals, context=context)
         self.pool['ir.model.access'].call_cache_clearing_methods(cr)
-        self.pool['res.users'].has_group.clear_cache(self.pool['res.users'])
         return res
 
 class ResUsersLog(osv.Model):
@@ -158,9 +157,11 @@ class res_users(osv.osv):
         return dict.fromkeys(ids, '')
 
     def _is_share(self, cr, uid, ids, name, args, context=None):
+
         res = {}
         for user in self.browse(cr, uid, ids, context=context):
             res[user.id] = not self.has_group(cr, user.id, 'base.group_user')
+            _logger.info('intExt: Is share uid {0}, id: {1} / result: {2}'.format(uid, user.id, res[user.id]))
         return res
 
     def _store_trigger_share_res_groups(self, cr, uid, ids, context=None):
@@ -379,7 +380,6 @@ class res_users(osv.osv):
                 if id in self.__uid_cache[db]:
                     del self.__uid_cache[db][id]
         self.context_get.clear_cache(self)
-        self.has_group.clear_cache(self)
         return res
 
     def unlink(self, cr, uid, ids, context=None):
@@ -549,7 +549,6 @@ class res_users(osv.osv):
         return self._has_group(self.env.cr, uid, group_ext_id)
 
     @api.noguess
-    @tools.ormcache('uid', 'group_ext_id')
     def _has_group(self, cr, uid, group_ext_id):
         """Checks whether user belongs to given group.
 
@@ -561,12 +560,13 @@ class res_users(osv.osv):
         """
         assert group_ext_id and '.' in group_ext_id, "External ID must be fully qualified"
         module, ext_id = group_ext_id.split('.')
-        cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid IN
-                        (SELECT res_id FROM ir_model_data WHERE module=%s AND name=%s)""",
-                   (uid, module, ext_id))
-        return bool(cr.fetchone())
-    # for a few places explicitly clearing the has_group cache
-    has_group.clear_cache = _has_group.clear_cache
+
+        query = "SELECT 1 FROM res_groups_users_rel WHERE uid={0} AND gid IN(SELECT res_id FROM ir_model_data WHERE module='{1}' AND name='{2}')".format(uid, module, ext_id)
+        cr.execute(query)
+        result = bool(cr.fetchone())
+        if(uid > 900 and group_ext_id == 'base.group_user'):
+            _logger.info('intExt: Is share query:  {0} , result: {1}'.format(query,result))
+        return result
 
     @api.multi
     def _is_admin(self):
