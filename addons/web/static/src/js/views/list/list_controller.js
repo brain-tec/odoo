@@ -108,6 +108,7 @@ var ListController = BasicController.extend({
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
         this.multipleRecordsSavingPromise = null;
+        this.fieldChangedPrevented = false;
         this.activeActions = _.extend({}, this.activeActions, {
             download: this.renderer.arch.attrs.download ? !!JSON.parse(this.renderer.arch.attrs.download) : true,
         });
@@ -195,6 +196,7 @@ var ListController = BasicController.extend({
                 },
                 trigger: 'manual',
             });
+            this.$buttons.on('mousedown', '.o_list_button_discard', this._onDiscardMousedown.bind(this));
             this.$buttons.on('click', '.o_list_button_discard', this._onDiscard.bind(this));
             this.$buttons.appendTo($node);
         }
@@ -457,6 +459,7 @@ var ListController = BasicController.extend({
      */
     _saveMultipleRecords: function (recordId, node, changes) {
         var self = this;
+        var fieldName = Object.keys(changes)[0];
         var value = Object.values(changes)[0];
         var recordIds = _.union([recordId], this.selectedRecords);
         var validRecordIds = recordIds.reduce(function (result, nextRecordId) {
@@ -474,6 +477,7 @@ var ListController = BasicController.extend({
                 this.model.discardChanges(recordId);
                 return this._confirmSave(recordId).then(reject);
             };
+            let dialog;
             if (validRecordIds.length > 0) {
                 let message;
                 if (nbInvalid === 0) {
@@ -485,13 +489,13 @@ var ListController = BasicController.extend({
                         _t("Do you want to set the value on the %d valid selected records? (%d invalid)"),
                         validRecordIds.length, nbInvalid);
                 }
-                Dialog.confirm(this, message, {
+                dialog = Dialog.confirm(this, message, {
                     confirm_callback: () => {
-                        this.model.saveRecords(recordId, validRecordIds)
-                            .then(() => {
+                        return this.model.saveRecords(recordId, validRecordIds, fieldName)
+                            .then(async () => {
                                 this._updateButtons('readonly');
                                 const state = this.model.get(this.handle);
-                                this.renderer.updateState(state, {keepWidths: true});
+                                await this.renderer.updateState(state, {keepWidths: true});
                                 resolve(Object.keys(changes));
                             })
                             .guardedCatch(rejectAndDiscard);
@@ -499,10 +503,17 @@ var ListController = BasicController.extend({
                     cancel_callback: rejectAndDiscard,
                 });
             } else {
-                Dialog.alert(this, _t("No valid record to save"), {
+                dialog = Dialog.alert(this, _t("No valid record to save"), {
                     confirm_callback: rejectAndDiscard,
                 });
             }
+            dialog.on('closed', this, async () => {
+                // we need to wait for the dialog to be actually closed, but
+                // the 'closed' event is triggered just before, and it prevents
+                // from focussing the cell
+                await Promise.resolve();
+                this.renderer.focusCell(recordId, node);
+            });
         });
     },
     /**
@@ -673,6 +684,28 @@ var ListController = BasicController.extend({
         this._discardChanges();
     },
     /**
+     * Used to detect if the discard button is about to be clicked.
+     * Some focusout events might occur and trigger a save which
+     * is not always wanted when clicking "Discard".
+     *
+     * @param {MouseEvent} ev
+     * @private
+     */
+    _onDiscardMousedown: function (ev) {
+        var self = this;
+        this.fieldChangedPrevented = true;
+        window.addEventListener('mouseup', function (mouseupEvent) {
+            var preventedEvent = self.fieldChangedPrevented;
+            self.fieldChangedPrevented = false;
+            // If the user starts clicking (mousedown) on the button and stops clicking
+            // (mouseup) outside of the button, we want to trigger the original onFieldChanged
+            // Event that was prevented in the meantime.
+            if (ev.target !== mouseupEvent.target && preventedEvent.constructor.name === 'OdooEvent') {
+                self._onFieldChanged(preventedEvent);
+            }
+        }, { capture: true, once: true });
+    },
+    /**
      * Called when the user asks to edit a row -> Updates the controller buttons
      *
      * @param {OdooEvent} ev
@@ -737,15 +770,16 @@ var ListController = BasicController.extend({
         ev.stopPropagation();
         const recordId = ev.data.dataPointID;
 
-        if (this.renderer.inMultipleRecordEdition(recordId)) {
+        if (this.fieldChangedPrevented) {
+            this.fieldChangedPrevented = ev;
+        } else if (this.renderer.inMultipleRecordEdition(recordId)) {
             // deal with edition of multiple lines
-            const _onSuccess = ev.data.onSuccess;
             ev.data.onSuccess = () => {
-                Promise.resolve(_onSuccess()).then(() => {
-                    const savedRecordsPromise = this._saveMultipleRecords(ev.data.dataPointID, ev.target.__node, ev.data.changes);
-                    this.multipleRecordsSavingPromise = savedRecordsPromise;
-                });
+                this.multipleRecordsSavingPromise =
+                    this._saveMultipleRecords(ev.data.dataPointID, ev.target.__node, ev.data.changes);
             };
+            // disable onchanges as we'll save directly
+            ev.data.notifyChange = false;
         }
         this._super.apply(this, arguments);
     },
@@ -770,6 +804,29 @@ var ListController = BasicController.extend({
     _onSelectionChanged: function (ev) {
         this.selectedRecords = ev.data.selection;
         this._toggleSidebar();
+    },
+    /**
+     * If the record is set as dirty while in multiple record edition,
+     * we want to immediatly discard the change.
+     *
+     * @private
+     * @override
+     * @param {OdooEvent} ev
+     */
+    _onSetDirty: function (ev) {
+        var self = this;
+        var recordId = ev.data.dataPointID;
+        if (this.renderer.inMultipleRecordEdition(recordId)) {
+            ev.stopPropagation();
+            Dialog.alert(this, _t("No valid record to save"), {
+                confirm_callback: function () {
+                    self.model.discardChanges(recordId);
+                    self._confirmSave(recordId);
+                },
+            });
+        } else {
+            this._super.apply(this, arguments);
+        }
     },
     /**
      * When the user clicks on one of the sortable column headers, we need to

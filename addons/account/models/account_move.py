@@ -1117,7 +1117,7 @@ class AccountMove(models.Model):
             pay_term_line_ids = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
 
             domain = [('account_id', 'in', pay_term_line_ids.mapped('account_id').ids),
-                      ('move_id.state', '=', 'posted'),
+                      '|', ('move_id.state', '=', 'posted'), '&', ('move_id.state', '=', 'draft'), ('journal_id.post_at', '=', 'bank_rec'),
                       ('partner_id', '=', move.commercial_partner_id.id),
                       ('reconciled', '=', False), '|', ('amount_residual', '!=', 0.0),
                       ('amount_residual_currency', '!=', 0.0)]
@@ -1521,7 +1521,8 @@ class AccountMove(models.Model):
         result = []
         for move in self:
             if self._context.get('name_groupby') and not (move.type == 'entry' and move.state == 'draft'):
-                name = '**%s**, %s' % (format_date(self.env, move.date), move.name or '')
+                move_name = move.name != "/" and move.name or _("Draft %s") % dict(move._fields['type']._description_selection(self.env))[move.type]
+                name = '**%s**, %s' % (format_date(self.env, move.date), move_name or '')
                 if move.ref:
                     name += '     (%s)' % move.ref
                 if move.partner_id.name:
@@ -1529,7 +1530,7 @@ class AccountMove(models.Model):
             elif move.type == 'entry':
                 # Miscellaneous operation.
                 if move.state == 'draft':
-                    name = '* %s' % str(move.id)
+                    name = _('Draft Entry (* %s)') % str(move.id)
                 else:
                     name = move.name
             else:

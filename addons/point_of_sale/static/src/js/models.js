@@ -277,7 +277,6 @@ exports.PosModel = Backbone.Model.extend({
         loaded: function(self,configs){
             self.config = configs[0];
             self.config.use_proxy = self.config.is_posbox && (
-                                    self.config.iface_payment_terminal ||
                                     self.config.iface_electronic_scale ||
                                     self.config.iface_print_via_proxy  ||
                                     self.config.iface_scan_via_proxy   ||
@@ -2561,10 +2560,16 @@ exports.Order = Backbone.Model.extend({
                 if (lines[i].get_product() === tip_product) {
                     lines[i].set_unit_price(tip);
                     lines[i].set_lst_price(tip);
+                    lines[i].price_manually_set = true;
                     return;
                 }
             }
-            this.add_product(tip_product, {quantity: 1, price: tip, lst_price: tip });
+            this.add_product(tip_product, {
+              quantity: 1,
+              price: tip,
+              lst_price: tip,
+              extras: {price_manually_set: true},
+            });
         }
     },
     set_pricelist: function (pricelist) {
