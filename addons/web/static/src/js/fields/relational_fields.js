@@ -2286,11 +2286,15 @@ var FieldMany2ManyTags = AbstractField.extend({
         this.many2one._getSearchCreatePopupOptions = function (view, ids, context, dynamicFilters) {
             var options = _getSearchCreatePopupOptions.apply(this, arguments);
             var domain = this.record.getDomain({fieldName: this.name});
+            var m2mRecords = [];
             return _.extend({}, options, {
                 domain: domain.concat(["!", ["id", "in", self.value.res_ids]]),
                 disable_multiple_selection: false,
                 on_selected: function (records) {
-                    self.many2one.reinitialize(records);
+                    m2mRecords.push(...records);
+                },
+                on_closed: function () {
+                    self.many2one.reinitialize(m2mRecords);
                 },
             });
         };
@@ -2377,7 +2381,7 @@ var FieldMany2ManyTagsAvatar = FieldMany2ManyTags.extend({
     _getRenderTagsContext: function () {
         var result = this._super.apply(this, arguments);
         result.avatarModel = this.nodeOptions.avatarModel || this.field.relation;
-        result.avatarField = this.nodeOptions.avatarField || 'image_64';
+        result.avatarField = this.nodeOptions.avatarField || 'image_128';
         return result;
     },
 });
