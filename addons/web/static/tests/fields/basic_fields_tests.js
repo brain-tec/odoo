@@ -11,6 +11,7 @@ var KanbanView = require('web.KanbanView');
 var ListView = require('web.ListView');
 var session = require('web.session');
 var testUtils = require('web.test_utils');
+var testUtilsDom = require('web.test_utils_dom');
 var field_registry = require('web.field_registry');
 
 var createView = testUtils.createView;
@@ -2635,7 +2636,7 @@ QUnit.module('basic_fields', {
     QUnit.module('FieldDateRange');
 
     QUnit.test('Datetime field', async function (assert) {
-        assert.expect(19);
+        assert.expect(20);
 
         this.data.partner.fields.datetime_end = {string: 'Datetime End', type: 'datetime'};
         this.data.partner.records[0].datetime_end = '2017-03-13 00:00:00';
@@ -2684,6 +2685,8 @@ QUnit.module('basic_fields', {
             "active end date hour should be '5' in date range picker");
         assert.strictEqual($('.daterangepicker:first .drp-calendar.right .minuteselect').val(), '30',
             "active end date minute should be '30' in date range picker");
+        assert.containsN($('.daterangepicker:first .drp-calendar.left .minuteselect'), 'option', 12,
+            "minute selection should contain 12 options (1 for each 5 minutes)");
 
         // Close picker
         await testUtils.dom.click($('.daterangepicker:first .cancelBtn'));
@@ -5955,7 +5958,7 @@ QUnit.module('basic_fields', {
     QUnit.module('FieldProgressBar');
 
     QUnit.test('Field ProgressBar: max_value should update', async function (assert) {
-        assert.expect(2);
+        assert.expect(3);
 
         this.data.partner.records = this.data.partner.records.slice(0,1);
         this.data.partner.records[0].qux = 2;
@@ -5980,6 +5983,15 @@ QUnit.module('basic_fields', {
             viewOptions: {
                 mode: 'edit',
             },
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.deepEqual(
+                        args.args[1],
+                        {int_field: 999, qux: 5, display_name: 'new name'},
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
         });
 
         assert.strictEqual(form.$('.o_progressbar_value').text(), '10 / 2',
@@ -5991,6 +6003,435 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_progressbar_value').text(), '999 / 5',
             'The value of the progress bar should be correct after the update');
 
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: value should not update in readonly mode when sliding the bar', async function (assert) {
+        assert.expect(4);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true}" />' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            }
+        });
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body'); // => select with click position
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct')
+
+        var $progressBarEl = form.$('.o_progress');
+        var top = $progressBarEl.offset().top + 5;
+        var left = $progressBarEl.offset().left + 5;
+        try {
+            testUtils.triggerPositionalMouseEvent(left, top, "click");
+        } catch (e) {
+            form.destroy();
+            $view.remove();
+            throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
+        }
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'New value should be different than initial after click');
+
+        assert.verifySteps(["/web/dataset/call_kw/partner/read"]);
+
+        form.destroy();
+        $view.remove();
+    });
+
+    QUnit.test('Field ProgressBar: value should not update in edit mode when sliding the bar', async function (assert) {
+        assert.expect(6);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            mockRPC: function (route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            }
+        });
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body'); // => select with click position
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct')
+
+        var $progressBarEl = form.$('.o_progress');
+        var top = $progressBarEl.offset().top + 5;
+        var left = $progressBarEl.offset().left + 5;
+        try {
+            testUtils.triggerPositionalMouseEvent(left, top, "click");
+        } catch (e) {
+            form.destroy();
+            $view.remove();
+            throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
+        }
+        assert.strictEqual(form.$('.o_progressbar_value.o_input').val(), "99",
+            'Value of input is not changed');
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'New value should be different than initial after click');
+
+        assert.verifySteps(["/web/dataset/call_kw/partner/read"]);
+
+        form.destroy();
+        $view.remove();
+    });
+
+    QUnit.test('Field ProgressBar: value should update in edit mode when typing in input', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].int_field, 69,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), '99', 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '69', ['input', 'blur']);
+
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '69%',
+            'New value should be different than initial after click');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: value should update in edit mode when typing in input with field max value', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="qux" invisible="1" />' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true, \'max_value\': \'qux\'}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].int_field, 69,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 0',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), '99', 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '69', ['input', 'blur']);
+
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '69 / 0',
+            'New value should be different than initial after click');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: max value should update in edit mode when typing in input with field max value', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="qux" invisible="1" />' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true, \'max_value\': \'qux\', \'edit_max_value\': true}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].qux, 69,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 0',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), "0.44444", 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '69', ['input', 'blur']);
+
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 69',
+            'New value should be different than initial after click');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: Standard readonly mode is readonly', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="qux" invisible="1" />' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true, \'max_value\': \'qux\', \'edit_max_value\': true}" />' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_readonly'), 'Form in readonly mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 0',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        assert.containsNone(form, '.o_progressbar_value.o_input', 'no input in readonly mode');
+
+        assert.verifySteps(["/web/dataset/call_kw/partner/read"]);
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: max value should update in readonly mode with right parameter when typing in input with field max value', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="qux" invisible="1" />' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true, \'max_value\': \'qux\', \'edit_max_value\': true, \'editable_readonly\': true}" />' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].qux, 69,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_readonly'), 'Form in readonly mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 0',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), "0.44444", 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '69', ['input', 'blur']);
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99 / 69',
+            'New value should be different than initial after changing it');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: value should update in readonly mode with right parameter when typing in input with field value', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true, \'editable_readonly\': true}" />' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].int_field, 69,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_readonly'), 'Form in readonly mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), "99", 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '69.6', ['input', 'blur']);
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '69%',
+            'New value should be different than initial after changing it');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: write float instead of int works, in locale', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            translateParameters: {
+                thousands_sep: "#",
+                decimal_point: ":",
+            },
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].int_field, 1037,
+                        'New value of progress bar saved');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), '99', 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, '1#037:9', ['input', 'blur']);
+
+        await testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '1k%',
+            'New value should be different than initial after click');
+
+        form.destroy();
+    });
+
+    QUnit.test('Field ProgressBar: write gibbrish instead of int throws warning', async function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].int_field = 99;
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="int_field" widget="progressbar" options="{\'editable\': true}" />' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+            interceptsPropagate: {
+                call_service: function (ev) {
+                    if (ev.data.service === 'notification') {
+                        assert.strictEqual(ev.data.method, 'notify');
+                        assert.strictEqual(ev.data.args[0].title, 'Wrong value entered!');
+                    }
+                }
+            },
+        });
+
+        assert.ok(form.$('.o_form_view').hasClass('o_form_editable'), 'Form in edit mode');
+
+        assert.strictEqual(form.$('.o_progressbar_value').text(), '99%',
+            'Initial value should be correct');
+
+        await testUtilsDom.click(form.$('.o_progress'));
+
+        var $valInput = form.$('.o_progressbar_value.o_input');
+        assert.strictEqual($valInput.val(), '99', 'Initial value in input is correct');
+
+        await testUtils.fields.editAndTrigger($valInput, 'trente sept virgule neuf', ['input']);
+
         form.destroy();
     });
 
@@ -6001,7 +6442,7 @@ QUnit.module('basic_fields', {
     });
 
     QUnit.test('Field Color: default widget state', async function (assert) {
-        assert.expect(3);
+        assert.expect(4);
 
         var form = await createView({
             View: FormView,
@@ -6025,6 +6466,46 @@ QUnit.module('basic_fields', {
             "Opacity input should not be present");
 
         await testUtils.dom.click($('.modal .btn:contains("Discard")'));
+
+        assert.strictEqual(document.activeElement, form.$('.o_field_color')[0],
+            "Focus should go back to the color field");
+
+        form.destroy();
+    });
+
+    QUnit.test('Field Color: behaviour in different views', async function (assert) {
+        assert.expect(2);
+
+        this.data.partner.records[0].p = [4, 2];
+        this.data.partner.records[1].hex_color = '#ff0080';
+
+        const form = await createView({
+            arch: '<form>' +
+                    '<field name="hex_color" widget="color"/>' +
+                    '<field name="p">' +
+                        '<tree editable="top">' +
+                            '<field name="display_name"/>' +
+                            '<field name="hex_color" widget="color"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            data: this.data,
+            model: 'partner',
+            res_id: 1,
+            View: FormView,
+        });
+
+        await testUtils.dom.click(form.$('.o_field_color:first()'));
+        assert.containsNone($(document.body), '.modal',
+            "Color field in readonly shouldn't be editable");
+
+        const rowInitialHeight = form.$('.o_data_row:first()').height();
+
+        await testUtils.form.clickEdit(form);
+        await testUtils.dom.click(form.$('.o_data_row:first() .o_data_cell:first()'));
+
+        assert.strictEqual(rowInitialHeight, form.$('.o_data_row:first()').height(),
+            "Color field shouldn't change the color height when edited");
 
         form.destroy();
     });
