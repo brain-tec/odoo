@@ -628,7 +628,11 @@ class Field(MetaField('DummyField', (object,), {})):
                 )
         # assign final values to records
         for record, value in zip(records, values):
-            record[self.name] = value[self.related_field.name]
+            record[self.name] = self._process_related(value[self.related_field.name])
+
+    def _process_related(self, value):
+        """No transformation by default, but allows override."""
+        return value
 
     def _inverse_related(self, records):
         """ Inverse the related field ``self`` on ``records``. """
@@ -1944,15 +1948,21 @@ class Binary(Field):
         records = cache.get_records_different_from(records, self, cache_value)
         if not records:
             return records
+        if self.store:
+            # determine records that are known to be not null
+            not_null = cache.get_records_different_from(records, self, None)
+
         cache.update(records, self, [cache_value] * len(records))
 
         # retrieve the attachments that store the values, and adapt them
         if self.store:
-            atts = records.env['ir.attachment'].sudo().search([
-                ('res_model', '=', self.model_name),
-                ('res_field', '=', self.name),
-                ('res_id', 'in', records.ids),
-            ])
+            atts = records.env['ir.attachment'].sudo()
+            if not_null:
+                atts = atts.search([
+                    ('res_model', '=', self.model_name),
+                    ('res_field', '=', self.name),
+                    ('res_id', 'in', records.ids),
+                ])
             if value:
                 # update the existing attachments
                 atts.write({'datas': value})
@@ -2002,10 +2012,9 @@ class Image(Binary):
             value = image_process(value, size=(self.max_width, self.max_height))
         return value
 
-    def _compute_related(self, records):
-        super(Image, self)._compute_related(records)
-        for record in records:
-            record[self.name] = self._image_process(record[self.name])
+    def _process_related(self, value):
+        """Override to resize the related value before saving it on self."""
+        return self._image_process(super()._process_related(value))
 
 
 class Selection(Field):
@@ -2483,10 +2492,11 @@ class Many2one(_Relational):
 
 class Many2oneReference(Integer):
     type = 'many2one_reference'
-
     _slots = {
         'model_field': None,
     }
+
+    _related_model_field = property(attrgetter('model_field'))
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
