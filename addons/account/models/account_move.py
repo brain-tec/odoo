@@ -2053,7 +2053,6 @@ class AccountMove(models.Model):
         """
         if any(not move.is_invoice(include_receipts=True) for move in self):
             raise UserError(_("Only invoices could be printed."))
-        self._check_tax_lock_date()
 
         self.filtered(lambda inv: not inv.invoice_sent).write({'invoice_sent': True})
         if self.user_has_groups('account.group_account_invoice'):
@@ -2278,7 +2277,7 @@ class AccountMoveLine(models.Model):
         ),
         (
             'check_accountable_required_fields',
-             "CHECK(display_type IN ('line_section', 'line_note') OR account_id IS NOT NULL)",
+             "CHECK(COALESCE(display_type IN ('line_section', 'line_note'), 'f') OR account_id IS NOT NULL)",
              "Missing required account on accountable invoice line."
         ),
         (
