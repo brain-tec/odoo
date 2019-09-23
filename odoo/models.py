@@ -3726,6 +3726,8 @@ Record ids: %(records)s
             for field in self._fields.values():
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
+                elif field.related and not field.column_type:
+                    self.env.cache.set(record, field, field.convert_to_cache(None, record))
                 # DLE P123: `test_adv_activity`, `test_message_assignation_inbox`, `test_message_log`, `test_create_mail_simple`, ...
                 # Set `mail.message.parent_id` to False in cache so it doesn't do the useless SELECT when computing the modified of `child_ids`
                 # in other words, if `parent_id` is not set, no other message `child_ids` are impacted.
@@ -5536,7 +5538,7 @@ Record ids: %(records)s
                 continue
             else:
                 # val is another tree of dependencies
-                model = self.env[key.model_name]
+                model = self.env[key.model_name].with_context(active_test=False)
                 for invf in model._field_inverses[key]:
                     # use an inverse of field without domain
                     if not (invf.type in ('one2many', 'many2many') and invf.domain):

@@ -7,7 +7,7 @@ import uuid
 from odoo import fields, models, api, _
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import UserError
-from odoo.tools.misc import _format_time_ago
+from odoo.tools.misc import _format_time_ago, format_time
 from odoo.http import request
 from odoo.osv import expression
 
@@ -37,7 +37,7 @@ class WebsiteVisitor(models.Model):
     _description = 'Website Visitor'
     _order = 'create_date DESC'
 
-    name = fields.Char('Name', default=lambda self: _('Website Visitor'))
+    name = fields.Char('Name')
     access_token = fields.Char(required=True, default=lambda x: uuid.uuid4().hex, index=True, copy=False, groups='base.group_website_publisher')
     active = fields.Boolean('Active', default=True)
     website_id = fields.Many2one('website', "Website", readonly=True)
@@ -71,7 +71,7 @@ class WebsiteVisitor(models.Model):
     def name_get(self):
         return [(
             record.id,
-            '%s #%d' % (record.name, record.id) if record.name == _('Website Visitor') else record.name
+            (record.name or _('Website Visitor #%s') % record.id)
         ) for record in self]
 
     @api.model
