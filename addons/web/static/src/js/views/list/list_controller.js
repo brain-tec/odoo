@@ -54,6 +54,19 @@ var ListController = BasicController.extend({
         this.selectedRecords = params.selectedRecords || [];
         this.multipleRecordsSavingPromise = null;
         this.fieldChangedPrevented = false;
+        this._onMouseupWindowDiscard = null;
+    },
+
+    /**
+     * Overriden to properly unbind any mouseup listeners still bound to the window
+     *
+     * @override
+     */
+    destroy: function () {
+        if (this._onMouseupWindowDiscard) {
+            window.removeEventListener('mouseup', this._onMouseupWindowDiscard, true);
+        }
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -346,7 +359,7 @@ var ListController = BasicController.extend({
      */
     _getExportDialogWidget() {
         let state = this.model.get(this.handle);
-        let defaultExportFields = this.renderer.columns.map(field => field.attrs.name);
+        let defaultExportFields = this.renderer.columns.filter(field => field.tag === 'field').map(field => field.attrs.name);
         let groupedBy = this.renderer.state.groupedBy;
         return new DataExport(this, state, defaultExportFields, groupedBy,
             this.getActiveDomain(), this.getSelectedIds());
