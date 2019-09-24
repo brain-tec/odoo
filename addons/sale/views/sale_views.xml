@@ -284,7 +284,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Order Lines" name="order_lines">
+                        <page string="Order Lines Che" name="order_lines">
                             <field
                                 name="order_line"
                                 widget="section_and_note_one2many"
@@ -419,7 +419,7 @@
                                     <field name="name" widget="section_and_note_text"/>
                                     <field
                                         name="product_uom_qty"
-                                        string="Ordered Qty"
+                                        string="Ordered Qty tratra"
                                         context="{
                                             'partner_id': parent.partner_id,
                                             'quantity': product_uom_qty,
