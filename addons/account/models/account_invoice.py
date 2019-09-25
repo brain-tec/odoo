@@ -1607,6 +1607,29 @@ class AccountInvoice(models.Model):
 
         return rslt
 
+    def _prepare_tax_line_vals_for_refund(self, tax_line, refund_repartition_line):
+        """
+        Usefull to deal with module extension when localization needs specific
+        stuff in their refund tax
+
+        @return dict
+        """
+        return {
+            'name': tax_line.name,
+            'tax_id': tax_line.tax_id.id,
+            'tax_repartition_line_id': refund_repartition_line.id,
+            'account_id': refund_repartition_line.account_id.id or tax_line.account_id.id,  # If the refund repartition line has no account set, we use the one from the original invoice
+            'account_analytic_id': tax_line.account_analytic_id.id,
+            'analytic_tag_ids': [(6, 0, tax_line.analytic_tag_ids.ids)],
+            'amount': tax_line.amount,
+            'amount_rounding': tax_line.amount_rounding,
+            'manual': tax_line.manual,
+            'sequence': tax_line.sequence,
+            'base': tax_line.base,
+            'tax_ids': [(6, 0, tax_line.tax_ids.ids)],
+            'tag_ids': [(6, 0, refund_repartition_line.tag_ids.ids)],
+        }
+
     @api.model
     def _prepare_refund(self, invoice, date_invoice=None, date=None, description=None, journal_id=None):
         """ Prepare the dict of values to create the new credit note from the invoice.
@@ -1671,21 +1694,7 @@ class AccountInvoice(models.Model):
         tax_line_vals = []
         for invoice_tax_entry in invoice.tax_line_ids:
             ref_rep_ln = tax_rep_ln_mapping[invoice_tax_entry.tax_id.id][invoice_tax_entry.tax_repartition_line_id.id]
-            tax_line_vals.append({
-                'name': invoice_tax_entry.name,
-                'tax_id': invoice_tax_entry.tax_id.id,
-                'tax_repartition_line_id': ref_rep_ln.id,
-                'account_id': ref_rep_ln.account_id.id or invoice_tax_entry.account_id.id, # If the refund repartition line has no account set, we use the one from the original invoice
-                'account_analytic_id': invoice_tax_entry.account_analytic_id.id,
-                'analytic_tag_ids': [(6, 0, invoice_tax_entry.analytic_tag_ids.ids)],
-                'amount': invoice_tax_entry.amount,
-                'amount_rounding': invoice_tax_entry.amount_rounding,
-                'manual': invoice_tax_entry.manual,
-                'sequence': invoice_tax_entry.sequence,
-                'base': invoice_tax_entry.base,
-                'tax_ids': [(6, 0, invoice_tax_entry.tax_ids.ids)],
-                'tag_ids': [(6, 0, ref_rep_ln.tag_ids.ids)],
-            })
+            tax_line_vals.append(self._prepare_tax_line_vals_for_refund(invoice_tax_entry, ref_rep_ln))
         values['tax_line_ids'] = [(0, 0, tax_line_val) for tax_line_val in tax_line_vals]
 
         return values
@@ -1782,12 +1791,13 @@ class AccountInvoice(models.Model):
             for line in invoice.tax_line_ids:
                 tax = line.tax_id
                 group_key = (tax.tax_group_id, tax.amount_type, tax.amount)
+                tax_key_add_base = tuple(line._get_tax_key_for_group_add_base(line))
                 res.setdefault(group_key, {'base': 0.0, 'amount': 0.0})
                 res[group_key]['amount'] += line.amount_total
-                if tax.id not in done_taxes:
+                if tax_key_add_base not in done_taxes:
                     # The base should be added ONCE
                     res[group_key]['base'] += line.base
-                    done_taxes.add(tax.id)
+                    done_taxes.add(tax_key_add_base)
             res = sorted(res.items(), key=lambda l: l[0][0].sequence)
             invoice.amount_by_group = [(
                 r[0][0].name, r[1]['amount'], r[1]['base'],
@@ -2150,3 +2160,13 @@ class AccountInvoiceTax(models.Model):
     def _compute_amount_total(self):
         for tax_line in self:
             tax_line.amount_total = tax_line.amount + tax_line.amount_rounding
+
+    @api.model
+    def _get_tax_key_for_group_add_base(self, taxline):
+        """
+        Useful for _amout_by_group
+        should take account.tax.get_grouping_key into account
+
+        @return list
+        """
+        return [taxline.tax_id.id]
