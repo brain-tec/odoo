@@ -80,6 +80,13 @@ class AccountInvoice(models.Model):
         vals['l10n_in_quantity'] = line.quantity
         return vals
 
+    def _prepare_tax_line_vals_for_refund(self, tax_line, refund_repartition_line):
+        res = super(AccountInvoice, self)._prepare_tax_line_vals_for_refund(tax_line, refund_repartition_line)
+        res['l10n_in_product_id'] = tax_line.l10n_in_product_id.id
+        res['l10n_in_uom_id'] = tax_line.l10n_in_uom_id.id
+        res['l10n_in_quantity'] = tax_line.l10n_in_quantity
+        return res
+
     @api.multi
     def get_taxes_values(self, tax_group_fields=False):
         if tax_group_fields:
@@ -102,3 +109,13 @@ class AccountInvoiceTax(models.Model):
         res['l10n_in_product_id'] = self.l10n_in_product_id.id
         res['l10n_in_uom_id'] = self.l10n_in_uom_id.id
         return res
+
+    @api.model
+    def _get_tax_key_for_group_add_base(self, taxline):
+        tax_key = super(AccountInvoiceTax, self)._get_tax_key_for_group_add_base(taxline)
+        if taxline.invoice_id.company_id.country_id.code == 'IN':
+            tax_key += [
+                taxline.l10n_in_product_id,
+                taxline.l10n_in_uom_id
+            ]
+        return tax_key
