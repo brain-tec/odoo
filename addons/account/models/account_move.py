@@ -71,6 +71,10 @@ class AccountMove(models.Model):
         return journal
 
     @api.model
+    def _get_default_invoice_date(self):
+        return fields.Date.today() if self._context.get('default_type', 'entry') in ('in_invoice', 'in_refund', 'in_receipt') else False
+
+    @api.model
     def _get_default_currency(self):
         ''' Get the default currency from either the journal, either the default journal's company. '''
         journal = self._get_default_journal()
@@ -185,7 +189,8 @@ class AccountMove(models.Model):
         string='Payment', store=True, readonly=True, copy=False, tracking=True,
         compute='_compute_amount')
     invoice_date = fields.Date(string='Invoice/Bill Date', readonly=True, index=True, copy=False,
-        states={'draft': [('readonly', False)]})
+        states={'draft': [('readonly', False)]},
+        default=_get_default_invoice_date)
     invoice_date_due = fields.Date(string='Due Date', readonly=True, index=True, copy=False,
         states={'draft': [('readonly', False)]})
     invoice_payment_ref = fields.Char(string='Payment Reference', index=True, copy=False,
@@ -263,7 +268,7 @@ class AccountMove(models.Model):
     @api.onchange('invoice_date')
     def _onchange_invoice_date(self):
         if self.invoice_date:
-            if not self.invoice_date_due and not self.invoice_payment_term_id:
+            if not self.invoice_payment_term_id:
                 self.invoice_date_due = self.invoice_date
             self.date = self.invoice_date
             self._onchange_currency()
@@ -1570,6 +1575,13 @@ class AccountMove(models.Model):
             result.append((move.id, name))
         return result
 
+    def _creation_subtype(self):
+        # OVERRIDE
+        if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
+            return self.env.ref('account.mt_invoice_created')
+        else:
+            return super(AccountMove, self)._creation_subtype()
+
     def _track_subtype(self, init_values):
         # OVERRIDE to add custom subtype depending of the state.
         self.ensure_one()
@@ -1581,9 +1593,20 @@ class AccountMove(models.Model):
             return self.env.ref('account.mt_invoice_paid')
         elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
-        elif 'state' in init_values and self.state == 'draft' and self.is_sale_document(include_receipts=True):
-            return self.env.ref('account.mt_invoice_created')
         return super(AccountMove, self)._track_subtype(init_values)
+
+    def _get_creation_message(self):
+        # OVERRIDE
+        if not self.is_invoice(include_receipts=True):
+            return super()._get_creation_message()
+        return {
+            'out_invoice': _('Invoice Created'),
+            'out_refund': _('Refund Created'),
+            'in_invoice': _('Vendor Bill Created'),
+            'in_refund': _('Credit Note Created'),
+            'out_receipt': _('Sales Receipt Created'),
+            'in_receipt': _('Purchase Receipt Created'),
+        }[self.type]
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
@@ -2804,7 +2827,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.balance = line.debit - line.credit
 
-    @api.depends('debit', 'credit', 'amount_currency', 'currency_id', 'matched_debit_ids', 'matched_credit_ids', 'matched_debit_ids.amount', 'matched_credit_ids.amount', 'move_id.state', 'company_id')
+    @api.depends('debit', 'credit', 'account_id', 'amount_currency', 'currency_id', 'matched_debit_ids', 'matched_credit_ids', 'matched_debit_ids.amount', 'matched_credit_ids.amount', 'move_id.state', 'company_id')
     def _amount_residual(self):
         """ Computes the residual amount of a move line from a reconcilable account in the company currency and the line's currency.
             This amount will be 0 for fully reconciled lines or lines from a non-reconcilable account, the original line amount
@@ -3912,7 +3935,7 @@ class AccountPartialReconcile(models.Model):
                             'name': line.name,
                             'debit': rounded_amt if rounded_amt > 0 else 0.0,
                             'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
-                            'account_id': line.tax_repartition_line_id.account_id.id,
+                            'account_id': line.tax_repartition_line_id.account_id.id or line.account_id.id,
                             'analytic_account_id': line.analytic_account_id.id,
                             'analytic_tag_ids': line.analytic_tag_ids.ids,
                             'tax_exigible': True,
