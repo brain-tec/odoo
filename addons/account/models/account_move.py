@@ -1243,9 +1243,10 @@ class AccountMoveLine(models.Model):
                 debit-credit == 0 while creating the move lines composing the move.
         """
         for vals in vals_list:
+            account = self.env['account.account'].browse(vals['account_id'])
+            vals.setdefault('company_currency_id', account.company_id.currency_id.id) # important to bypass the ORM limitation where monetary fields are not rounded; more info in the commit message
             amount = vals.get('debit', 0.0) - vals.get('credit', 0.0)
             move = self.env['account.move'].browse(vals['move_id'])
-            account = self.env['account.account'].browse(vals['account_id'])
             if account.deprecated:
                 raise UserError(_('The account %s (%s) is deprecated.') %(account.name, account.code))
             journal = vals.get('journal_id') and self.env['account.journal'].browse(vals['journal_id']) or move.journal_id
@@ -1723,7 +1724,7 @@ class AccountPartialReconcile(models.Model):
                                 'name': line.name,
                                 'debit': rounded_amt if rounded_amt > 0 else 0.0,
                                 'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
-                                'account_id': line.tax_repartition_line_id.account_id.id,
+                                'account_id': line.tax_repartition_line_id.account_id.id or line.account_id.id,
                                 'analytic_account_id': line.analytic_account_id.id,
                                 'analytic_tag_ids': line.analytic_tag_ids.ids,
                                 'tax_line_id': line.tax_line_id.id,
