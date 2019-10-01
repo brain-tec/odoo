@@ -2039,7 +2039,7 @@ class AccountMove(models.Model):
             if move.auto_post and move.date > fields.Date.today():
                 raise UserError(_("This move is configured to be auto-posted on {}".format(move.date.strftime(self.env['res.lang']._lang_get(self.env.user.lang).date_format))))
 
-            move.message_subscribe([p.id for p in [move.partner_id, move.commercial_partner_id] if p not in move.message_partner_ids])
+            move.message_subscribe([p.id for p in [move.partner_id, move.commercial_partner_id] if p not in move.sudo().message_partner_ids])
 
             to_write = {'state': 'posted'}
 
@@ -2344,13 +2344,13 @@ class AccountMoveLine(models.Model):
 
     # ==== Business fields ====
     move_id = fields.Many2one('account.move', string='Journal Entry',
-        index=True, required=True, auto_join=True, ondelete="cascade",
+        index=True, required=True, readonly=True, auto_join=True, ondelete="cascade",
         help="The move of this entry line.")
     move_name = fields.Char(string='Number', related='move_id.name', store=True, index=True)
     date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False, group_operator='min')
     ref = fields.Char(related='move_id.ref', store=True, copy=False, index=True, readonly=False)
     parent_state = fields.Selection(related='move_id.state', store=True, readonly=True)
-    journal_id = fields.Many2one(related='move_id.journal_id', store=True, readonly=False, index=True, copy=False)
+    journal_id = fields.Many2one(related='move_id.journal_id', store=True, index=True, copy=False)
     company_id = fields.Many2one(related='move_id.company_id', store=True, readonly=True)
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
@@ -2392,7 +2392,7 @@ class AccountMoveLine(models.Model):
     product_id = fields.Many2one('product.product', string='Product')
 
     # ==== Origin fields ====
-    reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False)
+    reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True)
     payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False,
         help="Payment that created this entry")
     statement_line_id = fields.Many2one('account.bank.statement.line',
@@ -3133,8 +3133,12 @@ class AccountMoveLine(models.Model):
         PROTECTED_FIELDS_LOCK_DATE = PROTECTED_FIELDS_TAX_LOCK_DATE + ['account_id', 'journal_id', 'amount_currency', 'currency_id', 'partner_id']
         PROTECTED_FIELDS_RECONCILIATION = ('account_id', 'date', 'debit', 'credit', 'amount_currency', 'currency_id')
 
-        if ('account_id' in vals) and self.env['account.account'].browse(vals['account_id']).deprecated:
+        account_to_write = self.env['account.account'].browse(vals['account_id']) if 'account_id' in vals else None
+
+        # Check writing a deprecated account.
+        if account_to_write and account_to_write.deprecated:
             raise UserError(_('You cannot use a deprecated account.'))
+
         # when making a reconciliation on an existing liquidity journal item, mark the payment as reconciled
         for line in self:
             if line.parent_state == 'posted':
@@ -3159,6 +3163,18 @@ class AccountMoveLine(models.Model):
             # Check the reconciliation.
             if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_RECONCILIATION):
                 line._check_reconciliation()
+
+            # Check switching receivable / payable accounts.
+            if account_to_write:
+                account_type = line.account_id.user_type_id.type
+                if line.move_id.is_sale_document(include_receipts=True):
+                    if (account_type == 'receivable' and account_to_write.user_type_id.type != account_type) \
+                            or (account_type != 'receivable' and account_to_write.user_type_id.type == 'receivable'):
+                        raise UserError(_("You can only set an account having the receivable type on payment terms lines for customer invoice."))
+                if line.move_id.is_purchase_document(include_receipts=True):
+                    if (account_type == 'payable' and account_to_write.user_type_id.type != account_type) \
+                            or (account_type != 'payable' and account_to_write.user_type_id.type == 'payable'):
+                        raise UserError(_("You can only set an account having the payable type on payment terms lines for vendor bill."))
 
         result = super(AccountMoveLine, self).write(vals)
 
