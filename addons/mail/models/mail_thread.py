@@ -1764,7 +1764,7 @@ class MailThread(models.AbstractModel):
         return return_values
 
     @api.returns('mail.message', lambda value: value.id)
-    def message_post(self,
+    def message_post(self, *,
                      body='', subject=None, message_type='notification',
                      email_from=None, author_id=None, parent_id=False,
                      subtype_id=False, subtype=None, partner_ids=None, channel_ids=None,
@@ -1923,7 +1923,7 @@ class MailThread(models.AbstractModel):
             kwargs['body'] = rendered_template
             record.message_post_with_template(False, **kwargs)
 
-    def message_post_with_template(self, template_id, email_layout_xmlid=None, **kwargs):
+    def message_post_with_template(self, template_id, email_layout_xmlid=None, auto_commit=False, **kwargs):
         """ Helper method to send a mail with a template
             :param template_id : the id of the template to render to create the body of the message
             :param **kwargs : parameter to create a mail.compose.message woaerd (which inherit from mail.message)
@@ -1952,9 +1952,10 @@ class MailThread(models.AbstractModel):
         if template_id:
             update_values = composer.onchange_template_id(template_id, kwargs['composition_mode'], self._name, res_id)['value']
             composer.write(update_values)
-        return composer.send_mail()
+        return composer.send_mail(auto_commit=auto_commit)
 
-    def message_notify(self, partner_ids=False, parent_id=False, model=False, res_id=False,
+    def message_notify(self, *,
+                       partner_ids=False, parent_id=False, model=False, res_id=False,
                        author_id=None, email_from=None, body='', subject=False, **kwargs):
         """ Shortcut allowing to notify partners of messages that shouldn't be 
         displayed on a document. It pushes notifications on inbox or by email depending
@@ -1997,7 +1998,7 @@ class MailThread(models.AbstractModel):
         MailThread._notify_thread(new_message, values, **notif_kwargs)
         return new_message
 
-    def _message_log(self, body='', author_id=None, email_from=None, subject=False, message_type='notification', **kwargs):
+    def _message_log(self, *, body='', author_id=None, email_from=None, subject=False, message_type='notification', **kwargs):
         """ Shortcut allowing to post note on a document. It does not perform
         any notification and pre-computes some values to have a short code
         as optimized as possible. This method is private as it does not check

@@ -301,6 +301,9 @@ class Channel(models.Model):
                 base_url = channel.get_base_url()
                 channel.website_url = '%s/slides/%s' % (base_url, slug(channel))
 
+    def get_backend_menu_id(self):
+        return self.env.ref('website_slides.website_slides_menu_root').id
+
     def _compute_action_rights(self):
         user_karma = self.env.user.karma
         for channel in self:
@@ -360,7 +363,7 @@ class Channel(models.Model):
         return res
 
     @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, parent_id=False, subtype=None, **kwargs):
+    def message_post(self, *, parent_id=False, subtype=None, **kwargs):
         """ Temporary workaround to avoid spam. If someone replies on a channel
         through the 'Presentation Published' email, it should be considered as a
         note as we don't want all channel followers to be notified of this answer. """
