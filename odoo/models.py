@@ -2408,7 +2408,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     continue            # don't update custom fields
                 new = field.update_db(self, columns)
                 if new and field.compute:
-                    fields_to_compute.append(field)
+                    fields_to_compute.append(field.name)
 
             if fields_to_compute:
                 @self.pool.post_init
@@ -2416,7 +2416,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     recs = self.with_context(active_test=False).search([])
                     for field in fields_to_compute:
                         _logger.info("Storing computed values of %s", field)
-                        self.env.add_to_compute(field, recs)
+                        self.env.add_to_compute(recs._fields[field], recs)
 
         if self._auto:
             self._add_sql_constraints()
@@ -3204,7 +3204,7 @@ Record ids: %(records)s
 
     def _filter_access_rules_python(self, operation):
         dom = self.env['ir.rule']._compute_domain(self._name, operation)
-        return self.filtered_domain(dom or [])
+        return self.sudo().filtered_domain(dom or [])
 
     def unlink(self):
         """ unlink()
