@@ -520,6 +520,39 @@ QUnit.test('attachmentBox basic rendering', async function (assert) {
     form.destroy();
 });
 
+QUnit.test('attachmentBox: deletable attachments', async function (assert) {
+    assert.expect(1);
+    this.data.partner.records.push({
+        id: 7,
+        display_name: "attachment_test",
+    });
+
+    const form = await createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        arch: `
+            <form string="Partners">
+                <sheet>
+                    '<field name="foo"/>
+                </sheet>
+                <div class="oe_chatter">
+                    '<field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>`,
+        res_id: 7,
+    });
+    await testUtils.dom.click(form.$('.o_chatter_button_attachment'));
+    assert.containsN(
+        form,
+        '.o_attachment_delete_cross',
+        2,
+        "Attachments should be deletable inside attachment box");
+
+    form.destroy();
+});
+
 QUnit.test('chatter in create mode', async function (assert) {
     assert.expect(9);
 
@@ -2796,6 +2829,40 @@ QUnit.test('chatter: do not duplicate messages on (un)star message', async funct
         "there should still be a single message in the chatter after unstarring the message");
 
     //cleanup
+    form.destroy();
+});
+
+QUnit.test('test open attachment option', async function (assert) {
+    assert.expect(5);
+
+    const form = await createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        res_id: 2,
+        arch: `
+            <form string="Partners">
+                <sheet>
+                    <field name="foo"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids" widget="mail_thread" options="{'open_attachments': True}"/>
+                </div>
+            </form>`,
+    });
+    assert.containsOnce(form, '.o_mail_chatter_attachments', "Attachment box should be open by default")
+    await testUtils.form.clickEdit(form);
+    assert.containsOnce(form, '.o_mail_chatter_attachments', "Attachment box should still be open")
+    await testUtils.fields.editInput(form.$('.o_field_char'), 'Coucou Petite Perruche');
+    assert.containsOnce(form, '.o_mail_chatter_attachments', "Attachment box should still be open")
+
+    // Close the attachment box with the button
+    await testUtils.dom.click(form.$('.o_chatter_button_attachment'))
+    assert.containsNone(form, '.o_mail_chatter_attachments', "Attachment box should be closed")
+    await testUtils.form.clickSave(form);
+    assert.containsNone(form, '.o_mail_chatter_attachments', "Attachment box should still be closed")
+
     form.destroy();
 });
 
