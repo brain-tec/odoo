@@ -359,6 +359,10 @@ var SnippetEditor = Widget.extend({
         $optionsSection.on('click', '.oe_snippet_remove', this._onRemoveClick.bind(this));
         this._customize$Elements.push($optionsSection);
 
+        // TODO get rid of this when possible (made as a fix to support old
+        // theme options)
+        this.$el.data('$optionsSection', $optionsSection);
+
         var i = 0;
         var defs = _.map(this.templateOptions, val => {
             if (!val.selector.is(this.$target)) {
@@ -1588,7 +1592,9 @@ var SnippetsMenu = Widget.extend({
      * @param {*} ev
      */
     _onCollapseTogglerClick: function (ev) {
-        this.$('we-collapse-area > we-toggler').not(ev.currentTarget).removeClass('active');
+        var $hierarchyTogglers = $(ev.currentTarget).parents('we-collapse-area').children('we-toggler');
+        this.$('we-collapse-area > we-toggler').not($hierarchyTogglers).removeClass('active');
+        $hierarchyTogglers.not(ev.currentTarget).addClass('active');
         ev.currentTarget.classList.toggle('active');
     },
     /**
