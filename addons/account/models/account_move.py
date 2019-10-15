@@ -47,7 +47,7 @@ class AccountMove(models.Model):
             journal = self.env['account.journal'].browse(self._context['default_journal_id'])
 
             if move_type != 'entry' and journal.type != journal_type:
-                raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal_type))
+                raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal.type))
         else:
             company_id = self._context.get('default_company_id', self.env.company.id)
             domain = [('company_id', '=', company_id), ('type', '=', journal_type)]
@@ -164,7 +164,7 @@ class AccountMove(models.Model):
         help='If this checkbox is ticked, this entry will be automatically posted at its date.')
 
     # ==== Reverse feature fields ====
-    reversed_entry_id = fields.Many2one('account.move', string="Reverse entry", readonly=True, copy=False)
+    reversed_entry_id = fields.Many2one('account.move', string="Reversal of", readonly=True, copy=False)
 
     # =========================================================
     # Invoice related fields
