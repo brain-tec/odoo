@@ -307,7 +307,8 @@ exports.PosModel = Backbone.Model.extend({
                 });
                 if (user.id === session.uid) {
                     self.user = user;
-                    self.employee = user;
+                    self.employee.name = user.name;
+                    self.employee.role = user.role;
                     self.employee.user_id = [user.id, user.name];
                 }
             });
@@ -2434,7 +2435,7 @@ exports.Order = Backbone.Model.extend({
             tax_details: this.get_tax_details(),
             change: this.get_change(),
             name : this.get_name(),
-            client: client ? client.name : null ,
+            client: client ? client : null ,
             invoice_id: null,   //TODO
             cashier: cashier ? cashier.name : null,
             precision: {
