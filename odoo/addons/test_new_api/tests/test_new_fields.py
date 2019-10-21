@@ -13,6 +13,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
+from odoo.tools.image import image_data_uri
 
 
 class TestFields(common.TransactionCase):
@@ -1496,6 +1497,74 @@ class TestFields(common.TransactionCase):
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_512))).size, (256, 512))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image))).size, (2000, 4000))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_256))).size, (128, 256))
+
+        # test bin_size
+        record_bin_size = record.with_context(bin_size=True)
+        self.assertEqual(record_bin_size.image, b'31.54 Kb')
+        self.assertEqual(record_bin_size.image_512, b'1.02 Kb')
+        self.assertEqual(record_bin_size.image_256, b'424.00 bytes')
+
+        # ensure image_data_uri works (value must be bytes and not string)
+        self.assertEqual(record.image_256[:8], b'iVBORw0K')
+        self.assertEqual(image_data_uri(record.image_256)[:30], 'data:image/png;base64,iVBORw0K')
+
+        # ensure invalid image raises
+        with self.assertRaises(UserError):
+            record.write({
+                'image': 'invalid image',
+            })
+
+    def test_95_binary_bin_size(self):
+        binary_value = base64.b64encode(b'content')
+        binary_size = b'7.00 bytes'
+
+        def assertBinaryValue(record, value):
+            for field in ('binary', 'binary_related_store', 'binary_related_no_store'):
+                self.assertEqual(record[field], value)
+
+        # created, flushed, and first read without context
+        record = self.env['test_new_api.model_binary'].create({'binary': binary_value})
+        record.flush()
+        record.invalidate_cache()
+        record_no_bin_size = record.with_context(bin_size=False)
+        record_bin_size = record.with_context(bin_size=True)
+
+        assertBinaryValue(record, binary_value)
+        assertBinaryValue(record_no_bin_size, binary_value)
+        assertBinaryValue(record_bin_size, binary_size)
+
+        # created, flushed, and first read with bin_size=False
+        record_no_bin_size = self.env['test_new_api.model_binary'].with_context(bin_size=False).create({'binary': binary_value})
+        record_no_bin_size.flush()
+        record_no_bin_size.invalidate_cache()
+        record = self.env['test_new_api.model_binary'].browse(record.id)
+        record_bin_size = record.with_context(bin_size=True)
+
+        assertBinaryValue(record_no_bin_size, binary_value)
+        assertBinaryValue(record, binary_value)
+        assertBinaryValue(record_bin_size, binary_size)
+
+        # created, flushed, and first read with bin_size=True
+        record_bin_size = self.env['test_new_api.model_binary'].with_context(bin_size=True).create({'binary': binary_value})
+        record_bin_size.flush()
+        record_bin_size.invalidate_cache()
+        record = self.env['test_new_api.model_binary'].browse(record.id)
+        record_no_bin_size = record.with_context(bin_size=False)
+
+        assertBinaryValue(record_bin_size, binary_size)
+        assertBinaryValue(record_no_bin_size, binary_value)
+        assertBinaryValue(record, binary_value)
+
+        # created without context and flushed with bin_size
+        record = self.env['test_new_api.model_binary'].create({'binary': binary_value})
+        record_no_bin_size = record.with_context(bin_size=False)
+        record_bin_size = record.with_context(bin_size=True)
+        record_bin_size.flush()
+        record_bin_size.invalidate_cache()
+
+        assertBinaryValue(record, binary_value)
+        assertBinaryValue(record_no_bin_size, binary_value)
+        assertBinaryValue(record_bin_size, binary_size)
 
 
 class TestX2many(common.TransactionCase):
