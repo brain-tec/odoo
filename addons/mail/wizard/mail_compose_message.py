@@ -355,7 +355,17 @@ class MailComposer(models.TransientModel):
             if template.mail_server_id:
                 values['mail_server_id'] = template.mail_server_id.id
             if template.user_signature and 'body_html' in values:
-                signature = self.env.user.signature
+                if 'company_id' in self.env[model]._fields and \
+                        self.env[model].browse(res_id).company_id:
+                    company_id = self.env[template.model].browse(
+                        res_id).company_id.id
+                else:
+                    company_id = self.env.user.company_id.id
+                res_users_obj_sudo = self.env['res.users'].sudo().with_context(
+                    force_company=company_id)
+                # compute signature
+                signature = res_users_obj_sudo.browse(
+                    self.env.user.id).signature
                 values['body_html'] = tools.append_content_to_html(values['body_html'], signature, plaintext=False)
         elif template_id:
             values = self.generate_email_for_composer(template_id, [res_id])[res_id]
