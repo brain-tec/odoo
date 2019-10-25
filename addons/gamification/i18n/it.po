@@ -3,7 +3,7 @@
 # * gamification
 # 
 # Translators:
-# Lorenzo Battistini <lorenzo.battistini@agilebg.com>, 2018
+# Lorenzo Battistini <lb@takobi.online>, 2018
 # Giacomo Grasso <giacomo.grasso.82@gmail.com>, 2018
 # Christian <chris@effeci.info>, 2018
 # Pietro Della Notte <pdellanotte@gmail.com>, 2018
@@ -509,7 +509,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__message_attachment_count
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__message_attachment_count
 msgid "Attachment Count"
-msgstr "Numero di allegati"
+msgstr "Numero allegati"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__rule_auth_user_ids
@@ -1115,7 +1115,7 @@ msgstr "Assegna questo Badge"
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_user_kanban_view
 msgid "Granted by"
-msgstr "Assegnato da"
+msgstr ""
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
@@ -2141,7 +2141,7 @@ msgstr "Messaggi sito web"
 #: model:ir.model.fields,help:gamification.field_gamification_badge__website_message_ids
 #: model:ir.model.fields,help:gamification.field_gamification_challenge__website_message_ids
 msgid "Website communication history"
-msgstr "Cronologia comunicazioni sito"
+msgstr "Cronologia comunicazioni sito web"
 
 #. module: gamification
 #: selection:gamification.challenge,period:0

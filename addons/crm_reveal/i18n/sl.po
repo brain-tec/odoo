@@ -286,7 +286,7 @@ msgstr ""
 #. module: crm_reveal
 #: model:crm.reveal.industry,name:crm_reveal.crm_reveal_industry_225
 msgid "Commodity Chemicals"
-msgstr ""
+msgstr "Blagovne kemikalije"
 
 #. module: crm_reveal
 #: model:crm.reveal.industry,name:crm_reveal.crm_reveal_industry_25
@@ -1859,7 +1859,7 @@ msgstr ""
 #. module: crm_reveal
 #: model:crm.reveal.role,name:crm_reveal.crm_reveal_role_14
 msgid "operations"
-msgstr ""
+msgstr "operacije"
 
 #. module: crm_reveal
 #: model:crm.reveal.role,name:crm_reveal.crm_reveal_role_15

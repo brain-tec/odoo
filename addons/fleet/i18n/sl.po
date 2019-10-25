@@ -8,6 +8,7 @@
 # matjaz k <matjaz@mentis.si>, 2019
 # Martin Trigaux, 2019
 # Boris Kodelja <boris@hbs.si>, 2019
+# Tadej Lupšina <tadej@hbs.si>, 2019
 # Jasmina Macur <jasmina@hbs.si>, 2019
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
 # 
@@ -28,12 +29,12 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "<span>g/km</span>"
-msgstr ""
+msgstr "<span>g/km</span>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "<span>kW</span>"
-msgstr ""
+msgstr "<span>kW</span>"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -98,7 +99,7 @@ msgstr "Tipi aktivnosti"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_tag_action
 msgid "Add a new tag"
-msgstr ""
+msgstr "Dodaj novo oznako"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_fuel_view_form
@@ -776,7 +777,7 @@ msgstr "Zamenjava izpušnega kolektorja"
 #: selection:fleet.vehicle.log.contract,state:0
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
 msgid "Expired"
-msgstr ""
+msgstr "Poteklo"
 
 #. module: fleet
 #: selection:fleet.vehicle.log.contract,state:0
@@ -1900,7 +1901,7 @@ msgstr "Zamenjava zaganjalnika"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__state_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_state_view_tree
 msgid "State"
-msgstr "Regija"
+msgstr "Stanje"
 
 #. module: fleet
 #: sql_constraint:fleet.vehicle.state:0
@@ -1923,9 +1924,9 @@ msgid ""
 "Planned: Future activities."
 msgstr ""
 "Status na podlagi aktivnosti\n"
-"Zapadel: Datum zapadlosti je v preteklosti\n"
+"Zapadel: Rok je že prekoračen\n"
 "Danes: Datum aktivnosti je danes\n"
-"Planned: Bodoče aktivnosti."
+"Planirano: Bodoče aktivnosti."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_5
@@ -2277,7 +2278,7 @@ msgstr "Datum opozorila"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
 msgid "Warning: renewal due soon"
-msgstr ""
+msgstr "Opozorilo: kmalu je treba obnoviti"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_50
@@ -2372,17 +2373,17 @@ msgstr "znesek"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "e.g. Model S"
-msgstr ""
+msgstr "npr. Model S"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "e.g. PAE 326"
-msgstr ""
+msgstr "npr. PAE 326"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 msgid "e.g. Tesla"
-msgstr ""
+msgstr "npr. Tesla"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form

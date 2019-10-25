@@ -3,6 +3,7 @@
 # * stock
 # 
 # Translators:
+# SebastianoPistore <SebastianoPistore.info@protonmail.ch>, 2018
 # Manuela Feliciani <mfeliciani@alice.it>, 2018
 # Alessandro Forte <a.forte1010@gmail.com>, 2018
 # Fabio Genovese <ing.fabiogenovese@gmail.com>, 2018
@@ -12,7 +13,6 @@
 # Christian <chris@effeci.info>, 2018
 # Francesco Garganese <francesco.garganese@aeromnia.aero>, 2018
 # Giacomo Grasso <giacomo.grasso.82@gmail.com>, 2018
-# SebastianoPistore <SebastianoPistore.info@protonmail.ch>, 2018
 # Alberto Carollo <baba75@gmail.com>, 2018
 # Cesare Cugnasco <cesare.cugnasco@gmail.com>, 2018
 # Massimo Bianchi <bianchi.massimo@gmail.com>, 2018
@@ -25,7 +25,7 @@
 # Mario Riva <mario.riva@gmail.com>, 2019
 # Léonie Bouchat <lbo@odoo.com>, 2019
 # mymage <stefano.consolaro@mymage.it>, 2019
-# Lorenzo Battistini <lorenzo.battistini@agilebg.com>, 2019
+# Lorenzo Battistini <lb@takobi.online>, 2019
 # Sergio Zanchetta <primes2h@gmail.com>, 2019
 # 
 msgid ""
@@ -760,24 +760,24 @@ msgstr "Back order <em>%s</em> <b>annullato</b>."
 #. module: stock
 #: model:ir.model,name:stock.model_stock_backorder_confirmation
 msgid "Backorder Confirmation"
-msgstr "Conferma Backorder"
+msgstr "Conferma ordine residuo"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 msgid "Backorder creation"
-msgstr "Creazione Backorder"
+msgstr "Creazione ordine residuo"
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:71
 #, python-format
 msgid "Backorder exists"
-msgstr "Backorder esistente"
+msgstr "Ordine residuo esistente"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_picking_tree_backorder
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Backorders"
-msgstr "Backorders"
+msgstr "Ordini residui"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__barcode
@@ -1189,7 +1189,7 @@ msgstr "Conta i Picking"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__count_picking_backorders
 msgid "Count Picking Backorders"
-msgstr "Conta i Picking con Backorders"
+msgstr "Numero ordini residui dei prelievi"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__count_picking_draft
@@ -1219,13 +1219,13 @@ msgstr "Ubicazioni di contropartita"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 msgid "Create Backorder"
-msgstr "Crea Backorder"
+msgstr "Crea ordine residuo"
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:755
 #, python-format
 msgid "Create Backorder?"
-msgstr "Crea Backorder?"
+msgstr "Creare ordine residuo?"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_scrap_tree_view
@@ -1254,9 +1254,9 @@ msgid ""
 "                        products later. Do not create a backorder if you will not\n"
 "                        process the remaining products."
 msgstr ""
-"Crea un ordine arretrato se prevedi di trattare i prodotti rimanenti \n"
-"                        più tardi. Non creare un ordine arretrato se non prevedi\n"
-"                        di trattare i prodotti rimanenti. "
+"Creare un ordine residuo se l'elaborazione dei prodotti\n"
+"                        restanti è prevista successivamente. Non creare se i\n"
+"                        prodotti rimanenti non vengono elaborati."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_inventory_form
@@ -3276,12 +3276,12 @@ msgstr "Operazione di produzione"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "Mark as Todo"
-msgstr "Segna come da Fare"
+msgstr "Segna come da fare"
 
 #. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_inventory_control
 msgid "Master Data"
-msgstr "Dati principali"
+msgstr "Anagrafiche"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__product_max_qty
@@ -3519,7 +3519,7 @@ msgstr "Prossimo/i trasferimento/i colpito/i:"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 msgid "No Backorder"
-msgstr "No Backorder"
+msgstr "Nessun ordine residuo"
 
 #. module: stock
 #: selection:res.partner,picking_warn:0
@@ -4703,7 +4703,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__rate_picking_backorders
 msgid "Rate Picking Backorders"
-msgstr "Percentuale prelievi con ordini arretrati"
+msgstr "Indice ordini residui dei prelievi"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__rate_picking_late
@@ -5890,8 +5890,8 @@ msgid ""
 "The backorder <a href=# data-oe-model=stock.picking data-oe-id=%d>%s</a> has"
 " been created."
 msgstr ""
-"L'ordine arretrato <a href=# data-oe-model=stock.picking data-oe-"
-"id=%d>%s</a> è stato creato."
+"È stato creato l'ordine residuo <a href=# data-oe-model=stock.picking data-"
+"oe-id=%d>%s</a>."
 
 #. module: stock
 #: sql_constraint:stock.location:0
@@ -6156,12 +6156,12 @@ msgid ""
 "this quantity on assigned moves affects the product reservation, and should "
 "be done with care."
 msgstr ""
-"Questa è la quantità di prodotti dal punto di vista dell'inventario. Per i "
-"movimenti nello stato \"Completato\", è la quantità di prodotti che è stata "
-"effettivamente spostata. Per gli altri movimenti, è la quantità di prodotti "
-"che si intende spostare. Ridurre questa quantità non genera un ordine "
-"arretrato. La modifica di questa quantità sui movimenti assegnati influisce "
-"sulla prenotazione del prodotto e deve essere effettuata con cura."
+"Questa è la quantità di prodotti dal punto di vista del magazzino. Per i "
+"movimenti nello stato \"Completato\" è la quantità di prodotti che è stata "
+"effettivamente movimentata. Per gli altri movimenti è la quantità di "
+"prodotti che si intende movimentare. Ridurre questa quantità non genera un "
+"ordine residuo. La modifica di questa quantità sui movimenti assegnati "
+"influisce sulla prenotazione del prodotto e deve essere effettuata con cura."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_inventory_form
@@ -6837,7 +6837,7 @@ msgstr "Messaggi sito web"
 #: model:ir.model.fields,help:stock.field_stock_picking__website_message_ids
 #: model:ir.model.fields,help:stock.field_stock_production_lot__website_message_ids
 msgid "Website communication history"
-msgstr "Storico comunicazione sito"
+msgstr "Cronologia comunicazioni sito web"
 
 #. module: stock
 #: selection:barcode.rule,type:0

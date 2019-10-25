@@ -36,7 +36,8 @@ class PaymentAcquirerStripeSCA(models.Model):
             + "?reference=%s" % tx_values["reference"],
             "cancel_url": urls.url_join(base_url, StripeController._cancel_url)
             + "?reference=%s" % tx_values["reference"],
-            "customer_email": tx_values["partner_email"] or tx_values["billing_partner_email"],
+            "payment_intent_data[description]": tx_values["reference"],
+            "customer_email": tx_values.get("partner_email") or tx_values.get("billing_partner_email"),
         }
         tx_values["session_id"] = self._create_stripe_session(stripe_session_data)
 
@@ -306,8 +307,8 @@ class PaymentTransactionStripeSCA(models.Model):
             self._set_transaction_pending()
             return True
         else:
-            error = tree.get("failure_message")
-            _logger.warn(error)
+            error = tree.get("failure_message") or tree['error']['message']
+            _logger.warning(error)
             vals.update({"state_message": error})
             self.write(vals)
             self._set_transaction_cancel()

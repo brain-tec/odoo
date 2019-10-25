@@ -180,7 +180,7 @@ msgid ""
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"可庫存商品是指在倉庫中受存量管控的產品。 要使用此專案您必須安裝倉庫模組。\n"
+"可庫存商品是指在倉庫中受存量管控的產品。 要使用此功能您必須安裝倉庫模組。\n"
 "可消耗商品是指不受庫存量管控的產品。\n"
 "服務是指您提供的非產品類服務業務。"
 
@@ -1198,7 +1198,7 @@ msgstr "使此屬性值與產品的其他值或可選和附屬產品的一些屬
 #. module: product
 #: model:res.groups,name:product.group_pricelist_item
 msgid "Manage Pricelist Items"
-msgstr "管理價格表項"
+msgstr "管理價格表明細"
 
 #. module: product
 #: model:res.groups,name:product.group_stock_packaging
@@ -1272,7 +1272,7 @@ msgstr "最少數量"
 #: model:ir.model.fields,field_description:product.field_product_product__name
 #: model:ir.model.fields,field_description:product.field_product_template__name
 msgid "Name"
-msgstr "名称"
+msgstr "名稱"
 
 #. module: product
 #: selection:product.attribute,create_variant:0
@@ -1521,7 +1521,7 @@ msgstr "價格表明細"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__applied_on
 msgid "Pricelist Item applicable on selected option"
-msgstr "適用於選定的選項價格表專案"
+msgstr "適用於選定的選項價格表明細"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__item_ids
@@ -1533,7 +1533,7 @@ msgstr "適用於選定的選項價格表專案"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Pricelist Items"
-msgstr "價格表專案"
+msgstr "價格表明細"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__name
@@ -1637,7 +1637,7 @@ msgstr "產品類別"
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Product Category"
-msgstr "產品類別"
+msgstr "類別"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_label
@@ -1700,7 +1700,7 @@ msgstr "基於價目表版本的每單位產品價格"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__product_tmpl_id
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 msgid "Product Template"
-msgstr "产品模板"
+msgstr "產品模板"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_exclusion
@@ -2493,7 +2493,7 @@ msgstr "變體和屬性"
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 msgid "Vendor"
-msgstr "供应商"
+msgstr "供應商"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
