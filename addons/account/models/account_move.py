@@ -1375,11 +1375,9 @@ class AccountMove(models.Model):
             raise UserError(_("Cannot create unbalanced journal entry. Ids: %s\nDifferences debit - credit: %s") % (ids, sums))
 
     def _check_fiscalyear_lock_date(self):
-        for move in self.filtered(lambda move: move.state == 'posted'):
-            lock_date = max(move.company_id.period_lock_date or date.min, move.company_id.fiscalyear_lock_date or date.min)
-            if self.user_has_groups('account.group_account_manager'):
-                lock_date = move.company_id.fiscalyear_lock_date
-            if move.date <= (lock_date or date.min):
+        for move in self:
+            lock_date = move.company_id._get_user_fiscal_lock_date()
+            if move.date <= lock_date:
                 if self.user_has_groups('account.group_account_manager'):
                     message = _("You cannot add/modify entries prior to and inclusive of the lock date %s.") % format_date(self.env, lock_date)
                 else:
@@ -1495,6 +1493,13 @@ class AccountMove(models.Model):
             values.pop('invoice_line_ids', None)
             invoice.write(values)
         return True
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        default = dict(default or {})
+        if (fields.Date.to_date(default.get('date')) or self.date) <= self.company_id._get_user_fiscal_lock_date():
+            default['date'] = self.company_id._get_user_fiscal_lock_date() + timedelta(days=1)
+        return super(AccountMove, self).copy(default)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -2970,8 +2975,8 @@ class AccountMoveLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('account_id')
-    def _check_constrains_account_id(self):
+    @api.constrains('account_id', 'journal_id')
+    def _check_constrains_account_id_journal_id(self):
         for line in self:
             account = line.account_id
             journal = line.journal_id
@@ -2979,10 +2984,13 @@ class AccountMoveLine(models.Model):
             if account.deprecated:
                 raise UserError(_('The account %s (%s) is deprecated.') % (account.name, account.code))
 
+            control_journal_failed = account.allowed_journal_ids and journal not in account.allowed_journal_ids
             control_type_failed = journal.type_control_ids and account.user_type_id not in journal.type_control_ids
             control_account_failed = journal.account_control_ids and account not in journal.account_control_ids
+            if control_journal_failed:
+                raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.') % account.display_name)
             if control_type_failed or control_account_failed:
-                raise UserError(_('You cannot use this general account in this journal, check the tab \'Entry Controls\' on the related journal.'))
+                raise UserError(_('You cannot use this account (%s) in this journal, check the tab \'Control-Access\' on the related journal.') % account.display_name)
 
     @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
     def _check_off_balance(self):
@@ -4130,6 +4138,6 @@ class AccountFullReconcile(models.Model):
         # The move date should be the maximum date between payment and invoice
         # (in case of payment in advance). However, we should make sure the
         # move date is not recorded after the end of year closing.
-        if move_date > (company.fiscalyear_lock_date or date.min):
+        if move_date > company._get_user_fiscal_lock_date():
             res['date'] = move_date
         return res
