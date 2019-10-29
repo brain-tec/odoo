@@ -199,7 +199,7 @@ exports.PosModel = Backbone.Model.extend({
     },{
         model:  'res.partner',
         label: 'load_partners',
-        fields: ['name','street','city','state_id','country_id','vat',
+        fields: ['name','street','city','state_id','country_id','vat','lang',
                  'phone','zip','mobile','email','barcode','write_date',
                  'property_account_position_id','property_product_pricelist'],
         loaded: function(self,partners){
@@ -223,6 +223,12 @@ exports.PosModel = Backbone.Model.extend({
                     self.company.country = countries[i];
                 }
             }
+        },
+    },{
+        model:  'res.lang',
+        fields: ['name', 'code'],
+        loaded: function (self, langs){
+            self.langs = langs;
         },
     },{
         model:  'account.tax',
@@ -294,7 +300,7 @@ exports.PosModel = Backbone.Model.extend({
        },
     },{
         model:  'res.users',
-        fields: ['name','company_id', 'id', 'groups_id'],
+        fields: ['name','company_id', 'id', 'groups_id', 'lang'],
         domain: function(self){ return [['company_ids', 'in', self.config.company_id[0]],'|', ['groups_id','=', self.config.group_pos_manager_id[0]],['groups_id','=', self.config.group_pos_user_id[0]]]; },
         loaded: function(self,users){
             users.forEach(function(user) {
@@ -319,7 +325,13 @@ exports.PosModel = Backbone.Model.extend({
     },{
         model:  'product.pricelist',
         fields: ['name', 'display_name', 'discount_policy'],
-        domain: function(self) { return [['id', 'in', self.config.available_pricelist_ids]]; },
+        domain: function(self) {
+            if (self.config.use_pricelist) {
+                return [['id', 'in', self.config.available_pricelist_ids]];
+            } else {
+                return [['id', '=', self.config.pricelist_id[0]]];
+            }
+        },
         loaded: function(self, pricelists){
             _.map(pricelists, function (pricelist) { pricelist.items = []; });
             self.default_pricelist = _.findWhere(pricelists, {id: self.config.pricelist_id[0]});
