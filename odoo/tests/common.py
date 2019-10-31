@@ -87,37 +87,6 @@ def get_db_name():
 DB = get_db_name()
 
 
-def at_install(flag):
-    """ Sets the at-install state of a test, the flag is a boolean specifying
-    whether the test should (``True``) or should not (``False``) run during
-    module installation.
-
-    By default, tests are run right after installing the module, before
-    starting the installation of the next module.
-
-    .. deprecated:: 12.0
-
-        ``at_install`` is now a flag, you can use :func:`tagged` to
-        add/remove it, although ``tagged`` only works on test classes
-    """
-    return tagged('at_install' if flag else '-at_install')
-
-def post_install(flag):
-    """ Sets the post-install state of a test. The flag is a boolean
-    specifying whether the test should or should not run after a set of
-    module installations.
-
-    By default, tests are *not* run after installation of all modules in the
-    current installation set.
-
-    .. deprecated:: 12.0
-
-        ``post_install`` is now a flag, you can use :func:`tagged` to
-        add/remove it, although ``tagged`` only works on test classes
-    """
-    return tagged('post_install' if flag else '-post_install')
-
-
 def new_test_user(env, login='', groups='base.group_user', context=None, **kwargs):
     """ Helper function to create a new test user. It allows to quickly create
     users given its login and groups (being a comma separated list of xml ids).
@@ -811,7 +780,7 @@ class ChromeBrowser():
         params = {kw:kwargs[kw] for kw in kwargs if kw in ['url', 'domain', 'path']}
         params.update({'name': name})
         _id = self._websocket_send('Network.deleteCookies', params=params)
-        return self._websocket_wait_id(_id) 
+        return self._websocket_wait_id(_id)
 
     def _wait_ready(self, ready_code, timeout=60):
         self._logger.info('Evaluate ready code "%s"', ready_code)
@@ -865,7 +834,23 @@ class ChromeBrowser():
             elif res and res.get('method') == 'Runtime.consoleAPICalled' and res.get('params', {}).get('type') in ('log', 'error', 'trace'):
                 logs = res.get('params', {}).get('args')
                 log_type = res.get('params', {}).get('type')
-                content = " ".join([str(log.get('value', '')) for log in logs])
+                content = []
+                for log in logs:
+                    text = ''
+                    if log.get('type') == 'string':
+                        text = str(log.get('value', '`Empty string`'))
+                    elif log.get('type') == 'object' and 'Error' in log.get('className', '') and log.get('description'):
+                        text = str(log.get('description'))
+                    else:
+                        type_ = log.get('className') or log.get('type')
+                        properties = log.get('preview', {}).get('properties')
+                        if log.get('type') == 'object' and properties and all(p.get('name') is not None and p.get('value') is not None for p in properties):
+                            elems = ['%s:%s' % (p.get('name'), "'%s'" % p.get('value') if p.get('type') == 'string' else p.get('value')) for p in properties]
+                            text = "%s\n{%s}" % (type_, ", ".join(elems))
+                        else:
+                            text = str(log)
+                    content.append(text)
+                content = " ".join(content)
                 if log_type == 'error':
                     self.take_screenshot()
                     self._save_screencast()
@@ -955,7 +940,8 @@ class HttpCase(TransactionCase):
 
     def setUp(self):
         super(HttpCase, self).setUp()
-
+        if not self.env.registry.loaded:
+            self._logger.warning('HttpCase test should be in post_install only')
         if self.registry_test_mode:
             self.registry.enter_test_mode(self.cr)
             self.addCleanup(self.registry.leave_test_mode)
@@ -1000,6 +986,9 @@ class HttpCase(TransactionCase):
     def authenticate(self, user, password):
         # stay non-authenticated
         if user is None:
+            if self.session:
+                odoo.http.root.session_store.delete(self.session)
+            self.browser.delete_cookie('session_id', domain=HOST)
             return
 
         db = get_db_name()
@@ -1053,7 +1042,10 @@ class HttpCase(TransactionCase):
             # flush updates to the database before launching the client side,
             # otherwise they simply won't be visible
             ICP.flush()
-            url = "%s%s" % (base_url, url_path or '/')
+            if re.match('[a-z]*:', url_path or ''): # about:, http:, ...
+                url = url_path
+            else:
+                url = "%s%s" % (base_url, url_path or '/')
             self._logger.info('Open "%s" in browser', url)
 
             if self.browser.screencasts_dir:
@@ -1098,8 +1090,6 @@ class HttpCase(TransactionCase):
         # database
         self.env.cache.invalidate()
         return res
-
-    phantom_js = browser_js
 
 
 def users(*logins):
