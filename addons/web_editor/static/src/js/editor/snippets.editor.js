@@ -3,6 +3,7 @@ odoo.define('web_editor.snippet.editor', function (require) {
 
 var concurrency = require('web.concurrency');
 var core = require('web.core');
+var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var Widget = require('web.Widget');
 var options = require('web_editor.snippets.options');
@@ -45,6 +46,10 @@ var SnippetEditor = Widget.extend({
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
+
+        this.__isStarted = new Promise(resolve => {
+            this.__isStartedResolveFunc = resolve;
+        });
     },
     /**
      * @override
@@ -121,7 +126,9 @@ var SnippetEditor = Widget.extend({
         // a flickering when not needed.
         this.$target.on('transitionend.snippet_editor, animationend.snippet_editor', postAnimationCover);
 
-        return Promise.all(defs);
+        return Promise.all(defs).then(() => {
+            this.__isStartedResolveFunc(this);
+        });
     },
     /**
      * @override
@@ -640,6 +647,7 @@ var SnippetsMenu = Widget.extend({
     cacheSnippetTemplate: {},
     events: {
         'click we-collapse-area > we-toggler': '_onCollapseTogglerClick',
+        'click .o_install_btn': '_onInstallBtnClick',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -1051,16 +1059,17 @@ var SnippetsMenu = Widget.extend({
                 resolve(null);
             }).then(editorToEnable => {
                 // First disable all editors...
-                this.snippetEditors.forEach(editor => {
+                for (let i = this.snippetEditors.length; i--;) {
+                    const editor = this.snippetEditors[i];
                     if (editor === editorToEnable) {
                         // Avoid disable -> enable of an editor (the toggleFocus
                         // method is in charge of doing nothing is nothing has
                         // to be done but if we explicitly ask for disable then
                         // enable... it will disable then enable).
-                        return;
+                        continue;
                     }
                     editor.toggleFocus(false, previewMode);
-                });
+                }
                 // ... then enable the right editor
                 if (editorToEnable) {
                     editorToEnable.toggleFocus(true, previewMode);
@@ -1306,13 +1315,11 @@ var SnippetsMenu = Widget.extend({
                 var moduleID = $snippet.data('moduleId');
                 if (moduleID) {
                     $snippet.addClass('o_snippet_install');
-                    var $installBtn = $('<a/>', {
-                        class: 'btn btn-primary o_install_btn',
-                        target: '_blank',
-                        href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
+                    $thumbnail.append($('<button/>', {
+                        class: 'btn btn-primary o_install_btn w-100',
+                        type: 'button',
                         text: _t("Install"),
-                    });
-                    $thumbnail.append($installBtn);
+                    }));
                 }
             })
             .not('[data-module-id]');
@@ -1362,7 +1369,7 @@ var SnippetsMenu = Widget.extend({
         var self = this;
         var snippetEditor = $snippet.data('snippet-editor');
         if (snippetEditor) {
-            return Promise.resolve(snippetEditor);
+            return snippetEditor.__isStarted;
         }
 
         var def;
@@ -1372,6 +1379,15 @@ var SnippetsMenu = Widget.extend({
         }
 
         return Promise.resolve(def).then(function (parentEditor) {
+            // When reaching this position, after the Promise resolution, the
+            // snippet editor instance might have been created by another call
+            // to _createSnippetEditor... the whole logic should be improved
+            // to avoid doing this here.
+            snippetEditor = $snippet.data('snippet-editor');
+            if (snippetEditor) {
+                return snippetEditor.__isStarted;
+            }
+
             let editableArea = self.getEditableArea();
             snippetEditor = new SnippetEditor(parentEditor || self, $snippet, self.templateOptions, $snippet.closest('[data-oe-type="html"], .oe_structure').add(editableArea), self.options);
             self.snippetEditors.push(snippetEditor);
@@ -1662,6 +1678,63 @@ var SnippetsMenu = Widget.extend({
     _onGoToParent: function (ev) {
         ev.stopPropagation();
         this._activateSnippet(ev.data.$snippet.parent());
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onInstallBtnClick: function (ev) {
+        var self = this;
+        var $snippet = $(ev.currentTarget).closest('[data-module-id]');
+        var moduleID = $snippet.data('moduleId');
+        var name = $snippet.attr('name');
+        new Dialog(this, {
+            title: _.str.sprintf(_t("Install %s"), name),
+            size: 'medium',
+            $content: $('<div/>', {text: _.str.sprintf(_t("Do you want to install the %s App?"), name)}).append(
+                $('<a/>', {
+                    target: '_blank',
+                    href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
+                    text: _t("More info about this app."),
+                    class: 'ml4',
+                })
+            ),
+            buttons: [{
+                text: _t("Save and Install"),
+                classes: 'btn-primary',
+                click: function () {
+                    this.$footer.find('.btn').toggleClass('o_hidden');
+                    this._rpc({
+                        model: 'ir.module.module',
+                        method: 'button_immediate_install',
+                        args: [[moduleID]],
+                    }).then(() => {
+                        self.trigger_up('request_save', {
+                            reload: false,
+                            onSuccess: function () {
+                                window.location.href = window.location.origin + window.location.pathname + '?enable_editor=1';
+                            },
+                        });
+                    }).guardedCatch(reason => {
+                        reason.event.preventDefault();
+                        this.close();
+                        self.displayNotification({
+                            title: _t("Something went wrong."),
+                            message: _.str.sprintf(_t("The module <strong>%s</strong> could not be installed."), name),
+                            type: 'danger',
+                            sticky: true,
+                        });
+                    });
+                },
+            }, {
+                text: _t("Install in progress"),
+                icon: 'fa-spin fa-spinner fa-pulse mr8',
+                classes: 'btn-primary disabled o_hidden',
+            }, {
+                text: _t("Cancel"),
+                close: true,
+            }],
+        }).open();
     },
     /**
      * @private
