@@ -4,7 +4,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -107,9 +107,9 @@ class PosConfig(models.Model):
         'stock.picking.type',
         string='Operation Type',
         default=_default_picking_type_id,
+        required=True,
         domain="[('code', '=', 'outgoing'), ('warehouse_id.company_id', '=', company_id)]",
         ondelete='restrict')
-    use_existing_lots = fields.Boolean(related='picking_type_id.use_existing_lots', readonly=False)
     journal_id = fields.Many2one(
         'account.journal', string='Sales Journal',
         domain=[('type', '=', 'sale')],
@@ -320,6 +320,7 @@ class PosConfig(models.Model):
     @api.constrains('company_id', 'payment_method_ids')
     def _check_company_payment(self):
         if self.env['pos.payment.method'].search_count([('id', 'in', self.payment_method_ids.ids), ('company_id', '!=', self.company_id.id)]):
+            import pdb; pdb.set_trace()
             raise ValidationError(_("The method payments and the point of sale must belong to the same company."))
 
     @api.constrains('pricelist_id', 'use_pricelist', 'available_pricelist_ids', 'journal_id', 'invoice_journal_id', 'payment_method_ids')
@@ -509,10 +510,10 @@ class PosConfig(models.Model):
     # Methods to open the POS
     def open_ui(self):
         """Open the pos interface with config_id as an extra argument.
-    
+
         In vanilla PoS each user can only have one active session, therefore it was not needed to pass the config_id
         on opening a session. It is also possible to login to sessions created by other users.
-        
+
         :returns: dict
         """
         self.ensure_one()
@@ -524,7 +525,7 @@ class PosConfig(models.Model):
             'target': 'self',
         }
 
-    def open_session_cb(self):
+    def open_session_cb(self, check_coa=True):
         """ new session button
 
         create one if none exist
@@ -532,7 +533,7 @@ class PosConfig(models.Model):
         """
         self.ensure_one()
         if not self.current_session_id:
-            if not self.company_has_template:
+            if check_coa and not tools.config['test_enable'] and not self.company_has_template:
                 raise UserError(_("A Chart of Accounts is not yet installed in your current company. Please install a "
                                   "Chart of Accounts through the Invoicing/Accounting settings before launching a PoS session." ))
             self._check_company_journal()
