@@ -837,7 +837,7 @@ class UoM(models.Model):
                               for f in {'category_id'}))
             if changed:
                 stock_move_lines = self.env['stock.move.line'].search_count([
-                    ('product_uom_id.category_id', 'in', changed.mapped('category_id.id')),
+                    ('product_uom_id', 'in', changed.ids),
                     ('state', '!=', 'cancel'),
                 ])
 
