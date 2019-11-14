@@ -78,7 +78,6 @@
                         domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
                         ]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_name" string="Description" context="{'group_by':'name'}"/>
                     <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
                     <filter name="group_category" string="Category" context="{'group_by':'category_id'}"/>
                     <filter name="group_second_approver_id" string="Validator" context="{'group_by':'second_approver_id'}"/>
@@ -142,8 +141,8 @@
                             <div class="row no-gutters" t-if="['validate', 'refuse'].includes(record.state.raw_value)">
                                 <div class="col-2"/>
                                 <div class="col-10">
-                                    <span t-if="record.state.raw_value === 'validate'" class="fa fa-check text-muted"/>
-                                    <span t-else="" class="fa fa-ban text-muted"/>
+                                    <span t-if="record.state.raw_value === 'validate'" class="fa fa-check text-muted" aria-label="validated"/>
+                                    <span t-else="" class="fa fa-ban text-muted" aria-label="refused"/>
                                     <span class="text-muted"><t t-esc="record.state.value"/></span>
                                 </div>
                             </div>
