@@ -7,7 +7,6 @@ from odoo.tools.misc import formatLang, format_date
 
 from datetime import date, timedelta
 from itertools import groupby
-from stdnum.iso7064 import mod_97_10
 from itertools import zip_longest
 from hashlib import sha256
 from json import dumps
@@ -22,6 +21,15 @@ _logger = logging.getLogger(__name__)
 #forbidden fields
 INTEGRITY_HASH_MOVE_FIELDS = ('date', 'journal_id', 'company_id')
 INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
+
+
+def calc_check_digits(number):
+    """Calculate the extra digits that should be appended to the number to make it a valid number.
+    Source: python-stdnum iso7064.mod_97_10.calc_check_digits
+    """
+    number_base10 = ''.join(str(int(x, 36)) for x in number)
+    checksum = int(number_base10) % 97
+    return '%02d' % ((98 - 100 * checksum) % 97)
 
 
 class AccountMove(models.Model):
@@ -658,9 +666,13 @@ class AccountMove(models.Model):
                 })
 
             elif self.invoice_cash_rounding_id.strategy == 'add_invoice_line':
+                if diff_balance > 0.0 and self.invoice_cash_rounding_id.loss_account_id:
+                    account_id = self.invoice_cash_rounding_id.loss_account_id.id
+                else:
+                    account_id = self.invoice_cash_rounding_id.profit_account_id.id
                 rounding_line_vals.update({
                     'name': self.invoice_cash_rounding_id.name,
-                    'account_id': self.invoice_cash_rounding_id.account_id.id,
+                    'account_id': account_id,
                 })
 
             # Create or update the cash rounding line.
@@ -669,6 +681,7 @@ class AccountMove(models.Model):
                     'amount_currency': rounding_line_vals['amount_currency'],
                     'debit': rounding_line_vals['debit'],
                     'credit': rounding_line_vals['credit'],
+                    'account_id': rounding_line_vals['account_id'],
                 })
             else:
                 create_method = in_draft_mode and self.env['account.move.line'].new or self.env['account.move.line'].create
@@ -1674,7 +1687,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         base = self.id
-        check_digits = mod_97_10.calc_check_digits('{}RF'.format(base))
+        check_digits = calc_check_digits('{}RF'.format(base))
         reference = 'RF{} {}'.format(check_digits, " ".join(["".join(x) for x in zip_longest(*[iter(str(base))]*4, fillvalue="")]))
         return reference
 
@@ -1693,7 +1706,7 @@ class AccountMove(models.Model):
         partner_ref = self.partner_id.ref
         partner_ref_nr = re.sub('\D', '', partner_ref or '')[-21:] or str(self.partner_id.id)[-21:]
         partner_ref_nr = partner_ref_nr[-21:]
-        check_digits = mod_97_10.calc_check_digits('{}RF'.format(partner_ref_nr))
+        check_digits = calc_check_digits('{}RF'.format(partner_ref_nr))
         reference = 'RF{} {}'.format(check_digits, " ".join(["".join(x) for x in zip_longest(*[iter(partner_ref_nr)]*4, fillvalue="")]))
         return reference
 
@@ -3131,6 +3144,8 @@ class AccountMoveLine(models.Model):
                 current_ids = set(line[field_name].ids)
                 after_write_ids = set(r['id'] for r in line.resolve_2many_commands(field_name, vals[field_name], fields=['id']))
                 return current_ids != after_write_ids
+            if field.type == 'monetary' and line[field.currency_field]:
+                return not line[field.currency_field].is_zero(line[field_name] - vals[field_name])
             return line[field_name] != vals[field_name]
 
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')

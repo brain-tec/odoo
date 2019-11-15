@@ -399,8 +399,9 @@ class StockMove(models.Model):
     @api.model
     def default_get(self, fields_list):
         # We override the default_get to make stock moves created after the picking was confirmed
-        # directly as available. This allows to create extra move lines in
-        # the fp view.
+        # directly as available in immediate transfer mode. This allows to create extra move lines
+        # in the fp view. In planned transfer, the stock move are marked as `additional` and will be
+        # auto-confirmed.
         defaults = super(StockMove, self).default_get(fields_list)
         if self.env.context.get('default_picking_id'):
             picking_id = self.env['stock.picking'].browse(self.env.context['default_picking_id'])
@@ -408,10 +409,11 @@ class StockMove(models.Model):
                 defaults['state'] = 'done'
                 defaults['product_uom_qty'] = 0.0
                 defaults['additional'] = True
-            elif picking_id.state not in ['draft', 'confirmed']:
-                defaults['state'] = 'assigned'
+            elif picking_id.state not in ['cancel', 'draft', 'done']:
+                if picking_id.immediate_transfer:
+                    defaults['state'] = 'assigned'
                 defaults['product_uom_qty'] = 0.0
-                defaults['additional'] = True
+                defaults['additional'] = True  # to trigger `_autoconfirm_picking`
         return defaults
 
     def name_get(self):
@@ -1288,7 +1290,7 @@ class StockMove(models.Model):
                 extra_move = extra_move._action_confirm()
 
             # link it to some move lines. We don't need to do it for move since they should be merged.
-            if not merge_into_self:
+            if not merge_into_self or not extra_move.picking_id:
                 for move_line in self.move_line_ids.filtered(lambda ml: ml.qty_done):
                     if float_compare(move_line.qty_done, extra_move_quantity, precision_rounding=rounding) <= 0:
                         # move this move line to our extra move
