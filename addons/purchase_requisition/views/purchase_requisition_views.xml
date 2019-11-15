@@ -150,7 +150,7 @@
                 <button name="action_draft" states="cancel" string="Reset to Draft" type="object"/>
                 <button name="action_cancel" states="draft,in_progress,ongoing" string="Cancel" type="object"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,open,done" attrs="{'invisible': [('is_quantity_copy', '=', 'none')]}"/>
-
+                <field name="state_blanket_order" widget="statusbar" statusbar_visible="draft,ongoing,done" attrs="{'invisible': [('is_quantity_copy', '!=', 'none')]}"/>
             </header>
             <sheet>
                 <div class="oe_button_box" name="button_box">
