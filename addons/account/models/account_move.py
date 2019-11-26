@@ -325,9 +325,8 @@ class AccountMove(models.Model):
 
         # Find the new fiscal position.
         delivery_partner_id = self._get_invoice_delivery_partner_id()
-        new_fiscal_position_id = self.env['account.fiscal.position'].with_company(self.company_id).get_fiscal_position(
+        self.fiscal_position_id = self.env['account.fiscal.position'].with_company(self.company_id).get_fiscal_position(
             self.partner_id.id, delivery_id=delivery_partner_id)
-        self.fiscal_position_id = self.env['account.fiscal.position'].browse(new_fiscal_position_id)
         self._recompute_dynamic_lines()
         if warning:
             return {'warning': warning}
@@ -2633,11 +2632,7 @@ class AccountMoveLine(models.Model):
         if self.company_id and tax_ids:
             tax_ids = tax_ids.filtered(lambda tax: tax.company_id == self.company_id)
 
-        fiscal_position = self.move_id.fiscal_position_id
-        if tax_ids and fiscal_position:
-            return fiscal_position.map_tax(tax_ids, partner=self.partner_id)
-        else:
-            return tax_ids
+        return self.move_id.fiscal_position_id.map_tax(tax_ids, partner=self.partner_id)
 
     def _get_computed_uom(self):
         self.ensure_one()
