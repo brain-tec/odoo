@@ -37,7 +37,7 @@
                         <button name="return_action_to_open"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-tachometer"
+                            icon="fas fa-tachometer-alt"
                             context="{'xml_id':'fleet_vehicle_odometer_action'}"
                             help="show the odometer logs for this vehicle" >
                             <field name="odometer_count" widget="statinfo" string="Odometer"/>
@@ -87,7 +87,7 @@
                             <field name="residual_value" widget="monetary"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
-                        <group string="Contract">
+                        <group string="Contract" name="contract">
                             <field name="manager_id"/>
                             <field name="first_contract_date"/>
                         </group>

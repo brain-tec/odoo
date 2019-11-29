@@ -158,6 +158,10 @@ class FleetVehicle(models.Model):
             record.contract_renewal_total = total - 1  # we remove 1 from the real total for display purposes
             record.contract_renewal_name = name
 
+    def _get_analytic_name(self):
+        # This function is used in fleet_account and is overrided in l10n_be_hr_payroll_fleet
+        return self.license_plate or _('No plate')
+
     def _search_contract_renewal_due_soon(self, operator, value):
         params = self.env['ir.config_parameter'].sudo()
         delay_alert_contract = int(params.get_param('hr_fleet.delay_alert_contract', default=30))
@@ -196,16 +200,12 @@ class FleetVehicle(models.Model):
 
     @api.model
     def create(self, vals):
-        res = super(FleetVehicle, self.with_context({'odometer_no_chatter': True})).create(vals)
+        res = super(FleetVehicle, self).create(vals)
         if 'driver_id' in vals and vals['driver_id']:
             res.create_driver_history(vals['driver_id'])
         if 'future_driver_id' in vals and vals['future_driver_id']:
             future_driver = self.env['res.partner'].browse(vals['future_driver_id'])
             future_driver.write({'plan_to_change_car': True})
-        for rec in res:
-            if rec.odometer:
-                date = fields.Date.context_today(rec)
-                rec.message_post(body=_("Odometer on %s: %s %s") % (date, rec.odometer, rec.odometer_unit))
         return res
 
     def write(self, vals):
@@ -340,22 +340,6 @@ class FleetVehicleOdometer(models.Model):
         if self.vehicle_id:
             self.unit = self.vehicle_id.odometer_unit
 
-    @api.model
-    def create(self, vals):
-        odometers = super(FleetVehicleOdometer, self).create(vals)
-
-        for odometer in odometers:
-            if not self.env.context.get('odometer_no_chatter'):
-                odometer.vehicle_id.message_post(body=_("Odometer on %s: %s %s") % (odometer.date, odometer.value, odometer.unit))
-
-        return odometers
-
-    def write(self, vals):
-        odometers = super(FleetVehicleOdometer, self).write(vals)
-        if 'value' in vals and not self.env.context.get('odometer_no_chatter'):
-            for odometer in self:
-                odometer.vehicle_id.message_post(body=_("Odometer on %s: %s %s") % (odometer.date, odometer.value, odometer.unit))
-        return odometers
 
 class FleetVehicleState(models.Model):
     _name = 'fleet.vehicle.state'
