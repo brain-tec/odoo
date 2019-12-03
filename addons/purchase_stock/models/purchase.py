@@ -360,7 +360,7 @@ class PurchaseOrderLine(models.Model):
             'date': self.order_id.date_order,
             'date_expected': self.date_planned,
             'location_id': self.order_id.partner_id.property_stock_supplier.id,
-            'location_dest_id': self.order_id._get_destination_location(),
+            'location_dest_id': self.orderpoint_id and self.orderpoint_id.location_id.id or self.order_id._get_destination_location(),
             'picking_id': picking.id,
             'partner_id': self.order_id.dest_address_id.id,
             'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids],
@@ -388,6 +388,17 @@ class PurchaseOrderLine(models.Model):
             res.append(template)
         return res
 
+    @api.model
+    def _prepare_purchase_order_line_from_procurement(self, product_id, product_qty, product_uom, company_id, values, po):
+        supplier = values.get('supplier')
+        res = self._prepare_purchase_order_line(product_id, product_qty, product_uom, company_id, supplier, po)
+        res['move_dest_ids'] = [(4, x.id) for x in values.get('move_dest_ids', [])]
+        res['orderpoint_id'] = values.get('orderpoint_id', False) and values.get('orderpoint_id').id
+        res['propagate_cancel'] = values.get('propagate_cancel')
+        res['propagate_date'] = values.get('propagate_date')
+        res['propagate_date_minimum_delta'] = values.get('propagate_date_minimum_delta')
+        return res
+
     def _create_stock_moves(self, picking):
         values = []
         for line in self.filtered(lambda l: not l.display_type):
@@ -400,5 +411,5 @@ class PurchaseOrderLine(models.Model):
         args can be merged. If it returns an empty record then a new line will
         be created.
         """
-        lines = self.filtered(lambda l: l.propagate_date == values['propagate_date'] and l.propagate_date_minimum_delta == values['propagate_date_minimum_delta'] and l.propagate_cancel == values['propagate_cancel'])
+        lines = self.filtered(lambda l: l.propagate_date == values['propagate_date'] and l.propagate_date_minimum_delta == values['propagate_date_minimum_delta'] and l.propagate_cancel == values['propagate_cancel'] and l.orderpoint_id == values['orderpoint_id'])
         return lines and lines[0] or self.env['purchase.order.line']

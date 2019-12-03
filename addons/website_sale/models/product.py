@@ -138,7 +138,7 @@ class ProductPublicCategory(models.Model):
     _order = "sequence, name"
 
     name = fields.Char(required=True, translate=True)
-    parent_id = fields.Many2one('product.public.category', string='Parent Category', index=True)
+    parent_id = fields.Many2one('product.public.category', string='Parent Category', index=True, ondelete="cascade")
     parent_path = fields.Char(index=True)
     child_id = fields.One2many('product.public.category', 'parent_id', string='Children Categories')
     parents_and_self = fields.Many2many('product.public.category', compute='_compute_parents_and_self')
@@ -372,7 +372,7 @@ class ProductTemplate(models.Model):
     def _rating_domain(self):
         """ Only take the published rating into account to compute avg and count """
         domain = super(ProductTemplate, self)._rating_domain()
-        return expression.AND([domain, [('website_published', '=', True)]])
+        return expression.AND([domain, [('is_internal', '=', False)]])
 
     def _get_images(self):
         """Return a list of records implementing `image.mixin` to

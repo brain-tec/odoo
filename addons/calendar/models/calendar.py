@@ -213,7 +213,7 @@ class Attendee(models.Model):
                 mail_ids.append(invitation_template.send_mail(attendee.id, email_values=email_values, notif_layout='mail.mail_notification_light'))
 
         if force_send and mail_ids:
-            res = self.env['mail.mail'].browse(mail_ids).send()
+            res = self.env['mail.mail'].sudo().browse(mail_ids).send()
 
         return res
 
@@ -226,7 +226,7 @@ class Attendee(models.Model):
         result = self.write({'state': 'accepted'})
         for attendee in self:
             if attendee.event_id:
-                attendee.event_id.message_post(body=_("%s has accepted invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
+                attendee.event_id.message_post(body=_("%s has accepted invitation") % (attendee.common_name), subtype_xmlid="calendar.subtype_invitation")
         return result
 
     def do_decline(self):
@@ -234,7 +234,7 @@ class Attendee(models.Model):
         res = self.write({'state': 'declined'})
         for attendee in self:
             if attendee.event_id:
-                attendee.event_id.message_post(body=_("%s has declined invitation") % (attendee.common_name), subtype="calendar.subtype_invitation")
+                attendee.event_id.message_post(body=_("%s has declined invitation") % (attendee.common_name), subtype_xmlid="calendar.subtype_invitation")
         return res
 
 
