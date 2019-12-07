@@ -4,6 +4,7 @@ odoo.define('web_editor.snippets.options', function (require) {
 var core = require('web.core');
 const concurrency = require('web.concurrency');
 const ColorpickerDialog = require('web.ColorpickerDialog');
+const time = require('web.time');
 var Widget = require('web.Widget');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 const weUtils = require('web_editor.utils');
@@ -76,6 +77,31 @@ function _buildRowElement(title, options) {
 
     return groupEl;
 }
+/**
+ * Creates a proxy for an object where one property is replaced by a different
+ * value. This value is captured in the closure and can be read and written to.
+ *
+ * @param {Object} obj - the object for which to create a proxy
+ * @param {string} propertyName - the name/key of the property to replace
+ * @param {*} value - the initial value to give to the property's copy
+ * @returns {Proxy} a proxy of the object with the property replaced
+ */
+function createPropertyProxy(obj, propertyName, value) {
+    return new Proxy(obj, {
+        get: function (obj, prop) {
+            if (prop === propertyName) {
+                return value;
+            }
+            return obj[prop];
+        },
+        set: function (obj, prop, val) {
+            if (prop === propertyName) {
+                return (value = val);
+            }
+            return Reflect.set(...arguments);
+        },
+    });
+}
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -84,6 +110,7 @@ function _buildRowElement(title, options) {
  * user values.
  */
 const UserValueWidget = Widget.extend({
+    className: 'o_we_user_value_widget',
     custom_events: {
         'user_value_change': '_onUserValueNotification',
         'user_value_preview': '_onUserValueNotification',
@@ -107,6 +134,8 @@ const UserValueWidget = Widget.extend({
     _makeDescriptive: function () {
         const $el = this._super(...arguments);
         _addTitleAndAllowedAttributes($el[0], this.title, this.options);
+        this.containerEl = document.createElement('div');
+        $el.append(this.containerEl);
         return $el;
     },
 
@@ -293,6 +322,7 @@ const UserValueWidget = Widget.extend({
         if (this._canUpdateUI()) {
             await this._updateUI();
         }
+        this._validating = false;
     },
 
     //--------------------------------------------------------------------------
@@ -309,7 +339,8 @@ const UserValueWidget = Widget.extend({
     _canUpdateUI: function () {
         const focusEl = document.activeElement;
         if (focusEl && focusEl.tagName === 'INPUT'
-                && (this.el === focusEl || this.el.contains(focusEl))) {
+                && (this.el === focusEl || this.el.contains(focusEl))
+                && !this._validating) {
             return false;
         }
         return true;
@@ -444,7 +475,7 @@ const ButtonUserValueWidget = UserValueWidget.extend({
      */
     start: function (parent, title, options) {
         if (this.options && this.options.childNodes) {
-            this.options.childNodes.forEach(node => this.el.appendChild(node));
+            this.options.childNodes.forEach(node => this.containerEl.appendChild(node));
         }
 
         return this._super(...arguments);
@@ -502,7 +533,7 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
      */
     start: function () {
         const checkboxEl = document.createElement('we-checkbox');
-        this.el.appendChild(checkboxEl);
+        this.containerEl.appendChild(checkboxEl);
 
         return this._super(...arguments);
     },
@@ -519,17 +550,17 @@ const SelectUserValueWidget = UserValueWidget.extend({
      */
     start: function () {
         if (this.options && this.options.valueEl) {
-            this.el.appendChild(this.options.valueEl);
+            this.containerEl.appendChild(this.options.valueEl);
         }
 
         this.menuTogglerEl = document.createElement('we-toggler');
-        this.el.appendChild(this.menuTogglerEl);
+        this.containerEl.appendChild(this.menuTogglerEl);
 
         this.menuEl = document.createElement('we-select-menu');
         if (this.options && this.options.childNodes) {
             this.options.childNodes.forEach(node => this.menuEl.appendChild(node));
         }
-        this.el.appendChild(this.menuEl);
+        this.containerEl.appendChild(this.menuEl);
 
         return this._super(...arguments);
     },
@@ -618,7 +649,6 @@ const InputUserValueWidget = UserValueWidget.extend({
         'input input': '_onInputInput',
         'blur input': '_onInputBlur',
 
-        'click': '_onInputClick',
         'keydown input': '_onInputKeydown',
     },
 
@@ -634,11 +664,11 @@ const InputUserValueWidget = UserValueWidget.extend({
 
         this.inputEl = document.createElement('input');
         this.inputEl.setAttribute('type', 'text');
-        this.el.appendChild(this.inputEl);
+        this.containerEl.appendChild(this.inputEl);
 
         var unitEl = document.createElement('span');
         unitEl.textContent = unit;
-        this.el.appendChild(unitEl);
+        this.containerEl.appendChild(unitEl);
 
         return this._super(...arguments);
     },
@@ -754,43 +784,30 @@ const InputUserValueWidget = UserValueWidget.extend({
      * @private
      * @param {Event} ev
      */
-    _onInputClick: function (ev) {
-        const inputEl = ev.currentTarget.querySelector('input');
-        if (inputEl) {
-            inputEl.select();
-        }
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
     _onInputKeydown: function (ev) {
-        const input = ev.currentTarget;
-        let value = parseFloat(input.value || input.placeholder);
-        if (isNaN(value)) {
-            return;
-        }
-
-        let step = parseFloat(input.parentNode.dataset.step);
-        if (isNaN(step)) {
-            step = 1.0;
-        }
         switch (ev.which) {
-            case $.ui.keyCode.UP: {
-                value += step;
+            case $.ui.keyCode.ENTER: {
+                this._validating = true;
+                this._onUserValueChange(ev);
                 break;
             }
+            case $.ui.keyCode.UP:
             case $.ui.keyCode.DOWN: {
-                value -= step;
+                const input = ev.currentTarget;
+                let value = parseFloat(input.value || input.placeholder);
+                if (isNaN(value)) {
+                    return;
+                }
+                let step = parseFloat(input.parentNode.dataset.step);
+                if (isNaN(step)) {
+                    step = 1.0;
+                }
+                value += (ev.which === $.ui.keyCode.UP ? step : -step);
+                input.value = `${parseFloat(value.toFixed(3))}`;
+                $(input).trigger('input');
                 break;
-            }
-            default: {
-                return;
             }
         }
-
-        input.value = `${parseFloat(value.toFixed(3))}`;
-        $(input).trigger('input');
     },
 });
 
@@ -801,7 +818,7 @@ const MultiUserValueWidget = UserValueWidget.extend({
      * @override
      */
     start: function () {
-        this.el.appendChild(_buildRowElement('', this.options));
+        this.containerEl.appendChild(_buildRowElement('', this.options));
         return this._super(...arguments);
     },
 
@@ -841,6 +858,7 @@ const MultiUserValueWidget = UserValueWidget.extend({
 });
 
 const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
+    className: (ButtonUserValueWidget.prototype.className || '') + ' o_we_so_color_palette',
     custom_events: {
         'color_picked': '_onColorPicked',
         'color_hover': '_onColorHovered',
@@ -851,26 +869,16 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
     /**
      * @override
      */
-    init: function () {
-        this._super(...arguments);
-        if (!this.title) {
-            this.title = ' ';
-        }
-    },
-    /**
-     * @override
-     */
     start: async function () {
         const _super = this._super.bind(this);
         const args = arguments;
-
-        this.el.classList.add('o_we_so_color_palette');
 
         // Pre-instanciate the color palette widget
         await this._renderColorPalette();
 
         // Build the select element with a custom span to hold the color preview
         this.colorPreviewEl = document.createElement('span');
+        this.colorPreviewEl.classList.add('o_we_color_preview');
         this.options.childNodes = [this.colorPalette.el];
         this.options.valueEl = this.colorPreviewEl;
 
@@ -994,6 +1002,109 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
+    events: _.extend({}, InputUserValueWidget.prototype.events || {}, {
+        'error.datetimepicker': '_onDateTimePickerError',
+    }),
+
+    /**
+     * @override
+     */
+    init: function () {
+        this._super(...arguments);
+        this.__libInput = 0;
+    },
+    /**
+     * @override
+     */
+    start: async function () {
+        await this._super(...arguments);
+
+        const datetimePickerId = _.uniqueId('datetimepicker');
+        this.inputEl.setAttribute('type', 'text');
+        this.inputEl.setAttribute('class', 'datetimepicker-input mx-0 text-left');
+        this.inputEl.setAttribute('id', datetimePickerId);
+        this.inputEl.setAttribute('data-target', '#' + datetimePickerId);
+        this.inputEl.setAttribute('data-toggle', 'datetimepicker');
+
+        const datepickersOptions = {
+            minDate: moment({y: 1900}),
+            maxDate: moment().add(200, 'y'),
+            calendarWeeks: true,
+            defaultDate: moment().format(),
+            icons: {
+                close: 'fa fa-check primary',
+                today: 'far fa-calendar-check',
+            },
+            locale: moment.locale(),
+            format: time.getLangDatetimeFormat(),
+            sideBySide: true,
+            buttons: {
+                showClose: true,
+                showToday: true,
+            },
+            widgetParent: 'body',
+        };
+        this.__libInput++;
+        $(this.inputEl).datetimepicker(datepickersOptions);
+        this.__libInput--;
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+    * @override
+    */
+    getValue: function (methodName) {
+        const value = this._super(...arguments);
+        let date = new Date(value);
+        if (isNaN(date)) {
+            date = new Date();
+        }
+        return moment(date).unix().toString();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _notifyValueChange: function () {
+        if (this.__libInput > 0) {
+            return;
+        }
+        this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _updateUI: async function () {
+        await this._super(...arguments);
+        const val = parseInt(this._value);
+        if (!isNaN(val)) {
+            this.__libInput++;
+            $(this.inputEl).datetimepicker('date', moment(val * 1000));
+            this.__libInput--;
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Prevents crash manager to throw CORS error. Note that library already
+     * clears the wrong date format.
+     */
+    _onDateTimePickerError: function (ev) {
+        ev.stopPropagation();
+    },
+});
+
 const userValueWidgetsRegistry = {
     'we-button': ButtonUserValueWidget,
     'we-checkbox': CheckboxUserValueWidget,
@@ -1001,6 +1112,7 @@ const userValueWidgetsRegistry = {
     'we-input': InputUserValueWidget,
     'we-multi': MultiUserValueWidget,
     'we-colorpicker': ColorpickerUserValueWidget,
+    'we-datetimepicker': DatetimePickerUserValueWidget,
 };
 
 /**
@@ -1330,7 +1442,18 @@ const SnippetOptionWidget = Widget.extend({
 
             const methodsNames = widget.getMethodsNames();
             const proms = methodsNames.map(async methodName => {
-                const value = await this._computeWidgetState(methodName, widget.getMethodsParams(methodName));
+                const params = widget.getMethodsParams(methodName);
+
+                let obj = this;
+                if (params.applyTo) {
+                    const $firstSubTarget = this.$(params.applyTo).eq(0);
+                    if (!$firstSubTarget.length) {
+                        return;
+                    }
+                    obj = createPropertyProxy(this, '$target', $firstSubTarget);
+                }
+
+                const value = await this._computeWidgetState.call(obj, methodName, params);
                 if (value === undefined) {
                     return;
                 }
@@ -1575,7 +1698,18 @@ const SnippetOptionWidget = Widget.extend({
         }
 
         widget.getMethodsNames().forEach(methodName => {
-            this[methodName](previewMode, widget.getValue(methodName), widget.getMethodsParams(methodName));
+            const widgetValue = widget.getValue(methodName);
+            const params = widget.getMethodsParams(methodName);
+
+            if (params.applyTo) {
+                const $subTargets = this.$(params.applyTo);
+                _.each($subTargets, subTargetEl => {
+                    const proxy = createPropertyProxy(this, '$target', $(subTargetEl));
+                    this[methodName].call(proxy, previewMode, widgetValue, params);
+                });
+            } else {
+                this[methodName](previewMode, widgetValue, params);
+            }
         });
 
         if (!previewMode) {

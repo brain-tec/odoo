@@ -78,6 +78,10 @@ class SurveyQuestion(models.Model):
         ('simple_choice', 'Multiple choice: only one answer'),
         ('multiple_choice', 'Multiple choice: multiple answers allowed'),
         ('matrix', 'Matrix')], string='Question Type')
+    # -- char_box
+    save_as_email = fields.Boolean(
+        "Save as user email", compute='_compute_save_as_email', readonly=False, store=True,
+        help="If checked, this option will save the user's answer as its email address.")
     # -- simple choice / multiple choice / matrix
     suggested_answer_ids = fields.One2many(
         'survey.question.answer', 'question_id', string='Types of answers', copy=True,
@@ -151,8 +155,9 @@ class SurveyQuestion(models.Model):
                         next_page_index = page._index()
                         break
 
-                question.question_ids = question.survey_id.question_ids.filtered(lambda q:
-                    q._index() > question._index() and (not next_page_index or q._index() < next_page_index))
+                question.question_ids = question.survey_id.question_ids.filtered(
+                    lambda q: q._index() > question._index() and (not next_page_index or q._index() < next_page_index)
+                )
             else:
                 question.question_ids = self.env['survey.question']
 
@@ -164,13 +169,17 @@ class SurveyQuestion(models.Model):
                 question.page_id = None
             else:
                 question.page_id = next(
-                    (iter(question
-                        .survey_id
-                        .question_and_page_ids
-                        .filtered(lambda q: q.is_page and q.sequence < question.sequence)
-                        .sorted(reverse=True))),
+                    (iter(question.survey_id.question_and_page_ids.filtered(
+                        lambda q: q.is_page and q.sequence < question.sequence
+                    ).sorted(reverse=True))),
                     None
                 )
+
+    @api.depends('question_type', 'validation_email')
+    def _compute_save_as_email(self):
+        for question in self:
+            if question.question_type != 'char_box' or not question.validation_email:
+                question.save_as_email = False
 
     # Validation methods
     def validate_question(self, answer, comment=None):
