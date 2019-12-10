@@ -2,7 +2,6 @@ odoo.define('web_editor.snippets.options', function (require) {
 'use strict';
 
 var core = require('web.core');
-const concurrency = require('web.concurrency');
 const ColorpickerDialog = require('web.ColorpickerDialog');
 const time = require('web.time');
 var Widget = require('web.Widget');
@@ -350,6 +349,10 @@ const UserValueWidget = Widget.extend({
      * @param {boolean} [previewMode=false]
      */
     _notifyValueChange: function (previewMode) {
+        if (!this._methodsNames.length) {
+            return;
+        }
+
         const data = {
             widget: this,
         };
@@ -1158,7 +1161,6 @@ const SnippetOptionWidget = Widget.extend({
         this.ownerDocument = this.$target[0].ownerDocument;
 
         this._userValueWidgets = [];
-        this._selectEventMutex = new concurrency.Mutex();
     },
     /**
      * @override
@@ -1248,6 +1250,7 @@ const SnippetOptionWidget = Widget.extend({
      *        - false if the option should be activated for good
      * @param {string} widgetValue
      * @param {Object} params
+     * @returns {Promise|undefined}
      */
     selectClass: function (previewMode, widgetValue, params) {
         for (const classNames of params.possibleValues) {
@@ -1267,6 +1270,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {boolean} previewMode - @see this.selectClass
      * @param {string} widgetValue
      * @param {Object} params
+     * @returns {Promise|undefined}
      */
     selectDataAttribute: function (previewMode, widgetValue, params) {
         const dataName = params.attributeName;
@@ -1290,6 +1294,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {boolean} previewMode - @see this.selectClass
      * @param {string} widgetValue
      * @param {Object} params
+     * @returns {Promise|undefined}
      */
     selectStyle: function (previewMode, widgetValue, params) {
         if (params.cssProperty === 'background-color') {
@@ -1538,7 +1543,7 @@ const SnippetOptionWidget = Widget.extend({
         }
     },
     /**
-     * @static
+     * @private
      * @param {HTMLElement} el
      * @returns {Object}
      */
@@ -1553,6 +1558,46 @@ const SnippetOptionWidget = Widget.extend({
         };
     },
     /**
+     * @private
+     * @param {OdooEvent} ev
+     * @param {boolean|string} previewMode
+     */
+    _handleUserValueEvent: function (ev, previewMode) {
+        ev.stopPropagation();
+        this.trigger_up('snippet_edition_request', {exec: async () => {
+            if (ev.data.prepare) {
+                ev.data.prepare();
+            }
+
+            const widget = ev.data.widget;
+            if (previewMode && (widget.$el.closest('[data-no-preview="true"]').length)) {
+                // TODO the flag should be fetched through widget params somehow
+                return;
+            }
+
+            // Call widget option methods and update $target
+            await this._select(previewMode, widget);
+
+            // Trigger the related events notifying snippet changes
+            let evName = 'snippet-option-reset';
+            if (previewMode === false) {
+                evName = 'snippet-option-change';
+            } else if (previewMode === true) {
+                evName = 'snippet-option-preview';
+            }
+            this.$target.trigger(evName, [this]);
+            this.$target.trigger('content_changed');
+
+            // Update the UI of the correct widgets
+            if (!previewMode) {
+                await this.updateUI(w => !w.isPreviewed() || w === widget);
+            } else {
+                await this.updateUI(w => w !== widget && !w.isPreviewed());
+            }
+        }});
+    },
+    /**
+     * @private
      * @param {*}
      * @returns {string}
      */
@@ -1686,39 +1731,28 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise}
      */
     _select: async function (previewMode, widget) {
-        // Options can say they respond to strong choice
-        if (previewMode && (widget.$el.closest('[data-no-preview="true"]').length)) {
-            // TODO the no-preview flag should be retrieved through widget params
-            return;
-        }
         // If it is not preview mode, the user selected the option for good
         // (so record the action)
         if (!previewMode) {
             this.trigger_up('request_history_undo_record', {$target: this.$target});
         }
 
-        widget.getMethodsNames().forEach(methodName => {
+        // Call each option method sequentially
+        for (const methodName of widget.getMethodsNames()) {
             const widgetValue = widget.getValue(methodName);
             const params = widget.getMethodsParams(methodName);
 
             if (params.applyTo) {
                 const $subTargets = this.$(params.applyTo);
-                _.each($subTargets, subTargetEl => {
+                const proms = _.each($subTargets, subTargetEl => {
                     const proxy = createPropertyProxy(this, '$target', $(subTargetEl));
-                    this[methodName].call(proxy, previewMode, widgetValue, params);
+                    return this[methodName].call(proxy, previewMode, widgetValue, params);
                 });
+                await Promise.all(proms);
             } else {
-                this[methodName](previewMode, widgetValue, params);
+                await this[methodName](previewMode, widgetValue, params);
             }
-        });
-
-        if (!previewMode) {
-            await this.updateUI(w => !w.isPreviewed() || w === widget);
-        } else {
-            await this.updateUI(w => w !== widget && !w.isPreviewed());
         }
-
-        this.$target.trigger('content_changed');
     },
 
     //--------------------------------------------------------------------------
@@ -1733,15 +1767,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Event} ev
      */
     _onOptionPreview: function (ev) {
-        ev.stopPropagation();
-        this._selectEventMutex.exec(() => {
-            if (ev.data.prepare) {
-                ev.data.prepare();
-            }
-            return this._select(true, ev.data.widget).then(() => {
-                this.$target.trigger('snippet-option-preview', [this]);
-            });
-        });
+        this._handleUserValueEvent(ev, true);
     },
     /**
      * Called when an option link is clicked or an option input content is
@@ -1751,15 +1777,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Event} ev
      */
     _onOptionSelection: function (ev) {
-        ev.stopPropagation();
-        this._selectEventMutex.exec(() => {
-            if (ev.data.prepare) {
-                ev.data.prepare();
-            }
-            return this._select(false, ev.data.widget).then(() => {
-                this.$target.trigger('snippet-option-change', [this]);
-            });
-        });
+        this._handleUserValueEvent(ev, false);
     },
     /**
      * Called when an option link/menu is left -> reactivate the options that
@@ -1769,13 +1787,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Event} ev
      */
     _onOptionCancel: function (ev) {
-        ev.stopPropagation();
-        this._selectEventMutex.exec(() => {
-            if (ev.data.prepare) {
-                ev.data.prepare();
-            }
-            return this._select('reset', ev.data.widget);
-        });
+        this._handleUserValueEvent(ev, 'reset');
     },
 });
 const registry = {};
