@@ -703,6 +703,8 @@ const InputUserValueWidget = UserValueWidget.extend({
 
         this.inputEl = document.createElement('input');
         this.inputEl.setAttribute('type', 'text');
+        this.inputEl.classList.toggle('text-left', !unit);
+        this.inputEl.classList.toggle('text-right', !!unit);
         this.containerEl.appendChild(this.inputEl);
 
         var unitEl = document.createElement('span');
@@ -1288,12 +1290,29 @@ const SnippetOptionWidget = Widget.extend({
      */
     onRemove: function () {},
     /**
+     * Called when the target is shown, only meaningful if the target was hidden
+     * at some point (typically used for 'invisible' snippets).
+     *
+     * @abstract
+     * @returns {Promise|undefined}
+     */
+    onTargetShow: async function () {},
+    /**
+     * Called when the target is hidden (typically used for 'invisible'
+     * snippets).
+     *
+     * @abstract
+     * @returns {Promise|undefined}
+     */
+    onTargetHide: async function () {},
+    /**
      * Called when the template which contains the associated snippet is about
      * to be saved.
      *
      * @abstract
+     * @return {Promise|undefined}
      */
-    cleanForSave: function () {},
+    cleanForSave: async function () {},
 
     //--------------------------------------------------------------------------
     // Options
@@ -1565,7 +1584,18 @@ const SnippetOptionWidget = Widget.extend({
     updateUIVisibility: async function () {
         const proms = this._userValueWidgets.map(async widget => {
             const params = widget.getMethodsParams();
-            const show = await this._computeWidgetVisibility(widget.getName(), params);
+
+            let obj = this;
+            if (params.applyTo) {
+                const $firstSubTarget = this.$(params.applyTo).eq(0);
+                if (!$firstSubTarget.length) {
+                    widget.toggleVisibility(false);
+                    return;
+                }
+                obj = createPropertyProxy(this, '$target', $firstSubTarget);
+            }
+
+            const show = await this._computeWidgetVisibility.call(obj, widget.getName(), params);
             if (!show) {
                 widget.toggleVisibility(false);
                 return;
