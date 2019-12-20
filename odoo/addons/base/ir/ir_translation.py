@@ -277,7 +277,17 @@ class IrTranslation(models.Model):
             cr.commit()
 
         if 'ir_translation_unique' not in indexes:
-            cr.execute('CREATE INDEX ir_translation_unique ON ir_translation (type, name, lang, res_id, md5(src))')
+            # remove duplicated translations before unique index creation
+            cr.execute('''
+                DELETE FROM ir_translation t
+                USING    (SELECT type, name, lang, res_id, md5(src) AS md5_src, max(id) AS max_id
+                    FROM ir_translation
+                    GROUP BY type, name, lang, res_id, md5(src)
+                    HAVING COUNT(id) > 1) dup
+                WHERE    (t.type, t.name, t.lang, t.res_id, md5(t.src)) = (dup.type, dup.name, dup.lang, dup.res_id, dup.md5_src)
+                    AND t.id <> dup.max_id
+            ''')
+            cr.execute('CREATE UNIQUE INDEX ir_translation_unique ON ir_translation (type, name, lang, res_id, md5(src))')
             cr.commit()
         return res
 
