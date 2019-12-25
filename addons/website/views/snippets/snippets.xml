@@ -48,6 +48,7 @@
                     <t t-snippet="website.s_popup" t-thumbnail="/website/static/src/img/snippets_thumbs/s_popup.png"/>
                     <t t-snippet="website.s_tabs" t-thumbnail="/website/static/src/img/snippets_thumbs/s_tabs.png"/>
                     <t t-snippet="website.s_countdown" t-thumbnail="/website/static/src/img/snippets_thumbs/s_countdown.png"/>
+                    <t t-snippet="website.s_product_catalog" t-thumbnail="/website/static/src/img/snippets_thumbs/s_product_catalog.png"/>
                 </div>
             </div>
 
@@ -407,10 +408,13 @@
     </div>
 
     <!-- Stretch section -->
-    <div data-js="SectionStretch"
-        data-selector="section"
-        data-target="> .container, > .container-fluid">
-        <we-checkbox string="Stretch" data-select-class="container|container-fluid" data-no-preview="true"/>
+    <div data-selector="section"
+        data-target="> .container, > .container-fluid, > .o_container_small">
+        <we-select string="Width" class="o_we_inline">
+            <we-button data-select-class="container-fluid">Full</we-button>
+            <we-button data-select-class="container">Regular</we-button>
+            <we-button data-select-class="o_container_small">Small</we-button>
+        </we-select>
     </div>
 </template>
 </odoo>
