@@ -1131,7 +1131,7 @@ class AccountMove(models.Model):
 
             for move in group:
                 prefix, dummy = sequence._get_prefix_suffix(date=move.invoice_date or fields.Date.today(), date_range=move.invoice_date)
-                number_next = sequence._get_current_sequence().number_next_actual
+                number_next = sequence._get_current_sequence(sequence_date=move.date).number_next_actual
                 move.invoice_sequence_number_next_prefix = prefix
                 move.invoice_sequence_number_next = '%%0%sd' % sequence.padding % number_next
                 treated |= move
@@ -1153,7 +1153,7 @@ class AccountMove(models.Model):
             nxt = re.sub("[^0-9]", '', move.invoice_sequence_number_next)
             result = re.match("(0*)([0-9]+)", nxt)
             if result and sequence:
-                date_sequence = sequence._get_current_sequence()
+                date_sequence = sequence._get_current_sequence(sequence_date=move.date)
                 date_sequence.number_next_actual = int(result.group(2))
 
     def _compute_payments_widget_to_reconcile_info(self):
@@ -2053,7 +2053,7 @@ class AccountMove(models.Model):
             if not move.line_ids.filtered(lambda line: not line.display_type):
                 raise UserError(_('You need to add a line before posting.'))
             if move.auto_post and move.date > fields.Date.today():
-                date_msg = move.date.strftime(self.env['res.lang']._lang_get(self.env.user.lang).date_format)
+                date_msg = move.date.strftime(get_lang(self.env).date_format)
                 raise UserError(_("This move is configured to be auto-posted on %s" % date_msg))
 
             if not move.partner_id:
@@ -2084,7 +2084,7 @@ class AccountMove(models.Model):
         self.mapped('line_ids').create_analytic_lines()
         for move in self:
             if move.auto_post and move.date > fields.Date.today():
-                raise UserError(_("This move is configured to be auto-posted on {}".format(move.date.strftime(self.env['res.lang']._lang_get(self.env.user.lang).date_format))))
+                raise UserError(_("This move is configured to be auto-posted on {}".format(move.date.strftime(get_lang(self.env).date_format))))
 
             move.message_subscribe([p.id for p in [move.partner_id, move.commercial_partner_id] if p not in move.sudo().message_partner_ids])
 
