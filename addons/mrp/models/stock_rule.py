@@ -5,8 +5,8 @@ from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
 from odoo.osv import expression
+from odoo.addons.stock.models.stock_rule import ProcurementException
 
 
 class StockRule(models.Model):
@@ -37,13 +37,17 @@ class StockRule(models.Model):
     @api.model
     def _run_manufacture(self, procurements):
         productions_values_by_company = defaultdict(list)
+        errors = []
         for procurement, rule in procurements:
             bom = self._get_matching_bom(procurement.product_id, procurement.company_id, procurement.values)
             if not bom:
                 msg = _('There is no Bill of Material of type manufacture or kit found for the product %s. Please define a Bill of Material for this product.') % (procurement.product_id.display_name,)
-                raise UserError(msg)
+                errors.append((procurement, msg))
 
             productions_values_by_company[procurement.company_id.id].append(rule._prepare_mo_vals(*procurement, bom))
+
+        if errors:
+            raise ProcurementException(errors)
 
         for company_id, productions_values in productions_values_by_company.items():
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
@@ -106,6 +110,25 @@ class StockRule(models.Model):
         date_planned = date_planned - relativedelta(days=company_id.manufacturing_lead)
         return date_planned
 
+    def _get_lead_days(self, product):
+        """Add the product and company manufacture delay to the cumulative delay
+        and cumulative description.
+        """
+        delay, delay_description = super()._get_lead_days(product)
+        manufacture_rule = self.filtered(lambda r: r.action == 'manufacture')
+        if not manufacture_rule:
+            return delay, delay_description
+        manufacture_rule.ensure_one()
+        manufacture_delay = product.produce_delay
+        if manufacture_delay:
+            delay += manufacture_delay
+            delay_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Manufacturing Lead Time'), manufacture_delay, _('day(s)'))
+        security_delay = manufacture_rule.picking_type_id.company_id.manufacturing_lead
+        if security_delay:
+            delay += security_delay
+            delay_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Company Manufacture Lead Time'), security_delay, _('day(s)'))
+        return delay, delay_description
+
     def _push_prepare_move_copy_values(self, move_to_copy, new_date):
         new_move_vals = super(StockRule, self)._push_prepare_move_copy_values(move_to_copy, new_date)
         new_move_vals['production_id'] = False
@@ -115,7 +138,7 @@ class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
     @api.model
-    def run(self, procurements):
+    def run(self, procurements, raise_user_error=True):
         """ If 'run' is called on a kit, this override is made in order to call
         the original 'run' method with the values of the components of that kit.
         """
@@ -138,7 +161,7 @@ class ProcurementGroup(models.Model):
                         procurement.origin, procurement.company_id, values))
             else:
                 procurements_without_kit.append(procurement)
-        return super(ProcurementGroup, self).run(procurements_without_kit)
+        return super(ProcurementGroup, self).run(procurements_without_kit, raise_user_error=raise_user_error)
 
     def _get_moves_to_assign_domain(self):
         domain = super(ProcurementGroup, self)._get_moves_to_assign_domain()
