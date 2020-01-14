@@ -21,13 +21,18 @@ var _t = core._t;
  * @returns {HTMLElement} - the original 'el' argument
  */
 function _addTitleAndAllowedAttributes(el, title, options) {
+    let tooltipEl = el;
     if (title) {
         const titleEl = _buildTitleElement(title);
+        tooltipEl = titleEl;
         el.appendChild(titleEl);
     }
 
     if (options && options.classes) {
         el.classList.add(...options.classes);
+    }
+    if (options && options.tooltip) {
+        tooltipEl.title = options.tooltip;
     }
     if (options && options.dataAttributes) {
         for (const key in options.dataAttributes) {
@@ -983,7 +988,10 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      * @override
      */
     getValue: function (methodName) {
-        return this._previewColor || this._super(...arguments);
+        if (typeof this._previewColor === 'string') {
+            return this._previewColor;
+        }
+        return this._super(...arguments);
     },
     /**
      * @override
@@ -1851,6 +1859,7 @@ const SnippetOptionWidget = Widget.extend({
             options: {
                 classes: el.classList,
                 dataAttributes: el.dataset,
+                tooltip: el.title,
                 childNodes: [...el.childNodes],
             },
         };
