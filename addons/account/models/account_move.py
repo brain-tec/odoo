@@ -156,6 +156,14 @@ class AccountMove(models.Model):
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
         help='Edit Tax amounts if you encounter rouding issues.')
+    payment_state = fields.Selection(selection=[
+        ('not_paid', 'Not Paid'),
+        ('in_payment', 'In Payment'),
+        ('paid', 'Paid'),
+        ('partial', 'Partially Paid'),
+        ('reversed', 'Reversed'),],
+        string='Payment', store=True, readonly=True, copy=False, tracking=True,
+        compute='_compute_amount')
 
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
@@ -186,12 +194,6 @@ class AccountMove(models.Model):
         default=lambda self: self.env.user)
     user_id = fields.Many2one(string='User', related='invoice_user_id',
         help='Technical field used to fit the generic behavior in mail templates.')
-    invoice_payment_state = fields.Selection(selection=[
-        ('not_paid', 'Not Paid'),
-        ('in_payment', 'In Payment'),
-        ('paid', 'Paid')],
-        string='Payment', store=True, readonly=True, copy=False, tracking=True,
-        compute='_compute_amount')
     invoice_date = fields.Date(string='Invoice/Bill Date', readonly=True, index=True, copy=False,
         states={'draft': [('readonly', False)]},
         default=_get_default_invoice_date)
@@ -451,7 +453,7 @@ class AccountMove(models.Model):
             '''
             move = base_line.move_id
 
-            if move.is_invoice():
+            if move.is_invoice(include_receipts=True):
                 sign = -1 if move.is_inbound() else 1
                 quantity = base_line.quantity
                 if base_line.currency_id:
@@ -945,7 +947,8 @@ class AccountMove(models.Model):
         'line_ids.amount_currency',
         'line_ids.amount_residual',
         'line_ids.amount_residual_currency',
-        'line_ids.payment_id.state')
+        'line_ids.payment_id.state',
+        'line_ids.full_reconcile_id')
     def _compute_amount(self):
         invoice_ids = [move.id for move in self if move.id and move.is_invoice(include_receipts=True)]
         self.env['account.payment'].flush(['state'])
@@ -976,6 +979,7 @@ class AccountMove(models.Model):
             total_untaxed_currency = 0.0
             total_tax = 0.0
             total_tax_currency = 0.0
+            total_to_pay = 0.0
             total_residual = 0.0
             total_residual_currency = 0.0
             total = 0.0
@@ -1003,6 +1007,7 @@ class AccountMove(models.Model):
                         total_currency += line.amount_currency
                     elif line.account_id.user_type_id.type in ('receivable', 'payable'):
                         # Residual amount.
+                        total_to_pay += line.balance
                         total_residual += line.amount_residual
                         total_residual_currency += line.amount_residual_currency
                 else:
@@ -1025,18 +1030,30 @@ class AccountMove(models.Model):
             move.amount_residual_signed = total_residual
 
             currency = len(currencies) == 1 and currencies.pop() or move.company_id.currency_id
-            is_paid = currency and currency.is_zero(move.amount_residual) or not move.amount_residual
 
-            # Compute 'invoice_payment_state'.
-            if move.type == 'entry':
-                move.invoice_payment_state = False
-            elif move.state == 'posted' and is_paid:
-                if move.id in in_payment_set:
-                    move.invoice_payment_state = 'in_payment'
-                else:
-                    move.invoice_payment_state = 'paid'
-            else:
-                move.invoice_payment_state = 'not_paid'
+            # Compute 'payment_state'.
+            new_pmt_state = 'not_paid' if move.type != 'entry' else False
+
+            if move.is_invoice(include_receipts=True) and move.state == 'posted':
+
+                if currency.is_zero(move.amount_residual):
+                    if move.id in in_payment_set:
+                        new_pmt_state = 'in_payment'
+                    else:
+                        new_pmt_state = 'paid'
+                elif currency.compare_amounts(total_to_pay, total_residual) != 0:
+                    new_pmt_state = 'partial'
+
+            if new_pmt_state == 'paid' and move.type in ('in_invoice', 'out_invoice', 'entry'):
+                reverse_type = move.type == 'in_invoice' and 'in_refund' or move.type == 'out_invoice' and 'out_refund' or 'entry'
+                reverse_moves = self.env['account.move'].search([('reversed_entry_id', '=', move.id), ('state', '=', 'posted'), ('type', '=', reverse_type)])
+
+                # We only set 'reversed' state in cas of 1 to 1 full reconciliation with a reverse entry; otherwise, we use the regular 'paid' state
+                reverse_moves_full_recs = reverse_moves.mapped('line_ids.full_reconcile_id')
+                if reverse_moves_full_recs.mapped('reconciled_line_ids.move_id').filtered(lambda x: x not in (reverse_moves + reverse_moves_full_recs.mapped('exchange_move_id'))) == move:
+                    new_pmt_state = 'reversed'
+
+            move.payment_state = new_pmt_state
 
     def _inverse_amount_total(self):
         for move in self:
@@ -1075,12 +1092,12 @@ class AccountMove(models.Model):
     def _compute_has_matching_suspense_amount(self):
         for r in self:
             res = False
-            if r.state == 'posted' and r.is_invoice() and r.invoice_payment_state == 'not_paid':
+            if r.state == 'posted' and r.is_invoice() and r.payment_state == 'not_paid':
                 domain = r._get_domain_matching_suspense_moves()
                 #there are more than one but less than 5 suspense moves matching the residual amount
                 if (0 < self.env['account.move.line'].search_count(domain) < 5):
                     domain2 = [
-                        ('invoice_payment_state', '=', 'not_paid'),
+                        ('payment_state', '=', 'not_paid'),
                         ('state', '=', 'posted'),
                         ('amount_residual', '=', r.amount_residual),
                         ('type', '=', r.type)]
@@ -1168,7 +1185,7 @@ class AccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
             move.invoice_has_outstanding = False
 
-            if move.state != 'posted' or move.invoice_payment_state != 'not_paid' or not move.is_invoice(include_receipts=True):
+            if move.state != 'posted' or move.payment_state != 'not_paid' or not move.is_invoice(include_receipts=True):
                 continue
             pay_term_line_ids = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
 
@@ -1557,12 +1574,12 @@ class AccountMove(models.Model):
         moves = super(AccountMove, self).create(vals_list)
 
         # Trigger 'action_invoice_paid' when the invoice is directly paid at its creation.
-        moves.filtered(lambda move: move.is_invoice(include_receipts=True) and move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
+        moves.filtered(lambda move: move.is_invoice(include_receipts=True) and move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
         return moves
 
     def write(self, vals):
-        not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.invoice_payment_state not in ('paid', 'in_payment'))
+        not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.payment_state not in ('paid', 'in_payment'))
 
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
@@ -1606,7 +1623,7 @@ class AccountMove(models.Model):
             self._check_balanced()
 
         # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
-        not_paid_invoices.filtered(lambda move: move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
+        not_paid_invoices.filtered(lambda move: move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
         return res
 
@@ -1646,7 +1663,7 @@ class AccountMove(models.Model):
         if not self.is_invoice(include_receipts=True):
             return super(AccountMove, self)._track_subtype(init_values)
 
-        if 'invoice_payment_state' in init_values and self.invoice_payment_state == 'paid':
+        if 'payment_state' in init_values and self.payment_state == 'paid':
             return self.env.ref('account.mt_invoice_paid')
         elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
@@ -2115,7 +2132,7 @@ class AccountMove(models.Model):
             move.write(to_write)
 
             # Compute 'ref' for 'out_invoice'.
-            if move.type == 'out_invoice' and not move.invoice_payment_ref:
+            if move._auto_compute_invoice_reference():
                 to_write = {
                     'invoice_payment_ref': move._get_invoice_computed_reference(),
                     'line_ids': []
@@ -2139,6 +2156,14 @@ class AccountMove(models.Model):
                 move.partner_id._increase_rank('supplier_rank')
             else:
                 continue
+
+    def _auto_compute_invoice_reference(self):
+        ''' Hook to be overridden to set custom conditions for auto-computed invoice references.
+            :return True if the move should get a auto-computed reference else False
+            :rtype bool
+        '''
+        self.ensure_one()
+        return self.type == 'out_invoice' and not self.invoice_payment_ref
 
     def action_reverse(self):
         action = self.env.ref('account.action_view_account_move_reversal').read()[0]
@@ -2472,11 +2497,12 @@ class AccountMoveLine(models.Model):
     amount_residual_currency = fields.Monetary(string='Residual Amount in Currency', store=True,
         compute='_amount_residual',
         help="The residual amount on a journal item expressed in its currency (possibly not the company currency).")
-    full_reconcile_id = fields.Many2one('account.full.reconcile', string="Matching #", copy=False, index=True, readonly=True)
+    full_reconcile_id = fields.Many2one('account.full.reconcile', string="Matching", copy=False, index=True, readonly=True)
     matched_debit_ids = fields.One2many('account.partial.reconcile', 'credit_move_id', string='Matched Debits',
         help='Debit journal items that are matched with this journal item.', readonly=True)
     matched_credit_ids = fields.One2many('account.partial.reconcile', 'debit_move_id', string='Matched Credits',
         help='Credit journal items that are matched with this journal item.', readonly=True)
+    matching_number = fields.Char(string="Matching #", compute='_compute_matching_number', store=True, help="Matching number for this line, 'P' if it is only partially reconcile, or the name of the full reconcile if it exists.")
 
     # ==== Analytic fields ====
     analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
@@ -2943,6 +2969,16 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('full_reconcile_id.name', 'matched_debit_ids', 'matched_credit_ids')
+    def _compute_matching_number(self):
+        for record in self:
+            if record.full_reconcile_id:
+                record.matching_number = record.full_reconcile_id.name
+            elif record.matched_debit_ids or record.matched_credit_ids:
+                record.matching_number = 'P'
+            else:
+                record.matching_number = None
 
     @api.depends('currency_id')
     def _compute_always_set_currency_id(self):
@@ -4017,6 +4053,20 @@ class AccountMoveLine(models.Model):
             ('full_reconcile_id', '=', False),
             ('statement_line_id', '!=', False),
         ]
+
+    def action_transfer_accounts_wizard(self):
+        wizard = self.env['account.transfer.wizard'].create({})
+
+        return {
+            'name': _("Transfer Entries"),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.transfer.wizard',
+            'res_id': wizard.id,
+            'target': 'new',
+            'context': self.env.context,
+        }
 
 
 class AccountPartialReconcile(models.Model):
