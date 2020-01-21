@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 
@@ -96,9 +96,6 @@ class StockScrap(models.Model):
         if 'done' in self.mapped('state'):
             raise UserError(_('You cannot delete a scrap which is done.'))
         return super(StockScrap, self).unlink()
-
-    def _get_origin_moves(self):
-        return self.picking_id and self.picking_id.move_lines.filtered(lambda x: x.product_id == self.product_id)
 
     def _prepare_move_values(self):
         self.ensure_one()

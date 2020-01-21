@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 from collections import namedtuple
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-
-import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -796,16 +795,6 @@ class Warehouse(models.Model):
         self.mapped('wh_pack_stock_loc_id').write({'active': new_delivery_step == 'pick_pack_ship'})
         self.mapped('wh_output_stock_loc_id').write({'active': new_delivery_step != 'ship_only'})
 
-    def _location_used(self, location):
-        rules = self.env['stock.rule'].search_count([
-            '&',
-            ('route_id', 'not in', [x.id for x in self.route_ids]),
-            '|', ('location_src_id', '=', location.id),
-            ('location_id', '=', location.id)])
-        if rules:
-            return True
-        return False
-
     # Misc
     # ------------------------------------------------------------
 
@@ -939,7 +928,6 @@ class Warehouse(models.Model):
         routes = self.mapped('route_ids') | self.mapped('mto_pull_id').mapped('route_id')
         routes |= self.env["stock.location.route"].search([('supplied_wh_id', 'in', self.ids)])
         return routes
-    get_all_routes_for_wh = _get_all_routes
 
     def action_view_all_routes(self):
         routes = self._get_all_routes()
