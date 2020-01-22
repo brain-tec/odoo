@@ -5242,7 +5242,7 @@ Record ids: %(records)s
         if isinstance(func, str):
             recs = self
             for name in func.split('.'):
-                recs = recs._mapped_func(operator.itemgetter(name))
+                recs = recs._fields[name].mapped(recs)
             return recs
         else:
             return self._mapped_func(func)
@@ -5279,6 +5279,8 @@ Record ids: %(records)s
         if isinstance(func, str):
             name = func
             func = lambda rec: any(rec.mapped(name))
+            # populate cache
+            self.mapped(name)
         return self.browse([rec.id for rec in self if func(rec)])
 
     def filtered_domain(self, domain):
@@ -6151,6 +6153,13 @@ Record ids: %(records)s
             result['warning'] = dict(title=title, message=message, type='dialog')
 
         return result
+
+    def _get_placeholder_filename(self, field=None):
+        """ Returns the filename of the placeholder to use,
+            set on web/static/src/img by default, or the
+            complete path to access it (eg: module/path/to/image.png).
+        """
+        return 'placeholder.png'
 
 collections.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have __reversed__, index or count

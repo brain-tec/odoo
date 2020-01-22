@@ -304,7 +304,6 @@
         <script type="text/javascript" src="/web/static/src/js/views/abstract_renderer_owl.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/abstract_model.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/abstract_controller.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/controller_adapter.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/renderer_wrapper.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/basic/basic_model.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/basic/basic_view.js"></script>
@@ -379,6 +378,8 @@
         <script type="text/javascript" src="/web/static/src/js/views/qweb/qweb_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/widgets/attach_document.js"></script>
         <script type="text/javascript" src="/web/static/src/js/fields/signature.js"></script>
+
+        <script type="text/javascript" src="/web/static/src/js/owl_compatibility.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/report/utils.js"/>
         <script type="text/javascript" src="/web/static/src/js/report/client_action.js"/>
@@ -516,7 +517,7 @@
         <div class="o_brand_promotion">
             <t t-call="web.brand_promotion_message">
                 <t t-set="_message"></t>
-                <t t-set="_utm_medium">portal</t>
+                <t t-set="_utm_medium" t-valuef="portal"/>
             </t>
         </div>
     </template>
@@ -726,6 +727,8 @@
                 <script type="text/javascript" src="/web/static/tests/tools/debug_manager_tests.js"/>
 
                 <script type="text/javascript" src="/web/static/tests/helpers/test_utils_tests.js"></script>
+
+                <script type="text/javascript" src="/web/static/tests/owl_compatibility_tests.js"></script>
             </t>
 
             <div id="qunit"/>
