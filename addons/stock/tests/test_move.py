@@ -2610,12 +2610,14 @@ class StockMove(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
 
+        self.assertEqual(move1.move_line_ids.state, 'assigned')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, shelf1_location), 0.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, shelf2_location), 0.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
 
         move1.move_line_ids.location_id = shelf2_location.id
 
+        self.assertEqual(move1.move_line_ids.state, 'confirmed')
         self.assertEqual(move1.reserved_availability, 0.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, shelf1_location), 1.0)
@@ -3443,7 +3445,7 @@ class StockMove(SavepointCase):
         })
         picking.action_confirm()
         picking.action_assign()
-        # No quantites filled, immediate transfer wizard should pop up.
+        # No quantities filled, immediate transfer wizard should pop up.
         immediate_trans_wiz_dict = picking.button_validate()
         self.assertEqual(immediate_trans_wiz_dict.get('res_model'), 'stock.immediate.transfer')
         immediate_trans_wiz = Form(self.env[immediate_trans_wiz_dict['res_model']].with_context(immediate_trans_wiz_dict['context'])).save()
