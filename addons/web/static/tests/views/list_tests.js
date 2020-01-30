@@ -315,6 +315,24 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('field titles are not escaped', async function (assert) {
+        assert.expect(2);
+
+        this.data.foo.records[0].foo = '<div>Hello</div>';
+
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree><field name="foo"/></tree>',
+        });
+
+        assert.strictEqual(list.$('tbody tr:first .o_data_cell').text(), "<div>Hello</div>");
+        assert.strictEqual(list.$('tbody tr:first .o_data_cell').attr('title'), "<div>Hello</div>");
+
+        list.destroy();
+    });
+
     QUnit.test('record-depending invisible lines are correctly aligned', async function (assert) {
         assert.expect(4);
 
@@ -5799,7 +5817,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('editable list view: multi edition with readonly modifiers', async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         var list = await createView({
             View: ListView,
@@ -5832,6 +5850,8 @@ QUnit.module('Views', {
         assert.strictEqual(modalText,
             "Among the 4 selected records, 2 are valid for this update. Are you sure you want to " +
             "perform the following update on those 2 records ? Field: int_field Update to: 666");
+        assert.strictEqual(document.querySelector('.modal .o_modal_changes .o_field_widget').style.pointerEvents, 'none',
+            "pointer events should be deactivated on the demo widget");
 
         await testUtils.dom.click($('.modal .btn-primary'));
         assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), "1yop666",

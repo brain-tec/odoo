@@ -156,6 +156,21 @@ class Field(MetaField('DummyField', (object,), {})):
     :param bool store: whether the field is stored in database
         (default:``True``, ``False`` for computed fields)
 
+    :param str group_operator: aggregate function used by :meth:`~odoo.models.Model.read_group`
+        when grouping on this field.
+
+        Supported aggregate functions are:
+
+            * ``array_agg`` : values, including nulls, concatenated into an array
+            * ``count`` : number of rows
+            * ``count_distinct`` : number of distinct rows
+            * ``bool_and`` : true if all values are true, otherwise false
+            * ``bool_or`` : true if at least one value is true, otherwise false
+            * ``max`` : maximum value of all values
+            * ``min`` : minimum value of all values
+            * ``avg`` : the average (arithmetic mean) of all values
+            * ``sum`` : sum of all values
+
     .. rubric:: Computed Fields
 
     :param str compute: name of a method that computes the field
@@ -622,9 +637,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def cache_key(self, env):
         """ Return the cache key corresponding to ``self.depends_context``. """
-        get_context = env.context.get
 
-        def get(key):
+        def get(key, get_context=env.context.get):
             if key == 'force_company':
                 return get_context('force_company') or env.company.id
             elif key == 'uid':
@@ -632,7 +646,16 @@ class Field(MetaField('DummyField', (object,), {})):
             elif key == 'active_test':
                 return get_context('active_test', self.context.get('active_test', True))
             else:
-                return get_context(key)
+                v = get_context(key)
+                try: hash(v)
+                except TypeError:
+                    raise TypeError(
+                        "Can only create cache keys from hashable values, "
+                        "got non-hashable value {!r} at context key {!r} "
+                        "(dependency of field {})".format(v, key, self)
+                    ) from None # we don't need to chain the exception created 2 lines above
+                else:
+                    return v
 
         return tuple(get(key) for key in self.depends_context)
 
@@ -1051,7 +1074,11 @@ class Field(MetaField('DummyField', (object,), {})):
             records = records.sudo()
         fields = records._field_computed[self]
 
-        # just in case the compute method does not assign a value
+        # Just in case the compute method does not assign a value, we already
+        # mark the computation as done. This is also necessary if the compute
+        # method accesses the old value of the field: the field will be fetched
+        # with _read(), which will flush() it. If the field is still to compute,
+        # the latter flush() will recursively compute this field!
         for field in fields:
             env.remove_to_compute(field, records)
 
@@ -2273,9 +2300,9 @@ class Many2one(_Relational):
     :param bool delegate: set it to ``True`` to make fields of the target model
         accessible from the current model (corresponds to ``_inherits``)
 
-    :param check_company: add default domain ``['|', ('company_id', '=', False),
-        ('company_id', '=', company_id)]``. Mark the field to be verified in
-        ``_check_company``.
+    :param bool check_company: Mark the field to be verified in
+        :meth:`~odoo.models.Model._check_company`. Add a default company
+        domain depending on the field attributes.
     """
     type = 'many2one'
     column_type = ('int4', 'int4')
@@ -2640,7 +2667,10 @@ class _RelationalMulti(_Relational):
         # use registry to avoid creating a recordset for the model
         prefetch_ids = IterableGenerator(prefetch_x2many_ids, record, self)
         corecords = record.pool[self.comodel_name]._browse(record.env, value, prefetch_ids)
-        if 'active' in corecords and record.env.context.get('active_test', True):
+        if (
+            'active' in corecords
+            and self.context.get('active_test', record.env.context.get('active_test', True))
+        ):
             corecords = corecords.filtered('active').with_prefetch(prefetch_ids)
         return corecords
 
@@ -3037,9 +3067,9 @@ class Many2many(_RelationalMulti):
     :param dict context: an optional context to use on the client side when
         handling that field
 
-    :param check_company: add default domain ``['|', ('company_id', '=', False),
-        ('company_id', '=', company_id)]``. Mark the field to be verified in
-        ``_check_company``.
+    :param bool check_company: Mark the field to be verified in
+        :meth:`~odoo.models.Model._check_company`. Add a default company
+        domain depending on the field attributes.
 
     :param int limit: optional limit to use upon read
     """
@@ -3248,10 +3278,9 @@ class Many2many(_RelationalMulti):
             for ys1 in new_relation.values():
                 ys1 -= ys
 
-        to_create = []                  # line vals to create
-        to_delete = []                  # line ids to delete
-
         for recs, commands in records_commands_list:
+            to_create = []  # line vals to create
+            to_delete = []  # line ids to delete
             for command in (commands or ()):
                 if not isinstance(command, (list, tuple)) or not command:
                     continue

@@ -11,7 +11,7 @@
 # Link Up링크업 <linkup.way@gmail.com>, 2019
 # Martin Trigaux, 2019
 # Linkup <link-up@naver.com>, 2019
-# JH CHOI <hwangtog@gmail.com>, 2019
+# JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-01 12:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: JH CHOI <hwangtog@gmail.com>, 2019\n"
+"Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -93,6 +93,20 @@ msgid ""
 "        **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"고객 청구서에 구조화된 커뮤니케이션 추가.\n"
+"--------------------------------------------------\n"
+"\n"
+"Using BBA structured communication simplifies the reconciliation between invoices and payments.\n"
+"You can select the structured communication as payment communication in Invoicing/Accounting settings.\n"
+"Two algorithms are suggested:\n"
+"\n"
+"    1) Invoice Number +++RRR/RRRR/RRRDD+++\n"
+"        **R..R =** Invoice Number, **DD =** Check Digits\n"
+"    2) Customer Reference +++RRR/RRRR/SSSDD+++\n"
+"        **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_reprint
@@ -329,6 +343,9 @@ msgid ""
 "\n"
 "This module adds a custom Sales Team for the Point of Sale. This enables you to view and manage your point of sale sales with more ease.\n"
 msgstr ""
+"\n"
+"\n"
+"이 모듈은 사용자 정의가 가능한 판매 팀 기능을 POS에 추가합니다. 이 기능은 POS 판매를 보다 쉽게 보고 관리할 수 있도록 합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_restaurant
@@ -341,6 +358,13 @@ msgid ""
 "- Kitchen Order Printing: allows you to print orders updates to kitchen or bar printers\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"이 모듈은 음식점 관리와 관련된 몇 가지 기능을 POS에 추가합니다 :\n"
+"- 계산서 인쇄 : 주문이 결제되기 전에 수령증을 인쇄할 수 있습니다\n"
+"- 계산서 분할 : 주문을 다른 주문으로 분할할 수 있습니다\n"
+"- 주방용 주문서 인쇄 : 주방 또는 바 프린터로 주문서를 인쇄 할 수 있습니다\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_discount
@@ -351,6 +375,11 @@ msgid ""
 "discount to a customer.\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"이 모듈을 사용하면 계산원이 고객에게 할인율을\n"
+"신속하게 제공할 수 있습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_loyalty
@@ -362,6 +391,12 @@ msgid ""
 "and get rewards.\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"이 모듈을 사용하면 POS에 멤버십 포인트 프로그램을\n"
+"정의할 수 있습니다. 고객은 멤버십 포인트를 얻고 \n"
+"보상을 받을 수 있습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_epson_printer_restaurant
@@ -381,6 +416,9 @@ msgid ""
 "\n"
 "Use Epson ePOS Printers without the IoT Box in the Point of Sale\n"
 msgstr ""
+"\n"
+"\n"
+"POS에 IOT Box가 없을 경우 Epson ePOS 프린터를 사용합니다. \n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_at
@@ -399,6 +437,19 @@ msgid ""
 " \n"
 "    "
 msgstr ""
+"\n"
+"   \n"
+"오스트리아 계정과목 일람표 (Einheitskontenrahmen 2010).\n"
+"==========================================================\n"
+"\n"
+"    * Defines the following chart of account templates:\n"
+"        * Austrian General Chart of accounts 2010\n"
+"    * Defines templates for VAT on sales and purchases\n"
+"    * Defines tax templates\n"
+"    * Defines fiscal positions for Austrian fiscal legislation\n"
+"    * Defines tax reports U1/U30\n"
+" \n"
+"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_renting_sign
@@ -407,6 +458,9 @@ msgid ""
 "            Bridge Sign functionalities with the Rental application\n"
 "        "
 msgstr ""
+"\n"
+"            임대 응용프로그램의 사인 기능과 연결\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_timesheet
@@ -416,6 +470,10 @@ msgid ""
 "        - Track timesheet for a task from a ticket\n"
 "    "
 msgstr ""
+"\n"
+"        - 고객센터 팀을 위한 프로젝트 설정 가능\n"
+"        - 티켓에서 작업에 대한 작업 일정 추적\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_reports
@@ -425,7 +483,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        벨기에 회계보고서\n"
+"        벨기에 회계 보고서\n"
 "    "
 
 #. module: base
@@ -436,7 +494,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"칠레 회계보고서"
+"칠레 회계 보고서"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_reports
@@ -447,6 +505,11 @@ msgid ""
 "        Also adds DATEV export options to general ledger\n"
 "    "
 msgstr ""
+"\n"
+"        독일 회계 보고서\n"
+"        Contains Balance sheet, Profit and Loss, VAT and Partner VAT reports\n"
+"        Also adds DATEV export options to general ledger\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_reports
@@ -456,7 +519,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"네덜란드 회계보고서"
+"네덜란드 회계 보고서"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_es_reports
@@ -466,7 +529,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"스페인 회계보고서"
+"스페인 회계 보고서"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ch_reports
@@ -476,7 +539,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"스위스 회계보고서"
+"스위스 회계 보고서"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_uk_reports
@@ -503,7 +566,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        미국 회계보고서\n"
+"        미국 회계 보고서\n"
 "    "
 
 #. module: base
@@ -515,6 +578,11 @@ msgid ""
 "        Colloquially known as \"Month 13\"\n"
 "    "
 msgstr ""
+"\n"
+"        결산 항목에 대한 시산표를 생성할 수 있습니다.\n"
+"\n"
+"        구어체로 \"13번째달\"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents
@@ -535,7 +603,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        서비스 데스크에 등록된 품목에 대한 작업 비용.\n"
+"        고객 센터 티켓에 기록된 작업 일정 청구서.\n"
 "    "
 
 #. module: base
@@ -584,7 +652,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        웹 사이트 전자 상거래가 제품 구성기와 호환되도록 하기 위한 연결 모듈\n"
+"        전자 상거래가 제품 구성기와 호환되도록 하기 위한 연결 모듈\n"
 "    "
 
 #. module: base
@@ -594,6 +662,9 @@ msgid ""
 "        Bridge module to make the website e-commerce stock management compatible with the product configurator\n"
 "    "
 msgstr ""
+"\n"
+"        전자 상거래 재고 관리를 제품 구성자와 호환 가능하게하는 연결 모듈\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_fsm
@@ -602,6 +673,9 @@ msgid ""
 "        Convert helpdesk tickets to field service tasks.\n"
 "    "
 msgstr ""
+"\n"
+"        고객센터 티켓을 현장 서비스 작업으로 변경.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_form
@@ -622,6 +696,8 @@ msgid ""
 "\n"
 "        Define default purchase journal on the warehouse"
 msgstr ""
+"\n"
+"        창고에 기본 구매 분개장 정의"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_purchase_stock
@@ -633,6 +709,12 @@ msgid ""
 "        useful when you setup the multiple GSTIN units.\n"
 "    "
 msgstr ""
+"\n"
+"        창고에서 기본 구매 분개장을 정의합니다.\n"
+"        선별 작업을 변경할 때 구매 주문서에 대한 \n"
+"        올바른 구매 분개장을 선택할 수 있도록 도와줍니다.\n"
+"        여러 GSTIN 장치를 설정할 때 유용합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_in_sale_stock
@@ -640,6 +722,8 @@ msgid ""
 "\n"
 "        Define default sales journal on the warehouse"
 msgstr ""
+"\n"
+"        창고에 기본 판매 분개장 정의"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_sale_stock
@@ -651,6 +735,12 @@ msgid ""
 "        useful when you setup the multiple GSTIN units.\n"
 "    "
 msgstr ""
+"\n"
+"        창고에서 기본 판매 분개장을 정의합니다.\n"
+"        창고를 변경할 때 판매 주문서에 대한 \n"
+"        올바른 판매 분개장을 선택할 수 있도록 도와줍니다.\n"
+"        여러 GSTIN 장치를 설정할 때 유용합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_mx_reports
@@ -803,6 +893,10 @@ msgid ""
 "        by choosing product variants quantity through a Grid Entry.\n"
 "    "
 msgstr ""
+"\n"
+"        이 모듈을 사용하면 그리드 항목을 통해 \n"
+"        상품 변형 수량을 선택하여 구매 주문을 빠르게 채울 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_product_matrix
@@ -828,6 +922,13 @@ msgid ""
 "        but aims to connect with all European banks later on\n"
 "    "
 msgstr ""
+"\n"
+"        이 모듈은 myponto.com에 연결하여 은행 명세서를 검색합니다.\n"
+"\n"
+"        현재 이 서비스는 Beligian 은행에만 연결할 수 있습니다.\n"
+"         (BNP Paribas Fortis, KBC, CBC, KBC 브뤼셀, 핀트로, Hello Bank, ING 벨기에, AXA 벨기에)\n"
+"        하지만 나중에 모든 유럽 은행과 연결하는 것을 목표로 합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_sepa_direct_debit
@@ -1000,6 +1101,9 @@ msgid ""
 "       Add variants to your purchase orders through an Order Grid Entry.\n"
 "    "
 msgstr ""
+"\n"
+"       주문 그리드 항목을 통해 구매 주문에 변형 상품을 추가하십시오.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_partner_autocomplete
@@ -1048,6 +1152,8 @@ msgid ""
 "\n"
 "    Adds Quality Control to workorders with IoT.\n"
 msgstr ""
+"\n"
+"    IoT와 함께 작업지시서에 품질 관리 추가.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_quality_mrp_workorder
@@ -1167,6 +1273,9 @@ msgid ""
 "    Schedule your teams and employees with shift.\n"
 "    "
 msgstr ""
+"\n"
+"    교대 근무 팀과 직원을 예약하십시오.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ie
@@ -1177,6 +1286,11 @@ msgid ""
 "    - a Chart of Accounts customised to Ireland\n"
 "    - VAT Rates and Structure"
 msgstr ""
+"\n"
+"    이 모듈은 신속하게 회계를 설정하려는 모든 아일랜드 중소기업을위한 것입니다. 이 모듈은 다음을 제공합니다 :\n"
+"\n"
+"    - 아일랜드에 맞춤화된 계정 일람표\n"
+"    - 부가가치 세율과 구조"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_ebay
@@ -1228,6 +1342,13 @@ msgid ""
 "\"Python Code\" defines the amount of the tax.\n"
 "        "
 msgstr ""
+"\n"
+"세금은 파이썬 코드로 정의되며 단위 가격, 제품 또는 파트너와 같은 데이터를 포함하는 로컬 환경에서 실행되는 두 개의 파이썬 코드의 스니펫으로 구성됩니다.\n"
+"\n"
+"\"해당 코드\"는 세금 적용 여부를 정의합니다.\n"
+"\n"
+"\"파이썬 코드\"는 세금의 액수를 정의합니다.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_au_aba
@@ -1441,6 +1562,11 @@ msgid ""
 "Manage automatic transfers between your accounts.\n"
 "    "
 msgstr ""
+"\n"
+"계정 자동 이체\n"
+"===========================\n"
+"계정 간 자동 이체를 관리하십시오.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_generic_auto_transfer_demo
@@ -1451,6 +1577,11 @@ msgid ""
 "Demo data for account automatic transfers module\n"
 "    "
 msgstr ""
+"\n"
+"계정 자동 이체 데모\n"
+"================================\n"
+"계정 자동 이체 모듈의 데모 데이터\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_us_consolidation_demo
@@ -1459,6 +1590,9 @@ msgid ""
 "Account Consolidation Demo Data\n"
 "==================================\n"
 msgstr ""
+"\n"
+"계정 통합 데모 데이터\n"
+"==================================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_accountant
@@ -1616,6 +1750,44 @@ msgid ""
 "\n"
 "This module is compatible with base_vat module in order to be able to validate VAT numbers for each country that have or not have the possibility to manage multiple identification types.\n"
 msgstr ""
+"\n"
+"Add a new model named \"Identification Type\" that extend the vat field functionality in the partner and let the user to identify (an eventually invoice) to contacts not only with their fiscal tax ID (VAT) but with other types of identifications like national document, passport, foreign ID, etc. With this module installed you will see now in the partner form view two fields:\n"
+"\n"
+"* Identification Type\n"
+"* Identification Number\n"
+"\n"
+"이러한 행동은 아르헨티나나 칠레와 같은 몇몇 라틴 국가들에게 일반적인 요구 조건입니다. If your localization has this requirements then you need to depend on this module and define in your localization module the identifications types that are used in your country. Generally these types of identifications are defined by the government authorities that regulate the fiscal operations. For example:\n"
+"\n"
+"* AFIP in Argentina defines DNI, CUIT (vat for legal entities), CUIL (vat for natural person), and another 80 valid identification types.\n"
+"\n"
+"Each identification holds this information:\n"
+"\n"
+"* name: short name of the identification\n"
+"* description: could be the same short name or a long name\n"
+"* country_id: the country where this identification belongs\n"
+"* is_vat: identify this record as the corresponding VAT for the specific country.\n"
+"* sequence: let us to sort the identification types depending on the ones that are most used.\n"
+"* active: we can activate/inactivate identifications to make it easier to our customers\n"
+"\n"
+"In order to make this module compatible for multi-company environments where we have companies that does not need/support this requirement, we have added generic identification types and generic rules to manage the contact information and make it transparent for the user when only use the VAT as we formerly know.\n"
+"\n"
+"Generic Identifications:\n"
+"\n"
+"* VAT: The Fiscal Tax Identification or VAT number, by default will be selected as identification type so the user will only need to add the related vat number.\n"
+"* Passport\n"
+"* Foreign ID (Foreign National Document)\n"
+"\n"
+"Rules when creating a new partner: We will only see the identification types that are meaningful, taking into account these rules:\n"
+"\n"
+"* If the partner have not country address set: Will show the generic identification types plus the ones defined in the partner's related company country (If the partner has not specific company then will show the identification types related to the current user company)\n"
+"\n"
+"* If the partner has country address : will show the generic identification types plus the ones defined for the country of the partner.\n"
+"\n"
+"When creating a new company, will set to the related partner always the related country is_vat identification type.\n"
+"\n"
+"All the defined identification types can be reviewed and activate/deactivate in \"Contacts / Configuration / Identification Type\" menu.\n"
+"\n"
+"This module is compatible with base_vat module in order to be able to validate VAT numbers for each country that have or not have the possibility to manage multiple identification types.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_delivery
@@ -1745,6 +1917,8 @@ msgid ""
 "\n"
 "Adds fleet data to documents\n"
 msgstr ""
+"\n"
+"문서에 차량 데이터 추가\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_product
@@ -1753,6 +1927,9 @@ msgid ""
 "Adds the ability to create products from the document module and adds the\n"
 "option to send products' attachments to the documents app.\n"
 msgstr ""
+"\n"
+"문서 모듈에 제품을 생성하는 기능을 추가하고\n"
+"제품의 첨부 파일을 문서 앱에 보내는 선택 사항을 추가합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_voip_crm
@@ -1761,6 +1938,9 @@ msgid ""
 "Adds the lead partner to phonecall list\n"
 "    "
 msgstr ""
+"\n"
+"통화 목록에 영업제안 파트너를 추가합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_enterprise
@@ -1769,6 +1949,9 @@ msgid ""
 "Advanced features for the PoS like better views \n"
 "for IoT Box config.   \n"
 msgstr ""
+"\n"
+"PoS의 고급 기능은 IoT Box 구성을 위한 \n"
+"더 나은 화면 보기를 제공합니다. \n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_calendar
@@ -1801,6 +1984,20 @@ msgid ""
 "* Supported cards: Visa, MasterCard, American Express, Discover\n"
 "    "
 msgstr ""
+"\n"
+"신용 카드 POS 지불 허용\n"
+"==============================\n"
+"\n"
+"이 모듈을 통해 고객은 신용카드로 주문을 지불할 수 있습니다. \n"
+"거래는 Vantiv(Wells Fargo Bank가 개발했습니다).\n"
+"Vantiv merchant account가 필요합니다.\n"
+"이 모듈은 다음과 같은 내용을 수행할 수 있습니다:\n"
+"\n"
+"* 결제 화면에서 신용카드를 스와이프하여 빠르게 지불\n"
+"* 현금 지불과 신용 카드 지불의 결합\n"
+"* 캐시백\n"
+"* 지원카드 : Visa, MasterCard, American Express, Discover\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_wishlist
@@ -1879,6 +2076,9 @@ msgid ""
 "Allows to make call from next activities or with click-to-dial.\n"
 "    "
 msgstr ""
+"\n"
+"다음 활동에서 전화를 걸거나 버튼을 클릭하여 전화를 걸 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_timesheet
@@ -1917,6 +2117,9 @@ msgid ""
 "Allows use of stock application to manage rentals inventory\n"
 "        "
 msgstr ""
+"\n"
+"재고 응용 프로그램을 사용하여 임대 재고를 관리할 수 있습니다.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_snailmail
@@ -1990,6 +2193,16 @@ msgid ""
 "If the automated inventory valuation is active, the necessary accounting entries will be created.\n"
 "\n"
 msgstr ""
+"\n"
+"MRP 분석 회계\n"
+"==========================\n"
+"\n"
+"* Cost structure report\n"
+"\n"
+"Also, allows to compute the cost of the product based on its BoM, using the costs of its components and work center operations.\n"
+"It adds a button on the product itself but also an action in the list view of the products.\n"
+"If the automated inventory valuation is active, the necessary accounting entries will be created.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_forum
@@ -2174,6 +2387,42 @@ msgid ""
 "2011). Those modules are also strictly licensed under AGPL V3 and today don't \n"
 "come with any additional paid permission for online use of 'private modules'.\n"
 msgstr ""
+"\n"
+"브라질 현지화를 위한 기본 모듈\n"
+"==========================================\n"
+"\n"
+"This module consists of:\n"
+"\n"
+" - Generic Brazilian chart of accounts\n"
+" - Brazilian taxes such as:\n"
+"\n"
+"        - IPI\n"
+"        - ICMS\n"
+"        - PIS\n"
+"        - COFINS\n"
+"        - ISS\n"
+"        - IR\n"
+"        - IRPJ\n"
+"        - CSLL\n"
+"\n"
+"The field tax_discount has also been added in the account.tax.template and \n"
+"account.tax objects to allow the proper computation of some Brazilian VATs \n"
+"such as ICMS. The chart of account creation wizard has been extended to \n"
+"propagate those new data properly.\n"
+"\n"
+"It's important to note however that this module lack many implementations to \n"
+"use Odoo properly in Brazil. Those implementations (such as the electronic \n"
+"fiscal Invoicing which is already operational) are brought by more than 15 \n"
+"additional modules of the Brazilian Launchpad localization project \n"
+"https://launchpad.net/openerp.pt-br-localiz and their dependencies in the \n"
+"extra addons branch. Those modules aim at not breaking with the remarkable \n"
+"Odoo modularity, this is why they are numerous but small. One of the \n"
+"reasons for maintaining those modules apart is that Brazilian Localization \n"
+"leaders need commit rights agility to complete the localization as companies \n"
+"fund the remaining legal requirements (such as soon fiscal ledgers, \n"
+"accounting SPED, fiscal SPED and PAF ECF that are still missing as September \n"
+"2011). Those modules are also strictly licensed under AGPL V3 and today don't \n"
+"come with any additional paid permission for online use of 'private modules'.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_batch_payment
@@ -2300,6 +2549,11 @@ msgid ""
 "button on Accounting's reports allowing to save the report into the\n"
 "Documents app in the desired format(s).\n"
 msgstr ""
+"\n"
+"계정과 문서 앱 간의 연결 모듈입니다.\n"
+"이것은 문서 모듈에서 송장 작성을 가능하게 합니다. \n"
+"그리고 원하는 형식으로 문서 앱에 보고서를 저장할 수 있는 \n"
+"회계 보고서 버튼을 추가합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail_enterprise
@@ -2382,6 +2636,12 @@ msgid ""
 "This module adds certification to resumé for employees.\n"
 "        "
 msgstr ""
+"\n"
+"HR을 위한 기술 및 자격증\n"
+"===============================\n"
+"\n"
+"이 모듈은 직원 경력서에 자격 사항을 추가합니다.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ve
@@ -2500,6 +2760,10 @@ msgid ""
 "Plan contable chileno e impuestos de acuerdo a disposiciones vigentes\n"
 "    "
 msgstr ""
+"\n"
+"칠레 회계 계정 및 세금 현지화.\n"
+"Plan contable chileno e impuestos de acuerdo a disposiciones vigentes\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_address_city
@@ -2546,6 +2810,13 @@ msgid ""
 "on old plannings.\n"
 "\n"
 msgstr ""
+"\n"
+"작업 기록과 예측 비교\n"
+"================================\n"
+"\n"
+"기존 계획에 소요된 시간을 관찰하여 향후 계획을 보다 효과적으로 \n"
+"계획할 수 있습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_taxcloud
@@ -2554,6 +2825,9 @@ msgid ""
 "Computes the sales tax automatically using TaxCloud and the customer's address in United States.\n"
 "    "
 msgstr ""
+"\n"
+"TaxCloud와 미국 내 고객 주소를 사용하여 부가가치세를 자동으로 계산합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_enterprise
@@ -2584,6 +2858,9 @@ msgid ""
 "Contains advanced features for purchase management\n"
 "    "
 msgstr ""
+"\n"
+"구매 관리를 위한 고급 기능 포함\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_enterprise
@@ -2604,7 +2881,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"재고 계정에 기업용 뷰 포함\n"
+"재고 계정에 기업용 화면 포함\n"
 "    "
 
 #. module: base
@@ -2615,7 +2892,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"재고 관리에 기업용 뷰 포함\n"
+"재고 관리에 기업용 화면 포함\n"
 "    "
 
 #. module: base
@@ -2633,6 +2910,17 @@ msgid ""
 "Allows to contact directly the employee in case of unjustified absence.\n"
 "    "
 msgstr ""
+"\n"
+"직원 부재 관리\n"
+"==========================\n"
+"\n"
+"기준 :\n"
+"    * IP 주소\n"
+"    * 사용자 세션\n"
+"    * 이메일 발송\n"
+"\n"
+"적절하지 않은 부재 시 직원에게 직접 연락할 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_partner_autocomplete_address_extended
@@ -2640,6 +2928,8 @@ msgid ""
 "\n"
 "Correct address formating when both partner_autocomplete and base_address_extended modules are installed"
 msgstr ""
+"\n"
+"partner_autocomplete 및 base_address_extended 모듈이 모두 설치된 경우 올바른 주소 형식을 지정합니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_account
@@ -2648,6 +2938,9 @@ msgid ""
 "Create Credit Notes from Helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"고객센터 티켓에서 대변 전표 만들기\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_slides
@@ -2665,6 +2958,18 @@ msgid ""
 " * Filter and Tag\n"
 " * Statistics\n"
 msgstr ""
+"\n"
+"온라인 강좌 만들기\n"
+"=====================\n"
+"\n"
+"특징\n"
+"\n"
+" * 통합 과정 및 수업 관리\n"
+" * 전체 화면 탐색\n"
+" * 유튜브 비디오, 구글 문서, PDF, 이미지, 웹 페이지 지원\n"
+" * 퀴즈로 지식 시험\n"
+" * 필터 및 태그\n"
+" * 통계\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_industry_fsm_report
@@ -2675,7 +2980,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"필드 서비스에 대한 보고서 작성\n"
+"현장 서비스에 대한 보고서 작성\n"
 "================================\n"
 "\n"
 
@@ -2870,6 +3175,9 @@ msgid ""
 "E-invoice implementation\n"
 "    "
 msgstr ""
+"\n"
+"전자 송장 구현\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_skills_slides
@@ -2881,6 +3189,12 @@ msgid ""
 "This module add completed courses to resumé for employees.\n"
 "        "
 msgstr ""
+"\n"
+"HR을 위한 이러닝 및 기술\n"
+"============================\n"
+"\n"
+"이 모듈은 직원의 경력에 완료한 강좌를 추가합니다.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_mx_edi
@@ -3029,6 +3343,8 @@ msgid ""
 "\n"
 "Easily access your documents from your employee profile.\n"
 msgstr ""
+"\n"
+"직원 프로필에서 문서에 쉽게 접근할 수 있습니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_hr_contract
@@ -3036,6 +3352,8 @@ msgid ""
 "\n"
 "Employee contracts files will be automatically integrated to the Document app.\n"
 msgstr ""
+"\n"
+"직원 계약 파일은 자동으로 문서 앱에 통합됩니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_hr_payroll
@@ -3043,6 +3361,8 @@ msgid ""
 "\n"
 "Employee payslips will be automatically integrated to the Document app.\n"
 msgstr ""
+"\n"
+"직원 급여 명세서가 자동으로 문서 앱에 통합됩니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_utm
@@ -3107,6 +3427,22 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"현장 서비스 관리\n"
+"=========================\n"
+"이 모듈은 최신 현장 서비스 관리에 필요한 기능을 추가합니다.\n"
+"다음과 같은 앱을 설치합니다 :\n"
+"- 프로젝트\n"
+"- 작업 기록\n"
+"- 판매\n"
+"\n"
+"다음 옵션을 추가합니다 :\n"
+"-작업에 대한 보고서\n"
+"-현장 작업자를 위한 사용자 정의 보기가 있는 FSM 앱\n"
+"-작업에 제품 추가\n"
+"-작업 기록 및 상품으로 판매 주문 생성\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_hw_blackbox_be
@@ -3200,6 +3536,15 @@ msgid ""
 "\n"
 "\n"
 msgstr ""
+"\n"
+"기능\n"
+"----------\n"
+"\n"
+"아르헨티나에서 법적 요구 사항이며 일정 기간 동안 이루어진 판매 또는 구매에 대한 VAT 세부 정보를 포함하는 VAT 문서 보고서를 추가합니다.\n"
+"\n"
+"송장을 분석하는 데 사용되는 VAT 요약 보고서도 추가합니다.\n"
+"\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_latam_invoice_document
@@ -3223,6 +3568,24 @@ msgid ""
 "* create the data of the document types that exists for the specific country. The document type has a country field\n"
 "\n"
 msgstr ""
+"\n"
+"기능\n"
+"----------\n"
+"\n"
+"아르헨티나, 칠레 등 일부 라틴아메리카 국가에서는 송장과 벤더 어음 같은 일부 회계거래를 정부 재정당국이 정의한 문서형태로 분류하고 있습니다(아르헨티나 AFIP, 칠레의 경우 SII).\n"
+"\n"
+"This module is intended to be extended by localizations in order to manage these document types and is an essential information that needs to be displayed in the printed reports and that needs to be easily identified, within the set of invoices as well of account moves.\n"
+"\n"
+"Each document type have their own rules and sequence number, this last one is integrated with the invoice number and journal sequence in order to be easy for the localization user. In order to support or not this document types a Journal has a new option that lets to use document or not.\n"
+"\n"
+"Technical\n"
+"---------\n"
+"\n"
+"If your localization needs this logic will then need to add this module as dependency and in your localization module extend:\n"
+"\n"
+"* extend company's _localization_use_documents() method.\n"
+"* create the data of the document types that exists for the specific country. The document type has a country field\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ar
@@ -3289,6 +3652,67 @@ msgid ""
 "* Unit of measures AFIP codes\n"
 "* Partners: Consumidor Final and AFIP\n"
 msgstr ""
+"\n"
+"기능\n"
+"----------\n"
+"\n"
+"본 모듈은 아르헨티나 현지화에 대한 회계 기능을 추가하는데, 이는 아르헨티나에서 회사가 운영되는 데 필요한 최소한의 구성과 AFIP(Administratoracion Federal de Ingresos Pulblicos) 규정 및 지침에 따른 것입니다.\n"
+"\n"
+"Follow the next configuration steps for Production:\n"
+"\n"
+"1. Go to your company and configure your VAT number and AFIP Responsibility Type\n"
+"2. Go to Accounting / Settings and set the Chart of Account that you will like to use.\n"
+"3. Create your Sale journals taking into account AFIP POS info.\n"
+"\n"
+"Demo data for testing:\n"
+"\n"
+"* 3 companies were created, one for each AFIP responsibility type with the respective Chart of Account installed. Choose the company that fix you in order to make tests:\n"
+"\n"
+"  * (AR) Responsable Inscripto\n"
+"  * (AR) Exento\n"
+"  * (AR) Monotributo\n"
+"\n"
+"* Journal sales configured to Pre printed and Expo invoices in all companies\n"
+"* Invoices and other documents examples already validated in “(AR) Responsable Inscripto” company\n"
+"* Partners example for the different responsibility types:\n"
+"\n"
+"  * ADHOC (IVA Responsable Inscripto)\n"
+"  * Consejo Municipal Rosario (IVA Sujeto Exento)\n"
+"  * Gritti (Monotributo)\n"
+"  * Cerro Castor. IVA Liberado in Zona Franca\n"
+"  * Expresso (Cliente del Exterior)\n"
+"  * Odoo (Proveedor del Exterior)\n"
+"\n"
+"Highlights:\n"
+"\n"
+"* Chart of account will not be automatically installed, each CoA Template depends on the AFIP Responsibility of the company, you will need to install the CoA for your needs.\n"
+"* No sales journals will be generated when installing a CoA, you will need to configure your journals manually.\n"
+"* The Document type will be properly pre selected when creating an invoice depending on the fiscal responsibility of the issuer and receiver of the document and the related journal.\n"
+"* A CBU account type has been added and also CBU Validation\n"
+"\n"
+"\n"
+"Technical\n"
+"---------\n"
+"\n"
+"This module adds both models and fields that will be eventually used for the electronic invoice module. Here is a summary of the main features:\n"
+"\n"
+"Master Data:\n"
+"\n"
+"* Chart of Account: one for each AFIP responsibility that is related to a legal entity:\n"
+"\n"
+"  * Responsable Inscripto (RI)\n"
+"  * Exento (EX)\n"
+"  * Monotributo (Mono)\n"
+"\n"
+"* Argentinian Taxes and Account Tax Groups (VAT taxes with the existing aliquots and other types)\n"
+"* AFIP Responsibility Types\n"
+"* Fiscal Positions (in order to map taxes)\n"
+"* Legal Documents Types in Argentina\n"
+"* Identification Types valid in Argentina.\n"
+"* Country AFIP codes and Country VAT codes for legal entities, natural persons and others\n"
+"* Currency AFIP codes\n"
+"* Unit of measures AFIP codes\n"
+"* Partners: Consumidor Final and AFIP\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_gamification
@@ -3340,6 +3764,9 @@ msgid ""
 "Generate Coupons from Helpdesks tickets\n"
 "    "
 msgstr ""
+"\n"
+"고객센터 티켓에서 구폰을 생성합니다\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_mx_edi_landing
@@ -3348,6 +3775,9 @@ msgid ""
 "Generate Electronic Invoice with custom numbers\n"
 "    "
 msgstr ""
+"\n"
+"사용자 지정 번호로 전자 송장을 생성합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm
@@ -3358,6 +3788,11 @@ msgid ""
 "\n"
 "This module includes contact phone and mobile numbers validation."
 msgstr ""
+"\n"
+"웹사이트의 연락처 페이지에 게시된 연락처 양식을 사용하여 CRM 앱에서 영업제안 또는 기회를 생성하십시오.  \n"
+"*양식 작성기* 모듈(Odoo Enterprise에서 사용 가능)로 이 양식을 사용자 지정할 수 있다.\n"
+"\n"
+"이 모듈에는 연락처 전화번호 및 휴대폰 번호 유효성 검사가 포함됩니다.   "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_links
@@ -3369,7 +3804,7 @@ msgid ""
 msgstr ""
 "\n"
 "UTM(Analytic Tracker)을 사용하여 짧은 링크를 생성하고 마케팅 캠페인에서 웹 페이지를 공유하십시오.\n"
-"이 추적기는 Google 웹 로그 분석에서 클릭 수 및 방문자 수를 추적하거나 Odoo 보고서에서 리드 생성, 관련 수익(판매 주문), 채용 등의 측면에서 캠페인의 효율성을 분석하는 데 사용될 수 있습니다.\n"
+"이 추적기는 Google 웹 로그 분석에서 클릭 수 및 방문자 수를 추적하거나 Odoo 보고서에서 영업제안 생성, 관련 수익(판매 주문), 채용 등의 측면에서 캠페인의 효율성을 분석하는 데 사용될 수 있습니다.\n"
 "    "
 
 #. module: base
@@ -3403,6 +3838,11 @@ msgid ""
 "Adds the possibility to specify the origin country of goods and the partner VAT in the Intrastat XML report.\n"
 "    "
 msgstr ""
+"\n"
+"송장을 기준으로 한 신고서에 대해 \n"
+"Intrastat XML 보고서를 생성합니다.\n"
+"Intrastat XML 보고서에서 원산지 국가 및 파트너의 부가가치세를 지정할 수 있도록 추가합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_intrastat
@@ -3449,6 +3889,15 @@ msgid ""
 "are found in other modules that must be installed separately.\n"
 "\n"
 msgstr ""
+"\n"
+"하드웨어 프록시\n"
+"=============\n"
+"\n"
+"이 모듈을 사용하면 이 서버에 연결된 주변 장치를 원격으로 사용할 수 있습니다.\n"
+"이 모듈은 활성화 프레임 워크 만 포함합니다. \n"
+"실제 장치 드라이버는\n"
+"별도로 설치해야하는 다른 모듈에 있습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hw_proxy
@@ -3495,7 +3944,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"헬프데스크 - 티켓 관리 앱\n"
+"고객센터 - 티켓 관리 앱\n"
 "================================\n"
 "\n"
 "기능:\n"
@@ -3520,6 +3969,9 @@ msgid ""
 "Hides the attendance presence button when an employee is on leave.\n"
 "    "
 msgstr ""
+"\n"
+"임직원이 휴가 중일 때는 출석 버튼을 숨깁니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_import_module
@@ -3554,6 +4006,18 @@ msgid ""
 "    * FBA: A stock location and stock moves allow to monitor your stock in Amazon Fulfilment Centers.\n"
 "    * FBM: Delivery notifications are sent to Amazon for each confirmed picking (partial delivery friendly).\n"
 msgstr ""
+"\n"
+"Odoo에서 Amazon 주문을 가져오고 배송을 동기화합니다.\n"
+"============================================================\n"
+"\n"
+"주요 기능\n"
+"--------------\n"
+"*여러 계정 및 시장에서 주문을 가져옵니다.\n"
+"* 주문을 내부 참조 자료(Amazon의 SKU)에 따라 오두 제품과 일치시킵니다.\n"
+"* 오두에서의 배송 및 취소가 아마존과 동기화됩니다.\n"
+"* Fulfillment by Amazon (FBA) 및 Fulfillment by Merchant (FBM) 모두 지원 :\n"
+"    * FBA : 재고 위치 및 재고 이동을 통해 Amazon Fulfillment Centers에서 재고를 모니터링 할 수 있습니다.\n"
+"    * FBM : 확인된 피킹마다 부분적으로 배달 알림이 전송됩니다 (일부 배달 가능).\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cn
@@ -3777,6 +4241,17 @@ msgid ""
 "regular Odoo interface anymore.\n"
 "\n"
 msgstr ""
+"\n"
+"IoT Box 홈페이지\n"
+"================\n"
+"\n"
+"이 모듈은 Odoo 웹 인터페이스를 재정의하여 \n"
+"iotbox가 무엇인지 설명하고 상태를 표시하며 \n"
+"설명서를 찾을 수 있는 간단한 홈페이지를 표시합니다.\n"
+"\n"
+"이 모듈을 활성화하면 더 이상 일반 Odoo 인터페이스를 \n"
+"사용할 수 없습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hw_posbox_upgrade
@@ -3805,6 +4280,8 @@ msgid ""
 "\n"
 "It links the module\n"
 msgstr ""
+"\n"
+"모듈을 연결합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_restaurant_iot
@@ -3845,6 +4322,17 @@ msgid ""
 "* Assign leads to sales teams.\n"
 "* Assign leads to specific salespersons in the sales team.\n"
 msgstr ""
+"\n"
+"영업제안 점수 매기기\n"
+"===================\n"
+"\n"
+"이 모듈에서는 다음을 수행할 수 있습니다 :\n"
+"\n"
+"* 연락처 페이지에 메시지를 게시한 방문자의 페이지 화면을 추적합니다.\n"
+"페이지 화면에 관련 영업제안을 나열합니다.\n"
+"* 들어오는 영업제안에 대한 점수를 계산하여 적절히 할당합니다.\n"
+"* 영업 팀에 영업제안을 할당합니다.\n"
+"* 영업 팀의 특정 영업 사원에 영업제안을 할당합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_helpdesk
@@ -3856,6 +4344,12 @@ msgid ""
 "Link module to map leads to tickets\n"
 "        "
 msgstr ""
+"\n"
+"티켓을 영업제안으로\n"
+"===============\n"
+"\n"
+"티켓을 영업제안으로 매핑하는 연결 모듈\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_board
@@ -3997,6 +4491,9 @@ msgid ""
 "Manage Product returns from helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"고객센터 티켓에서 상품 반품 관리\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_dropshipping
@@ -4164,6 +4661,9 @@ msgid ""
 "Manage the after sale of the products from helpdesk tickets.\n"
 "    "
 msgstr ""
+"\n"
+"고객센터 티켓에서 제품 판매 사후 관리.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_stock
@@ -4227,6 +4727,12 @@ msgid ""
 "Bridge module adding UX requirements to ease mass mailing of course members.\n"
 "        "
 msgstr ""
+"\n"
+"강좌 수강생용 일괄 메일\n"
+"========================\n"
+"\n"
+"강좌 수강생용 일괄 메일 발송을 용이하게 하는 UX 요구 사항을 추가한 연결 모듈.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing_event
@@ -4378,7 +4884,7 @@ msgstr ""
 "\n"
 "예약 가능한 자원을 관리합니다(작업에서의 개발자 또는\n"
 "제조 주문에서의 작업장). 이 모듈은 전체 자원과 관련된 \n"
-"자원 예약 달력을 관리합니다. 또한 자원의 가동여부도 관리합니다.\n"
+"자원 예약 일정표를 관리합니다. 또한 자원의 가동여부도 관리합니다.\n"
 "    "
 
 #. module: base
@@ -4411,6 +4917,21 @@ msgid ""
 "of recall defined. You can define different policies for different companies.\n"
 "\n"
 msgstr ""
+"\n"
+"다단계 미지급 송장 자동 독촉 문서 모듈\n"
+"=========================================================================\n"
+"\n"
+"메뉴를 통해 다단계 독촉을 정의할 수 있습니다 :\n"
+"---------------------------------------------------------------\n"
+"    환경 설정 / 후속조치 / 후속조치 수준\n"
+"    \n"
+"일단 정의하고 메뉴에서 간단히 클릭만 하면 자동으로 매일 독촉장을 인쇄합니다 :\n"
+"------------------------------------------------------------------------------------------------------\n"
+"    지불 후속조치 / 메일 및 서신 보내기\n"
+"\n"
+"정의된 독촉 수준에 따라 PDF / 이메일 발송 / 수동 작업 설정을 생성합니다.\n"
+"또한 다양한 방식으로 다양한 회사에 대응할 수 있습니다. \n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_bank_statement_import_camt
@@ -4804,6 +5325,10 @@ msgid ""
 "=============================\n"
 "\n"
 msgstr ""
+"\n"
+"Odoo 웹 간트 도표 화면.\n"
+"=============================\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web
@@ -4925,7 +5450,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"거래처 위치정보\n"
+"거래처 위치 정보\n"
 "========================\n"
 "    "
 
@@ -4985,6 +5510,21 @@ msgid ""
 "    used for example in number fields onchange;\n"
 "  * mail.thread.phone: handle sanitation and blacklist of records numbers;\n"
 msgstr ""
+"\n"
+"전화번호 확인\n"
+"========================\n"
+"\n"
+"이 모듈은 대상 국가에 따라 전화번호 확인 및 \n"
+"형식 지정 기능을 추가합니다.\n"
+"\n"
+"또 블랙리스트에 적힌 전화번호를 저장하는 특정 모델을 통해 \n"
+"전화 블랙리스트 관리를 추가합니다.\n"
+"\n"
+"두 가지 믹스 인을 추가합니다 :\n"
+"\n"
+"  * phone.validation.mixin: 레코드의 구문 분석 / 형식 작성 도우미, \n"
+"예를들어 번호 필드 변경에서 사용;\n"
+"  * mail.thread.phone: 레코드 번호의 위생 및 블랙리스트를 처리합니다;\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it
@@ -5010,6 +5550,9 @@ msgid ""
 "Please refer to Sale Matrix or Purchase Matrix for the use of this module.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈의 사용에 대해서는 판매 매트릭스 또는 구매 매트릭스를 참조하십시오.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_plm
@@ -5146,6 +5689,12 @@ msgid ""
 "This application allows you to reimburse expenses in payslips.\n"
 "    "
 msgstr ""
+"\n"
+"급여 명세서의 비용 배상\n"
+"=====================================\n"
+"\n"
+"이 응용 프로그램은 급여 명세서에 비용 배상을 포함합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_expense
@@ -5171,6 +5720,9 @@ msgid ""
 "Repair Products from helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"고객센터 티켓에서 제품 수리\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_fetchmail
@@ -5215,13 +5767,13 @@ msgstr ""
 "\n"
 "이 기능은 다음과 같이 이메일 사용이 가능한 많은 Odoo 문서에 대해 이메일 기반 작업 절차를 쉽게 생성하는 데 사용할 수 있습니다:\n"
 "----------------------------------------------------------------------------------------------------------\n"
-"    * CRM 리드/기회\n"
+"    * CRM 영업제안/기회\n"
 "    * CRM 클레임\n"
 "    * 프로젝트 문제\n"
 "    * 프로젝트 작업\n"
 "    * 인적 자원 모집 (신청자)\n"
 "\n"
-"관련 응용 프로그램을 설치하기만 하면 이러한 문서 유형(리드, 프로젝트 문제) 중 하나를 \n"
+"관련 응용 프로그램을 설치하기만 하면 이러한 문서 유형(영업제안, 프로젝트 문제) 중 하나를 \n"
 "수신 메일 계정에 할당할 수 있다. \n"
 "새로운 이메일은 선택된 유형의 새로운 문서를 자동으로 생성하므로 \n"
 "메일함과 Odoo를 통합하는 것은 간단합니다. \n"
@@ -5242,6 +5794,12 @@ msgid ""
 "Bridge module adding UX requirements to ease SMS marketing o, event attendees.\n"
 "        "
 msgstr ""
+"\n"
+"행사 참석자에 대한 SMS 마케팅\n"
+"================================\n"
+"\n"
+"행사 참석자에 대한 SMS 마케팅을 용이하게 하기 위한  UX 요구사항을 추가하는 연결 모듈.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing_event_track_sms
@@ -5254,6 +5812,12 @@ msgid ""
 "speakers..\n"
 "        "
 msgstr ""
+"\n"
+"행사 부문별 연사에 대한 SMS 마케팅\n"
+"=====================================\n"
+"\n"
+"행사 부문별 연사에 대한 SMS 마케팅을 용이하게 하기 위해 UX 요구사항을 추가하는 연결 모듈.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_subscription_dashboard
@@ -5451,6 +6015,12 @@ msgid ""
 "This module introduces skills and resumé management for employees.\n"
 "        "
 msgstr ""
+"\n"
+"HR을 위한 경력 및 기술\n"
+"========================\n"
+"\n"
+"이 모듈은 직원을 위한 기술 및 경력 관리를 소개합니다.\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_es
@@ -5610,6 +6180,12 @@ msgid ""
 "It also enables the \"optional products\" feature.\n"
 "    "
 msgstr ""
+"\n"
+"사용자가 \"module_sale_product_configurator\" 설정을 확인할 때 설치된 기술 모듈입니다.\n"
+"주요 목적은 SO 양식으로 제품을 구성할 수 있도록 sale_order 보기를 재정의하는 것입니다.\n"
+"\n"
+"또한 \"옵션 제품\" 기능을 사용할 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_repair
@@ -5715,6 +6291,10 @@ msgid ""
 "social media configuration for any other module that might need it.\n"
 "    "
 msgstr ""
+"\n"
+"이 기술 모듈의 목적은 필요할 수 있는 다른 모든 모듈에 \n"
+"소셜 미디어 환경 설정을 위한 화면을 제공하는 것입니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_pos_cert
@@ -5802,7 +6382,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"이것은 모든 기능을 갖춘 달력 시스템입니다.\n"
+"이것은 모든 기능을 갖춘 일정표 시스템입니다.\n"
 "========================================\n"
 "\n"
 "이 기능은 다음을 지원합니다 :\n"
@@ -6104,6 +6684,11 @@ msgid ""
 "    - a generic chart of accounts\n"
 "    - SARS VAT Ready Structure"
 msgstr ""
+"\n"
+"This is the latest basic 남아프리카공화국 지역화 necessary to run Odoo in ZA:\n"
+"================================================================================\n"
+"    - a generic chart of accounts\n"
+"    - SARS VAT Ready Structure"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ro
@@ -6325,6 +6910,9 @@ msgid ""
 "This module adds a Twitter scroller building block to the website builder, so that you can display Twitter feeds on any page of your website.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈은 웹사이트 작성기에 Twitter 스크롤러 빌딩 블록을 추가하여 웹사이트의 모든 페이지에 Twitter 피드를 표시할 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_comparison
@@ -6480,6 +7068,10 @@ msgid ""
 "The actual till still requires one user but an unlimited number of employees can log on to that till and process sales.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈을 통해 직원(사용자가 아닌)은 바코드, PIN 번호 또는 둘 모두를 사용하여 POS 응용 프로그램에 로그인할 수 있습니다.\n"
+"실제 까지는 여전히 한 명의 사용자가 필요하지만 무제한의 수의 직원이 해당 사용자로 로그인하여 판매를 처리할 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_rating
@@ -6508,6 +7100,9 @@ msgid ""
 "This module allows the user to add real estate related data to the Spanish localization and generates a mod 347 report.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈을 사용하면 부동산 관련 데이터를 스페인어 현지화에 추가하고 mod 347 보고서를 생성할 수 있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_automation
@@ -6531,7 +7126,7 @@ msgstr ""
 "\n"
 "**예:** 특정 사용자가 생성한 잠재 고객을 특정 영업 팀으로 자동 설정하거나, \n"
 "14일 후에도 여전히 보류 중인 상태로 있는 기회가 \n"
-"자동 알림 이메일을 트리거할 수 있습니다.\n"
+"자동 미리 알림 이메일을 트리거할 수 있습니다.\n"
 "    "
 
 #. module: base
@@ -6622,16 +7217,16 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"이 모듈을 통해 리셀러/거래처를 웹사이트에 게시하고 들어오는 리드/기회를 리셀러에게 전달할 수 있습니다.\n"
+"이 모듈을 통해 리셀러/거래처를 웹사이트에 게시하고 들어오는 영업제안/기회를 리셀러에게 전달할 수 있습니다.\n"
 "\n"
 "\n"
 "**거래처를 게시합니다**\n"
 "\n"
 "거래처를 게시하려면 연락처 양식의 *등급*을 설정하고(파트너 할당 섹션) *게시* 버튼을 클릭합니다.\n"
 "\n"
-"**리드 전달**\n"
+"**영업제안 전달**\n"
 "\n"
-"리드 전달은 한 번에 하나 또는 여러 개의 리드에 대해 수행할 수 있습니다. 이 작업은 리드/기회 양식 보기의 *할당된 거래처* 섹션과 목록보기의 *동작* 메뉴에서 사용할 수 있습니다.\n"
+"영업제안 전달은 한 번에 하나 또는 여러 개의 영업제안에 대해 수행할 수 있습니다. 이 작업은 영업제안/기회 양식 보기의 *할당된 거래처* 섹션과 목록보기의 *동작* 메뉴에서 사용할 수 있습니다.\n"
 "\n"
 "자동 할당은 거래처 등급의 수준과 지리적 위치 설정으로 계산됩니다. 파트너는 주변에 있는 잠재 고객을 확보합니다.\n"
 "\n"
@@ -6750,6 +7345,9 @@ msgid ""
 "This module enables the barcode scanning feature for the warehouse management system.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈은 창고 관리 시스템에 바코드 스캔 기능을 활성화합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_barcode
@@ -6758,6 +7356,9 @@ msgid ""
 "This module enables the management of deliveries through the use of barcode scanning.\n"
 "    "
 msgstr ""
+"\n"
+"이 모듈을 사용하면 바코드 스캔을 통해 배송을 관리할 수 ​​있습니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sms
@@ -6826,6 +7427,11 @@ msgid ""
 "a protection to avoid using it in production environment. However, do\n"
 "not use it in production environment.\n"
 msgstr ""
+"\n"
+"이 모듈은 전자 상거래에서 성공적인 결제 행동을 테스트할 수 있도록 \n"
+"간단한 연습용 결제 대행사 흐름을 구현합니다.\n"
+"생산 환경에서 사용하지 않도록 하는 보호 기능이 포함되어 있지만,\n"
+"생산 환경에서는 사용하지 마십시오.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_timesheet
@@ -7102,6 +7708,10 @@ msgid ""
 "It will install the e-learning, survey and e-commerce apps and make a complete\n"
 "certification flow including purchase, certification, failure and success.\n"
 msgstr ""
+"\n"
+"이 모듈은 Odoo의 주요 인증 흐름을 테스트합니다.\n"
+"전자학습, 설문조사, 전자 상거래 앱을 설치하고 \n"
+"구매, 인증, 실패 및 성공 등 완벽한 인증 흐름을 만들 것입니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_main_flows
@@ -7111,7 +7721,7 @@ msgid ""
 "It will install some main apps and will try to execute the most important actions.\n"
 msgstr ""
 "\n"
-"이 모듈은 Odoo의 기본 워크 플로를 테스트합니다.\n"
+"이 모듈은 Odoo의 기본 업무 순서를 테스트합니다.\n"
 "몇 가지 주요 앱을 설치하고 가장 중요한 작업을 실행하려고 시도합니다.\n"
 
 #. module: base
@@ -7129,6 +7739,8 @@ msgid ""
 "\n"
 "Time off documents will be automatically integrated to the Document app.\n"
 msgstr ""
+"\n"
+"휴가 문서는 자동으로 문서 앱에 통합됩니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_product_expiry
@@ -7217,6 +7829,10 @@ msgid ""
 "============================\n"
 "    "
 msgstr ""
+"\n"
+"우크라이나 - 계정과목 일람표.\n"
+"============================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ae
@@ -7359,6 +7975,9 @@ msgid ""
 "Validate stock moves for Field Service\n"
 "======================================\n"
 msgstr ""
+"\n"
+"현장 서비스에 대한 재고 이동 승인\n"
+"======================================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_fleet
@@ -7391,7 +8010,7 @@ msgstr ""
 "-------------\n"
 "* 차량 추가\n"
 "* 차량 보험계약 관리\n"
-"* 보험계약이 만료일에 도달하면 알림\n"
+"* 보험계약이 만료일에 도달하면 미리 알림\n"
 "* 모든 차량에 대한 서비스, 연료 기록, 주행 거리 값 추가\n"
 "* 차량 또는 서비스 유형과 관련된 모든 비용 표시\n"
 "* 비용 분석 그래프()\n"
@@ -7530,7 +8149,7 @@ msgstr " - %r in %s=%r"
 #: model:ir.module.module,description:base.module_website_crm_livechat
 msgid ""
 " Adds a stat button on lead form view to access their livechat sessions."
-msgstr ""
+msgstr "영업제안 양식 화면에 시작 버튼을 추가하여 실시간 채널 세션에 접근합니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_inter_company_rules
@@ -7556,17 +8175,17 @@ msgstr " 홍콩의 회계 및 현지화 계정을 관리하는 기본 모듈입�
 msgid ""
 " another model requires the record being deleted. If possible, archive it "
 "instead."
-msgstr ""
+msgstr "다른 모델에서는 레코드를 삭제해야 합니다. 가능하면 대신 보관하십시오."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__accesses_count
 msgid "# Access Rights"
-msgstr ""
+msgstr "# 사용 권한"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__groups_count
 msgid "# Groups"
-msgstr ""
+msgstr "# 그룹"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__rules_count
@@ -7713,7 +8332,7 @@ msgstr "'%s'은(는) '%%(field)s' 필드의 정수값이 아닙니다."
 #: code:addons/base/models/ir_ui_view.py:0
 #, python-format
 msgid "'groupby' tags can only target many2one (%(field)s)"
-msgstr ""
+msgstr "'그룹별' 태그는 many2one (%(field)s)만 대상으로 지정할 수 있습니다."
 
 #. module: base
 #: code:addons/fields.py:0
@@ -7724,7 +8343,7 @@ msgstr "(레코드 : %s, 사용자 : %s)"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "), are you sure to create a new one?"
-msgstr ""
+msgstr "), 새로 만드시겠습니까?"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -7753,6 +8372,8 @@ msgid ""
 "- Create/update: a mandatory field is not set.\n"
 "- Delete: another model requires the record being deleted. If possible, archive it instead."
 msgstr ""
+"- 생성 / 업데이트 : 필수 필드가 설정되지 않았습니다.\n"
+"- 삭제 : 다른 모델에서 레코드를 삭제해야 합니다. 가능하면 삭제 대신 보관하십시오."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -7817,7 +8438,7 @@ msgstr "-이 모듈은 다른 모듈에 영향을 주지 않습니다."
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "02/05/2019"
-msgstr ""
+msgstr "02/05/2019"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -7894,6 +8515,12 @@ msgid ""
 "                                <b attrs=\"{'invisible': [('type', '!=', 'private')]}\">Private Address</b>\n"
 "                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">Address</b>"
 msgstr ""
+"<b attrs=\"{'invisible': [('type', '!=', 'contact')]}\">회사 주소</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'invoice')]}\">송장 주소</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'delivery')]}\">배송 주소</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'other')]}\">기타 주소</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'private')]}\">개인 주소</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">주소</b>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_short_form
@@ -8026,7 +8653,7 @@ msgstr "<i class=\"fa fa-times\" title=\"Close the onboarding panel\"/>"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
 msgid "<span aria-label=\"Close\">&amp;times;</span>"
-msgstr "<span aria-label=\"Close\">&amp;시간;</span>"
+msgstr "<span aria-label=\"Close\">&amp;times;</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.reset_view_arch_wizard_view
@@ -8034,6 +8661,8 @@ msgid ""
 "<span attrs=\"{'invisible': [('reset_mode', '=', 'hard')]}\">This view has no previous version.</span>\n"
 "                        <span attrs=\"{'invisible': [('reset_mode', '=', 'soft')]}\">This view is not coming from a file.</span>"
 msgstr ""
+"<span attrs=\"{'invisible': [('reset_mode', '=', 'hard')]}\">이 보기에는 이전 버전이 없습니다.</span>\n"
+"                        <span attrs=\"{'invisible': [('reset_mode', '=', 'soft')]}\">이 보기는 파일에서 제공되지 않습니다.</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -8043,7 +8672,7 @@ msgid ""
 "                                       Create company"
 msgstr ""
 "<span class=\"fa fa-plus-square\"/>\n"
-"                                       회사 작성"
+"                                       회사 만들기"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
@@ -8221,7 +8850,7 @@ msgstr "<strong>이름</strong>"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_company_kanban
 msgid "<strong>Phone:</strong>"
-msgstr ""
+msgstr "<strong>전화 :</strong>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_company_kanban
@@ -8499,7 +9128,7 @@ msgstr "예외를 생성하는 모듈입니다."
 #. module: base
 #: model:ir.module.module,description:base.module_test_lint
 msgid "A module to test Odoo code with various linters."
-msgstr ""
+msgstr "다양한 린터로 오두 코드를 테스트하는 모듈입니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_impex
@@ -8529,13 +9158,13 @@ msgstr "번역 가져오기를 시험하는 모듈입니다."
 #. module: base
 #: model:ir.module.module,description:base.module_test_assetsbundle
 msgid "A module to verify the Assets Bundle mechanism."
-msgstr "자산 패키징 메커니즘을 확인하기 위한 모듈입니다."
+msgstr "에셋 번들 메커니즘을 확인하기 위한 모듈입니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_inherits_depends
 msgid ""
 "A module to verify the inheritance using _inherits in non-original modules."
-msgstr ""
+msgstr "비 원본 모듈에서 _inherits를 사용하여 상속을 확인하는 모듈입니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_inherits
@@ -8687,7 +9316,7 @@ msgstr "사용 권한 토큰"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr
 msgid "Access documents from the employee profile"
-msgstr ""
+msgstr "직원 프로필에서 문서에 접근하기"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_profile
@@ -8707,7 +9336,7 @@ msgstr "계정 분석 기본값"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_analytic_default_purchase
 msgid "Account Analytic Defaults for Purchase."
-msgstr ""
+msgstr "구매에 대한 계정 분석 기본값."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_analytic_default_hr_expense
@@ -8717,12 +9346,12 @@ msgstr "비용에 대한 계정 분석 기본값"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_auto_transfer
 msgid "Account Automatic Transfers"
-msgstr ""
+msgstr "자동 이체 계정"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_generic_auto_transfer_demo
 msgid "Account Automatic Transfers Demo Data"
-msgstr ""
+msgstr "자동 이체 데모 데이터 계정"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import
@@ -8737,12 +9366,12 @@ msgstr "계정과목"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_us_consolidation_demo
 msgid "Account Consolidation Demo Data"
-msgstr ""
+msgstr "계정 통합 데모 데이터"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_be_us_consolidation_demo
 msgid "Account Consolidation Demo Data using a Belgium and a US company"
-msgstr ""
+msgstr "벨기에 및 미국 회사를 사용한 계정 통합 데모 데이터"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__partner_id
@@ -8792,7 +9421,7 @@ msgstr "TaxCloud 계정 - 판매"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_winbooks_import
 msgid "Account Winbooks Import"
-msgstr ""
+msgstr "Winbooks 계정 가져 오기"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_payment
@@ -8977,7 +9606,7 @@ msgstr "추가 작업"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_tree
 msgid "Activate Language and Update Translations"
-msgstr ""
+msgstr "언어 활성화 및 번역 업데이트"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -9061,7 +9690,7 @@ msgstr "바코드 스캔 기능을 이벤트 관리에 추가합니다."
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_survey
 msgid "Add certification capabilities to your courses"
-msgstr ""
+msgstr "강좌에 자격 인증 추가"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_survey
@@ -9071,12 +9700,12 @@ msgstr "임직원 경력에 자격 증명 추가"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_slides
 msgid "Add completed courses to resumé of your employees"
-msgstr ""
+msgstr "임직원 경력에 완료한 과정 추가"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_crm
 msgid "Add crm UTM info on social"
-msgstr ""
+msgstr "소셜에 CRM UTM 정보 추가"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
@@ -9096,7 +9725,7 @@ msgstr "'인쇄' 메뉴에 추가"
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_crm
 msgid "Add lead / opportunities UTM info on mass mailing"
-msgstr "일괄 메일 보내기에 리드/기회 UTM 정보 추가"
+msgstr "일괄 메일 보내기에 영업제안/기회 UTM 정보 추가"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_im_livechat_mail_bot
@@ -9106,7 +9735,7 @@ msgstr "OdooBot에 대한 실시간 채팅 지원 추가"
 #. module: base
 #: model:ir.module.module,summary:base.module_social_sale
 msgid "Add sale UTM info on social"
-msgstr ""
+msgstr "소셜에 판매 UTM 정보 추가"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_sale
@@ -9116,7 +9745,7 @@ msgstr "일괄 메일 보내기에 판매 주문 UTM 정보 추가"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_product_matrix
 msgid "Add variants to Sales Order through a grid entry."
-msgstr ""
+msgstr "그리드 항목을 통해 판매 주문에 변형 상품을 추가하십시오."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.contact
@@ -9148,7 +9777,7 @@ msgstr "주소 구분 기호"
 #. module: base
 #: model:ir.module.module,description:base.module_contacts_enterprise
 msgid "Adds notably the map view of contact"
-msgstr ""
+msgstr "연락처의 지도 화면을 확실히 추가합니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_auth_ldap
@@ -9320,12 +9949,12 @@ msgstr "고급 행사"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_event_track_gantt
 msgid "Advanced Events Gantt"
-msgstr ""
+msgstr "행사용 고급 간트 차트"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase_enterprise
 msgid "Advanced Features for Purchase Management"
-msgstr ""
+msgstr "구매 관리를 위한 고급 기능"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_enterprise
@@ -9446,7 +10075,7 @@ msgstr "이 연락처로 전송된 모든 이메일과 문서는 이 언어로 �
 #: model:ir.module.module,description:base.module_account_consolidation
 #: model:ir.module.module,summary:base.module_account_consolidation
 msgid "All you need to make financial consolidation"
-msgstr ""
+msgstr "재무 통합에 필요한 모든 것"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays
@@ -9461,7 +10090,7 @@ msgstr "계산원이 영수증을 다시 인쇄할 수 있도록 허용"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_fsm
 msgid "Allow generating fsm tasks from ticket"
-msgstr ""
+msgstr "티켓에서 fsm 작업 생성 허용"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_ocn_client
@@ -9503,7 +10132,7 @@ msgstr "지도에서 레코드를 볼 수 있습니다"
 msgid ""
 "Allows to access the website profile of the users and see their statistics "
 "(karma, badges, etc..)"
-msgstr ""
+msgstr "사용자의 웹 사이트 프로필에 접근하고 통계(카르마, 배지 등)를 볼 수 있습니다."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_forum
@@ -9519,44 +10148,44 @@ msgstr "쿠폰 보상으로 무료 배송 제공"
 #: model:ir.module.module,description:base.module_website_sale_coupon_delivery
 #: model:ir.module.module,summary:base.module_website_sale_coupon_delivery
 msgid "Allows to offer free shippings in coupon reward on eCommerce"
-msgstr ""
+msgstr "전자상거래에서 쿠폰 보상으로 무료 배송 제공"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sms
 msgid "Allows to send sms to website visitor"
-msgstr ""
+msgstr "웹사이트 방문자에게 sms를 보낼 수 있습니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a lead."
-msgstr ""
+msgstr "방문자가 영업제안에 연결되어 있는 경우 웹 사이트 방문자에게 SMS를 보낼 수 있습니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a partner."
-msgstr ""
+msgstr "방문자가 협력사로 연결된 경우 웹 사이트 방문자에게 SMS를 보낼 수 있습니다."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_sms
 msgid "Allows to send sms to website visitor that have lead"
-msgstr ""
+msgstr "영업제안이 있는 웹 사이트 방문자에게 SMS를 보낼 수 있습니다"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon
 msgid "Amazon Connector"
-msgstr ""
+msgstr "아마존 연결기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_delivery
 msgid "Amazon/Delivery Bridge"
-msgstr ""
+msgstr "아마존/배송 연결"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_taxcloud
 msgid "Amazon/TaxCloud Bridge"
-msgstr ""
+msgstr "Amazon/TaxCloud 연결"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -9797,12 +10426,12 @@ msgstr "아르헨티나"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ar
 msgid "Argentinian Accounting"
-msgstr ""
+msgstr "아르헨티나 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ar_reports
 msgid "Argentinian Accounting Reports"
-msgstr ""
+msgstr "아르헨티나 회계 보고서"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_client__params
@@ -9914,7 +10543,7 @@ msgstr "오스트리아 - 회계"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_at_reports
 msgid "Austria - Accounting Reports"
-msgstr ""
+msgstr "오스트리아 - 회계 보고서"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_at_reports
@@ -9924,7 +10553,7 @@ msgstr "오스트리아 재무 보고서"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_at
 msgid "Austrian Standardized Charts & Tax"
-msgstr ""
+msgstr "오스트리아 표준 계정 및 세금"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_ldap
@@ -9951,17 +10580,17 @@ msgstr "Authorize.Net 결제 매입사"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_dependency__auto_install_required
 msgid "Auto Install Required"
-msgstr ""
+msgstr "자동 설치 필요"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_partner_autocomplete
 msgid "Auto-complete partner companies' data"
-msgstr ""
+msgstr "협력사 데이터 자동 완성"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_partner_autocomplete_address_extended
 msgid "Autocomplete extended addresses"
-msgstr ""
+msgstr "확장 주소 자동 완성"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_automation
@@ -10195,7 +10824,7 @@ msgstr "모바일 바코드 스캔"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Barcode symbology"
-msgstr ""
+msgstr "바코드 기호"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
@@ -10345,7 +10974,7 @@ msgstr "벨기에 - 회계 보고서"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_edi
 msgid "Belgium - E-Invoicing (UBL 2.0, e-fff)"
-msgstr ""
+msgstr "벨기에 - 전자 송장 (UBL 2.0, e-fff)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_coda
@@ -10511,28 +11140,28 @@ msgstr "브라질 - 회계"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_amazon_delivery
 msgid "Bridge module between Amazon Connector and Delivery"
-msgstr ""
+msgstr "아마존 연결기 및 배송간의 연결 모듈"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_amazon_taxcloud
 msgid "Bridge module between Amazon Connector and TaxCloud"
-msgstr ""
+msgstr "Amazon Connector와 TaxCloud 간 연결 모듈"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_timesheet_purchase
 msgid "Bridge module between Sales Timesheet and Purchase"
-msgstr ""
+msgstr "판매 작업 기록과 구매 간의 연결 모듈"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_helpdesk
 #: model:ir.module.module,summary:base.module_website_helpdesk
 msgid "Bridge module for helpdesk modules using the website."
-msgstr "웹사이트를 사용하는 헬프데스크 모듈용 연결 모듈입니다."
+msgstr "웹사이트를 사용하는 고객센터 모듈용 연결 모듈입니다."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project_enterprise
 msgid "Bridge module for project and enterprise"
-msgstr ""
+msgstr "프로젝트 및 엔터프라이즈용 연결 모듈"
 
 #. module: base
 #: model:res.country,name:base.io
@@ -10635,7 +11264,7 @@ msgstr "고객 관계 관리 유료버전"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_crm
 msgid "CRM statistics on social"
-msgstr ""
+msgstr "소셜 CRM 통계"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_language_export__format__csv
@@ -10666,7 +11295,7 @@ msgstr "일정 관리"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_calendar_sms
 msgid "Calendar - SMS"
-msgstr "달력 - SMS"
+msgstr "일정표 - SMS"
 
 #. module: base
 #: model:res.country,name:base.kh
@@ -10761,7 +11390,7 @@ msgstr "%r 필드를 집계할 수 없습니다."
 msgid ""
 "Cannot create new '%s' records from their name alone. Please create those "
 "records manually and try importing again."
-msgstr ""
+msgstr "이름만으로는 새 '%s' 레코드를 만들 수 없습니다. 이러한 레코드를 수동으로 생성한 후 가져오기를 다시 시도하세요."
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -11182,7 +11811,7 @@ msgstr "Comm10E 25  105 x 241 mm, 미국 일반 10 봉투"
 msgid ""
 "Comma-separated list of allowed view modes, such as 'form', 'tree', "
 "'calendar', etc. (Default: tree,form)"
-msgstr "'양식', '트리', '달력' 등과 같은 허용된 보기 방법의 쉼표로 구분된 목록 (기본: 트리,양식)"
+msgstr "'양식', '트리', '일정표' 등과 같은 허용된 보기 방법의 쉼표로 구분된 목록 (기본: 트리,양식)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__comment
@@ -11323,7 +11952,7 @@ msgstr "프로젝트의 작업 기록과 예측을 비교합니다."
 #. module: base
 #: model:ir.module.module,summary:base.module_project_timesheet_forecast
 msgid "Compare timesheets and plannings"
-msgstr ""
+msgstr "작업 기록 및 작업 계획 비교"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__contact_address
@@ -11397,7 +12026,7 @@ msgstr "설치 프로그램 구성"
 #. module: base
 #: model:ir.model,name:base.model_res_config_settings
 msgid "Config Settings"
-msgstr "설정"
+msgstr "설정 구성"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_form
@@ -11441,7 +12070,7 @@ msgstr "문서 유형 구성"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_product_configurator
 msgid "Configure your products"
-msgstr ""
+msgstr "상품 구성"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
@@ -11489,7 +12118,7 @@ msgstr "연결 테스트 성공!"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_consolidation
 msgid "Consolidation"
-msgstr ""
+msgstr "통합"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__name
@@ -11578,12 +12207,12 @@ msgstr "연락처와 주소록"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_contacts_enterprise
 msgid "Contacts Enterprise"
-msgstr ""
+msgstr "엔터프라이즈용 주소록"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_partner_check_name
 msgid "Contacts require a name"
-msgstr ""
+msgstr "연락처에는 이름이 필요합니다."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_filters__context
@@ -11606,7 +12235,7 @@ msgstr "파이썬 문법의 문맥 사전, 기본적으로 비어 있음 (Defaul
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract_sign
 msgid "Contract - Signature"
-msgstr ""
+msgstr "계약 - 서명"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_contracts
@@ -11657,7 +12286,7 @@ msgstr "이메일 주소 없이 문의 사항을 작성할 수 없습니다!"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__count
 msgid "Count (Incl. Archived)"
-msgstr ""
+msgstr "집계 (보관 처리 포함)"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_country
@@ -11725,7 +12354,7 @@ msgstr "전자 상거래를 위한 쿠폰 및 프로모션"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_survey
 msgid "Course Certifications"
-msgstr "과정 인증서"
+msgstr "강좌 수료증"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_create
@@ -11735,7 +12364,7 @@ msgstr "사용하게 만들기"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 msgid "Create Access Right"
-msgstr "사용 권한 작성"
+msgstr "사용 권한 만들기"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -11752,12 +12381,12 @@ msgstr "작성일"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_iap_lead
 msgid "Create Leads/Opportunities based on country, industries, size, etc."
-msgstr ""
+msgstr "국가, 산업분야, 크기, 기타 정보에 기반한 새로운 영업제안/기회를 생성합니다."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_iap_lead_website
 msgid "Create Leads/Opportunities from your website's traffic"
-msgstr "웹사이트 트래픽에서 리드 / 기회 창출"
+msgstr "웹사이트 트래픽에서 영업제안/기회 창출"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.act_menu_create
@@ -11773,12 +12402,12 @@ msgstr "마법사 메뉴 만들기"
 #. module: base
 #: model:ir.module.module,summary:base.module_industry_fsm_report
 msgid "Create Reports for Field service workers"
-msgstr "현장 서비스 작업자를 위한 보고서 작성"
+msgstr "현장 서비스 작업자를 위한 보고서 만들기"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_helpdesk
 msgid "Create Tickets from Leads"
-msgstr ""
+msgstr "영업제안으로 티켓 만들기"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_menu_create
@@ -11793,7 +12422,7 @@ msgstr "메뉴 만들기"
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_res_partner_bank_account_form
 msgid "Create a bank account"
-msgstr "은행 계좌 작성"
+msgstr "은행 계좌 만들기"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_ui_view_custom
@@ -11813,7 +12442,7 @@ msgstr "새로 은행 만들기"
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_res_company_form
 msgid "Create a new company"
-msgstr "새로 회사 만들기"
+msgstr "새 회사 만들기"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_category_form
@@ -11868,12 +12497,12 @@ msgstr "승인 요청 생성 및 검증"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_livechat
 msgid "Create lead from livechat conversation"
-msgstr "실시간 채팅에서 리드 만들기"
+msgstr "실시간 채팅에서 영업제안 만들기"
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_livechat
 msgid "Create new lead with using /lead command in the channel"
-msgstr "채널에서 /lead 명령을 사용하여 새 리드를 만듭니다."
+msgstr "채널에서 /lead 명령을 사용하여 새 영업제안을 만듭니다."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_survey
@@ -12068,7 +12697,7 @@ msgstr "작성일"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_logging_form_view
 msgid "Creation details"
-msgstr ""
+msgstr "세부사항 작성"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__credit_limit
@@ -12168,7 +12797,7 @@ msgstr "통화 기호입니다. 금액을 인쇄할 때 사용됩니다."
 #: code:addons/base/models/ir_ui_view.py:0
 #, python-format
 msgid "Current Arch"
-msgstr ""
+msgstr "현재 보관"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__current_line_id
@@ -12397,7 +13026,7 @@ msgstr "비교 및 서식에 사용되는 날짜 단위입니다."
 msgid ""
 "Date unit used for the rounding. The value must be smaller than 'hour' if "
 "you use the digital formatting."
-msgstr ""
+msgstr "반올림에 사용되는 날짜 단위입니다. 디지털 서식을 사용하는 경우 값은 '시간'보다 작아야 합니다."
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
@@ -12508,7 +13137,7 @@ msgstr "정의된 보고서"
 #. module: base
 #: model:ir.module.module,summary:base.module_web_map
 msgid "Defines the map view for odoo enterprise"
-msgstr ""
+msgstr "odoo enterprise에 대한 맵 뷰 정의"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__definition
@@ -12694,7 +13323,7 @@ msgstr "디지털 제품"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Digital formatting"
-msgstr ""
+msgstr "디지털 포맷"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_decimal_precision__digits
@@ -12964,7 +13593,7 @@ msgstr "이 구성 패널을 제거 하시겠습니까?"
 #. module: base
 #: model:res.partner.title,name:base.res_partner_title_doctor
 msgid "Doctor"
-msgstr "의사"
+msgstr "박사"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
@@ -12987,7 +13616,7 @@ msgstr "문서 관리"
 #: code:addons/models.py:0
 #, python-format
 msgid "Document type:"
-msgstr ""
+msgstr "문서 유형 :"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_documentation_examples
@@ -13008,27 +13637,27 @@ msgstr "문서 - 회계"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_hr_contract
 msgid "Documents - Contracts"
-msgstr ""
+msgstr "문서 - 계약"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_fleet
 msgid "Documents - Fleet"
-msgstr ""
+msgstr "문서 - 차량"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_hr
 msgid "Documents - HR"
-msgstr ""
+msgstr "문서 - 인사"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_hr_payroll
 msgid "Documents - Payroll"
-msgstr ""
+msgstr "문서 - 급여"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_product
 msgid "Documents - Product"
-msgstr "문서 - 제품"
+msgstr "문서 - 상품"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_project
@@ -13038,7 +13667,7 @@ msgstr "문서 - 프로젝트"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_hr_recruitment
 msgid "Documents - Recruitment"
-msgstr ""
+msgstr "문서 - 채용"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_sign
@@ -13048,7 +13677,7 @@ msgstr "문서 - 서명"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_hr_holidays
 msgid "Documents - Time Off"
-msgstr ""
+msgstr "문서 - 휴가"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_filters__domain
@@ -13108,7 +13737,7 @@ msgstr "드롭다운 메뉴"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_dropshipping
 msgid "Dropship and Subcontracting Management"
-msgstr ""
+msgstr "수송선 및 하도급 관리"
 
 #. module: base
 #: code:addons/base/models/res_company.py:0
@@ -13125,7 +13754,7 @@ msgstr "E 상수도 ; 상하수도, 폐기물 관리 및 재생 활동"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_be_edi
 msgid "E-Invoicing, Universal Business Language (UBL 2.0), e-fff protocol"
-msgstr ""
+msgstr "전자 송장, 범용 기업용 언어(UBL 2.0), e-fff 프로토콜"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_edi
@@ -13151,7 +13780,7 @@ msgstr "각 모델은 고유해야 합니다!"
 #: model:ir.module.module,description:base.module_social
 #: model:ir.module.module,summary:base.module_social
 msgid "Easily manage your social media and website visitors"
-msgstr ""
+msgstr "소셜 미디어 및 웹 사이트 방문자를 쉽게 관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_easypost
@@ -13330,7 +13959,7 @@ msgstr "이메일 서명"
 #: model:ir.model.fields,field_description:base.field_res_partner__employee
 #: model:ir.model.fields,field_description:base.field_res_users__employee
 msgid "Employee"
-msgstr "직원"
+msgstr "임직원"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract
@@ -13345,19 +13974,19 @@ msgstr "근로계약 보고"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_presence
 msgid "Employee Presence Control"
-msgstr ""
+msgstr "직원 현황 관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_referral
 msgid "Employee Referral"
-msgstr ""
+msgstr "임직원 추천"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_employee_form
 #: model:ir.module.category,name:base.module_category_human_resources_employees
 #: model:ir.module.module,shortdesc:base.module_hr
 msgid "Employees"
-msgstr "직원"
+msgstr "임직원 관리"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -13368,7 +13997,7 @@ msgstr "%r의 종속성이 비어 있습니다."
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_cache
 msgid "Enable a cache on products for a lower POS loading time."
-msgstr ""
+msgstr "POS 로딩 시간을 단축하기 위해 제품 캐시를 활성화합니다."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -13383,7 +14012,7 @@ msgstr "에너지 공급"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_iap_lead_enrich
 msgid "Enrich Leads/Opportunities using email address domain"
-msgstr ""
+msgstr "이메일 주소 도메인을 사용하여 영업제안/기회 강화"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -13408,7 +14037,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_contacts_enterprise
 msgid "Enterprise features on contacts"
-msgstr ""
+msgstr "엔터프라이즈용 연락처 기능"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website
@@ -13469,7 +14098,7 @@ msgstr "제약 조건을 위반하면 오류 메시지가 돌아옵니다."
 #: code:addons/base/models/ir_ui_view.py:0
 #, python-format
 msgid "Error while validating view"
-msgstr ""
+msgstr "화면 확인 중 오류"
 
 #. module: base
 #: code:addons/base/models/ir_ui_menu.py:0
@@ -13505,7 +14134,7 @@ msgstr "평가 유형"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_event_sms
 msgid "Event Attendees SMS Marketing"
-msgstr ""
+msgstr "행사 참석자 SMS 마케팅"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_barcode
@@ -13630,7 +14259,7 @@ msgstr "경비 관리"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_payroll_expense
 msgid "Expenses in Payslips"
-msgstr ""
+msgstr "급여 명세서 상의 비용"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_report_paperformat__report_ids
@@ -13808,6 +14437,9 @@ msgid ""
 "from mail header:\n"
 "%s"
 msgstr ""
+"%s 주소를 인코딩하지 못했습니다.\n"
+"해당 메일 헤더 :\n"
+"%s"
 
 #. module: base
 #: model:ir.actions.server,name:base.demo_failure_action
@@ -14070,7 +14702,7 @@ msgstr "필드 설명"
 #: model:ir.model,name:base.model_ir_model_fields_selection
 #: model:ir.ui.menu,name:base.ir_model_model_fields_selection
 msgid "Fields Selection"
-msgstr ""
+msgstr "필드 선택"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -14099,6 +14731,10 @@ msgid ""
 "Technical Details:\n"
 "%s"
 msgstr ""
+"형식이 일치하지 않거나 형식이 잘못된 파일로 인해 %r 파일을 가져 오지 못했습니다. (유효한 형식 : .csv, .po, .pot)\n"
+"\n"
+"기술적 세부 사항 :\n"
+"%s"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -14133,6 +14769,7 @@ msgid ""
 "File from where the view originates.\n"
 "                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
+"화면이 유래된 곳의 파일입니다. 깨진 화면을(하드) 재설정하거나 dev-xml 모드에 있는 파일에서 보관본을 읽는 데 유용합니다."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__filter
@@ -14226,6 +14863,23 @@ msgid ""
 "3. The trial balance Month 13 report must be generated with dates for all the\n"
 "   fiscal year to report.\n"
 msgstr ""
+"결산 항목에 대한 회계 보고서\n"
+"================================\n"
+"\n"
+"시산표 보고서가 마감 항목을 생성하도록 보완됩니다.\n"
+"(A.K.A. 13개월 이동)\n"
+"\n"
+"환경 설정\n"
+"=============\n"
+"\n"
+"보고서를 얻는 단계 :\n"
+"\n"
+"1. 연습 이전을 위한 분개는 마감 회계 연도의 종료일과 함께 수동으로 생성해야 합니다.\n"
+"그리고 게시되어야 합니다.\n"
+"\n"
+"2. 이 항목은 회계 연도의 마감 항목으로 표시되어야 합니다.\n"
+"\n"
+"3. 모든 회계 연도에 보고할 날짜와 함께 시산표 13월 보고서를 생성해야 합니다.\n"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_fleet
@@ -14241,7 +14895,7 @@ msgstr "차량 이력"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_fleet
 msgid "Fleet from documents"
-msgstr ""
+msgstr "차량용 문서"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__float
@@ -14356,7 +15010,7 @@ msgstr "게시판"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_forum
 msgid "Forum on Courses"
-msgstr ""
+msgstr "강좌 포럼"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -14394,7 +15048,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_coupon_delivery
 msgid "Free Delivery with Coupon on eCommerce"
-msgstr ""
+msgstr "전자상거래에서 쿠폰으로 무료 배송"
 
 #. module: base
 #: model:res.country,name:base.gf
@@ -14548,12 +15202,12 @@ msgstr "간트"
 #: model:ir.module.module,description:base.module_website_event_track_gantt
 #: model:ir.module.module,summary:base.module_website_event_track_gantt
 msgid "Gantt View for Advanced Events"
-msgstr "고급 이벤트를 위한 간트 보기"
+msgstr "고급 행사를 위한 간트 화면"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays_gantt
 msgid "Gantt view for Time Off Dashboard"
-msgstr "휴가 대시보드 간트 보기"
+msgstr "휴가 대시보드 간트 화면"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_kanban_gauge
@@ -14586,7 +15240,7 @@ msgstr "누락된 용어 생성"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm
 msgid "Generate leads from a contact form"
-msgstr "문의 양식에서 리드 생성"
+msgstr "문의 양식에서 영업제안 생성"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription
@@ -14678,7 +15332,7 @@ msgstr "웹사이트 앱에서 새로운 대시보드 보기 가져 오기"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_fleet
 msgid "Get history of driven cars by employees"
-msgstr ""
+msgstr "직원별 자동차 운전 이력 가져오기"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_enterprise
@@ -15018,7 +15672,7 @@ msgstr "H 운송 및 보관"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_attendance
 msgid "HR Attendance Holidays"
-msgstr ""
+msgstr "HR 근태 휴일"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract_salary
@@ -15122,12 +15776,12 @@ msgstr "고객센터 관리"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_account
 msgid "Helpdesk Account"
-msgstr ""
+msgstr "고객센터 계정"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale
 msgid "Helpdesk After Sales"
-msgstr ""
+msgstr "고객센터 사후관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_fsm
@@ -15147,17 +15801,17 @@ msgstr "고객센터 판매 쿠폰"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_stock
 msgid "Helpdesk Stock"
-msgstr ""
+msgstr "고객센터 재고"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_timesheet
 msgid "Helpdesk Timesheet"
-msgstr "헬프데스크 작업 기록"
+msgstr "고객센터 작업 기록"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_forum
 msgid "Helpdesk: Knowledge Base"
-msgstr "헬프데스크 : 기술 자료"
+msgstr "고객센터 : 기술 자료"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_point_of_sale
@@ -15202,7 +15856,7 @@ msgstr "평가를 관리하는 데 도움이 됩니다."
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_approvals
 msgid "Helps you manage your approvals."
-msgstr ""
+msgstr "승인 관리에 도움이 됩니다."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_contracts
@@ -15239,6 +15893,8 @@ msgid ""
 "Helps you manage your mass mailing to design\n"
 "professional emails and reuse templates."
 msgstr ""
+"전문적인 이메일로 디자인하고 서식을 재사용하는 \n"
+"일괄 메일을 관리하는 데 도움을 줍니다."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_payroll
@@ -15262,7 +15918,7 @@ msgstr "견적 요청, 공급 업체 청구서 발송 등과 같은 구매 관�
 #. module: base
 #: model:ir.module.category,description:base.module_category_manufacturing_quality
 msgid "Helps you manage your quality alerts and quality checks."
-msgstr ""
+msgstr "품질 경고 및 품질 검사를 관리할 수 ​​있습니다."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_recruitment
@@ -15272,7 +15928,7 @@ msgstr "채용 관리를 도와줍니다."
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_time_off
 msgid "Helps you manage your time off."
-msgstr ""
+msgstr "휴가를 관리하는 데 도움이 됩니다."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_sign
@@ -15782,7 +16438,7 @@ msgstr "영향을 받는 모듈"
 #. module: base
 #: model:ir.module.module,summary:base.module_auth_password_policy
 msgid "Implement basic password policy configuration & check"
-msgstr ""
+msgstr "기본 비밀번호 정책 환경 설정 및 확인 구현"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__implementation
@@ -15829,7 +16485,7 @@ msgstr "CSV 예금거래 명세서 가져오기"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_winbooks_import
 msgid "Import Data From Winbooks"
-msgstr ""
+msgstr "Winbooks에서 데이터 가져오기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import_ofx
@@ -15900,12 +16556,12 @@ msgstr "인도"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_purchase_stock
 msgid "India Purchase and Warehouse Management"
-msgstr ""
+msgstr "인도용 구매 및 창고 관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_sale_stock
 msgid "India Sales and Warehouse Management"
-msgstr ""
+msgstr "인도용 판매 및 창고 관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in
@@ -16088,7 +16744,7 @@ msgstr "일정관리 보기에 대한 필드가 부족합니다!"
 msgid ""
 "Insufficient fields to generate a Calendar View for %s, missing a date_stop "
 "or a date_delay"
-msgstr "필드가 부족하여 %s에 대한 달력 보기를 생성할 수 없습니다. date_stop 또는 date_delay가 누락되었습니다."
+msgstr "필드가 부족하여 %s에 대한 일정 보기를 생성할 수 없습니다. date_stop 또는 date_delay가 누락되었습니다."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__integer
@@ -16098,7 +16754,7 @@ msgstr "정수"
 #. module: base
 #: model:ir.module.module,summary:base.module_marketing_automation_sms
 msgid "Integrate SMS Marketing in marketing campaigns"
-msgstr ""
+msgstr "마케팅 캠페인에 SMS 마케팅 통합"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_coupon
@@ -16113,7 +16769,7 @@ msgstr "쿠폰 메커니즘과 배송 비용을 통합합니다."
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_adyen
 msgid "Integrate your POS with an Adyen payment terminal"
-msgstr ""
+msgstr "POS를 Adyen 결제 단말기와 통합"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_inter_company_rules
@@ -16340,12 +16996,12 @@ msgstr "인보이스 발행 주소"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "Invoice Date:"
-msgstr ""
+msgstr "송장 발행일 : "
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "Invoice INV/2019/0005"
-msgstr ""
+msgstr "송장 INV/2019/0005"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account
@@ -16441,7 +17097,7 @@ msgstr "이탈리아 - 회계"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi
 msgid "Italy - E-invoicing"
-msgstr ""
+msgstr "이탈리아 - 전자 송장"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_J
@@ -16577,22 +17233,22 @@ msgstr "L 실제적인 활동들"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_latam_invoice_document
 msgid "LATAM Document"
-msgstr ""
+msgstr "LATAM 문서"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_latam_invoice_document
 msgid "LATAM Document Types"
-msgstr ""
+msgstr "LATAM 문서 유형"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_latam_base
 msgid "LATAM Identification Types"
-msgstr ""
+msgstr "LATAM 식별 유형"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_latam_base
 msgid "LATAM Localization Base"
-msgstr ""
+msgstr "LATAM 현지화 기본"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__license__lgpl-3
@@ -16951,7 +17607,7 @@ msgstr "최근 인증"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__lato
 msgid "Lato"
-msgstr ""
+msgstr "Lato"
 
 #. module: base
 #: model:res.country,name:base.lv
@@ -16983,12 +17639,12 @@ msgstr "보고서 배치"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead_enrich
 msgid "Lead Enrichment"
-msgstr ""
+msgstr "영업제안 강화"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead
 msgid "Lead Generation"
-msgstr "리드 생성"
+msgstr "영업제안 생성"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead_website
@@ -16998,17 +17654,17 @@ msgstr "웹 사이트 방문에서 영업제안 생성"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_livechat
 msgid "Lead Livechat Sessions"
-msgstr ""
+msgstr "영업제안 실시간 채팅 세션"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_score
 msgid "Lead Scoring"
-msgstr "리드 득점"
+msgstr "영업제안 득점"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_helpdesk
 msgid "Lead to Tickets"
-msgstr ""
+msgstr "티켓에서 영업제안"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
@@ -17066,7 +17722,7 @@ msgstr "시스템이 공급업체 청구서에 맞는 계정, 제품을 선택�
 #: model:ir.module.module,description:base.module_hr_referral
 #: model:ir.module.module,summary:base.module_hr_referral
 msgid "Let your employees share job positions and refer their friends"
-msgstr ""
+msgstr "직원들이 직무를 공유하고 친구를 추천하도록 하십시오"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_step
@@ -17149,7 +17805,7 @@ msgstr "링크 추적기"
 #. module: base
 #: model:ir.module.module,summary:base.module_voip_crm
 msgid "Link between voip and crm"
-msgstr ""
+msgstr "VoIP와 CRM 사이의 연결"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_hr
@@ -17212,7 +17868,7 @@ msgstr "실시간 통화 환율"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_livechat_enterprise
 msgid "Live chat enterprise"
-msgstr ""
+msgstr "실시간 채팅 엔터프라이즈용"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_support
@@ -17261,7 +17917,7 @@ msgstr "로그인 중"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_logging_form_view
 msgid "Logging details"
-msgstr ""
+msgstr "로그인 상세사항"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__login
@@ -17340,7 +17996,7 @@ msgstr "품질 관리를 위한 MRP 기능"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_mrp_workorder_iot
 msgid "MRP features for Quality Control with IoT"
-msgstr ""
+msgstr "IoT를 이용한 품질관리를 위한 MRP 기능"
 
 #. module: base
 #: model:res.country,name:base.mo
@@ -17391,7 +18047,7 @@ msgstr "메일 테스트(엔터프라이즈용)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_mail_full
 msgid "Mail Tests (Full)"
-msgstr ""
+msgstr "메일 테스트(전체)"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_mail
@@ -17403,7 +18059,7 @@ msgstr "메일 테스트 : 메일 관련 수행 및 테스트"
 #: model:ir.module.module,summary:base.module_test_mail_full
 msgid ""
 "Mail Tests: performances and tests specific to mail with all sub-modules"
-msgstr ""
+msgstr "메일 테스트 : 모든 하위 모듈이 있는 메일과 관련된 성능 및 테스트"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -17611,7 +18267,7 @@ msgstr "제품 재고 및 가용성을 관리"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_renting
 msgid "Manage rental contracts, deliveries and returns"
-msgstr ""
+msgstr "임대 계약, 배송 및 반품 관리"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.res_partner_industry_action
@@ -17636,30 +18292,30 @@ msgstr "시스템에서 사용할 수 있는 연락처 제목을 관리하여 �
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_work_entry
 msgid "Manage work entries"
-msgstr ""
+msgstr "작업 항목 관리"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_facebook
 #: model:ir.module.module,summary:base.module_social_facebook
 msgid "Manage your Facebook pages and schedule posts"
-msgstr ""
+msgstr "Facebook 페이지 관리 및 게시 예약"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_linkedin
 #: model:ir.module.module,summary:base.module_social_linkedin
 msgid "Manage your LinkedIn accounts and schedule posts"
-msgstr ""
+msgstr "LinkedIn 계정 관리 및 게시 예약"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_twitter
 #: model:ir.module.module,summary:base.module_social_twitter
 msgid "Manage your Twitter accounts and schedule tweets"
-msgstr ""
+msgstr "트위터 계정 관리 및 트윗 예약"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_contract_sign
 msgid "Manage your documents to sign in contracts"
-msgstr ""
+msgstr "계약서에 서명할 문서 관리"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_payroll
@@ -17669,7 +18325,7 @@ msgstr "직원 급여 기록 관리"
 #. module: base
 #: model:ir.module.module,summary:base.module_planning
 msgid "Manage your employees' schedule"
-msgstr ""
+msgstr "직원 일정 관리"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_fleet
@@ -17794,7 +18450,7 @@ msgstr "강좌 회원들에게 일괄적으로 메일 보내기"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_crm
 msgid "Mass mailing on lead / opportunities"
-msgstr "리드 및 비즈니스 기회에 일괄적으로 메일 보내기"
+msgstr "영업제안 및 비즈니스 기회에 일괄적으로 메일 보내기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_sale
@@ -18038,6 +18694,74 @@ msgid ""
 "perspectiva contable íntegramente. Por lo tanto, este PCGE no debe ser considerado en ningún aspecto\n"
 "como una guía con propósitos distintos del contable."
 msgstr ""
+"Perú에서 작동하는 최소 계정 세트.\n"
+"=================================================\n"
+"\n"
+"The usage of this CoA must refer to the official documentation on MEF.\n"
+"\n"
+"https://www.mef.gob.pe/contenidos/conta_publ/documentac/VERSION_MODIFICADA_PCG_EMPRESARIAL.pdf\n"
+"https://www.mef.gob.pe/contenidos/conta_publ/documentac/PCGE_2019.pdf\n"
+"\n"
+"All the legal references can be found here.\n"
+"\n"
+"http://www.sunat.gob.pe/legislacion/general/index.html\n"
+"\n"
+"Considerations.\n"
+"===============\n"
+"\n"
+"Chart of account:\n"
+"-----------------\n"
+"\n"
+"The tree of the CoA is done using account groups, all the accounts with move\n"
+"are available as groups but only the more common ones are available as actual\n"
+"accounts, if you want to create a new one use the group of accounts as\n"
+"reference.\n"
+"\n"
+"# TODO: Image showing what I am talking about.\n"
+"\n"
+"Taxes:\n"
+"------\n"
+"\n"
+"'IGV': {'name': 'VAT', 'code': 'S'},\n"
+"'IVAP': {'name': 'VAT', 'code': ''},\n"
+"'ISC': {'name': 'EXC', 'code': 'S'},\n"
+"'ICBPER': {'name': 'OTH', 'code': ''},\n"
+"'EXP': {'name': 'FRE', 'code': 'G'},\n"
+"'GRA': {'name': 'FRE', 'code': 'Z'},\n"
+"'EXO': {'name': 'VAT', 'code': 'E'},\n"
+"'INA': {'name': 'FRE', 'code': 'O'},\n"
+"'OTROS': {'name': 'OTH', 'code': 'S'},\n"
+"\n"
+"We added on this module the 3 concepts in taxes (necessary for the EDI\n"
+"signature)\n"
+"\n"
+"# TODO: Describe new fields.\n"
+"\n"
+"Products:\n"
+"---------\n"
+"\n"
+"Code for products to be used in the EDI are availables here, in order to decide\n"
+"which tax use due to which code following this reference and python code:\n"
+"\n"
+"https://docs.google.com/spreadsheets/d/1f1fxV8uGhA-Qz9-R1L1-dJirZ8xi3Wfg/edit#gid=662652969\n"
+"\n"
+"**Nota:**\n"
+"---------\n"
+"\n"
+"**RELACIÓN ENTRE EL PCGE Y LA LEGISLACIÓN TRIBUTARIA:**\n"
+"\n"
+"Este PCGE ha sido preparado como una herramienta de carácter contable, para acumular información que \n"
+"requiere ser expuesta en el cuerpo de los estados financieros o en las notas a dichos estados. Esa acumulación se \n"
+"efectúa en los libros o registros contables, cuya denominación y naturaleza depende de las actividades que se \n"
+"efectúen, y que permiten acciones de verificación, control y seguimiento. Las NIIF completas y la NIIF PYMES no\n"
+"contienen prescripciones sobre teneduría de libros, y consecuentemente, sobre los libros y otros registros \n"
+"de naturaleza contable. Por otro lado, si bien es cierto la contabilidad es también un insumo, dentro de otros, para \n"
+"labores de cumplimiento tributario, este PCGE no ha sido elaborado para satisfacer prescripciones tributarias ni su \n"
+"verificación. No obstante ello, donde no hubo oposición entre la contabilidad financiera prescrita por las NIIF y\n"
+"la legislación tributaria, este PCGE ha incluido subcuentas, divisionarias y sub divisionarias, para\n"
+"distinguir componentes con validez tributaria, dentro del conjunto de componentes que corresponden a una\n"
+"perspectiva contable íntegramente. Por lo tanto, este PCGE no debe ser considerado en ningún aspecto\n"
+"como una guía con propósitos distintos del contable."
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_B
@@ -18082,7 +18806,7 @@ msgstr "누락된 문서()"
 #: code:addons/models.py:0
 #, python-format
 msgid "Missing required value for the field '%s'"
-msgstr ""
+msgstr " '%s' 필드에 필요한 값이 없습니다"
 
 #. module: base
 #: code:addons/models.py:0
@@ -18364,12 +19088,12 @@ msgstr "몽골"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn
 msgid "Mongolia - Accounting"
-msgstr ""
+msgstr "몽고 - 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn_reports
 msgid "Mongolia - Accounting Reports"
-msgstr ""
+msgstr "몽고 - 회계 보고서"
 
 #. module: base
 #: model:res.country,name:base.me
@@ -18682,7 +19406,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.open_module_tree
 msgid "No module found!"
-msgstr ""
+msgstr "모듈이 없습니다!"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__view_ids
@@ -18808,7 +19532,7 @@ msgstr "회사 갯수"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__accesses_count
 msgid "Number of access rights that apply to the current user"
-msgstr ""
+msgstr "현재 사용자에게 적용되는 접근 권한 수"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__groups_count
@@ -18828,7 +19552,7 @@ msgstr "업데이트된 모듈 갯수"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__rules_count
 msgid "Number of record rules that apply to the current user"
-msgstr ""
+msgstr "현재 사용자에게 적용되는 레코드 규칙 숫자"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_O
@@ -19176,8 +19900,8 @@ msgstr ""
 "Odoo <a href=\"https://www.odoo.com/page/crm\">Open Source CRM</a>을 사용하여 판매 생산성을 높이고 승리율을 높이고 매출을 높일 수 있습니다.\n"
 "\n"
 "노력없이 판매 유입 경로를 관리하십시오. \n"
-"리드 유도, 전화 통화 및 회의 후속 조치. 전자 메일을 응용 프로그램에 직접 통합하여 \n"
-"정보의 의사 결정을 내리고 시간을 절약 할 수 있도록 리드의 품질을 분석하십시오.\n"
+"영업제안 유도, 전화 통화 및 회의 후속 조치. 전자 메일을 응용 프로그램에 직접 통합하여 \n"
+"정보의 의사 결정을 내리고 시간을 절약 할 수 있도록 영업제안의 품질을 분석하십시오.\n"
 "\n"
 "판매 유입 경로, 귀하가 좋아하는 길\n"
 "--------------------------------------\n"
@@ -19186,14 +19910,14 @@ msgstr ""
 "판매 퍼널 내부에서 작업하고 다음 작업, 새로운 메시지, 최고의 기회 및 예상 수익에 대한 \n"
 "즉각적인 시각적 정보를 얻으십시오.\n"
 "\n"
-"간편한 리드 관리\n"
+"간편한 영업제안 관리\n"
 "-------------------------\n"
 "\n"
-"수신 이메일에서 자동으로 리드를 만듭니다. \n"
+"수신 이메일에서 자동으로 영업제안을 만듭니다. \n"
 "분석을 통해 효율성을 이끌어 내고 캠페인, 채널 또는 영업 팀별로 성과를 비교하십시오.\n"
 "\n"
-"중복 작업을 찾아서 리드를 병합하고 한 번의 작업으로 적절한 영업 사원에게 할당하십시오. \n"
-"관리 시간을 줄이고 유자격 리드에 더 많은 시간을 할애하십시오.\n"
+"중복 작업을 찾아서 영업제안을 병합하고 한 번의 작업으로 적절한 영업 사원에게 할당하십시오. \n"
+"관리 시간을 줄이고 유자격 영업제안에 더 많은 시간을 할애하십시오.\n"
 "\n"
 "당신의 기회를 조직하십시오\n"
 "---------------------------\n"
@@ -19214,7 +19938,7 @@ msgstr ""
 "\n"
 "수신 이메일을 자동으로 라우팅, 정렬 및 필터링합니다. \n"
 "Odoo CRM은 수신 이메일을 처리하고 이를 올바른 기회 또는 영업 팀에 전달합니다. \n"
-"새로운 리드가 즉석에서 생성되고 관심있는 영업 사원에게 자동으로 통보됩니다.\n"
+"새로운 영업제안이 즉석에서 생성되고 관심있는 영업 사원에게 자동으로 통보됩니다.\n"
 ".\n"
 "\n"
 "공동 의제\n"
@@ -19229,11 +19953,11 @@ msgstr ""
 "\n"
 "Odoo <a href=\"https://www.odoo.com/page/crm\">CRM</a>을 사용하여 작업을 자동화하여 성능을 향상시킵니다..\n"
 "\n"
-"리드 획득, 후속 조치 및 판촉을 자동화하기 위해 마케팅 캠페인을 사용하십시오. \n"
+"영업제안 획득, 후속 조치 및 판촉을 자동화하기 위해 마케팅 캠페인을 사용하십시오. \n"
 "트리거 (20 일 이후의 활동 없음, 홍보 이메일에 응답 한 등)에 기반한 \n"
 "자동 액션(예 : 영업 사원에게 전화 걸기, 이메일 보내기 ... 등)을 정의하십시오.\n"
 "\n"
-"모든 채널에서 리드에서 종료까지 캠페인을 최적화하십시오. \n"
+"모든 채널에서 영업제안에서 종료까지 캠페인을 최적화하십시오. \n"
 "투자 할 곳을 현명하게 결정하고 마케팅 활동이 회사의 수익에 미치는 영향을 보여줍니다.\n"
 "\n"
 "판매주기 사용자 정의\n"
@@ -19810,6 +20534,103 @@ msgid ""
 "emails directly into the application.\n"
 "\n"
 msgstr ""
+"Odoo 일괄 메일 보내기\n"
+"----------------------------------\n"
+"\n"
+"Easily send mass mailing to your leads, opportunities or customers\n"
+"with Odoo <a href=\"https://www.odoo.com/page/mailing#\">Email Marketing</a>. Track\n"
+"marketing campaigns performance to improve conversion rates. Design\n"
+"professional emails and reuse templates in a few clicks.\n"
+"\n"
+"Send Professional Emails\n"
+"------------------------\n"
+"\n"
+"Import database of prospects or filter on existing leads, opportunities and\n"
+"customers in just a few clicks.\n"
+"\n"
+"Define email templates to reuse content or specific design for your newsletter.\n"
+"Setup several email servers with their own IP/domain to optimise opening rates.\n"
+"\n"
+"Organize Marketing Campaigns\n"
+"----------------------------\n"
+"\n"
+"Design, Send, Track by Campaigns with our <a href=\"https://www.odoo.com/page/mailing\">Lead Automation</a> app.\n"
+"\n"
+"Get real time statistics on campaigns performance to improve your conversion\n"
+"rate. Track mails sent, received, opened and answered.\n"
+"\n"
+"Easily manage your marketing campaigns, discussion groups, leads and\n"
+"opportunities in one simple and powerful platform.\n"
+"\n"
+"Integrated with Odoo Apps\n"
+"-------------------------\n"
+"\n"
+"Get access to mass mailing features from every Odoo app to improve the way your\n"
+"users communicate.\n"
+"\n"
+"Send template of emails from Odoo <a href=\"https://www.odoo.com/page/mailing\">CRM opportunities</a>, select leads based\n"
+"on marketing segments, send <a href=\"https://www.odoo.com/page/recruitment\">job offers</a> and automate\n"
+"answers to applicants, reuse email template in the lead automation marketing\n"
+"campaigns.\n"
+"\n"
+"Answers to your emails appears automatically in the history of every document\n"
+"with the social network module.\n"
+"\n"
+"Clean Your Lead Database\n"
+"------------------------\n"
+"\n"
+"Get a clean lead database that improves over the time using the performance of\n"
+"your mails. Odoo handle bounce mails efficiently, flag erroneous leads\n"
+"accordingly and gives you statistics on the quality of your leads.\n"
+"\n"
+"One click emails send\n"
+"---------------------\n"
+"\n"
+"The marketing department will love working on campaigns. But you can also give\n"
+"a one click mass mailing facility to all others users on their own prospects or\n"
+"documents.\n"
+"\n"
+"Select a few documents (e.g. leads, support tickets, suppliers, applicants,\n"
+"...) and send emails to their contacts in one click, reusing existing emails\n"
+"templates.\n"
+"\n"
+"Follow-up On Answers\n"
+"--------------------\n"
+"\n"
+"The chatter feature enables you to communicate faster and more efficiently with\n"
+"your customer. Get documents created automatically (leads, opportunities,\n"
+"tasks, ...) based on answers to your mass mailing campaigns Follow the\n"
+"discussion directly on the business documents within Odoo or via email.\n"
+"\n"
+"Get all the negotiations and discussions attached to the right document and\n"
+"relevent managers notified on specific events.\n"
+"\n"
+"Campaigns Dashboard\n"
+"-------------------\n"
+"\n"
+"Get the insights you need to make smarter marketing campaign. Track statistics\n"
+"per campaign: bounce rates, sent mails, best content, etc. The clear dashboards\n"
+"gives you a direct overview of your campaign performance.\n"
+"\n"
+"Fully Integrated With Others Apps\n"
+"---------------------------------\n"
+"\n"
+"Define automated actions (e.g. ask a salesperson to call, send an email, ...)\n"
+"based on triggers (no activity since 20 days, answered a promotional email,\n"
+"etc.)\n"
+"\n"
+"Optimize campaigns from lead to close, on every channel. Make smarter decisions\n"
+"about where to invest and show the impact of your marketing activities on your\n"
+"company's bottom line.\n"
+"\n"
+"Integrate a contact form in your website easily. Forms submissions create leads\n"
+"automatically in Odoo CRM. Leads can be used in marketing campaigns.\n"
+"\n"
+"Manage your <a href=\"https://www.odoo.com/page/crm\">sales funnel</a> with no\n"
+"effort. Attract leads, follow-up on phone calls and meetings. Analyse the\n"
+"quality of your leads to make informed decisions and save time by integrating\n"
+"emails directly into the application.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_reports
@@ -20065,6 +20886,115 @@ msgid ""
 "interaction history, profiles, and more.\n"
 "\n"
 msgstr ""
+"Odoo Point of Sale\n"
+"-----------------------------\n"
+"\n"
+"Odoo's <a href=\"https://www.odoo.com/page/point-of-sale\">Point of Sale</a>\n"
+"introduces a super clean interface with no installation required that runs\n"
+"online and offline on modern hardwares.\n"
+"\n"
+"It's full integration with the company inventory and accounting, gives you real\n"
+"time statistics and consolidations amongst all shops without the hassle of\n"
+"integrating several applications.\n"
+"\n"
+"Work with the hardware you already have\n"
+"---------------------------------------\n"
+"\n"
+"### In your web browser\n"
+"\n"
+"Odoo's POS is a web application that can run on any device that can display\n"
+"websites with little to no setup required.\n"
+"\n"
+"### Touchscreen or Keyboard ?\n"
+"\n"
+"The Point of Sale works perfectly on any kind of touch enabled device, whether\n"
+"it's multi-touch tablets like an iPad or keyboardless resistive touchscreen\n"
+"terminals.\n"
+"\n"
+"### Scales and Printers\n"
+"\n"
+"Barcode scanners and printers are supported out of the box with no setup\n"
+"required. Scales, cashboxes, and other peripherals can be used with the proxy\n"
+"API.\n"
+"\n"
+"Online and Offline\n"
+"------------------\n"
+"\n"
+"### Odoo's POS stays reliable even if your connection isn't\n"
+"\n"
+"Deploy new stores with just an internet connection: **no installation, no\n"
+"specific hardware required**. It works with any **iPad, Tablet PC, laptop** or\n"
+"industrial POS machine.\n"
+"\n"
+"While an internet connection is required to start the Point of Sale, it will\n"
+"stay operational even after a complete disconnection.\n"
+"\n"
+"\n"
+"A super clean user interface\n"
+"----------------------------\n"
+"\n"
+"### Simple and beautiful\n"
+"\n"
+"Say goodbye to ugly, outdated POS software and enjoy the Odoo web interface\n"
+"designed for modern retailer.\n"
+"\n"
+"### Designed for Productivity\n"
+"\n"
+"Whether it's for a restaurant or a shop, you can activate the multiple orders\n"
+"in parallel to not make your customers wait.\n"
+"\n"
+"### Blazing fast search\n"
+"\n"
+"Scan products, browse through hierarchical categories, or get quick information\n"
+"about products with the blasting fast filter accross all your products.\n"
+"\n"
+"Integrated Inventory Management\n"
+"-------------------------------\n"
+"\n"
+"Consolidate all your Sales Teams in real time: stores, ecommerce, sales\n"
+"teams. Get real time control of the inventory and accurate forecasts to manage\n"
+"procurements.\n"
+"\n"
+"A full warehouse management system at your fingertips: get information about\n"
+"products availabilities, trigger procurement requests, etc.\n"
+"\n"
+"Deliver in-store customer services\n"
+"----------------------------------\n"
+"\n"
+"Give your shopper a strong experience by integrating in-store customer\n"
+"services. Handle reparations, track warantees, follow customer claims, plan\n"
+"delivery orders, etc.\n"
+"\n"
+"Invoicing & Accounting Integration\n"
+"----------------------------------\n"
+"\n"
+"Produce customer invoices in just a few clicks. Control sales and cash in real\n"
+"time and use Odoo's powerful reporting to make smarter decisions to improve\n"
+"your store's efficiency.\n"
+"\n"
+"No more hassle of having to integrate softwares: get all your sales and\n"
+"inventory operations automatically posted in your G/L.\n"
+"\n"
+"Unified Data Amongst All Shops\n"
+"------------------------------\n"
+"\n"
+"Get new products, pricing strategies and promotions applied automatically to\n"
+"selected stores. Work on a unified customer base. No complex interface is\n"
+"required to pilot a global strategy amongst all your stores.\n"
+"\n"
+"With Odoo as a backend, you have a system proven to be perfectly suitable for\n"
+"small stores or large multinationals.\n"
+"\n"
+"Know your customers - in store and out\n"
+"--------------------------------------\n"
+"\n"
+"Successful brands integrates all their customer relationship accross all their\n"
+"channels to develop accurate customer profile and communicate with shoppers as\n"
+"they make buying decisions, in store or online.\n"
+"\n"
+"With Odoo, you get a 360° customer view, including cross-channel sales,\n"
+"interaction history, profiles, and more.\n"
+"\n"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__license__opl-1
@@ -20939,7 +21869,7 @@ msgstr "앱 열기"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__open_sans
 msgid "Open Sans"
-msgstr ""
+msgstr "Open Sans"
 
 #. module: base
 #: model:ir.actions.client,name:base.action_client_base_menu
@@ -21469,7 +22399,7 @@ msgstr "P 교육"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_pe
 msgid "PCGE Simplified"
-msgstr ""
+msgstr "PCGE 단순화"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_report__report_type__qweb-pdf
@@ -21499,7 +22429,7 @@ msgstr "POEdit"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_adyen
 msgid "POS Adyen"
-msgstr ""
+msgstr "POS Adyen"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad_project
@@ -21677,7 +22607,7 @@ msgstr "웹사이트용 협력사 모듈"
 #: model:ir.model.fields,field_description:base.field_res_partner__same_vat_partner_id
 #: model:ir.model.fields,field_description:base.field_res_users__same_vat_partner_id
 msgid "Partner with same Tax ID"
-msgstr ""
+msgstr "동일한 부가세 ID를 가진 협력사"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__partner_id
@@ -21778,7 +22708,7 @@ msgstr "결제 매입사 : Buckaroo 도입"
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_ingenico
 msgid "Payment Acquirer: Ingenico Implementation"
-msgstr ""
+msgstr "결제 매입사 : Ingenico 도입"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_paypal
@@ -21845,12 +22775,12 @@ msgstr "급여 회계"
 #. module: base
 #: model:ir.module.category,name:base.module_category_payroll_localization
 msgid "Payroll Localization"
-msgstr ""
+msgstr "급여 현지화"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_payulatam
 msgid "PayuLatam Payment Acquirer"
-msgstr ""
+msgstr "Payulatam 결제 매입사"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_payumoney
@@ -21910,7 +22840,7 @@ msgstr "피벗 테이블"
 #. module: base
 #: model:ir.module.module,summary:base.module_project_forecast
 msgid "Plan your resources on project tasks"
-msgstr ""
+msgstr "프로젝트 작업에 대한 자원 계획"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_planning
@@ -21996,7 +22926,7 @@ msgstr "POS 영수증 재인쇄"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_enterprise
 msgid "Point of Sale enterprise"
-msgstr ""
+msgstr "점포판매시스템 엔터프라이즈용"
 
 #. module: base
 #: model:res.country,name:base.pl
@@ -22090,12 +23020,12 @@ msgstr "이미지 src 미리보기"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__preview_logo
 msgid "Preview logo"
-msgstr ""
+msgstr "로고 미리보기"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_layout__pdf
 msgid "Preview pdf src"
-msgstr ""
+msgstr "pdf src 미리보기"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -22113,7 +23043,7 @@ msgstr "이전 뷰 아키텍쳐"
 msgid ""
 "Previous time the cron ran successfully, provided to the job through the "
 "context on the `lastcall` key"
-msgstr ""
+msgstr "이전에 클론이 성공적으로 실행되어 `lastcall` 키의 컨텍스트를 통해 작업에 제공되었습니다."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_form
@@ -22124,7 +23054,7 @@ msgstr "가격 정확도"
 #: model:ir.model.fields,field_description:base.field_base_document_layout__primary_color
 #: model:ir.model.fields,field_description:base.field_res_company__primary_color
 msgid "Primary Color"
-msgstr ""
+msgstr "기본 색상"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ca_check_printing
@@ -22392,7 +23322,7 @@ msgstr "프로젝트, 헬프 데스크, 작업 기록 및 판매 주문"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_account
 msgid "Project, Tasks, Account"
-msgstr ""
+msgstr "프로젝트, 작업, 계정"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale
@@ -22407,12 +23337,12 @@ msgstr "프로젝트, 작업, 수리"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale_coupon
 msgid "Project, Tasks, Sale Coupon"
-msgstr ""
+msgstr "프로젝트, 작업, 판매 쿠폰"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_stock
 msgid "Project, Tasks, Stock"
-msgstr ""
+msgstr "프로젝트, 작업, 재고"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_timesheet
@@ -22485,7 +23415,7 @@ msgstr "구성원 명부 게시"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_partner_assign
 msgid "Publish your resellers/partners and forward leads to them"
-msgstr "도매상/협력사와 리드 전달 게시"
+msgstr "도매상/협력사와 영업제안 전달 게시"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__published_version
@@ -22522,7 +23452,7 @@ msgstr "구매 주문서, 영수증, 재고를 위한 공급 업체 청구서"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_requisition_stock
 msgid "Purchase Requisition Stock"
-msgstr ""
+msgstr "재고 구매 요청"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_stock
@@ -22709,7 +23639,7 @@ msgstr "Qweb 다대일 필드"
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_monetary
 msgid "Qweb Field Monetary"
-msgstr ""
+msgstr "Qweb 필드 통화"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_relative
@@ -22762,7 +23692,7 @@ msgstr "RNC"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__raleway
 msgid "Raleway"
-msgstr ""
+msgstr "Raleway"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_currency_rate__rate
@@ -22881,7 +23811,7 @@ msgstr "하위 서버 작업에서 재귀가 발견되었습니다."
 #: code:addons/models.py:0
 #, python-format
 msgid "Recursion Detected."
-msgstr ""
+msgstr "재귀성이 탐지되었습니다."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_data__reference
@@ -22974,7 +23904,7 @@ msgstr "첨부 파일에서 새로 고침"
 #. module: base
 #: model:ir.module.module,summary:base.module_hw_posbox_upgrade
 msgid "Remotely upgrade the IoTBox software"
-msgstr ""
+msgstr "IoTBox 소프트웨어를 원격으로 업그레이드"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
@@ -23014,7 +23944,7 @@ msgstr "임대"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_stock_renting
 msgid "Rental Stock Management"
-msgstr ""
+msgstr "임대 재고 관리"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_renting_sign
@@ -23141,7 +24071,7 @@ msgstr "화면 구조 재설정"
 #. module: base
 #: model:ir.model,name:base.model_reset_view_arch_wizard
 msgid "Reset View Architecture Wizard"
-msgstr ""
+msgstr "뷰 아키텍쳐 마법사 재설정"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__hard
@@ -23199,7 +24129,7 @@ msgstr "POS 식당 기능 확장"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__soft
 msgid "Restore previous version (soft reset)."
-msgstr ""
+msgstr "이전 버전 복구(소프트 리셋)"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__on_delete__restrict
@@ -23338,7 +24268,7 @@ msgstr "SMS 마케팅"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_marketing_automation_sms
 msgid "SMS Marketing in Marketing Automation"
-msgstr ""
+msgstr "마케팅 자동화의 SMS 마케팅"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sms
@@ -23378,7 +24308,7 @@ msgstr "SMTP 서버"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "SO022"
-msgstr ""
+msgstr "SO022"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_mail_server__smtp_encryption__ssl
@@ -23443,12 +24373,12 @@ msgstr "Intrastat 판매"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_product_matrix
 msgid "Sale Matrix"
-msgstr ""
+msgstr "판매 매트릭스"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_product_configurator
 msgid "Sale Product Configurator"
-msgstr ""
+msgstr "판매 제품 구성기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_purchase
@@ -23473,7 +24403,7 @@ msgstr "판매 Enterprise Edition"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_sale
 msgid "Sale statistics on social"
-msgstr ""
+msgstr "소셜 판매 통계"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_sales
@@ -23583,12 +24513,12 @@ msgstr "첨부 파일 접두사로 저장"
 #. module: base
 #: model:ir.module.module,summary:base.module_barcodes
 msgid "Scan and Parse Barcodes"
-msgstr ""
+msgstr "바코드 스캔 및 구문 분석"
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_sms
 msgid "Schedule SMS in event management"
-msgstr ""
+msgstr "행사 관리에 SMS 일정 포함"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_maintenance
@@ -23598,7 +24528,7 @@ msgstr "기계 및 도구에 대한 유지 관리를 예약하고 관리합니�
 #. module: base
 #: model:ir.module.module,summary:base.module_industry_fsm
 msgid "Schedule and track onsite operations, invoice time and material"
-msgstr ""
+msgstr "현장 운영, 송장 시간 및 자재 일정 및 추적"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_calendar
@@ -23608,12 +24538,12 @@ msgstr "고객과의 약속 예약"
 #. module: base
 #: model:ir.module.module,summary:base.module_calendar
 msgid "Schedule employees' meetings"
-msgstr ""
+msgstr "직원 회의 일정"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project_timesheet_holidays
 msgid "Schedule timesheet when on time off"
-msgstr ""
+msgstr "휴가 기간 중 작업 계획 예약"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__usage__ir_cron
@@ -23665,7 +24595,7 @@ msgstr "협력사 검색"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_category_view_search
 msgid "Search Partner Category"
-msgstr ""
+msgstr "협력사 범주 검색"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_search
@@ -23701,7 +24631,7 @@ msgstr "검색..."
 #: model:ir.model.fields,field_description:base.field_base_document_layout__secondary_color
 #: model:ir.model.fields,field_description:base.field_res_company__secondary_color
 msgid "Secondary Color"
-msgstr ""
+msgstr "2차 색상"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_security
@@ -23786,7 +24716,7 @@ msgstr "항목 선택"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__selection
 msgid "Selection Options (Deprecated)"
-msgstr ""
+msgstr "선택 옵션(삭제됨)"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_model_fields_selection_selection_field_uniq
@@ -23802,7 +24732,7 @@ msgstr "자신"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_slides
 msgid "Sell Courses"
-msgstr ""
+msgstr "강좌 판매"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale_timesheet
@@ -23827,12 +24757,12 @@ msgstr "온라인 판매 이벤트 티켓"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_slides
 msgid "Sell your courses online"
-msgstr ""
+msgstr "온라인으로 강좌 판매"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_slides
 msgid "Sell your courses using the e-commerce features of the website."
-msgstr ""
+msgstr "웹 사이트의 전자 상거래 기능을 사용하여 강좌를 판매하십시오."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale
@@ -23842,35 +24772,35 @@ msgstr "온라인으로 제품 판매"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sms
 msgid "Send SMS to Visitor"
-msgstr ""
+msgstr "방문자에게 SMS 보내기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_sms
 msgid "Send SMS to Visitor with leads"
-msgstr ""
+msgstr "영업제안과 함께 방문자에게 SMS 보내기"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sign
 msgid "Send documents to sign online and handle filled copies"
-msgstr "파일을 온라인 서명에 보내고 완성된 사본을 처리하십시오."
+msgstr "온라인으로 서명할 문서를 보내고 완성된 사본을 처리"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_push_notifications
 #: model:ir.module.module,summary:base.module_social_push_notifications
 msgid "Send live notifications to your web visitors"
-msgstr ""
+msgstr "웹 방문자에게 실시간 알림 보내기"
 
 #. module: base
 #: model:ir.module.module,description:base.module_calendar_sms
 #: model:ir.module.module,summary:base.module_calendar_sms
 msgid "Send text messages as event reminders"
-msgstr "이벤트 알림으로 텍스트 메시지를 보냅니다."
+msgstr "행사 미리 알림으로 문자 메시지 보내기"
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_sms
 #: model:ir.module.module,summary:base.module_stock_sms
 msgid "Send text messages when final stock move"
-msgstr ""
+msgstr "마지막 재고가 이동하면 문자 메시지 보내기"
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_easypost
@@ -24172,7 +25102,7 @@ msgstr "필드의 길이는 음수가 될 수 없습니다."
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_skills_survey
 msgid "Skills Certification"
-msgstr ""
+msgstr "자격 인증"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_skills
@@ -24182,7 +25112,7 @@ msgstr "관리 기술"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_skills_slides
 msgid "Skills e-learning"
-msgstr ""
+msgstr "이러닝 자격"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_config_installer
@@ -24223,22 +25153,22 @@ msgstr "Snail Mail 후속 조치"
 #: model:ir.module.category,name:base.module_category_marketing_social
 #: model:ir.module.category,name:base.module_category_social
 msgid "Social"
-msgstr ""
+msgstr "소셜"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_facebook
 msgid "Social Facebook"
-msgstr ""
+msgstr "소셜 페이스북"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_linkedin
 msgid "Social LinkedIn"
-msgstr ""
+msgstr "소셜 링크드인"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social
 msgid "Social Marketing"
-msgstr ""
+msgstr "소셜 마케팅"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_media
@@ -24248,17 +25178,17 @@ msgstr "소셜미디어"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_push_notifications
 msgid "Social Push Notifications"
-msgstr ""
+msgstr "소셜 푸시 알림"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_twitter
 msgid "Social Twitter"
-msgstr ""
+msgstr "소셜 트위터"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_media
 msgid "Social media connectors for company settings."
-msgstr ""
+msgstr "회사 설정을 위한 소셜미디어 연결기."
 
 #. module: base
 #: model:res.country,name:base.sb
@@ -24280,6 +25210,11 @@ msgid ""
 "Fields: %(fields)s\n"
 "Record ids: %(records)s\n"
 msgstr ""
+"일부 레코드는  %(document_descr)s 회사와 호환되지 ㅇ낳습니다.\n"
+"\n"
+"미호환 :\n"
+"필드 : %(fields)s\n"
+"레코드 ids: %(records)s\n"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_bank__bic
@@ -24291,7 +25226,7 @@ msgstr "BIC 또는 Swift라고도 합니다."
 #: code:addons/base/models/ir_attachment.py:0
 #, python-format
 msgid "Sorry, the syntax 'name:agg(field)' is not available for attachments"
-msgstr ""
+msgstr "'name:agg (field)'구문을 첨부 파일에 사용할 수 없습니다"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -24300,6 +25235,8 @@ msgid ""
 "Sorry, you are not allowed to access documents of type '%(document_kind)s' "
 "(%(document_model)s)."
 msgstr ""
+"죄송합니다. 귀하는 다음 유형의 문서에 접근할 수 없습니다 :  '%(document_kind)s' "
+"(%(document_model)s)."
 
 #. module: base
 #: code:addons/base/models/ir_attachment.py:0
@@ -24321,6 +25258,8 @@ msgid ""
 "Sorry, you are not allowed to create documents of type '%(document_kind)s' "
 "(%(document_model)s)."
 msgstr ""
+"죄송합니다. 귀하는 다음 유형의 문서를 작성할 수 없습니다 :  '%(document_kind)s' "
+"(%(document_model)s)."
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -24346,7 +25285,7 @@ msgstr ""
 #: code:addons/base/models/ir_attachment.py:0
 #, python-format
 msgid "Sorry, you must provide fields to read on attachments"
-msgstr ""
+msgstr "죄송합니다. 첨부 파일을 읽을 필드를 제공해야 합니다."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_filters__sort
@@ -24377,7 +25316,7 @@ msgstr "남아프리카 공화국"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_za
 msgid "South Africa - Accounting"
-msgstr ""
+msgstr "남아프리카 공화국 - 회계"
 
 #. module: base
 #: model:res.country.group,name:base.south_america
@@ -24438,7 +25377,7 @@ msgstr "서버를 재시작할 때 누락된 항목을 실행할지 여부를 �
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event_track
 msgid "Sponsors, Tracks, Agenda, Event News"
-msgstr "스폰서, 단서, 일정, 이벤트 뉴스"
+msgstr "스폰서, 트랙, 의제, 이벤트 뉴스"
 
 #. module: base
 #: model:res.country,name:base.lk
@@ -24524,7 +25463,7 @@ msgstr "단계의 증가는 0이 아니어야 합니다."
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_workorder_iot
 msgid "Steps in MRP work orders with IoT devices"
-msgstr ""
+msgstr "IoT 장치를 사용한 MRP 작업 지시의 단계"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_note_pad
@@ -24534,7 +25473,7 @@ msgstr "스티커 메모, 협업"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_sms
 msgid "Stock - SMS"
-msgstr ""
+msgstr "재고 - SMS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_mobile
@@ -24564,17 +25503,17 @@ msgstr "엔터프라이즈용 재고"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_contract
 msgid "Store employee contracts in the Document app"
-msgstr ""
+msgstr "문서 앱 내에서 직원 계약서 저장"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_payroll
 msgid "Store employee payslips in the Document app"
-msgstr ""
+msgstr "문서 앱 내에서 직원 급여 명세서 저장"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_holidays
 msgid "Store employee's time off documents  in the Document app"
-msgstr ""
+msgstr "문서 앱 내에서 직원 휴가 문서 저장"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__store
@@ -24904,7 +25843,7 @@ msgstr "TaxCloud 및 납품 - 전자 상거래"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_taxcloud
 msgid "TaxCloud and Subscriptions"
-msgstr ""
+msgstr "TaxCloud 및 구독"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_taxcloud
@@ -24978,7 +25917,7 @@ msgstr "연결 테스트"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_website_slides_full
 msgid "Test Full eLearning Flow"
-msgstr ""
+msgstr "전체 온라인학습 진행 테스트"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_main_flows
@@ -24988,7 +25927,7 @@ msgstr "주요 프로세스 테스트"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_test
 msgid "Test Payment Acquirer"
-msgstr ""
+msgstr "결제 대행사 테스트"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_performance
@@ -25065,7 +26004,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__url_code
 msgid "The Lang Code displayed in the URL"
-msgstr ""
+msgstr "URL에 표시되는 Lang 코드"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__grouping
@@ -25104,7 +26043,7 @@ msgstr "세금 번호. 세금 납부가 필요한 경우 기입하십시오. 특
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_lang_url_code_uniq
 msgid "The URL code of the language must be unique !"
-msgstr ""
+msgstr "언어 URL 코드는 고유해야 합니다!"
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0
@@ -25426,6 +26365,10 @@ msgid ""
 "%(multi_company_warning)s\n"
 "(Records: %(example_records)s, User: %(user_id)s)"
 msgstr ""
+"요청된 작업 (\"%(document_kind)s\"(%(document_model)s)에 \"%(operation)s\")이 다음 규칙으로 인해 거부되었습니다 :\n"
+"%(rules_list)s\n"
+"%(multi_company_warning)s\n"
+"(레코드 : %(example_records)s, 사용자 : %(user_id)s)"
 
 #. module: base
 #: code:addons/models.py:0
@@ -25439,6 +26382,13 @@ msgid ""
 "Fields:\n"
 "%(fields_list)s"
 msgstr ""
+"보안 제한으로 인해 요청한 작업을 완료할 수 없습니다.\n"
+"\n"
+"문서 유형 : %(document_kind)s (%(document_model)s)\n"
+"작업 : %(operation)s\n"
+"사용자 : %(user)s\n"
+"필드 :\n"
+"%(fields_list)s"
 
 #. module: base
 #: code:addons/base/models/ir_rule.py:0
@@ -25463,7 +26413,7 @@ msgstr "반올림 정밀도는 0보다 커야 합니다!"
 msgid ""
 "The server is busy right now, module operations are not possible at this "
 "time, please try again later."
-msgstr ""
+msgstr "현재 서버가 사용 중입니다. 현재 모듈 작업을 수행할 수 없습니다. 나중에 다시 시도하십시오."
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -25557,12 +26507,12 @@ msgstr "테마"
 #: model:ir.ui.menu,name:base.menu_theme_store
 #: model:ir.ui.menu,name:base.theme_store
 msgid "Theme Store"
-msgstr ""
+msgstr "테마 스토어"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
 msgid "There are no more contacts to merge for this request"
-msgstr ""
+msgstr "이 요청에 대해 더 이상 병합할 연락처가 없습니다."
 
 #. module: base
 #: code:addons/base/models/ir_filters.py:0
@@ -25576,7 +26526,7 @@ msgstr "%(model)s 공유 필터가 이미 기본값으로 설정되어 있습니
 #: model:ir.actions.act_url,name:base.action_third_party
 #: model:ir.ui.menu,name:base.menu_third_party
 msgid "Third-Party Apps"
-msgstr ""
+msgstr "타사 앱"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__iso_code
@@ -25598,12 +26548,12 @@ msgstr "이 필드는 모듈 데이터를 포함하고 있으므로 삭제할 �
 #: model:ir.model.fields,help:base.field_res_company__favicon
 msgid ""
 "This field holds the image used to display a favicon for a given company."
-msgstr ""
+msgstr "이 필드에는 특정 회사의 즐겨 찾기 아이콘을 표시하는 데 사용되는 이미지가 있습니다."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_base
 msgid "This field is the same as `arch` field without translations"
-msgstr ""
+msgstr "이 필드는 번역이 없는 `arch` 필드와 같습니다"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__code
@@ -25616,11 +26566,13 @@ msgid ""
 "This field should be used when accessing view arch. It will use translation.\n"
 "                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 msgstr ""
+"이 필드는 뷰 아치에 접근할 때 사용해야 합니다. 변환을 사용합니다.\n"
+"                               dev-xml 모드로 읽으면 'arch_db' 또는 'arch_fs'를 읽습니다."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_db
 msgid "This field stores the view arch."
-msgstr ""
+msgstr "이 필드는 뷰 아치를 저장합니다."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_prev
@@ -25637,7 +26589,7 @@ msgstr ""
 msgid ""
 "This file could not be decoded as an image file. Please try with a different"
 " file."
-msgstr ""
+msgstr "이 파일을 이미지 파일로 디코딩할 수 없습니다. 다른 파일로 시도하십시오."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -25719,6 +26671,11 @@ msgid ""
 "modules build on mail (sms, snailmail, mail_enterprise) are set as dependencies\n"
 "in order to test the whole mail codebase. "
 msgstr ""
+"이 모듈에는 메일 관련 테스트가 포함되어 있습니다.\n"
+"다른 모델의 기능적 측면과 독립적으로 테스트를 수행하는 데만 사용되는 모델이 포함되어 있으므로 \n"
+"별도의 모듈에 포함되어 있습니다.\n"
+"또한 메일을 기반으로 구축된 대부분의 모듈(sms, snailmail, mail_enterprise)은 \n"
+"전체 메일 코드베이스를 테스트하기 위해 종속성으로 설정됩니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_mass_mailing
@@ -25753,6 +26710,11 @@ msgid ""
 "dependencies. Neither we want to add in website module some routes, views and\n"
 "models which only purpose is to run tests."
 msgstr ""
+"이 모듈에는 웹 사이트와 관련된 테스트가 포함되어 있습니다.\n"
+"모듈 설치/제거/업그레이드를 테스트하는 중이며 웹 사이트 모듈이 가능한 종속성을 포함하여 \n"
+"매번 다시 로드되는 것은 원치 않으므로 별도의 모듈에 포함되어 있습니다.\n"
+"우리는 웹 사이트 모듈에 테스트를 실행하는 데 목적이 있으므로 \n"
+"일부 경로, 화면 및 모델을 추가하지 않습니다."
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_subscription_taxcloud
@@ -25777,7 +26739,7 @@ msgstr ""
 msgid ""
 "This module lets you use the full power of certifications within your "
 "courses."
-msgstr ""
+msgstr "이 모듈을 사용하면 과정 내에서 모든 인증 기능을 사용할 수 있습니다."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
@@ -25791,6 +26753,8 @@ msgid ""
 "This operation is allowed for the groups:\n"
 "%(groups_list)s"
 msgstr ""
+"이 작업은 다음 그룹에만 허용됩니다 :\n"
+"%(groups_list)s"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__thousands_sep
@@ -25826,7 +26790,7 @@ msgstr "휴가 관리"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_gantt
 msgid "Time off Gantt"
-msgstr ""
+msgstr "휴가 간트 차트"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_timesheet_grid
@@ -25836,12 +26800,12 @@ msgstr "작업 기록 확인 및  그리드 보기"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_timesheet_forecast
 msgid "Timesheet and Planning"
-msgstr ""
+msgstr "작업 기록과 작업 계획"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_timesheet_holidays
 msgid "Timesheet when on Time Off"
-msgstr ""
+msgstr "휴가 기간 중 작업 계획"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_operations_timesheets
@@ -25981,7 +26945,7 @@ msgstr "안내"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_event_track_sms
 msgid "Track Speakers SMS Marketing"
-msgstr ""
+msgstr "연사 SMS 마케팅 추적"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_attendance
@@ -26006,12 +26970,12 @@ msgstr "도움말 티켓 추적"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm
 msgid "Track leads and close opportunities"
-msgstr "리드 추적 및 기회 마감"
+msgstr "영업제안 추적 및 기회 마감"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_recruitment
 msgid "Track your recruitment pipeline"
-msgstr "모집 프로세스 추적"
+msgstr "모집 순서도 추적"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_event
@@ -26189,7 +27153,7 @@ msgstr "투발루"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_twitter
 msgid "Twitter Snippet"
-msgstr ""
+msgstr "트위터 스니펫"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_twitter_wall
@@ -26228,6 +27192,14 @@ msgid ""
 "- 'Add Followers': add followers to a record (Discuss)\n"
 "- 'Create Next Activity': create an activity (Discuss)"
 msgstr ""
+"서버 작업 유형입니다. 다음 값을 사용할 수 있습니다.\n"
+"- 'Python 코드 실행' : 실행될 Python 코드 블록입니다.\n"
+"- '작성 ': 새 값으로 새 레코드를 만듭니다.\n"
+"- '기록 업데이트' : 레코드의 값을 업데이트합니다.\n"
+"- '여러 작업 실행' : 여러 다른 서버 작업을 트리거하는 작업을 정의합니다.\n"
+"- '이메일 보내기' : 자동으로 이메일을 보냅니다(토론).\n"
+"- '팔로워 추가' : 레코드에 팔로워를 추가합니다(토론).\n"
+"- '다음 활동 만들기' : 활동을 만듭니다(토론)."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_constraint__type
@@ -26243,7 +27215,7 @@ msgstr "유형 :"
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_U
 msgid "U ACTIVITIES OF EXTRA TERRITORIAL ORGANISATIONS AND BODIES"
-msgstr "U 공인 된 조직 및 기관"
+msgstr "U 공인된 조직 및 기관"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae
@@ -26280,7 +27252,7 @@ msgstr "URL"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__url_code
 msgid "URL Code"
-msgstr ""
+msgstr "URL 코드"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_us_reports
@@ -26305,7 +27277,7 @@ msgstr "UTM 추적기"
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing_crm
 msgid "UTM and mass mailing on lead / opportunities"
-msgstr "리드 / 기회에 대한 UTM 및 일괄 메일 보내기"
+msgstr "영업제안/기회에 대한 UTM 및 일괄 메일 보내기"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing_sale
@@ -26315,12 +27287,12 @@ msgstr "판매 주문에 UTM 및 일괄 메일  보내기"
 #. module: base
 #: model:ir.module.module,description:base.module_social_sale
 msgid "UTM and post on sale orders"
-msgstr ""
+msgstr "UTM 및 판매 주문서 게시"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_crm
 msgid "UTM and posts on crm"
-msgstr ""
+msgstr "UTM 및 CRM 게시"
 
 #. module: base
 #: model:res.country,name:base.ug
@@ -26335,7 +27307,7 @@ msgstr "우크라이나"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ua
 msgid "Ukraine - Accounting"
-msgstr ""
+msgstr "우크라이나 - 회계"
 
 #. module: base
 #: code:addons/models.py:0
@@ -26493,7 +27465,7 @@ msgstr "인식할 수 없는 확장자 : .csv, .po, or .tgz 중 하나여야 합
 #: code:addons/base/static/src/js/res_config_settings.js:0
 #, python-format
 msgid "Unsaved changes"
-msgstr ""
+msgstr "변경 내용이 저장되지 않음"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_unsplash
@@ -26617,12 +27589,12 @@ msgstr "온라인 상점에서 쿠폰 및 프로모션 사용"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon
 msgid "Use discount coupons in sales orders"
-msgstr ""
+msgstr "판매 주문서에 할인 쿠폰 사용"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_tax_python
 msgid "Use python code to define taxes"
-msgstr ""
+msgstr "파이썬 코드를 사용하여 세금 정의"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__use_date_range
@@ -26748,7 +27720,7 @@ msgstr "사용자 정의 필터"
 #. module: base
 #: model:ir.module.module,summary:base.module_point_of_sale
 msgid "User-friendly PoS interface for shops and restaurants"
-msgstr ""
+msgstr "상점과 식당을 위한 사용자 친화적인 PoS 인터페이스"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0 code:addons/models.py:0
@@ -26843,7 +27815,7 @@ msgstr "VOIP OnSIP"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip_crm
 msgid "VOIP for crm"
-msgstr ""
+msgstr "CRM에 대한 VOIP"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_phone_validation
@@ -26855,7 +27827,7 @@ msgstr "전화 번호 형식 확인 및 승인"
 msgid ""
 "Validate stock moves for product added on sales orders through Field Service"
 " Management App"
-msgstr ""
+msgstr "현장 서비스 관리 앱을 통해 판매 주문에 추가된 상품의 재고 이동 확인"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_config_parameter__value
@@ -26911,7 +27883,7 @@ msgstr "텍스트 값"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_mercury
 msgid "Vantiv Payment Services"
-msgstr ""
+msgstr "Vantiv 결제 서비스"
 
 #. module: base
 #: model:res.country,name:base.vu
@@ -27017,7 +27989,7 @@ msgstr "상속 모드 보기"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_livechat
 msgid "View livechat sessions for leads"
-msgstr ""
+msgstr "영업제안 실시간 채팅 세션 보기"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -27039,7 +28011,7 @@ msgstr "보기 : %s"
 #: model_terms:ir.ui.view,arch_db:base.view_view_tree
 #: model_terms:ir.ui.view,arch_db:base.view_window_action_form
 msgid "Views"
-msgstr "보기"
+msgstr "화면"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_ui_view
@@ -27237,12 +28209,12 @@ msgstr "웹사이트 평가"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_product_configurator
 msgid "Website Sale Product Configurator"
-msgstr "웹사이트 판매 제품 구성기"
+msgstr "웹 사이트 판매 상품 구성기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_stock_product_configurator
 msgid "Website Sale Stock Product Configurator"
-msgstr ""
+msgstr "웹사이트 판매 재고 상품 구성기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_dashboard
@@ -27262,12 +28234,12 @@ msgstr "웹사이트 스튜디오"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_website
 msgid "Website Test"
-msgstr ""
+msgstr "웹사이트 테스트"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_website
 msgid "Website Test, mainly for module install/uninstall tests"
-msgstr ""
+msgstr "웹 사이트 테스트, 주로 모듈 설치/제거 테스트"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_theme_install
@@ -27319,6 +28291,9 @@ msgid ""
 "If the timezone is not set, UTC (Coordinated Universal Time) is used.\n"
 "Anywhere else, time values are computed according to the time offset of your web client."
 msgstr ""
+"문서를 인쇄하고 데이터를 내보내거나 가져올 때이 시간대에 따라 시간 값이 계산됩니다.\n"
+"시간대를 설정하지 않으면 UTC (협정 세계시)가 사용됩니다.\n"
+"다른 곳에서는 시간 값이 웹 클라이언트의 시간 오프셋에 따라 계산됩니다."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -27360,6 +28335,8 @@ msgid ""
 "number upon assignation, there can still be gaps in the sequence if records "
 "are deleted. The 'no gap' implementation is slower than the standard one."
 msgstr ""
+"레코드에 시퀀스 번호를 할당하는 동안 '차이 없음'시퀀스 구현은 각 이전 시퀀스 번호가 이미 할당되었는지 확인합니다. 이 시퀀스 구현은 "
+"할당 시퀀스 번호를 건너뛰지 않지만 레코드가 삭제되면 시퀀스에 틈이 있을 수 있습니다. '차이 없음' 구현은 표준 구현보다 느립니다."
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_G
@@ -27408,12 +28385,12 @@ msgstr "Wkhtmltopdf가 실패했습니다 (에러코드: %s). 메시지 : %s"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_work_entry
 msgid "Work Entries"
-msgstr ""
+msgstr "작업 항목"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_workorder
 msgid "Work Orders, Planning, Stock Reports."
-msgstr ""
+msgstr "작업 지시, 계획, 재고 보고서."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_sips
@@ -27501,7 +28478,7 @@ msgstr "컴퓨터에서 파일을 업로드하거나 인터넷 링크를 복사�
 msgid ""
 "You can manage the different federal states you are working on from here. "
 "Each state is attached to one country."
-msgstr ""
+msgstr "여기서 작업중인 여러 연방 주를 관리 할 수 ​​있습니다. 각주는 한 국가에 연결되어 있습니다."
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0
@@ -27596,6 +28573,9 @@ msgid ""
 "\n"
 "(Operation: %(operation)s)"
 msgstr ""
+"필드에 접근할 수 있는 권한이 없습니다. %(document_kind)s (%(document_model)s)에 \"%(fields)s\". 시스템 관리자에게 문의하십시오.\n"
+"\n"
+"(조작 : %(operation)s)"
 
 #. module: base
 #: code:addons/base/models/ir_actions.py:0
@@ -27701,7 +28681,7 @@ msgstr "[SKU001] 서버"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "[SKU002] Computer"
-msgstr ""
+msgstr "[SKU002] 컴퓨터"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_import_language
@@ -27721,7 +28701,7 @@ msgstr "account_plaid"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_ponto
 msgid "account_ponto"
-msgstr ""
+msgstr "account_ponto"
 
 #. module: base
 #: code:addons/models.py:0
@@ -27875,7 +28855,7 @@ msgstr "email@yourcompany.com"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "example.com"
-msgstr ""
+msgstr "example.com"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -27908,7 +28888,7 @@ msgstr ""
 #: code:addons/models.py:0
 #, python-format
 msgid "forbidden for groups %s"
-msgstr ""
+msgstr "%s 그룹에 금지됨"
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -27929,7 +28909,7 @@ msgstr "html"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "info@example.com"
-msgstr ""
+msgstr "info@example.com"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_language_install__state__init
@@ -28000,7 +28980,7 @@ msgstr "통화"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting
 msgid "mrp_subcontracting"
-msgstr ""
+msgstr "mrp_subcontracting"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0

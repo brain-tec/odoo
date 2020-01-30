@@ -462,6 +462,8 @@ logic. They are used as elements or sets of elements in form views.
   ``attrs``
     standard dynamic attributes based on record values
 
+  .. note:: Note that ``notebook`` should not be placed within ``group``
+
 ``group``
   used to define column layouts in forms. By default, groups define 2 columns
   and most direct children of groups take a single column. ``field`` direct
@@ -537,9 +539,6 @@ system. Available semantic components are:
       floats_ the field to the corresponding direction
     ``oe_read_only``, ``oe_edit_only``
       only displays the field in the corresponding form mode
-    ``oe_no_button``
-      avoids displaying the navigation button in a
-      :class:`~odoo.fields.Many2one`
     ``oe_avatar``
       for image fields, displays images as "avatar" (square, 90x90 maximum
       size, some image decorations)
@@ -1027,13 +1026,13 @@ take the following attributes:
 
   * Possible values for scale ``week`` are (default: ``day:half``):
 
-    ``day``: records times snap to full days (ex: 7:28 AM becomes 11:59:59 PM)
+    ``day``: records times snap to full days (ex: 7:28 AM becomes 11:59:59 PM of the previous day, 10:32 PM becomes 12:00 PM of the current day)
 
     ``day:half``: records times snap to half hours (ex: 7:28 AM becomes 12:00 PM)
 
   * Possible values for scale ``month`` are (default: ``day:half``):
 
-    ``day``: records times snap to full days (ex: 7:28 AM becomes 11:59:59 PM)
+    ``day``: records times snap to full days (ex: 7:28 AM becomes 11:59:59 PM of the previous day, 10:32 PM becomes 12:00 PM of the current day)
 
     ``day:half``: records times snap to half hours (ex: 7:28 AM becomes 12:00 PM)
 
@@ -1089,17 +1088,17 @@ take the following attributes:
 
   Example: tasks have a field user_id that reference res.users. The res.users model has a field image that holds the avatar,
   then:
-.. code-block:: xml
 
-      <gantt
+  .. code-block:: xml
+
+     <gantt
         date_start="date_start"
         date_stop="date_stop"
         thumbnails="{'user_id': 'image_128'}"
       >
       </gantt>
 
-
-will display the users avatars next to their names when grouped by user_id
+  will display the users avatars next to their names when grouped by user_id.
 
 .. _reference/views/diagram:
 

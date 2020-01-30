@@ -252,7 +252,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         }
         return {
             author: this.getDisplayedAuthor(),
-            body: mailUtils.parseAndTransform(this.getBody(), mailUtils.inline),
+            body: mailUtils.htmlToTextContentInline(this.getBody()),
             date: this.getDate(),
             documentModel: this.getDocumentModel(),
             documentID: this.getDocumentID(),
@@ -759,6 +759,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._documentID = data.res_id;
         this._emailFrom = data.email_from;
         this._info = data.info;
+        this._isNote = data.is_note;
         this._moduleIcon = data.module_icon;
         this._needactionPartnerIDs = data.needaction_partner_ids || [];
         this._starredPartnerIDs = data.starred_partner_ids || [];

@@ -329,7 +329,7 @@ class IrHttp(models.AbstractModel):
         """ Return a domain to list the domain adding web-translations and
             dynamic resources that may be used frontend views
         """
-        return []
+        return [('name', '=', 'web')]
 
     bots = "bot|crawl|slurp|spider|curl|wget|facebookexternalhit".split("|")
 
@@ -344,6 +344,10 @@ class IrHttp(models.AbstractModel):
             return any(bot in user_agent.encode('ascii', 'ignore') for bot in cls.bots)
 
     @classmethod
+    def _get_frontend_langs(cls):
+        return [code for code, _ in request.env['res.lang'].get_installed()]
+
+    @classmethod
     def get_nearest_lang(cls, lang_code):
         """ Try to find a similar lang. Eg: fr_BE and fr_FR
             :param lang_code: the lang `code` (en_US)
@@ -352,7 +356,7 @@ class IrHttp(models.AbstractModel):
             return False
         short_match = False
         short = lang_code.partition('_')[0]
-        for (code, _) in request.env['res.lang'].get_installed():
+        for code in cls._get_frontend_langs():
             if code == lang_code:
                 return code
             if not short_match and code.startswith(short):
@@ -397,8 +401,9 @@ class IrHttp(models.AbstractModel):
                 lang = Lang._lang_get(nearest_lang)
             else:
                 nearest_ctx_lg = not is_a_bot and cls.get_nearest_lang(request.env.context['lang'])
-                preferred_lang = Lang._lang_get(cook_lang or nearest_ctx_lg) or cls._get_default_lang()
-                lang = preferred_lang
+                nearest_ctx_lg = nearest_ctx_lg in lang_codes and nearest_ctx_lg
+                preferred_lang = Lang._lang_get(cook_lang or nearest_ctx_lg)
+                lang = preferred_lang or cls._get_default_lang()
 
             request.lang = lang
             context['lang'] = lang.code
@@ -622,6 +627,21 @@ class IrHttp(models.AbstractModel):
 
         if not request.uid:
             cls._auth_method_public()
+
+        # We rollback the current transaction before initializing a new
+        # cursor to avoid potential deadlocks.
+
+        # If the current (failed) transaction was holding a lock, the new
+        # cursor might have to wait for this lock to be released further
+        # down the line. However, this will only happen after the
+        # request is done (and in fact it won't happen). As a result, the
+        # current thread/worker is frozen until its timeout is reached.
+
+        # So rolling back the transaction will release any potential lock
+        # and, since we are in a case where an exception was raised, the
+        # transaction shouldn't be committed in the first place.
+        request.env.cr.rollback()
+
         with registry(request.env.cr.dbname).cursor() as cr:
             env = api.Environment(cr, request.uid, request.env.context)
             if code == 500:
