@@ -79,7 +79,9 @@ class StockMove(models.Model):
     consume_unbuild_id = fields.Many2one(
         'mrp.unbuild', 'Consumed Disassembly Order', check_company=True)
     operation_id = fields.Many2one(
-        'mrp.routing.workcenter', 'Operation To Consume', check_company=True)  # TDE FIXME: naming
+        'mrp.routing.workcenter', 'Operation To Consume', check_company=True,
+        domain="[('routing_id', '=', routing_id), '|', ('company_id', '=', company_id), ('company_id', '=', False)]")
+    routing_id = fields.Many2one(related='raw_material_production_id.routing_id')
     workorder_id = fields.Many2one(
         'mrp.workorder', 'Work Order To Consume', check_company=True)
     # Quantities to process, in normalized UoMs
@@ -87,7 +89,7 @@ class StockMove(models.Model):
     byproduct_id = fields.Many2one(
         'mrp.bom.byproduct', 'By-products', check_company=True,
         help="By-product line that generated the move in a manufacturing order")
-    unit_factor = fields.Float('Unit Factor', default=1)
+    unit_factor = fields.Float('Unit Factor', compute='_compute_unit_factor', store=True)
     is_done = fields.Boolean(
         'Done', compute='_compute_is_done',
         store=True,
@@ -135,13 +137,25 @@ class StockMove(models.Model):
         for move in self:
             move.is_done = (move.state in ('done', 'cancel'))
 
+    @api.depends('product_uom_qty')
+    def _compute_unit_factor(self):
+        for move in self:
+            mo = move.raw_material_production_id or move.production_id
+            if mo:
+                move.unit_factor = (move.product_uom_qty - move.quantity_done) / ((mo.product_qty - mo.qty_produced) or 1)
+            else:
+                move.unit_factor = 1.0
+
     @api.model
     def default_get(self, fields_list):
         defaults = super(StockMove, self).default_get(fields_list)
         if self.env.context.get('default_raw_material_production_id'):
             production_id = self.env['mrp.production'].browse(self.env.context['default_raw_material_production_id'])
-            if production_id.state == 'done':
-                defaults['state'] = 'done'
+            if production_id.state in ('confirmed', 'done'):
+                if production_id.state == 'confirmed':
+                    defaults['state'] = 'draft'
+                else:
+                    defaults['state'] = 'done'
                 defaults['product_uom_qty'] = 0.0
                 defaults['additional'] = True
         return defaults
