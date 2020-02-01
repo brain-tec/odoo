@@ -1579,17 +1579,9 @@ class AccountMove(models.Model):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
-
-        moves = super(AccountMove, self).create(vals_list)
-
-        # Trigger 'action_invoice_paid' when the invoice is directly paid at its creation.
-        moves.filtered(lambda move: move.is_invoice(include_receipts=True) and move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
-
-        return moves
+        return super(AccountMove, self).create(vals_list)
 
     def write(self, vals):
-        not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.payment_state not in ('paid', 'in_payment'))
-
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
                 raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
@@ -1630,9 +1622,6 @@ class AccountMove(models.Model):
         # Ensure the move is still well balanced.
         if 'line_ids' in vals and self._context.get('check_move_validity', True):
             self._check_balanced()
-
-        # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
-        not_paid_invoices.filtered(lambda move: move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
         return res
 
@@ -2166,6 +2155,12 @@ class AccountMove(models.Model):
             else:
                 continue
 
+        # Trigger action for paid invoices in amount is zero
+        self.filtered(
+            lambda m: m.is_invoice(include_receipts=True) and m.currency_id.is_zero(m.amount_total)
+        ).action_invoice_paid()
+
+
     def _auto_compute_invoice_reference(self):
         ''' Hook to be overridden to set custom conditions for auto-computed invoice references.
             :return True if the move should get a auto-computed reference else False
@@ -2437,7 +2432,7 @@ class AccountMoveLine(models.Model):
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", store=True, readonly=True)
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
     sequence = fields.Integer(default=10)
-    name = fields.Char(string='Label', tracking=True)
+    name = fields.Text(string='Label', tracking=True)
     quantity = fields.Float(string='Quantity',
         default=1.0, digits='Product Unit of Measure',
         help="The optional quantity expressed by this line, eg: number of product sold. "
@@ -3451,13 +3446,10 @@ class AccountMoveLine(models.Model):
         return result
 
     def unlink(self):
+        moves = self.mapped('move_id')
+
         # Check the lines are not reconciled (partially or not).
         self._check_reconciliation()
-
-        # Check total_debit == total_credit in the related moves.
-        moves = self.mapped('move_id')
-        if self._context.get('check_move_validity', True):
-            moves._check_balanced()
 
         # Check the lock date.
         moves._check_fiscalyear_lock_date()
@@ -3465,7 +3457,13 @@ class AccountMoveLine(models.Model):
         # Check the tax lock date.
         self._check_tax_lock_date()
 
-        return super(AccountMoveLine, self).unlink()
+        res = super(AccountMoveLine, self).unlink()
+
+        # Check total_debit == total_credit in the related moves.
+        if self._context.get('check_move_validity', True):
+            moves._check_balanced()
+
+        return res
 
     @api.model
     def default_get(self, default_fields):
@@ -3784,6 +3782,11 @@ class AccountMoveLine(models.Model):
         if not self:
             return
 
+        # List unpaid invoices
+        not_paid_invoices = self.mapped('move_id').filtered(
+            lambda m: m.is_invoice(include_receipts=True) and m.payment_state not in ('paid', 'in_payment')
+        )
+
         self._check_reconcile_validity()
         #reconcile everything that can be
         remaining_moves = self.auto_reconcile_lines()
@@ -3803,6 +3806,12 @@ class AccountMoveLine(models.Model):
             remaining_moves = (remaining_moves + writeoff_to_reconcile).auto_reconcile_lines()
         # Check if reconciliation is total or needs an exchange rate entry to be created
         (self + writeoff_to_reconcile).check_full_reconcile()
+
+        # Trigger action for paid invoices
+        not_paid_invoices.filtered(
+            lambda m: m.payment_state in ('paid', 'in_payment')
+        ).action_invoice_paid()
+
         return True
 
     def _create_writeoff(self, writeoff_vals):
