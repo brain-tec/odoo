@@ -24,7 +24,6 @@ except ImportError:
 from collections import namedtuple
 from email.message import EmailMessage
 from lxml import etree
-from werkzeug import url_encode
 from werkzeug import urls
 
 from odoo import _, api, exceptions, fields, models, tools, registry, SUPERUSER_ID
@@ -1648,7 +1647,7 @@ class MailThread(models.AbstractModel):
             normalized_email = tools.email_normalize(contact)
             partner = next((partner for partner in done_partners if partner.email_normalized == normalized_email), self.env['res.partner'])
             if not partner and force_create and normalized_email in normalized_emails:
-                partner = self.env['res.partner'].name_create(contact)[0]
+                partner = self.env['res.partner'].browse(self.env['res.partner'].name_create(contact)[0])
             partners.append(partner)
         return partners
 
@@ -2482,7 +2481,7 @@ class MailThread(models.AbstractModel):
             token = self._notify_encode_link(base_link, params)
             params['token'] = token
 
-        link = '%s?%s' % (base_link, url_encode(params))
+        link = '%s?%s' % (base_link, urls.url_encode(params))
         if self:
             link = self[0].get_base_url() + link
 

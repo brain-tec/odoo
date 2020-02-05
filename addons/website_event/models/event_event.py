@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import werkzeug
+import werkzeug.urls
 import json
 
 from odoo import api, fields, models, _
@@ -19,7 +19,7 @@ class EventType(models.Model):
 
 class Event(models.Model):
     _name = 'event.event'
-    _inherit = ['event.event', 'website.seo.metadata', 'website.published.multi.mixin']
+    _inherit = ['event.event', 'website.seo.metadata', 'website.published.multi.mixin', 'website.cover_properties.mixin']
 
     # description
     subtitle = fields.Char('Event Subtitle', translate=True)
@@ -27,9 +27,6 @@ class Event(models.Model):
     is_participating = fields.Boolean("Is Participating", compute="_compute_is_participating")
     # website
     website_published = fields.Boolean(tracking=True)
-    cover_properties = fields.Text(
-        'Cover Properties',
-        default='{"background-image": "none", "background-color": "oe_blue", "opacity": "0.4", "resize_class": "o_half_screen_height"}')
     website_menu = fields.Boolean(
         'Dedicated Menu', copy=False,
         help="Creates menus Introduction, Location and Register on the page "
@@ -58,6 +55,11 @@ class Event(models.Model):
         super(Event, self)._onchange_type()
         if self.event_type_id:
             self.website_menu = self.event_type_id.website_menu
+
+    def _default_cover_properties(self):
+        res = super()._default_cover_properties()
+        res['opacity'] = '0.4'
+        return res
 
     def _get_menu_entries(self):
         """ Method returning menu entries to display on the website view of the
@@ -145,7 +147,7 @@ class Event(models.Model):
         }
         if self.address_id:
             params.update(location=self.sudo().address_id.contact_address.replace('\n', ' '))
-        encoded_params = werkzeug.url_encode(params)
+        encoded_params = werkzeug.urls.url_encode(params)
         google_url = GOOGLE_CALENDAR_URL + encoded_params
         iCal_url = '/event/%d/ics?%s' % (self.id, encoded_params)
         return {'google_url': google_url, 'iCal_url': iCal_url}

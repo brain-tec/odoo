@@ -54,7 +54,7 @@ class AccountMove(models.Model):
             if move_type != 'entry' and journal.type != journal_type:
                 raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal.type))
         else:
-            company_id = self._context.get('default_company_id', self.env.company.id)
+            company_id = self._context.get('force_company', self._context.get('default_company_id', self.env.company.id))
             domain = [('company_id', '=', company_id), ('type', '=', journal_type)]
 
             journal = None
@@ -1196,7 +1196,7 @@ class AccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
             move.invoice_has_outstanding = False
 
-            if move.state != 'posted' or move.payment_state != 'not_paid' or not move.is_invoice(include_receipts=True):
+            if move.state != 'posted' or move.payment_state not in ('not_paid', 'partial') or not move.is_invoice(include_receipts=True):
                 continue
             pay_term_line_ids = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
 
@@ -1312,7 +1312,7 @@ class AccountMove(models.Model):
                 tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
                 if tax_key_add_base not in done_taxes:
                     if line.currency_id != self.company_id.currency_id:
-                        amount = self.company_id.currency_id._convert(line.tax_base_amount, line.currency_id, self.company_id, line.date)
+                        amount = self.company_id.currency_id._convert(line.tax_base_amount, line.currency_id, self.company_id, line.date or fields.Date.today())
                     else:
                         amount = line.tax_base_amount
                     res[line.tax_line_id.tax_group_id]['base'] += amount
@@ -4154,6 +4154,14 @@ class AccountMoveLine(models.Model):
             'context': self.env.context,
         }
 
+    def _get_attachment_domains(self):
+        self.ensure_one()
+        domains = [[('res_model', '=', 'account.move'), ('res_id', '=', self.move_id.id)]]
+        if self.statement_id:
+            domains.append([('res_model', '=', 'account.bank.statement'), ('res_id', '=', self.statement_id.id)])
+        if self.payment_id:
+            domains.append([('res_model', '=', 'account.payment'), ('res_id', '=', self.payment_id.id)])
+        return domains
 
 class AccountPartialReconcile(models.Model):
     _name = "account.partial.reconcile"
