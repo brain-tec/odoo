@@ -31,8 +31,7 @@
             name="Change Password"
             binding_model="res.users"
             res_model="change.password.wizard"
-            view_mode="form" target="new"
-            groups="base.group_erp_manager"/>
+            view_mode="form" target="new"/>
 
         <!-- res.groups -->
         <record id="view_groups_search" model="ir.ui.view">
@@ -138,7 +137,7 @@
                             <label for="company_id" class="oe_edit_only" groups="base.group_multi_company"/>
                             <field name="company_id" context="{'user_preference': 0}" groups="base.group_multi_company"/>
                         </div>
-                        <group>
+                        <group name="phone_numbers">
                             <label for="groups_id" string="Access Rights"
                                     attrs="{'invisible': [('id', '>', 0)]}" groups="base.group_no_one"/>
                             <div attrs="{'invisible': [('id', '>', 0)]}" groups="base.group_no_one">

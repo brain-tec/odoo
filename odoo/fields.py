@@ -170,15 +170,28 @@ class Field(MetaField('DummyField', (object,), {})):
 
         Supported aggregate functions are:
 
-            * ``array_agg`` : values, including nulls, concatenated into an array
-            * ``count`` : number of rows
-            * ``count_distinct`` : number of distinct rows
-            * ``bool_and`` : true if all values are true, otherwise false
-            * ``bool_or`` : true if at least one value is true, otherwise false
-            * ``max`` : maximum value of all values
-            * ``min`` : minimum value of all values
-            * ``avg`` : the average (arithmetic mean) of all values
-            * ``sum`` : sum of all values
+        * ``array_agg`` : values, including nulls, concatenated into an array
+        * ``count`` : number of rows
+        * ``count_distinct`` : number of distinct rows
+        * ``bool_and`` : true if all values are true, otherwise false
+        * ``bool_or`` : true if at least one value is true, otherwise false
+        * ``max`` : maximum value of all values
+        * ``min`` : minimum value of all values
+        * ``avg`` : the average (arithmetic mean) of all values
+        * ``sum`` : sum of all values
+
+    :param str group_expand: function used to expand read_group results when grouping on
+        the current field.
+
+        .. code-block:: python
+
+            @api.model
+            def _read_group_selection_field(self, values, domain, order):
+                return ['choice1', 'choice2', ...] # available selection choices.
+
+            @api.model
+            def _read_group_many2one_field(self, records, domain, order):
+                return records + self.search([custom_domain])
 
     .. rubric:: Computed Fields
 
@@ -2607,6 +2620,8 @@ class Many2oneReference(Integer):
 
     def _update_inverses(self, records, value):
         """ Add `records` to the cached values of the inverse fields of `self`. """
+        if not value:
+            return
         cache = records.env.cache
         model_ids = self._record_ids_per_res_model(records)
 
