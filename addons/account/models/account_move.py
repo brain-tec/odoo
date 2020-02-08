@@ -323,9 +323,9 @@ class AccountMove(models.Model):
                     return {'warning': warning}
         for line in self.line_ids:
             line.partner_id = self.partner_id.commercial_partner_id
-        if self.is_sale_document(include_receipts=True):
+        if self.is_sale_document(include_receipts=True) and self.partner_id.property_payment_term_id:
             self.invoice_payment_term_id = self.partner_id.property_payment_term_id
-        elif self.is_purchase_document(include_receipts=True):
+        elif self.is_purchase_document(include_receipts=True) and self.partner_id.property_supplier_payment_term_id:
             self.invoice_payment_term_id = self.partner_id.property_supplier_payment_term_id
 
         self._compute_bank_partner_id()
@@ -952,7 +952,8 @@ class AccountMove(models.Model):
         param = {'journal_id': self.journal_id.id}
 
         if not relaxed:
-            reference_move = self.search([('journal_id', '=', self.journal_id.id), ('date', '<=', self.date), ('id', '!=', self.id or self._origin.id)], order='date desc', limit=1) or self.search([('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id)], order='date asc', limit=1)
+            domain = [('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id), ('name', 'not in', ('/', False))]
+            reference_move = self.search(domain + [('date', '<=', self.date)], order='date desc', limit=1) or self.search(domain, order='date asc', limit=1)
             sequence_number_reset = self._deduce_sequence_number_reset(reference_move.name)
             if sequence_number_reset == 'year':
                 where_string += " AND date_trunc('year', date) = date_trunc('year', %(date)s) "
@@ -974,7 +975,8 @@ class AccountMove(models.Model):
         # Try to find a pattern already used by relaxing a domain. If we are here, the domain non relaxed should return nothing.
         last_sequence = self._get_last_sequence(relaxed=True)
         if last_sequence:
-            reference_move = self.search([('journal_id', '=', self.journal_id.id), ('date', '<=', self.date), ('id', '!=', self.id or self._origin.id)], order='date asc', limit=1) or self.search([('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id)], order='date desc', limit=1)
+            domain = [('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id), ('name', 'not in', ('/', False))]
+            reference_move = self.search(domain + [('date', '<=', self.date)], order='date desc', limit=1) or self.search(domain, order='date asc', limit=1)
             sequence_number_reset = self._deduce_sequence_number_reset(reference_move.name)
             if sequence_number_reset == 'year':
                 sequence = re.match(self._sequence_yearly_regex, last_sequence)
@@ -2323,11 +2325,7 @@ class AccountMove(models.Model):
         if any(move.type not in ('in_invoice', 'out_invoice') for move in self):
             raise ValidationError(_("This action isn't available for this document."))
 
-        # this is necessary, go figure why
-        self.flush()
-
         for move in self:
-            move.type = move.type.replace('invoice', 'refund')
             reversed_move = move._reverse_move_vals({}, False)
             new_invoice_line_ids = []
             for cmd, virtualid, line_vals in reversed_move['line_ids']:
@@ -2342,7 +2340,11 @@ class AccountMove(models.Model):
                         'debit' : line_vals['credit'],
                         'credit' : line_vals['debit']
                     })
-            move.write({'invoice_line_ids' : [(5, 0, 0)], 'invoice_partner_bank_id': False})
+            move.write({
+                'type': move.type.replace('invoice', 'refund'),
+                'invoice_line_ids' : [(5, 0, 0)],
+                'invoice_partner_bank_id': False,
+            })
             move.write({'invoice_line_ids' : new_invoice_line_ids})
 
     def _get_report_base_filename(self):
@@ -3442,7 +3444,7 @@ class AccountMoveLine(models.Model):
                 ))
                 super(AccountMoveLine, line).write(to_write)
             elif any(field in vals for field in BUSINESS_FIELDS):
-                to_write = self._get_price_total_and_subtotal()
+                to_write = line._get_price_total_and_subtotal()
                 to_write.update(line._get_fields_onchange_subtotal(
                     price_subtotal=to_write['price_subtotal'],
                 ))
@@ -3510,9 +3512,13 @@ class AccountMoveLine(models.Model):
 
             # Suggest default value for 'partner_id'.
             if 'partner_id' in default_fields and not values.get('partner_id'):
-                partners = move.line_ids[-2:].mapped('partner_id')
-                if len(partners) == 1:
-                    values['partner_id'] = partners.id
+                if len(move.line_ids[-2:]) == 2 and  move.line_ids[-1].partner_id == move.line_ids[-2].partner_id != False:
+                    values['partner_id'] = move.line_ids[-2:].mapped('partner_id').id
+
+            # Suggest default value for 'account_id'.
+            if 'account_id' in default_fields and not values.get('account_id'):
+                if len(move.line_ids[-2:]) == 2 and  move.line_ids[-1].account_id == move.line_ids[-2].account_id != False:
+                    values['account_id'] = move.line_ids[-2:].mapped('account_id').id
         return values
 
     @api.depends('ref', 'move_id')
