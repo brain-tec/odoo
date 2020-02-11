@@ -2059,7 +2059,7 @@ const SnippetOptionWidget = Widget.extend({
 
             if (params.applyTo) {
                 const $subTargets = this.$(params.applyTo);
-                const proms = _.each($subTargets, subTargetEl => {
+                const proms = _.map($subTargets, subTargetEl => {
                     const proxy = createPropertyProxy(this, '$target', $(subTargetEl));
                     return this[methodName].call(proxy, previewMode, widgetValue, params);
                 });
@@ -2107,6 +2107,13 @@ const SnippetOptionWidget = Widget.extend({
             await this._select(previewMode, widget);
             this.$target.trigger('content_changed');
 
+            // Enabling an option and notifying that the $target has changed
+            // may destroy the option (if the DOM is altered in such a way the
+            // option is not attached to it anymore). In that case, we must not
+            // wait for a response to the option update.
+            if (this.isDestroyed()) {
+                return;
+            }
             await new Promise(resolve => {
                 // Will update the UI of the correct widgets for all options
                 // related to the same $target/editor if necessary
@@ -3072,14 +3079,13 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                             },
                         });
                         this.trigger_up('reload_snippet_template');
-                        resolve();
                     },
                 }, {
                     text: _t("Discard"),
                     close: true,
-                    click: () => resolve(),
                 }],
             }).open();
+            dialog.on('closed', this, () => resolve());
         });
     },
 });
