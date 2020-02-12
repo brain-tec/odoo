@@ -33,13 +33,10 @@ const FormEditor = options.Class.extend({
         }
         // Set selection as records to avoid added conplexity
         if (field.type === 'selection') {
-            field.records = [];
-            field.selection.forEach(el => {
-                field.records.push({
-                    id: el[0],
-                    display_name: el[1],
-                });
-            });
+            field.records = field.selection.map(el => ({
+                id: el[0],
+                display_name: el[1],
+            }));
         } else if (field.relation && field.relation !== 'ir.attachment') {
             field.records = await this._rpc({
                 model: field.relation,
@@ -86,9 +83,8 @@ const FormEditor = options.Class.extend({
      * @returns {Object}
      */
     _getDefaultFormat: function () {
-        const formOptions = this.el.closest('.o_we_customize_panel');
         return {
-            labelWidth: formOptions && formOptions.querySelector('we-customizeblock-options [data-select-style] input').value + 'px',
+            labelWidth: this.$target[0].querySelector('.s_website_form_label').style.width,
             labelPosition: 'left',
             multiPosition: 'horizontal',
             requiredMark: this._isRequiredMark(),
@@ -342,7 +338,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         // Disable text edition
         this.$target.attr('contentEditable', false);
         // Make button editable
-        this.$target.find('.s_website_form_send').parent().attr('contentEditable', true);
+        this.$target.find('.s_website_form_send').attr('contentEditable', true);
         // Get potential message
         this.$message = this.$target.parent().find('.s_website_form_end_message');
         this.showEndMessage = false;
