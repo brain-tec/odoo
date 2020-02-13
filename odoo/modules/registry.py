@@ -239,6 +239,12 @@ class Registry(Mapping):
         lazy_property.reset_all(self)
         env = odoo.api.Environment(cr, SUPERUSER_ID, {})
 
+        if env.all.tocompute:
+            _logger.error(
+                "Remaining fields to compute before setting up registry: %s",
+                env.all.tocompute, stack_info=True,
+            )
+
         # add manual models
         if self._init_modules:
             env['ir.model']._add_manual_models()
@@ -310,7 +316,7 @@ class Registry(Mapping):
         try:
             func(*args, **kwargs)
         except Exception as e:
-            if self._mode == 'init':
+            if self._is_install:
                 _schema.error(*e.args)
             else:
                 _schema.info(*e.args)
@@ -325,7 +331,7 @@ class Registry(Mapping):
             except Exception as e:
                 _schema.error(*e.args)
 
-    def init_models(self, cr, model_names, context, mode='init'):
+    def init_models(self, cr, model_names, context, install=True):
         """ Initialize a list of models (given by their name). Call methods
             ``_auto_init`` and ``init`` on each model to create or update the
             database tables supporting the models.
@@ -344,7 +350,7 @@ class Registry(Mapping):
 
         # make sure the queue does not contain some leftover from a former call
         self._post_init_queue.clear()
-        self._mode = mode
+        self._is_install = install
 
         for model in models:
             model._auto_init()
