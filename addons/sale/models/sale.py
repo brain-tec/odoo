@@ -7,7 +7,7 @@ from itertools import groupby
 
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang
+from odoo.tools.misc import formatLang, get_lang
 from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
@@ -544,6 +544,7 @@ class SaleOrder(models.Model):
             'partner_shipping_id': self.partner_shipping_id.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(self.partner_invoice_id.id)).id,
             'invoice_partner_bank_id': self.company_id.partner_id.bank_ids[:1].id,
+            'journal_id': journal.id,  # company comes from the journal
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
             'invoice_payment_ref': self.reference,
@@ -1487,7 +1488,7 @@ class SaleOrderLine(models.Model):
             vals['product_uom_qty'] = self.product_uom_qty or 1.0
 
         product = self.product_id.with_context(
-            lang=self.order_id.partner_id.lang,
+            lang=get_lang(self.env, self.order_id.partner_id.lang).code,
             partner=self.order_id.partner_id,
             quantity=vals.get('product_uom_qty') or self.product_uom_qty,
             date=self.order_id.date_order,
