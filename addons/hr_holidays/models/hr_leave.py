@@ -126,7 +126,7 @@ class HolidaysRequest(models.Model):
         "hr.leave.type", string="Time Off Type", required=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
         domain=[('valid', '=', True)])
-    validation_type = fields.Selection('Validation Type', related='holiday_status_id.leave_validation_type', readonly=False)
+    validation_type = fields.Selection(string='Validation Type', related='holiday_status_id.leave_validation_type', readonly=False)
     # HR data
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', index=True, readonly=True, ondelete="restrict",
@@ -173,7 +173,7 @@ class HolidaysRequest(models.Model):
         'hr.employee.category', string='Employee Tag', readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, help='Category of Employee')
     mode_company_id = fields.Many2one(
-        'res.company', string='Company', readonly=True,
+        'res.company', string='Company Mode', readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     first_approver_id = fields.Many2one(
         'hr.employee', string='First Approval', readonly=True, copy=False,

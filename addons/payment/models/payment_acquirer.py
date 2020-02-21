@@ -9,7 +9,6 @@ import pprint
 
 from odoo import api, exceptions, fields, models, _, SUPERUSER_ID
 from odoo.tools import consteq, float_round, image_process, ustr
-from odoo.addons.base.models import ir_module
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.misc import formatLang
@@ -154,7 +153,7 @@ class PaymentAcquirer(models.Model):
 
     # TDE FIXME: remove that brol
     module_id = fields.Many2one('ir.module.module', string='Corresponding Module')
-    module_state = fields.Selection(selection=ir_module.STATES, string='Installation State', related='module_id.state', store=True)
+    module_state = fields.Selection(string='Installation State', related='module_id.state', store=True)
     module_to_buy = fields.Boolean(string='Odoo Enterprise Module', related='module_id.to_buy', readonly=True, store=False)
 
     image_128 = fields.Image("Image", max_width=128, max_height=128)
@@ -625,7 +624,7 @@ class PaymentTransaction(models.Model):
     payment_id = fields.Many2one('account.payment', string='Payment', readonly=True)
     invoice_ids = fields.Many2many('account.move', 'account_invoice_transaction_rel', 'transaction_id', 'invoice_id',
         string='Invoices', copy=False, readonly=True,
-        domain=[('type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))])
+        domain=[('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))])
     invoice_ids_nbr = fields.Integer(compute='_compute_invoice_ids_nbr', string='# of Invoices')
 
     _sql_constraints = [
