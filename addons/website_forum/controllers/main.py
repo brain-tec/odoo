@@ -49,7 +49,11 @@ class WebsiteForum(WebsiteProfile):
 
     @http.route('/forum/new', type='json', auth="user", methods=['POST'], website=True)
     def forum_create(self, forum_name="New Forum", forum_mode="questions", add_menu=False):
-        forum_id = request.env['forum.forum'].create({'name': forum_name, 'mode': forum_mode})
+        forum_id = request.env['forum.forum'].create({
+            'name': forum_name,
+            'mode': forum_mode,
+            'website_id': request.website.id,
+        })
         if add_menu:
             request.env['website.menu'].create({
                 'name': forum_name,
@@ -201,7 +205,7 @@ class WebsiteForum(WebsiteProfile):
         except IOError:
             return False
 
-    @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum[0]),('parent_id','=',False),('can_view', '=', True)]"):question>'''],
+    @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum.id),('parent_id','=',False),('can_view', '=', True)]"):question>'''],
                 type='http', auth="public", website=True, sitemap=True)
     def question(self, forum, question, **post):
         if not forum.active:
