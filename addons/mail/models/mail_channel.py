@@ -419,8 +419,9 @@ class Channel(models.Model):
             ('channel_id', 'in', self.ids)
         ]).mapped('email')
         for partner in partners.filtered(lambda p: p.email and not (p.email in banned_emails)):
+            company = partner.company_id or self.env.company
             create_values = {
-                'email_from': partner.company_id.catchall_formatted or partner.company_id.email_formatted,
+                'email_from': company.catchall_formatted or company.email_formatted,
                 'author_id': self.env.user.partner_id.id,
                 'body_html': view.render({'channel': self, 'partner': partner}, engine='ir.qweb', minimal_qcontext=True),
                 'subject': _("Guidelines of channel %s") % self.name,
@@ -472,7 +473,10 @@ class Channel(models.Model):
         for partner in self.env['res.partner'].browse(partner_ids):
             user_id = partner.user_ids and partner.user_ids[0] or False
             if user_id:
-                for channel_info in self.with_user(user_id).channel_info():
+                user_channels = self.with_user(user_id).with_context(
+                    allowed_company_ids=user_id.company_ids.ids
+                )
+                for channel_info in user_channels.channel_info():
                     notifications.append([(self._cr.dbname, 'res.partner', partner.id), channel_info])
         return notifications
 
