@@ -349,8 +349,10 @@ class AccountMove(models.Model):
             for line in self._get_lines_onchange_currency():
                 new_currency = has_foreign_currency and self.currency_id
                 line.currency_id = new_currency
+                line._onchange_currency()
+        else:
+            self.line_ids._onchange_currency()
 
-        self.line_ids._onchange_currency()
         self._recompute_dynamic_lines(recompute_tax_base_amount=True)
 
     @api.onchange('invoice_payment_ref')
@@ -4033,6 +4035,7 @@ class AccountMoveLine(models.Model):
                 'name': default_name,
                 'date': move_line.date,
                 'account_id': move_line.analytic_account_id.id,
+                'group_id': move_line.analytic_account_id.group_id.id,
                 'tag_ids': [(6, 0, move_line._get_analytic_tag_ids())],
                 'unit_amount': move_line.quantity,
                 'product_id': move_line.product_id and move_line.product_id.id or False,
