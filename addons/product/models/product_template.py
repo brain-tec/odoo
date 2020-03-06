@@ -41,7 +41,7 @@ class ProductTemplate(models.Model):
 
     def _read_group_categ_id(self, categories, domain, order):
         category_ids = self.env.context.get('default_categ_id')
-        if not category_ids:
+        if not category_ids and self.env.context.get('group_expand'):
             category_ids = categories._search([], order=order, access_rights_uid=SUPERUSER_ID)
         return categories.browse(category_ids)
 
@@ -229,8 +229,11 @@ class ProductTemplate(models.Model):
         else:
             self.write({'list_price': self.price})
 
+    @api.depends_context('company')
     @api.depends('product_variant_ids', 'product_variant_ids.standard_price')
     def _compute_standard_price(self):
+        # Depends on force_company context because standard_price is company_dependent
+        # on the product_product
         unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)
         for template in unique_variants:
             template.standard_price = template.product_variant_ids.standard_price
