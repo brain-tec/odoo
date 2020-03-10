@@ -6,7 +6,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from itertools import groupby
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.addons.stock.models.stock_rule import ProcurementException
 
 
@@ -90,7 +90,7 @@ class StockRule(models.Model):
                 vals = rules[0]._prepare_purchase_order(company_id, origins, [p.values for p in procurements])
                 # The company_id is the same for all procurements since
                 # _make_po_get_domain add the company in the domain.
-                po = self.env['purchase.order'].with_company(company_id).sudo().create(vals)
+                po = self.env['purchase.order'].with_user(SUPERUSER_ID).with_company(company_id).sudo().create(vals)
             else:
                 # If a purchase order is found, adapt its `origin` field.
                 if po.origin:
@@ -290,6 +290,7 @@ class StockRule(models.Model):
             ('state', '=', 'draft'),
             ('picking_type_id', '=', self.picking_type_id.id),
             ('company_id', '=', company_id.id),
+            ('user_id', '=', False),
         )
         if values.get('orderpoint_id'):
             procurement_date = fields.Date.to_date(values['date_planned']) - relativedelta(days=int(values['supplier'].delay) + company_id.po_lead)
