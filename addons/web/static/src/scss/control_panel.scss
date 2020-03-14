@@ -6,17 +6,14 @@
 
     > div {
         display: flex;
-        justify-content: space-between;
         min-height: 30px;
         margin: 5px 0px;
     }
 
-    .breadcrumb, .o_cp_left {
-        flex: 1 1 auto;
-    }
-
-    .o_cp_searchview, .o_cp_right {
-        flex: 0 0 50%;
+    @include media-breakpoint-up(md) {
+        .breadcrumb, .o_cp_left, .o_cp_searchview, .o_cp_right {
+            width: 50%;
+        }
     }
 
     .breadcrumb {
@@ -24,10 +21,6 @@
 
         > li {
             @include o-text-overflow($max-width: 90%);
-
-            > a {
-                cursor: pointer;
-            }
         }
     }
 
@@ -45,7 +38,7 @@
         display: flex;
         justify-content: space-between;
 
-        > .o_cp_sidebar {
+        > .o_cp_action_menus {
             padding-right: 10px;
 
             .o_hidden_input_file {
@@ -83,14 +76,14 @@
             text-align: center;
             user-select: none;
 
-            > div {
+            .o_pager {
                 display: flex;
                 align-items: center;
-            }
 
-            .o_pager_counter {
-                margin-right: 5px;
-                min-width: $o-statbutton-height;
+                .o_pager_counter {
+                    margin-right: 5px;
+                    min-width: $o-statbutton-height;
+                }
             }
         }
 
@@ -123,12 +116,17 @@
     }
 }
 
-// Pager input (to edit pager values)
-.o_pager_value > input {
+.o_pager_value {
     display: inline-block;
-    width: 60px;
-    text-align: right;
+}
 
+span.o_pager_value {
+    border-bottom: 1px solid transparent;
+}
+
+input.o_pager_value {
+    text-align: right;
+    width: 60px;
     &:focus {
         outline: none;
     }

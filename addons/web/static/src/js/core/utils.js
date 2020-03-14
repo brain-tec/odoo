@@ -520,10 +520,6 @@ var utils = {
      * Patch a class and return a function that remove the patch
      * when called.
      *
-     * In the patch object, super methods and getters are accessible thru:
-     *  - this._super() - for method
-     *  - this._super   - for getter
-     *
      * @param {Class} C Class to patch
      * @param {string} patchName
      * @param {Object} patch
@@ -535,8 +531,7 @@ var utils = {
             metadata = {
                 origMethods: {},
                 patches: {},
-                current: [],
-                originalDescriptors: {},
+                current: []
             };
             patchMap.set(C.prototype, metadata);
         }
@@ -549,41 +544,20 @@ var utils = {
         metadata.current.push(patchName);
 
         function applyPatch(proto, patch) {
-            Object.keys(patch).forEach(function(property) {
-                const protoDescriptor = Object.getOwnPropertyDescriptor(proto, property);
-                const patchDescriptor = Object.getOwnPropertyDescriptor(patch, property);
-                if (!protoDescriptor && patchDescriptor) {
-                    if (!(property in metadata.originalDescriptors)) {
-                        metadata.originalDescriptors[property] = undefined;
+            Object.keys(patch).forEach(function (methodName) {
+                const method = patch[methodName];
+                if (typeof method === "function") {
+                    const original = proto[methodName];
+                    if (!(methodName in metadata.origMethods)) {
+                        metadata.origMethods[methodName] = original;
                     }
-                    Object.defineProperty(proto, property, patchDescriptor);
-                    return;
-                }
-                if (protoDescriptor.value) {
-                    const method = patch[property];
-                    if (typeof method !== 'function') return;
-                    const original = proto[property];
-                    if (!(property in metadata.origMethods)) {
-                        metadata.origMethods[property] = original;
-                    }
-                    proto[property] = function(...args) {
+                    proto[methodName] = function (...args) {
                         const previousSuper = this._super;
                         this._super = original;
                         const res = method.call(this, ...args);
                         this._super = previousSuper;
                         return res;
                     };
-                } else if (protoDescriptor.get) {
-                    if (!(property in metadata.originalDescriptors)) {
-                        metadata.originalDescriptors[property] = protoDescriptor;
-                    }
-                    const patchDescriptor = Object.getOwnPropertyDescriptor(patch, property);
-                    Object.defineProperty(proto, property, {
-                        get() {
-                            this._super = protoDescriptor.get.apply(this);
-                            return patchDescriptor.get.apply(this);
-                        },
-                    });
                 }
             });
         }
@@ -653,6 +627,28 @@ var utils = {
             'max-age=' + ttl,
             'expires=' + new Date(new Date().getTime() + ttl*1000).toGMTString()
         ].join(';');
+    },
+    /**
+     * Returns a string formatted using given values.
+     * If the value is an object, its keys will replace `%(key)s` expressions.
+     * If the values are a set of strings, they will replace `%s` expressions.
+     * If no value is given, the string will not be formatted.
+     *
+     * @param {string} string
+     * @param  {(Object|...string)} values
+     */
+    sprintf: function (string, ...values) {
+        if (values.length === 1 && typeof values[0] === 'object') {
+            const valuesDict = values[0];
+            for (const value in valuesDict) {
+                string = string.replace(`%(${value})s`, valuesDict[value]);
+            }
+        } else {
+            for (const value of values) {
+                string = string.replace(/%s/, value);
+            }
+        }
+        return string;
     },
     /**
      * Sort an array in place, keeping the initial order for identical values.
@@ -759,16 +755,6 @@ var utils = {
         // reset to original
         for (let k in metadata.origMethods) {
             proto[k] = metadata.origMethods[k];
-        }
-
-        // reset the descriptors
-        for (let k in metadata.originalDescriptors) {
-            const descriptor = metadata.originalDescriptors[k];
-            if (descriptor === undefined) {
-                delete proto[k];
-            } else {
-                Object.defineProperty(proto, k, descriptor);
-            }
         }
 
         // apply other patches
