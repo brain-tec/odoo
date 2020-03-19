@@ -367,8 +367,8 @@ options.registry.CarouselItem = options.Class.extend({
      *
      * @override
      */
-    updateUI: function () {
-        this._super(...arguments);
+    updateUI: async function () {
+        await this._super(...arguments);
         const $items = this.$carousel.find('.carousel-item');
         const $activeSlide = $items.filter('.active');
         const updatedText = ` (${$activeSlide.index() + 1}/${$items.length})`;
@@ -1588,12 +1588,27 @@ options.registry.topMenuColor = options.Class.extend({
      * @override
      */
     start: function () {
-        var self = this;
         var def = this._super.apply(this, arguments);
-        this.$target.on('snippet-option-change', function () {
-            self.onFocus();
+        this.$target.on('snippet-option-change', () => {
+            this.updateUI();
         });
         return def;
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    selectStyle(previewMode, widgetValue, params) {
+        this._super(...arguments);
+        const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
+        this.trigger_up('action_demand', {
+            actionName: 'toggle_page_option',
+            params: [{name: 'header_color', value: className}],
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -1603,32 +1618,14 @@ options.registry.topMenuColor = options.Class.extend({
     /**
      * @override
      */
-    updateUI: function () {
-        this._super(...arguments);
+    updateUI: async function () {
+        await this._super(...arguments);
         this.trigger_up('action_demand', {
             actionName: 'get_page_option',
             params: ['header_overlay'],
             onSuccess: value => {
                 this.$el.toggleClass('d-none', !value);
             },
-        });
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _onColorButtonClick: function () {
-        this._super.apply(this, arguments);
-        var bgs = this.$target.attr('class').match(/bg-(\w|-)+/g);
-        var allowedBgs = this.classes.split(' ');
-        var color = _.intersection(bgs, allowedBgs).join(' ');
-        this.trigger_up('action_demand', {
-            actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: color}],
         });
     },
 });
