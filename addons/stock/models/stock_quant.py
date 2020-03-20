@@ -218,17 +218,6 @@ class StockQuant(models.Model):
     @api.model
     def action_view_quants(self):
         self = self.with_context(search_default_internal_loc=1)
-        if self.user_has_groups('stock.group_production_lot,stock.group_stock_multi_locations'):
-            # fixme: erase the following condition when it'll be possible to create a new record
-            # from a empty grouped editable list without go through the form view.
-            if self.search_count([
-                ('company_id', '=', self.env.company.id),
-                ('location_id.usage', 'in', ['internal', 'transit'])
-            ]):
-                self = self.with_context(
-                    search_default_productgroup=1,
-                    search_default_locationgroup=1
-                )
         if not self.user_has_groups('stock.group_stock_multi_locations'):
             company_user = self.env.company
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
@@ -507,7 +496,7 @@ class StockQuant(models.Model):
         """
         precision_digits = max(6, self.sudo().env.ref('product.decimal_product_uom').digits * 2)
         # Use a select instead of ORM search for UoM robustness.
-        query = """SELECT id FROM stock_quant WHERE round(quantity::numeric, %s) = 0 AND round(reserved_quantity::numeric, %s) = 0;"""
+        query = """SELECT id FROM stock_quant WHERE (round(quantity::numeric, %s) = 0 OR quantity IS NULL) AND round(reserved_quantity::numeric, %s) = 0;"""
         params = (precision_digits, precision_digits)
         self.env.cr.execute(query, params)
         quant_ids = self.env['stock.quant'].browse([quant['id'] for quant in self.env.cr.dictfetchall()])
@@ -632,13 +621,6 @@ class StockQuant(models.Model):
 
         if self._is_inventory_mode():
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
-            # fixme: erase the following condition when it'll be possible to create a new record
-            # from a empty grouped editable list without go through the form view.
-            if not self.search_count([
-                ('company_id', '=', self.env.company.id),
-                ('location_id.usage', 'in', ['internal', 'transit'])
-            ]):
-                action['context'] = dict(action['context'], search_default_productgroup=0, search_default_locationgroup=0)
         else:
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree').id
             # Enables form view in readonly list
