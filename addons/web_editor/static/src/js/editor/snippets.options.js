@@ -1260,7 +1260,6 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
             defaultDate: moment().format(),
             icons: {
                 close: 'fa fa-check primary',
-                today: 'far fa-calendar-check',
             },
             locale: moment.locale(),
             format: time.getLangDatetimeFormat(),
@@ -2225,6 +2224,9 @@ registry.sizing = SnippetOptionWidget.extend({
         this.$handles.on('mousedown', function (ev) {
             ev.preventDefault();
 
+            // First update size values as some element sizes may not have been
+            // initialized on option start (hidden slides, etc)
+            resizeValues = self._getSize();
             var $handle = $(ev.currentTarget);
 
             var compass = false;

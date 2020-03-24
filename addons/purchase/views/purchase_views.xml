@@ -88,6 +88,7 @@
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
                 <calendar string="Calendar View" date_start="date_planned" color="partner_id" hide_time="true" event_limit="5">
+                    <field name="currency_id" invisible="1"/>
                     <field name="name"/>
                     <field name="partner_ref"/>
                     <field name="amount_total" widget="monetary"/>
@@ -335,7 +336,7 @@
                                     </div>
                                 </group>
                                 <group name="other_info">
-                                    <field name="user_id"/>
+                                    <field name="user_id" domain="[('share', '=', False)]"/>
                                     <field name="invoice_status" attrs="{'invisible': [('state', 'in', ('draft', 'sent', 'to approve', 'cancel'))]}"/>
                                     <field name="payment_term_id" attrs="{'readonly': ['|', ('invoice_status','=', 'invoiced'), ('state', '=', 'done')]}" options="{'no_create': True}"/>
                                     <field name="fiscal_position_id" options="{'no_create': True}" attrs="{'readonly': ['|', ('invoice_status','=', 'invoiced'), ('state', '=', 'done')]}"/>
