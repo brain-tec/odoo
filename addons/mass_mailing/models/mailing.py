@@ -443,7 +443,7 @@ class MassMailing(models.Model):
                   JOIN res_partner p ON (t.partner_id = p.id)
                  WHERE substring(p.%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL
             """
-        elif issubclass(type(target), self.pool['mail.address.mixin']):
+        elif issubclass(type(target), self.pool['mail.thread.blacklist']):
             mail_field = 'email_normalized'
         elif 'email_from' in target._fields:
             mail_field = 'email_from'
@@ -561,7 +561,7 @@ class MassMailing(models.Model):
             if mass_mailing.medium_id:
                 vals['medium_id'] = mass_mailing.medium_id.id
 
-            res[mass_mailing.id] = self.env['link.tracker'].convert_links(html, vals, blacklist=['/unsubscribe_from_list'])
+            res[mass_mailing.id] = self._shorten_links(html, vals, blacklist=['/unsubscribe_from_list'])
 
         return res
 

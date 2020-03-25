@@ -16,15 +16,16 @@ class EventRegistration(models.Model):
     _order = 'id desc'
 
     # event
-    origin = fields.Char(
-        string='Source Document', readonly=True,
-        help="Reference of the document that created the registration, for example a sales order")
     event_id = fields.Many2one(
         'event.event', string='Event', required=True,
         readonly=True, states={'draft': [('readonly', False)]})
     event_ticket_id = fields.Many2one(
         'event.event.ticket', string='Event Ticket', readonly=True,
         states={'draft': [('readonly', False)]})
+    # utm informations
+    utm_campaign_id = fields.Many2one('utm.campaign', 'Campaign',  index=True, ondelete='set null')
+    utm_source_id = fields.Many2one('utm.source', 'Source', index=True, ondelete='set null')
+    utm_medium_id = fields.Many2one('utm.medium', 'Medium', index=True, ondelete='set null')
     # attendee
     partner_id = fields.Many2one(
         'res.partner', string='Contact',
@@ -109,13 +110,13 @@ class EventRegistration(models.Model):
     # CRUD
     # ------------------------------------------------------------
 
-    @api.model
-    def create(self, vals):
-        registration = super(EventRegistration, self).create(vals)
-        if registration._check_auto_confirmation():
-            registration.sudo().action_confirm()
+    @api.model_create_multi
+    def create(self, vals_list):
+        registrations = super(EventRegistration, self).create(vals_list)
+        if registrations._check_auto_confirmation():
+            registrations.sudo().action_confirm()
 
-        return registration
+        return registrations
 
     def write(self, vals):
         ret = super(EventRegistration, self).write(vals)

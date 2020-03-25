@@ -1508,9 +1508,10 @@ options.registry.anchor = options.Class.extend({
         clipboard.on('success', () => {
             const anchor = decodeURIComponent(this._getAnchorLink());
             this.displayNotification({
+              type: 'success',
               title: _t("Copied !"),
               message: _.str.sprintf(_t("The anchor has been copied to your clipboard.<br>Link: %s"), anchor),
-              buttons: [{text: _t("edit"), click: () => this.openAnchorDialog()}],
+              buttons: [{text: _t("Edit"), click: () => this.openAnchorDialog(), primary: true}],
             });
         });
 
@@ -1608,7 +1609,7 @@ options.registry.anchor = options.Class.extend({
             }
             this._setAnchorName(anchorName + n);
         }
-        return `#${this.$target[0].id}`;
+        return `${window.location.pathname}#${this.$target[0].id}`;
     },
     /**
      * Creates a safe id/anchor from text.
@@ -1619,6 +1620,47 @@ options.registry.anchor = options.Class.extend({
      */
     _text2Anchor: function (text) {
         return encodeURIComponent(text.trim().replace(/\s+/g, '-'));
+    },
+});
+
+/**
+ * Controls box properties.
+ */
+options.registry.Box = options.Class.extend({
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @see this.selectClass for parameters
+     */
+    setShadow(previewMode, widgetValue, params) {
+        this.$target.toggleClass(params.shadowClass, !!widgetValue);
+        if (widgetValue) {
+            const inset = widgetValue === 'inset' ? widgetValue : '';
+            const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
+            this.$target[0].style.setProperty('box-shadow', values, 'important');
+        } else {
+            this.$target.css('box-shadow', '');
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        if (methodName === 'setShadow') {
+            if (!this.$target[0].classList.contains(params.shadowClass)) {
+                return '';
+            }
+            return this.$target.css('box-shadow').includes('inset') ? 'inset' : 'outset';
+        }
+        return this._super(...arguments);
     },
 });
 
@@ -1787,6 +1829,31 @@ options.registry.CoverProperties = options.Class.extend({
             return (hasCover && !notAllowed);
         }
         return this._super(...arguments);
+    },
+});
+
+options.registry.ContainerWidth = options.Class.extend({
+    /**
+     * @override
+     */
+    cleanForSave: function () {
+        this.$target.removeClass('o_container_preview');
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    selectClass: async function (previewMode, widgetValue, params) {
+        await this._super(...arguments);
+        if (previewMode === 'reset') {
+            this.$target.removeClass('o_container_preview');
+        } else if (previewMode) {
+            this.$target.addClass('o_container_preview');
+        }
     },
 });
 
