@@ -32,7 +32,7 @@ class Pricelist(models.Model):
     discount_policy = fields.Selection([
         ('with_discount', 'Discount included in the price'),
         ('without_discount', 'Show public price & discount to the customer')],
-        default='with_discount')
+        default='with_discount', required=True)
 
     def name_get(self):
         return [(pricelist.id, '%s (%s)' % (pricelist.name, pricelist.currency_id.name)) for pricelist in self]
@@ -399,7 +399,7 @@ class PricelistItem(models.Model):
         'product.category', 'Product Category', ondelete='cascade',
         help="Specify a product category if this rule only applies to products belonging to this category or its children categories. Keep empty otherwise.")
     min_quantity = fields.Float(
-        'Min. Quantity', default=0,
+        'Min. Quantity', default=0, digits="Product Unit Of Measure",
         help="For the rule to apply, bought/sold quantity must be greater "
              "than or equal to the minimum quantity specified in this field.\n"
              "Expressed in the default unit of measure of the product.")

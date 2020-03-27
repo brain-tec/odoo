@@ -187,7 +187,7 @@ class SaleOrder(models.Model):
         required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
-    currency_id = fields.Many2one("res.currency", related='pricelist_id.currency_id', string="Currency", readonly=True, required=True)
+    currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True)
     analytic_account_id = fields.Many2one(
         'account.analytic.account', 'Analytic Account',
         readonly=True, copy=False, check_company=True,  # Unrequired company
@@ -1454,7 +1454,7 @@ class SaleOrderLine(models.Model):
                         amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
             line.untaxed_amount_invoiced = amount_invoiced
 
-    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
+    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered', 'product_uom_qty')
     def _compute_untaxed_amount_to_invoice(self):
         """ Total of remaining amount to invoice on the sale order line (taxes excl.) as
                 total_sol - amount already invoiced
