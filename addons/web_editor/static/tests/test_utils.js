@@ -211,6 +211,10 @@ function wysiwygData(data) {
                     string: "display_name",
                     type: 'char',
                 },
+                description: {
+                    string: "description",
+                    type: 'char',
+                },
                 mimetype: {
                     string: "mimetype",
                     type: 'char',
@@ -255,10 +259,16 @@ function wysiwygData(data) {
                     string: "image_height",
                     type: 'integer',
                 },
+                original_id: {
+                    string: "original_id",
+                    type: 'many2one',
+                    relation: 'ir.attachment',
+                },
             },
             records: [{
                 id: 1,
                 name: 'image',
+                description: '',
                 mimetype: 'image/png',
                 checksum: false,
                 url: '/web_editor/static/src/img/transparent.png',

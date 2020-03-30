@@ -2,8 +2,10 @@
 
 # Copyright 2015 Eezee-It
 
+import datetime
 import json
 import logging
+import pytz
 import re
 import time
 from hashlib import sha256
@@ -41,7 +43,9 @@ CURRENCY_CODES = {
 class AcquirerSips(models.Model):
     _inherit = 'payment.acquirer'
 
-    provider = fields.Selection(selection_add=[('sips', 'Sips')])
+    provider = fields.Selection(selection_add=[
+        ('sips', 'Sips')
+    ], ondelete={'sips': 'set default'})
     sips_merchant_id = fields.Char('Merchant ID', help="Used for production only", required_if_provider='sips', groups='base.group_user')
     sips_secret = fields.Char('Secret Key', size=64, required_if_provider='sips', groups='base.group_user')
     sips_test_url = fields.Char("Test url", required_if_provider='sips', default='https://payment-webinit.simu.sips-atos.com/paymentInit')
@@ -180,10 +184,13 @@ class TxSips(models.Model):
     def _sips_form_validate(self, data):
         data = self._sips_data_to_object(data.get('Data'))
         status = data.get('responseCode')
+        date = data.get('transactionDateTime')
+        if date:
+            date = datetime.datetime.fromisoformat(date)
+            date = date.astimezone(pytz.utc).replace(tzinfo=None)
         data = {
             'acquirer_reference': data.get('transactionReference'),
-            'date': data.get('transactionDateTime',
-                                      fields.Datetime.now())
+            'date': date or fields.Datetime.now(),
         }
         res = False
         if status in self._sips_valid_tx_status:

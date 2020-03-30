@@ -171,8 +171,7 @@ var EditorMenuBar = Widget.extend({
         if (this.snippetsMenu) {
             await this.snippetsMenu.cleanForSave();
         }
-
-        await this._saveCroppedImages();
+        await this.getParent().saveCroppedImages(this.rte.editable());
         await this.rte.save();
 
         if (reload !== false) {
@@ -224,12 +223,6 @@ var EditorMenuBar = Widget.extend({
             window.location.reload(true);
         }
         return new Promise(function(){});
-    },
-    /**
-     * @private
-     */
-    _saveCroppedImages: function () {
-        return this.rte.saveCroppedImages(this.rte.editable());
     },
 
     //--------------------------------------------------------------------------
