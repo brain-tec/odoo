@@ -96,9 +96,12 @@ class PurchaseOrder(models.Model):
         ('to invoice', 'Waiting Bills'),
         ('invoiced', 'Fully Billed'),
     ], string='Billing Status', compute='_get_invoiced', store=True, readonly=True, copy=False, default='no')
-
-    # There is no inverse function on purpose since the date may be different on each line
-    date_planned = fields.Datetime(string='Receipt Date', index=True)
+    date_planned = fields.Datetime(
+        string='Receipt Date', index=True, copy=False,
+        help="Delivery date promised by vendor. This date is used to determine expected arrival of products.")
+    expected_date = fields.Datetime("Expected Date", compute='_compute_expected_date', store=True,
+        help="Delivery date expected by vendor, computed from the minimum lead time of the order lines.")
+    date_calendar_start = fields.Datetime(compute='_compute_date_calendar_start', readonly=True, store=True)
 
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=True)
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
@@ -128,6 +131,11 @@ class PurchaseOrder(models.Model):
         for order in self:
             order.access_url = '/my/purchase/%s' % (order.id)
 
+    @api.depends('state', 'date_order', 'date_approve')
+    def _compute_date_calendar_start(self):
+        for order in self:
+            order.date_calendar_start = order.date_approve if (order.state in ['purchase', 'done']) else order.date_order
+
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
@@ -141,6 +149,13 @@ class PurchaseOrder(models.Model):
     def _compute_currency_rate(self):
         for order in self:
             order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order)
+
+    @api.depends('order_line.date_planned')
+    def _compute_expected_date(self):
+        """ expected_date = the earliest date_planned across all order lines. """
+        for order in self:
+            dates_list = order.order_line.mapped('date_planned')
+            order.expected_date = fields.Datetime.to_string(min(dates_list)) if dates_list else False
 
     @api.depends('name', 'partner_ref')
     def name_get(self):
@@ -163,12 +178,6 @@ class PurchaseOrder(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('purchase.order', sequence_date=seq_date) or '/'
         return super(PurchaseOrder, self).create(vals)
 
-    def write(self, vals):
-        res = super(PurchaseOrder, self).write(vals)
-        if vals.get('date_planned'):
-            self.order_line.filtered(lambda line: not line.display_type).date_planned = vals['date_planned']
-        return res
-
     def unlink(self):
         for order in self:
             if not order.state == 'cancel':
@@ -181,9 +190,7 @@ class PurchaseOrder(models.Model):
         self = self.with_context(ctx)
         new_po = super(PurchaseOrder, self).copy(default=default)
         for line in new_po.order_line:
-            if new_po.date_planned:
-                line.date_planned = new_po.date_planned
-            elif line.product_id:
+            if line.product_id:
                 seller = line.product_id._select_seller(
                     partner_id=line.partner_id, quantity=line.product_qty,
                     date=line.order_id.date_order and line.order_id.date_order.date(), uom_id=line.product_uom)
@@ -522,6 +529,76 @@ class PurchaseOrder(models.Model):
 
         return result
 
+    @api.model
+    def retrieve_dashboard(self):
+        """ This function returns the values to populate the custom dashboard in
+            the purchase order views.
+        """
+        self.check_access_rights('read')
+
+        result = {
+            'all_to_send': 0,
+            'all_waiting': 0,
+            'all_late': 0,
+            'my_to_send': 0,
+            'my_waiting': 0,
+            'my_late': 0,
+            'all_avg_order_value': 0,
+            'all_avg_days_to_purchase': 0,
+            'all_total_last_7_days': 0,
+            'all_sent_rfqs': 0,
+            'company_currency_symbol': self.env.company.currency_id.symbol
+        }
+
+        one_week_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(days=7))
+        # This query is brittle since it depends on the label values of a selection field
+        # not changing, but we don't have a direct time tracker of when a state changes
+        query = """SELECT COUNT(1)
+                   FROM mail_tracking_value v
+                   LEFT JOIN mail_message m ON (v.mail_message_id = m.id)
+                   JOIN purchase_order po ON (po.id = m.res_id)
+                   WHERE m.create_date >= %s
+                     AND m.model = 'purchase.order'
+                     AND m.message_type = 'notification'
+                     AND v.old_value_char = 'RFQ'
+                     AND v.new_value_char = 'RFQ Sent'
+                     AND po.company_id = %s;
+                """
+
+        self.env.cr.execute(query, (one_week_ago, self.env.company.id))
+        res = self.env.cr.fetchone()
+        result['all_sent_rfqs'] = res[0] or 0
+
+        # easy counts
+        po = self.env['purchase.order']
+        result['all_to_send'] = po.search_count([('state', '=', 'draft')])
+        result['my_to_send'] = po.search_count([('state', '=', 'draft'), ('user_id', '=', self.env.uid)])
+        result['all_waiting'] = po.search_count([('state', '=', 'sent'), ('date_order', '>=', fields.Datetime.now())])
+        result['my_waiting'] = po.search_count([('state', '=', 'sent'), ('date_order', '>=', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
+        result['all_late'] = po.search_count([('state', '=', 'sent'), ('date_order', '<', fields.Datetime.now())])
+        result['my_late'] = po.search_count([('state', '=', 'sent'), ('date_order', '<', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
+
+        # Calculated values ('avg order value', 'avg days to purchase', and 'total last 7 days') note that 'avg order value' and
+        # 'total last 7 days' takes into account exchange rate and current company's currency's precision. Min of currency precision
+        # is taken to easily extract it from query.
+        # This is done via SQL for scalability reasons
+        query = """SELECT AVG(COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total)),
+                          AVG(extract(epoch from age(po.date_approve,po.create_date)/(24*60*60)::decimal(16,2))),
+                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END),
+                          MIN(curr.decimal_places)
+                   FROM purchase_order po
+                   JOIN res_company comp ON (po.company_id = comp.id)
+                   JOIN res_currency curr ON (comp.currency_id = curr.id)
+                   WHERE state in ('purchase', 'done')
+                     AND company_id = %s;
+                """
+        self._cr.execute(query, (one_week_ago, self.env.company.id))
+        res = self.env.cr.fetchone()
+        result['all_avg_order_value'] = round(res[0] or 0, res[3])
+        result['all_avg_days_to_purchase'] = round(res[1] or 0, 2)
+        result['all_total_last_7_days'] = round(res[2] or 0, res[3])
+
+        return result
 
 class PurchaseOrderLine(models.Model):
     _name = 'purchase.order.line'
@@ -532,7 +609,8 @@ class PurchaseOrderLine(models.Model):
     sequence = fields.Integer(string='Sequence', default=10)
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True)
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
-    date_planned = fields.Datetime(string='Scheduled Date', index=True)
+    date_planned = fields.Datetime(string='Scheduled Date', index=True,
+        help="Delivery date expected from vendor. This date respectively defaults to vendor pricelist lead time then today's date.")
     taxes_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
     product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')

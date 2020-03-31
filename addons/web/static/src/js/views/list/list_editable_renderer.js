@@ -15,6 +15,7 @@ var core = require('web.core');
 var dom = require('web.dom');
 var ListRenderer = require('web.ListRenderer');
 var utils = require('web.utils');
+const { WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 var _t = core._t;
 
@@ -462,6 +463,9 @@ ListRenderer.include({
         }
 
         return Promise.all(defs).then(function () {
+            // mark Owl sub components as mounted
+            WidgetAdapterMixin.on_attach_callback.call(self);
+
             // necessary to trigger resize on fieldtexts
             core.bus.trigger('DOM_updated');
         });
@@ -659,7 +663,7 @@ ListRenderer.include({
         if (!thElements.length) {
             return;
         }
-        const table = this.el.getElementsByTagName('table')[0];
+        const table = this.el.getElementsByClassName('o_list_table')[0];
         let columnWidths = this.columnWidths;
 
         if (!columnWidths || !columnWidths.length) { // no column widths to restore
@@ -1224,7 +1228,7 @@ ListRenderer.include({
     _renderView: function () {
         this.currentRow = null;
         return this._super.apply(this, arguments).then(() => {
-            const table = this.el.getElementsByTagName('table')[0];
+            const table = this.el.getElementsByClassName('o_list_table')[0];
             if (table) {
                 table.classList.toggle('o_empty_list', !this._hasVisibleRecords(this.state));
                 this._freezeColumnWidths();
@@ -1337,7 +1341,7 @@ ListRenderer.include({
      *   overflow
      */
     _squeezeTable: function () {
-        const table = this.el.getElementsByTagName('table')[0];
+        const table = this.el.getElementsByClassName('o_list_table')[0];
         const thead = table.getElementsByTagName('thead')[0];
         const thElements = [...thead.getElementsByTagName('th')];
         const columnWidths = thElements.map(th => th.offsetWidth);
@@ -1553,6 +1557,10 @@ ListRenderer.include({
             return;
         }
         ev.stopPropagation(); // stop the event, the action is done by this renderer
+        if (ev.data.originalEvent && ['next', 'previous'].includes(ev.data.direction)) {
+            ev.data.originalEvent.preventDefault();
+            ev.data.originalEvent.stopPropagation();
+        }
         switch (ev.data.direction) {
             case 'previous':
                 if (this.currentFieldIndex > 0) {
@@ -1676,7 +1684,7 @@ ListRenderer.include({
 
         this.isResizing = true;
 
-        const table = this.el.getElementsByTagName('table')[0];
+        const table = this.el.getElementsByClassName('o_list_table')[0];
         const th = ev.target.closest('th');
         table.style.width = `${table.offsetWidth}px`;
         const thPosition = [...th.parentNode.children].indexOf(th);

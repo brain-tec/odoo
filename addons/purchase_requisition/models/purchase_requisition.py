@@ -24,10 +24,10 @@ class PurchaseRequisitionType(models.Model):
     name = fields.Char(string='Agreement Type', required=True, translate=True)
     sequence = fields.Integer(default=1)
     exclusive = fields.Selection([
-        ('exclusive', 'Select only one RFQ (exclusive)'), ('multiple', 'Select multiple RFQ')],
+        ('exclusive', 'Select only one RFQ (exclusive)'), ('multiple', 'Select multiple RFQ (non-exclusive)')],
         string='Agreement Selection Type', required=True, default='multiple',
             help="""Select only one RFQ (exclusive):  when a purchase order is confirmed, cancel the remaining purchase order.\n
-                    Select multiple RFQ: allows multiple purchase orders. On confirmation of a purchase order it does not cancel the remaining orders""")
+                    Select multiple RFQ (non-exclusive): allows multiple purchase orders. On confirmation of a purchase order it does not cancel the remaining orders""")
     quantity_copy = fields.Selection([
         ('copy', 'Use quantities of agreement'), ('none', 'Set quantities manually')],
         string='Quantities', required=True, default='none')
@@ -71,7 +71,8 @@ class PurchaseRequisition(models.Model):
 
     @api.depends('state')
     def _set_state(self):
-        self.state_blanket_order = self.state
+        for requisition in self:
+            requisition.state_blanket_order = requisition.state
 
     @api.onchange('vendor_id')
     def _onchange_vendor(self):
