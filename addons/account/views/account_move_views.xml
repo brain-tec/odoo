@@ -578,6 +578,7 @@
                         <field name="invoice_has_matching_suspense_amount" invisible="1"/>
                         <field name="has_reconciled_entries" invisible="1"/>
                         <field name="restrict_mode_hash_table" invisible="1"/>
+                        <field name="country_code" invisible="1"/>
 
                         <div class="oe_title">
                             <!-- Invoice draft header -->
@@ -704,7 +705,7 @@
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
                                         <field name="price_unit" string="Price"/>
-                                        <field name="discount" string="Disc.%" groups="base.group_no_one" optional="show"/>
+                                        <field name="discount" string="Disc.%" optional="hide"/>
                                         <field name="tax_ids" widget="many2many_tags"
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id)]"
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
