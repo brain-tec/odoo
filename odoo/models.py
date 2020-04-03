@@ -161,7 +161,7 @@ class MetaModel(api.Meta):
             self._module = self._get_addon_name(self.__module__)
 
         # Remember which models to instanciate for this module.
-        if not self._custom:
+        if self._module:
             self.module_to_models[self._module].append(self)
 
         # check for new-api conversion error: leave comma after field definition
@@ -169,7 +169,7 @@ class MetaModel(api.Meta):
             if type(val) is tuple and len(val) == 1 and isinstance(val[0], Field):
                 _logger.error("Trailing comma after field definition: %s.%s", self, key)
             if isinstance(val, Field):
-                val.args = dict(val.args, _module=self._module)
+                val.args['_module'] = self._module
 
     def _get_addon_name(self, full_name):
         # The (OpenERP) module name can be in the ``odoo.addons`` namespace
@@ -352,17 +352,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         opened. This method is invoked by :meth:`~default_get`.
         """
         pass
-
-    def _reflect(self):
-        """ Reflect the model and its fields in the models 'ir.model' and
-        'ir.model.fields'. Also create entries in 'ir.model.data' if the key
-        'module' is passed to the context.
-        """
-        self.env['ir.model']._reflect_model(self)
-        self.env['ir.model.fields']._reflect_model(self)
-        self.env['ir.model.fields.selection']._reflect_model(self)
-        self.env['ir.model.constraint']._reflect_model(self)
-        self.invalidate_cache()
 
     @api.model
     def _add_field(self, name, field):
@@ -2477,8 +2466,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # has not been added in database yet!
         self = self.with_context(prefetch_fields=False)
 
-        self.pool.post_init(self._reflect)
-
         cr = self._cr
         update_custom_fields = self._context.get('update_custom_fields', False)
         must_create_table = not tools.table_exists(cr, self._table)
@@ -2486,14 +2473,22 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         if self._auto:
             if must_create_table:
-                tools.create_model_table(cr, self._table, self._description)
+                def make_type(field):
+                    return field.column_type[1] + (" NOT NULL" if field.required else "")
+
+                tools.create_model_table(cr, self._table, self._description, [
+                    (name, make_type(field), field.string)
+                    for name, field in self._fields.items()
+                    if name != 'id' and field.store and field.column_type
+                ])
 
             if self._parent_store:
                 if not tools.column_exists(cr, self._table, 'parent_path'):
                     self._create_parent_columns()
                     parent_path_compute = True
 
-            self._check_removed_columns(log=False)
+            if not must_create_table:
+                self._check_removed_columns(log=False)
 
             # update the database schema for fields
             columns = tools.table_columns(cr, self._table)
@@ -2575,28 +2570,31 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _add_inherited_fields(self):
         """ Determine inherited fields. """
-        # determine candidate inherited fields
-        fields = {}
-        for parent_model, parent_field in self._inherits.items():
-            parent = self.env[parent_model]
-            for name, field in parent._fields.items():
+        if not self._inherits:
+            return
+
+        # determine which fields can be inherited
+        to_inherit = {
+            name: (parent_fname, field)
+            for parent_model_name, parent_fname in self._inherits.items()
+            for name, field in self.env[parent_model_name]._fields.items()
+        }
+
+        # add inherited fields that are not redefined locally
+        for name, (parent_fname, field) in to_inherit.items():
+            if name not in self._fields:
                 # inherited fields are implemented as related fields, with the
                 # following specific properties:
                 #  - reading inherited fields should not bypass access rights
                 #  - copy inherited fields iff their original field is copied
-                fields[name] = field.new(
+                self._add_field(name, field.new(
                     inherited=True,
                     inherited_field=field,
-                    related=(parent_field, name),
+                    related=(parent_fname, name),
                     related_sudo=False,
                     copy=field.copy,
                     readonly=field.readonly,
-                )
-
-        # add inherited fields that are not redefined locally
-        for name, field in fields.items():
-            if name not in self._fields:
-                self._add_field(name, field)
+                ))
 
     @api.model
     def _inherits_check(self):
@@ -2628,8 +2626,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """ Prepare the setup of the model. """
         cls = type(self)
         cls._setup_done = False
-        # a model's base structure depends on its mro (without registry classes)
-        cls._model_cache_key = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
+
+        # the classes that define this model's base fields and methods
+        cls._model_classes = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
 
         # reset those attributes on the model's class for _setup_fields() below
         for attr in ('_rec_name', '_active_name'):
@@ -2647,8 +2646,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # 1. determine the proper fields of the model: the fields defined on the
         # class and magic fields, not the inherited or custom ones
-        cls0 = cls.pool.model_cache.get(cls._model_cache_key)
-        if cls0 and cls0._model_cache_key == cls._model_cache_key:
+        cls0 = cls.pool.model_cache.get(cls._model_classes)
+
+        if cls0 and cls0._model_classes == cls._model_classes:
             # cls0 is either a model class from another registry, or cls itself.
             # The point is that it has the same base classes. We retrieve stuff
             # from cls0 to optimize the setup of cls. cls0 is guaranteed to be
@@ -2656,18 +2656,24 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # therefore two registries are never set up at the same time.
 
             # remove fields that are not proper to cls
-            for name in OrderedSet(cls._fields) - cls0._proper_fields:
+            for name in set(cls._fields).difference(cls0._model_fields):
                 delattr(cls, name)
-                cls._fields.pop(name, None)
-            # collect proper fields on cls0, and add them on cls
-            for name in cls0._proper_fields:
-                field = cls0._fields[name]
-                # regular fields are shared, while related fields are setup from scratch
-                if not field.related:
-                    self._add_field(name, field)
-                else:
-                    self._add_field(name, field.new(**field.args))
-            cls._proper_fields = OrderedSet(cls._fields)
+                del cls._fields[name]
+
+            if cls0 is cls:
+                # simply reset up fields
+                for name, field in cls._fields.items():
+                    field.setup_base(self, name)
+            else:
+                # collect proper fields on cls0, and add them on cls
+                for name in cls0._model_fields:
+                    field = cls0._fields[name]
+                    # regular fields are shared, while related fields are setup from scratch
+                    if not field.related:
+                        self._add_field(name, field)
+                    else:
+                        self._add_field(name, field.new(**field.args))
+                cls._model_fields = list(cls._fields)
 
         else:
             # retrieve fields from parent classes, and duplicate them on cls to
@@ -2680,9 +2686,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 if not any(field.args.get(k) for k in ('automatic', 'manual', 'inherited')):
                     self._add_field(name, field.new())
             self._add_magic_fields()
-            cls._proper_fields = OrderedSet(cls._fields)
+            cls._model_fields = list(cls._fields)
 
-        cls.pool.model_cache[cls._model_cache_key] = cls
+        cls.pool.model_cache[cls._model_classes] = cls
 
         # 2. add manual fields
         if self.pool._init_modules:
@@ -2696,7 +2702,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         self._add_inherited_fields()
 
         # 4. initialize more field metadata
-        cls._field_computed = {}            # fields computed with the same method
         cls._field_inverses = Collector()   # inverse fields for related fields
 
         cls._setup_done = True
@@ -2752,43 +2757,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             field = cls._fields['display_name']
             field.depends = tuple(name for name in field.depends if name != 'x_name')
 
-        # map each field to the fields computed with the same method
-        groups = defaultdict(list)
-        for field in cls._fields.values():
-            if field.compute:
-                cls._field_computed[field] = group = groups[field.compute]
-                group.append(field)
-        for fields in groups.values():
-            compute_sudo = fields[0].compute_sudo
-            if not all(field.compute_sudo == compute_sudo for field in fields):
-                _logger.warning("%s: inconsistent 'compute_sudo' for computed fields: %s",
-                                self._name, ", ".join(field.name for field in fields))
-
     @api.model
     def _setup_complete(self):
         """ Setup recomputation triggers, and complete the model setup. """
         cls = type(self)
-
-        # The triggers of a field F is a tree that contains the fields that
-        # depend on F, together with the fields to inverse to find out which
-        # records to recompute.
-        #
-        # For instance, assume that G depends on F, H depends on X.F, I depends
-        # on W.X.F, and J depends on Y.F. The triggers of F will be the tree:
-        #
-        #                              [G]
-        #                            X/   \Y
-        #                          [H]     [J]
-        #                        W/
-        #                      [I]
-        #
-        # This tree provides perfect support for the trigger mechanism:
-        # when F is # modified on records,
-        #  - mark G to recompute on records,
-        #  - mark H to recompute on inverse(X, records),
-        #  - mark I to recompute on inverse(W, inverse(X, records)),
-        #  - mark J to recompute on inverse(Y, records).
-        cls._field_triggers = cls.pool.field_triggers
 
         # register constraints and onchange methods
         cls._init_constraints_onchanges()
@@ -3556,7 +3528,7 @@ Record ids: %(records)s
                     # will automatically invalidate the field from the cache,
                     # forcing its value to be recomputed once dependencies are
                     # up-to-date.
-                    protected.update(self._field_computed.get(field, [field]))
+                    protected.update(self.pool.field_computed.get(field, [field]))
             if fname == 'company_id' or (field.relational and field.check_company):
                 check_company = True
 
@@ -3763,7 +3735,7 @@ Record ids: %(records)s
                     inversed_fields.add(field)
                 # protect non-readonly computed fields against (re)computation
                 if field.compute and not field.readonly:
-                    protected.update(self._field_computed.get(field, [field]))
+                    protected.update(self.pool.field_computed.get(field, [field]))
 
             data_list.append(data)
 
@@ -3965,7 +3937,7 @@ Record ids: %(records)s
 
         if field.store and any(self._ids):
             # check constraints of the fields that have been computed
-            fnames = [f.name for f in self._field_computed[field]]
+            fnames = [f.name for f in self.pool.field_computed[field]]
             self.filtered('id')._validate_fields(fnames)
 
     def _parent_store_create(self):
@@ -5721,13 +5693,33 @@ Record ids: %(records)s
         """
         if not self or not fnames:
             return
+
+        # The triggers of a field F is a tree that contains the fields that
+        # depend on F, together with the fields to inverse to find out which
+        # records to recompute.
+        #
+        # For instance, assume that G depends on F, H depends on X.F, I depends
+        # on W.X.F, and J depends on Y.F. The triggers of F will be the tree:
+        #
+        #                              [G]
+        #                            X/   \Y
+        #                          [H]     [J]
+        #                        W/
+        #                      [I]
+        #
+        # This tree provides perfect support for the trigger mechanism:
+        # when F is # modified on records,
+        #  - mark G to recompute on records,
+        #  - mark H to recompute on inverse(X, records),
+        #  - mark I to recompute on inverse(W, inverse(X, records)),
+        #  - mark J to recompute on inverse(Y, records).
         if len(fnames) == 1:
-            tree = self._field_triggers.get(self._fields[next(iter(fnames))])
+            tree = self.pool.field_triggers.get(self._fields[next(iter(fnames))])
         else:
             # merge dependency trees to evaluate all triggers at once
             tree = {}
             for fname in fnames:
-                node = self._field_triggers.get(self._fields[fname])
+                node = self.pool.field_triggers.get(self._fields[fname])
                 if node:
                     trigger_tree_merge(tree, node)
         if tree:
@@ -5818,7 +5810,7 @@ Record ids: %(records)s
                     # mark the field as computed on missing records, otherwise
                     # they remain forever in the todo list, and lead to an
                     # infinite loop...
-                    for f in recs._field_computed[field]:
+                    for f in recs.pool.field_computed[field]:
                         self.env.remove_to_compute(f, recs - existing)
             else:
                 self.env.cache.invalidate([(field, recs._ids)])
@@ -5854,7 +5846,7 @@ Record ids: %(records)s
                     yield from val
                 else:
                     yield from traverse(val)
-        return traverse(self._field_triggers.get(field, {}))
+        return traverse(self.pool.field_triggers.get(field, {}))
 
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the
