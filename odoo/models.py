@@ -342,7 +342,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     # default values for _transient_vacuum()
     _transient_check_count = 0
     _transient_max_count = lazy_classproperty(lambda _: config.get('osv_memory_count_limit'))
-    _transient_max_hours = lazy_classproperty(lambda _: config.get('osv_memory_age_limit'))
+    _transient_max_hours = lazy_classproperty(lambda _: config.get('transient_age_limit'))
 
     CONCURRENCY_CHECK_FIELD = '__last_update'
 
@@ -352,6 +352,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         opened. This method is invoked by :meth:`~default_get`.
         """
         pass
+
+    def _valid_field_parameter(self, field, name):
+        """ Return whether the given parameter name is valid for the field. """
+        return name == 'related_sudo'
 
     @api.model
     def _add_field(self, name, field):

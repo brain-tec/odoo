@@ -29,9 +29,6 @@ from odoo.exceptions import CacheMiss
 DATE_LENGTH = len(date.today().strftime(DATE_FORMAT))
 DATETIME_LENGTH = len(datetime.now().strftime(DATETIME_FORMAT))
 
-RENAMED_ATTRS = [('select', 'index'), ('digits_compute', 'digits')]
-DEPRECATED_ATTRS = [("oldname", "use an upgrade script instead.")]
-
 IR_MODELS = (
     'ir.model', 'ir.model.data', 'ir.model.fields', 'ir.model.fields.selection',
     'ir.model.relation', 'ir.model.constraint', 'ir.module.module',
@@ -98,6 +95,8 @@ class Field(MetaField('DummyField', (object,), {})):
         set, the ORM takes the field name in the class (capitalized).
 
     :param str help: the tooltip of the field seen by users
+
+    :param invisible: whether the field is invisible (boolean, by default ``False``)
 
     :param bool readonly: whether the field is readonly (default: ``False``)
 
@@ -233,6 +232,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     string = None                       # field label
     help = None                         # field tooltip
+    invisible = False             # whether the field is invisible
     readonly = False                    # whether the field is readonly
     required = False                    # whether the field is required
     states = None                       # set readonly and required depending on state
@@ -345,18 +345,21 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _setup_attrs(self, model, name):
         """ Initialize the field parameter attributes. """
+        # validate extra arguments
+        for key in self.args:
+            # TODO: improve filter as there are attributes on the class which
+            #       are not valid on the field, probably
+            if not (hasattr(self, key) or model._valid_field_parameter(self, key)):
+                _logger.warning(
+                    "Field %s.%s: unknown parameter %r, if this is an actual"
+                    " parameter you may want to override the method"
+                    " _valid_field_parameter on the relevant model in order to"
+                    " allow it",
+                    model._name, name, key
+                )
+
         attrs = self._get_attrs(model, name)
         self.__dict__.update(attrs)
-
-        # check for renamed attributes (conversion errors)
-        for key1, key2 in RENAMED_ATTRS:
-            if key1 in attrs:
-                _logger.warning("Field %s: parameter %r is no longer supported; use %r instead.",
-                                self, key1, key2)
-        for key, msg in DEPRECATED_ATTRS:
-            if key in attrs:
-                _logger.warning("Field %s: parameter %r is not longer supported; %s",
-                                self, key, msg)
 
         # prefetch only stored, column, non-manual and non-deprecated fields
         if not (self.store and self.column_type) or self.manual or self.deprecated:
@@ -466,7 +469,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 setattr(self, attr, getattr(field, prop))
 
         for attr, value in field.__dict__.items():
-            if not hasattr(self, attr):
+            if not hasattr(self, attr) and model._valid_field_parameter(self, attr):
                 setattr(self, attr, value)
 
         # special cases of inherited fields
@@ -837,12 +840,14 @@ class Field(MetaField('DummyField', (object,), {})):
 
     ############################################################################
     #
-    # Read from/write to database
+    # Alternatively stored fields: if fields don't have a `column_type` (not
+    # stored as regular db columns) they go through a read/create/write
+    # protocol instead
     #
 
     def read(self, records):
         """ Read the value of ``self`` on ``records``, and store it in cache. """
-        return NotImplementedError("Method read() undefined on %s" % self)
+        raise NotImplementedError("Method read() undefined on %s" % self)
 
     def create(self, record_values):
         """ Write the value of ``self`` on the given records, which have just
@@ -1949,8 +1954,10 @@ class Binary(Field):
             ('res_id', 'in', records.ids),
         ]
         # Note: the 'bin_size' flag is handled by the field 'datas' itself
-        data = {att.res_id: att.datas
-                for att in records.env['ir.attachment'].sudo().search(domain)}
+        data = {
+            att.res_id: att.datas
+            for att in records.env['ir.attachment'].sudo().search(domain)
+        }
         cache = records.env.cache
         for record in records:
             cache.set(record, self, data.get(record.id, False))
@@ -2135,6 +2142,12 @@ class Selection(Field):
         # selection must be computed on related field
         field = self.related_field
         self.selection = lambda model: field._description_selection(model.env)
+
+    def _get_attrs(self, model, name):
+        attrs = super(Selection, self)._get_attrs(model, name)
+        # arguments 'selection' and 'selection_add' are processed below
+        attrs.pop('selection_add', None)
+        return attrs
 
     def _setup_attrs(self, model, name):
         super(Selection, self)._setup_attrs(model, name)

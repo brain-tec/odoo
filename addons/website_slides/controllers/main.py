@@ -602,9 +602,9 @@ class WebsiteSlides(WebsiteProfile):
             channel = request.env['slide.channel'].browse(int(channel_id))
             can_upload = channel.can_upload
             can_publish = channel.can_publish
-        except (UserError, AccessError) as e:
+        except UserError as e:
             _logger.error(e)
-            return {'error': e.name}
+            return {'error': e.args[0]}
         else:
             if not can_upload or not can_publish:
                 return {'error': _('You cannot add tags to this course.')}
@@ -1013,9 +1013,9 @@ class WebsiteSlides(WebsiteProfile):
             channel = request.env['slide.channel'].browse(values['channel_id'])
             can_upload = channel.can_upload
             can_publish = channel.can_publish
-        except (UserError, AccessError) as e:
+        except UserError as e:
             _logger.error(e)
-            return {'error': e.name}
+            return {'error': e.args[0]}
         else:
             if not can_upload:
                 return {'error': _('You cannot upload on this channel.')}
@@ -1031,8 +1031,8 @@ class WebsiteSlides(WebsiteProfile):
             if category_id == 0:
                 category = request.env['slide.slide'].create(self._get_new_slide_category_values(channel, post['category_id'][1]['name']))
                 values['sequence'] = category.sequence + 1
-                category_id = category.id
             else:
+                category = request.env['slide.slide'].browse(category_id)
                 values.update({
                     'sequence': request.env['slide.slide'].browse(post['category_id'][0]).sequence + 1
                 })
@@ -1042,15 +1042,15 @@ class WebsiteSlides(WebsiteProfile):
             values['user_id'] = request.env.uid
             values['is_published'] = values.get('is_published', False) and can_publish
             slide = request.env['slide.slide'].sudo().create(values)
-        except (UserError, AccessError) as e:
+        except UserError as e:
             _logger.error(e)
-            return {'error': e.name}
+            return {'error': e.args[0]}
         except Exception as e:
             _logger.error(e)
             return {'error': _('Internal server error, please try again later or contact administrator.\nHere is the error message: %s') % e}
 
         # ensure correct ordering by re sequencing slides in front-end (backend should be ok thanks to list view)
-        channel._resequence_slides(slide, category_id)
+        channel._resequence_slides(slide, category)
 
         redirect_url = "/slides/slide/%s" % (slide.id)
         if channel.channel_type == "training" and not slide.slide_type == "webpage":
