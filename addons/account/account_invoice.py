@@ -341,7 +341,7 @@ class account_invoice(osv.osv):
         'sent': False,
     }
     _sql_constraints = [
-        ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
+        ('number_uniq', 'unique(number, company_id, journal_id, type) DEFERRABLE INITIALLY deferred', 'Invoice Number must be unique per Company!'),
     ]
 
 

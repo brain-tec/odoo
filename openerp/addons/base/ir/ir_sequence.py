@@ -67,7 +67,7 @@ class ir_sequence(openerp.osv.osv.osv):
                 # currval, because that might give an error when
                 # not having used nextval before.
                 statement = (
-                    "SELECT last_value, increment_by, is_called"
+                    "SELECT last_value, 1, is_called"
                     " FROM ir_sequence_%03d"
                     % element.id)
                 cr.execute(statement)
