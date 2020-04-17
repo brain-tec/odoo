@@ -4427,8 +4427,9 @@ class BaseModel(object):
         if not context:
             context = {}
 
-        if self.is_transient():
-            self._transient_vacuum(cr, user)
+        # this is done in a cron job, no need here - it causes concurrency errors
+        #if self.is_transient():
+        #    self._transient_vacuum(cr, user)
 
         self.check_access_rights(cr, user, 'create')
         
