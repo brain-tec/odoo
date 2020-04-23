@@ -307,7 +307,9 @@ body.editor_enable.editor_has_snippets {
                     text-align: center;
 
                     > we-customizeblock-option {
-                        display: inline-block; // Ideally -> display: contents;
+                        &, .fa {
+                            display: inline-block !important;
+                        }
                     }
                 }
             }
@@ -998,16 +1000,6 @@ body.editor_enable.editor_has_snippets {
                 max-height: unset !important;
             }
         }
-    }
-
-    .contact_menu {
-        display: block;
-        top: -24px;
-        margin: 0px;
-        padding: 2px 0px;
-        position: relative;
-        min-height: 44px;
-        position: absolute !important;
     }
 }
 
