@@ -2,12 +2,28 @@
 # This file contains the translation of the following modules:
 # * mail
 # 
+# Translators:
+# José Miguel Andonegi <jm.andonegi@gmail.com>, 2019
+# ibinka lete <ilete@fpbidasoa.net>, 2019
+# Eneko <eastigarraga@codesyntax.com>, 2019
+# Martin Trigaux, 2019
+# oihane <oihanecruce@gmail.com>, 2019
+# Esther Martín Menéndez <esthermartin001@gmail.com>, 2019
+# Gorka Toledo <gorka.toledo@gmail.com>, 2019
+# Mikel Lizarralde <mikellizarralde@gmail.com>, 2019
+# Naomi Hidalgo <naomihid96@gmail.com>, 2019
+# Victor Laskurain <blaskurain@binovo.es>, 2019
+# Iñaki Ibarrola <inakiibarrola@yahoo.es>, 2020
+# Maialen Rodriguez <maialenrodriguez98@gmail.com>, 2020
+# Miren Maiz <mirenmaizz@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 13:50+0000\n"
+"POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:20+0000\n"
+"Last-Translator: Miren Maiz <mirenmaizz@gmail.com>, 2020\n"
 "Language-Team: Basque (https://www.transifex.com/odoo/teams/41243/eu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +35,7 @@ msgstr ""
 #: code:addons/mail/models/mail_channel.py:922
 #, python-format
 msgid " This channel is private. People must be invited to join it."
-msgstr ""
+msgstr "Kanala pribatua da. Jendeari gonbidatu behar zaio bertan sartzeko."
 
 #. module: mail
 #: code:addons/mail/wizard/invite.py:29
@@ -51,7 +67,7 @@ msgstr ""
 #: code:addons/mail/models/mail_template.py:249
 #, python-format
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (kopia)"
 
 #. module: mail
 #. openerp-web
@@ -350,7 +366,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:412
 #, python-format
 msgid "Accept"
-msgstr ""
+msgstr "Onartu"
 
 #. module: mail
 #. openerp-web
@@ -370,12 +386,12 @@ msgstr ""
 #: selection:mail.compose.message,moderation_status:0
 #: selection:mail.message,moderation_status:0
 msgid "Accepted"
-msgstr ""
+msgstr "Onartuta"
 
 #. module: mail
 #: model:ir.model,name:mail.model_res_groups
 msgid "Access Groups"
-msgstr ""
+msgstr "Sarbide taldeak "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_needaction
@@ -384,12 +400,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_needaction
 #: model:ir.model.fields,field_description:mail.field_res_users__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Beharrezko ekintza"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__state
 msgid "Action To Do"
-msgstr ""
+msgstr "Egitekoa"
 
 #. module: mail
 #: model:ir.model,name:mail.model_ir_actions_act_window_view
@@ -406,12 +422,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__active
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_search
 msgid "Active"
-msgstr ""
+msgstr "Aktiboa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__active_domain
 msgid "Active domain"
-msgstr ""
+msgstr "Domeinu aktiboa"
 
 #. module: mail
 #. openerp-web
@@ -425,7 +441,7 @@ msgstr ""
 #: model:mail.message.subtype,name:mail.mt_activities
 #, python-format
 msgid "Activities"
-msgstr ""
+msgstr "Jarduerak"
 
 #. module: mail
 #. openerp-web
@@ -443,7 +459,7 @@ msgstr ""
 #: selection:ir.ui.view,type:0
 #, python-format
 msgid "Activity"
-msgstr ""
+msgstr "Jarduera"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_mixin
@@ -455,20 +471,20 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_state
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Jarduera egoera"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_type
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 msgid "Activity Type"
-msgstr ""
+msgstr "Jarduera mota"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.mail_activity_type_action
 #: model:ir.ui.menu,name:mail.menu_mail_activity_type
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Activity Types"
-msgstr ""
+msgstr "Jarduera motak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_user_type
@@ -487,7 +503,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:111
 #, python-format
 msgid "Add"
-msgstr ""
+msgstr "Gehitu"
 
 #. module: mail
 #. openerp-web
@@ -580,7 +596,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #: model_terms:ir.ui.view,arch_db:mail.mail_wizard_invite_form
 msgid "Add contacts to notify..."
-msgstr ""
+msgstr "Gehitu kontaktuak jakinarazteko..."
 
 #. module: mail
 #. openerp-web
@@ -597,12 +613,12 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 msgid "Advanced"
-msgstr ""
+msgstr "Aurreratua"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
 msgid "Advanced Settings"
-msgstr ""
+msgstr "Aurreratutako ezarpenak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__delay_count
@@ -619,7 +635,7 @@ msgstr ""
 #. module: mail
 #: selection:mail.activity.type,decoration_type:0
 msgid "Alert"
-msgstr ""
+msgstr "Alerta"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias_mixin__alias_id
@@ -628,7 +644,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_form
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_tree
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_contact
@@ -641,21 +657,21 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_config_settings__alias_domain
 msgid "Alias Domain"
-msgstr ""
+msgstr "Domeinu deitura"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_name
 #: model:ir.model.fields,field_description:mail.field_mail_alias_mixin__alias_name
 #: model:ir.model.fields,field_description:mail.field_mail_channel__alias_name
 msgid "Alias Name"
-msgstr ""
+msgstr "Alias izena "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_domain
 #: model:ir.model.fields,field_description:mail.field_mail_alias_mixin__alias_domain
 #: model:ir.model.fields,field_description:mail.field_mail_channel__alias_domain
 msgid "Alias domain"
-msgstr ""
+msgstr "Alias domeinua "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_model_id
@@ -676,7 +692,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/systray.xml:31
 #, python-format
 msgid "All"
-msgstr ""
+msgstr "Denak"
 
 #. module: mail
 #. openerp-web
@@ -693,7 +709,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.model.fields,track_visibility:0
 msgid "Always"
-msgstr ""
+msgstr "Beti"
 
 #. module: mail
 #: selection:mail.moderation,status:0
@@ -742,13 +758,13 @@ msgstr ""
 #: code:addons/mail/static/src/js/followers.js:357
 #, python-format
 msgid "Apply"
-msgstr ""
+msgstr "Aplikatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_type_view_search
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_view_search
 msgid "Archived"
-msgstr ""
+msgstr "Artxibatua"
 
 #. module: mail
 #: code:addons/mail/wizard/mail_resend_message.py:122
@@ -764,7 +780,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity__user_id
 #, python-format
 msgid "Assigned to"
-msgstr ""
+msgstr "Nori egokitua "
 
 #. module: mail
 #: code:addons/mail/models/mail_activity.py:258
@@ -783,7 +799,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_ir_attachment
 msgid "Attachment"
-msgstr ""
+msgstr "Eranskin "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_attachment_count
@@ -792,7 +808,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_attachment_count
 #: model:ir.model.fields,field_description:mail.field_res_users__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Eranskin kontagailua"
 
 #. module: mail
 #. openerp-web
@@ -805,7 +821,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 #, python-format
 msgid "Attachments"
-msgstr ""
+msgstr "Eranskinak "
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__attachment_ids
@@ -832,7 +848,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__author_id
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Author"
-msgstr ""
+msgstr "Egilea"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -909,7 +925,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/followers.xml:44
 #, python-format
 msgid "Avatar"
-msgstr ""
+msgstr "Avatarra"
 
 #. module: mail
 #. openerp-web
@@ -954,7 +970,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__is_blacklisted
 #: model:ir.model.fields,field_description:mail.field_res_users__is_blacklisted
 msgid "Blacklist"
-msgstr ""
+msgstr "Zerrenda beltza"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_view_tree
@@ -967,13 +983,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 #: model_terms:ir.ui.view,arch_db:mail.view_message_form
 msgid "Body"
-msgstr ""
+msgstr "Gorputza"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_bounce
 #: model:ir.model.fields,field_description:mail.field_res_users__message_bounce
 msgid "Bounce"
-msgstr ""
+msgstr "Berreskuratze"
 
 #. module: mail
 #. openerp-web
@@ -987,7 +1003,7 @@ msgstr ""
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Calendar"
-msgstr ""
+msgstr "Egutegia"
 
 #. module: mail
 #: model:mail.activity.type,name:mail.mail_activity_data_call
@@ -1005,12 +1021,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 #, python-format
 msgid "Cancel"
-msgstr ""
+msgstr "Utzi"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tree
 msgid "Cancel Email"
-msgstr ""
+msgstr "Emaila ezeztatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_cancel_view_form
@@ -1023,12 +1039,12 @@ msgstr ""
 #: selection:mail.notification,email_status:0
 #, python-format
 msgid "Canceled"
-msgstr ""
+msgstr "Baliogabetua "
 
 #. module: mail
 #: selection:mail.mail,state:0
 msgid "Cancelled"
-msgstr ""
+msgstr "Ezeztatua"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_shortcode
@@ -1061,7 +1077,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity__activity_category
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__category
 msgid "Category"
-msgstr ""
+msgstr "Kategoria"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__email_cc
@@ -1073,7 +1089,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tracking_value_form
 msgid "Change"
-msgstr ""
+msgstr "Aldatu"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__activity_decoration
@@ -1103,7 +1119,7 @@ msgstr ""
 #: selection:mail.channel,channel_type:0
 #, python-format
 msgid "Channel"
-msgstr ""
+msgstr "Kanala"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__channel_message_ids
@@ -1118,7 +1134,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__channel_type
 msgid "Channel Type"
-msgstr ""
+msgstr "Kanal-mota"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_moderation
@@ -1148,7 +1164,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_partner_view_tree
 #, python-format
 msgid "Channels"
-msgstr ""
+msgstr "Kanalak "
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.mail_channel_partner_action
@@ -1192,7 +1208,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:50
 #, python-format
 msgid "Close"
-msgstr ""
+msgstr "Irten"
 
 #. module: mail
 #. openerp-web
@@ -1204,7 +1220,7 @@ msgstr ""
 #. module: mail
 #: selection:mail.channel.partner,fold_state:0
 msgid "Closed"
-msgstr ""
+msgstr "Itxita"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -1239,12 +1255,12 @@ msgstr ""
 #: selection:mail.compose.message,message_type:0
 #: selection:mail.message,message_type:0
 msgid "Comment"
-msgstr ""
+msgstr "Iruzkin"
 
 #. module: mail
 #: model:ir.model,name:mail.model_res_company
 msgid "Companies"
-msgstr ""
+msgstr "Enpresak"
 
 #. module: mail
 #. openerp-web
@@ -1253,7 +1269,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #, python-format
 msgid "Compose Email"
-msgstr ""
+msgstr "Eposta idatzi"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__composition_mode
@@ -1263,7 +1279,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Konfigurazio ezarpenak"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -1292,20 +1308,20 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "Kontaktua"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
 #: model_terms:ir.ui.view,arch_db:mail.view_message_search
 msgid "Content"
-msgstr ""
+msgstr "Edukia"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__body
 #: model:ir.model.fields,field_description:mail.field_mail_mail__body
 #: model:ir.model.fields,field_description:mail.field_mail_message__body
 msgid "Contents"
-msgstr ""
+msgstr "Edukiak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel_partner__fold_state
@@ -1328,7 +1344,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__message_bounce
 #: model:ir.model.fields,help:mail.field_res_users__message_bounce
 msgid "Counter of the number of bounced emails for this contact"
-msgstr ""
+msgstr "Kontaktu honek izan dituen errebote e-posten kontagailua"
 
 #. module: mail
 #. openerp-web
@@ -1357,12 +1373,12 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,state:0
 msgid "Create a new Record"
-msgstr ""
+msgstr "Erregistro berria sortu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 msgid "Created By"
-msgstr ""
+msgstr "Nork sortua"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__create_uid
@@ -1386,7 +1402,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__create_uid
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Nork sortua"
 
 #. module: mail
 #. openerp-web
@@ -1413,13 +1429,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__create_date
 #, python-format
 msgid "Created on"
-msgstr ""
+msgstr "Noiz sortua"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_view_form
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Creation Date"
-msgstr ""
+msgstr "Sortze data"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__create_user_id
@@ -1444,19 +1460,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__date
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/chatter.xml:93
 #, python-format
 msgid "Dates"
-msgstr ""
+msgstr "Data"
 
 #. module: mail
 #: selection:ir.actions.server,activity_date_deadline_range_type:0
 msgid "Days"
-msgstr ""
+msgstr "Egunak"
 
 #. module: mail
 #. openerp-web
@@ -1464,7 +1480,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #, python-format
 msgid "Deadline"
-msgstr ""
+msgstr "Epemuga "
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_user_assigned
@@ -1498,7 +1514,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_alias_mixin__alias_defaults
 #: model:ir.model.fields,field_description:mail.field_mail_channel__alias_defaults
 msgid "Default Values"
-msgstr ""
+msgstr "Balio lehenetsiak "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__use_default_to
@@ -1536,12 +1552,12 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:532
 #, python-format
 msgid "Delete"
-msgstr ""
+msgstr "Ezabatu"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__auto_delete
 msgid "Delete Emails"
-msgstr ""
+msgstr "Ezabatu epostak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__auto_delete_message
@@ -1564,7 +1580,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_shortcode__description
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_message_subtype_form
 msgid "Description"
-msgstr ""
+msgstr "Deskribapena"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_message_subtype__description
@@ -1576,7 +1592,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.ui.view,type:0
 msgid "Diagram"
-msgstr ""
+msgstr "Diagrama"
 
 #. module: mail
 #. openerp-web
@@ -1594,7 +1610,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
 #, python-format
 msgid "Discard"
-msgstr ""
+msgstr "Baztertu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_cancel_view_form
@@ -1625,17 +1641,17 @@ msgstr ""
 #: model:ir.ui.menu,name:mail.menu_root_discuss
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Discuss"
-msgstr ""
+msgstr "Eztabaidatu"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_channel
 msgid "Discussion Channel"
-msgstr ""
+msgstr "Eztabaida kanala"
 
 #. module: mail
 #: model:mail.message.subtype,name:mail.mt_comment
 msgid "Discussions"
-msgstr ""
+msgstr "Eztabaidak "
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_resend_cancel
@@ -1670,7 +1686,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__display_name
 #: model:ir.model.fields,field_description:mail.field_publisher_warranty_contract__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Izena erakutsi"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -1682,7 +1698,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__res_name
 msgid "Display name of the related document."
-msgstr ""
+msgstr "Erlazionatutako dokumentuaren izena bistaratu."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__auto_delete_message
@@ -1701,12 +1717,12 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_document_file_kanban
 msgid "Document"
-msgstr ""
+msgstr "Dokumentua"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_followers
 msgid "Document Followers"
-msgstr ""
+msgstr "Dokumentuaren jarraitzaileak "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__res_model_id
@@ -1723,7 +1739,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/activity.xml:101
 #, python-format
 msgid "Done"
-msgstr ""
+msgstr "Eginda "
 
 #. module: mail
 #. openerp-web
@@ -1747,7 +1763,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:77
 #, python-format
 msgid "Download"
-msgstr ""
+msgstr "Deskargatu"
 
 #. module: mail
 #. openerp-web
@@ -1759,7 +1775,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__date_deadline
 msgid "Due Date"
-msgstr ""
+msgstr "Zorren Data"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_date_deadline_range
@@ -1788,7 +1804,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/activity.xml:83
 #, python-format
 msgid "Edit"
-msgstr ""
+msgstr "Editatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_message_view_form
@@ -1819,22 +1835,22 @@ msgstr ""
 #: selection:mail.compose.message,message_type:0
 #: selection:mail.message,message_type:0
 msgid "Email"
-msgstr ""
+msgstr "Eposta"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__email
 msgid "Email Address"
-msgstr ""
+msgstr "Eposta helbidea"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_form
 msgid "Email Alias"
-msgstr ""
+msgstr "Eposta ezizena "
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_alias
 msgid "Email Aliases"
-msgstr ""
+msgstr "Eposta ezizenak"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_alias_mixin
@@ -1869,17 +1885,17 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__template_id
 msgid "Email Template"
-msgstr ""
+msgstr "Eposta txantiloia "
 
 #. module: mail
 #: model:ir.model,name:mail.model_email_template_preview
 msgid "Email Template Preview"
-msgstr ""
+msgstr "Eposta txantiloiaren aurrebista "
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_template
 msgid "Email Templates"
-msgstr ""
+msgstr "Eposta txantiloiak"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_thread
@@ -1927,7 +1943,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr ""
+msgstr "E-posta sortzeko laguntzailea"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
@@ -1945,7 +1961,7 @@ msgstr ""
 #: model:ir.ui.menu,name:mail.menu_mail_mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tree
 msgid "Emails"
-msgstr ""
+msgstr "Emailak"
 
 #. module: mail
 #. openerp-web
@@ -1965,7 +1981,7 @@ msgstr ""
 #: selection:mail.activity.type,decoration_type:0
 #, python-format
 msgid "Error"
-msgstr ""
+msgstr "Akatsa"
 
 #. module: mail
 #: code:addons/mail/models/update.py:98
@@ -2008,13 +2024,13 @@ msgstr ""
 #. module: mail
 #: selection:mail.alias,alias_contact:0 selection:mail.channel,public:0
 msgid "Everyone"
-msgstr ""
+msgstr "Denok"
 
 #. module: mail
 #: model:mail.activity.type,name:mail.mail_activity_data_warning
 #: selection:mail.notification,email_status:0
 msgid "Exception"
-msgstr ""
+msgstr "Salbuespen"
 
 #. module: mail
 #: selection:ir.actions.server,state:0
@@ -2024,7 +2040,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,state:0
 msgid "Execute several actions"
-msgstr ""
+msgstr "Hainbat ekintza exekutatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
@@ -2046,7 +2062,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Failed"
-msgstr ""
+msgstr "Huts egin du"
 
 #. module: mail
 #: code:addons/mail/models/mail_template.py:338
@@ -2096,7 +2112,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__model_object_field
 #: model:ir.model.fields,field_description:mail.field_mail_template__model_object_field
 msgid "Field"
-msgstr ""
+msgstr "Arlo"
 
 #. module: mail
 #: code:addons/mail/models/ir_model.py:30
@@ -2125,7 +2141,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_ir_model_fields
 msgid "Fields"
-msgstr ""
+msgstr "Eremuak"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_email_template_preview__copyvalue
@@ -2145,7 +2161,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/followers.xml:20
 #, python-format
 msgid "Follow"
-msgstr ""
+msgstr "Jarraitu "
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_view_followers
@@ -2157,7 +2173,7 @@ msgstr ""
 #: model:ir.ui.menu,name:mail.menu_email_followers
 #: model_terms:ir.ui.view,arch_db:mail.view_followers_tree
 msgid "Followers"
-msgstr ""
+msgstr "Followers"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_channel_ids
@@ -2166,7 +2182,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_channel_ids
 #: model:ir.model.fields,field_description:mail.field_res_users__message_channel_ids
 msgid "Followers (Channels)"
-msgstr ""
+msgstr "Jarraitzaileak (kanalak)"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_partner_ids
@@ -2175,7 +2191,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_partner_ids
 #: model:ir.model.fields,field_description:mail.field_res_users__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "Jarraitzaileak (Lagunak)"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_subscription_form
@@ -2211,7 +2227,7 @@ msgstr ""
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Form"
-msgstr ""
+msgstr "Formularioa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__email_from
@@ -2220,7 +2236,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__email_from
 #: model:ir.model.fields,field_description:mail.field_mail_template__email_from
 msgid "From"
-msgstr ""
+msgstr "Bidaltzailea"
 
 #. module: mail
 #. openerp-web
@@ -2234,19 +2250,19 @@ msgstr ""
 #: code:addons/mail/static/src/xml/systray.xml:98
 #, python-format
 msgid "Future"
-msgstr ""
+msgstr "Etorkizuna"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_search_inherit_mail
 msgid "Future Activities"
-msgstr ""
+msgstr "Etorkizuneko jarduerak"
 
 #. module: mail
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Gantt"
-msgstr ""
+msgstr "Gantt"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_message_form
@@ -2262,30 +2278,30 @@ msgstr ""
 #: code:addons/mail/models/res_users.py:88
 #, python-format
 msgid "Go to the configuration panel"
-msgstr ""
+msgstr "Zoaz konfigurazio panelera"
 
 #. module: mail
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Graph"
-msgstr ""
+msgstr "Grafo"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_search
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Group By"
-msgstr ""
+msgstr "Taldekatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_template_search
 msgid "Group by..."
-msgstr ""
+msgstr "Taldekatu..."
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_tree
 msgid "Groups"
-msgstr ""
+msgstr "Taldeak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__moderation_guidelines_msg
@@ -2331,7 +2347,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_mail_mail__has_error
 #: model:ir.model.fields,help:mail.field_mail_message__has_error
 msgid "Has error"
-msgstr ""
+msgstr "Errorea dauka"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__headers
@@ -2356,12 +2372,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_resend_cancel__help_message
 #: model:ir.model.fields,field_description:mail.field_mail_resend_partner__message
 msgid "Help message"
-msgstr ""
+msgstr "Laguntza mezua"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_message_subtype__hidden
 msgid "Hidden"
-msgstr ""
+msgstr "Ezkutatuta"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_message_subtype__hidden
@@ -2396,7 +2412,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__id
 #: model:ir.model.fields,field_description:mail.field_publisher_warranty_contract__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_alias__alias_parent_thread_id
@@ -2411,7 +2427,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity__icon
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__icon
 msgid "Icon"
-msgstr ""
+msgstr "Ikono"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_followers__res_id
@@ -2434,7 +2450,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__message_unread
 #: model:ir.model.fields,help:mail.field_res_users__message_unread
 msgid "If checked new messages require your attention."
-msgstr ""
+msgstr "If checked new messages require your attention."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_needaction
@@ -2519,7 +2535,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:39
 #, python-format
 msgid "Image"
-msgstr ""
+msgstr "Irudia"
 
 #. module: mail
 #: code:addons/mail/models/mail_alias.py:130
@@ -2548,7 +2564,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/activity.xml:33
 #, python-format
 msgid "Info"
-msgstr ""
+msgstr "Informazioa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__initial_res_model_id
@@ -2619,13 +2635,13 @@ msgstr ""
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:197
 #, python-format
 msgid "Invitation"
-msgstr ""
+msgstr "Gonbidapena"
 
 #. module: mail
 #: code:addons/mail/wizard/invite.py:53
 #, python-format
 msgid "Invitation to follow %s: %s"
-msgstr ""
+msgstr "%s jarraitzeko gonbidapena: %s"
 
 #. module: mail
 #. openerp-web
@@ -2633,14 +2649,14 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:178
 #, python-format
 msgid "Invite"
-msgstr ""
+msgstr "Gonbidatu "
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/js/followers.js:171
 #, python-format
 msgid "Invite Follower"
-msgstr ""
+msgstr "Gonbidatu jarraitzailea "
 
 #. module: mail
 #. openerp-web
@@ -2660,7 +2676,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_mail_wizard_invite
 msgid "Invite wizard"
-msgstr ""
+msgstr "Gonbidapen-laguntzailea"
 
 #. module: mail
 #: selection:mail.channel,public:0
@@ -2675,7 +2691,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_moderation_view_search
 msgid "Is Banned"
-msgstr ""
+msgstr "Debekatuta dago"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_is_follower
@@ -2684,7 +2700,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_is_follower
 #: model:ir.model.fields,field_description:mail.field_res_users__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Jarraitzailea da"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__notification
@@ -2709,7 +2725,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__is_member
 msgid "Is a member"
-msgstr ""
+msgstr "Bazkidea da"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_users__is_moderator
@@ -2735,13 +2751,13 @@ msgstr ""
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Kanban"
-msgstr ""
+msgstr "Kanban"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__lang
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
-msgstr ""
+msgstr "Hizkuntza"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview____last_update
@@ -2771,7 +2787,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite____last_update
 #: model:ir.model.fields,field_description:mail.field_publisher_warranty_contract____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Azken aldaketa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__channel_last_seen_partner_ids
@@ -2801,7 +2817,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__write_uid
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Azkenengoz eguneratu zuena"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__write_date
@@ -2825,20 +2841,20 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__write_date
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Azken eguneraketa noiz"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/systray.xml:94
 #, python-format
 msgid "Late"
-msgstr ""
+msgstr "Berandu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_search_inherit_mail
 msgid "Late Activities"
-msgstr ""
+msgstr "Azken jarduerak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__layout
@@ -2903,21 +2919,21 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:55
 #, python-format
 msgid "Loading"
-msgstr ""
+msgstr "Kargatzen"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/thread.xml:544
 #, python-format
 msgid "Loading older messages..."
-msgstr ""
+msgstr "Mezu zaharrak kargatzen..."
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/web_kanban_activity.xml:15
 #, python-format
 msgid "Loading..."
-msgstr ""
+msgstr "Kargatzen..."
 
 #. module: mail
 #. openerp-web
@@ -3058,7 +3074,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_main_attachment_id
 #: model:ir.model.fields,field_description:mail.field_res_users__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Eranskin nagusia"
 
 #. module: mail
 #. openerp-web
@@ -3108,14 +3124,14 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:340
 #, python-format
 msgid "Mark as Todo"
-msgstr ""
+msgstr "Egiteko bezala markatu"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/web_kanban_activity.xml:71
 #, python-format
 msgid "Mark as done"
-msgstr ""
+msgstr "Markatu eginda bezala"
 
 #. module: mail
 #: model:ir.ui.menu,name:mail.mail_blacklist_menu
@@ -3125,7 +3141,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__image_medium
 msgid "Medium-sized photo"
-msgstr ""
+msgstr "Argazki ertaina "
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_channel__image_medium
@@ -3139,12 +3155,12 @@ msgstr ""
 #: selection:mail.activity.type,category:0
 #: model:mail.activity.type,name:mail.mail_activity_data_meeting
 msgid "Meeting"
-msgstr ""
+msgstr "Bilera"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_form
 msgid "Members"
-msgstr ""
+msgstr "Kideak"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_channel__group_ids
@@ -3162,7 +3178,7 @@ msgstr ""
 #: code:addons/mail/wizard/base_partner_merge.py:13
 #, python-format
 msgid "Merged with the following partners:"
-msgstr ""
+msgstr "Ondorengo kidearekin bateratua:"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_message
@@ -3172,7 +3188,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__message
 #: model_terms:ir.ui.view,arch_db:mail.view_message_form
 msgid "Message"
-msgstr ""
+msgstr "Mezua"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_has_error
@@ -3181,7 +3197,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_has_error
 #: model:ir.model.fields,field_description:mail.field_res_users__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Mezua igortzean errorea"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__mail_message_id
@@ -3191,7 +3207,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_mail_notification
 msgid "Message Notifications"
-msgstr ""
+msgstr "Mezuen jakinarazpenak "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__record_name
@@ -3283,7 +3299,7 @@ msgstr ""
 #: model:ir.ui.menu,name:mail.menu_mail_message
 #: model_terms:ir.ui.view,arch_db:mail.view_message_tree
 msgid "Messages"
-msgstr ""
+msgstr "Mezuak"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_message_search
@@ -3318,7 +3334,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_email_template_search
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_search
 msgid "Model"
-msgstr ""
+msgstr "Eredua"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__res_model_change
@@ -3339,7 +3355,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_ir_model
 msgid "Models"
-msgstr ""
+msgstr "Ereduak"
 
 #. module: mail
 #. openerp-web
@@ -3449,13 +3465,13 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,activity_date_deadline_range_type:0
 msgid "Months"
-msgstr ""
+msgstr "Hilabeteak"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_search_inherit_mail
 msgid "My Activities"
-msgstr ""
+msgstr "Nire Jarduerak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__name
@@ -3465,7 +3481,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_template__name
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_form
 msgid "Name"
-msgstr ""
+msgstr "Izena"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__record_name
@@ -3571,7 +3587,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:131
 #, python-format
 msgid "New messages appear here."
-msgstr ""
+msgstr "Mezu berriak hemen agertzen dira."
 
 #. module: mail
 #. openerp-web
@@ -3592,33 +3608,33 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:95
 #, python-format
 msgid "Next"
-msgstr ""
+msgstr "Hurrengoa"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_tree
 msgid "Next Activities"
-msgstr ""
+msgstr "Hurrengo Jarduerak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_date_deadline
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_date_deadline
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "Hurrengo jardueraren epemuga"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_summary
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_summary
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "Hurrengo jardueraren laburpena"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_type_id
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_type_id
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "Hurrengo jarduera mota"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__has_recommended_activities
@@ -3629,7 +3645,7 @@ msgstr ""
 #: code:addons/mail/models/mail_notification.py:50
 #, python-format
 msgid "No Error"
-msgstr ""
+msgstr "Errorerik ez"
 
 #. module: mail
 #. openerp-web
@@ -3651,7 +3667,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/activity_view.xml:21
 #, python-format
 msgid "No data to display"
-msgstr ""
+msgstr "Ez dago bistaratzeko daturik"
 
 #. module: mail
 #. openerp-web
@@ -3706,7 +3722,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity__note
 #: model:mail.message.subtype,name:mail.mt_note
 msgid "Note"
-msgstr ""
+msgstr "Oharra"
 
 #. module: mail
 #. openerp-web
@@ -3718,7 +3734,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Notification"
-msgstr ""
+msgstr "Jakinarazpena"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_users__notification_type
@@ -3736,7 +3752,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__notification_ids
 #: model:ir.model.fields,field_description:mail.field_mail_resend_message__notification_ids
 msgid "Notifications"
-msgstr ""
+msgstr "Jakinarazpenak "
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__notify
@@ -3755,7 +3771,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_needaction_counter
 #: model:ir.model.fields,field_description:mail.field_res_users__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "Akzio kopurua"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity_type__delay_count
@@ -3771,7 +3787,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_has_error_counter
 #: model:ir.model.fields,field_description:mail.field_res_users__message_has_error_counter
 msgid "Number of error"
-msgstr ""
+msgstr "Errore kopurua"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_needaction_counter
@@ -3780,7 +3796,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr ""
+msgstr "Ekintza bat eskatzen duen mezu kopurua"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_has_error_counter
@@ -3789,7 +3805,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__message_has_error_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Bidaltzean errorea eman duten mezu kopurua"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_unread_counter
@@ -3798,7 +3814,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__message_unread_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_unread_counter
 msgid "Number of unread messages"
-msgstr ""
+msgstr "Irakurri gabeko mezu kopurua"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_notification_borders
@@ -3806,7 +3822,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.mail_notification_paynow
 #: model_terms:ir.ui.view,arch_db:mail.message_notification_email
 msgid "Odoo"
-msgstr ""
+msgstr "Odoo"
 
 #. module: mail
 #. openerp-web
@@ -3864,7 +3880,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/followers.js:188
 #, python-format
 msgid "One follower"
-msgstr ""
+msgstr "Jarraitzaile bat"
 
 #. module: mail
 #. openerp-web
@@ -3872,7 +3888,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:277
 #, python-format
 msgid "Online"
-msgstr ""
+msgstr "Linean "
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:436
@@ -3885,7 +3901,7 @@ msgstr ""
 #: code:addons/mail/models/ir_model.py:53
 #, python-format
 msgid "Only custom models can be modified."
-msgstr ""
+msgstr "Pertsonalizatutako moduluak bakarrik aldatu daitezke."
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:165
@@ -3896,7 +3912,7 @@ msgstr ""
 #. module: mail
 #: selection:mail.channel.partner,fold_state:0
 msgid "Open"
-msgstr ""
+msgstr "Irekita"
 
 #. module: mail
 #. openerp-web
@@ -3979,13 +3995,13 @@ msgstr ""
 #. module: mail
 #: selection:mail.activity.type,category:0
 msgid "Other"
-msgstr ""
+msgstr "Beste"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 #: selection:mail.mail,state:0
 msgid "Outgoing"
-msgstr ""
+msgstr "Bidaltzea"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__mail_server_id
@@ -3996,7 +4012,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_mail_mail
 msgid "Outgoing Mails"
-msgstr ""
+msgstr "Irteerako mezuak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__mail_server_id
@@ -4013,7 +4029,7 @@ msgstr ""
 #: selection:res.partner,activity_state:0
 #, python-format
 msgid "Overdue"
-msgstr ""
+msgstr "Atzeratua"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -4025,7 +4041,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_alias_mixin__alias_user_id
 #: model:ir.model.fields,field_description:mail.field_mail_channel__alias_user_id
 msgid "Owner"
-msgstr ""
+msgstr "Jabea"
 
 #. module: mail
 #. openerp-web
@@ -4037,7 +4053,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_message_subtype__parent_id
 msgid "Parent"
-msgstr ""
+msgstr "Gurasoa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__parent_id
@@ -4081,7 +4097,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_partner__partner_id
 msgid "Partner"
-msgstr ""
+msgstr "Kidea"
 
 #. module: mail
 #: code:addons/mail/models/res_partner.py:29
@@ -4148,13 +4164,13 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__image
 msgid "Photo"
-msgstr ""
+msgstr "Argazkia "
 
 #. module: mail
 #: selection:ir.actions.act_window.view,view_mode:0
 #: selection:ir.ui.view,type:0
 msgid "Pivot"
-msgstr ""
+msgstr "Pibote"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__copyvalue
@@ -4273,7 +4289,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
 #, python-format
 msgid "Preview"
-msgstr ""
+msgstr "Aurreikusi"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_preview_form
@@ -4285,7 +4301,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:92
 #, python-format
 msgid "Previous"
-msgstr ""
+msgstr "Aurrekoa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__previous_activity_type_id
@@ -4297,13 +4313,13 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:76
 #, python-format
 msgid "Print"
-msgstr ""
+msgstr "Inprimatu"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__public
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_form
 msgid "Privacy"
-msgstr ""
+msgstr "Pribatutasuna"
 
 #. module: mail
 #. openerp-web
@@ -4318,7 +4334,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/discuss.js:1348
 #, python-format
 msgid "Public Channels"
-msgstr ""
+msgstr "Kanal publikoak"
 
 #. module: mail
 #: model:ir.model,name:mail.model_publisher_warranty_contract
@@ -4335,7 +4351,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.ui.view,type:0
 msgid "QWeb"
-msgstr ""
+msgstr "QWeb"
 
 #. module: mail
 #: code:addons/mail/wizard/mail_compose_message.py:179
@@ -4348,7 +4364,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:400
 #, python-format
 msgid "Ready"
-msgstr ""
+msgstr "Prest"
 
 #. module: mail
 #: selection:mail.notification,email_status:0
@@ -4376,7 +4392,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #: model_terms:ir.ui.view,arch_db:mail.view_message_form
 msgid "Recipients"
-msgstr ""
+msgstr "Hartzailea"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__recommended_activity_type_id
@@ -4401,12 +4417,12 @@ msgstr ""
 #: code:addons/mail/models/mail_message.py:899
 #, python-format
 msgid "Records:"
-msgstr ""
+msgstr "Erregistroak:"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__references
 msgid "References"
-msgstr ""
+msgstr "Erreferentziak"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
@@ -4425,7 +4441,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:186
 #, python-format
 msgid "Reject selected messages"
-msgstr ""
+msgstr "Hautatutako mezuak baztertu"
 
 #. module: mail
 #. openerp-web
@@ -4438,7 +4454,7 @@ msgstr ""
 #: selection:mail.compose.message,moderation_status:0
 #: selection:mail.message,moderation_status:0
 msgid "Rejected"
-msgstr ""
+msgstr "Baztertuta"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__res_id
@@ -4518,7 +4534,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 #, python-format
 msgid "Reply"
-msgstr ""
+msgstr "Erantzun "
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__reply_to
@@ -4536,7 +4552,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__reply_to
 #: model:ir.model.fields,field_description:mail.field_mail_template__reply_to
 msgid "Reply-To"
-msgstr ""
+msgstr "Nori erantzun"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__report_name
@@ -4569,7 +4585,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_user_id
 msgid "Responsible"
-msgstr ""
+msgstr "Arduraduna"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_user_id
@@ -4619,7 +4635,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 msgid "Save as new template"
-msgstr ""
+msgstr "Gorde txantiloi berri gisa"
 
 #. module: mail
 #. openerp-web
@@ -4657,7 +4673,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__scheduled_date
 #: model:ir.model.fields,field_description:mail.field_mail_template__scheduled_date
 msgid "Scheduled Date"
-msgstr ""
+msgstr "Programatutako data"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__scheduled_date
@@ -4668,7 +4684,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.ui.view,type:0
 msgid "Search"
-msgstr ""
+msgstr "Bilatu"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_search
@@ -4727,7 +4743,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #, python-format
 msgid "Send"
-msgstr ""
+msgstr "Bidali"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_partner__resend
@@ -4739,7 +4755,7 @@ msgstr ""
 #: selection:ir.actions.server,state:0
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__send_mail
 msgid "Send Email"
-msgstr ""
+msgstr "Emaila Bidali"
 
 #. module: mail
 #: code:addons/mail/models/mail_template.py:265
@@ -4755,7 +4771,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tree
 #, python-format
 msgid "Send Now"
-msgstr ""
+msgstr "Bidali orain "
 
 #. module: mail
 #. openerp-web
@@ -4823,7 +4839,7 @@ msgstr ""
 #: selection:mail.mail,state:0 selection:mail.notification,email_status:0
 #, python-format
 msgid "Sent"
-msgstr ""
+msgstr "Bidalia"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_notification__is_email
@@ -4834,7 +4850,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__sequence
 #: model:ir.model.fields,field_description:mail.field_mail_message_subtype__sequence
 msgid "Sequence"
-msgstr ""
+msgstr "Sekuentzia"
 
 #. module: mail
 #: model:ir.model,name:mail.model_ir_actions_server
@@ -4857,6 +4873,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_search_inherit_mail
 msgid "Show all records which has next action date is before today"
 msgstr ""
+"Erakutsi gaur baino lehenagoko hurrengo ekintza data duten erregistro "
+"guztiak"
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:914
@@ -4891,7 +4909,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__image_small
 msgid "Small-sized photo"
-msgstr ""
+msgstr "Argazki txikia "
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_channel__image_small
@@ -4918,7 +4936,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:47
 #, python-format
 msgid "Split"
-msgstr ""
+msgstr "Zatitu"
 
 #. module: mail
 #. openerp-web
@@ -4935,7 +4953,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__state
 msgid "State"
-msgstr ""
+msgstr "Egoera"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__state
@@ -4943,7 +4961,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Status"
-msgstr ""
+msgstr "Egoera"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity_mixin__activity_state
@@ -4979,7 +4997,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_template__subject
 #, python-format
 msgid "Subject"
-msgstr ""
+msgstr "Gaia"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_email_template_preview__subject
@@ -4998,7 +5016,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:365
 #, python-format
 msgid "Subject:"
-msgstr ""
+msgstr "Gaia:"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_shortcode__substitution
@@ -5012,7 +5030,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__subtype_id
 #: model_terms:ir.ui.view,arch_db:mail.view_message_subtype_tree
 msgid "Subtype"
-msgstr ""
+msgstr "Azpi-mota"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_view_message_subtype
@@ -5025,7 +5043,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_activity__summary
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__summary
 msgid "Summary"
-msgstr ""
+msgstr "Laburpena"
 
 #. module: mail
 #: selection:mail.compose.message,message_type:0
@@ -5072,12 +5090,12 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_notify_moderation
 msgid "Thank you!"
-msgstr ""
+msgstr "Eskerrik asko!"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "The"
-msgstr ""
+msgstr "The"
 
 #. module: mail
 #: code:addons/mail/models/ir_actions.py:51
@@ -5093,7 +5111,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "The email sent to"
-msgstr ""
+msgstr "Eposta nori bidalia"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_shortcode__substitution
@@ -5162,7 +5180,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/activity_view.xml:10
 #, python-format
 msgid "This action will send an email."
-msgstr ""
+msgstr "Ekintza honek eposta bat bidaliko du."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_channel__image
@@ -5186,12 +5204,12 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
 msgid "Thread"
-msgstr ""
+msgstr "Haria"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__email_to
 msgid "To"
-msgstr ""
+msgstr "Nora"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__email_to
@@ -5209,7 +5227,7 @@ msgstr ""
 #. module: mail
 #: model:mail.activity.type,name:mail.mail_activity_data_todo
 msgid "To Do"
-msgstr ""
+msgstr "Egiteko"
 
 #. module: mail
 #. openerp-web
@@ -5230,13 +5248,13 @@ msgstr ""
 #: selection:res.partner,activity_state:0
 #, python-format
 msgid "Today"
-msgstr ""
+msgstr "Gaur"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_search_inherit_mail
 msgid "Today Activities"
-msgstr ""
+msgstr "Gaurko jarduerak"
 
 #. module: mail
 #. openerp-web
@@ -5263,7 +5281,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_ir_model_fields__track_visibility
 #: model_terms:ir.ui.view,arch_db:mail.view_message_form
 msgid "Tracking"
-msgstr ""
+msgstr "Jarraipena"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tracking_value_form
@@ -5310,7 +5328,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_message__message_type
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_type_view_tree
 msgid "Type"
-msgstr ""
+msgstr "Mota"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity_type__delay_from
@@ -5322,11 +5340,12 @@ msgstr ""
 msgid ""
 "Type of server action. The following values are available:\n"
 "- 'Execute Python Code': a block of python code that will be executed\n"
-"- 'Create or Copy a new Record': create a new record with new values, or copy an existing record in your database\n"
-"- 'Write on a Record': update the values of a record\n"
+"- 'Create': create a new record with new values\n"
+"- 'Update a Record': update the values of a record\n"
 "- 'Execute several actions': define an action that triggers several other server actions\n"
-"- 'Add Followers': add followers to a record (available in Discuss)\n"
-"- 'Send Email': automatically send an email (available in email_template)"
+"- 'Send Email': automatically send an email (Discuss)\n"
+"- 'Add Followers': add followers to a record (Discuss)\n"
+"- 'Create Next Activity': create an activity (Discuss)"
 msgstr ""
 
 #. module: mail
@@ -5363,7 +5382,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/thread_windows/abstract_thread_window.js:163
 #, python-format
 msgid "Undefined"
-msgstr ""
+msgstr "Definitu gabea"
 
 #. module: mail
 #. openerp-web
@@ -5381,7 +5400,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_type_view_tree
 msgid "Unit"
-msgstr ""
+msgstr "Unitatea"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity_type__delay_unit
@@ -5402,7 +5421,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_unread
 #: model:ir.model.fields,field_description:mail.field_res_users__message_unread
 msgid "Unread Messages"
-msgstr ""
+msgstr "Irakurri gabeko mezuak"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_unread_counter
@@ -5411,7 +5430,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_unread_counter
 #: model:ir.model.fields,field_description:mail.field_res_users__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr ""
+msgstr "Irakurri gabeko mezuen kontagailua"
 
 #. module: mail
 #. openerp-web
@@ -5461,7 +5480,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:454
 #, python-format
 msgid "Unsubscribed"
-msgstr ""
+msgstr "Harpidetza ezeztatuta"
 
 #. module: mail
 #: code:addons/mail/models/mail_template.py:473
@@ -5478,7 +5497,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,state:0
 msgid "Update the Record"
-msgstr ""
+msgstr "Erregistroa eguneratu"
 
 #. module: mail
 #. openerp-web
@@ -5512,7 +5531,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__use_active_domain
 msgid "Use active domain"
-msgstr ""
+msgstr "Erabili domeinu aktiboa"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__template_id
@@ -5537,7 +5556,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_tree
 #, python-format
 msgid "User"
-msgstr ""
+msgstr "Erabiltzailea"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_user_field_name
@@ -5558,12 +5577,12 @@ msgstr ""
 #: code:addons/mail/models/mail_message.py:899
 #, python-format
 msgid "User:"
-msgstr ""
+msgstr "Erabiltzailea:"
 
 #. module: mail
 #: model:ir.model,name:mail.model_res_users
 msgid "Users"
-msgstr ""
+msgstr "Erabiltzaileak"
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:965
@@ -5584,7 +5603,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:41
 #, python-format
 msgid "Video"
-msgstr ""
+msgstr "Bideoa"
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:747
@@ -5594,7 +5613,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.message_user_assigned
 #, python-format
 msgid "View"
-msgstr ""
+msgstr "Ikusi"
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:434
@@ -5608,7 +5627,7 @@ msgstr ""
 #: code:addons/mail/models/mail_thread.py:752
 #, python-format
 msgid "View %s"
-msgstr ""
+msgstr "Ikusi %s"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_act_window_view__view_mode
@@ -5645,7 +5664,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/followers.xml:85
 #, python-format
 msgid "Warning"
-msgstr ""
+msgstr "Abisua"
 
 #. module: mail
 #. openerp-web
@@ -5660,7 +5679,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,activity_date_deadline_range_type:0
 msgid "Weeks"
-msgstr ""
+msgstr "Asteak"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_email_template_preview__sub_model_object_field
@@ -5683,6 +5702,8 @@ msgstr ""
 msgid ""
 "When set, every modification to this field will be tracked in the chatter."
 msgstr ""
+"Ezarrita dagoenean, eremu honetara egindako aldaketa guztiak elkarrizketetan"
+" kontrolatuko dira."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__is_log
@@ -5719,7 +5740,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/models/messages/abstract_message.js:109
 #, python-format
 msgid "Yesterday"
-msgstr ""
+msgstr "Atzo"
 
 #. module: mail
 #. openerp-web
@@ -5766,13 +5787,13 @@ msgstr ""
 #: code:addons/mail/models/mail_channel.py:925
 #, python-format
 msgid "You are in a private conversation with <b>@%s</b>."
-msgstr ""
+msgstr "Elkarrizketa pribatu batean zaude <b>@%s</b>."
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:919
 #, python-format
 msgid "You are in channel <b>#%s</b>."
-msgstr ""
+msgstr "<b>#%s</b> kanalean zaude."
 
 #. module: mail
 #. openerp-web
@@ -5976,7 +5997,7 @@ msgstr ""
 #. module: mail
 #: selection:mail.activity.type,delay_unit:0
 msgid "days"
-msgstr ""
+msgstr "egunak"
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:357
@@ -6009,7 +6030,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/followers.js:190
 #, python-format
 msgid "followers"
-msgstr ""
+msgstr "jarraitzaileak "
 
 #. module: mail
 #. openerp-web
@@ -6072,7 +6093,7 @@ msgstr ""
 #. module: mail
 #: selection:mail.activity.type,delay_unit:0
 msgid "months"
-msgstr ""
+msgstr "hilabeteak"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -6101,7 +6122,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/web_kanban_activity.xml:55
 #, python-format
 msgid "or"
-msgstr ""
+msgstr "edo"
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:1021
@@ -6135,7 +6156,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/thread_widget.js:19
 #, python-format
 msgid "read more"
-msgstr ""
+msgstr "gehiago irakurri"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_preview_form
@@ -6211,15 +6232,23 @@ msgid "to close for"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:1074
+#: code:addons/mail/models/mail_thread.py:1081
 #, python-format
 msgid "unknown error"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:1014
+#: code:addons/mail/models/mail_thread.py:1021
 #, python-format
 msgid "unknown target model %s"
+msgstr ""
+
+#. module: mail
+#. openerp-web
+#: code:addons/mail/static/src/js/attachment_box.js:40
+#: code:addons/mail/static/src/js/models/messages/abstract_message.js:52
+#, python-format
+msgid "unnamed"
 msgstr ""
 
 #. module: mail

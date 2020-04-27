@@ -146,7 +146,7 @@ class Website(models.Model):
             public_user_to_change_websites = self.filtered(lambda w: w.sudo().user_id.company_id.id != values['company_id'])
             if public_user_to_change_websites:
                 company = self.env['res.company'].browse(values['company_id'])
-                super(Website, public_user_to_change_websites).write(dict(values, user_id=company._get_public_user().id))
+                super(Website, public_user_to_change_websites).write(dict(values, user_id=company and company._get_public_user().id))
 
         result = super(Website, self - public_user_to_change_websites).write(values)
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
@@ -171,6 +171,7 @@ class Website(models.Model):
     # Page Management
     # ----------------------------------------------------------
     def _bootstrap_homepage(self):
+        Page = self.env['website.page']
         standard_homepage = self.env.ref('website.homepage', raise_if_not_found=False)
         if not standard_homepage:
             return
@@ -183,10 +184,19 @@ class Website(models.Model):
         </t>''' % (self.id)
         standard_homepage.with_context(website_id=self.id).arch_db = new_homepage_view
 
-        self.homepage_id = self.env['website.page'].search([('website_id', '=', self.id),
-                                                            ('key', '=', standard_homepage.key)])
+        homepage_page = Page.search([
+            ('website_id', '=', self.id),
+            ('key', '=', standard_homepage.key),
+        ])
+        if not homepage_page:
+            homepage_page = Page.create({
+                'website_published': True,
+                'url': '/',
+                'view_id': self.with_context(website_id=self.id).viewref('website.homepage').id,
+            })
         # prevent /-1 as homepage URL
-        self.homepage_id.url = '/'
+        homepage_page.url = '/'
+        self.homepage_id = homepage_page
 
         # Bootstrap default menu hierarchy, create a new minimalist one if no default
         default_menu = self.env.ref('website.main_menu')
@@ -468,7 +478,12 @@ class Website(models.Model):
     @api.model
     def get_current_website(self, fallback=True):
         if request and request.session.get('force_website_id'):
-            return self.browse(request.session['force_website_id'])
+            website_id = self.browse(request.session['force_website_id']).exists()
+            if not website_id:
+                # Don't crash is session website got deleted
+                request.session.pop('force_website_id')
+            else:
+                return website_id
 
         website_id = self.env.context.get('website_id')
         if website_id:
@@ -1017,7 +1032,7 @@ class Page(models.Model):
     header_color = fields.Char()
 
     # don't use mixin website_id but use website_id on ir.ui.view instead
-    website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False)
+    website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False, ondelete='cascade')
 
     @api.one
     def _compute_homepage(self):

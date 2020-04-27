@@ -125,7 +125,11 @@ class PurchaseOrder(models.Model):
             result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
         elif len(pick_ids) == 1:
             res = self.env.ref('stock.view_picking_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
+            form_view = [(res and res.id or False, 'form')]
+            if 'views' in result:
+                result['views'] = form_view + [(state,view) for state,view in result['views'] if view != 'form']
+            else:
+                result['views'] = form_view
             result['res_id'] = pick_ids.id
         return result
 
@@ -360,7 +364,9 @@ class PurchaseOrderLine(models.Model):
     def _update_received_qty(self):
         for line in self:
             total = 0.0
-            for move in line.move_ids:
+            # In case of a BOM in kit, the products delivered do not correspond to the products in
+            # the PO. Therefore, we can skip them since they will be handled later on.
+            for move in line.move_ids.filtered(lambda m: m.product_id == line.product_id):
                 if move.state == 'done':
                     if move.location_dest_id.usage == "supplier":
                         if move.to_refund:

@@ -14,7 +14,10 @@
 # Paolo Valier, 2018
 # David Minneci <david@numeko.it>, 2018
 # Léonie Bouchat <lbo@odoo.com>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2019
+# Lorenzo Battistini <lb@takobi.online>, 2019
+# Simone Sanfilippo <s.sanfilippo@hinge16.eu>, 2019
+# Sergio Zanchetta <primes2h@gmail.com>, 2020
+# Iacopo Simonelli <lsi@odoo.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -22,7 +25,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-09 10:31+0000\n"
 "PO-Revision-Date: 2018-08-24 09:17+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2019\n"
+"Last-Translator: Iacopo Simonelli <lsi@odoo.com>, 2020\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -161,8 +164,8 @@ msgid ""
 "</p>"
 msgstr ""
 "<p class='o_view_nocontent_smiling_face'>Aggiungi nuove opportunità</p><p>\n"
-"    Sembra che tu non faccia parte di alcun team di vendita. Dovresti\n"
-"    aggiungerti a uno dei team.\n"
+"    Non sembri appartenere ad alcun team di vendita. Entra a far parte di\n"
+"    uno dei team.\n"
 "</p>"
 
 #. module: crm
@@ -497,7 +500,7 @@ msgstr "Nome azienda"
 #. module: crm
 #: model:ir.model,name:crm.model_res_config_settings
 msgid "Config Settings"
-msgstr "Impostazioni configurazione"
+msgstr "Impostazioni di configurazione"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_menu_config
@@ -685,8 +688,8 @@ msgid ""
 "Create tags that fit your business (product structure, sales type, etc.) to "
 "better manage and tack your opportunities."
 msgstr ""
-"Creare etichette che si adattano all'attività (struttura del prodotto, tipo "
-"di vendita ecc.) per gestire e affinare meglio le opportunità."
+"Creare etichette che si adattano alla propria attività (struttura del "
+"prodotto, tipo di vendita ecc.) per gestire e seguire meglio le opportunità."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__author_id
@@ -730,7 +733,7 @@ msgstr "Data di creazione"
 #. module: crm
 #: model:ir.actions.server,name:crm.action_your_pipeline
 msgid "Crm: My Pipeline"
-msgstr "Crm: il mio flusso di opportunità"
+msgstr "CRM: il mio flusso"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__company_currency
@@ -844,7 +847,7 @@ msgstr "Nome visualizzato"
 #: code:addons/crm/models/digest.py:18 code:addons/crm/models/digest.py:29
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
-msgstr ""
+msgstr "Non hai accesso, salta questi dati per l'e-mail digest dell'utente"
 
 #. module: crm
 #: selection:crm.lead2opportunity.partner,action:0
@@ -878,7 +881,7 @@ msgstr "Alias e-mail"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__email_from
 msgid "Email address of the contact"
-msgstr "Indirizzo email del contatto"
+msgstr "Indirizzo e-mail del contatto"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
@@ -886,7 +889,7 @@ msgid ""
 "Email sent to <strong>${email}</strong> generate opportunities in your "
 "pipeline.<br>"
 msgstr ""
-"Le email inviate a <strong>${email}</strong> generano opportunità nel "
+"Le e-mail inviate a <strong>${email}</strong> generano opportunità nel "
 "flusso.<br>"
 
 #. module: crm
@@ -1001,12 +1004,12 @@ msgstr "Follower"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "Follower (canali)"
+msgstr "Chi sta seguendo (canali)"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Follower (partner)"
+msgstr "Chi sta seguendo (partner)"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor
@@ -1053,7 +1056,7 @@ msgstr "Ottieni motivo della perdita"
 #: model_terms:ir.ui.view,arch_db:crm.crm_stage_form
 msgid "Give your team the requirements to move an opportunity to this stage."
 msgstr ""
-"Fornire al team i requisiti per trasferire un'opportunità a questa fase."
+"Fornisci al team i requisiti per trasferire un'opportunità a questa fase."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__email_cc
@@ -1203,7 +1206,7 @@ msgstr "Fatture"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_is_follower
 msgid "Is Follower"
-msgstr "È un follower"
+msgstr "Sta seguendo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__function
@@ -1365,8 +1368,8 @@ msgid ""
 "Leads that you selected that have duplicates. If the list is empty, it means"
 " that no duplicates were found"
 msgstr ""
-"Contatti selezionati che possiedono duplicati. Se l'elenco è vuoto, "
-"significa che non sono stati trovati"
+"Contatti selezionati che possiedono duplicati. Un elenco vuoto indica che "
+"non ne sono stati trovati"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
@@ -1457,12 +1460,12 @@ msgstr "Assegnazione manuale e-mail in ingresso"
 #. module: crm
 #: model:ir.actions.server,name:crm.action_mark_activities_done
 msgid "Mark All Activities as Done"
-msgstr "Imposta tutte le attività come completate"
+msgstr "Segna tutte le attività come completate"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.action_mark_late_activities_done
 msgid "Mark Late Activities as Done"
-msgstr "Imposta attività in ritardo come completate"
+msgstr "Segna attività in ritardo come completate"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor
@@ -1472,17 +1475,17 @@ msgstr "Imposta a persa"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor
 msgid "Mark Won"
-msgstr "Imposta a vinta"
+msgstr "Segna vinta"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_leads
 msgid "Mark as Lost"
-msgstr "Imposta a persa"
+msgstr "Segna persa"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.action_mark_as_lost
 msgid "Mark as lost"
-msgstr "Imposta a persa"
+msgstr "Segna persa"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor
@@ -1607,7 +1610,7 @@ msgstr "Le mie opportunità"
 #: model:ir.ui.menu,name:crm.menu_crm_opportunities
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "My Pipeline"
-msgstr "Il mio flusso di opportunità"
+msgstr "Il mio flusso"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_tag__name
@@ -1649,7 +1652,7 @@ msgstr "Riepilogo prossima attività"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_type_id
 msgid "Next Activity Type"
-msgstr "Tipo prossima attività"
+msgstr "Tipologia prossima attività"
 
 #. module: crm
 #: selection:crm.lead,kanban_state:0
@@ -1710,7 +1713,7 @@ msgstr "Numero di messaggi che richiedono un'azione"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Numero di messaggi con errori di consegna"
+msgstr "Numero di messaggi con errore di consegna"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__opportunities_count
@@ -1901,7 +1904,7 @@ msgstr "Il partner è nella lista nera"
 #. module: crm
 #: model:ir.model,name:crm.model_crm_partner_binding
 msgid "Partner linking/binding in CRM wizard"
-msgstr ""
+msgstr "Collegamento / associazione dei partner nella procedura guidata CRM"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__partner_id
@@ -1928,7 +1931,7 @@ msgstr "Gestione formato numeri telefonici"
 #: model:ir.ui.menu,name:crm.menu_crm_config_lead
 #, python-format
 msgid "Pipeline"
-msgstr "Flusso delle opportunità"
+msgstr "Flusso"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_report_crm_opportunity_salesteam
@@ -1938,7 +1941,7 @@ msgstr "Flusso delle opportunità"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_graph
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_pivot
 msgid "Pipeline Analysis"
-msgstr "Analisi flusso di opportunità"
+msgstr "Analisi del flusso"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action
@@ -1949,8 +1952,8 @@ msgid ""
 "mainly used by the sales manager in order to do the periodic review with the\n"
 "teams of the sales pipeline."
 msgstr ""
-"L'analisi del flusso di opportunità fornisce un accesso \n"
-"immediato a informazioni quali i ricavi previsti, i costi pianificati, le scadenze mancate\n"
+"L'analisi del flusso fornisce un accesso immediato\n"
+"alle opportunità con informazioni quali i ricavi previsti, i costi pianificati, le scadenze mancate\n"
 "o il numero di interazioni per opportunità. Questo resoconto viene utilizzato\n"
 "principalmente dal responsabile vendite per eseguire la revisione periodica\n"
 "con i team del flusso di vendita."
@@ -1964,17 +1967,17 @@ msgid ""
 "mainly used by the sales manager in order to periodically review the pipeline\n"
 "with the the Sales Team."
 msgstr ""
-"L'analisi del flusso di vendita fornisce un accesso \n"
-"immediato a informazioni quali i ricavi previsti, i costi pianificati, le scadenze mancate\n"
+"L'analisi del flusso fornisce un accesso immediato\n"
+"alle opportunità con informazioni quali i ricavi previsti, i costi pianificati, le scadenze mancate\n"
 "o il numero di interazioni per opportunità. Questo resoconto viene utilizzato\n"
-"principalmente dal responsabile vendite per la revisione periodica del flusso\n"
-"di vendita con i relativi team."
+"principalmente dal responsabile vendite per eseguire la revisione periodica\n"
+"con i team del flusso di vendita."
 
 #. module: crm
 #: code:addons/crm/models/crm_team.py:224
 #, python-format
 msgid "Pipeline: Expected Revenue"
-msgstr "Flusso delle opportunità - Ricavi previsti"
+msgstr "Flusso - Ricavi previsti"
 
 #. module: crm
 #: selection:crm.lead,activity_state:0
@@ -2040,8 +2043,8 @@ msgid ""
 "Ready to boost your sales? Your <b>Pipeline</b> can be found here, under the"
 " <b>CRM</b> app."
 msgstr ""
-"Pronto per incrementare le vendite? Il tuo <b>flusso delle opportunità</b> "
-"si trova qui, nell’applicazione <b>CRM</b>."
+"Pronto per incrementare le vendite? Il tuo <b>flusso</b> si trova qui, "
+"nell’applicazione <b>CRM</b>."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__referred
@@ -2190,7 +2193,7 @@ msgstr "Impostazioni"
 #. module: crm
 #: model:res.groups,name:crm.group_use_lead
 msgid "Show Lead Menu"
-msgstr "Mostrare menù contatti (CRM)"
+msgstr "Mostrare menù contatti CRM"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
@@ -2368,7 +2371,7 @@ msgstr "Etichette"
 #. module: crm
 #: model:ir.ui.menu,name:crm.sales_team_menu_team_pipeline
 msgid "Team Pipelines"
-msgstr "Flussi di opportunità del team"
+msgstr "Flussi del team"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_id
@@ -2745,8 +2748,8 @@ msgid ""
 "You have to enable the Pipeline on your Sales Team to be able to set it as a"
 " content for the graph"
 msgstr ""
-"Per impostare il flusso di opportunità come contenuto per il grafico è "
-"necessario abilitarlo nel relativo team "
+"Per impostare il flusso come contenuto per il grafico è necessario "
+"abilitarlo nel relativo team "
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:404

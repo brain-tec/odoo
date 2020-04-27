@@ -181,6 +181,7 @@ class PosOrder(models.Model):
             # considering partner's sale pricelist's currency
             'currency_id': self.pricelist_id.currency_id.id,
             'user_id': self.user_id.id,
+            'fiscal_position_id': self.fiscal_position_id.id,
         }
 
     @api.model
@@ -354,6 +355,7 @@ class PosOrder(models.Model):
             cur_company = order.company_id.currency_id
             amount_cur_company = 0.0
             date_order = order.date_order.date() if order.date_order else fields.Date.today()
+            move_lines = []
             for line in order.lines:
                 if cur != cur_company:
                     amount_subtotal = cur._convert(line.price_subtotal, cur_company, order.company_id, date_order)
@@ -395,6 +397,7 @@ class PosOrder(models.Model):
                     data['amount_currency'] = -abs(line.price_subtotal) if data.get('credit') else abs(line.price_subtotal)
                     amount_cur_company += data['credit'] - data['debit']
                 insert_data('product', data)
+                move_lines.append({'data_type': 'product', 'values': data})
 
                 # Create the tax lines
                 taxes = line.tax_ids_after_fiscal_position.filtered(lambda t: t.company_id.id == current_company.id)
@@ -424,6 +427,7 @@ class PosOrder(models.Model):
                         data['amount_currency'] = -abs(tax['amount']) if data.get('credit') else abs(tax['amount'])
                         amount_cur_company += data['credit'] - data['debit']
                     insert_data('tax', data)
+                    move_lines.append({'data_type': 'tax', 'values': data})
 
             # round tax lines per order
             if rounding_method == 'round_globally':
@@ -435,25 +439,18 @@ class PosOrder(models.Model):
                             if line.get('currency_id'):
                                 line['amount_currency'] = cur.round(line.get('amount_currency', 0.0))
 
-            # counterpart
-            if cur != cur_company:
-                # 'amount_cur_company' contains the sum of the AML converted in the company
-                # currency. This makes the logic consistent with 'compute_invoice_totals' from
-                # 'account.invoice'. It ensures that the counterpart line is the same amount than
-                # the sum of the product and taxes lines.
-                amount_total = amount_cur_company
-            else:
-                amount_total = order.amount_total
+            receivable_amounts = order._get_amount_receivable(move_lines)
+
             data = {
                 'name': _("Trade Receivables"),  # order.name,
                 'account_id': order_account,
-                'credit': ((amount_total < 0) and -amount_total) or 0.0,
-                'debit': ((amount_total > 0) and amount_total) or 0.0,
+                'credit': ((receivable_amounts['amount'] < 0) and -receivable_amounts['amount']) or 0.0,
+                'debit': ((receivable_amounts['amount'] > 0) and receivable_amounts['amount']) or 0.0,
                 'partner_id': partner_id
             }
-            if cur != cur_company:
+            if receivable_amounts['amount_currency']:
                 data['currency_id'] = cur.id
-                data['amount_currency'] = -abs(order.amount_total) if data.get('credit') else abs(order.amount_total)
+                data['amount_currency'] = -abs(receivable_amounts['amount_currency']) if data.get('credit') else abs(receivable_amounts['amount_currency'])
             insert_data('counter_part', data)
 
             order.write({'state': 'done', 'account_move': move.id})
@@ -465,6 +462,28 @@ class PosOrder(models.Model):
             'grouped_data': grouped_data,
             'move': move,
         }
+
+    def _get_amount_receivable(self, move_lines):
+        self.ensure_one()
+        cur = self.pricelist_id.currency_id
+        cur_company = self.company_id.currency_id
+        # counterpart
+        res = {}
+        if cur != cur_company:
+            # 'amount_cur_company' contains the sum of the AML converted in the company
+            # currency. This makes the logic consistent with 'compute_invoice_totals' from
+            # 'account.invoice'. It ensures that the counterpart line is the same amount than
+            # the sum of the product and taxes lines.
+            amount_total = 0.0
+            for move_line in move_lines:
+                    amount_total +=  move_line['values']['credit'] - move_line['values']['debit']
+            res['amount'] = amount_total
+            res['amount_currency'] = self.amount_total
+        else:
+            res['amount'] = self.amount_total
+            res['amount_currency'] = False
+        return res
+
 
     def _create_account_move_line(self, session=None, move=None):
         vals = self._prepare_account_move_and_lines(session, move)
@@ -668,36 +687,39 @@ class PosOrder(models.Model):
         self.write({'state': 'paid'})
         return self.create_picking()
 
+    def _create_invoice(self):
+        self.ensure_one()
+        Invoice = self.env['account.invoice']
+        # Force company for all SUPERUSER_ID action
+        local_context = dict(self.env.context, force_company=self.company_id.id, company_id=self.company_id.id)
+        if self.invoice_id:
+            return self.invoice_id
+
+        if not self.partner_id:
+            raise UserError(_('Please provide a partner for the sale.'))
+
+        invoice = Invoice.new(self._prepare_invoice())
+        invoice._onchange_partner_id()
+        invoice.fiscal_position_id = self.fiscal_position_id
+
+        inv = invoice._convert_to_write({name: invoice[name] for name in invoice._cache})
+        new_invoice = Invoice.with_context(local_context).sudo().create(inv)
+        message = _("This invoice has been created from the point of sale session: <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>") % (self.id, self.name)
+        new_invoice.message_post(body=message)
+        self.write({'invoice_id': new_invoice.id, 'state': 'invoiced'})
+
+        for line in self.lines:
+            self.with_context(local_context)._action_create_invoice_line(line, new_invoice.id)
+
+        new_invoice.with_context(local_context).sudo().compute_taxes()
+        self.sudo().write({'state': 'invoiced'})
+        return new_invoice
+
     @api.multi
     def action_pos_order_invoice(self):
         Invoice = self.env['account.invoice']
-
         for order in self:
-            # Force company for all SUPERUSER_ID action
-            local_context = dict(self.env.context, force_company=order.company_id.id, company_id=order.company_id.id)
-            if order.invoice_id:
-                Invoice += order.invoice_id
-                continue
-
-            if not order.partner_id:
-                raise UserError(_('Please provide a partner for the sale.'))
-
-            invoice = Invoice.new(order._prepare_invoice())
-            invoice._onchange_partner_id()
-            invoice.fiscal_position_id = order.fiscal_position_id
-
-            inv = invoice._convert_to_write({name: invoice[name] for name in invoice._cache})
-            new_invoice = Invoice.with_context(local_context).sudo().create(inv)
-            message = _("This invoice has been created from the point of sale session: <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>") % (order.id, order.name)
-            new_invoice.message_post(body=message)
-            order.write({'invoice_id': new_invoice.id, 'state': 'invoiced'})
-            Invoice += new_invoice
-
-            for line in order.lines:
-                self.with_context(local_context)._action_create_invoice_line(line, new_invoice.id)
-
-            new_invoice.with_context(local_context).sudo().compute_taxes()
-            order.sudo().write({'state': 'invoiced'})
+            Invoice |= order._create_invoice()
 
         if not Invoice:
             return {}
@@ -735,7 +757,7 @@ class PosOrder(models.Model):
         order_ids = []
 
         for tmp_order in orders_to_save:
-            to_invoice = tmp_order['to_invoice']
+            to_invoice = tmp_order['to_invoice'] or tmp_order['data'].get('to_invoice')
             order = tmp_order['data']
             if to_invoice:
                 self._match_payment_to_invoice(order)
@@ -748,11 +770,13 @@ class PosOrder(models.Model):
                 # do not hide transactional errors, the order(s) won't be saved!
                 raise
             except Exception as e:
-                _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
+                _logger.error('Could not fully process the POS Order: %s', tools.ustr(e), exc_info=True)
 
             if to_invoice:
                 pos_order.action_pos_order_invoice()
-                pos_order.invoice_id.sudo().with_context(force_company=self.env.user.company_id.id).action_invoice_open()
+                pos_order.invoice_id.sudo().with_context(
+                    force_company=self.env.user.company_id.id, pos_picking_id=pos_order.picking_id
+                ).action_invoice_open()
                 pos_order.account_move = pos_order.invoice_id.move_id
         return order_ids
 
@@ -763,13 +787,18 @@ class PosOrder(models.Model):
         for order in self:
             if order.lines and not order.amount_total:
                 continue
-            if (not order.lines) or (not order.statement_ids) or (abs(order.amount_total - order.amount_paid) > 0.00001):
+            if (not order.lines) or (not order.statement_ids) or (not float_is_zero((order.amount_total - order.amount_paid), precision_rounding=order.pricelist_id.currency_id.rounding)):
                 return False
         return True
 
     def create_picking(self):
         """Create a picking for each order and validate it."""
         Picking = self.env['stock.picking']
+        # If no email is set on the user, the picking creation and validation will fail be cause of
+        # the 'Unable to log message, please configure the sender's email address.' error.
+        # We disable the tracking in this case.
+        if not self.env.user.partner_id.email:
+            Picking = Picking.with_context(tracking_disable=True)
         Move = self.env['stock.move']
         StockWarehouse = self.env['stock.warehouse']
         for order in self:
@@ -807,7 +836,10 @@ class PosOrder(models.Model):
                 pos_qty = any([x.qty > 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if pos_qty:
                     order_picking = Picking.create(picking_vals.copy())
-                    order_picking.message_post(body=message)
+                    if self.env.user.partner_id.email:
+                        order_picking.message_post(body=message)
+                    else:
+                        order_picking.sudo().message_post(body=message)
                 neg_qty = any([x.qty < 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if neg_qty:
                     return_vals = picking_vals.copy()
@@ -817,7 +849,10 @@ class PosOrder(models.Model):
                         'picking_type_id': return_pick_type.id
                     })
                     return_picking = Picking.create(return_vals)
-                    return_picking.message_post(body=message)
+                    if self.env.user.partner_id.email:
+                        return_picking.message_post(body=message)
+                    else:
+                        return_picking.message_post(body=message)
 
             for line in order.lines.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not float_is_zero(l.qty, precision_rounding=l.product_id.uom_id.rounding)):
                 moves |= Move.create({
@@ -1206,10 +1241,10 @@ class ReportSaleDetails(models.AbstractModel):
                 SELECT aj.name, sum(amount) total
                 FROM account_bank_statement_line AS absl,
                      account_bank_statement AS abs,
-                     account_journal AS aj 
+                     account_journal AS aj
                 WHERE absl.statement_id = abs.id
-                    AND abs.journal_id = aj.id 
-                    AND absl.id IN %s 
+                    AND abs.journal_id = aj.id
+                    AND absl.id IN %s
                 GROUP BY aj.name
             """, (tuple(st_line_ids),))
             payments = self.env.cr.dictfetchall()

@@ -224,7 +224,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_rc_about_us
 msgid "About us"
-msgstr ""
+msgstr "អំពី​ពួក​យើង "
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_template_new_post
@@ -612,7 +612,7 @@ msgstr "Google Plus"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
 msgid "Green"
-msgstr ""
+msgstr "បៃតង"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
@@ -984,7 +984,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
 msgid "Purple"
-msgstr ""
+msgstr "ពណ៌ស្វាយ"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_rc_follow_us
@@ -1000,7 +1000,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_blog.s_latest_posts_big_picture_template
 #: model_terms:ir.ui.view,arch_db:website_blog.s_latest_posts_list_template
 msgid "Read More"
-msgstr ""
+msgstr "ការអានបន្ថែម"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_complete_read_next
@@ -1332,7 +1332,7 @@ msgstr "គេហទំព័រ opengraph រូបភាព។"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
 msgid "White"
-msgstr ""
+msgstr "ពណ៌ស"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_rc_about_us
@@ -1351,7 +1351,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
 msgid "Yellow"
-msgstr ""
+msgstr "ពណ៌លឿង"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.latest_blogs
@@ -1401,7 +1401,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "unpublished"
-msgstr ""
+msgstr "មិនបានផ្សព្វផ្សាយ។"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
@@ -1411,9 +1411,9 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "views"
-msgstr ""
+msgstr "បើល"
 
 #. module: website_blog
 #: model:blog.tag,name:website_blog.blog_tag_2
 msgid "website"
-msgstr ""
+msgstr "គេហទំព័រ"

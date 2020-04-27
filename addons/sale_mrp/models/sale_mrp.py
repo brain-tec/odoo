@@ -67,7 +67,12 @@ class SaleOrderLine(models.Model):
         for line in self:
             bom = self.env['mrp.bom']._bom_find(product=line.product_id, company_id=line.company_id.id)
             if bom and bom.type == 'phantom' and line.order_id.state == 'sale':
-                bom_delivered = all([move.state == 'done' for move in line.move_ids])
+                bom_delivered = all(
+                    [
+                        move.state == "done"
+                        for move in line.move_ids.filtered(lambda m: m.picking_id and m.picking_id.state != "cancel")
+                    ]
+                )
                 if not bom_delivered:
                     line.qty_delivered_method = 'manual'
                     lines |= line
@@ -92,7 +97,7 @@ class AccountInvoiceLine(models.Model):
                 # Go through all the moves and do nothing until you get to qty_done
                 # Beyond qty_done we need to calculate the average of the price_unit
                 # on the moves we encounter.
-                bom = s_line.product_id.product_tmpl_id.bom_ids and s_line.product_id.product_tmpl_id.bom_ids[0]
+                bom = self.env['mrp.bom'].sudo()._bom_find(product=s_line.product_id, company_id=s_line.company_id.id)
                 if bom.type == 'phantom':
                     average_price_unit = 0
                     components = s_line._get_bom_component_qty(bom)

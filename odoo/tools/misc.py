@@ -909,8 +909,10 @@ class ConstantMapping(Mapping):
         return self._value
 
 
-def dumpstacks(sig=None, frame=None):
-    """ Signal handler: dump a stack trace for each existing thread."""
+def dumpstacks(sig=None, frame=None, thread_idents=None):
+    """ Signal handler: dump a stack trace for each existing thread or given
+    thread(s) specified through the ``thread_idents`` sequence.
+    """
     code = []
 
     def extract_stack(stack):
@@ -927,14 +929,15 @@ def dumpstacks(sig=None, frame=None):
                                'url': getattr(th, 'url', 'n/a')}
                     for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
-        thread_info = threads_info.get(threadId, {})
-        code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
-                    (thread_info.get('repr', threadId),
-                     thread_info.get('dbname', 'n/a'),
-                     thread_info.get('uid', 'n/a'),
-                     thread_info.get('url', 'n/a')))
-        for line in extract_stack(stack):
-            code.append(line)
+        if not thread_idents or threadId in thread_idents:
+            thread_info = threads_info.get(threadId, {})
+            code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
+                        (thread_info.get('repr', threadId),
+                         thread_info.get('dbname', 'n/a'),
+                         thread_info.get('uid', 'n/a'),
+                         thread_info.get('url', 'n/a')))
+            for line in extract_stack(stack):
+                code.append(line)
 
     if odoo.evented:
         # code from http://stackoverflow.com/questions/12510648/in-gevent-how-can-i-dump-stack-traces-of-all-running-greenlets
@@ -1253,3 +1256,20 @@ class DotDict(dict):
     def __getattr__(self, attrib):
         val = self.get(attrib)
         return DotDict(val) if type(val) is dict else val
+
+def traverse_containers(val, type_):
+    """ Yields atoms filtered by specified type_ (or type tuple), traverses
+    through standard containers (non-string mappings or sequences) *unless*
+    they're selected by the type filter
+    """
+    if isinstance(val, type_):
+        yield val
+    elif isinstance(val, (str, bytes)):
+        return
+    elif isinstance(val, Mapping):
+        for k, v in val.items():
+            yield from traverse_containers(k, type_)
+            yield from traverse_containers(v, type_)
+    elif isinstance(val, collections.abc.Sequence):
+        for v in val:
+            yield from traverse_containers(v, type_)

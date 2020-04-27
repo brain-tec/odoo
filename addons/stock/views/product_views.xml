@@ -10,9 +10,7 @@
                 <group name="first" position="after">
                     <group string="Logistics">
                         <field name="route_ids" widget="many2many_tags" groups="stock.group_adv_location"/>
-                        <div colspan="2" attrs="{'invisible': [('parent_id', '=', False)]}">
-                            <field name="total_route_ids" nolabel="1" widget="many2many_tags"/>
-                        </div>
+                        <field name="total_route_ids" widget="many2many_tags" groups="stock.group_adv_location" attrs="{'invisible': [('parent_id', '=', False)]}"/>
                         <field name="removal_strategy_id" options="{'no_create': True}"/>
                     </group>
                 </group>
@@ -67,8 +65,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='pricelist_id']" position="after">
                     <separator/>
-                    <field name="location_id" widget="selection" context="{'location': self}"/>
-                    <field name="warehouse_id" widget="selection" context="{'warehouse': self}"/>
+                    <field name="location_id" widget="selection" context="{'location': self}" filter_domain="[]"/>
+                    <field name="warehouse_id" widget="selection" context="{'warehouse': self}" filter_domain="[]"/>
                     <separator/>
                     <filter name="real_stock_available" string="Available Products" domain="[('qty_available','&gt;',0)]"/>
                     <filter name="real_stock_negative" string="Negative Forecasted Quantity" domain="[('virtual_available','&lt;',0)]"/>
@@ -346,7 +344,7 @@
                     <!-- change attrs of fields added in view_template_property_form
                     to restrict the display for templates -->
                     <xpath expr="//group[@name='group_lots_and_weight']" position="attributes">
-                        <attribute name="attrs">{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}</attribute>
+                        <attribute name="attrs">{'invisible':[('type', 'not in', ['product', 'consu'])]}</attribute>
                     </xpath>
 
                     <xpath expr="//group[@name='group_lots_and_weight']" position="inside">

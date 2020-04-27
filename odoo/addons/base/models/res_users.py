@@ -535,11 +535,13 @@ class Users(models.Model):
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
-        if operator == 'ilike' and not (name or '').strip():
-            domain = []
-        else:
-            domain = [('login', '=', name)]
-        user_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
+        user_ids = []
+        if operator not in expression.NEGATIVE_TERM_OPERATORS:
+            if operator == 'ilike' and not (name or '').strip():
+                domain = []
+            else:
+                domain = [('login', '=', name)]
+            user_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
         if not user_ids:
             user_ids = self._search(expression.AND([[('name', operator, name)], args]), limit=limit, access_rights_uid=name_get_uid)
         return self.browse(user_ids).name_get()
@@ -947,24 +949,20 @@ class UsersImplied(models.Model):
             if 'groups_id' in values:
                 # complete 'groups_id' with implied groups
                 user = self.new(values)
-                group_public = self.env.ref('base.group_public', raise_if_not_found=False)
-                group_portal = self.env.ref('base.group_portal', raise_if_not_found=False)
-                if group_public and group_public in user.groups_id:
-                    gs = self.env.ref('base.group_public') | self.env.ref('base.group_public').trans_implied_ids
-                elif group_portal and group_portal in user.groups_id:
-                    gs = self.env.ref('base.group_portal') | self.env.ref('base.group_portal').trans_implied_ids
-                else:
-                    gs = user.groups_id | user.groups_id.mapped('trans_implied_ids')
+                gs = user.groups_id | user.groups_id.mapped('trans_implied_ids')
                 values['groups_id'] = type(self).groups_id.convert_to_write(gs, user.groups_id)
         return super(UsersImplied, self).create(vals_list)
 
     @api.multi
     def write(self, values):
+        users_before = self.filtered(lambda u: u.has_group('base.group_user'))
         res = super(UsersImplied, self).write(values)
         if values.get('groups_id'):
             # add implied groups for all users
             for user in self.with_context({}):
-                if not user.has_group('base.group_user'):
+                if not user.has_group('base.group_user') and user in users_before:
+                    # if we demoted a user, we strip him of all its previous privileges
+                    # (but we should not do it if we are simply adding a technical group to a portal user)
                     vals = {'groups_id': [(5, 0, 0)] + values['groups_id']}
                     super(UsersImplied, user).write(vals)
                 gs = set(concat(g.trans_implied_ids for g in user.groups_id))
@@ -1041,7 +1039,10 @@ class GroupsView(models.Model):
             xml2.append(E.separator(string='Application Accesses', colspan="2"))
 
             user_type_field_name = ''
-            for app, kind, gs in self.get_groups_by_application():
+            user_type_readonly = str({})
+            sorted_triples = sorted(self.get_groups_by_application(),
+                                    key=lambda t: t[0].xml_id != 'base.module_category_user_type')
+            for app, kind, gs in sorted_triples:  # we process the user type first
                 attrs = {}
                 # hide groups in categories 'Hidden' and 'Extra' (except for group_no_one)
                 if app.xml_id in ('base.module_category_hidden', 'base.module_category_extra', 'base.module_category_usability'):
@@ -1053,6 +1054,7 @@ class GroupsView(models.Model):
                     # application name with a selection field
                     field_name = name_selection_groups(gs.ids)
                     user_type_field_name = field_name
+                    user_type_readonly = str({'readonly': [(user_type_field_name, '!=', group_employee.id)]})
                     attrs['widget'] = 'radio'
                     attrs['groups'] = 'base.group_no_one'
                     xml1.append(E.field(name=field_name, **attrs))
@@ -1061,12 +1063,14 @@ class GroupsView(models.Model):
                 elif kind == 'selection':
                     # application name with a selection field
                     field_name = name_selection_groups(gs.ids)
+                    attrs['attrs'] = user_type_readonly
                     xml2.append(E.field(name=field_name, **attrs))
                     xml2.append(E.newline())
                 else:
                     # application separator with boolean fields
                     app_name = app.name or 'Other'
                     xml3.append(E.separator(string=app_name, colspan="4", **attrs))
+                    attrs['attrs'] = user_type_readonly
                     for g in gs:
                         field_name = name_boolean_group(g.id)
                         if g == group_no_one:
@@ -1089,7 +1093,7 @@ class GroupsView(models.Model):
             xml_content = etree.tostring(xml, pretty_print=True, encoding="unicode")
 
             new_context = dict(view._context)
-            new_context.pop('install_mode_data', None)  # don't set arch_fs for this computed view
+            new_context.pop('install_filename', None)  # don't set arch_fs for this computed view
             new_context['lang'] = None
             view.with_context(new_context).write({'arch': xml_content})
 

@@ -429,15 +429,16 @@ class StockMove(models.Model):
             rounding = move.product_id.uom_id.rounding
 
             qty_done = move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
-            if float_is_zero(product_tot_qty_available, precision_rounding=rounding):
+            qty = forced_qty or qty_done
+            # If the current stock is negative, we should not average it with the incoming one
+            if float_is_zero(product_tot_qty_available, precision_rounding=rounding) or product_tot_qty_available < 0:
                 new_std_price = move._get_price_unit()
             elif float_is_zero(product_tot_qty_available + move.product_qty, precision_rounding=rounding) or \
-                    float_is_zero(product_tot_qty_available + qty_done, precision_rounding=rounding):
+                    float_is_zero(product_tot_qty_available + qty, precision_rounding=rounding):
                 new_std_price = move._get_price_unit()
             else:
                 # Get the standard price
                 amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.standard_price
-                qty = forced_qty or qty_done
                 new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
 
             tmpl_dict[move.product_id.id] += qty_done
@@ -721,7 +722,8 @@ class StockMove(models.Model):
 
         if self.company_id.anglo_saxon_accounting:
             #eventually reconcile together the invoice and valuation accounting entries on the stock interim accounts
-            self._get_related_invoices()._anglo_saxon_reconcile_valuation(product=self.product_id)
+            allowed_invoice_types = self._is_in() and ('in_invoice', 'out_refund') or ('in_refund', 'out_invoice')
+            self._get_related_invoices().filtered(lambda x: x.type in allowed_invoice_types)._anglo_saxon_reconcile_valuation(product=self.product_id)
 
     def _get_related_invoices(self): # To be overridden in purchase and sale_stock
         """ This method is overrided in both purchase and sale_stock modules to adapt
@@ -757,3 +759,5 @@ class ProcurementGroup(models.Model):
     def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
         super(ProcurementGroup, self)._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)
         self.env['stock.move']._run_fifo_vacuum()
+        if use_new_cursor:
+            self._cr.commit()

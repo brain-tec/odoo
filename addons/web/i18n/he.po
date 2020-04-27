@@ -14,6 +14,8 @@
 # שהאב חוסיין <shhab89@gmail.com>, 2018
 # דודי מלכה <Dudimalka6@gmail.com>, 2019
 # Amit Spilman <amit@laylinetech.com>, 2019
+# hed shefetr <hed@laylinetech.com>, 2019
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -21,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-13 07:03+0000\n"
 "PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Amit Spilman <amit@laylinetech.com>, 2019\n"
+"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2020\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -193,7 +195,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:537
 #, python-format
 msgid "(count)"
-msgstr ""
+msgstr "(כמות)"
 
 #. module: web
 #. openerp-web
@@ -259,7 +261,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:632
 #, python-format
 msgid "ALL"
-msgstr ""
+msgstr "הכל"
 
 #. module: web
 #. openerp-web
@@ -362,7 +364,7 @@ msgstr "הוסף קבוצה מותאמת אישית"
 #: code:addons/web/static/src/xml/kanban.xml:49
 #, python-format
 msgid "Add a Column"
-msgstr ""
+msgstr "הוסף עמודה"
 
 #. module: web
 #. openerp-web
@@ -390,14 +392,14 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:48
 #, python-format
 msgid "Add column"
-msgstr ""
+msgstr "הוסף עמודה"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:640
 #, python-format
 msgid "Add filter"
-msgstr ""
+msgstr "הוסף מסנן"
 
 #. module: web
 #. openerp-web
@@ -554,14 +556,14 @@ msgstr "ארכיון"
 #: code:addons/web/static/src/xml/kanban.xml:27
 #, python-format
 msgid "Archive All"
-msgstr ""
+msgstr "העבר הכל לארכיון"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/fields/basic_fields.js:2047
 #, python-format
 msgid "Archived"
-msgstr "התווסף לארכיון"
+msgstr "בארכיון"
 
 #. module: web
 #. openerp-web
@@ -569,14 +571,14 @@ msgstr "התווסף לארכיון"
 #, python-format
 msgid ""
 "Are you sure that you want to archive all the records from this column?"
-msgstr ""
+msgstr "האם אתה בטוח שאתה רוצה להעביר לארכיון את כל הרשומות מעמודה זו?"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/views/list/list_controller.js:156
 #, python-format
 msgid "Are you sure that you want to archive all the selected records?"
-msgstr ""
+msgstr "האם אתה בטוח שאתה רוצה להעביר לארכיון את כל הרשומות שנבחרו?"
 
 #. module: web
 #. openerp-web
@@ -636,7 +638,7 @@ msgstr "אווטר"
 #: code:addons/web/static/src/xml/base.xml:515
 #, python-format
 msgid "Bar Chart"
-msgstr ""
+msgstr "תרשים עמודות"
 
 #. module: web
 #: model:ir.model,name:web.model_base
@@ -648,7 +650,7 @@ msgstr "בסיס"
 #: code:addons/web/static/src/xml/base.xml:1143
 #, python-format
 msgid "Based On"
-msgstr ""
+msgstr "מבוסס על"
 
 #. module: web
 #. openerp-web
@@ -677,7 +679,7 @@ msgstr "קובץ בינארי"
 #: code:addons/web/static/src/xml/colorpicker.xml:35
 #, python-format
 msgid "Blue"
-msgstr ""
+msgstr "כחול"
 
 #. module: web
 #. openerp-web
@@ -780,7 +782,7 @@ msgstr "שנה ברירת מחדל:"
 #: code:addons/web/static/src/js/widgets/colorpicker.js:35
 #, python-format
 msgid "Choose"
-msgstr ""
+msgstr "בחר"
 
 #. module: web
 #. openerp-web
@@ -823,7 +825,7 @@ msgstr "סגור"
 #: code:addons/web/static/src/xml/kanban.xml:54
 #, python-format
 msgid "Column title"
-msgstr ""
+msgstr "שם עמודה"
 
 #. module: web
 #. openerp-web
@@ -944,7 +946,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:540
 #, python-format
 msgid "Count"
-msgstr ""
+msgstr "כמות"
 
 #. module: web
 #. openerp-web
@@ -1013,7 +1015,7 @@ msgstr "צור: "
 #: code:addons/web/static/src/js/views/calendar/calendar_controller.js:245
 #, python-format
 msgid "Create: %s"
-msgstr ""
+msgstr "צור: %s"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_report_layout__create_uid
@@ -1067,7 +1069,7 @@ msgstr "מַסְנֵן מותאם אישית"
 #: code:addons/web/static/src/xml/kanban.xml:88
 #, python-format
 msgid "Dark blue"
-msgstr ""
+msgstr "כחול כהה"
 
 #. module: web
 #. openerp-web
@@ -1076,7 +1078,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:85
 #, python-format
 msgid "Dark purple"
-msgstr ""
+msgstr "סגול כהה"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
@@ -1301,7 +1303,7 @@ msgstr "עריכת תצוגת החיפוש"
 #: code:addons/web/static/src/xml/kanban.xml:23
 #, python-format
 msgid "Edit Stage"
-msgstr ""
+msgstr "ערוך שלב"
 
 #. module: web
 #. openerp-web
@@ -1325,7 +1327,7 @@ msgstr "דוא\"ל"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 msgid "Email:"
-msgstr ""
+msgstr "דוא\"ל:"
 
 #. module: web
 #. openerp-web
@@ -1347,7 +1349,7 @@ msgstr "שגיאה, סיסמה לא הוחלפה !"
 #: code:addons/web/static/src/xml/kanban.xml:62
 #, python-format
 msgid "Esc to discard"
-msgstr ""
+msgstr "לחץ על Esc לביטול"
 
 #. module: web
 #. openerp-web
@@ -1426,7 +1428,7 @@ msgstr "ID חיצוני"
 #: code:addons/web/static/src/xml/base.xml:826
 #, python-format
 msgid "External link"
-msgstr ""
+msgstr "קישור חיצוני"
 
 #. module: web
 #. openerp-web
@@ -1533,7 +1535,7 @@ msgstr "מסננים"
 #: code:addons/web/static/src/xml/base.xml:544
 #, python-format
 msgid "Flip axis"
-msgstr ""
+msgstr "הפוך ציר"
 
 #. module: web
 #. openerp-web
@@ -1580,7 +1582,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:89
 #, python-format
 msgid "Fushia"
-msgstr ""
+msgstr "ורוד כהה"
 
 #. module: web
 #. openerp-web
@@ -1694,7 +1696,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/colorpicker.xml:41
 #, python-format
 msgid "Hue"
-msgstr ""
+msgstr "גוון"
 
 #. module: web
 #. openerp-web
@@ -1808,21 +1810,21 @@ msgstr "שפות"
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:9
 #, python-format
 msgid "Last 30 Days"
-msgstr ""
+msgstr "30 ימים אחרונים"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:10
 #, python-format
 msgid "Last 365 Days"
-msgstr ""
+msgstr "365 ימים אחרונים"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:8
 #, python-format
 msgid "Last 7 Days"
-msgstr ""
+msgstr "7 ימים אחרונים"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_report_layout____last_update
@@ -1858,14 +1860,14 @@ msgstr "תאריך עדכון אחרון"
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:17
 #, python-format
 msgid "Last Week"
-msgstr ""
+msgstr "שבוע שעבר"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:20
 #, python-format
 msgid "Last Year"
-msgstr ""
+msgstr "שנה שעברה"
 
 #. module: web
 #. openerp-web
@@ -1895,21 +1897,21 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:84
 #, python-format
 msgid "Light blue"
-msgstr ""
+msgstr "כחול בהיר"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/colorpicker.xml:49
 #, python-format
 msgid "Lightness %"
-msgstr ""
+msgstr " % בהירות "
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:516
 #, python-format
 msgid "Line Chart"
-msgstr ""
+msgstr "גרף רציף"
 
 #. module: web
 #. openerp-web
@@ -1923,7 +1925,7 @@ msgstr "רשימה"
 #: code:addons/web/static/src/xml/kanban.xml:42
 #, python-format
 msgid "Load more... ("
-msgstr ""
+msgstr "טען עוד... ("
 
 #. module: web
 #. openerp-web
@@ -2028,21 +2030,21 @@ msgstr "ניהול מסננים"
 #: code:addons/web/static/src/xml/base.xml:639
 #, python-format
 msgid "Match"
-msgstr ""
+msgstr "התאם"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:646
 #, python-format
 msgid "Match records with"
-msgstr ""
+msgstr "התאם רשומות עם"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:644
 #, python-format
 msgid "Match records with the following rule:"
-msgstr ""
+msgstr "התאם רשומות עם הכלל הבא:"
 
 #. module: web
 #. openerp-web
@@ -2057,7 +2059,7 @@ msgstr "מומלץ לנסות לטעון מחדש על ידי לחיצה על F5
 #: code:addons/web/static/src/xml/base.xml:532
 #, python-format
 msgid "Measures"
-msgstr ""
+msgstr "מדדים"
 
 #. module: web
 #. openerp-web
@@ -2066,7 +2068,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:87
 #, python-format
 msgid "Medium blue"
-msgstr ""
+msgstr "כחול בינוני"
 
 #. module: web
 #. openerp-web
@@ -2220,7 +2222,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:80
 #, python-format
 msgid "No color"
-msgstr ""
+msgstr "ללא צבע"
 
 #. module: web
 #. openerp-web
@@ -2331,7 +2333,7 @@ msgstr ""
 #: code:addons/web/static/src/js/services/crash_manager.js:194
 #, python-format
 msgid "Odoo Warning"
-msgstr ""
+msgstr "אזהרת Odoo"
 
 #. module: web
 #. openerp-web
@@ -2378,6 +2380,12 @@ msgstr "בשינוי:"
 #: code:addons/web/static/src/js/fields/basic_fields.js:2283
 #, python-format
 msgid "Only Integer Value should be valid."
+msgstr "רק ערך מספר שלם אמור להיות תקף."
+
+#. module: web
+#: code:addons/web/static/src/js/fields/basic_fields.js:1982
+#, python-format
+msgid "Only Integer or Float Value should be valid."
 msgstr ""
 
 #. module: web
@@ -2467,7 +2475,7 @@ msgstr "פתח:"
 #: code:addons/web/static/src/xml/kanban.xml:82
 #, python-format
 msgid "Orange"
-msgstr ""
+msgstr "כתום"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_background
@@ -2499,14 +2507,14 @@ msgstr "טלפון:"
 #: code:addons/web/static/src/js/widgets/colorpicker.js:33
 #, python-format
 msgid "Pick a color"
-msgstr ""
+msgstr "בחר צבע"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:517
 #, python-format
 msgid "Pie Chart"
-msgstr ""
+msgstr "תרשים עוגה"
 
 #. module: web
 #. openerp-web
@@ -2566,7 +2574,7 @@ msgstr "נא לבחור שדות לשמירה ברשימת ייצוא"
 #: code:addons/web/static/src/xml/base.xml:1525
 #, python-format
 msgid "Please update translations of :"
-msgstr ""
+msgstr "אנא עדכן תרגומים של:"
 
 #. module: web
 #. openerp-web
@@ -2629,7 +2637,7 @@ msgstr "מחזור קודם"
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:25
 #, python-format
 msgid "Previous Year"
-msgstr ""
+msgstr "שנה שעברה"
 
 #. module: web
 #. openerp-web
@@ -2661,7 +2669,7 @@ msgstr "רבעון"
 #: code:addons/web/static/src/xml/kanban.xml:32
 #, python-format
 msgid "Quick add"
-msgstr ""
+msgstr "הוספה מהירה"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_qweb_field_image
@@ -2734,7 +2742,7 @@ msgstr "הסר הכול"
 #: code:addons/web/static/src/js/fields/basic_fields.js:1966
 #, python-format
 msgid "Remove from Favorites"
-msgstr ""
+msgstr "הסר מהמועדפים"
 
 #. module: web
 #. openerp-web
@@ -2774,7 +2782,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/basic_fields.js:2048
 #, python-format
 msgid "Restore"
-msgstr ""
+msgstr "שחזר"
 
 #. module: web
 #. openerp-web
@@ -2811,14 +2819,14 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:86
 #, python-format
 msgid "Salmon pink"
-msgstr ""
+msgstr "ורוד"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/colorpicker.xml:45
 #, python-format
 msgid "Saturation %"
-msgstr ""
+msgstr "% רוויה"
 
 #. module: web
 #. openerp-web
@@ -3198,7 +3206,7 @@ msgstr ""
 msgid ""
 "The record has been modified, your changes will be discarded. Do you want to"
 " proceed?"
-msgstr ""
+msgstr "הרשומה שונתה, השינויים שביצעת יבוטלו. האם תרצה להמשיך?"
 
 #. module: web
 #. openerp-web
@@ -3352,7 +3360,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/field_utils.js:62
 #, python-format
 msgid "True"
-msgstr ""
+msgstr "נכון"
 
 #. module: web
 #. openerp-web
@@ -3408,7 +3416,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:28
 #, python-format
 msgid "Unarchive All"
-msgstr ""
+msgstr "הוצא הכל מהארכיון"
 
 #. module: web
 #. openerp-web
@@ -3429,7 +3437,7 @@ msgstr "לא מוגדר"
 #: code:addons/web/static/src/xml/kanban.xml:17
 #, python-format
 msgid "Unfold"
-msgstr ""
+msgstr "פרוס"
 
 #. module: web
 #. openerp-web
@@ -3524,7 +3532,7 @@ msgstr "מעלה..."
 #: code:addons/web/static/src/xml/base.xml:1365
 #, python-format
 msgid "Use by default"
-msgstr "שימוש בזה כברירת מחדל"
+msgstr "השתמש כברירת מחדל"
 
 #. module: web
 #. openerp-web
@@ -3632,7 +3640,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:1383
 #, python-format
 msgid "What do you want to do?"
-msgstr ""
+msgstr "מה אתה רוצה לעשות?"
 
 #. module: web
 #. openerp-web
@@ -3683,7 +3691,7 @@ msgstr "שנה"
 #: code:addons/web/static/src/xml/kanban.xml:83
 #, python-format
 msgid "Yellow"
-msgstr ""
+msgstr "צהוב"
 
 #. module: web
 #. openerp-web
@@ -3698,7 +3706,7 @@ msgstr "כן"
 #: code:addons/web/static/src/js/views/search/time_range_menu_options.js:16
 #, python-format
 msgid "Yesterday"
-msgstr ""
+msgstr "אתמול"
 
 #. module: web
 #. openerp-web
@@ -3817,7 +3825,7 @@ msgstr "לפני כשעה"
 #: code:addons/web/static/src/xml/base.xml:639
 #, python-format
 msgid "all records"
-msgstr ""
+msgstr "כל הרשומות"
 
 #. module: web
 #. openerp-web
@@ -3839,7 +3847,7 @@ msgstr "מכיל"
 #: code:addons/web/static/src/js/widgets/domain_selector.js:24
 #, python-format
 msgid "does not contain"
-msgstr ""
+msgstr "לא מכיל"
 
 #. module: web
 #. openerp-web
@@ -3862,7 +3870,7 @@ msgstr "גדול מ־"
 #: code:addons/web/static/src/js/views/search/search_filters.js:306
 #, python-format
 msgid "greater than or equal to"
-msgstr ""
+msgstr "גדול או שווה ל"
 
 #. module: web
 #. openerp-web
@@ -3946,7 +3954,7 @@ msgstr "אינו"
 #: code:addons/web/static/src/js/widgets/domain_selector.js:18
 #, python-format
 msgid "is not ="
-msgstr ""
+msgstr "לא ="
 
 #. module: web
 #. openerp-web
@@ -4017,7 +4025,7 @@ msgstr "לפני פחות מדקה"
 #: code:addons/web/static/src/js/views/search/search_filters.js:307
 #, python-format
 msgid "less than or equal to"
-msgstr ""
+msgstr "קטן או שווה ל-"
 
 #. module: web
 #. openerp-web
@@ -4059,7 +4067,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:648
 #, python-format
 msgid "of the following rules:"
-msgstr ""
+msgstr "מהכללים הבאים:"
 
 #. module: web
 #. openerp-web
@@ -4088,7 +4096,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:604
 #, python-format
 msgid "record(s)"
-msgstr ""
+msgstr "רשומות"
 
 #. module: web
 #. openerp-web

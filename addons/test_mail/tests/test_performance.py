@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from email.utils import formataddr
-
 from odoo.tests.common import TransactionCase, users, warmup
 from odoo.tests import tagged
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, formataddr
 
 
 @tagged('mail_performance')
@@ -182,7 +180,7 @@ class TestAdvMailPerformance(TransactionCase):
             #voip module read activity_type during create leading to one less query in enterprise on action_feedback
             category = activity.activity_type_id.category
 
-        with self.assertQueryCount(__system__=26, emp=46):  # com runbot: 25 - 46 // test_mail only: 26 - 46
+        with self.assertQueryCount(__system__=27, emp=46):  # com runbot: 26 - 46 // test_mail only: 27 - 46
             activity.action_feedback(feedback='Zizisse Done !')
 
     @users('__system__', 'emp')
@@ -199,7 +197,7 @@ class TestAdvMailPerformance(TransactionCase):
 
         record.write({'name': 'Dupe write'})
 
-        with self.assertQueryCount(__system__=28, emp=48):  # com runbot: 27 - 86 // test_mail only: 28 - 48
+        with self.assertQueryCount(__system__=29, emp=48):  # com runbot: 28 - 86 // test_mail only: 29 - 48
             record.action_close('Dupe feedback')
 
         self.assertEqual(record.activity_ids, self.env['mail.activity'])
@@ -211,7 +209,7 @@ class TestAdvMailPerformance(TransactionCase):
         self.user_test.write({'notification_type': 'email'})
         record = self.env['mail.test.track'].create({'name': 'Test'})
 
-        with self.assertQueryCount(__system__=58, emp=77):  # com runbot: 58 - 77 // test_mail only: 56 - 70
+        with self.assertQueryCount(__system__=59, emp=77):  # com runbot: 59 - 77 // test_mail only: 56 - 70
             record.write({
                 'user_id': self.user_test.id,
             })
@@ -221,7 +219,7 @@ class TestAdvMailPerformance(TransactionCase):
     def test_message_assignation_inbox(self):
         record = self.env['mail.test.track'].create({'name': 'Test'})
 
-        with self.assertQueryCount(__system__=36, emp=47):  # test_mail only: 36 - 43
+        with self.assertQueryCount(__system__=39, emp=47):  # test_mail only: 39 - 43
             record.write({
                 'user_id': self.user_test.id,
             })
@@ -511,7 +509,7 @@ class TestHeavyMailPerformance(TransactionCase):
         customer_id = self.customer.id
         user_id = self.user_portal.id
 
-        with self.assertQueryCount(__system__=162, emp=198):  # com runbot: 161 - 198 // test_mail only: 161 - 191
+        with self.assertQueryCount(__system__=162, emp=199):  # com runbot: 161 - 198 // test_mail only: 161 - 191
             rec = self.env['mail.test.full'].create({
                 'name': 'Test',
                 'umbrella_id': umbrella_id,

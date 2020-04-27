@@ -3,15 +3,15 @@
 # * account
 # 
 # Translators:
-# Slimane AMIRI, 2018
-# Martin Trigaux, 2019
+# Martin Trigaux, 2018
+# Selyan Sliman Ɛmiri <selyan.kab@gmail.com>, 2018
 # Muḥend Belqasem <belkacem77@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 13:35+0000\n"
+"POT-Creation-Date: 2019-11-14 07:33+0000\n"
 "PO-Revision-Date: 2018-08-24 09:14+0000\n"
 "Last-Translator: Muḥend Belqasem <belkacem77@gmail.com>, 2019\n"
 "Language-Team: Kabyle (https://www.transifex.com/odoo/teams/41243/kab/)\n"
@@ -475,6 +475,11 @@ msgid "<span>Quantity</span>"
 msgstr ""
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
+msgid "<span>Reference</span>"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span>Reporting</span>"
 msgstr ""
@@ -724,7 +729,6 @@ msgstr ""
 #, python-format
 msgid ""
 "A user cannot have both Tax B2B and Tax B2C.\n"
-"Problematic user(s): %s\n"
 "You should go in General Settings, and choose to display Product Prices\n"
 "either in 'Tax-Included' or in 'Tax-Excluded' mode\n"
 "(or switch twice the mode if you are already in the desired one)."
@@ -755,6 +759,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__account_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__account_id
+#: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_accountant
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -1074,7 +1079,6 @@ msgid "Account; Reverse entries"
 msgstr ""
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_accountant
 #: model:ir.ui.menu,name:account.account_account_menu
 #: model:ir.ui.menu,name:account.menu_finance_entries
 #: model_terms:ir.ui.view,arch_db:account.product_template_form_view
@@ -3933,7 +3937,6 @@ msgstr "Motif du retrait de liquide de la caisse"
 #: code:addons/account/static/src/xml/account_reconciliation.xml:310
 #: model:ir.model.fields,field_description:account.field_account_account_type__note
 #: model:ir.model.fields,field_description:account.field_account_invoice_line__name
-#: model:ir.model.fields,field_description:account.field_account_invoice_send__description
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_type_form
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_line_form
@@ -3983,6 +3986,12 @@ msgstr ""
 msgid ""
 "Difference between the computed ending balance and the specified ending "
 "balance."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:408
+#, python-format
+msgid "Difference debit - credit: "
 msgstr ""
 
 #. module: account
@@ -4494,6 +4503,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_res_partner__property_account_position_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_position_id
+#: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_template_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_template_tree
@@ -6573,11 +6583,6 @@ msgid "Message Record Name"
 msgstr "Esem n ukalas n yizen"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_invoice_send__description
-msgid "Message description: either the subject, or the beginning of the body"
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__invoice_warn_msg
 #: model:ir.model.fields,field_description:account.field_res_users__invoice_warn_msg
 msgid "Message for Invoice"
@@ -8001,11 +8006,6 @@ msgid "Properties"
 msgstr "Tulmisin"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_invoice_send__website_published
-msgid "Published"
-msgstr ""
-
-#. module: account
 #: selection:account.journal,type:0
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_template_search
@@ -9292,13 +9292,15 @@ msgstr "Imussuten isḍasen"
 
 #. module: account
 #. openerp-web
-#: code:addons/account/static/src/xml/account_reconciliation.xml:185
+#: code:addons/account/static/src/xml/account_reconciliation.xml:186
 #: model:ir.model,name:account.model_account_tax
 #: model:ir.model.fields,field_description:account.field_account_invoice__amount_tax
 #: model:ir.model.fields,field_description:account.field_account_invoice_tax__tax_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__tax_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__tax_id
 #: model_terms:ir.ui.view,arch_db:account.account_tax_view_search
+#: model_terms:ir.ui.view,arch_db:account.invoice_supplier_tree
+#: model_terms:ir.ui.view,arch_db:account.invoice_tree
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 #, python-format
@@ -9632,8 +9634,8 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_payment__multi
 #: model:ir.model.fields,help:account.field_account_register_payments__multi
 msgid ""
-"Technical field indicating if the user selected invoices from multiple "
-"partners or from different types."
+"Technical field indicating if the registering payment will generate multiple"
+" payments or not."
 msgstr ""
 
 #. module: account
@@ -10671,11 +10673,6 @@ msgid "Total Payable"
 msgstr "Asemday n umiḍan n useǧǧaw"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "Total Price"
-msgstr "ssuma  tasemdayt"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit
 #: model:ir.model.fields,field_description:account.field_res_users__credit
 msgid "Total Receivable"
@@ -11239,17 +11236,12 @@ msgid "View accounts detail"
 msgstr ""
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_invoice_send__website_published
-msgid "Visible on the website as a comment"
-msgstr "Ad iban ɣef usmel web am uwennit"
-
-#. module: account
 #: selection:res.partner,invoice_warn:0
 msgid "Warning"
 msgstr "ɣuṛ-ek"
 
 #. module: account
-#: code:addons/account/models/account_invoice.py:808
+#: code:addons/account/models/account_invoice.py:852
 #, python-format
 msgid "Warning for %s"
 msgstr "Ɣuṛ-ek ɣef %s"
@@ -11842,14 +11834,14 @@ msgstr ""
 
 #. module: account
 #. openerp-web
-#: code:addons/account/static/src/xml/account_reconciliation.xml:318
+#: code:addons/account/static/src/xml/account_reconciliation.xml:323
 #, python-format
 msgid "have been reconciled automatically."
 msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__invoice_without_email
-msgid "number of invoice(s) that will not be sent"
+msgid "invoice(s) that will not be sent"
 msgstr ""
 
 #. module: account

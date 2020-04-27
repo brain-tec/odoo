@@ -31,17 +31,22 @@
 # Richard Mathot <rim@odoo.com>, 2018
 # William Olhasque <william.olhasque@scopea.fr>, 2019
 # Sébastien BÜHL <buhlsebastien@gmail.com>, 2019
-# Moka Tourisme <hello@mokatourisme.fr>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # thomas quertinmont <tqu@odoo.com>, 2019
+# gdp Odoo <gdp@odoo.com>, 2019
+# Samuel Ballé <sballe@sbcmaroc.com>, 2019
+# Florian Hatat, 2019
+# Oriane Malburny <oma@odoo.com>, 2019
+# Moka Tourisme <hello@mokatourisme.fr>, 2019
+# Corentin Delacroix <edc@odoo.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
+"POT-Creation-Date: 2019-11-04 14:42+0000\n"
 "PO-Revision-Date: 2018-08-24 09:35+0000\n"
-"Last-Translator: thomas quertinmont <tqu@odoo.com>, 2019\n"
+"Last-Translator: Corentin Delacroix <edc@odoo.com>, 2020\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -124,7 +129,7 @@ msgid ""
 "                    <h1 style=\"color:#A9A9A9;\">THERE'S SOMETHING IN YOUR CART.</h1>\n"
 "                    Would you like to complete your purchase?<br/><br/>\n"
 "                    % if object.order_line:\n"
-"                        % for line in object.order_line:\n"
+"                        % for line in object.website_order_line:\n"
 "                            <hr/>\n"
 "                            <table width=\"100%\">\n"
 "                                <tr>\n"
@@ -718,7 +723,7 @@ msgstr ""
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_boxes
 msgid "Boxes"
-msgstr ""
+msgstr "Boites"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_cabinets
@@ -793,7 +798,7 @@ msgstr ""
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_chairs
 msgid "Chairs"
-msgstr ""
+msgstr "Sièges"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
@@ -935,7 +940,7 @@ msgstr "Contact"
 #: code:addons/website_sale/static/src/js/website_sale_options.js:87
 #, python-format
 msgid "Continue Shopping"
-msgstr ""
+msgstr "Continuer les achats"
 
 #. module: website_sale
 #. openerp-web
@@ -1060,7 +1065,7 @@ msgstr "Détermine l'ordre d'affichage sur le site de vente"
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_digest_digest
 msgid "Digest"
-msgstr "Digest"
+msgstr "Récapitulatif"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_digital
@@ -1080,8 +1085,8 @@ msgstr "Nom affiché"
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
 msgstr ""
-"Accès non disponible, ne pas tenir compte de cette donnée dans l'email "
-"digest de l'utilisateur"
+"Accès non disponible, ne pas tenir compte de cette donnée dans l'e-mail "
+"récapitulatif envoyé à l'utilisateur"
 
 #. module: website_sale
 #: selection:res.company,website_sale_onboarding_payment_acquirer_state:0
@@ -1834,7 +1839,7 @@ msgstr "Imprimer"
 #: code:addons/website_sale/static/src/js/website_sale_options.js:86
 #, python-format
 msgid "Proceed to Checkout"
-msgstr ""
+msgstr "Procéder à la sortie"
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.action_unpaid_orders_ecommerce
@@ -2246,7 +2251,7 @@ msgstr "Panier"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "Sign Up"
-msgstr "S'inscrirer"
+msgstr "S'inscrire"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.website_sale
@@ -2506,7 +2511,7 @@ msgstr "Voici votre panier actuel."
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 msgid "This product has no valid combination."
-msgstr ""
+msgstr "Ce produit n'a pas de combinaison existante"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -2595,6 +2600,13 @@ msgid ""
 msgstr ""
 "Garantie délivrée à l'acheteur d'un article par le fabricant: promettant la "
 "réparation ou le remplacement, si nécessaire dans un délai imparti."
+
+#. module: website_sale
+#. openerp-web
+#: code:addons/website_sale/static/src/js/website_sale_validate.js:49
+#, python-format
+msgid "We are waiting the confirmation of the bank or payment provider"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website

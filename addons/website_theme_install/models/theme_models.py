@@ -41,6 +41,14 @@ class ThemeView(models.Model):
                 # inherit_id not yet created, add to the queue
                 return False
 
+        if inherit and inherit.website_id != website:
+            website_specific_inherit = self.env['ir.ui.view'].with_context(active_test=False).search([
+                ('key', '=', inherit.key),
+                ('website_id', '=', website.id)
+            ], limit=1)
+            if website_specific_inherit:
+                inherit = website_specific_inherit
+
         new_view = {
             'type': self.type or 'qweb',
             'name': self.name,
@@ -107,10 +115,10 @@ class ThemeMenu(models.Model):
         new_menu = {
             'name': self.name,
             'url': self.url,
-            'page_id': page_id,
+            'page_id': page_id and page_id.id or False,
             'new_window': self.new_window,
             'sequence': self.sequence,
-            'parent_id': parent_id,
+            'parent_id': parent_id and parent_id.id or False,
             'theme_template_id': self.id,
         }
         return new_menu

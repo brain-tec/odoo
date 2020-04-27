@@ -4,6 +4,7 @@ import logging
 import requests
 import pprint
 from werkzeug import urls
+from requests.exceptions import HTTPError
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
@@ -20,7 +21,7 @@ class PaymentAcquirerStripeSCA(models.Model):
     def stripe_form_generate_values(self, tx_values):
         self.ensure_one()
 
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        base_url = self.get_base_url()
         stripe_session_data = {
             "payment_method_types[]": "card",
             "line_items[][amount]": int(
@@ -36,7 +37,8 @@ class PaymentAcquirerStripeSCA(models.Model):
             + "?reference=%s" % tx_values["reference"],
             "cancel_url": urls.url_join(base_url, StripeController._cancel_url)
             + "?reference=%s" % tx_values["reference"],
-            "customer_email": tx_values["partner_email"] or tx_values["billing_partner_email"],
+            "payment_intent_data[description]": tx_values["reference"],
+            "customer_email": tx_values.get("partner_email") or tx_values.get("billing_partner_email"),
         }
         tx_values["session_id"] = self._create_stripe_session(stripe_session_data)
 
@@ -44,17 +46,26 @@ class PaymentAcquirerStripeSCA(models.Model):
 
     def _stripe_request(self, url, data=False, method="POST"):
         self.ensure_one()
-        url = urls.url_join(self._get_stripe_api_url(), url)
+        stripe_url = 'https://%s/' % (self._get_stripe_api_url())
+        url = urls.url_join(stripe_url, url)
         headers = {
             "AUTHORIZATION": "Bearer %s" % self.sudo().stripe_secret_key,
             "Stripe-Version": "2019-05-16",  # SetupIntent need a specific version
         }
         resp = requests.request(method, url, data=data, headers=headers)
-        try:
-            resp.raise_for_status()
-        except:
-            _logger.error(resp.text)
-            raise
+        # Stripe can send 4XX errors for payment failure (not badly-formed requests)
+        # check if error `code` is present in 4XX response and raise only if not
+        # cfr https://stripe.com/docs/error-codes
+        # these can be made customer-facing, as they usually indicate a problem with the payment
+        # (e.g. insufficient funds, expired card, etc.)
+        if not resp.ok and not (400 <= resp.status_code < 500 and resp.json().get('error', {}).get('code')):
+            try:
+                resp.raise_for_status()
+            except HTTPError:
+                _logger.error(resp.text)
+                stripe_error = resp.json().get('error', {}).get('message', '')
+                error_msg = " " + (_("Stripe gave us the following info about the problem: '%s'") % stripe_error)
+                raise ValidationError(error_msg)
         return resp.json()
 
     def _create_stripe_session(self, kwargs):
@@ -83,10 +94,6 @@ class PaymentAcquirerStripeSCA(models.Model):
             "_stripe_create_setup_intent: Values received:\n%s", pprint.pformat(res)
         )
         return res
-
-    @api.model
-    def _get_stripe_api_url(self):
-        return "https://api.stripe.com/v1/"
 
     @api.model
     def stripe_s2s_form_process(self, data):
@@ -180,6 +187,9 @@ class PaymentTransactionStripeSCA(models.Model):
                 "_stripe_create_payment_intent: Values received:\n%s", pprint.pformat(res)
                 )
             return res
+        if not self.payment_token_id.stripe_payment_method:
+            # old token before installing stripe_sca, need to fetch data from the api
+            self.payment_token_id._stripe_sca_migrate_customer()
         charge_params = {
             "amount": int(
                 self.amount
@@ -306,11 +316,8 @@ class PaymentTransactionStripeSCA(models.Model):
             self._set_transaction_pending()
             return True
         else:
-            error = tree.get("failure_message")
-            _logger.warn(error)
-            vals.update({"state_message": error})
-            self.write(vals)
-            self._set_transaction_cancel()
+            error = tree.get("failure_message") or tree.get('error', {}).get('message')
+            self._set_transaction_error(error)
             return False
 
     def _stripe_form_get_invalid_parameters(self, data):
@@ -370,3 +377,38 @@ class PaymentTokenStripeSCA(models.Model):
             "This method can no longer be used with the payment_stripe_sca module."
         )
 
+    def _stripe_sca_migrate_customer(self):
+        """Migrate a token from the old implementation of Stripe to the SCA one.
+
+        In the old implementation, it was possible to create a valid charge just by
+        giving the customer ref to ask Stripe to use the default source (= default
+        card). Since we have a one-to-one matching between a saved card, this used to
+        work well - but now we need to specify the payment method for each call and so
+        we have to contact stripe to get the default source for the customer and save it
+        in the payment token.
+        This conversion will happen once per token, the first time it gets used following
+        the installation of the module."""
+        self.ensure_one()
+        url = "customers/%s" % (self.acquirer_ref)
+        data = self.acquirer_id._stripe_request(url, method="GET")
+        sources = data.get('sources', {}).get('data', [])
+        pm_ref = False
+        if sources:
+            if len(sources) > 1:
+                _logger.warning('stripe sca customer conversion: there should be a single saved source per customer!')
+            pm_ref = sources[0].get('id')
+        else:
+            url = 'payment_methods'
+            params = {
+                'type': 'card',
+                'customer': self.acquirer_ref,
+            }
+            payment_methods = self.acquirer_id._stripe_request(url, params, method='GET')
+            cards = payment_methods.get('data', [])
+            if len(cards) > 1:
+                _logger.warning('stripe sca customer conversion: there should be a single saved source per customer!')
+            pm_ref = cards and cards[0].get('id')
+        if not pm_ref:
+            raise ValidationError(_('Unable to convert Stripe customer for SCA compatibility. Is there at least one card for this customer in the Stripe backend?'))
+        self.stripe_payment_method = pm_ref
+        _logger.info('converted old customer ref to sca-compatible record for payment token %s', self.id)

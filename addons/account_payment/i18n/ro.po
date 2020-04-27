@@ -28,7 +28,7 @@ msgstr "&amp;times;"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_success
 msgid "<b>Communication: </b>"
-msgstr ""
+msgstr "<b>Comunicare:</b>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -104,6 +104,8 @@ msgid ""
 "Done, your online payment has been successfully processed. Thank you for "
 "your order."
 msgstr ""
+"Finalizat, plata online a fost procesată cu succes. Vă mulțumim pentru "
+"comanda dumneavoastră."
 
 #. module: account_payment
 #: code:addons/account_payment/controllers/payment.py:47

@@ -138,17 +138,17 @@ msgstr "ពាក្យសម្ងាត់ API ចុងក្រោយ"
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_acquirer__paypal_api_username
 msgid "Rest API Username"
-msgstr ""
+msgstr "ឈ្មោះអ្នកប្រើ API សម្រាក"
 
 #. module: payment_paypal
 #: selection:payment.acquirer,provider:0
 msgid "Sips"
-msgstr ""
+msgstr "Sips"
 
 #. module: payment_paypal
 #: selection:payment.acquirer,provider:0
 msgid "Stripe"
-msgstr ""
+msgstr "ឆ្នូត"
 
 #. module: payment_paypal
 #: model:ir.model.fields,help:payment_paypal.field_payment_acquirer__paypal_seller_account
@@ -172,7 +172,7 @@ msgstr "ប្រើ IPN "
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_acquirer__paypal_api_enabled
 msgid "Use Rest API"
-msgstr ""
+msgstr "ប្រើ API សម្រាក "
 
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_acquirer__fees_dom_var

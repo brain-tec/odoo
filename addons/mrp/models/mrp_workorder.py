@@ -135,7 +135,7 @@ class MrpWorkorder(models.Model):
 
     @api.multi
     def name_get(self):
-        return [(wo.id, "%s - %s - %s" % (wo.production_id.name, wo.product_id.name, wo.name)) for wo in self]
+        return [(wo.id, "%s - %s - %s" % (wo.production_id.sudo().name, wo.product_id.sudo().name, wo.name)) for wo in self]
 
     @api.one
     @api.depends('production_id.product_qty', 'qty_produced')
@@ -181,7 +181,9 @@ class MrpWorkorder(models.Model):
     @api.multi
     @api.depends('date_planned_finished', 'production_id.date_planned_finished')
     def _compute_color(self):
-        late_orders = self.filtered(lambda x: x.production_id.date_planned_finished and x.date_planned_finished > x.production_id.date_planned_finished)
+        late_orders = self.filtered(lambda x: x.production_id.date_planned_finished
+                                              and x.date_planned_finished
+                                              and x.date_planned_finished > x.production_id.date_planned_finished)
         for order in late_orders:
             order.color = 4
         for order in (self - late_orders):

@@ -9,6 +9,7 @@
 # 966ff43e6966712895a590e7320ca288, 2018
 # Cristopher Cravioto <ccr@odoo.com>, 2018
 # Martin Trigaux, 2019
+# Pedro M. Baeza <pedro.baeza@gmail.com>, 2019
 # Jesse Garza <jga@odoo.com>, 2019
 # 
 msgid ""
@@ -43,7 +44,9 @@ msgstr "<small><i class=\"fa fa-trash-o\"/> Eliminar</small>"
 #: model_terms:ir.ui.view,arch_db:website_sale_wishlist.add_to_wishlist
 #: model_terms:ir.ui.view,arch_db:website_sale_wishlist.product_add_to_wishlist
 msgid "<span class=\"fa fa-heart\" role=\"img\" aria-label=\"Add to wishlist\"/>"
-msgstr "<span class=\"fa fa-heart\" role=\"img\" aria-label=\"Add to wishlist\"/>"
+msgstr ""
+"<span class=\"fa fa-heart\" role=\"img\" aria-label=\"Añadir a la lista de "
+"deseos\"/>"
 
 #. module: website_sale_wishlist
 #: model:ir.model.fields,field_description:website_sale_wishlist.field_product_wishlist__active
@@ -95,6 +98,11 @@ msgstr "Moneda"
 #: model:ir.model.fields,field_description:website_sale_wishlist.field_product_wishlist__display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
+
+#. module: website_sale_wishlist
+#: sql_constraint:product.wishlist:0
+msgid "Duplicated wishlisted product for this partner."
+msgstr "Producto duplicado en la lista de este socio."
 
 #. module: website_sale_wishlist
 #: model:ir.model.fields,field_description:website_sale_wishlist.field_product_wishlist__id

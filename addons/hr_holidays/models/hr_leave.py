@@ -190,7 +190,7 @@ class HolidaysRequest(models.Model):
     # change the column type in stable and it was defined as an int4 column
     #
     request_hour_from = fields.Selection([
-        (0, '12:00 PM'), (-1, '0:30 AM'),
+        (0, '12:00 AM'), (-1, '0:30 AM'),
         (1, '1:00 AM'), (-2, '1:30 AM'),
         (2, '2:00 AM'), (-3, '2:30 AM'),
         (3, '3:00 AM'), (-4, '3:30 AM'),
@@ -202,7 +202,7 @@ class HolidaysRequest(models.Model):
         (9, '9:00 AM'), (-10, '9:30 AM'),
         (10, '10:00 AM'), (-11, '10:30 AM'),
         (11, '11:00 AM'), (-12, '11:30 AM'),
-        (12, '12:00 AM'), (-13, '0:30 PM'),
+        (12, '12:00 PM'), (-13, '0:30 PM'),
         (13, '1:00 PM'), (-14, '1:30 PM'),
         (14, '2:00 PM'), (-15, '2:30 PM'),
         (15, '3:00 PM'), (-16, '3:30 PM'),
@@ -215,7 +215,7 @@ class HolidaysRequest(models.Model):
         (22, '10:00 PM'), (-23, '10:30 PM'),
         (23, '11:00 PM'), (-24, '11:30 PM')], string='Hour from')
     request_hour_to = fields.Selection([
-        (0, '12:00 PM'), (-1, '0:30 AM'),
+        (0, '12:00 AM'), (-1, '0:30 AM'),
         (1, '1:00 AM'), (-2, '1:30 AM'),
         (2, '2:00 AM'), (-3, '2:30 AM'),
         (3, '3:00 AM'), (-4, '3:30 AM'),
@@ -227,7 +227,7 @@ class HolidaysRequest(models.Model):
         (9, '9:00 AM'), (-10, '9:30 AM'),
         (10, '10:00 AM'), (-11, '10:30 AM'),
         (11, '11:00 AM'), (-12, '11:30 AM'),
-        (12, '12:00 AM'), (-13, '0:30 PM'),
+        (12, '12:00 PM'), (-13, '0:30 PM'),
         (13, '1:00 PM'), (-14, '1:30 PM'),
         (14, '2:00 PM'), (-15, '2:30 PM'),
         (15, '3:00 PM'), (-16, '3:30 PM'),
@@ -592,6 +592,12 @@ class HolidaysRequest(models.Model):
     def copy_data(self, default=None):
         raise UserError(_('A leave cannot be duplicated.'))
 
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        if not self.user_has_groups('hr_holidays.group_hr_holidays_user') and 'name' in groupby:
+            raise UserError(_('Such grouping is not allowed.'))
+        return super(HolidaysRequest, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
     ####################################################
     # Business methods
     ####################################################
@@ -633,8 +639,13 @@ class HolidaysRequest(models.Model):
     def _prepare_holidays_meeting_values(self):
         self.ensure_one()
         calendar = self.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+        if self.leave_type_request_unit == 'hour':
+            meeting_name = _("%s on Time Off : %.2f hour(s)") % (self.employee_id.name or self.category_id.name, self.number_of_hours_display)
+        else:
+            meeting_name = _("%s on Time Off : %.2f day(s)") % (self.employee_id.name or self.category_id.name, self.number_of_days)
+
         meeting_values = {
-            'name': self.display_name,
+            'name': meeting_name,
             'categ_ids': [(6, 0, [
                 self.holiday_status_id.categ_id.id])] if self.holiday_status_id.categ_id else [],
             'duration': self.number_of_days * (calendar.hours_per_day or HOURS_PER_DAY),
@@ -672,17 +683,16 @@ class HolidaysRequest(models.Model):
 
     @api.multi
     def action_draft(self):
-        for holiday in self:
-            if holiday.state not in ['confirm', 'refuse']:
-                raise UserError(_('Leave request state must be "Refused" or "To Approve" in order to be reset to draft.'))
-            holiday.write({
-                'state': 'draft',
-                'first_approver_id': False,
-                'second_approver_id': False,
-            })
-            linked_requests = holiday.mapped('linked_request_ids')
-            for linked_request in linked_requests:
-                linked_request.action_draft()
+        if any(holiday.state not in ['confirm', 'refuse'] for holiday in self):
+            raise UserError(_('Leave request state must be "Refused" or "To Approve" in order to be reset to draft.'))
+        self.write({
+            'state': 'draft',
+            'first_approver_id': False,
+            'second_approver_id': False,
+        })
+        linked_requests = self.mapped('linked_request_ids')
+        if linked_requests:
+            linked_requests.action_draft()
             linked_requests.unlink()
         self.activity_update()
         return True
@@ -752,19 +762,18 @@ class HolidaysRequest(models.Model):
     @api.multi
     def action_refuse(self):
         current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-        for holiday in self:
-            if holiday.state not in ['confirm', 'validate', 'validate1']:
-                raise UserError(_('Leave request must be confirmed or validated in order to refuse it.'))
+        if any(holiday.state not in ['confirm', 'validate', 'validate1'] for holiday in self):
+            raise UserError(_('Leave request must be confirmed or validated in order to refuse it.'))
 
-            if holiday.state == 'validate1':
-                holiday.write({'state': 'refuse', 'first_approver_id': current_employee.id})
-            else:
-                holiday.write({'state': 'refuse', 'second_approver_id': current_employee.id})
-            # Delete the meeting
-            if holiday.meeting_id:
-                holiday.meeting_id.unlink()
-            # If a category that created several holidays, cancel all related
-            holiday.linked_request_ids.action_refuse()
+        validated_holidays = self.filtered(lambda hol: hol.state == 'validate1')
+        validated_holidays.write({'state': 'refuse', 'first_approver_id': current_employee.id})
+        (self - validated_holidays).write({'state': 'refuse', 'second_approver_id': current_employee.id})
+        # Delete the meeting
+        self.mapped('meeting_id').unlink()
+        # If a category that created several holidays, cancel all related
+        linked_requests = self.mapped('linked_request_ids')
+        if linked_requests:
+            linked_requests.action_refuse()
         self._remove_resource_leave()
         self.activity_update()
         return True

@@ -3,20 +3,22 @@
 # * payment
 # 
 # Translators:
-# Martin Trigaux, 2018
 # Johannes Croe <jcr@odoo.com>, 2018
-# Marco Tarsia <marco.y.tarsia@gmail.com>, 2018
 # Rudolf Schnapka <rs@techno-flex.de>, 2019
 # Chris Egal <sodaswed@web.de>, 2019
 # Leon Grill <leg@odoo.com>, 2019
+# Martin Trigaux, 2019
+# Wolfgang Taferner, 2019
+# Marco Tarsia <marco.y.tarsia@gmail.com>, 2019
+# JEK Odoo <jek@odoo.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
+"POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
-"Last-Translator: Leon Grill <leg@odoo.com>, 2019\n"
+"Last-Translator: JEK Odoo <jek@odoo.com>, 2020\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,6 +67,8 @@ msgid ""
 "<i class=\"fa fa-check text-success\" title=\"This payment method is "
 "verified by our system.\" role=\"img\" aria-label=\"Ok\"/>"
 msgstr ""
+"<i class=\"fa fa-check text-success\" title=\"This payment method is "
+"verified by our system.\" role=\"img\" aria-label=\"Ok\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_tokens_list
@@ -76,7 +80,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay_methods
 msgid "<i class=\"fa fa-home\" role=\"img\" aria-label=\"Home\" title=\"Home\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-home\" role=\"img\" aria-label=\"Home\" title=\"Home\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_tokens_list
@@ -270,13 +274,13 @@ msgstr "Ein Zahlungsvorgang ist bereits vorhanden."
 #: code:addons/payment/models/account_payment.py:57
 #, python-format
 msgid "A token is required to create a new payment transaction."
-msgstr ""
+msgstr "Ein Token ist benötigt um eine neue Transaktion zu erstellen."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:657
 #, python-format
 msgid "A transaction %s with %s initiated using %s credit card."
-msgstr ""
+msgstr "Eine Transaktion %s mit %s eingeleiten mit der Kreditkarte %s."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:663
@@ -295,6 +299,8 @@ msgstr ""
 #, python-format
 msgid "A transaction can't be linked to invoices having different partners."
 msgstr ""
+"Eine Transaktion kann nicht mit einer Rechnung verbunden werden wenn "
+"verschiedene Partner angegeben sind."
 
 #. module: payment
 #: code:addons/payment/wizards/payment_acquirer_onboarding_wizard.py:34
@@ -818,6 +824,11 @@ msgid "Group By"
 msgstr "Gruppieren nach"
 
 #. module: payment
+#: model:ir.model,name:payment.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP Routing"
+
+#. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__is_processed
 msgid "Has the payment been post processed"
 msgstr "Wurde die Zahlung nachbearbeitet?"
@@ -1190,7 +1201,7 @@ msgstr ""
 #: code:addons/payment/models/payment_acquirer.py:775
 #, python-format
 msgid "Only draft transaction can be processed."
-msgstr ""
+msgstr "Nur ein Transaktionsentwurf kann gebucht werden."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:763
@@ -1373,12 +1384,6 @@ msgid "Payment method set!"
 msgstr ""
 
 #. module: payment
-#: code:addons/payment/controllers/portal.py:252
-#, python-format
-msgid "Payment transaction failed."
-msgstr "Zahlungstransaktion fehlgeschlagen."
-
-#. module: payment
 #: model:ir.model,name:payment.model_account_payment
 #: model:ir.ui.menu,name:payment.root_payment_menu
 #: model_terms:ir.ui.view,arch_db:payment.payment_token_form_view
@@ -1519,6 +1524,20 @@ msgstr "Produktivbetrieb"
 #: model_terms:ir.ui.view,arch_db:payment.acquirer_search
 msgid "Provider"
 msgstr "Anbieter"
+
+#. module: payment
+#. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:10
+#, python-format
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+#. module: payment
+#. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:9
+#, python-format
+msgid "Published"
+msgstr "Veröffentlicht"
 
 #. module: payment
 #. openerp-web
@@ -1973,7 +1992,7 @@ msgstr "Wir bearbeiten Ihre Zahlungen, bitte warten Sie ..."
 #: code:addons/payment/static/src/xml/payment_processing.xml:99
 #, python-format
 msgid "We are waiting for the payment acquirer to confirm the payment."
-msgstr ""
+msgstr "Wir warten auf die Zahlungsbestätigung vom Zahlungsanbieter."
 
 #. module: payment
 #. openerp-web
@@ -1994,6 +2013,7 @@ msgstr "Banküberweisung"
 #, python-format
 msgid "You can click here to be redirected to the confirmation page."
 msgstr ""
+"Sie können hier klicken, um zur Bestätigungsseite weitergeleitet zu werden."
 
 #. module: payment
 #: code:addons/payment/wizards/payment_acquirer_onboarding_wizard.py:135

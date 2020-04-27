@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
+import logging
 import time
 from datetime import date
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
@@ -11,6 +13,9 @@ from odoo.tools import float_is_zero, float_compare
 from odoo.tools.safe_eval import safe_eval
 from odoo.addons import decimal_precision as dp
 from lxml import etree
+
+
+_logger = logging.getLogger(__name__)
 
 #----------------------------------------------------------
 # Entries
@@ -52,9 +57,10 @@ class AccountMove(models.Model):
             total_reconciled = 0.0
             for line in move.line_ids:
                 if line.account_id.user_type_id.type in ('receivable', 'payable'):
-                    amount = abs(line.debit - line.credit)
+                    amount = abs(line.balance)
                     total_amount += amount
             precision_currency = move.currency_id or move.company_id.currency_id
+
             if float_is_zero(total_amount, precision_rounding=precision_currency.rounding):
                 move.matched_percentage = 1.0
             else:
@@ -62,7 +68,7 @@ class AccountMove(models.Model):
                     if line.account_id.user_type_id.type in ('receivable', 'payable'):
                         for partial_line in (line.matched_debit_ids + line.matched_credit_ids):
                             total_reconciled += partial_line.amount
-                move.matched_percentage = total_reconciled / total_amount
+                move.matched_percentage = precision_currency.round(total_reconciled) / precision_currency.round(total_amount)
 
     @api.one
     @api.depends('company_id')
@@ -214,23 +220,46 @@ class AccountMove(models.Model):
                 balance = sum([l.balance for l in lines_to_sum])
 
                 # Compute the tax amount one by one.
-                quantity = len(lines_to_sum) if tax.amount_type == 'fixed' else 1
-                taxes_vals = tax.compute_all(balance,
-                    quantity=quantity, currency=line.currency_id, product=line.product_id, partner=line.partner_id)
+                if self.company_id.tax_calculation_rounding_method == 'round_globally':
+                    quantity = len(lines_to_sum) if tax.amount_type == 'fixed' else 1
+                    taxes_vals = tax.compute_all(balance,
+                        quantity=quantity, currency=line.currency_id, product=line.product_id, partner=line.partner_id)
+                else:
+                    taxes_vals_line = [
+                        tax.compute_all(
+                            lts.balance, quantity=1.0, currency=line.currency_id,
+                            product=line.product_id, partner=line.partner_id
+                        )
+                        for lts in lines_to_sum
+                    ]
+                    taxes_vals = {
+                        'base': 0.0,
+                        'total_excluded': 0.0,
+                        'total_included': 0.0,
+                        'taxes': deepcopy(taxes_vals_line[0]['taxes']),
+                    }
+                    taxes_vals['taxes'][0]['base'] = 0.0
+                    taxes_vals['taxes'][0]['amount'] = 0.0
+                    for val in taxes_vals_line:
+                        taxes_vals['base'] += val['base']
+                        taxes_vals['total_excluded'] += val['total_excluded']
+                        taxes_vals['taxes'][0]['base'] += sum([v['base'] for v in val['taxes']])
+                        taxes_vals['taxes'][0]['amount'] += sum([v['amount'] for v in val['taxes']])
 
                 if tax_line:
-                    # Update the existing tax_line.
-                    if balance:
-                        # Update the debit/credit amount according to the new balance.
-                        if taxes_vals.get('taxes'):
-                            amount = taxes_vals['taxes'][0]['amount']
-                            account = _get_tax_account(tax, amount) or line.account_id
-                            tax_line.debit = amount > 0 and amount or 0.0
-                            tax_line.credit = amount < 0 and -amount or 0.0
-                            tax_line.account_id = account
-                    else:
-                        # Reset debit/credit in case of the originator line is temporary set to 0 in both debit/credit.
-                        tax_line.debit = tax_line.credit = 0.0
+                    if len(tax_line) == 1:
+                        # Update the existing tax_line.
+                        if balance:
+                            # Update the debit/credit amount according to the new balance.
+                            if taxes_vals.get('taxes'):
+                                amount = taxes_vals['taxes'][0]['amount']
+                                account = _get_tax_account(tax, amount) or line.account_id
+                                tax_line.debit = amount > 0 and amount or 0.0
+                                tax_line.credit = amount < 0 and -amount or 0.0
+                                tax_line.account_id = account
+                        else:
+                            # Reset debit/credit in case of the originator line is temporary set to 0 in both debit/credit.
+                            tax_line.debit = tax_line.credit = 0.0
                 elif taxes_vals.get('taxes'):
                     # Create a new tax_line.
 
@@ -385,7 +414,7 @@ class AccountMove(models.Model):
         # are already done. Then, this query MUST NOT depend of computed stored fields (e.g. balance).
         # It happens as the ORM makes the create with the 'no_recompute' statement.
         self._cr.execute('''
-            SELECT line.move_id
+            SELECT line.move_id, ROUND(SUM(debit - credit), currency.decimal_places)
             FROM account_move_line line
             JOIN account_move move ON move.id = line.move_id
             JOIN account_journal journal ON journal.id = move.journal_id
@@ -396,8 +425,12 @@ class AccountMove(models.Model):
             HAVING ROUND(SUM(debit - credit), currency.decimal_places) != 0.0;
         ''', [tuple(self.ids)])
 
-        if self._cr.fetchone():
-            raise UserError(_("Cannot create unbalanced journal entry."))
+        res = self._cr.fetchone()
+        if res:
+            raise UserError(
+                _("Cannot create unbalanced journal entry.") +
+                "\n\n{}{}".format(_('Difference debit - credit: '), res[1])
+            )
         return True
 
     @api.multi
@@ -470,7 +503,8 @@ class AccountMove(models.Model):
             ('reverse_entry_id', '=', False)])
         for move in records:
             date = None
-            if move.reverse_date and (not self.env.user.company_id.period_lock_date or move.reverse_date > self.env.user.company_id.period_lock_date):
+            company = move.company_id or self.env.user.company_id
+            if move.reverse_date and (not company.period_lock_date or move.reverse_date > company.period_lock_date):
                 date = move.reverse_date
             move.reverse_moves(date=date, auto=True)
 
@@ -585,7 +619,7 @@ class AccountMoveLine(models.Model):
     def _compute_tax_base_amount(self):
         for move_line in self:
             if move_line.tax_line_id:
-                base_lines = move_line.move_id.line_ids.filtered(lambda line: move_line.tax_line_id in line.tax_ids)
+                base_lines = move_line.move_id.line_ids.filtered(lambda line: move_line.tax_line_id in line.tax_ids and move_line.partner_id == line.partner_id)
                 move_line.tax_base_amount = abs(sum(base_lines.mapped('balance')))
             else:
                 move_line.tax_base_amount = 0
@@ -889,6 +923,14 @@ class AccountMoveLine(models.Model):
                 currency = credit_move.currency_id.id
                 amount_reconcile_currency = temp_amount_residual_currency
                 amount_reconcile = temp_amount_residual
+            elif bool(debit_move.currency_id) != bool(credit_move.currency_id):
+                # If only one of debit_move or credit_move has a secondary currency, also record the converted amount
+                # in that secondary currency in the partial reconciliation. That allows the exchange difference entry
+                # to be created, in case it is needed. It also allows to compute the amount residual in foreign currency.
+                currency = debit_move.currency_id or credit_move.currency_id
+                currency_date = debit_move.currency_id and credit_move.date or debit_move.date
+                amount_reconcile_currency = company_currency._convert(amount_reconcile, currency, debit_move.company_id, currency_date)
+                currency = currency.id
 
             if cash_basis:
                 tmp_set = debit_move | credit_move
@@ -1107,10 +1149,11 @@ class AccountMoveLine(models.Model):
         taxes = self.env['account.tax'].browse(tax_ids)
         currency = self.env['res.currency'].browse(vals.get('currency_id'))
         partner = self.env['res.partner'].browse(vals.get('partner_id'))
+        product = self.env['product.product'].browse(vals.get('product_id'))
         ctx = dict(self._context)
         ctx['round'] = ctx.get('round', True)
         res = taxes.with_context(ctx).compute_all(amount,
-            currency, 1, vals.get('product_id'), partner)
+            currency, 1, product, partner)
         # Adjust line amount if any tax is price_include
         if abs(res['total_excluded']) < abs(amount):
             if vals['debit'] != 0.0: vals['debit'] = res['total_excluded']
@@ -1159,9 +1202,10 @@ class AccountMoveLine(models.Model):
                 debit-credit == 0 while creating the move lines composing the move.
         """
         for vals in vals_list:
+            account = self.env['account.account'].browse(vals['account_id'])
+            vals.setdefault('company_currency_id', account.company_id.currency_id.id) # important to bypass the ORM limitation where monetary fields are not rounded; more info in the commit message
             amount = vals.get('debit', 0.0) - vals.get('credit', 0.0)
             move = self.env['account.move'].browse(vals['move_id'])
-            account = self.env['account.account'].browse(vals['account_id'])
             if account.deprecated:
                 raise UserError(_('The account %s (%s) is deprecated.') %(account.name, account.code))
             journal = vals.get('journal_id') and self.env['account.journal'].browse(vals['journal_id']) or move.journal_id
@@ -1502,9 +1546,42 @@ class AccountPartialReconcile(models.Model):
 
     @api.model
     def _prepare_exchange_diff_partial_reconcile(self, aml, line_to_reconcile, currency):
+        """
+        Prepares the values for the partial reconciliation between an account.move.line
+        that needs to be fixed by an exchange rate entry and the account.move.line that fixes it
+
+        @param {account.move.line} aml:
+            The line that needs fixing with exchange difference entry
+            (e.g. a receivable/payable from an invoice)
+        @param {account.move.line} line_to_reconcile:
+            The line that fixes the aml. it is the receivable/payable line
+            of the exchange difference entry move
+        @param {res.currency} currency
+
+        @return {dict} values of account.partial.reconcile; ready for create()
+        """
+
+        # the exhange rate difference that will be fixed may be of opposite direction
+        # than the original move line (i.e. the exchange difference may be negative whereas
+        # the move line on which it applies may be a debit -- positive)
+        # So we need to register both the move line and the exchange line
+        # to either debit_move or credit_move as a function of whether the direction (debit VS credit)
+        # of the exchange loss/gain is the same (or not) as the direction of the line that is fixed here
+        if aml.currency_id:
+            residual_same_sign = aml.amount_currency * aml.amount_residual_currency >= 0
+        else:
+            residual_same_sign = aml.balance * aml.amount_residual >= 0
+
+        if residual_same_sign:
+            debit_move_id = line_to_reconcile.id if aml.credit else aml.id
+            credit_move_id = line_to_reconcile.id if aml.debit else aml.id
+        else:
+            debit_move_id = aml.id if aml.credit else line_to_reconcile.id
+            credit_move_id = aml.id if aml.debit else line_to_reconcile.id
+
         return {
-            'debit_move_id': aml.credit and line_to_reconcile.id or aml.id,
-            'credit_move_id': aml.debit and line_to_reconcile.id or aml.id,
+            'debit_move_id': debit_move_id,
+            'credit_move_id': credit_move_id,
             'amount': abs(aml.amount_residual),
             'amount_currency': abs(aml.amount_residual_currency),
             'currency_id': currency and currency.id or False,
@@ -1578,10 +1655,57 @@ class AccountPartialReconcile(models.Model):
     def _get_amount_tax_cash_basis(self, amount, line):
         return line.company_id.currency_id.round(amount)
 
+    def _set_tax_cash_basis_entry_date(self, move_date, newly_created_move):
+        if move_date > (self.company_id.period_lock_date or date.min) and newly_created_move.date != move_date:
+            # The move date should be the maximum date between payment and invoice (in case
+            # of payment in advance). However, we should make sure the move date is not
+            # recorded before the period lock date as the tax statement for this period is
+            # probably already sent to the estate.
+            newly_created_move.write({'date': move_date})
+
+    def _get_tax_cash_basis_base_key(self, tax, move, line):
+        account_id = self._get_tax_cash_basis_base_account(line, tax)
+        return (line.id, account_id.id, tax.id, line.currency_id.id, line.partner_id.id)
+
+    def _get_tax_cash_basis_base_common_vals(self, key, new_move):
+        line, account_id, tax, currency_id, partner_id = key
+        line = self.env['account.move.line'].browse(line)
+        return {
+            'name': line.name,
+            'account_id': account_id,
+            'journal_id': new_move.journal_id.id,
+            'tax_exigible': True,
+            'tax_ids': [(6, 0, [tax])],
+            'move_id': new_move.id,
+            'currency_id': currency_id,
+            'partner_id': partner_id,
+        }
+
+    def _create_tax_cash_basis_base_line(self, amount_dict, amount_currency_dict, new_move):
+        for key in amount_dict.keys():
+            base_line = self._get_tax_cash_basis_base_common_vals(key, new_move)
+            currency_id = base_line.get('currency_id', False)
+            rounded_amt = amount_dict[key]
+            amount_currency = amount_currency_dict[key] if currency_id else 0.0
+            aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
+            aml_obj.create(dict(
+                base_line,
+                debit=rounded_amt > 0 and rounded_amt or 0.0,
+                credit=rounded_amt < 0 and abs(rounded_amt) or 0.0,
+                amount_currency=amount_currency))
+            aml_obj.create(dict(
+                base_line,
+                credit=rounded_amt > 0 and rounded_amt or 0.0,
+                debit=rounded_amt < 0 and abs(rounded_amt) or 0.0,
+                amount_currency=-amount_currency,
+                tax_ids=[]))
+
     def create_tax_cash_basis_entry(self, percentage_before_rec):
         self.ensure_one()
         move_date = self.debit_move_id.date
         newly_created_move = self.env['account.move']
+        cash_basis_amount_dict = defaultdict(float)
+        cash_basis_amount_currency_dict = defaultdict(float)
         with self.env.norecompute():
             # We use a set here in case the reconciled lines belong to the same move (it happens with POS)
             for move in {self.debit_move_id.move_id, self.credit_move_id.move_id}:
@@ -1617,6 +1741,7 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'move_id': newly_created_move.id,
                                 'partner_id': line.partner_id.id,
+                                'journal_id': newly_created_move.journal_id.id,
                             })
                             # Group by cash basis account and tax
                             self.env['account.move.line'].with_context(check_move_validity=False).create({
@@ -1632,49 +1757,31 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'move_id': newly_created_move.id,
                                 'partner_id': line.partner_id.id,
+                                'journal_id': newly_created_move.journal_id.id,
                             })
-                            if line.account_id.reconcile:
+                            if line.account_id.reconcile and not line.reconciled:
                                 #setting the account to allow reconciliation will help to fix rounding errors
                                 to_clear_aml |= line
                                 to_clear_aml.reconcile()
 
                         if any([tax.tax_exigibility == 'on_payment' for tax in line.tax_ids]):
-                            if not newly_created_move:
-                                newly_created_move = self._create_tax_basis_move()
                             #create cash basis entry for the base
                             for tax in line.tax_ids.filtered(lambda t: t.tax_exigibility == 'on_payment'):
-                                account_id = self._get_tax_cash_basis_base_account(line, tax)
-                                self.env['account.move.line'].with_context(check_move_validity=False).create({
-                                    'name': line.name,
-                                    'debit': rounded_amt > 0 and rounded_amt or 0.0,
-                                    'credit': rounded_amt < 0 and abs(rounded_amt) or 0.0,
-                                    'account_id': account_id.id,
-                                    'tax_exigible': True,
-                                    'tax_ids': [(6, 0, [tax.id])],
-                                    'move_id': newly_created_move.id,
-                                    'currency_id': line.currency_id.id,
-                                    'amount_currency': self.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
-                                    'partner_id': line.partner_id.id,
-                                })
-                                self.env['account.move.line'].with_context(check_move_validity=False).create({
-                                    'name': line.name,
-                                    'credit': rounded_amt > 0 and rounded_amt or 0.0,
-                                    'debit': rounded_amt < 0 and abs(rounded_amt) or 0.0,
-                                    'account_id': account_id.id,
-                                    'tax_exigible': True,
-                                    'move_id': newly_created_move.id,
-                                    'currency_id': line.currency_id.id,
-                                    'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
-                                    'partner_id': line.partner_id.id,
-                                })
+                                # We want to group base lines as much as
+                                # possible to avoid creating too many of them.
+                                # This will result in a more readable report
+                                # tax and less cumbersome to analyse.
+                                key = self._get_tax_cash_basis_base_key(tax, move, line)
+                                cash_basis_amount_dict[key] += rounded_amt
+                                cash_basis_amount_currency_dict[key] += line.currency_id.round(line.amount_currency * amount / line.balance) if line.currency_id and self.amount_currency else 0.0
+
+            if cash_basis_amount_dict:
+                if not newly_created_move:
+                    newly_created_move = self._create_tax_basis_move()
+                self._create_tax_cash_basis_base_line(cash_basis_amount_dict, cash_basis_amount_currency_dict, newly_created_move)
         self.recompute()
         if newly_created_move:
-            if move_date > (self.company_id.period_lock_date or date.min) and newly_created_move.date != move_date:
-                # The move date should be the maximum date between payment and invoice (in case
-                # of payment in advance). However, we should make sure the move date is not
-                # recorded before the period lock date as the tax statement for this period is
-                # probably already sent to the estate.
-                newly_created_move.write({'date': move_date})
+            self._set_tax_cash_basis_entry_date(move_date, newly_created_move)
             # post move
             newly_created_move.post()
 
@@ -1728,12 +1835,15 @@ class AccountFullReconcile(models.Model):
             for example).
         """
         for rec in self:
-            if rec.exchange_move_id:
+            if rec.exists() and rec.exchange_move_id:
                 # reverse the exchange rate entry after de-referencing it to avoid looping
                 # (reversing will cause a nested attempt to drop the full reconciliation)
                 to_reverse = rec.exchange_move_id
                 rec.exchange_move_id = False
-                to_reverse.reverse_moves()
+                if to_reverse.date > (to_reverse.company_id.period_lock_date or date.min):
+                    to_reverse.reverse_moves(date=to_reverse.date)
+                else:
+                    to_reverse.reverse_moves()
         return super(AccountFullReconcile, self).unlink()
 
     @api.model

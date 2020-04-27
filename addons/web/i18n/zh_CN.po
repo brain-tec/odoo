@@ -333,7 +333,7 @@ msgstr "激活"
 #: code:addons/web/static/src/xml/base.xml:248
 #, python-format
 msgid "Activate Assets Debugging"
-msgstr "激活资产调试"
+msgstr "激活资源调试"
 
 #. module: web
 #. openerp-web
@@ -906,7 +906,7 @@ msgstr "上下文:"
 #: code:addons/web/static/src/xml/menu.xml:200
 #, python-format
 msgid "Control"
-msgstr "控制"
+msgstr "Ctrl控制"
 
 #. module: web
 #. openerp-web
@@ -1907,7 +1907,7 @@ msgstr "最后修改者："
 #: code:addons/web/static/src/xml/base.xml:251
 #, python-format
 msgid "Leave the Developer Tools"
-msgstr "离开开发者工具"
+msgstr "退出开发者工具"
 
 #. module: web
 #. openerp-web
@@ -2402,6 +2402,12 @@ msgid "Only Integer Value should be valid."
 msgstr "仅整型数值是有效的。"
 
 #. module: web
+#: code:addons/web/static/src/js/fields/basic_fields.js:1982
+#, python-format
+msgid "Only Integer or Float Value should be valid."
+msgstr "只有正数和浮点数值是有效的."
+
+#. module: web
 #: code:addons/web/controllers/main.py:502
 #, python-format
 msgid ""
@@ -2715,7 +2721,7 @@ msgstr "红色"
 #: code:addons/web/static/src/xml/base.xml:249
 #, python-format
 msgid "Regenerate Assets Bundles"
-msgstr "重新生成资产包"
+msgstr "重新生成资源包"
 
 #. module: web
 #. openerp-web

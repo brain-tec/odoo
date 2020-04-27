@@ -9,11 +9,11 @@
 # Jesper Carstensen <jc@danodoo.dk>, 2018
 # Martin Trigaux, 2018
 # Per Rasmussen <perhgrasmussen@gmail.com>, 2018
-# JonathanStein <jstein@image.dk>, 2018
 # Pernille Kristensen <pernillekristensen1994@gmail.com>, 2018
-# Sanne Kristensen <sanne@vkdata.dk>, 2018
-# lhmflexerp <lhm@flexerp.dk>, 2019
 # Ejner Sønniksen <ejner@vkdata.dk>, 2019
+# lhmflexerp <lhm@flexerp.dk>, 2019
+# JonathanStein <jstein@image.dk>, 2020
+# Sanne Kristensen <sanne@vkdata.dk>, 2020
 # 
 msgid ""
 msgstr ""
@@ -21,7 +21,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-09 10:31+0000\n"
 "PO-Revision-Date: 2018-08-24 09:23+0000\n"
-"Last-Translator: Ejner Sønniksen <ejner@vkdata.dk>, 2019\n"
+"Last-Translator: Sanne Kristensen <sanne@vkdata.dk>, 2020\n"
 "Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,7 +57,7 @@ msgstr "Antal opgaver"
 #. module: project
 #: model:mail.template,subject:project.rating_project_request_email_template
 msgid "${object.project_id.company_id.name}: Satisfaction Survey"
-msgstr ""
+msgstr "${object.project_id.company_id.name}: Tilfredshedsundersøgelse"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -77,6 +77,8 @@ msgid ""
 "(Un)archiving a project automatically (un)archives its tasks. Do you want to"
 " proceed?"
 msgstr ""
+"(De)aktivering af et projekt vil automatisk (de)aktivere opgaverne. Vil du "
+"fortsætte?"
 
 #. module: project
 #. openerp-web
@@ -200,12 +202,12 @@ msgstr "<i class=\"fa fa-calendar\"/> Slutdato:"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "<i class=\"fa fa-comments\" role=\"img\" aria-label=\"Unread Messages\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-comments\" role=\"img\" aria-label=\"Unread Messages\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
@@ -213,6 +215,8 @@ msgid ""
 "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Domain Alias\" "
 "title=\"Domain Alias\"/>"
 msgstr ""
+"<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Domain Alias\" "
+"title=\"Domain Alias\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.rating_index
@@ -225,6 +229,8 @@ msgid ""
 "<i class=\"fa fa-smile-o\" role=\"img\" aria-label=\"Percentage of "
 "satisfaction\" title=\"Percentage of satisfaction\"/>"
 msgstr ""
+"<i class=\"fa fa-smile-o\" role=\"img\" aria-label=\"Percentage of "
+"satisfaction\" title=\"Percentage of satisfaction\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
@@ -249,6 +255,8 @@ msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
 "                    Create a new project</p>"
 msgstr ""
+"<p class=\"o_view_nocontent_smiling_face\">\n"
+"                    Opret et projekt</p>"
 
 #. module: project
 #. openerp-web
@@ -260,7 +268,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_project
 msgid "<small class=\"text-muted\">Project - </small>"
-msgstr ""
+msgstr "<small class=\"text-muted\">Projekt - </small>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
@@ -270,17 +278,17 @@ msgstr "<small class=\"text-right\">Status:</small>"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_project
 msgid "<span class=\"fa fa-tasks\" role=\"img\" aria-label=\"Tasks\" title=\"Tasks\"/>"
-msgstr ""
+msgstr "<span class=\"fa fa-tasks\" role=\"img\" aria-label=\"Tasks\" title=\"Tasks\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
 msgid "<strong class=\"d-block mb-2\">Attachments</strong>"
-msgstr ""
+msgstr "<strong class=\"d-block mb-2\">Vedhæftning</strong>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
 msgid "<strong class=\"d-block mb-2\">Description</strong>"
-msgstr ""
+msgstr "<strong class=\"d-block mb-2\">Beskrivelse</strong>"
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_0
@@ -431,7 +439,7 @@ msgstr "Alle"
 #. module: project
 #: model:ir.ui.menu,name:project.menu_project_management
 msgid "All Tasks"
-msgstr ""
+msgstr "Alle opgaver"
 
 #. module: project
 #. openerp-web
@@ -742,7 +750,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__displayed_image_id
 msgid "Cover Image"
-msgstr ""
+msgstr "Coverbillede"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
@@ -758,7 +766,7 @@ msgstr "Opret et projekt"
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all_config
 msgid "Create a new project"
-msgstr ""
+msgstr "Opret et ny projekt"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_task_type_form
@@ -768,7 +776,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_tags_action
 msgid "Create a new tag"
-msgstr ""
+msgstr "Opret et nyt tag"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.action_view_task
@@ -778,7 +786,7 @@ msgstr "Opret en ny opgave"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__create_date
 msgid "Created On"
-msgstr ""
+msgstr "Oprettet den"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__create_uid
@@ -844,7 +852,7 @@ msgstr "Kunde e-mail"
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:44
 #, python-format
 msgid "Customer Feedback"
-msgstr ""
+msgstr "Kunde-feedback"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__access_url
@@ -1032,6 +1040,8 @@ msgid ""
 "Edit project's stages and set an email template on the stages on which you "
 "want to activate the rating."
 msgstr ""
+"Rediger projektets faser, og indstil en e-mailskabelon på de stadier, som du"
+" vil aktivere vurderingen på."
 
 #. module: project
 #. openerp-web
@@ -1209,7 +1219,7 @@ msgstr "Grøn"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__legend_done
 msgid "Green Kanban Label"
-msgstr ""
+msgstr "Grøn kanban label"
 
 #. module: project
 #: selection:project.task,kanban_state:0
@@ -1219,7 +1229,7 @@ msgstr "Grå"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__legend_normal
 msgid "Grey Kanban Label"
-msgstr ""
+msgstr "Grå kanban label"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
@@ -1451,12 +1461,12 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__legend_blocked
 msgid "Kanban Blocked Explanation"
-msgstr ""
+msgstr "Kanban blokeret forklaring"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__legend_normal
 msgid "Kanban Ongoing Explanation"
-msgstr ""
+msgstr "Kanban igang forklaring"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__kanban_state
@@ -1472,7 +1482,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__legend_done
 msgid "Kanban Valid Explanation"
-msgstr ""
+msgstr "Kanban gyldig forklaring"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_digest_digest__kpi_project_task_opened_value
@@ -1514,7 +1524,7 @@ msgstr "Sidste fase opdatering"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__write_date
 msgid "Last Updated On"
-msgstr ""
+msgstr "Sidst opdateret den"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__write_uid
@@ -1587,7 +1597,7 @@ msgstr "Live"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Log time on tasks"
-msgstr ""
+msgstr "Registrér tid på opgaver"
 
 #. module: project
 #. openerp-web
@@ -1710,14 +1720,14 @@ msgstr "Ny"
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:67
 #, python-format
 msgid "New Orders"
-msgstr ""
+msgstr "Nye ordrer"
 
 #. module: project
 #. openerp-web
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:58
 #, python-format
 msgid "New Projects"
-msgstr ""
+msgstr "Nye projekter"
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_0
@@ -1763,7 +1773,7 @@ msgstr "Intet emne"
 #: model_terms:ir.actions.act_window,help:project.rating_rating_action_project_report
 #: model_terms:ir.actions.act_window,help:project.rating_rating_action_task
 msgid "No customer ratings yet"
-msgstr ""
+msgstr "Endnu ingen kundebedømmelser"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.rating_index
@@ -1878,7 +1888,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_digest_digest__kpi_project_task_opened
 msgid "Open Tasks"
-msgstr ""
+msgstr "Åbne opgaver"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__alias_force_thread_id
@@ -1907,7 +1917,7 @@ msgstr ""
 #: code:addons/project/controllers/portal.py:129
 #, python-format
 msgid "Others"
-msgstr ""
+msgstr "Andre"
 
 #. module: project
 #: selection:project.task,activity_state:0
@@ -2159,7 +2169,7 @@ msgstr "Bedømmelse"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__rating_template_id
 msgid "Rating Email Template"
-msgstr ""
+msgstr "Bedømmelse e-mailskabelon"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_status_period
@@ -2278,7 +2288,7 @@ msgstr "Rød"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__legend_blocked
 msgid "Red Kanban Label"
-msgstr ""
+msgstr "Rød kanban label"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_tasks
@@ -2297,7 +2307,7 @@ msgstr "Afvist"
 #: code:addons/project/static/src/js/project.js:74
 #, python-format
 msgid "Remove Cover Image"
-msgstr ""
+msgstr "Fjern coverbillede"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_project_report
@@ -2407,7 +2417,7 @@ msgstr "Rækkefølge"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Set Cover Image"
-msgstr ""
+msgstr "Angiv coverbillede"
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_0
@@ -2417,14 +2427,14 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Set Email Template to Stages"
-msgstr ""
+msgstr "Sæt e-mailskabelon til faser"
 
 #. module: project
 #. openerp-web
 #: code:addons/project/static/src/js/project.js:64
 #, python-format
 msgid "Set a Cover Image"
-msgstr ""
+msgstr "Angiv et coverbillede"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_config_settings_action
@@ -2463,7 +2473,7 @@ msgstr ""
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:29
 #, python-format
 msgid "Specifications"
-msgstr ""
+msgstr "Specifikationer"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
@@ -2562,7 +2572,7 @@ msgstr "Underopgaver"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__subtask_planned_hours
 msgid "Subtasks"
-msgstr ""
+msgstr "Underopgaver"
 
 #. module: project
 #. openerp-web
@@ -2574,7 +2584,7 @@ msgstr ""
 #. module: project
 #: sql_constraint:project.tags:0
 msgid "Tag name already exists!"
-msgstr ""
+msgstr "Tag navn eksisterer allerede!"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_tags_action
@@ -2619,7 +2629,7 @@ msgstr ""
 #: model:mail.message.subtype,name:project.mt_project_task_new
 #: model:mail.message.subtype,name:project.mt_task_new
 msgid "Task Created"
-msgstr ""
+msgstr "Opgave oprettet"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_res_config_settings__module_hr_timesheet
@@ -2674,12 +2684,13 @@ msgstr "Opgave blokeret"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
 msgid "Task in progress. Click to block or set as done."
-msgstr ""
+msgstr "Opgave igang. Klik for at blokere eller markere som udført."
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
 msgid "Task is blocked. Click to unblock or set as done."
 msgstr ""
+"Opgave er blokeret. Klik for at ophæve blokeringen eller markere som udført."
 
 #. module: project
 #: model:mail.message.subtype,description:project.mt_task_ready
@@ -2721,7 +2732,7 @@ msgstr "Opgave analyse"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Tasks Management"
-msgstr ""
+msgstr "Opgavehåndtering"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__type_ids
@@ -2866,7 +2877,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
 msgid "This step is done. Click to block or set in progress."
-msgstr ""
+msgstr "Dette trin er udført. Klik for at blokere eller sætte igang."
 
 #. module: project
 #. openerp-web
@@ -2981,7 +2992,7 @@ msgstr ""
 #. module: project
 #: model:res.groups,name:project.group_subtask_project
 msgid "Use Subtasks"
-msgstr ""
+msgstr "Anvend underopgaver"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__label_tasks
@@ -3085,7 +3096,7 @@ msgstr "Arbejdstid"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Working Time to Assign"
-msgstr ""
+msgstr "Arbejdstid til tildeling"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -3161,12 +3172,12 @@ msgstr "aktivér et prøveprodukt"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_project_rating_partner_stat
 msgid "average"
-msgstr ""
+msgstr "gennemsnit"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_project_rating_partner_stat
 msgid "bad"
-msgstr ""
+msgstr "dårlig"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
@@ -3176,12 +3187,12 @@ msgstr "fx Firmafest"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_tasks
 msgid "for project:"
-msgstr ""
+msgstr "for projekt:"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_project_rating_partner_stat
 msgid "happy"
-msgstr ""
+msgstr "glad"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
@@ -3192,7 +3203,7 @@ msgstr "oe_kanban_text_red"
 #: code:addons/project/models/project.py:635
 #, python-format
 msgid "task"
-msgstr ""
+msgstr "opgave"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all

@@ -3,16 +3,18 @@
 # * payment
 # 
 # Translators:
-# Martin Trigaux, 2018
-# Dorin Hongu <dhongu@gmail.com>, 2019
+# Martin Trigaux, 2019
+# sharkutz <sharkutz4life@yahoo.com>, 2019
+# Cozmin Candea <office@terrabit.ro>, 2020
+# Dorin Hongu <dhongu@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
+"POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2019\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2020\n"
 "Language-Team: Romanian (https://www.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,12 +45,12 @@ msgstr "<b>Valoare:</b>"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_confirmation_status
 msgid "<b>Communication: </b>"
-msgstr ""
+msgstr "<b>Comunicare:</b>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
 msgid "<b>Reference:</b>"
-msgstr ""
+msgstr "<b>Referință:</b>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.confirm
@@ -93,7 +95,7 @@ msgstr "<i class=\"fa fa-trash\"/> Șterge"
 #: code:addons/payment/models/payment_acquirer.py:124
 #, python-format
 msgid "<i>Cancel,</i> Your payment has been cancelled."
-msgstr ""
+msgstr "<i>Anulată</i>, plata dvs. a fost anulată."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:120
@@ -102,6 +104,8 @@ msgid ""
 "<i>Done,</i> Your online payment has been successfully processed. Thank you "
 "for your order."
 msgstr ""
+"<i>Finalizat</i>, plata online a fost procesată cu succes. Vă mulțumim "
+"pentru comanda dumneavoastră."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:128
@@ -111,6 +115,9 @@ msgid ""
 " The order has been confirmed but will not be paid. Do not hesitate to "
 "contact us if you have any questions on the status of your order."
 msgstr ""
+"<i>Eroare</i>, rețineți că a avut loc o eroare în timpul tranzacției. "
+"Comanda a fost confirmată, dar nu va fi achitată. Nu ezitați să ne "
+"contactați dacă aveți întrebări cu privire la starea comenzii dvs."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:116
@@ -119,6 +126,8 @@ msgid ""
 "<i>Pending,</i> Your online payment has been successfully processed. But "
 "your order is not validated yet."
 msgstr ""
+"<i>În așteptare</i>, plata online a fost procesată cu succes. Dar comanda "
+"dvs. nu este validată încă."
 
 #. module: payment
 #. openerp-web
@@ -168,7 +177,7 @@ msgstr ""
 #: model_terms:payment.acquirer,cancel_msg:payment.payment_acquirer_stripe
 #: model_terms:payment.acquirer,cancel_msg:payment.payment_acquirer_transfer
 msgid "<span><i>Cancel,</i> Your payment has been cancelled.</span>"
-msgstr ""
+msgstr "<span><i>Anulată</i>, plata dvs. a fost anulată.</span>"
 
 #. module: payment
 #: model_terms:payment.acquirer,done_msg:payment.payment_acquirer_adyen
@@ -185,6 +194,8 @@ msgid ""
 "<span><i>Done,</i> Your online payment has been successfully processed. "
 "Thank you for your order.</span>"
 msgstr ""
+"<span><i>Finalizat</i>, plata online a fost procesată cu succes. Vă mulțumim"
+" pentru comanda dumneavoastră.</span>"
 
 #. module: payment
 #: model_terms:payment.acquirer,error_msg:payment.payment_acquirer_adyen
@@ -203,6 +214,9 @@ msgid ""
 "hesitate to contact us if you have any questions on the status of your "
 "order.</span>"
 msgstr ""
+"<span><i>Eroare</i>, rețineți că a avut loc o eroare în timpul tranzacției. "
+"Comanda a fost confirmată, dar nu va fi achitată. Nu ezitați să ne "
+"contactați dacă aveți întrebări cu privire la starea comenzii dvs.</span>"
 
 #. module: payment
 #: model_terms:payment.acquirer,pending_msg:payment.payment_acquirer_adyen
@@ -218,6 +232,8 @@ msgid ""
 "<span><i>Pending,</i> Your online payment has been successfully processed. "
 "But your order is not validated yet.</span>"
 msgstr ""
+"<span><i>În așteptare</i>, plata online a fost procesată cu succes. Dar "
+"comanda dvs. nu este validată încă.</span>"
 
 #. module: payment
 #: model_terms:payment.acquirer,pending_msg:payment.payment_acquirer_transfer
@@ -225,12 +241,14 @@ msgid ""
 "<span><i>Pending</i>... The order will be validated after the "
 "payment.</span>"
 msgstr ""
+"<span><i>În așteptare</i>... Comanda va fi validată după efectuarea "
+"plății..</span>"
 
 #. module: payment
 #: code:addons/payment/models/account_invoice.py:72
 #, python-format
 msgid "A journal must be specified of the acquirer %s."
-msgstr ""
+msgstr "Trebuie să fie specificat un jurnal colectorul de plată %s."
 
 #. module: payment
 #: code:addons/payment/models/account_invoice.py:65
@@ -506,13 +524,13 @@ msgstr ""
 #: model:ir.actions.act_window,name:payment.action_open_payment_onboarding_payment_acquirer_wizard
 #: model_terms:ir.ui.view,arch_db:payment.payment_acquirer_onboarding_wizard_form
 msgid "Choose a payment method"
-msgstr ""
+msgstr "Alege metoda de plată"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_city
 #: model_terms:ir.ui.view,arch_db:payment.transaction_form
 msgid "City"
-msgstr "Oraș"
+msgstr "Localitate"
 
 #. module: payment
 #. openerp-web
@@ -555,7 +573,7 @@ msgstr "Configurare"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Configure your payment methods."
-msgstr ""
+msgstr "Configurați metodele de plată."
 
 #. module: payment
 #. openerp-web
@@ -793,6 +811,11 @@ msgid "Group By"
 msgstr "Grupează după"
 
 #. module: payment
+#: model:ir.model,name:payment.model_ir_http
+msgid "HTTP Routing"
+msgstr "Rutare HTTP"
+
+#. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__is_processed
 msgid "Has the payment been post processed"
 msgstr ""
@@ -823,7 +846,7 @@ msgstr ""
 #: code:addons/payment/static/src/xml/payment_processing.xml:132
 #, python-format
 msgid "If, the payment hasn't been confirmed you can contact us."
-msgstr ""
+msgstr "Dacă plata nu a fost confirmată ne puteți contacta."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer__image
@@ -1098,7 +1121,7 @@ msgstr ""
 #. module: payment
 #: selection:res.company,payment_acquirer_onboarding_state:0
 msgid "Not done"
-msgstr ""
+msgstr "Nerealizat"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_account_payment__payment_token_id
@@ -1173,7 +1196,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment.confirm
 #: model_terms:ir.ui.view,arch_db:payment.payment_confirmation_status
 msgid "Or scan me with your banking app."
-msgstr ""
+msgstr "Sau scanează folosind aplicația de plată"
 
 #. module: payment
 #: selection:res.company,payment_onboarding_payment_method:0
@@ -1203,7 +1226,7 @@ msgstr "Plata cu un alt colector de plăți"
 #. module: payment
 #: selection:payment.acquirer.onboarding.wizard,payment_method:0
 msgid "Pay with credit card (via Stripe)"
-msgstr ""
+msgstr "Plătește cu credit card (via Stripe)"
 
 #. module: payment
 #: selection:res.company,payment_onboarding_payment_method:0
@@ -1213,7 +1236,7 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_email_account
 msgid "PayPal Email ID"
-msgstr ""
+msgstr "PayPal Email ID"
 
 #. module: payment
 #: model:payment.acquirer,name:payment.payment_acquirer_payu
@@ -1326,12 +1349,6 @@ msgid "Payment method set!"
 msgstr ""
 
 #. module: payment
-#: code:addons/payment/controllers/portal.py:252
-#, python-format
-msgid "Payment transaction failed."
-msgstr ""
-
-#. module: payment
 #: model:ir.model,name:payment.model_account_payment
 #: model:ir.ui.menu,name:payment.root_payment_menu
 #: model_terms:ir.ui.view,arch_db:payment.payment_token_form_view
@@ -1373,12 +1390,12 @@ msgstr "PayPal"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_seller_account
 msgid "Paypal Merchant ID"
-msgstr ""
+msgstr "Paypal Merchant ID"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_pdt_token
 msgid "Paypal PDT Token"
-msgstr ""
+msgstr "Paypal PDT Token"
 
 #. module: payment
 #: selection:payment.transaction,state:0
@@ -1428,13 +1445,13 @@ msgstr ""
 #: model_terms:payment.acquirer,post_msg:payment.payment_acquirer_custom
 #: model_terms:payment.acquirer,post_msg:payment.payment_acquirer_transfer
 msgid "Please use the following transfer details"
-msgstr ""
+msgstr "Vă rugăm să utilizați următoarele detalii de transfer"
 
 #. module: payment
 #: model_terms:payment.acquirer,post_msg:payment.payment_acquirer_custom
 #: model_terms:payment.acquirer,post_msg:payment.payment_acquirer_transfer
 msgid "Please use the order name as communication reference."
-msgstr ""
+msgstr "Vă rugăm să folosiți numele comenzii ca referință de comunicare."
 
 #. module: payment
 #. openerp-web
@@ -1469,6 +1486,20 @@ msgstr "Furnizor"
 
 #. module: payment
 #. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:10
+#, python-format
+msgid "Publish"
+msgstr "Publică"
+
+#. module: payment
+#. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:9
+#, python-format
+msgid "Published"
+msgstr "Publicat"
+
+#. module: payment
+#. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:19
 #, python-format
 msgid "Reason:"
@@ -1488,7 +1519,7 @@ msgstr "Referință"
 #. module: payment
 #: sql_constraint:payment.transaction:0
 msgid "Reference must be unique!"
-msgstr ""
+msgstr "Referința trebuie să fie unică!"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_transaction__acquirer_reference
@@ -1581,7 +1612,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Set payments"
-msgstr ""
+msgstr "Setare plăți"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_token__short_name
@@ -1675,7 +1706,7 @@ msgstr ""
 #: code:addons/payment/models/payment_acquirer.py:660
 #, python-format
 msgid "The customer has selected %s to pay this document."
-msgstr ""
+msgstr "Clientul a ales %s să achite acest document."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:677
@@ -1684,6 +1715,8 @@ msgid ""
 "The transaction %s with %s for %s has been authorized. Waiting for "
 "capture..."
 msgstr ""
+"Tranzacția %s cu %spentru %s a fost autorizată. În așteptare pentru "
+"finalizare..."
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:682
@@ -1691,13 +1724,13 @@ msgstr ""
 msgid ""
 "The transaction %s with %s for %s has been cancelled with the following "
 "message: %s"
-msgstr ""
+msgstr "Tranzacția %scu %s  pentru%s a fost anulată cu următorul mesaj:%s"
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:685
 #, python-format
 msgid "The transaction %s with %s for %s has been cancelled."
-msgstr ""
+msgstr "Tranzacția  %scu %s pentru %s fost anulată"
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:679
@@ -1706,12 +1739,13 @@ msgid ""
 "The transaction %s with %s for %s has been confirmed. The related payment is"
 " posted: %s"
 msgstr ""
+"Tranzacția %scu%s pentru%sa fost confirmată. Plata aferentă este postată:%s"
 
 #. module: payment
 #: code:addons/payment/models/payment_acquirer.py:675
 #, python-format
 msgid "The transaction %s with %s for %s is pending."
-msgstr ""
+msgstr "Tranzacția  %scu %s pentru %s este în așteptare."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_icon__image
@@ -1768,6 +1802,7 @@ msgstr "Tranzacții"
 msgid ""
 "Transfer information will be provided after choosing the payment aquirer."
 msgstr ""
+"Informațiile despre transfer vor fi furnizate după alegerea metodei de plată"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__type
@@ -1847,14 +1882,14 @@ msgstr "Atenție!"
 #: code:addons/payment/static/src/js/payment_form.js:136
 #, python-format
 msgid "We are not able to add your payment method at the moment."
-msgstr ""
+msgstr "În acest moment nu putem adăuga metoda dvs. de plată."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/js/payment_form.js:303
 #, python-format
 msgid "We are not able to add your payment method at the moment.</p>"
-msgstr ""
+msgstr "În acest moment nu putem adăuga metoda dvs. de plată </p>"
 
 #. module: payment
 #. openerp-web
@@ -1862,49 +1897,49 @@ msgstr ""
 #: code:addons/payment/static/src/js/payment_form.js:370
 #, python-format
 msgid "We are not able to delete your payment method at the moment."
-msgstr ""
+msgstr "Nu putem șterge metoda de plată pentru moment."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:130
 #, python-format
 msgid "We are not able to find your payment, but don't worry."
-msgstr ""
+msgstr "Nu putem găsi plata dvs., dar nu vă faceți griji."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/js/payment_form.js:176
 #, python-format
 msgid "We are not able to redirect you to the payment form."
-msgstr ""
+msgstr "Nu vă putem redirecționa către formularul de plată"
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/js/payment_form.js:182
 #, python-format
 msgid "We are not able to redirect you to the payment form. "
-msgstr ""
+msgstr "Nu vă putem redirecționa către formularul de plată"
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/js/payment_processing.js:117
 #, python-format
 msgid "We are processing your payments, please wait ..."
-msgstr ""
+msgstr "Procesăm plățile, vă rugăm să așteptați ..."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:99
 #, python-format
 msgid "We are waiting for the payment acquirer to confirm the payment."
-msgstr ""
+msgstr "Așteptăm achizitorul de plată pentru confirmarea plății."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/js/payment_form.js:191
 #, python-format
 msgid "We're unable to process your payment."
-msgstr ""
+msgstr "Nu putem procesa plata."
 
 #. module: payment
 #: model:payment.acquirer,name:payment.payment_acquirer_transfer
@@ -1931,20 +1966,21 @@ msgstr ""
 #, python-format
 msgid "You should receive an email confirming your payment in a few minutes."
 msgstr ""
+"Ar trebui să primiți un e-mail care vă confirmă plata în câteva minute."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:77
 #, python-format
 msgid "You will be notified when the payment is confirmed."
-msgstr ""
+msgstr "Veți fi anunțat la confirmarea plății."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:58
 #, python-format
 msgid "You will be notified when the payment is fully confirmed."
-msgstr ""
+msgstr "Veți fi anunțat atunci când plata este complet confirmată."
 
 #. module: payment
 #: model_terms:payment.acquirer,pre_msg:payment.payment_acquirer_stripe
@@ -2004,14 +2040,14 @@ msgstr ""
 #: code:addons/payment/static/src/xml/payment_processing.xml:39
 #, python-format
 msgid "Your order has been processed."
-msgstr ""
+msgstr "Comanda dumneavoastră a fost procesată."
 
 #. module: payment
 #. openerp-web
 #: code:addons/payment/static/src/xml/payment_processing.xml:36
 #, python-format
 msgid "Your order is being processed, please wait ..."
-msgstr ""
+msgstr "Comanda dvs. este procesată, vă rugăm să așteptați ..."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_confirmation_status

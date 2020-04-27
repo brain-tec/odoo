@@ -49,7 +49,7 @@ class PosConfig(models.Model):
         return self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.user.company_id.id)], limit=1)
 
     def _default_pricelist(self):
-        return self.env['product.pricelist'].search([('currency_id', '=', self.env.user.company_id.currency_id.id)], limit=1)
+        return self.env['product.pricelist'].search([('company_id', 'in', (False, self.env.user.company_id.id)), ('currency_id', '=', self.env.user.company_id.currency_id.id)], limit=1)
 
     def _get_default_location(self):
         return self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_id.id)], limit=1).lot_stock_id
@@ -206,7 +206,7 @@ class PosConfig(models.Model):
         for pos_config in self:
             session = pos_config.session_ids.filtered(lambda s: s.state in ['opening_control', 'opened', 'closing_control'] and not s.rescue)
             if session:
-                pos_config.pos_session_username = session[0].user_id.name
+                pos_config.pos_session_username = session[0].user_id.sudo().name
                 pos_config.pos_session_state = session[0].state
                 pos_config.pos_session_duration = (
                     datetime.now() - session[0].start_at

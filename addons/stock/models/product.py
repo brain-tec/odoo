@@ -367,7 +367,7 @@ class Product(models.Model):
         return res
 
     def action_update_quantity_on_hand(self):
-        return self.product_tmpl_id.with_context({'default_product_id': self.id}).action_update_quantity_on_hand()
+        return self.product_tmpl_id.with_context(default_product_id=self.id).action_update_quantity_on_hand()
 
     def action_view_routes(self):
         return self.mapped('product_tmpl_id').action_view_routes()
@@ -423,13 +423,17 @@ class Product(models.Model):
                 raise UserError(msg)
         return res
 
+    def _is_phantom_bom(self):
+        self.ensure_one()
+        return False
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     responsible_id = fields.Many2one(
         'res.users', string='Responsible', default=lambda self: self.env.uid, required=True,
         help="This user will be responsible of the next activities related to logistic operations for this product.")
-    type = fields.Selection(selection_add=[('product', 'Storable Product')])
+    type = fields.Selection(selection_add=[('product', 'Storable Product')], track_visibility='onchange')
     property_stock_production = fields.Many2one(
         'stock.location', "Production Location",
         company_dependent=True, domain=[('usage', 'like', 'production')],
@@ -460,11 +464,10 @@ class ProductTemplate(models.Model):
     outgoing_qty = fields.Float(
         'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
         digits=dp.get_precision('Product Unit of Measure'))
-    # The goal of these fields is not to be able to search a location_id/warehouse_id but
-    # to properly make these fields "dummy": only used to put some keys in context from
-    # the search view in order to influence computed field
-    location_id = fields.Many2one('stock.location', 'Location', store=False, search=lambda operator, operand, vals: [])
-    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', store=False, search=lambda operator, operand, vals: [])
+    # The goal of these fields is to be able to put some keys in context from search view in order
+    # to influence computed field.
+    location_id = fields.Many2one('stock.location', 'Location', store=False)
+    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', store=False)
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
         domain=[('product_selectable', '=', True)],

@@ -96,9 +96,9 @@ class SaleOrder(models.Model):
                 invoice_status = 'no'
             elif any(invoice_status == 'to invoice' for invoice_status in line_invoice_status):
                 invoice_status = 'to invoice'
-            elif all(invoice_status == 'invoiced' for invoice_status in line_invoice_status):
+            elif line_invoice_status and all(invoice_status == 'invoiced' for invoice_status in line_invoice_status):
                 invoice_status = 'invoiced'
-            elif all(invoice_status in ['invoiced', 'upselling'] for invoice_status in line_invoice_status):
+            elif line_invoice_status and all(invoice_status in ['invoiced', 'upselling'] for invoice_status in line_invoice_status):
                 invoice_status = 'upselling'
             else:
                 invoice_status = 'no'
@@ -254,7 +254,7 @@ class SaleOrder(models.Model):
     def _compute_remaining_validity_days(self):
         for record in self:
             if record.validity_date:
-                record.remaining_validity_days = (record.validity_date - fields.Date.today()).days + 1
+                record.remaining_validity_days = (record.validity_date - fields.Date.context_today(record)).days + 1
             else:
                 record.remaining_validity_days = 0
 
@@ -464,26 +464,31 @@ class SaleOrder(models.Model):
         a clean extension chain).
         """
         self.ensure_one()
-        journal_id = self.env['account.invoice'].default_get(['journal_id'])['journal_id']
+        company_id = self.company_id.id
+        journal_id = (self.env['account.invoice'].with_context(company_id=company_id or self.env.user.company_id.id)
+            .default_get(['journal_id'])['journal_id'])
         if not journal_id:
             raise UserError(_('Please define an accounting sales journal for this company.'))
-        invoice_vals = {
-            'name': self.client_order_ref or '',
+        vinvoice = self.env['account.invoice'].new({'partner_id': self.partner_invoice_id.id, 'type': 'out_invoice'})
+        # Get partner extra fields
+        vinvoice._onchange_partner_id()
+        invoice_vals = vinvoice._convert_to_write(vinvoice._cache)
+        invoice_vals.update({
+            'name': (self.client_order_ref or '')[:2000],
             'origin': self.name,
             'type': 'out_invoice',
             'account_id': self.partner_invoice_id.property_account_receivable_id.id,
-            'partner_id': self.partner_invoice_id.id,
             'partner_shipping_id': self.partner_shipping_id.id,
             'journal_id': journal_id,
             'currency_id': self.pricelist_id.currency_id.id,
             'comment': self.note,
             'payment_term_id': self.payment_term_id.id,
             'fiscal_position_id': self.fiscal_position_id.id or self.partner_invoice_id.property_account_position_id.id,
-            'company_id': self.company_id.id,
+            'company_id': company_id,
             'user_id': self.user_id and self.user_id.id,
             'team_id': self.team_id.id,
             'transaction_ids': [(6, 0, self.transaction_ids.ids)],
-        }
+        })
         return invoice_vals
 
     @api.multi
@@ -500,7 +505,11 @@ class SaleOrder(models.Model):
         if len(invoices) > 1:
             action['domain'] = [('id', 'in', invoices.ids)]
         elif len(invoices) == 1:
-            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            form_view = [(self.env.ref('account.invoice_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state,view) for state,view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
             action['res_id'] = invoices.ids[0]
         else:
             action = {'type': 'ir.actions.act_window_close'}
@@ -525,14 +534,10 @@ class SaleOrder(models.Model):
             # Use additional field helper function (for account extensions)
             for line in invoice.invoice_line_ids:
                 line._set_additional_fields(invoice)
-            # Necessary to force computation of taxes. In account_invoice, they are triggered
+            # Necessary to force computation of taxes and cash rounding. In account_invoice, they are triggered
             # by onchanges, which are not triggered when doing a create.
             invoice.compute_taxes()
-            # Idem for partner
-            so_payment_term_id = invoice.payment_term_id.id
-            invoice._onchange_partner_id()
-            # To keep the payment terms set on the SO
-            invoice.payment_term_id = so_payment_term_id
+            invoice._onchange_cash_rounding()
             invoice.message_post_with_view('mail.message_origin_link',
                 values={'self': invoice, 'origin': references[invoice]},
                 subtype_id=self.env.ref('mail.mt_note').id)
@@ -609,7 +614,7 @@ class SaleOrder(models.Model):
             self.env['account.invoice.line'].create(line_vals_list)
 
         for group_key in invoices:
-            invoices[group_key].write({'name': ', '.join(invoices_name[group_key]),
+            invoices[group_key].write({'name': ', '.join(invoices_name[group_key])[:2000],
                                        'origin': ', '.join(invoices_origin[group_key])})
             sale_orders = references[invoices[group_key]]
             if len(sale_orders) == 1:
@@ -649,6 +654,10 @@ class SaleOrder(models.Model):
             compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
         except ValueError:
             compose_form_id = False
+        lang = self.env.context.get('lang')
+        template = template_id and self.env['mail.template'].browse(template_id)
+        if template and template.lang:
+            lang = template._render_template(template.lang, 'sale.order', self.ids[0])
         ctx = {
             'default_model': 'sale.order',
             'default_res_id': self.ids[0],
@@ -656,6 +665,7 @@ class SaleOrder(models.Model):
             'default_template_id': template_id,
             'default_composition_mode': 'comment',
             'mark_so_as_sent': True,
+            'model_description': self.with_context(lang=lang).type_name,
             'custom_layout': "mail.mail_notification_paynow",
             'proforma': self.env.context.get('proforma', False),
             'force_email': True
@@ -775,27 +785,6 @@ class SaleOrder(models.Model):
                 fmt(l[1]['amount']), fmt(l[1]['base']),
                 len(res),
             ) for l in res]
-
-    def order_lines_layouted(self):
-        """
-        Returns this order lines classified by sale_layout_category and separated in
-        pages according to the category pagebreaks. Used to render the report.
-        """
-        self.ensure_one()
-        report_pages = [[]]
-        for category, lines in groupby(self.order_line, lambda l: l.layout_category_id):
-            # If last added category induced a pagebreak, this one will be on a new page
-            if report_pages[-1] and report_pages[-1][-1]['pagebreak']:
-                report_pages.append([])
-            # Append category to current report page
-            report_pages[-1].append({
-                'name': category and category.name or _('Uncategorized'),
-                'subtotal': category and category.subtotal,
-                'pagebreak': category and category.pagebreak,
-                'lines': list(lines)
-            })
-
-        return report_pages
 
     def has_to_be_signed(self, also_in_draft=False):
         return (self.state == 'sent' or (self.state == 'draft' and also_in_draft)) and not self.is_expired and self.require_signature and not self.signature and self.team_id.team_type != 'website'
@@ -1053,8 +1042,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             fpos = line.order_id.fiscal_position_id or line.order_id.partner_id.property_account_position_id
             # If company_id is set, always filter taxes by the company
-            line_company_id = line.company_id or line.order_id.company_id
-            taxes = line.product_id.taxes_id.filtered(lambda r: not line_company_id or r.company_id == line_company_id)
+            taxes = line.product_id.taxes_id.filtered(lambda r: not line.company_id or r.company_id == line.company_id)
             line.tax_id = fpos.map_tax(taxes, line.product_id, line.order_id.partner_shipping_id) if fpos else taxes
 
     @api.model
@@ -1067,11 +1055,12 @@ class SaleOrderLine(models.Model):
         res = {}
         onchange_fields = ['name', 'price_unit', 'product_uom', 'tax_id']
         if values.get('order_id') and values.get('product_id') and any(f not in values for f in onchange_fields):
-            line = self.new(values)
-            line.product_id_change()
-            for field in onchange_fields:
-                if field not in values:
-                    res[field] = line._fields[field].convert_to_write(line[field], line)
+            with self.env.do_in_onchange():
+                line = self.new(values)
+                line.product_id_change()
+                for field in onchange_fields:
+                    if field not in values:
+                        res[field] = line._fields[field].convert_to_write(line[field], line)
         return res
 
     @api.model_create_multi
@@ -1205,7 +1194,7 @@ class SaleOrderLine(models.Model):
     untaxed_amount_to_invoice = fields.Monetary("Untaxed Amount To Invoice", compute='_compute_untaxed_amount_to_invoice', compute_sudo=True, store=True)
 
     salesman_id = fields.Many2one(related='order_id.user_id', store=True, string='Salesperson', readonly=True)
-    currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id'], store=True, string='Currency', readonly=True)
+    currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
     company_id = fields.Many2one(related='order_id.company_id', string='Company', store=True, readonly=True)
     order_partner_id = fields.Many2one(related='order_id.partner_id', store=True, string='Customer', readonly=False)
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
@@ -1374,7 +1363,8 @@ class SaleOrderLine(models.Model):
         """
         self.ensure_one()
         res = {}
-        account = self.product_id.property_account_income_id or self.product_id.categ_id.property_account_income_categ_id
+        product = self.product_id.with_context(force_company=self.company_id.id)
+        account = product.property_account_income_id or product.categ_id.property_account_income_categ_id
 
         if not account and self.product_id:
             raise UserError(_('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
@@ -1552,7 +1542,7 @@ class SaleOrderLine(models.Model):
     def name_get(self):
         result = []
         for so_line in self.sudo():
-            name = '%s - %s' % (so_line.order_id.name, so_line.name.split('\n')[0] or so_line.product_id.name)
+            name = '%s - %s' % (so_line.order_id.name, (so_line.name and so_line.name.split('\n')[0]) or so_line.product_id.name)
             if so_line.order_partner_id.ref:
                 name = '%s (%s)' % (name, so_line.order_partner_id.ref)
             result.append((so_line.id, name))

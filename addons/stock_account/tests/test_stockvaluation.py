@@ -2473,7 +2473,7 @@ class TestStockValuation(TransactionCase):
 
         move2.move_line_ids.qty_done = 20
 
-        self.assertEqual(self.product1.stock_value, 87.5)
+        self.assertEqual(self.product1.stock_value, 75)
 
     def test_average_perpetual_3(self):
         self.product1.product_tmpl_id.cost_method = 'average'
@@ -2716,6 +2716,42 @@ class TestStockValuation(TransactionCase):
         move3._action_done()
 
         self.assertAlmostEqual(self.product1.standard_price, 10.0)
+
+    def test_average_perpetual_8(self):
+        """ When a product has an available quantity of -5, edit an incoming shipment and increase
+        the received quantity by 5 units.
+        """
+        self.product1.categ_id.property_cost_method = 'average'
+        # receive 10
+        move1 = self.env['stock.move'].create({
+            'name': 'IN 5@10',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 10,
+            'price_unit': 10,
+        })
+        move1._action_confirm()
+        move1.quantity_done = 10
+        move1._action_done()
+
+        # deliver 15
+        move2 = self.env['stock.move'].create({
+            'name': 'Deliver 10 units',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 15.0,
+        })
+        move2._action_confirm()
+        move2._action_assign()
+        move2.move_line_ids.qty_done = 15.0
+        move2._action_done()
+
+        # increase the receipt to 15
+        move1.move_line_ids.qty_done = 15
 
     def test_average_negative_1(self):
         """ Test edit in the past. Receive 10, send 20, edit the second move to only send 10.
@@ -2961,7 +2997,7 @@ class TestStockValuation(TransactionCase):
         move5._action_done()
 
         self.assertEqual(move5.value, 400.0)
-        self.assertEqual(self.product1.standard_price, 35)
+        self.assertEqual(self.product1.standard_price, 20)
 
         self.assertEqual(self.product1.qty_available, 5)
 
@@ -2978,8 +3014,8 @@ class TestStockValuation(TransactionCase):
         move6.quantity_done = 5.0
         move6._action_done()
 
-        self.assertEqual(move6.value, -175.0)
-        self.assertEqual(self.product1.standard_price, 35)
+        self.assertEqual(move6.value, -100.0)
+        self.assertEqual(self.product1.standard_price, 20)
 
         # in 10 @ 10, the new average price should be 10
         move7 = self.env['stock.move'].create({

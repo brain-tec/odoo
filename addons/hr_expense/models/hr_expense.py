@@ -485,6 +485,7 @@ class HrExpense(models.Model):
             'quantity': 1,
             'unit_amount': price,
             'company_id': employee.company_id.id,
+            'currency_id': employee.company_id.currency_id.id,
         })
         if account:
             custom_values['account_id'] = account.id
@@ -708,7 +709,7 @@ class HrExpenseSheet(models.Model):
         if not self.user_has_groups('hr_expense.group_hr_expense_user'):
             raise UserError(_("Only Managers and HR Officers can approve expenses"))
         elif not self.user_has_groups('hr_expense.group_hr_expense_manager'):
-            current_managers = self.employee_id.parent_id.user_id | self.employee_id.department_id.manager_id.user_id
+            current_managers = self.employee_id.parent_id.user_id | self.employee_id.department_id.manager_id.user_id | self.employee_id.expense_manager_id
 
             if self.employee_id.user_id == self.env.user:
                 raise UserError(_("You cannot refuse your own expenses"))

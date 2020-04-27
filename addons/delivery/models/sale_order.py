@@ -21,11 +21,11 @@ class SaleOrder(models.Model):
         delivery_cost = sum([l.price_total for l in self.order_line if l.is_delivery])
         return self.amount_total - delivery_cost
 
-    @api.depends('partner_id')
+    @api.depends('partner_shipping_id')
     def _compute_available_carrier(self):
         carriers = self.env['delivery.carrier'].search([])
         for rec in self:
-            rec.available_carrier_ids = carriers.available_carriers(rec.partner_shipping_id) if rec.partner_id else carriers
+            rec.available_carrier_ids = carriers.available_carriers(rec.partner_shipping_id) if rec.partner_shipping_id else carriers
 
     def get_delivery_price(self):
         for order in self.filtered(lambda o: o.state in ('draft', 'sent') and len(o.order_line) > 0):
@@ -125,7 +125,7 @@ class SaleOrder(models.Model):
     def _get_invoiced(self):
         super(SaleOrder, self)._get_invoiced()
         for order in self:
-            order_line = order.order_line.filtered(lambda x: not x.is_delivery and not x.is_downpayment)
+            order_line = order.order_line.filtered(lambda x: not x.is_delivery and not x.is_downpayment and not x.display_type)
             if all(line.product_id.invoice_policy == 'delivery' and line.invoice_status == 'no' for line in order_line):
                 order.update({'invoice_status': 'no'})
 

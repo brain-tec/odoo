@@ -19,7 +19,12 @@ class TestUi(odoo.tests.HttpCase):
 
         # To be able to test reconciliation, admin user must have access to accounting features, so we give him the right group for that
         self.env.ref('base.user_admin').write({'groups_id': [(4, self.env.ref('account.group_account_user').id)]})
-
+        if not self.env['account.account'].search([('code', '=', '100000')]):
+            self.env['account.account'].create({
+                'code': '100000',
+                'name': 'Fixed Asset Account',
+                'user_type_id': self.ref('account.data_account_type_fixed_assets'),
+            })
         self.phantom_js("/web#statement_ids=" + str(bank_stmt.id) + "&action=bank_statement_reconciliation_view",
             "odoo.__DEBUG__.services['web_tour.tour'].run('bank_statement_reconciliation')",
             "odoo.__DEBUG__.services['web_tour.tour'].tours.bank_statement_reconciliation.ready", login="admin")
@@ -53,6 +58,7 @@ class TestReconciliationWidget(TestReconciliation):
     def test_filter_partner1(self):
         inv1 = self.create_invoice(currency_id=self.currency_euro_id)
         inv2 = self.create_invoice(currency_id=self.currency_euro_id)
+        partner = inv1.partner_id
 
         receivable1 = inv1.move_id.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
         receivable2 = inv2.move_id.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
@@ -71,7 +77,31 @@ class TestReconciliationWidget(TestReconciliation):
             'date': time.strftime('%Y-07-15'),
         })
 
-        # This is like opening the widget, and type "deco" in the filter
+        # This is like input a partner in the widget
+        mv_lines_rec = self.env['account.reconciliation.widget'].get_move_lines_for_bank_statement_line(
+            bank_stmt_line.id,
+            partner_id=partner.id,
+            excluded_ids=[],
+            search_str=False
+        )
+        mv_lines_ids = [l['id'] for l in mv_lines_rec]
+
+        self.assertTrue(receivable1.id in mv_lines_ids)
+        self.assertTrue(receivable2.id in mv_lines_ids)
+
+        # With a partner set, type the invoice reference in the filter
+        mv_lines_rec = self.env['account.reconciliation.widget'].get_move_lines_for_bank_statement_line(
+            bank_stmt_line.id,
+            partner_id=partner.id,
+            excluded_ids=[],
+            search_str=inv1.reference
+        )
+        mv_lines_ids = [l['id'] for l in mv_lines_rec]
+
+        self.assertTrue(receivable1.id in mv_lines_ids)
+        self.assertFalse(receivable2.id in mv_lines_ids)
+
+        # Without a partner set, type "deco" in the filter
         mv_lines_rec = self.env['account.reconciliation.widget'].get_move_lines_for_bank_statement_line(
             bank_stmt_line.id,
             partner_id=False,
@@ -83,8 +113,7 @@ class TestReconciliationWidget(TestReconciliation):
         self.assertTrue(receivable1.id in mv_lines_ids)
         self.assertTrue(receivable2.id in mv_lines_ids)
 
-        # This is like clicking on the first receivable
-        partner = inv1.partner_id
+        # With a partner set, type "deco" in the filter and click on the first receivable
         mv_lines_rec = self.env['account.reconciliation.widget'].get_move_lines_for_bank_statement_line(
             bank_stmt_line.id,
             partner_id=partner.id,

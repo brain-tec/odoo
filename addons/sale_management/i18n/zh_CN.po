@@ -8,7 +8,6 @@
 # fausthuang, 2018
 # e2f_cn c5 <jarvisn@ecinnovations.com>, 2018
 # bf2549c5415a9287249cba2b8a5823c7, 2018
-# Felix Yuen <fyu@odoo.com>, 2018
 # ChinaMaker <liuct@chinamaker.net>, 2018
 # Martin Trigaux, 2018
 # diaojiaolou <124412206@qq.com>, 2018
@@ -18,6 +17,7 @@
 # snow wang <147156565@qq.com>, 2018
 # inspur qiuguodong <qiuguodong@inspur.com>, 2018
 # 黎伟杰 <674416404@qq.com>, 2019
+# Felix Yuen <fyu@odoo.com>, 2019
 # Jeffery CHEN Fan <jeffery9@gmail.com>, 2019
 # 
 msgid ""
@@ -74,7 +74,7 @@ msgstr "添加产品"
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Add a section"
-msgstr "添加部分"
+msgstr "添加章节"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
@@ -117,7 +117,7 @@ msgstr "属性"
 msgid ""
 "Before archiving \"%s\" please select another default template in the "
 "settings."
-msgstr ""
+msgstr "在归档“%s”之前，请在设置中选择另一个默认模板。"
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_res_config_settings
@@ -478,7 +478,7 @@ msgstr "搜索报价模板"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 #: selection:sale.order.template.line,display_type:0
 msgid "Section"
-msgstr "部分"
+msgstr "章节"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__sequence
@@ -549,7 +549,7 @@ msgstr "你不能添加选项到已确认的订单。"
 msgid ""
 "You cannot change the type of a sale quote line. Instead you should delete "
 "the current line and create a new line of the proper type."
-msgstr ""
+msgstr "你无法更改销售报价单的类型。相反，你应删除当前行并创建正确类型的新行。"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form

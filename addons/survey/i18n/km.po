@@ -48,7 +48,7 @@ msgstr "&amp;times;"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.403
 msgid "403: Forbidden"
-msgstr ""
+msgstr "403: ត្រូវហាមឃាត់ "
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
@@ -380,7 +380,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Answers"
-msgstr ""
+msgstr "ចម្លើយ"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_mail_compose_message__no_auto_thread
@@ -770,7 +770,7 @@ msgstr "ម៉ឺនុយទម្លាក់ចុះ"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__email
 msgid "E-mail"
-msgstr ""
+msgstr "អ៊ីមែល"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
@@ -816,7 +816,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__constr_error_msg
 msgid "Error message"
-msgstr ""
+msgstr "សារកំហុស"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_mail_compose_message__partner_ids
@@ -846,7 +846,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_stage__fold
 msgid "Folded in kanban view"
-msgstr ""
+msgstr "បត់នៅក្នុងទិដ្ឋភាពកាន"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_follower_ids
@@ -1579,7 +1579,7 @@ msgstr "ទំព័រ"
 #: model:ir.model.fields,field_description:survey.field_survey_page__title
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_form
 msgid "Page Title"
-msgstr ""
+msgstr "ចំណងជើងគេហទំព័រ"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_page__sequence
@@ -1712,7 +1712,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.survey_label_search
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
 msgid "Question"
-msgstr ""
+msgstr "សំនួរ"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_label__question_id_2
@@ -1737,7 +1737,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:survey.field_survey_page__question_ids
 #: model:ir.ui.menu,name:survey.menu_survey_question_form1
 msgid "Questions"
-msgstr ""
+msgstr "សំនួរ"
 
 #. module: survey
 #: model:survey.page,title:survey.feedback_4
@@ -1826,7 +1826,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Rows"
-msgstr ""
+msgstr "ជួរដេក"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__labels_ids_2
@@ -2125,7 +2125,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model,name:survey.model_survey_user_input
 msgid "Survey User Input"
-msgstr ""
+msgstr "ការបញ្ចូលអ្នកប្រើស្ទង់មតិ។"
 
 #. module: survey
 #: model:ir.model,name:survey.model_survey_user_input_line
@@ -2178,7 +2178,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_kanban
 msgid "Test"
-msgstr ""
+msgstr "ការសាកល្បង"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_search
@@ -2213,7 +2213,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__thank_you_message
 msgid "Thanks Message"
-msgstr ""
+msgstr "សារអរគុណ"
 
 #. module: survey
 #: model:survey.label,value:survey.frow_2_5_3

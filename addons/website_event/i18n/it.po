@@ -9,19 +9,18 @@
 # Massimo Bianchi <bianchi.massimo@gmail.com>, 2018
 # Paolo Valier, 2018
 # Pietro Della Notte <pdellanotte@gmail.com>, 2018
-# David Minneci <david@numeko.it>, 2018
 # Martin Trigaux, 2018
 # Léonie Bouchat <lbo@odoo.com>, 2019
-# Lorenzo Battistini <lorenzo.battistini@agilebg.com>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2019
+# Lorenzo Battistini <lb@takobi.online>, 2019
+# Sergio Zanchetta <primes2h@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:32+0000\n"
+"POT-Creation-Date: 2019-11-14 07:35+0000\n"
 "PO-Revision-Date: 2018-08-24 09:34+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2019\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2020\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -336,6 +335,7 @@ msgid "Click to publish your event."
 msgstr "Fai click qui per pubblicare l'evento."
 
 #. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.layout
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Close"
 msgstr "Chiudi"
@@ -385,7 +385,7 @@ msgstr "Trascina questo blocco e rilascialo nella pagina."
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "E-mail"
-msgstr "Email"
+msgstr "E-mail"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.ticket
@@ -477,8 +477,13 @@ msgid ""
 "Find out what people see and say about this event,\n"
 "                            and join the conversation."
 msgstr ""
-"Scopri come viene mostrato e cosa si dice dell'evento.\n"
-"                            Partecipa alla discussione!"
+"Scopri cosa pensano le persone di questo evento\n"
+"                            e partecipa alla discussione."
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.layout
+msgid "Following content will appear on all events"
+msgstr "I seguenti contenuti compariranno su tutti gli eventi"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -505,7 +510,7 @@ msgstr "È pubblicato"
 #: code:addons/website_event/models/event.py:71
 #, python-format
 msgid "Location"
-msgstr "Location"
+msgstr "Ubicazione"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
@@ -523,7 +528,7 @@ msgstr "Nome"
 #: code:addons/website_event/static/src/js/website_event.editor.js:30
 #, python-format
 msgid "New Event"
-msgstr "Nuovo Evento"
+msgstr "Nuovo evento"
 
 #. module: website_event
 #: code:addons/website_event/controllers/main.py:39

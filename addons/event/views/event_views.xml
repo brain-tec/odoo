@@ -475,11 +475,11 @@
                             <group string="Attendee" name="attendee">
                                 <field name="partner_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
                                 <field name="name"/>
-                                <field name="phone"/>
+                                <field name="phone" class="o_force_ltr"/>
                                 <field name="email"/>
                             </group>
                             <group string="Event Information" name="event">
-                                <field name="event_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="event_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create': True}"/>
                                 <field name="date_open" groups="base.group_no_one"/>
                                 <field name="date_closed" groups="base.group_no_one"/>
                             </group>

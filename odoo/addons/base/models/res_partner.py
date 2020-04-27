@@ -9,8 +9,6 @@ import pytz
 import threading
 import re
 
-from email.utils import formataddr
-
 import requests
 from lxml import etree
 from werkzeug import urls
@@ -406,7 +404,7 @@ class Partner(models.Model):
     def _compute_email_formatted(self):
         for partner in self:
             if partner.email:
-                partner.email_formatted = formataddr((partner.name or u"False", partner.email or u"False"))
+                partner.email_formatted = tools.formataddr((partner.name or u"False", partner.email or u"False"))
             else:
                 partner.email_formatted = ''
 
@@ -481,8 +479,9 @@ class Partner(models.Model):
         sync_children = self.child_ids.filtered(lambda c: not c.is_company)
         for child in sync_children:
             child._commercial_sync_to_children()
+        res = sync_children.write(sync_vals)
         sync_children._compute_commercial_partner()
-        return sync_children.write(sync_vals)
+        return res
 
     @api.multi
     def _fields_sync(self, values):
@@ -676,6 +675,9 @@ class Partner(models.Model):
                 'target': 'new',
                 'flags': {'form': {'action_buttons': True}}}
 
+    def _get_contact_name(self, partner, name):
+        return "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, name)
+
     def _get_name(self):
         """ Utility method to allow name_get to be overrided without re-browse the partner """
         partner = self
@@ -685,7 +687,7 @@ class Partner(models.Model):
             if not name and partner.type in ['invoice', 'delivery', 'other']:
                 name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
             if not partner.is_company:
-                name = "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, name)
+                name = self._get_contact_name(partner, name)
         if self._context.get('show_address_only'):
             name = partner._display_address(without_company=True)
         if self._context.get('show_address'):
@@ -799,7 +801,7 @@ class Partner(models.Model):
             partner_ids = [row[0] for row in self.env.cr.fetchall()]
 
             if partner_ids:
-                return self.browse(partner_ids).name_get()
+                return models.lazy_name_get(self.browse(partner_ids))
             else:
                 return []
         return super(Partner, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)

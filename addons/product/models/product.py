@@ -159,7 +159,8 @@ class ProductProduct(models.Model):
     ]
 
     def _get_invoice_policy(self):
-        return False
+        # Consider we are in "delivery" mode for proper valuation
+        return "delivery"
 
     def _compute_is_product_variant(self):
         for product in self:
@@ -741,7 +742,6 @@ class SupplierInfo(models.Model):
         'res.partner', 'Vendor',
         domain=[('supplier', '=', True)], ondelete='cascade', required=True,
         help="Vendor of this product")
-    active = fields.Boolean(related='name.active', readonly=True)
     product_name = fields.Char(
         'Vendor Product Name',
         help="This vendor's product name will be used when printing a request for quotation. Keep empty to use the internal one.")

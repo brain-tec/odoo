@@ -8,9 +8,9 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-21 13:17+0000\n"
+"POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
 "Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
@@ -32,6 +32,11 @@ msgstr "ប្រសិនបើអ្នកមិនមានគណនី ស�
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_login
 msgid "API Login Id"
 msgstr "API Id សំរាប់ពិនិត្យចូល"
+
+#. module: payment_authorize
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_signature_key
+msgid "API Signature Key"
+msgstr ""
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_transaction_key
@@ -94,22 +99,14 @@ msgid "How to get paid with Authorize.Net"
 msgstr "របៀបបង់លុយជាមួយ Authorize.Net "
 
 #. module: payment_authorize
-#: code:addons/payment_authorize/controllers/main.py:64
-#, python-format
-msgid ""
-"If you don't have any account, please ask your salesperson to update your "
-"profile. "
-msgstr ""
-"ប្រសិនបើអ្នកមិនមានគណនី  "
-"សូមសួរអ្នកលក់របស់អ្នកឱ្យធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូបរបស់អ្នក។"
-
-#. module: payment_authorize
-#: code:addons/payment_authorize/models/payment.py:261
+#: code:addons/payment_authorize/models/payment.py:292
 #, python-format
 msgid ""
 "Invalid token found: the Authorize profile is missing.Please make sure the "
 "token has a valid acquirer reference."
 msgstr ""
+"រកឃើញថូខឹនមិនត្រឹមត្រូវ៖ បាត់ព័ត៌មានផ្ទាល់ខ្លួន។ "
+"សូមប្រាកដថាថូខឹនមានឯកសារយោងត្រឹមត្រូវ។"
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
@@ -150,13 +147,13 @@ msgstr "Paypal"
 #: code:addons/payment_authorize/controllers/main.py:66
 #, python-format
 msgid "Please complete your profile. "
-msgstr ""
+msgstr "សូមបំពេញទម្រង់របស់អ្នក។"
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/controllers/main.py:61
 #, python-format
 msgid "Please sign in to complete the payment."
-msgstr ""
+msgstr "សូមចូលដើម្បីបញ្ចប់ការទូទាត់។"
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__provider
@@ -167,23 +164,23 @@ msgstr "ការផ្តល់ជូន"
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_token__save_token
 msgid "Save Cards"
-msgstr ""
+msgstr "រក្សាទុកកាត"
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Sips"
-msgstr ""
+msgstr "Sips"
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Stripe"
-msgstr ""
+msgstr "ឆ្នូត"
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/models/payment.py:365
 #, python-format
 msgid "The Customer Profile creation in Authorize.NET failed."
-msgstr ""
+msgstr "ការបង្កើតប្រវត្តិរូបអតិថិជននៅក្នុង Authorize.NET បានបរាជ័យ។"
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/controllers/main.py:58
@@ -192,6 +189,7 @@ msgid ""
 "The transaction cannot be processed because some contact details are missing"
 " or invalid: "
 msgstr ""
+"ប្រតិបត្តិការមិនអាចដំណើរការបានទេពីព្រោះព័ត៌មានលំអិតទំនាក់ទំនងមួយចំនួនត្រូវបានបាត់ឬមិនត្រឹមត្រូវ។"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__authorize_profile
@@ -199,6 +197,8 @@ msgid ""
 "This contains the unique reference for this partner/payment token "
 "combination in the Authorize.net backend"
 msgstr ""
+"នេះមានឯកសារយោងតែមួយគត់សម្រាប់ការរួមបញ្ចូលគ្នានៃនិមិត្តសញ្ញា / "
+"ការទូទាត់នៅក្នុងកម្មវិធីខាងក្រោយ Authorize.net ។"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__save_token
@@ -208,6 +208,9 @@ msgid ""
 " invoicing), you need it to automatically charge the customer when you issue"
 " an invoice."
 msgstr ""
+"ជម្រើសនេះអនុញ្ញាតឱ្យអតិថិជនរក្សាទុកកាតឥណទានរបស់ពួកគេជានិមិត្តសញ្ញាទូទាត់និងប្រើវាឡើងវិញសម្រាប់ការទិញនៅពេលក្រោយ។"
+" ប្រសិនបើអ្នកគ្រប់គ្រងការជាវ (វិក្កយបត្រកើតឡើង) "
+"អ្នកត្រូវគិតថ្លៃអតិថិជនដោយស្វ័យប្រវត្តិនៅពេលអ្នកចេញវិក្កយបត្រ។"
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0

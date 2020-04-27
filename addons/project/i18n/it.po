@@ -3,6 +3,7 @@
 # * project
 # 
 # Translators:
+# Francesco Garganese <francesco.garganese@aeromnia.aero>, 2018
 # Cesare Cugnasco <cesare.cugnasco@gmail.com>, 2018
 # Simone Bernini <simone@aperturelabs.it>, 2018
 # SebastianoPistore <SebastianoPistore.info@protonmail.ch>, 2018
@@ -12,15 +13,15 @@
 # Manuela Feliciani <mfeliciani@alice.it>, 2018
 # David Minneci <david@numeko.it>, 2018
 # maiolif <maiolif@mgftools.com>, 2018
-# Francesco Garganese <francesco.garganese@aeromnia.aero>, 2018
 # Martin Trigaux, 2018
 # Giovanni Perteghella <giovanni@perteghella.org>, 2018
 # Luigi Di Naro <gigidn@gmail.com>, 2018
 # Cécile Collart <cco@odoo.com>, 2018
 # Paolo Valier, 2018
 # Léonie Bouchat <lbo@odoo.com>, 2019
-# Mario Riva <mario.riva@gmail.com>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2019
+# Simone Sanfilippo <s.sanfilippo@hinge16.eu>, 2019
+# Mario Riva <mario.riva@gmail.com>, 2020
+# Sergio Zanchetta <primes2h@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -28,7 +29,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-09 10:31+0000\n"
 "PO-Revision-Date: 2018-08-24 09:23+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2019\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2020\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -261,7 +262,7 @@ msgstr "<i class=\"fa fa-arrow-circle-right \"/> Leggi le opinioni"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.rating_index
 msgid "<i class=\"fa fa-calendar\"/> End date :"
-msgstr "<i class=\"fa fa-calendar\"/> Data di fine :"
+msgstr "<i class=\"fa fa-calendar\"/> Data fine :"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
@@ -804,7 +805,7 @@ msgstr ""
 #. module: project
 #: model:ir.model,name:project.model_res_config_settings
 msgid "Config Settings"
-msgstr "Impostazioni configurazione"
+msgstr "Impostazioni di configurazione"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_project_config
@@ -1089,7 +1090,7 @@ msgstr "Nome visualizzato"
 #: code:addons/project/models/digest.py:16
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
-msgstr ""
+msgstr "Non hai accesso, salta questi dati per l'e-mail digest dell'utente"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -1176,7 +1177,7 @@ msgstr "Data finale"
 #: code:addons/project/models/project.py:631
 #, python-format
 msgid "Error! You cannot create recursive hierarchy of task(s)."
-msgstr "Errore! Impossibile creare una gerarchia ricorsiva nei lavori."
+msgstr "Errore, impossibile creare gerarchie ricorsive nei lavori."
 
 #. module: project
 #: sql_constraint:project.project:0
@@ -1232,6 +1233,11 @@ msgid ""
 "review the \"This Week\" column to move important tasks \"Today\". Every "
 "Monday, you review the \"This Month\" column."
 msgstr ""
+"Riempi facilmente la Posta in arrivo con il gateway e-mail. Rivedi "
+"periodicamente la Posta in arrivo e pianifica le attività spostandole su "
+"altre colonne. Ogni giorno, rivedi la colonna \"Questa settimana\" per "
+"spostare importanti attività nella colonna \"Oggi\". Ogni lunedì, rivedi la "
+"colonna \"Questo mese\"."
 
 #. module: project
 #. openerp-web
@@ -1314,8 +1320,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__sequence
 msgid "Gives the sequence order when displaying a list of tasks."
-msgstr ""
-"Fornisce l'ordine di sequenza quando viene visualizzato l'elenco dei lavori."
+msgstr "Stabilisce l'ordine con cui visualizzare un elenco di lavori."
 
 #. module: project
 #: selection:project.task,kanban_state:0
@@ -1401,9 +1406,9 @@ msgid ""
 "\n"
 "Don't forget to set up the mail templates on the stages for which you want to get the customer's feedbacks."
 msgstr ""
-"Modalità di rilevamento opinioni cliente:\n"
-"- Valutazione al cambio di fase: verrà inviata una e-mail quando un lavoro o un problema cambia di fase\n"
-"- Valutazione periodica: le e-mail verranno inviate periodicamente\n"
+"Modalità di rilevamento opinioni cliente.\n"
+"- Valutazione al cambio di fase: viene inviata una e-mail quando un lavoro o un problema cambia fase\n"
+"- Valutazione periodica: le e-mail vengono inviate periodicamente\n"
 "\n"
 "È necessario impostare i modelli e-mail nelle fasi per le quali si desidera ottenere le opinioni del cliente."
 
@@ -2028,14 +2033,14 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"ID facoltativo di un thread (record) a cui verranno allegati tutti i "
-"messaggi in arrivo, anche se non hanno risposto ad esso. Se impostato, "
-"disabiliterà completamente la creazione di nuovi record."
+"ID opzionale di una discussione (record) alla quale vengono allegati tutti i"
+" messaggi in arrivo, non solo le risposte. Se impostato, viene disabilitata "
+"in modo completo la creazione di nuovi record."
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all
 msgid "Or"
-msgstr "O"
+msgstr "Oppure"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all_config
@@ -2310,7 +2315,7 @@ msgstr "Valutazione"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__rating_template_id
 msgid "Rating Email Template"
-msgstr "Modello e-mail di valutazione"
+msgstr "Modello e-mail per valutazione"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_status_period
@@ -2320,17 +2325,17 @@ msgstr "Frequenza valutazione"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr "Valutazione - Ultima opinione"
+msgstr "Opinione ultima valutazione"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_image
 msgid "Rating Last Image"
-msgstr "Valutazione - Ultima immagine"
+msgstr "Immagine ultima valutazione"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_value
 msgid "Rating Last Value"
-msgstr "Valutazione - Ultimo valore"
+msgstr "Valore ultima valutazione"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_request_deadline
@@ -2692,7 +2697,7 @@ msgstr ""
 "Stato basato sulle attività\n"
 "In ritardo: data di scadenza già superata\n"
 "Oggi: attività in data odierna\n"
-"Pianificata: attività future."
+"Pianificato: attività future."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__subtask_project_id
@@ -2728,7 +2733,7 @@ msgstr "Stampa maglietta"
 #. module: project
 #: sql_constraint:project.tags:0
 msgid "Tag name already exists!"
-msgstr "Questo nome etichetta esiste già!"
+msgstr "Nome etichetta già esistente."
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_tags_action
@@ -3240,7 +3245,7 @@ msgstr "Settimanale"
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__is_favorite
 msgid "Whether this project should be displayed on the dashboard or not"
-msgstr "Indica se questo progetto deve essere visualizzato nella bacheca"
+msgstr "Indica se il progetto deve essere visualizzato nella bacheca"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__resource_calendar_id

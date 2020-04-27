@@ -70,7 +70,7 @@ class StockMoveLine(models.Model):
     @api.constrains('lot_id', 'product_id')
     def _check_lot_product(self):
         for line in self:
-            if line.lot_id and line.product_id != line.lot_id.product_id:
+            if line.lot_id and line.product_id != line.lot_id.sudo().product_id:
                 raise ValidationError(_('This lot %s is incompatible with this product %s' % (line.lot_id.name, line.product_id.display_name)))
 
     @api.one
@@ -180,7 +180,7 @@ class StockMoveLine(models.Model):
 
         mls = super(StockMoveLine, self).create(vals_list)
 
-        for ml in mls:
+        for ml, vals in izip(mls, vals_list):
             if ml.state == 'done':
                 if 'qty_done' in vals:
                     ml.move_id.product_uom_qty = ml.move_id.quantity_done
@@ -200,7 +200,6 @@ class StockMoveLine(models.Model):
                 next_moves = ml.move_id.move_dest_ids.filtered(lambda move: move.state not in ('done', 'cancel'))
                 next_moves._do_unreserve()
                 next_moves._action_assign()
-
         return mls
 
     def write(self, vals):
@@ -210,6 +209,9 @@ class StockMoveLine(models.Model):
         """
         if self.env.context.get('bypass_reservation_update'):
             return super(StockMoveLine, self).write(vals)
+
+        if 'product_id' in vals and any(vals.get('state', ml.state) != 'draft' and vals['product_id'] != ml.product_id.id for ml in self):
+            raise UserError(_("Changing the product is only allowed in 'Draft' state."))
 
         Quant = self.env['stock.quant']
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
@@ -422,8 +424,9 @@ class StockMoveLine(models.Model):
                 rounding = ml.product_uom_id.rounding
 
                 # if this move line is force assigned, unreserve elsewhere if needed
-                if not ml.location_id.should_bypass_reservation() and float_compare(ml.qty_done, ml.product_qty, precision_rounding=rounding) > 0:
-                    extra_qty = ml.qty_done - ml.product_qty
+                if not ml.location_id.should_bypass_reservation() and float_compare(ml.qty_done, ml.product_uom_qty, precision_rounding=rounding) > 0:
+                    qty_done_product_uom = ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP')
+                    extra_qty = qty_done_product_uom - ml.product_qty
                     ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_to_ignore=done_ml)
                 # unreserve what's been reserved
                 if not ml.location_id.should_bypass_reservation() and ml.product_id.type == 'product' and ml.product_qty:
@@ -488,7 +491,7 @@ class StockMoveLine(models.Model):
             # We now have to find the move lines that reserved our now unavailable quantity. We
             # take care to exclude ourselves and the move lines were work had already been done.
             outdated_move_lines_domain = [
-                ('move_id.state', 'not in', ['done', 'cancel']),
+                ('state', 'not in', ['done', 'cancel']),
                 ('product_id', '=', product_id.id),
                 ('lot_id', '=', lot_id.id if lot_id else False),
                 ('location_id', '=', location_id.id),
@@ -497,7 +500,13 @@ class StockMoveLine(models.Model):
                 ('product_qty', '>', 0.0),
                 ('id', 'not in', ml_to_ignore.ids),
             ]
-            current_picking_first = lambda cand: cand.picking_id != self.move_id.picking_id
+            # We take the current picking first, then the pickings with the latest scheduled date
+            current_picking_first = lambda cand: (
+                cand.picking_id != self.move_id.picking_id,
+                -(cand.picking_id.scheduled_date or cand.move_id.date_expected).timestamp()
+                if cand.picking_id or cand.move_id
+                else -cand.id,
+            )
             outdated_candidates = self.env['stock.move.line'].search(outdated_move_lines_domain).sorted(current_picking_first)
 
             # As the move's state is not computed over the move lines, we'll have to manually

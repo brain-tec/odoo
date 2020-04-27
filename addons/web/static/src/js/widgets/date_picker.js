@@ -30,7 +30,7 @@ var DateWidget = Widget.extend({
             locale: moment.locale(),
             format : this.type_of_date === 'datetime' ? time.getLangDatetimeFormat() : time.getLangDateFormat(),
             minDate: moment({ y: 1900 }),
-            maxDate: moment().add(200, "y"),
+            maxDate: moment({ y: 9999, M: 11, d: 31 }),
             useCurrent: false,
             icons: {
                 time: 'fa fa-clock-o',
@@ -40,7 +40,7 @@ var DateWidget = Widget.extend({
                 previous: 'fa fa-chevron-left',
                 next: 'fa fa-chevron-right',
                 today: 'fa fa-calendar-check-o',
-                clear: 'fa fa-delete',
+                clear: 'fa fa-trash',
                 close: 'fa fa-times'
             },
             calendarWeeks: true,
@@ -84,6 +84,13 @@ var DateWidget = Widget.extend({
      * set datetime value
      */
     changeDatetime: function () {
+        if (this.__libInput > 0) {
+            if (this.options.warn_future) {
+                this._warnFuture(this.getValue());
+            }
+            this.trigger("datetime_changed");
+            return;
+        }
         var oldValue = this.getValue();
         if (this.isValid()) {
             this._setValueFromUi();
@@ -193,7 +200,8 @@ var DateWidget = Widget.extend({
             this.$warning.attr('title', title);
             this.$input.after(this.$warning);
         }
-        if (currentDate && currentDate.isAfter(moment())) {
+        // Get rid of time and TZ crap for comparison
+        if (currentDate && currentDate.format('YYYY-MM-DD') > moment().format('YYYY-MM-DD')) {
             this.$warning.show();
         } else {
             this.$warning.hide();

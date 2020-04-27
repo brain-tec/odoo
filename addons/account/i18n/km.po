@@ -8,14 +8,14 @@
 # AN Souphorn <ansouphorn@gmail.com>, 2018
 # Samkhann Seang <seangsamkhann@gmail.com>, 2018
 # Sengtha Chay <sengtha@gmail.com>, 2018
-# Chan Nath <channath@gmail.com>, 2019
+# Chan Nath <channath@gmail.com>, 2018
 # Lux Sok <sok.lux@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 13:35+0000\n"
+"POT-Creation-Date: 2019-11-14 07:33+0000\n"
 "PO-Revision-Date: 2018-08-24 09:14+0000\n"
 "Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
@@ -581,6 +581,11 @@ msgid "<span>Quantity</span>"
 msgstr "<span>គុណតម្លៃ</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
+msgid "<span>Reference</span>"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span>Reporting</span>"
 msgstr "<span>រាយការណ៍</span>"
@@ -852,16 +857,14 @@ msgstr "ទីតាំងសារពើពន្ធពន្ធអាចត្
 #, python-format
 msgid ""
 "A user cannot have both Tax B2B and Tax B2C.\n"
-"Problematic user(s): %s\n"
 "You should go in General Settings, and choose to display Product Prices\n"
 "either in 'Tax-Included' or in 'Tax-Excluded' mode\n"
 "(or switch twice the mode if you are already in the desired one)."
 msgstr ""
-"អ្នកប្រើមិនអាចមានទាំងពន្ធ B2B និងពន្ធ B2C ។\n"
-"អ្នកប្រើមានបញ្ហា:%s\n"
-"អ្នកគួរចូលក្នុងការកំណត់ទូទៅហើយជ្រើសរើសបង្ហាញតម្លៃផលិតផល\n"
-"ទាំងនៅក្នុង 'អាករដែលបានរួមបញ្ចូល' ឬនៅក្នុង 'ពន្ធមិនរាប់បញ្ចូល' របៀប\n"
-"(ឬប្តូររបៀបទ្វេរដងបើអ្នកមានរួចហើយក្នុងការចង់បាន) ។"
+"អ្នកប្រើប្រាស់មិនអាចមានទាំងពន្ធ B2B និងពន្ធ B2C ។\n"
+"អ្នកគួរតែចូលទៅក្នុងការកំណត់ទូទៅហើយជ្រើសរើសបង្ហាញតម្លៃផលិតផល។\n"
+"ទាំងនៅក្នុង 'ពន្ធបញ្ចូល -' ឬនៅក្នុងរបៀប 'ដកពន្ធ' ។\n"
+"(ឬប្តូររបៀបពីរដងបើអ្នកបានជ្រើសរើសរួចហើយ) ។"
 
 #. module: account
 #: model:res.groups,name:account.group_warning_account
@@ -888,6 +891,7 @@ msgstr "ដំណើររការនៃការពិន័យ"
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__account_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__account_id
+#: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_accountant
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -1215,7 +1219,6 @@ msgid "Account; Reverse entries"
 msgstr "គណនី; បញ្ច្រាសធាតុ"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_accountant
 #: model:ir.ui.menu,name:account.account_account_menu
 #: model:ir.ui.menu,name:account.menu_finance_entries
 #: model_terms:ir.ui.view,arch_db:account.product_template_form_view
@@ -4120,7 +4123,6 @@ msgstr "រៀបរាប់ពីមូលហេតុដែលអ្នកយ
 #: code:addons/account/static/src/xml/account_reconciliation.xml:310
 #: model:ir.model.fields,field_description:account.field_account_account_type__note
 #: model:ir.model.fields,field_description:account.field_account_invoice_line__name
-#: model:ir.model.fields,field_description:account.field_account_invoice_send__description
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_type_form
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_line_form
@@ -4175,6 +4177,12 @@ msgid ""
 "Difference between the computed ending balance and the specified ending "
 "balance."
 msgstr "ភាពខុសគ្នារវាងការគណនាសមតុល្យចុងគ្រានិងសមតុល្យចុងគ្រាដែលបានបញ្ជាក់។"
+
+#. module: account
+#: code:addons/account/models/account_move.py:408
+#, python-format
+msgid "Difference debit - credit: "
+msgstr "ឥណពន្ធភាពខុសគ្នា - ឥណទាន៖"
 
 #. module: account
 #: model:ir.model,name:account.model_digest_digest
@@ -4700,6 +4708,7 @@ msgstr "រយៈពេលសារពើពន្ធ"
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_res_partner__property_account_position_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_position_id
+#: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_template_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_template_tree
@@ -6874,11 +6883,6 @@ msgid "Message Record Name"
 msgstr "ឈ្មោះកំណត់ត្រាសារ"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_invoice_send__description
-msgid "Message description: either the subject, or the beginning of the body"
-msgstr "ការពិពណ៌នាសារ: ទាំងប្រធានបទឬការចាប់ផ្តើមនៃរាងកាយ"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__invoice_warn_msg
 #: model:ir.model.fields,field_description:account.field_res_users__invoice_warn_msg
 msgid "Message for Invoice"
@@ -8354,11 +8358,6 @@ msgid "Properties"
 msgstr "ទ្រព្យសម្បត្តិ"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_invoice_send__website_published
-msgid "Published"
-msgstr "ចេញផ្សាយ"
-
-#. module: account
 #: selection:account.journal,type:0
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_template_search
@@ -9695,13 +9694,15 @@ msgstr "គោលដៅផ្លាស់ទី"
 
 #. module: account
 #. openerp-web
-#: code:addons/account/static/src/xml/account_reconciliation.xml:185
+#: code:addons/account/static/src/xml/account_reconciliation.xml:186
 #: model:ir.model,name:account.model_account_tax
 #: model:ir.model.fields,field_description:account.field_account_invoice__amount_tax
 #: model:ir.model.fields,field_description:account.field_account_invoice_tax__tax_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__tax_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__tax_id
 #: model_terms:ir.ui.view,arch_db:account.account_tax_view_search
+#: model_terms:ir.ui.view,arch_db:account.invoice_supplier_tree
+#: model_terms:ir.ui.view,arch_db:account.invoice_tree
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 #, python-format
@@ -10050,10 +10051,9 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_payment__multi
 #: model:ir.model.fields,help:account.field_account_register_payments__multi
 msgid ""
-"Technical field indicating if the user selected invoices from multiple "
-"partners or from different types."
+"Technical field indicating if the registering payment will generate multiple"
+" payments or not."
 msgstr ""
-"បច្ចេកទេសដែលបង្ហាញថាតើអ្នកប្រើជ្រើសវិក័យប័ត្រពីដៃគូច្រើនឬពីប្រភេទផ្សេងគ្នា។"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_refund__refund_only
@@ -11201,11 +11201,6 @@ msgid "Total Payable"
 msgstr "សរុបត្រូវបង់"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "Total Price"
-msgstr "តំលៃសរុប"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit
 #: model:ir.model.fields,field_description:account.field_res_users__credit
 msgid "Total Receivable"
@@ -11796,17 +11791,12 @@ msgid "View accounts detail"
 msgstr "បង្ហាញលម្អិតគណនី"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_invoice_send__website_published
-msgid "Visible on the website as a comment"
-msgstr "មើលឃើញនៅលើគេហទំព័រដូចជាមតិយោបល់"
-
-#. module: account
 #: selection:res.partner,invoice_warn:0
 msgid "Warning"
 msgstr "ព្រមាន"
 
 #. module: account
-#: code:addons/account/models/account_invoice.py:808
+#: code:addons/account/models/account_invoice.py:852
 #, python-format
 msgid "Warning for %s"
 msgstr ""
@@ -12455,15 +12445,15 @@ msgstr ""
 
 #. module: account
 #. openerp-web
-#: code:addons/account/static/src/xml/account_reconciliation.xml:318
+#: code:addons/account/static/src/xml/account_reconciliation.xml:323
 #, python-format
 msgid "have been reconciled automatically."
 msgstr "ត្រូវបានសម្របសម្រួលដោយស្វ័យប្រវត្តិ"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__invoice_without_email
-msgid "number of invoice(s) that will not be sent"
-msgstr "ចំនួនវិក័យប័ត្រ(s)ដែលមិនត្រូវបានផ្ញើ"
+msgid "invoice(s) that will not be sent"
+msgstr "វិក្ក័យបត្រ(s) ដែលមិនអាចផ្ញើរបាន"
 
 #. module: account
 #. openerp-web

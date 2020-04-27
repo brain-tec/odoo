@@ -118,6 +118,9 @@ var MediaWidget = Widget.extend({
         this.media = media;
         this.$media = $(media);
         this.page = 0;
+        this.lastLoadedPage = -1;
+        this.records = [];
+        this.needle = '';
     },
 
     //--------------------------------------------------------------------------
@@ -149,6 +152,10 @@ var MediaWidget = Widget.extend({
      */
     goToPage: function (page) {
         this.page = page;
+        if (page > this.lastLoadedPage) {
+            return this.fetchPage(page);
+        }
+        return $.when();
     },
     /**
      * @abstract
@@ -221,6 +228,7 @@ var ImageWidget = MediaWidget.extend({
 
         this.multiImages = options.multiImages;
 
+        // No longer supported, kept for compatibility with custos. TODO: Remove in master.
         this.firstFilters = options.firstFilters || [];
         this.lastFilters = options.lastFilters || [];
 
@@ -229,20 +237,9 @@ var ImageWidget = MediaWidget.extend({
     /**
      * @override
      */
-    willStart: function () {
-        return $.when(
-            this._super.apply(this, arguments),
-            this.search('', true)
-        );
-    },
-    /**
-     * @override
-     */
     start: function () {
         var def = this._super.apply(this, arguments);
         var self = this;
-
-        this._renderImages();
 
         var o = {
             url: null,
@@ -255,11 +252,13 @@ var ImageWidget = MediaWidget.extend({
             o.id = +o.url.match(/\/web\/content\/(\d+)/, '')[1];
             o.isDocument = true;
         }
-        if (o.url) {
-            self._toggleImage(_.find(self.records, function (record) { return record.src === o.url;}) || o, true);
-        }
 
-        return def;
+        return this.search('').then(function () {
+            if (o.url) {
+                self._toggleImage(_.find(self.records, function (record) { return record.url === o.url;}) || o);
+            }
+            return def;
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -279,8 +278,10 @@ var ImageWidget = MediaWidget.extend({
      * @override
      */
     goToPage: function (page) {
-        this._super.apply(this, arguments);
-        this._renderImages();
+        var self = this;
+        return this._super.apply(this, arguments).then(function () {
+            self._renderImages();
+        });
     },
     /**
      * @override
@@ -348,6 +349,12 @@ var ImageWidget = MediaWidget.extend({
             // Remove crop related attributes
             if (self.$media.attr('data-aspect-ratio')) {
                 var attrs = ['aspect-ratio', 'x', 'y', 'width', 'height', 'rotate', 'scale-x', 'scale-y'];
+                Object.keys(self.$media.data()).forEach(function (key) {
+                    if (_.str.startsWith(key, 'crop:')) {
+                        attrs.push(key);
+                    }
+                });
+                self.$media.removeClass('o_cropped_img_to_save');
                 _.each(attrs, function (attr) {
                     self.$media.removeData(attr);
                     self.$media.removeAttr('data-' + attr);
@@ -359,17 +366,30 @@ var ImageWidget = MediaWidget.extend({
     /**
      * @override
      */
-    search: function (needle, noRender) {
+    search: function (needle) {
         var self = this;
-        if (!noRender) {
-            this.$('input.url').val('').trigger('input').trigger('change');
-        }
+        this.records.splice(0);
+        this.lastLoadedPage = -1;
+        this.needle = needle;
+        return this.goToPage(0).then(function () {
+            self._renderImages();
+        });
+    },
+    fetchPage: function (pageNum) {
         // TODO: Expand this for adding SVG
-        var domain = this.domain.concat(['|', ['mimetype', '=', false], ['mimetype', this.options.document ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png']]]);
-        if (needle && needle.length) {
-            domain.push('|', ['datas_fname', 'ilike', needle], ['name', 'ilike', needle]);
+        var domain = this.domain.concat([
+            '|',
+            ['type', '=like', 'binary'],
+            ['url', '!=', false],
+            '|',
+            ['mimetype', '=', false],
+            ['mimetype', this.options.document ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png']],
+        ]);
+        if (this.needle && this.needle.length) {
+            domain.push('|', ['datas_fname', 'ilike', this.needle], ['name', 'ilike', this.needle]);
         }
         domain.push('|', ['datas_fname', '=', false], '!', ['datas_fname', '=like', '%.crop'], '!', ['name', '=like', '%.crop']);
+        var self = this;
         return this._rpc({
             model: 'ir.attachment',
             method: 'search_read',
@@ -379,39 +399,18 @@ var ImageWidget = MediaWidget.extend({
                 fields: ['name', 'datas_fname', 'mimetype', 'checksum', 'url', 'type', 'res_id', 'res_model', 'access_token'],
                 order: [{name: 'id', asc: false}],
                 context: weContext.get(),
-            },
+                // Try to fetch first record of next page just to know whether there is a next page.
+                limit: this.IMAGES_PER_PAGE + 1,
+                offset: pageNum * this.IMAGES_PER_PAGE,
+            }
         }).then(function (records) {
-            self.records = _.chain(records)
-                .filter(function (r) {
-                    return (r.type === "binary" || r.url && r.url.length > 0);
-                })
-                .uniq(function (r) {
-                    return (r.url || r.id);
-                })
-                .sortBy(function (r) {
-                    if (_.any(self.firstFilters, function (filter) {
-                        var regex = new RegExp(filter, 'i');
-                        return r.name.match(regex) || r.datas_fname && r.datas_fname.match(regex);
-                    })) {
-                        return -1;
-                    }
-                    if (_.any(self.lastFilters, function (filter) {
-                        var regex = new RegExp(filter, 'i');
-                        return r.name.match(regex) || r.datas_fname && r.datas_fname.match(regex);
-                    })) {
-                        return 1;
-                    }
-                    return 0;
-                })
-                .value();
-
+            self.lastLoadedPage = pageNum;
+            self.records = self.records.slice();
+            Array.prototype.splice.apply(self.records, [pageNum * self.IMAGES_PER_PAGE, records.length].concat(records));
             _.each(self.records, function (record) {
                 record.src = record.url || _.str.sprintf('/web/image/%s/%s', record.id, encodeURI(record.name));  // Name is added for SEO purposes
                 record.isDocument = !(/gif|jpe|jpg|png/.test(record.mimetype));
             });
-            if (!noRender) {
-                self._renderImages();
-            }
         });
     },
 
@@ -872,7 +871,7 @@ var VideoWidget = MediaWidget.extend({
                 '<div class="media_iframe_video" data-oe-expression="' + this.$content.attr('src') + '">'+
                     '<div class="css_editable_mode_display">&nbsp;</div>'+
                     '<div class="media_iframe_video_size" contenteditable="false">&nbsp;</div>'+
-                    '<iframe src="' + this.$content.attr('src') + '" frameborder="0" contenteditable="false"></iframe>'+
+                    '<iframe src="' + this.$content.attr('src') + '" frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen"></iframe>'+
                 '</div>'
             ));
         }
@@ -925,7 +924,7 @@ var VideoWidget = MediaWidget.extend({
         var vimRegExp = /\/\/(player.)?vimeo.com\/([a-z]*\/)*([0-9]{6,11})[?]?.*/;
         var vimMatch = url.match(vimRegExp);
 
-        var dmRegExp = /.+dailymotion.com\/(video|hub|embed)\/([^_]+)[^#]*(#video=([^_&]+))?/;
+        var dmRegExp = /.+dailymotion.com\/(video|hub|embed)\/([^_?]+)[^#]*(#video=([^_&]+))?/;
         var dmMatch = url.match(dmRegExp);
 
         var ykuRegExp = /(.*).youku\.com\/(v_show\/id_|embed\/)(.+)/;
@@ -949,7 +948,7 @@ var VideoWidget = MediaWidget.extend({
             $video.attr('src', vinMatch[0] + '/embed/simple');
             videoType = 'vin';
         } else if (vimMatch && vimMatch[3].length) {
-            $video.attr('src', '//player.vimeo.com/video/' + vimMatch[3] + autoplay);
+            $video.attr('src', '//player.vimeo.com/video/' + vimMatch[3] + autoplay.replace('mute', 'muted'));
             videoType = 'vim';
         } else if (dmMatch && dmMatch[2].length) {
             var just_id = dmMatch[2].replace('video/','');
@@ -1268,9 +1267,11 @@ var MediaDialog = Dialog.extend({
      * @private
      */
     _setActive: function (widget) {
+        var self = this;
         this.active = widget;
-        this.active.goToPage(0);
-        this._updateControlPanel();
+        this.active.goToPage(0).then(function () {
+            self._updateControlPanel();
+        });
     },
     /**
      * @private
@@ -1292,8 +1293,10 @@ var MediaDialog = Dialog.extend({
      */
     _onPagerClick: function (ev) {
         ev.preventDefault();
-        this.active.goToPage(this.active.page + ($(ev.currentTarget).hasClass('previous') ? -1 : 1));
-        this._updateControlPanel();
+        var self = this;
+        this.active.goToPage(this.active.page + ($(ev.currentTarget).hasClass('previous') ? -1 : 1)).then(function () {
+            self._updateControlPanel();
+        });
     },
     /**
      * @private
@@ -1307,7 +1310,6 @@ var MediaDialog = Dialog.extend({
      */
     _onSearchInput: function (ev) {
         var self = this;
-        this.active.goToPage(0);
         this.active.search($(ev.currentTarget).val() || '').then(function () {
             self._updateControlPanel();
         });

@@ -8,3 +8,11 @@
 .orders_label_text_align {
     vertical-align: 15%;
 }
+
+/* ---- Order page ---- */
+
+.sale_tbody .o_line_note {
+    word-break: break-word;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}

@@ -14,14 +14,19 @@
 # Cécile Collart <cco@odoo.com>, 2019
 # gdp Odoo <gdp@odoo.com>, 2019
 # thomas quertinmont <tqu@odoo.com>, 2019
+# Paul Morelle <madprog@htkc.org>, 2019
+# Mohamed Cherkaoui <chermed@gmail.com>, 2019
+# Shark McGnark <peculiarcheese@gmail.com>, 2019
+# William Olhasque <william.olhasque@scopea.fr>, 2019
+# Laura Piraux <lap@odoo.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
+"POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
-"Last-Translator: thomas quertinmont <tqu@odoo.com>, 2019\n"
+"Last-Translator: Laura Piraux <lap@odoo.com>, 2020\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -168,14 +173,18 @@ msgstr "<span class=\"o_stat_text\">Carte(s) de crédit</span>"
 msgid ""
 "<span class=\"o_warning_text\">Test</span>\n"
 "                                    <span class=\"o_stat_text\">Environment</span>"
-msgstr "<span class=\"o_warning_text\"/><span class=\"o_stat_text\"/>"
+msgstr ""
+"<span class=\"o_warning_text\">Environnement</span>\n"
+"                                    <span class=\"o_stat_text\">de tests</span>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.acquirer_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
 "                                    <span class=\"o_stat_text\">Environment</span>"
-msgstr "<span class=\"text-success\"/><span class=\"o_stat_text\"/>"
+msgstr ""
+"<span class=\"text-success\">Environnement</span>\n"
+"                                    <span class=\"o_stat_text\">de production</span>"
 
 #. module: payment
 #: model_terms:payment.acquirer,cancel_msg:payment.payment_acquirer_adyen
@@ -705,7 +714,7 @@ msgstr "Détermine l'ordre d'affichage"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_confirmation_status
 msgid "Dismiss"
-msgstr ""
+msgstr "Annuler"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer__display_name
@@ -833,6 +842,11 @@ msgstr "De"
 #: model_terms:ir.ui.view,arch_db:payment.acquirer_search
 msgid "Group By"
 msgstr "Regrouper par"
+
+#. module: payment
+#: model:ir.model,name:payment.model_ir_http
+msgid "HTTP Routing"
+msgstr "Routage HTTP"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__is_processed
@@ -1389,12 +1403,6 @@ msgid "Payment method set!"
 msgstr "Methode de paiement définie!"
 
 #. module: payment
-#: code:addons/payment/controllers/portal.py:252
-#, python-format
-msgid "Payment transaction failed."
-msgstr "La transaction de paiement a échoué."
-
-#. module: payment
 #: model:ir.model,name:payment.model_account_payment
 #: model:ir.ui.menu,name:payment.root_payment_menu
 #: model_terms:ir.ui.view,arch_db:payment.payment_token_form_view
@@ -1535,6 +1543,20 @@ msgstr "Fabrication"
 #: model_terms:ir.ui.view,arch_db:payment.acquirer_search
 msgid "Provider"
 msgstr "Fournisseur"
+
+#. module: payment
+#. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:10
+#, python-format
+msgid "Publish"
+msgstr "Publier"
+
+#. module: payment
+#. openerp-web
+#: code:addons/payment/static/src/js/payment_translations.js:9
+#, python-format
+msgid "Published"
+msgstr "Publié"
 
 #. module: payment
 #. openerp-web
