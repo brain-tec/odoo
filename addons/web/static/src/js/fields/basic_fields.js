@@ -326,7 +326,7 @@ var InputField = DebouncedField.extend({
      * @private
      */
     _onInput: function () {
-        this.isDirty = true;
+        this.isDirty = !this._isLastSetValue(this.$input.val());
         this._doDebouncedAction();
     },
     /**
@@ -773,7 +773,7 @@ var FieldDate = InputField.extend({
      */
     activate: function () {
         if (this.isFocusable() && this.datewidget) {
-            this.datewidget.focus();
+            this.datewidget.$input.select();
             return true;
         }
         return false;
