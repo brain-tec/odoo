@@ -2044,11 +2044,19 @@ class Binary(Field):
 class Image(Binary):
     """Encapsulates an image, extending :class:`Binary`.
 
-    :param int max_width: the maximum width of the image
-    :param int max_height: the maximum height of the image
+    If image size is greater than the ``max_width``/``max_height`` limit of pixels, the image will be
+    resized to the limit by keeping aspect ratio.
+
+    :param int max_width: the maximum width of the image (default: ``0``, no limit)
+    :param int max_height: the maximum height of the image (default: ``0``, no limit)
     :param bool verify_resolution: whether the image resolution should be verified
         to ensure it doesn't go over the maximum image resolution (default: ``True``).
         See :class:`odoo.tools.image.ImageProcess` for maximum image resolution (default: ``45e6``).
+
+    .. note::
+
+        If no ``max_width``/``max_height`` is specified (or is set to 0) and ``verify_resolution`` is False,
+        the field content won't be verified at all and a :class:`Binary` field should be used.
     """
     max_width = 0
     max_height = 0
@@ -2174,9 +2182,11 @@ class Selection(Field):
                     if values is not None and values != [kv[0] for kv in selection]:
                         _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead", self, selection)
                     values = [kv[0] for kv in selection]
-                    labels.update(selection)
+                    labels = dict(selection)
                     self.ondelete = {}
                 else:
+                    values = None
+                    labels = {}
                     self.selection = selection
                     self.ondelete = None
 
