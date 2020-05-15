@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_is_zero, float_compare, date_utils, email_split, email_escape_char, email_re
+from odoo.tools import float_is_zero, float_repr, float_compare, date_utils, email_split, email_escape_char, email_re
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 from datetime import date, timedelta
@@ -2749,8 +2749,10 @@ class AccountMoveLine(models.Model):
 
     # ==== Analytic fields ====
     analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True, check_company=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', check_company=True)
+    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account',
+        index=True, compute="_compute_analytic_account", store=True, readonly=False, check_company=True)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags',
+        compute="_compute_analytic_account", store=True, readonly=False, check_company=True)
 
     # ==== Onchange / display purpose fields ====
     recompute_tax_line = fields.Boolean(store=False, readonly=True,
@@ -2805,6 +2807,25 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
+
+    @api.model
+    def _get_default_line_name(self, document, amount, currency, date, partner=None):
+        ''' Helper to construct a default label to set on journal items.
+
+        E.g. Vendor Reimbursement $ 1,555.00 - Azure Interior - 05/14/2020.
+
+        :param document:    A string representing the type of the document.
+        :param amount:      The document's amount.
+        :param currency:    The document's currency.
+        :param date:        The document's date.
+        :param partner:     The optional partner.
+        :return:            A string.
+        '''
+        values = ['%s %s' % (document, formatLang(self.env, amount, currency_obj=currency))]
+        if partner:
+            values.append(partner.display_name)
+        values.append(format_date(self.env, fields.Date.to_string(date)))
+        return ' - '.join(values)
 
     @api.model
     def _get_default_tax_account(self, repartition_line):
@@ -2909,6 +2930,20 @@ class AccountMoveLine(models.Model):
         if self.product_id:
             return self.product_id.uom_id
         return False
+
+    @api.depends('product_id', 'account_id', 'partner_id', 'date_maturity')
+    def _compute_analytic_account(self):
+        for record in self:
+            rec = self.env['account.analytic.default'].account_get(
+                product_id=record.product_id.id,
+                partner_id=record.partner_id.commercial_partner_id.id or record.move_id.partner_id.commercial_partner_id.id,
+                account_id=record.account_id.id,
+                user_id=record.env.uid,
+                date=record.date_maturity,
+                company_id=record.move_id.company_id.id
+            )
+            record.analytic_account_id = (record._origin or record).analytic_account_id or rec.analytic_id
+            record.analytic_tag_ids = (record._origin or record).analytic_tag_ids or rec.analytic_tag_ids
 
     def _get_price_total_and_subtotal(self, price_unit=None, quantity=None, discount=None, currency=None, product=None, partner=None, taxes=None, move_type=None):
         self.ensure_one()
