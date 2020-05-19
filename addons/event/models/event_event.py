@@ -265,8 +265,8 @@ class EventEvent(models.Model):
         """ Compute the start sale date of an event. Currently lowest starting sale
         date of tickets if they are used, of False. """
         for event in self:
-            start_dates = [ticket.start_sale_date for ticket in event.event_ticket_ids if ticket.start_sale_date]
-            event.start_sale_date = min(start_dates) if start_dates else False
+            start_dates = [ticket.start_sale_date for ticket in event.event_ticket_ids if not ticket.is_expired]
+            event.start_sale_date = min(start_dates) if start_dates and all(start_dates) else False
 
     @api.depends('event_ticket_ids.sale_available')
     def _compute_event_registrations_sold_out(self):
@@ -496,3 +496,13 @@ class EventEvent(models.Model):
 
             result[event.id] = cal.serialize().encode('utf-8')
         return result
+
+    @api.autovacuum
+    def _gc_mark_events_done(self):
+        """ move every ended events in the next 'ended stage' """
+        ended_events = self.env['event.event'].search([
+            ('date_end', '<', fields.Datetime.now()),
+            ('stage_id.pipe_end', '=', False),
+        ])
+        if ended_events:
+            ended_events.action_set_done()
