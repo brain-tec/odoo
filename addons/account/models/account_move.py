@@ -32,7 +32,7 @@ def calc_check_digits(number):
 class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'sequence.mixin']
-    _description = "Journal Entries"
+    _description = "Journal Entry"
     _order = 'date desc, name desc, id desc'
     _mail_post_access = 'read'
     _check_company_auto = True
@@ -3822,8 +3822,11 @@ class AccountMoveLine(models.Model):
             # Eventually create a journal entry to book the difference due to foreign currency's exchange rate that fluctuates
             if to_balance and any([not float_is_zero(residual, precision_rounding=digits_rounding_precision) for aml, residual in to_balance.values()]):
                 if not self.env.context.get('no_exchange_difference'):
-                    exchange_move = self.env['account.move'].with_context(default_move_type='entry').create(
-                        self.env['account.full.reconcile']._prepare_exchange_diff_move(move_date=maxdate, company=amls[0].company_id))
+                    exchange_move_vals = self.env['account.full.reconcile']._prepare_exchange_diff_move(
+                        move_date=maxdate, company=amls[0].company_id)
+                    if len(amls.mapped('partner_id')) == 1 and amls[0].partner_id:
+                        exchange_move_vals['partner_id'] = amls[0].partner_id.id
+                    exchange_move = self.env['account.move'].with_context(default_move_type='entry').create(exchange_move_vals)
                     part_reconcile = self.env['account.partial.reconcile']
                     for aml_to_balance, total in to_balance.values():
                         if total:
@@ -4575,8 +4578,8 @@ class AccountPartialReconcile(models.Model):
                                 'tax_exigible': True,
                                 'tax_ids': [(6, 0, [tax.id])],
                                 'move_id': newly_created_move.id,
-                                'currency_id': line.currency_id.id,
-                                'amount_currency': self.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
+                                'currency_id': self.currency_id.id,
+                                'amount_currency': line.currency_id.round(line.amount_currency * amount / line.balance) if line.currency_id and line.balance else 0.0,
                                 'partner_id': line.partner_id.id,
                                 'journal_id': newly_created_move.journal_id.id,
                                 'tax_repartition_line_id': line.tax_repartition_line_id.id,
@@ -4590,8 +4593,8 @@ class AccountPartialReconcile(models.Model):
                                 'account_id': account_id.id,
                                 'tax_exigible': True,
                                 'move_id': newly_created_move.id,
-                                'currency_id': line.currency_id.id,
-                                'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
+                                'currency_id': self.currency_id.id,
+                                'amount_currency': line.currency_id.round(-line.amount_currency * amount / line.balance) if line.currency_id and line.balance else 0.0,
                                 'partner_id': line.partner_id.id,
                                 'journal_id': newly_created_move.journal_id.id,
                             })
