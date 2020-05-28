@@ -1873,10 +1873,10 @@ var SnippetsMenu = Widget.extend({
 
         tab = tab || this.tabs.BLOCKS;
 
-        while (this.customizePanel.firstChild) {
-            this.customizePanel.removeChild(this.customizePanel.firstChild);
-        }
         if (content) {
+            while (this.customizePanel.firstChild) {
+                this.customizePanel.removeChild(this.customizePanel.firstChild);
+            }
             $(this.customizePanel).append(content);
         }
 
@@ -2057,10 +2057,11 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onBlocksTabClick: function (ev) {
-        this._activateSnippet(false);
-        this._updateLeftPanelContent({
-            content: [],
-            tab: this.tabs.BLOCKS,
+        this._activateSnippet(false).then(() => {
+            this._updateLeftPanelContent({
+                content: [],
+                tab: this.tabs.BLOCKS,
+            });
         });
     },
     /**
