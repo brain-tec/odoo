@@ -84,8 +84,8 @@ class StockRule(models.Model):
             'location_dest_id': location_id.id,
             'bom_id': bom.id,
             'date_deadline': date_deadline,
-            'date_planned_finished': date_deadline,
-            'date_planned_start': fields.Datetime.from_string(date_deadline) - relativedelta(hours=1),
+            'date_planned_finished': fields.Datetime.from_string(values['date_planned']),
+            'date_planned_start': date_deadline,
             'procurement_group_id': False,
             'propagate_cancel': self.propagate_cancel,
             'propagate_date': self.propagate_date,
@@ -99,7 +99,10 @@ class StockRule(models.Model):
 
     def _get_date_planned(self, product_id, company_id, values):
         format_date_planned = fields.Datetime.from_string(values['date_planned'])
-        date_planned = format_date_planned - relativedelta(days=product_id.produce_delay or 0.0)
+        if product_id.produce_delay:
+            date_planned = format_date_planned - relativedelta(days=product_id.produce_delay)
+        else:
+            date_planned = format_date_planned - relativedelta(hours=1)
         date_planned = date_planned - relativedelta(days=company_id.manufacturing_lead)
         return date_planned
 
@@ -118,7 +121,11 @@ class ProcurementGroup(models.Model):
         """
         procurements_without_kit = []
         for procurement in procurements:
-            bom_kit = self.env['mrp.bom']._bom_find(product=procurement.product_id, bom_type='phantom')
+            bom_kit = self.env['mrp.bom']._bom_find(
+                product=procurement.product_id,
+                company_id=procurement.company_id.id,
+                bom_type='phantom',
+            )
             if bom_kit:
                 order_qty = procurement.product_uom._compute_quantity(procurement.product_qty, bom_kit.product_uom_id, round=False)
                 qty_to_produce = (order_qty / bom_kit.product_qty)

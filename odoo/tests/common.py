@@ -6,6 +6,7 @@ helpers and classes to write tests.
 """
 import base64
 import collections
+import functools
 import importlib
 import inspect
 import itertools
@@ -20,6 +21,7 @@ import shutil
 import signal
 import socket
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -424,19 +426,16 @@ class TransactionCase(BaseCase):
     def setUp(self):
         super(TransactionCase, self).setUp()
         self.registry = odoo.registry(get_db_name())
+        self.addCleanup(self.registry.reset_changes)
+        self.addCleanup(self.registry.clear_caches)
+
         #: current transaction's cursor
         self.cr = self.cursor()
+        self.addCleanup(self.cr.close)
+
         #: :class:`~odoo.api.Environment` for the current test case
         self.env = api.Environment(self.cr, odoo.SUPERUSER_ID, {})
-
-        @self.addCleanup
-        def reset():
-            # rollback and close the cursor, and reset the environments
-            self.registry.clear_caches()
-            self.registry.reset_changes()
-            self.env.reset()
-            self.cr.rollback()
-            self.cr.close()
+        self.addCleanup(self.env.reset)
 
         self.patch(type(self.env['res.partner']), '_get_gravatar_image', lambda *a: False)
 
@@ -525,21 +524,18 @@ class ChromeBrowser():
         self.ws = None  # websocket
         self.request_id = 0
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
-        self.chrome_process = None
+        self.chrome_pid = None
 
         otc = odoo.tools.config
         self.screenshots_dir = os.path.join(otc['screenshots'], get_db_name(), 'screenshots')
         self.screencasts_dir = None
         if otc['screencasts']:
-            if otc['screencasts'] in ('1', 'true', 't'):
-                self.screencasts_dir = os.path.join(otc['screenshots'], get_db_name(), 'screencasts')
-            else:
-                self.screencasts_dir =os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
-
+            self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
         self.screencast_frames = []
         os.makedirs(self.screenshots_dir, exist_ok=True)
 
         self.window_size = window_size
+        self.sigxcpu_handler = None
         self._chrome_start()
         self._find_websocket()
         self._logger.info('Websocket url found: %s', self.ws_url)
@@ -548,7 +544,6 @@ class ChromeBrowser():
         self._websocket_send('Runtime.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
-        self.sigxcpu_handler = None
         if os.name == 'posix':
             self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
             signal.signal(signal.SIGXCPU, self.signal_handler)
@@ -560,13 +555,11 @@ class ChromeBrowser():
             os._exit(0)
 
     def stop(self):
-        if self.chrome_process is not None:
-            self._logger.info("Closing chrome headless with pid %s", self.chrome_process.pid)
+        if self.chrome_pid is not None:
+            self._logger.info("Closing chrome headless with pid %s", self.chrome_pid)
             self._websocket_send('Browser.close')
-            if self.chrome_process.poll() is None:
-                self._logger.info("Terminating chrome headless with pid %s", self.chrome_process.pid)
-                self.chrome_process.terminate()
-                self.chrome_process.wait()
+            self._logger.info("Terminating chrome headless with pid %s", self.chrome_pid)
+            os.kill(self.chrome_pid, signal.SIGTERM)
         if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
             self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
             shutil.rmtree(self.user_data_dir, ignore_errors=True)
@@ -599,8 +592,27 @@ class ChromeBrowser():
 
         raise unittest.SkipTest("Chrome executable not found")
 
+    def _spawn_chrome(self, cmd):
+        if os.name != 'posix':
+            return
+        pid = os.fork()
+        if pid != 0:
+            return pid
+        else:
+            if platform.system() != 'Darwin':
+                # since the introduction of pointer compression in Chrome 80 (v8 v8.0),
+                # the memory reservation algorithm requires more than 8GiB of virtual mem for alignment
+                # this exceeds our default memory limits.
+                # OSX already reserve huge memory for processes
+                import resource
+                resource.setrlimit(resource.RLIMIT_AS, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+            # redirect browser stderr to /dev/null
+            with open(os.devnull, 'wb', 0) as stderr_replacement:
+                os.dup2(stderr_replacement.fileno(), sys.stderr.fileno())
+            os.execv(cmd[0], cmd)
+
     def _chrome_start(self):
-        if self.chrome_process is not None:
+        if self.chrome_pid is not None:
             return
         with socket.socket() as s:
             s.bind(('localhost', 0))
@@ -610,7 +622,6 @@ class ChromeBrowser():
 
         switches = {
             '--headless': '',
-            '--enable-logging': 'stderr',
             '--no-default-browser-check': '',
             '--no-first-run': '',
             '--disable-extensions': '',
@@ -633,31 +644,27 @@ class ChromeBrowser():
             '--remote-debugging-address': HOST,
             '--remote-debugging-port': str(self.devtools_port),
             '--no-sandbox': '',
+            '--disable-crash-reporter': '',
+            '--disable-gpu': '',
         }
         cmd = [self.executable]
         cmd += ['%s=%s' % (k, v) if v else k for k, v in switches.items()]
         url = 'about:blank'
         cmd.append(url)
-        self._logger.info('chrome_run executing %s', ' '.join(cmd))
         try:
-            self.chrome_process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.chrome_pid = self._spawn_chrome(cmd)
         except OSError:
             raise unittest.SkipTest("%s not found" % cmd[0])
-        self._logger.info('Chrome pid: %s', self.chrome_process.pid)
+        self._logger.info('Chrome pid: %s', self.chrome_pid)
 
     def _find_websocket(self):
         version = self._json_command('version')
         self._logger.info('Browser version: %s', version['Browser'])
-        try:
-            infos = self._json_command('')[0]  # Infos about the first tab
-        except IndexError:
-            self._logger.warning('No tab found in Chrome')
-            self.stop()
-            raise unittest.SkipTest('No tab found in Chrome')
+        infos = self._json_command('', get_key=0)  # Infos about the first tab
         self.ws_url = infos['webSocketDebuggerUrl']
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
 
-    def _json_command(self, command, timeout=3):
+    def _json_command(self, command, timeout=3, get_key=None):
         """
         Inspect dev tools with get
         Available commands:
@@ -675,27 +682,38 @@ class ChromeBrowser():
         delay = 0.1
         tries = 0
         failure_info = None
-        while tries * delay < timeout:
-            if self.chrome_process.poll() is not None:
-                self._logger.error('Chrome crashed at startup with return code', self.chrome_process.returncode)
+        while timeout > 0:
+            try:
+                os.kill(self.chrome_pid, 0)
+            except ProcessLookupError:
+                message = 'Chrome crashed at startup'
                 break
             try:
                 r = requests.get(url, timeout=3)
                 if r.ok:
-                    self._logger.info("Json command result in %s", tries * delay)
-                    return r.json()
-                return {'status_code': r.status_code}
+                    res = r.json()
+                    if get_key is None:
+                        return res
+                    else:
+                        return res[get_key]
             except requests.ConnectionError as e:
                 failure_info = str(e)
-                time.sleep(delay)
-                tries+=1
+                message = 'Connection Error while trying to connect to Chrome debugger'
             except requests.exceptions.ReadTimeout as e:
                 failure_info = str(e)
+                message = 'Connection Timeout while trying to connect to Chrome debugger'
                 break
-        self._logger.error('Could not connect to chrome debugger after %s tries, %ss' % (tries, delay))
+            except (KeyError, IndexError):
+                message = 'Key "%s" not found in json result "%s" after connecting to Chrome debugger' % (get_key, res)
+            time.sleep(delay)
+            timeout -= delay
+            delay = delay * 1.5
+            tries += 1
+        self._logger.error("%s after %s tries" % (message, tries))
         if failure_info:
             self._logger.info(failure_info)
-        raise unittest.SkipTest("Cannot connect to chrome headless")
+        self.stop()
+        raise unittest.SkipTest("Error during Chrome headless connection")
 
     def _open_websocket(self):
         self.ws = websocket.create_connection(self.ws_url)
@@ -707,6 +725,8 @@ class ChromeBrowser():
         """
         send chrome devtools protocol commands through websocket
         """
+        if self.ws is None:
+            return
         sent_id = self.request_id
         payload = {
             'method': method,
@@ -859,7 +879,7 @@ class ChromeBrowser():
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
         fname = '%s_screencast_%s.mp4' % (prefix, timestamp)
         outfile = os.path.join(self.screencasts_dir, fname)
-        
+
         try:
             ffmpeg_path = find_in_path('ffmpeg')
         except IOError:
@@ -867,7 +887,7 @@ class ChromeBrowser():
 
         if ffmpeg_path:
             framerate = int(len(self.screencast_frames) / (self.screencast_frames[-1].get('timestamp') - self.screencast_frames[0].get('timestamp')))
-            r = subprocess.run([ffmpeg_path, '-framerate', str(framerate), '-i', '%s/frame_%%05d.png' % self.screencasts_dir, outfile])
+            r = subprocess.run([ffmpeg_path, '-framerate', str(framerate), '-i', '%s/frame_%%05d.png' % self.screencasts_frames_dir, outfile])
             self._logger.log(25, 'Screencast in: %s', outfile)
         else:
             outfile = outfile.strip('.mp4')
@@ -982,23 +1002,32 @@ class ChromeBrowser():
         """ attempts to make a CDT RemoteObject comprehensible
         """
         objtype = arg['type']
-        klass = arg.get('className', '')
         subtype = arg.get('subtype')
         if objtype == 'undefined':
             # the undefined remoteobject is literally just {type: undefined}...
             return 'undefined'
-        elif objtype != 'object' or subtype:
+        elif objtype != 'object' or subtype not in (None, 'array'):
             # value is the json representation for json object
             # otherwise fallback on the description which is "a string
             # representation of the object" e.g. the traceback for errors, the
             # source for functions, ... finally fallback on the entire arg mess
             return arg.get('value', arg.get('description', arg))
-
+        elif subtype == 'array':
+            # apparently value is *not* the JSON representation for arrays
+            # instead it's just Array(3) which is useless, however the preview
+            # properties are the same as object which is useful (just ignore the
+            # name which is the index)
+            return '[%s]' % ', '.join(
+                repr(p['value']) if p['type'] == 'string' else str(p['value'])
+                for p in arg.get('preview', {}).get('properties', [])
+                if re.match(r'\d+', p['name'])
+            )
         # all that's left is type=object, subtype=None aka custom or
         # non-standard objects, print as TypeName(param=val, ...), sadly because
         # of the way Odoo widgets are created they all appear as Class(...)
+        # nb: preview properties are *not* recursive, the value is *all* we get
         return '%s(%s)' % (
-            klass or objtype,
+            arg.get('className') or 'object',
             ', '.join(
                 '%s=%s' % (p['name'], repr(p['value']) if p['type'] == 'string' else p['value'])
                 for p in arg.get('preview', {}).get('properties', [])
@@ -1008,7 +1037,7 @@ class ChromeBrowser():
 
     LINE_PATTERN = '\tat %(functionName)s (%(url)s:%(lineNumber)d:%(columnNumber)d)\n'
     def _format_stack(self, logrecord):
-        if logrecord['type'] not in ('error', 'trace', 'warning'):
+        if logrecord['type'] not in ['trace']:
             return
 
         trace = logrecord.get('stackTrace')
@@ -1159,13 +1188,8 @@ class HttpCase(TransactionCase):
         - wait for ready object to be available
         - eval(code) inside the page
 
-        To signal success test do:
-        console.log('test successful')
-
-        To signal failure do:
-        console.error('test failed')
-
-        If neither are done before timeout test fails.
+        To signal success test do: console.log('test successful')
+        To signal test failure raise an exception or call console.error
         """
         # increase timeout if coverage is running
         if any(f.filename.endswith('/coverage/execfile.py') for f in inspect.stack()  if f.filename):
@@ -1683,12 +1707,12 @@ class Form(object):
                 r.write(values)
         else:
             r = self._model.create(values)
-            self._values.update(
-                record_to_values(self._view['fields'], r)
-            )
+        self._values.update(
+            record_to_values(self._view['fields'], r)
+        )
         self._changed.clear()
         self._model.flush()
-        self._model.invalidate_cache()
+        self._model.env.clear()  # discard cache and pending recomputations
         return r
 
     def _values_to_save(self, all_fields=False):
@@ -1699,45 +1723,70 @@ class Form(object):
                                 fields and only save fields which are changed
                                 and not readonly
         """
-        values = {}
+        view = self._view
         fields = self._view['fields']
+        record_values = self._values
+        changed = self._changed
+        return self._values_to_save_(
+            record_values, fields, view,
+            changed, all_fields
+        )
+
+    def _values_to_save_(
+            self, record_values, fields, view,
+            changed, all_fields=False, modifiers_values=None,
+            parent_link=None
+    ):
+        """ Validates & extracts values to save, recursively in order to handle
+         o2ms properly
+
+        :param dict record_values: values of the record to extract
+        :param dict fields: fields_get result
+        :param view: view tree
+        :param set changed: set of fields which have been modified (since last save)
+        :param bool all_fields:
+            whether to ignore normal filtering and just return everything
+        :param dict modifiers_values:
+            defaults to ``record_values``, but o2ms need some additional
+            massaging
+        """
+        values = {}
         for f in fields:
+            get_modifier = functools.partial(
+                self._get_modifier,
+                f, modmap=view['modifiers'],
+                vals=modifiers_values or record_values
+            )
             descr = fields[f]
-            v = self._values[f]
+            v = record_values[f]
             # note: maybe `invisible` should not skip `required` if model attribute
-            if not all_fields and self._get_modifier(f, 'required') and not (descr['type'] == 'boolean' or self._get_modifier(f, 'invisible')):
-                assert v is not False, "{} is a required field".format(f)
+            if v is False and not (all_fields or f == parent_link or descr['type'] == 'boolean' or get_modifier('invisible') or get_modifier('column_invisible')):
+                if get_modifier('required'):
+                    raise AssertionError("{} is a required field ({})".format(f, view['modifiers'][f]))
+
             # skip unmodified fields unless all_fields (also always ignore id)
-            if f == 'id' or not (all_fields or f in self._changed):
+            if f == 'id' or not (all_fields or f in changed):
                 continue
 
-            if self._get_modifier(f, 'readonly'):
-                node = _get_node(self._view, f)
+            if get_modifier('readonly'):
+                node = _get_node(view, f)
                 if not (all_fields or node.get('force_save')):
                     continue
 
             if descr['type'] == 'one2many':
-                view = descr['views']['edition']
-                modifiers = view['modifiers']
+                subview = descr['views']['edition']
+                fields_ = subview['fields']
                 oldvals = v
                 v = []
-
-                nodes = {
-                    n.get('name'): n
-                    for n in view['tree'].iter('field')
-                }
-                nodes['id'] = etree.Element('field', attrib={'name': 'id'})
-
                 for (c, rid, vs) in oldvals:
-                    if c in (0, 1):
+                    if c == 1 and not vs:
+                        c, vs = 4, False
+                    elif c in (0, 1):
                         vs = vs or {}
-                        if all_fields:
-                            items = list(vs.items())
-                        else:
-                            items = list(getattr(vs, 'changed_items', vs.items)())
-                        fields_ = view['fields']
+
                         missing = fields_.keys() - vs.keys()
-                        if missing: # FIXME: maaaybe this should be done at the start?
+                        # FIXME: maybe do this during initial loading instead?
+                        if missing:
                             Model = self._env[descr['relation']]
                             if c == 0:
                                 vs.update(dict.fromkeys(missing, False))
@@ -1750,13 +1799,14 @@ class Form(object):
                                     {k: v for k, v in fields_.items() if k not in vs},
                                     Model.browse(rid)
                                 ))
-                        context = dict(vs)
-                        context.setdefault('id', False)
-                        context['•parent•'] = self._values
-                        vs = {
-                            k: v for k, v in items
-                            if all_fields or nodes[k].get('force_save') or not self._get_modifier(k, 'readonly', modmap=modifiers, vals=context)
-                        }
+                        vs = self._values_to_save_(
+                            vs, fields_, subview,
+                            vs._changed if isinstance(vs, UpdateDict) else vs.keys(),
+                            all_fields,
+                            modifiers_values={'id': False, **vs, '•parent•': record_values},
+                            # related o2m don't have a relation_field
+                            parent_link=descr.get('relation_field'),
+                        )
                     v.append((c, rid, vs))
 
             values[f] = v
@@ -1776,7 +1826,7 @@ class Form(object):
         record = self._model.browse(self._values.get('id'))
         result = record.onchange(self._onchange_values(), fields, spec)
         self._model.flush()
-        self._model.invalidate_cache()
+        self._model.env.clear()  # discard cache and pending recomputations
         if result.get('warning'):
             _logger.getChild('onchange').warning("%(title)s %(message)s" % result.get('warning'))
         values = result.get('value', {})
@@ -1792,17 +1842,33 @@ class Form(object):
         )
 
     def _onchange_values(self):
-        f = self._view['fields']
+        return self._onchange_values_(self._view['fields'], self._values)
+
+    def _onchange_values_(self, fields, record):
+        """ Recursively cleanup o2m values for onchanges:
+
+        * if an o2m command is a 1 (UPDATE) and there is nothing to update, send
+          a 4 instead (LINK_TO) instead as that's what the webclient sends for
+          unmodified rows
+        * if an o2m command is a 1 (UPDATE) and only a subset of its fields have
+          been modified, only send the modified ones
+
+        This needs to be recursive as there are people who put invisible o2ms
+        inside their o2ms.
+        """
         values = {}
-        for k, v in self._values.items():
-            if f[k]['type'] == 'one2many':
+        for k, v in record.items():
+            if fields[k]['type'] == 'one2many':
+                subfields = fields[k]['views']['edition']['fields']
                 it = values[k] = []
                 for (c, rid, vs) in v:
+                    if c == 1 and isinstance(vs, UpdateDict):
+                        vs = dict(vs.changed_items())
+
                     if c == 1 and not vs:
-                        # web client sends a 4 for unmodified o2m rows
                         it.append((4, rid, False))
-                    elif c == 1 and isinstance(vs, UpdateDict):
-                        it.append((1, rid, dict(vs.changed_items())))
+                    elif c in (0, 1):
+                        it.append((c, rid, self._onchange_values_(subfields, vs)))
                     else:
                         it.append((c, rid, vs))
             else:
@@ -2202,6 +2268,7 @@ def _cleanup_from_default(type_, value):
         return odoo.fields.Datetime.to_string(value)
     elif type_ == 'date' and isinstance(value, date):
         return odoo.fields.Date.to_string(value)
+    return value
 
 def _get_node(view, f, *arg):
     """ Find etree node for the field ``f`` in the view's arch
@@ -2273,7 +2340,7 @@ class TagsSelector(object):
 
         test_module = getattr(test, 'test_module', None)
         test_class = getattr(test, 'test_class', None)
-        test_tags = test.test_tags | {test_module}  # module as test_tags deprecated, keep for retrocompatibility, 
+        test_tags = test.test_tags | {test_module}  # module as test_tags deprecated, keep for retrocompatibility,
         test_method = getattr(test, '_testMethodName', None)
 
         def _is_matching(test_filter):

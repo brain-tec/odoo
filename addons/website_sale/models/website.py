@@ -3,7 +3,7 @@
 
 import logging
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, SUPERUSER_ID
 
 from odoo.http import request
 from odoo.addons.website.models import ir_http
@@ -55,12 +55,9 @@ class Website(models.Model):
                 Pricelist._get_website_pricelists_domain(website.id)
             )
 
-    @api.depends_context('website_id')
     def _compute_pricelist_id(self):
         for website in self:
-            if website._context.get('website_id') != website.id:
-                website = website.with_context(website_id=website.id)
-            website.pricelist_id = website.get_current_pricelist()
+            website.pricelist_id = website.with_context(website_id=website.id).get_current_pricelist()
 
     # This method is cached, must not return records! See also #8795
     @tools.ormcache('self.env.uid', 'country_code', 'show_visible', 'website_pl', 'current_pl', 'all_pl', 'partner_pl', 'order_pl')
@@ -114,7 +111,7 @@ class Website(models.Model):
             if country_code:
                 # keep partner_pl only if GeoIP compliant in case of GeoIP enabled
                 partner_pl = partner_pl.filtered(
-                    lambda pl: pl.country_group_ids and country_code in pl.country_group_ids.mapped('country_ids.code')
+                    lambda pl: pl.country_group_ids and country_code in pl.country_group_ids.mapped('country_ids.code') or not pl.country_group_ids
                 )
             pricelists |= partner_pl
 
@@ -252,7 +249,7 @@ class Website(models.Model):
                 sale_order_id = last_order.pricelist_id in available_pricelists and last_order.id
 
         # Test validity of the sale_order_id
-        sale_order = self.env['sale.order'].sudo().browse(sale_order_id).exists() if sale_order_id else None
+        sale_order = self.env['sale.order'].with_context(force_company=request.website.company_id.id).sudo().browse(sale_order_id).exists() if sale_order_id else None
 
         if not (sale_order or force_create or code):
             if request.session.get('sale_order_id'):
@@ -274,7 +271,7 @@ class Website(models.Model):
             # TODO cache partner_id session
             pricelist = self.env['product.pricelist'].browse(pricelist_id).sudo()
             so_data = self._prepare_sale_order_values(partner, pricelist)
-            sale_order = self.env['sale.order'].with_context(force_company=request.website.company_id.id).sudo().create(so_data)
+            sale_order = self.env['sale.order'].with_context(force_company=request.website.company_id.id).with_user(SUPERUSER_ID).create(so_data)
 
             # set fiscal position
             if request.website.partner_id.id != partner.id:
@@ -307,7 +304,7 @@ class Website(models.Model):
 
             # change the partner, and trigger the onchange
             sale_order.write({'partner_id': partner.id})
-            sale_order.onchange_partner_id()
+            sale_order.with_context(not_self_saleperson=True).onchange_partner_id()
             sale_order.write({'partner_invoice_id': partner.id})
             sale_order.onchange_partner_shipping_id() # fiscal position
             sale_order['payment_term_id'] = self.sale_get_payment_term(partner)

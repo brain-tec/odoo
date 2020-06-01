@@ -12,11 +12,11 @@
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
 # aleksandar ivanov, 2020
 # Boyan Rabchev <boyan.rabchev@plana.solutions>, 2020
-# Martin Trigaux, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
+# Martin Trigaux, 2020
 # 
 msgid ""
 msgstr ""
@@ -24,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-01 12:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Igor Sheludko <igor.sheludko@gmail.com>, 2020\n"
+"Last-Translator: Martin Trigaux, 2020\n"
 "Language-Team: Bulgarian (https://www.transifex.com/odoo/teams/41243/bg/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -106,9 +106,9 @@ msgstr ""
 "Препоръчваме два алгоритма:\n"
 "\n"
 "    1) Invoice Number +++RRR/RRRR/RRRDD+++\n"
-"        **R..R =** Invoice Number, **DD =** Check Digits\n"
+"        **R..R =** Номер Фактура, **DD =** Контролни числа\n"
 "    2) Customer Reference +++RRR/RRRR/SSSDD+++\n"
-"        **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits\n"
+"        **R..R =** Клиентска референция без нечислови знаци, **SSS =** Пореден номер, **DD =** Контролни числа\n"
 "    "
 
 #. module: base
@@ -224,7 +224,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Модул локализация за Доминиканска Репунлика\n"
+"Модул локализация за Доминиканска Република\n"
 "===========================================\n"
 "\n"
 "Catálogo de Cuentas e Impuestos para República Dominicana, Compatible para\n"
@@ -1171,6 +1171,11 @@ msgid ""
 "This module gives the details of the goods traded between the countries of\n"
 "European Union."
 msgstr ""
+"\n"
+"Модул, който добавя управление на наличностите в отчети за интрастат.\n"
+"============================================================\n"
+"\n"
+"Този модул задава подробности за стоки, търгувани между държавите от Европейския съюз. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_tax_python
@@ -7278,11 +7283,13 @@ msgid ""
 "<i class=\"fa fa-building\" role=\"img\" aria-label=\"Enterprise\" "
 "title=\"Enterprise\"/>"
 msgstr ""
+"<i class=\"fa fa-building\" role=\"img\" aria-label=\"Enterprise\" "
+"title=\"Enterprise\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Invalid\" title=\"Invalid\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Invalid\" title=\"Invalid\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
@@ -10625,7 +10632,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Конфиг Настройки"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_form
@@ -17354,7 +17361,7 @@ msgstr "Model %s does not exist"
 #: code:addons/base/models/ir_model.py:0
 #, python-format
 msgid "Model %s does not exist!"
-msgstr "Модел с % не съществува!"
+msgstr "Модел с %s не съществува!"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -21065,7 +21072,7 @@ msgstr "Print amount in words on checks issued for expenses"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_paperformat__print_page_height
 msgid "Print page height (mm)"
-msgstr ""
+msgstr "Печат - Вис. на страница (мм)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_paperformat__print_page_width

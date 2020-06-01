@@ -7,7 +7,7 @@ from itertools import groupby
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError
-from odoo.tools import date_utils, float_round, float_is_zero
+from odoo.tools import date_utils, float_compare, float_round, float_is_zero
 
 
 class MrpProduction(models.Model):
@@ -216,7 +216,7 @@ class MrpProduction(models.Model):
                                 readonly=True, states={'draft': [('readonly', False)]}, default='1')
     is_locked = fields.Boolean('Is Locked', default=True, copy=False)
     show_final_lots = fields.Boolean('Show Final Lots', compute='_compute_show_lots')
-    production_location_id = fields.Many2one('stock.location', "Production Location", related='product_id.property_stock_production', readonly=False)  # FIXME sle: probably wrong if document in another company
+    production_location_id = fields.Many2one('stock.location', "Production Location", related='product_id.property_stock_production', readonly=False, related_sudo=False)
     picking_ids = fields.Many2many('stock.picking', compute='_compute_picking_ids', string='Picking associated to this manufacturing order')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     confirm_cancel = fields.Boolean(compute='_compute_confirm_cancel')
@@ -333,13 +333,19 @@ class MrpProduction(models.Model):
             elif all(move.state == 'cancel' for move in production.move_raw_ids):
                 production.state = 'cancel'
             elif all(move.state in ['cancel', 'done'] for move in production.move_raw_ids):
-                production.state = 'done'
+                if (
+                    production.bom_id.consumption == 'flexible'
+                    and float_compare(production.qty_produced, production.product_qty, precision_rounding=production.product_uom_id.rounding) == -1
+                ):
+                    production.state = 'progress'
+                else:
+                    production.state = 'done'
             elif production.move_finished_ids.filtered(lambda m: m.state not in ('cancel', 'done') and m.product_id.id == production.product_id.id)\
                  and (production.qty_produced >= production.product_qty)\
                  and (not production.routing_id or all(wo_state in ('cancel', 'done') for wo_state in production.workorder_ids.mapped('state'))):
                 production.state = 'to_close'
             elif production.workorder_ids and any(wo_state in ('progress') for wo_state in production.workorder_ids.mapped('state'))\
-                 or production.qty_produced > 0 and production.qty_produced < production.product_uom_qty:
+                 or production.qty_produced > 0 and production.qty_produced < production.product_qty:
                 production.state = 'progress'
             elif production.workorder_ids:
                 production.state = 'planned'
@@ -348,10 +354,9 @@ class MrpProduction(models.Model):
 
             # Compute reservation state
             # State where the reservation does not matter.
-            if production.state in ('draft', 'done', 'cancel'):
-                production.reservation_state = False
+            production.reservation_state = False
             # Compute reservation state according to its component's moves.
-            else:
+            if production.state not in ('draft', 'done', 'cancel'):
                 relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
                 if relevant_move_state == 'partially_available':
                     if production.routing_id and production.routing_id.operation_ids and production.bom_id.ready_to_produce == 'asap':
@@ -500,8 +505,17 @@ class MrpProduction(models.Model):
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code('mrp.production') or _('New')
         if not values.get('procurement_group_id'):
-            values['procurement_group_id'] = self.env["procurement.group"].create({'name': values['name']}).id
-        return super(MrpProduction, self).create(values)
+            procurement_group_vals = self._prepare_procurement_group_vals(values)
+            values['procurement_group_id'] = self.env["procurement.group"].create(procurement_group_vals).id
+        production = super(MrpProduction, self).create(values)
+        production.move_raw_ids.write({
+            'group_id': production.procurement_group_id.id,
+            'reference': production.name,  # set reference when MO name is different than 'New'
+        })
+        # Trigger move_raw creation when importing a file
+        if 'import_file' in self.env.context:
+            production._onchange_move_raw()
+        return production
 
     def unlink(self):
         if any(production.state == 'done' for production in self):
@@ -613,8 +627,7 @@ class MrpProduction(models.Model):
             old_qty = move[0].product_uom_qty
             remaining_qty = move[0].raw_material_production_id.product_qty - move[0].raw_material_production_id.qty_produced
             if quantity > 0:
-                move[0]._decrease_reserved_quanity(quantity)
-                move[0].with_context(do_not_unreserve=True).write({'product_uom_qty': quantity})
+                move[0].write({'product_uom_qty': quantity})
                 move[0]._recompute_state()
                 move[0]._action_assign()
                 move[0].unit_factor = remaining_qty and (quantity - move[0].quantity_done) / remaining_qty or 1.0
@@ -657,9 +670,7 @@ class MrpProduction(models.Model):
                 raise UserError(_("Add some materials to consume before marking this MO as to do."))
             for move_raw in production.move_raw_ids:
                 move_raw.write({
-                    'group_id': production.procurement_group_id.id,
                     'unit_factor': move_raw.product_uom_qty / production.product_qty,
-                    'reference': production.name,  # set reference when MO name is different than 'New'
                 })
             production._generate_finished_moves()
             production.move_raw_ids._adjust_procure_method()
@@ -796,16 +807,9 @@ class MrpProduction(models.Model):
             quantity = 1.0
 
         for operation in bom.routing_id.operation_ids:
-            workorder = workorders.create({
-                'name': operation.name,
-                'production_id': self.id,
-                'workcenter_id': operation.workcenter_id.id,
-                'product_uom_id': self.product_id.uom_id.id,
-                'operation_id': operation.id,
-                'state': len(workorders) == 0 and 'ready' or 'pending',
-                'qty_producing': quantity,
-                'consumption': self.bom_id.consumption,
-            })
+            workorder_vals = self._prepare_workorder_vals(
+                operation, workorders, quantity)
+            workorder = workorders.create(workorder_vals)
             if workorders:
                 workorders[-1].next_work_order_id = workorder.id
                 workorders[-1]._start_nextworkorder()
@@ -1035,3 +1039,20 @@ class MrpProduction(models.Model):
             return self.env.ref('mrp.exception_on_mo').render(values=values)
 
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_mo, documents)
+
+    def _prepare_workorder_vals(self, operation, workorders, quantity):
+        self.ensure_one()
+        return {
+            'name': operation.name,
+            'production_id': self.id,
+            'workcenter_id': operation.workcenter_id.id,
+            'product_uom_id': self.product_id.uom_id.id,
+            'operation_id': operation.id,
+            'state': len(workorders) == 0 and 'ready' or 'pending',
+            'qty_producing': quantity,
+            'consumption': self.bom_id.consumption,
+        }
+
+    @api.model
+    def _prepare_procurement_group_vals(self, values):
+        return {'name': values['name']}

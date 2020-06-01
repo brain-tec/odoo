@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from uuid import uuid4
+import pytz
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
@@ -88,7 +89,7 @@ class PosConfig(models.Model):
         return self.env['pos.payment.method'].search([('split_transactions', '=', False), ('company_id', '=', self.env.company.id)])
 
     def _default_pricelist(self):
-        return self.env['product.pricelist'].search([('currency_id', '=', self.env.company.currency_id.id)], limit=1)
+        return self.env['product.pricelist'].search([('company_id', 'in', (False, self.env.company.id)), ('currency_id', '=', self.env.company.currency_id.id)], limit=1)
 
     def _get_group_pos_manager(self):
         return self.env.ref('point_of_sale.group_pos_manager')
@@ -249,8 +250,7 @@ class PosConfig(models.Model):
         """If there is an open session, store it to current_session_id / current_session_State.
         """
         for pos_config in self:
-            session = pos_config.session_ids.filtered(lambda s: s.user_id.id == self.env.uid and \
-                    not s.state == 'closed' and not s.rescue)
+            session = pos_config.session_ids.filtered(lambda s: not s.state == 'closed' and not s.rescue)
             # sessions ordered by id desc
             pos_config.current_session_id = session and session[0].id or False
             pos_config.current_session_state = session and session[0].state or False
@@ -264,7 +264,8 @@ class PosConfig(models.Model):
                 ['cash_register_balance_end_real', 'stop_at', 'cash_register_id'],
                 order="stop_at desc", limit=1)
             if session:
-                pos_config.last_session_closing_date = session[0]['stop_at'].date()
+                timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
+                pos_config.last_session_closing_date = session[0]['stop_at'].astimezone(timezone).date()
                 if session[0]['cash_register_id']:
                     pos_config.last_session_closing_cash = session[0]['cash_register_balance_end_real']
                     pos_config.last_session_closing_cashbox = self.env['account.bank.statement'].browse(session[0]['cash_register_id'][0]).cashbox_end_id

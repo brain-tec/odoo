@@ -209,7 +209,7 @@ class User(models.Model):
     def action_create_employee(self):
         self.ensure_one()
         self.env['hr.employee'].create(dict(
-            user_id=self.id,
             name=self.name,
+            company_id=self.env.company.id,
             **self.env['hr.employee']._sync_user(self)
         ))

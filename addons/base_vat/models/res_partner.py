@@ -21,7 +21,7 @@ try:
 except ImportError:
     stdnum = None
 
-from odoo import api, models, _
+from odoo import api, models, tools, _
 from odoo.tools.misc import ustr
 from odoo.exceptions import ValidationError
 from stdnum.at.uid import compact as compact_at
@@ -134,11 +134,18 @@ class ResPartner(models.Model):
         return check_func(vat_number)
 
     @api.model
+    @tools.ormcache('vat')
+    def _check_vies(self, vat):
+        # Store the VIES result in the cache. In case an exception is raised during the request
+        # (e.g. service unavailable), the fallback on simple_vat_check is not kept in cache.
+        return vatnumber.check_vies(vat)
+
+    @api.model
     def vies_vat_check(self, country_code, vat_number):
         try:
             # Validate against  VAT Information Exchange System (VIES)
             # see also http://ec.europa.eu/taxation_customs/vies/
-            return vatnumber.check_vies(country_code.upper() + vat_number)
+            return self._check_vies(country_code.upper() + vat_number)
         except Exception:
             # see http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl
             # Fault code may contain INVALID_INPUT, SERVICE_UNAVAILABLE, MS_UNAVAILABLE,
@@ -456,8 +463,11 @@ class ResPartner(models.Model):
     def default_compact(self, vat):
         return vat
 
-    def _fix_vat_number(self, vat):
+    def _fix_vat_number(self, vat, country_id):
+        code = self.env['res.country'].browse(country_id).code if country_id else False
         vat_country, vat_number = self._split_vat(vat)
+        if code and code.lower() != vat_country:
+            return vat
         check_func_name = 'compact_' + vat_country
         check_func = globals().get(check_func_name) or getattr(self, 'default_compact')
         vat_number = check_func(vat_number)
@@ -466,11 +476,13 @@ class ResPartner(models.Model):
     @api.model
     def create(self, values):
         if values.get('vat'):
-            values['vat'] = self._fix_vat_number(values['vat'])
+            country_id = values.get('country_id')
+            values['vat'] = self._fix_vat_number(values['vat'], country_id)
         return super(ResPartner, self).create(values)
 
     def write(self, values):
-        if values.get('vat'):
-            values['vat'] = self._fix_vat_number(values['vat'])
+        if values.get('vat') and len(self.mapped('country_id')) == 1:
+            country_id = values.get('country_id', self.country_id.id)
+            values['vat'] = self._fix_vat_number(values['vat'], country_id)
         return super(ResPartner, self).write(values)
-        
+

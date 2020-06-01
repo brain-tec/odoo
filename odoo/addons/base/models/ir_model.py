@@ -221,6 +221,7 @@ class IrModel(models.Model):
         # reload is done independently in odoo.modules.loading.
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             # setup models; this automatically removes model from registry
+            self.flush()
             self.pool.setup_models(self._cr)
 
         return res
@@ -245,6 +246,7 @@ class IrModel(models.Model):
         res = super(IrModel, self).create(vals)
         if vals.get('state', 'manual') == 'manual':
             # setup models; this automatically adds model in registry
+            self.flush()
             self.pool.setup_models(self._cr)
             # update database schema
             self.pool.init_models(self._cr, [vals['model']], dict(self._context, update_custom_fields=True))
@@ -559,6 +561,16 @@ class IrModelFields(models.Model):
                     'message': _("The table %r if used for other, possibly incompatible fields.") % self.relation_table,
                 }}
 
+    @api.onchange('required', 'ttype', 'on_delete')
+    def _onchange_required(self):
+        for rec in self:
+            if rec.ttype == 'many2one' and rec.required and rec.on_delete == 'set null':
+                return {'warning': {'title': _("Warning"), 'message': _(
+                    "The m2o field %s is required but declares its ondelete policy "
+                    "as being 'set null'. Only 'restrict' and 'cascade' make sense."
+                    % (rec.name)
+                )}}
+
     def _get(self, model_name, name):
         """ Return the (sudoed) `ir.model.fields` record with the given model and name.
         The result may be an empty recordset if the model is not found.
@@ -581,12 +593,16 @@ class IrModelFields(models.Model):
                 continue
             model = self.env.get(field.model)
             is_model = model is not None
-            if is_model and tools.column_exists(self._cr, model._table, field.name) and \
-                    tools.table_kind(self._cr, model._table) == 'r':
-                self._cr.execute('ALTER TABLE "%s" DROP COLUMN "%s" CASCADE' % (model._table, field.name))
-            if field.state == 'manual' and field.ttype == 'many2many':
-                rel_name = field.relation_table or (is_model and model._fields[field.name].relation)
-                tables_to_drop.add(rel_name)
+            if field.store:
+                # TODO: Refactor this brol in master
+                if is_model and tools.column_exists(self._cr, model._table, field.name) and \
+                        tools.table_kind(self._cr, model._table) == 'r':
+                    self._cr.execute('ALTER TABLE "%s" DROP COLUMN "%s" CASCADE' % (
+                        model._table, field.name,
+                    ))
+                if field.state == 'manual' and field.ttype == 'many2many':
+                    rel_name = field.relation_table or (is_model and model._fields[field.name].relation)
+                    tables_to_drop.add(rel_name)
             if field.state == 'manual' and is_model:
                 model._pop_field(field.name)
             if field.translate:
@@ -712,6 +728,7 @@ class IrModelFields(models.Model):
         # inconsistent in this case; therefore we reload the registry.
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             # setup models; this re-initializes models in registry
+            self.flush()
             self.pool.setup_models(self._cr)
             # update database schema of model and its descendant models
             models = self.pool.descendants(model_names, '_inherits')
@@ -739,6 +756,7 @@ class IrModelFields(models.Model):
 
             if vals['model'] in self.pool:
                 # setup models; this re-initializes model in registry
+                self.flush()
                 self.pool.setup_models(self._cr)
                 # update database schema of model and its descendant models
                 models = self.pool.descendants([vals['model']], '_inherits')
@@ -806,6 +824,7 @@ class IrModelFields(models.Model):
 
         if column_rename or patched_models:
             # setup models, this will reload all manual fields in registry
+            self.flush()
             self.pool.setup_models(self._cr)
 
         if patched_models:
@@ -1134,6 +1153,7 @@ class IrModelSelection(models.Model):
         recs = super().create(vals_list)
 
         # setup models; this re-initializes model in registry
+        self.flush()
         self.pool.setup_models(self._cr)
 
         return recs
@@ -1178,7 +1198,8 @@ class IrModelSelection(models.Model):
                               'preferably through a custom addon!'))
 
         for selection in self:
-            if selection.field_id.store:
+            if selection.field_id.store and \
+                    not self.env[selection.field_id.model]._abstract:
                 # replace the value by NULL in the field's corresponding column
                 query = 'UPDATE "{table}" SET "{field}"=NULL WHERE "{field}"=%s'.format(
                     table=self.env[selection.field_id.model]._table,
@@ -1192,6 +1213,7 @@ class IrModelSelection(models.Model):
         # reload is done independently in odoo.modules.loading.
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             # setup models; this re-initializes model in registry
+            self.flush()
             self.pool.setup_models(self._cr)
 
         return result
@@ -1489,6 +1511,8 @@ class IrModelAccess(models.Model):
         elif self.env[model].is_transient():
             return True
 
+        self.flush(self._fields)
+
         # We check if a specific rule exists
         self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
                               FROM ir_model_access a
@@ -1759,8 +1783,6 @@ class IrModelData(models.Model):
         if not data_list:
             return
 
-        # rows to insert
-        rowf = "(%s, %s, %s, %s, %s, now() at time zone 'UTC', now() at time zone 'UTC')"
         rows = tools.OrderedSet()
         for data in data_list:
             prefix, suffix = data['xml_id'].split('.', 1)
@@ -1778,15 +1800,7 @@ class IrModelData(models.Model):
 
         for sub_rows in self.env.cr.split_for_in_conditions(rows):
             # insert rows or update them
-            query = """
-                INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
-                VALUES {rows}
-                ON CONFLICT (module, name)
-                DO UPDATE SET date_update=(now() at time zone 'UTC') {where}
-            """.format(
-                rows=", ".join([rowf] * len(sub_rows)),
-                where="WHERE NOT ir_model_data.noupdate" if update else "",
-            )
+            query = self._build_update_xmlids_query(sub_rows, update)
             try:
                 self.env.cr.execute(query, [arg for row in sub_rows for arg in row])
             except Exception:
@@ -1795,6 +1809,20 @@ class IrModelData(models.Model):
 
         # update loaded_xmlids
         self.pool.loaded_xmlids.update("%s.%s" % row[:2] for row in rows)
+
+    # NOTE: this method is overriden in web_studio; if you need to make another
+    #  override, make sure it is compatible with the one that is there.
+    def _build_update_xmlids_query(self, sub_rows, update):
+        rowf = "(%s, %s, %s, %s, %s, now() at time zone 'UTC', now() at time zone 'UTC')"
+        return """
+            INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
+            VALUES {rows}
+            ON CONFLICT (module, name)
+            DO UPDATE SET date_update=(now() at time zone 'UTC') {where}
+        """.format(
+            rows=", ".join([rowf] * len(sub_rows)),
+            where="WHERE NOT ir_model_data.noupdate" if update else "",
+        )
 
     @api.model
     def _load_xmlid(self, xml_id):

@@ -18,7 +18,7 @@ class HrExpense(models.Model):
 
     @api.model
     def _default_employee_id(self):
-        return self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
+        return self.env.user.employee_id
 
     @api.model
     def _default_product_uom_id(self):
@@ -35,7 +35,7 @@ class HrExpense(models.Model):
             res = "['|', ('company_id', '=', False), ('company_id', '=', company_id)]"  # Then, domain accepts everything
         elif self.user_has_groups('hr_expense.group_hr_expense_team_approver') and self.env.user.employee_ids:
             user = self.env.user
-            employee = user.employee_ids[0]
+            employee = self.env.user.employee_id
             res = [
                 '|', '|', '|',
                 ('department_id.manager_id', '=', employee.id),
@@ -44,8 +44,8 @@ class HrExpense(models.Model):
                 ('expense_manager_id', '=', user.id),
                 '|', ('company_id', '=', False), ('company_id', '=', employee.company_id.id),
             ]
-        elif self.env.user.employee_ids:
-            employee = self.env.user.employee_ids[0]
+        elif self.env.user.employee_id:
+            employee = self.env.user.employee_id
             res = [('id', '=', employee.id), '|', ('company_id', '=', False), ('company_id', '=', employee.company_id.id)]
         return res
 
@@ -53,7 +53,7 @@ class HrExpense(models.Model):
     date = fields.Date(readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, default=fields.Date.context_today, string="Date")
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_employee_id, domain=lambda self: self._get_employee_id_domain(), check_company=True)
     # product_id not required to allow create an expense without product via mail alias, but should be required on the view.
-    product_id = fields.Many2one('product.product', string='Product', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, domain="[('can_be_expensed', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    product_id = fields.Many2one('product.product', string='Product', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, domain="[('can_be_expensed', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", ondelete='restrict')
     product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_product_uom_id, domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     unit_amount = fields.Float("Unit Price", readonly=True, required=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, digits='Product Price')
@@ -151,11 +151,12 @@ class HrExpense(models.Model):
         if self.product_id:
             if not self.name:
                 self.name = self.product_id.display_name or ''
-            self.unit_amount = self.product_id.price_compute('standard_price')[self.product_id.id]
+            if not self.attachment_number or (self.attachment_number and not self.unit_amount):
+                self.unit_amount = self.product_id.price_compute('standard_price')[self.product_id.id]
             self.product_uom_id = self.product_id.uom_id
             self.tax_ids = self.product_id.supplier_taxes_id.filtered(lambda tax: tax.company_id == self.company_id)  # taxes only from the same company
             account = self.product_id.product_tmpl_id._get_product_accounts()['expense']
-            if account:
+            if account and self.is_editable:
                 self.account_id = account
 
     @api.onchange('company_id')
@@ -414,6 +415,8 @@ class HrExpense(models.Model):
                     'expense_id': expense.id,
                     'partner_id': partner_id,
                     'currency_id': expense.currency_id.id if different_currency else False,
+                    'analytic_account_id': expense.analytic_account_id.id if tax['analytic'] else False,
+                    'analytic_tag_ids': [(6, 0, expense.analytic_tag_ids.ids)] if tax['analytic'] else False,
                 }
                 total_amount -= amount
                 total_amount_currency -= move_line_tax_values['amount_currency'] or amount
@@ -555,7 +558,7 @@ class HrExpense(models.Model):
         product_code = expense_description.split(' ')[0]
         product = self.env['product.product'].search([('can_be_expensed', '=', True), ('default_code', '=ilike', product_code)], limit=1)
         if product:
-            expense_description = expense_description.replace(product_code, '')
+            expense_description = expense_description.replace(product_code, '', 1)
 
         return product, expense_description
 

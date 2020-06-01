@@ -111,17 +111,18 @@ class ResCompany(models.Model):
     def _check_fiscalyear_last_day(self):
         # if the user explicitly chooses the 29th of February we allow it:
         # there is no "fiscalyear_last_year" so we do not know his intentions.
-        if self.fiscalyear_last_day == 29 and self.fiscalyear_last_month == '2':
-            return
+        for rec in self:
+            if rec.fiscalyear_last_day == 29 and rec.fiscalyear_last_month == '2':
+                continue
 
-        if self.account_opening_date:
-            year = self.account_opening_date.year
-        else:
-            year = datetime.now().year
+            if rec.account_opening_date:
+                year = rec.account_opening_date.year
+            else:
+                year = datetime.now().year
 
-        max_day = calendar.monthrange(year, int(self.fiscalyear_last_month))[1]
-        if self.fiscalyear_last_day > max_day:
-            raise ValidationError(_("Invalid fiscal year last day"))
+            max_day = calendar.monthrange(year, int(rec.fiscalyear_last_month))[1]
+            if rec.fiscalyear_last_day > max_day:
+                raise ValidationError(_("Invalid fiscal year last day"))
 
     def get_and_update_account_invoice_onboarding_state(self):
         """ This method is called on the controller rendering method and ensures that the animations
@@ -382,10 +383,16 @@ class ResCompany(models.Model):
         current year earnings account.
         """
         if self.account_opening_move_id and self.account_opening_move_id.state == 'draft':
-            debit_diff, credit_diff = self.get_opening_move_differences(self.account_opening_move_id.line_ids)
-
+            balancing_account = self.get_unaffected_earnings_account()
             currency = self.currency_id
-            balancing_move_line = self.account_opening_move_id.line_ids.filtered(lambda x: x.account_id == self.get_unaffected_earnings_account())
+
+            balancing_move_line = self.account_opening_move_id.line_ids.filtered(lambda x: x.account_id == balancing_account)
+            # There could be multiple lines if we imported the balance from unaffected earnings account too
+            if len(balancing_move_line) > 1:
+                self.with_context(check_move_validity=False).account_opening_move_id.line_ids -= balancing_move_line[1:]
+                balancing_move_line = balancing_move_line[0]
+
+            debit_diff, credit_diff = self.get_opening_move_differences(self.account_opening_move_id.line_ids)
 
             if float_is_zero(debit_diff + credit_diff, precision_rounding=currency.rounding):
                 if balancing_move_line:
@@ -397,7 +404,6 @@ class ResCompany(models.Model):
                     balancing_move_line.write({'debit': credit_diff, 'credit': debit_diff})
                 else:
                     # Non-zero difference and no existing line : create a new line
-                    balancing_account = self.get_unaffected_earnings_account()
                     self.env['account.move.line'].create({
                         'name': _('Automatic Balancing Line'),
                         'move_id': self.account_opening_move_id.id,

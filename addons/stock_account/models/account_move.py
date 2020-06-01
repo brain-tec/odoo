@@ -6,7 +6,7 @@ from odoo import fields, models, api, _
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    stock_move_id = fields.Many2one('stock.move', string='Stock Move')
+    stock_move_id = fields.Many2one('stock.move', string='Stock Move', index=True)
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'account_move_id', string='Stock Valuation Layer')
 
     # -------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class AccountMove(models.Model):
             for line in move.invoice_line_ids:
 
                 # Filter out lines being not eligible for COGS.
-                if line.product_id.type not in ('product', 'consu') or line.product_id.valuation != 'real_time':
+                if line.product_id.type != 'product' or line.product_id.valuation != 'real_time':
                     continue
 
                 # Retrieve accounts needed to generate the COGS.
@@ -125,8 +125,6 @@ class AccountMove(models.Model):
                     'debit': balance < 0.0 and -balance or 0.0,
                     'credit': balance > 0.0 and balance or 0.0,
                     'account_id': debit_interim_account.id,
-                    'analytic_account_id': line.analytic_account_id.id,
-                    'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                     'exclude_from_invoice_tab': True,
                     'is_anglo_saxon_line': True,
                 })
