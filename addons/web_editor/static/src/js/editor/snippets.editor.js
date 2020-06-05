@@ -219,6 +219,9 @@ var SnippetEditor = Widget.extend({
         if (this.$target.data('name') !== undefined) {
             return this.$target.data('name');
         }
+        if (this.$target.is('img')) {
+            return _t("Image");
+        }
         if (this.$target.parent('.row').length) {
             return _t("Column");
         }
@@ -800,6 +803,7 @@ var SnippetsMenu = Widget.extend({
         'click .o_we_add_snippet_btn': '_onBlocksTabClick',
         'click .o_we_invisible_entry': '_onInvisibleEntryClick',
         'click #snippet_custom .o_delete_btn': '_onDeleteBtnClick',
+        'mousedown': '_onMouseDown',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -873,6 +877,7 @@ var SnippetsMenu = Widget.extend({
             '.o_we_no_overlay',
             '.ui-autocomplete',
             '.modal .close',
+            '.o_we_crop_widget',
         ].join(', ');
     },
     /**
@@ -1739,8 +1744,6 @@ var SnippetsMenu = Widget.extend({
     _makeSnippetDraggable: function ($snippets) {
         var self = this;
         var $tumb = $snippets.find('.oe_snippet_thumbnail_img:first');
-        var left = $tumb.outerWidth() / 2;
-        var top = $tumb.outerHeight() / 2;
         var $toInsert, dropped, $snippet;
 
         $snippets.draggable({
@@ -1752,12 +1755,8 @@ var SnippetsMenu = Widget.extend({
             },
             appendTo: this.$body,
             cursor: 'move',
+            distance: 0,
             handle: '.oe_snippet_thumbnail',
-            distance: 30,
-            cursorAt: {
-                left: left,
-                top: top,
-            },
             start: function () {
                 dropped = false;
                 $snippet = $(this);
@@ -2111,6 +2110,24 @@ var SnippetsMenu = Widget.extend({
                 close: true,
             }],
         }).open();
+    },
+    /**
+     * Prevents pointer-events to change the focus when a pointer slide from
+     * left-panel to the editable area.
+     *
+     * @private
+     */
+    _onMouseDown: function () {
+        const $blockedArea = $('#wrapwrap'); // TODO should get that element another way
+        $blockedArea.addClass('o_we_no_pointer_events');
+        const reenable = () => $blockedArea.removeClass('o_we_no_pointer_events');
+        // Use a setTimeout fallback to avoid locking the editor if the mouseup
+        // is fired over an element which stops propagation for example.
+        const enableTimeoutID = setTimeout(() => reenable(), 5000);
+        $(document).one('mouseup', () => {
+            clearTimeout(enableTimeoutID);
+            reenable();
+        });
     },
     /**
      * @private
