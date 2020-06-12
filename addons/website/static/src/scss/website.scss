@@ -229,14 +229,6 @@ font[class*='bg-'] {
     }
 }
 
-// Blockquotes
-.blockquote {
-    font-size: 1rem;
-    footer {
-        background-color: inherit;
-    }
-}
-
 // Background Images
 .oe_img_bg {
     background-size: cover;
@@ -995,4 +987,11 @@ $ribbon-padding: 100px;
 .o_tag_left {
     @include o-position-absolute($top: 0, $left: 0);
     padding: 0.25rem 1rem;
+}
+
+// Cookies Bar
+#website_cookies_bar {
+    :not(.o_cookies_popup) {
+        bottom: 0;
+    }
 }
