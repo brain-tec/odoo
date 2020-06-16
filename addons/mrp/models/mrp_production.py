@@ -1258,6 +1258,18 @@ class MrpProduction(models.Model):
                     continue
                 filtered_documents[(parent, responsible)] = rendering_context
             production._log_manufacture_exception(filtered_documents, cancel=True)
+
+        # In case of a flexible BOM, we don't know from the state of the moves if the MO should
+        # remain in progress or done. Indeed, if all moves are done/cancel but the quantity produced
+        # is lower than expected, it might mean:
+        # - we have used all components but we still want to produce the quantity expected
+        # - we have used all components and we won't be able to produce the last units
+        #
+        # However, if the user clicks on 'Cancel', it is expected that the MO is either done or
+        # canceled. If the MO is still in progress at this point, it means that the move raws
+        # are either all done or a mix of done / canceled => the MO should be done.
+        self.filtered(lambda p: p.state not in ['done', 'cancel'] and p.bom_id.consumption == 'flexible').write({'state': 'done'})
+
         return True
 
     def _get_document_iterate_key(self, move_raw_id):
@@ -1306,17 +1318,18 @@ class MrpProduction(models.Model):
             return name[:-SIZE_BACK_ORDER_NUMERING-1] + seq_back
         return name + seq_back
 
-    def _get_backorder_mo_vals(self, mo_source):
-        next_seq = max(mo_source.procurement_group_id.mrp_production_ids.mapped("backorder_sequence"))
+    def _get_backorder_mo_vals(self):
+        self.ensure_one()
+        next_seq = max(self.procurement_group_id.mrp_production_ids.mapped("backorder_sequence"))
         return {
-            'name': self._get_name_backorder(mo_source.name, next_seq + 1),
+            'name': self._get_name_backorder(self.name, next_seq + 1),
             'backorder_sequence': next_seq + 1,
-            'procurement_group_id': mo_source.procurement_group_id.id,
+            'procurement_group_id': self.procurement_group_id.id,
             'move_raw_ids': None,
             'move_finished_ids': None,
             'product_qty': self._get_quantity_to_backorder(),
             'lot_producing_id': False,
-            'origin': mo_source.origin
+            'origin': self.origin
         }
 
     def _generate_backorder_productions(self, close_mo=True):
@@ -1324,7 +1337,7 @@ class MrpProduction(models.Model):
         for production in self:
             if production.backorder_sequence == 0:  # Activate backorder naming
                 production.backorder_sequence = 1
-            backorder_mo = production.copy(default=self._get_backorder_mo_vals(production))
+            backorder_mo = production.copy(default=production._get_backorder_mo_vals())
             if close_mo:
                 production.move_raw_ids.filtered(lambda m: m.state not in ('done', 'cancel')).write({
                     'raw_material_production_id': backorder_mo.id,
@@ -1360,9 +1373,7 @@ class MrpProduction(models.Model):
             for workorder in backorder_mo.workorder_ids:
                 workorder.duration_expected = workorder.duration_expected * (1 - ratio)
         backorders.action_confirm()
-        for wo in backorders.workorder_ids:
-            if wo.component_id:
-                wo._update_component_quantity()
+
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
         backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.product_qty == 0).unlink()
