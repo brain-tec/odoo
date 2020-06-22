@@ -12,6 +12,7 @@ class Inventory(models.Model):
     _name = "stock.inventory"
     _description = "Inventory"
     _order = "date desc, id desc"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         'Inventory Reference', default="Inventory",
@@ -35,7 +36,7 @@ class Inventory(models.Model):
         ('cancel', 'Cancelled'),
         ('confirm', 'In Progress'),
         ('done', 'Validated')],
-        copy=False, index=True, readonly=True,
+        copy=False, index=True, readonly=True, tracking=True,
         default='draft')
     company_id = fields.Many2one(
         'res.company', 'Company',
@@ -213,6 +214,9 @@ class Inventory(models.Model):
             'domain': domain,
         }
         return action
+
+    def action_print(self):
+        return self.env.ref('stock.action_report_inventory').report_action(self)
 
     def _get_quantities(self):
         """Return quantities group by product_id, location_id, lot_id, package_id and owner_id
