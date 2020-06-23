@@ -311,7 +311,7 @@ class ProductTemplate(models.Model):
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         # Only use the product.product heuristics if there is a search term and the domain
         # does not specify a match on `product.template` IDs.
-        if not name or any(term[0] == 'id' for term in (args or [])):
+        if not name or any(term[0] == 'id' and term[1] in ('=','in') for term in (args or [])):
             return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
 
         Product = self.env['product.product']
