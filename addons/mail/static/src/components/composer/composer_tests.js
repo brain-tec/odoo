@@ -258,21 +258,15 @@ QUnit.test('add emoji replaces (keyboard) text selection', async function (asser
 QUnit.test('display partner mention suggestions on typing "@"', async function (assert) {
     assert.expect(2);
 
-    await this.start({
-        async mockRPC(route, args) {
-            if (args.method === 'get_mention_suggestions') {
-                return [
-                    [{
-                        email: "testpartnert@odoo.com",
-                        id: 11,
-                        name: "TestPartner",
-                    }],
-                    [],
-                ];
-            }
-            return this._super(...arguments);
-        },
-    });
+    this.data['res.partner'].records = [{
+        email: "testpartnert@odoo.com",
+        id: 11,
+        name: "TestPartner",
+    }];
+    this.data['res.users'].records = [{
+        partner_id: 11,
+    }];
+    await this.start();
     const composer = this.env.models['mail.composer'].create();
     await this.createComposerComponent(composer);
 
@@ -299,21 +293,15 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
 QUnit.test('mention a partner', async function (assert) {
     assert.expect(4);
 
-    await this.start({
-        async mockRPC(route, args) {
-            if (args.method === 'get_mention_suggestions') {
-                return [
-                    [{
-                        email: "testpartnert@odoo.com",
-                        id: 11,
-                        name: "TestPartner",
-                    }],
-                    [],
-                ];
-            }
-            return this._super(...arguments);
-        },
-    });
+    this.data['res.partner'].records = [{
+        email: "testpartnert@odoo.com",
+        id: 11,
+        name: "TestPartner",
+    }];
+    this.data['res.users'].records = [{
+        partner_id: 11,
+    }];
+    await this.start();
     const composer = this.env.models['mail.composer'].create();
     await this.createComposerComponent(composer);
 
@@ -355,21 +343,15 @@ QUnit.test('mention a partner', async function (assert) {
 QUnit.test('mention a partner after some text', async function (assert) {
     assert.expect(5);
 
-    await this.start({
-        async mockRPC(route, args) {
-            if (args.method === 'get_mention_suggestions') {
-                return [
-                    [{
-                        email: "testpartnert@odoo.com",
-                        id: 11,
-                        name: "TestPartner",
-                    }],
-                    [],
-                ];
-            }
-            return this._super(...arguments);
-        },
-    });
+    this.data['res.partner'].records = [{
+        email: "testpartnert@odoo.com",
+        id: 11,
+        name: "TestPartner",
+    }];
+    this.data['res.users'].records = [{
+        partner_id: 11,
+    }];
+    await this.start();
     const composer = this.env.models['mail.composer'].create();
     await this.createComposerComponent(composer);
 
@@ -419,21 +401,15 @@ QUnit.test('mention a partner after some text', async function (assert) {
 QUnit.test('add an emoji after a partner mention', async function (assert) {
     assert.expect(5);
 
-    await this.start({
-        async mockRPC(route, args) {
-            if (args.method === 'get_mention_suggestions') {
-                return [
-                    [{
-                        email: "testpartnert@odoo.com",
-                        id: 11,
-                        name: "TestPartner",
-                    }],
-                    [],
-                ];
-            }
-            return this._super(...arguments);
-        },
-    });
+    this.data['res.partner'].records = [{
+        email: "testpartnert@odoo.com",
+        id: 11,
+        name: "TestPartner",
+    }];
+    this.data['res.users'].records = [{
+        partner_id: 11,
+    }];
+    await this.start();
     const composer = this.env.models['mail.composer'].create();
     await this.createComposerComponent(composer);
 
@@ -612,6 +588,7 @@ QUnit.test('composer text input cleared on message post', async function (assert
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 name: "General",
             }],
         },
@@ -660,6 +637,7 @@ QUnit.test('composer with thread typing notification status', async function (as
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 name: "General",
             }],
         },
@@ -691,6 +669,7 @@ QUnit.test('current partner notify is typing to other thread members', async fun
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 members: [{
                     email: 'admin@odoo.com',
                     id: 3,
@@ -746,6 +725,7 @@ QUnit.test('current partner is typing should not translate on textual typing sta
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 members: [{
                     email: 'admin@odoo.com',
                     id: 3,
@@ -809,6 +789,7 @@ QUnit.test('current partner notify no longer is typing to thread members after 5
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 members: [{
                     email: 'admin@odoo.com',
                     id: 3,
@@ -871,6 +852,7 @@ QUnit.test('current partner notify is typing again to other members every 50s of
             channel_channel: [{
                 channel_type: 'channel',
                 id: 20,
+                is_pinned: true,
                 members: [{
                     email: 'admin@odoo.com',
                     id: 3,
