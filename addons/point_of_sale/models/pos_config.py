@@ -253,7 +253,8 @@ class PosConfig(models.Model):
         """
         for pos_config in self:
             opened_sessions = pos_config.session_ids.filtered(lambda s: not s.state == 'closed')
-            session = pos_config.session_ids.filtered(lambda s: not s.state == 'closed' and not s.rescue)
+            session = pos_config.session_ids.filtered(lambda s: s.user_id.id == self.env.uid and \
+                    not s.state == 'closed' and not s.rescue)
             # sessions ordered by id desc
             pos_config.has_active_session = opened_sessions and True or False
             pos_config.current_session_id = session and session[0].id or False
@@ -479,13 +480,16 @@ class PosConfig(models.Model):
     def write(self, vals):
         opened_session = self.mapped('session_ids').filtered(lambda s: s.state != 'closed')
         if opened_session:
-            str = []
+            forbidden_fields = []
             for key in self._get_forbidden_change_fields():
                 if key in vals.keys():
-                    str.append(key)
-            if len(str) > 0:
-                raise UserError(
-                    _("Unable to modify this PoS Configuration because you can't modify " + ", ".join(str)) + " while a session is open.")
+                    field_name = self._fields[key].get_description(self.env)["string"]
+                    forbidden_fields.append(field_name)
+            if len(forbidden_fields) > 0:
+                raise UserError(_(
+                    "Unable to modify this PoS Configuration because you can't modify %s while a session is open.",
+                    ", ".join(forbidden_fields)
+                ))
         result = super(PosConfig, self).write(vals)
 
         self.sudo()._set_fiscal_position()
