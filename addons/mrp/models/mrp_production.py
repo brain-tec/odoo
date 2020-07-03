@@ -1376,7 +1376,8 @@ class MrpProduction(models.Model):
                 workorder.duration_expected = workorder.duration_expected * ratio
             for workorder in backorder_mo.workorder_ids:
                 workorder.duration_expected = workorder.duration_expected * (1 - ratio)
-        backorders.action_confirm()
+        # Confirm only productions with remaining components
+        backorders.filtered(lambda mo: mo.move_raw_ids).action_confirm()
 
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
@@ -1386,11 +1387,7 @@ class MrpProduction(models.Model):
         return backorders
 
     def button_mark_done(self):
-        self._check_company()
-        for order in self:
-            # TODO : multi _check_sn_uniqueness + error message with MO name
-            order._check_sn_uniqueness()
-
+        self._button_mark_done_sanity_checks()
         res = self._pre_button_mark_done()
         if res is not True:
             return res
@@ -1464,6 +1461,11 @@ class MrpProduction(models.Model):
         if quantity_issues:
             return self._action_generate_backorder_wizard(quantity_issues)
         return True
+
+    def _button_mark_done_sanity_checks(self):
+        self._check_company()
+        for order in self:
+            order._check_sn_uniqueness()
 
     def do_unreserve(self):
         for production in self:
