@@ -74,6 +74,15 @@ function _buildTitleElement(title) {
     return titleEl;
 }
 /**
+ * @param {string} src
+ * @returns {HTMLElement}
+ */
+function _buildImgElement(src) {
+    const imgEl = document.createElement('img');
+    imgEl.src = src;
+    return imgEl;
+}
+/**
  * Build the correct DOM for a we-row element.
  *
  * @param {string} [title] - @see _buildElement
@@ -121,6 +130,8 @@ function createPropertyProxy(obj, propertyName, value) {
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+const NULL_ID = '__NULL__';
+
 /**
  * Base class for components to be used in snippet options widgets to retrieve
  * user values.
@@ -147,10 +158,42 @@ const UserValueWidget = Widget.extend({
      */
     _makeDescriptive: function () {
         const $el = this._super(...arguments);
-        _addTitleAndAllowedAttributes($el[0], this.title, this.options);
+        const el = $el[0];
+        _addTitleAndAllowedAttributes(el, this.title, this.options);
         this.containerEl = document.createElement('div');
-        $el.append(this.containerEl);
+
+        if (el.dataset.img) {
+            const imgEl = _buildImgElement(el.dataset.img);
+            this.containerEl.appendChild(imgEl);
+        }
+
+        el.appendChild(this.containerEl);
         return $el;
+    },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+
+        if (this.el.classList.contains('o_we_img_animate')) {
+            const buildImgExtensionSwitcher = (from, to) => {
+                const regex = new RegExp(`${from}$`, 'i');
+                return ev => {
+                    const img = ev.currentTarget;
+                    img.src = img.src.replace(regex, to);
+                };
+            };
+            this.$el.on('mouseenter.img_animate', 'img', buildImgExtensionSwitcher('png', 'gif'));
+            this.$el.on('mouseleave.img_animate', 'img', buildImgExtensionSwitcher('gif', 'png'));
+        }
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        this.$el.off('.img_animate');
+        this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -161,6 +204,8 @@ const UserValueWidget = Widget.extend({
      * Closes the widget (only meaningful for widgets that can be closed).
      */
     close: function () {
+        this.trigger_up('user_value_widget_closing');
+        this.el.classList.remove('o_we_widget_opened');
         this._userValueWidgets.forEach(widget => widget.close());
     },
     /**
@@ -261,7 +306,7 @@ const UserValueWidget = Widget.extend({
      * @returns {boolean}
      */
     isActive: function () {
-        return !!this._value;
+        return this._value && this._value !== NULL_ID;
     },
     /**
      * Indicates if the widget can contain sub user value widgets or not.
@@ -378,6 +423,13 @@ const UserValueWidget = Widget.extend({
         }
 
         this.trigger_up('user_value_update', data);
+    },
+    /**
+     * Opens the widget (only meaningful for widgets that can be opened).
+     */
+    open() {
+        this.trigger_up('user_value_widget_opening');
+        this.el.classList.add('o_we_widget_opened');
     },
     /**
      * Adds the given widget to the known list of user value sub-widgets (useful
@@ -627,7 +679,63 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
     },
 });
 
-const SelectUserValueWidget = UserValueWidget.extend({
+const BaseSelectionUserValueWidget = UserValueWidget.extend({
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+
+        this.menuEl = document.createElement('we-selection-items');
+        if (this.options && this.options.childNodes) {
+            this.options.childNodes.forEach(node => this.menuEl.appendChild(node));
+        }
+        this.containerEl.appendChild(this.menuEl);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        let activeWidget = this._userValueWidgets.find(widget => widget.isPreviewed());
+        if (!activeWidget) {
+            activeWidget = this._userValueWidgets.find(widget => widget.isActive());
+        }
+        if (activeWidget) {
+            return activeWidget.getActiveValue(methodName);
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    isContainer() {
+        return true;
+    },
+    /**
+     * @override
+     */
+    setValue(value, methodName) {
+        this._userValueWidgets.forEach(widget => {
+            widget.setValue(NULL_ID, methodName);
+        });
+        for (const widget of [...this._userValueWidgets].reverse()) {
+            widget.setValue(value, methodName);
+            if (widget.isActive()) {
+                // Only one select item can be true at a time, we consider the
+                // last one if multiple would be active.
+                return;
+            }
+        }
+        this._super(...arguments);
+    },
+});
+
+const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
     tagName: 'we-select',
     events: {
         'click': '_onClick',
@@ -636,9 +744,11 @@ const SelectUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    start: function () {
+    async start() {
+        await this._super(...arguments);
+
         if (this.options && this.options.valueEl) {
-            this.containerEl.appendChild(this.options.valueEl);
+            this.containerEl.insertBefore(this.options.valueEl, this.menuEl);
         }
 
         this.menuTogglerEl = document.createElement('we-toggler');
@@ -649,15 +759,7 @@ const SelectUserValueWidget = UserValueWidget.extend({
             iconEl.classList.add('fa', 'fa-fw', this.icon);
             this.menuTogglerEl.appendChild(iconEl);
         }
-        this.containerEl.appendChild(this.menuTogglerEl);
-
-        this.menuEl = document.createElement('we-select-menu');
-        if (this.options && this.options.childNodes) {
-            this.options.childNodes.forEach(node => this.menuEl.appendChild(node));
-        }
-        this.containerEl.appendChild(this.menuEl);
-
-        return this._super(...arguments);
+        this.containerEl.insertBefore(this.menuTogglerEl, this.menuEl);
     },
 
     //--------------------------------------------------------------------------
@@ -674,44 +776,15 @@ const SelectUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    getValue: function (methodName) {
-        let activeWidget = this._userValueWidgets.find(widget => widget.isPreviewed());
-        if (!activeWidget) {
-            activeWidget = this._userValueWidgets.find(widget => widget.isActive());
-        }
-        if (activeWidget) {
-            return activeWidget.getActiveValue(methodName);
-        }
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    isContainer: function () {
-        return true;
-    },
-    /**
-     * @override
-     */
     isPreviewed: function () {
         return this._super(...arguments) || this.menuTogglerEl.classList.contains('active');
     },
     /**
      * @override
      */
-    setValue: function (value, methodName) {
-        this._userValueWidgets.forEach(widget => {
-            widget.setValue('__NULL__', methodName);
-        });
-        for (const widget of [...this._userValueWidgets].reverse()) {
-            widget.setValue(value, methodName);
-            if (widget.isActive()) {
-                // Only one select item can be true at a time, we consider the
-                // last one if multiple would be active.
-                return;
-            }
-        }
+    open() {
         this._super(...arguments);
+        this.menuTogglerEl.classList.add('active');
     },
 
     //--------------------------------------------------------------------------
@@ -728,12 +801,35 @@ const SelectUserValueWidget = UserValueWidget.extend({
             return;
         }
 
-        const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
-        let value = "/";
-        if (activeWidget) {
-            value = activeWidget.el.dataset.selectLabel || activeWidget.el.textContent;
+        if (this.menuTogglerItemEl) {
+            this.menuTogglerItemEl.remove();
+            this.menuTogglerItemEl = null;
         }
-        this.menuTogglerEl.textContent = value;
+
+        let textContent = '';
+        const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
+        if (activeWidget) {
+            const value = (activeWidget.el.dataset.selectLabel || activeWidget.el.textContent.trim());
+            const imgSrc = activeWidget.el.dataset.img;
+            if (value) {
+                textContent = value;
+            } else if (imgSrc) {
+                this.menuTogglerItemEl = document.createElement('img');
+                this.menuTogglerItemEl.src = imgSrc;
+            } else {
+                const fakeImgEl = activeWidget.el.querySelector('.o_we_fake_img_item');
+                if (fakeImgEl) {
+                    this.menuTogglerItemEl = fakeImgEl.cloneNode(true);
+                }
+            }
+        } else {
+            textContent = "/";
+        }
+
+        this.menuTogglerEl.textContent = textContent;
+        if (this.menuTogglerItemEl) {
+            this.menuTogglerEl.appendChild(this.menuTogglerItemEl);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -751,8 +847,7 @@ const SelectUserValueWidget = UserValueWidget.extend({
         }
 
         if (!this.menuTogglerEl.classList.contains('active')) {
-            this.trigger_up('user_value_widget_opening');
-            this.menuTogglerEl.classList.add('active');
+            this.open();
         } else {
             this.close();
         }
@@ -761,6 +856,10 @@ const SelectUserValueWidget = UserValueWidget.extend({
             this.menuEl.scrollTop = activeButton.el.offsetTop - (this.menuEl.offsetHeight / 2);
         }
     },
+});
+
+const ButtonGroupUserValueWidget = BaseSelectionUserValueWidget.extend({
+    tagName: 'we-button-group',
 });
 
 const InputUserValueWidget = UserValueWidget.extend({
@@ -966,7 +1065,9 @@ const MultiUserValueWidget = UserValueWidget.extend({
      * @override
      */
     start: function () {
-        this.containerEl.appendChild(_buildRowElement('', this.options));
+        if (this.options && this.options.childNodes) {
+            this.options.childNodes.forEach(node => this.containerEl.appendChild(node));
+        }
         return this._super(...arguments);
     },
 
@@ -1213,10 +1314,9 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
 });
 
 const ImagepickerUserValueWidget = UserValueWidget.extend({
-    tagName: 'we-imagepicker',
+    tagName: 'we-button',
     events: {
-        'click .o_we_edit_image': '_onEditImage',
-        'click .o_we_remove_image': '_onRemoveImage',
+        'click': '_onEditImage',
     },
 
     /**
@@ -1224,18 +1324,13 @@ const ImagepickerUserValueWidget = UserValueWidget.extend({
      */
     start: async function () {
         await this._super(...arguments);
+
         const allowedSelector = this.el.dataset.allowVideos;
         this.allowVideos = allowedSelector ? this.$target.is(allowedSelector) : false;
 
-        this.editImageButton = document.createElement('we-button');
-        this.editImageButton.classList.add('o_we_edit_image', 'fa', 'fa-fw', 'fa-edit');
-
-        this.removeImageButton = document.createElement('we-button');
-        this.removeImageButton.classList.add('o_we_remove_image', 'fa', 'fa-fw', 'fa-times');
-        this.removeImageButton.title = _t("Remove");
-
-        this.containerEl.appendChild(this.editImageButton);
-        this.containerEl.appendChild(this.removeImageButton);
+        const iconEl = document.createElement('i');
+        iconEl.classList.add('fa', 'fa-fw', 'fa-camera');
+        this.containerEl.appendChild(iconEl);
     },
     /**
      * @override
@@ -1251,9 +1346,9 @@ const ImagepickerUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    _updateUI: async function () {
+    async _updateUI() {
         await this._super(...arguments);
-        this.removeImageButton.classList.toggle('d-none', !this.isActive());
+        this.el.classList.toggle('active', this.isActive());
     },
 
     //--------------------------------------------------------------------------
@@ -1279,8 +1374,8 @@ const ImagepickerUserValueWidget = UserValueWidget.extend({
             noDocuments: true,
             noVideos: !this.allowVideos,
             isForBgVideo: true,
-            res_model: $editable.data('oe-model'),
-            res_id: $editable.data('oe-id'),
+            'res_model': $editable.data('oe-model'),
+            'res_id': $editable.data('oe-id'),
         }, dummyEl).open();
         mediaDialog.on('save', this, data => {
             if (data.bgVideoSrc) {
@@ -1295,16 +1390,6 @@ const ImagepickerUserValueWidget = UserValueWidget.extend({
             }
             this._onUserValueChange();
         });
-    },
-    /**
-     * Called when the remove background button is clicked.
-     *
-     * @private
-     */
-    _onRemoveImage: function (ev) {
-        this._value = '';
-        this.isVideo = false;
-        this._onUserValueChange(ev);
     },
 });
 
@@ -1330,7 +1415,8 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
         await this._super(...arguments);
 
         const datetimePickerId = _.uniqueId('datetimepicker');
-        this.inputEl.setAttribute('class', 'datetimepicker-input mx-0 text-left');
+        this.el.classList.add('o_we_large_input');
+        this.inputEl.classList.add('datetimepicker-input', 'mx-0', 'text-left');
         this.inputEl.setAttribute('id', datetimePickerId);
         this.inputEl.setAttribute('data-target', '#' + datetimePickerId);
 
@@ -1443,7 +1529,6 @@ const RangeUserValueWidget = UserValueWidget.extend({
         await this._super(...arguments);
         this.input = document.createElement('input');
         this.input.type = "range";
-        this.input.className = "custom-range";
         this.containerEl.appendChild(this.input);
     },
 
@@ -1472,11 +1557,11 @@ const RangeUserValueWidget = UserValueWidget.extend({
     },
 });
 
-
 const userValueWidgetsRegistry = {
     'we-button': ButtonUserValueWidget,
     'we-checkbox': CheckboxUserValueWidget,
     'we-select': SelectUserValueWidget,
+    'we-button-group': ButtonGroupUserValueWidget,
     'we-input': InputUserValueWidget,
     'we-multi': MultiUserValueWidget,
     'we-colorpicker': ColorpickerUserValueWidget,
@@ -1951,7 +2036,14 @@ const SnippetOptionWidget = Widget.extend({
         const showUI = await this._computeVisibility();
         this.el.classList.toggle('d-none', !showUI);
 
-        return Promise.all(proms);
+        await Promise.all(proms);
+
+        // Hide rows which contains only hidden widgets
+        for (const rowEl of this.$el.find('we-row')) {
+            // TODO improve this, this is hackish to rely on DOM structure
+            // here. Rows should be handled as widgets or something like that.
+            rowEl.classList.toggle('d-none', $(rowEl).find('> div > .o_we_user_value_widget:not(.d-none)').length === 0);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -2384,7 +2476,7 @@ const SnippetOptionWidget = Widget.extend({
             if (this.isDestroyed()) {
                 return;
             }
-            await new Promise(resolve => {
+            await new Promise(resolve => setTimeout(() => {
                 // Will update the UI of the correct widgets for all options
                 // related to the same $target/editor if necessary
                 this.trigger_up('snippet_option_update', {
@@ -2392,7 +2484,9 @@ const SnippetOptionWidget = Widget.extend({
                     previewMode: previewMode,
                     onSuccess: () => resolve(),
                 });
-            });
+            // Set timeout needed so that the user event which triggered the
+            // option can bubble first.
+            }));
         }});
 
         if (ev.data.isSimulatedEvent) {
@@ -2442,44 +2536,6 @@ const SnippetOptionWidget = Widget.extend({
 const registry = {};
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-/**
- * Marks color levels of any element that may get or has a color classes. This
- * is done for the specific main colorpicker option so that those are marked on
- * snippet drop (so that base snippet definition do not need to care about that)
- * and on first focus (for compatibility).
- */
-registry.MainColorpicker = SnippetOptionWidget.extend({
-    /**
-     * @override
-     */
-    start: function () {
-        this._markColorLevel();
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    onBuilt: function () {
-        this._markColorLevel();
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Adds a specific class indicating the element is colored so that nested
-     * color classes work (we support one-level). Removing it is not useful,
-     * technically the class can be added on anything that *may* receive a color
-     * class: this does not come with any CSS rule.
-     *
-     * @private
-     */
-    _markColorLevel: function () {
-        this.$target.addClass('o_colored_level');
-    },
-});
 
 registry.sizing = SnippetOptionWidget.extend({
     /**
@@ -2875,7 +2931,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         }
         const dataURL = await applyModifications(img);
         const weight = dataURL.split(',')[1].length / 4 * 3;
-        this.$el.find('.o_we_image_weight').text(`${(weight / 1024).toFixed(1)}kb`);
+        const $weight = this.$el.find('.o_we_image_weight');
+        $weight.find('> span').text(`${(weight / 1024).toFixed(1)}kb`);
+        $weight.removeClass('d-none');
         img.classList.add('o_modified_image_to_save');
         return loadImage(dataURL, img);
     },
@@ -3120,7 +3178,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
 /**
  * Handles the edition of snippet's background image.
  */
-registry.background = SnippetOptionWidget.extend({
+registry.BackgroundImage = SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -3549,6 +3607,44 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
 });
 
 /**
+ * Marks color levels of any element that may get or has a color classes. This
+ * is done for the specific main colorpicker option so that those are marked on
+ * snippet drop (so that base snippet definition do not need to care about that)
+ * and on first focus (for compatibility).
+ */
+registry.ColoredLevelBackground = registry.BackgroundImage.extend({
+    /**
+     * @override
+     */
+    start: function () {
+        this._markColorLevel();
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    onBuilt: function () {
+        this._markColorLevel();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Adds a specific class indicating the element is colored so that nested
+     * color classes work (we support one-level). Removing it is not useful,
+     * technically the class can be added on anything that *may* receive a color
+     * class: this does not come with any CSS rule.
+     *
+     * @private
+     */
+    _markColorLevel: function () {
+        this.$target.addClass('o_colored_level');
+    },
+});
+
+/**
  * Allows to replace a text value with the name of a database record.
  * @todo replace this mechanism with real backend m2o field ?
  */
@@ -3789,6 +3885,7 @@ return {
     SnippetOptionWidget: SnippetOptionWidget,
     snippetOptionRegistry: registry,
 
+    NULL_ID: NULL_ID,
     UserValueWidget: UserValueWidget,
     userValueWidgetsRegistry: userValueWidgetsRegistry,
 

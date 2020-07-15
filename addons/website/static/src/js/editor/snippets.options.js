@@ -33,7 +33,8 @@ const UrlPickerUserValueWidget = InputUserValueWidget.extend({
         linkButton.classList.add('o_we_redirect_to', 'fa', 'fa-fw', 'fa-external-link');
         linkButton.title = _t("Redirect to URL in a new tab");
         this.containerEl.appendChild(linkButton);
-        $(this.inputEl).addClass('text-left');
+        this.el.classList.add('o_we_large_input');
+        this.inputEl.classList.add('text-left');
         wUtils.autocompleteWithPages(this, $(this.inputEl));
     },
 
@@ -510,19 +511,7 @@ options.Class.include({
     },
 });
 
-options.registry.BackgroundOptimize.include({
-    /**
-     * @override
-     */
-    _computeVisibility() {
-        if (this.$target.hasClass('o_background_video')) {
-            return false;
-        }
-        return this._super(...arguments);
-    },
-});
-
-options.registry.background.include({
+options.registry.BackgroundImage.include({
     background: async function (previewMode, widgetValue, params) {
         if (previewMode === 'reset' && this.videoSrc) {
             return this._setBgVideo(false, this.videoSrc);
@@ -590,6 +579,45 @@ options.registry.background.include({
     },
 });
 
+options.registry.BackgroundOptimize.include({
+    /**
+     * @override
+     */
+    _computeVisibility() {
+        if (this.$target.hasClass('o_background_video')) {
+            return false;
+        }
+        return this._super(...arguments);
+    },
+});
+
+options.registry.SwitchTheme = options.Class.extend({
+    isTopOption: true,
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @see this.selectClass for parameters
+     */
+    switchTheme: async function (previewMode, widgetValue, params) {
+        const save = await new Promise(resolve => {
+            Dialog.confirm(this, _t("Changing theme requires to leave the editor. This will save all your changes, are you sure you want to proceed? Be careful that changing the theme will reset all your color customizations."), {
+                confirm_callback: () => resolve(true),
+                cancel_callback: () => resolve(false),
+            });
+        });
+        if (!save) {
+            return;
+        }
+        this.trigger_up('request_save', {
+            reload: false,
+            onSuccess: () => window.location.href = '/web#action=website.theme_install_kanban_action',
+        });
+    },
+});
+
 options.registry.Theme = options.Class.extend({
     events: {
         'click .o_color_combinations_edition we-toggler': '_onCCTogglerClick',
@@ -650,6 +678,14 @@ options.registry.Theme = options.Class.extend({
         }
 
         await this._reloadBundles();
+    },
+    async enableImagepicker(previewMode, widgetValue, params) {
+        if (widgetValue) {
+            // TODO improve: here we make a hack so that a hidden imagepicker
+            // widget opens...
+            const widget = this._requestUserValueWidgets(widgetValue)[0];
+            widget.$el.click();
+        }
     },
     /**
      * @see this.selectClass for parameters
@@ -725,24 +761,6 @@ options.registry.Theme = options.Class.extend({
             dialog.open();
         });
     },
-    /**
-     * @see this.selectClass for parameters
-     */
-    switchTheme: async function (previewMode, widgetValue, params) {
-        const save = await new Promise(resolve => {
-            Dialog.confirm(this, _t("Changing theme requires to leave the editor. This will save all your changes, are you sure you want to proceed? Be careful that changing the theme will reset all your color customizations."), {
-                confirm_callback: () => resolve(true),
-                cancel_callback: () => resolve(false),
-            });
-        });
-        if (!save) {
-            return;
-        }
-        this.trigger_up('request_save', {
-            reload: false,
-            onSuccess: () => window.location.href = '/web#action=website.theme_install_kanban_action',
-        });
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -776,6 +794,15 @@ options.registry.Theme = options.Class.extend({
             const bgURL = $('#wrapwrap').css('background-image');
             const srcValueWrapper = /url\(['"]*|['"]*\)|^none$/g;
             return bgURL && bgURL.replace(srcValueWrapper, '') || '';
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        if (widgetName === 'body_bg_image_opt') {
+            return false;
         }
         return this._super(...arguments);
     },
@@ -1357,7 +1384,7 @@ options.registry.parallax = options.Class.extend({
      */
     onFocus: function () {
         this.trigger_up('option_update', {
-            optionNames: ['background', 'BackgroundPosition'],
+            optionNames: ['BackgroundImage', 'BackgroundPosition'],
             name: 'target',
             data: this.$target.find('> .s_parallax_bg'),
         });
@@ -1993,6 +2020,7 @@ options.registry.CoverProperties = options.Class.extend({
             this.$target.removeClass('o_record_has_cover');
         } else {
             this.$image.css('background-image', `url('${widgetValue}')`);
+            this.$target.addClass('o_record_has_cover');
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
@@ -2057,10 +2085,8 @@ options.registry.CoverProperties = options.Class.extend({
      * @override
      */
     _computeWidgetVisibility: function (widgetName, params) {
-        const hasCover = this.$target.hasClass('o_record_has_cover');
         if (params.coverOptName) {
-            var notAllowed = (this.$target.data(`use_${params.coverOptName}`) !== 'True');
-            return (hasCover && !notAllowed);
+            return this.$target.data(`use_${params.coverOptName}`) === 'True';
         }
         return this._super(...arguments);
     },
