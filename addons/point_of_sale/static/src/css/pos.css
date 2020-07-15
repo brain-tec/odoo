@@ -573,8 +573,6 @@ td {
 
 .pos .leftpane .pads {
     border-top: solid 3px rgb(110, 200, 155);
-    display: flex;
-    flex-direction: column;
 }
 
 .pos .leftpane .pads .subpads {
@@ -2187,7 +2185,6 @@ td {
 
 .splitbill-screen .order-info {
     text-align: center;
-    margin-bottom:20px;
     padding: 20px 0px;
     font-size: 64px;
     color: #43996E;
@@ -2208,6 +2205,8 @@ td {
     text-align: left;
     max-width: 500px;
     -webkit-transform: translate3d(0,0,0);
+    height: max-content;
+    width: 100%;
 }
 .splitbill-screen .order .orderline.selected{
     background: rgb(110,200,155);
