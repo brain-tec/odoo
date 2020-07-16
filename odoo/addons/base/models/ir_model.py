@@ -204,7 +204,7 @@ class IrModel(models.Model):
         for model in self:
             records = self.env[model.model]
             if not records._abstract:
-                cr.execute(sql.SQL('SELECT COUNT(*) FROM {}').format(records._table))
+                cr.execute(sql.SQL('SELECT COUNT(*) FROM {}').format(sql.Identifier(records._table)))
                 model.count = cr.fetchone()[0]
 
     @api.constrains('model')
@@ -234,7 +234,7 @@ class IrModel(models.Model):
                     raise ValidationError(_("Unable to order by %s: fields used for ordering must be present on the model and stored.", field))
 
     _sql_constraints = [
-        ('obj_name_uniq', 'unique (model)', 'Each model must be unique!'),
+        ('obj_name_uniq', 'unique (model)', 'Each model must have a unique name.'),
     ]
 
     def _get(self, name):
@@ -736,7 +736,7 @@ class IrModelFields(models.Model):
                              (tuple(tables_to_drop), tuple(self.ids)))
             tables_to_keep = set(row[0] for row in self._cr.fetchall())
             for rel_name in tables_to_drop - tables_to_keep:
-                self._cr.execute(sql.SQL('DROP TABLE {}').format(rel_name))
+                self._cr.execute(sql.SQL('DROP TABLE {}').format(sql.Identifier(rel_name)))
 
         return True
 
@@ -1596,7 +1596,7 @@ class IrModelRelation(models.Model):
 
         # drop m2m relation tables
         for table in to_drop:
-            self._cr.execute(sql.SQL('DROP TABLE {} CASCADE').format(table))
+            self._cr.execute(sql.SQL('DROP TABLE {} CASCADE').format(sql.Identifier(table)))
             _logger.info('Dropped table %s', table)
 
     def _reflect_relation(self, model, table, module):
