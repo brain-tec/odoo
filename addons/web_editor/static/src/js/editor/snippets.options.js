@@ -700,11 +700,19 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    getValue(methodName) {
-        let activeWidget = this._userValueWidgets.find(widget => widget.isPreviewed());
+    getMethodsParams(methodName) {
+        const params = this._super(...arguments);
+        const activeWidget = this._getActiveSubWidget();
         if (!activeWidget) {
-            activeWidget = this._userValueWidgets.find(widget => widget.isActive());
+            return params;
         }
+        return Object.assign(activeWidget.getMethodsParams(...arguments), params);
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        const activeWidget = this._getActiveSubWidget();
         if (activeWidget) {
             return activeWidget.getActiveValue(methodName);
         }
@@ -732,6 +740,22 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
             }
         }
         this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @returns {UserValueWidget|undefined}
+     */
+    _getActiveSubWidget() {
+        const previewedWidget = this._userValueWidgets.find(widget => widget.isPreviewed());
+        if (previewedWidget) {
+            return previewedWidget;
+        }
+        return this._userValueWidgets.find(widget => widget.isActive());
     },
 });
 
@@ -2469,13 +2493,6 @@ const SnippetOptionWidget = Widget.extend({
             // Call widget option methods and update $target
             await this._select(previewMode, widget);
 
-            // Enabling an option and notifying that the $target has changed
-            // may destroy the option (if the DOM is altered in such a way the
-            // option is not attached to it anymore). In that case, we must not
-            // wait for a response to the option update.
-            if (this.isDestroyed()) {
-                return;
-            }
             await new Promise(resolve => setTimeout(() => {
                 // Will update the UI of the correct widgets for all options
                 // related to the same $target/editor if necessary
