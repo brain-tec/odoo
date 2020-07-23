@@ -28,8 +28,8 @@ class AccountBankStmtCashWizard(models.Model):
     @api.model
     def default_get(self, fields):
         vals = super(AccountBankStmtCashWizard, self).default_get(fields)
-        if "is_a_template" in fields and self.env.context.get('default_is_a_template'):
-            vals['is_a_template'] = True
+        if 'cashbox_lines_ids' not in fields:
+            return vals
         config_id = self.env.context.get('default_pos_id')
         if config_id:
             config = self.env['pos.config'].browse(config_id)
@@ -461,9 +461,9 @@ class PosConfig(models.Model):
         for config in self:
             last_session = self.env['pos.session'].search([('config_id', '=', config.id)], limit=1)
             if (not last_session) or (last_session.state == 'closed'):
-                result.append((config.id, config.name + ' (' + _('not used') + ')'))
-                continue
-            result.append((config.id, config.name + ' (' + last_session.user_id.name + ')'))
+                result.append((config.id, _("%(pos_name)s (not used)", pos_name=config.name)))
+            else:
+                result.append((config.id, "%s (%s)" % (config.name, last_session.user_id.name)))
         return result
 
     @api.model
