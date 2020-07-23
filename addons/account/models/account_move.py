@@ -172,6 +172,8 @@ class AccountMove(models.Model):
         for move in self:
             if not move.journal_id.update_posted:
                 raise UserError(_('You cannot modify a posted entry of this journal.\nFirst you should set the journal to allow cancelling entries.'))
+            # We remove all the analytics entries for this journal
+            move.mapped('line_ids.analytic_line_ids').unlink()
         if self.ids:
             self.check_access_rights('write')
             self.check_access_rule('write')
@@ -1358,8 +1360,7 @@ class AccountMoveLine(models.Model):
                 vals['amount_currency'] = 0.0
             else:
                 ctx = {}
-                if 'date' in vals:
-                    ctx['date'] = vals['date']
+                ctx['date'] = vals.get('date') or vals.get('date_maturity') or fields.Date.today()
                 vals['amount_currency'] = account.company_id.currency_id.with_context(ctx).compute(amount, account.currency_id)
 
         if not ok:
