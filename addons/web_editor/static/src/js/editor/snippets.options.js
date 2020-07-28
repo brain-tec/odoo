@@ -1443,7 +1443,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
         this.inputEl.setAttribute('data-target', '#' + datetimePickerId);
 
         const datepickersOptions = {
-            minDate: moment({y: 1900}),
+            minDate: moment({ y: 1 }),
             maxDate: moment().add(200, 'y'),
             calendarWeeks: true,
             defaultDate: moment().format(),
@@ -3697,7 +3697,7 @@ registry.many2one = SnippetOptionWidget.extend({
         this.$search.find('input')
             .focus()
             .on('keyup', function (e) {
-                self.$overlay.removeClass('o_keypress');
+                self.$overlay.removeClass('o_overlay_hidden');
                 self._findExisting($(this).val());
             });
 
