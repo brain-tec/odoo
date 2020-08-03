@@ -6,11 +6,6 @@ const ModelField = require('mail/static/src/model/model_field.js');
 const { patchClassMethods, patchInstanceMethods } = require('mail/static/src/utils/utils.js');
 
 /**
- * Inner separator used between 2 bits of information in string that is used to
- * identify record and field to be computed during an update cycle.
- */
-const COMPUTE_RECORD_FIELD_INNER_SEPARATOR = "--||--||--";
-/**
  * Inner separator used between bits of information in string that is used to
  * identify a dependent of a field. Useful to determine which record and field
  * to register for compute during this update cycle.
@@ -56,10 +51,6 @@ class ModelManager {
          */
         this._isInUpdateCycle = false;
         /**
-         * Contains all records. key is local id, while value is the record.
-         */
-        this._records = {};
-        /**
          * Fields flagged to call compute during an update cycle.
          * For instance, when a field with dependents got update, dependent
          * fields should update themselves by invoking compute at end of
@@ -71,11 +62,11 @@ class ModelManager {
          */
         this._toComputeFields = new Map();
         /**
-         * List of "update after" on records that have been registered.
+         * Map of "update after" on records that have been registered.
          * These are processed after any explicit update and computed/related
          * fields.
          */
-        this._toUpdateAfters = [];
+        this._toUpdateAfters = new Map();
     }
 
     /**
@@ -102,8 +93,7 @@ class ModelManager {
      * @returns {mail.model[]} records matching criteria.
      */
     all(Model, filterFunc) {
-        const allRecords = Object.values(this._records)
-            .filter(e => e instanceof Model);
+        const allRecords = Object.values(Model.__records);
         if (filterFunc) {
             return allRecords.filter(filterFunc);
         }
@@ -123,24 +113,64 @@ class ModelManager {
         return this._updateCycle(() => {
             const isMulti = typeof data[Symbol.iterator] === 'function';
             const dataList = isMulti ? data : [data];
-            const res = dataList.map(data => {
-                const record = new Model({ valid: true });
-                Object.defineProperty(record, 'env', { get: () => Model.env });
-                record.localId = record._createRecordLocalId(data);
+            const fieldNames = new Set(Object.keys(Model.fields));
+            const fields = Object.values(Model.fields);
+            const records = [];
+            for (const data of dataList) {
+                // Make proxified record, so that access to field redirects
+                // to field getter.
+                const record = new Proxy(new Model({ valid: true }), {
+                    get: (target, k) => {
+                        if (!(fieldNames.has(k))) {
+                            // No crash, we allow these reads due to patch()
+                            // implementation details that read on `this._super` even
+                            // if not set before-hand.
+                            return target[k];
+                        }
+                        return Model.fields[k].get(target);
+                    },
+                    set: (target, k, newVal) => {
+                        if (fieldNames.has(k)) {
+                            throw new Error("Forbidden to write on record field without .update()!!");
+                        } else {
+                            // No crash, we allow these writes due to following concerns:
+                            // - patch() implementation details that write on `this._super`
+                            // - record listeners that need setting on this with `.bind(this)`
+                            target[k] = newVal;
+                        }
+                        return true;
+                    },
+                });
+                record.env = this.env;
+                record.localId = Model._createRecordLocalId(data);
+                if (Model.get(record.localId)) {
+                    throw Error(`A record already exists for model "${Model.modelName}" with localId "${record.localId}".`);
+                }
                 // Contains field values of record.
                 record.__values = {};
                 // Contains revNumber of record for checking record update in useStore.
                 record.__state = 0;
 
-                // Make proxified record, so that access to field redirects
-                // to field getter.
-                const proxifiedRecord = this._makeProxifiedRecord(record);
-                this._records[record.localId] = proxifiedRecord;
-                proxifiedRecord.init();
-                this._makeDefaults(proxifiedRecord);
+                Model.__records[record.localId] = record;
+                record.init();
+
+                // Make default values of its fields for newly created record.
+                for (const field of fields) {
+                    if (field.fieldType === 'attribute') {
+                        field.write(record, field.default, { registerDependents: false });
+                    }
+                    if (field.fieldType === 'relation') {
+                        if (['one2many', 'many2many'].includes(field.relationType)) {
+                            // Ensure X2many relations are Set by defaults.
+                            field.write(record, new Set(), { registerDependents: false });
+                        } else {
+                            field.write(record, undefined, { registerDependents: false });
+                        }
+                    }
+                }
 
                 const data2 = Object.assign({}, data);
-                for (const field of Object.values(Model.fields)) {
+                for (const field of fields) {
                     if (field.fieldType !== 'relation') {
                         continue;
                     }
@@ -150,21 +180,18 @@ class ModelManager {
                     data2[field.fieldName] = [['create']];
                 }
 
-                for (const field of Object.values(Model.fields)) {
+                for (const field of fields) {
                     if (field.compute || field.related) {
                         // new record should always invoke computed fields.
                         this.registerToComputeField(record, field);
                     }
                 }
 
-                this.update(proxifiedRecord, data2);
+                this.update(record, data2);
 
-                return proxifiedRecord;
-            });
-            if (!isMulti) {
-                return res[0];
+                records.push(record);
             }
-            return res;
+            return isMulti ? records : records[0];
         });
     }
 
@@ -178,7 +205,7 @@ class ModelManager {
     delete(record) {
         this._updateCycle(() => {
             const Model = record.constructor;
-            if (!this.get(Model, record)) {
+            if (!record.exists()) {
                 // Record has already been deleted.
                 // (e.g. unlinking one of its reverse relation was causal)
                 return;
@@ -206,8 +233,7 @@ class ModelManager {
                 data[relation.fieldName] = [['unlink-all']];
             }
             record.update(data);
-            delete this._records[record.localId];
-            delete this.env.store.state[record.localId];
+            delete Model.__records[record.localId];
         });
     }
 
@@ -216,10 +242,23 @@ class ModelManager {
      */
     deleteAll() {
         this._updateCycle(() => {
-            for (const record of Object.values(this._records)) {
-                record.delete();
+            for (const Model of Object.values(this.env.models)) {
+                for (const record of Object.values(Model.__records)) {
+                    record.delete();
+                }
             }
         });
+    }
+
+    /**
+     * Returns whether the given record still exists.
+     *
+     * @param {mail.model} Model class
+     * @param {mail.model} record
+     * @returns {boolean}
+     */
+    exists(Model, record) {
+        return Model.__records[record.localId] ? true : false;
     }
 
     /**
@@ -237,29 +276,30 @@ class ModelManager {
 
     /**
      * This method returns the record of provided model that matches provided
-     * record/local id. Useful to convert a local id to a record, and also to
-     * determine whether the record is still "alive" (i.e. not deleted). Note
-     * that even if there's a record in the system having provided local id, if
-     * the resulting record is not an instance of this model, this getter
+     * local id. Useful to convert a local id to a record.
+     * Note that even if there's a record in the system having provided local
+     * id, if the resulting record is not an instance of this model, this getter
      * assumes the record does not exist.
      *
      * @param {mail.model} Model class
-     * @param {string|mail.model|undefined} recordOrLocalId
+     * @param {string} localId
      * @returns {mail.model|undefined} record, if exists
      */
-    get(Model, recordOrLocalId) {
-        if (recordOrLocalId === undefined) {
-            return undefined;
-        }
-        const record = this._records[
-            recordOrLocalId instanceof this.env.models['mail.model']
-                ? recordOrLocalId.localId
-                : recordOrLocalId
-        ];
-        if (!(record instanceof Model)) {
+    get(Model, localId) {
+        if (!localId) {
             return;
         }
-        return record;
+        const record = Model.__records[localId];
+        if (record) {
+            return record;
+        }
+        // support for inherited models (eg. relation targeting `mail.model`)
+        for (const Model of Object.values(this.env.models)) {
+            const record = Model.__records[localId];
+            if (record) {
+                return record;
+            }
+        }
     }
 
     /**
@@ -276,19 +316,18 @@ class ModelManager {
         return this._updateCycle(() => {
             const isMulti = typeof data[Symbol.iterator] === 'function';
             const dataList = isMulti ? data : [data];
-            const res = dataList.map(data => {
-                let record = Model.find(Model._findFunctionFromData(data));
+            const records = [];
+            for (const data of dataList) {
+                const localId = Model._createRecordLocalId(data);
+                let record = Model.get(localId);
                 if (!record) {
                     record = Model.create(data);
                 } else {
                     record.update(data);
                 }
-                return record;
-            });
-            if (!isMulti) {
-                return res[0];
+                records.push(record);
             }
-            return res;
+            return isMulti ? records : records[0];
         });
     }
 
@@ -315,8 +354,10 @@ class ModelManager {
      * @param {ModelField} field
      */
     registerToComputeField(record, field) {
-        const entry = [record.localId, field.fieldName].join(COMPUTE_RECORD_FIELD_INNER_SEPARATOR);
-        this._toComputeFields.set(entry, true);
+        if (!this._toComputeFields.has(record)) {
+            this._toComputeFields.set(record, new Set());
+        }
+        this._toComputeFields.get(record).add(field);
     }
 
     //--------------------------------------------------------------------------
@@ -632,7 +673,11 @@ class ModelManager {
             }
             // Make environment accessible from Model.
             const Model = generatable.factory(Models);
-            Object.defineProperty(Model, 'env', { get: () => this.env });
+            Model.env = this.env;
+            /**
+            * Contains all records. key is local id, while value is the record.
+            */
+            Model.__records = {};
             for (const patch of generatable.patches) {
                 switch (patch.type) {
                     case 'class':
@@ -646,7 +691,7 @@ class ModelManager {
                         break;
                 }
             }
-            if (!Model.hasOwnProperty('modelName')) {
+            if (!Object.prototype.hasOwnProperty.call(Model, 'modelName')) {
                 throw new Error(`Missing static property "modelName" on Model class "${Model.name}".`);
             }
             if (generatedNames.includes(Model.modelName)) {
@@ -673,29 +718,6 @@ class ModelManager {
          */
         this._checkProcessedFieldsOnModels(Models);
         return Models;
-    }
-
-    /**
-     * Make default values of its fields for newly created record.
-     *
-     * @private
-     * @param {mail.model} record
-     */
-    _makeDefaults(record) {
-        const Model = record.constructor;
-        for (const field of Object.values(Model.fields)) {
-            if (field.fieldType === 'attribute') {
-                field.write(record, field.default, { registerDependents: false });
-            }
-            if (field.fieldType === 'relation') {
-                if (['one2many', 'many2many'].includes(field.relationType)) {
-                    // Ensure X2many relations are Set by defaults.
-                    field.write(record, new Set(), { registerDependents: false });
-                } else {
-                    field.write(record, undefined, { registerDependents: false });
-                }
-            }
-        }
     }
 
     /**
@@ -726,47 +748,6 @@ class ModelManager {
     }
 
     /**
-     * Wrap record that has just been created in a proxy. Proxy is useful for
-     * auto-getting records when accessing relational fields.
-     *
-     * @private
-     * @param {mail.model} record
-     * @return {Proxy<mail.model>} proxified record
-     */
-    _makeProxifiedRecord(record) {
-        const proxifiedRecord = new Proxy(record, {
-            get: (target, k) => {
-                if (k === 'constructor') {
-                    return target[k];
-                }
-                const fields = target.constructor.fields;
-                const field = Object.prototype.hasOwnProperty.call(fields, k)
-                    ? fields[k]
-                    : undefined;
-                if (!field) {
-                    // No crash, we allow these reads due to patch()
-                    // implementation details that read on `this._super` even
-                    // if not set before-hand.
-                    return target[k];
-                }
-                return field.get(proxifiedRecord);
-            },
-            set: (target, k, newVal) => {
-                if (target.constructor.fields[k]) {
-                    throw new Error("Forbidden to write on record field without .update()!!");
-                } else {
-                    // No crash, we allow these writes due to following concerns:
-                    // - patch() implementation details that write on `this._super`
-                    // - record listeners that need setting on this with `.bind(this)`
-                    target[k] = newVal;
-                }
-                return true;
-            },
-        });
-        return proxifiedRecord;
-    }
-
-    /**
      * This function processes definition of declared fields in provided models.
      * Basically, models have fields declared in static prop `fields`, and this
      * function processes and modifies them in place so that they are fully
@@ -782,7 +763,7 @@ class ModelManager {
          * 1. Prepare fields.
          */
         for (const Model of Object.values(Models)) {
-            if (!Model.hasOwnProperty('fields')) {
+            if (!Object.prototype.hasOwnProperty.call(Model, 'fields')) {
                 Model.fields = {};
             }
             Model.inverseRelations = [];
@@ -906,15 +887,17 @@ class ModelManager {
      */
     _updateComputes() {
         while (this._toComputeFields.size > 0) {
-            // process one compute field
-            const key = this._toComputeFields.keys().next().value;
-            const [recordLocalId, fieldName] = key.split(COMPUTE_RECORD_FIELD_INNER_SEPARATOR);
-            this._toComputeFields.delete(key);
-            const record = this.env.models['mail.model'].get(recordLocalId);
-            if (record) {
-                const Model = record.constructor;
-                const field = Model.fields[fieldName];
-                field.doCompute(record);
+            for (const [record, fields] of this._toComputeFields) {
+                this._toComputeFields.delete(record);
+                if (!record.exists()) {
+                    continue;
+                }
+                while (fields.size > 0) {
+                    for (const field of fields) {
+                        fields.delete(field);
+                        field.doCompute(record);
+                    }
+                }
             }
         }
     }
@@ -937,16 +920,16 @@ class ModelManager {
             this._isInUpdateCycle = true;
             res = func();
             this._updateComputes();
-            while (this._toUpdateAfters.length > 0) {
-                this._isHandlingToUpdateAfters = true;
-                // process one update after
-                const [recordToUpdate, previous] = this._toUpdateAfters.pop();
-                const RecordToUpdateModel = recordToUpdate.constructor;
-                if (this.get(RecordToUpdateModel, recordToUpdate)) {
-                    recordToUpdate._updateAfter(previous);
+            this._isHandlingToUpdateAfters = true;
+            while (this._toUpdateAfters.size > 0) {
+                for (const [record, previous] of this._toUpdateAfters) {
+                    this._toUpdateAfters.delete(record);
+                    if (record.exists()) {
+                        record._updateAfter(previous);
+                    }
                 }
-                this._isHandlingToUpdateAfters = false;
             }
+            this._isHandlingToUpdateAfters = false;
             this._isInUpdateCycle = false;
             // trigger at most one useStore call per update cycle
             this.env.store.state.messagingRevNumber++;
@@ -975,19 +958,18 @@ class ModelManager {
      * @param {Object} data
      */
     _updateDirect(record, data) {
-        const existing = this._toUpdateAfters.find(entry => entry[0] === record);
-        if (!existing) {
+        if (!this._toUpdateAfters.has(record)) {
             // queue updateAfter before calling field.set to ensure previous
             // contains the value at the start of update cycle
-            this._toUpdateAfters.push([record, record._updateBefore()]);
+            this._toUpdateAfters.set(record, record._updateBefore());
         }
-        for (const [k, v] of Object.entries(data)) {
-            const Model = record.constructor;
-            const field = Model.fields[k];
+        const Model = record.constructor;
+        for (const fieldName of Object.keys(data)) {
+            const field = Model.fields[fieldName];
             if (!field) {
-                throw new Error(`Cannot create/update record with data unrelated to a field. (model: "${Model.modelName}", non-field attempted update: "${k}")`);
+                throw new Error(`Cannot create/update record with data unrelated to a field. (model: "${Model.modelName}", non-field attempted update: "${fieldName}")`);
             }
-            field.set(record, v);
+            field.set(record, data[fieldName]);
         }
     }
 

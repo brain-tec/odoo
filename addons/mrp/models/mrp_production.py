@@ -475,7 +475,7 @@ class MrpProduction(models.Model):
                 production.state = 'progress'
             elif not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 production.state = 'progress'
-            elif any(not float_is_zero(move.quantity_done, precision_rounding=move.product_uom.rounding) for move in production.move_raw_ids) :
+            elif any(not float_is_zero(move.quantity_done, precision_rounding=move.product_uom.rounding or move.product_id.uom_id.rounding) for move in production.move_raw_ids):
                 production.state = 'progress'
             else:
                 production.state = 'confirmed'
@@ -579,7 +579,7 @@ class MrpProduction(models.Model):
     def _onchange_bom_id(self):
         if not self.product_id and self.bom_id:
             self.product_id = self.bom_id.product_id or self.bom_id.product_tmpl_id.product_variant_ids[0]
-        self.product_qty = self.bom_id.product_qty
+        self.product_qty = self.bom_id.product_qty or 1.0
         self.product_uom_id = self.bom_id and self.bom_id.product_uom_id.id or self.product_id.uom_id.id
         self.move_raw_ids = [(2, move.id) for move in self.move_raw_ids.filtered(lambda m: m.bom_line_id)]
         self.picking_type_id = self.bom_id.picking_type_id or self.picking_type_id
