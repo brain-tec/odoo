@@ -48,6 +48,19 @@ CRM_LEAD_FIELDS_TO_MERGE = [
     'email_cc',
     'website']
 
+PARTNER_FIELDS_TO_SYNC = [
+    'title',
+    'street',
+    'street2',
+    'city',
+    'state_id',
+    'country_id',
+    'mobile',
+    'zip',
+    'function',
+    'website',
+]
+
 # Those values have been determined based on benchmark to minimise
 # computation time, number of transaction and transaction time.
 PLS_COMPUTE_BATCH_STEP = 50000  # odoo.models.PREFETCH_MAX = 1000 but larger cluster can speed up global computation
@@ -282,7 +295,7 @@ class Lead(models.Model):
     @api.depends('partner_id.email')
     def _compute_email_from(self):
         for lead in self:
-            if lead.partner_id and lead.partner_id.email != lead.email_from:
+            if lead.partner_id.email and lead.partner_id.email != lead.email_from:
                 lead.email_from = lead.partner_id.email
 
     def _inverse_email_from(self):
@@ -293,7 +306,7 @@ class Lead(models.Model):
     @api.depends('partner_id.phone')
     def _compute_phone(self):
         for lead in self:
-            if lead.partner_id and lead.phone != lead.partner_id.phone:
+            if lead.partner_id.phone and lead.phone != lead.partner_id.phone:
                 lead.phone = lead.partner_id.phone
 
     def _inverse_phone(self):
@@ -422,21 +435,14 @@ class Lead(models.Model):
         partner_name = partner.parent_id.name
         if not partner_name and partner.is_company:
             partner_name = partner.name
+        contact_name = False if partner.is_company else partner.name
 
-        return {
-            'partner_name': partner_name,
-            'contact_name': partner.name if not partner.is_company else False,
-            'title': partner.title.id,
-            'street': partner.street,
-            'street2': partner.street2,
-            'city': partner.city,
-            'state_id': partner.state_id.id,
-            'country_id': partner.country_id.id,
-            'mobile': partner.mobile,
-            'zip': partner.zip,
-            'function': partner.function,
-            'website': partner.website,
-        }
+        values = {f: partner[f] if partner else self[f] for f in PARTNER_FIELDS_TO_SYNC}
+        values.update({
+            'partner_name': partner_name or self.partner_name,
+            'contact_name': False if partner.is_company else partner.name or self.contact_name,
+        })
+        return self._convert_to_write(values)
 
     # ------------------------------------------------------------
     # ORM
