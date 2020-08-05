@@ -1112,7 +1112,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         ], self.move_vals)
 
     def test_in_invoice_create_refund(self):
-        self.invoice.post()
+        self.invoice.action_post()
 
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=self.invoice.ids).create({
             'date': fields.Date.from_string('2019-02-01'),
@@ -1215,7 +1215,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form.currency_id = self.currency_data['currency']
         move_form.save()
 
-        self.invoice.post()
+        self.invoice.action_post()
 
         # The currency rate changed from 1/3 to 1/2.
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=self.invoice.ids).create({
@@ -1651,10 +1651,11 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 }),
             ]
         })
-        move.post()
+        move.action_post()
 
-        wizard = self.env['account.accrual.accounting.wizard']\
+        wizard = self.env['account.automatic.entry.wizard']\
             .with_context(active_model='account.move.line', active_ids=move.invoice_line_ids.ids).create({
+            'action': 'change_period',
             'date': '2018-01-01',
             'percentage': 60,
             'journal_id': self.company_data['default_journal_misc'].id,
@@ -1671,7 +1672,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 'reconcile': True,
             }).id,
         })
-        wizard_res = wizard.amend_entries()
+        wizard_res = wizard.do_action()
 
         self.assertInvoiceValues(move, [
             {
