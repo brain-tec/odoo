@@ -760,14 +760,8 @@ var SnippetEditor = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onSnippetOptionUpdate: async function (ev) {
-        if (ev.data.previewMode) {
-            ev.data.onSuccess();
-            return;
-        }
-
         const proms1 = Object.keys(this.styles).map(key => {
             return this.styles[key].updateUI({
-                forced: ev.data.widget,
                 noVisibility: true,
             });
         });
