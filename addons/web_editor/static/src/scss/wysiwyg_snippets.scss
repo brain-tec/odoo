@@ -71,21 +71,74 @@ body.editor_enable.editor_has_snippets {
 
         .oe_snippet_thumbnail_img {
             width: 100%;
-            height: 60px;
+            padding-top: 75%;
             background-repeat: no-repeat;
             background-size: contain;
-            background-position: center center;
+            background-position: top center;
             overflow: hidden;
-        }
-
-        img.oe_snippet_thumbnail_img {
-            height: auto;
-            padding-bottom: 0;
         }
     }
 
     .oe_snippet_thumbnail_title {
         display: none;
+    }
+}
+
+@mixin we-svg-icon(
+        $graphic: $o-we-sidebar-content-field-color,
+        $subdle: $o-we-sidebar-content-field-color,
+        $subdle-opacity: 0.5) {
+    svg {
+        .o_graphic {
+            fill: $graphic;
+        }
+        .o_subdle {
+            fill: rgba($subdle, $subdle-opacity);
+        }
+    }
+}
+
+%we-generic-link {
+    cursor: pointer;
+    color: $o-we-sidebar-content-field-color;
+    line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
+    text-decoration: none;
+    outline: none;
+    @include we-svg-icon();
+
+    &:not([disabled]) {
+        &.active, &:hover {
+            @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
+            color: $o-we-sidebar-content-field-pressed-color;
+        }
+
+        $-hover-colors: (
+            'success': $o-we-color-success,
+            'info': $o-we-color-info,
+            'warning': $o-we-color-warning,
+            'danger': $o-we-color-danger,
+        );
+        @each $name, $color in $-hover-colors {
+            &.o_we_hover_#{$name}:hover {
+                color: $color;
+            }
+        }
+    }
+    &[disabled] {
+        opacity: .5;
+    }
+}
+
+%we-generic-button {
+    @extend %we-generic-link;
+    @include o-text-overflow(block);
+    padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
+    border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+    border-radius: $o-we-sidebar-content-field-border-radius;
+    background: $o-we-sidebar-content-field-clickable-bg;
+
+    &.active {
+        background: $o-we-sidebar-content-field-pressed-bg;
     }
 }
 
@@ -105,7 +158,7 @@ body.editor_enable.editor_has_snippets {
     color: $o-we-sidebar-color;
     font-family: $o-we-font-family;
     font-size: $o-we-sidebar-font-size;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 1;
 
     transition: transform 400ms ease 0s;
@@ -254,46 +307,15 @@ body.editor_enable.editor_has_snippets {
             width: $o-we-sidebar-width / 2; // TODO maybe there is a better way to implement this
         }
 
-        @mixin we-svg-icon(
-                $graphic: $o-we-sidebar-content-field-color,
-                $subdle: $o-we-sidebar-content-field-color,
-                $subdle-opacity: 0.5) {
-            svg {
-                .o_graphic {
-                    fill: $graphic;
-                }
-                .o_subdle {
-                    fill: rgba($subdle, $subdle-opacity);
-                }
-            }
-        }
-
         we-button, we-toggler {
-            cursor: pointer;
-            @include o-text-overflow(block);
-            padding: 0 $o-we-sidebar-content-field-clickable-spacing;
-            border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-            border-radius: $o-we-sidebar-content-field-border-radius;
-            background: $o-we-sidebar-content-field-clickable-bg;
-            color: $o-we-sidebar-content-field-color;
-            line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
+            @extend %we-generic-button;
             text-align: left;
-            @include we-svg-icon();
-
-            &.active, &:hover {
-                color: $o-we-sidebar-content-field-pressed-color;
-                @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
-            }
-            &.active {
-                background: $o-we-sidebar-content-field-pressed-bg;
-            }
 
             &.fa {
                 display: inline-block;
                 padding: 0;
                 border: none;
                 background: none;
-                color: inherit;
                 text-align: center;
 
                 &.fa-times, &.fa-minus {
@@ -321,8 +343,12 @@ body.editor_enable.editor_has_snippets {
                 background-color: $o-we-sidebar-content-field-dropdown-bg;
                 box-shadow: $o-we-sidebar-content-field-dropdown-shadow;
             }
-            &.active + * {
-                display: block !important;
+            &.active {
+                @include we-icon-button('\f0d8');
+
+                + * {
+                    display: block !important;
+                }
             }
         }
         %we-icon-button {
@@ -370,8 +396,6 @@ body.editor_enable.editor_has_snippets {
                     flex: 0 0 auto;
                     display: block;
                     margin-left: auto;
-                    color: $o-we-sidebar-content-field-control-item-color;
-                    text-align: center;
 
                     > * {
                         margin-left: $o-we-sidebar-content-field-multi-spacing;
@@ -383,6 +407,10 @@ body.editor_enable.editor_has_snippets {
                         .fa {
                             margin: 0;
                         }
+                    }
+
+                    .fa {
+                        @extend %we-generic-link;
                     }
                 }
             }
@@ -525,6 +553,10 @@ body.editor_enable.editor_has_snippets {
                     background-color: $o-we-sidebar-content-field-dropdown-item-bg;
                     color: $o-we-sidebar-content-field-dropdown-item-color;
 
+                    > we-title {
+                        flex-grow: 1;
+                    }
+
                     > div {
                         line-height: $o-we-sidebar-content-field-dropdown-item-height;
                     }
@@ -538,9 +570,18 @@ body.editor_enable.editor_has_snippets {
                         border-top: $o-we-sidebar-content-field-dropdown-item-spacing solid transparent;
                     }
 
+                    &:hover {
+                        background-color: $o-we-sidebar-content-field-dropdown-item-bg-hover;
+                        color: $o-we-sidebar-content-field-dropdown-item-hover-color;
+                    }
                     &.active {
                         @include we-icon-button('\f00c', $align: left);
+                        background-color: $o-we-sidebar-content-field-dropdown-item-active-bg;
                         color: $o-we-sidebar-content-field-dropdown-item-active-color;
+
+                        &:after {
+                            color: $o-we-accent;
+                        }
                     }
                 }
             }
@@ -573,9 +614,16 @@ body.editor_enable.editor_has_snippets {
 
                 we-button {
                     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
+                    border-radius: 0;
 
                     + we-button {
                         border-left: none;
+                    }
+                    &:first-child {
+                        @include border-left-radius($o-we-sidebar-content-field-border-radius);
+                    }
+                    &:last-child {
+                        @include border-right-radius($o-we-sidebar-content-field-border-radius);
                     }
                 }
             }
@@ -950,10 +998,12 @@ body.editor_enable.editor_has_snippets {
     @extend %o-preview-alpha-background;
     font-family: sans-serif !important;
     font-size: 16px !important;
+    padding: $o-we-sidebar-content-field-spacing * 1.6;
 }
 .o_we_cc_preview_wrapper > * {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+    line-height: .8 !important;
 }
 .o_we_color_combination_btn_text {
     color: inherit !important;
@@ -964,7 +1014,7 @@ body.editor_enable.editor_has_snippets {
     font-size: 1em !important;
 }
 .o_we_color_combination_btn_btn {
-    padding: 0 1px !important;
+    padding: 3px 3px 2px !important;
     border-radius: 2px !important;
     font-size: 0.8em !important;
 }
