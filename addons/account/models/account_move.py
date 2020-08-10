@@ -1430,9 +1430,10 @@ class AccountMove(models.Model):
             # At this point we only want to keep the taxes with a zero amount since they do not
             # generate a tax line.
             for line in move.line_ids:
-                for tax in line.tax_ids.flatten_taxes_hierarchy().filtered(lambda t: t.amount == 0.0):
-                    res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                    res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                for tax in line.tax_ids.flatten_taxes_hierarchy():
+                    if tax.tax_group_id not in res:
+                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
 
             res = sorted(res.items(), key=lambda l: l[0].sequence)
             move.amount_by_group = [(
@@ -1749,7 +1750,7 @@ class AccountMove(models.Model):
             self.mapped('line_ids')._check_tax_lock_date()
 
         if ('state' in vals and vals.get('state') == 'posted'):
-            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)):
+            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)).sorted(lambda m: (m.date, m.ref or '', m.id)):
                 new_number = move.journal_id.secure_sequence_id.next_by_id()
                 vals_hashing = {'secure_sequence_number': new_number,
                                 'inalterable_hash': move._get_new_hash(new_number)}
