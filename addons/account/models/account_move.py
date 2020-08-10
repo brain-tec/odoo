@@ -1776,7 +1776,7 @@ class AccountMove(models.Model):
             self.mapped('line_ids')._check_tax_lock_date()
 
         if ('state' in vals and vals.get('state') == 'posted'):
-            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)):
+            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)).sorted(lambda m: (m.date, m.ref or '', m.id)):
                 new_number = move.journal_id.secure_sequence_id.next_by_id()
                 vals_hashing = {'secure_sequence_number': new_number,
                                 'inalterable_hash': move._get_new_hash(new_number)}
@@ -3473,7 +3473,7 @@ class AccountMoveLine(models.Model):
                     # Cash basis entries are always treated as misc operations, applying the tag sign directly to the balance
                     type_multiplicator = 1
                 else:
-                    type_multiplicator = (record.journal_id.type == 'sale' and -1 or 1) * (record.move_id.move_type in ('in_refund', 'out_refund') and -1 or 1)
+                    type_multiplicator = (record.journal_id.type == 'sale' and -1 or 1) * (self._get_refund_tax_audit_condition(record) and -1 or 1)
 
                 tag_amount = type_multiplicator * (tag.tax_negate and -1 or 1) * record.balance
 
@@ -3488,6 +3488,13 @@ class AccountMoveLine(models.Model):
                     audit_str += tag.name + ': ' + formatLang(self.env, tag_amount, currency_obj=currency)
 
             record.tax_audit = audit_str
+
+    def _get_refund_tax_audit_condition(self, aml):
+        """ Returns the condition to be used for the provided move line to tell
+        whether or not it comes from a refund operation.
+        This is overridden by pos in order to treat returns properly.
+        """
+        return aml.move_id.move_type in ('in_refund', 'out_refund') and -1 or 1
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
