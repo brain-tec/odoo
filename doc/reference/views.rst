@@ -375,7 +375,7 @@ Possible children of the view element are:
 Calendar
 --------
 
-Calendar views display records as events in a daily, weekly or monthly
+Calendar views display records as events in a daily, weekly, monthly or yearly
 calendar. Their root element is ``<calendar>``. Available attributes on the
 calendar view are:
 
@@ -410,7 +410,10 @@ calendar view are:
     event is flagged as day-long (and duration is irrelevant)
 ``mode``
     Default display mode when loading the calendar.
-    Possible attributes are: ``day``, ``week``, ``month``
+    Possible attributes are: ``day``, ``week``, ``month``, ``year``
+``scales``
+    Comma-separated list of scales to provide. By default, all scales are
+    available. See mode for possible scale values.
 
 ``<field>``
   declares fields to aggregate or to use in kanban *logic*. If the field is
