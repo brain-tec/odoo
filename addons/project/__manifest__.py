@@ -23,6 +23,7 @@
     'data': [
         'security/project_security.xml',
         'security/ir.model.access.csv',
+        'data/digest_data.xml',
         'report/project_report_views.xml',
         'views/analytic_views.xml',
         'views/digest_views.xml',
@@ -40,6 +41,7 @@
         'wizard/project_task_type_delete_views.xml',
     ],
     'demo': ['data/project_demo.xml'],
+    'qweb': ['static/src/xml/project_templates.xml'],
     'test': [
     ],
     'installable': True,

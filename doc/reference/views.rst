@@ -125,7 +125,7 @@ an impact on all view types.
      ``info``, ``warning``, ``danger`` and ``secondary`` displays. The list view supports ``bf``,
      ``it``, ``success``, ``info``, ``warning``, ``danger``, ``muted`` and ``primary`` displays.
 
-* ``sample`` (``kanban`` & ``list`` & ``gantt``)
+* ``sample`` (``kanban`` & ``list`` & ``gantt`` & ``graph`` & ``pivot`` & ``cohort`` & ``dashboard``)
 
   Populate the view with a set of sample records if none are found for the current model.
   This attribute is false by default.
@@ -2038,6 +2038,8 @@ Possible children elements of the search view are:
 
   A domain might be used to express a dependency on another field (with select="one")
   of the search panel. Consider
+  /!\ This attribute is incompatible with a select="one" with enabled counters; if a select="multi"
+  has a `domain` attribute, all select="one" will have their counters disabled.
 
   .. code-block:: xml
 

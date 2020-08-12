@@ -386,9 +386,9 @@ class HrExpense(models.Model):
         self.ensure_one()
         account_dest = self.env['account.account']
         if self.payment_mode == 'company_account':
-            if not self.sheet_id.bank_journal_id.default_credit_account_id:
-                raise UserError(_("No credit account found for the %s journal, please configure one.") % (self.sheet_id.bank_journal_id.name))
-            account_dest = self.sheet_id.bank_journal_id.default_credit_account_id.id
+            if not self.sheet_id.bank_journal_id.default_account_id:
+                raise UserError(_("No account found for the %s journal, please configure one.") % (self.sheet_id.bank_journal_id.name))
+            account_dest = self.sheet_id.bank_journal_id.default_account_id.id
         else:
             if not self.employee_id.sudo().address_home_id:
                 raise UserError(_("No Home Address found for the employee %s, please configure one.") % (self.employee_id.name))
@@ -507,8 +507,8 @@ class HrExpense(models.Model):
 
             # create one more move line, a counterline for the total on payable account
             if expense.payment_mode == 'company_account':
-                if not expense.sheet_id.bank_journal_id.default_credit_account_id:
-                    raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
+                if not expense.sheet_id.bank_journal_id.default_account_id:
+                    raise UserError(_("No account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
                 journal = expense.sheet_id.bank_journal_id
                 # create payment
                 payment_methods = journal.outbound_payment_method_ids if total_amount < 0 else journal.inbound_payment_method_ids
@@ -772,6 +772,10 @@ class HrExpenseSheet(models.Model):
     payment_mode = fields.Selection(related='expense_line_ids.payment_mode', default='own_account', readonly=True, string="Paid By", tracking=True)
     user_id = fields.Many2one('res.users', 'Manager', compute='_compute_from_employee_id', store=True, readonly=True, copy=False, states={'draft': [('readonly', False)]}, tracking=True, domain=lambda self: [('groups_id', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').id)])
     total_amount = fields.Monetary('Total Amount', currency_field='currency_id', compute='_compute_amount', store=True, tracking=True)
+    amount_residual = fields.Monetary(
+        string="Amount Due", store=True,
+        currency_field='currency_id',
+        compute='_compute_amount_residual')
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, states={'draft': [('readonly', False)]}, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, states={'draft': [('readonly', False)]}, default=lambda self: self.env.company.currency_id)
     attachment_number = fields.Integer(compute='_compute_attachment_number', string='Number of Attachments')
@@ -793,6 +797,22 @@ class HrExpenseSheet(models.Model):
     def _compute_amount(self):
         for sheet in self:
             sheet.total_amount = sum(sheet.expense_line_ids.mapped('total_amount_company'))
+
+    @api.depends(
+        'currency_id',
+        'account_move_id.line_ids.amount_residual',
+        'account_move_id.line_ids.amount_residual_currency',
+        'account_move_id.line_ids.account_internal_type',)
+    def _compute_amount_residual(self):
+        for sheet in self:
+            if sheet.currency_id == sheet.company_id.currency_id:
+                residual_field = 'amount_residual'
+            else:
+                residual_field = 'amount_residual_currency'
+
+            payment_term_lines = sheet.account_move_id.line_ids\
+                .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
+            sheet.amount_residual = -sum(payment_term_lines.mapped(residual_field))
 
     def _compute_attachment_number(self):
         for sheet in self:
@@ -983,3 +1003,19 @@ class HrExpenseSheet(models.Model):
                 user_id=expense_report.sudo()._get_responsible_for_approval().id or self.env.user.id)
         self.filtered(lambda hol: hol.state == 'approve').activity_feedback(['hr_expense.mail_act_expense_approval'])
         self.filtered(lambda hol: hol.state == 'cancel').activity_unlink(['hr_expense.mail_act_expense_approval'])
+
+    def action_register_payment(self):
+        ''' Open the account.payment.register wizard to pay the selected journal entries.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'context': {
+                'active_model': 'account.move',
+                'active_ids': self.account_move_id.ids,
+            },
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
