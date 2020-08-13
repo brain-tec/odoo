@@ -48,17 +48,22 @@ CRM_LEAD_FIELDS_TO_MERGE = [
     'email_cc',
     'website']
 
+# Subset of partner fields: sync any of those
 PARTNER_FIELDS_TO_SYNC = [
+    'mobile',
     'title',
+    'function',
+    'website',
+]
+
+# Subset of partner fields: sync all or none to avoid mixed addresses
+PARTNER_ADDRESS_FIELDS_TO_SYNC = [
     'street',
     'street2',
     'city',
+    'zip',
     'state_id',
     'country_id',
-    'mobile',
-    'zip',
-    'function',
-    'website',
 ]
 
 # Those values have been determined based on benchmark to minimise
@@ -429,18 +434,27 @@ class Lead(models.Model):
             self.mobile = self.phone_format(self.mobile)
 
     def _prepare_values_from_partner(self, partner):
-        """ Get a dictionary with values coming from customer information to
-        copy on a lead. Email_from and phone fields get the current lead
-        values to avoid being reset if customer has no value for them. """
+        """ Get a dictionary with values coming from partner information to
+        copy on a lead. Non-address fields get the current lead
+        values to avoid being reset if partner has no value for them. """
+
+        # Sync all address fields from partner, or none, to avoid mixing them.
+        if any(partner[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC):
+            values = {f: partner[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC}
+        else:
+            values = {f: self[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC}
+
+        # For other fields, get the info from the partner, but only if set
+        values.update({f: partner[f] or self[f] for f in PARTNER_FIELDS_TO_SYNC})
+
+        # Fields with specific logic
         partner_name = partner.parent_id.name
         if not partner_name and partner.is_company:
             partner_name = partner.name
         contact_name = False if partner.is_company else partner.name
-
-        values = {f: partner[f] if partner else self[f] for f in PARTNER_FIELDS_TO_SYNC}
         values.update({
             'partner_name': partner_name or self.partner_name,
-            'contact_name': False if partner.is_company else partner.name or self.contact_name,
+            'contact_name': contact_name or self.contact_name,
         })
         return self._convert_to_write(values)
 
@@ -1030,11 +1044,12 @@ class Lead(models.Model):
         """
         new_team_id = team_id if team_id else self.team_id.id
         upd_values = {
-            'partner_id': customer.id if customer else False,
             'type': 'opportunity',
             'date_open': fields.Datetime.now(),
             'date_conversion': fields.Datetime.now(),
         }
+        if customer != self.partner_id:
+            upd_values['partner_id'] = customer.id if customer else False
         if not self.stage_id:
             stage = self._stage_find(team_id=new_team_id)
             upd_values['stage_id'] = stage.id
@@ -1143,10 +1158,12 @@ class Lead(models.Model):
             res['lang'] = self.lang_id.code
         return res
 
-    def _find_matching_partner(self):
+    def _find_matching_partner(self, email_only=False):
         """ Try to find a matching partner with available information on the
-        lead, using notably customer's name, email, phone, ...
+        lead, using notably customer's name, email, ...
 
+        :param email_only: Only find a matching based on the email. To use
+            for automatic process where ilike based on name can be too dangerous
         :return: partner browse record
         """
         self.ensure_one()
@@ -1155,7 +1172,7 @@ class Lead(models.Model):
         if not partner and self.email_from:
             partner = self.env['res.partner'].search([('email', '=', self.email_from)], limit=1)
 
-        if not partner:
+        if not partner and not email_only:
             # search through the existing partners based on the lead's partner or contact name
             # to be aligned with _create_customer, search on lead's name as last possibility
             for customer_potential_name in [self[field_name] for field_name in ['partner_name', 'contact_name', 'name'] if self[field_name]]:
