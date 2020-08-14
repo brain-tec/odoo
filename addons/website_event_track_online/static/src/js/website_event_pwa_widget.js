@@ -9,6 +9,14 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
         template: "pwa_install_banner",
         events: {
             "click .o_btn_install": "_onClickInstall",
+            "click .o_btn_close": "_onClickClose",
+        },
+
+        /**
+         * @private
+         */
+        _onClickClose: function () {
+            this.trigger_up("prompt_close_bar");
         },
 
         /**
@@ -23,6 +31,7 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
         selector: "#wrapwrap.event",
         custom_events: {
             prompt_install: "_onPromptInstall",
+            prompt_close_bar: "_onPromptCloseBar",
         },
 
         /**
@@ -62,6 +71,7 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
          */
         _hideInstallBanner: function () {
             this.installBanner ? this.installBanner.destroy() : undefined;
+            $('.o_livechat_button').css('bottom', '0');
         },
 
         /**
@@ -87,7 +97,11 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
          */
         _showInstallBanner: function () {
             this.installBanner = new PWAInstallBanner(this);
-            this.installBanner.appendTo(this.$el);
+            this.installBanner.appendTo(this.$el).then(() => {
+                // If Livechat available, It should be placed above the PWA banner.
+                var height = this.$('.o_pwa_install_banner').outerHeight(true);
+                $('.o_livechat_button').css('bottom', height + 'px');
+            });
         },
 
         //--------------------------------------------------------------------------
@@ -106,7 +120,14 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
             this.deferredPrompt = ev;
             this._showInstallBanner();
         },
-
+        /**
+         * @private
+         * @param ev {Event}
+         */
+        _onPromptCloseBar: function (ev) {
+            ev.stopPropagation();
+            this._hideInstallBanner();
+        },
         /**
          * @private
          * @param ev {Event}

@@ -22,10 +22,10 @@ DEFAULT_FACTURX_DATE_FORMAT = '%Y%m%d'
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
-    def _export_invoice_to_attachment(self, invoice):
+    def _export_invoice_to_embed_to_pdf(self, pdf_content, invoice):
         self.ensure_one()
         if self.code != 'facturx_1_0_05':
-            return super()._export_invoice_to_attachment(invoice)
+            return super()._export_invoice_to_embed_to_pdf(pdf_content, invoice)
 
         def format_date(dt):
             # Format the date in the Factur-x standard.
@@ -101,7 +101,7 @@ class AccountEdiFormat(models.Model):
     def _create_invoice_from_xml_tree(self, filename, tree):
         self.ensure_one()
         if self._is_facturx(filename, tree):
-            return self._import_facturx(tree, self.env['account_move'])
+            return self._import_facturx(tree, self.env['account.move'])
         return super()._create_invoice_from_xml_tree(filename, tree)
 
     def _update_invoice_from_xml_tree(self, filename, tree, invoice):
