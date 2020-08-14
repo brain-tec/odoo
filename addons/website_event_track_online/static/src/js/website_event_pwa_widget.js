@@ -3,12 +3,21 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
 
     var config = require("web.config");
     var publicWidget = require("web.public.widget");
+    var utils = require("web.utils");
 
     var PWAInstallBanner = publicWidget.Widget.extend({
         xmlDependencies: ["/website_event_track_online/static/src/xml/website_event_pwa.xml"],
         template: "pwa_install_banner",
         events: {
             "click .o_btn_install": "_onClickInstall",
+            "click .o_btn_close": "_onClickClose",
+        },
+
+        /**
+         * @private
+         */
+        _onClickClose: function () {
+            this.trigger_up("prompt_close_bar");
         },
 
         /**
@@ -23,6 +32,7 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
         selector: "#wrapwrap.event",
         custom_events: {
             prompt_install: "_onPromptInstall",
+            prompt_close_bar: "_onPromptCloseBar",
         },
 
         /**
@@ -41,7 +51,7 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
         start: function () {
             var superProm = this._super.apply(this, arguments);
             window.addEventListener("beforeinstallprompt", this.beforeInstallPromptHandler);
-            return superProm.then(this._registerServiceWorker);
+            return superProm.then(this._registerServiceWorker.bind(this));
         },
 
         /**
@@ -58,10 +68,24 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
         //--------------------------------------------------------------------------
 
         /**
+         * Returns the website's language
+         * @private
+         * @return {String}
+         */
+        _getLangPrefix: function () {
+            var lang = utils.get_cookie('frontend_lang');
+            if (lang !== undefined && window.location.href.indexOf(`/${lang}/`) >= 0) {
+                return `/${lang}`;
+            }
+            return '';
+        },
+
+        /**
          * @private
          */
         _hideInstallBanner: function () {
             this.installBanner ? this.installBanner.destroy() : undefined;
+            $('.o_livechat_button').css('bottom', '0');
         },
 
         /**
@@ -72,8 +96,9 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
             if (!("serviceWorker" in navigator)) {
                 return;
             }
+            var langPrefix = this._getLangPrefix();
             navigator.serviceWorker
-                .register("/event/service-worker.js", { scope: "/event" })
+                .register(`${langPrefix}/event/service-worker.js`, { scope: `${langPrefix}/event` })
                 .then((registration) => {
                     console.info("Registration successful, scope is:", registration.scope);
                 })
@@ -87,7 +112,11 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
          */
         _showInstallBanner: function () {
             this.installBanner = new PWAInstallBanner(this);
-            this.installBanner.appendTo(this.$el);
+            this.installBanner.appendTo(this.$el).then(() => {
+                // If Livechat available, It should be placed above the PWA banner.
+                var height = this.$('.o_pwa_install_banner').outerHeight(true);
+                $('.o_livechat_button').css('bottom', height + 'px');
+            });
         },
 
         //--------------------------------------------------------------------------
@@ -106,7 +135,14 @@ odoo.define("website_event_track_online.website_event_pwa_widget", function (req
             this.deferredPrompt = ev;
             this._showInstallBanner();
         },
-
+        /**
+         * @private
+         * @param ev {Event}
+         */
+        _onPromptCloseBar: function (ev) {
+            ev.stopPropagation();
+            this._hideInstallBanner();
+        },
         /**
          * @private
          * @param ev {Event}

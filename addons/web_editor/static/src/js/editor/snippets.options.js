@@ -778,6 +778,10 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
             this.menuTogglerEl.appendChild(iconEl);
         }
         this.containerEl.insertBefore(this.menuTogglerEl, this.menuEl);
+
+        const dropdownCaretEl = document.createElement('span');
+        dropdownCaretEl.classList.add('o_we_dropdown_caret');
+        this.containerEl.appendChild(dropdownCaretEl);
     },
 
     //--------------------------------------------------------------------------
@@ -1347,13 +1351,15 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
      */
     async start() {
         await this._super(...arguments);
+        const iconEl = document.createElement('i');
         if (this.options.dataAttributes.buttonStyle) {
-            const iconEl = document.createElement('i');
             iconEl.classList.add('fa', 'fa-fw', 'fa-camera');
-            this.containerEl.appendChild(iconEl);
         } else {
-            this.el.classList.add('fa', 'fa-fw', 'fa-edit');
+            iconEl.classList.add('fa', 'fa-fw', 'fa-refresh', 'mr-1');
+            this.el.classList.add('o_we_no_toggle');
+            this.containerEl.textContent = _t("Replace media");
         }
+        $(this.containerEl).prepend(iconEl);
     },
 
     //--------------------------------------------------------------------------
@@ -3081,7 +3087,8 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         const dataURL = await applyModifications(img);
         const weight = dataURL.split(',')[1].length / 4 * 3;
         const $weight = this.$el.find('.o_we_image_weight');
-        $weight.find('> span').text(`${(weight / 1024).toFixed(1)}kb`);
+        $weight.find('> small').text(_t("New size"));
+        $weight.find('b').text(`${(weight / 1024).toFixed(1)} kb`);
         $weight.removeClass('d-none');
         img.classList.add('o_modified_image_to_save');
         return loadImage(dataURL, img);
@@ -4355,6 +4362,12 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                         const snippetName = dialog.el.querySelector('.o_we_snippet_name_input').value;
                         const targetCopyEl = this.$target[0].cloneNode(true);
                         delete targetCopyEl.dataset.name;
+                        const snippetKey = this.$target[0].dataset.snippet;
+                        let thumbnailURL;
+                        this.trigger_up('snippet_thumbnail_url_request', {
+                            key: snippetKey,
+                            onSuccess: url => thumbnailURL = url,
+                        });
                         await this._rpc({
                             model: 'ir.ui.view',
                             method: 'save_snippet',
@@ -4362,7 +4375,8 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                                 'name': snippetName,
                                 'arch': targetCopyEl.outerHTML,
                                 'template_key': this.options.snippets,
-                                'snippet_class': [...this.$target[0].classList].filter(x => /\bs_./g.test(x))[0],
+                                'snippet_key': snippetKey,
+                                'thumbnail_url': thumbnailURL,
                             },
                         });
                         this.trigger_up('reload_snippet_template');

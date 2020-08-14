@@ -4,10 +4,10 @@
 <!-- Snippets menu -->
 <template id="snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
     <xpath expr="//div[@id='snippets_menu']" position="inside">
-        <button type="button" class="o_we_customize_theme_btn"
+        <button type="button" tabindex="3" class="o_we_customize_theme_btn text-uppercase"
                 data-title="Customize your theme"
                 groups="website.group_website_designer" accesskey="2">
-            Options
+            <span>Options</span>
         </button>
     </xpath>
     <xpath expr="//t[@id='default_snippets']" position="replace">
@@ -383,10 +383,18 @@
 
     <div data-js="CarouselItem"
          data-selector=".s_carousel .carousel-item, .s_quotes_carousel .carousel-item">
-        <we-button data-slide="left" data-no-preview="true" class="fa fa-fw fa-angle-left"/>
-        <we-button data-slide="right" data-no-preview="true" class="fa fa-fw fa-angle-right"/>
-        <we-button data-add-slide="true" data-no-preview="true" class="fa fa-fw fa-plus"/>
-        <we-button data-remove-slide="true" data-no-preview="true" class="fa fa-fw fa-minus"/>
+        <we-button data-slide="left" data-no-preview="true">
+            <i class="fa fa-fw fa-angle-left"/>
+        </we-button>
+        <we-button data-slide="right" data-no-preview="true" class="mr-2">
+            <i class="fa fa-fw fa-angle-right"/>
+        </we-button>
+        <we-button data-add-slide="true" data-no-preview="true" class="o_we_text_success">
+            <i class="fa fa-fw fa-plus"/>
+        </we-button>
+        <we-button data-remove-slide="true" data-no-preview="true" class="o_we_text_danger">
+            <i class="fa fa-fw fa-minus"/>
+        </we-button>
     </div>
 
     <!-- Accordion -->
@@ -491,7 +499,7 @@
 
     <div data-js="SnippetSave"
         t-attf-data-selector="#{so_snippet_addition_selector}, #{so_content_addition_selector}">
-        <we-button class="fa fa-fw fa-save o_we_hover_warning"
+        <we-button class="fa fa-fw fa-save o_we_link o_we_hover_warning"
                    title="Save the block to use it elsewhere"
                    data-save-snippet=""
                    data-no-preview="true"/>
@@ -675,7 +683,13 @@
                        data-customize-website-variable="'slideout_shadow'"/>
         </we-select>
         <we-checkbox string="Copyright"
+                data-name="footer_copyright_opt"
                 data-customize-website-views="website.footer_no_copyright|"
+                data-no-preview="true"
+                data-reload="/"/>
+        <we-checkbox string="Language Selector"
+                data-dependencies="!footer_copyright_opt"
+                data-customize-website-views="website.footer_no_copyright|portal.footer_language_selector"
                 data-no-preview="true"
                 data-reload="/"/>
     </div>
@@ -696,13 +710,24 @@
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="copyright"
                         data-with-combinations="true"/>
+        <we-select string="Language Selector" data-reload="/">
+            <we-button data-name="language_selector_none_opt"
+                       data-customize-website-views="">None</we-button>
+            <we-button data-customize-website-views="portal.footer_language_selector">Dropdown</we-button>
+            <we-button data-customize-website-views="portal.footer_language_selector, website.footer_language_selector_inline">Inline</we-button>
+        </we-select>
+        <we-select string="⌙ Label" data-dependencies="!language_selector_none_opt" data-reload="/">
+            <we-button data-customize-website-views="">Text</we-button>
+            <we-button data-customize-website-views="website.footer_language_selector_flag, website.footer_language_selector_no_text">Flag</we-button>
+            <we-button data-customize-website-views="website.footer_language_selector_flag">Flag and Text</we-button>
+        </we-select>
     </div>
 
     <!-- Anchor Name -->
     <div data-js="anchor"
         data-selector=":not(p).oe_structure > *, :not(p)[data-oe-type=html] > *"
         data-exclude=".modal *, .oe_structure .oe_structure *, [data-oe-type=html] .oe_structure *">
-        <we-button class="fa fa-fw fa-link"
+        <we-button class="fa fa-fw fa-link o_we_link"
                    title="Create a link to target this section"
                    data-no-preview="true"/>
     </div>
@@ -829,7 +854,7 @@
             we recommend you to try to use the new color system, which is
             still customizable.
         </we-alert>
-        <we-row>
+        <we-row class="o_we_theme_colors_selector">
             <we-colorpicker data-name="color_1_opt" title="Primary"
                             data-customize-website-color="" data-color="o-color-1"
                             data-use-css-color="true"/>
@@ -842,7 +867,7 @@
                             data-use-css-color="true"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"
                             data-use-css-color="true"/>
-            <we-select data-icon="fa-lightbulb-o" data-variable="color-palettes-number"/>
+            <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-number"/>
         </we-row>
         <div class="o_color_combinations_edition"/>
     </div>

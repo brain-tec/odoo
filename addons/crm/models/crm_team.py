@@ -26,11 +26,11 @@ class Team(models.Model):
         help="Number of leads and opportunities assigned this last month.")
     opportunities_count = fields.Integer(
         string='# Opportunities', compute='_compute_opportunities_data')
-    opportunities_amount = fields.Integer(
+    opportunities_amount = fields.Monetary(
         string='Opportunities Revenues', compute='_compute_opportunities_data')
     opportunities_overdue_count = fields.Integer(
         string='# Overdue Opportunities', compute='_compute_opportunities_overdue_data')
-    opportunities_overdue_amount = fields.Integer(
+    opportunities_overdue_amount = fields.Monetary(
         string='Overdue Opportunities Revenues', compute='_compute_opportunities_overdue_data',)
     # alias: improve fields coming from _inherits, use inherited to avoid replacing them
     alias_user_id = fields.Many2one(
@@ -63,14 +63,14 @@ class Team(models.Model):
             ('team_id', 'in', self.ids),
             ('probability', '<', 100),
             ('type', '=', 'opportunity'),
-        ]).read(['planned_revenue', 'team_id'])
+        ]).read(['expected_revenue', 'team_id'])
         counts = {}
         amounts = {}
         for datum in opportunity_data:
             counts.setdefault(datum['team_id'][0], 0)
             amounts.setdefault(datum['team_id'][0], 0)
             counts[datum['team_id'][0]] += 1
-            amounts[datum['team_id'][0]] += (datum.get('planned_revenue', 0))
+            amounts[datum['team_id'][0]] += (datum.get('expected_revenue', 0))
         for team in self:
             team.opportunities_count = counts.get(team.id, 0)
             team.opportunities_amount = amounts.get(team.id, 0)
@@ -81,9 +81,9 @@ class Team(models.Model):
             ('probability', '<', 100),
             ('type', '=', 'opportunity'),
             ('date_deadline', '<', fields.Date.to_string(fields.Datetime.now()))
-        ], ['planned_revenue', 'team_id'], ['team_id'])
+        ], ['expected_revenue', 'team_id'], ['team_id'])
         counts = {datum['team_id'][0]: datum['team_id_count'] for datum in opportunity_data}
-        amounts = {datum['team_id'][0]: (datum['planned_revenue']) for datum in opportunity_data}
+        amounts = {datum['team_id'][0]: (datum['expected_revenue']) for datum in opportunity_data}
         for team in self:
             team.opportunities_overdue_count = counts.get(team.id, 0)
             team.opportunities_overdue_amount = amounts.get(team.id, 0)

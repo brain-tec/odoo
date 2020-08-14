@@ -39,6 +39,7 @@ class AccountBankStmtCashWizard(models.Model):
     """
     _name = 'account.bank.statement.cashbox'
     _description = 'Bank Statement Cashbox'
+    _rec_name = 'id'
 
     cashbox_lines_ids = fields.One2many('account.cashbox.line', 'cashbox_id', string='Cashbox Lines')
     start_bank_stmt_ids = fields.One2many('account.bank.statement', 'cashbox_start_id')
@@ -199,7 +200,7 @@ class AccountBankStatement(models.Model):
             # not have any id yet. However if we are updating an existing record, the domain date <= st.date
             # will find the record itself, so we have to add a condition in the search to ignore self.id
             if not isinstance(st.id, models.NewId):
-                domain.append(('id', '!=', st.id))
+                domain.extend(['|', '&', ('id', '<', st.id), ('date', '=', st.date), '&', ('id', '!=', st.id), ('date', '!=', st.date)])
             previous_statement = self.search(domain, limit=1)
             st.previous_statement_id = previous_statement.id
 
@@ -432,6 +433,13 @@ class AccountBankStatement(models.Model):
         self.write({'state': 'open'})
         self.line_ids.move_id.button_draft()
         self.line_ids.button_undo_reconciliation()
+
+    def button_reprocess(self):
+        """Move the bank statements back to the 'posted' state."""
+        if any(statement.state != 'confirm' for statement in self):
+            raise UserError(_("Only Validated statements can be reset to new."))
+
+        self.write({'state': 'posted', 'date_done': False})
 
     def button_journal_entries(self):
         return {

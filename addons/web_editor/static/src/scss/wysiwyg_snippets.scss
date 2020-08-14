@@ -53,11 +53,11 @@ body.editor_enable.editor_has_snippets {
     // No root because can be drag and drop (and the helper is in the body)
     position: relative;
     z-index: $o-we-zindex;
-    width: 100px;
+    width: 77px;
     background-color: $o-we-sidebar-blocks-content-snippet-bg;
 
     &.ui-draggable-dragging {
-        transform: rotate(3deg);
+        transform: rotate(-3deg) scale(1.2);
         box-shadow: 0 5px 25px -10px black;
         transition: transform 0.3s, box-shadow 0.3s;
     }
@@ -82,6 +82,15 @@ body.editor_enable.editor_has_snippets {
     .oe_snippet_thumbnail_title {
         display: none;
     }
+
+    &:not(:hover):not(.o_disabled):not(.o_snippet_install) {
+        background-color: rgba($o-we-sidebar-blocks-content-snippet-bg, .9);
+
+        .oe_snippet_thumbnail {
+            filter: saturate(.7);
+            opacity: .9;
+        }
+    }
 }
 
 @mixin we-svg-icon(
@@ -98,17 +107,18 @@ body.editor_enable.editor_has_snippets {
     }
 }
 
-%we-generic-link {
-    cursor: pointer;
-    color: $o-we-sidebar-content-field-color;
-    line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
-    text-decoration: none;
+%we-generic-clickable {
     outline: none;
-    @include we-svg-icon();
+    text-decoration: none;
+    line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
+    cursor: pointer;
+
+    &[disabled] {
+        opacity: .5;
+    }
 
     &:not([disabled]) {
-        &.active, &:hover {
-            @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
+        &.active:not(.o_we_no_toggle), &:hover {
             color: $o-we-sidebar-content-field-pressed-color;
         }
 
@@ -118,27 +128,69 @@ body.editor_enable.editor_has_snippets {
             'warning': $o-we-color-warning,
             'danger': $o-we-color-danger,
         );
+
         @each $name, $color in $-hover-colors {
+            &.o_we_text_#{$name} {
+                color: $color;
+            }
+
             &.o_we_hover_#{$name}:hover {
                 color: $color;
             }
         }
     }
-    &[disabled] {
-        opacity: .5;
+}
+
+%we-generic-link {
+    color: $o-we-sidebar-content-field-color;
+    @include we-svg-icon();
+    @extend %we-generic-clickable;
+
+    &:not([disabled]) {
+        &.active, &:hover {
+            @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
+        }
     }
 }
 
 %we-generic-button {
-    @extend %we-generic-link;
+    @extend %we-generic-clickable;
     @include o-text-overflow(block);
+    @include we-svg-icon($o-we-sidebar-content-field-clickable-color, $o-we-sidebar-content-field-clickable-color);
+
     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
     border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
     border-radius: $o-we-sidebar-content-field-border-radius;
-    background: $o-we-sidebar-content-field-clickable-bg;
+    background-color: $o-we-sidebar-content-field-clickable-bg;
+    color: $o-we-sidebar-content-field-clickable-color;
 
-    &.active {
-        background: $o-we-sidebar-content-field-pressed-bg;
+    &:not([disabled]):hover, &.active:not(.o_we_no_toggle) {
+        @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
+    }
+
+    &.active:not(.o_we_no_toggle) {
+        background-color: $o-we-sidebar-content-field-pressed-bg;
+    }
+}
+
+%we-generic-tab-button {
+    @extend %we-generic-link;
+    @include o-text-overflow(inline-flex);
+    flex: 1 1 auto;
+    justify-content: center;
+    border: none;
+    background-color: transparent;
+    color: inherit;
+    font-weight: normal;
+
+    > span {
+        display: inline-block;
+        $-r: $o-we-sidebar-tabs-size-ratio;
+        padding: (0.6em * $-r) (0.4em * $-r) (0.5em * $-r);
+    }
+    &.active > span {
+        color: $o-we-sidebar-content-field-colorpicker-dropdown-active-color;
+        box-shadow: inset 0 ($o-we-sidebar-tabs-active-border-width * -1) 0 $o-we-sidebar-tabs-active-border-color;
     }
 }
 
@@ -159,7 +211,6 @@ body.editor_enable.editor_has_snippets {
     font-family: $o-we-font-family;
     font-size: $o-we-sidebar-font-size;
     font-weight: 400;
-    line-height: 1;
 
     transition: transform 400ms ease 0s;
     transform: translateX(-100%);
@@ -171,29 +222,12 @@ body.editor_enable.editor_has_snippets {
     #snippets_menu {
         flex: 0 0 auto;
         display: flex;
-        height: $o-we-sidebar-tabs-height;
-        border-bottom: $o-we-sidebar-tabs-border-width solid $o-we-sidebar-tabs-border-color;
-        background: $o-we-sidebar-tabs-bg;
+        background-color: $o-we-sidebar-tabs-bg;
+        box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2);
         color: $o-we-sidebar-tabs-color;
 
         > button {
-            flex: 1 1 auto;
-            border: none;
-            background: transparent;
-            color: inherit;
-            font-weight: inherit; // Don't know why but does not work without it
-            @include o-text-overflow();
-
-            &:disabled {
-                color: $o-we-sidebar-tabs-disabled-color;
-            }
-
-            &.active,
-            &:focus, &:active, &:focus:active {
-                border-bottom: $o-we-sidebar-tabs-active-border-width solid $o-we-sidebar-tabs-active-border-color;
-                color: $o-we-sidebar-tabs-active-color;
-                outline: none;
-            }
+            @extend %we-generic-tab-button;
         }
     }
 
@@ -202,6 +236,7 @@ body.editor_enable.editor_has_snippets {
         position: relative;
         width: 100%;
         padding: $o-we-sidebar-blocks-content-spacing;
+        background-color: $o-we-bg-lighter;
 
         .o_snippet_search_filter_input {
             width: 100%;
@@ -238,6 +273,7 @@ body.editor_enable.editor_has_snippets {
     > #o_scroll {
         background-color: $o-we-sidebar-blocks-content-bg;
         padding: 0 $o-we-sidebar-blocks-content-spacing;
+        box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2);
 
         .o_panel, .o_panel_header {
             padding: $o-we-sidebar-blocks-content-spacing 0;
@@ -266,52 +302,55 @@ body.editor_enable.editor_has_snippets {
                     text-align: center;
                 }
 
-                &.o_disabled {
-                    .oe_snippet_thumbnail {
-                        background-color: rgba(255, 0, 0, 0.75);
-                    }
-                    .oe_snippet_thumbnail_img {
-                        opacity: 0.8;
-                    }
+                &.o_disabled .o_snippet_undroppable {
+                    @include o-position-absolute(8px, 6px, auto, auto);
                 }
 
                 &.o_snippet_install {
-                    .oe_snippet_thumbnail_img {
-                        opacity: 0.5;
-                    }
                     .btn.o_install_btn {
-                        display: none;
-                        @include o-position-absolute($top: 16px);
+                        @include o-position-absolute($top: 10px);
                     }
-                    &:hover .btn.o_install_btn {
-                        display: block;
+
+                    &:not(:hover) .btn.o_install_btn {
+                        display: none;
+                    }
+                }
+
+                &.o_disabled, &.o_snippet_install {
+                    background-color: rgba($o-we-sidebar-blocks-content-snippet-bg, .2);
+
+                    .oe_snippet_thumbnail_img {
+                        opacity: .4;
+                        filter: saturate(0) blur(1px);
                     }
                 }
             }
         }
         #snippet_custom .oe_snippet {
-            .o_delete_btn {
-                @include o-position-absolute(0, 0);
-                display: none;
-                width: 25px;
-                height: 25px;
-                background-color: rgba(255, 0, 0, 0.75);
-                justify-content: center;
-                align-items: center;
+            width: 100%;
 
-                &:hover {
-                    cursor: pointer;
-                }
-            }
-            &:hover .o_delete_btn {
+            &, .oe_snippet_thumbnail, .o_delete_btn {
                 display: flex;
             }
-            .o_image_ribbon {
-                @include o-position-absolute($top: 0, $left: 0);
-                width: 0;
-                height: 0;
-                border-right: 20px solid transparent;
-                border-top: 20px solid $o-enterprise-color;
+            .oe_snippet_thumbnail, .o_delete_btn {
+                align-items: center;
+            }
+            .oe_snippet_thumbnail {
+                min-width: 0; // Ensure text-overflow on flex children
+            }
+            .oe_snippet_thumbnail_title {
+                @include o-text-overflow(block);
+            }
+            .oe_snippet_thumbnail_img {
+                flex-shrink: 0;
+                width: 40px;
+                height: 32px;
+                padding: 0;
+            }
+            .o_delete_btn {
+                @extend %we-generic-link;
+                padding-top: 0;
+                padding-bottom: 0;
             }
         }
     }
@@ -336,38 +375,24 @@ body.editor_enable.editor_has_snippets {
 
         @mixin large-component() {
             flex: 1 1 auto;
-            width: $o-we-sidebar-width / 2; // TODO maybe there is a better way to implement this
+            width: $o-we-sidebar-content-available-room * .6;
         }
 
         we-button, we-toggler {
             @extend %we-generic-button;
-            text-align: left;
-
-            &.fa {
-                display: inline-block;
-                padding: 0;
-                border: none;
-                background: none;
-                text-align: center;
-
-                &.fa-times, &.fa-minus {
-                    color: $o-we-color-danger;
-                }
-                &.fa-plus {
-                    color: $o-we-color-success;
-                }
-
-                &.active {
-                    padding: 0;
-
-                    &::after {
-                        display: none;
-                    }
-                }
-            }
         }
+
+        we-button.o_we_link {
+            @extend %we-generic-link;
+            margin-top: 0;
+            border: 0;
+            padding: 0;
+            background: 0;
+        }
+
         we-toggler {
             @include we-icon-button('\f0d7');
+            text-align: left;
 
             + * {
                 display: none !important;
@@ -377,7 +402,6 @@ body.editor_enable.editor_has_snippets {
             }
             &.active {
                 @include we-icon-button('\f0d8');
-
                 + * {
                     display: block !important;
                 }
@@ -403,46 +427,41 @@ body.editor_enable.editor_has_snippets {
         we-customizeblock-options {
             position: relative;
             display: block;
-            padding: 0 $o-we-sidebar-content-block-spacing $o-we-sidebar-content-block-spacing $o-we-sidebar-content-indent;
-            border-top: $o-we-sidebar-content-main-title-border-width solid $o-we-sidebar-content-main-title-border-color;
-            background-image: $o-we-sidebar-content-main-title-shadow;
-            background-size: 100% ($o-we-sidebar-content-main-title-height / 2);
-            background-repeat: no-repeat;
-
-            &:first-child {
-                border-top-color: $o-we-sidebar-content-main-title-shadow-start;
-            }
+            padding: 0 $o-we-sidebar-content-padding-base $o-we-sidebar-content-block-spacing * 1.5 $o-we-sidebar-content-indent;
+            background-color: $o-we-bg-lighter;
+            box-shadow: $o-we-item-standup-bottom rgba($o-we-item-standup-color-dark, 0.8);
 
             > we-title {
                 display: flex;
                 align-items: center;
-                margin-bottom: $o-we-sidebar-content-main-title-margin-bottom - $o-we-sidebar-content-field-spacing;
+                margin: 0 (-$o-we-sidebar-content-padding-base) 0 (-$o-we-sidebar-content-indent);
+                padding: $o-we-sidebar-content-block-spacing * .3 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
+                background-color: $o-we-bg-light;
+                box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2), $o-we-item-standup-bottom rgba($o-we-item-standup-color-dark, .5);
+                font-size: $o-we-sidebar-content-main-title-font-size;
 
                 > span {
                     color: $o-we-sidebar-content-main-title-color !important;
-                    font-size: $o-we-sidebar-content-main-title-font-size;
-                    line-height: $o-we-sidebar-content-main-title-height - $o-we-sidebar-content-main-title-border-width;
+                    line-height: $o-we-sidebar-content-main-title-height;
                 }
 
                 > we-top-button-group {
                     flex: 0 0 auto;
-                    display: block;
+                    display: flex;
                     margin-left: auto;
+                    font-size: .9em;
 
-                    > * {
+                    .oe_snippet_remove {
+                        font-size: 1.2em;
+                    }
+
+                    we-button {
                         margin-left: $o-we-sidebar-content-field-multi-spacing;
-                    }
-                    > we-customizeblock-option {
-                        &, .fa {
-                            display: inline-block !important;
-                        }
-                        .fa {
-                            margin: 0;
-                        }
-                    }
+                        padding: 0 $o-we-sidebar-content-field-multi-spacing;
 
-                    .fa {
-                        @extend %we-generic-link;
+                        &.fa {
+                            margin-left: $o-we-sidebar-content-field-label-spacing;
+                        }
                     }
                 }
             }
@@ -471,11 +490,13 @@ body.editor_enable.editor_has_snippets {
         }
 
         .o_we_fold_icon {
-            @include o-position-absolute(0, 100%, 0, auto);
+            @include o-position-absolute(0, 100%, 0, -$o-we-sidebar-content-indent);
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 1em;
+            width: $o-we-sidebar-content-indent;
+
+            @extend %we-generic-link;
         }
 
         //----------------------------------------------------------------------
@@ -504,6 +525,9 @@ body.editor_enable.editor_has_snippets {
                 > img {
                     margin-bottom: 1px; // Not sure why but not really centered otherwise
                 }
+                > svg {
+                    margin-bottom: 2px; // Not sure why but not really centered otherwise
+                }
             }
             &.fa > div {
                 display: none;
@@ -511,7 +535,7 @@ body.editor_enable.editor_has_snippets {
         }
 
         // Checkboxes
-        .o_we_checkbox_wrapper.o_we_user_value_widget {
+        we-button.o_we_checkbox_wrapper.o_we_user_value_widget {
             padding: 0;
             border: none;
             background: none;
@@ -561,6 +585,31 @@ body.editor_enable.editor_has_snippets {
 
             &:not(.o_we_icon_select) we-toggler {
                 @include large-component();
+            }
+            &.o_we_widget_opened .o_we_dropdown_caret {
+                position: relative;
+                display: block;
+                align-self: flex-end;
+
+                &::before, &::after {
+                    content: '';
+                    $-toggler-caret-size: 2 * $o-we-sidebar-content-field-control-item-spacing + $o-we-sidebar-content-field-control-item-size;
+                    @include o-position-absolute(100%, $-toggler-caret-size);
+                    z-index: $zindex-dropdown + 1;
+                    transform: translateX(50%);
+                    margin-top: $o-we-dropdown-caret-spacing;
+                    border-bottom: ($o-we-item-spacing + $o-we-sidebar-content-field-dropdown-border-width - $o-we-dropdown-caret-spacing) solid $o-we-dropdown-border-color;
+                    border-left: $o-we-item-spacing solid transparent;
+                    border-right: $o-we-item-spacing solid transparent;
+                }
+                &::after {
+                    border-bottom-color: $o-we-sidebar-content-field-dropdown-item-bg;
+                    border-left-width: ($o-we-item-spacing - 1px);
+                    border-right-width: ($o-we-item-spacing - 1px);
+                }
+            }
+            &:not(.o_we_so_color_palette) + we-button:not(:hover) {
+                background: none;
             }
 
             we-selection-items {
@@ -660,6 +709,18 @@ body.editor_enable.editor_has_snippets {
                 }
             }
         }
+        // Only when main option (not in a we-row or something like that...)
+        we-customizeblock-option > we-button-group.o_we_user_value_widget we-selection-items {
+            @include large-component();
+
+            we-button {
+                display: flex;
+                justify-content: center;
+                flex: 0 1 percentage(1/4);
+                padding: ($o-we-sidebar-content-field-button-group-button-spacing / 4) ($o-we-sidebar-content-field-button-group-button-spacing / 3);
+                text-align: center;
+            }
+        }
 
         // Inputs
         we-input.o_we_user_value_widget {
@@ -673,6 +734,10 @@ body.editor_enable.editor_has_snippets {
 
                 &:focus-within {
                     border-color: $o-we-sidebar-content-field-input-border-color;
+                }
+
+                > we-button { // for input-group
+                    border: none;
                 }
             }
 
@@ -724,6 +789,22 @@ body.editor_enable.editor_has_snippets {
                     box-shadow: $o-we-sidebar-content-field-colorpicker-shadow;
                 }
             }
+
+            &.o_we_widget_opened {
+
+                .o_we_color_preview {
+                    border: 2px solid $o-we-accent;
+                }
+                .o_we_dropdown_caret {
+                    &::before, &::after {
+                        right: $o-we-sidebar-content-field-colorpicker-size / 2;
+                    }
+                    &::after {
+                        border-bottom-width: ($o-we-item-spacing + $o-we-sidebar-content-field-dropdown-border-width - $o-we-dropdown-caret-spacing) + 1px; // 1px = colorpicker inset box-shadow...
+                    }
+                }
+            }
+
             we-toggler {
                 display: none;
             }
@@ -776,7 +857,7 @@ body.editor_enable.editor_has_snippets {
             input[type="range"] {
                 @include large-component();
                 height: $o-we-sidebar-content-field-height;
-                padding: 0;
+                padding: 0 $o-we-item-border-width 0 0;
                 background-color: transparent;
                 appearance: none;
 
@@ -979,13 +1060,15 @@ body.editor_enable.editor_has_snippets {
         }
 
         .o_we_image_weight {
-            margin-top: $o-we-sidebar-content-field-spacing;
-            text-align: right;
-            color: $o-we-color-success;
-            line-height: $o-we-sidebar-content-field-height;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin: $o-we-sidebar-content-field-spacing *.25 $o-we-item-border-width $o-we-sidebar-content-field-spacing*2;
 
-            > .fa {
-                margin-right: $o-we-sidebar-content-field-label-spacing;
+            b {
+                margin-left: $o-we-sidebar-content-field-label-spacing;
+                font: 1em/1 bold $o-we-sidebar-content-field-input-font-family;
+                color: $o-we-color-success;
             }
         }
 
@@ -1012,7 +1095,7 @@ body.editor_enable.editor_has_snippets {
         overflow-y: auto;
         padding: $o-we-sidebar-blocks-content-spacing;
         background-color: $o-we-sidebar-blocks-content-bg;
-        border-top: $o-we-sidebar-tabs-border-width solid $o-we-sidebar-tabs-border-color;
+        box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2);
 
         .o_panel_header {
             padding: $o-we-sidebar-content-field-spacing 0;
@@ -1047,7 +1130,7 @@ body.editor_enable.editor_has_snippets {
     @extend %o-preview-alpha-background;
     font-family: sans-serif !important;
     font-size: 16px !important;
-    padding: $o-we-sidebar-content-field-spacing * 1.6;
+    padding: $o-we-sidebar-content-field-spacing;
 }
 .o_we_cc_preview_wrapper > * {
     margin-top: 0 !important;
@@ -1073,39 +1156,27 @@ body.editor_enable.editor_has_snippets {
     background-color: $o-we-sidebar-content-field-colorpicker-dropdown-bg;
     color: $o-we-sidebar-content-field-colorpicker-dropdown-color;
 
-    .d-flex .btn.o_we_colorpicker_switch_pane_btn {
-        color: inherit !important;
-        font-size: inherit !important;
-        font-weight: inherit !important;
-
-        &.active {
-            color: $o-we-sidebar-content-field-colorpicker-dropdown-active-color;
-            border-bottom: $o-we-sidebar-tabs-active-border-width solid $o-we-sidebar-tabs-active-border-color;
-        }
-        + .o_colorpicker_reset {
-            padding: 0 $o-we-sidebar-content-field-clickable-spacing !important;
-            border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color !important;
-            border-radius: $o-we-sidebar-content-field-border-radius !important;
-            background: $o-we-sidebar-content-field-clickable-bg !important;
-            line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width !important;
-            color: inherit !important;
-            font-size: inherit !important;
-            font-weight: inherit !important;
-            align-self: center;
-        }
-        &:focus {
-            box-shadow: none;
-        }
+    .o_we_colorpicker_switch_panel {
+        border-bottom: 1px solid $o-we-bg-dark;
+        box-shadow: inset 0 1px 0 rgba(white, .2);
+    }
+    .o_we_colorpicker_switch_pane_btn {
+        @extend %we-generic-tab-button;
+        flex: 0 0 auto;
+    }
+    .o_colorpicker_reset {
+        max-width: 40%;
+        @extend %we-generic-button;
     }
     .o_colorpicker_sections {
 
         .o_we_color_btn, .o_we_color_combination_btn {
             float: left;
             width: percentage(1 / 8);
-            padding-top: percentage(1 / 8);
+            padding-top: percentage(1 / 10);
             margin: 0;
-            border: none;
-            box-shadow: inset 0 0 0 1px $o-we-sidebar-content-field-colorpicker-dropdown-bg;
+            border: 1px solid $o-we-sidebar-content-field-colorpicker-dropdown-bg;
+            box-shadow: $o-we-sidebar-content-field-colorpicker-shadow;
 
             &.o_colorpicker_reset {
                 background-color: transparent;
@@ -1121,25 +1192,27 @@ body.editor_enable.editor_has_snippets {
                 }
             }
         }
-
         .o_we_color_combination_btn {
             float: none;
             width: 100%;
             padding: 0;
             margin: 0;
+            border: 0;
             background-clip: padding-box;
             border-top: $o-we-sidebar-content-field-spacing solid transparent;
             border-bottom: $o-we-sidebar-content-field-spacing solid transparent;
 
-            > .o_we_cc_preview_wrapper {
-                padding: $o-we-sidebar-content-field-clickable-spacing;
+            + .o_we_color_combination_btn {
+                margin-top: $o-we-sidebar-content-field-spacing * -.5;
             }
 
-            + .o_we_color_combination_btn {
-                margin-top: -$o-we-sidebar-content-field-spacing;
+            .o_we_cc_preview_wrapper:after {
+                // For some reasons, in this specific context we have to
+                // compensate a 1px gap between the flex container and the
+                // absolute positioned pseudo-element that generates the bg.
+                bottom: -1px;
             }
         }
-
         .o_colorpicker_section {
             padding-top: $o-we-sidebar-content-field-spacing;
 
@@ -1152,14 +1225,10 @@ body.editor_enable.editor_has_snippets {
             .o_we_color_btn {
                 position: relative;
 
-                &.selected::before {
-                    @include o-position-absolute(0, 0, 0, 0);
-                    content: "\f00c" !important;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    font-family: FontAwesome !important;
-                    color: $o-we-color-success;
+                &.selected {
+                    box-shadow: inset 0 0 0 1px $o-we-sidebar-content-field-colorpicker-dropdown-bg,
+                                inset 0 0 0 3px $o-we-accent,
+                                inset 0 0 0 4px white;
                 }
 
                 &.o_btn_transparent::before {
@@ -1296,12 +1365,17 @@ body.editor_enable.editor_has_snippets {
                     display: block;
                     width: $o-we-handles-btn-size;
                     height: $o-we-handles-btn-size;
-                    border: solid 1px darken($o-we-handles-accent-color, 10%);
+                    border: solid 1px darken($o-we-handles-accent-color, 20%);
                     line-height: $o-we-handles-btn-size - 2;
                     font-size: 14px;
                     font-family: FontAwesome;
-                    background-color: darken($o-we-handles-accent-color, 20%);
+                    background-color: darken($o-we-handles-accent-color, 10%);
                     color: white;
+                }
+
+                &.o_handle_start:after {
+                    background-color: rgba($o-we-sidebar-content-field-clickable-bg, .6);
+                    border-color: rgba($o-we-sidebar-content-field-border-color, .2);
                 }
 
                 &:hover,
@@ -1369,35 +1443,38 @@ body.editor_enable.editor_has_snippets {
 
                 > div {
                     display: flex;
-                    align-items: center;
 
                     > * {
-                        margin: 0 2px;
-                        border: 1px solid #999999;
-                        border-radius: 20%;
-                        color: #999999;
-                        opacity: 0.5;
-                        transition: opacity 400ms ease 0s;
-                        cursor: pointer;
-
-                        &:hover {
-                            opacity: 1;
-                        }
+                        @extend %we-generic-button;
+                        margin: 0 1px 0;
+                        min-width: 22px;
+                        padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
+                        color: $o-we-fg-lighter;
                     }
-                }
-            }
-
-            .o_overlay_move_options {
-                .o_move_handle {
-                    padding: 3px 4px;
-                    cursor: move;
-
-                    &::before, &::after {
-                        content: '\f141';
-                        display: block;
-                        font-family: FontAwesome;
-                        font-size: 0.8em;
-                        line-height: 0.4em;
+                    .o_move_handle {
+                        cursor: move;
+                        width: 30px;
+                        height: 22px;
+                        background-image: url('/web_editor/static/src/img/snippets_options/o_overlay_move_drag.svg');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                    }
+                    .o_delete_button {
+                        margin-left: $o-we-sidebar-content-field-button-group-button-spacing;
+                        background-color: mix($o-we-color-danger, $o-we-sidebar-content-field-clickable-bg);;
+                    }
+                    &:hover {
+                        > * {
+                            @include o-hover-opacity(.6);
+                        }
+                        we-button:hover, .o_move_handle:hover {
+                            border-color: mix($o-we-handles-accent-color, $o-we-sidebar-content-field-pressed-bg, .4);
+                            background-color: $o-we-sidebar-content-field-pressed-bg;
+                        }
+                        .o_delete_button:hover {
+                            border-color: mix($o-we-color-danger, $o-we-sidebar-content-field-pressed-bg, .4);
+                            background-color: $o-we-color-danger;
+                        }
                     }
                 }
             }

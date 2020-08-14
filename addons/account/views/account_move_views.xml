@@ -715,7 +715,8 @@
                                         <field name="name" widget="section_and_note_text" attrs="{'required': [('parent.move_type', 'not in', ('in_invoice', 'in_refund','in_receipt'))]}"/>
                                         <field name="account_id"
                                                groups="account.group_account_readonly"
-                                               domain="[('deprecated', '=', False), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('company_id', '=', parent.company_id)]"
+                                               options="{'no_create': True}"
+                                               domain="[('deprecated', '=', False), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('company_id', '=', parent.company_id), ('is_off_balance', '=', False)]"
                                                attrs="{'required': [('display_type', '=', False)]}"/>
                                         <field name="analytic_account_id"
                                                domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
@@ -952,8 +953,8 @@
                                         <field name="credit"
                                                sum="Total Credit"
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
-                                        <field name="country_id" invisible="1"/>
-                                        <field name="tax_tag_ids" widget="many2many_tags" string="Tax Grids" optional="show" domain="[('country_id', '=', country_id), ('applicability', '=', 'taxes')]"/>
+                                        <field name="tax_fiscal_country_id" invisible="1"/>
+                                        <field name="tax_tag_ids" widget="many2many_tags" string="Tax Grids" optional="show" domain="[('country_id', '=', tax_fiscal_country_id), ('applicability', '=', 'taxes')]"/>
 
                                         <!-- Buttons -->
                                         <button name="action_automatic_entry"

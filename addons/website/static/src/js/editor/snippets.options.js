@@ -30,8 +30,11 @@ const UrlPickerUserValueWidget = InputUserValueWidget.extend({
     start: async function () {
         await this._super(...arguments);
         const linkButton = document.createElement('we-button');
-        linkButton.classList.add('o_we_redirect_to', 'fa', 'fa-fw', 'fa-external-link');
+        const icon = document.createElement('i');
+        icon.classList.add('fa', 'fa-fw', 'fa-external-link')
+        linkButton.classList.add('o_we_redirect_to');
         linkButton.title = _t("Redirect to URL in a new tab");
+        linkButton.appendChild(icon);
         this.containerEl.appendChild(linkButton);
         this.el.classList.add('o_we_large_input');
         this.inputEl.classList.add('text-left');
@@ -1045,7 +1048,7 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
 
         uiFragment.querySelectorAll('.o_cc_subheadings_toggler').forEach(headingsEl => {
             const togglerEl = document.createElement('span');
-            togglerEl.classList.add('o_cc_subheadings_toggler_icon', 'o_we_fold_icon', 'fa', 'fa-caret-down');
+            togglerEl.classList.add('o_cc_subheadings_toggler_icon', 'o_we_fold_icon', 'fa', 'fa-caret-right');
             togglerEl.setAttribute('role', 'button');
             const titleEl = headingsEl.querySelector('we-title');
             titleEl.insertBefore(togglerEl, titleEl.firstChild);
@@ -1116,9 +1119,11 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
     _onCCHeadingsTogglerClick(ev) {
         const togglerEl = ev.currentTarget;
         const collapseEl = togglerEl.closest('we-collapse').querySelector('.o_cc_subheadings_collapse');
-        const show = togglerEl.classList.contains('fa-caret-down');
-        togglerEl.classList.toggle('fa-caret-down', !show);
-        togglerEl.classList.toggle('fa-caret-up', show);
+        const show = togglerEl.classList.contains('fa-caret-right');
+        const parentEl = togglerEl.closest('we-select');
+        togglerEl.classList.toggle('fa-caret-right', !show);
+        togglerEl.classList.toggle('fa-caret-down', show);
+        parentEl.classList.toggle('active', show);
         this._showCCSubHeadings[collapseEl.dataset.uid] = show;
         // FIXME big hack to rerender the interface (all the foldable code is
         // a hack currently anyway, it needs to be generic)

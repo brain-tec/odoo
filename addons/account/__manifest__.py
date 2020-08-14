@@ -4,7 +4,7 @@
     'name' : 'Invoicing',
     'version' : '1.1',
     'summary': 'Invoices & Payments',
-    'sequence': 15,
+    'sequence': 10,
     'description': """
 Invoicing & Payments
 ====================
@@ -93,5 +93,5 @@ You could use this simplified accounting in case you work with an (external) acc
     'installable': True,
     'application': True,
     'auto_install': False,
-    'post_init_hook': '_auto_install_l10n',
+    'post_init_hook': '_account_post_init',
 }

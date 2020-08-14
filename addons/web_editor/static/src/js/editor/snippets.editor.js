@@ -828,6 +828,7 @@ var SnippetsMenu = Widget.extend({
         'snippet_removed': '_onSnippetRemoved',
         'snippet_cloned': '_onSnippetCloned',
         'snippet_option_visibility_update': '_onSnippetOptionVisibilityUpdate',
+        'snippet_thumbnail_url_request': '_onSnippetThumbnailURLRequest',
         'reload_snippet_dropzones': '_disableUndroppableSnippets',
         'request_save': '_onSaveRequest',
         'update_customize_elements': '_onUpdateCustomizeElements',
@@ -1629,8 +1630,8 @@ var SnippetsMenu = Widget.extend({
                 if (isCustomSnippet) {
                     const btnEl = document.createElement('we-button');
                     btnEl.dataset.snippetId = $snippet.data('oeSnippetId');
-                    btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash');
-                    $snippet.append($('<div class="o_image_ribbon"/>'));
+                    btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash', 'btn', 'o_we_hover_danger');
+                    btnEl.title = _.str.sprintf(_t("Delete %s"), name);
                     $snippet.append(btnEl);
                 }
             })
@@ -1728,6 +1729,16 @@ var SnippetsMenu = Widget.extend({
             });
 
             $snippet.toggleClass('o_disabled', !check);
+            $snippet.attr('title', check ? '' : _t("No location to drop in"));
+            const $icon = $snippet.find('.o_snippet_undroppable').remove();
+            if (check) {
+                $icon.remove();
+            } else if (!$icon.length) {
+                const imgEl = document.createElement('img');
+                imgEl.classList.add('o_snippet_undroppable');
+                imgEl.src = '/web_editor/static/src/img/snippet_disabled.svg';
+                $snippet.append(imgEl);
+            }
         });
     },
     /**
@@ -1816,7 +1827,7 @@ var SnippetsMenu = Widget.extend({
                 handle: '.oe_snippet_thumbnail',
                 helper: function () {
                     const dragSnip = this.cloneNode(true);
-                    dragSnip.querySelectorAll('.o_delete_btn, .o_image_ribbon').forEach(
+                    dragSnip.querySelectorAll('.o_delete_btn').forEach(
                         el => el.remove()
                     );
                     return dragSnip;
@@ -1966,7 +1977,8 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel.classList.toggle('d-none', tab === this.tabs.BLOCKS);
 
         this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
-        this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS);
+        this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS)
+                                             .prop('disabled', tab !== this.tabs.OPTIONS);
     },
 
     //--------------------------------------------------------------------------
@@ -2306,6 +2318,14 @@ var SnippetsMenu = Widget.extend({
             await this._activateSnippet(false);
         }
         await this._updateInvisibleDOM(); // Re-render to update status
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onSnippetThumbnailURLRequest(ev) {
+        const $snippet = this.$snippets.has(`[data-snippet="${ev.data.key}"]`);
+        ev.data.onSuccess($snippet.length ? $snippet[0].dataset.oeThumbnail : '');
     },
     /**
      * @private
