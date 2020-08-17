@@ -4,7 +4,7 @@
             <field name="name">crm.lead.form</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
-                <form class="o_lead_opportunity_form">
+                <form class="o_lead_opportunity_form" js_class="crm_form">
                     <header>
                         <button name="action_set_won_rainbowman" string="Mark Won"
                             type="object" class="oe_highlight"
@@ -22,7 +22,7 @@
                             domain="['|', ('team_id', '=', team_id), ('team_id', '=', False)]"
                             attrs="{'invisible': ['|', ('active', '=', False), ('type', '=', 'lead')]}"/>
                     </header>
-                    <div class="text-center alert alert-primary" role="alert" attrs="{'invisible': ['|', ('ribbon_message', '=', False), ('ribbon_message', '=', '')]}">
+                    <div class="text-center alert alert-primary oe_edit_only" role="alert" attrs="{'invisible': ['|', ('ribbon_message', '=', False), ('ribbon_message', '=', '')]}">
                         <field name="ribbon_message"/>
                     </div>
                     <sheet>
@@ -30,7 +30,7 @@
                         <div class="oe_button_box" name="button_box">
                             <button name="action_schedule_meeting" type="object"
                                 class="oe_stat_button" icon="fa-calendar"
-                                context="{'partner_id': partner_id, 'search_default_opportunity_id': id}"
+                                context="{'partner_id': partner_id}"
                                 attrs="{'invisible': [('type', '=', 'lead')]}">
                                 <div class="o_stat_info">
                                     <field name="meeting_count" class="o_stat_value"/>
@@ -355,7 +355,7 @@
             <field name="model">crm.lead</field>
             <field name="priority" eval="100"/>
             <field name="arch" type="xml">
-                <kanban class="o_kanban_mobile" archivable="false" sample="1">
+                <kanban class="o_kanban_mobile" archivable="false" js_class="crm_kanban" sample="1">
                     <field name="name"/>
                     <field name="contact_name"/>
                     <field name="priority"/>
@@ -981,6 +981,7 @@ if record:
             <field name="name">Crm: My Pipeline</field>
             <field name="model_id" ref="crm.model_crm_team"/>
             <field name="state">code</field>
+            <field name="groups_id"  eval="[(4, ref('base.group_user'))]"/>
             <field name="code">action = model.action_your_pipeline()</field>
         </record>
 

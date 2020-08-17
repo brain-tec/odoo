@@ -104,6 +104,7 @@ class ResCompany(models.Model):
     account_invoice_onboarding_state = fields.Selection(DASHBOARD_ONBOARDING_STATES, string="State of the account invoice onboarding panel", default='not_done')
     account_dashboard_onboarding_state = fields.Selection(DASHBOARD_ONBOARDING_STATES, string="State of the account dashboard onboarding panel", default='not_done')
     invoice_terms = fields.Text(string='Default Terms and Conditions', translate=True)
+    account_setup_bill_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding bill step", default='not_done')
 
     # Needed in the Point of Sale
     account_default_pos_receivable_account_id = fields.Many2one('account.account', string="Default PoS Receivable Account")
@@ -181,7 +182,7 @@ class ResCompany(models.Model):
     def get_account_dashboard_onboarding_steps_states_names(self):
         """ Necessary to add/edit steps from other modules (account_winbooks_import in this case). """
         return [
-            'base_onboarding_company_state',
+            'account_setup_bill_state',
             'account_setup_bank_data_state',
             'account_setup_fy_data_state',
             'account_setup_coa_state',
@@ -431,7 +432,7 @@ class ResCompany(models.Model):
     @api.model
     def action_open_account_onboarding_sale_tax(self):
         """ Onboarding step for the invoice layout. """
-        action = self.env.ref('account.action_open_account_onboarding_sale_tax').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_open_account_onboarding_sale_tax")
         action['res_id'] = self.env.company.id
         return action
 
@@ -485,7 +486,7 @@ class ResCompany(models.Model):
             with the edi_invoice_template message loaded by default. """
         sample_invoice = self._get_sample_invoice()
         template = self.env.ref('account.email_template_edi_invoice', False)
-        action = self.env.ref('account.action_open_account_onboarding_sample_invoice').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_open_account_onboarding_sample_invoice")
         action['context'] = {
             'default_res_id': sample_invoice.id,
             'default_use_template': bool(template),

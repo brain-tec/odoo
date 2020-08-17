@@ -306,6 +306,7 @@ class AccountMove(models.Model):
         help="Technical field used to display a message when the invoice's accounting date is prior of the tax lock date.")
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
+    show_reset_to_draft_button = fields.Boolean(compute='_compute_show_reset_to_draft_button')
 
     # ==== Hash Fields ====
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
@@ -1430,6 +1431,11 @@ class AccountMove(models.Model):
             else:
                 move.tax_lock_date_message = False
 
+    @api.depends('restrict_mode_hash_table', 'state')
+    def _compute_show_reset_to_draft_button(self):
+        for move in self:
+            move.show_reset_to_draft_button = not move.restrict_mode_hash_table and move.state in ('posted', 'cancel')
+
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------
@@ -2361,7 +2367,7 @@ class AccountMove(models.Model):
         return self.move_type == 'out_invoice' and not self.payment_reference
 
     def action_reverse(self):
-        action = self.env.ref('account.action_view_account_move_reversal').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_view_account_move_reversal")
 
         if self.is_invoice():
             action['name'] = _('Credit Note')
@@ -2390,6 +2396,24 @@ class AccountMove(models.Model):
         self.ensure_one()
         partial = self.env['account.partial.reconcile'].browse(partial_id)
         return partial.unlink()
+
+    @api.model
+    def setting_upload_bill_wizard(self):
+        """ Called by the 'First Bill' button of the setup bar."""
+        self.env.company.sudo().set_onboarding_step_done('account_setup_bill_state')
+
+        new_wizard = self.env['account.tour.upload.bill'].create({})
+        view_id = self.env.ref('account.account_tour_upload_bill').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Import your first bill'),
+            'view_mode': 'form',
+            'res_model': 'account.tour.upload.bill',
+            'target': 'new',
+            'res_id': new_wizard.id,
+            'views': [[view_id, 'form']],
+        }
 
     def button_draft(self):
         AccountMoveLine = self.env['account.move.line']
@@ -2558,6 +2582,12 @@ class AccountMove(models.Model):
             raise UserError(_("Only invoices could be printed."))
         return self._get_move_display_name()
 
+    def _get_name_invoice_report(self):
+        """ This method need to be inherit by the localizations if they want to print a custom invoice report instead of
+        the default one. For example please review the l10n_ar module """
+        self.ensure_one()
+        return 'account.report_invoice_document'
+
     def preview_invoice(self):
         self.ensure_one()
         return {
@@ -2614,7 +2644,7 @@ class AccountMove(models.Model):
     # offer the possibility to duplicate thanks to a button instead of a hidden menu, which is more visible
     def action_duplicate(self):
         self.ensure_one()
-        action = self.env.ref('account.action_move_journal_line').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
         action['context'] = dict(self.env.context)
         action['context']['form_view_initial_mode'] = 'edit'
         action['context']['view_no_maturity'] = False

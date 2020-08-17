@@ -149,9 +149,9 @@ class Applicant(models.Model):
         ('done', 'Green'),
         ('blocked', 'Red')], string='Kanban State',
         copy=False, default='normal', required=True)
-    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked', readonly=False, related_sudo=True)
-    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid', readonly=False, related_sudo=True)
-    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing', readonly=False, related_sudo=True)
+    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked')
+    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid')
+    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing')
     application_count = fields.Integer(compute='_compute_application_count', help='Applications with the same email')
     meeting_count = fields.Integer(compute='_compute_meeting_count', help='Meeting Count')
     refuse_reason_id = fields.Many2one('hr.applicant.refuse.reason', string='Refuse Reason', tracking=True)
@@ -339,7 +339,7 @@ class Applicant(models.Model):
         partners = self.partner_id | self.user_id.partner_id | self.department_id.manager_id.user_id.partner_id
 
         category = self.env.ref('hr_recruitment.categ_meet_interview')
-        res = self.env['ir.actions.act_window'].for_xml_id('calendar', 'action_calendar_event')
+        res = self.env['ir.actions.act_window']._for_xml_id('calendar.action_calendar_event')
         res['context'] = {
             'default_partner_ids': partners.ids,
             'default_user_id': self.env.uid,
