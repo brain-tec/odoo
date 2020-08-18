@@ -1753,21 +1753,23 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :rtype: list
         :return: list of pairs ``(id, text_repr)`` for all matching records.
         """
-        return self._name_search(name, args, operator, limit=limit)
+        ids = self._name_search(name, args, operator, limit=limit)
+        return self.browse(ids).sudo().name_get()
 
     @api.model
     def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        # private implementation of name_search, allows passing a dedicated user
-        # for the name_get part to solve some access rights issues
+        """ _name_search(name='', args=None, operator='ilike', limit=100, name_get_uid=None) -> ids
+
+        Private implementation of name_search, allows passing a dedicated user
+        for the name_get part to solve some access rights issues.
+        """
         args = list(args or [])
         # optimize out the default criterion of ``ilike ''`` that matches everything
         if not self._rec_name:
             _logger.warning("Cannot execute name_search, no _rec_name defined on %s", self._name)
         elif not (name == '' and operator == 'ilike'):
             args += [(self._rec_name, operator, name)]
-        ids = self._search(args, limit=limit, access_rights_uid=name_get_uid)
-        recs = self.browse(ids)
-        return lazy_name_get(recs.with_user(name_get_uid))
+        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
 
     @api.model
     def _add_missing_default_values(self, values):
@@ -2360,11 +2362,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         inherits_field = current_model._inherits[parent_model_name]
         parent_model = self.env[parent_model_name]
-        parent_alias, parent_alias_statement = query.add_join((current_model._table, parent_model._table, inherits_field, 'id', inherits_field), implicit=True)
+        parent_alias = query.left_join(
+            current_model._table, inherits_field, parent_model._table, 'id', inherits_field,
+        )
         return parent_alias
 
     @api.model
-    def _inherits_join_calc(self, alias, fname, query, implicit=True, outer=False):
+    def _inherits_join_calc(self, alias, fname, query):
         """
         Adds missing table select and join clause(s) to ``query`` for reaching
         the field coming from an '_inherits' parent table (no duplicates).
@@ -2381,9 +2385,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             parent_model = self.env[field.related_field.model_name]
             parent_fname = field.related[0]
             # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
-            parent_alias, _ = query.add_join(
-                (alias, parent_model._table, parent_fname, 'id', parent_fname),
-                implicit=implicit, outer=outer,
+            parent_alias = query.left_join(
+                alias, parent_fname, parent_model._table, 'id', parent_fname,
             )
             model, alias, field = parent_model, parent_alias, field.related_field
         # handle the case where the field is translated
@@ -3055,8 +3058,7 @@ Fields:
             cr, user, context, su = env.args
 
             # make a query object for selecting ids, and apply security rules to it
-            param_ids = object()
-            query = Query(['"%s"' % self._table], ['"%s".id IN %%s' % self._table], [param_ids])
+            query = Query(self.env.cr, self._table)
             self._apply_ir_rules(query, 'read')
 
             # the query may involve several tables: we need fully-qualified names
@@ -3071,17 +3073,13 @@ Fields:
             # selected fields are: 'id' followed by fields_pre
             qual_names = [qualify(name) for name in [self._fields['id']] + fields_pre]
 
-            # determine the actual query to execute
-            from_clause, where_clause, params = query.get_sql()
-            query_str = "SELECT %s FROM %s WHERE %s" % (",".join(qual_names), from_clause, where_clause)
-
-            # fetch one list of record values per field
-            param_pos = params.index(param_ids)
+            # determine the actual query to execute (last parameter is added below)
+            query.add_where('"%s".id IN %%s' % self._table)
+            query_str, params = query.select(*qual_names)
 
             result = []
             for sub_ids in cr.split_for_in_conditions(self.ids):
-                params[param_pos] = tuple(sub_ids)
-                cr.execute(query_str, params)
+                cr.execute(query_str, params + [sub_ids])
                 result += cr.fetchall()
         else:
             self.check_access_rule('read')
@@ -3323,21 +3321,18 @@ Fields:
         if not self._ids:
             return self
 
-        quoted_table = '"%s"' % self._table
-        query = Query([quoted_table])
+        query = Query(self._cr, self._table)
         self._apply_ir_rules(query, operation)
         if not query.where_clause:
             return self
 
         # detemine ids in database that satisfy ir.rules
         valid_ids = set()
-        from_clause, where_clause, where_params = query.get_sql()
-        query_str = "SELECT {}.id FROM {} WHERE {} AND {}.id IN %s".format(
-            quoted_table, from_clause, where_clause, quoted_table,
-        )
+        query.add_where(f'"{self._table}".id IN %s')
+        query_str, params = query.select()
         self._flush_search([])
         for sub_ids in self._cr.split_for_in_conditions(self.ids):
-            self._cr.execute(query_str, where_params + [sub_ids])
+            self._cr.execute(query_str, params + [sub_ids])
             valid_ids.update(row[0] for row in self._cr.fetchall())
 
         # return new ids without origin and ids with origin in valid_ids
@@ -4158,7 +4153,7 @@ Fields:
         if domain:
             return expression.expression(domain, self).query
         else:
-            return Query(['"%s"' % self._table])
+            return Query(self.env.cr, self._table)
 
     def _check_qorder(self, word):
         if not regex_order.match(word):
@@ -4201,10 +4196,8 @@ Fields:
         :return: the qualified field name (or expression) to use for ``field``
         """
         if self.env.lang:
-            alias, alias_statement = query.add_join(
-                (table_alias, 'ir_translation', 'id', 'res_id', field),
-                implicit=False,
-                outer=True,
+            alias = query.left_join(
+                table_alias, 'id', 'ir_translation', 'res_id', field,
                 extra='"{rhs}"."type" = \'model\' AND "{rhs}"."name" = %s AND "{rhs}"."lang" = %s AND "{rhs}"."value" != %s',
                 extra_params=["%s,%s" % (self._name, field), self.env.lang, ""],
             )
@@ -4244,8 +4237,7 @@ Fields:
 
         # Join the dest m2o table if it's not joined yet. We use [LEFT] OUTER join here
         # as we don't want to exclude results that have NULL values for the m2o
-        join = (alias, dest_model._table, order_field, 'id', order_field)
-        dest_alias, _ = query.add_join(join, implicit=False, outer=True)
+        dest_alias = query.left_join(alias, order_field, dest_model._table, 'id', order_field)
         return dest_model._generate_order_by_inner(dest_alias, m2o_order, query,
                                                    reverse_direction, seen)
 
@@ -4279,7 +4271,7 @@ Fields:
                         seen.add(key)
                         order_by_elements += self._generate_m2o_order_by(alias, order_field, query, do_reverse, seen)
                 elif field.store and field.column_type:
-                    qualifield_name = self._inherits_join_calc(alias, order_field, query, implicit=False, outer=True)
+                    qualifield_name = self._inherits_join_calc(alias, order_field, query)
                     if field.type == 'boolean':
                         qualifield_name = "COALESCE(%s, false)" % qualifield_name
                     order_by_elements.append("%s %s" % (qualifield_name, order_direction))
@@ -4400,21 +4392,16 @@ Fields:
         if count:
             # Ignore order, limit and offset when just counting, they don't make sense and could
             # hurt performance
-            from_clause, where_clause, where_clause_params = query.get_sql()
-            where_str = where_clause and (" WHERE %s" % where_clause) or ''
-            query_str = 'SELECT count(1) FROM ' + from_clause + where_str
-            self._cr.execute(query_str, where_clause_params)
+            query_str, params = query.select("count(1)")
+            self._cr.execute(query_str, params)
             res = self._cr.fetchone()
             return res[0]
 
-        order_by = self._generate_order_by(order, query)
-        from_clause, where_clause, where_clause_params = query.get_sql()
-        where_str = where_clause and (" WHERE %s" % where_clause) or ''
-        limit_str = limit and ' limit %d' % limit or ''
-        offset_str = offset and ' offset %d' % offset or ''
-        query_str = 'SELECT "%s".id FROM ' % self._table + from_clause + where_str + order_by + limit_str + offset_str
-        self._cr.execute(query_str, where_clause_params)
-        return [row[0] for row in self._cr.fetchall()]
+        query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
+        query.limit = limit
+        query.offset = offset
+
+        return query
 
     @api.returns(None, lambda value: value[0])
     def copy_data(self, default=None):
