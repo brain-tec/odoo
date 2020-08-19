@@ -332,7 +332,7 @@ class SaleOrder(models.Model):
             return self.env.ref('sale.mt_order_sent')
         return super(SaleOrder, self)._track_subtype(init_values)
 
-    @api.onchange('partner_shipping_id', 'partner_id')
+    @api.onchange('partner_shipping_id', 'partner_id', 'company_id')
     def onchange_partner_shipping_id(self):
         """
         Trigger the change of fiscal position when the shipping address is modified.
@@ -1062,6 +1062,9 @@ Reason(s) of this behavior could be:
         if optional_values:
             down_payments_section_line.update(optional_values)
         return down_payments_section_line
+
+    def add_option_to_order_with_taxcloud(self):
+        self.ensure_one()
 
 
 class SaleOrderLine(models.Model):
