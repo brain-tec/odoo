@@ -60,7 +60,7 @@ class AccountJournal(models.Model):
     default_account_type = fields.Many2one('account.account.type', compute="_compute_default_account_type")
     default_account_id = fields.Many2one(
         comodel_name='account.account', check_company=True, copy=False, ondelete='restrict',
-        string='Default Account',  help="It acts as a default account",
+        string='Default Account',
         domain="[('deprecated', '=', False), ('company_id', '=', company_id),"
                "('user_type_id', '=', default_account_type),"
                "('user_type_id.type', 'not in', ('receivable', 'payable'))]")
@@ -266,9 +266,11 @@ class AccountJournal(models.Model):
 
     @api.constrains('default_account_id', 'payment_debit_account_id', 'payment_credit_account_id')
     def _check_journal_not_shared_accounts(self):
-        accounts = self.default_account_id \
-                   + self.payment_debit_account_id \
-                   + self.payment_credit_account_id
+        liquidity_journals = self.filtered(lambda journal: journal.type in ('bank', 'cash'))
+
+        accounts = liquidity_journals.default_account_id \
+                   + liquidity_journals.payment_debit_account_id \
+                   + liquidity_journals.payment_credit_account_id
 
         if not accounts:
             return
@@ -290,6 +292,7 @@ class AccountJournal(models.Model):
                 OR
                 journal.payment_credit_account_id = account.id
             WHERE account.id IN %s
+            AND journal.type IN ('bank', 'cash')
             GROUP BY account.name
             HAVING COUNT(DISTINCT journal.id) > 1
         ''', [tuple(accounts.ids)])
@@ -386,8 +389,8 @@ class AccountJournal(models.Model):
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.", field_string))
         result = super(AccountJournal, self).write(vals)
 
-        for journal in self:
-            # Ensure the liquidity accounts are sharing the same foreign currency.
+        # Ensure the liquidity accounts are sharing the same foreign currency.
+        for journal in self.filtered(lambda journal: journal.type in ('bank', 'cash')):
             journal.default_account_id.currency_id = journal.currency_id
 
         # Create the bank_account_id if necessary

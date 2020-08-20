@@ -378,8 +378,6 @@ class MrpWorkorder(models.Model):
                     if workorder.state in ('progress', 'done', 'cancel'):
                         raise UserError(_('You cannot change the workcenter of a work order that is in progress or done.'))
                     workorder.leave_id.resource_id = self.env['mrp.workcenter'].browse(values['workcenter_id']).resource_id
-        if 'next_work_order_id' in values and any(workorder.state == 'done' for workorder in self):
-            raise UserError(_('You can not change the finished work order.'))
         if 'date_planned_start' in values or 'date_planned_finished' in values:
             for workorder in self:
                 start_date = fields.Datetime.to_datetime(values.get('date_planned_start')) or workorder.date_planned_start
@@ -668,7 +666,7 @@ class MrpWorkorder(models.Model):
     def _get_duration_expected(self, alternative_workcenter=False, ratio=1):
         self.ensure_one()
         if not self.workcenter_id:
-            return False
+            return self.duration_expected
         if not self.operation_id:
             duration_expected_working = (self.duration_expected - self.workcenter_id.time_start - self.workcenter_id.time_stop) * self.workcenter_id.time_efficiency / 100.0
             if duration_expected_working < 0:
@@ -782,16 +780,6 @@ class MrpWorkorder(models.Model):
             production_move._set_quantity_done(
                 float_round(self.qty_producing, precision_rounding=rounding)
             )
-
-    def _strict_consumption_check(self):
-        if self.consumption == 'strict':
-            for move in self.move_raw_ids:
-                qty_done = 0.0
-                for line in move.move_line_ids:
-                    qty_done += line.product_uom_id._compute_quantity(line.qty_done, move.product_uom)
-                rounding = move.product_uom_id.rounding
-                if float_compare(qty_done, move.product_uom_qty, precision_rounding=rounding) != 0:
-                    raise UserError(_('You should consume the quantity of %s defined in the BoM. If you want to consume more or less components, change the consumption setting on the BoM.', move.product_id.name))
 
     def _check_sn_uniqueness(self):
         """ Alert the user if the serial number as already been produced """

@@ -316,6 +316,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
       correspond to the last one (in the inherits list order).
     """
     _table = None               #: SQL table name used by model if :attr:`_auto`
+    _table_query = None         #: SQL expression of the table's content (optional)
     _sequence = None            #: SQL sequence to use for ID field
     _sql_constraints = []       #: SQL constraints [(name, sql_def, message)]
 
@@ -3058,7 +3059,7 @@ Fields:
             cr, user, context, su = env.args
 
             # make a query object for selecting ids, and apply security rules to it
-            query = Query(self.env.cr, self._table)
+            query = Query(self.env.cr, self._table, self._table_query)
             self._apply_ir_rules(query, 'read')
 
             # the query may involve several tables: we need fully-qualified names
@@ -3321,7 +3322,7 @@ Fields:
         if not self._ids:
             return self
 
-        query = Query(self._cr, self._table)
+        query = Query(self.env.cr, self._table, self._table_query)
         self._apply_ir_rules(query, operation)
         if not query.where_clause:
             return self
@@ -4153,7 +4154,7 @@ Fields:
         if domain:
             return expression.expression(domain, self).query
         else:
-            return Query(self.env.cr, self._table)
+            return Query(self.env.cr, self._table, self._table_query)
 
     def _check_qorder(self, word):
         if not regex_order.match(word):
@@ -5856,6 +5857,10 @@ Fields:
                 names (in view order), or False
             :param field_onchange: dictionary mapping field names to their
                 on_change attribute
+
+            When ``field_name`` is falsy, the method first adds default values
+            to ``values``, computes the remaining fields, applies onchange
+            methods to them, and return all the fields in ``field_onchange``.
         """
         # this is for tests using `Form`
         self.flush()
@@ -5867,6 +5872,8 @@ Fields:
             names = [field_name]
         else:
             names = []
+
+        first_call = not names
 
         if not all(name in self._fields for name in names):
             return {}
@@ -5895,11 +5902,12 @@ Fields:
             """ A dict with the values of a record, following a prefix tree. """
             __slots__ = ()
 
-            def __init__(self, record, tree):
+            def __init__(self, record, tree, fetch=True):
                 # put record in dict to include it when comparing snapshots
                 super(Snapshot, self).__init__({'<record>': record, '<tree>': tree})
-                for name in tree:
-                    self.fetch(name)
+                if fetch:
+                    for name in tree:
+                        self.fetch(name)
 
             def fetch(self, name):
                 """ Set the value of field ``name`` from the record's value. """
@@ -5913,6 +5921,8 @@ Fields:
 
             def has_changed(self, name):
                 """ Return whether a field on record has changed. """
+                if name not in self:
+                    return True
                 record = self['<record>']
                 subnames = self['<tree>'][name]
                 if record._fields[name].type not in ('one2many', 'many2many'):
@@ -5930,14 +5940,16 @@ Fields:
                     )
                 )
 
-            def diff(self, other):
+            def diff(self, other, force=False):
                 """ Return the values in ``self`` that differ from ``other``.
                     Requires record cache invalidation for correct output!
                 """
                 record = self['<record>']
                 result = {}
                 for name, subnames in self['<tree>'].items():
-                    if (name == 'id') or (other.get(name) == self[name]):
+                    if name == 'id':
+                        continue
+                    if not force and other.get(name) == self[name]:
                         continue
                     field = record._fields[name]
                     if field.type not in ('one2many', 'many2many'):
@@ -5966,6 +5978,13 @@ Fields:
                 return result
 
         nametree = PrefixTree(self.browse(), field_onchange)
+
+        if first_call:
+            values.update(self.default_get([
+                name
+                for name in nametree
+                if name not in values
+            ]))
 
         # prefetch x2many lines without data (for the initial snapshot)
         for name, subnames in nametree.items():
@@ -6013,7 +6032,7 @@ Fields:
         record = self.new(initial_values, origin=self)
 
         # make a snapshot based on the initial values of record
-        snapshot0 = Snapshot(record, nametree)
+        snapshot0 = Snapshot(record, nametree, fetch=(not first_call))
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
@@ -6064,7 +6083,7 @@ Fields:
 
         # determine values that have changed by comparing snapshots
         self.invalidate_cache()
-        result['value'] = snapshot1.diff(snapshot0)
+        result['value'] = snapshot1.diff(snapshot0, force=first_call)
 
         # format warnings
         warnings = result.pop('warnings')
