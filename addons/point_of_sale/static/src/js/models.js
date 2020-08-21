@@ -2385,6 +2385,7 @@ exports.Paymentline = Backbone.Model.extend({
         this.order = options.order;
         this.amount = 0;
         this.selected = false;
+        this.cashier_receipt = '';
         this.ticket = '';
         this.payment_status = '';
         this.card_type = '';
@@ -2453,6 +2454,17 @@ exports.Paymentline = Backbone.Model.extend({
      */
     is_done: function() {
         return this.get_payment_status() ? this.get_payment_status() === 'done' : true;
+    },
+
+    /**
+    * Set info to be printed on the cashier receipt. value should
+    * be compatible with both the QWeb and ESC/POS receipts.
+    *
+    * @param {string} value - receipt info
+    */
+    set_cashier_receipt: function (value) {
+        this.cashier_receipt = value;
+        this.trigger('change', this);
     },
 
     /**
@@ -2535,6 +2547,9 @@ exports.Order = Backbone.Model.extend({
                 emailSuccessful: null,
                 emailNotice: '',
             }),
+            TipScreen: new Context({
+                inputTipAmount: '',
+            })
         };
 
         if (options.json) {
@@ -2877,6 +2892,7 @@ exports.Order = Backbone.Model.extend({
                     lines[i].set_unit_price(tip);
                     lines[i].set_lst_price(tip);
                     lines[i].price_manually_set = true;
+                    lines[i].order.tip_amount = tip;
                     return;
                 }
             }

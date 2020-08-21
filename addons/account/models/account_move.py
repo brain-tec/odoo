@@ -171,8 +171,13 @@ class AccountMove(models.Model):
     country_code = fields.Char(related='company_id.country_id.code', readonly=True)
     user_id = fields.Many2one(string='User', related='invoice_user_id',
         help='Technical field used to fit the generic behavior in mail templates.')
-    is_move_sent = fields.Boolean(readonly=True, default=False, copy=False,
-        help="It indicates that the invoice/payment has been sent.")
+    is_move_sent = fields.Boolean(
+        readonly=True,
+        default=False,
+        copy=False,
+        tracking=True,
+        help="It indicates that the invoice/payment has been sent.",
+    )
     partner_bank_id = fields.Many2one('res.partner.bank', string='Recipient Bank',
         help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Vendor Credit Note, otherwise a Partner bank account number.',
         check_company=True)
@@ -1038,10 +1043,10 @@ class AccountMove(models.Model):
             reference_move = self.search(domain + [('date', '<=', self.date)], order='date desc', limit=1) or self.search(domain, order='date asc', limit=1)
             sequence_number_reset = self._deduce_sequence_number_reset(reference_move.name)
             if sequence_number_reset == 'year':
-                where_string += " AND date_trunc('year', date) = date_trunc('year', %(date)s) "
+                where_string += " AND date_trunc('year', date::timestamp without time zone) = date_trunc('year', %(date)s) "
                 param['date'] = self.date
             elif sequence_number_reset == 'month':
-                where_string += " AND date_trunc('month', date) = date_trunc('month', %(date)s) "
+                where_string += " AND date_trunc('month', date::timestamp without time zone) = date_trunc('month', %(date)s) "
                 param['date'] = self.date
 
         if self.journal_id.refund_sequence:
@@ -1425,8 +1430,8 @@ class AccountMove(models.Model):
         for move in self:
             if move._affect_tax_report() and move.company_id.tax_lock_date and move.date and move.date <= move.company_id.tax_lock_date:
                 move.tax_lock_date_message = _(
-                    "The accounting date is prior to the tax lock date which is set on %s. "
-                    "Then, this will be moved to the next available one during the invoice validation.",
+                    "The accounting date is set prior to the tax lock date which is set on %s. "
+                    "Hence, the accounting date will be changed to the next available date when posting.",
                     format_date(self.env, move.company_id.tax_lock_date))
             else:
                 move.tax_lock_date_message = False
@@ -2797,9 +2802,9 @@ class AccountMoveLine(models.Model):
              " are displayed). By default all new journal items are directly exigible, but with the feature cash_basis"
              " on taxes, some will become exigible only when the payment is recorded.")
     tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line',
-        string="Originator Tax Repartition Line", ondelete='restrict', readonly=True,
+        string="Originator Tax Distribution Line", ondelete='restrict', readonly=True,
         check_company=True,
-        help="Tax repartition line that caused the creation of this move line, if any")
+        help="Tax distribution line that caused the creation of this move line, if any")
     tax_tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.", tracking=True)
     tax_audit = fields.Char(string="Tax Audit String", compute="_compute_tax_audit", store=True,
@@ -2870,7 +2875,7 @@ class AccountMoveLine(models.Model):
                     currency_id = company_currency_id
                     AND
                     ROUND(debit - credit - amount_currency, 2) = 0
-                )                
+                )
             )''',
             "The amount expressed in the secondary currency must be positive when account is debited and negative when "
             "account is credited. If the currency is the same as the one from the company, this amount must strictly "
