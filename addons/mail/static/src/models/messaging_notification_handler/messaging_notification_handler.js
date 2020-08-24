@@ -56,7 +56,7 @@ function factory(dependencies) {
         /**
          * @private
          * @param {Object[]} notifications
-         * @param {Array} notifications[i][0] meta-data of the notification.
+         * @param {Array|string} notifications[i][0] meta-data of the notification.
          * @param {string} notifications[i][0][0] name of database this
          *   notification comes from.
          * @param {string} notifications[i][0][1] type of notification.
@@ -68,16 +68,25 @@ function factory(dependencies) {
         async _handleNotifications(notifications) {
             const filteredNotifications = this._filterNotificationsOnUnsubscribe(notifications);
             const proms = filteredNotifications.map(notification => {
-                const [[, model, id], data] = notification;
+                const [channel, message] = notification;
+                if (typeof channel === 'string') {
+                    // uuid notification, only for (livechat) public handler
+                    return;
+                }
+                const [, model, id] = channel;
                 switch (model) {
                     case 'ir.needaction':
-                        return this._handleNotificationNeedaction(data);
+                        return this._handleNotificationNeedaction(message);
                     case 'mail.channel':
                         return this._handleNotificationChannel(Object.assign({
                             channelId: id,
-                        }, data));
+                        }, message));
                     case 'res.partner':
-                        return this._handleNotificationPartner(Object.assign({}, data));
+                        if (id !== this.env.messaging.currentPartner.id) {
+                            // ignore broadcast to other partners
+                            return;
+                        }
+                        return this._handleNotificationPartner(Object.assign({}, message));
                     default:
                         console.warn(`mail.messaging_notification_handler: Unhandled notification "${model}"`);
                         return;
@@ -144,9 +153,10 @@ function factory(dependencies) {
             last_message_id,
             partner_id,
         }) {
-            const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId && thread.model === 'mail.channel'
-            );
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id: channelId,
+                model: 'mail.channel',
+            });
             if (!channel) {
                 // for example seen from another browser, the current one has no
                 // knowledge of the channel
@@ -198,10 +208,10 @@ function factory(dependencies) {
             const message = this.env.models['mail.message'].insert(convertedData);
 
             // join the corresponding channel if necessary
-            const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId &&
-                thread.model === 'mail.channel'
-            );
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id: channelId,
+                model: 'mail.channel',
+            });
             if (!channel || !channel.isPinned) {
                 this.env.models['mail.thread'].joinChannel(channelId);
             }
@@ -275,9 +285,10 @@ function factory(dependencies) {
             last_message_id,
             partner_id,
         }) {
-            const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId && thread.model === 'mail.channel'
-            );
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id: channelId,
+                model: 'mail.channel',
+            });
             if (!channel) {
                 // for example seen from another browser, the current one has no
                 // knowledge of the channel
@@ -327,10 +338,13 @@ function factory(dependencies) {
             is_typing,
             partner_id,
         }) {
-            const channel = this.env.models['mail.thread'].insert({
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
                 id: channelId,
                 model: 'mail.channel',
             });
+            if (!channel) {
+                return;
+            }
             const partner = this.env.models['mail.partner'].insert({ id: partner_id });
             if (partner === this.env.messaging.currentPartner) {
                 // Ignore management of current partner is typing notification.
@@ -444,10 +458,7 @@ function factory(dependencies) {
         _handleNotificationPartnerChannel(data) {
             const convertedData = this.env.models['mail.thread'].convertData(data);
 
-            let channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === convertedData.id &&
-                thread.model === 'mail.channel'
-            );
+            let channel = this.env.models['mail.thread'].findFromIdentifyingData(convertedData);
             const wasCurrentPartnerMember = (
                 channel &&
                 channel.members.includes(this.env.messaging.currentPartner)
