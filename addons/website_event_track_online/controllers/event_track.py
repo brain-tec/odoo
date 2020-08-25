@@ -238,12 +238,11 @@ class EventTrackOnlineController(WebsiteEventTrackController):
         Using this metadata, user agents can provide developers with means to create user 
         experiences that are more comparable to that of a native application.
         """
-        company = request.env.company
         website = request.website
         manifest = {
-            'name': _('%s Online Events') % company.name,
-            'short_name': company.name,
-            'description': _('%s Online Events') % company.name,
+            'name': website.events_app_name,
+            'short_name': website.events_app_name,
+            'description': _('%s Online Events Application') % website.company_id.name,
             'scope': url_for('/event'),
             'start_url': url_for('/event'),
             'display': 'standalone',
@@ -274,3 +273,9 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             ('Service-Worker-Allowed', url_for('/event')),
         ])
         return response
+
+    @http.route('/event/offline', type='http', auth='public', methods=['GET'], website=True, sitemap=False)
+    def offline(self):
+        """ Returns the offline page used by the 'website_event' PWA
+        """
+        return request.render('website_event_track_online.offline')
