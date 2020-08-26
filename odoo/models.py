@@ -3869,7 +3869,27 @@ Fields:
                 else:
                     other_fields.add(field)
 
-            # insert a row with the given columns
+            # Insert rows one by one
+            # - as records don't all specify the same columns, code building batch-insert query
+            #   was very complex
+            # - and the gains were low, so not worth spending so much complexity
+            #
+            # It also seems that we have to be careful with INSERTs in batch, because they have the
+            # same problem as SELECTs:
+            # If we inject a lot of data in a single query, we fall into pathological perfs in
+            # terms of SQL parser and the execution of the query itself.
+            # In SELECT queries, we inject max 1000 ids (integers) when we can, because we know
+            # that this limit is well managed by PostgreSQL.
+            # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
+            # example).
+            # 
+            # The problem then becomes: how to "estimate" the right size of the batch to have
+            # good performance?
+            #
+            # This requires extensive testing, and it was prefered not to introduce INSERTs in
+            # batch, to avoid regressions as much as possible.
+            #
+            # That said, we haven't closed the door completely.
             query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
                 quote(self._table),
                 ", ".join(quote(name) for name, fmt, val in columns),
@@ -4699,7 +4719,7 @@ Fields:
         return cls._transient
 
     @api.model
-    def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
+    def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, **read_kwargs):
         """Perform a :meth:`search` followed by a :meth:`read`.
 
         :param domain: Search domain, see ``args`` parameter in :meth:`search`.
@@ -4712,6 +4732,8 @@ Fields:
             Defaults to no limit.
         :param order: Columns to sort result, see ``order`` parameter in :meth:`search`.
             Defaults to no sort.
+        :param read_kwargs: All read keywords arguments used to call read(..., **read_kwargs) method
+            E.g. you can use search_read(..., load='') in order to avoid computing name_get
         :return: List of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
@@ -4732,7 +4754,7 @@ Fields:
             del context['active_test']
             records = records.with_context(context)
 
-        result = records.read(fields)
+        result = records.read(fields, **read_kwargs)
         if len(result) <= 1:
             return result
 
