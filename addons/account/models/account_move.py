@@ -1801,9 +1801,9 @@ class AccountMove(models.Model):
             return super()._get_creation_message()
         return {
             'out_invoice': _('Invoice Created'),
-            'out_refund': _('Refund Created'),
+            'out_refund': _('Credit Note Created'),
             'in_invoice': _('Vendor Bill Created'),
-            'in_refund': _('Credit Note Created'),
+            'in_refund': _('Refund Created'),
             'out_receipt': _('Sales Receipt Created'),
             'in_receipt': _('Purchase Receipt Created'),
         }[self.move_type]
@@ -2240,11 +2240,13 @@ class AccountMove(models.Model):
 
         # Create the invoice.
         values = {
+            'name': '/',  # we have to give the name otherwise it will be set to the mail's subject
             'invoice_source_email': from_mail_addresses[0],
             'partner_id': partners and partners[0].id or False,
         }
         move_ctx = self.with_context(default_move_type=custom_values['move_type'], default_journal_id=custom_values['journal_id'])
         move = super(AccountMove, move_ctx).message_new(msg_dict, custom_values=values)
+        move._compute_name()  # because the name is given, we need to recompute in case it is the first invoice of the journal
 
         # Assign followers.
         all_followers_ids = set(partner.id for partner in followers + senders + partners if is_internal_partner(partner))
@@ -2741,7 +2743,7 @@ class AccountMoveLine(models.Model):
     account_internal_group = fields.Selection(related='account_id.user_type_id.internal_group', string="Internal Group", readonly=True)
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
     sequence = fields.Integer(default=10)
-    name = fields.Text(string='Label', tracking=True)
+    name = fields.Char(string='Label', tracking=True)
     quantity = fields.Float(string='Quantity',
         default=1.0, digits='Product Unit of Measure',
         help="The optional quantity expressed by this line, eg: number of product sold. "
