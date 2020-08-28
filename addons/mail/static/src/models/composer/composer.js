@@ -38,10 +38,6 @@ function factory(dependencies) {
             }
         }
 
-        focus() {
-            this.update({ isDoFocus: true });
-        }
-
         /**
          * Inserts text content in text input based on selection.
          *
@@ -185,8 +181,8 @@ function factory(dependencies) {
                 );
                 thread.loadNewMessages();
             }
-            for (const threadViewer of this.thread.viewers) {
-                threadViewer.addComponentHint('current-partner-just-posted-message', messageId);
+            for (const threadView of this.thread.threadViews) {
+                threadView.addComponentHint('current-partner-just-posted-message', messageId);
             }
             this._reset();
         }
@@ -604,9 +600,6 @@ function factory(dependencies) {
             dependencies: [
                 'allSuggestedPartners',
             ],
-            default: false,
-        }),
-        isDoFocus: attr({
             default: false,
         }),
         /**

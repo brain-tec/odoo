@@ -1402,9 +1402,10 @@ class AccountMove(models.Model):
             # At this point we only want to keep the taxes with a zero amount since they do not
             # generate a tax line.
             for line in move.line_ids:
-                for tax in line.tax_ids.flatten_taxes_hierarchy().filtered(lambda t: t.amount == 0.0):
-                    res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                    res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                for tax in line.tax_ids.flatten_taxes_hierarchy():
+                    if tax.tax_group_id not in res:
+                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
 
             res = sorted(res.items(), key=lambda l: l[0].sequence)
             move.amount_by_group = [(
@@ -1795,10 +1796,10 @@ class AccountMove(models.Model):
             return self.env.ref('account.mt_invoice_validated')
         return super(AccountMove, self)._track_subtype(init_values)
 
-    def _get_creation_message(self):
+    def _creation_message(self):
         # OVERRIDE
         if not self.is_invoice(include_receipts=True):
-            return super()._get_creation_message()
+            return super()._creation_message()
         return {
             'out_invoice': _('Invoice Created'),
             'out_refund': _('Credit Note Created'),
@@ -2121,6 +2122,8 @@ class AccountMove(models.Model):
             elif line_vals.get('tax_repartition_line_id'):
                 # Tax line.
                 invoice_repartition_line = self.env['account.tax.repartition.line'].browse(line_vals['tax_repartition_line_id'])
+                if invoice_repartition_line not in tax_repartition_lines_mapping:
+                    raise UserError(_("It seems that the taxes have been modified since the creation of the journal entry. You should create the credit note manually instead."))
                 refund_repartition_line = tax_repartition_lines_mapping[invoice_repartition_line]
 
                 # Find the right account.
@@ -3713,16 +3716,16 @@ class AccountMoveLine(models.Model):
         for move_id, modified_lines in move_initial_values.items():
             tmp_move = {move_id: []}
             for line in self.filtered(lambda l: l.move_id.id == move_id):
-                tracked_field = self.env['mail.thread'].static_message_track(line, ref_fields, modified_lines) # Return a tuple like (changed field, ORM command)
+                changes, tracking_value_ids = line._mail_track(ref_fields, modified_lines) # Return a tuple like (changed field, ORM command)
                 tmp = {'line_id': line.id}
-                if len(tracked_field[1]) > 0:
-                    selected_field = tracked_field[1][0][2] # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
+                if tracking_value_ids:
+                    selected_field = tracking_value_ids[0][2] # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
                     tmp.update({
                         **{'field_name': selected_field.get('field_desc')},
                         **self._get_formated_values(selected_field)
                     })
-                elif len(tracked_field[0]):
-                    field_name = line._fields[tracked_field[0].pop()].string # Get the field name
+                elif changes:
+                    field_name = line._fields[changes.pop()].string # Get the field name
                     tmp.update({
                         'error': True,
                         'field_error': field_name
