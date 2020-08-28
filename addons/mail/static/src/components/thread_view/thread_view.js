@@ -1,4 +1,4 @@
-odoo.define('mail/static/src/components/thread_viewer/thread_viewer.js', function (require) {
+odoo.define('mail/static/src/components/thread_view/thread_view.js', function (require) {
 'use strict';
 
 const components = {
@@ -10,7 +10,7 @@ const useStore = require('mail/static/src/component_hooks/use_store/use_store.js
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class ThreadViewer extends Component {
+class ThreadView extends Component {
 
     /**
      * @param {...any} args
@@ -74,10 +74,10 @@ class ThreadViewer extends Component {
     }
 
     /**
-     * @returns {mail.thread_viewer}
+     * @returns {mail.thread_view}
      */
-    get threadViewer() {
-        return this.env.models['mail.thread_viewer'].get(this.props.threadViewerLocalId);
+    get threadView() {
+        return this.env.models['mail.thread_view'].get(this.props.threadViewLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -112,27 +112,26 @@ class ThreadViewer extends Component {
      * @returns {Object}
      */
     _useStoreSelector(props) {
-        const threadViewer = this.env.models['mail.thread_viewer'].get(props.threadViewerLocalId);
-        const thread = threadViewer ? threadViewer.thread : undefined;
-        const threadCache = threadViewer ? threadViewer.threadCache : undefined;
+        const threadView = this.env.models['mail.thread_view'].get(props.threadViewLocalId);
+        const thread = threadView ? threadView.thread : undefined;
+        const threadCache = threadView ? threadView.threadCache : undefined;
         return {
             isDeviceMobile: this.env.messaging.device.isMobile,
             thread: thread ? thread.__state : undefined,
             threadCache: threadCache ? threadCache.__state : undefined,
-            threadViewer: threadViewer ? threadViewer.__state : undefined,
+            threadView: threadView ? threadView.__state : undefined,
         };
     }
 
 }
 
-Object.assign(ThreadViewer, {
+Object.assign(ThreadView, {
     components,
     defaultProps: {
         composerAttachmentsDetailsMode: 'auto',
         hasComposer: false,
         hasMessageCheckbox: false,
         hasSquashCloseMessages: false,
-        haveMessagesAuthorRedirect: false,
         haveMessagesMarkAsReadIcon: false,
         haveMessagesReplyIcon: false,
         order: 'asc',
@@ -168,7 +167,6 @@ Object.assign(ThreadViewer, {
             optional: true,
         },
         hasSquashCloseMessages: Boolean,
-        haveMessagesAuthorRedirect: Boolean,
         haveMessagesMarkAsReadIcon: Boolean,
         haveMessagesReplyIcon: Boolean,
         order: {
@@ -181,11 +179,11 @@ Object.assign(ThreadViewer, {
         },
         showComposerAttachmentsExtensions: Boolean,
         showComposerAttachmentsFilenames: Boolean,
-        threadViewerLocalId: String,
+        threadViewLocalId: String,
     },
-    template: 'mail.ThreadViewer',
+    template: 'mail.ThreadView',
 });
 
-return ThreadViewer;
+return ThreadView;
 
 });
