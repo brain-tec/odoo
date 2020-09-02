@@ -652,6 +652,8 @@ class AccountMove(models.Model):
                 continue
 
             tax_base_amount = (-1 if self.is_inbound() else 1) * taxes_map_entry['tax_base_amount']
+            # tax_base_amount field is expressed using the company currency.
+            tax_base_amount = currency._convert(tax_base_amount, self.company_currency_id, self.company_id, self.date or fields.Date.context_today(self))
 
             # Recompute only the tax_base_amount.
             if taxes_map_entry['tax_line'] and recompute_tax_base_amount:
@@ -2229,7 +2231,7 @@ class AccountMove(models.Model):
                 'move_type': reverse_type_map[move.move_type],
                 'reversed_entry_id': move.id,
             })
-            move_vals_list.append(move._reverse_move_vals(default_values, cancel=cancel))
+            move_vals_list.append(move.with_context(move_reverse_cancel=cancel)._reverse_move_vals(default_values, cancel=cancel))
 
         reverse_moves = self.env['account.move'].create(move_vals_list)
         for move, reverse_move in zip(self, reverse_moves.with_context(check_move_validity=False)):
@@ -4475,6 +4477,7 @@ class AccountMoveLine(models.Model):
 
     def copy_data(self, default=None):
         res = super(AccountMoveLine, self).copy_data(default=default)
+
         for line, values in zip(self, res):
             # Don't copy the name of a payment term line.
             if line.move_id.is_invoice() and line.account_id.user_type_id.type in ('receivable', 'payable'):
