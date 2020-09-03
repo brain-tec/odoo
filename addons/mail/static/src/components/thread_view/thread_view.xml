@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ThreadView" owl="1">
-        <div class="o_ThreadView" t-att-data-thread-local-id="threadView and threadView.thread and threadView.thread.localId">
+        <div class="o_ThreadView" t-att-data-correspondent-id="threadView and threadView.thread and threadView.thread.correspondent and threadView.thread.correspondent.id" t-att-data-thread-local-id="threadView and threadView.thread and threadView.thread.localId">
             <t t-if="threadView">
                 <t t-if="threadView.isShowingLoading" name="loadingCondition">
                     <div class="o_ThreadView_loading">
@@ -30,11 +30,11 @@
                         composerLocalId="threadView.thread.composer.localId"
                         hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
                         hasSendButton="props.hasComposerSendButton"
-                        hasTextInputSendOnEnterEnabled="(threadView.thread.model === 'mail.channel' and threadView.thread.mass_mailing) ? false : undefined"
                         hasThreadTyping="props.hasComposerThreadTyping"
                         isCompact="(threadView.thread.model === 'mail.channel' and threadView.thread.mass_mailing) ? false : undefined"
                         showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
                         showAttachmentsFilenames="props.showComposerAttachmentsFilenames"
+                        textInputSendShortcuts="(threadView.thread.model === 'mail.channel' and threadView.thread.mass_mailing) ? ['ctrl-enter', 'meta-enter'] : ['enter']"
                         t-ref="composer"
                     />
                 </t>
