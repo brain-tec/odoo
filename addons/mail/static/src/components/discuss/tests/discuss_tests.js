@@ -8,6 +8,7 @@ const {
     afterEach,
     afterNextRender,
     beforeEach,
+    nextAnimationFrame,
     start,
 } = require('mail/static/src/utils/test_utils.js');
 
@@ -1884,6 +1885,11 @@ QUnit.test('restore thread scroll position', async function (assert) {
         "should have scrolled to top of thread"
     );
 
+    const scrollChannel12Def = makeDeferred();
+    const onScroll = () => {
+        scrollChannel12Def.resolve();
+    };
+    document.addEventListener('o-message-list-scrolled', onScroll);
     // select channel 12
     await afterNextRender(async () => {
         document.querySelector(`
@@ -1910,7 +1916,8 @@ QUnit.test('restore thread scroll position', async function (assert) {
     // going back to channel 11. Await is needed to prevent the scrollIntoView
     // initially planned for channel 12 to actually apply on channel 11.
     // task-2333535
-    await new Promise((resolve) => setTimeout(resolve));
+    await scrollChannel12Def;
+    document.removeEventListener('o-message-list-scrolled', onScroll);
 
     // select channel 11
     await afterNextRender(() =>
@@ -2980,10 +2987,9 @@ QUnit.test('do not post message on non-mailing channel with "SHIFT-Enter" keyboa
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "Test");
     });
-    await afterNextRender(() => {
-        const kevt = new window.KeyboardEvent('keydown', { key: "Enter", shiftKey: true });
-        document.querySelector('.o_ComposerTextInput_textarea').dispatchEvent(kevt);
-    });
+    const kevt = new window.KeyboardEvent('keydown', { key: "Enter", shiftKey: true });
+    document.querySelector('.o_ComposerTextInput_textarea').dispatchEvent(kevt);
+    await nextAnimationFrame();
     assert.containsNone(
         document.body,
         '.o_Message',
@@ -3088,10 +3094,9 @@ QUnit.test('do not post message on mailing channel with "Enter" keyboard shortcu
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "Test");
     });
-    await afterNextRender(() => {
-        const kevt = new window.KeyboardEvent('keydown', { key: "Enter" });
-        document.querySelector('.o_ComposerTextInput_textarea').dispatchEvent(kevt);
-    });
+    const kevt = new window.KeyboardEvent('keydown', { key: "Enter" });
+    document.querySelector('.o_ComposerTextInput_textarea').dispatchEvent(kevt);
+    await nextAnimationFrame();
     assert.containsNone(
         document.body,
         '.o_Message',
