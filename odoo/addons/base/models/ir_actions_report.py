@@ -145,7 +145,11 @@ class IrActionsReport(models.Model):
 
     def _get_readable_fields(self):
         return super()._get_readable_fields() | {
-            "params", "report_name", "report_type", "target",
+            "report_name", "report_type", "target",
+            # these two are not real fields of ir.actions.report but are
+            # expected in the route /report/<converter>/<reportname> and must
+            # not be removed by clean_action
+            "context", "data",
         }
 
     def associated_view(self):
