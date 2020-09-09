@@ -152,7 +152,7 @@
                             <label for="product_qty" string="Quantity"/>
                             <div class="o_row no-gutters d-flex">
                                 <div attrs="{'invisible': [('state', '=', 'draft')]}" class="o_row">
-                                    <field name="qty_producing" digits="[12,3]" class="text-left"  attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"/>
+                                    <field name="qty_producing" class="text-left" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"/>
                                     /
                                 </div>
                                 <field name="product_qty" class="oe_inline text-left" attrs="{'readonly': [('state', '!=', 'draft')], 'invisible': [('state', 'not in', ('draft', 'done'))]}"/>
@@ -514,7 +514,7 @@
             <field name="domain">[('picking_type_id.active', '=', True)]</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
-                Create a new manufacturing order <br/>
+                No manufacturing order found. Let's create one.
               </p><p>
                 Consume <a name="%(product.product_template_action)d" type='action' tabindex="-1">components</a> and build finished products using <a name="%(mrp_bom_form_action)d" type='action' tabindex="-1">bills of materials</a>
               </p>
