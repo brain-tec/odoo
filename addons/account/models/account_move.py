@@ -123,9 +123,15 @@ class AccountMove(models.Model):
     name = fields.Char(string='Number', copy=False, compute='_compute_name', readonly=False, store=True, index=True, tracking=True)
     highest_name = fields.Char(compute='_compute_highest_name')
     show_name_warning = fields.Boolean(store=False)
-    date = fields.Date(string='Date', required=True, index=True, readonly=True,
+    date = fields.Date(
+        string='Date',
+        required=True,
+        index=True,
+        readonly=True,
         states={'draft': [('readonly', False)]},
-        default=fields.Date.context_today)
+        copy=False,
+        default=fields.Date.context_today
+    )
     ref = fields.Char(string='Reference', copy=False, tracking=True)
     narration = fields.Text(string='Terms and Conditions')
     state = fields.Selection(selection=[
@@ -1025,10 +1031,11 @@ class AccountMove(models.Model):
                 }
             )
         )
+        self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
         highest_name = self[0]._get_last_sequence() if self else False
 
         # Group the moves by journal and month
-        for move in self.sorted(lambda m: (m.date, m.ref or '', m.id)):
+        for move in self:
             if not highest_name and move == self[0] and not move.posted_before:
                 # In the form view, we need to compute a default sequence so that the user can edit
                 # it. We only check the first move as an approximation (enough for new in form view)
@@ -1036,15 +1043,13 @@ class AccountMove(models.Model):
             elif (move.name and move.name != '/') or move.state != 'posted':
                 # Has already a name or is not posted, we don't add to a batch
                 continue
-            if not grouped[journal_key(move)][date_key(move)]['records']:
+            group = grouped[journal_key(move)][date_key(move)]
+            if not group['records']:
                 # Compute all the values needed to sequence this whole group
                 move._set_next_sequence()
-                format, format_values = move._get_sequence_format_param(move.name)
-                reset = move._deduce_sequence_number_reset(move.name)
-                grouped[journal_key(move)][date_key(move)]['format'] = format
-                grouped[journal_key(move)][date_key(move)]['format_values'] = format_values
-                grouped[journal_key(move)][date_key(move)]['reset'] = reset
-            grouped[journal_key(move)][date_key(move)]['records'] += move
+                group['format'], group['format_values'] = move._get_sequence_format_param(move.name)
+                group['reset'] = move._deduce_sequence_number_reset(move.name)
+            group['records'] += move
 
         # Fusion the groups depending on the sequence reset and the format used because `seq` is
         # the same counter for multiple groups that might be spread in multiple months.
@@ -2521,6 +2526,10 @@ class AccountMove(models.Model):
         ctx = dict(
             default_model='account.move',
             default_res_id=self.id,
+            # For the sake of consistency we need a default_res_model if
+            # default_res_id is set. Not renaming default_model as it can
+            # create many side-effects.
+            default_res_model='account.move',
             default_use_template=bool(template),
             default_template_id=template and template.id or False,
             default_composition_mode='comment',
@@ -3167,7 +3176,7 @@ class AccountMoveLine(models.Model):
             sign = 1
 
         amount_currency = price_subtotal * sign
-        balance = currency._convert(amount_currency, company.currency_id, company, date)
+        balance = currency._convert(amount_currency, company.currency_id, company, date or fields.Date.context_today(self))
         return {
             'amount_currency': amount_currency,
             'currency_id': currency.id,
