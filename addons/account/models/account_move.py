@@ -1267,15 +1267,11 @@ class AccountMove(models.Model):
 
             to_write = []
 
-            if move.currency_id != move.company_id.currency_id:
-                amount_currency = abs(move.amount_total)
-                balance = move.currency_id._convert(amount_currency, move.company_currency_id, move.company_id, move.date)
-            else:
-                balance = abs(move.amount_total)
-                amount_currency = 0.0
+            amount_currency = abs(move.amount_total)
+            balance = move.currency_id._convert(amount_currency, move.company_currency_id, move.company_id, move.date)
 
             for line in move.line_ids:
-                if float_compare(abs(line.balance), balance, precision_rounding=move.currency_id.rounding) != 0:
+                if not line.currency_id.is_zero(balance - abs(line.balance)):
                     to_write.append((1, line.id, {
                         'debit': line.balance > 0.0 and balance or 0.0,
                         'credit': line.balance < 0.0 and balance or 0.0,
@@ -2520,6 +2516,10 @@ class AccountMove(models.Model):
         ctx = dict(
             default_model='account.move',
             default_res_id=self.id,
+            # For the sake of consistency we need a default_res_model if
+            # default_res_id is set. Not renaming default_model as it can
+            # create many side-effects.
+            default_res_model='account.move',
             default_use_template=bool(template),
             default_template_id=template and template.id or False,
             default_composition_mode='comment',
