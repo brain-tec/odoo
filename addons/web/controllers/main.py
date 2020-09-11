@@ -1049,7 +1049,13 @@ class Binary(http.Controller):
             return werkzeug.utils.redirect(content, code=301)
         elif status != 200 and download:
             return request.not_found()
-
+        
+        if not content:
+            # Since we set a placeholder for any missing image, the status must be 200. In case one
+            # wants to configure a specific 404 page (e.g. though nginx), a 404 status will cause
+            # troubles.
+            status = 200
+            
         if headers and dict(headers).get('Content-Type', '') == 'image/svg+xml':  # we shan't resize svg images
             height = 0
             width = 0
