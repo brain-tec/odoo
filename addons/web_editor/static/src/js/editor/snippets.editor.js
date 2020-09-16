@@ -10,6 +10,7 @@ var options = require('web_editor.snippets.options');
 var Wysiwyg = require('web_editor.wysiwyg');
 const {ColorPaletteWidget} = require('web_editor.ColorPalette');
 const SmoothScrollOnDrag = require('web/static/src/js/core/smooth_scroll_on_drag.js');
+const {getCSSVariableValue} = require('web_editor.utils');
 
 var _t = core._t;
 
@@ -897,6 +898,9 @@ var SnippetsMenu = Widget.extend({
             '.modal .close',
             '.o_we_crop_widget',
         ].join(', ');
+
+        this.loadingTimers = {};
+        this.loadingElements = {};
     },
     /**
      * @override
@@ -912,7 +916,7 @@ var SnippetsMenu = Widget.extend({
     /**
      * @override
      */
-    start: function () {
+    async start() {
         var defs = [this._super.apply(this, arguments)];
         this.ownerDocument = this.$el[0].ownerDocument;
         this.$document = $(this.ownerDocument);
@@ -931,14 +935,13 @@ var SnippetsMenu = Widget.extend({
             })[0]
         );
 
-        this._addTabLoading(this.tabs.BLOCKS);
-
         this.options.getScrollOptions = this._getScrollOptions.bind(this);
 
         // Fetch snippet templates and compute it
-        defs.push(this._loadSnippetsTemplates().then(() => {
-            return this._updateInvisibleDOM();
-        }));
+        defs.push((async () => {
+            await this._loadSnippetsTemplates();
+            await this._updateInvisibleDOM();
+        })());
 
         // Prepare snippets editor environment
         this.$snippetEditorArea = $('<div/>', {
@@ -1280,21 +1283,6 @@ var SnippetsMenu = Widget.extend({
         });
     },
     /**
-     * @private
-     * @param {this.tabs.VALUE} [tab='OPTIONS'] - the tab to select
-     */
-    _addTabLoading: function (tab) {
-        const loadingEl = document.createElement('div');
-        loadingEl.classList.add('o_we_ui_loading', 'text-center', 'pt-5');
-        const loadingIconEl = document.createElement('i');
-        loadingIconEl.classList.add('fa', 'fa-circle-o-notch', 'fa-spin', 'fa-3x');
-        loadingEl.appendChild(loadingIconEl);
-        this._updateLeftPanelContent({
-            content: loadingEl,
-            tab: tab || this.tabs.OPTIONS,
-        });
-    },
-    /**
      * Adds an entry for every invisible snippet in the left panel box.
      * The entries will contains an 'Edit' button to activate their snippet.
      *
@@ -1302,7 +1290,7 @@ var SnippetsMenu = Widget.extend({
      * @returns {Promise}
      */
     _updateInvisibleDOM: function () {
-        return this._mutex.exec(() => {
+        return this._execWithLoadingEffect(() => {
             this.invisibleDOMMap = new Map();
             const $invisibleDOMPanelEl = $(this.invisibleDOMPanelEl);
             $invisibleDOMPanelEl.find('.o_we_invisible_entry').remove();
@@ -1320,7 +1308,7 @@ var SnippetsMenu = Widget.extend({
                 this.invisibleDOMMap.set($invisEntry[0], el);
             });
             return Promise.all(proms);
-        });
+        }, false);
     },
     /**
      * Disable the overlay editor of the active snippet and activate the new one
@@ -1345,7 +1333,10 @@ var SnippetsMenu = Widget.extend({
         if ($snippet && !$snippet.is(':visible')) {
             return;
         }
-        return this._mutex.exec(() => {
+        const exec = previewMode
+            ? action => this._mutex.exec(action)
+            : action => this._execWithLoadingEffect(action, false);
+        return exec(() => {
             return new Promise(resolve => {
                 // Take the first parent of the provided DOM (or itself) which
                 // should have an associated snippet editor and create + enable it.
@@ -1398,11 +1389,11 @@ var SnippetsMenu = Widget.extend({
      * @param {boolean} invalidateCache
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
-        return this._mutex.exec(async () => {
+        return this._execWithLoadingEffect(async () => {
             await this._destroyEditors();
             const html = await this.loadSnippets(invalidateCache);
             await this._computeSnippetTemplates(html);
-        });
+        }, false);
     },
     /**
      * @private
@@ -1863,6 +1854,12 @@ var SnippetsMenu = Widget.extend({
                     }
 
                     $toInsert = $baseBody.clone();
+                    // Color-customize dynamic SVGs in dropped snippets with current theme colors.
+                    [...$toInsert.find('img[src^="/web_editor/shape/"]')].forEach(dynamicSvg => {
+                        const colorCustomizedURL = new URL(dynamicSvg.getAttribute('src'), window.location.origin);
+                        colorCustomizedURL.searchParams.set('c1', getCSSVariableValue('o-color-1'));
+                        dynamicSvg.src = colorCustomizedURL.pathname + colorCustomizedURL.search;
+                    });
 
                     if (!$selectorSiblings.length && !$selectorChildren.length) {
                         console.warn($snippet.find('.oe_snippet_thumbnail_title').text() + " have not insert action: data-drop-near or data-drop-in");
@@ -2019,6 +2016,69 @@ var SnippetsMenu = Widget.extend({
               resolve,
           );
         });
+    },
+    /**
+     * @private
+     * @returns {HTMLElement}
+     */
+    _createLoadingElement() {
+        const loaderContainer = document.createElement('div');
+        const loader = document.createElement('i');
+        const loaderContainerClassList = [
+            'o_we_ui_loading',
+            'd-flex',
+            'justify-content-center',
+            'align-items-center',
+        ];
+        const loaderClassList = [
+            'fa',
+            'fa-circle-o-notch',
+            'fa-spin',
+            'fa-4x',
+        ];
+        loaderContainer.classList.add(...loaderContainerClassList);
+        loader.classList.add(...loaderClassList);
+        loaderContainer.appendChild(loader);
+        return loaderContainer;
+    },
+    /**
+     * Adds the action to the mutex queue and sets a loading effect over the
+     * editor to appear if the action takes too much time.
+     * As soon as the mutex is unlocked, the loading effect will be removed.
+     *
+     * @private
+     * @param {function} action
+     * @param {boolean} [contentLoading=true]
+     * @param {number} [delay=500]
+     * @returns {Promise}
+     */
+    async _execWithLoadingEffect(action, contentLoading = true, delay = 500) {
+        const mutexExecResult = this._mutex.exec(action);
+        if (!this.loadingTimers[contentLoading]) {
+            this.loadingTimers[contentLoading] = setTimeout(() => {
+                this.loadingElements[contentLoading] = this._createLoadingElement();
+                if (contentLoading) {
+                    this.$snippetEditorArea.append(this.loadingElements[contentLoading]);
+                } else {
+                    this.el.appendChild(this.loadingElements[contentLoading]);
+                }
+            }, delay);
+            this._mutex.getUnlockedDef().then(() => {
+                // Note: we remove the loading element at the end of the
+                // execution queue *even if subsequent actions are content
+                // related or not*. This is a limitation of the loading feature,
+                // the goal is still to limit the number of elements in that
+                // queue anyway.
+                clearTimeout(this.loadingTimers[contentLoading]);
+                this.loadingTimers[contentLoading] = undefined;
+
+                if (this.loadingElements[contentLoading]) {
+                    this.loadingElements[contentLoading].remove();
+                    this.loadingElements[contentLoading] = null;
+                }
+            });
+        }
+        return mutexExecResult;
     },
 
     //--------------------------------------------------------------------------
@@ -2177,10 +2237,10 @@ var SnippetsMenu = Widget.extend({
     _onInvisibleEntryClick: async function (ev) {
         ev.preventDefault();
         const $snippet = $(this.invisibleDOMMap.get(ev.currentTarget));
-        const isVisible = await this._mutex.exec(async () => {
+        const isVisible = await this._execWithLoadingEffect(async () => {
             const editor = await this._createSnippetEditor($snippet);
             return editor.toggleTargetVisibility();
-        });
+        }, true);
         $(ev.currentTarget).find('.fa')
             .toggleClass('fa-eye', isVisible)
             .toggleClass('fa-eye-slash', !isVisible);
@@ -2301,7 +2361,7 @@ var SnippetsMenu = Widget.extend({
         }
         delete data._toMutex;
         ev.stopPropagation();
-        this._mutex.exec(() => {
+        this._execWithLoadingEffect(() => {
             if (data.reloadEditor) {
                 data.reload = false;
                 const oldOnSuccess = data.onSuccess;
@@ -2313,7 +2373,7 @@ var SnippetsMenu = Widget.extend({
                 };
             }
             this.trigger_up('request_save', data);
-        });
+        }, true);
     },
     /**
      * @private
@@ -2322,7 +2382,7 @@ var SnippetsMenu = Widget.extend({
      * @param {function} ev.data.exec
      */
     _onSnippetEditionRequest: function (ev) {
-        this._mutex.exec(ev.data.exec);
+        this._execWithLoadingEffect(ev.data.exec, true);
     },
     /**
      * @private
