@@ -234,12 +234,12 @@ const UserValueWidget = Widget.extend({
             const buildImgExtensionSwitcher = (from, to) => {
                 const regex = new RegExp(`${from}$`, 'i');
                 return ev => {
-                    const img = ev.currentTarget;
+                    const img = ev.currentTarget.getElementsByTagName("img")[0];
                     img.src = img.src.replace(regex, to);
                 };
             };
-            this.$el.on('mouseenter.img_animate', 'img', buildImgExtensionSwitcher('png', 'gif'));
-            this.$el.on('mouseleave.img_animate', 'img', buildImgExtensionSwitcher('gif', 'png'));
+            this.$el.on('mouseenter.img_animate', buildImgExtensionSwitcher('png', 'gif'));
+            this.$el.on('mouseleave.img_animate', buildImgExtensionSwitcher('gif', 'png'));
         }
     },
     /**
@@ -1816,6 +1816,7 @@ const SnippetOptionWidget = Widget.extend({
         this.ownerDocument = this.$target[0].ownerDocument;
 
         this._userValueWidgets = [];
+        this._actionQueues = new Map();
     },
     /**
      * @override
@@ -2684,9 +2685,34 @@ const SnippetOptionWidget = Widget.extend({
             }
         }
 
+        // Queue action so that we can later skip useless actions.
+        if (!this._actionQueues.get(widget)) {
+            this._actionQueues.set(widget, []);
+        }
+        const currentAction = {previewMode};
+        this._actionQueues.get(widget).push(currentAction);
+
         // Ask a mutexed snippet update according to the widget value change
         const shouldRecordUndo = (!previewMode && !ev.data.isSimulatedEvent);
         this.trigger_up('snippet_edition_request', {exec: async () => {
+            // Filter actions that are counterbalanced by earlier/later actions
+            const actionQueue = this._actionQueues.get(widget).filter(({previewMode}, i, actions) => {
+                const prev = actions[i - 1];
+                const next = actions[i + 1];
+                if (previewMode === true && next && next.previewMode) {
+                    return false;
+                } else if (previewMode === 'reset' && prev && prev.previewMode) {
+                    return false;
+                }
+                return true;
+            });
+            // Skip action if it's been counterbalanced
+            if (!actionQueue.includes(currentAction)) {
+                this._actionQueues.set(widget, actionQueue);
+                return;
+            }
+            this._actionQueues.set(widget, actionQueue.filter(action => action !== currentAction));
+
             if (ev.data.prepare) {
                 ev.data.prepare();
             }
@@ -3703,7 +3729,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         this._handlePreviewState(previewMode, () => {
             const {colorName} = params;
             const {colors: previousColors} = this._getShapeData();
-            const newColor = widgetValue || this._getDefaultColors()[colorName];
+            const newColor = normalizeColor(widgetValue) || this._getDefaultColors()[colorName];
             const newColors = Object.assign(previousColors, {[colorName]: newColor});
             return {colors: newColors};
         });
@@ -3741,7 +3767,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
                 const {shape, colors: customColors} = this._getShapeData();
                 const colors = Object.assign(this._getDefaultColors(), customColors);
                 const color = shape && colors[params.colorName];
-                return color ? normalizeColor(color) : '';
+                return color || '';
             }
             case 'flipX': {
                 return this.$target.find('> .o_we_shape.o_we_flip_x').length !== 0;
@@ -3869,7 +3895,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const defaultColors = this._getDefaultColors();
         const shapeData = Object.assign(this._getShapeData(), newData);
         const areColorsDefault = Object.entries(shapeData.colors).every(([colorName, colorValue]) => {
-            return colorValue === defaultColors[colorName];
+            return colorValue.toLowerCase() === defaultColors[colorName].toLowerCase();
         });
         if (areColorsDefault) {
             delete shapeData.colors;
@@ -3902,7 +3928,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         const queryString = Object.entries(colors)
             .map(([colorName, colorValue]) => {
-                const encodedCol = encodeURIComponent(normalizeColor(colorValue));
+                const encodedCol = encodeURIComponent(colorValue);
                 return `${colorName}=${encodedCol}`;
             }).join('&');
         return `/web_editor/shape/${shape}.svg?${queryString}`;
@@ -4126,7 +4152,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @param {boolean} activate toggle the overlay on (true) or off (false)
      */
     _toggleBgOverlay: function (activate) {
-        if (this.$backgroundOverlay.is('.oe_active') === activate) {
+        if (!this.$backgroundOverlay || this.$backgroundOverlay.is('.oe_active') === activate) {
             return;
         }
 
