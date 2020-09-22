@@ -100,7 +100,7 @@ var SnippetEditor = Widget.extend({
                     },
                 },
             });
-            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $('html'), smoothScrollOptions);
+            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $().getScrollingElement(), smoothScrollOptions);
         } else {
             this.$('.o_overlay_move_options').addClass('d-none');
             $customize.find('.oe_snippet_clone').addClass('d-none');
@@ -888,6 +888,7 @@ var SnippetsMenu = Widget.extend({
 
         this._notActivableElementsSelector = [
             '#web_editor-top-edit',
+            '.o_we_website_top_actions',
             '#oe_snippets',
             '#oe_manipulators',
             '.o_technical_modal',
@@ -925,6 +926,9 @@ var SnippetsMenu = Widget.extend({
 
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
+
+        this.textEditorPanelEl = document.createElement('div');
+        this.textEditorPanelEl.classList.add('o_we_snippet_text_tools');
 
         this.invisibleDOMPanelEl = document.createElement('div');
         this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
@@ -997,8 +1001,8 @@ var SnippetsMenu = Widget.extend({
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
-        // TODO: current limitation, suppose that this is the body which scrolls
-        this.$document.on('scroll.snippets_menu', _.throttle(() => {
+        this.$scrollingElement = $().getScrollingElement();
+        this.$scrollingElement.on('scroll.snippets_menu', _.throttle(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
             }
@@ -1054,6 +1058,7 @@ var SnippetsMenu = Widget.extend({
             this.$snippetEditorArea.remove();
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
+            this.$scrollingElement.off('.snippets_menu');
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         delete this.cacheSnippetTemplate[this.options.snippets];
@@ -1650,6 +1655,7 @@ var SnippetsMenu = Widget.extend({
         // Add the computed template and make elements draggable
         this.$el.html($html);
         this.$el.append(this.customizePanel);
+        this.$el.append(this.textEditorPanelEl);
         this.$el.append(this.invisibleDOMPanelEl);
         this._makeSnippetDraggable(this.$snippets);
         this._disableUndroppableSnippets();
@@ -1778,13 +1784,6 @@ var SnippetsMenu = Widget.extend({
      */
     _getScrollOptions(options = {}) {
         return Object.assign({}, options, {
-            offsetElements: Object.assign({
-                $top: $('#web_editor-top-edit'), // TODO should ideally be retrieved another way
-                $left: this.$el,
-            }, options.offsetElements),
-            scrollBoundaries: Object.assign({
-                left: false,
-            }, options.scrollBoundaries),
             jQueryDraggableOptions: Object.assign({
                 appendTo: this.$body,
                 cursor: 'move',
@@ -1824,10 +1823,12 @@ var SnippetsMenu = Widget.extend({
         var $toInsert, dropped, $snippet;
         let scrollValue;
 
+        let dragAndDropResolve;
+
         const smoothScrollOptions = this._getScrollOptions({
             jQueryDraggableOptions: {
                 distance: 0,
-                handle: '.oe_snippet_thumbnail',
+                handle: '.oe_snippet_thumbnail:not(.o_we_already_dragging)',
                 helper: function () {
                     const dragSnip = this.cloneNode(true);
                     dragSnip.querySelectorAll('.o_delete_btn').forEach(
@@ -1836,6 +1837,8 @@ var SnippetsMenu = Widget.extend({
                     return dragSnip;
                 },
                 start: function () {
+                    self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
+
                     dropped = false;
                     $snippet = $(this);
                     var $baseBody = $snippet.find('.oe_snippet_body');
@@ -1888,11 +1891,14 @@ var SnippetsMenu = Widget.extend({
                             }
                         },
                     });
+
+                    const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
+                    self._mutex.exec(() => prom);
                 },
                 stop: async function (ev, ui) {
                     $toInsert.removeClass('oe_snippet_body');
 
-                    if (!dropped && ui.position.top > 3 && ui.position.left > self.el.getBoundingClientRect().right) {
+                    if (!dropped && ui.position.top > 3 && ui.position.left + ui.helper.outerHeight() < self.el.getBoundingClientRect().left) {
                         var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
                         if ($el.length) {
                             scrollValue = $el.offset().top;
@@ -1925,24 +1931,29 @@ var SnippetsMenu = Widget.extend({
                         var $target = $toInsert;
                         await self._scrollToSnippet($target, scrollValue);
 
-                        _.defer(function () {
+                        _.defer(async function () {
                             self.trigger_up('snippet_dropped', {$target: $target});
                             self._disableUndroppableSnippets();
 
-                            self._callForEachChildSnippet($target, function (editor, $snippet) {
+                            dragAndDropResolve();
+
+                            await self._callForEachChildSnippet($target, function (editor, $snippet) {
                                 return editor.buildSnippet();
-                            }).then(function () {
-                                $target.trigger('content_changed');
-                                return self._updateInvisibleDOM();
                             });
+                            $target.trigger('content_changed');
+                            await self._updateInvisibleDOM();
+
+                            self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                         });
                     } else {
                         $toInsert.remove();
+                        dragAndDropResolve();
+                        self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                     }
                 },
             },
         });
-        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, $('html'), smoothScrollOptions);
+        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, $().getScrollingElement(), smoothScrollOptions);
     },
     /**
      * Adds the 'o_default_snippet_text' class on nodes which contain only
@@ -1993,29 +2004,14 @@ var SnippetsMenu = Widget.extend({
                                              .prop('disabled', tab !== this.tabs.OPTIONS);
     },
     /**
-     * Scroll to the dropped snippet.
+     * Scrolls to given snippet.
      *
      * @private
-     * @param {jQuery} [$el] - dropped snippet
-     * @param {integer} [scrollValue] - scrollValue
+     * @param {jQuery} $el - snippet to scroll to
+     * @return {Promise}
      */
-    _scrollToSnippet: function ($el, scrollValue) {
-        // return if it's an inner snippet or if it's dropped in a modal
-        if ($el.get(0).tagName.toLowerCase() !== 'section' || $el.parent().find("[class^='modal-']").length) {
-            return Promise.resolve();
-        }
-        let headerHeight = 0;
-        _.each($('.o_top_fixed_element'), el => headerHeight += $(el).outerHeight());
-        return new Promise(resolve => {
-          $('html, body').animate(
-              {
-                  scrollTop: scrollValue - headerHeight - 50,
-              },
-              700,
-              'swing',
-              resolve,
-          );
-        });
+    async _scrollToSnippet($el) {
+        return dom.scrollTo($el[0], {extraOffset: 50});
     },
     /**
      * @private
