@@ -217,7 +217,7 @@ class AccountMove(models.Model):
         compute='_compute_amount', currency_field='company_currency_id')
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
-        help='Edit Tax amounts if you encounter rouding issues.')
+        help='Edit Tax amounts if you encounter rounding issues.')
     payment_state = fields.Selection(selection=[
         ('not_paid', 'Not Paid'),
         ('in_payment', 'In Payment'),
@@ -4666,7 +4666,7 @@ class AccountMoveLine(models.Model):
         [action] = self.env.ref('account.account_automatic_entry_wizard_action').read()
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
-        ctx['active_id'] = self.id
+        ctx.pop('active_id', None)
         ctx['active_ids'] = self.ids
         ctx['active_model'] = 'account.move.line'
         action['context'] = ctx
