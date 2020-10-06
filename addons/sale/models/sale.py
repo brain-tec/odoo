@@ -12,7 +12,6 @@ from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
 
-
 from werkzeug.urls import url_encode
 
 
@@ -109,7 +108,11 @@ class SaleOrder(models.Model):
 
     @api.model
     def _default_note(self):
-        return self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms') and self.env.company.invoice_terms or ''
+        use_invoice_terms = self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms')
+        if use_invoice_terms and self.env.company.terms_type == "html":
+            baseurl = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            return _('Terms & Conditions: %s/terms', baseurl)
+        return use_invoice_terms and self.env.company.invoice_terms or ''
 
     @api.model
     def _get_default_team(self):
@@ -207,6 +210,7 @@ class SaleOrder(models.Model):
         ], string='Invoice Status', compute='_get_invoice_status', store=True, readonly=True)
 
     note = fields.Text('Terms and conditions', default=_default_note)
+    terms_type = fields.Selection(related='company_id.terms_type')
 
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=5)
     amount_by_group = fields.Binary(string="Tax amount by group", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
@@ -305,6 +309,10 @@ class SaleOrder(models.Model):
             else:
                 order.expected_date = False
 
+    @api.onchange('expected_date')
+    def _onchange_commitment_date(self):
+        self.commitment_date = self.expected_date
+
     @api.depends('transaction_ids')
     def _compute_authorized_transaction_ids(self):
         for trans in self:
@@ -377,8 +385,11 @@ class SaleOrder(models.Model):
         if user_id and self.user_id.id != user_id:
             values['user_id'] = user_id
 
-        if self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms') and self.env.company.invoice_terms:
-            values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
+        if self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms'):
+            if self.terms_type == 'html' and self.env.company.invoice_terms_html:
+                values['note'] = _('Terms & Conditions: %s/terms', self.get_base_url())
+            elif self.env.company.invoice_terms:
+                values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
         if not self.env.context.get('not_self_saleperson') or not self.team_id:
             values['team_id'] = self.env['crm.team']._get_default_team_id(domain=['|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],user_id=user_id)
         self.update(values)
@@ -844,7 +855,13 @@ Reason(s) of this behavior could be:
         for order in self.filtered(lambda order: order.partner_id not in order.message_partner_ids):
             order.message_subscribe([order.partner_id.id])
         self.write(self._prepare_confirmation_values())
-        self._action_confirm()
+
+        # Context key 'default_name' is sometimes propagated up to here.
+        # We don't need it and it creates issues in the creation of linked records.
+        context = self._context.copy()
+        context.pop('default_name', None)
+
+        self.with_context(context)._action_confirm()
         if self.env.user.has_group('sale.group_auto_done_setting'):
             self.action_done()
         return True
