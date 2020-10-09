@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:49+0000\n"
+"POT-Creation-Date: 2016-08-18 14:06+0000\n"
 "PO-Revision-Date: 2016-07-08 16:00+0000\n"
 "Last-Translator: Aleksandar Vangelovski <aleksandarv@hbee.eu>\n"
 "Language-Team: Macedonian (http://www.transifex.com/odoo/odoo-9/language/"
@@ -38,7 +38,7 @@ msgid "128 bit CryptoAPI failed"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "<i>Mercury Configurations</i> define what Mercury account will be used when\n"
 "                                processing credit card transactions in the "
@@ -73,8 +73,8 @@ msgid "All Connections Failed"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_return
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_transaction
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_return
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_transaction
 msgid "Allow"
 msgstr ""
 
@@ -107,8 +107,8 @@ msgid "Card Owner Name"
 msgstr "Име на сопственикот на картичката"
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_tree
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_tree
 msgid "Card Reader"
 msgstr "Читач на картички"
 
@@ -120,7 +120,7 @@ msgid "Clear Text Request Not Supported"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.actions.act_window,help:pos_mercury.action_configuration_form
+#: model_terms:ir.actions.act_window,help:pos_mercury.action_configuration_form
 msgid "Click to configure your card reader."
 msgstr "Кликнете за да го конфигурирате вашиот читач на картички."
 
@@ -153,13 +153,6 @@ msgid "Could Not Encrypt Response- Call Provider"
 msgstr ""
 
 #. module: pos_mercury
-#. openerp-web
-#: code:addons/pos_mercury/static/src/js/pos_mercury.js:357
-#, python-format
-msgid "Could not read card"
-msgstr ""
-
-#. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_configuration_create_uid
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_mercury_transaction_create_uid
 msgid "Created by"
@@ -172,7 +165,7 @@ msgid "Created on"
 msgstr "Креирано на"
 
 #. module: pos_mercury
-#: code:addons/pos_mercury/models/pos_mercury.py:15
+#: code:addons/pos_mercury/models/pos_mercury.py:17
 #, python-format
 msgid "Credit Card"
 msgstr ""
@@ -213,13 +206,6 @@ msgstr ""
 
 #. module: pos_mercury
 #. openerp-web
-#: code:addons/pos_mercury/static/src/js/pos_mercury.js:638
-#, python-format
-msgid "Error"
-msgstr ""
-
-#. module: pos_mercury
-#. openerp-web
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:198
 #, python-format
 msgid "Error Occurred While Decrypting Request"
@@ -233,7 +219,7 @@ msgid "Failed to start Event Thread."
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "For quickly handling orders: just swiping a credit card when on the payment "
 "screen\n"
@@ -296,7 +282,7 @@ msgid "ID of the merchant to authenticate him on the payment provider server"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "If you don't already have a Mercury account, contact Mercury at +1 (800) "
 "846-4472\n"
@@ -564,7 +550,7 @@ msgid "Last Updated on"
 msgstr "Последно ажурирање на"
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_transaction
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_transaction
 msgid "MagneSafe"
 msgstr ""
 
@@ -622,18 +608,6 @@ msgid "Name of this Mercury configuration"
 msgstr ""
 
 #. module: pos_mercury
-#: code:addons/pos_mercury/models/pos_mercury_transaction.py:35
-#, python-format
-msgid "No Mercury configuration associated with the journal."
-msgstr ""
-
-#. module: pos_mercury
-#: code:addons/pos_mercury/models/pos_mercury_transaction.py:23
-#, python-format
-msgid "No opened point of sale session for user %s found"
-msgstr ""
-
-#. module: pos_mercury
 #. openerp-web
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:334
 #, python-format
@@ -663,7 +637,7 @@ msgid "One credit card swipe already pending."
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_common
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_common
 msgid "OneTime"
 msgstr ""
 
@@ -738,7 +712,7 @@ msgid "Queue Full"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_transaction
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_transaction
 msgid "RecordNumberRequested"
 msgstr ""
 
@@ -806,7 +780,7 @@ msgid "Socket already open or in use"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.mercury_transaction
+#: model_terms:ir.ui.view,arch_db:pos_mercury.mercury_transaction
 msgid "Swiped"
 msgstr ""
 
@@ -929,7 +903,7 @@ msgid "Unrecognized Request Format"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "Using the Mercury integration in the Point Of Sale is easy: just press the\n"
 "                                associated payment method. After that the "
@@ -954,7 +928,7 @@ msgid "WAITING FOR SWIPE"
 msgstr ""
 
 #. module: pos_mercury
-#: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
+#: model_terms:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "We currently support the MagTek Dynamag card reader device. It can be "
 "connected\n"
@@ -986,11 +960,6 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.model,name:pos_mercury.model_barcode_rule
 msgid "barcode.rule"
-msgstr ""
-
-#. module: pos_mercury
-#: model:ir.model,name:pos_mercury.model_ir_autovacuum
-msgid "ir.autovacuum"
 msgstr ""
 
 #. module: pos_mercury

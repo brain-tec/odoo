@@ -1,147 +1,256 @@
 odoo.define('mrp.mrp_state', function (require) {
 "use strict";
 
+var AbstractField = require('web.AbstractField');
 var core = require('web.core');
-var common = require('web.form_common');
-var Model = require('web.Model');
+var fields = require('web.basic_fields');
+var field_registry = require('web.field_registry');
 var time = require('web.time');
-var utils = require('web.utils');
-var FieldBinaryFile = core.form_widget_registry.get('binary');
 
 var _t = core._t;
 
-
-var SetBulletStatus = common.AbstractField.extend(common.ReinitializeFieldMixin,{
-    init: function(field_manager, node) {
-        this._super(field_manager, node);
-        this.classes = this.options && this.options.classes || {};
-    },
-    render_value: function() {
+/**
+ * This widget is used to display the availability on a workorder.
+ */
+var SetBulletStatus = AbstractField.extend({
+    // as this widget is based on hardcoded values, use it in another context
+    // probably won't work
+    // supportedFieldTypes: ['selection'],
+    /**
+     * @override
+     */
+    init: function () {
         this._super.apply(this, arguments);
-        if (this.get("effective_readonly")) {
-            var bullet_class = this.classes[this.get('value')] || 'default';
-            if (this.get('value')){
-                var title = this.get('value') == 'waiting'? _t('Waiting Materials') : _t('Ready to produce');
-                this.$el.attr({'title': title, 'style': 'display:inline'});
-                this.$el.removeClass('text-success text-danger text-default');
-                this.$el.html($('<span>' + title + '</span>').addClass('label label-' + bullet_class));
-            }
-        }
+        this.classes = this.nodeOptions && this.nodeOptions.classes || {};
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @override
+     */
+    _renderReadonly: function () {
+        this._super.apply(this, arguments);
+        var bullet_class = this.classes[this.value] || 'default';
+        if (this.value) {
+            var title = this.value === 'waiting' ? _t('Waiting Materials') : '';
+            this.$el.attr({'title': title, 'style': 'display:inline'});
+            this.$el.removeClass('text-success text-danger text-default');
+            this.$el.html($('<span>' + title + '</span>').addClass('badge badge-' + bullet_class));
+        }
+    }
 });
 
-var TimeCounter = common.AbstractField.extend(common.ReinitializeFieldMixin, {
-    start: function() {
-        this._super();
+var TimeCounter = AbstractField.extend({
+    supportedFieldTypes: [],
+    /**
+     * @override
+     */
+    willStart: function () {
         var self = this;
-        this.field_manager.on("view_content_has_changed", this, function () {
-            self.render_value();
+        var def = this._rpc({
+            model: 'mrp.workcenter.productivity',
+            method: 'search_read',
+            domain: [
+                ['workorder_id', '=', this.record.data.id],
+            ],
+        }).then(function (result) {
+            if (self.mode === 'readonly') {
+                var currentDate = new Date();
+                self.duration = 0;
+                _.each(result, function (data) {
+                    self.duration += data.date_end ?
+                        self._getDateDifference(data.date_start, data.date_end) :
+                        self._getDateDifference(time.auto_str_to_date(data.date_start), currentDate);
+                });
+            }
         });
+        return Promise.all([this._super.apply(this, arguments), def]);
     },
-    start_time_counter: function(){
+
+    destroy: function () {
+        this._super.apply(this, arguments);
+        clearTimeout(this.timer);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    isSet: function () {
+        return true;
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Compute the difference between two dates.
+     *
+     * @private
+     * @param {string} dateStart
+     * @param {string} dateEnd
+     * @returns {integer} the difference in millisecond
+     */
+    _getDateDifference: function (dateStart, dateEnd) {
+        return moment(dateEnd).diff(moment(dateStart));
+    },
+    /**
+     * @override
+     */
+    _render: function () {
+        this._startTimeCounter();
+    },
+    /**
+     * @private
+     */
+    _startTimeCounter: function () {
         var self = this;
         clearTimeout(this.timer);
-        if (this.field_manager.datarecord.is_user_working) {
-            this.duration += 1000;
-            this.timer = setTimeout(function() {
-                self.start_time_counter();
+        if (this.record.data.is_user_working) {
+            this.timer = setTimeout(function () {
+                self.duration += 1000;
+                self._startTimeCounter();
             }, 1000);
         } else {
             clearTimeout(this.timer);
         }
         this.$el.html($('<span>' + moment.utc(this.duration).format("HH:mm:ss") + '</span>'));
     },
-    render_value: function() {
-        this._super.apply(this, arguments);
-        var self = this;
-        this.duration;
-        var productivity_domain = [['workorder_id', '=', this.field_manager.datarecord.id], ['user_id', '=', self.session.uid]];
-        new Model('mrp.workcenter.productivity').call('search_read', [productivity_domain, []]).then(function(result) {
-            if (self.get("effective_readonly")) {
-                self.$el.removeClass('o_form_field_empty');
-                var current_date = new Date();
-                self.duration = 0;
-                _.each(result, function(data) {
-                    self.duration += data.date_end ? self.get_date_difference(data.date_start, data.date_end) : self.get_date_difference(time.auto_str_to_date(data.date_start), current_date);
-                });
-                self.start_time_counter();
-            }
-        });
-    },
-    get_date_difference: function(date_start, date_end) {
-        var difference = moment(date_end).diff(moment(date_start));
-        return moment.duration(difference);
-    },
 });
 
-var FieldPdfViewer = FieldBinaryFile.extend({
-    template: 'FieldPdfViewer',
-    init: function(){
-        this._super.apply(this, arguments);
-        this.PDFViewerApplication = false;
-    },
-    get_uri: function(){
-        var query_obj = {
-            model: this.view.dataset.model,
-            field: this.name,
-            id: this.view.datarecord.id
-        };
-        var query_string = $.param(query_obj);
-        var url = encodeURIComponent('/web/image?' + query_string);
-        var viewer_url = '/web/static/lib/pdfjs/web/viewer.html?file=';
-        return viewer_url + url;
-    },
-    on_file_change: function(ev) {
-        this._super.apply(this, arguments);
-        if(this.PDFViewerApplication){
-            var files = ev.target.files;
-            if (!files || files.length === 0) {
-              return;
-            }
-            var file = files[0];
-            // TOCheck: is there requirement to fallback on FileReader if browser don't support URL
-            this.PDFViewerApplication.open(URL.createObjectURL(file), 0);
-        }
-    },
-    render_value: function() {
-        var $pdf_viewer = this.$('.o_form_pdf_controls').children().add(this.$('.o_pdfview_iframe')),
-            $select_upload_el = this.$('.o_select_file_button').first(),
-            $iFrame = this.$('.o_pdfview_iframe'),
-            value = this.get('value'),
-            self = this;
+var FieldEmbedURLViewer = fields.FieldChar.extend({
 
-        var bin_size = utils.is_bin_size(value);
-        $iFrame.on('load', function(){
-            self.PDFViewerApplication = this.contentWindow.window.PDFViewerApplication;
-            self.disable_buttons(this);
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.page = 1;
+        this.srcDirty = false;
+    },
+
+    /**
+     * force to set 'src' for embed iframe viewer when its value has changed
+     *
+     * @override
+     *
+     */
+    reset: function () {
+        this._super.apply(this, arguments);
+        this._updateIframePreview();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Initializes and returns an iframe for the viewer
+     *
+     * @private
+     * @returns {jQueryElement}
+     */
+    _prepareIframe: function () {
+        return $('<iframe>', {
+            class: 'o_embed_iframe d-none',
+            allowfullscreen: true,
         });
-        if (this.get("effective_readonly")) {
-            if (value) {
-                this.$el.off('click'); // off click event(on_save_as) of FieldBinaryFile
-                $iFrame.attr('src', this.get_uri());
-            }
+    },
+
+    /**
+     * @override
+     * @private
+     */
+    _renderEdit: function () {
+        if (!this.$('iframe.o_embed_iframe').length) {
+            this.$input = this.$el;
+            this.setElement(this.$el.wrap('<div class="o_embed_url_viewer o_field_widget"/>').parent());
+            this.$el.append(this._prepareIframe());
+        }
+        this._prepareInput(this.$input);
+
+        // Do not set iframe src if widget is invisible
+        if (!this.record.evalModifiers(this.attrs.modifiers).invisible) {
+            this._updateIframePreview();
         } else {
-            if (value) {
-                $pdf_viewer.removeClass('o_hidden');
-                $select_upload_el.addClass('o_hidden');
-                if(bin_size){
-                    $iFrame.attr('src', this.get_uri());
-                }
-            } else {
-                $pdf_viewer.addClass('o_hidden');
-                $select_upload_el.removeClass('o_hidden');
-            }
+            this.srcDirty = true;
         }
     },
-    disable_buttons: function(iframe){
-        if (this.get("effective_readonly")){
-            $(iframe).contents().find('button#download').hide();
+    /**
+     * @override
+     * @private
+     */
+    _renderReadonly: function () {
+        if (!this.$('iframe.o_embed_iframe').length) {
+            this.$el.addClass('o_embed_url_viewer');
+            this.$el.append(this._prepareIframe());
         }
-        $(iframe).contents().find('button#openFile').hide();
-    }
-
+        this._updateIframePreview();
+    },
+    /**
+     * Set the associated src for embed iframe viewer
+     *
+     * @private
+     * @returns {string} source of the google slide
+     */
+    _getEmbedSrc: function () {
+        var src = false;
+        if (this.value) {
+            // check given google slide url is valid or not
+            var googleRegExp = /(^https:\/\/docs.google.com).*(\/d\/e\/|\/d\/)([A-Za-z0-9-_]+)/;
+            var google = this.value.match(googleRegExp);
+            if (google && google[3]) {
+                src = 'https://docs.google.com/presentation' + google[2] + google[3] + '/preview?slide=' + this.page;
+            }
+        }
+        return src || this.value;
+    },
+    /**
+     * update iframe attrs
+     *
+     * @private
+     */
+    _updateIframePreview: function () {
+        var $iframe = this.$('iframe.o_embed_iframe');
+        var src = this._getEmbedSrc();
+        $iframe.toggleClass('d-none', !src);
+        if (src) {
+            $iframe.attr('src', src);
+        } else {
+            $iframe.removeAttr('src');
+        }
+    },
+    /**
+     * Listen to modifiers updates to and only render iframe when it is necessary
+     *
+     * @override
+     */
+    updateModifiersValue: function () {
+        this._super.apply(this, arguments);
+        if (!this.attrs.modifiersValue.invisible && this.srcDirty) {
+            this._updateIframePreview();
+            this.srcDirty = false;
+        }
+    },
 });
-core.form_widget_registry.add('bullet_state', SetBulletStatus)
-                         .add('mrp_time_counter', TimeCounter)
-                         .add('pdf_viewer', FieldPdfViewer);
+
+
+field_registry
+    .add('bullet_state', SetBulletStatus)
+    .add('mrp_time_counter', TimeCounter)
+    .add('embed_viewer', FieldEmbedURLViewer);
+
+return FieldEmbedURLViewer;
 });

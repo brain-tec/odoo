@@ -6,9 +6,12 @@ import werkzeug
 from odoo import http, _
 from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.controllers.main import ensure_db, Home
+from odoo.addons.base_setup.controllers.main import BaseSetup
+from odoo.exceptions import UserError
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
+
 
 class AuthSignupHome(Home):
 
@@ -22,7 +25,7 @@ class AuthSignupHome(Home):
             return http.redirect_with_hash(request.params.get('redirect'))
         return response
 
-    @http.route('/web/signup', type='http', auth='public', website=True)
+    @http.route('/web/signup', type='http', auth='public', website=True, sitemap=False)
     def web_auth_signup(self, *args, **kw):
         qcontext = self.get_auth_signup_qcontext()
 
@@ -32,19 +35,33 @@ class AuthSignupHome(Home):
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             try:
                 self.do_signup(qcontext)
+                # Send an account creation confirmation email
+                if qcontext.get('token'):
+                    User = request.env['res.users']
+                    user_sudo = User.sudo().search(
+                        User._get_login_domain(qcontext.get('login')), order=User._get_login_order(), limit=1
+                    )
+                    template = request.env.ref('auth_signup.mail_template_user_signup_account_created', raise_if_not_found=False)
+                    if user_sudo and template:
+                        template.sudo().with_context(
+                            lang=user_sudo.lang,
+                            auth_login=werkzeug.url_encode({'auth_login': user_sudo.email}),
+                        ).send_mail(user_sudo.id, force_send=True)
                 return self.web_login(*args, **kw)
-            except (SignupError, AssertionError), e:
+            except UserError as e:
+                qcontext['error'] = e.name or e.value
+            except (SignupError, AssertionError) as e:
                 if request.env["res.users"].sudo().search([("login", "=", qcontext.get("login"))]):
                     qcontext["error"] = _("Another user is already registered using this email address.")
                 else:
-                    _logger.error(e.message)
+                    _logger.error("%s", e)
                     qcontext['error'] = _("Could not create a new account.")
 
         response = request.render('auth_signup.signup', qcontext)
         response.headers['X-Frame-Options'] = 'DENY'
         return response
 
-    @http.route('/web/reset_password', type='http', auth='public', website=True)
+    @http.route('/web/reset_password', type='http', auth='public', website=True, sitemap=False)
     def web_auth_reset_password(self, *args, **kw):
         qcontext = self.get_auth_signup_qcontext()
 
@@ -58,17 +75,19 @@ class AuthSignupHome(Home):
                     return self.web_login(*args, **kw)
                 else:
                     login = qcontext.get('login')
-                    assert login, "No login provided."
+                    assert login, _("No login provided.")
                     _logger.info(
                         "Password reset attempt for <%s> by user <%s> from %s",
                         login, request.env.user.login, request.httprequest.remote_addr)
                     request.env['res.users'].sudo().reset_password(login)
                     qcontext['message'] = _("An email has been sent with credentials to reset your password")
+            except UserError as e:
+                qcontext['error'] = e.name or e.value
             except SignupError:
                 qcontext['error'] = _("Could not reset your password")
                 _logger.exception('error when resetting password')
-            except Exception, e:
-                qcontext['error'] = e.message or e.name
+            except Exception as e:
+                qcontext['error'] = str(e)
 
         response = request.render('auth_signup.reset_password', qcontext)
         response.headers['X-Frame-Options'] = 'DENY'
@@ -79,7 +98,7 @@ class AuthSignupHome(Home):
 
         get_param = request.env['ir.config_parameter'].sudo().get_param
         return {
-            'signup_enabled': get_param('auth_signup.allow_uninvited') == 'True',
+            'signup_enabled': request.env['res.users']._get_signup_invitation_scope() == 'b2c',
             'reset_password_enabled': get_param('auth_signup.reset_password') == 'True',
         }
 
@@ -87,6 +106,8 @@ class AuthSignupHome(Home):
         """ Shared helper returning the rendering context for signup and reset password """
         qcontext = request.params.copy()
         qcontext.update(self.get_auth_signup_config())
+        if not qcontext.get('token') and request.session.get('auth_signup_token'):
+            qcontext['token'] = request.session.get('auth_signup_token')
         if qcontext.get('token'):
             try:
                 # retrieve the user info (name, login or email) corresponding to a signup token
@@ -101,11 +122,14 @@ class AuthSignupHome(Home):
     def do_signup(self, qcontext):
         """ Shared helper that creates a res.partner out of a token """
         values = { key: qcontext.get(key) for key in ('login', 'name', 'password') }
-        assert values.values(), "The form was not properly filled in."
-        assert values.get('password') == qcontext.get('confirm_password'), "Passwords do not match; please retype them."
-        supported_langs = [lang['code'] for lang in request.env['res.lang'].sudo().search_read([], ['code'])]
-        if request.lang in supported_langs:
-            values['lang'] = request.lang
+        if not values:
+            raise UserError(_("The form was not properly filled in."))
+        if values.get('password') != qcontext.get('confirm_password'):
+            raise UserError(_("Passwords do not match; please retype them."))
+        supported_lang_codes = [code for code, _ in request.env['res.lang'].get_installed()]
+        lang = request.context.get('lang', '').split('_')[0]
+        if lang in supported_lang_codes:
+            values['lang'] = lang
         self._signup_with_values(qcontext.get('token'), values)
         request.env.cr.commit()
 
@@ -115,3 +139,10 @@ class AuthSignupHome(Home):
         uid = request.session.authenticate(db, login, password)
         if not uid:
             raise SignupError(_('Authentication Failed.'))
+
+class AuthBaseSetup(BaseSetup):
+    @http.route('/base_setup/data', type='json', auth='user')
+    def base_setup_data(self, **kwargs):
+        res = super().base_setup_data(**kwargs)
+        res.update({'resend_invitation': True})
+        return res

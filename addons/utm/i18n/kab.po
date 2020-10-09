@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:50+0000\n"
+"POT-Creation-Date: 2016-08-18 14:08+0000\n"
 "PO-Revision-Date: 2015-09-30 09:28+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Kabyle (http://www.transifex.com/odoo/odoo-9/language/kab/)\n"
@@ -30,8 +30,8 @@ msgstr "Urmid"
 #: model:ir.model.fields,field_description:utm.field_link_tracker_campaign_id
 #: model:ir.model.fields,field_description:utm.field_sale_order_campaign_id
 #: model:ir.model.fields,field_description:utm.field_utm_mixin_campaign_id
-#: model:ir.ui.view,arch_db:utm.utm_campaign_form
-#: model:ir.ui.view,arch_db:utm.utm_campaign_tree
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_form
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_tree
 msgid "Campaign"
 msgstr "Amzizzel"
 
@@ -47,8 +47,8 @@ msgid "Campaigns"
 msgstr "Imzizzlen"
 
 #. module: utm
-#: model:ir.ui.view,arch_db:utm.utm_medium_view_form
-#: model:ir.ui.view,arch_db:utm.utm_source_view_form
+#: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_form
+#: model_terms:ir.ui.view,arch_db:utm.utm_source_view_form
 msgid "Channel"
 msgstr "Abadu"
 
@@ -68,12 +68,12 @@ msgid "Christmas Special"
 msgstr ""
 
 #. module: utm
-#: model:ir.actions.act_window,help:utm.utm_medium_action
+#: model_terms:ir.actions.act_window,help:utm.utm_medium_action
 msgid "Click to define a new medium."
 msgstr ""
 
 #. module: utm
-#: model:ir.actions.act_window,help:utm.utm_source_action
+#: model_terms:ir.actions.act_window,help:utm.utm_source_action
 msgid "Click to define a new source."
 msgstr ""
 
@@ -97,11 +97,6 @@ msgstr "Yerna di"
 #: model:ir.model.fields,field_description:utm.field_utm_mixin_display_name
 #: model:ir.model.fields,field_description:utm.field_utm_source_display_name
 msgid "Display Name"
-msgstr ""
-
-#. module: utm
-#: model:utm.campaign,name:utm.utm_campaign_email_campaign_products
-msgid "Email Campaign - Products"
 msgstr ""
 
 #. module: utm
@@ -168,12 +163,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:utm.field_sale_order_medium_id
 #: model:ir.model.fields,field_description:utm.field_utm_mixin_medium_id
 #: model:ir.ui.menu,name:utm.menu_utm_medium
-#: model:ir.ui.view,arch_db:utm.utm_medium_view_tree
-#: model:ir.ui.view,arch_db:utm.utm_source_view_tree
+#: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
+#: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
 msgid "Medium"
 msgstr ""
 
 #. module: utm
+#: model:utm.campaign,name:utm.utm_campaign_email_campaign_products
 #: model:utm.source,name:utm.utm_source_newsletter
 msgid "Newsletter"
 msgstr "Izen n telɣut"
@@ -181,7 +177,7 @@ msgstr "Izen n telɣut"
 #. module: utm
 #: model:utm.campaign,name:utm.utm_campaign_fall_drive
 msgid "Sale"
-msgstr "Aznuzu"
+msgstr ""
 
 #. module: utm
 #: model:utm.source,name:utm.utm_source_search_engine
@@ -231,8 +227,11 @@ msgstr ""
 #: model:ir.model.fields,help:utm.field_link_tracker_medium_id
 #: model:ir.model.fields,help:utm.field_sale_order_medium_id
 #: model:ir.model.fields,help:utm.field_utm_mixin_medium_id
+#, fuzzy
 msgid "This is the method of delivery.Ex: Postcard, Email, or Banner Ad"
 msgstr ""
+"Ceci est le mode de transmission. Ex: carte postale, courriel, bannière "
+"publicitaire"
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_account_invoice_source_id
@@ -241,10 +240,13 @@ msgstr ""
 #: model:ir.model.fields,help:utm.field_link_tracker_source_id
 #: model:ir.model.fields,help:utm.field_sale_order_source_id
 #: model:ir.model.fields,help:utm.field_utm_mixin_source_id
+#, fuzzy
 msgid ""
 "This is the source of the link Ex:Search Engine, another domain,or name of "
 "email list"
 msgstr ""
+"Wagi d aɣbalu n useɣwen. Amedya: Amsedday n unadi, aḥric nniḍen, neɣ isem  n "
+"tebdart n yimayl."
 
 #. module: utm
 #: model:utm.source,name:utm.utm_source_twitter

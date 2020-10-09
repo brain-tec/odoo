@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-import equipment
+from . import equipment
+from . import res_users

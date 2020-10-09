@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:49+0000\n"
+"POT-Creation-Date: 2016-08-18 14:07+0000\n"
 "PO-Revision-Date: 2016-02-05 09:53+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Tamil (http://www.transifex.com/odoo/odoo-9/language/ta/)\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: google_drive
-#: model:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
+#: model_terms:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
 msgid ""
 "<b>To create a new filter:</b><br/>\n"
 "                                - Go to the Odoo document you want to "
@@ -42,7 +42,7 @@ msgid "Active"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:40
+#: code:addons/google_drive/google_drive.py:34
 #, python-format
 msgid "At least one key cannot be found in your Google Drive name pattern"
 msgstr ""
@@ -60,8 +60,13 @@ msgid ""
 msgstr ""
 
 #. module: google_drive
-#: model:ir.actions.act_window,help:google_drive.action_google_drive_users_config
+#: model_terms:ir.actions.act_window,help:google_drive.action_google_drive_users_config
 msgid "Click to add a new template."
+msgstr ""
+
+#. module: google_drive
+#: model_terms:ir.ui.view,arch_db:google_drive.inherited_google_view_general_configuration
+msgid "Configure your templates"
 msgstr ""
 
 #. module: google_drive
@@ -77,9 +82,14 @@ msgstr ""
 "தேதி"
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:159
+#: code:addons/google_drive/google_drive.py:141
 #, python-format
 msgid "Creating google drive may only be done by one at a time."
+msgstr ""
+
+#. module: google_drive
+#: model:ir.filters,name:google_drive.filter_partner
+msgid "Customer"
 msgstr ""
 
 #. module: google_drive
@@ -93,15 +103,15 @@ msgid "Filter"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:59
-#: code:addons/google_drive/models/google_drive.py:80
+#: code:addons/google_drive/google_drive.py:53
+#: code:addons/google_drive/google_drive.py:73
 #, python-format
 msgid "Go to the configuration panel"
 msgstr ""
 
 #. module: google_drive
 #: model:ir.model.fields,field_description:google_drive.field_google_drive_config_google_drive_client_id
-msgid "Google Client"
+msgid "Google Client "
 msgstr ""
 
 #. module: google_drive
@@ -110,8 +120,8 @@ msgid "Google Drive"
 msgstr ""
 
 #. module: google_drive
-#: model:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
-#: model:ir.ui.view,arch_db:google_drive.view_google_drive_config_tree
+#: model_terms:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
+#: model_terms:ir.ui.view,arch_db:google_drive.view_google_drive_config_tree
 msgid "Google Drive Configuration"
 msgstr ""
 
@@ -121,13 +131,8 @@ msgid "Google Drive Name Pattern"
 msgstr ""
 
 #. module: google_drive
-#: model:ir.ui.view,arch_db:google_drive.base_config_settings_view_form_inherit_google_drive
-msgid "Google Drive Templates"
-msgstr ""
-
-#. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:61
-#: code:addons/google_drive/models/google_drive.py:82
+#: code:addons/google_drive/google_drive.py:55
+#: code:addons/google_drive/google_drive.py:75
 #, python-format
 msgid "Google Drive is not yet configured. Please contact your administrator."
 msgstr ""
@@ -158,7 +163,7 @@ msgid "Last Updated on"
 msgstr "கடைசியாக புதுப்பிக்கப்பட்டது"
 
 #. module: google_drive
-#: model:ir.actions.act_window,help:google_drive.action_google_drive_users_config
+#: model_terms:ir.actions.act_window,help:google_drive.action_google_drive_users_config
 msgid ""
 "Link your own google drive templates to any record of Odoo. If you have "
 "really specific documents you want your collaborator fill in, e.g. Use a "
@@ -168,19 +173,21 @@ msgid ""
 msgstr ""
 
 #. module: google_drive
+#: model:ir.model.fields,field_description:google_drive.field_google_drive_config_model
 #: model:ir.model.fields,field_description:google_drive.field_google_drive_config_model_id
 msgid "Model"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:201
-#, python-format
-msgid "Please enter a valid Google Document URL."
+#: constraint:google.drive.config:0
+msgid ""
+"Model of selected filter is not matching with model of current template."
 msgstr ""
 
 #. module: google_drive
-#: model:ir.model.fields,field_description:google_drive.field_google_drive_config_model
-msgid "Related Model"
+#: code:addons/google_drive/google_drive.py:173
+#, python-format
+msgid "Please enter a valid Google Document URL."
 msgstr ""
 
 #. module: google_drive
@@ -189,7 +196,7 @@ msgid "Resource Id"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:79
+#: code:addons/google_drive/google_drive.py:72
 #, python-format
 msgid ""
 "Something went wrong during the token generation. Please request again an "
@@ -213,7 +220,7 @@ msgid "Templates"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:97
+#: code:addons/google_drive/google_drive.py:90
 #, python-format
 msgid "The Google Template cannot be found. Maybe it has been deleted."
 msgstr ""
@@ -224,7 +231,7 @@ msgid "The URL to generate the authorization code from Google"
 msgstr ""
 
 #. module: google_drive
-#: model:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
+#: model_terms:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
 msgid ""
 "The name of the attached document can use fixed or variable data. To "
 "distinguish between documents in\n"
@@ -236,7 +243,7 @@ msgid ""
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:135
+#: code:addons/google_drive/google_drive.py:117
 #, python-format
 msgid ""
 "The permission 'reader' for 'anyone with the link' has not been written on "
@@ -249,11 +256,16 @@ msgid "URI"
 msgstr ""
 
 #. module: google_drive
-#: code:addons/google_drive/models/google_drive.py:58
+#: code:addons/google_drive/google_drive.py:52
 #, python-format
 msgid ""
 "You haven't configured 'Authorization Code' generated from google, Please "
 "generate and configure it ."
+msgstr ""
+
+#. module: google_drive
+#: model_terms:ir.ui.view,arch_db:google_drive.inherited_google_view_general_configuration
+msgid "and paste it here"
 msgstr ""
 
 #. module: google_drive
@@ -262,7 +274,7 @@ msgid "base.config.settings"
 msgstr ""
 
 #. module: google_drive
-#: model:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
+#: model_terms:ir.ui.view,arch_db:google_drive.view_google_drive_config_form
 msgid ""
 "https://docs.google.com/document/"
 "d/1vOtpJK9scIQz6taD9tJRIETWbEw3fSiaQHArsJYcua4/edit"

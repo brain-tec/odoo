@@ -1,119 +1,580 @@
 odoo.define('mail.Chatter', function (require) {
 "use strict";
 
-var chat_manager = require('mail.chat_manager');
-var composer = require('mail.composer');
-var ChatThread = require('mail.ChatThread');
-var utils = require('mail.utils');
+var Activity = require('mail.Activity');
+var AttachmentBox = require('mail.AttachmentBox');
+var ChatterComposer = require('mail.composer.Chatter');
+var Dialog = require('web.Dialog');
+var Followers = require('mail.Followers');
+var ThreadField = require('mail.ThreadField');
+var mailUtils = require('mail.utils');
 
+var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
-var form_common = require('web.form_common');
-var framework = require('web.framework');
-var pyeval = require('web.pyeval');
-var Model = require("web.Model");
-var web_utils = require('web.utils');
 var Widget = require('web.Widget');
 
 var _t = core._t;
 var QWeb = core.qweb;
 
-// -----------------------------------------------------------------------------
-// Chat Composer for the Chatter
+// The purpose of this widget is to display the chatter area below the form view
 //
-// Extends the basic Composer Widget to add 'suggested partner' layer (open
-// popup when suggested partner is selected without email, or other
-// informations), and the button to open the full composer wizard.
-// -----------------------------------------------------------------------------
-var ChatterComposer = composer.BasicComposer.extend({
-    template: 'mail.chatter.ChatComposer',
-
-    init: function (parent, dataset, options) {
-        this._super(parent, options);
-        this.thread_dataset = dataset;
-        this.suggested_partners = [];
-        this.options = _.defaults(this.options, {
-            display_mode: 'textarea',
-            record_name: false,
-            is_log: false,
-        });
-        if (this.options.is_log) {
-            this.options.send_text = _t('Log');
-        }
-        this.events = _.extend(this.events, {
-            'click .o_composer_button_full_composer': 'on_open_full_composer',
-        });
+// It instantiates the optional mail_thread, mail_activity and mail_followers widgets.
+// It Ensures that those widgets are appended at the right place, and allows them to communicate
+// with each other.
+// It synchronizes the rendering of those widgets (as they may be asynchronous), to mitigate
+// the flickering when switching between records
+var Chatter = Widget.extend({
+    template: 'mail.Chatter',
+    custom_events: {
+        delete_attachment: '_onDeleteAttachment',
+        discard_record_changes: '_onDiscardRecordChanges',
+        reload_attachment_box: '_onReloadAttachmentBox',
+        reload_mail_fields: '_onReloadMailFields',
+        reset_suggested_partners: '_onResetSuggestedPartners',
     },
-
-    willStart: function () {
-        if (this.options.is_log) {
-            return this._super.apply(this, arguments);
-        }
-        return $.when(this._super.apply(this, arguments), this.message_get_suggested_recipients());
+    events: {
+        'click .o_chatter_button_new_message': '_onOpenComposerMessage',
+        'click .o_chatter_button_log_note': '_onOpenComposerNote',
+        'click .o_chatter_button_attachment': '_onClickAttachmentButton',
+        'click .o_chatter_button_schedule_activity': '_onScheduleActivity',
     },
-
-    should_send: function () {
-        return false;
-    },
-
-    preprocess_message: function () {
-        var self = this;
-        var def = $.Deferred();
-        this._super().then(function (message) {
-            message = _.extend(message, {
-                subtype: 'mail.mt_comment',
-                message_type: 'comment',
-                content_subtype: 'html',
-                context: self.context,
-            });
-
-            // Subtype
-            if (self.options.is_log) {
-                message.subtype = 'mail.mt_note';
-            }
-
-            // Partner_ids
-            if (!self.options.is_log) {
-                var checked_suggested_partners = self.get_checked_suggested_partners();
-                self.check_suggested_partners(checked_suggested_partners).done(function (partner_ids) {
-                    message.partner_ids = (message.partner_ids || []).concat(partner_ids);
-                    // update context
-                    message.context = _.defaults({}, message.context, {
-                        mail_post_autofollow: true,
-                    });
-                    def.resolve(message);
-                });
-            } else {
-                def.resolve(message);
-            }
-
-        });
-
-        return def;
-    },
-
-    clear_composer_on_send: function() {
-        /* chatter don't clear message on sent but after successful sent */
-    },
+    supportedFieldTypes: ['one2many'],
 
     /**
-    * Send the message on SHIFT+ENTER, but go to new line on ENTER
-    */
-    prevent_send: function (event) {
-        return !event.shiftKey;
+     * @override
+     * @param {widget} parent
+     * @param {Object} record
+     * @param {Object} mailFields
+     * @param {string} [mailFields.mail_activity]
+     * @param {string} [mailFields.mail_followers]
+     * @param {string} [mailFields.mail_thread]
+     * @param {Object} options
+     * @param {string} [options.viewType=record.viewType] current viewType in
+     *   which the chatter is instantiated
+     */
+    init: function (parent, record, mailFields, options) {
+        this._super.apply(this, arguments);
+        this._setState(record);
+
+        this.attachments = {};
+        this.fields = {};
+        this._areAttachmentsLoaded = false;
+        this._disableAttachmentBox = !!options.disable_attachment_box;
+        this._dp = new concurrency.DropPrevious();
+        this._isAttachmentBoxOpen = false;
+        // mention: get the prefetched partners and use them as mention suggestions
+        // if there is a follower widget, the followers will be added to the
+        // suggestions as well once fetched
+        this._mentionPartnerSuggestions = this.call('mail_service', 'getMentionPartnerSuggestions');
+        this._mentionSuggestions = this._mentionPartnerSuggestions;
+        this._suggestedPartnersProm = undefined;
+
+        if (mailFields.mail_activity) {
+            this.fields.activity = new Activity(this, mailFields.mail_activity, record, options);
+        }
+        if (mailFields.mail_followers) {
+            this.fields.followers = new Followers(this, mailFields.mail_followers, record, options);
+        }
+        if (mailFields.mail_thread) {
+            this.fields.thread = new ThreadField(this, mailFields.mail_thread, record, options);
+            var fieldsInfo = record.fieldsInfo[options.viewType || record.viewType];
+            var nodeOptions = fieldsInfo[mailFields.mail_thread].options || {};
+            this.hasLogButton = options.display_log_button || nodeOptions.display_log_button;
+            this.postRefresh = nodeOptions.post_refresh || 'never';
+            this.reloadOnUploadAttachment = this.postRefresh === 'always';
+            this.openAttachments = nodeOptions.open_attachments || false;
+        }
+    },
+    /**
+     * @override
+     */
+    start: function () {
+        this._$topbar = this.$('.o_chatter_topbar');
+        if(!this._disableAttachmentBox) {
+            this.$('.o_topbar_right_area').append(QWeb.render('mail.chatter.Attachment.Button', {
+                displayCounter: !!this.fields.thread,
+                count: this.record.data.message_attachment_count || 0,
+            }));
+        }
+        // render and append the buttons
+        this._$topbar.prepend(this._renderButtons());
+        // start and append the widgets
+        var fieldDefs = _.invoke(this.fields, 'appendTo', $('<div>'));
+        var def = this._dp.add(Promise.all(fieldDefs));
+        this._render(def)
+            .then(this._updateMentionSuggestions.bind(this))
+            .then(() => {
+                if (this.openAttachments) {
+                    this._fetchAttachments().then(() => this._openAttachmentBox());
+                }
+            });
+
+        return this._super.apply(this, arguments);
     },
 
-    message_get_suggested_recipients: function () {
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {Object} record
+     * @param {integer} [record.res_id=undefined]
+     * @param {Object[]} [fieldNames=undefined]
+     */
+    update: function (record, fieldNames) {
         var self = this;
-        var email_addresses = _.pluck(this.suggested_partners, 'email_address');
-        return this.thread_dataset
-            .call('message_get_suggested_recipients', [[this.context.default_res_id], this.context])
-            .done(function (suggested_recipients) {
-                var thread_recipients = suggested_recipients[self.context.default_res_id];
-                _.each(thread_recipients, function (recipient) {
-                    var parsed_email = utils.parse_email(recipient[1]);
-                    if (_.indexOf(email_addresses, parsed_email[1]) === -1) {
-                        self.suggested_partners.push({
+
+        // close the composer if we switch to another record as it is record dependent
+        if (this.record.res_id !== record.res_id) {
+            this._closeComposer(true);
+            this._closeAttachments();
+            this._areAttachmentsLoaded = false;
+            this.attachments = {};
+        }
+
+        // update the state
+        this._setState(record);
+
+        // detach the thread and activity widgets (temporarily force the height to prevent flickering)
+        // keep the followers in the DOM as it has a synchronous pre-rendering
+        this.$el.height(this.$el.height());
+        if (this.fields.activity) {
+            this.fields.activity.$el.detach();
+        }
+        if (this.fields.thread && this.fields.thread.$el ) {
+            this.fields.thread.$el.detach();
+        }
+
+        // reset and re-append the widgets (and reset 'height: auto' rule)
+        // if fieldNames is given, only reset those fields, otherwise reset all fields
+        var fieldsToReset;
+        if (fieldNames) {
+            fieldsToReset = _.filter(this.fields, function (field) {
+                return _.contains(fieldNames, field.name);
+            });
+        } else {
+            fieldsToReset = this.fields;
+        }
+        var fieldDefs = _.invoke(fieldsToReset, 'reset', record);
+        var def = this._dp.add(Promise.all(fieldDefs));
+        this._render(def).then(function () {
+            self.$el.height('auto');
+            self._updateMentionSuggestions();
+        });
+        this._updateAttachmentCounter();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _closeAttachments: function () {
+        if (this.fields.attachments) {
+            this.$('.o_chatter_button_attachment').removeClass('o_active_attach');
+            this.fields.attachments.destroy();
+            this._isAttachmentBoxOpen = false;
+        }
+    },
+    /**
+     * @private
+     * @param {boolean} force
+     */
+    _closeComposer: function (force) {
+        if (this._composer && (this._composer.isEmpty() || force)) {
+            this.$el.removeClass('o_chatter_composer_active');
+            this.$('.o_chatter_button_new_message, .o_chatter_button_log_note').removeClass('o_active');
+            this._composer.do_hide();
+            this._composer.clearComposer();
+        }
+    },
+    /**
+     * @private
+     */
+    _disableChatter: function () {
+        this.$('.btn').prop('disabled', true); // disable buttons
+    },
+    /**
+     * @private
+     */
+    _disableComposer: function () {
+        this.$(".o_composer_button_send").prop('disabled', true);
+    },
+    /**
+     * Discard changes on the record.
+     *
+     * @private
+     * @returns {Promise} resolved if successfully discarding changes on
+     *   the record, rejected otherwise
+     */
+    _discardChanges: function () {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            self.trigger_up('discard_changes', {
+                recordID: self.record.id,
+                onSuccess: resolve,
+                onFailure: reject,
+            });
+        });
+    },
+    /**
+     * Discard changes on the record if the message will reload the record
+     * after posting it
+     *
+     * @private
+     * @param {Object} messageData
+     * @return {Promise} resolved if no reload or proceed to discard the
+     *   changes on the record, rejected otherwise
+     */
+    _discardOnReload: function (messageData) {
+        if (this._reloadAfterPost(messageData)) {
+            return this._discardChanges();
+        }
+        return Promise.resolve();
+    },
+    /**
+     * @private
+     */
+    _enableChatter: function () {
+        this.$('.btn').prop('disabled', false); // enable buttons
+    },
+    /**
+     * @private
+     */
+    _enableComposer: function () {
+        this.$(".o_composer_button_send").prop('disabled', false);
+    },
+    /*
+    * @private
+    * @return {Deferred}
+    */
+    _fetchAttachments: function () {
+        var self = this;
+        var domain = [
+            ['res_id', '=', this.record.res_id],
+            ['res_model', '=', this.record.model],
+        ];
+        return this._rpc({
+            model: 'ir.attachment',
+            method: 'search_read',
+            domain: domain,
+            fields: ['id', 'name', 'mimetype'],
+        }).then(function (result) {
+            self._areAttachmentsLoaded = true;
+            self.attachments = result;
+        });
+
+    },
+    /**
+     * @private
+     */
+    _openAttachmentBox: function () {
+        if (this.fields.attachments) {
+            this._closeAttachments();
+        }
+        this.fields.attachments = new AttachmentBox(this, this.record, this.attachments);
+        var $anchor = this.$('.o_chatter_topbar');
+        if (this._composer) {
+            var $anchor = this.$('.o_thread_composer');
+        } else {
+            var $anchor = this.$('.o_chatter_topbar');
+        }
+        this.fields.attachments.insertAfter($anchor);
+        this.$el.addClass('o_chatter_composer_active');
+        this.$('.o_chatter_button_attachment').addClass('o_active_attach');
+
+        this._isAttachmentBoxOpen = true;
+    },
+    /**
+     * @private
+     * @param {Object} options
+     * @param {Object[]} [options.suggested_partners=[]]
+     * @param {boolean} [options.isLog]
+     */
+    _openComposer: function (options) {
+        var self = this;
+        var oldComposer = this._composer;
+        // create the new composer
+        this._composer = new ChatterComposer(this, this.record.model, options.suggested_partners || [], {
+            commandsEnabled: false,
+            context: this.context,
+            inputMinHeight: 50,
+            isLog: options && options.isLog,
+            recordName: this.recordName,
+            defaultBody: oldComposer && oldComposer.$input && oldComposer.$input.val(),
+            defaultMentionSelections: oldComposer && oldComposer.getMentionListenerSelections(),
+            attachmentIds: (oldComposer && oldComposer.get('attachment_ids')) || [],
+        });
+        this._composer.on('input_focused', this, function () {
+            this._composer.mentionSetPrefetchedPartners(this._mentionSuggestions || []);
+        });
+        this._composer.insertAfter(this.$('.o_chatter_topbar')).then(function () {
+            // destroy existing composer
+            if (oldComposer) {
+                oldComposer.destroy();
+            }
+            self._composer.focus();
+            self._composer.on('post_message', self, function (messageData) {
+                self._discardOnReload(messageData).then(function () {
+                    self._disableComposer();
+                    self.fields.thread.postMessage(messageData).then(function () {
+                        self._closeComposer(true);
+                        if (self._reloadAfterPost(messageData)) {
+                            self.trigger_up('reload');
+                        } else if (messageData.attachment_ids.length) {
+                            self._reloadAttachmentBox();
+                            self.trigger_up('reload', {fieldNames: ['message_attachment_count'], keepChanges: true});
+                        }
+                    }).guardedCatch(function () {
+                        self._enableComposer();
+                    });
+                });
+            });
+            self._composer.on('need_refresh', self, self.trigger_up.bind(self, 'reload'));
+            self._composer.on('close_composer', null, self._closeComposer.bind(self, true));
+
+            self.$el.addClass('o_chatter_composer_active');
+            self.$('.o_chatter_button_new_message, .o_chatter_button_log_note').removeClass('o_active');
+            self.$('.o_chatter_button_new_message').toggleClass('o_active', !self._composer.options.isLog);
+            self.$('.o_chatter_button_log_note').toggleClass('o_active', self._composer.options.isLog);
+        });
+    },
+    /**
+     * State if the record will be reloaded after posting a message.
+     * Useful to warn the user of unsaved changes if the record is dirty.
+     *
+     * @private
+     * @param {Object} messageData
+     * @param {Array} [messageData.partner_ids] list of recipients of a message
+     * @return {boolean} true if record will be reloaded after posting the
+     *   message, false otherwise
+     */
+    _reloadAfterPost: function (messageData) {
+        return this.postRefresh === 'always' ||
+                (
+                   this.postRefresh === 'recipients' &&
+                   messageData.partner_ids &&
+                   messageData.partner_ids.length
+                );
+    },
+    /**
+     * @private
+     */
+    _reloadAttachmentBox: function () {
+        this._areAttachmentsLoaded = false;
+        if (this._isAttachmentBoxOpen) {
+            this._fetchAttachments().then(this._openAttachmentBox.bind(this));
+        }
+        if (this.fields.thread) {
+            this.trigger_up('reload', { fieldNames: ['message_attachment_count'], keepChanges: true });
+        }
+    },
+    /**
+     * @private
+     * @param {Deferred} def
+     * @returns {Deferred}
+     */
+    _render: function (def) {
+        // the rendering of the chatter is aynchronous: relational data of its fields needs to be
+        // fetched (in some case, it might be synchronous as they hold an internal cache).
+        // this function takes a promise as argument, which is resolved once all fields have
+        // fetched their data
+        // this function appends the fields where they should be once the given promise is resolved
+        // and if it takes more than 500ms, displays a spinner to indicate that it is loading
+        var self = this;
+
+        var $spinner = $(QWeb.render('Spinner'));
+        concurrency.rejectAfter(concurrency.delay(500), def).then(function () {
+            $spinner.appendTo(self.$el);
+        });
+        var always = function () {
+            // disable widgets in create mode, otherwise enable
+            self._isCreateMode ? self._disableChatter() : self._enableChatter();
+            $spinner.remove();
+        };
+
+        return def.then(function () {
+            if (self.fields.activity) {
+                self.fields.activity.$el.appendTo(self.$el);
+            }
+            if (self.fields.followers) {
+                if (self._disableAttachmentBox) {
+                    self.fields.followers.$el.appendTo(self.$('.o_topbar_right_area'));
+                } else {
+                    self.fields.followers.$el.insertBefore(self.$('.o_chatter_button_attachment'));
+                }
+            }
+            if (self.fields.thread && self.fields.thread.$el) {
+                self.fields.thread.$el.appendTo(self.$el);
+            }
+        }).then(always).guardedCatch(always);
+    },
+    /**
+     * @private
+     */
+    _resetSuggestedPartners() {
+        this._suggestedPartnersProm = undefined;
+    },
+    _renderButtons: function () {
+        return QWeb.render('mail.chatter.Buttons', {
+            newMessageButton: !!this.fields.thread,
+            logNoteButton: this.hasLogButton,
+            scheduleActivityButton: !!this.fields.activity,
+            isMobile: config.device.isMobile,
+        });
+    },
+    /**
+     * @private
+     * @param {Object} record
+     * @param {integer} [record.res_id]
+     * @param {string} [record.model]
+     * @param {string} record.data.display_name
+     */
+    _setState: function (record) {
+
+        this._isCreateMode = !record.res_id;
+
+        if (!this.record || this.record.res_id !== record.res_id) {
+            this.context = {
+                default_res_id: record.res_id || false,
+                default_model: record.model || false,
+            };
+            // reset the _suggestedPartnersProm to ensure a reload of the
+            // suggested partners when opening the composer on another record
+            this._resetSuggestedPartners();
+        }
+        this.record = record;
+        this.recordName = record.data.display_name;
+    },
+    /**
+     * @private
+     */
+     _updateAttachmentCounter: function () {
+        var count = this.record.data.message_attachment_count || 0;
+        var $element = this.$('.o_chatter_attachment_button_count');
+        if (Number($element.html()) !== count) {
+            this._areAttachmentsLoaded = false;
+            $element.html(count);
+        }
+     },
+    /**
+     * @private
+     */
+    _updateMentionSuggestions: function () {
+        if (!this.fields.followers) {
+            return;
+        }
+        var self = this;
+
+        this._mentionSuggestions = [];
+
+        // add the followers to the mention suggestions
+        var followerSuggestions = [];
+        var followers = this.fields.followers.getFollowers();
+        _.each(followers, function (follower) {
+            if (follower.res_model === 'res.partner') {
+                followerSuggestions.push({
+                    id: follower.res_id,
+                    name: follower.name,
+                    email: follower.email,
+                });
+            }
+        });
+        if (followerSuggestions.length) {
+            this._mentionSuggestions.push(followerSuggestions);
+        }
+
+        // add the partners (followers filtered out) to the mention suggestions
+        _.each(this._mentionPartnerSuggestions, function (partners) {
+            self._mentionSuggestions.push(_.filter(partners, function (partner) {
+                return !_.findWhere(followerSuggestions, { id: partner.id });
+            }));
+        });
+    },
+
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     * @param {integer} ev.data.attachmentId
+     * @param {String} ev.data.attachmentName
+     */
+    _onDeleteAttachment: function (ev) {
+        ev.stopPropagation();
+        var self = this;
+        var options = {
+            confirm_callback: function () {
+                self._rpc({
+                    model: 'ir.attachment',
+                    method: 'unlink',
+                    args: [parseInt(ev.data.attachmentId, 10)],
+                })
+                .then(function () {
+                    self._reloadAttachmentBox();
+                    if (self.fields.thread) {
+                        self.fields.thread.removeAttachments([ev.data.attachmentId]);
+                    }
+                    self.trigger_up('reload');
+                });
+            }
+        };
+        var promptText = _.str.sprintf(_t("Do you really want to delete %s?"), _.escape(ev.data.attachmentName));
+        Dialog.confirm(this, promptText, options);
+    },
+    /**
+     * @private
+     */
+    _onClickAttachmentButton: function () {
+        if(this._disableAttachmentBox) {
+            return;
+        }
+        if (this._isAttachmentBoxOpen) {
+            this._closeAttachments();
+        } else {
+            var def;
+            if (!this._areAttachmentsLoaded) {
+                def = this._fetchAttachments();
+            }
+            Promise.resolve(def).then(this._openAttachmentBox.bind(this));
+        }
+    },
+    /**
+     * Discard changes on the record.
+     * This is notified by the composer, when opening the full-composer.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {function} ev.data.proceed callback to tell to proceed
+     */
+    _onDiscardRecordChanges: function (ev) {
+        this._discardChanges().then(ev.data.proceed);
+    },
+    _onOpenComposerMessage: function () {
+        var self = this;
+        if (!this._suggestedPartnersProm) {
+            this._suggestedPartnersProm = new Promise(function (resolve, reject) {
+                self._rpc({
+                    route: '/mail/get_suggested_recipients',
+                    params: {
+                        model: self.record.model,
+                        res_ids: [self.context.default_res_id],
+                    },
+                }).then(function (result) {
+                    if (!self._suggestedPartnersProm) {
+                        return; // widget has been reset (e.g. we just switched to another record)
+                    }
+                    var suggested_partners = [];
+                    var thread_recipients = result[self.context.default_res_id];
+                    _.each(thread_recipients, function (recipient) {
+                        var parsed_email = recipient[1] && mailUtils.parseEmail(recipient[1]);
+                        suggested_partners.push({
                             checked: true,
                             partner_id: recipient[0],
                             full_name: recipient[1],
@@ -121,452 +582,70 @@ var ChatterComposer = composer.BasicComposer.extend({
                             email_address: parsed_email[1],
                             reason: recipient[2],
                         });
-                    }
-                });
-            });
-    },
-
-    /**
-     * Get the list of selected suggested partners
-     * @returns Array() : list of 'recipient' selected partners (may not be created in db)
-     **/
-    get_checked_suggested_partners: function () {
-        var self = this;
-        var checked_partners = [];
-        this.$('.o_composer_suggested_partners input:checked').each(function() {
-            var full_name = $(this).data('fullname');
-            checked_partners = checked_partners.concat(_.filter(self.suggested_partners, function(item) {
-                return full_name === item.full_name;
-            }));
-        });
-        return checked_partners;
-    },
-
-    /**
-     * Check the additional partners (not necessary registered partners), and open a popup form view
-     * for the ones who informations is missing.
-     * @param Array : list of 'recipient' partners to complete informations or validate
-     * @returns Deferred resolved with the list of checked suggested partners (real partner)
-     **/
-    check_suggested_partners: function (checked_suggested_partners) {
-        var self = this;
-        var check_done = $.Deferred();
-
-        var recipients = _.filter(checked_suggested_partners, function (recipient) { return recipient.checked; });
-        var recipients_to_find = _.filter(recipients, function (recipient) { return (! recipient.partner_id); });
-        var names_to_find = _.pluck(recipients_to_find, 'full_name');
-        var recipients_to_check = _.filter(recipients, function (recipient) { return (recipient.partner_id && ! recipient.email_address); });
-        var recipient_ids = _.pluck(_.filter(recipients, function (recipient) { return recipient.partner_id && recipient.email_address; }), 'partner_id');
-
-        var names_to_remove = [];
-        var recipient_ids_to_remove = [];
-
-        // have unknown names -> call message_get_partner_info_from_emails to try to find partner_id
-        var find_done = $.Deferred();
-        if (names_to_find.length > 0) {
-            find_done = self.thread_dataset.call('message_partner_info_from_emails', [[this.context.default_res_id], names_to_find]);
-        } else {
-            find_done.resolve([]);
-        }
-
-        // for unknown names + incomplete partners -> open popup - cancel = remove from recipients
-        $.when(find_done).pipe(function (result) {
-            var emails_deferred = [];
-            var recipient_popups = result.concat(recipients_to_check);
-
-            _.each(recipient_popups, function (partner_info) {
-                var deferred = $.Deferred();
-                emails_deferred.push(deferred);
-
-                var partner_name = partner_info.full_name;
-                var partner_id = partner_info.partner_id;
-                var parsed_email = utils.parse_email(partner_name);
-
-                var dialog = new form_common.FormViewDialog(self, {
-                    res_model: 'res.partner',
-                    res_id: partner_id,
-                    context: {
-                        force_email: true,
-                        ref: "compound_context",
-                        default_name: parsed_email[0],
-                        default_email: parsed_email[1],
-                    },
-                    title: _t("Please complete partner's informations"),
-                    disable_multiple_selection: true,
-                }).open();
-                dialog.on('closed', self, function () {
-                    deferred.resolve();
-                });
-                dialog.opened().then(function () {
-                    dialog.view_form.on('on_button_cancel', self, function () {
-                        names_to_remove.push(partner_name);
-                        if (partner_id) {
-                            recipient_ids_to_remove.push(partner_id);
-                        }
                     });
+                    resolve(suggested_partners);
                 });
             });
-            $.when.apply($, emails_deferred).then(function () {
-                var new_names_to_find = _.difference(names_to_find, names_to_remove);
-                find_done = $.Deferred();
-                if (new_names_to_find.length > 0) {
-                    find_done = self.thread_dataset.call('message_partner_info_from_emails', [[self.context.default_res_id], new_names_to_find, true]);
-                } else {
-                    find_done.resolve([]);
-                }
-                $.when(find_done).pipe(function (result) {
-                    var recipient_popups = result.concat(recipients_to_check);
-                    _.each(recipient_popups, function (partner_info) {
-                        if (partner_info.partner_id && _.indexOf(partner_info.partner_id, recipient_ids_to_remove) === -1) {
-                            recipient_ids.push(partner_info.partner_id);
-                        }
-                    });
-                }).pipe(function () {
-                    check_done.resolve(recipient_ids);
-                });
-            });
-        });
-        return check_done;
-    },
-
-    on_open_full_composer: function() {
-        if (!this.do_check_attachment_upload()){
-            return false;
         }
-
-        var self = this;
-        var recipient_done = $.Deferred();
-        if (this.options.is_log) {
-            recipient_done.resolve([]);
-        } else {
-            var checked_suggested_partners = this.get_checked_suggested_partners();
-            recipient_done = this.check_suggested_partners(checked_suggested_partners);
-        }
-        recipient_done.then(function (partner_ids) {
-            var context = {
-                default_parent_id: self.id,
-                default_body: utils.get_text2html(self.$input.val()),
-                default_attachment_ids: _.pluck(self.get('attachment_ids'), 'id'),
-                default_partner_ids: partner_ids,
-                default_is_log: self.options.is_log,
-                mail_post_autofollow: true,
-            };
-
-            if (self.context.default_model && self.context.default_res_id) {
-                context.default_model = self.context.default_model;
-                context.default_res_id = self.context.default_res_id;
-            }
-
-            self.do_action({
-                type: 'ir.actions.act_window',
-                res_model: 'mail.compose.message',
-                view_mode: 'form',
-                view_type: 'form',
-                views: [[false, 'form']],
-                target: 'new',
-                context: context,
-            }, {
-                on_close: function() {
-                    self.trigger('need_refresh');
-                    var parent = self.getParent();
-                    chat_manager.get_messages({model: parent.model, res_id: parent.res_id});
-                },
-            }).then(self.trigger.bind(self, 'close_composer'));
-        });
-    }
-});
-
-// -----------------------------------------------------------------------------
-// Document Chatter ('mail_thread' widget)
-//
-// Since it is displayed on a form view, it extends 'AbstractField' widget.
-// -----------------------------------------------------------------------------
-var Chatter = form_common.AbstractField.extend({
-    template: 'mail.Chatter',
-
-    events: {
-        'click .o_chatter_button_new_message': 'on_open_composer_new_message',
-        'click .o_chatter_button_log_note': 'on_open_composer_log_note',
-        'click .o_activity_schedule': 'on_activity_schedule',
-    },
-
-    init: function () {
-        this._super.apply(this, arguments);
-        this.model = this.view.dataset.model;
-        this.res_id = undefined;
-        this.context = this.options.context || {};
-        this.dp = new web_utils.DropPrevious();
-        // extends display options
-        this.options = _.extend(this.options || {}, {
-            'display_activity_button': this.field_manager.fields.activity_ids
+        this._suggestedPartnersProm.then(function (suggested_partners) {
+            self._openComposer({ isLog: false, suggested_partners: suggested_partners });
         });
     },
-
-    willStart: function () {
-        return chat_manager.is_ready;
-    },
-
-    start: function () {
-        var self = this;
-
-        // Hide the chatter in 'create' mode
-        this.view.on("change:actual_mode", this, this.check_visibility);
-        this.check_visibility();
-        var $container = this.$el.parent();
-        if ($container.hasClass('oe_chatter')) {
-            this.$el
-                .addClass($container.attr("class"))
-                .unwrap();
-        }
-
-        // Move the follower's widget (if any) inside the chatter
-        this.followers = this.field_manager.fields.message_follower_ids;
-        if (this.followers) {
-            this.$('.o_chatter_topbar').append(this.followers.$el);
-            this.followers.on('redirect', chat_manager, chat_manager.redirect);
-            this.followers.on('followers_update', this, this.on_followers_update);
-        }
-
-        // Move the activities widget (if any) inside the chatter
-        this.activities = this.field_manager.fields.activity_ids
-        if (this.activities) {
-            this.$('.o_chatter_topbar').after(this.activities.$el);
-        }
-
-        this.thread = new ChatThread(this, {
-            display_order: ChatThread.ORDER.DESC,
-            display_document_link: false,
-            display_needactions: false,
-            squash_close_messages: false,
-        });
-        this.thread.on('load_more_messages', this, this.load_more_messages);
-        this.thread.on('toggle_star_status', this, function (message_id) {
-            chat_manager.toggle_star_status(message_id);
-        });
-        this.thread.on('redirect', chat_manager, chat_manager.redirect);
-        this.thread.on('redirect_to_channel', this, this.on_channel_redirect);
-
-        this.ready = $.Deferred();
-
-        var def1 = this._super.apply(this, arguments);
-        var def2 = this.thread.appendTo(this.$el);
-
-        return $.when(def1, def2).then(function () {
-            chat_manager.bus.on('new_message', self, self.on_new_message);
-            chat_manager.bus.on('update_message', self, self.on_update_message);
-            self.ready.resolve();
-        });
-    },
-
-    check_visibility: function () {
-        this.set({"force_invisible": this.view.get("actual_mode") === "create"});
-    },
-
-    fetch_and_render_thread: function (ids, options) {
-        var self = this;
-        options = options || {};
-        options.ids = ids;
-
-        // Ensure that only the last loaded thread is rendered to prevent displaying the wrong thread
-        var fetch_def = this.dp.add(chat_manager.get_messages(options));
-
-        // Empty thread and display a spinner after 1s to indicate that it is loading
-        this.thread.$el.empty();
-        web_utils.reject_after(web_utils.delay(1000), fetch_def).then(function () {
-            self.thread.$el.append(QWeb.render('Spinner'));
-        });
-
-        return fetch_def.then(function (raw_messages) {
-            self.thread.render(raw_messages, {display_load_more: raw_messages.length < ids.length});
-        });
-    },
-
-    on_post_message: function (message) {
-        var self = this;
-        var options = {model: this.model, res_id: this.res_id};
-        chat_manager
-            .post_message(message, options)
-            .then(function () {
-                self.close_composer(true);
-                if (message.partner_ids.length) {
-                    self.refresh_followers(); // refresh followers' list
-                }
-            })
-            .fail(function () {
-                self.do_notify(_t('Sending Error'), _t('Your message has not been sent.'));
-            });
-    },
-
     /**
-     * When a message is correctly posted, fetch its data to render it
-     * @param {Number} message_id : the identifier of the new posted message
-     * @returns {Deferred}
+     * @private
      */
-    on_new_message: function (message) {
-        if (message.model === this.model && message.res_id === this.res_id) {
-            this.msg_ids.unshift(message.id);
-            this.fetch_and_render_thread(this.msg_ids);
-        }
+    _onOpenComposerNote: function () {
+        this._openComposer({ isLog: true });
     },
-
-    on_update_message: function (message) {
-        if (message.model === this.model && message.res_id === this.res_id) {
-            this.fetch_and_render_thread(this.msg_ids);
-        }
-    },
-
-    on_channel_redirect: function (channel_id) {
-        var self = this;
-        var def = chat_manager.join_channel(channel_id);
-        $.when(def).then(function () {
-            // Execute Discuss client action with 'channel' as default channel
-            self.do_action('mail.mail_channel_action_client_chat', {active_id: channel_id});
-        });
-    },
-
-    on_followers_update: function (followers) {
-        this.mention_suggestions = [];
-        var self = this;
-        var prefetched_partners = chat_manager.get_mention_partner_suggestions();
-        var follower_suggestions = [];
-        _.each(followers, function (follower) {
-            if (follower.res_model === 'res.partner') {
-                follower_suggestions.push({
-                    id: follower.res_id,
-                    name: follower.name,
-                    email: follower.email,
-                });
-            }
-        });
-        if (follower_suggestions.length) {
-            this.mention_suggestions.push(follower_suggestions);
-        }
-        _.each(prefetched_partners, function (partners) {
-            self.mention_suggestions.push(_.filter(partners, function (partner) {
-                return !_.findWhere(follower_suggestions, { id: partner.id });
-            }));
-        });
-    },
-
-    load_more_messages: function () {
-        var self = this;
-        var top_msg_id = this.$('.o_thread_message').first().data('messageId');
-        var top_msg_selector = '.o_thread_message[data-message-id="' + top_msg_id + '"]';
-        var offset = -framework.getPosition(document.querySelector(top_msg_selector)).top;
-        this.fetch_and_render_thread(this.msg_ids, {force_fetch: true}).then(function(){
-            offset += framework.getPosition(document.querySelector(top_msg_selector)).top;
-            self.thread.scroll_to({offset: offset});
-        });
-    },
-
     /**
-     * The value of the field has change (modification or switch to next document). Form view is
-     * not re-rendered, simply updated. A re-fetch is needed.
-     * @override
+     * @private
      */
-    render_value: function () {
-        return this.ready.then(this._render_value.bind(this));
-    },
-
-    _render_value: function () {
-        // update context
-        var context = _.extend(this.options.context || {},
-            pyeval.eval('contexts', this.build_context())
-        );
-        this.context = _.extend({
-            // expect integer ID or false
-            default_res_id: parseInt(this.view.datarecord.id, 10) || false,
-            default_model: this.view.model || false,
-        }, context);
-        this.thread_dataset = this.view.dataset;
-        this.res_id = this.context.default_res_id;
-        this.record_name = this.view.datarecord.display_name;
-        this.msg_ids = this.get_value() || [];
-
-        // destroy current composer, if any
-        if (this.composer) {
-            this.composer.destroy();
-            this.composer = undefined;
-            this.mute_new_message_button(false);
+    _onReloadAttachmentBox: function () {
+        if (this.reloadOnUploadAttachment) {
+            this.trigger_up('reload');
         }
-
-        // fetch and render messages of current document
-        return this.fetch_and_render_thread(this.msg_ids);
+        this._reloadAttachmentBox();
     },
-    refresh_followers: function () {
-        if (this.followers) {
-            this.followers.read_value();
+    /**
+     * @private
+     * @param {OdooEvent} event
+     * @param {string} event.name
+     * @param {Object} event.data
+     * @param {boolean} [event.data.activity]
+     * @param {boolean} [event.data.followers]
+     * @param {boolean} [event.data.thread]
+     */
+    _onReloadMailFields: function (event) {
+        var fieldNames = [];
+        if (this.fields.activity && event.data.activity) {
+            fieldNames.push(this.fields.activity.name);
         }
-    },
-
-    on_activity_schedule: function (event) {
-        if (this.activities) {
-            this.activities.on_activity_schedule(event);
+        if (this.fields.followers && event.data.followers) {
+            fieldNames.push(this.fields.followers.name);
         }
-    },
-
-    // composer toggle
-    on_open_composer_new_message: function () {
-        this.open_composer();
-    },
-    on_open_composer_log_note: function () {
-        this.open_composer({is_log: true});
-    },
-    open_composer: function (options) {
-        var self = this;
-        var old_composer = this.composer;
-        // create the new composer
-        this.composer = new ChatterComposer(this, this.thread_dataset, {
-            commands_enabled: false,
-            context: this.context,
-            input_min_height: 50,
-            input_max_height: Number.MAX_VALUE, // no max_height limit for the chatter
-            input_baseline: 14,
-            is_log: options && options.is_log,
-            record_name: this.record_name,
-            default_body: old_composer && old_composer.$input && old_composer.$input.val(),
-            default_mention_selections: old_composer && old_composer.mention_get_listener_selections(),
+        if (this.fields.thread && event.data.thread) {
+            fieldNames.push(this.fields.thread.name);
+        }
+        this.trigger_up('reload', {
+            fieldNames: fieldNames,
+            keepChanges: true,
         });
-        this.composer.on('input_focused', this, function () {
-            this.composer.mention_set_prefetched_partners(this.mention_suggestions || []);
-        });
-        this.composer.insertAfter(this.$('.o_chatter_topbar')).then(function () {
-            // destroy existing composer
-            if (old_composer) {
-                old_composer.destroy();
-            }
-            if (!config.device.touch) {
-                self.composer.focus();
-            }
-            self.composer.on('post_message', self, self.on_post_message);
-            self.composer.on('need_refresh', self, self.refresh_followers);
-            self.composer.on('close_composer', null, self.close_composer.bind(self, true));
-        });
-        this.mute_new_message_button(true);
     },
-    close_composer: function (force) {
-        if (this.composer && (this.composer.is_empty() || force)) {
-            this.composer.do_hide();
-            this.composer.clear_composer();
-            this.mute_new_message_button(false);
-        }
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onResetSuggestedPartners(ev) {
+        ev.stopPropagation();
+        this._resetSuggestedPartners();
     },
-    mute_new_message_button: function (mute) {
-        if (mute) {
-            this.$('.o_chatter_button_new_message').removeClass('btn-primary').addClass('btn-default');
-        } else if (!mute) {
-            this.$('.o_chatter_button_new_message').removeClass('btn-default').addClass('btn-primary');
-        }
+    /**
+     * @private
+     */
+    _onScheduleActivity: function () {
+        this.fields.activity.scheduleActivity();
     },
-
-    destroy: function () {
-        chat_manager.remove_chatter_messages(this.model);
-        this._super.apply(this, arguments);
-    },
-
 });
-
-core.form_widget_registry.add('mail_thread', Chatter);
 
 return Chatter;
 

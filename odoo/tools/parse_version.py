@@ -4,6 +4,7 @@
 ## this functions are taken from the setuptools package (version 0.6c8)
 ## http://peak.telecommunity.com/DevCenter/PkgResources#parsing-utilities
 
+from __future__ import print_function
 import re
 
 component_re = re.compile(r'(\d+ | [a-z]+ | \.| -)', re.VERBOSE)
@@ -40,7 +41,7 @@ def parse_version(s):
     The algorithm assumes that strings like "-" and any alpha string that
     alphabetically follows "final"  represents a "patch level".  So, "2.4-1"
     is assumed to be a branch or patch of "2.4", and therefore "2.4.1" is
-    considered newer than "2.4-1", whic in turn is newer than "2.4".
+    considered newer than "2.4-1", which in turn is newer than "2.4".
 
     Strings like "a", "b", "c", "alpha", "beta", "candidate" and so on (that
     come before "final" alphabetically) are assumed to be pre-release versions,
@@ -63,20 +64,16 @@ def parse_version(s):
     return tuple(parts)
 
 if __name__ == '__main__':
-        
-        def cmp(a, b):
-            msg = '%s < %s == %s' % (a, b, a < b)
-            assert a < b, msg
-            return b
-
         def chk(lst, verbose=False):
             pvs = []
             for v in lst:
                 pv = parse_version(v)
                 pvs.append(pv)
                 if verbose:
-                    print v, pv
-            reduce(cmp, pvs)
+                    print(v, pv)
+
+            for a, b in zip(pvs, pvs[1:]):
+                assert a < b, '%s < %s == %s' % (a, b, a < b)
         
         chk(('0', '4.2', '4.2.3.4', '5.0.0-alpha', '5.0.0-rc1', '5.0.0-rc1.1', '5.0.0_rc2', '5.0.0_rc3', '5.0.0'), False)
         chk(('5.0.0-0_rc3', '5.0.0-1dev', '5.0.0-1'), False) 

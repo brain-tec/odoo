@@ -5,26 +5,24 @@
 {
     'name': 'Restaurant',
     'version': '1.0',
-    'category': 'Point of Sale',
+    'category': 'Sales/Point Of Sale',
     'sequence': 6,
     'summary': 'Restaurant extensions for the Point of Sale ',
     'description': """
 
-=======================
-
-This module adds several restaurant features to the Point of Sale:
+This module adds several features to the Point of Sale that are specific to restaurant management:
 - Bill Printing: Allows you to print a receipt before the order is paid
 - Bill Splitting: Allows you to split an order into different orders
 - Kitchen Order Printing: allows you to print orders updates to kitchen or bar printers
 
 """,
     'depends': ['point_of_sale'],
-    'website': 'https://www.odoo.com/page/point-of-sale',
+    'website': 'https://www.odoo.com/page/point-of-sale-restaurant',
     'data': [
         'security/ir.model.access.csv',
-        'views/pos_config_views.xml',
         'views/pos_order_views.xml',
         'views/pos_restaurant_views.xml',
+        'views/pos_config_views.xml',
         'views/pos_restaurant_templates.xml',
     ],
     'qweb': [

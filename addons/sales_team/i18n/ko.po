@@ -1,758 +1,422 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * sales_team
-#
+# 	* sales_team
+# 
 # Translators:
+# Martin Trigaux, 2019
+# Goh Gangtai <gangtai.goh@gmail.com>, 2019
+# Linda Stockelova <stockeloval@btlnet.com>, 2019
+# Link Up링크업 <linkup.way@gmail.com>, 2019
+# Seongseok Shin <shinss61@hotmail.com>, 2019
+# Linkup <link-up@naver.com>, 2019
+# JH CHOI <hwangtog@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:50+0000\n"
-"PO-Revision-Date: 2016-04-26 05:54+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Korean (http://www.transifex.com/odoo/odoo-9/language/ko/)\n"
-"Language: ko\n"
+"POT-Creation-Date: 2019-12-05 12:33+0000\n"
+"PO-Revision-Date: 2019-08-26 09:14+0000\n"
+"Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
+"Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
+"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:91
-#, python-format
-msgid "3 exp. closing"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
+msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:139
-#, python-format
-msgid "35,029.39€"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:125
-#, python-format
-msgid "78,140.03€"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:171
-#, python-format
-msgid "80.000€"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
 msgid "<span>New</span>"
-msgstr ""
+msgstr "<span>신규</span>"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
 msgid "<span>Reporting</span>"
-msgstr ""
+msgstr "<span>보고</span>"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
 msgid "<span>View</span>"
-msgstr ""
+msgstr "<span>보기</span>"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_account_accountant
-msgid "Accounting"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_needaction
+msgid "Action Needed"
+msgstr "작업이 필요함"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_active
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__active
 msgid "Active"
 msgstr "활성"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:114
-#, python-format
-msgid "Activities Done"
-msgstr ""
+#: model:ir.actions.act_window,name:sales_team.mail_activity_type_action_config_sales
+msgid "Activity Types"
+msgstr "활동 유형"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
+#: model:ir.model.fields,help:sales_team.field_crm_team__member_ids
+msgid ""
+"Add members to automatically assign their documents to this sales team. You "
+"can only be member of one team."
+msgstr "이 영업 팀에 문서를 자동으로 배정하려면 회원을 추가하십시오. 한 팀의 구성원만 될 수 있습니다."
+
+#. module: sales_team
+#: model:res.groups,name:sales_team.group_sale_manager
+msgid "Administrator"
+msgstr "관리자"
+
+#. module: sales_team
+#: model:crm.team,name:sales_team.crm_team_1
+msgid "America"
+msgstr "아메리카"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid "Archived"
-msgstr ""
+msgstr "보존"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_action_res_partner_bank_form
-#: model:ir.ui.menu,name:sales_team.menu_config_bank_accounts
-msgid "Bank Accounts"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_attachment_count
+msgid "Attachment Count"
+msgstr "첨부 파일 수"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_action_res_bank_form
-msgid "Banks"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+msgid "Avatar"
+msgstr "아바타"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_type:0
-msgid "Bar"
-msgstr ""
-
-#. module: sales_team
-#: code:addons/sales_team/models/crm_team.py:235
+#: code:addons/sales_team/models/crm_team.py:0
 #, python-format
 msgid "Big Pretty Button :)"
-msgstr ""
+msgstr "크고 아름다운 버튼 :)"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_crm
-msgid "CRM"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Cancel"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_user_id
-msgid "Channel Leader"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_member_ids
-msgid "Channel Members"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_team_type
-msgid "Channel Type"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.actions.act_window,help:sales_team.crm_team_act
-#: model:ir.actions.act_window,help:sales_team.crm_team_salesteams_act
-#: model:ir.actions.act_window,help:sales_team.sales_team_config_action
-msgid "Click here to define a new sales channel."
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:150
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:154
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:163
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:167
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:176
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:180
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:184
+#: code:addons/sales_team/models/crm_team.py:0
 #, python-format
-msgid "Click to set"
-msgstr ""
+msgid "Cannot delete default team \"%s\""
+msgstr "\"%s\" 기본 팀을 삭제할 수 없습니다"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_color
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__member_ids
+msgid "Channel Members"
+msgstr "채널 회원"
+
+#. module: sales_team
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__color
 msgid "Color Index"
-msgstr "컬러 색인"
+msgstr "색상표"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_company_id
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_company_id
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__company_id
 msgid "Company"
 msgstr "회사"
 
 #. module: sales_team
 #: model:ir.ui.menu,name:sales_team.menu_sale_config
 msgid "Configuration"
-msgstr ""
+msgstr "환경 설정"
 
 #. module: sales_team
-#: model:ir.actions.act_window,name:sales_team.action_sale_config
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Configure Sales"
-msgstr ""
+#: model:ir.model,name:sales_team.model_res_partner
+msgid "Contact"
+msgstr "연락처"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_partner_category_form
-msgid "Contact Tags"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_partner_title_contact
-msgid "Contact Titles"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_config_address_book
-msgid "Contacts"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_graph_model
-msgid "Content"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_country_partner
-msgid "Countries"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_country_group
-msgid "Country Group"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:219
-#, python-format
-msgid "Create a few opportunities in it."
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_create_uid
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_create_uid
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__create_uid
 msgid "Created by"
-msgstr "작성자"
+msgstr "작성인"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_create_date
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_create_date
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__create_date
 msgid "Created on"
 msgstr "작성일"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_action_currency_form
-msgid "Currencies"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_currency_id
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__currency_id
 msgid "Currency"
-msgstr ""
+msgstr "통화"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_partner_form
-msgid "Customers"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/js/sales_team_dashboard.js:18
-#: model:ir.actions.act_window,name:sales_team.crm_team_salesteams_act
-#: model:ir.ui.menu,name:sales_team.menu_sales_team_act
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
-#, python-format
-msgid "Dashboard"
-msgstr "알림"
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_button_name
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__dashboard_button_name
 msgid "Dashboard Button"
-msgstr ""
+msgstr "대시보드 버튼"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_graph_data
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__dashboard_graph_data
 msgid "Dashboard Graph Data"
-msgstr ""
+msgstr "대시보드 그래프 데이터"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_group:0
-msgid "Day"
-msgstr ""
+#: model_terms:ir.actions.act_window,help:sales_team.crm_team_salesteams_act
+#: model_terms:ir.actions.act_window,help:sales_team.crm_team_salesteams_pipelines_act
+#: model_terms:ir.actions.act_window,help:sales_team.sales_team_config_action
+msgid "Define a new sales team"
+msgstr "새로운 영업팀 정의"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_display_name
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_display_name
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__display_name
 msgid "Display Name"
 msgstr "표시 이름"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_country_state_partner
-msgid "Fed. States"
-msgstr ""
+#: model:crm.team,name:sales_team.team_sales_department
+msgid "Europe"
+msgstr "유럽"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__favorite_user_ids
+msgid "Favorite Members"
+msgstr "즐겨찾는 회원"
+
+#. module: sales_team
+#: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
+msgstr "즐겨찾는 팀이 대시 보드에 표시되고 쉽게 접근할 수 있습니다."
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
 "Follow this salesteam to automatically track the events associated to users "
 "of this team."
-msgstr ""
-"이 팀의 사용자와 관련된 행사를 자동으로 추적하기 위해 이 영업팀을 팔로우하기."
+msgstr "이 팀의 사용자와 관련된 행사를 자동으로 추적하기 위해 이 영업팀을 팔로우하기."
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
-msgid "Graph"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_follower_ids
+msgid "Followers"
+msgstr "팔로워"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:218
-#, python-format
-msgid "Great sales journeys start with a clean pipeline."
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_channel_ids
+msgid "Followers (Channels)"
+msgstr "팔로워 (채널)"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "팔로워 (협력사)"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
 msgid "Group By..."
-msgstr "그룹화..."
+msgstr "그룹별..."
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_graph_group
-msgid "Group by"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_helpdesk
-msgid "Helpdesk"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:217
-#, python-format
-msgid "Hi there!"
-msgstr "안녕하세요!"
-
-#. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_dashboard_graph_group
-msgid "How this channel's dashboard graph will group the results."
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_id
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_id
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__id
 msgid "ID"
 msgstr "ID"
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_res_partner_team_id
-#: model:ir.model.fields,help:sales_team.field_res_users_team_id
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_unread
+msgid "If checked, new messages require your attention."
+msgstr "선택하면 새로운 메시지를 주목할 필요가 있습니다."
+
+#. module: sales_team
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합니다."
+
+#. module: sales_team
+#: model:ir.model.fields,help:sales_team.field_res_partner__team_id
+#: model:ir.model.fields,help:sales_team.field_res_users__team_id
 msgid ""
-"If set, this sales channel will be used for sales and assignations related "
-"to this partner"
-msgstr ""
+"If set, this Sales Team will be used for sales and assignations related to "
+"this partner"
+msgstr "설정된 경우 이 영업 팀은 이 협력사와 관련된 영업 및 할당에 사용됩니다."
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_active
+#: model:ir.model.fields,help:sales_team.field_crm_team__active
 msgid ""
-"If the active field is set to false, it will allow you to hide the sales "
-"channel without removing it."
-msgstr ""
+"If the active field is set to false, it will allow you to hide the Sales "
+"Team without removing it."
+msgstr "활성 필드가 false로 설정되면 영업 팀을 제거하지 않고 숨길 수 있습니다."
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Integrations"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_is_follower
+msgid "Is Follower"
+msgstr "팔로워 여부"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:142
-#, python-format
-msgid "Invoiced"
-msgstr "송장 발행됨"
-
-#. module: sales_team
-#: selection:crm.team,dashboard_graph_model:0
-msgid "Invoices"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team___last_update
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings___last_update
+#: model:ir.model.fields,field_description:sales_team.field_crm_team____last_update
 msgid "Last Modified on"
-msgstr "최근 수정"
+msgstr "최근 수정일"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:190
-#, python-format
-msgid "Last Month"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_write_uid
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_write_uid
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__write_uid
 msgid "Last Updated by"
 msgstr "최근 갱신한 사람"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_write_date
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_write_date
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신 날짜"
+msgstr "최근 갱신일"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_type:0
-msgid "Line"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "주요 첨부 파일"
 
 #. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_localisation
-msgid "Localization"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_has_error
+msgid "Message Delivery error"
+msgstr "메시지 전송 오류"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Manage leads, opportunities, meetings and activities"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_ids
+msgid "Messages"
+msgstr "메시지"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_sale_contract
-msgid "Manage subscriptions and recurring invoicing"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_needaction_counter
+msgid "Number of Actions"
+msgstr "작업 수"
 
 #. module: sales_team
-#: model:res.groups,name:sales_team.group_sale_manager
-msgid "Manager"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_has_error_counter
+msgid "Number of errors"
+msgstr "오류 횟수"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:25
-#, python-format
-msgid "Meetings"
-msgstr "회의"
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr "작업이 필요한 메시지 수"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_group:0
-msgid "Month"
-msgstr ""
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "전송 오류 메시지 수"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
-msgid "More <i class=\"fa fa-caret-down\"/>"
-msgstr "더 보기 <i class=\"fa fa-caret-down\"/>"
+#: model:ir.model.fields,help:sales_team.field_crm_team__message_unread_counter
+msgid "Number of unread messages"
+msgstr "읽지 않은 메시지 수"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:42
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:44
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:220
-#, python-format
-msgid "My Pipeline"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
-msgid "My Salesteams"
-msgstr "내 영업팀"
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:50
-#, python-format
-msgid "Next 7 days"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:38
-#, python-format
-msgid "Next Activities"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/js/sales_team_dashboard.js:65
-#, python-format
-msgid "Only Integer Value should be valid."
-msgstr "오직 정수 값만이 유효합니다."
-
-#. module: sales_team
-#: model:ir.model,name:sales_team.model_res_partner
-msgid "Partner"
-msgstr "파트너"
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:102
-#, python-format
-msgid "Performance"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_graph_period
-msgid "Period"
-msgstr ""
-
-#. module: sales_team
-#: selection:crm.team,dashboard_graph_model:0
-msgid "Pipeline"
-msgstr ""
-
-#. module: sales_team
-#: selection:crm.team,team_type:0
+#: model:crm.team,name:sales_team.pos_sales_team
 msgid "Point of Sale"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Recommended Apps"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_reply_to
-msgid "Reply-To"
-msgstr "회신 주소"
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_sale_report
-msgid "Reporting"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_res_users_property_product_pricelist
-msgid "Sale Pricelist"
-msgstr "판매 가격표"
-
-#. module: sales_team
-#: selection:crm.team,dashboard_graph_model:0
-#: model:crm.team,name:sales_team.team_sales_department
-#: selection:crm.team,team_type:0
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_sale
-#: model:ir.ui.menu,name:sales_team.menu_base_partner
-#: model:ir.ui.menu,name:sales_team.menu_sales
-msgid "Sales"
-msgstr ""
+msgstr "점포판매시스템"
 
 #. module: sales_team
 #: model:ir.model,name:sales_team.model_crm_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_name
-#: model:ir.model.fields,field_description:sales_team.field_res_partner_team_id
-#: model:ir.model.fields,field_description:sales_team.field_res_users_sale_team_id
-#: model:ir.model.fields,field_description:sales_team.field_res_users_team_id
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_tree
-msgid "Sales Channel"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__name
+#: model:ir.model.fields,field_description:sales_team.field_res_partner__team_id
+#: model:ir.model.fields,field_description:sales_team.field_res_users__team_id
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_tree
+msgid "Sales Team"
+msgstr "영업팀"
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_res_users_sale_team_id
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+msgid "Sales Team name..."
+msgstr "영업팀 이름..."
+
+#. module: sales_team
+#: model:ir.model.fields,help:sales_team.field_res_users__sale_team_id
 msgid ""
-"Sales Channel the user is member of. Used to compute the members of a sales "
-"channel through the inverse one2many"
-msgstr ""
+"Sales Team the user is member of. Used to compute the members of a Sales "
+"Team through the inverse one2many"
+msgstr "사용자가 속한 영업팀입니다. one2many의 역수를 통해 영업 팀의 구성원을 계산하는 데 사용됩니다."
 
 #. module: sales_team
-#: model:ir.actions.act_window,name:sales_team.crm_team_act
+#: model:ir.actions.act_window,name:sales_team.crm_team_salesteams_act
 #: model:ir.actions.act_window,name:sales_team.sales_team_config_action
-#: model:ir.ui.menu,name:sales_team.sales_team_config
-msgid "Sales Channels"
-msgstr ""
+msgid "Sales Teams"
+msgstr "영업팀"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_group:0
-msgid "Salesperson"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
-msgid "Salesteam name..."
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
 msgid "Salesteams Search"
 msgstr "영업팀 검색"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Save"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__sequence
+msgid "Sequence"
+msgstr "순서"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Sell recurring services with automated billing"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Send quotations and manage invoicing"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Send, sign and approve documents online"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.ui.menu,name:sales_team.menu_sale_general_settings
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_view_kanban
 msgid "Settings"
 msgstr "설정"
 
 #. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:148
-#, python-format
-msgid "Target"
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__is_favorite
+msgid "Show on dashboard"
+msgstr "대시보드에 표시"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__user_id
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_salesteams_search
 msgid "Team Leader"
-msgstr "팀 리더"
+msgstr "팀장"
 
 #. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.crm_team_view_form
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid "Team Members"
 msgstr "팀 구성원"
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_color
+#: model:ir.actions.act_window,name:sales_team.crm_team_salesteams_pipelines_act
+msgid "Team Pipelines"
+msgstr "팀 파이프라인"
+
+#. module: sales_team
+#: model:ir.model.fields,help:sales_team.field_crm_team__color
 msgid "The color of the channel"
-msgstr ""
+msgstr "채널의 색상"
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_reply_to
+#: code:addons/sales_team/models/crm_team.py:0
+#: code:addons/sales_team/models/crm_team.py:0
+#, python-format
+msgid "Undefined graph model for Sales Team: %s"
+msgstr "영업팀에 대한 정의되지 않은 그래프 모델 : %s"
+
+#. module: sales_team
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_unread
+msgid "Unread Messages"
+msgstr "읽지 않은 메시지"
+
+#. module: sales_team
+#: model:ir.model.fields,field_description:sales_team.field_crm_team__message_unread_counter
+msgid "Unread Messages Counter"
+msgstr "읽지 않은 메시지 수"
+
+#. module: sales_team
+#: model_terms:ir.actions.act_window,help:sales_team.crm_team_salesteams_act
+#: model_terms:ir.actions.act_window,help:sales_team.crm_team_salesteams_pipelines_act
+#: model_terms:ir.actions.act_window,help:sales_team.sales_team_config_action
 msgid ""
-"The email address put in the 'Reply-To' of all emails sent by Odoo about "
-"cases in this sales channel"
+"Use Sales Teams to organize your sales departments.\n"
+"                    Each team will work with a separate pipeline."
 msgstr ""
+"영업 팀을 사용하여 영업 부서를 구성하십시오. \n"
+"                      각 팀은 별도의 순서를 사용합니다."
 
 #. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_dashboard_graph_model
-msgid "The graph this channel will display in the Dashboard.\n"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_dashboard_graph_period
-msgid "The time period this channel's dashboard graph will consider."
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_dashboard_graph_type
-msgid "The type of graph this channel will display in the dashboard."
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_crm_team_team_type
-msgid ""
-"The type of this channel, it will define the resources this channel uses."
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:102
-#: selection:crm.team,dashboard_graph_period:0
-#, python-format
-msgid "This Month"
-msgstr "이번 달"
-
-#. module: sales_team
-#: selection:crm.team,dashboard_graph_period:0
-msgid "This Week"
-msgstr ""
-
-#. module: sales_team
-#: selection:crm.team,dashboard_graph_period:0
-msgid "This Year"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,help:sales_team.field_res_users_property_product_pricelist
-msgid ""
-"This pricelist will be used, instead of the default one, for sales to the "
-"current partner"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:29
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:61
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:76
-#, python-format
-msgid "To Activities"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:105
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:191
-#, python-format
-msgid "To Activity Report"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:16
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:51
-#, python-format
-msgid "To Calendar"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:132
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:202
-#, python-format
-msgid "To Invoice Report"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:86
-#, python-format
-msgid "To Opportunities"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:118
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:196
-#, python-format
-msgid "To Opportunity Report"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:13
-#, python-format
-msgid "To do"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:13
-#, python-format
-msgid "Today"
-msgstr "오늘"
-
-#. module: sales_team
-#: model:ir.ui.view,arch_db:sales_team.sale_config_settings_view_form
-msgid "Track after-sales tickets"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_dashboard_graph_type
-msgid "Type"
-msgstr ""
-
-#. module: sales_team
-#: code:addons/sales_team/models/crm_team.py:122
-#: code:addons/sales_team/models/crm_team.py:125
-#, python-format
-msgid "Undefined graph model for Sales Channel: %s"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.actions.act_window,help:sales_team.crm_team_act
-#: model:ir.actions.act_window,help:sales_team.crm_team_salesteams_act
-#: model:ir.actions.act_window,help:sales_team.sales_team_config_action
-msgid ""
-"Use sales channels to organize your sales departments. \n"
-"                    Each channel will work with a separate pipeline."
-msgstr ""
+#: model:ir.model.fields,field_description:sales_team.field_res_users__sale_team_id
+msgid "User's Sales Team"
+msgstr "사용자 영업팀"
 
 #. module: sales_team
 #: model:res.groups,name:sales_team.group_sale_salesman_all_leads
 msgid "User: All Documents"
-msgstr ""
+msgstr "사용자 : 모든 문서"
 
 #. module: sales_team
 #: model:res.groups,name:sales_team.group_sale_salesman
 msgid "User: Own Documents Only"
-msgstr ""
+msgstr "사용자 : 자신의 문서만"
 
 #. module: sales_team
 #: model:ir.model,name:sales_team.model_res_users
@@ -761,68 +425,29 @@ msgstr "사용자"
 
 #. module: sales_team
 #: model:crm.team,name:sales_team.salesteam_website_sales
-#: selection:crm.team,team_type:0
 msgid "Website"
-msgstr ""
+msgstr "웹사이트"
 
 #. module: sales_team
-#: selection:crm.team,dashboard_graph_group:0
-msgid "Week"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:128
-#, python-format
-msgid "Won in Opportunities"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/js/sales_team_dashboard.js:65
-#, python-format
-msgid "Wrong value entered!"
-msgstr "잘못된 값을 입력!"
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_sale_config_settings_module_website_sign
-msgid "eSign"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:89
-#, python-format
-msgid "exp. closing"
-msgstr ""
-
-#. module: sales_team
-#. openerp-web
-#: code:addons/sales_team/static/src/xml/sales_team_dashboard.xml:79
-#, python-format
-msgid "overdue"
-msgstr ""
-
-#. module: sales_team
-#: model:ir.model,name:sales_team.model_sale_config_settings
-msgid "sale.config.settings"
-msgstr ""
+#: model:crm.team,name:sales_team.ebay_sales_team
+msgid "eBay"
+msgstr "eBay"
 
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_salesman_all_leads
 msgid ""
 "the user will have access to all records of everyone in the sales "
 "application."
-msgstr ""
+msgstr "사용자는 영업 응용 프로그램의 모든 사람의 모든 레코드에 접근할 수 있습니다."
 
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_salesman
 msgid "the user will have access to his own data in the sales application."
-msgstr ""
+msgstr "사용자는 영업 응용 프로그램에서 자신의 데이터에 접근할 수 있습니다."
 
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
-msgstr ""
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
+msgstr "사용자는 통계 보고서뿐만 아니라 판매 환경 설정에 접근할 수 있습니다."

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
-import barcodes
-import barcode_events_mixin
+from . import barcodes
+from . import barcode_events_mixin
 from . import ir_http
+from . import res_company

@@ -1,17 +1,15 @@
 odoo.define('hr_attendance.greeting_message', function (require) {
 "use strict";
 
-var BarcodeHandlerMixin = require('barcodes.BarcodeHandlerMixin');
-
+var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
-var Model = require('web.Model');
-var Widget = require('web.Widget');
+var time = require('web.time');
 
 var _t = core._t;
 
 
-var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
-    template: 'HrAttendanceGreetingMessage',
+var GreetingMessage = AbstractAction.extend({
+    contentTemplate: 'HrAttendanceGreetingMessage',
 
     events: {
         "click .o_hr_attendance_button_dismiss": function() { this.do_action(this.next_action, {clear_breadcrumbs: true}); },
@@ -20,13 +18,13 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
     init: function(parent, action) {
         var self = this;
         this._super.apply(this, arguments);
-        BarcodeHandlerMixin.init.apply(this, arguments);
+        this.activeBarcode = true;
 
         // if no correct action given (due to an erroneous back or refresh from the browser), we set the dismiss button to return
         // to the (likely) appropriate menu, according to the user access rights
         if(!action.attendance) {
-            this.stop_listening();
-            this.session.user_has_group('hr_attendance.group_hr_attendance_user').then(function(has_group) {
+            this.activeBarcode = false;
+            this.getSession().user_has_group('hr_attendance.group_hr_attendance_user').then(function(has_group) {
                 if(has_group) {
                     self.next_action = 'hr_attendance.hr_attendance_action_kiosk_mode';
                 } else {
@@ -39,7 +37,7 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
         this.next_action = action.next_action || 'hr_attendance.hr_attendance_action_my_attendances';
         // no listening to barcode scans if we aren't coming from the kiosk mode (and thus not going back to it with next_action)
         if (this.next_action != 'hr_attendance.hr_attendance_action_kiosk_mode' && this.next_action.tag != 'hr_attendance_kiosk_mode') {
-            this.stop_listening();
+            this.activeBarcode = false;
         }
 
         this.attendance = action.attendance;
@@ -50,16 +48,27 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
         this.previous_attendance_change_date = action.previous_attendance_change_date && moment.utc(action.previous_attendance_change_date).local();
 
         // check in/out times displayed in the greeting message template.
-        this.format_time = 'HH:mm:ss';
+        this.format_time = time.getLangTimeFormat();
         this.attendance.check_in_time = this.attendance.check_in && this.attendance.check_in.format(this.format_time);
         this.attendance.check_out_time = this.attendance.check_out && this.attendance.check_out.format(this.format_time);
+
+        if (action.hours_today) {
+            var duration = moment.duration(action.hours_today, "hours");
+            this.hours_today = duration.hours() + ' hours, ' + duration.minutes() + ' minutes';
+        }
+
         this.employee_name = action.employee_name;
+        this.attendanceBarcode = action.barcode;
     },
 
     start: function() {
         if (this.attendance) {
             this.attendance.check_out ? this.farewell_message() : this.welcome_message();
         }
+        if (this.activeBarcode) {
+            core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
+        }
+        return this._super.apply(this, arguments);
     },
 
     welcome_message: function() {
@@ -106,9 +115,9 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
         if(this.previous_attendance_change_date){
             var last_check_in_date = this.previous_attendance_change_date.clone();
             if(now - last_check_in_date > 1000*60*60*12){
-                this.$('.o_hr_attendance_warning_message').append(_t("Warning! Last check in was over 12 hours ago.<br/>If this isn't right, please contact Human Resources."));
+                this.$('.o_hr_attendance_warning_message').show().append(_t("<b>Warning! Last check in was over 12 hours ago.</b><br/>If this isn't right, please contact Human Resource staff"));
                 clearTimeout(this.return_to_main_menu);
-                this.stop_listening();
+                this.activeBarcode = false;
             } else if(now - last_check_in_date > 1000*60*60*8){
                 this.$('.o_hr_attendance_random_message').html(_t("Another good day's work! See you soon!"));
             }
@@ -134,23 +143,33 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
         }
     },
 
-    on_barcode_scanned: function(barcode) {
+    _onBarcodeScanned: function(barcode) {
         var self = this;
-        if (this.return_to_main_menu) {  // in case of multiple scans in the greeting message view, delete the timer, a new one will be created.
-            clearTimeout(this.return_to_main_menu);
+        if (this.attendanceBarcode !== barcode){
+            if (this.return_to_main_menu) {  // in case of multiple scans in the greeting message view, delete the timer, a new one will be created.
+                clearTimeout(this.return_to_main_menu);
+            }
+            core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
+            this._rpc({
+                    model: 'hr.employee',
+                    method: 'attendance_scan',
+                    args: [barcode, ],
+                })
+                .then(function (result) {
+                    if (result.action) {
+                        self.do_action(result.action);
+                    } else if (result.warning) {
+                        self.do_warn(result.warning);
+                        setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
+                    }
+                }, function () {
+                    setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
+                });
         }
-        var hr_employee = new Model('hr.employee');
-        hr_employee.call('attendance_scan', [barcode, ])
-            .then(function (result) {
-                if (result.action) {
-                    self.do_action(result.action);
-                } else if (result.warning) {
-                    self.do_warn(result.warning);
-                }
-            });
     },
 
     destroy: function () {
+        core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         clearTimeout(this.return_to_main_menu);
         this._super.apply(this, arguments);
     },

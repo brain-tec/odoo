@@ -4,71 +4,100 @@ odoo.define('website_form.animation', function (require) {
     var core = require('web.core');
     var time = require('web.time');
     var ajax = require('web.ajax');
-    var snippet_animation = require('web_editor.snippets.animation');
+    var publicWidget = require('web.public.widget');
 
     var _t = core._t;
     var qweb = core.qweb;
 
-
-    snippet_animation.registry.form_builder_send = snippet_animation.Class.extend({
+    publicWidget.registry.form_builder_send = publicWidget.Widget.extend({
         selector: '.s_website_form',
 
-        start: function(editable_mode) {
+        willStart: function () {
+            var prom;
+            if (!$.fn.datetimepicker) {
+                prom = ajax.loadJS("/web/static/lib/tempusdominus/tempusdominus.js");
+            }
+            return Promise.all([this._super.apply(this, arguments), prom]);
+        },
+
+        start: function (editable_mode) {
             if (editable_mode) {
                 this.stop();
                 return;
             }
             var self = this;
             this.templates_loaded = ajax.loadXML('/website_form/static/src/xml/website_form.xml', qweb);
-            this.$target.find('.o_website_form_send').on('click',function(e) {self.send(e);});
+            this.$target.find('.o_website_form_send').on('click',function (e) {self.send(e);});
 
             // Initialize datetimepickers
             var l10n = _t.database.parameters;
             var datepickers_options = {
-                startDate: moment({ y: 1900 }),
-                endDate: moment().add(200, "y"),
+                minDate: moment({ y: 1900 }),
+                maxDate: moment({ y: 9999, M: 11, d: 31 }),
                 calendarWeeks: true,
                 icons : {
                     time: 'fa fa-clock-o',
                     date: 'fa fa-calendar',
+                    next: 'fa fa-chevron-right',
+                    previous: 'fa fa-chevron-left',
                     up: 'fa fa-chevron-up',
-                    down: 'fa fa-chevron-down'
+                    down: 'fa fa-chevron-down',
                    },
-                language : moment.locale(),
-                format : time.strftime_to_moment_format(l10n.date_format +' '+ l10n.time_format),
-            }
+                locale : moment.locale(),
+                format : time.getLangDatetimeFormat(),
+            };
             this.$target.find('.o_website_form_datetime').datetimepicker(datepickers_options);
 
             // Adapt options to date-only pickers
-            datepickers_options.pickTime = false;
-            datepickers_options.format = time.strftime_to_moment_format(l10n.date_format);
+            datepickers_options.format = time.getLangDateFormat();
             this.$target.find('.o_website_form_date').datetimepicker(datepickers_options);
+
+            // Display form values from tag having data-for attribute
+            // It's necessary to handle field values generated on server-side
+            // Because, using t-att- inside form make it non-editable
+            var $values = $('[data-for=' + this.$target.attr('id') + ']');
+            if ($values.length) {
+                var values = JSON.parse($values.data('values').replace('False', '""').replace('None', '""').replace(/'/g, '"'));
+                var fields = _.pluck(this.$target.serializeArray(), 'name');
+                _.each(fields, function (field) {
+                    if (_.has(values, field)) {
+                        var $field = self.$target.find('input[name="' + field + '"], textarea[name="' + field + '"]');
+                        if (!$field.val()) {
+                            $field.val(values[field]);
+                            $field.data('website_form_original_default_value', $field.val());
+                        }
+                    }
+                });
+            }
+
+            return this._super.apply(this, arguments);
         },
 
-        stop: function() {
+        destroy: function () {
+            this._super.apply(this, arguments);
             this.$target.find('button').off('click');
         },
 
-        send: function(e) {
+        send: function (e) {
             e.preventDefault();  // Prevent the default submit behavior
             this.$target.find('.o_website_form_send').off().addClass('disabled');  // Prevent users from crazy clicking
 
             var self = this;
 
             self.$target.find('#o_website_form_result').empty();
-            if (!self.check_error_fields([])) {
+            if (!self.check_error_fields({})) {
                 self.update_status('invalid');
                 return false;
             }
 
             // Prepare form inputs
             this.form_fields = this.$target.serializeArray();
-            _.each(this.$target.find('input[type=file]'), function(input) {
-                $.each($(input).prop('files'), function(index, file) {
+            $.each(this.$target.find('input[type=file]'), function (outer_index, input) {
+                $.each($(input).prop('files'), function (index, file) {
                     // Index field name as ajax won't accept arrays of files
                     // when aggregating multiple files into a single field value
                     self.form_fields.push({
-                        name: input.name + '[' + index + ']',
+                        name: input.name + '[' + outer_index + '][' + index + ']',
                         value: file
                     });
                 });
@@ -77,7 +106,7 @@ odoo.define('website_form.animation', function (require) {
             // Serialize form inputs into a single object
             // Aggregate multiple values into arrays
             var form_values = {};
-            _.each(this.form_fields, function(input) {
+            _.each(this.form_fields, function (input) {
                 if (input.name in form_values) {
                     // If a value already exists for this field,
                     // we are facing a x2many field, so we store
@@ -88,37 +117,42 @@ odoo.define('website_form.animation', function (require) {
                         form_values[input.name] = [form_values[input.name], input.value];
                     }
                 } else {
-                    if (input.value != '') {
+                    if (input.value !== '') {
                         form_values[input.name] = input.value;
                     }
                 }
             });
 
-            // Overwrite form_values array with values from the form tag
-            // Necessary to handle field values generated server-side, since
-            // using t-att- inside a snippet makes it non-editable !
-            for (var key in this.$target.data()) {
-                if (_.str.startsWith(key, 'form_field_')){
-                    form_values[key.replace('form_field_', '')] = this.$target.data(key);
-                }
+            // force server format if usage of textual month that would not be understood server-side
+            if (time.getLangDatetimeFormat().indexOf('MMM') !== 1) {
+                this.$target.find('.form-field:not(.o_website_form_custom)')
+                .find('.o_website_form_date, .o_website_form_datetime').each(function () {
+                    var date = $(this).datetimepicker('viewDate').clone().locale('en');
+                    var format = 'YYYY-MM-DD';
+                    if ($(this).hasClass('o_website_form_datetime')) {
+                        date = date.utc();
+                        format = 'YYYY-MM-DD HH:mm:ss';
+                    }
+                    form_values[$(this).find('input').attr('name')] = date.format(format);
+                });
             }
 
             // Post form and handle result
             ajax.post(this.$target.attr('action') + (this.$target.data('force_action')||this.$target.data('model_name')), form_values)
-            .then(function(result_data) {
-                result_data = $.parseJSON(result_data);
-                if(!result_data.id) {
+            .then(function (result_data) {
+                result_data = JSON.parse(result_data);
+                if (!result_data.id) {
                     // Failure, the server didn't return the created record ID
                     self.update_status('error');
-                    if (result_data.error_fields && result_data.error_fields.length) {
+                    if (result_data.error_fields) {
                         // If the server return a list of bad fields, show these fields for users
                         self.check_error_fields(result_data.error_fields);
                     }
                 } else {
                     // Success, redirect or update status
                     var success_page = self.$target.attr('data-success_page');
-                    if(success_page) {
-                        $(location).attr('href', success_page);
+                    if (success_page) {
+                        $(window.location).attr('href', success_page);
                     }
                     else {
                         self.update_status('success');
@@ -128,37 +162,35 @@ odoo.define('website_form.animation', function (require) {
                     self.$target[0].reset();
                 }
             })
-            .fail(function(result_data){
+            .guardedCatch(function (){
                 self.update_status('error');
             });
         },
 
-        check_error_fields: function(error_fields) {
+        check_error_fields: function (error_fields) {
             var self = this;
             var form_valid = true;
             // Loop on all fields
-            this.$target.find('.form-field').each(function(k, field){
+            this.$target.find('.form-field').each(function (k, field){
                 var $field = $(field);
-                var $fields = self.$fields;
-                var field_name = $field.find('.control-label').attr('for')
+                var field_name = $field.find('.col-form-label').attr('for');
 
                 // Validate inputs for this field
-                var field_valid = true;
                 var inputs = $field.find('.o_website_form_input:not(#editable_select)');
-                var invalid_inputs = inputs.toArray().filter(function(input, k, inputs) {
+                var invalid_inputs = inputs.toArray().filter(function (input, k, inputs) {
                     // Special check for multiple required checkbox for same
                     // field as it seems checkValidity forces every required
                     // checkbox to be checked, instead of looking at other
                     // checkboxes with the same name and only requiring one
                     // of them to be checked.
-                    if (input.required && input.type == 'checkbox') {
+                    if (input.required && input.type === 'checkbox') {
                         // Considering we are currently processing a single
                         // field, we can assume that all checkboxes in the
                         // inputs variable have the same name
-                        var checkboxes = _.filter(inputs, function(input){
-                            return input.required && input.type == 'checkbox'
-                        })
-                        return !_.any(checkboxes, function(checkbox){return checkbox.checked})
+                        var checkboxes = _.filter(inputs, function (input){
+                            return input.required && input.type === 'checkbox';
+                        });
+                        return !_.any(checkboxes, function (checkbox) { return checkbox.checked; });
 
                     // Special cases for dates and datetimes
                     } else if ($(input).hasClass('o_website_form_date')) {
@@ -171,26 +203,32 @@ odoo.define('website_form.animation', function (require) {
                         }
                     }
                     return !input.checkValidity();
-                })
+                });
 
                 // Update field color if invalid or erroneous
-                $field.removeClass('has-error');
-                if(invalid_inputs.length || error_fields.indexOf(field_name) >= 0){
-                    $field.addClass('has-error');
+                $field.removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
+                if (invalid_inputs.length || error_fields[field_name]){
+                    $field.addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid')
+                    if (_.isString(error_fields[field_name])){
+                        $field.popover({content: error_fields[field_name], trigger: 'hover', container: 'body', placement: 'top'});
+                        // update error message and show it.
+                        $field.data("bs.popover").config.content = error_fields[field_name];
+                        $field.popover('show');
+                    }
                     form_valid = false;
                 }
             });
             return form_valid;
         },
 
-        is_datetime_valid: function(value, type_of_date) {
+        is_datetime_valid: function (value, type_of_date) {
             if (value === "") {
                 return true;
             } else {
                 try {
                     this.parse_date(value, type_of_date);
                     return true;
-                } catch(e) {
+                } catch (e) {
                     return false;
                 }
             }
@@ -198,8 +236,8 @@ odoo.define('website_form.animation', function (require) {
 
         // This is a stripped down version of format.js parse_value function
         parse_date: function (value, type_of_date, value_if_empty) {
-            var date_pattern = time.strftime_to_moment_format(_t.database.parameters.date_format),
-                time_pattern = time.strftime_to_moment_format(_t.database.parameters.time_format);
+            var date_pattern = time.getLangDateFormat(),
+                time_pattern = time.getLangTimeFormat();
             var date_pattern_wo_zero = date_pattern.replace('MM','M').replace('DD','D'),
                 time_pattern_wo_zero = time_pattern.replace('HH','H').replace('mm','m').replace('ss','s');
             switch (type_of_date) {
@@ -217,13 +255,13 @@ odoo.define('website_form.animation', function (require) {
             return value;
         },
 
-        update_status: function(status) {
+        update_status: function (status) {
             var self = this;
-            if (status != 'success') {  // Restore send button behavior if result is an error
-                this.$target.find('.o_website_form_send').on('click',function(e) {self.send(e);}).removeClass('disabled');
+            if (status !== 'success') {  // Restore send button behavior if result is an error
+                this.$target.find('.o_website_form_send').on('click',function (e) {self.send(e);}).removeClass('disabled');
             }
             var $result = this.$('#o_website_form_result');
-            this.templates_loaded.done(function () {
+            this.templates_loaded.then(function () {
                 $result.replaceWith(qweb.render("website_form.status_" + status));
             });
         },

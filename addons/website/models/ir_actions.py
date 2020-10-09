@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import urlparse
+from werkzeug import urls
 
 from odoo import api, fields, models
 from odoo.http import request
@@ -32,7 +31,7 @@ class ServerAction(models.Model):
         link = website_path or xml_id or (self.id and '%d' % self.id) or ''
         if base_url and link:
             path = '%s/%s' % ('/website/action', link)
-            return '%s' % urlparse.urljoin(base_url, path)
+            return urls.url_join(base_url, path)
         return ''
 
     @api.depends('state', 'website_published', 'website_path', 'xml_id')
@@ -40,6 +39,8 @@ class ServerAction(models.Model):
         for action in self:
             if action.state == 'code' and action.website_published:
                 action.website_url = action._compute_website_url(action.website_path, action.xml_id)
+            else:
+                action.website_url = False
 
     @api.model
     def _get_eval_context(self, action):

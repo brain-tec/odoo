@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import ir_actions
-import ir_ui_view
-import ir_qweb
-import ir_http
-import ir_attachment
-import res_company
-import res_partner
-import res_config
-import website
-import web_planner
+from . import assets
+from . import ir_actions
+from . import ir_attachment
+from . import ir_http
+from . import ir_qweb
+from . import ir_qweb_fields
+from . import mixins
+from . import website
+from . import website_menu
+from . import website_page
+from . import website_rewrite
+from . import ir_rule
+from . import ir_translation
+from . import ir_ui_view
+from . import res_company
+from . import res_partner
+from . import res_users
+from . import res_config_settings
+from . import res_lang
+from . import website_visitor

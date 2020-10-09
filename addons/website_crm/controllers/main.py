@@ -1,91 +1,71 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import babel
-from datetime import datetime, timedelta
-
-from odoo import http, _
+from odoo import http
 from odoo.http import request
-
-from odoo.addons.website.controllers.backend import WebsiteBackend
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from odoo.addons.website_form.controllers.main import WebsiteForm
 
 
-class WebsiteCrmBackend(WebsiteBackend):
+class WebsiteForm(WebsiteForm):
 
-    @http.route()
-    def fetch_dashboard_data(self, date_from, date_to):
+    def _get_country(self):
+        country_code = request.session.geoip and request.session.geoip.get('country_code') or False
+        if country_code:
+            return request.env['res.country'].sudo().search([('code', '=', country_code)], limit=1)
+        return request.env['res.country']
 
-        results = super(WebsiteCrmBackend, self).fetch_dashboard_data(date_from, date_to)
-        results['groups']['sale_salesman'] = request.env['res.users'].has_group('sales_team.group_sale_salesman')
-        if not results['groups']['sale_salesman']:
-            return results
+    def _get_phone_fields_to_validate(self):
+        return ['phone', 'mobile']
 
-        date_from = datetime.strptime(date_from, DEFAULT_SERVER_DATE_FORMAT)
-        date_to = datetime.strptime(date_to, DEFAULT_SERVER_DATE_FORMAT)
+    # Check and insert values from the form on the model <model> + validation phone fields
+    @http.route('/website_form/<string:model_name>', type='http', auth="public", methods=['POST'], website=True)
+    def website_form(self, model_name, **kwargs):
+        model_record = request.env['ir.model'].sudo().search([('model', '=', model_name), ('website_form_access', '=', True)])
+        if model_record and hasattr(request.env[model_name], 'phone_format'):
+            try:
+                data = self.extract_data(model_record, request.params)
+            except:
+                # no specific management, super will do it
+                pass
+            else:
+                record = data.get('record', {})
+                phone_fields = self._get_phone_fields_to_validate()
+                country = request.env['res.country'].browse(record.get('country_id'))
+                contact_country = country.exists() and country or self._get_country()
+                for phone_field in phone_fields:
+                    if not record.get(phone_field):
+                        continue
+                    number = record[phone_field]
+                    fmt_number = request.env[model_name].phone_format(number, contact_country)
+                    request.params.update({phone_field: fmt_number})
 
-        lead_domain = []
+        if model_name == 'crm.lead' and not request.params.get('state_id'):
+            geoip_country_code = request.session.get('geoip', {}).get('country_code')
+            geoip_state_code = request.session.get('geoip', {}).get('region')
+            if geoip_country_code and geoip_state_code:
+                state = request.env['res.country.state'].search([('code', '=', geoip_state_code), ('country_id.code', '=', geoip_country_code)])
+                if state:
+                    request.params['state_id'] = state.id
+        return super(WebsiteForm, self).website_form(model_name, **kwargs)
 
-        website_utm = request.env['ir.model.data'].xmlid_to_res_id('utm.utm_medium_website')
-        if website_utm:
-            lead_domain += [('medium_id', '=', website_utm)]
+    def insert_record(self, request, model, values, custom, meta=None):
+        is_lead_model = model.model == 'crm.lead'
+        if is_lead_model:
+            if 'company_id' not in values:
+                values['company_id'] = request.website.company_id.id
+            lang = request.context.get('lang', False)
+            lang_id = request.env["res.lang"].sudo().search([('code', '=', lang)], limit=1).id
+            values['lang_id'] = lang_id
 
-        lead_ids = request.env['crm.lead'].search(
-            lead_domain + [
-                ('create_date', '>=', date_from.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                ('create_date', '<=', date_to.strftime(DEFAULT_SERVER_DATE_FORMAT))],
-            )
+        result = super(WebsiteForm, self).insert_record(request, model, values, custom, meta=meta)
 
-        leads = [{
-            'create_date': datetime.strptime(lead.create_date, DEFAULT_SERVER_DATETIME_FORMAT).strftime(DEFAULT_SERVER_DATE_FORMAT),
-            'campaign_id': lead.campaign_id.name,
-            'medium_id': lead.medium_id.name,
-            'source_id': lead.source_id.name,
-        } for lead in lead_ids]
-
-        leads_graph = self._compute_lead_graph(date_from, date_to, lead_domain)
-        previous_leads_graph = self._compute_lead_graph(date_from - timedelta(days=(date_to - date_from).days), date_from, lead_domain, previous=True)
-
-        results['dashboards']['leads'] = {
-            'graph': [
-                {
-                    'values': leads_graph,
-                    'key': _('Leads'),
-                },
-                {
-                    'values': previous_leads_graph,
-                    'key': _('Previous Leads'),
-                },
-            ],
-            'leads': leads,
-            'lead_fields': {
-                'create_date': _('Create Date'),
-                'campaign_id': _('Campaign'),
-                'medium_id': _('Medium'),
-                'source_id': _('Source'),
-            },
-        }
-
-        return results
-
-    def _compute_lead_graph(self, date_from, date_to, lead_domain, previous=False):
-
-        days_between = (date_to - date_from).days
-        date_list = [(date_from + timedelta(days=x)) for x in range(0, days_between + 1)]
-
-        daily_leads = request.env['crm.lead'].read_group(
-            domain=lead_domain + [
-                ('create_date', '>=', date_from.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                ('create_date', '<=', date_to.strftime(DEFAULT_SERVER_DATE_FORMAT))],
-            fields=['create_date'],
-            groupby='create_date:day')
-
-        daily_leads_dict = {l['create_date:day']: l['create_date_count'] for l in daily_leads}
-
-        leads_graph = [{
-            '0': d.strftime(DEFAULT_SERVER_DATE_FORMAT) if not previous else (d + timedelta(days=days_between)).strftime(DEFAULT_SERVER_DATE_FORMAT),
-            # Respect read_group format in models.py
-            '1': daily_leads_dict.get(babel.dates.format_date(d, format='dd MMM yyyy', locale=request.env.context.get('lang') or 'en_US'), 0)
-        } for d in date_list]
-
-        return leads_graph
+        if is_lead_model:
+            visitor_sudo = request.env['website.visitor']._get_visitor_from_request()
+            if visitor_sudo and result:
+                lead_sudo = request.env['crm.lead'].browse(result).sudo()
+                if lead_sudo.exists():
+                    vals = {'lead_ids': [(4, result)]}
+                    if not visitor_sudo.lead_ids and not visitor_sudo.partner_id:
+                        vals['name'] = lead_sudo.contact_name
+                    visitor_sudo.write(vals)
+        return result

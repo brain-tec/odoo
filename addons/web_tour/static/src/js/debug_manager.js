@@ -1,10 +1,9 @@
-odoo.define('web_tour.DebugManager', function (require) {
+odoo.define('web_tour.DebugManager.Backend', function (require) {
 "use strict";
 
 var core = require("web.core");
-var DebugManager = require('web.DebugManager');
+var DebugManager = require('web.DebugManager.Backend');
 var Dialog = require("web.Dialog");
-var Model = require('web.Model');
 
 var tour = require('web_tour.tour');
 
@@ -20,23 +19,30 @@ DebugManager.include({
     consume_tours: function () {
         var active_tours = get_active_tours();
         if (active_tours.length > 0) { // tours might have been consumed meanwhile
-            new Model('web_tour.tour').call('consume', [active_tours]).then(function () {
-                window.location.reload();
-            });
+            this._rpc({
+                    model: 'web_tour.tour',
+                    method: 'consume',
+                    args: [active_tours],
+                })
+                .then(function () {
+                    window.location.reload();
+                });
         }
     },
-    start_tour: function() {
+    start_tour: function () {
         var dialog = new Dialog(this, {
             title: 'Tours',
             $content: core.qweb.render('WebClient.DebugManager.ToursDialog', {
                 tours: tour.tours
             }),
-        }).open();
-
-        dialog.$('.o_start_tour').on('click', function(e) {
-            e.preventDefault();
-            tour.run($(e.target).data('name'));
         });
+        dialog.opened().then(function () {
+            dialog.$('.o_start_tour').on('click', function (e) {
+                e.preventDefault();
+                tour.run($(e.target).data('name'));
+            });
+        });
+        dialog.open();
     },
 });
 

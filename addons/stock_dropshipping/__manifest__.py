@@ -4,13 +4,13 @@
 {
     'name': 'Drop Shipping',
     'version': '1.0',
-    'category': 'Warehouse',
+    'category': 'Operations/Inventory',
     'summary': 'Drop Shipping',
     'description': """
 Manage drop shipping orders
 ===========================
 
-This module adds a pre-configured Drop Shipping picking type
+This module adds a pre-configured Drop Shipping operation type
 as well as a procurement route that allow configuring Drop
 Shipping products and orders.
 
@@ -20,18 +20,8 @@ going through the retailer's warehouse. In this case no
 internal transfer document is needed.
 
 """,
-    'website': 'https://www.odoo.com/page/warehouse',
-    'depends': ['purchase', 'sale_stock'],
-    'data': ['data/stock_data.xml'],
-    'test': [
-        '../account/test/account_minimal_test.xml',
-        '../stock_account/test/stock_valuation_account.xml',
-        'test/cancellation_propagated.yml',
-        'test/crossdock.yml',
-        'test/dropship.yml',
-        'test/procurementexception.yml',
-        'test/lifo_price.yml'
-    ],
+    'depends': ['sale_purchase', 'sale_stock', 'purchase_stock'],
+    'data': ['data/stock_data.xml', 'views/sale_order_views.xml'],
     'installable': True,
     'auto_install': False,
 }

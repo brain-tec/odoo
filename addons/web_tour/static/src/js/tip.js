@@ -1,17 +1,22 @@
 odoo.define('web_tour.Tip', function(require) {
 "use strict";
 
+var config = require('web.config');
 var core = require('web.core');
 var Widget = require('web.Widget');
+var _t = core._t;
 
 var Tip = Widget.extend({
     template: "Tip",
+    xmlDependencies: ['/web_tour/static/src/xml/tip.xml'],
     events: {
+        click: '_onTipClicked',
         mouseenter: "_to_info_mode",
         mouseleave: "_to_bubble_mode",
     },
     /**
-     * @param {info} [Object] description of the tip, containing the following keys:
+     * @param {Widget} parent
+     * @param {Object} [info] description of the tip, containing the following keys:
      *  - content [String] the html content of the tip
      *  - event_handlers [Object] description of optional event handlers to bind to the tip:
      *    - event [String] the event name
@@ -40,14 +45,14 @@ var Tip = Widget.extend({
         };
     },
     /**
-     * @param {$anchor} [JQuery] the node on which the tip should be placed
+     * @param {jQuery} $anchor the node on which the tip should be placed
      */
     attach_to: function ($anchor) {
         this.$anchor = $anchor;
         this.$ideal_location = this._get_ideal_location();
 
         var position = this.$ideal_location.css("position");
-        if (position === "static") {
+        if (position === "static" || position === "relative") {
             this.$ideal_location.addClass("o_tooltip_parent");
         }
 
@@ -128,27 +133,44 @@ var Tip = Widget.extend({
             $location = $location.parent();
             o = $location.css("overflow");
             p = $location.css("position");
-        } while ((o === "visible" || o === "hidden") && p !== "fixed" && $location[0] !== document.body);
+        } while (
+            $location.hasClass('dropdown-menu') ||
+            (
+                (o === "visible" || o === "hidden") &&
+                p !== "fixed" &&
+                $location[0].tagName.toUpperCase() !== 'BODY'
+            )
+        );
 
         return $location;
     },
     _reposition: function () {
         if (this.tip_opened) return;
+        if (!this.$el) return;
         this.$el.removeClass("o_animated");
 
+        // Reverse left/right position if direction is right to left
+        var appendAt = this.info.position;
+        var rtlMap = {left: 'right', right: 'left'};
+        if (rtlMap[appendAt] && _t.database.parameters.direction === 'rtl') {
+            appendAt = rtlMap[appendAt];
+        }
         this.$el.position({
-            my: this._get_spaced_inverted_position(this.info.position),
-            at: this.info.position,
+            my: this._get_spaced_inverted_position(appendAt),
+            at: appendAt,
             of: this.$anchor,
             collision: "none",
         });
 
+        // Reverse overlay if direction is right to left
+        var positionRight = _t.database.parameters.direction === 'rtl' ? "right" : "left";
+        var positionLeft = _t.database.parameters.direction === 'rtl' ? "left" : "right";
         var offset = this.$el.offset();
         this.$tooltip_overlay.css({
             top: -Math.min((this.info.position === "bottom" ? this.info.space : this.info.overlay.y), offset.top),
-            right: -Math.min((this.info.position === "left" ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
+            right: -Math.min((this.info.position === positionRight ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
             bottom: -Math.min((this.info.position === "top" ? this.info.space : this.info.overlay.y), this.$window.height() - (offset.top + this.init_height + this.double_border_width)),
-            left: -Math.min((this.info.position === "right" ? this.info.space : this.info.overlay.x), offset.left),
+            left: -Math.min((this.info.position === positionLeft ? this.info.space : this.info.overlay.x), offset.left),
         });
 
         this.position = this.$el.position();
@@ -156,8 +178,22 @@ var Tip = Widget.extend({
         this.$el.addClass("o_animated");
     },
     _bind_anchor_events: function () {
-        this.consume_event = Tip.getConsumeEventType(this.$anchor);
-        this.$anchor.on(this.consume_event + ".anchor", (function (e) {
+        this.consume_event = Tip.getConsumeEventType(this.$anchor, this.info.run);
+        this.$consumeEventAnchor = this.$anchor;
+        // jQuery-ui draggable triggers 'drag' events on the .ui-draggable element,
+        // but the tip is attached to the .ui-draggable-handle element which may
+        // be one of its children (or the element itself)
+        if (this.consume_event === "drag") {
+            this.$consumeEventAnchor = this.$anchor.closest('.ui-draggable');
+        } else if (this.consume_event.includes('apply.daterangepicker')) {
+            this.$consumeEventAnchor = this.$anchor.parent().children('.o_field_date_range');
+        }
+        // when an element is dragged inside a sortable container (with classname
+        // 'ui-sortable'), jQuery triggers the 'sort' event on the container
+        if (this.consume_event === "sort") {
+            this.$consumeEventAnchor = this.$anchor.closest('.ui-sortable');
+        }
+        this.$consumeEventAnchor.on(this.consume_event + ".anchor", (function (e) {
             if (e.type !== "mousedown" || e.which === 1) { // only left click
                 this.trigger("tip_consumed");
                 this._unbind_anchor_events();
@@ -168,6 +204,7 @@ var Tip = Widget.extend({
     },
     _unbind_anchor_events: function () {
         this.$anchor.off(".anchor");
+        this.$consumeEventAnchor.off(".anchor");
     },
     _get_spaced_inverted_position: function (position) {
         if (position === "right") return "left+" + this.info.space;
@@ -214,7 +251,7 @@ var Tip = Widget.extend({
         } else {
             overflow = (offset.top + this.content_height + this.double_border_width + this.info.overlay.y > this.$window.height());
         }
-        if (posVertical && overflow || this.info.position === "left") {
+        if (posVertical && overflow || this.info.position === "left" || (_t.database.parameters.direction === 'rtl' && this.info.position == "right")) {
             mbLeft -= (this.content_width - this.init_width);
         }
         if (!posVertical && overflow || this.info.position === "top") {
@@ -259,16 +296,51 @@ var Tip = Widget.extend({
             margin: 0,
         });
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * On touch devices, closes the tip when clicked.
+     *
+     * @private
+     */
+    _onTipClicked: function () {
+        if (config.device.touch && this.tip_opened) {
+            this._to_bubble_mode();
+        }
+    },
 });
 
-Tip.getConsumeEventType = function ($element) {
-    if ($element.is("textarea") || $element.filter("input").is(function () {
+/**
+ * @static
+ * @param {jQuery} $element
+ * @param {string} [run] the run parameter of the tip (only strings are useful)
+ */
+Tip.getConsumeEventType = function ($element, run) {
+    if ($element.hasClass('o_field_many2one') || $element.hasClass('o_field_many2manytags')) {
+        return 'autocompleteselect';
+    } else if ($element.is("textarea") || $element.filter("input").is(function () {
         var type = $(this).attr("type");
         return !type || !!type.match(/^(email|number|password|search|tel|text|url)$/);
     })) {
+        // FieldDateRange triggers a special event when using the widget
+        if ($element.hasClass("o_field_date_range")) {
+            return "apply.daterangepicker input";
+        }
         return "input";
+    } else if ($element.hasClass('ui-draggable-handle')) {
+        return "drag";
+    } else if (typeof run === 'string' && run.indexOf('drag_and_drop') === 0) {
+        // this is a heuristic: the element has to be dragged and dropped but it
+        // doesn't have class 'ui-draggable-handle', so we check if it has an
+        // ui-sortable parent, and if so, we conclude that its event type is 'sort'
+        if ($element.closest('.ui-sortable').length) {
+            return 'sort';
+        }
     }
-    return "mousedown";
+    return "click";
 };
 
 return Tip;

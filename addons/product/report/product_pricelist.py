@@ -7,14 +7,15 @@ from odoo.tools import float_round
 
 class report_product_pricelist(models.AbstractModel):
     _name = 'report.product.report_pricelist'
+    _description = 'Product Price List Report'
 
     @api.model
-    def render_html(self, docids, data=None):
+    def _get_report_values(self, docids, data=None):
         data = data if data is not None else {}
         pricelist = self.env['product.pricelist'].browse(data.get('form', {}).get('price_list', False))
         products = self.env['product.product'].browse(data.get('ids', data.get('active_ids')))
         quantities = self._get_quantity(data)
-        docargs = {
+        return {
             'doc_ids': data.get('ids', data.get('active_ids')),
             'doc_model': 'product.pricelist',
             'docs': products,
@@ -25,10 +26,10 @@ class report_product_pricelist(models.AbstractModel):
                 categories_data=self._get_categories(pricelist, products, quantities)
             ),
         }
-        return self.env['report'].render('product.report_pricelist', docargs)
 
     def _get_quantity(self, data):
-        return sorted([data['form'][key] for key in data['form'].keys() if key.startswith('qty') and data['form'][key]])
+        form = data and data.get('form') or {}
+        return sorted([form[key] for key in form if key.startswith('qty') and form[key]])
 
     def _get_categories(self, pricelist, products, quantities):
         categ_data = []

@@ -5,9 +5,12 @@ var PosBaseWidget = require('point_of_sale.BaseWidget');
 var gui = require('point_of_sale.gui');
 var keyboard = require('point_of_sale.keyboard');
 var models = require('point_of_sale.models');
+var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
 var ajax = require('web.ajax');
-var CrashManager = require('web.CrashManager');
+var CrashManager = require('web.CrashManager').CrashManager;
+var rpc = require('web.rpc');
+var BarcodeEvents = require('barcodes.BarcodeEvents').BarcodeEvents;
 
 
 var _t = core._t;
@@ -78,8 +81,7 @@ var OrderSelectorWidget = PosBaseWidget.extend({
 
 /* ------- The User Name Widget ------- */
 
-// Displays the current cashier's name and allows
-// to switch between cashiers.
+// Displays the current cashier's name
 
 var UsernameWidget = PosBaseWidget.extend({
     template: 'UsernameWidget',
@@ -87,27 +89,8 @@ var UsernameWidget = PosBaseWidget.extend({
         options = options || {};
         this._super(parent,options);
     },
-    renderElement: function(){
-        var self = this;
-        this._super();
-
-        this.$el.click(function(){
-            self.click_username();
-        });
-    },
-    click_username: function(){
-        var self = this;
-        this.gui.select_user({
-            'security':     true,
-            'current_user': this.pos.get_cashier(),
-            'title':      _t('Change Cashier'),
-        }).then(function(user){
-            self.pos.set_cashier(user);
-            self.renderElement();
-        });
-    },
     get_name: function(){
-        var user = this.pos.cashier || this.pos.user;
+        var user = this.pos.get_cashier();
         if(user){
             return user.name;
         }else{
@@ -128,7 +111,9 @@ var HeaderButtonWidget = PosBaseWidget.extend({
         options = options || {};
         this._super(parent, options);
         this.action = options.action;
-        this.label   = options.label;
+        this.label  = options.label;
+        this.button_class = options.button_class;
+
     },
     renderElement: function(){
         var self = this;
@@ -139,8 +124,8 @@ var HeaderButtonWidget = PosBaseWidget.extend({
             });
         }
     },
-    show: function(){ this.$el.removeClass('oe_hidden'); },
-    hide: function(){ this.$el.addClass('oe_hidden'); },
+    show: function() { this.$el.removeClass('oe_hidden'); },
+    hide: function() { this.$el.addClass('oe_hidden'); },
 });
 
 /* --------- The Debug Widget --------- */
@@ -263,14 +248,14 @@ var DebugWidget = PosBaseWidget.extend({
                 'body':  _t('This operation will permanently destroy all paid orders from the local storage. You will lose all the data. This operation cannot be undone.'),
                 confirm: function(){
                     self.pos.db.remove_all_orders();
-                    self.pos.set({synch: { state:'connected', pending: 0 }});
+                    self.pos.set_synch('connected', 0);
                 },
             });
         });
         this.$('.button.delete_unpaid_orders').click(function(){
             self.gui.show_popup('confirm',{
                 'title': _t('Delete Unpaid Orders ?'),
-                'body':  _t('This operation will permanently destroy all unpaid orders from all sessions that have been put in the local storage. You will lose all the data and exit the point of sale. This operation cannot be undone.'),
+                'body':  _t('This operation will destroy all unpaid orders in the browser. You will lose all the unsaved data and exit the point of sale. This operation cannot be undone.'),
                 confirm: function(){
                     self.pos.db.remove_all_unpaid_orders();
                     window.location = '/';
@@ -292,6 +277,10 @@ var DebugWidget = PosBaseWidget.extend({
                 _t("paid orders") + ' ' + moment().format('YYYY-MM-DD-HH-mm-ss') + '.json',
                 ".export_paid_orders", ".download_paid_orders"
             );
+        });
+
+        this.$('.button.display_refresh').click(function () {
+            self.pos.proxy.message('display_refresh', {});
         });
 
         this.$('.button.import_orders input').on('change', function(event) {
@@ -325,6 +314,7 @@ var DebugWidget = PosBaseWidget.extend({
 
 var StatusWidget = PosBaseWidget.extend({
     status: ['connected','connecting','disconnected','warning','error'],
+
     set_status: function(status,msg){
         for(var i = 0; i < this.status.length; i++){
             this.$('.js_'+this.status[i]).addClass('oe_hidden');
@@ -377,8 +367,8 @@ var ProxyStatusWidget = StatusWidget.extend({
             }
             if( this.pos.config.iface_print_via_proxy || 
                 this.pos.config.iface_cashdrawer ){
-                var printer = status.drivers.escpos ? status.drivers.escpos.status : false;
-                if( printer != 'connected' && printer != 'connecting'){
+                var printer = status.drivers.printer ? status.drivers.printer.status : false;
+                if (printer != 'connected' && printer != 'connecting') {
                     warning = true;
                     msg = msg ? msg + ' & ' : msg;
                     msg += _t('Printer');
@@ -392,10 +382,11 @@ var ProxyStatusWidget = StatusWidget.extend({
                     msg += _t('Scale');
                 }
             }
+
             msg = msg ? msg + ' ' + _t('Offline') : msg;
             this.set_status(warning ? 'warning' : 'connected', msg);
         }else{
-            this.set_status(status.status,'');
+            this.set_status(status.status, status.msg || '');
         }
     },
     start: function(){
@@ -416,16 +407,149 @@ var ProxyStatusWidget = StatusWidget.extend({
 
 /* --------- The Sale Details --------- */
 
-// Generates a report to print the sales of the
-// day on a ticket
-
+/** Print an overview of todays sales.
+ *
+ * If the current cashier is a manager all sales of the day will be printed, else only the sales of the current
+ * session will be printed.
+ */
 var SaleDetailsButton = PosBaseWidget.extend({
     template: 'SaleDetailsButton',
     start: function(){
         var self = this;
         this.$el.click(function(){
-            self.pos.proxy.print_sale_details();
+            self.print_sale_details();
         });
+    },
+
+    /** Print an overview of todays sales.
+     *
+     * By default this will print all sales of the day for current PoS config.
+     */
+    print_sale_details: function () {
+        var self = this;
+        rpc.query({
+            model: 'report.point_of_sale.report_saledetails',
+            method: 'get_sale_details',
+            args: [false, false, false, [this.pos.pos_session.id]],
+        })
+        .then(function(result){
+            var env = {
+                widget: new PosBaseWidget(self),
+                company: self.pos.company,
+                pos: self.pos,
+                products: result.products,
+                payments: result.payments,
+                taxes: result.taxes,
+                total_paid: result.total_paid,
+                date: (new Date()).toLocaleString(),
+            };
+            var report = QWeb.render('SaleDetailsReport', env);
+            self.pos.proxy.printer.print_receipt(report);
+        });
+    },
+});
+
+/* User interface for distant control over the Client display on the IoT Box */
+// The boolean posbox_supports_display (in devices.js) will allow interaction to the IoT Box on true, prevents it otherwise
+// We don't want the incompatible IoT Box to be flooded with 404 errors on arrival of our many requests as it triggers losses of connections altogether
+var ClientScreenWidget = PosBaseWidget.extend({
+    template: 'ClientScreenWidget',
+
+    change_status_display: function(status) {
+        var msg = ''
+        if (status === 'success') {
+            this.$('.js_warning').addClass('oe_hidden');
+            this.$('.js_disconnected').addClass('oe_hidden');
+            this.$('.js_connected').removeClass('oe_hidden');
+        } else if (status === 'warning') {
+            this.$('.js_disconnected').addClass('oe_hidden');
+            this.$('.js_connected').addClass('oe_hidden');
+            this.$('.js_warning').removeClass('oe_hidden');
+            msg = _t('Connected, Not Owned');
+        } else {
+            this.$('.js_warning').addClass('oe_hidden');
+            this.$('.js_connected').addClass('oe_hidden');
+            this.$('.js_disconnected').removeClass('oe_hidden');
+            msg = _t('Disconnected')
+            if (status === 'not_found') {
+                msg = _t('Client Screen Unsupported. Please upgrade the IoT Box')
+            }
+        }
+
+        this.$('.oe_customer_display_text').text(msg);
+    },
+
+    status_loop: function() {
+        var self = this;
+        function loop() {
+            if (self.pos.proxy.posbox_supports_display) {
+                self.pos.proxy.test_ownership_of_client_screen().then(
+                    function (data) {
+                        if (typeof data === 'string') {
+                            data = JSON.parse(data);
+                        }
+                        if (data.status === 'OWNER') {
+                            self.change_status_display('success');
+                        } else {
+                            self.change_status_display('warning');
+                        }
+                        setTimeout(loop, 3000);
+                    },
+                    function (err) {
+                        if (err.abort) {
+                            // Stop the loop
+                            return;
+                        }
+                        if (typeof err == "undefined") {
+                            self.change_status_display('failure');
+                        } else {
+                            self.change_status_display('not_found');
+                            self.pos.proxy.posbox_supports_display = false;
+                        }
+                        setTimeout(loop, 3000);
+                    }
+                );
+            }
+        }
+        loop();
+    },
+
+    start: function(){
+        if (this.pos.config.iface_customer_facing_display) {
+                this.show();
+                var self = this;
+                this.$el.click(function(){
+                    self.pos.render_html_for_customer_facing_display().then(function(rendered_html) {
+                        self.pos.proxy.take_ownership_over_client_screen(rendered_html).then(
+                        function(data) {
+                            if (typeof data === 'string') {
+                                data = JSON.parse(data);
+                            }
+                            if (data.status === 'success') {
+                               self.change_status_display('success');
+                            } else {
+                               self.change_status_display('warning');
+                            }
+                            if (!self.pos.proxy.posbox_supports_display) {
+                                self.pos.proxy.posbox_supports_display = true;
+                                self.status_loop();
+                            }
+                        }, 
+        
+                        function(err) {
+                            if (typeof err == "undefined") {
+                                self.change_status_display('failure');
+                            } else {
+                                self.change_status_display('not_found');
+                            }
+                        });
+                    });
+
+                });
+                this.status_loop();
+        } else {
+            this.hide();
+        }
     },
 });
 
@@ -451,7 +575,7 @@ var SaleDetailsButton = PosBaseWidget.extend({
 // - .gui which controls the switching between 
 //   screens and the showing/closing of popups
 
-var Chrome = PosBaseWidget.extend({
+var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
     template: 'Chrome',
     init: function() { 
         var self = this;
@@ -460,7 +584,7 @@ var Chrome = PosBaseWidget.extend({
         this.started  = new $.Deferred(); // resolves when DOM is online
         this.ready    = new $.Deferred(); // resolves when the whole GUI has been loaded
 
-        this.pos = new models.PosModel(this.session,{chrome:this});
+        this.pos = new models.PosModel(this.getSession(), {chrome:this});
         this.gui = new gui.Gui({pos: this.pos, chrome: this});
         this.chrome = this; // So that chrome's childs have chrome set automatically
         this.pos.gui = this.gui;
@@ -468,13 +592,12 @@ var Chrome = PosBaseWidget.extend({
         this.logo_click_time  = 0;
         this.logo_click_count = 0;
 
-            this.previous_touch_y_coordinate = -1;
+        this.previous_touch_y_coordinate = -1;
 
         this.widget = {};   // contains references to subwidgets instances
 
         this.cleanup_dom();
-
-        this.pos.ready.done(function(){
+        this.pos.ready.then(function(){
             self.build_chrome();
             self.build_widgets();
             self.disable_rubberbanding();
@@ -483,7 +606,7 @@ var Chrome = PosBaseWidget.extend({
             self.loading_hide();
             self.replace_crashmanager();
             self.pos.push_order();
-        }).fail(function(err){   // error when loading models data from the backend
+        }).guardedCatch(function (err) { // error when loading models data from the backend
             self.loading_error(err);
         });
     },
@@ -494,15 +617,12 @@ var Chrome = PosBaseWidget.extend({
         $(window).off();
         $('html').off();
         $('body').off();
-        $(this.$el).parent().off();
-        $('document').off();
-        $('.oe_web_client').off();
-        $('.openerp_webclient_container').off();
+        // The above lines removed the bindings, but we really need them for the barcode
+        BarcodeEvents.start();
     },
 
     build_chrome: function() { 
         var self = this;
-        FastClick.attach(document.body);
 
         if ($.browser.chrome) {
             var chrome_version = $.browser.version.split('.')[0];
@@ -690,11 +810,16 @@ var Chrome = PosBaseWidget.extend({
             'name':   'sale_details',
             'widget': SaleDetailsButton,
             'append':  '.pos-rightheader',
-            'condition': function(){ return this.pos.config.use_proxy; },
+            'condition': function(){ return this.pos.proxy.printer; },
         },{
             'name':   'proxy_status',
             'widget': ProxyStatusWidget,
             'append':  '.pos-rightheader',
+            'condition': function(){ return this.pos.config.use_proxy; },
+        },{
+            'name': 'screen_status',
+            'widget': ClientScreenWidget,
+            'append': '.pos-rightheader',
             'condition': function(){ return this.pos.config.use_proxy; },
         },{
             'name':   'notification',
@@ -705,8 +830,9 @@ var Chrome = PosBaseWidget.extend({
             'widget': HeaderButtonWidget,
             'append':  '.pos-rightheader',
             'args': {
-                label: _lt('Close'),
+                label: _t('Close'),
                 action: function(){ 
+                    this.$el.addClass('close_button');
                     var self = this;
                     if (!this.confirmed) {
                         this.$el.addClass('confirm');
@@ -737,30 +863,34 @@ var Chrome = PosBaseWidget.extend({
         },
     ],
 
-    // This method instantiates all the screens, widgets, etc. 
-    build_widgets: function() {
-        var classe;
-
-        for (var i = 0; i < this.widgets.length; i++) {
-            var def = this.widgets[i];
-            if ( !def.condition || def.condition.call(this) ) {
-                var args = typeof def.args === 'function' ? def.args(this) : def.args;
-                var w = new def.widget(this, args || {});
-                if (def.replace) {
-                    w.replace(this.$(def.replace));
-                } else if (def.append) {
-                    w.appendTo(this.$(def.append));
-                } else if (def.prepend) {
-                    w.prependTo(this.$(def.prepend));
+    load_widgets: function(widgets) {
+        for (var i = 0; i < widgets.length; i++) {
+            var widget = widgets[i];
+            if ( !widget.condition || widget.condition.call(this) ) {
+                var args = typeof widget.args === 'function' ? widget.args(this) : widget.args;
+                var w = new widget.widget(this, args || {});
+                if (widget.replace) {
+                    w.replace(this.$(widget.replace));
+                } else if (widget.append) {
+                    w.appendTo(this.$(widget.append));
+                } else if (widget.prepend) {
+                    w.prependTo(this.$(widget.prepend));
                 } else {
                     w.appendTo(this.$el);
                 }
-                this.widget[def.name] = w;
+                this.widget[widget.name] = w;
             }
         }
+    },
+
+    // This method instantiates all the screens, widgets, etc.
+    build_widgets: function() {
+        var self = this;
+        this.load_widgets(this.widgets);
 
         this.screens = {};
-        for (i = 0; i < this.gui.screen_classes.length; i++) {
+        var classe;
+        for (var i = 0; i < this.gui.screen_classes.length; i++) {
             classe = this.gui.screen_classes[i];
             if (!classe.condition || classe.condition.call(this)) {
                 var screen = new classe.widget(this,{});
@@ -771,15 +901,15 @@ var Chrome = PosBaseWidget.extend({
         }
 
         this.popups = {};
-        for (i = 0; i < this.gui.popup_classes.length; i++) {
-            classe = this.gui.popup_classes[i];
-            if (!classe.condition || classe.condition.call(this)) {
-                var popup = new classe.widget(this,{});
-                    popup.appendTo(this.$('.popups'));
-                this.popups[classe.name] = popup;
-                this.gui.add_popup(classe.name, popup);
+        _.forEach(this.gui.popup_classes, function (classe) {
+            if (!classe.condition || classe.condition.call(self)) {
+                var popup = new classe.widget(self,{});
+                popup.appendTo(self.$('.popups')).then(function () {
+                    self.popups[classe.name] = popup;
+                    self.gui.add_popup(classe.name, popup);
+                });
             }
-        }
+        });
 
         this.gui.set_startup_screen('products');
         this.gui.set_default_screen('products');
@@ -799,9 +929,9 @@ return {
     OrderSelectorWidget: OrderSelectorWidget,
     ProxyStatusWidget: ProxyStatusWidget,
     SaleDetailsButton: SaleDetailsButton,
+    ClientScreenWidget: ClientScreenWidget,
     StatusWidget: StatusWidget,
     SynchNotificationWidget: SynchNotificationWidget,
     UsernameWidget: UsernameWidget,
 };
 });
-

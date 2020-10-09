@@ -5,41 +5,48 @@
 """
 Miscellaneous tools used by OpenERP.
 """
-
 from functools import wraps
-import cPickle
-import cProfile
+import babel
+import babel.dates
 from contextlib import contextmanager
+import datetime
+import math
 import subprocess
-import logging
+import io
 import os
+
+import collections
 import passlib.utils
+import pickle as pickle_
+import pytz
 import re
 import socket
 import sys
 import threading
 import time
 import types
+import unicodedata
 import werkzeug.utils
 import zipfile
-from cStringIO import StringIO
-from collections import defaultdict, Iterable, Mapping, MutableSet, OrderedDict
-from itertools import islice, izip, groupby, repeat
+from collections import defaultdict, Iterable, Mapping, MutableMapping, MutableSet, OrderedDict
+from itertools import islice, groupby as itergroupby, repeat
 from lxml import etree
-from which import which
-from threading import local
+
+from .which import which
 import traceback
-import csv
 from operator import itemgetter
 
 try:
-    from html2text import html2text
+    # pylint: disable=bad-python3-import
+    import cProfile
 except ImportError:
-    html2text = None
+    import profile as cProfile
 
-from config import config
-from cache import *
-from .parse_version import parse_version 
+
+from .config import config
+from .cache import *
+from .parse_version import parse_version
+from . import pycompat
 
 import odoo
 # get_encodings, ustr and exception_to_unicode were originally from tools.misc.
@@ -139,10 +146,9 @@ def file_open(name, mode="r", subdir='addons', pathinfo=False):
     """Open a file from the OpenERP root, using a subdir folder.
 
     Example::
-    
+
     >>> file_open('hr/report/timesheer.xsl')
     >>> file_open('addons/hr/report/timesheet.xsl')
-    >>> file_open('../../base/report/rml_template.xsl', subdir='addons/hr/report', pathinfo=True)
 
     @param name name of the file
     @param mode file open mode
@@ -152,7 +158,7 @@ def file_open(name, mode="r", subdir='addons', pathinfo=False):
     @return fileobject if pathinfo is False else (fileobject, filepath)
     """
     import odoo.modules as addons
-    adps = addons.module.ad_paths
+    adps = odoo.addons.__path__
     rtp = os.path.normcase(os.path.abspath(config['root_path']))
 
     basename = name
@@ -200,7 +206,7 @@ def _fileopen(path, mode, basedir, pathinfo, basename=None):
     name = os.path.normpath(os.path.normcase(os.path.join(basedir, path)))
 
     import odoo.modules as addons
-    paths = addons.module.ad_paths + [config['root_path']]
+    paths = odoo.addons.__path__ + [config['root_path']]
     for addons_path in paths:
         addons_path = os.path.normpath(os.path.normcase(addons_path)) + os.sep
         if name.startswith(addons_path):
@@ -213,7 +219,10 @@ def _fileopen(path, mode, basedir, pathinfo, basename=None):
     # Give higher priority to module directories, which is
     # a more common case than zipped modules.
     if os.path.isfile(name):
-        fo = open(name, mode)
+        if 'b' in mode:
+            fo = open(name, mode)
+        else:
+            fo = io.open(name, mode, encoding='utf-8')
         if pathinfo:
             return fo, name
         return fo
@@ -233,10 +242,9 @@ def _fileopen(path, mode, basedir, pathinfo, basename=None):
             zipname = tail
         zpath = os.path.join(basedir, head + '.zip')
         if zipfile.is_zipfile(zpath):
-            from cStringIO import StringIO
             zfile = zipfile.ZipFile(zpath)
             try:
-                fo = StringIO()
+                fo = io.BytesIO()
                 fo.write(zfile.read(os.path.join(
                     os.path.basename(head), zipname).replace(
                         os.sep, '/')))
@@ -248,7 +256,7 @@ def _fileopen(path, mode, basedir, pathinfo, basename=None):
                 pass
     # Not found
     if name.endswith('.rml'):
-        raise IOError('Report %r doesn\'t exist or deleted' % basename)
+        raise IOError('Report %r does not exist or has been deleted' % basename)
     raise IOError('File not found: %s' % basename)
 
 
@@ -256,7 +264,7 @@ def _fileopen(path, mode, basedir, pathinfo, basename=None):
 # iterables
 #----------------------------------------------------------
 def flatten(list):
-    """Flatten a list of elements into a uniqu list
+    """Flatten a list of elements into a unique list
     Author: Christophe Simonis (christophe@tinyerp.com)
 
     Examples::
@@ -274,21 +282,17 @@ def flatten(list):
     >>> flatten(t)
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     """
-
-    def isiterable(x):
-        return hasattr(x, "__iter__")
-
     r = []
     for e in list:
-        if isiterable(e):
-            map(r.append, flatten(e))
-        else:
+        if isinstance(e, (bytes, str)) or not isinstance(e, collections.Iterable):
             r.append(e)
+        else:
+            r.extend(flatten(e))
     return r
 
 def reverse_enumerate(l):
-    """Like enumerate but in the other sens
-    
+    """Like enumerate but in the other direction
+
     Usage::
     >>> a = ['a', 'b', 'c']
     >>> it = reverse_enumerate(a)
@@ -303,7 +307,7 @@ def reverse_enumerate(l):
       File "<stdin>", line 1, in <module>
     StopIteration
     """
-    return izip(xrange(len(l)-1, -1, -1), reversed(l))
+    return zip(range(len(l)-1, -1, -1), reversed(l))
 
 def partition(pred, elems):
     """ Return a pair equivalent to:
@@ -336,18 +340,49 @@ def topological_sort(elems):
             visited.add(n)
             if n in elems:
                 # first visit all dependencies of n, then append n to result
-                map(visit, elems[n])
+                for it in elems[n]:
+                    visit(it)
                 result.append(n)
 
-    map(visit, elems)
+    for el in elems:
+        visit(el)
 
     return result
+
+
+def merge_sequences(*iterables):
+    """ Merge several iterables into a list. The result is the union of the
+        iterables, ordered following the partial order given by the iterables,
+        with a bias towards the end for the last iterable::
+
+            seq = merge_sequences(['A', 'B', 'C'])
+            assert seq == ['A', 'B', 'C']
+
+            seq = merge_sequences(
+                ['A', 'B', 'C'],
+                ['Z'],                  # 'Z' can be anywhere
+                ['Y', 'C'],             # 'Y' must precede 'C';
+                ['A', 'X', 'Y'],        # 'X' must follow 'A' and precede 'Y'
+            )
+            assert seq == ['A', 'B', 'X', 'Y', 'C', 'Z']
+    """
+    # we use an OrderedDict to keep elements in order by default
+    deps = OrderedDict()                # {item: elems_before_item}
+    for iterable in iterables:
+        prev = None
+        for index, item in enumerate(iterable):
+            if not index:
+                deps.setdefault(item, [])
+            else:
+                deps.setdefault(item, []).append(prev)
+            prev = item
+    return topological_sort(deps)
 
 
 try:
     import xlwt
 
-    # add some sanitizations to respect the excel sheet name restrictions
+    # add some sanitization to respect the excel sheet name restrictions
     # as the sheet name is often translatable, can not control the input
     class PatchedWorkbook(xlwt.Workbook):
         def add_sheet(self, name, cell_overwrite_ok=False):
@@ -363,11 +398,10 @@ try:
 except ImportError:
     xlwt = None
 
-
 try:
     import xlsxwriter
 
-    # add some sanitizations to respect the excel sheet name restrictions
+    # add some sanitization to respect the excel sheet name restrictions
     # as the sheet name is often translatable, can not control the input
     class PatchedXlsxWorkbook(xlsxwriter.Workbook):
 
@@ -387,122 +421,6 @@ except ImportError:
     xlsxwriter = None
 
 
-class UpdateableStr(local):
-    """ Class that stores an updateable string (used in wizards)
-    """
-
-    def __init__(self, string=''):
-        self.string = string
-
-    def __str__(self):
-        return str(self.string)
-
-    def __repr__(self):
-        return str(self.string)
-
-    def __nonzero__(self):
-        return bool(self.string)
-
-
-class UpdateableDict(local):
-    """Stores an updateable dict to use in wizards
-    """
-
-    def __init__(self, dict=None):
-        if dict is None:
-            dict = {}
-        self.dict = dict
-
-    def __str__(self):
-        return str(self.dict)
-
-    def __repr__(self):
-        return str(self.dict)
-
-    def clear(self):
-        return self.dict.clear()
-
-    def keys(self):
-        return self.dict.keys()
-
-    def __setitem__(self, i, y):
-        self.dict.__setitem__(i, y)
-
-    def __getitem__(self, i):
-        return self.dict.__getitem__(i)
-
-    def copy(self):
-        return self.dict.copy()
-
-    def iteritems(self):
-        return self.dict.iteritems()
-
-    def iterkeys(self):
-        return self.dict.iterkeys()
-
-    def itervalues(self):
-        return self.dict.itervalues()
-
-    def pop(self, k, d=None):
-        return self.dict.pop(k, d)
-
-    def popitem(self):
-        return self.dict.popitem()
-
-    def setdefault(self, k, d=None):
-        return self.dict.setdefault(k, d)
-
-    def update(self, E, **F):
-        return self.dict.update(E, F)
-
-    def values(self):
-        return self.dict.values()
-
-    def get(self, k, d=None):
-        return self.dict.get(k, d)
-
-    def has_key(self, k):
-        return self.dict.has_key(k)
-
-    def items(self):
-        return self.dict.items()
-
-    def __cmp__(self, y):
-        return self.dict.__cmp__(y)
-
-    def __contains__(self, k):
-        return self.dict.__contains__(k)
-
-    def __delitem__(self, y):
-        return self.dict.__delitem__(y)
-
-    def __eq__(self, y):
-        return self.dict.__eq__(y)
-
-    def __ge__(self, y):
-        return self.dict.__ge__(y)
-
-    def __gt__(self, y):
-        return self.dict.__gt__(y)
-
-    def __hash__(self):
-        return self.dict.__hash__()
-
-    def __iter__(self):
-        return self.dict.__iter__()
-
-    def __le__(self, y):
-        return self.dict.__le__(y)
-
-    def __len__(self):
-        return self.dict.__len__()
-
-    def __lt__(self, y):
-        return self.dict.__lt__(y)
-
-    def __ne__(self, y):
-        return self.dict.__ne__(y)
-
 def to_xml(s):
     return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
@@ -518,36 +436,23 @@ def scan_languages():
     :returns: a list of (lang_code, lang_name) pairs
     :rtype: [(str, unicode)]
     """
-    csvpath = odoo.modules.module.get_resource_path('base', 'res', 'res.lang.csv')
+    csvpath = odoo.modules.module.get_resource_path('base', 'data', 'res.lang.csv')
     try:
-        # read (code, name) from languages in base/res/res.lang.csv
-        result = []
-        with open(csvpath) as csvfile:
-            reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-            fields = reader.next()
+        # read (code, name) from languages in base/data/res.lang.csv
+        with open(csvpath, 'rb') as csvfile:
+            reader = pycompat.csv_reader(csvfile, delimiter=',', quotechar='"')
+            fields = next(reader)
             code_index = fields.index("code")
             name_index = fields.index("name")
-            for row in reader:
-                result.append((ustr(row[code_index]), ustr(row[name_index])))
+            result = [
+                (row[code_index], row[name_index])
+                for row in reader
+            ]
     except Exception:
         _logger.error("Could not read %s", csvpath)
         result = []
 
     return sorted(result or [('en_US', u'English')], key=itemgetter(1))
-
-def get_user_companies(cr, user):
-    def _get_company_children(cr, ids):
-        if not ids:
-            return []
-        cr.execute('SELECT id FROM res_company WHERE parent_id IN %s', (tuple(ids),))
-        res = [x[0] for x in cr.fetchall()]
-        res.extend(_get_company_children(cr, res))
-        return res
-    cr.execute('SELECT company_id FROM res_users WHERE id=%s', (user,))
-    user_comp = cr.fetchone()[0]
-    if not user_comp:
-        return []
-    return [user_comp] + _get_company_children(cr, [user_comp])
 
 def mod10r(number):
     """
@@ -580,8 +485,8 @@ def human_size(sz):
     """
     if not sz:
         return False
-    units = ('bytes', 'Kb', 'Mb', 'Gb')
-    if isinstance(sz,basestring):
+    units = ('bytes', 'Kb', 'Mb', 'Gb', 'Tb')
+    if isinstance(sz, str):
         sz=len(sz)
     s, i = float(sz), 0
     while s >= 1024 and i < len(units)-1:
@@ -619,7 +524,7 @@ class profile(object):
         def wrapper(*args, **kwargs):
             profile = cProfile.Profile()
             result = profile.runcall(f, *args, **kwargs)
-            profile.dump_stats(self.fname or ("%s.cprof" % (f.func_name,)))
+            profile.dump_stats(self.fname or ("%s.cprof" % (f.__name__,)))
             return result
 
         return wrapper
@@ -662,9 +567,9 @@ def detect_ip_addr():
 
             # try 32 bit kernel:
             if ip_addr is None:
-                ifaces = filter(None, [namestr[i:i+32].split('\0', 1)[0] for i in range(0, outbytes, 32)])
+                ifaces = [namestr[i:i+32].split('\0', 1)[0] for i in range(0, outbytes, 32)]
 
-                for ifname in [iface for iface in ifaces if iface != 'lo']:
+                for ifname in [iface for iface in ifaces if iface if iface != 'lo']:
                     ip_addr = socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, pack('256s', ifname[:15]))[20:24])
                     break
 
@@ -681,6 +586,8 @@ DEFAULT_SERVER_TIME_FORMAT = "%H:%M:%S"
 DEFAULT_SERVER_DATETIME_FORMAT = "%s %s" % (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_TIME_FORMAT)
+
+DATE_LENGTH = len(datetime.date.today().strftime(DEFAULT_SERVER_DATE_FORMAT))
 
 # Python's strftime supports only the format directives
 # that are available on the platform's libc, so in order to
@@ -800,37 +707,17 @@ def posix_to_ldml(fmt, locale):
 def split_every(n, iterable, piece_maker=tuple):
     """Splits an iterable into length-n pieces. The last piece will be shorter
        if ``n`` does not evenly divide the iterable length.
-       @param ``piece_maker``: function to build the pieces
-       from the slices (tuple,list,...)
+
+       :param int n: maximum size of each generated chunk
+       :param Iterable iterable: iterable to chunk into pieces
+       :param piece_maker: callable taking an iterable and collecting each
+                           chunk from its slice, *must consume the entire slice*.
     """
     iterator = iter(iterable)
     piece = piece_maker(islice(iterator, n))
     while piece:
         yield piece
         piece = piece_maker(islice(iterator, n))
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-class upload_data_thread(threading.Thread):
-    def __init__(self, email, data, type):
-        self.args = [('email',email),('type',type),('data',data)]
-        super(upload_data_thread,self).__init__()
-    def run(self):
-        try:
-            import urllib
-            args = urllib.urlencode(self.args)
-            fp = urllib.urlopen('http://www.openerp.com/scripts/survey.php', args)
-            fp.read()
-            fp.close()
-        except Exception:
-            pass
-
-def upload_data(email, data, type='SURVEY'):
-    a = upload_data_thread(email, data, type)
-    a.start()
-    return True
 
 def get_and_group_by_field(cr, uid, obj, ids, field, context=None):
     """ Read the values of ``field´´ for the given ``ids´´ and group ids by value.
@@ -864,6 +751,21 @@ def attrgetter(*items):
             return tuple(resolve_attr(obj, attr) for attr in items)
     return g
 
+# ---------------------------------------------
+# String management
+# ---------------------------------------------
+
+# Inspired by http://stackoverflow.com/questions/517923
+def remove_accents(input_str):
+    """Suboptimal-but-better-than-nothing way to replace accented
+    latin letters by an ASCII equivalent. Will obviously change the
+    meaning of input_str and work only for some cases"""
+    if not input_str:
+        return input_str
+    input_str = ustr(input_str)
+    nkfd_form = unicodedata.normalize('NFKD', input_str)
+    return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
+
 class unquote(str):
     """A subclass of str that implements repr() without enclosing quotation marks
        or escaping, keeping the original string untouched. The name come from Lisp's unquote.
@@ -885,7 +787,7 @@ class unquote(str):
         return self
 
 class UnquoteEvalContext(defaultdict):
-    """Defaultdict-based evaluation context that returns 
+    """Defaultdict-based evaluation context that returns
        an ``unquote`` string for any missing name used during
        the evaluation.
        Mostly useful for evaluating OpenERP domains/contexts that
@@ -932,7 +834,7 @@ class mute_logger(object):
 
     def __enter__(self):
         for logger in self.loggers:
-            assert isinstance(logger, basestring),\
+            assert isinstance(logger, str),\
                 "A logger name must be a string, got %s" % type(logger)
             logging.getLogger(logger).addFilter(self)
 
@@ -979,6 +881,7 @@ class CountingStream(object):
             self.stopped = True
             raise StopIteration()
         return val
+    __next__ = next
 
 def stripped_sys_argv(*strip_args):
     """Return sys.argv with some arguments stripped, suitable for reexecution or subprocesses"""
@@ -986,7 +889,7 @@ def stripped_sys_argv(*strip_args):
     assert all(config.parser.has_option(s) for s in strip_args)
     takes_value = dict((s, config.parser.get_option(s).takes_value()) for s in strip_args)
 
-    longs, shorts = list(tuple(y) for _, y in groupby(strip_args, lambda x: x.startswith('--')))
+    longs, shorts = list(tuple(y) for _, y in itergroupby(strip_args, lambda x: x.startswith('--')))
     longs_eq = tuple(l + '=' for l in longs if takes_value[l])
 
     args = sys.argv[:]
@@ -1017,7 +920,7 @@ class ConstantMapping(Mapping):
 
     def __iter__(self):
         """
-        same as len, defaultdict udpates its iterable keyset with each key
+        same as len, defaultdict updates its iterable keyset with each key
         requested, is there a point for this?
         """
         return iter([])
@@ -1026,8 +929,10 @@ class ConstantMapping(Mapping):
         return self._value
 
 
-def dumpstacks(sig=None, frame=None):
-    """ Signal handler: dump a stack trace for each existing thread."""
+def dumpstacks(sig=None, frame=None, thread_idents=None):
+    """ Signal handler: dump a stack trace for each existing thread or given
+    thread(s) specified through the ``thread_idents`` sequence.
+    """
     code = []
 
     def extract_stack(stack):
@@ -1038,21 +943,21 @@ def dumpstacks(sig=None, frame=None):
 
     # code from http://stackoverflow.com/questions/132058/getting-stack-trace-from-a-running-python-application#answer-2569696
     # modified for python 2.5 compatibility
-    threads_info = {th.ident: {'name': th.name,
+    threads_info = {th.ident: {'repr': repr(th),
                                'uid': getattr(th, 'uid', 'n/a'),
                                'dbname': getattr(th, 'dbname', 'n/a'),
                                'url': getattr(th, 'url', 'n/a')}
                     for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
-        thread_info = threads_info.get(threadId, {})
-        code.append("\n# Thread: %s (id:%s) (db:%s) (uid:%s) (url:%s)" %
-                    (thread_info.get('name', 'n/a'),
-                     threadId,
-                     thread_info.get('dbname', 'n/a'),
-                     thread_info.get('uid', 'n/a'),
-                     thread_info.get('url', 'n/a')))
-        for line in extract_stack(stack):
-            code.append(line)
+        if not thread_idents or threadId in thread_idents:
+            thread_info = threads_info.get(threadId, {})
+            code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
+                        (thread_info.get('repr', threadId),
+                         thread_info.get('dbname', 'n/a'),
+                         thread_info.get('uid', 'n/a'),
+                         thread_info.get('url', 'n/a')))
+            for line in extract_stack(stack):
+                code.append(line)
 
     if odoo.evented:
         # code from http://stackoverflow.com/questions/12510648/in-gevent-how-can-i-dump-stack-traces-of-all-running-greenlets
@@ -1074,9 +979,13 @@ def freehash(arg):
         if isinstance(arg, Mapping):
             return hash(frozendict(arg))
         elif isinstance(arg, Iterable):
-            return hash(frozenset(map(freehash, arg)))
+            return hash(frozenset(freehash(item) for item in arg))
         else:
             return id(arg)
+
+def clean_context(context):
+    """ This function take a dictionary and remove each entry with its key starting with 'default_' """
+    return {k: v for k, v in context.items() if not k.startswith('default_')}
 
 class frozendict(dict):
     """ An implementation of an immutable dictionary. """
@@ -1095,7 +1004,7 @@ class frozendict(dict):
     def update(self, *args, **kwargs):
         raise NotImplementedError("'update' not supported on frozendict")
     def __hash__(self):
-        return hash(frozenset((key, freehash(val)) for key, val in self.iteritems()))
+        return hash(frozenset((key, freehash(val)) for key, val in self.items()))
 
 class Collector(Mapping):
     """ A mapping from keys to lists. This is essentially a space optimization
@@ -1115,6 +1024,48 @@ class Collector(Mapping):
     def __len__(self):
         return len(self._map)
 
+
+class StackMap(MutableMapping):
+    """ A stack of mappings behaving as a single mapping, and used to implement
+        nested scopes. The lookups search the stack from top to bottom, and
+        returns the first value found. Mutable operations modify the topmost
+        mapping only.
+    """
+    __slots__ = ['_maps']
+
+    def __init__(self, m=None):
+        self._maps = [] if m is None else [m]
+
+    def __getitem__(self, key):
+        for mapping in reversed(self._maps):
+            try:
+                return mapping[key]
+            except KeyError:
+                pass
+        raise KeyError(key)
+
+    def __setitem__(self, key, val):
+        self._maps[-1][key] = val
+
+    def __delitem__(self, key):
+        del self._maps[-1][key]
+
+    def __iter__(self):
+        return iter({key for mapping in self._maps for key in mapping})
+
+    def __len__(self):
+        return sum(1 for key in self)
+
+    def __str__(self):
+        return u"<StackMap %s>" % self._maps
+
+    def pushmap(self, m=None):
+        self._maps.append({} if m is None else m)
+
+    def popmap(self):
+        return self._maps.pop()
+
+
 class OrderedSet(MutableSet):
     """ A set collection that remembers the elements first insertion order. """
     __slots__ = ['_map']
@@ -1131,11 +1082,73 @@ class OrderedSet(MutableSet):
     def discard(self, elem):
         self._map.pop(elem, None)
 
+
 class LastOrderedSet(OrderedSet):
     """ A set collection that remembers the elements last insertion order. """
     def add(self, elem):
         OrderedSet.discard(self, elem)
         OrderedSet.add(self, elem)
+
+
+class IterableGenerator:
+    """ An iterable object based on a generator function, which is called each
+        time the object is iterated over.
+    """
+    __slots__ = ['func', 'args']
+
+    def __init__(self, func, *args):
+        self.func = func
+        self.args = args
+
+    def __iter__(self):
+        return self.func(*self.args)
+
+
+def groupby(iterable, key=None):
+    """ Return a collection of pairs ``(key, elements)`` from ``iterable``. The
+        ``key`` is a function computing a key value for each element. This
+        function is similar to ``itertools.groupby``, but aggregates all
+        elements under the same key, not only consecutive elements.
+    """
+    if key is None:
+        key = lambda arg: arg
+    groups = defaultdict(list)
+    for elem in iterable:
+        groups[key(elem)].append(elem)
+    return groups.items()
+
+def unique(it):
+    """ "Uniquifier" for the provided iterable: will output each element of
+    the iterable once.
+
+    The iterable's elements must be hashahble.
+
+    :param Iterable it:
+    :rtype: Iterator
+    """
+    seen = set()
+    for e in it:
+        if e not in seen:
+            seen.add(e)
+            yield e
+
+class Reverse(object):
+    """ Wraps a value and reverses its ordering, useful in key functions when
+    mixing ascending and descending sort on non-numeric data as the
+    ``reverse`` parameter can not do piecemeal reordering.
+    """
+    __slots__ = ['val']
+
+    def __init__(self, val):
+        self.val = val
+
+    def __eq__(self, other): return self.val == other.val
+    def __ne__(self, other): return self.val != other.val
+
+    def __ge__(self, other): return self.val <= other.val
+    def __gt__(self, other): return self.val < other.val
+    def __le__(self, other): return self.val >= other.val
+    def __lt__(self, other): return self.val > other.val
 
 @contextmanager
 def ignore(*exc):
@@ -1151,6 +1164,21 @@ if parse_version(getattr(werkzeug, '__version__', '0.0')) < parse_version('0.9.0
 else:
     def html_escape(text):
         return werkzeug.utils.escape(text)
+
+
+def get_lang(env, lang_code=False):
+    """
+    Retrieve the first lang object installed, by checking the parameter lang_code,
+    the context and then the company. If no lang is installed from those variables,
+    fallback on the first lang installed in the system.
+    :param str lang_code: the locale (i.e. en_US)
+    :return res.lang: the first lang found that is installed on the system.
+    """
+    langs = [code for code, _ in env['res.lang'].get_installed()]
+    for code in [lang_code, env.context.get('lang'), env.user.company_id.partner_id.lang, langs[0]]:
+        if code in langs:
+            return env['res.lang']._lang_get(code)
+
 
 def formatLang(env, value, digits=None, grouping=True, monetary=False, dp=False, currency_obj=False):
     """
@@ -1168,16 +1196,11 @@ def formatLang(env, value, digits=None, grouping=True, monetary=False, dp=False,
             digits = decimal_precision_obj.precision_get(dp)
         elif currency_obj:
             digits = currency_obj.decimal_places
-        elif (hasattr(value, '_field') and isinstance(value._field, (float_field, function_field)) and value._field.digits):
-                digits = value._field.digits[1]
-                if not digits and digits is not 0:
-                    digits = DEFAULT_DIGITS
 
-    if isinstance(value, (str, unicode)) and not value:
+    if isinstance(value, str) and not value:
         return ''
 
-    lang = env.context.get('lang') or env.user.company_id.partner_id.lang or 'en_US'
-    lang_obj = env['res.lang']._lang_get(lang)
+    lang_obj = get_lang(env)
 
     res = lang_obj.format('%.' + str(digits) + 'f', value, grouping=grouping, monetary=monetary)
 
@@ -1188,6 +1211,158 @@ def formatLang(env, value, digits=None, grouping=True, monetary=False, dp=False,
             res = '%s %s' % (currency_obj.symbol, res)
     return res
 
+
+def format_date(env, value, lang_code=False, date_format=False):
+    '''
+        Formats the date in a given format.
+
+        :param env: an environment.
+        :param date, datetime or string value: the date to format.
+        :param string lang_code: the lang code, if not specified it is extracted from the
+            environment context.
+        :param string date_format: the format or the date (LDML format), if not specified the
+            default format of the lang.
+        :return: date formatted in the specified format.
+        :rtype: string
+    '''
+    if not value:
+        return ''
+    if isinstance(value, str):
+        if len(value) < DATE_LENGTH:
+            return ''
+        if len(value) > DATE_LENGTH:
+            # a datetime, convert to correct timezone
+            value = odoo.fields.Datetime.from_string(value)
+            value = odoo.fields.Datetime.context_timestamp(env['res.lang'], value)
+        else:
+            value = odoo.fields.Datetime.from_string(value)
+
+    lang = get_lang(env, lang_code)
+    locale = babel.Locale.parse(lang.code)
+    if not date_format:
+        date_format = posix_to_ldml(lang.date_format, locale=locale)
+
+    return babel.dates.format_date(value, format=date_format, locale=locale)
+
+def parse_date(env, value, lang_code=False):
+    '''
+        Parse the date from a given format. If it is not a valid format for the
+        localization, return the original string.
+
+        :param env: an environment.
+        :param string value: the date to parse.
+        :param string lang_code: the lang code, if not specified it is extracted from the
+            environment context.
+        :return: date object from the localized string
+        :rtype: datetime.date
+    '''
+    lang = get_lang(env, lang_code)
+    locale = babel.Locale.parse(lang.code)
+    try:
+        return babel.dates.parse_date(value, locale=locale)
+    except:
+        return value
+
+
+def format_datetime(env, value, tz=False, dt_format='medium', lang_code=False):
+    """ Formats the datetime in a given format.
+
+        :param {str, datetime} value: naive datetime to format either in string or in datetime
+        :param {str} tz: name of the timezone  in which the given datetime should be localized
+        :param {str} dt_format: one of “full”, “long”, “medium”, or “short”, or a custom date/time pattern compatible with `babel` lib
+        :param {str} lang_code: ISO code of the language to use to render the given datetime
+    """
+    if not value:
+        return ''
+    if isinstance(value, str):
+        timestamp = odoo.fields.Datetime.from_string(value)
+    else:
+        timestamp = value
+
+    tz_name = tz or env.user.tz or 'UTC'
+    utc_datetime = pytz.utc.localize(timestamp, is_dst=False)
+    try:
+        context_tz = pytz.timezone(tz_name)
+        localized_datetime = utc_datetime.astimezone(context_tz)
+    except Exception:
+        localized_datetime = utc_datetime
+
+    lang = get_lang(env, lang_code)
+
+    locale = babel.Locale.parse(lang.code or lang_code)  # lang can be inactive, so `lang`is empty
+    if not dt_format:
+        date_format = posix_to_ldml(lang.date_format, locale=locale)
+        time_format = posix_to_ldml(lang.time_format, locale=locale)
+        dt_format = '%s %s' % (date_format, time_format)
+
+    # Babel allows to format datetime in a specific language without change locale
+    # So month 1 = January in English, and janvier in French
+    # Be aware that the default value for format is 'medium', instead of 'short'
+    #     medium:  Jan 5, 2016, 10:20:31 PM |   5 janv. 2016 22:20:31
+    #     short:   1/5/16, 10:20 PM         |   5/01/16 22:20
+    # Formatting available here : http://babel.pocoo.org/en/latest/dates.html#date-fields
+    return babel.dates.format_datetime(localized_datetime, dt_format, locale=locale)
+
+
+def format_time(env, value, tz=False, time_format='medium', lang_code=False):
+    """ Format the given time (hour, minute and second) with the current user preference (language, format, ...)
+
+        :param value: the time to format
+        :type value: `datetime.time` instance. Could be timezoned to display tzinfo according to format (e.i.: 'full' format)
+        :param format: one of “full”, “long”, “medium”, or “short”, or a custom date/time pattern
+        :param lang_code: ISO
+
+        :rtype str
+    """
+    if not value:
+        return ''
+
+    lang = get_lang(env, lang_code)
+    locale = babel.Locale.parse(lang.code)
+    if not time_format:
+        time_format = posix_to_ldml(lang.time_format, locale=locale)
+
+    return babel.dates.format_time(value, format=time_format, locale=locale)
+
+
+def _format_time_ago(env, time_delta, lang_code=False, add_direction=True):
+    if not lang_code:
+        langs = [code for code, _ in env['res.lang'].get_installed()]
+        lang_code = env.context['lang'] if env.context.get('lang') in langs else (env.user.company_id.partner_id.lang or langs[0])
+    locale = babel.Locale.parse(lang_code)
+    return babel.dates.format_timedelta(-time_delta, add_direction=add_direction, locale=locale)
+
+
+def format_amount(env, amount, currency, lang_code=False):
+    fmt = "%.{0}f".format(currency.decimal_places)
+    lang = get_lang(env, lang_code)
+
+    formatted_amount = lang.format(fmt, currency.round(amount), grouping=True, monetary=True)\
+        .replace(r' ', u'\N{NO-BREAK SPACE}').replace(r'-', u'-\N{ZERO WIDTH NO-BREAK SPACE}')
+
+    pre = post = u''
+    if currency.position == 'before':
+        pre = u'{symbol}\N{NO-BREAK SPACE}'.format(symbol=currency.symbol or '')
+    else:
+        post = u'\N{NO-BREAK SPACE}{symbol}'.format(symbol=currency.symbol or '')
+
+    return u'{pre}{0}{post}'.format(formatted_amount, pre=pre, post=post)
+
+
+def format_duration(value):
+    """ Format a float: used to display integral or fractional values as
+        human-readable time spans (e.g. 1.5 as "01:30").
+    """
+    hours, minutes = divmod(abs(value) * 60, 60)
+    minutes = round(minutes)
+    if minutes == 60:
+        minutes = 0
+        hours += 1
+    if value < 0:
+        return '-%02d:%02d' % (hours, minutes)
+    return '%02d:%02d' % (hours, minutes)
+
+
 def _consteq(str1, str2):
     """ Constant-time string comparison. Suitable to compare bytestrings of fixed,
         known length only, because length difference is optimized. """
@@ -1195,26 +1370,26 @@ def _consteq(str1, str2):
 
 consteq = getattr(passlib.utils, 'consteq', _consteq)
 
-class Pickle(object):
-    @classmethod
-    def load(cls, stream, errors=False):
-        unpickler = cPickle.Unpickler(stream)
-        # pickle builtins: str/unicode, int/long, float, bool, tuple, list, dict, None
-        unpickler.find_global = None
-        try:
-            return unpickler.load()
-        except Exception:
-            _logger.warning('Failed unpickling data, returning default: %r', errors, exc_info=True)
-            return errors
-
-    @classmethod
-    def loads(cls, text):
-        return cls.load(StringIO(text))
-
-    dumps = cPickle.dumps
-    dump = cPickle.dump
-
-pickle = Pickle
+# forbid globals entirely: str/unicode, int/long, float, bool, tuple, list, dict, None
+class Unpickler(pickle_.Unpickler, object):
+    find_global = None # Python 2
+    find_class = None # Python 3
+def _pickle_load(stream, encoding='ASCII', errors=False):
+    if sys.version_info[0] == 3:
+        unpickler = Unpickler(stream, encoding=encoding)
+    else:
+        unpickler = Unpickler(stream)
+    try:
+        return unpickler.load()
+    except Exception:
+        _logger.warning('Failed unpickling data, returning default: %r',
+                        errors, exc_info=True)
+        return errors
+pickle = types.ModuleType(__name__ + '.pickle')
+pickle.load = _pickle_load
+pickle.loads = lambda text, encoding='ASCII': _pickle_load(io.BytesIO(text), encoding=encoding)
+pickle.dump = pickle_.dump
+pickle.dumps = pickle_.dumps
 
 def wrap_module(module, attr_list):
     """Helper for wrapping a package/module to expose selected attributes
@@ -1235,3 +1410,33 @@ def wrap_module(module, attr_list):
             raise AttributeError(attrib)
     # module and attr_list are in the closure
     return WrappedModule()
+
+
+class DotDict(dict):
+    """Helper for dot.notation access to dictionary attributes
+
+        E.g.
+          foo = DotDict({'bar': False})
+          return foo.bar
+    """
+    def __getattr__(self, attrib):
+        val = self.get(attrib)
+        return DotDict(val) if type(val) is dict else val
+
+def traverse_containers(val, type_):
+    """ Yields atoms filtered by specified type_ (or type tuple), traverses
+    through standard containers (non-string mappings or sequences) *unless*
+    they're selected by the type filter
+    """
+    from odoo.models import BaseModel
+    if isinstance(val, type_):
+        yield val
+    elif isinstance(val, (str, bytes, BaseModel)):
+        return
+    elif isinstance(val, Mapping):
+        for k, v in val.items():
+            yield from traverse_containers(k, type_)
+            yield from traverse_containers(v, type_)
+    elif isinstance(val, collections.abc.Sequence):
+        for v in val:
+            yield from traverse_containers(v, type_)

@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Theme "Basic" template -->
+    <template id="theme_basic_template">
+        <div class="o_mail_no_options">
+            <p><br/></p>
+            <p><br/></p>
+            <p>
+                <br/>
+                <a href="/unsubscribe_from_list">Unsubscribe</a>
+            </p>
+        </div>
+    </template>
+
     <!-- Default Theme -->
     <template id="theme_default_template">
         <div class="o_mail_block_header_logo mb16">

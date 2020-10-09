@@ -2,9 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import babel
+import babel.dates
 import collections
 import datetime
 import pytz
+from werkzeug.exceptions import NotFound
 
 from odoo import fields, http
 from odoo.http import request
@@ -13,8 +15,11 @@ from odoo.tools import html_escape as escape, html2plaintext
 
 class WebsiteEventTrackController(http.Controller):
 
-    @http.route(['''/event/<model("event.event"):event>/track/<model("event.track", "[('event_id','=',event[0])]"):track>'''], type='http', auth="public", website=True)
+    @http.route(['''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/track/<model("event.track", "[('event_id','=',event[0])]"):track>'''], type='http', auth="public", website=True)
     def event_track_view(self, event, track, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         track = track.sudo().with_context(tz=event.date_tz or 'UTC')
         values = {'track': track, 'event': track.event_id, 'main_object': track}
         return request.render("website_event_track.track_view", values)
@@ -47,7 +52,7 @@ class WebsiteEventTrackController(http.Controller):
             if forcetr or (start_date>dates[-1][0]) or not location:
                 formatted_time = self._get_locale_time(start_date, lang_code)
                 dates.append((start_date, {}, bool(location), formatted_time))
-                for loc in locations.keys():
+                for loc in list(locations):
                     if locations[loc] and (locations[loc][-1][2] > start_date):
                         locations[loc][-1][3] += 1
                     elif not locations[loc] or locations[loc][-1][2] <= start_date:
@@ -60,17 +65,21 @@ class WebsiteEventTrackController(http.Controller):
                 locations[location][-1][3] -= 1
             locations[location].append([track, start_date, end_date, 1])
             dates[-1][1][location] = locations[location][-1]
+            locations = collections.OrderedDict(sorted(locations.items(), key=lambda t: t[0].id if t[0] else 0))
         return {
             'locations': locations,
             'dates': dates
         }
 
-    @http.route(['''/event/<model("event.event", "[('show_tracks','=',1)]"):event>/agenda'''], type='http', auth="public", website=True)
+    @http.route(['''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/agenda'''], type='http', auth="public", website=True, sitemap=False)
     def event_agenda(self, event, tag=None, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         event = event.with_context(tz=event.date_tz or 'UTC')
         local_tz = pytz.timezone(event.date_tz or 'UTC')
         days_tracks = collections.defaultdict(lambda: [])
-        for track in event.track_ids.sorted(lambda track: (track.date, bool(track.location_id))):
+        for track in event.track_ids.sorted(lambda track: (bool(track.date), track.date, bool(track.location_id))):
             if not track.date:
                 continue
             date = fields.Datetime.from_string(track.date).replace(tzinfo=pytz.utc).astimezone(local_tz)
@@ -78,28 +87,25 @@ class WebsiteEventTrackController(http.Controller):
 
         days = {}
         tracks_by_days = {}
-        for day, tracks in days_tracks.iteritems():
+        for day, tracks in days_tracks.items():
             tracks_by_days[day] = tracks
             days[day] = self._prepare_calendar(event, tracks)
-
-        speakers = {}
-        for track in event.sudo().track_ids:
-            speakers_name = u" – ".join(track.speaker_ids.mapped('name'))
-            speakers[track.id] = speakers_name
 
         return request.render("website_event_track.agenda", {
             'event': event,
             'days': days,
             'tracks_by_days': tracks_by_days,
-            'speakers': speakers,
             'tag': tag
         })
 
     @http.route([
-        '''/event/<model("event.event", "[('show_tracks','=',1)]"):event>/track''',
-        '''/event/<model("event.event", "[('show_tracks','=',1)]"):event>/track/tag/<model("event.track.tag"):tag>'''
-        ], type='http', auth="public", website=True)
+        '''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/track''',
+        '''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/track/tag/<model("event.track.tag"):tag>'''
+    ], type='http', auth="public", website=True, sitemap=False)
     def event_tracks(self, event, tag=None, **post):
+        if not event.can_access_from_current_website() or (tag and tag.color == 0):
+            raise NotFound()
+
         event = event.with_context(tz=event.date_tz or 'UTC')
         searches = {}
         if tag:
@@ -118,12 +124,18 @@ class WebsiteEventTrackController(http.Controller):
         }
         return request.render("website_event_track.tracks", values)
 
-    @http.route(['''/event/<model("event.event", "[('show_track_proposal','=',1)]"):event>/track_proposal'''], type='http', auth="public", website=True)
+    @http.route(['''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/track_proposal'''], type='http', auth="public", website=True, sitemap=False)
     def event_track_proposal(self, event, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         return request.render("website_event_track.event_track_proposal", {'event': event})
 
-    @http.route(['/event/<model("event.event"):event>/track_proposal/post'], type='http', auth="public", methods=['POST'], website=True)
+    @http.route(['''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/track_proposal/post'''], type='http', auth="public", methods=['POST'], website=True)
     def event_track_proposal_post(self, event, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         tags = []
         for tag in event.allowed_track_tag_ids:
             if post.get('tag_' + str(tag.id)):
@@ -141,7 +153,7 @@ class WebsiteEventTrackController(http.Controller):
             'description': escape(post['description'])
         })
         if request.env.user != request.website.user_id:
-            track.sudo().message_subscribe_users(user_ids=request.env.user.ids)
+            track.sudo().message_subscribe(partner_ids=request.env.user.partner_id.ids)
         else:
             partner = request.env['res.partner'].sudo().search([('email', '=', post['email_from'])])
             if partner:

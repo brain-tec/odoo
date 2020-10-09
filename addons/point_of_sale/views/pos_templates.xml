@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+<template id="pos_assets_backend" name="POS UI Backend Assets" inherit_id="web.assets_backend" primary="True">
+    <xpath expr="//script[contains(@src, '/mail/static/src/js/services/mail_service.js')]" position="replace"></xpath>
+</template>
+
 <template id="index" name="POS Index">&lt;!DOCTYPE html&gt;
 <html>
     <head>
@@ -19,22 +23,23 @@
         <link rel="apple-touch-icon" sizes="120x120" href="/point_of_sale/static/src/img/touch-icon-iphone-retina.png"/>
         <link rel="apple-touch-icon" sizes="152x152" href="/point_of_sale/static/src/img/touch-icon-ipad-retina.png"/>
 
-        <style> body { background: #222; } </style> 
+        <style> body { background: #222; } </style>
 
         <link rel="shortcut icon" href="/web/static/src/img/favicon.ico" type="image/x-icon"/>
 
         <script type="text/javascript">
-            var odoo = {
-                csrf_token: "<t t-esc="request.csrf_token(None)"/>",
-                session_info: <t t-raw="session_info"/>,
-            };
+            var odoo = <t t-raw="json.dumps({
+                'csrf_token': request.csrf_token(None),
+                'session_info': session_info,
+                'login_number': login_number,
+                'debug': debug,
+            })"/>;
         </script>
 
         <t t-call-assets="web.assets_common" t-css="false"/>
-        <t t-call-assets="web.assets_backend" t-css="false"/>
-        <t t-call-assets="web_editor.summernote" t-css="false"/>
-        <t t-call-assets="web_editor.assets_editor" t-css="false"/>
+        <t t-call-assets="point_of_sale.pos_assets_backend" t-css="false"/>
         <t t-call-assets="point_of_sale.assets"/>
+        <t t-call="web.conditional_assets_tests"/>
 
         <script type="text/javascript" id="loading-script" t-raw="init">
             odoo.define('web.web_client', function (require) {
@@ -55,8 +60,8 @@
         </script>
     </head>
     <body>
-        <div class="o_main_content"/>
     </body>
 </html>
 </template>
+
 </odoo>

@@ -4,7 +4,7 @@
 {
     'name': 'Google Spreadsheet',
     'version': '1.0',
-    'category': 'Extra Tools',
+    'category': 'Tools',
     'description': """
 The module adds the possibility to display data from Odoo in Google Spreadsheets in real time.
 =================================================================================================
@@ -14,7 +14,7 @@ The module adds the possibility to display data from Odoo in Google Spreadsheets
         'data/google_spreadsheet_data.xml',
         'views/google_spreadsheet_views.xml',
         'views/google_spreadsheet_templates.xml',
-        'views/base_config_settings_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'qweb': ['static/src/xml/*.xml'],
     'demo': [],

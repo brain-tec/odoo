@@ -4,7 +4,7 @@
         <record id="goal_user_visibility" model="ir.rule">
             <field name="name">User can only see his/her goals or goal from the same challenge in board visibility</field>
             <field name="model_id" ref="model_gamification_goal"/>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="groups" eval="[(4, ref('base.group_user')), (4, ref('base.group_portal'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="False"/>
@@ -31,7 +31,7 @@
         <record id="goal_global_multicompany" model="ir.rule">
             <field name="name">Multicompany rule on challenges</field>
             <field name="model_id" ref="model_gamification_goal"/>
-            <field name="domain_force">[('user_id.company_id', 'child_of', [user.company_id.id])]</field>
+            <field name="domain_force">[('user_id.company_id', 'in', company_ids)]</field>
             <field name="global" eval="True"/>
         </record>
 

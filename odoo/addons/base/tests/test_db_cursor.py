@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import unittest
 
 import odoo
 from odoo.sql_db import TestCursor
 from odoo.tests import common
+from odoo.tests.common import BaseCase
 from odoo.tools.misc import mute_logger
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
@@ -14,7 +14,7 @@ def registry():
     return odoo.registry(common.get_db_name())
 
 
-class TestExecute(unittest.TestCase):
+class TestExecute(BaseCase):
     """ Try cr.execute with wrong parameters """
 
     @mute_logger('odoo.sql_db')
@@ -35,11 +35,14 @@ class TestTestCursor(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestTestCursor, cls).setUpClass()
-        registry().enter_test_mode()
+        r = registry()
+        r.enter_test_mode(r.cursor())
 
     @classmethod
     def tearDownClass(cls):
-        registry().leave_test_mode()
+        r = registry()
+        r.test_cr.close()
+        r.leave_test_mode()
         super(TestTestCursor, cls).tearDownClass()
 
     def setUp(self):
@@ -47,10 +50,13 @@ class TestTestCursor(common.TransactionCase):
         self.record = self.env['res.partner'].create({'name': 'Foo'})
 
     def write(self, record, value):
-            record.ref = value
+        record.ref = value
+
+    def flush(self, record):
+        record.flush(['ref'])
 
     def check(self, record, value):
-            self.assertEqual(record.read(['ref'])[0]['ref'], value)
+        self.assertEqual(record.read(['ref'])[0]['ref'], value)
 
     def test_single_cursor(self):
         """ Check the behavior of a single test cursor. """
@@ -73,6 +79,7 @@ class TestTestCursor(common.TransactionCase):
         self.cr.commit()
 
         self.write(self.record, 'B')
+        self.flush(self.record)
 
         # check behavior of a "sub-cursor" that commits
         with self.registry.cursor() as cr:
@@ -93,6 +100,7 @@ class TestTestCursor(common.TransactionCase):
         self.cr.commit()
 
         self.write(self.record, 'B')
+        self.flush(self.record)
 
         # check behavior of a "sub-cursor" that rollbacks
         with self.assertRaises(ValueError):

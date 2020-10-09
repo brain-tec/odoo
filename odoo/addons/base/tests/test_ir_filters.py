@@ -4,16 +4,17 @@
 from odoo import exceptions
 from odoo.tests.common import TransactionCase, ADMIN_USER_ID
 
-def noid(d):
+def noid(seq):
     """ Removes values that are not relevant for the test comparisons """
-    d.pop('id', None)
-    d.pop('action_id', None)
-    return d
+    for d in seq:
+        d.pop('id', None)
+        d.pop('action_id', None)
+    return seq
 
 
 class FiltersCase(TransactionCase):
     def build(self, model, *args):
-        Model = self.env[model].sudo(ADMIN_USER_ID)
+        Model = self.env[model].with_user(ADMIN_USER_ID)
         for vals in args:
             Model.create(vals)
 
@@ -32,9 +33,9 @@ class TestGetFilters(FiltersCase):
             dict(name='c', user_id=self.USER_ID, model_id='ir.filters'),
             dict(name='d', user_id=self.USER_ID, model_id='ir.filters'))
 
-        filters = self.env['ir.filters'].sudo(self.USER_ID).get_filters('ir.filters')
+        filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
             dict(name='b', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
             dict(name='c', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
@@ -50,9 +51,9 @@ class TestGetFilters(FiltersCase):
             dict(name='d', user_id=False, model_id='ir.filters'),
         )
 
-        filters = self.env['ir.filters'].sudo(self.USER_ID).get_filters('ir.filters')
+        filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
             dict(name='b', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
             dict(name='c', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
@@ -67,9 +68,9 @@ class TestGetFilters(FiltersCase):
             dict(name='c', user_id=self.USER_ID, model_id='ir.filters'),
             dict(name='d', user_id=ADMIN_USER_ID, model_id='ir.filters')  )
 
-        filters = self.env['ir.filters'].sudo(self.USER_ID).get_filters('ir.filters')
+        filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
             dict(name='c', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
         ])
@@ -86,7 +87,7 @@ class TestOwnDefaults(FiltersCase):
         When creating a @is_default filter with no existing filter, that new
         filter gets the default flag
         """
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         Filters.create_or_replace({
             'name': 'a',
             'model_id': 'ir.filters',
@@ -95,7 +96,7 @@ class TestOwnDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=self.USER_NG, is_default=True,
                  domain='[]', context='{}', sort='[]')
         ])
@@ -111,7 +112,7 @@ class TestOwnDefaults(FiltersCase):
             dict(name='b', user_id=self.USER_ID, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         Filters.create_or_replace({
             'name': 'c',
             'model_id': 'ir.filters',
@@ -120,7 +121,7 @@ class TestOwnDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='c', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
@@ -137,7 +138,7 @@ class TestOwnDefaults(FiltersCase):
             dict(name='b', is_default=True, user_id=self.USER_ID, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         Filters.create_or_replace({
             'name': 'c',
             'model_id': 'ir.filters',
@@ -146,7 +147,7 @@ class TestOwnDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='c', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
@@ -163,7 +164,7 @@ class TestOwnDefaults(FiltersCase):
             dict(name='b', is_default=True, user_id=self.USER_ID, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         Filters.create_or_replace({
             'name': 'a',
             'model_id': 'ir.filters',
@@ -172,7 +173,7 @@ class TestOwnDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
             dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
         ])
@@ -195,7 +196,7 @@ class TestGlobalDefaults(FiltersCase):
             dict(name='b', user_id=False, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         Filters.create_or_replace({
             'name': 'c',
             'model_id': 'ir.filters',
@@ -204,7 +205,7 @@ class TestGlobalDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='b', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='c', user_id=False, is_default=True, domain='[]', context='{}', sort='[]'),
@@ -221,7 +222,7 @@ class TestGlobalDefaults(FiltersCase):
             dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         with self.assertRaises(exceptions.Warning):
             Filters.create_or_replace({
                 'name': 'c',
@@ -241,7 +242,7 @@ class TestGlobalDefaults(FiltersCase):
             dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         with self.assertRaises(exceptions.Warning):
             Filters.create_or_replace({
                 'name': 'a',
@@ -260,7 +261,7 @@ class TestGlobalDefaults(FiltersCase):
             dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
         )
 
-        Filters = self.env['ir.filters'].sudo(self.USER_ID)
+        Filters = self.env['ir.filters'].with_user(self.USER_ID)
         context_value = "{'some_key': True}"
         Filters.create_or_replace({
             'name': 'b',
@@ -271,7 +272,7 @@ class TestGlobalDefaults(FiltersCase):
         })
         filters = Filters.get_filters('ir.filters')
 
-        self.assertItemsEqual(map(noid, filters), [
+        self.assertItemsEqual(noid(filters), [
             dict(name='a', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
             dict(name='b', user_id=False, is_default=True, domain='[]', context=context_value, sort='[]'),
         ])

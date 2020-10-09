@@ -1,230 +1,182 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * auth_oauth
-#
+# 	* auth_oauth
+# 
 # Translators:
-# Marko Happonen <marko.happonen@sprintit.fi>, 2016
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2019
+# Martin Trigaux, 2019
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2019
+# Miku Laitinen <miku.laitinen@gmail.com>, 2019
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2019
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2019
+# Heikki Katajisto <heikki.katajisto@myyntivoima.fi>, 2019
+# Jussi Heikkilä <jussi.heikkila@panimo.com>, 2019
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:49+0000\n"
-"PO-Revision-Date: 2016-06-21 06:43+0000\n"
-"Last-Translator: Marko Happonen <marko.happonen@sprintit.fi>\n"
-"Language-Team: Finnish (http://www.transifex.com/odoo/odoo-9/language/fi/)\n"
-"Language: fi\n"
+"POT-Creation-Date: 2019-10-18 09:46+0000\n"
+"PO-Revision-Date: 2019-08-26 09:09+0000\n"
+"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2020\n"
+"Language-Team: Finnish (https://www.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
+"Language: fi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Tutorial"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:auth_oauth.providers
+msgid "- or -"
+msgstr "- tai -"
 
 #. module: auth_oauth
-#: code:addons/auth_oauth/controllers/main.py:99
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
+msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Tutorial"
+msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Käyttöohje"
+
+#. module: auth_oauth
+#: code:addons/auth_oauth/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
 msgstr "Käyttö estetty"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_property_account_payable_id
-msgid "Account Payable"
-msgstr "Ostovelat"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_property_account_receivable_id
-msgid "Account Receivable"
-msgstr "Myyntireskontra"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_base_config_settings_auth_oauth_google_enabled
+#: model:ir.model.fields,field_description:auth_oauth.field_res_config_settings__auth_oauth_google_enabled
 msgid "Allow users to sign in with Google"
 msgstr "Salli käyttäjien kirjautua Google tunnuksilla"
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
 msgid "Allow users to sign in with their Google account"
-msgstr ""
+msgstr "Salli käyttäjien kirjautuminen Google-tunnuksilla"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_enabled
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__enabled
 msgid "Allowed"
 msgstr "Sallittu"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_auth_endpoint
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__auth_endpoint
 msgid "Authentication URL"
 msgstr "Autentikointi/todennus URL"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_bank_account_count
-msgid "Bank"
-msgstr "Pankki"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_body
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__body
 msgid "Body"
-msgstr "Runko"
+msgstr "Viesti"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_css_class
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__css_class
 msgid "CSS class"
 msgstr "CSS luokka"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_client_id
-#: model:ir.model.fields,field_description:auth_oauth.field_base_config_settings_auth_oauth_google_client_id
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__client_id
+#: model:ir.model.fields,field_description:auth_oauth.field_res_config_settings__auth_oauth_google_client_id
 msgid "Client ID"
 msgstr "Asiakkaan tunniste/ID"
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
 msgid "Client ID:"
-msgstr ""
+msgstr "Client ID:"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_ref_company_ids
-msgid "Companies that refers to partner"
-msgstr "Yritykset jotka viittaavat kumppaniin"
+#: model:ir.model,name:auth_oauth.model_res_config_settings
+msgid "Config Settings"
+msgstr "Konfiguraatioasetukset"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_contract_ids
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_contracts_count
-msgid "Contracts"
-msgstr "Sopimukset"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_create_uid
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__create_uid
 msgid "Created by"
 msgstr "Luonut"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_create_date
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__create_date
 msgid "Created on"
 msgstr "Luotu"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_currency_id
-msgid "Currency"
-msgstr "Valuutta"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_property_payment_term_id
-msgid "Customer Payment Terms"
-msgstr "Asiakkaan maksuehdot"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_data_endpoint
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__data_endpoint
 msgid "Data URL"
 msgstr "Data URL"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_trust
-msgid "Degree of trust you have in this debtor"
-msgstr "Kuinka vahvasti luotat tähän maksajaan"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_display_name
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__display_name
 msgid "Display Name"
-msgstr "Näytä nimi"
+msgstr "Näyttönimi"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_property_account_position_id
-msgid "Fiscal Position"
-msgstr "Verokanta"
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
+msgid "Google Authentication"
+msgstr "Google-tunnistautuminen"
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
-msgid "Google Authentification"
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_has_unreconciled_entries
-msgid "Has Unreconciled Entries"
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_id
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__id
 msgid "ID"
-msgstr "ID"
+msgstr "Tunniste (ID)"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_invoice_warn
-msgid "Invoice"
-msgstr "Lasku"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_invoice_ids
-msgid "Invoices"
-msgstr "Laskut"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_issued_total
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_journal_item_count
-msgid "Journal Items"
-msgstr "Päiväkirjan tapahtumat"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider___last_update
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider____last_update
 msgid "Last Modified on"
 msgstr "Viimeksi muokattu"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_write_uid
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__write_uid
 msgid "Last Updated by"
-msgstr "Viimeksi päivittänyt"
+msgstr "Viimeksi päivitetty"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_write_date
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__write_date
 msgid "Last Updated on"
 msgstr "Viimeksi päivitetty"
 
 #. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_last_time_entries_checked
-msgid ""
-"Last time the invoices & payments matching was performed for this partner. "
-"It is set either if there's not at least an unreconciled debit and an "
-"unreconciled credit or if you click the \"Done\" button."
-msgstr ""
-"Aika jolloin kumppanin maksujen seuranta on viimeksi tehty. Se asetetaan jos "
-"täsmäyttämättömiä tapahtumia ei ole tai jos painat \"Tehty\" painiketta."
+#: model:ir.model.fields,help:auth_oauth.field_auth_oauth_provider__body
+msgid "Link text in Login Dialog"
+msgstr "Liitä teksti kirjautumisikkunaan"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_last_time_entries_checked
-msgid "Latest Invoices & Payments Matching Date"
-msgstr ""
+#: model:auth.oauth.provider,body:auth_oauth.provider_facebook
+msgid "Log in with Facebook"
+msgstr "Facebook-kirjautuminen"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_invoice_warn_msg
-msgid "Message for Invoice"
-msgstr "Viesti laskulle"
+#: model:auth.oauth.provider,body:auth_oauth.provider_google
+msgid "Log in with Google"
+msgstr "Google-kirjautuminen"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_oauth_access_token
+#: model:auth.oauth.provider,body:auth_oauth.provider_openerp
+msgid "Log in with Odoo.com"
+msgstr "Odoo.com-tunnistautuminen"
+
+#. module: auth_oauth
+#: model:ir.model.fields,field_description:auth_oauth.field_res_users__oauth_access_token
 msgid "OAuth Access Token"
 msgstr "OAuth Access Token"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_oauth_provider_id
+#: model:ir.model.fields,field_description:auth_oauth.field_res_users__oauth_provider_id
 msgid "OAuth Provider"
 msgstr "OAuth Provider"
 
 #. module: auth_oauth
 #: model:ir.ui.menu,name:auth_oauth.menu_oauth_providers
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
 msgid "OAuth Providers"
 msgstr "OAuth Providers"
 
 #. module: auth_oauth
-#: sql_constraint:res.users:0
+#: model:ir.model.constraint,message:auth_oauth.constraint_res_users_uniq_users_oauth_provider_oauth_uid
 msgid "OAuth UID must be unique per provider"
 msgstr "OAuth UID täytyy olla Provider-kohtaisesti yksilöllinen "
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_oauth_uid
+#: model:ir.model.fields,field_description:auth_oauth.field_res_users__oauth_uid
 msgid "OAuth User ID"
 msgstr "OAuth User ID"
 
@@ -234,22 +186,17 @@ msgid "OAuth2 provider"
 msgstr "OAuth2 provider"
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.view_users_form
+#: model_terms:ir.ui.view,arch_db:auth_oauth.view_users_form
 msgid "Oauth"
 msgstr "Oauth"
 
 #. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_oauth_uid
+#: model:ir.model.fields,help:auth_oauth.field_res_users__oauth_uid
 msgid "Oauth Provider user_id"
 msgstr "Oauth tarjoajan käyttäjätunnus/user_id"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_debit_limit
-msgid "Payable Limit"
-msgstr "Ostovelkaraja"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_name
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__name
 msgid "Provider name"
 msgstr "Palveluntarjoajan nimi"
 
@@ -259,107 +206,30 @@ msgid "Providers"
 msgstr "Palveluntarjoajat"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_scope
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__scope
 msgid "Scope"
 msgstr "Laajuus"
 
 #. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_invoice_warn
-msgid ""
-"Selecting the \"Warning\" option will notify user with the message, "
-"Selecting \"Blocking Message\" will throw an exception with the message and "
-"block the flow. The Message has to be written in the next field."
-msgstr ""
-"Valittaessa vaihtoehto:\n"
-"  \"Varoitusviesti\", käyttäjälle näytetään varoitusviesti\n"
-"  \"Estoviesti, käyttäjälle näytetään poikkeusviesti ja toimenpide "
-"estetään.\n"
-"Kirjoita näytettävä viesti seuraavaan kenttään."
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_sequence
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__sequence
 msgid "Sequence"
 msgstr "Järjestys"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_base_config_settings_server_uri_google
+#: model:ir.model.fields,field_description:auth_oauth.field_res_config_settings__server_uri_google
 msgid "Server uri"
-msgstr ""
+msgstr "Palvelimen URI"
 
 #. module: auth_oauth
-#: code:addons/auth_oauth/controllers/main.py:97
+#: code:addons/auth_oauth/controllers/main.py:0
 #, python-format
 msgid "Sign up is not allowed on this database."
 msgstr "Kirjautuminen tietokantaan ei ole sallittu."
 
 #. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_property_account_position_id
-msgid ""
-"The fiscal position will determine taxes and accounts used for the partner."
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_has_unreconciled_entries
-msgid ""
-"The partner has at least one unreconciled debit and credit since last time "
-"the invoices & payments matching was performed."
-msgstr ""
-"Kumppanilla on vähintään yksi täsmäyttämätön debit/kredit kirjaus edellisen "
-"maksujentarkistuksen jälkeen."
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_property_account_payable_id
-msgid ""
-"This account will be used instead of the default one as the payable account "
-"for the current partner"
-msgstr ""
-"Tätä tiliä käytetään oletustilin sijasta ostovelkoina tälle kumppanille."
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_property_account_receivable_id
-msgid ""
-"This account will be used instead of the default one as the receivable "
-"account for the current partner"
-msgstr "Tätä tiliä käytetään oletustilin sijasta tämän kumppanin saataville."
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_property_supplier_payment_term_id
-msgid ""
-"This payment term will be used instead of the default one for purchase "
-"orders and vendor bills"
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_property_payment_term_id
-msgid ""
-"This payment term will be used instead of the default one for sales orders "
-"and customer invoices"
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_total_invoiced
-msgid "Total Invoiced"
-msgstr "Laskutettu kaikkiaan"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_debit
-msgid "Total Payable"
-msgstr "Maksettavat yhteensä"
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_credit
-msgid "Total Receivable"
-msgstr "Saatavat yhteensä"
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_credit
-msgid "Total amount this customer owes you."
-msgstr "Asiakkaan kokonaisvelan määrä."
-
-#. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_debit
-msgid "Total amount you have to pay to this vendor."
-msgstr ""
+#: model:ir.model,name:auth_oauth.model_ir_config_parameter
+msgid "System Parameter"
+msgstr "Järjestelmäparametri"
 
 #. module: auth_oauth
 #: model:ir.model,name:auth_oauth.model_res_users
@@ -367,48 +237,28 @@ msgid "Users"
 msgstr "Käyttäjät"
 
 #. module: auth_oauth
-#: model:ir.model.fields,help:auth_oauth.field_res_users_currency_id
-msgid "Utility field to express amount currency"
-msgstr ""
-
-#. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider_validation_endpoint
+#: model:ir.model.fields,field_description:auth_oauth.field_auth_oauth_provider__validation_endpoint
 msgid "Validation URL"
 msgstr "Vahvistus URL"
 
 #. module: auth_oauth
-#: model:ir.model.fields,field_description:auth_oauth.field_res_users_property_supplier_payment_term_id
-msgid "Vendor Payment Terms"
-msgstr "Toimittajan maksuehto"
-
-#. module: auth_oauth
-#: code:addons/auth_oauth/controllers/main.py:101
+#: code:addons/auth_oauth/controllers/main.py:0
 #, python-format
 msgid ""
 "You do not have access to this database or your invitation has expired. "
 "Please ask for an invitation and be sure to follow the link in your "
 "invitation email."
 msgstr ""
-"Sinulla ei ole pääsyä tähän tietokantaan tai käyttäjäkutsusi on vanhentunut. "
-"Pyydä uutta kutsua ja varmista että seuraat kutsuviestissä olevaa linkkiä."
+"Sinulla ei ole pääsyä tähän tietokantaan tai käyttäjäkutsusi on vanhentunut."
+" Pyydä uutta kutsua ja varmista että seuraat kutsuviestissä olevaa linkkiä."
 
 #. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.view_oauth_provider_form
-#: model:ir.ui.view,arch_db:auth_oauth.view_oauth_provider_tree
+#: model_terms:ir.ui.view,arch_db:auth_oauth.view_oauth_provider_form
+#: model_terms:ir.ui.view,arch_db:auth_oauth.view_oauth_provider_tree
 msgid "arch"
-msgstr ""
+msgstr "arch"
 
 #. module: auth_oauth
-#: model:ir.model,name:auth_oauth.model_base_config_settings
-msgid "base.config.settings"
-msgstr "base.config.settings"
-
-#. module: auth_oauth
-#: model:ir.ui.view,arch_db:auth_oauth.base_config_settings_view_form_inherit_auth_oauth
+#: model_terms:ir.ui.view,arch_db:auth_oauth.res_config_settings_view_form
 msgid "e.g. 1234-xyz.apps.googleusercontent.com"
 msgstr "esim. 1234-xyz.apps.googleusercontent.com"
-
-#. module: auth_oauth
-#: model:ir.model,name:auth_oauth.model_ir_config_parameter
-msgid "ir.config_parameter"
-msgstr "ir.config_parameter"

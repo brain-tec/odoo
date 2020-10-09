@@ -19,7 +19,7 @@ class TestProductPricelist(TransactionCase):
         self.laptop_E5023 = self.env.ref('product.product_delivery_01')
         self.laptop_S3450 = self.env.ref("product.product_product_25")
         self.category_5_id = self.ref('product.product_category_5')
-        self.uom_unit_id = self.ref('product.product_uom_unit')
+        self.uom_unit_id = self.ref('uom.product_uom_unit')
         self.list0 = self.ref('product.list0')
 
         self.ipad_retina_display.write({'uom_id': self.uom_unit_id, 'categ_id': self.category_5_id})
@@ -33,23 +33,20 @@ class TestProductPricelist(TransactionCase):
             }), (0, 0, {
                 'name': '10% Discount on Assemble Computer',
                 'applied_on': '1_product',
-                'sequence': 1,
-                'product_id': self.ipad_retina_display.id,
+                'product_tmpl_id': self.ipad_retina_display.product_tmpl_id.id,
                 'compute_price': 'formula',
                 'base': 'list_price',
                 'price_discount': 10
             }), (0, 0, {
                 'name': '1 surchange on Laptop',
                 'applied_on': '1_product',
-                'sequence': 4,
-                'product_id': self.laptop_E5023.id,
+                'product_tmpl_id': self.laptop_E5023.product_tmpl_id.id,
                 'compute_price': 'formula',
                 'base': 'list_price',
                 'price_surcharge': 1
             }), (0, 0, {
                 'name': '5% Discount on all Computer related products',
                 'applied_on': '2_product_category',
-                'sequence': 1,
                 'min_quantity': 2,
                 'compute_price': 'formula',
                 'base': 'list_price',
@@ -57,23 +54,22 @@ class TestProductPricelist(TransactionCase):
                 'price_discount': 5
             }), (0, 0, {
                 'name': '30% Discount on all products',
-                'applied_on': '0_product_variant',
+                'applied_on': '3_global',
                 'date_start': '2011-12-27',
                 'date_end': '2011-12-31',
                 'compute_price': 'formula',
                 'price_discount': 30,
-                'sequence': 1,
                 'base': 'list_price'
             })]
         })
 
     def test_10_calculation_price_of_products_pricelist(self):
         """Test calculation of product price based on pricelist"""
-        # I check sale price of iPad Retina Display
+        # I check sale price of Customizable Desk
         context = {}
         context.update({'pricelist': self.customer_pricelist.id, 'quantity': 1})
         ipad_retina_display = self.ipad_retina_display.with_context(context)
-        msg = "Wrong sale price: iPad Retina Display. should be %s instead of %s" % (ipad_retina_display.price, (ipad_retina_display.lst_price-ipad_retina_display.lst_price*(0.10)))
+        msg = "Wrong sale price: Customizable Desk. should be %s instead of %s" % (ipad_retina_display.price, (ipad_retina_display.lst_price-ipad_retina_display.lst_price*(0.10)))
         self.assertEqual(float_compare(ipad_retina_display.price, (ipad_retina_display.lst_price-ipad_retina_display.lst_price*(0.10)), precision_digits=2), 0, msg)
 
         # I check sale price of Laptop.
@@ -128,4 +124,6 @@ class TestProductPricelist(TransactionCase):
             'qty5': 30,
             'price_list': self.customer_pricelist.id,
         }
+
+        self.env.company.external_report_layout_id = self.env.ref('web.external_layout_standard').id
         test_reports.try_report_action(self.cr, self.uid, 'action_product_price_list', wiz_data=data_dict, context=ctx, our_module='product')

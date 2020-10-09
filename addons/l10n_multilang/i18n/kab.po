@@ -20,27 +20,27 @@ msgstr ""
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_account
 msgid "Account"
-msgstr "Amiḍan"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Amiḍan n tusliṭ"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_fiscal_position
 msgid "Fiscal Position"
-msgstr "Imiḍanen n unhil amtewsan"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_journal
 msgid "Journal"
-msgstr "Aɣemis"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model.fields,field_description:l10n_multilang.field_account_chart_template_spoken_languages
 msgid "Spoken Languages"
-msgstr "Tutlayin iţmeslayen."
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model.fields,help:l10n_multilang.field_account_chart_template_spoken_languages
@@ -50,34 +50,31 @@ msgid ""
 "the final object when generating them from templates. You must provide the "
 "language codes separated by ';'"
 msgstr ""
-"Fren dagi tutlayin anida ara d-ali tsuqilt n tneɣrufin deg sebded n uzegrir-"
-"agi n tsidegt sakin nɣel taɣawsa taneggarut ticki ttwasirent-d si tneɣrufin. "
-"Yessefk ad tmuddeḍ tingalin n tutlayin yal yiwet iman-is s useqdec n ';'"
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_tax
 msgid "Tax"
-msgstr "Taẓeṭṭaṭ"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_fiscal_position_template
 msgid "Template for Fiscal Position"
-msgstr "Taneɣruft n unhil amtewsan"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_chart_template
 msgid "Templates for Account Chart"
-msgstr "Tineɣrufin n uɣawas asiḍan"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_account_template
 msgid "Templates for Accounts"
-msgstr "Tineɣrufin n imiḍanen"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_account_tax_template
 msgid "Templates for Taxes"
-msgstr "Tineɣrufin n tẓeṭṭaḍin"
+msgstr ""
 
 #. module: l10n_multilang
 #: model:ir.model,name:l10n_multilang.model_wizard_multi_charts_accounts

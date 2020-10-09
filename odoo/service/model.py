@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from contextlib import closing
 from functools import wraps
 import logging
 from psycopg2 import IntegrityError, OperationalError, errorcodes
@@ -10,10 +11,11 @@ import time
 import odoo
 from odoo.exceptions import UserError, ValidationError, QWebException
 from odoo.models import check_method_name
-from odoo.tools.translate import translate
+from odoo.tools.translate import translate, translate_sql_constraint
 from odoo.tools.translate import _
 
-import security
+from . import security
+from ..tools import traverse_containers, lazy
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ PG_CONCURRENCY_ERRORS_TO_RETRY = (errorcodes.LOCK_NOT_AVAILABLE, errorcodes.SERI
 MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 def dispatch(method, params):
-    (db, uid, passwd ) = params[0:3]
+    (db, uid, passwd ) = params[0], int(params[1]), params[2]
 
     # set uid tracker - cleaned up at the WSGI
     # dispatching phase in odoo.service.wsgi_server.application
@@ -35,8 +37,8 @@ def dispatch(method, params):
     security.check(db,uid,passwd)
     registry = odoo.registry(db).check_signaling()
     fn = globals()[method]
-    res = fn(db, uid, *params)
-    registry.signal_caches_change()
+    with registry.manage_changes():
+        res = fn(db, uid, *params)
     return res
 
 def check(f):
@@ -67,28 +69,19 @@ def check(f):
                     except Exception:
                         pass
 
-            uid = 1
-            if args and isinstance(args[0], (long, int)):
-                uid = args[0]
-
             lang = ctx and ctx.get('lang')
             if not (lang or hasattr(src, '__call__')):
                 return src
 
             # We open a *new* cursor here, one reason is that failed SQL
             # queries (as in IntegrityError) will invalidate the current one.
-            cr = False
-
-            try:
-                cr = odoo.sql_db.db_connect(dbname).cursor()
-                res = translate(cr, name=False, source_type=ttype,
-                                lang=lang, source=src)
-                if res:
-                    return res
+            with closing(odoo.sql_db.db_connect(dbname).cursor()) as cr:
+                if ttype == 'sql_constraint':
+                    res = translate_sql_constraint(cr, key=key, lang=lang)
                 else:
-                    return src
-            finally:
-                if cr: cr.close()
+                    res = translate(cr, name=False, source_type=ttype,
+                                    lang=lang, source=src)
+                return res or src
 
         def _(src):
             return tr(src, 'code')
@@ -116,11 +109,11 @@ def check(f):
                 tries += 1
                 _logger.info("%s, retry %d/%d in %.04f sec..." % (errorcodes.lookup(e.pgcode), tries, MAX_TRIES_ON_CONCURRENCY_FAILURE, wait_time))
                 time.sleep(wait_time)
-            except IntegrityError, inst:
+            except IntegrityError as inst:
                 registry = odoo.registry(dbname)
-                for key in registry._sql_error.keys():
-                    if key in inst[0]:
-                        raise ValidationError(tr(registry._sql_error[key], 'sql_constraint') or inst[0])
+                key = inst.diag.constraint_name
+                if key in registry._sql_constraints:
+                    raise ValidationError(tr(key, 'sql_constraint') or inst.pgerror)
                 if inst.pgcode in (errorcodes.NOT_NULL_VIOLATION, errorcodes.FOREIGN_KEY_VIOLATION, errorcodes.RESTRICT_VIOLATION):
                     msg = _('The operation cannot be completed:')
                     _logger.debug("IntegrityError", exc_info=True)
@@ -160,15 +153,21 @@ def check(f):
                         pass
                     raise ValidationError(msg)
                 else:
-                    raise ValidationError(inst[0])
+                    raise ValidationError(inst.args[0])
 
     return wrapper
 
 def execute_cr(cr, uid, obj, method, *args, **kw):
+    odoo.api.Environment.reset()  # clean cache etc if we retry the same transaction
     recs = odoo.api.Environment(cr, uid, {}).get(obj)
     if recs is None:
         raise UserError(_("Object %s doesn't exist") % obj)
-    return odoo.api.call_kw(recs, method, args, kw)
+    result = odoo.api.call_kw(recs, method, args, kw)
+    # force evaluation of lazy values before the cursor is closed, as it would
+    # error afterwards if the lazy isn't already evaluated (and cached)
+    for l in traverse_containers(result, lazy):
+        _0 = l._value
+    return result
 
 
 def execute_kw(db, uid, obj, method, args, kw=None):

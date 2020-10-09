@@ -2,86 +2,40 @@
 <odoo>
     <data>
         <!-- QWeb Reports -->
-        <report 
+        <report
             id="account_invoices"
-            model="account.invoice"
+            model="account.move"
             string="Invoices"
+            report_type="qweb-pdf"
+            name="account.report_invoice_with_payments"
+            file="account.report_invoice_with_payments"
+            attachment="(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')"
+            print_report_name="(object._get_report_base_filename())"
+            groups="account.group_account_invoice"
+        />
+
+        <record id="action_account_original_vendor_bill" model="ir.actions.report">
+            <field name="name">Original Bills</field>
+            <field name="model">account.move</field>
+            <field name="binding_model_id" ref="model_account_move"/>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account.report_original_vendor_bill</field>
+            <field name="report_file">account.report_original_vendor_bill</field>
+            <field name="attachment">'original_vendor_bill.pdf'</field>
+            <field name="attachment_use">True</field>
+            <field name="binding_view_types">list</field>
+        </record>
+
+        <report
+            id="account_invoices_without_payment"
+            model="account.move"
+            string="Invoices without Payment"
             report_type="qweb-pdf"
             name="account.report_invoice"
             file="account.report_invoice"
-            attachment_use="True"
-            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            attachment="(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')"
+            print_report_name="(object._get_report_base_filename())"
         />
-
-        <record id="account_invoices" model="ir.actions.report.xml">
-            <field name="print_report_name">(object.type == 'out_invoice' and object.state == 'draft' and 'Draft Invoice' or
-            object.type == 'out_invoice' and object.state in ('open','paid') and 'Invoice'+'-'+(object.number) or
-            object.type == 'out_refund' and object.state == 'draft' and 'Refund' or
-            object.type == 'out_refund' and 'Refund'+'-'+(object.number) or
-            object.type == 'in_invoice' and object.state == 'draft' and 'Vendor Bill' or
-            object.type == 'in_invoice' and object.state in ('open','paid') and 'Vendor Bill'+'-'+(object.number) or
-            object.type == 'in_refund' and object.state == 'draft' and 'Vendor Refund' or
-            object.type == 'in_refund' and 'Vendor Refund'+'-'+(object.number))</field>
-        </record>
-
-        <report 
-            id="account_invoice_action_report_duplicate"
-            model="account.invoice"
-            string="Duplicates"
-            report_type="qweb-pdf"
-            name="account.account_invoice_report_duplicate_main"
-            file="account.report_invoice_duplicate"
-            attachment_use="False"
-        />
-        <record id="account_invoice_action_report_duplicate" model="ir.actions.report.xml">
-            <field name="print_report_name">(object.type == 'out_invoice' and object.state == 'draft' and 'Duplicate Invoice' or
-            object.type == 'out_invoice' and object.state in ('open','paid') and 'Duplicate Invoice'+'-'+(object.number) or
-            object.type == 'out_refund' and object.state == 'draft' and 'Duplicate Refund' or
-            object.type == 'out_refund' and 'Duplicate Refund'+'-'+(object.number) or
-            object.type == 'in_invoice' and object.state == 'draft' and 'Duplicate Vendor Bill' or
-            object.type == 'in_invoice' and object.state in ('open','paid') and 'Duplicate Vendor Bill'+'-'+(object.number) or
-            object.type == 'in_refund' and object.state == 'draft' and 'Duplicate Vendor Refund' or
-            object.type == 'in_refund' and 'Duplicate Vendor Refund'+'-'+(object.number))</field>
-        </record>
-
-        <report 
-            id="action_report_print_overdue"
-            model="res.partner"
-            report_type="qweb-pdf"
-            string="Due Payments"
-            name="account.report_overdue"
-            file="account.report_overdue"
-            />
-        <record id="action_report_print_overdue" model="ir.actions.report.xml">
-            <field name="print_report_name">'Due Payments'+'-'+(object.name)</field>
-        </record>
-
-        <report 
-            id="action_report_general_ledger"
-            model="account.report.general.ledger"
-            string="General Ledger"
-            report_type="qweb-pdf"
-            name="account.report_generalledger"
-            file="account.report_generalledger"
-            />
-
-        <report 
-            id="action_report_trial_balance"
-            model="account.balance.report"
-            string="Trial Balance"
-            report_type="qweb-pdf"
-            name="account.report_trialbalance"
-            file="account.report_trialbalance"
-            />
-
-        <report 
-            id="action_report_financial"
-            model="account.financial.report"
-            string="Financial report"
-            report_type="qweb-pdf"
-            name="account.report_financial"
-            file="account.report_financial"
-            />
 
         <report
             id="action_report_aged_partner_balance"
@@ -93,23 +47,43 @@
             file="account.report_agedpartnerbalance"
         />
 
-        <report 
+        <report
             id="action_report_journal"
-            model="report.account.report_journal"
-            string="Sale/Purchase Journal"
+            model="account.common.journal.report"
+            string="Journals Audit"
             report_type="qweb-pdf"
             name="account.report_journal"
             file="account.report_journal"
             />
 
-        <report 
-            id="action_report_partnerledger"
-            model="report.account.report_partnerledger"
-            string="Partner Ledger"
+        <report
+            id="action_report_payment_receipt"
+            model="account.payment"
+            string="Payment Receipt"
             report_type="qweb-pdf"
-            name="account.report_partnerledger"
-            file="account.report_partnerledger"
-            />
+            name="account.report_payment_receipt"
+            file="account.report_payment_receipt"
+            menu="True"
+        />
+
+        <report
+            id="action_report_account_statement" 
+            model="account.bank.statement"
+            string="Statement"
+            name="account.report_statement"
+            file="account.report_statement"
+            report_type="qweb-pdf"
+        />
+
+        <report
+            id="action_report_account_hash_integrity"
+            model="res.company"
+            string="Hash integrity result PDF"
+            report_type="qweb-pdf"
+            name="account.report_hash_integrity"
+            file="account.report_hash_integrity"
+            menu="False"
+        />
 
     </data>
 </odoo>

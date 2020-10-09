@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 
 class ReportJournal(models.AbstractModel):
     _name = 'report.account.report_journal'
+    _description = 'Account Journal Report'
 
     def lines(self, target_move, journal_ids, sort_selection, data):
         if isinstance(journal_ids, int):
@@ -25,7 +26,7 @@ class ReportJournal(models.AbstractModel):
             query += 'am.name'
         query += ', "account_move_line".move_id, acc.code'
         self.env.cr.execute(query, tuple(params))
-        ids = map(lambda x: x[0], self.env.cr.fetchall())
+        ids = (x[0] for x in self.env.cr.fetchall())
         return self.env['account.move.line'].browse(ids)
 
     def _sum_debit(self, data, journal_id):
@@ -95,9 +96,9 @@ class ReportJournal(models.AbstractModel):
         return self.env['account.move.line'].with_context(data['form'].get('used_context', {}))._query_get()
 
     @api.model
-    def render_html(self, docids, data=None):
+    def _get_report_values(self, docids, data=None):
         if not data.get('form'):
-            raise UserError(_("Some data are missing, this report cannot be printed."))
+            raise UserError(_("Form content is missing, this report cannot be printed."))
 
         target_move = data['form'].get('target_move', 'all')
         sort_selection = data['form'].get('sort_selection', 'date')
@@ -105,7 +106,7 @@ class ReportJournal(models.AbstractModel):
         res = {}
         for journal in data['form']['journal_ids']:
             res[journal] = self.with_context(data['form'].get('used_context', {})).lines(target_move, journal, sort_selection, data)
-        docargs = {
+        return {
             'doc_ids': data['form']['journal_ids'],
             'doc_model': self.env['account.journal'],
             'data': data,
@@ -115,5 +116,6 @@ class ReportJournal(models.AbstractModel):
             'sum_credit': self._sum_credit,
             'sum_debit': self._sum_debit,
             'get_taxes': self._get_taxes,
+            'company_id': self.env['res.company'].browse(
+                data['form']['company_id'][0]),
         }
-        return self.env['report'].render('account.report_journal', docargs)

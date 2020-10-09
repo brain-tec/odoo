@@ -1,2 +1,6 @@
 # -*- coding: utf-8 -*-
-import rating
+
+from . import rating
+from . import rating_mixin
+from . import mail_thread
+from . import mail_message

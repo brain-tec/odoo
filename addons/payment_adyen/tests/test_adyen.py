@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from lxml import objectify
-import urlparse
 
 from odoo.addons.payment.tests.common import PaymentAcquirerCommon
 from odoo.addons.payment_adyen.controllers.main import AdyenController
+from werkzeug import urls
+import odoo.tests
 
 
 class AdyenCommon(PaymentAcquirerCommon):
@@ -27,14 +28,22 @@ class AdyenCommon(PaymentAcquirerCommon):
         self.dsmastercard = (('521234567890 1234', '737', 'user', 'password'))
         self.dsvisa = (('4212345678901237', '737', 'user', 'password'))
         self.mistercash = (('6703444444444449', None, 'user', 'password'))
+        self.adyen = self.env.ref('payment.payment_acquirer_adyen')
+        self.adyen.write({
+            'adyen_merchant_account': 'dummy',
+            'adyen_skin_code': 'dummy',
+            'adyen_skin_hmac_key': 'dummy',
+            'state': 'test',
+        })
 
 
+@odoo.tests.tagged('post_install', '-at_install', 'external', '-standard')
 class AdyenForm(AdyenCommon):
 
     def test_10_adyen_form_render(self):
         # be sure not to do stupid things
-        adyen = self.env.ref('payment.payment_acquirer_adyen')
-        self.assertEqual(adyen.environment, 'test', 'test without test environment')
+        adyen = self.adyen
+        self.assertEqual(adyen.state, 'test', 'test without test environment')
 
         # ----------------------------------------
         # Test: button direct rendering
@@ -47,7 +56,7 @@ class AdyenForm(AdyenCommon):
             'skinCode': 'cbqYWvVL',
             'paymentAmount': '1',
             'currencyCode': 'EUR',
-            'resURL': '%s' % urlparse.urljoin(base_url, AdyenController._return_url),
+            'resURL': urls.url_join(base_url, AdyenController._return_url),
         }
 
         # render the button

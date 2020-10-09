@@ -14,7 +14,7 @@ class WebsiteGengo(http.Controller):
         result = {"done": 0}
         gengo_translation_ids = request.env['ir.translation'].search([('id', 'in', translated_ids), ('gengo_translation', '!=', False)])
         for trans in gengo_translation_ids:
-            result['done'] += len(trans.source.split())
+            result['done'] += len(trans.src.split())
         return result
 
     @http.route('/website/check_gengo_set', type='json', auth='user', website=True)
@@ -27,7 +27,7 @@ class WebsiteGengo(http.Controller):
 
     @http.route('/website/set_gengo_config', type='json', auth='user', website=True)
     def set_gengo_config(self, config):
-        request.env.user.company_id.write(config)
+        request.env.company.write(config)
         return True
 
     @http.route('/website/post_gengo_jobs', type='json', auth='user', website=True)
@@ -44,7 +44,7 @@ class WebsiteGengo(http.Controller):
             if not translation_ids:
                 translations = IrTranslation.search_read([('lang', '=', lang), ('src', '=', initial_content)], fields=['id'])
                 if translations:
-                    translation_ids = map(lambda t_id: t_id['id'], translations)
+                    translation_ids = [t_id['id'] for t_id in translations]
 
             vals = {
                 'gengo_comment': term['gengo_comment'],
@@ -57,7 +57,7 @@ class WebsiteGengo(http.Controller):
                 vals.update({
                     'name': 'website',
                     'lang': lang,
-                    'source': initial_content,
+                    'src': initial_content,
                 })
                 IrTranslation.create(vals)
         return True

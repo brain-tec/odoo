@@ -40,3 +40,11 @@ Germana Oliveira germana@vauxoo.com https://github.com/goliveirab
 Mariano Fernandez mariano@vauxoo.com https://github.com/Batuto
 Edgar Rivero edgar@vauxoo.com https://github.com/egrivero
 Edilianny Sánchez esanchez@vauxoo.com https://github.com/edy1192
+Alexander Olivares alexander@vauxoo.com https://github.com/alxolivares
+Jose Manuel Robles josemanuel@vauxoo.com https://github.com/keylor2906
+Erick Birbe erick@vauxoo.com https://github.com/ebirbe
+Tomas Alvarez tomas@vauxoo.com https://github.com/tomeyro
+Carmen Liliana Miranda González carmen@vauxoo.com https://github.com/CarmenMiranda
+Arturo Flores arturo@vauxoo.com https://github.com/umiphos
+Deivis Laya deivis@vauxoo.com https://github.com/deivislaya
+Yennifer Santiago yennifer@vauxoo.com https://github.com/ysantiago

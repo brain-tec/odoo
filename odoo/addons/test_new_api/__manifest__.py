@@ -10,7 +10,8 @@
     'data': [
         'ir.model.access.csv',
         'views.xml',
-        'template.xml',
+        'assets.xml',
+        'security/test_new_api_security.xml',
     ],
     'demo': [
         'demo_data.xml',

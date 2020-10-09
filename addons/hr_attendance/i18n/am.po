@@ -1,20 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * hr_attendance
-#
+# 
 # Translators:
+# Martin Trigaux <mat@odoo.com>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:49+0000\n"
-"PO-Revision-Date: 2015-09-07 19:20+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Amharic (http://www.transifex.com/odoo/odoo-9/language/am/)\n"
-"Language: am\n"
+"POT-Creation-Date: 2017-11-16 08:08+0000\n"
+"PO-Revision-Date: 2017-11-16 08:08+0000\n"
+"Last-Translator: Martin Trigaux <mat@odoo.com>, 2017\n"
+"Language-Team: Amharic (https://www.transifex.com/odoo/teams/41243/am/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
+"Language: am\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: hr_attendance
@@ -36,7 +37,7 @@ msgid "%(empl_name)s from %(check_in)s to %(check_out)s"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.view_employee_form_inherit_hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.view_employee_form_inherit_hr_attendance
 msgid "<span class=\"o_stat_text\">Attendance</span>"
 msgstr ""
 
@@ -55,20 +56,15 @@ msgid "Another good day's work! See you soon!"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_config
-msgid "Apply"
-msgstr ""
-
-#. module: hr_attendance
 #: model:ir.actions.client,name:hr_attendance.hr_attendance_action_my_attendances
 #: model:ir.model,name:hr_attendance.model_hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_attendance_ids
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_attendance_state
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_graph
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_pivot
-#: model:ir.ui.view,arch_db:hr_attendance.view_employee_form_inherit_hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_graph
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_pivot
+#: model_terms:ir.ui.view,arch_db:hr_attendance.view_employee_form_inherit_hr_attendance
 msgid "Attendance"
-msgstr "የሰራተኞች ሰአት መቆጣጠርያ"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.hr_attendance_action_graph
@@ -77,17 +73,13 @@ msgid "Attendance Analysis"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_settings
-msgid "Attendance Settings"
-msgstr ""
-
-#. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.hr_attendance_action
 #: model:ir.actions.act_window,name:hr_attendance.hr_attendance_action_employee
 #: model:ir.actions.client,name:hr_attendance.hr_attendance_action_kiosk_mode
 #: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance_root
 #: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance_view_attendances
-#: model:ir.ui.view,arch_db:hr_attendance.hr_department_view_kanban
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_department_view_kanban
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Attendances"
 msgstr ""
 
@@ -95,11 +87,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_barcode
 msgid "Badge ID"
 msgstr ""
-
-#. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_config
-msgid "Cancel"
-msgstr "መሰረዝ"
 
 #. module: hr_attendance
 #: code:addons/hr_attendance/models/hr_attendance.py:85
@@ -119,13 +106,13 @@ msgid ""
 msgstr ""
 
 #. module: hr_attendance
-#: code:addons/hr_attendance/models/hr_employee.py:111
+#: code:addons/hr_attendance/models/hr_employee.py:108
 #, python-format
 msgid "Cannot perform check in or check out on multiple employees."
 msgstr ""
 
 #. module: hr_attendance
-#: code:addons/hr_attendance/models/hr_employee.py:125
+#: code:addons/hr_attendance/models/hr_employee.py:122
 #, python-format
 msgid ""
 "Cannot perform check out on %(empl_name)s, could not find corresponding "
@@ -160,6 +147,11 @@ msgstr ""
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:49
 #, python-format
 msgid "Check out"
+msgstr ""
+
+#. module: hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
+msgid "Check-In/Out"
 msgstr ""
 
 #. module: hr_attendance
@@ -203,22 +195,21 @@ msgstr ""
 #. module: hr_attendance
 #. openerp-web
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:12
-#: model:ir.ui.view,arch_db:hr_attendance.print_employee_badge
+#: model_terms:ir.ui.view,arch_db:hr_attendance.print_employee_badge
 #, python-format
 msgid "Company Logo"
 msgstr ""
 
 #. module: hr_attendance
 #: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance_settings
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_config
 msgid "Configuration"
-msgstr "ማስተካከያዎች"
+msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
+#: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid ""
-"Create a few employees to be able to select an employee here and perform his "
-"check in / check out."
+"Create a few employees to be able to select an employee here and perform his"
+" check in / check out."
 msgstr ""
 
 #. module: hr_attendance
@@ -232,14 +223,14 @@ msgid "Created on"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Current Month"
 msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_department_id
 msgid "Department"
-msgstr "የስራ ክፍል"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_display_name
@@ -263,28 +254,29 @@ msgstr ""
 #. module: hr_attendance
 #: model:ir.model,name:hr_attendance.model_hr_employee
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_employee_id
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Employee"
-msgstr "ተቀጣሪ"
+msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.print_employee_badge
+#: model_terms:ir.ui.view,arch_db:hr_attendance.print_employee_badge
 msgid "Employee Image"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.model.fields,field_description:hr_attendance.field_base_config_settings_group_attendance_use_pin
+#: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings_group_attendance_use_pin
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Employee PIN"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_form
-#: model:ir.ui.view,arch_db:hr_attendance.view_attendance_tree
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_form
+#: model_terms:ir.ui.view,arch_db:hr_attendance.view_attendance_tree
 msgid "Employee attendances"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.view_employee_kanban_inherit_hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.view_employee_kanban_inherit_hr_attendance
 msgid "Employee's Name"
 msgstr ""
 
@@ -295,26 +287,8 @@ msgid "Employees"
 msgstr ""
 
 #. module: hr_attendance
-#: selection:base.config.settings,group_attendance_use_pin:0
-msgid ""
-"Employees do not need to enter their PIN to check in manually in the \"Kiosk "
-"Mode\"."
-msgstr ""
-
-#. module: hr_attendance
-#: selection:base.config.settings,group_attendance_use_pin:0
-msgid ""
-"Employees must enter their PIN to check in manually in the \"Kiosk Mode\"."
-msgstr ""
-
-#. module: hr_attendance
 #: model:res.groups,name:hr_attendance.group_hr_attendance_use_pin
 msgid "Enable PIN use"
-msgstr ""
-
-#. module: hr_attendance
-#: model:ir.model.fields,help:hr_attendance.field_base_config_settings_group_attendance_use_pin
-msgid "Enable or disable employee PIN identification at check in"
 msgstr ""
 
 #. module: hr_attendance
@@ -389,7 +363,7 @@ msgid "Goodbye"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Group By"
 msgstr "በመደብ"
 
@@ -422,7 +396,7 @@ msgid "Have a nice lunch!"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Hr Attendance Search"
 msgstr ""
 
@@ -487,6 +461,7 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_manual_attendance
+#: model:res.groups,name:hr_attendance.group_hr_attendance
 msgid "Manual Attendance"
 msgstr ""
 
@@ -496,22 +471,22 @@ msgid "Message"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Month"
-msgstr "ወር"
+msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "My Attendances"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "No Check Out"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,help:hr_attendance.hr_attendance_action_employee
+#: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action_employee
 msgid "No attendance records to display."
 msgstr ""
 
@@ -551,7 +526,7 @@ msgid "Please enter your PIN to check out"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,help:hr_attendance.hr_attendance_action
+#: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action
 msgid ""
 "Please make sure you're using the correct filter if you expected to see any."
 msgstr ""
@@ -564,7 +539,7 @@ msgid "Please return to the main menu."
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.report.xml,name:hr_attendance.hr_employee_print_badge
+#: model:ir.actions.report,name:hr_attendance.hr_employee_print_badge
 msgid "Print Badge"
 msgstr ""
 
@@ -588,7 +563,12 @@ msgid "Select Employee"
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_config
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
+msgid "Set PIN codes in the employee detail form (in HR Settings tab)."
+msgstr ""
+
+#. module: hr_attendance
+#: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_settings
 msgid "Settings"
 msgstr ""
 
@@ -606,7 +586,7 @@ msgid "The PIN must be a sequence of digits."
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,help:hr_attendance.hr_attendance_action
+#: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action
 msgid "The attendance records of your employees will be displayed here."
 msgstr ""
 
@@ -620,8 +600,15 @@ msgstr ""
 #. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_employee_manual_attendance
 msgid ""
-"The employee will have access to the \"My Attendances\" menu to check in and "
-"out from his session"
+"The employee will have access to the \"My Attendances\" menu to check in and"
+" out from his session"
+msgstr ""
+
+#. module: hr_attendance
+#: model:res.groups,comment:hr_attendance.group_hr_attendance
+msgid ""
+"The user will gain access to the human resources attendance menu, enabling "
+"him to manage his own attendance."
 msgstr ""
 
 #. module: hr_attendance
@@ -632,13 +619,18 @@ msgid ""
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
+#: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid "To create employees go to the Employees menu."
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Today"
+msgstr ""
+
+#. module: hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
+msgid "Use PIN codes to check in in Kiosk Mode"
 msgstr ""
 
 #. module: hr_attendance
@@ -684,18 +676,6 @@ msgid "You cannot duplicate an attendance."
 msgstr ""
 
 #. module: hr_attendance
-#: model:ir.model,name:hr_attendance.model_base_config_settings
-msgid "base.config.settings"
-msgstr ""
-
-#. module: hr_attendance
-#. openerp-web
-#: code:addons/hr_attendance/static/src/js/presence_widgets.js:20
-#, python-format
-msgid "employee presence<br/>green: checked in<br/>red: checked out"
-msgstr ""
-
-#. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_employee_attendance_ids
 msgid "list of attendances for the employee"
 msgstr ""
@@ -712,4 +692,9 @@ msgstr ""
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:14
 #, python-format
 msgid "or"
+msgstr ""
+
+#. module: hr_attendance
+#: model:ir.model,name:hr_attendance.model_res_config_settings
+msgid "res.config.settings"
 msgstr ""

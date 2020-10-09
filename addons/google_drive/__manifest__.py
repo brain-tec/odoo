@@ -4,7 +4,7 @@
 {
     'name': 'Google Drive™ integration',
     'version': '0.2',
-    'category': 'Extra Tools',
+    'category': 'Tools',
     'installable': True,
     'auto_install': False,
     'data': [
@@ -12,7 +12,7 @@
         'data/google_drive_data.xml',
         'views/google_drive_views.xml',
         'views/google_drive_templates.xml',
-        'views/res_config_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'demo': [
         'data/google_drive_demo.xml'

@@ -3,27 +3,11 @@
 
 """ Modules dependency graph. """
 
-import os, sys, imp
-from os.path import join as opj
 import itertools
-import zipimport
+import logging
 
 import odoo
-
-import odoo.osv as osv
 import odoo.tools as tools
-import odoo.tools.osutil as osutil
-from odoo.tools.translate import _
-
-import zipfile
-import odoo.release as release
-
-import re
-import base64
-from zipfile import PyZipFile, ZIP_DEFLATED
-from cStringIO import StringIO
-
-import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -51,7 +35,7 @@ class Graph(dict):
             return
         # update the graph with values from the database (if exist)
         ## First, we set the default values for each package in graph
-        additional_data = dict((key, {'id': 0, 'state': 'uninstalled', 'dbdemo': False, 'installed_version': None}) for key in self.keys())
+        additional_data = {key: {'id': 0, 'state': 'uninstalled', 'dbdemo': False, 'installed_version': None} for key in self.keys()}
         ## Then we get the values from the database
         cr.execute('SELECT name, id, state, demo AS dbdemo, latest_version AS installed_version'
                    '  FROM ir_module_module'
@@ -91,7 +75,7 @@ class Graph(dict):
             deps = info['depends']
 
             # if all dependencies of 'package' are already in the graph, add 'package' in the graph
-            if reduce(lambda x, y: x and y in self, deps, True):
+            if all(dep in self for dep in deps):
                 if not package in current:
                     packages.pop(0)
                     continue
@@ -109,8 +93,8 @@ class Graph(dict):
         self.update_from_db(cr)
 
         for package in later:
-            unmet_deps = filter(lambda p: p not in self, dependencies[package])
-            _logger.error('module %s: Unmet dependencies: %s', package, ', '.join(unmet_deps))
+            unmet_deps = [p for p in dependencies[package] if p not in self]
+            _logger.info('module %s: Unmet dependencies: %s', package, ', '.join(unmet_deps))
 
         return len(self) - len_graph
 
@@ -165,7 +149,7 @@ class Node(object):
         for attr in ('init', 'update', 'demo'):
             if hasattr(self, attr):
                 setattr(node, attr, True)
-        self.children.sort(lambda x, y: cmp(x.name, y.name))
+        self.children.sort(key=lambda x: x.name)
         return node
 
     def __setattr__(self, name, value):
@@ -179,7 +163,10 @@ class Node(object):
                 setattr(child, name, value + 1)
 
     def __iter__(self):
-        return itertools.chain(iter(self.children), *map(iter, self.children))
+        return itertools.chain(
+            self.children,
+            itertools.chain.from_iterable(self.children)
+        )
 
     def __str__(self):
         return self._pprint()
@@ -189,3 +176,17 @@ class Node(object):
         for c in self.children:
             s += '%s`-> %s' % ('   ' * depth, c._pprint(depth+1))
         return s
+
+    def should_have_demo(self):
+        return (hasattr(self, 'demo') or (self.dbdemo and self.state != 'installed')) and all(p.dbdemo for p in self.parents)
+
+    @property
+    def parents(self):
+        if self.depth == 0:
+            return []
+
+        return (
+            node for node in self.graph.values()
+            if node.depth < self.depth
+            if self in node.children
+        )

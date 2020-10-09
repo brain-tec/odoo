@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:49+0000\n"
+"POT-Creation-Date: 2016-08-18 14:07+0000\n"
 "PO-Revision-Date: 2016-02-11 10:14+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Tamil (http://www.transifex.com/odoo/odoo-9/language/ta/)\n"
@@ -36,7 +36,7 @@ msgstr "நிறுவனம்"
 
 #. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap_create_user
-msgid "Create User"
+msgid "Create user"
 msgstr ""
 
 #. module: auth_ldap
@@ -62,20 +62,15 @@ msgid "ID"
 msgstr "ID"
 
 #. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.res_company_ldap_view_tree
-#: model:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
+#: model_terms:ir.ui.view,arch_db:auth_ldap.company_form_view
+#: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
 msgid "LDAP Configuration"
 msgstr ""
 
 #. module: auth_ldap
-#: model:ir.model.fields,field_description:auth_ldap.field_base_config_settings_ldaps
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldaps
+#: model_terms:ir.ui.view,arch_db:auth_ldap.company_form_view
 msgid "LDAP Parameters"
-msgstr ""
-
-#. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.base_config_settings_view_form_inherit_auth_ldap
-msgid "LDAP Server"
 msgstr ""
 
 #. module: auth_ldap
@@ -124,12 +119,12 @@ msgid "Last Updated on"
 msgstr "கடைசியாக புதுப்பிக்கப்பட்டது"
 
 #. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
+#: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
 msgid "Login Information"
 msgstr ""
 
 #. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
+#: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
 msgid "Process Parameter"
 msgstr ""
 
@@ -147,7 +142,7 @@ msgid "Sequence"
 msgstr "வரிசை"
 
 #. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
+#: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
 msgid "Server Information"
 msgstr ""
 
@@ -181,7 +176,7 @@ msgid "Use TLS"
 msgstr ""
 
 #. module: auth_ldap
-#: model:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
+#: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
 msgid "User Information"
 msgstr ""
 
@@ -194,11 +189,6 @@ msgstr ""
 #: model:ir.model,name:auth_ldap.model_res_users
 msgid "Users"
 msgstr "பயனர்கள்"
-
-#. module: auth_ldap
-#: model:ir.model,name:auth_ldap.model_base_config_settings
-msgid "base.config.settings"
-msgstr ""
 
 #. module: auth_ldap
 #: model:ir.model,name:auth_ldap.model_res_company_ldap

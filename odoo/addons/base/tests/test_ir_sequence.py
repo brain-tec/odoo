@@ -2,13 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from contextlib import contextmanager
-import unittest
 
 import psycopg2
 import psycopg2.errorcodes
 
 import odoo
+from odoo.exceptions import UserError
 from odoo.tests import common
+from odoo.tests.common import BaseCase
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
@@ -20,7 +21,6 @@ def environment():
     registry = odoo.registry(common.get_db_name())
     with registry.cursor() as cr:
         yield odoo.api.Environment(cr, ADMIN_USER_ID, {})
-        cr.commit()
 
 
 def drop_sequence(code):
@@ -29,7 +29,7 @@ def drop_sequence(code):
         seq.unlink()
 
 
-class TestIrSequenceStandard(unittest.TestCase):
+class TestIrSequenceStandard(BaseCase):
     """ A few tests for a 'Standard' (i.e. PostgreSQL) sequence. """
 
     def test_ir_sequence_create(self):
@@ -67,7 +67,7 @@ class TestIrSequenceStandard(unittest.TestCase):
         drop_sequence('test_sequence_type')
 
 
-class TestIrSequenceNoGap(unittest.TestCase):
+class TestIrSequenceNoGap(BaseCase):
     """ Copy of the previous tests for a 'No gap' sequence. """
 
     def test_ir_sequence_create_no_gap(self):
@@ -93,18 +93,17 @@ class TestIrSequenceNoGap(unittest.TestCase):
         with environment() as env0:
             with environment() as env1:
                 env1.cr._default_log_exceptions = False # Prevent logging a traceback
-                with self.assertRaises(psycopg2.OperationalError) as e:
+                with self.assertRaises(UserError) as e:
                     n0 = env0['ir.sequence'].next_by_code('test_sequence_type_2')
                     self.assertTrue(n0)
                     n1 = env1['ir.sequence'].next_by_code('test_sequence_type_2')
-                self.assertEqual(e.exception.pgcode, psycopg2.errorcodes.LOCK_NOT_AVAILABLE, msg="postgresql returned an incorrect errcode")
 
     @classmethod
     def tearDownClass(cls):
         drop_sequence('test_sequence_type_2')
 
 
-class TestIrSequenceChangeImplementation(unittest.TestCase):
+class TestIrSequenceChangeImplementation(BaseCase):
     """ Create sequence objects and change their ``implementation`` field. """
 
     def test_ir_sequence_1_create(self):
@@ -141,7 +140,7 @@ class TestIrSequenceChangeImplementation(unittest.TestCase):
         drop_sequence('test_sequence_type_4')
 
 
-class TestIrSequenceGenerate(unittest.TestCase):
+class TestIrSequenceGenerate(BaseCase):
     """ Create sequence objects and generate some values. """
 
     def test_ir_sequence_create(self):
@@ -154,7 +153,7 @@ class TestIrSequenceGenerate(unittest.TestCase):
             self.assertTrue(seq)
 
         with environment() as env:
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 n = env['ir.sequence'].next_by_code('test_sequence_type_5')
                 self.assertEqual(n, str(i))
 
@@ -169,7 +168,7 @@ class TestIrSequenceGenerate(unittest.TestCase):
             self.assertTrue(seq)
 
         with environment() as env:
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 n = env['ir.sequence'].next_by_code('test_sequence_type_6')
                 self.assertEqual(n, str(i))
 

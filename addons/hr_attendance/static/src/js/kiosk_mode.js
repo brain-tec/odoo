@@ -1,66 +1,71 @@
 odoo.define('hr_attendance.kiosk_mode', function (require) {
 "use strict";
 
+var AbstractAction = require('web.AbstractAction');
+var ajax = require('web.ajax');
 var core = require('web.core');
-var Model = require('web.Model');
-var Widget = require('web.Widget');
 var Session = require('web.session');
-var BarcodeHandlerMixin = require('barcodes.BarcodeHandlerMixin');
 
 var QWeb = core.qweb;
-var _t = core._t;
 
 
-var KioskMode = Widget.extend(BarcodeHandlerMixin, {
+var KioskMode = AbstractAction.extend({
     events: {
-        "click .o_hr_attendance_button_employees": function(){ this.do_action('hr_attendance.hr_employee_attendance_action_kanban'); },
-    },
-
-    init: function (parent, action) {
-        // Note: BarcodeHandlerMixin.init calls this._super.init, so there's no need to do it here.
-        // Yet, "_super" must be present in a function for the class mechanism to replace it with the actual parent method.
-        this._super;
-        BarcodeHandlerMixin.init.apply(this, arguments);
+        "click .o_hr_attendance_button_employees": function() {
+            this.do_action('hr_attendance.hr_employee_attendance_action_kanban', {
+                additional_context: {'no_group_by': true},
+            });
+        },
     },
 
     start: function () {
         var self = this;
+        core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
         self.session = Session;
-        var res_company = new Model('res.company');
-        res_company.query(['name'])
-           .filter([['id', '=', self.session.company_id]])
-           .all()
-           .then(function (companies){
+        var def = this._rpc({
+                model: 'res.company',
+                method: 'search_read',
+                args: [[['id', '=', this.session.company_id]], ['name']],
+            })
+            .then(function (companies){
                 self.company_name = companies[0].name;
-                self.company_image_url = self.session.url('/web/image', {model: 'res.company', id: self.session.company_id, field: 'logo',})
+                self.company_image_url = self.session.url('/web/image', {model: 'res.company', id: self.session.company_id, field: 'logo',});
                 self.$el.html(QWeb.render("HrAttendanceKioskMode", {widget: self}));
                 self.start_clock();
             });
         // Make a RPC call every day to keep the session alive
         self._interval = window.setInterval(this._callServer.bind(this), (60*60*1000*24));
-        return self._super.apply(this, arguments);
+        return Promise.all([def, this._super.apply(this, arguments)]);
     },
 
-    on_barcode_scanned: function(barcode) {
+    _onBarcodeScanned: function(barcode) {
         var self = this;
-        var hr_employee = new Model('hr.employee');
-        hr_employee.call('attendance_scan', [barcode, ])
+        core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
+        this._rpc({
+                model: 'hr.employee',
+                method: 'attendance_scan',
+                args: [barcode, ],
+            })
             .then(function (result) {
                 if (result.action) {
                     self.do_action(result.action);
                 } else if (result.warning) {
                     self.do_warn(result.warning);
+                    core.bus.on('barcode_scanned', self, self._onBarcodeScanned);
                 }
+            }, function () {
+                core.bus.on('barcode_scanned', self, self._onBarcodeScanned);
             });
     },
 
     start_clock: function() {
-        this.clock_start = setInterval(function() {this.$(".o_hr_attendance_clock").text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}));}, 500);
+        this.clock_start = setInterval(function() {this.$(".o_hr_attendance_clock").text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));}, 500);
         // First clock refresh before interval to avoid delay
-        this.$(".o_hr_attendance_clock").text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}));
+        this.$(".o_hr_attendance_clock").show().text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));
     },
 
     destroy: function () {
+        core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         clearInterval(this.clock_start);
         clearInterval(this._interval);
         this._super.apply(this, arguments);
@@ -68,7 +73,7 @@ var KioskMode = Widget.extend(BarcodeHandlerMixin, {
 
     _callServer: function () {
         // Make a call to the database to avoid the auto close of the session
-        return Session.rpc('/web/webclient/version_info', {})
+        return ajax.rpc("/hr_attendance/kiosk_keepalive", {});
     },
 
 });

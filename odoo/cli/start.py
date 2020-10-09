@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import argparse
 import glob
 import itertools
 import os
 import sys
 
+import odoo
 from . import Command
 from .server import main
 from odoo.modules.module import get_module_root, MANIFEST_NAMES
@@ -59,9 +61,10 @@ class Start(Command):
         # TODO: forbid some database names ? eg template1, ...
         try:
             _create_empty_database(args.db_name)
-        except DatabaseExists, e:
+            odoo.tools.config['init']['base'] = True
+        except DatabaseExists as e:
             pass
-        except Exception, e:
+        except Exception as e:
             die("Could not create database `%s`. (%s)" % (args.db_name, e))
 
         if '--db-filter' not in cmdargs:
@@ -77,5 +80,5 @@ class Start(Command):
         main(cmdargs)
 
 def die(message, code=1):
-    print >>sys.stderr, message
+    print(message, file=sys.stderr)
     sys.exit(code)

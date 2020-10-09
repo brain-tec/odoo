@@ -4,7 +4,7 @@ import base64
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.base.res.res_bank import sanitize_account_number
+from odoo.addons.base.models.res_bank import sanitize_account_number
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -25,46 +25,47 @@ class AccountBankStatementImport(models.TransientModel):
     _name = 'account.bank.statement.import'
     _description = 'Import Bank Statement'
 
-    data_file = fields.Binary(string='Bank Statement File', required=True, help='Get you bank statements in electronic format from your bank and select them here.')
-    filename = fields.Char()
+    attachment_ids = fields.Many2many('ir.attachment', string='Files', required=True, help='Get you bank statements in electronic format from your bank and select them here.')
 
-    @api.multi
     def import_file(self):
         """ Process the file chosen in the wizard, create bank statement(s) and go to reconciliation. """
         self.ensure_one()
+        statement_line_ids_all = []
+        notifications_all = []
         # Let the appropriate implementation module parse the file and return the required data
         # The active_id is passed in context in case an implementation module requires information about the wizard state (see QIF)
-        currency_code, account_number, stmts_vals = self.with_context(active_id=self.ids[0])._parse_file(base64.b64decode(self.data_file))
-        # Check raw data
-        self._check_parsed_data(stmts_vals)
-        # Try to find the currency and journal in odoo
-        currency, journal = self._find_additional_data(currency_code, account_number)
-        # If no journal found, ask the user about creating one
-        if not journal:
-            # The active_id is passed in context so the wizard can call import_file again once the journal is created
-            return self.with_context(active_id=self.ids[0])._journal_creation_wizard(currency, account_number)
-        if not journal.default_debit_account_id or not journal.default_credit_account_id:
-            raise UserError(_('You have to set a Default Debit Account and a Default Credit Account for the journal: %s') % (journal.name,))
-        # Prepare statement data to be used for bank statements creation
-        stmts_vals = self._complete_stmts_vals(stmts_vals, journal, account_number)
-        # Create the bank statements
-        statement_ids, notifications = self._create_bank_statements(stmts_vals)
-        # Now that the import worked out, set it as the bank_statements_source of the journal
-        if journal.bank_statements_source != 'file_import':
-            # Use sudo() because only 'account.group_account_manager'
-            # has write access on 'account.journal', but 'account.group_account_user'
-            # must be able to import bank statement files
-            journal.sudo().bank_statements_source = 'file_import'
+        for data_file in self.attachment_ids:
+            currency_code, account_number, stmts_vals = self.with_context(active_id=self.ids[0])._parse_file(base64.b64decode(data_file.datas))
+            # Check raw data
+            self._check_parsed_data(stmts_vals, account_number)
+            # Try to find the currency and journal in odoo
+            currency, journal = self._find_additional_data(currency_code, account_number)
+            # If no journal found, ask the user about creating one
+            if not journal:
+                # The active_id is passed in context so the wizard can call import_file again once the journal is created
+                return self.with_context(active_id=self.ids[0])._journal_creation_wizard(currency, account_number)
+            if not journal.default_debit_account_id or not journal.default_credit_account_id:
+                raise UserError(_('You have to set a Default Debit Account and a Default Credit Account for the journal: %s') % (journal.name,))
+            # Prepare statement data to be used for bank statements creation
+            stmts_vals = self._complete_stmts_vals(stmts_vals, journal, account_number)
+            # Create the bank statements
+            statement_line_ids, notifications = self._create_bank_statements(stmts_vals)
+            statement_line_ids_all.extend(statement_line_ids)
+            notifications_all.extend(notifications)
+            # Now that the import worked out, set it as the bank_statements_source of the journal
+            if journal.bank_statements_source != 'file_import':
+                # Use sudo() because only 'account.group_account_manager'
+                # has write access on 'account.journal', but 'account.group_account_user'
+                # must be able to import bank statement files
+                journal.sudo().bank_statements_source = 'file_import'
         # Finally dispatch to reconciliation interface
-        action = self.env.ref('account.action_bank_reconcile_bank_statements')
         return {
-            'name': action.name,
-            'tag': action.tag,
-            'context': {
-                'statement_ids': statement_ids,
-                'notifications': notifications
-            },
             'type': 'ir.actions.client',
+            'tag': 'bank_statement_reconciliation_view',
+            'context': {'statement_line_ids': statement_line_ids_all,
+                        'company_ids': self.env.user.company_ids.ids,
+                        'notifications': notifications_all,
+            },
         }
 
     def _journal_creation_wizard(self, currency, account_number):
@@ -73,7 +74,6 @@ class AccountBankStatementImport(models.TransientModel):
             'name': _('Journal Creation'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.bank.statement.import.journal.creation',
-            'view_type': 'form',
             'view_mode': 'form',
             'target': 'new',
             'context': {
@@ -111,10 +111,14 @@ class AccountBankStatementImport(models.TransientModel):
         """
         raise UserError(_('Could not make sense of the given file.\nDid you install the module to support this type of file ?'))
 
-    def _check_parsed_data(self, stmts_vals):
+    def _check_parsed_data(self, stmts_vals, account_number):
         """ Basic and structural verifications """
+        extra_msg = _('If it contains transactions for more than one account, it must be imported on each of them.')
         if len(stmts_vals) == 0:
-            raise UserError(_('This file doesn\'t contain any statement.'))
+            raise UserError(
+                _('This file doesn\'t contain any statement for account %s.') % (account_number,)
+                + '\n' + extra_msg
+            )
 
         no_st_line = True
         for vals in stmts_vals:
@@ -122,16 +126,23 @@ class AccountBankStatementImport(models.TransientModel):
                 no_st_line = False
                 break
         if no_st_line:
-            raise UserError(_('This file doesn\'t contain any transaction.'))
+            raise UserError(
+                _('This file doesn\'t contain any transaction for account %s.') % (account_number,)
+                + '\n' + extra_msg
+            )
 
     def _check_journal_bank_account(self, journal, account_number):
-        return journal.bank_account_id.sanitized_acc_number == account_number
+        # Needed for CH to accommodate for non-unique account numbers
+        sanitized_acc_number = journal.bank_account_id.sanitized_acc_number
+        if " " in sanitized_acc_number:
+            sanitized_acc_number = sanitized_acc_number.split(" ")[0]
+        return sanitized_acc_number == account_number
 
     def _find_additional_data(self, currency_code, account_number):
         """ Look for a res.currency and account.journal using values extracted from the
             statement and make sure it's consistent.
         """
-        company_currency = self.env.user.company_id.currency_id
+        company_currency = self.env.company.currency_id
         journal_obj = self.env['account.journal']
         currency = None
         sanitized_account_number = sanitize_account_number(account_number)
@@ -164,7 +175,7 @@ class AccountBankStatementImport(models.TransientModel):
             if currency and currency != journal_currency:
                 statement_cur_code = not currency and company_currency.name or currency.name
                 journal_cur_code = not journal_currency and company_currency.name or journal_currency.name
-                raise UserError(_('The currency of the bank statement (%s) is not the same as the currency of the journal (%s) !') % (statement_cur_code, journal_cur_code))
+                raise UserError(_('The currency of the bank statement (%s) is not the same as the currency of the journal (%s).') % (statement_cur_code, journal_cur_code))
 
         # If we couldn't find / can't create a journal, everything is lost
         if not journal and not account_number:
@@ -176,7 +187,7 @@ class AccountBankStatementImport(models.TransientModel):
         for st_vals in stmts_vals:
             st_vals['journal_id'] = journal.id
             if not st_vals.get('reference'):
-                st_vals['reference'] = self.filename
+                st_vals['reference'] = " ".join(self.attachment_ids.mapped('name'))
             if st_vals.get('number'):
                 #build the full name like BNK/2016/00135 by just giving the number '135'
                 st_vals['name'] = journal.sequence_id.with_context(ir_sequence_date=st_vals.get('date')).get_next_char(st_vals['number'])
@@ -190,19 +201,12 @@ class AccountBankStatementImport(models.TransientModel):
                 if not line_vals.get('bank_account_id'):
                     # Find the partner and his bank account or create the bank account. The partner selected during the
                     # reconciliation process will be linked to the bank when the statement is closed.
-                    partner_id = False
-                    bank_account_id = False
                     identifying_string = line_vals.get('account_number')
                     if identifying_string:
                         partner_bank = self.env['res.partner.bank'].search([('acc_number', '=', identifying_string)], limit=1)
                         if partner_bank:
-                            bank_account_id = partner_bank.id
-                            partner_id = partner_bank.partner_id.id
-                        else:
-                            bank_account_id = self.env['res.partner.bank'].create({'acc_number': line_vals['account_number']}).id
-                    line_vals['partner_id'] = partner_id
-                    line_vals['bank_account_id'] = bank_account_id
-
+                            line_vals['bank_account_id'] = partner_bank.id
+                            line_vals['partner_id'] = partner_bank.partner_id.id
         return stmts_vals
 
     def _create_bank_statements(self, stmts_vals):
@@ -211,7 +215,7 @@ class AccountBankStatementImport(models.TransientModel):
         BankStatementLine = self.env['account.bank.statement.line']
 
         # Filter out already imported transactions and create statements
-        statement_ids = []
+        statement_line_ids = []
         ignored_statement_lines_import_ids = []
         for st_vals in stmts_vals:
             filtered_st_lines = []
@@ -219,11 +223,7 @@ class AccountBankStatementImport(models.TransientModel):
                 if 'unique_import_id' not in line_vals \
                    or not line_vals['unique_import_id'] \
                    or not bool(BankStatementLine.sudo().search([('unique_import_id', '=', line_vals['unique_import_id'])], limit=1)):
-                    if line_vals['amount'] != 0:
-                        # Some banks, like ING, create a line for free charges.
-                        # We just skip those lines as there's a 'non-zero' constraint
-                        # on the amount of account.bank.statement.line
-                        filtered_st_lines.append(line_vals)
+                    filtered_st_lines.append(line_vals)
                 else:
                     ignored_statement_lines_import_ids.append(line_vals['unique_import_id'])
                     if 'balance_start' in st_vals:
@@ -232,13 +232,11 @@ class AccountBankStatementImport(models.TransientModel):
             if len(filtered_st_lines) > 0:
                 # Remove values that won't be used to create records
                 st_vals.pop('transactions', None)
-                for line_vals in filtered_st_lines:
-                    line_vals.pop('account_number', None)
-                # Create the satement
+                # Create the statement
                 st_vals['line_ids'] = [[0, False, line] for line in filtered_st_lines]
-                statement_ids.append(BankStatement.create(st_vals).id)
-        if len(statement_ids) == 0:
-            raise UserError(_('You have already imported that file.'))
+                statement_line_ids.extend(BankStatement.create(st_vals).line_ids.ids)
+        if len(statement_line_ids) == 0:
+            raise UserError(_('You already have imported that file.'))
 
         # Prepare import feedback
         notifications = []
@@ -253,4 +251,4 @@ class AccountBankStatementImport(models.TransientModel):
                     'ids': BankStatementLine.search([('unique_import_id', 'in', ignored_statement_lines_import_ids)]).ids
                 }
             }]
-        return statement_ids, notifications
+        return statement_line_ids, notifications

@@ -110,6 +110,7 @@ td {
 }
 
 .pos {
+    direction: ltr;
     padding: 0;
     margin: 0;
     background-color: #f0eeee;
@@ -332,8 +333,8 @@ td {
 }
 .pos .pos-logo {
     height: 35px;
-    margin-left: 7px;
-    margin-top: 2px;
+    margin-left: 10px;
+    margin-top: 5px;
     vertical-align:middle;
 } 
 .pos .pos-branding .username{
@@ -356,6 +357,9 @@ td {
     height:100%;
     display: -webkit-flex;
     display: flex;
+    overflow : hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .pos .pos-rightheader > * {
     border-right: 1px solid #292929;
@@ -436,8 +440,6 @@ td {
     display: flex;
     -webkit-flex: 1;
     flex: 1;
-    max-width: -moz-available;
-    max-width: -webkit-fill-available;
 }
 .pos .orders {
     display: -webkit-flex;
@@ -445,8 +447,6 @@ td {
     vertical-align: top;
     margin-left: 0px;
     overflow: hidden;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 /*  c) The session buttons */
@@ -505,7 +505,7 @@ td {
 .pos .oe_icon.oe_red {
     color: rgb(197, 52, 0);
 }
-.pos .oe_statu .oe_green,
+.pos .oe_status .oe_green,
 .pos .oe_icon.oe_green {
     color: rgb(94, 185, 55);
 }
@@ -730,7 +730,7 @@ td {
     border-top-right-radius: 4px;
 }
 .pos .numpad button {
-    float: left;
+    float: left/*rtl:ignore*/; /* rtlcss forced to keep ltr */
     height: 54px;
     width: 54px;
     font-weight: bold;
@@ -772,6 +772,11 @@ td {
     background: #6EC89B;
     color: white;
     border-color: transparent;
+}
+.pos .numpad .disabled-mode, .pos .numpad .disabled-mode:hover {
+    background: #c7c7c7;
+    color: #a5a1a1;
+    cursor: not-allowed;
 }
 
 /*  ********* The right pane contains the screens and headers ********* */
@@ -876,8 +881,8 @@ td {
     border: 1px solid #cecbcb;
     padding: 10px 20px;
     padding-left: 38px;
+    padding-right: 33px;
     margin: 6px;
-    background: url("../img/search.png") no-repeat 15px;
     background-color: white;
     border-radius: 20px;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
@@ -888,12 +893,25 @@ td {
     box-shadow: 0px 0px 0px 2px rgb(153, 153, 255) inset;
     color: rgb(153, 153, 255);
 }
+
 .pos .search-clear {
     position: absolute;
+    top: 9px;
     width: 30px;
     height: 30px;
-    top: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-clear.left {
     left: 11px;
+    color: #808080;
+}
+
+.search-clear.right {
+    left: 145px;
+    color: #808080;
     cursor: pointer;
 }
 
@@ -1282,6 +1300,8 @@ td {
 
 .pos .paymentlines {
     width: 100%;
+    border-spacing: 0px 10px;
+    border-collapse: inherit;
 }
 .pos .paymentlines .controls {
     width: 40px;
@@ -1409,6 +1429,16 @@ td {
     text-align: center;
 }
 
+.paymentlines .button {
+    cursor: pointer;
+    border: 1px solid #cacaca;
+}
+.paymentlines .electronic_payment {
+    background: #e2e2e2;
+    border-collapse: unset;
+    text-align: center;
+    font-size: 16px;
+}
 
 /* c) The receipt screen */
 
@@ -1428,37 +1458,21 @@ td {
 .pos .pos-receipt-container {
     font-size: 0.75em;
     text-align: center;
+    direction: ltr;
 }
 
-.pos .pos-sale-ticket {
+.pos .pos-receipt-container > div {
     text-align: left;
     width: 300px;
     background-color: white;
     margin: 20px;
     padding: 15px;
-    font-size: 14px;
+    font-size: 16px;
     padding-bottom:30px;
     display: inline-block;
-    font-family: "Inconsolata";
     border: solid 1px rgb(220,220,220);
     border-radius: 3px;
     overflow: hidden;
-}
-.pos .pos-sale-ticket pre{
-    font-family: "Inconsolata";
-}
-.pos .pos-sale-ticket .emph{
-    font-size: 20px;
-    margin:5px;
-}
-.pos .pos-sale-ticket table {
-    width: 100%;
-    border: 0;
-    table-layout: fixed;
-}
-.pos .pos-sale-ticket table td {
-    border: 0;
-    word-wrap: break-word;
 }
 
 @page {
@@ -1475,6 +1489,7 @@ td {
         /* avoid black background if backgrounds are printed */
         background: initial;
     }
+    .o_notification_manager,
     .oe_leftbar,
     .oe_loading,
     .pos .pos-topheader, 
@@ -1482,7 +1497,8 @@ td {
     .pos .keyboard_frame,
     .pos .receipt-screen header,
     .pos .receipt-screen .top-content,
-    .pos .receipt-screen .centered-content .button {
+    .pos .receipt-screen .centered-content .button,
+    .pos .receipt-screen .centered-content .print_invoice {
         display: none !important;
     }
     .pos,
@@ -1524,7 +1540,7 @@ td {
         box-shadow: none !important;
         background: transparent !important;
     }
-    .pos .pos-sale-ticket{
+    .pos .pos-receipt{
         margin: 0;
         margin-left: auto !important;
         margin-right: auto !important;
@@ -1536,6 +1552,9 @@ td {
         display: none !important;
     }
     .o_chat_window {
+        display: none !important;
+    }
+    .blockUI {
         display: none !important;
     }
 }
@@ -2151,19 +2170,6 @@ td {
     overflow: auto;
     height: 120px;
 }
-.pos .modal-dialog .popup-textinput{
-    display: flex;
-    flex-direction: column;
-}
-.pos .modal-dialog .popup-textinput .title,
-.pos .modal-dialog .popup-textinput .footer{
-    flex: none;
-}
-.pos .modal-dialog .popup-textinput textarea{
-    resize: none;
-    flex: auto;
-    margin: 0 20px 80px;
-}
 .pos .popup .title {
     background: rgba(255,255,255,0.5);
     margin: 0;
@@ -2297,7 +2303,7 @@ td {
     width: auto;
     line-height: 50px;
     margin-top: -1px;
-    border-top: solid 3px #6EC89B;
+    border-top: solid 3px rgba(60,60,60,0.1);
     
 }
 .pos .popup.popup-selection .selection-item {
@@ -2307,8 +2313,11 @@ td {
     text-align: left;
     padding: 0px 16px;
 }
-.pos .popup.popup-selection .selection-item:nth-child(even) {
+.pos .popup.popup-selection .selection-item:nth-child(odd) {
     background: rgb(247,247,247);
+}
+.pos .popup.popup-selection .selection-item.selected {
+    background: #6EC89B;
 }
 .pos .popup.popup-number {
     width: 300px;
@@ -2324,6 +2333,7 @@ td {
     margin-right: 3px;
 }
 .pos .popup-numpad {
+    direction: ltr/*rtl:ignore*/; /* rtlcss forced to keep ltr */
     margin: 12px auto;
     text-align: center;
     width: 254px;

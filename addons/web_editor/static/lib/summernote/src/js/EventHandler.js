@@ -191,7 +191,7 @@ define([
       if (!styleInfo) {
         return;
       }
-      var isAirMode = layoutInfo.editor().data('options').airMode;
+      var isAirMode = (layoutInfo.editor().data('options') || {}).airMode;
       if (!isAirMode) {
         modules.toolbar.update(layoutInfo.toolbar(), styleInfo);
       }
@@ -206,6 +206,9 @@ define([
       setTimeout(function () {
         var layoutInfo = dom.makeLayoutInfo(target);
         /* ODOO: (start_modification */
+        if (!layoutInfo) {
+            return;
+        }
         var $editable = layoutInfo.editable();
         if (event.setStyleInfoFromEditable) {
             var styleInfo = modules.editor.styleFromNode($editable);
@@ -476,7 +479,8 @@ define([
         onImageUpload: options.onImageUpload,
         onImageUploadError: options.onImageUploadError,
         onMediaDelete: options.onMediaDelete,
-        onToolbarClick: options.onToolbarClick
+        onToolbarClick: options.onToolbarClick,
+        onUpload: options.onUpload,
       });
 
       var styleInfo = modules.editor.styleFromNode(layoutInfo.editable());
