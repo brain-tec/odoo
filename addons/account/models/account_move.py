@@ -885,7 +885,7 @@ class AccountMove(models.Model):
             :return:                        A list <to_pay_company_currency, to_pay_invoice_currency, due_date>.
             '''
             if self.invoice_payment_term_id:
-                to_compute = self.invoice_payment_term_id.compute(total_balance, date_ref=date, currency=self.currency_id)
+                to_compute = self.invoice_payment_term_id.compute(total_balance, date_ref=date, currency=self.company_id.currency_id)
                 if self.currency_id != self.company_id.currency_id:
                     # Multi-currencies.
                     to_compute_currency = self.invoice_payment_term_id.compute(total_amount_currency, date_ref=date, currency=self.currency_id)
@@ -947,7 +947,7 @@ class AccountMove(models.Model):
 
         existing_terms_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
         others_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type not in ('receivable', 'payable'))
-        company_currency_id = self.company_id.currency_id
+        company_currency_id = (self.company_id or self.env.company).currency_id
         total_balance = sum(others_lines.mapped(lambda l: company_currency_id.round(l.balance)))
         total_amount_currency = sum(others_lines.mapped('amount_currency'))
 
