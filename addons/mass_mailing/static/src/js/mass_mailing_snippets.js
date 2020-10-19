@@ -138,4 +138,5 @@ options.registry.background = options.registry.background.extend({
         }
     }
 });
+
 });

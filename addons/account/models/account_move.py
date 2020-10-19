@@ -1674,7 +1674,7 @@ class AccountMove(models.Model):
             # Which is wrong in some case
             # It's better to set the account_id before the partner_id
             # Ensure related fields are well copied.
-            line.partner_id = self.partner_id
+            line.partner_id = self.partner_id.commercial_partner_id
             line.date = self.date
             line.recompute_tax_line = True
             line.currency_id = line_currency
@@ -3167,11 +3167,17 @@ class AccountMoveLine(models.Model):
             # E.g. mapping a 10% price-included tax to a 20% price-included tax for a price_unit of 110 should preserve
             # 100 as balance but set 120 as price_unit.
             if line.tax_ids and line.move_id.fiscal_position_id:
-                line.price_unit = line._get_price_total_and_subtotal()['price_subtotal']
-                line.tax_ids = line.move_id.fiscal_position_id.map_tax(line.tax_ids._origin, partner=line.move_id.partner_id)
-                accounting_vals = line._get_fields_onchange_subtotal(price_subtotal=line.price_unit, currency=line.move_id.company_currency_id)
+                price_subtotal = line._get_price_total_and_subtotal()['price_subtotal']
+                line.tax_ids = line.move_id.fiscal_position_id.map_tax(
+                    line.tax_ids._origin,
+                    partner=line.move_id.partner_id)
+                accounting_vals = line._get_fields_onchange_subtotal(
+                    price_subtotal=price_subtotal,
+                    currency=line.move_id.company_currency_id)
                 balance = accounting_vals['debit'] - accounting_vals['credit']
-                line.price_unit = line._get_fields_onchange_balance(balance=balance).get('price_unit', line.price_unit)
+                business_vals = line._get_fields_onchange_balance(balance=balance)
+                if 'price_unit' in business_vals:
+                    line.price_unit = business_vals['price_unit']
 
             # Convert the unit price to the invoice's currency.
             company = line.move_id.company_id
