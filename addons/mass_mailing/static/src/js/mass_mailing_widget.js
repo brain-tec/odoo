@@ -13,7 +13,10 @@ var _t = core._t;
 var MassMailingFieldHtml = FieldHtml.extend({
     xmlDependencies: (FieldHtml.prototype.xmlDependencies || []).concat(["/mass_mailing/static/src/xml/mass_mailing.xml"]),
     assetLibs: ['web_editor.compiled_assets_wysiwyg'],
-    jsLibs: ['/mass_mailing/static/src/js/mass_mailing_snippets.js'],
+    jsLibs: [
+        '/mass_mailing/static/src/js/mass_mailing_snippets.js',
+        '/mass_mailing/static/src/js/mass_mailing_link_dialog_fix.js'
+    ],
 
     custom_events: _.extend({}, FieldHtml.prototype.custom_events, {
         snippets_loaded: '_onSnippetsLoaded',
@@ -35,6 +38,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!this.nodeOptions.snippets) {
             this.nodeOptions.snippets = 'mass_mailing.email_designer_snippets';
         }
+        this.enableResizer = false;
     },
 
     //--------------------------------------------------------------------------
