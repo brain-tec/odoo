@@ -341,6 +341,7 @@ var VariantMixin = {
         $parent
             .find('option, input, label')
             .removeClass('css_not_available')
+            .prop('disabled', false)
             .attr('title', '')
             .data('excluded-by', '');
 
@@ -413,6 +414,7 @@ var VariantMixin = {
             .find('option[value=' + attributeValueId + '], input[value=' + attributeValueId + ']');
         $input.addClass('css_not_available');
         $input.closest('label').addClass('css_not_available');
+        $input.prop('disabled', true);
 
         if (excludedBy && attributeNames) {
             var $target = $input.is('option') ? $input : $input.closest('label').add($input);
@@ -444,6 +446,7 @@ var VariantMixin = {
         var $price = $parent.find(".oe_price:first .oe_currency_value");
         var $default_price = $parent.find(".oe_default_price:first .oe_currency_value");
         var $optional_price = $parent.find(".oe_optional:first .oe_currency_value");
+
         $price.text(self._priceToStr(combination.price));
         $default_price.text(self._priceToStr(combination.list_price));
 
@@ -493,6 +496,14 @@ var VariantMixin = {
                 isCombinationPossible
             );
         }
+
+        // $parent.find("#add_to_cart").toggleClass('disabled', !combination.is_available);
+        // if(!combination.is_available){
+        //     $parent.find("#product_is_not_available_warning").css('display', 'inline');
+        // }
+        // else{
+        //     $parent.find("#product_is_not_available_warning").css('display', 'none');
+        // }
 
         $parent
             .find('.product_id')

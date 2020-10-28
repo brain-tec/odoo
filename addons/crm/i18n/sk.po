@@ -6,12 +6,12 @@
 # Martin Trigaux, 2019
 # Matus Krnac <matus.krnac@gmail.com>, 2019
 # Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2019
-# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2019
 # gebri <gebri@inmail.sk>, 2019
 # Jan Prokop, 2019
 # Stefan Stieranka <stieranka@itec.sk>, 2020
 # Adam Levrinc <adam.levrinc@26house.com>, 2020
 # Michal Matus <misko.matus@gmail.com>, 2020
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2020
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # 
 msgid ""
@@ -53,7 +53,7 @@ msgid ""
 "    <strong style=\"font-size: 16px;\">Try the mail gateway</strong>"
 msgstr ""
 "% set email = object.env['crm.team'].search([('alias_name','!=', False)],limit=1).alias_id.display_name\n"
-"    % if email\n"
+"    % ak email\n"
 "    <strong style=\"font-size: 16px;\">Použite mailovú bránu</strong>"
 
 #. module: crm
@@ -64,8 +64,8 @@ msgid ""
 "<b>Choose a name</b> for your opportunity, example: <i>'Need a new "
 "website'</i>"
 msgstr ""
-"<b>Zvoľte meno</b> pre vašu príležitosť, napr: <i>'potreba novej webovej "
-"stránky'</i>"
+"<b>Zvoľte meno</b> pre váš obchodný prípad, napr: <i>'potreba novej "
+"webstránky'</i>"
 
 #. module: crm
 #. openerp-web
@@ -91,7 +91,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "<b>Predictive Lead Scoring</b>"
-msgstr "<b>Predpoveď úspechu potenciálnej zákazky</b>"
+msgstr "<b>Predpoveď úspechu Potenciálnej príležitosti</b>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -101,8 +101,8 @@ msgid ""
 "attrs=\"{'invisible': ['|', ('is_blacklisted', '=', False), "
 "('partner_address_email', '!=', False)]}\" groups=\"base.group_user\"/>"
 msgstr ""
-"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"Tento mail"
-" je zablokovaný pre hromadný mailing\" aria-label=\"Blacklisted\" "
+"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"This email"
+" is blacklisted for mass mailing\" aria-label=\"Blacklisted\" "
 "attrs=\"{'invisible': ['|', ('is_blacklisted', '=', False), "
 "('partner_address_email', '!=', False)]}\" groups=\"base.group_user\"/>"
 
@@ -127,8 +127,8 @@ msgid ""
 "attrs=\"{'invisible': [('is_blacklisted', '=', False)]}\" "
 "groups=\"base.group_user\"/>"
 msgstr ""
-"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"Tento mail"
-" je na čiernej listine pre hromadné posielanie\" aria-label=\"Blacklisted\" "
+"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"This email"
+" is blacklisted for mass mailing\" aria-label=\"Blacklisted\" "
 "attrs=\"{'invisible': [('is_blacklisted', '=', False)]}\" "
 "groups=\"base.group_user\"/>"
 
@@ -179,7 +179,7 @@ msgid ""
 "</p>"
 msgstr ""
 "<p class='o_view_nocontent_smiling_face'>Pridať nové Obchodné príležitosti</p><p>\n"
-"    Vyzerá to, že nie ste členom predajného tímu. Pridajte sa ako člen do niektorého z predajných tímov.\n"
+"    Zdá sa, že nie ste členom predajného tímu. Pridajte sa ako člen do niektorého z predajných tímov.\n"
 "</p>"
 
 #. module: crm
@@ -191,8 +191,8 @@ msgid ""
 "attached to this opportunity.</p><p class=\"mb0\">Type <i>'@'</i> to mention"
 " people - it's like cc-ing on emails.</p>"
 msgstr ""
-"<p><b>Posielajte správy</b>  potenciálnemu zákazníkovi a dostávajte odpovede"
-" pripojené k tejto Obchodnej príležitosti.</p><p class=\"mb0\">Zadajte "
+"<p><b>Posielajte správy</b>potenciálnemu zákazníkovi a dostávajte odpovede "
+"pripojené k tomuto obchodnému prípadu.</p><p class=\"mb0\">Zadajte "
 "<i>'@'</i> pre označenie ľudí - je to podobné ich dať do kópie v maily.</p>"
 
 #. module: crm
@@ -284,7 +284,7 @@ msgstr "Pridajte popis..."
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Add a qualification step before the creation of an opportunity"
-msgstr "Pridajte kvalifikačný krok pred vytvorením provízie"
+msgstr "Pridajte kvalifikačný krok pred vytvorením obchodného prípadu"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -328,7 +328,7 @@ msgstr "Prideliť tieto príležitosti"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 msgid "Assign this opportunity to"
-msgstr "Prideliť túto príležitost"
+msgstr "Pridelte tento obchodný prípad"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
@@ -359,7 +359,7 @@ msgstr "Automatická pravdepodobnosť"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
 msgid "Avg. of Probability"
-msgstr "Priem. pravdepodobnosti"
+msgstr "Priemer pravdepodobnosti"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__is_blacklisted
@@ -392,7 +392,7 @@ msgstr "CRM analýza aktivity"
 #. module: crm
 #: model:ir.model,name:crm.model_crm_stage
 msgid "CRM Stages"
-msgstr "Etapy CRM"
+msgstr "CRM štádia"
 
 #. module: crm
 #: model:ir.model,name:crm.model_calendar_event
@@ -402,7 +402,7 @@ msgstr "Udalosť kalendára"
 #. module: crm
 #: model:mail.activity.type,name:crm.mail_activity_demo_call_demo
 msgid "Call for Demo"
-msgstr "žiadať Demo"
+msgstr "Žiadosť o demo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__campaign_id
@@ -422,7 +422,7 @@ msgstr "Zrušiť"
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_team_act_tree
 msgid "Cases by Sales Team"
-msgstr "Prípady podľa predajného tímu"
+msgstr "Prípady podľa obchodného tímu"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
@@ -437,13 +437,14 @@ msgid ""
 "converting them into opportunities and assigning them to a salesperson."
 msgstr ""
 "Vyberte túto voľbu, ak chcete filtrovať a kvalifikovať prichádzajúce "
-"potenciálne príležitosti skôr, ako ich skonvertujete na príležitosti a "
-"priradíte obchodníkovi."
+"Potenciálne príležitosti skôr, ako ich skonvertujete na Obchodné "
+"príležitosti a priradíte ich obchodníkovi."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__use_opportunities
 msgid "Check this box to manage a presales process with opportunities."
-msgstr "Zvoľ pre riadenie predpredajného procesu pomocou príležitostí."
+msgstr ""
+"Zvoľ pre riadenie predpredajného procesu pomocou Obchodných príležitostí."
 
 #. module: crm
 #. openerp-web
@@ -470,15 +471,15 @@ msgid ""
 "Classify and analyze your lead/opportunity categories like: Training, "
 "Service"
 msgstr ""
-"Klasifikujte a analyzujte vaše kategórie potenciálnych "
-"zákazníkov/príležitostí ako sú: tréning, služba"
+"Klasifikujte a analyzujte vaše kategórie potenciálnych zákazníkov / obchodné"
+" prípady ako sú: tréning, služba a iné"
 
 #. module: crm
 #. openerp-web
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "Click here to <b>add your opportunity</b>."
-msgstr "Klikni pre <b>pridanie svojej príležitosti</b>."
+msgstr "Klikni tu <b>pridaj svoj obchodný prípad</b>."
 
 #. module: crm
 #. openerp-web
@@ -488,15 +489,15 @@ msgid ""
 "Click here to <b>create your first opportunity</b> and add it to your "
 "pipeline."
 msgstr ""
-"Kliknite pre <b>vytvorenie svojej prvej príležitosti</b> a pridajte na svoju"
-" obchodnú nástenku."
+"Kliknite tu <b>vytvorte svoje prvé obchodné prípady</b> a pridajte ich na "
+"svoju obchodnú nástenku."
 
 #. module: crm
 #. openerp-web
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "Click on the opportunity to zoom in."
-msgstr "Klikni na príležitosť pre zväčšenie."
+msgstr "Kliknite na obchodný prípad pre zväčšenie."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date_closed
@@ -513,14 +514,14 @@ msgstr "Dátum uzavretia"
 #, python-format
 msgid "Closed/Dead leads cannot be converted into opportunities."
 msgstr ""
-"Uzavreté / stratené potenciálne príležitosti nemôžu byť konvertované na "
-"príležitosti."
+"Uzavreté / stratené Potenciálne príležitosti nemôžu byť konvertované na "
+"Obchodné príležitosti."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__color
 #: model:ir.model.fields,field_description:crm.field_crm_lead_tag__color
 msgid "Color Index"
-msgstr "Farebný index"
+msgstr "Index farieb"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__company_id
@@ -540,13 +541,13 @@ msgstr "Názov spoločnosti"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
 msgid "Completed Last 365 Days"
-msgstr "Ukončené za posledných 365 dní"
+msgstr "Dokončené za posledných 365 dní"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date
 #: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
 msgid "Completion Date"
-msgstr "Dátum ukončenia"
+msgstr "Dátum dokončenia"
 
 #. module: crm
 #: model:ir.model,name:crm.model_res_config_settings
@@ -574,7 +575,7 @@ msgstr "Nastavte doménu"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Consider leads created as of the"
-msgstr "Berte vytvorené potenciálne príležitosti ako"
+msgstr "Berte vytvorené Potenciálne príležitosti ako"
 
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor7
@@ -594,7 +595,7 @@ msgstr "Kontaktné informácie"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__contact_name
 msgid "Contact Name"
-msgstr "Názov Kontaktu"
+msgstr "Názov kontaktu"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__name
@@ -613,7 +614,7 @@ msgstr "Dátum konverzie"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 msgid "Conversion Date from Lead to Opportunity"
-msgstr "Obdobie konverzie od potenciálnej príležitosti po príležitosť"
+msgstr "Obdobie konverzie od potenciálnej príležitosti po obchodný prípad"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
@@ -623,29 +624,29 @@ msgstr "Možnosti konverzie"
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead2opportunity_partner_mass
 msgid "Convert Lead to Opportunity (in mass)"
-msgstr "Konvertovať potenciálne príležitosti na príležitosti (hromadne)"
+msgstr "Konvertovať potenciálnu príležitosť na obchodný prípad (hromadne)"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead2opportunity_partner
 msgid "Convert Lead to Opportunity (not in mass)"
-msgstr "Konvertovať potenciálne príležitosti na príležitosti (nie hromadne)"
+msgstr "Konvertovať potenciálnu príležitosť na obchodný prípad (nie hromadne)"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Convert to Opportunities"
-msgstr "Konvertovať na príležitosti"
+msgstr "Konvertovať na Obchodné príležitosti"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Convert to Opportunity"
-msgstr "Konvertovať na príležitosti"
+msgstr "Konvertovať na obchodný prípad"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_crm_send_mass_convert
 msgid "Convert to opportunities"
-msgstr "Konvertovať na príležitosti"
+msgstr "Konvertovať na Obchodné príležitosti"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -654,7 +655,7 @@ msgstr "Konvertovať na príležitosti"
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead2opportunity_partner_mass__name__convert
 #, python-format
 msgid "Convert to opportunity"
-msgstr "Konvertovať na príležitosť"
+msgstr "Konvertovať na obchodný prípad"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -662,8 +663,8 @@ msgid ""
 "Convert visitors of your website into leads and perform data enrichment "
 "based on their IP address"
 msgstr ""
-"Konvertujte návtevníkov svojej web stránky na potenciálnych zákazníkov a "
-"obohaťte tieto dáta na základe ich IP adries"
+"Konvertujte návtevníkov svojej webstránky na Potenciálnych zákazníkov a "
+"pridajte dáta ich  IP adries"
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__email_state__correct
@@ -690,17 +691,18 @@ msgstr "Štát"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__module_crm_iap_lead_website
 msgid "Create Leads/Opportunities from your website's traffic"
-msgstr "Vytvoriť potenciálne príležitosti/príležitosti z vašej webstránky"
+msgstr ""
+"Vytvoriť Potenciálne príležitosti / Obchodné príležitosti z vašej webstránky"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 msgid "Create Opportunity"
-msgstr "Vytvoriť príležitosť"
+msgstr "Vytvoriť obchodný prípad"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__lead_mining_in_pipeline
 msgid "Create a lead mining request directly from the opportunity pipeline."
-msgstr "Automatické dopĺňanie údajov priamo v obchodnej nástenke."
+msgstr "Vytvorte potenciálnu príležitosť priamo v obchodnej nástenke."
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead2opportunity_partner__action__create
@@ -715,28 +717,28 @@ msgstr "Vytvoriť nového zákazníka"
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_opportunity
 #, python-format
 msgid "Create a new lead"
-msgstr "Vytvorte novú potenciálnu príležitosť"
+msgstr "Vytvorte novú Potenciálnu príležitosť"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.relate_partner_opportunities
 msgid "Create an new opportunity related to this customer"
-msgstr "Vytvorenie novej príležitosti týkajúcej sa tohoto zákazníka."
+msgstr "Vytvorte nový obchodný prípad, ktorý sa týka tohto zákazníka"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Create an opportunity in your pipeline"
-msgstr "Vytvorte príležitosť na vašej obchodnej nástenke"
+msgstr "Vytvorte obchodný prípad na vašej obchodnej nástenke"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Create leads from incoming emails"
-msgstr "Vytvorte potenciálnu príležitosť z prichádzajúcich emailov"
+msgstr "Vytvorte Potenciálnu príležitosť z prichádzajúcich emailov"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_tag_action
 msgid "Create new tags for your opportunities"
-msgstr "Vytvorte si nové značky pre svoje príležitosti"
+msgstr "Vytvorte si nové tagy pre svoje Obchodné príležitosti"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_tag_action
@@ -746,7 +748,7 @@ msgid ""
 msgstr ""
 "Vytvorte si označenia /tagy, ktoré Vám vyhovujú (pruduktová štruktúra, typ "
 "obchodu, selekcia zákazníka, atď.), aby ste vedeli lepšie vyhľadávať a "
-"sledovať svoje obchodné príležitosti. "
+"sledovať svoje Obchodné príležitosti. "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__create_uid
@@ -790,7 +792,7 @@ msgstr "Dátum vytvorenia"
 #. module: crm
 #: model:ir.actions.server,name:crm.action_your_pipeline
 msgid "Crm: My Pipeline"
-msgstr "CRM: Moja obchodná nástenka"
+msgstr "CRM: Moja Obchodná nástenka"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__company_currency
@@ -842,7 +844,7 @@ msgstr "Dni do uzavrenia"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__crm_alias_prefix
 msgid "Default Alias Name for Leads"
-msgstr "Názov predvoleného aliasu pre potenciálnu príležitosť."
+msgstr "Názov predvoleného aliasu pre Potenciálnu príležitosť."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lost_reason_action
@@ -941,8 +943,8 @@ msgid ""
 "Email sent to <strong>${email}</strong> generate opportunities in your "
 "pipeline.<br>"
 msgstr ""
-"Email zaslaný na <strong>${email}</strong> vytvorí príležitosti na vašej "
-"obchodnej nástenke.<br>"
+"Email zaslaný na <strong>${email}</strong> vytvorí Obchodné príležitosti na "
+"vašej Obchodnej nástenke.<br>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -952,25 +954,25 @@ msgid ""
 "Incoming emails can be automatically assigned to specific Sales Teams. To do"
 " so, set an email alias on the Sales Team."
 msgstr ""
-"Maily prijaté na túto adresu vytvoria nové potencionálne príležitosti zatiaľ"
+"Maily prijaté na túto adresu vytvoria nové Potencionálne príležitosti zatiaľ"
 " nepriradené k žiadnemu predajnému tímu. To sa udeje až počas konverzie na "
-"príležitosti. Prijaté maily možno automaticky priradiť predajnému tímu, "
-"nastavením mailového aliasu v konfigurácii predajného tímu."
+"Obchodné príležitosti. Prijaté maily možno automaticky priradiť predajnému "
+"tímu, nastavením mailového aliasu v konfigurácii predajného tímu."
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__res_config_settings__lead_enrich_auto__auto
 msgid "Enrich all leads automatically"
-msgstr "Automaticky spracujte všetky potenciálne príležitosti "
+msgstr "Automaticky pridajte všetky Potenciálne príležitosti "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__lead_enrich_auto
 msgid "Enrich lead automatically"
-msgstr "Automaticky spracujte potenciálnu príležitosť"
+msgstr "Automaticky pridajte Potenciálnu príležitosť"
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__res_config_settings__lead_enrich_auto__manual
 msgid "Enrich leads on demand only"
-msgstr "Spracovať potenciálnu príležitosť na požiadanie"
+msgstr "Pridajte Potenciálnu príležitosť na požiadanie"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -978,7 +980,7 @@ msgid ""
 "Enrich your leads automatically with company data based on their email "
 "address"
 msgstr ""
-"Spracujte svoje potenciálne príležitosti automaticky s údajmi o spoločnosti "
+"Pridajte svoje Potenciálne príležitosti automaticky s údajmi o spoločnosti "
 "na základe ich emailovej adresy"
 
 #. module: crm
@@ -987,7 +989,7 @@ msgid ""
 "Enrich your leads automatically with company data based on their email "
 "address."
 msgstr ""
-"Spracujte svoje potenciálne príležitosti automaticky s údajmi o spoločnosti "
+"Pridajte svoje Potenciálne príležitosti automaticky s údajmi o spoločnosti "
 "na základe ich emailovej adresy"
 
 #. module: crm
@@ -996,13 +998,13 @@ msgid ""
 "Enter here the internal requirements for this stage (ex: Offer sent to "
 "customer). It will appear as a tooltip over the stage's name."
 msgstr ""
-"Tu zadajte interný názov tejto fázy (napr. Ponuka zaslaná zákazníkovi). Bude"
-" to zobrazené ako nápoveda nástroja nad názvom fázy."
+"Tu zadajte interný názov tohto štádia (napr. Ponuka zaslaná zákazníkovi). "
+"Bude to zobrazené ako nápoveda nástroja nad názvom štádia."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__date_deadline
 msgid "Estimate of the date on which the opportunity will be won."
-msgstr "Časový odhad kedy bude príležitosť získaná. "
+msgstr "Časový odhad kedy bude obchodný prípad získaný. "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date_deadline
@@ -1048,7 +1050,7 @@ msgstr "Označenie poľa"
 msgid "Fields that can be used for predictive lead scoring computation"
 msgstr ""
 "Polia, ktoré môžu byť použité na odhadovaný výpočet pravdepodobnosti úspechu"
-" potenciálnej príležitosti"
+" Potenciálnej príležitosti"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -1058,7 +1060,7 @@ msgstr "Polia použité na výpočet pravdepodobnosti:"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_stage__fold
 msgid "Folded in Pipeline"
-msgstr "Zložené v obchodnej nástenke"
+msgstr "Zložené v Obchodnej nástenke"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -1073,17 +1075,17 @@ msgstr "Následná cenová ponuka"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_follower_ids
 msgid "Followers"
-msgstr "Nasledovníci"
+msgstr "Odberatelia"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "Nasledovníci (kanály)"
+msgstr "Odberatelia (kanály)"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Nasledovníci (partneri)"
+msgstr "Odberatelia (partneri)"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner_mass__force_assignation
@@ -1106,15 +1108,15 @@ msgstr "Budúce aktivity"
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__module_crm_iap_lead
 msgid "Generate new leads based on their country, industries, size, etc."
 msgstr ""
-"Vytvárajte potenciálne obchodné príležitosti rozdelené podľa štátu, "
-"odvetvia, veľkosti atď. "
+"Vytvárajte Potenciálne príležitosti rozdelené podľa štátu, odvetvia, "
+"veľkosti atď. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Generate new leads based on their country, industry, size, etc."
 msgstr ""
-"Vytvárajte potenciálne obchodné príležitosti rozdelené podľa štátu, "
-"odvetvia, veľkosti atď."
+"Vytvárajte Potenciálne príležitosti rozdelené podľa štátu, odvetvia, "
+"veľkosti atď."
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead_lost
@@ -1124,7 +1126,8 @@ msgstr "Dôvod straty"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_stage_form
 msgid "Give your team the requirements to move an opportunity to this stage."
-msgstr "Zadajte svojmu tímu požiadavku na presun príležitosti do tejto fázy."
+msgstr ""
+"Zadajte svojmu tímu požiadavku na presun obchodného prípadu do tohto štádia."
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -1253,17 +1256,17 @@ msgstr "Informácia"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Internal Notes"
-msgstr "Interné Poznámky"
+msgstr "Interné poznámky"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_is_follower
 msgid "Is Follower"
-msgstr "Je odberateľ"
+msgstr "Je nasledovník"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_stage__is_won
 msgid "Is Won Stage?"
-msgstr "Je to výherná fáza? "
+msgstr "Je to výherné štádium? "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__is_automated_probability
@@ -1288,7 +1291,7 @@ msgstr "KPI CRM hodnota vytvorená potencionálnou príležitosťou"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_digest_digest__kpi_crm_opportunities_won_value
 msgid "Kpi Crm Opportunities Won Value"
-msgstr "KPI CRM hodnota získaných príležitostí"
+msgstr "KPI CRM hodnota získaných Obchodných príležitostí"
 
 #. module: crm
 #: model:crm.lead.scoring.frequency.field,name:crm.frequency_field_lang_id
@@ -1325,7 +1328,7 @@ msgstr "Posledná úprava"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__date_last_stage_update
 msgid "Last Stage Update"
-msgstr "Posledná aktualizácia fázy"
+msgstr "Posledná aktualizácia štádia"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__write_uid
@@ -1376,22 +1379,22 @@ msgstr "Potenciálna príležitosť"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_utm_campaign__lead_count
 msgid "Lead Count"
-msgstr "Počet potenciálnych príležitostí"
+msgstr "Počet Potenciálnych príležitostí"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Lead Enrichment"
-msgstr "Spracovanie potenciálnych príležitostí"
+msgstr "Pridanie Potenciálnych príležitostí"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Lead Generation"
-msgstr "Vytváranie potenciálnej príležitosti"
+msgstr "Vytváranie Potenciálnej príležitosti"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Lead Mining"
-msgstr "Vyhladávanie potenciálnych príležitostí"
+msgstr "Vyhľadávanie Potenciálnych príležitostí"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead_scoring_frequency
@@ -1401,12 +1404,12 @@ msgstr "Frekvencia hodnotenia Potenciálnych príležitostí"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_fields
 msgid "Lead Scoring Frequency Fields"
-msgstr "Polia frekvencie hodnotenia potenciálnych príležitostí "
+msgstr "Polia frekvencie hodnotenia Potenciálnych príležitostí "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_fields_str
 msgid "Lead Scoring Frequency Fields in String"
-msgstr "Polia Frekvencie hodnotenia potenciálnych príležitostí v reťazci"
+msgstr "Polia frekvencie hodnotenia Potenciálnych príležitostí v reťazci"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_start_date
@@ -1433,12 +1436,12 @@ msgstr "Tagy Potenciálnych príležitostí"
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Lead or Opportunity"
-msgstr "Potenciálna príležitosť alebo Obchodná príležitosť"
+msgstr "Potenciálna príležitosť alebo obchodný prípad"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr "Potenciálna príležitosť / Obchodná príležitosť"
+msgstr "Potenciálna príležitosť / obchodný prípad"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_case_form_view_salesteams_lead
@@ -1471,20 +1474,20 @@ msgid ""
 "the treatment delays or number of leads per state. You can sort out your "
 "leads analysis by different groups to get accurate grained analysis."
 msgstr ""
-"Analýza potenciálnych príležitostí  Vám umožňuje zistiť rôzne informácie "
-"týkajúce sa CRM ako meškanie spracovania alebo počet potenciálnych "
-"príležitostí na fázu. Môžete triediť vašu analýzu iniciatív na rôzne skupiny"
-" pre získanie presnej analýzy."
+"Analýza Potenciálnych príležitostí  Vám umožňuje zistiť rôzne informácie "
+"týkajúce sa CRM ako meškanie spracovania alebo počet Potenciálnych "
+"príležitostí na štádium. Môžete triediť vašu analýzu Potenciálnych "
+"príležitostí na rôzne skupiny za účelom získania presných analýz."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_calendar_view_leads
 msgid "Leads Generation"
-msgstr "Generovanie potenciálnych príležitostí"
+msgstr "Generovanie Potenciálnych príležitostí"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_activity
 msgid "Leads or Opportunities"
-msgstr "Potenciálne príležitosti alebo príležitosti"
+msgstr "Potenciálne príležitosti alebo Obchodné príležitosti"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
@@ -1494,7 +1497,7 @@ msgstr "Potenciálne príležitosti pridelené mne"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 msgid "Leads that are not assigned"
-msgstr "Nepriradené Potenciálne príležitosti"
+msgstr "Nepridelené Potenciálne príležitosti"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
@@ -1559,7 +1562,7 @@ msgstr "Zoznam kópií z prichádzajúcich mailov."
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 #, python-format
 msgid "Lost"
-msgstr "Stratený"
+msgstr "Strata"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency__lost_count
@@ -1585,7 +1588,7 @@ msgstr "Dôvody strát"
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__priority__0
 msgid "Low"
-msgstr "Nízka"
+msgstr "Nízky"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_main_attachment_id
@@ -1633,13 +1636,13 @@ msgstr "Marketing"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Medium"
-msgstr "Stredné"
+msgstr "Stredný"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s hours"
-msgstr "Stretnutie dohodnute na '%s'<br> Premet: %s <br> Trvanie: %s hodín"
+msgstr "Stretnutie dohodnute na '%s'<br> Predmet: %s <br> Trvanie: %s hodín"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.act_crm_opportunity_calendar_event_new
@@ -1700,7 +1703,7 @@ msgstr "Zlúčené Obchodné príležitosti"
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Merged opportunity"
-msgstr "Zlúčená Obchodná príležitosť"
+msgstr "Zlúčený obchodný prípad"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_has_error
@@ -1739,6 +1742,11 @@ msgid "My Pipeline"
 msgstr "Moja Obchodná nástenka"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
+msgid "Name"
+msgstr "Meno"
+
+#. module: crm
 #: model:crm.stage,name:crm.stage_lead1
 msgid "New"
 msgstr "Nové"
@@ -1757,7 +1765,7 @@ msgstr "Nové Obchodné príležitosti"
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_opportunity_form
 msgid "New Opportunity"
-msgstr "Nová Obchodná príležitosť"
+msgstr "Nový obchodný prípad"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_tree_activity
@@ -1873,7 +1881,7 @@ msgstr "Otvorené Obchodné príležitosti"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_salesteams_view_kanban
 msgid "Open Opportunity"
-msgstr "Otvorená Obchodná príležitosť"
+msgstr "Otvorený obchodný prípad"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lost_reason
@@ -1914,11 +1922,11 @@ msgid ""
 "mainly used by the sales manager in order to do the periodic review with the"
 " channels of the sales pipeline."
 msgstr ""
-"Analýza Obchodných príležitostí vám dáva okamžitý prístup k informáciám o "
+"Analýza obchodných príležitostí vám dáva okamžitý prístup k informáciám o "
 "vašich príležitostiach ako sú očakávaný výnos, plánované náklady, nedodržané"
-" termíny alebo počet interakcií na jednu Obchodnú príležitosť. Tento výkaz "
-"je používaný manažérom predaja hlavne na pravideľné prehodnotenie predajných"
-" kanálov v zobrazení ochodných príležitostí."
+" termíny alebo počet interakcií na jeden obchodný prípad. Tento výkaz je "
+"používaný manažérom predaja hlavne na pravideľné prehodnotenie predajných "
+"kanálov v zobrazení ochodných príležitostí."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__opportunities_amount
@@ -1949,61 +1957,61 @@ msgstr "Obchodné príležitosti pridelené mne"
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_salesteams_view_kanban
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Opportunity"
-msgstr "Obchodná príležitosť"
+msgstr "Obchodný prípad"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_utm_campaign__opportunity_count
 msgid "Opportunity Count"
-msgstr "Počet Obchodných príležitostí"
+msgstr "Počet obchodných prípadov"
 
 #. module: crm
 #: model:mail.message.subtype,name:crm.mt_lead_create
 #: model:mail.message.subtype,name:crm.mt_salesteam_lead
 msgid "Opportunity Created"
-msgstr "Obchodná príležitosť je vytvorená"
+msgstr "Obchodný prípad je vytvorený"
 
 #. module: crm
 #: model:mail.message.subtype,name:crm.mt_lead_lost
 #: model:mail.message.subtype,name:crm.mt_salesteam_lead_lost
 msgid "Opportunity Lost"
-msgstr "Stretená Obchodná príležitosť"
+msgstr "Stretený obchodný prípad"
 
 #. module: crm
 #: model:mail.message.subtype,name:crm.mt_lead_restored
 #: model:mail.message.subtype,name:crm.mt_salesteam_lead_restored
 msgid "Opportunity Restored"
-msgstr "Obnovenie Obchodnej príležitosti"
+msgstr "Obnovenie obchodného prípadu"
 
 #. module: crm
 #: model:mail.message.subtype,name:crm.mt_salesteam_lead_stage
 msgid "Opportunity Stage Changed"
-msgstr "Zmena fázy Obchodnej príležitosti"
+msgstr "Zmena fázy obchodného prípadu"
 
 #. module: crm
 #: model:mail.message.subtype,name:crm.mt_lead_won
 #: model:mail.message.subtype,name:crm.mt_salesteam_lead_won
 msgid "Opportunity Won"
-msgstr "Získaná Obchodná príležitosť"
+msgstr "Získaný obchodný prípad"
 
 #. module: crm
 #: model:mail.message.subtype,description:crm.mt_lead_create
 msgid "Opportunity created"
-msgstr "Vytvorená Obchodná príležitosť "
+msgstr "Vytvorený obchodný prípad"
 
 #. module: crm
 #: model:mail.message.subtype,description:crm.mt_lead_lost
 msgid "Opportunity lost"
-msgstr "Stratená Obchodná príležitosť"
+msgstr "Stratený obchodný prípad"
 
 #. module: crm
 #: model:mail.message.subtype,description:crm.mt_lead_restored
 msgid "Opportunity restored"
-msgstr "Obnovených Príležitostí "
+msgstr "Obnovený obchodný prípad"
 
 #. module: crm
 #: model:mail.message.subtype,description:crm.mt_lead_won
 msgid "Opportunity won"
-msgstr "Vyhraná príležitosť"
+msgstr "Vyhraný obchodný prípad"
 
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor8
@@ -2024,7 +2032,7 @@ msgstr "Tržby zmeškaných príležitostí"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_salesteams_view_kanban
 msgid "Overdue Opportunity"
-msgstr "Zmeškané Príležitosti"
+msgstr "Zmeškaný obchodný prípad"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_user_id
@@ -2102,11 +2110,11 @@ msgid ""
 "                mainly used by the sales manager in order to do the periodic review with the\n"
 "                teams of the sales pipeline."
 msgstr ""
-"Analýza Ochodných príležitostí Vám okamžite umožní\n"
-"                zobraziť infomácie ako očakávané tržby alebo plánované náklady Obchodných príležitostí,\n"
-"                zmeškané termíny alebo počet interakciáí na Obchodnú príležitosť. Takýto report je\n"
+"Analýza ochodných príležitostí Vám okamžite umožní\n"
+"                zobraziť infomácie ako očakávané tržby alebo plánované náklady obchodných prípadov,\n"
+"                zmeškané termíny alebo počet interakcií na obchodný prípad. Takýto report je\n"
 "používaný obchodným manažérom, aby si pravidelne prehodnocoval \n"
-"Obchodné príležitosti s tímom."
+"obchodné príležitosti s tímom."
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -2115,8 +2123,8 @@ msgid ""
 "Please select more than one element (lead or opportunity) from the list "
 "view."
 msgstr ""
-"Prosím, vyberte viac ako jeden prvok (Potenciálna príležitosť alebo Obchodná"
-" príležitosť) zo  zoznamu."
+"Prosím, vyberte viac ako jeden prvok (potenciálna príležitosť alebo obchodný"
+" prípad) zo  zoznamu."
 
 #. module: crm
 #: model:ir.actions.server,name:crm.website_crm_score_cron_ir_actions_server
@@ -2233,13 +2241,13 @@ msgstr "Obchodník"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Sales Team"
-msgstr "Predajný tým"
+msgstr "Obchodný tím"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Sales Team Settings"
-msgstr "Nastavenia predajných tímov"
+msgstr "Nastavenia obchodných tímov"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_team_config
@@ -2267,13 +2275,13 @@ msgstr "Obchodník"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 msgid "Search Leads"
-msgstr "Vyhľadávanie Potenciálnych príležitostí"
+msgstr "Vyhľadávanie potenciálnych príležitostí"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Search Opportunities"
-msgstr "Vyhľadávanie Obchodných príležitostí"
+msgstr "Vyhľadávanie obchodných príležitostí"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.merge_opportunity_form
@@ -2298,7 +2306,7 @@ msgstr "Služby"
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_stage_action
 msgid "Set a new stage in your opportunity pipeline"
-msgstr "Nastaviť novú fázu na Obchodnej nástenke"
+msgstr "Nastaviť novú fázu na obchodnej nástenke"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_config_settings_action
@@ -2329,7 +2337,7 @@ msgstr "Ukázať iba Potenciálnu príležitosť"
 #: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 msgid "Show only opportunity"
-msgstr "Ukázať iba Obchodnú príležitosť"
+msgstr "Ukázať iba obchodný prípad"
 
 #. module: crm
 #: model:crm.lead.tag,name:crm.categ_oppor2
@@ -2405,8 +2413,8 @@ msgid ""
 "Stages allow salespersons to easily track how a specific opportunity\n"
 "            is positioned in the sales cycle."
 msgstr ""
-"Štádia umožňujú obchodníkom ľahšie sledovať pozíciu danej Obchodnej "
-"príležitosti v predajnom cykle.  "
+"Štádia umožňujú obchodníkom ľahšie sledovať pozíciu daného obchodného "
+"prípadu v predajnom cykle.  "
 
 #. module: crm
 #: model:crm.lead.scoring.frequency.field,name:crm.frequency_field_state_id
@@ -2502,7 +2510,7 @@ msgid ""
 " the lead into opportunity"
 msgstr ""
 "Názov budúceho partnera spoločnosti, ktorá vznikne pri konvertovaní "
-"potenciálnej príležitosti na príležitosť"
+"potenciálnej príležitosti na obchodný prípad"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_user_id
@@ -2527,7 +2535,7 @@ msgstr "Pravdepodobnosť uzavretia obchodu by mala byť medzi 0% a 100%!"
 msgid ""
 "This bar allows to filter the opportunities based on scheduled activities."
 msgstr ""
-"Táto lišta umožňuje filtrovať Obchodné príležitosti na základe naplánovaných"
+"Táto lišta umožňuje filtrovať obchodné príležitosti na základe naplánovaných"
 " aktivít."
 
 #. module: crm
@@ -2575,7 +2583,7 @@ msgstr ""
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "This opportunity has <b>no activity planned</b>."
-msgstr "Táto Obchdoná príležitosť nemá <b>naplánovanú aktivitu</b>."
+msgstr "Tento obchodný prípad nemá <b>naplánovanú aktivitu</b>."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action_lead
@@ -2707,7 +2715,7 @@ msgid ""
 "                    prospects you import, etc."
 msgstr ""
 "Použite potenciálnu príležitosť ak potrebujete kvalifikačný krok pred vytvorením\n"
-"Obchodnej príležitosti alebo zákazníka. Môže to byť vizitka zákazníka, ktorú ste dostali,\n"
+"obchodného prípadu alebo zákazníka. Môže to byť vizitka zákazníka, ktorú ste dostali,\n"
 "kontaktný formulár vyplnený na vašej webstránke, alebo súbor nekvalifikovaných\n"
 "záujemcov ktorý importujete, atď."
 
@@ -2720,18 +2728,19 @@ msgid ""
 "qualified, the lead can be converted into a business opportunity and/or a "
 "new customer in your address book."
 msgstr ""
-"Použite Potenciálnu príležitosť ak potrebujete kvalifikačný krok pred "
-"vytvorením Obchodnej príležitosti alebo zákazníka. Môže to byť vizitka, "
-"ktorú ste dostali, kontaktný formulár vyplnený na vašej webstránke, alebo "
-"súbor nekvalifikovaných záujemcov, ktorý importujete, atď. Ak je "
-"kvalifikovaný, môže byť konvertovaný na novú Obchodnú príležitosť a/alebo "
-"nového zákazníka v adresári."
+"Použite potenciálnu príležitosť ak potrebujete kvalifikačný krok pred "
+"vytvorením obchodného prípadu alebo zákazníka. Môže to byť vizitka, ktorú "
+"ste dostali, kontaktný formulár vyplnený na vašej webstránke, alebo súbor "
+"nekvalifikovaných záujemcov, ktorý importujete, atď. Ak je kvalifikovaný, "
+"môže byť konvertovaný na nový obchodný prípad a/alebo nového zákazníka v "
+"adresári."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lost_reason_action
 msgid "Use lost reasons to explain why an opportunity is lost."
 msgstr ""
-"Použite odôvodnenie straty na vysvetlenie prečo bola príležitosť stratená."
+"Použite odôvodnenie straty na vysvetlenie prečo bol obchodný prípad "
+"stratený."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.relate_partner_opportunities

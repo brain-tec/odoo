@@ -29,7 +29,7 @@ msgstr ""
 #. module: repair
 #: model:mail.template,report_name:repair.mail_template_repair_quotation
 msgid "${(object.name or '').replace('/','_')}"
-msgstr ""
+msgstr "${(object.name or '').replace('/','_')}"
 
 #. module: repair
 #: model:mail.template,subject:repair.mail_template_repair_quotation
@@ -164,7 +164,7 @@ msgstr "فعالیت‌ها"
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "دکوراسیون استثنا فعالیت"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_state
@@ -467,7 +467,7 @@ msgstr "شمایل"
 #. module: repair
 #: model:ir.model.fields,help:repair.field_repair_order__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "آیکون برای نشان دادن یک فعالیت استثنا."
 
 #. module: repair
 #: model:ir.model.fields,help:repair.field_repair_order__message_needaction
@@ -649,17 +649,17 @@ msgstr ""
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "موعد فعالیت بعدی"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "خلاصه فعالیت بعدی"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "نوع فعالیت بعدی"
 
 #. module: repair
 #: model:ir.model.fields.selection,name:repair.selection__repair_order__invoice_method__none
@@ -703,7 +703,7 @@ msgstr "تعداد اقدامات"
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "تعداد خطاها"
 
 #. module: repair
 #: model:ir.model.fields,help:repair.field_repair_order__message_needaction_counter
@@ -984,12 +984,12 @@ msgstr "پاسخگو"
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "کاربر پاسخگو"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "خطای تحویل پیامک"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form_filter
@@ -1194,7 +1194,7 @@ msgstr "واحد اندازه گیری"
 #: model:product.product,uom_name:repair.product_service_order_repair
 #: model:product.template,uom_name:repair.product_service_order_repair_product_template
 msgid "Units"
-msgstr ""
+msgstr "واحد ها"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__message_unread
@@ -1257,7 +1257,7 @@ msgstr "بله"
 #: code:addons/repair/models/repair.py:0
 #, python-format
 msgid "You can not enter negative quantities."
-msgstr ""
+msgstr "شما نمی توانید تعداد منفی وارد کنید."
 
 #. module: repair
 #: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0

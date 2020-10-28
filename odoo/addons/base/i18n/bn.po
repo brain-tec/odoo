@@ -2,12 +2,17 @@
 # This file contains the translation of the following modules:
 # 	* base
 # 
+# Translators:
+# Martin Trigaux, 2020
+# Abu Zafar <azmikbal@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-01 12:22+0000\n"
+"POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
+"Last-Translator: Abu Zafar <azmikbal@gmail.com>, 2020\n"
 "Language-Team: Bengali (https://www.transifex.com/odoo/teams/41243/bn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,6 +33,25 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"অ্যাকাউন্টের ধরণ \\ অ্যাকাউন্ট চার্ট টেম্পলেট \\ ভ্যাট ux সহায়ক অ্যাকাউন্টিং বিভাগ \\ পরিচালন অ্যাকাউন্টিং ভাউচার \\ আর্থিক অ্যাকাউন্টিং ভাউচার\n"
+"\n"
+" চীনা প্রদেশের ডেটা যুক্ত করুন\n"
+"\n"
+"অ্যাকাউন্ট ছকে ছোট ব্যবসায়িক অ্যাকাউন্টিং চার্ট বৃদ্ধি করুন"
+
+#. module: base
+#: model:ir.module.module,description:base.module_pos_kitchen_printer
+msgid ""
+"\n"
+"\n"
+"- Kitchen Order Printing: allows you to print orders updates to kitchen or bar printers\n"
+"\n"
+msgstr ""
+"\n"
+"\n"
+"- কিচেন অর্ডার মুদ্রণ: আপনাকে রান্নাঘর বা বার প্রিন্টারে অর্ডার আপডেটগুলি মুদ্রণ করতে দেয়\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_at_reports
@@ -43,6 +67,14 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"অস্ট্রিয়ার জন্য অ্যাকাউন্টিং রিপোর্ট।\n"
+"================================\n"
+"\n"
+"* নিম্নলিখিত রিপোর্টগুলি সংজ্ঞা দেয়:\n"
+" * লাভ / ক্ষতি (§ 231 UGB মোট খরচ পদ্ধতি)\n"
+"* ব্যালেন্স শিট (§ 224 UGB)"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_invoice_bba
@@ -62,6 +94,17 @@ msgid ""
 "        **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"গ্রাহক চালানে স্ট্রাকচার্ড যোগাযোগ যুক্ত করুন।\n"
+"--------------------------------------------------\n"
+"বিবিএ কাঠামোগত যোগাযোগ ব্যবহার চালান এবং অর্থ প্রদানের মধ্যে পুনর্মিলনকে সহজতর করে।\n"
+"ইনভয়েসিং / অ্যাকাউন্টিং সেটিংসে পেমেন্ট যোগাযোগ হিসাবে আপনি কাঠামোগত যোগাযোগ নির্বাচন করতে পারেন।\n"
+"দুটি অ্যালগরিদম প্রস্তাবিত:\n"
+"\n"
+"১) চালান নম্বর +++ আরআরআর / আরআরআরআর / আরআরআরডিডি +++\n"
+" ২) গ্রাহক রেফারেন্স +++ আরআরআর / আরআরআরআর / এসএসএসডিডি +++\n"
+"** আর..আর = ** অ-সংখ্যাযুক্ত অক্ষর ছাড়াই গ্রাহক রেফারেন্স, ** এসএসএস = ** সিকোয়েন্স নম্বর, ** ডিডি = ** চেক সংখ্যা"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_reprint
@@ -71,6 +114,10 @@ msgid ""
 "Allow cashier to reprint receipts\n"
 "\n"
 msgstr ""
+"\n"
+" \n"
+"ক্যাশিয়ারকে রিসিপ্টগুলি পুনরায় মুদ্রণের অনুমতি দিন\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hu
@@ -86,6 +133,93 @@ msgid ""
 " - Hungarian taxes\n"
 " - Hungarian Bank information\n"
 " "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dk
+msgid ""
+"\n"
+"\n"
+"Localization Module for Denmark\n"
+"===============================\n"
+"\n"
+"This is the module to manage the **accounting chart for Denmark**. Cover both one-man business as well as I/S, IVS, ApS and A/S\n"
+"\n"
+"**Modulet opsætter:**\n"
+"\n"
+"- **Dansk kontoplan**\n"
+"\n"
+"- Dansk moms\n"
+"        - 25% moms\n"
+"        - Resturationsmoms 6,25%\n"
+"        - Omvendt betalingspligt\n"
+"        \n"
+"- Konteringsgrupper\n"
+"        - EU (Virksomhed)\n"
+"        - EU (Privat)\n"
+"        - 3.lande\n"
+"\n"
+"- Finans raporter\n"
+"        - Resulttopgørelse\n"
+"        - Balance\n"
+"        - Momsafregning\n"
+"            - Afregning\n"
+"            - Rubrik A, B og C\n"
+"\n"
+"- **Anglo-Saxon regnskabsmetode**\n"
+"\n"
+".\n"
+"\n"
+"Produkt setup:\n"
+"==============\n"
+"\n"
+"**Vare**\n"
+"\n"
+"**Salgsmoms:**      Salgmoms 25%\n"
+"\n"
+"**Salgskonto:**     1010 Salg af vare, m/moms\n"
+"\n"
+"**Købsmoms:**       Købsmoms 25%\n"
+"\n"
+"**Købskonto:**      2010 Direkte omkostninger vare, m/moms\n"
+"\n"
+".\n"
+"\n"
+"**Ydelse**\n"
+"\n"
+"**Salgsmoms:**      Salgmoms 25%, ydelser\n"
+"\n"
+"**Salgskonto:**     1011 Salg af ydelser, m/moms\n"
+"\n"
+"**Købsmoms:**       Købsmoms 25%, ydelser\n"
+"\n"
+"**Købskonto:**      2011 Direkte omkostninger ydelser, m/moms\n"
+"\n"
+".\n"
+"\n"
+"**Vare med omvendt betalingspligt**\n"
+"\n"
+"**Salgsmoms:**      Salg omvendt betalingspligt\n"
+"\n"
+"**Salgskonto:**     1012 Salg af vare, u/moms\n"
+"\n"
+"**Købsmoms:**       Køb omvendt betalingspligt\n"
+"\n"
+"**Købskonto:**      2012 Direkte omkostninger vare, u/moms\n"
+"\n"
+"\n"
+".\n"
+"\n"
+"**Restauration**\n"
+"\n"
+"**Købsmoms:**       Restaurationsmoms 6,25%, købsmoms\n"
+"\n"
+"**Købskonto:**      4010 Restaurationsbesøg\n"
+"\n"
+".\n"
+"\n"
+"Copyright 2018 Odoo House ApS\n"
+"    "
 msgstr ""
 
 #. module: base
@@ -159,6 +293,72 @@ msgid ""
 "11010101 Caja General\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"ডোমিনিকান প্রজাতন্ত্রের স্থানীয়করণ মডিউল\n"
+"===========================================\n"
+"\n"
+" ডোমিনিকান প্রজাতন্ত্রের জন্য অ্যাকাউন্টস এবং ট্যাক্সের ক্যাটালগ, এর জন্য উপযুক্ত\n"
+"** আন্তর্জাতিকীকরণ ** ** আইএফআরএস ** এর সাথে এবং নিয়মকানুনে প্রান্তিককরণ\n"
+"অভ্যন্তরীণ করের সাধারণ অধিদপ্তরের (** ডিজিআইআই **)। \n"
+"\n"
+"** এই মডিউলটি সমন্বিত: **\n"
+" \n"
+"- স্ট্যান্ডার্ড অ্যাকাউন্টের ক্যাটালগ (ডিজিআইআই এবং আইএফআরএসের সাথে সংযুক্ত)\n"
+"- বেশিরভাগ প্রাক-কনফিগার করা শুল্ক সহ কর ক্যাটালগ\n"
+"        - ক্রয় এবং বিক্রয় জন্য ITBIS\n"
+"        - আইটিবিআইএস রিটেনশনস\n"
+"        - আইএসআর প্রতিবন্ধকতা\n"
+"        - কর এবং হোল্ডিং গ্রুপ:\n"
+"                - টেলিযোগাযোগ\n"
+"                - নির্মাণ সামগ্রী সরবরাহকারী\n"
+"                - পরিষেবাগুলির শারীরিক সরবরাহকারী\n"
+"        - অন্যান্য কর\n"
+"- সমস্ত এনসিএফ পরিচালনা করার জন্য পূর্ব-কনফিগার করা ক্রম\n"
+"        - আর্থিক মূল্য সহ চালান (বিক্রয় জন্য)\n"
+"        - চূড়ান্ত গ্রাহকদের জন্য চালান\n"
+"        - ডেবিট এবং ক্রেডিট নোটস\n"
+"        - অনানুষ্ঠানিক সরবরাহকারীর নিবন্ধন\n"
+"        - একক আয়ের নিবন্ধন\n"
+"        - ক্ষুদ্র ব্যয়ের রেকর্ড\n"
+"        - সরকার\n"
+"- ট্যাক্স এবং হোল্ডিংগুলি অটোমেশনের জন্য করের অবস্থান\n"
+"        - করের ছাড়সমূহে পরিবর্তন (যেমন রাজ্যের বিক্রয়)\n"
+"        - ট্যাক্স হোল্ডিংগুলি পরিবর্তন (বিদেশে ক্রয় পরিষেবাদি বিদেশে)\n"
+"        - অন্যদের মধ্যে\n"
+" \n"
+"** দ্রষ্টব্য: **\n"
+"এই অবস্থানটি, যদিও এটিতে এনসিএফের ক্রম রয়েছে, তারা পারবে না\n"
+"তৃতীয় পক্ষের মডিউল বা উন্নয়ন ছাড়া ব্যবহার করা হবে used\n"
+"অতিরিক্ত।\n"
+"\n"
+"অ্যাকাউন্ট ক্যাটালগের কোডিং কাঠামো:\n"
+"================================================== =\n"
+"\n"
+"** একটি ডিজিট ** আর্থিক বিবরণীর বিভাগ / ধরণের অ্যাকাউন্টের প্রতিনিধিত্ব করে।\n"
+"** 1 ** - সক্রিয় ** 4 ** - আয় এবং আয় অ্যাকাউন্ট\n"
+"** 2 ** - দায় ** 5 ** - ব্যয়, ব্যয় এবং ক্ষতি\n"
+"** 3 ** - মূলধন ** 6 ** - ফলাফল নিষ্পত্তি অ্যাকাউন্টগুলি\n"
+"\n"
+"** দুটি অঙ্ক ** গ্রুপিং আইটেমগুলি উপস্থাপন করে:\n"
+"11- বর্তমান সম্পদ\n"
+"21- বর্তমান দায়\n"
+"31- স্টকহোল্ডারদের ইক্যুইটি\n"
+"\n"
+"** চারটি সংখ্যা ** প্রধান অ্যাকাউন্টগুলিতে বরাদ্দ করা হয়: প্রথম অর্ডার অ্যাকাউন্টগুলি\n"
+"1101- নগদ এবং নগদ সমতুল্য\n"
+"2101- অ্যাকাউন্ট এবং ডকুমেন্টস প্রদেয়\n"
+"3101- সামাজিক মূলধন\n"
+"\n"
+"** ছয় ডিজিট ** উপ-অ্যাকাউন্টগুলিতে বরাদ্দ করা হয়: দ্বিতীয় আদেশের অ্যাকাউন্টসমূহ\n"
+"110101 - বক্স\n"
+"210101 - স্থানীয় সরবরাহকারী\n"
+"\n"
+"** আট সংখ্যা ** তৃতীয় অর্ডার অ্যাকাউন্টের জন্য (প্রদর্শিত হবে)\n"
+"ওডুতে):\n"
+"1101- নগদ এবং সমতুল্য\n"
+"110101- বক্স\n"
+"11010101 সাধারণ বাক্স"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_jp
@@ -197,6 +397,9 @@ msgid ""
 "\n"
 "This module adds a custom Sales Team for the Point of Sale. This enables you to view and manage your point of sale sales with more ease.\n"
 msgstr ""
+"\n"
+"\n"
+"এই মডিউলটি পয়েন্ট অফ বিক্রয়ের জন্য একটি কাস্টম বিক্রয় দল যুক্ত করে। এটি আপনাকে আরও সহজেই আপনার বিক্রয় বিক্রয় কেন্দ্রটি দেখতে এবং পরিচালনা করতে সক্ষম করে।\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_restaurant
@@ -209,6 +412,13 @@ msgid ""
 "- Kitchen Order Printing: allows you to print orders updates to kitchen or bar printers\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"\n"
+"এই মডিউলটি পয়েন্ট অফ সেল-এ বেশ কয়েকটি বৈশিষ্ট্য যুক্ত করেছে যা রেস্তোঁরা পরিচালনার জন্য নির্দিষ্ট:\n"
+"- বিল মুদ্রণ: অর্ডার প্রদানের আগে আপনাকে একটি রশিদ মুদ্রণের অনুমতি দেয়\n"
+"- বিল বিভক্তকরণ: আপনাকে একটি আদেশকে বিভিন্ন অর্ডারে বিভক্ত করার অনুমতি দেয়\n"
+"- কিচেন অর্ডার মুদ্রণ: আপনাকে রান্নাঘর বা বার প্রিন্টারে অর্ডার আপডেটগুলি মুদ্রণ করতে দেয়\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_discount
@@ -309,6 +519,16 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_lt_reports
+msgid ""
+"\n"
+"        Accounting reports for Lithuania\n"
+"\n"
+"        Contains Balance Sheet, Profit/Loss reports\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_reports
 msgid ""
 "\n"
@@ -321,6 +541,14 @@ msgstr ""
 msgid ""
 "\n"
 "        Accounting reports for Spain\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_se_reports
+msgid ""
+"\n"
+"        Accounting reports for Sweden\n"
 "    "
 msgstr ""
 
@@ -368,6 +596,9 @@ msgid ""
 "        App to upload and manage your documents.\n"
 "    "
 msgstr ""
+"\n"
+" \n"
+"আপনার দস্তাবেজগুলি আপলোড এবং পরিচালনা করতে অ্যাপ্লিকেশন।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_sale_timesheet
@@ -376,6 +607,8 @@ msgid ""
 "        Bill timesheets logged on helpdesk tickets.\n"
 "    "
 msgstr ""
+"\n"
+" বিল টাইমশিটগুলি হেল্পডেস্কের টিকিটে লগইন হয়েছে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_maintenance
@@ -383,6 +616,8 @@ msgid ""
 "\n"
 "        Bridge between HR and Maintenance."
 msgstr ""
+"\n"
+"এইচআর এবং রক্ষণাবেক্ষণের মধ্যে ব্রিজ।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_intrastat
@@ -391,6 +626,18 @@ msgid ""
 "        Bridge module between sale and intrastat.\n"
 "    "
 msgstr ""
+"\n"
+"বিক্রয় এবং ইন্ট্রাস্ট্যাটের মধ্যে ব্রিজ মডিউল।"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_be_sale_intrastat
+msgid ""
+"\n"
+"        Bridge module between sale_intrastat and l10n_be_intrastat.\n"
+"    "
+msgstr ""
+"\n"
+"বিক্রয়_সিনস্ট্রট এবং l10n_be_intrastat এর মধ্যে ব্রিজ মডিউল।"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_product_configurator
@@ -398,6 +645,8 @@ msgid ""
 "\n"
 "        Bridge module for website_sale / sale_product_configurator"
 msgstr ""
+"\n"
+"ওয়েবসাইট_সেল / বিক্রয়_প্রডাক্ট_কনফিগুরের জন্য ব্রিজ মডিউল"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_stock_product_configurator
@@ -405,6 +654,8 @@ msgid ""
 "\n"
 "        Bridge module for website_sale_stock / sale_product_configurator"
 msgstr ""
+"\n"
+"ওয়েবসাইট_সলে_স্টক / বিক্রয়_প্রডাক্ট_কনফিগুয়েটরটির জন্য ব্রিজ মডিউল"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_product_configurator
@@ -413,6 +664,8 @@ msgid ""
 "        Bridge module to make the website e-commerce compatible with the product configurator\n"
 "    "
 msgstr ""
+"\n"
+"ওয়েবসাইট ই-বাণিজ্য পণ্য কনফিগারারের সাথে সামঞ্জস্য করতে ব্রিজ মডিউল"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_stock_product_configurator
@@ -421,12 +674,49 @@ msgid ""
 "        Bridge module to make the website e-commerce stock management compatible with the product configurator\n"
 "    "
 msgstr ""
+"\n"
+"ওয়েবসাইটের ই-কমার্স স্টক পরিচালনটিকে পণ্যের কনফিগারারের সাথে সামঞ্জস্য করতে ব্রিজ মডিউল"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lt
+msgid ""
+"\n"
+"        Chart of Accounts (COA) Template for Lithuania's Accounting.\n"
+"\n"
+"        This module also includes:\n"
+"\n"
+"        * List of available banks in Lithuania.\n"
+"        * Tax groups.\n"
+"        * Most common Lithuanian Taxes.\n"
+"        * Fiscal positions.\n"
+"        * Account Tags.\n"
+"    "
+msgstr ""
+"\n"
+"লিথুয়ানিয়ার অ্যাকাউন্টিংয়ের জন্য চার্ট অফ অ্যাকাউন্টস (সিওএ) টেমপ্লেট।\n"
+"\n"
+"এই মডিউল এছাড়াও অন্তর্ভুক্ত:\n"
+"\n"
+"* লিথুয়ানিয়ায় উপলব্ধ ব্যাংকগুলির তালিকা \n"
+"* ট্যাক্স গ্রুপ\n"
+"* সর্বাধিক সাধারণ লিথুয়ানিয়ান ট্যাক্স।\n"
+"* আর্থিক পদসমূহ।\n"
+"* অ্যাকাউন্ট ট্যাগ"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_fsm
 msgid ""
 "\n"
 "        Convert helpdesk tickets to field service tasks.\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_product_unspsc
+msgid ""
+"\n"
+"        Countries like Colombia, Peru and Mexico need to be able to use the \n"
+"        UNSPSC code for their products and uoms.  \n"
 "    "
 msgstr ""
 
@@ -476,6 +766,56 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_id_efaktur
+msgid ""
+"\n"
+"        E-Faktur Menu(Indonesia)\n"
+"        Format : 010.000-16.00000001\n"
+"        * 2 (dua) digit pertama adalah Kode Transaksi\n"
+"        * 1 (satu) digit berikutnya adalah Kode Status\n"
+"        * 3 (tiga) digit berikutnya adalah Kode Cabang\n"
+"        * 2 (dua) digit pertama adalah Tahun Penerbitan\n"
+"        * 8 (delapan) digit berikutnya adalah Nomor Urut\n"
+"        \n"
+"        To be able to export customer invoices as e-Faktur,\n"
+"        you need to put the ranges of numbers you were assigned\n"
+"        by the government in Accounting > Customers > e-Faktur\n"
+"                    \n"
+"        When you validate an invoice, where the partner has the ID PKP\n"
+"        field checked, a tax number will be assigned to that invoice. \n"
+"        Afterwards, you can filter the invoices still to export in the\n"
+"        invoices list and click on Action > Download e-Faktur to download \n"
+"        the csv and upload it to the site of the government. \n"
+"        \n"
+"        You can replace an already sent invoice by another by indicating\n"
+"        the replaced invoice and the new one and you can reset an invoice\n"
+"        you have not already sent to the government to reuse its number.\n"
+"    "
+msgstr ""
+"\n"
+"ই-ফকতুর মেনু (ইন্দোনেশিয়া)\n"
+"ফর্ম্যাট: 010.000-16.00000001\n"
+"* ২ (দুআ) অঙ্কের পার্টমা আদলঃ কোড ট্রান্সাক্সি\n"
+"* 1 (সাতু) অঙ্কের বেরিকুতনিয়া আদলঃ কোড স্থিতি\n"
+"* 3 (টিগা) অঙ্কের বেরিকুতনিয়া আদলঃ কোদে কাবাং\n"
+"* 2 (দুআ) অঙ্কের পার্টামা আদলঃ তাহুন পেনারবিটান\n"
+"* 8 (ডেলাপান) অঙ্ক বেরিকুতনিয়া আদলহ নামোর উরুত\n"
+"\n"
+"ই-ফকতুর হিসাবে গ্রাহক চালান রফতানি করতে সক্ষম হতে,\n"
+"আপনাকে নির্ধারিত সংখ্যার সীমা রাখতে হবে\n"
+"অ্যাকাউন্টিং> গ্রাহকরা> ই-ফকতুরে সরকারের দ্বারা\n"
+"\n"
+"আপনি যখন কোনও চালানকে বৈধতা দিন, যেখানে অংশীদারটির আইডি পিকেপি থাকে\n"
+"ক্ষেত্র চেক করা হয়েছে, সেই চালানের জন্য একটি কর নম্বর বরাদ্দ করা হবে।\n"
+"এরপরে, আপনি চালানগুলি এখনও রফতানি করতে ফিল্টার করতে পারেন\n"
+"চালানের তালিকা এবং ডাউনলোডের জন্য অ্যাকশন> ই-ফকতুর ক্লিক করুন\n"
+"সিএসভি এবং এটি সরকারের সাইটে আপলোড করুন।\n"
+"\n"
+"আপনি ইঙ্গিত দিয়ে অন্য দ্বারা ইতিমধ্যে প্রেরিত চালান প্রতিস্থাপন করতে পারেন\n"
+"প্রতিস্থাপিত চালান এবং নতুন এবং আপনি একটি চালান পুনরায় সেট করতে পারেন\n"
+"আপনি এর নম্বরটি পুনরায় ব্যবহার করতে ইতিমধ্যে সরকারের কাছে প্রেরণ করেননি।"
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_mx_reports
 msgid ""
 "\n"
@@ -485,6 +825,11 @@ msgid ""
 "        DIOT Report\n"
 "    "
 msgstr ""
+"\n"
+"বৈদ্যুতিন অ্যাকাউন্টিং রিপোর্ট\n"
+"- সিওএ\n"
+"- ট্রায়াল ব্যালেন্স\n"
+"ডিআইওটি রিপোর্ট"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_sepa
@@ -496,6 +841,11 @@ msgid ""
 "        For more informations about the SEPA standards : http://www.iso20022.org/ and http://www.europeanpaymentscouncil.eu/\n"
 "    "
 msgstr ""
+"\n"
+"SEPA আদর্শ হিসাবে প্রস্তাবিত অর্থ প্রদানের অর্ডার উত্পন্ন করুন, ব্যথা.001 বার্তাগুলির জন্য ধন্যবাদ। সমর্থিত ব্যথার সংস্করণ (দেশগুলি) হচ্ছে ব্যথা.001.001.03 (জেনেরিক), ব্যথা.001.001.03.ch.02 (সুইজারল্যান্ড) এবং ব্যথা.001.003.03 (জার্মানি)। উত্পন্ন এক্সএমএল ফাইলটি তখন আপনার ব্যাংকে আপলোড করা যাবে।\n"
+"\n"
+"এই মডিউলটি ইউরোপীয় পেমেন্ট কাউন্সিল দ্বারা জারি করা বাস্তবায়ন নির্দেশিকা অনুসরণ করে।\n"
+"SEPA স্ট্যান্ডার্ড সম্পর্কে আরও তথ্যের জন্য: http://www.iso20022.org/ এবং http://www.europeanpaymentscouncil.eu/"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_winbooks_import
@@ -504,6 +854,8 @@ msgid ""
 "        Import Data From Winbooks\n"
 "    "
 msgstr ""
+"\n"
+"উইনবুকগুলি থেকে ডেটা আমদানি করুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_voip
@@ -573,6 +925,9 @@ msgid ""
 "        of another database on which a counterpart addon is installed.\n"
 "    "
 msgstr ""
+"\n"
+"এই মডিউলটি কর্মচারী ব্যবহারকারীদের লাইভচ্যাট অপারেটরগুলির সাথে যোগাযোগের অনুমতি দেয়\n"
+"অন্য একটি ডাটাবেসের যেখানে একটি পাল্টা অ্যাডোন ইনস্টল করা আছে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_purchase_product_matrix
@@ -582,6 +937,9 @@ msgid ""
 "        by choosing product variants quantity through a Grid Entry.\n"
 "    "
 msgstr ""
+"\n"
+"এই মডিউলটি ক্রয়ের অর্ডারগুলি দ্রুত পূরণ করতে দেয়\n"
+"একটি গ্রিড এন্ট্রি মাধ্যমে পণ্য বৈকল্পিক পরিমাণ চয়ন করে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_product_matrix
@@ -591,6 +949,9 @@ msgid ""
 "        by choosing product variants quantity through a Grid Entry.\n"
 "    "
 msgstr ""
+"\n"
+"এই মডিউলটি দ্রুত বিক্রয় ক্রম পূরণ করতে দেয়\n"
+"একটি গ্রিড এন্ট্রি মাধ্যমে পণ্য বৈকল্পিক পরিমাণ চয়ন করে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_ponto
@@ -603,6 +964,12 @@ msgid ""
 "        but aims to connect with all European banks later on\n"
 "    "
 msgstr ""
+"\n"
+"ব্যাঙ্কের বিবৃতি পুনরুদ্ধার করতে এই মডিউলটি আমার myponto.com এর সাথে সংযুক্ত।\n"
+"\n"
+"বর্তমানে, এই পরিষেবাটি কেবল বেলজিয়ামের ব্যাঙ্কগুলিতে সংযোগ করার অনুমতি দেয়\n"
+"(বিএনপি পরিবহনের ফোর্টিস, কেবিসি, সিবিসি, কেবিসি ব্রাসেলস, ফিন্ট্রো, হ্যালো ব্যাংক, আইএনজি বেলজিয়াম, এক্সএ বেলজিয়াম)\n"
+"তবে পরবর্তীতে সমস্ত ইউরোপীয় ব্যাংকের সাথে সংযোগ স্থাপনের লক্ষ্য"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_sepa_direct_debit
@@ -639,6 +1006,36 @@ msgid ""
 "        try to use this method on an invoice for whose payment no mandate can be used.\n"
 "    "
 msgstr ""
+"\n"
+"এই মডিউল SEPA সরাসরি ডেবিট (SDD) -compliant XML ফাইল প্রজন্মের (সামঞ্জস্যপূর্ণ সম্ভব\n"
+"আপনার ব্যাঙ্কে প্রেরণ করতে ব্যথা সহ. ০০৮.০০১.০২ স্পেসিফিকেশন)\n"
+"পেমেন্টের একটি সেট সংগ্রহ করুন।\n"
+"\n"
+"এই অর্থ প্রদানের পদ্ধতির জন্য যোগ্য হতে, একজন গ্রাহকের অবশ্যই প্রথমে থাকা উচিত\n"
+"সরাসরি ডেবিট ব্যবহারের জন্য তাঁর সম্মতি দিয়ে কোম্পানিকে একটি আদেশ জারি করে।\n"
+"এই সম্মতিটি অবশ্যই ওডুতে একটি 'গ্রাহক আদেশ' হিসাবে এনকোড করা উচিত।\n"
+"\n"
+"সঠিকভাবে করার জন্য আপনাকেও নিম্নলিখিত প্রয়োজনীয়তাগুলি পূরণ করতে হবে\n"
+"একটি এসডিডি ফাইল তৈরি করুন:\n"
+"- আপনার কোম্পানির অ্যাকাউন্টটি অবশ্যই একটি বৈধ IBAN নম্বর সেট করা উচিত\n"
+"- আপনার কোম্পানির অ্যাকাউন্টটি অবশ্যই একটি বৈধ বিআইসিসহ ব্যাঙ্কের সাথে সম্পর্কিত হতে হবে\n"
+"- আপনার কোম্পানিকে অবশ্যই কোনও পাওনাদার শনাক্তকারী দেওয়া হয়েছে (এটি অ্যাকাউন্টিং মডিউলের 'সেটিংস' মেনুতে করা যেতে পারে)\n"
+"- আপনার সংস্থা অবশ্যই এসডিডি অর্থ প্রদানের জন্য একটি জার্নাল সংজ্ঞায়িত করেছে (আবার, অ্যাকাউন্টিং মডিউলের 'সেটিংসে')\n"
+"- প্রতিটি গ্রাহক যার জন্য আপনি অর্থ প্রদান করেন তার অবশ্যই একটি সঠিক বিআইসির সাথে যুক্ত ব্যাঙ্কে একটি বৈধ আইবিএন অ্যাকাউন্ট নম্বর থাকতে হবে।\n"
+"\n"
+"ওডু আপনাকে এই প্রয়োজনীয়তাগুলির কোনওটি সন্তুষ্ট না হলে আপনাকে জানাতে দেবে।\n"
+"\n"
+"কোনও আদেশের সাথে গ্রাহকের জন্য বৈধ হওয়া যে কোনও চালানই হবে\n"
+"স্বয়ংক্রিয়ভাবে 'প্রদত্ত' স্থিতিতে সেট হয়ে যাবে এবং একটি অর্থ প্রদানের ব্যবস্থা করা হবে। একটি\n"
+"ড্যাশবোর্ডে বিকল্পটি আপনাকে উত্পন্ন সমস্ত অর্থ প্রদানের অনুমতি দেবে\n"
+"এসডিডি এর মাধ্যমে এবং তাদের জন্য একটি গ্রুপ তৈরি করে একটি এক্সএমএল সংগ্রহ ফাইল তৈরি করতে\n"
+"আপনি দেখতে ফিট.\n"
+"\n"
+"একটি উত্সর্গীকৃত 'এসইপিএ ডাইরেক্ট ডেবিট' প্রদানের পদ্ধতিটিও উপলভ্য\n"
+"চালানগুলি খুলুন, যখন 'নিবন্ধকের অর্থ প্রদান' উইজার্ডে কোনও ব্যাংক অ্যাকাউন্ট নির্বাচন করুন।\n"
+"চালানের জন্য এসডিডি অর্থ প্রদানের জন্য এটি ব্যবহার করুন যদি আপনি কোনও ম্যান্ডেট যোগ করেন\n"
+"এটির বৈধতার পরে তার মালিকের জন্য। আপনি যদি একটি ত্রুটি বার্তা দেখতে পাবেন\n"
+"এই চালানটিতে এই পদ্ধতিটি ব্যবহার করার চেষ্টা করুন যার অর্থ প্রদানের কোনও আদেশের ব্যবহার করা যাবে না।"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_online_sync
@@ -646,6 +1043,8 @@ msgid ""
 "\n"
 "        This module is used for Online bank synchronization."
 msgstr ""
+"\n"
+" এই মডিউলটি অনলাইন ব্যাংক সিঙ্ক্রোনাইজেশনের জন্য ব্যবহৃত হয়।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_online_sync
@@ -654,6 +1053,8 @@ msgid ""
 "        This module is used for Online bank synchronization. It provides basic methods to synchronize bank statement.\n"
 "    "
 msgstr ""
+"\n"
+"এই মডিউলটি অনলাইন ব্যাংক সিঙ্ক্রোনাইজেশনের জন্য ব্যবহৃত হয়। এটি ব্যাংক স্টেটমেন্টকে সিঙ্ক্রোনাইজ করার জন্য প্রাথমিক পদ্ধতি সরবরাহ করে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_mobile
@@ -662,6 +1063,8 @@ msgid ""
 "        This module provides the core of the Odoo Mobile App.\n"
 "        "
 msgstr ""
+"\n"
+" এই মডিউলটি ওডু মোবাইল অ্যাপের মূল সরবরাহ করে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_maintenance
@@ -669,6 +1072,8 @@ msgid ""
 "\n"
 "        Track equipments and maintenance requests"
 msgstr ""
+"\n"
+"সরঞ্জাম এবং রক্ষণাবেক্ষণের অনুরোধগুলি ট্র্যাক করুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_plaid
@@ -676,6 +1081,8 @@ msgid ""
 "\n"
 "        Use Plaid.com to retrieve bank statements"
 msgstr ""
+"\n"
+"ব্যাঙ্কের বিবৃতি পুনরুদ্ধার করতে প্লেড ডট কম ব্যবহার করুন"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_plaid
@@ -684,6 +1091,8 @@ msgid ""
 "        Use Plaid.com to retrieve bank statements.\n"
 "    "
 msgstr ""
+"\n"
+"ব্যাঙ্কের বিবৃতি পুনরুদ্ধার করতে প্লেড.কম ব্যবহার করুন।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_recruitment_survey
@@ -694,6 +1103,10 @@ msgid ""
 "        to allow you to define interviews for different jobs.\n"
 "    "
 msgstr ""
+"\n"
+"নিয়োগ প্রক্রিয়া চলাকালীন সাক্ষাত্কার ফর্ম ব্যবহার করুন।\n"
+"এই মডিউলটি সমীক্ষা মডিউলটির সাথে একীভূত হয়েছে\n"
+"আপনাকে বিভিন্ন কাজের জন্য সাক্ষাত্কার সংজ্ঞায়িত করার অনুমতি দেওয়ার জন্য।"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_ponto
@@ -710,6 +1123,9 @@ msgid ""
 "        linked to an SO, or only the validated timesheets\n"
 "    "
 msgstr ""
+"\n"
+"টাইমশিট চালনা করার সময়, সমস্ত টাইমশিটগুলিতে চালানের অনুমতি দেয়\n"
+"কোনও এসও, বা কেবলমাত্র বৈধ টাইমশিটগুলির সাথে যুক্ত"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase_product_matrix
@@ -785,6 +1201,8 @@ msgid ""
 "    syntax-checked and tested.\n"
 "    "
 msgstr ""
+"\n"
+"কোডের টুকরা রয়েছে এমন পরিস্থিতিতে প্রযুক্তিগত ডকুমেন্টেশন উদাহরণ হিসাবে ব্যবহার করতে (আক্ষরিক নির্দেশের মাধ্যমে) যেখানে সিনট্যাক্স-পরীক্ষা করা ও পরীক্ষা করা যেতে পারে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_holidays_gantt
@@ -805,12 +1223,66 @@ msgid ""
 "    * The new lock date for advisors must be set after the previous lock date.\n"
 "    "
 msgstr ""
+"\n"
+"লকের তারিখটি অপরিবর্তনীয় করে তুলুন:\n"
+"\n"
+"আপনি পরামর্শদাতাদের চেয়ে কড়া শর্তগুলি ব্যবহারকারীর চেয়ে সংজ্ঞা দিতে পারবেন না। তারপরে, পরামর্শদাতাদের লক ডেট অবশ্যই ব্যবহারকারীদের জন্য লক তারিখের আগে সেট করতে হবে।\n"
+"* আপনি এমন একটি সময়কে লক করতে পারবেন না যা এখনও শেষ হয়নি। তারপরে, উপদেষ্টাদের জন্য লক ডেট অবশ্যই পূর্ববর্তী মাসের শেষ দিনের আগে নির্ধারণ করা উচিত।\n"
+"* উপদেষ্টাদের জন্য নতুন লক তারিখটি অবশ্যই পূর্ববর্তী লক তারিখের পরে নির্ধারণ করতে হবে।"
+
+#. module: base
+#: model:ir.module.module,description:base.module_sale_coupon_taxcloud
+msgid ""
+"\n"
+"    Manage discounts in taxclouds computations.\n"
+"    See https://taxcloud.com/support/discounts or\n"
+"    https://service.taxcloud.net/hc/en-us/articles/360015649791-How-can-discounts-be-applied-\n"
+"\n"
+"    Summary: all seller-provided discounts must be applied to the Sales Price before calculating sales tax.\n"
+"    Sellers should disclose their methodology to customers in a Discount Application Policy.\n"
+"\n"
+"    The algorithm is as follows:\n"
+"     - line-specific discounts are applied first, on the lines they are supposed to apply to.\n"
+"       This means product-specific discounts or discounts on the cheapest line.\n"
+"     - Then global discounts are applied evenly across paid lines, as much as possible.\n"
+"       If there is a remainder, it is applied sequentially, in the order of the lines,\n"
+"       until there is either no discount left or no discountable line left.\n"
+"\n"
+"    Note that discount lines (with a negative price) will have no taxes applied to them,\n"
+"    but rather the amount of these lines will be deduced from the lines they apply to during tax computation.\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_sale_coupon_taxcloud_delivery
+msgid ""
+"\n"
+"    Manage discounts with deliveries in taxclouds computations.\n"
+"    This module follows the same logic as \"Account Taxcloud - Sale (coupon)\".\n"
+"    More information can be found there on how dicount computations are made for TaxCloud.\n"
+"\n"
+"    There is an added option for discount (free shipping) on deliveries.\n"
+"    With Sale coupon delivery, the discount computation does not apply on delivery lines.\n"
+"    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_timesheet_attendance
 msgid ""
 "\n"
 "    Module linking the attendance module to the timesheet app.\n"
+"    "
+msgstr ""
+"\n"
+"উপস্থিতি মডিউলটি টাইমশিট অ্যাপ্লিকেশনটির সাথে সংযোগকারী মডিউল।"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_no_saft
+msgid ""
+"\n"
+"    Norwegian SAF-T is standard file format for exporting various types of accounting transactional data using the XML format.\n"
+"    The first version of the SAF-T Financial is limited to the general ledger level including customer and supplier transactions.\n"
+"    Necessary master data is also included.\n"
 "    "
 msgstr ""
 
@@ -848,6 +1320,14 @@ msgid ""
 "\n"
 "    - a Chart of Accounts customised to Ireland\n"
 "    - VAT Rates and Structure"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lu_saft
+msgid ""
+"\n"
+"    Under Construction\n"
+"    "
 msgstr ""
 
 #. module: base
@@ -903,7 +1383,7 @@ msgid ""
 "Setup\n"
 "-----\n"
 "\n"
-"- *Configuration > Journals*\n"
+"- *Account > Configuration > invoicing > Journals*\n"
 "\n"
 "    If needed, create new journal or choose an existing journal with **Type**\n"
 "    set to *“Bank”*.\n"
@@ -912,28 +1392,9 @@ msgid ""
 "\n"
 "    On the **Bank Account** tab, enter the **Account Number**.\n"
 "\n"
-"- *Configuration > Bank Accounts*\n"
-"\n"
-"    Account will show up in list as the journal name.\n"
-"\n"
-"    Editing will show the **Account Number**.  This is important as it is used by\n"
-"    the ABA process.\n"
-"\n"
-"    **Bank** is optional.\n"
-"\n"
-"- *Sales > Configuration > Bank Accounts > Bank Accounts*\n"
-"\n"
-"    Account will show up in list as the account number.\n"
-"\n"
-"    **ABA Payments** - Set to *“Account for Making ABA Payments”*.\n"
+"    On the same tab, ensure the ABA transfer information is set up.\n"
 "\n"
 "    **BSB** - Required, 6 digits, and will be auto formatted.\n"
-"\n"
-"    **Account Holder** - Optional.\n"
-"\n"
-"    **Account / Payee Name** - Required.  Generally not validated by the banks\n"
-"    on ABA file transfers, and may show up on the payee bank statement against\n"
-"    the payment.\n"
 "\n"
 "    **Financial Institution Code** - Required (provided by bank or can be found\n"
 "    on Google).  It is three uppercase 3 characters.\n"
@@ -942,30 +1403,42 @@ msgid ""
 "    may reject the ABA file if the Supplying User Name is not as expected.  It\n"
 "    cannot be longer than 26 characters.\n"
 "\n"
-"    **Identification Number (APCA)** - User Identification number is bank\n"
+"    **APCA Identification Number** - User Identification number is bank\n"
 "    allocated.  It is 6 digits.\n"
 "\n"
 "    **Include Self Balancing Transaction** - Some institutions require that the\n"
 "    last be a self balancing transaction which is used as a verification.\n"
 "\n"
+"- *Accounting > Configuration > Payments > Bank Accounts*\n"
+"\n"
+"    Account will show up in list as the journal name.\n"
+"\n"
+"    Editing will show the **Account Number**.  This is important as it is used by\n"
+"    the ABA process.\n"
+"\n"
+"    **Bank** is optional.\n"
+"\n"
+"- *Contacts > Configuration > Bank Accounts > Bank Accounts*\n"
+"\n"
+"    Paying account will show up in list as the account number.\n"
+"\n"
+"    **Account Holder Name** - Can be entered here, if Required.  Generally not\n"
+"    validated by the banks on ABA file transfers, but may show up on the payee\n"
+"    bank statement against the payment.\n"
+"\n"
 "- Vendor bank accounts can be set up in the same place, however, it is\n"
 "  generally easier to set them up from the partner from for the Vendor.\n"
 "\n"
-"- *Accounting > Purchases > Vendors*\n"
+"- *Accounting > Vendors > Vendors*\n"
 "\n"
-"    On **Sales & Purchases** tab, click on *\"Bank account(s)\"* from where a\n"
+"    On **Accounting** tab, click on *\"View accounts detail\"* from where a\n"
 "    vendor bank account can be created or edited.\n"
 "\n"
-"    **Account Number** - Required.\n"
-"\n"
-"    **ABA Payments** - Set to *“Allow ABA Payments to this Account”*.\n"
+"    **Account Number** - Required, must be less than 9 digits.\n"
 "\n"
 "    **BSB** - Required, 6 digits, and will be auto formatted.\n"
 "\n"
-"    **Account Holder** - Optional.\n"
-"\n"
-"    **Account / Payee Name** - Required.  Generally not validated by the\n"
-"    banks.\n"
+"    **Account Holder Name** - Optional.\n"
 "\n"
 "Use\n"
 "---\n"
@@ -979,18 +1452,22 @@ msgid ""
 "    Select **ABA Credit Transfer** radio button.\n"
 "\n"
 "    If the vendor has multiple bank account, you may need to select the\n"
-"    correct **Recipient Bank Account**.\n"
+"    correct **Recipient Bank Account**.  Or if paying a vendor bill, it may\n"
+"    need the correct bank account associated with it.\n"
 "\n"
 "    Enter payment amount, etc.\n"
 "\n"
-"- *Purchases > Payments*\n"
+"- *Vendors > Payments*\n"
 "\n"
 "    After payment(s) are confirmed, they will show up in the payments list.\n"
 "\n"
 "    Using filters, or sorting, select the payments to be included.  Under\n"
-"    *Actions* choose *Download ABA Payment*.  A pop up appears with the ABA\n"
-"    file from which you can click on the file to download locally.  This\n"
-"    file can then be uploaded to the bank.\n"
+"    *Actions* choose *Create batch payment*.\n"
+"\n"
+"- *Vendors > Batch Payments*\n"
+"\n"
+"    When validating a batch payment, the ABA file will be generated.  It can\n"
+"    be regenerated.  This file can then be uploaded to the bank.\n"
 msgstr ""
 
 #. module: base
@@ -1060,6 +1537,25 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_dk_reports
+msgid ""
+"\n"
+"Accounting reports for Denmark\n"
+"=================================\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_fi_reports
+msgid ""
+"\n"
+"Accounting reports for Finland\n"
+"================================\n"
+"\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_reports
 msgid ""
 "\n"
@@ -1079,6 +1575,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_lu_reports
+msgid ""
+"\n"
+"Accounting reports for Luxembourg\n"
+"=================================\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_sg_reports
 msgid ""
 "\n"
@@ -1088,6 +1593,33 @@ msgid ""
 " - To generate the GST Return, go to Accounting -> Reporting -> GST Return\n"
 " - To generate the IRAS Audit File, go to Accounting -> Reporting -> IRAS Audit File\n"
 "    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_se_ocr
+msgid ""
+"\n"
+"Add Structured Communication to Customer Invoices and Vendor Bill.\n"
+"------------------------------------------------------------------\n"
+"\n"
+"Using OCR structured communication simplifies the reconciliation between invoices and payments.\n"
+"\n"
+"For Customer Invoicing support for OCR level 1 to 4. The OCR number can be based on partner or\n"
+"the invoice.\n"
+"\n"
+"For Vendor Bill support for Default Vendor Specific OCR is added and validation for OCR.\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_ar_reports
+msgid ""
+"\n"
+"Add VAT Book report which is a legal requirement in Argentine and that holds the VAT detail info of sales or purchases made in a period of time.\n"
+"\n"
+"Also add a VAT summary report that is used to analyze invoicing\n"
+"\n"
+"\n"
 msgstr ""
 
 #. module: base
@@ -1463,6 +1995,11 @@ msgid ""
 "* Show attachment on the top of the forms\n"
 "* Document Indexation: odt\n"
 msgstr ""
+"\n"
+"সংযুক্তি তালিকা এবং নথি সূচীকরণ\n"
+"========================================\n"
+"* ফর্মগুলির শীর্ষে সংযুক্তি প্রদর্শন করুন\n"
+"ডকুমেন্ট ইনডেক্সেশন: বিজোড়\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_au
@@ -1478,6 +2015,15 @@ msgid ""
 "    - sets up Australian taxes.\n"
 "    "
 msgstr ""
+"\n"
+"অস্ট্রেলিয়ান অ্যাকাউন্টিং মডিউল\n"
+"============================\n"
+"\n"
+"অস্ট্রেলিয়ান অ্যাকাউন্টিং বেসিক চার্ট এবং স্থানীয়করণ।\n"
+"\n"
+"এছাড়াও:\n"
+"- বেশ কয়েকটি আঞ্চলিক মুদ্রা সক্রিয় করে।\n"
+"- অস্ট্রেলিয়ান কর নির্ধারণ করুন।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_gengo
@@ -1494,6 +2040,16 @@ msgid ""
 "This wizard will activate the CRON job and the Scheduler and will start the automatic translation via Gengo Services for all the terms where you requested it.\n"
 "    "
 msgstr ""
+"\n"
+"জেনগো এপিআইয়ের মাধ্যমে স্বয়ংক্রিয় অনুবাদসমূহ\n"
+"========================================\n"
+"\n"
+"এই মডিউলটি স্বয়ংক্রিয় অনুবাদগুলির জন্য প্যাসিভ শিডিয়ুলার কাজ ইনস্টল করবে\n"
+"জেনগো এপিআই ব্যবহার করে। এটি সক্রিয় করতে, আপনার অবশ্যই আবশ্যক\n"
+"1) Gen সেটিংস> সংস্থাগুলি> জেনগো প্যারামিটারের অধীনে আপনার জেনগো প্রমাণীকরণের পরামিতিগুলি কনফিগার করুন `\n"
+"2) `সেটিংস> অ্যাপ্লিকেশন শর্তাদি> জেনগো: অনুবাদের ম্যানুয়াল অনুরোধ under এর অধীনে উইজার্ডটি চালু করুন এবং উইজার্ডটি অনুসরণ করুন।\n"
+"\n"
+"এই উইজার্ডটি CRON কাজ এবং সময়সূচী সক্রিয় করবে এবং আপনি যেখানে অনুরোধ করেছেন সেই সমস্ত শর্তের জন্য জেনগো পরিষেবাদির মাধ্যমে স্বয়ংক্রিয় অনুবাদ শুরু করবে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_et
@@ -1507,6 +2063,16 @@ msgid ""
 "    - VAT tax structure\n"
 "    - Withholding tax structure\n"
 "    - Regional State listings\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_account_saft
+msgid ""
+"\n"
+"Base module for SAF-T reporting\n"
+"===============================\n"
+"This is meant to be used with localization specific modules.\n"
 "    "
 msgstr ""
 
@@ -1600,7 +2166,7 @@ msgid ""
 "Legal\n"
 "-----\n"
 "**The use of pos_blackbox_be sources is only certified on odoo.com SaaS platform\n"
-"for version 11.0.** Contact Odoo SA before installing pos_blackbox_be module.\n"
+"for version 13.0.** Contact Odoo SA before installing pos_blackbox_be module.\n"
 "\n"
 "An obfuscated and certified version of the pos_blackbox_be may be provided on\n"
 "requests for on-premise installations.\n"
@@ -1674,6 +2240,15 @@ msgid ""
 "\n"
 "Bridge to add contract calendar on automated actions\n"
 "====================================================\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_account_reports_cash_basis
+msgid ""
+"\n"
+"Cash Basis for Accounting Reports\n"
+"=================================\n"
 "    "
 msgstr ""
 
@@ -1987,6 +2562,8 @@ msgid ""
 "Design gorgeous mails\n"
 "    "
 msgstr ""
+"\n"
+"চমত্কার মেল ডিজাইন করুন"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de
@@ -1999,6 +2576,12 @@ msgid ""
 "German accounting chart and localization.\n"
 "    "
 msgstr ""
+"\n"
+"ডায়েস মডুল বেনহালতেট আইনেন ডয়েসচেন কনটেনহেন বেসিনেড আউফ ডেম এসকেআর03।\n"
+"==============================================================================\n"
+"\n"
+"\n"
+"জার্মান অ্যাকাউন্টিং চার্ট এবং স্থানীয়করণ।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_skr04
@@ -2010,6 +2593,12 @@ msgid ""
 "German accounting chart and localization.\n"
 "    "
 msgstr ""
+"\n"
+"ডায়েস মডুল বেনহালটেট আইনেন ডয়েসচেন কনটেনহেন বেসিনেড আউফ ডেম এসকেআর04।\n"
+"==============================================================================\n"
+"\n"
+"\n"
+"জার্মান অ্যাকাউন্টিং চার্ট এবং স্থানীয়করণ।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_management
@@ -2123,6 +2712,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_lu_reports_electronic
+msgid ""
+"\n"
+"Electronic Accounting reports for Luxembourg\n"
+"============================================\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_documents_hr_contract
 msgid ""
 "\n"
@@ -2187,21 +2785,6 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_hw_blackbox_be
-msgid ""
-"\n"
-"Fiscal Data Module Hardware Driver\n"
-"==================================\n"
-"\n"
-"This module allows a Point Of Sale client to communicate with a\n"
-"connected Belgian Fiscal Data Module.\n"
-"\n"
-"This module does **not** turn an Odoo Point Of Sale module into a certified\n"
-"Belgian cash register. It allows the communication on with a certified Fiscal\n"
-"Data Module but will not modify the behaviour of the Point of Sale.\n"
-msgstr ""
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_hr_payroll
 msgid ""
 "\n"
@@ -2234,16 +2817,75 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_ar_reports
+#: model:ir.module.module,description:base.module_l10n_ar_edi
 msgid ""
 "\n"
 "Functional\n"
 "----------\n"
 "\n"
-"Add VAT Book report which is a legal requirement in Argentine and that holds the VAT detail info of sales or purchases made in a period of time.\n"
+"Be able to create journals in Odoo to create electronic customer invoices and report then to AFIP (via webserices).\n"
+"The options available are:\n"
 "\n"
-"Also add a VAT summary report that is used to analyze invoicing\n"
+"    * Electronic Invoice - Web Service\n"
+"    * Export Voucher - Web Service\n"
+"    * Electronic Fiscal Bond - Web Service\n"
 "\n"
+"In the electronic journals if you validate an invoice this one will be validated in both Odoo and AFIP. This validation is\n"
+"made at the instant and we recieve and \"approved/approved with observation/rejected\" state from AFIP. If the invoice has\n"
+"been rejected by AFIP will not be post in the system and a pop up message will be shown with both the error detail (reject reasons)\n"
+"we recieve and a HINT about what the problem could be.\n"
+"\n"
+"For auditing and troubleshooting purposes we also add a menu \"Consulit Invoice in AFIP\" that let us to consult invoices previously\n"
+"sent to AFIP and last number used as support for any possible issues on the sequences synchronization between Odoo and AFIP.\n"
+"\n"
+"    NOTE: From the Journal's form view we are able to force a sync between the odoo sequences to each of the document types in\n"
+"    with the last numbers registered in AFIP.\n"
+"\n"
+"From vendor bills, we have added a functionality that can be configured in the accounting settings to be able to verify\n"
+"vendor bills in AFIP to check if the vendor bills are real (more information please review the setting description).\n"
+"\n"
+"Configuration:\n"
+"\n"
+"1. Go to the Accounting Settings > Argentinian Localization section\n"
+"\n"
+"    1.1. Configure the AFIP Web Services mode:\n"
+"\n"
+"    * Testing environment in order to use demo certificates that will be use to test the instance and to make NOT\n"
+"      real invoices to AFIP. is just for testing. For demo instaces is already pre-defined you will not need to configure\n"
+"      it (commonly named in AFIP as Homologation environment).\n"
+"    * Production environment in order to generate real certificates and legal invoices to AFIP,\n"
+"\n"
+"    1.2. Configure your AFIP Certificate: If you are in a demo instance this one will be have been set by default. If you\n"
+"         are in production instance just need to go to upload your AFIP Certificate\n"
+"\n"
+"    1.3. Optionally you can define if you like to be eable to verify vendor bills in AFIP.\n"
+"\n"
+"2. Create Sales journals that will represent each one of your AFIP POS (Available in AFIP Portal) you want to use in Odoo.\n"
+"\n"
+"    2.1. Use Documents field is set by default please dont change\n"
+"    2.2. Set AFIP POS System for one of the electronic ones.\n"
+"\n"
+"        * Electronic Invoice - Web Service'\n"
+"        * Electronic Fiscal Bond - Web Service'\n"
+"        * Export Voucher - Web Service'\n"
+"\n"
+"    2.3. Set the AFIP POS Number and AFIP POS Address taking into account what you have configured in your AFIP Portal.\n"
+"\n"
+"    NOTE: You can use the \"Check Available AFIP POS\" button in Journal's form to corroborate the to use to create the journals.\n"
+"\n"
+"For more information about Argentinian Electronic invoicing please go to http://www.afip.gob.ar/fe/ayuda.asp\n"
+"\n"
+"Technical\n"
+"---------\n"
+"\n"
+"The web services that are implemented are the ones that are the most common:\n"
+"\n"
+"* wsfev1 - \"Factura Electrónica\" (Electronic Invoice)\n"
+"* wsbfev1 - \"Bono Fiscal Electrónico\" (Electronic Fiscal Bond)\n"
+"* wsfexv1 - \"Factura de Exportación Electrónica\" (Electronic Exportation Invoice - same as Export Voucher)\n"
+"* wscdc - \"Constatación de Comprobantes\" (Invoices Verification)\n"
+"\n"
+"For Development information go to http://www.afip.gob.ar/fe/documentos/WSBFEv1%20-%20Manual%20para%20el%20desarrollador.pdf\n"
 "\n"
 msgstr ""
 
@@ -2431,6 +3073,9 @@ msgid ""
 "Generates Netherlands Intrastat report for declaration based on invoices.\n"
 "    "
 msgstr ""
+"\n"
+" \n"
+"চালানের উপর ভিত্তি করে ঘোষণার জন্য নেদারল্যান্ডসের ইন্টারস্ট্যাট প্রতিবেদন তৈরি করে।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_payroll_account
@@ -2530,6 +3175,17 @@ msgid ""
 "* Support for both Fulfilment by Amazon (FBA) and Fulfilment by Merchant (FBM):\n"
 "    * FBA: A stock location and stock moves allow to monitor your stock in Amazon Fulfilment Centers.\n"
 "    * FBM: Delivery notifications are sent to Amazon for each confirmed picking (partial delivery friendly).\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_account_debit_note
+msgid ""
+"\n"
+"In a lot of countries, a debit note is used as an increase of the amounts of an existing invoice \n"
+"or in some specific cases to cancel a credit note. \n"
+"It is like a regular invoice, but we need to keep track of the link with the original invoice.  \n"
+"The wizard used is similar as the one for the credit note.\n"
+"    "
 msgstr ""
 
 #. module: base
@@ -2671,19 +3327,6 @@ msgid ""
 "\n"
 "If you activate this module, you won't be able to access the \n"
 "regular Odoo interface anymore.\n"
-"\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_hw_posbox_upgrade
-msgid ""
-"\n"
-"IoTBox Software Upgrader\n"
-"========================\n"
-"\n"
-"This module allows to remotely upgrade the IoTBox software to a\n"
-"new version. This module is specific to the IoTBox setup and environment\n"
-"and should not be installed on regular Odoo servers.\n"
 "\n"
 msgstr ""
 
@@ -3991,6 +4634,22 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_fi
+msgid ""
+"\n"
+"This is the Odoo module to manage the accounting in Finland.\n"
+"============================================================\n"
+"\n"
+"After installing this module, you'll have access to :\n"
+"    * Finnish chart of account\n"
+"    * Fiscal positions\n"
+"    * Invoice Payment Reference Types (Finnish Standard Reference & Finnish Creditor Reference (RF))\n"
+"\n"
+"Set the payment reference type from the Sales Journal.\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_uom
 msgid ""
 "\n"
@@ -4148,6 +4807,16 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_id
+msgid ""
+"\n"
+"This is the latest Indonesian Odoo localisation necessary to run Odoo accounting for SMEs with:\n"
+"=================================================================================================\n"
+"    - generic Indonesian chart of accounts\n"
+"    - tax structure"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_uk
 msgid ""
 "\n"
@@ -4157,6 +4826,19 @@ msgid ""
 "    - VAT100-ready tax structure\n"
 "    - InfoLogic UK counties listing\n"
 "    - a few other adaptations"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_il
+msgid ""
+"\n"
+"This is the latest basic Israelian localisation necessary to run Odoo in Israel:\n"
+"================================================================================\n"
+"\n"
+"This module consists:\n"
+" - Generic Israelian chart of accounts\n"
+" - Israelian taxes\n"
+" "
 msgstr ""
 
 #. module: base
@@ -4227,6 +4909,15 @@ msgid ""
 "Niniejszy moduł jest przeznaczony dla odoo 8.0.\n"
 "Wewnętrzny numer wersji OpenGLOBE 1.02\n"
 "    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dz
+msgid ""
+"\n"
+"This is the module to manage the accounting chart for Algeria in Odoo.\n"
+"======================================================================\n"
+"This module applies to companies based in Algeria.\n"
 msgstr ""
 
 #. module: base
@@ -4406,6 +5097,14 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_pos_hr_l10n_be
+msgid ""
+"\n"
+"This module allows Employees (and not users) to log in to the Point of Sale application using the fiscal data module\n"
+"    "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_rating
 msgid ""
 "\n"
@@ -4425,6 +5124,14 @@ msgstr ""
 msgid ""
 "\n"
 "This module allows the user to add real estate related data to the Spanish localization and generates a mod 347 report.\n"
+"    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_partner_commission
+msgid ""
+"\n"
+"This module allows to configure commissions for resellers.\n"
 "    "
 msgstr ""
 
@@ -4587,6 +5294,13 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_iot_pairing
+msgid ""
+"\n"
+"This module enables the pairing of the IoT Box with Odoo through odoo.com.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_sms
 msgid ""
 "\n"
@@ -4680,6 +5394,17 @@ msgid ""
 "The ability to extract the correctly represented local accounts from IBAN accounts\n"
 "with a single statement.\n"
 "    "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_social_linkedin_company_support
+msgid ""
+"\n"
+"This module intends to add support for company pages and remove the support of personal accounts.\n"
+"This is done to prepare the next iteration of the social_linkedin module that will allow a full \"Streams\" support,\n"
+"meaning you will be able to read your posts (and not only publish them), but only for company accounts.\n"
+"As we don't want existing users to keep adding their personal accounts to remove them later, we add a technical\n"
+"module in order to minimize impact and support.\n"
 msgstr ""
 
 #. module: base
@@ -5010,6 +5735,8 @@ msgid ""
 "Visitors can join public mail channels managed in the Discuss app in order to get regular updates or reach out with your community.\n"
 "    "
 msgstr ""
+"\n"
+"নিয়মিত আপডেট পেতে বা আপনার সম্প্রদায়ের সাথে যোগাযোগ করার জন্য দর্শনার্থীরা আলোচনা অ্যাপে পরিচালিত সর্বজনীন মেল চ্যানেলগুলিতে যোগদান করতে পারেন।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_account
@@ -5182,12 +5909,12 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "%Y - Year with century.\""
-msgstr ""
+msgstr "% Y - শতবর্ষ সহ বছর। \""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "%a - Abbreviated weekday name."
-msgstr ""
+msgstr "%a- সংক্ষিপ্ত সপ্তাহের নাম"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -5222,7 +5949,7 @@ msgstr ""
 #: code:addons/base/models/res_users.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr ""
+msgstr "%sঅনুলিপি"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -5237,7 +5964,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 msgid "&amp;nbsp;"
-msgstr ""
+msgstr "&amp;nbsp;"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -5301,11 +6028,27 @@ msgid ", required"
 msgstr ""
 
 #. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid ""
+"- %(record)r belongs to company %(company)r and %(field)r (%(fname)s: "
+"%(values)s) belongs to another company."
+msgstr ""
+
+#. module: base
 #: code:addons/model.py:0
 #, python-format
 msgid ""
 "- Create/update: a mandatory field is not set.\n"
 "- Delete: another model requires the record being deleted. If possible, archive it instead."
+msgstr ""
+
+#. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid ""
+"- Record is company %(company)r and %(field)r (%(fname)s: %(values)s) "
+"belongs to another company."
 msgstr ""
 
 #. module: base
@@ -5404,6 +6147,26 @@ msgid "2.000"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_1
+msgid ""
+"3 good reasons to choose today for Federal as partners for the implementation of your ERP project:\n"
+"Firstly, you have a software specialist, secondly, a hardware and performance specialist AND thirdly a business economist with expertise in project management. And what does this mean for you? It's simple ...<br>\n"
+"… Your individual requirements are mapped into the standard software<br>\n"
+"… professional design of the optimal sizing for your system landscape<br>\n"
+"… Understanding of commercial and logistical processes in your business and engaging your staff and efficient use of resources.<br><br>\n"
+"Above all, you need a reliable and professional advisors / companions who will listen, your challenges seriously and will implement it in your senses. And without you fool with limit time and on budget, an X for a U. Welcome to Federal"
+msgstr ""
+
+#. module: base
+#: model:res.partner,website_short_description:base.res_partner_1
+msgid ""
+"3 good reasons to choose today for Federal as partners for the "
+"implementation of your ERP project: Firstly, you have a software specialist,"
+" secondly, a hardware and performance specialist AND thirdly a business "
+"economist with expertise in project management. And..."
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "3. %y, %Y         ==&gt; 08, 2008"
 msgstr ""
@@ -5455,6 +6218,14 @@ msgid "<b>Company Address:</b>"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid ""
+"<br><br>\n"
+" \n"
+"The Jackson Group’s Odoo consulting services include: <br>"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
 "<code style=\"white-space: pre-wrap\">\n"
@@ -5491,6 +6262,8 @@ msgid ""
 "<code>log(message, level='info')</code>:logging function to record debug "
 "information in <code>ir.logging</code> table"
 msgstr ""
+"<code> লগ (বার্তা, স্তর = 'তথ্য')</code> : ডিবাগ তথ্য রেকর্ড করতে লগিং "
+"ফাংশন<code> আইআর.লগিং</code>ছক"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -5932,6 +6705,11 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "A highly-responsive support model"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_hw_posbox_homepage
 msgid "A homepage for the IoT Box"
 msgstr ""
@@ -5973,6 +6751,11 @@ msgid "A module to test translation import."
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_test_xlsx_export
+msgid "A module to test xlsx export."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_test_assetsbundle
 msgid "A module to verify the Assets Bundle mechanism."
 msgstr ""
@@ -6003,6 +6786,12 @@ msgstr ""
 msgid ""
 "A partner with the same <span><span class=\"o_vat_label\">Tax "
 "ID</span></span> already exists ("
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid ""
+"A strategy that drives US Localization and adds new capabilities to Odoo"
 msgstr ""
 
 #. module: base
@@ -6126,7 +6915,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__access_token
 msgid "Access Token"
-msgstr ""
+msgstr "অ্যাক্সেস টোকন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr
@@ -6141,6 +6930,12 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_private_addresses
 msgid "Access to Private Addresses"
+msgstr ""
+
+#. module: base
+#: code:addons/api.py:0 code:addons/api.py:0
+#, python-format
+msgid "Access to unauthorized or invalid companies."
 msgstr ""
 
 #. module: base
@@ -6191,7 +6986,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__partner_id
 msgid "Account Holder"
-msgstr ""
+msgstr "হিসাব ধারী"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__acc_holder_name
@@ -6201,6 +6996,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_invoice_extract
 msgid "Account Invoice Extract"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_account_invoice_extract_purchase
+msgid "Account Invoice Extract Purchase"
 msgstr ""
 
 #. module: base
@@ -6234,6 +7034,16 @@ msgid "Account TaxCloud - Sale"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_sale_coupon_taxcloud
+msgid "Account Taxcloud - Sale (coupon)"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_sale_coupon_taxcloud_delivery
+msgid "Account Taxcloud - Sale (coupon) - Delivery"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_account_winbooks_import
 msgid "Account Winbooks Import"
 msgstr ""
@@ -6256,7 +7066,7 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_account_accountant
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 msgid "Accounting"
-msgstr ""
+msgstr "অ্যাকাউন্টিং"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_account
@@ -6316,7 +7126,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.action_view_tree
 #: model_terms:ir.ui.view,arch_db:base.view_window_action_search
 msgid "Action"
-msgstr ""
+msgstr "ক্রিয়া"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__help
@@ -6328,7 +7138,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__help
 #: model:ir.model.fields,field_description:base.field_ir_cron__help
 msgid "Action Description"
-msgstr ""
+msgstr "কর্ম বিবরণ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__name
@@ -6337,7 +7147,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__name
 #: model:ir.model.fields,field_description:base.field_ir_cron__name
 msgid "Action Name"
-msgstr ""
+msgstr "কর্ম নাম"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__target
@@ -6348,7 +7158,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__state
 #: model:ir.model.fields,field_description:base.field_ir_cron__state
 msgid "Action To Do"
-msgstr ""
+msgstr "কর্ম করতে"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__type
@@ -6361,7 +7171,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_cron__type
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 msgid "Action Type"
-msgstr ""
+msgstr "কর্ম প্রকার"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_url
@@ -6428,7 +7238,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Active"
-msgstr ""
+msgstr "সক্রিয়"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__active_lang_count
@@ -6480,6 +7290,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_event_barcode
 msgid "Add barcode scanning feature to event management."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_account_reports_cash_basis
+msgid "Add cash basis functionality for reports"
 msgstr ""
 
 #. module: base
@@ -6553,6 +7368,11 @@ msgid "Address"
 msgstr ""
 
 #. module: base
+#: model:ir.model,name:base.model_format_address_mixin
+msgid "Address Format"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__type
 #: model:ir.model.fields,field_description:base.field_res_users__type
 msgid "Address Type"
@@ -6582,7 +7402,7 @@ msgid ""
 "This module allows users to login with their LDAP username and password, and\n"
 "will automatically create Odoo users for them on the fly.\n"
 "\n"
-"**Note:** This module only work on servers who have Python's ``ldap`` module installed.\n"
+"**Note:** This module only work on servers that have Python's ``python-ldap`` module installed.\n"
 "\n"
 "Configuration:\n"
 "--------------\n"
@@ -6774,6 +7594,11 @@ msgid "Algeria"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_dz
+msgid "Algeria - Accounting"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_payment_alipay
 #: model:ir.module.module,shortdesc:base.module_payment_alipay
 msgid "Alipay Payment Acquirer"
@@ -6842,24 +7667,39 @@ msgid "Allow shoppers to enlist products"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_pos_cash_rounding
+msgid "Allow specific rounding in pos"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_mail_channel
 msgid "Allow visitors to join public mail channels"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_odoo_referral
+msgid "Allow you to refer your friends to Odoo and get rewards"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_odoo_referral_portal
+msgid "Allow you to refer your friends to Odoo and get rewards - Deprecated"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
 msgid "Allowed Companies"
-msgstr ""
+msgstr "অনুমোদিত সংস্থা"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode_quality_control
 msgid "Allows the usage of quality checks within the barcode views"
-msgstr ""
+msgstr "বারকোড দর্শনগুলির মধ্যে মানের চেকগুলির ব্যবহারের অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_map
 msgid "Allows the viewing of records on a map"
-msgstr ""
+msgstr "একটি মানচিত্রে রেকর্ড দেখার অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_profile
@@ -6867,59 +7707,65 @@ msgid ""
 "Allows to access the website profile of the users and see their statistics "
 "(karma, badges, etc..)"
 msgstr ""
+"ব্যবহারকারীর ওয়েবসাইট প্রোফাইল অ্যাক্সেস করতে এবং তাদের পরিসংখ্যান (কর্মফল,"
+" ব্যাজ ইত্যাদি) দেখতে দেয়"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_forum
 msgid "Allows to link forum on a course"
-msgstr ""
+msgstr "একটি কোর্সে ফোরাম লিঙ্ক করার অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_delivery
 msgid "Allows to offer free shippings in coupon reward"
-msgstr ""
+msgstr "কুপন পুরষ্কারে বিনামূল্যে শিপিং অফার করার অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_coupon_delivery
 #: model:ir.module.module,summary:base.module_website_sale_coupon_delivery
 msgid "Allows to offer free shippings in coupon reward on eCommerce"
-msgstr ""
+msgstr "ইকমার্সে কুপন পুরষ্কারে বিনামূল্যে শিপিংয়ের প্রস্তাব দেয়"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sms
 msgid "Allows to send sms to website visitor"
-msgstr ""
+msgstr "ওয়েবসাইট ভিজিটরকে এসএমএস প্রেরণের অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a lead."
 msgstr ""
+"ভিজিটর যদি সীসার সাথে সংযুক্ত থাকে তবে ওয়েবসাইটের দর্শকের কাছে এসএমএস "
+"পাঠানোর অনুমতি দেয়।"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a partner."
 msgstr ""
+"ভিজিটর কোনও অংশীদারের সাথে সংযুক্ত থাকলে ওয়েবসাইটের দর্শকের কাছে এসএমএস "
+"প্রেরণের অনুমতি দেয়।"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_sms
 msgid "Allows to send sms to website visitor that have lead"
-msgstr ""
+msgstr "সীসা রয়েছে এমন ওয়েবসাইটের দর্শকদের এসএমএস পাঠানোর অনুমতি দেয়"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon
 msgid "Amazon Connector"
-msgstr ""
+msgstr "আমাজন সংযোগকারী"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_delivery
 msgid "Amazon/Delivery Bridge"
-msgstr ""
+msgstr "আমাজন / ডেলিভারি ব্রিজ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_taxcloud
 msgid "Amazon/TaxCloud Bridge"
-msgstr ""
+msgstr "আমাজন / ট্যাক্সক্লাউড ব্রিজ"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -6928,16 +7774,18 @@ msgid ""
 "Ambiguous specification for field '%(field)s', only provide one of name, "
 "external id or database id"
 msgstr ""
+"ক্ষেত্রের জন্য অস্পষ্ট স্পেসিফিকেশন '%(field)s'কেবলমাত্র নামের একটি, বাহ্যিক"
+" আইডি বা ডাটাবেস আইডি সরবরাহ করুন"
 
 #. module: base
 #: model:res.country,name:base.as
 msgid "American Samoa"
-msgstr ""
+msgstr "আমেরিকান সামোয়া"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "Amount"
-msgstr ""
+msgstr "পরিমাণ"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_client__tag
@@ -6945,6 +7793,8 @@ msgid ""
 "An arbitrary string, interpreted by the client according to its own needs "
 "and wishes. There is no central tag repository across clients."
 msgstr ""
+"একটি নির্বিচারে স্ট্রিং, ক্লায়েন্ট তার নিজস্ব চাহিদা এবং ইচ্ছা অনুযায়ী "
+"ব্যাখ্যা করা হয়। ক্লায়েন্ট জুড়ে কোনও কেন্দ্রীয় ট্যাগ সংগ্রহস্থল নেই।"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_module_module__auto_install
@@ -6953,37 +7803,40 @@ msgid ""
 " its dependencies are satisfied. If the module has no dependency, it is "
 "always installed."
 msgstr ""
+"একটি স্বয়ংক্রিয়-ইনস্টলযোগ্য মডিউল স্বয়ংক্রিয়ভাবে সিস্টেমের দ্বারা ইনস্টল"
+" করা হয় যখন এর সমস্ত নির্ভরতা সন্তুষ্ট হয়। মডিউলটির যদি কোনও নির্ভরতা না "
+"থাকে তবে এটি সর্বদা ইনস্টল করা থাকে।"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_analytic
 msgid "Analytic Accounting"
-msgstr ""
+msgstr "বিশ্লেষণী হিসাবরক্ষণ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_analytic_enterprise
 msgid "Analytic Accounting Enterprise"
-msgstr ""
+msgstr "অ্যানালিটিক অ্যাকাউন্টিং এন্টারপ্রাইজ"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_account
 #: model:ir.module.module,summary:base.module_mrp_account_enterprise
 msgid "Analytic accounting in Manufacturing"
-msgstr ""
+msgstr "উত্পাদন বিশ্লেষণী অ্যাকাউন্টিং"
 
 #. module: base
 #: model:res.country,name:base.ad
 msgid "Andorra"
-msgstr ""
+msgstr "এ্যান্ডোরা"
 
 #. module: base
 #: model:res.country,name:base.ao
 msgid "Angola"
-msgstr ""
+msgstr "অ্যাঙ্গোলা"
 
 #. module: base
 #: model:res.country,name:base.ai
 msgid "Anguilla"
-msgstr ""
+msgstr "এ্যাঙ্গুইলা"
 
 #. module: base
 #: model:res.country,name:base.aq
@@ -7088,7 +7941,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.module_tree
 #: model_terms:ir.ui.view,arch_db:base.view_module_filter
 msgid "Apps"
-msgstr ""
+msgstr "অ্যাপস"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_export__modules
@@ -7108,12 +7961,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_db
 msgid "Arch Blob"
-msgstr ""
+msgstr "আর্চ ব্লব"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_fs
 msgid "Arch Filename"
-msgstr ""
+msgstr "আর্চ ফাইলের নাম"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_view_form
@@ -7134,11 +7987,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.res_partner_category_view_search
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_search
 #: model_terms:ir.ui.view,arch_db:base.view_ir_mail_server_search
+#: model_terms:ir.ui.view,arch_db:base.view_partner_form
+#: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
 #: model_terms:ir.ui.view,arch_db:base.view_res_partner_filter
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 #: model_terms:ir.ui.view,arch_db:base.view_sequence_search
+#: model_terms:ir.ui.view,arch_db:base.view_users_form
 msgid "Archived"
-msgstr ""
+msgstr "আর্কাইভ করা"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
@@ -7164,6 +8020,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ar_reports
 msgid "Argentinian Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ar_edi
+msgid "Argentinian Electronic Invoicing"
 msgstr ""
 
 #. module: base
@@ -7213,11 +8074,6 @@ msgid "Attach a new document"
 msgstr ""
 
 #. module: base
-#: model_terms:ir.ui.view,arch_db:base.view_attachment_search
-msgid "Attached Document Name"
-msgstr ""
-
-#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_form
 msgid "Attached To"
 msgstr ""
@@ -7226,7 +8082,7 @@ msgstr ""
 #: model:ir.model,name:base.model_ir_attachment
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_search
 msgid "Attachment"
-msgstr ""
+msgstr "এটাচমেন্ট"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_attachment
@@ -7308,7 +8164,7 @@ msgstr ""
 #: model:ir.module.module,description:base.module_payment_authorize
 #: model:ir.module.module,shortdesc:base.module_payment_authorize
 msgid "Authorize.Net Payment Acquirer"
-msgstr ""
+msgstr "অনুমোদন. নেট পেমেন্ট গ্রহীতা "
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_dependency__auto_install_required
@@ -7362,6 +8218,13 @@ msgid "Automatic install of downloaded Apps is currently disabled."
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_account_invoice_extract_purchase
+msgid ""
+"Automatically finds the purchase order linked to a vendor bill when using "
+"invoice extraction"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_translation__state
 msgid ""
 "Automatically set to let administators find new terms that might need to be "
@@ -7371,7 +8234,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.menu,name:base.menu_automation
 msgid "Automation"
-msgstr ""
+msgstr "স্বয়ংক্রিয়তা"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_filters_view_form
@@ -7382,6 +8245,38 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "Avatar"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_2
+msgid ""
+"Axelor is a service company specializing in the integration of Open Source ERP. She is co-editor including the web version of Odoo and concentrates all its activities to Odoo integration and implementation of supply Saas (ASP) based on Odoo. Axelor can now claim many references to Odoo implementations in various industries.<br> <br>\n"
+"The company has its own R&amp;D performing many innovations to the continuous improvement of Odoo, such as the new web version, the plug-in MS Office and connectors to other applications. Its main advantages are its integration methodology and rigor to the management of major projects for the audit and design phase up to production and customer support."
+msgstr ""
+
+#. module: base
+#: model:res.partner,website_short_description:base.res_partner_2
+msgid ""
+"Axelor is a service company specializing in the integration of Open Source "
+"ERP. She is co-editor including the web version of Odoo and concentrates all"
+" its activities to Odoo integration and implementation of supply..."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_address_16
+msgid ""
+"Ayaan has in the IT sector <b>since 20 years</b>. He\n"
+"                develops software to help develop websites.  He sold his\n"
+"                first company at 30 years old and manage to grow OpenCorp\n"
+"                from 1 to 55 employees mostly by reselling services on\n"
+"                Odoo."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_address_16
+msgid ""
+"Ayaan is the <b>author of several books</b>, including Amazon best seller\n"
+"                \"How Odoo will change the business world!\"."
 msgstr ""
 
 #. module: base
@@ -7432,7 +8327,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__b6
 msgid "B6  20  125 x 176 mm"
-msgstr ""
+msgstr "বি 6 20 125 এক্স 176 মিমি"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__b7
@@ -7468,14 +8363,14 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.bd
 msgid "Bangladesh"
-msgstr ""
+msgstr "বাংলাদেশ"
 
 #. module: base
 #: model:ir.model,name:base.model_res_bank
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__bank_id
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
 msgid "Bank"
-msgstr ""
+msgstr "ব্যাংক"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_res_partner_bank_account_form
@@ -7485,23 +8380,23 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_partner_bank_search
 #: model_terms:ir.ui.view,arch_db:base.view_partner_bank_tree
 msgid "Bank Accounts"
-msgstr ""
+msgstr "ব্যাংক হিসাব"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
 msgid "Bank Address"
-msgstr ""
+msgstr "ব্যাংকের ঠিকানা"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_bank__bic
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__bank_bic
 msgid "Bank Identifier Code"
-msgstr ""
+msgstr "ব্যাংক শনাক্তকরণ কোড"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_bank_search
 msgid "Bank Name"
-msgstr ""
+msgstr "ব্যাংকের নাম"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_bank_form
@@ -7536,7 +8431,7 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_barcodes
 #: model:ir.module.module,shortdesc:base.module_stock_barcode
 msgid "Barcode"
-msgstr ""
+msgstr "বারকোড"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_quality_control
@@ -7571,7 +8466,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_search
 #: model_terms:ir.ui.view,arch_db:base.view_model_search
 msgid "Base"
-msgstr ""
+msgstr "ভিত্তি"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__state__base
@@ -7603,7 +8498,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_base
 msgid "Base View Architecture"
-msgstr ""
+msgstr "ভিত্তি স্থাপত্য দেখুন"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_import
@@ -7625,7 +8520,7 @@ msgstr ""
 #: model:ir.cron,cron_name:base.autovacuum_job
 #: model:ir.cron,name:base.autovacuum_job
 msgid "Base: Auto-vacuum internal data"
-msgstr ""
+msgstr "বেস: অটো-ভ্যাকুয়াম অভ্যন্তরীণ ডেটা"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_web_grid
@@ -7690,6 +8585,11 @@ msgid "Belgian Registered Cash Register"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pos_hr_l10n_be
+msgid "Belgian Registered Cash Register Employee module"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.be
 msgid "Belgium"
 msgstr ""
@@ -7747,6 +8647,24 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.bm
 msgid "Bermuda"
+msgstr "বারমুডা"
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_12
+msgid ""
+"Best Designers is an IT services organization, established by 3 industry experts headquartered at Mumbai, India. The organization serve customers with Open Source Enterprise Software applications. We are specialized in <b>ERP Implementation, CRM Implementation, E-Commerce to ERP Integrations, Document Management Systems and Open Source Training.</b> Our key products include <b>Odoo, Alfresco and Magento.</b> Our core objective is to deliver quality in <b>Odoo Implementation Services</b> incorporating supreme value to enterprises globally, at an affordable price. Our experience in managing projects right from selecting tools and platforms to implement solutions has shown results in <b>Reducing IT Budgets for SME making Technology Affordable. </b>\n"
+" <br> <br>\n"
+"Our ERP expertise is since 2005 and we mainly focus on Odoo Implementation across the globe, being an <b>Off-shore Development Partner from India</b>, we are also associated with other Odoo Partners across the globe to implement Odoo Business Applications. In order to provide world class ERP, E–Commerce and Enterprise Solutions, we have designed innovative Implementation Methodologies and concepts, which help us provide reliable business solutions that meet present as well as future demands.\n"
+"<br><br>\n"
+"Best Designers has now emerged serving the Small and Medium Business – SMB’s with lots of Free and Open Source Software's, Our team is proficient to deliver quick and quality solutions. With a blend of experts with proven track record, our enterprise solution Business Consultants, ERP Consultants, Network Engineers, Software Developers, Web Architects, Software Testers and Search Engine Optimizers makes it possible to offer our clients affordable solutions that are both innovative and highly influential."
+msgstr ""
+
+#. module: base
+#: model:res.partner,website_short_description:base.res_partner_12
+msgid ""
+"Best Designers is an IT services organization, established by 3 industry "
+"experts headquartered at Mumbai, India. The organization serve customers "
+"with Open Source Enterprise Software applications. We are specialized in..."
 msgstr ""
 
 #. module: base
@@ -7774,7 +8692,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_model_id
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_model_id
 msgid "Binding Model"
-msgstr ""
+msgstr "বাঁধাই মডিউল"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__binding_type
@@ -7786,7 +8704,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_type
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_type
 msgid "Binding Type"
-msgstr ""
+msgstr "বাঁধাই ধরণ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__binding_view_types
@@ -7798,11 +8716,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_view_types
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_view_types
 msgid "Binding View Types"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_hw_blackbox_be
-msgid "Blackbox Hardware Driver"
 msgstr ""
 
 #. module: base
@@ -7920,7 +8833,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_marketing_automation
 msgid "Build automated mailing campaigns"
-msgstr ""
+msgstr "স্বয়ংক্রিয় মেলিং প্রচারগুলি তৈরি করুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_form
@@ -8021,7 +8934,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__calendar
 #: model:ir.module.module,shortdesc:base.module_calendar
 msgid "Calendar"
-msgstr ""
+msgstr "পুঞ্জিকা"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_calendar_sms
@@ -8060,7 +8973,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.ca
 msgid "Canada"
-msgstr ""
+msgstr "কানাডা"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ca
@@ -8090,7 +9003,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 #: model_terms:ir.ui.view,arch_db:base.wizard_update_translations
 msgid "Cancel"
-msgstr ""
+msgstr "বাতিল"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_form
@@ -8126,6 +9039,12 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr ""
 
@@ -8149,6 +9068,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__on_delete__cascade
 msgid "Cascade"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_account_reports_cash_basis
+msgid "Cash Basis Accounting Reports"
 msgstr ""
 
 #. module: base
@@ -8191,7 +9115,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:base.change_password_wizard_action
 #: model_terms:ir.ui.view,arch_db:base.change_password_wizard_view
 msgid "Change Password"
-msgstr ""
+msgstr "অনুমোদন শব্দ পরিবর্তন করুন"
 
 #. module: base
 #: model:ir.model,name:base.model_change_password_wizard
@@ -8284,7 +9208,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__child_ids
 #: model:ir.model.fields,field_description:base.field_ir_cron__child_ids
 msgid "Child Actions"
-msgstr ""
+msgstr "গৌণ কর্ম "
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category__child_ids
@@ -8299,7 +9223,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__field_parent
 msgid "Child Field"
-msgstr ""
+msgstr "শিশু ফিল্ড"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_menu__child_id
@@ -8397,7 +9321,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_address_city
 msgid "City Addresses"
-msgstr ""
+msgstr "শহর ঠিকানা"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_logging__type__client
@@ -8421,7 +9345,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Close"
-msgstr ""
+msgstr "বদ্ধ"
 
 #. module: base
 #: model:res.country,name:base.cc
@@ -8477,6 +9401,12 @@ msgid "Colombian - Accounting Reports"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_co_pos
+#: model:ir.module.module,shortdesc:base.module_l10n_co_pos
+msgid "Colombian - Point of Sale"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_co
 msgid "Colombian Accounting and Tax Preconfiguration"
 msgstr ""
@@ -8484,7 +9414,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_co_edi
 msgid "Colombian Localization for EDI documents"
-msgstr ""
+msgstr "ইডিআই নথির জন্য কলম্বিয়ান স্থানীয়করণ"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_co_edi_ubl_2_1
+msgid "Colombian Localization for EDI documents UBL 2.1"
+msgstr "ইডিআই নথির জন্য কলম্বিয়ার স্থানীয়করণ ইউবিএল 2.1"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__color
@@ -8492,37 +9427,37 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner_category__color
 #: model:ir.model.fields,field_description:base.field_res_users__color
 msgid "Color Index"
-msgstr ""
+msgstr "রঙ সূচক"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Colors"
-msgstr ""
+msgstr "রং"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__column1
 msgid "Column 1"
-msgstr ""
+msgstr "কলাম 1"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__column2
 msgid "Column 2"
-msgstr ""
+msgstr "কলাম 2"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__column2
 msgid "Column referring to the record in the comodel table"
-msgstr ""
+msgstr "কমোডেল সারণীতে রেকর্ডকে উল্লেখ করে কলাম"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__column1
 msgid "Column referring to the record in the model table"
-msgstr ""
+msgstr "মডেল সারণীতে রেকর্ডকে উল্লেখ করে কলাম"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__comm10e
 msgid "Comm10E 25  105 x 241 mm, U.S. Common 10 Envelope"
-msgstr ""
+msgstr "Comm10E 25 105 x 241 মিমি, মার্কিন যুক্তরাষ্ট্রের সাধারণ 10 খাম"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_act_window__view_mode
@@ -8530,6 +9465,8 @@ msgid ""
 "Comma-separated list of allowed view modes, such as 'form', 'tree', "
 "'calendar', etc. (Default: tree,form)"
 msgstr ""
+"'ফর্ম', 'ট্রি', 'ক্যালেন্ডার' ইত্যাদি ইত্যাদির মতো অনুমোদিত ভিউ মোডের "
+"কমা-বিচ্ছিন্ন তালিকার তালিকা (ডিফল্ট: ট্রি, ফর্ম)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__comment
@@ -8561,7 +9498,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_company_tree
 #: model_terms:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Companies"
-msgstr ""
+msgstr "কোম্পানি"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
@@ -8590,7 +9527,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_users_search
 #, python-format
 msgid "Company"
-msgstr ""
+msgstr "কোম্পানি"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_company_step
@@ -8618,7 +9555,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner__company_name
 #: model:ir.model.fields,field_description:base.field_res_users__company_name
 msgid "Company Name"
-msgstr ""
+msgstr "কোমপানির নাম"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__commercial_company_name
@@ -8740,7 +9677,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "রূপরেখা নির্ধারণ"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_form
@@ -8757,7 +9694,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_reporting_config
 #: model_terms:ir.ui.view,arch_db:base.res_config_view_base
 msgid "Configuration"
-msgstr ""
+msgstr "রূপরেখা"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_config_installer
@@ -8769,6 +9706,11 @@ msgstr ""
 #: model:ir.model,name:base.model_ir_actions_todo
 #: model:ir.ui.menu,name:base.menu_ir_actions_todo_form
 msgid "Configuration Wizards"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_partner_commission
+msgid "Configure resellers commissions on subscription sale"
 msgstr ""
 
 #. module: base
@@ -8790,7 +9732,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "Confirm"
-msgstr ""
+msgstr "নিশ্চিত করুন"
 
 #. module: base
 #: model:res.country,name:base.cg
@@ -8859,6 +9801,11 @@ msgid "Construction"
 msgstr ""
 
 #. module: base
+#: model:res.partner.category,name:base.res_partner_category_8
+msgid "Consulting Services"
+msgstr ""
+
+#. module: base
 #: model:ir.model,name:base.model_res_partner
 #: model:ir.model.fields,field_description:base.field_res_partner__child_ids
 #: model:ir.model.fields,field_description:base.field_res_users__child_ids
@@ -8866,7 +9813,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_simple_form
 msgid "Contact"
-msgstr ""
+msgstr "যোগাযোগ"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -8891,13 +9838,13 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_category_form
 msgid "Contact Tag"
-msgstr ""
+msgstr "যোগাযোগ ট্যাগ"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_category_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_category_list
 msgid "Contact Tags"
-msgstr ""
+msgstr "যোগাযোগ ট্যাগ"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_title_contact
@@ -8909,7 +9856,7 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_contacts
 #: model_terms:ir.ui.view,arch_db:base.view_partner_tree
 msgid "Contacts"
-msgstr ""
+msgstr "পরিচিতদের তালিকা"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -9046,7 +9993,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__country_group_ids
 msgid "Country Groups"
-msgstr ""
+msgstr "দেশজ গোষ্ঠীসমূহ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__name
@@ -9104,7 +10051,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:base.act_menu_create
 #: model_terms:ir.ui.view,arch_db:base.view_model_menu_create
 msgid "Create Menu"
-msgstr ""
+msgstr "মেনু তৈরি করুন"
 
 #. module: base
 #: model:ir.model,name:base.model_wizard_ir_model_menu_create
@@ -9159,7 +10106,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_category_form
 msgid "Create a new contact tag"
-msgstr ""
+msgstr "একটি নতুন পরিচিতি ট্যাগ তৈরি করুন"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_customer_form
@@ -9232,7 +10179,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_form
 msgid "Created Views"
-msgstr ""
+msgstr "তৈরী করা হয়েছে দেখাচ্ছে"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__create_uid
@@ -9313,7 +10260,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__create_uid
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_search
 msgid "Created by"
-msgstr ""
+msgstr "দ্বারা সৃষ্টি"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__create_date
@@ -9390,7 +10337,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__create_date
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__create_date
 msgid "Created on"
-msgstr ""
+msgstr "তৈরি"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_form
@@ -9511,7 +10458,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__current_line_id
 msgid "Current Line"
-msgstr ""
+msgstr "কারেন্ট লাইন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_currency__rate
@@ -9529,7 +10476,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_search
 #: model_terms:ir.ui.view,arch_db:base.view_model_search
 msgid "Custom"
-msgstr ""
+msgstr "পছন্দসই"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__custom_colors
@@ -9549,45 +10496,45 @@ msgstr ""
 #. module: base
 #: model:ir.ui.menu,name:base.menu_administration_shortcut
 msgid "Custom Shortcuts"
-msgstr ""
+msgstr "কাস্টম শর্টকাটগুলি"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_ui_view_custom
 msgid "Custom View"
-msgstr ""
+msgstr "কাস্টম ভিউ"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
 #, python-format
 msgid "Custom fields must have a name that starts with 'x_' !"
-msgstr ""
+msgstr "কাস্টম ক্ষেত্রগুলির অবশ্যই একটি নাম থাকতে হবে যা 'x_' দিয়ে শুরু হবে!"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__name_position
 msgid "Customer Name Position"
-msgstr ""
+msgstr "গ্রাহকের নাম অবস্থান"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_portal
 #: model:ir.module.module,summary:base.module_portal
 msgid "Customer Portal"
-msgstr ""
+msgstr "গ্রাহক পোর্টাল"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_rating
 msgid "Customer Rating"
-msgstr ""
+msgstr "গ্রাহক রেটিং"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_customer
 msgid "Customer References"
-msgstr ""
+msgstr "গ্রাহক রেফারেন্স"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_customer_form
 #: model:ir.actions.act_window,name:base.action_partner_form
 msgid "Customers"
-msgstr ""
+msgstr "গ্রাহকরা"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_ui_view_custom
@@ -9596,7 +10543,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_view_custom_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_custom_tree
 msgid "Customized Views"
-msgstr ""
+msgstr "কাস্টমাইজড দর্শন"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_ui_view_custom
@@ -9604,11 +10551,13 @@ msgid ""
 "Customized views are used when users reorganize the content of their "
 "dashboard views (via web client)"
 msgstr ""
+"ব্যবহারকারীরা যখন তাদের ড্যাশবোর্ড দর্শনের বিষয়বস্তু পুনরায় সংগঠিত করে "
+"(ওয়েব ক্লায়েন্টের মাধ্যমে) তখন কাস্টমাইজড ভিউগুলি ব্যবহৃত হয়"
 
 #. module: base
 #: model:res.country,name:base.cy
 msgid "Cyprus"
-msgstr ""
+msgstr "সাইপ্রাসদ্বিপ"
 
 #. module: base
 #: model:res.country,name:base.cz
@@ -9643,6 +10592,11 @@ msgid "Dashboards"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Data Migration"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_test_convert
 msgid "Data for xml conversion tests"
 msgstr ""
@@ -9650,7 +10604,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid "Data to Write"
-msgstr ""
+msgstr "লেখার জন্য ডেটা"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_logging_search_view
@@ -9752,6 +10706,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_cron__interval_type__days
 msgid "Days"
+msgstr "দিন"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_account_debit_note
+#: model:ir.module.module,summary:base.module_account_debit_note
+msgid "Debit Notes"
 msgstr ""
 
 #. module: base
@@ -9926,11 +10886,21 @@ msgid "Denmark"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_dk
+msgid "Denmark - Accounting"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_dk_reports
+msgid "Denmark - Accounting Reports"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__depends
 #: model:ir.model.fields,field_description:base.field_ir_module_module__dependencies_id
 #: model_terms:ir.ui.view,arch_db:base.module_form
 msgid "Dependencies"
-msgstr ""
+msgstr "নির্ভরতাগুলি"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__depends
@@ -9953,7 +10923,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_form
 msgid "Description"
-msgstr ""
+msgstr "বিবরণ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__description_html
@@ -9980,6 +10950,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing
 msgid "Design, send and track emails"
+msgstr ""
+
+#. module: base
+#: model:res.partner.category,name:base.res_partner_category_14
+msgid "Desk Manufacturers"
 msgstr ""
 
 #. module: base
@@ -10015,7 +10990,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__diagram
 msgid "Diagram"
-msgstr ""
+msgstr "নকশা"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_digital
@@ -10050,7 +11025,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
 #: model_terms:ir.ui.view,arch_db:base.res_config_settings_view_form
 msgid "Discard"
-msgstr ""
+msgstr "বাতিল"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_discuss
@@ -10061,7 +11036,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_form
 msgid "Display"
-msgstr ""
+msgstr "প্রদর্শন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field__unknown__display_name
@@ -10169,7 +11144,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__display_name
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "প্রদর্শন নাম"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_studio
@@ -10375,11 +11350,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__domain
 #: model:ir.model.fields,field_description:base.field_ir_rule__domain_force
 msgid "Domain"
-msgstr ""
+msgstr "ডোমেইন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__domain
 msgid "Domain Value"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Domestic US, near-shore and offshore based resources"
 msgstr ""
 
 #. module: base
@@ -10407,7 +11387,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_todo__state__done
 #: model:ir.model.fields.selection,name:base.selection__res_company__base_onboarding_company_state__done
 msgid "Done"
-msgstr ""
+msgstr "সম্পন্ন"
 
 #. module: base
 #: model:res.partner.title,shortcut:base.res_partner_title_doctor
@@ -10423,7 +11403,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "ড্রপডাউন মেনু"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_dropshipping
@@ -10567,6 +11547,11 @@ msgid "Electronic invoicing for Colombia with Carvajal"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_co_edi_ubl_2_1
+msgid "Electronic invoicing for Colombia with Carvajal UBL 2.1"
+msgstr ""
+
+#. module: base
 #: code:addons/template_inheritance.py:0 code:addons/template_inheritance.py:0
 #, python-format
 msgid "Element '%s' cannot be located in parent view"
@@ -10581,7 +11566,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_email
 #: model_terms:ir.ui.view,arch_db:base.contact
 msgid "Email"
-msgstr ""
+msgstr "ই-মেইল"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
@@ -10635,6 +11620,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:base.action_partner_employee_form
 #: model:ir.module.category,name:base.module_category_human_resources_employees
 #: model:ir.module.module,shortdesc:base.module_hr
+#: model:res.partner.category,name:base.res_partner_category_3
 msgid "Employees"
 msgstr ""
 
@@ -10723,7 +11709,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_demo_failure__error
 msgid "Error"
-msgstr ""
+msgstr "ত্রুটি"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -10799,7 +11785,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_marketing_events
 #: model:ir.module.module,shortdesc:base.module_website_event
 msgid "Events"
-msgstr ""
+msgstr "ঘটনাবলী"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event
@@ -10880,7 +11866,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__state__multi
 msgid "Execute several actions"
-msgstr ""
+msgstr "বেশ কয়েকটি ক্রিয়া সম্পাদন করুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_search
@@ -10904,6 +11890,11 @@ msgid "Expenses in Payslips"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Experienced consulting services"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_report_paperformat__report_ids
 msgid "Explicitly associated reports"
 msgstr ""
@@ -10920,7 +11911,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_exports_line__export_id
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Export"
-msgstr ""
+msgstr "বহিরায়ন করুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -11009,7 +12000,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__xml_id
 #: model_terms:ir.ui.view,arch_db:base.view_window_action_form
 msgid "External ID"
-msgstr ""
+msgstr "বাহ্যিক আইডি"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_data__name
@@ -11043,7 +12034,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_module_filter
 msgid "Extra"
-msgstr ""
+msgstr "অতিরিক্ত"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_usability
@@ -11265,7 +12256,7 @@ msgstr ""
 #: code:addons/model.py:0
 #, python-format
 msgid "Field:"
-msgstr ""
+msgstr "ক্ষেত্র:"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_model_fields
@@ -11314,6 +12305,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_base_language_import__data
 #: model:ir.model.fields.selection,name:base.selection__ir_attachment__type__binary
 msgid "File"
+msgstr ""
+
+#. module: base
+#: code:addons/base/wizard/base_import_language.py:0
+#, python-format
+msgid ""
+"File %r not imported due to a malformed file.\n"
+"\n"
+"This issue can be caused by duplicates entries who are referring to the same field. Please check the content of the file you are trying to import.\n"
+"\n"
+"Technical Details:\n"
+"%s"
 msgstr ""
 
 #. module: base
@@ -11388,12 +12391,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.ir_filters_view_tree
 #: model_terms:ir.ui.view,arch_db:base.view_window_action_form
 msgid "Filters"
-msgstr ""
+msgstr "পরিশোধকগুলি"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Filters created by myself"
-msgstr ""
+msgstr "আমার নিজের দ্বারা তৈরি ফিল্টার"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_filters_view_search
@@ -11423,6 +12426,16 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.fi
 msgid "Finland"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fi_reports
+msgid "Finland - Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fi
+msgid "Finnish Localization"
 msgstr ""
 
 #. module: base
@@ -11472,16 +12485,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__float
 msgid "Float"
-msgstr ""
+msgstr "ভাসমান"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__folio
 msgid "Folio 27  210 x 330 mm"
-msgstr ""
-
-#. module: base
-#: model:ir.model,name:base.model_format_address_mixin
-msgid "Fomat Address"
 msgstr ""
 
 #. module: base
@@ -11555,7 +12563,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__form
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Form"
-msgstr ""
+msgstr "ফর্ম "
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__email_formatted
@@ -11567,7 +12575,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner__email_formatted
 #: model:ir.model.fields,field_description:base.field_res_users__email_formatted
 msgid "Formatted Email"
-msgstr ""
+msgstr "ফর্ম্যাট করা ইমেল"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_forum
@@ -11577,6 +12585,14 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_forum
 msgid "Forum on Courses"
+msgstr ""
+
+#. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid ""
+"Found more than 10 errors and more than one error per 10 records, "
+"interrupted to avoid showing too many errors."
 msgstr ""
 
 #. module: base
@@ -11639,7 +12655,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__5
 msgid "Friday"
-msgstr ""
+msgstr "শুক্রবার"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range__date_from
@@ -11675,7 +12691,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window__target__fullscreen
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_client__target__fullscreen
 msgid "Full Screen"
-msgstr ""
+msgstr "পূর্ণ পর্দা"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_mrp_workorder_quality
@@ -11762,7 +12778,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__gantt
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__gantt
 msgid "Gantt"
-msgstr ""
+msgstr "জ্ঞান্ট"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_event_track_gantt
@@ -11801,7 +12817,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_wizard_update_translations
 #: model_terms:ir.ui.view,arch_db:base.wizard_update_translations
 msgid "Generate Missing Terms"
-msgstr ""
+msgstr "অনুপস্থিত শর্তাদি তৈরি করুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm
@@ -11923,6 +12939,22 @@ msgid "Global"
 msgstr ""
 
 #. module: base
+#: model:res.partner,website_short_description:base.res_partner_4
+msgid ""
+"Global Solutions helps organisations of all shapes and sizes gain a "
+"competitive advantage through Free and Open Source software. Our experienced"
+" team can provide strategic advice, implementation, integration with exis..."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_4
+msgid ""
+"Global Solutions helps organisations of all shapes and sizes gain a competitive advantage through Free and Open Source software. Our experienced team can provide strategic advice, implementation, integration with existing systems, hosting and support services for a wide range of open source applications. Working with our customers Global Solutions helps to select and deliver best-of-breed solutions using Open Source products. Key skills and partnerships include Ubuntu, vtiger CRM, OpenEMM, Alfresco and of course Odoo.\n"
+" <br> <br>\n"
+"Founded in 2006, our clients range from SMEs to globally recognised brands and public sector organisations."
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
 msgid ""
 "Global rules (non group-specific) are restrictions, and cannot be bypassed.\n"
@@ -12013,7 +13045,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_google_map
 msgid "Google Maps"
-msgstr ""
+msgstr "গুগল মানচিত্র"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_spreadsheet
@@ -12029,7 +13061,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__graph
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__graph
 msgid "Graph"
-msgstr ""
+msgstr "লেখচিত্র"
 
 #. module: base
 #: model:res.country,name:base.gr
@@ -12061,7 +13093,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 #: model_terms:ir.ui.view,arch_db:base.view_groups_search
 msgid "Group"
-msgstr ""
+msgstr "দল"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.act_report_xml_search_view
@@ -12079,7 +13111,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Group By"
-msgstr ""
+msgstr "গ্রুপ দ্বারা"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__full_name
@@ -12124,7 +13156,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
 #, python-format
 msgid "Groups"
-msgstr ""
+msgstr "গ্রুপ"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
@@ -12209,7 +13241,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "এইচটিটিপি রাউটিং"
 
 #. module: base
 #: model:res.country,name:base.ht
@@ -12219,11 +13251,6 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_lunch
 msgid "Handle lunch orders of your employees"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,summary:base.module_hw_blackbox_be
-msgid "Hardware Driver for Belgian Fiscal Data Modules"
 msgstr ""
 
 #. module: base
@@ -12343,7 +13370,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,description:base.module_category_operations_timesheets
 msgid "Helps you manage the timesheets."
-msgstr ""
+msgstr "আপনাকে টাইমশিট পরিচালনা করতে সহায়তা করে।"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_user_type
@@ -12378,7 +13405,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,description:base.module_category_accounting_expenses
 msgid "Helps you manage your expenses."
-msgstr ""
+msgstr " আপনাকে আপনার ব্যয় পরিচালনা করতে সহায়তা করে।"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_operations_inventory
@@ -12386,6 +13413,8 @@ msgid ""
 "Helps you manage your inventory and main stock operations: delivery orders, "
 "receptions, etc."
 msgstr ""
+" আপনাকে আপনার জায় এবং প্রধান স্টক ক্রিয়াকলাপ পরিচালনা করতে সহায়তা করে: "
+"বিতরণ আদেশ, অভ্যর্থনা ইত্যাদি"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_manufacturing_manufacturing
@@ -12443,7 +13472,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Here is the exported translation file:"
-msgstr ""
+msgstr "রফতানি করার জন্যে অনুবাদ ফাইলটি এখানে:"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
@@ -12540,7 +13569,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_human_resources
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 msgid "Human Resources"
-msgstr ""
+msgstr "জনসম্পদ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_hu
@@ -12668,13 +13697,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__id
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__id
 msgid "ID"
-msgstr ""
+msgstr "আইডি "
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__xml_id
 #: model:ir.model.fields,help:base.field_ir_cron__xml_id
 msgid "ID of the action if defined in a XML file"
-msgstr ""
+msgstr "একটি এক্সএমএল ফাইল সংজ্ঞায়িত কার্য আইডি"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_data__res_id
@@ -12684,7 +13713,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__xml_id
 msgid "ID of the view defined in xml file"
-msgstr ""
+msgstr "এক্সএমএল ফাইল সংজ্ঞায়িত ভিউ আইডি"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_bus
@@ -12721,7 +13750,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 msgid "Icon"
-msgstr ""
+msgstr "আইকন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__icon
@@ -12793,6 +13822,8 @@ msgid ""
 "If this field is empty, the view applies to all users. Otherwise, the view "
 "applies to the users of those groups only."
 msgstr ""
+"এই ক্ষেত্রটি খালি থাকলে, দৃশ্যটি সমস্ত ব্যবহারকারীর জন্য প্রযোজ্য। অন্যথা, "
+"দৃশ্য শুধুমাত্র সেই সব গোষ্ঠীর ব্যবহারকারীদের ক্ষেত্রে প্রযোজ্য।"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__active
@@ -12802,6 +13833,9 @@ msgid ""
 "* if False, the view currently does not extend its parent but can be enabled\n"
 "         "
 msgstr ""
+"এই দৃশ্য উত্তরাধিকারী হয়,\n"
+"* সত্য হলে, দৃশ্য সবসময় তার পিতামাতার প্রসারিত\n"
+"* মিথ্যা হলে, দৃশ্যটি বর্তমানে তার পিতামাতার প্রসারিত করে না তবে সক্ষম করা যাবে"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
@@ -12935,8 +13969,21 @@ msgid "Implementation"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid ""
+"Implementation and Configuration (on-premise or on-demand environments)"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_base_sparse_field
 msgid "Implementation of sparse fields."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid ""
+"Implementations of feature rich, extensible, and cost-effective Open Source "
+"software (Odoo)"
 msgstr ""
 
 #. module: base
@@ -13013,7 +14060,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_iap
 msgid "In-App Purchases"
-msgstr ""
+msgstr "ইন-অ্যাপ ক্রয়"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
@@ -13029,7 +14076,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__index
 msgid "Indexed"
-msgstr ""
+msgstr "সূচিবদ্ধ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__index_content
@@ -13103,6 +14150,16 @@ msgid "Indonesia"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
+msgid "Indonesia E-faktur"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_id
+msgid "Indonesian - Accounting"
+msgstr ""
+
+#. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
 #: model:ir.model,name:base.model_res_partner_industry
 #: model:ir.model.fields,field_description:base.field_res_partner__industry_id
@@ -13137,7 +14194,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__inherit_id
 msgid "Inherited View"
-msgstr ""
+msgstr "উত্তরাধিকার দেখুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_view_form
@@ -13180,7 +14237,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 #, python-format
 msgid "Install"
-msgstr ""
+msgstr "ইনস্টল"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_config_installer
@@ -13190,7 +14247,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_base_language_install
 msgid "Install Language"
-msgstr ""
+msgstr "ভাষা ইনস্টল"
 
 #. module: base
 #: model:ir.actions.server,name:base.action_server_module_immediate_install
@@ -13256,6 +14313,11 @@ msgid "Integrate coupon mechanism with shipping costs."
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_pos_six
+msgid "Integrate your POS with a Six payment terminal"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_pos_adyen
 msgid "Integrate your POS with an Adyen payment terminal"
 msgstr ""
@@ -13283,7 +14345,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Internal Notes"
-msgstr ""
+msgstr "অভ্যন্তরীণ মন্তব্য"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_translation__src
@@ -13511,13 +14573,18 @@ msgid "IoT Box Homepage"
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,shortdesc:base.module_mrp_workorder_iot
-msgid "IoT features for Work Order"
+#: model:ir.module.module,summary:base.module_iot_pairing
+msgid "IoT Box pairing through odoo.com."
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,shortdesc:base.module_hw_posbox_upgrade
-msgid "IoTBox Software Upgrader"
+#: model:ir.module.module,shortdesc:base.module_iot_pairing
+msgid "IoT Pairing"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_mrp_workorder_iot
+msgid "IoT features for Work Order"
 msgstr ""
 
 #. module: base
@@ -13572,6 +14639,11 @@ msgid "Israel"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_il
+msgid "Israel - Accounting"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.it
 msgid "Italy"
 msgstr ""
@@ -13615,7 +14687,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner__function
 #: model:ir.model.fields,field_description:base.field_res_users__function
 msgid "Job Position"
-msgstr ""
+msgstr "পদ"
 
 #. module: base
 #: model:res.country,name:base.jo
@@ -13652,7 +14724,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__kanban
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Kanban"
-msgstr ""
+msgstr "কানবান"
 
 #. module: base
 #: model:res.country,name:base.kz
@@ -13675,7 +14747,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__key
 #: model_terms:ir.ui.view,arch_db:base.view_ir_config_search
 msgid "Key"
-msgstr ""
+msgstr "কী"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_config_parameter_key_uniq
@@ -13743,6 +14815,11 @@ msgid "LGPL Version 3"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
+msgid "LT - Accounting Reports"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_stock_landed_costs
 msgid "Landed Costs"
 msgstr ""
@@ -13803,7 +14880,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.res_lang_search
 #: model_terms:ir.ui.view,arch_db:base.res_lang_tree
 msgid "Languages"
-msgstr ""
+msgstr "ভাষাসমূহ"
 
 #. module: base
 #: model:res.country,name:base.la
@@ -13921,7 +14998,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard____last_update
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "সর্বশেষ সংশোধিত"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__write_uid
@@ -14001,7 +15078,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__write_uid
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "সর্বশেষ আপডেট করেছেন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__write_date
@@ -14079,7 +15156,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__write_date
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "সর্বশেষ আপডেট হয়েছে"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__installed_version
@@ -14116,7 +15193,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Layout"
-msgstr ""
+msgstr "বিন্যাস"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__address_format
@@ -14235,7 +15312,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.lr
 msgid "Liberia"
-msgstr ""
+msgstr "লাইবেরিয়া"
 
 #. module: base
 #: model:res.country,name:base.ly
@@ -14297,6 +15374,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_sale
 msgid "Link module between Point of Sale and Sales"
+msgstr "বিক্রয় এবং বিক্রয় পয়েন্ট অফ লিংক"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_pos_hr_l10n_be
+msgid "Link module between Pos Blackbox Be and Pos HR"
 msgstr ""
 
 #. module: base
@@ -14313,6 +15395,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_restaurant_iot
 msgid "Link your PoS configuration with an IoT Box for the restaurant"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_social_linkedin_company_support
+msgid "LinkedIn Company Support"
 msgstr ""
 
 #. module: base
@@ -14334,6 +15421,11 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.lt
 msgid "Lithuania"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lt
+msgid "Lithuania - Accounting"
 msgstr ""
 
 #. module: base
@@ -14460,6 +15552,21 @@ msgid "Luxembourg - Accounting"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lu_reports
+msgid "Luxembourg - Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lu_reports_electronic
+msgid "Luxembourg - Electronic Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lu_saft
+msgid "Luxembourg Standard Audit File for Tax"
+msgstr ""
+
+#. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_M
 msgid "M PROFESSIONAL, SCIENTIFIC AND TECHNICAL ACTIVITIES"
 msgstr ""
@@ -14467,7 +15574,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_workorder
 msgid "MRP II"
-msgstr ""
+msgstr "এমআরপি II"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_mrp
@@ -14504,7 +15611,7 @@ msgstr ""
 #: code:addons/base/models/ir_mail_server.py:0
 #, python-format
 msgid "Mail Delivery Failed"
-msgstr ""
+msgstr "মেইল বিতরণ ব্যর্থ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mail_enterprise
@@ -14656,6 +15763,44 @@ msgid ""
 "allowing you to easily find for specific skills and build up a database of\n"
 "profiles.\n"
 msgstr ""
+" \n"
+"নিয়োগ এবং কাজের অ্যাপ্লিকেশন পরিচালনা করুন\n"
+"---------------------------------------\n"
+"ওডু দিয়ে আপনার কাজের অফারগুলি প্রকাশ করুন, প্রচার করুন এবং সংগঠিত করুন\n"
+"<a href=\"https://www.odoo.com/page/recruitment\"> ওপেন সোর্স নিয়োগের আবেদন</a>\n"
+" \n"
+"আপনার কাজের বোর্ডকে সংগঠিত করুন, আপনার কাজের ঘোষণার প্রচার করুন এবং ট্র্যাক রাখুন\n"
+"সহজেই আবেদন জমা দিন। প্রতিটি আবেদনকারীকে অনুসরণ করুন এবং একটি ডাটাবেস তৈরি করুন\n"
+"ইনডেক্সড ডকুমেন্ট সহ দক্ষতা এবং প্রোফাইলগুলি।\n"
+"\n"
+"সেরা কাজ বোর্ডে আপনার কাজ পোস্ট করুন\n"
+" ---------------------------------\n"
+"\n"
+"সর্বাধিক বিখ্যাত জব বোর্ডের ওয়েবসাইটে স্বয়ংক্রিয়ভাবে সংযোগ স্থাপন করুন; লিঙ্কযুক্ত, মনস্টার,\n"
+"ক্রেগলিস্ট, ... প্রতিটি কাজের অবস্থানের স্বয়ংক্রিয়ভাবে একটি নতুন ইমেল ঠিকানা থাকে\n"
+"সঠিক কাজের অবস্থানে স্বয়ংক্রিয়ভাবে রুট অ্যাপ্লিকেশনগুলিকে নিয়োগ করা হয়েছে।\n"
+"\n"
+"আবেদনকারীরা ইমেলের মাধ্যমে আপনার সাথে যোগাযোগ করুন বা একটি অনলাইন ফর্ম ব্যবহার করুন না কেন, আপনি সবই পেয়ে যান\n"
+"ডেটা স্বয়ংক্রিয়ভাবে সূচিকৃত (পুনরায় শুরু, প্রেরণা পত্র) এবং আপনি উত্তর দিতে পারেন\n"
+"কেবলমাত্র একটি ক্লিকে, উত্তরের টেমপ্লেট পুনরায় ব্যবহার করে।\n"
+"\n"
+"আপনার নিয়োগ প্রক্রিয়াটি কাস্টমাইজ করুন\n"
+"----------------------------------\n"
+"কানবান ভিউ ব্যবহার করুন এবং আপনার নিয়োগ প্রক্রিয়াটির পদক্ষেপগুলি কাস্টমাইজ করুন;\n"
+"প্রাক-যোগ্যতা, প্রথম সাক্ষাত্কার, দ্বিতীয় সাক্ষাত্কার, মুখোমুখি, ...\n"
+"\n"
+"আপনার নিয়োগ পাইপলাইনে সঠিক পরিসংখ্যান পান। তুলনা করার জন্য প্রতিবেদনগুলি পান\n"
+"বাহ্যিক কাজের বোর্ডগুলিতে আপনার বিভিন্ন বিনিয়োগের পারফরম্যান্স।\n"
+"\n"
+"আপনার নিয়োগ প্রক্রিয়াটি স্ট্রিমলাইন করুন\n"
+"-----------------------------------\n"
+"\n"
+"স্মার্ট কানবান ভিউ সহ আপনার নিয়োগ প্রক্রিয়াতে আবেদনকারীদের অনুসরণ করুন। সংরক্ষণ করুন\n"
+"ইমেল টেমপ্লেটগুলির সাথে কিছু যোগাযোগ স্বয়ংক্রিয় করে time\n"
+"\n"
+"পুনঃসূচনা এবং অনুপ্রেরণা পত্রগুলির মতো নথিগুলি স্বয়ংক্রিয়ভাবে ইনডেক্স করা হয়,\n"
+"আপনাকে সহজেই নির্দিষ্ট দক্ষতা সন্ধান করতে এবং একটি ডাটাবেস তৈরি করতে সহায়তা করে\n"
+"প্রোফাইলের।\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_forum
@@ -14687,6 +15832,16 @@ msgstr ""
 msgid ""
 "Manage contact tags to better classify them for tracking and analysis "
 "purposes."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_sale_coupon_taxcloud_delivery
+msgid "Manage discounts in taxclouds computations with delivery."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_sale_coupon_taxcloud
+msgid "Manage discounts in taxclouds computations."
 msgstr ""
 
 #. module: base
@@ -14781,6 +15936,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_stock
 msgid "Manage your stock and logistics activities"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Managed Services"
 msgstr ""
 
 #. module: base
@@ -14947,7 +16107,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access_search
 #: model_terms:ir.ui.view,arch_db:base.view_menu
 msgid "Menu"
-msgstr ""
+msgstr "মেনু"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.grant_menu_access
@@ -14964,7 +16124,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_module_module__menus_by_module
 #: model_terms:ir.ui.view,arch_db:base.view_groups_form
 msgid "Menus"
-msgstr ""
+msgstr "মেনু সমূহ"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
@@ -15054,6 +16214,25 @@ msgid "Micronesia"
 msgstr ""
 
 #. module: base
+#: model:res.partner,website_short_description:base.res_partner_3
+msgid ""
+"Millennium Industries is a London based Odoo partner.  Their specialist "
+"areas include accounting, CRM, manufacturing, stock, logistics, and supply "
+"chain management.  The company has completed over 15 projects with intric..."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_3
+msgid ""
+"Millennium Industries is a London based Odoo partner.  Their specialist areas include accounting, CRM, manufacturing, stock, logistics, and supply chain management.  The company has completed over 15 projects with intricate consolidation and stock-accounting requirements for which they can provide references. <br> <br>\n"
+" \n"
+"Millennium Industries have developed several accounting modules for Odoo and are the leading experts in the UK for this area.  Additionally, a forefront success story of theirs is the nominal level data migrations from Sage Line 50 to Odoo that allows unprecedented efficiency in system switchover. <br> <br>\n"
+" \n"
+"Last but not least, Millennium Industries is the only UK partner with their own Europe-based fully staffed development centre, aimed to deliver to the exact client specification projects of any complexity. <br> <br>\n"
+"Please contact Millennium Industries direct to discuss your business requirement and the company would be delighted to help."
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__mimetype
 msgid "Mime Type"
 msgstr ""
@@ -15061,7 +16240,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_line__min_id
 msgid "MinID"
-msgstr ""
+msgstr "ন্যূনতমআইডি"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pe
@@ -15144,7 +16323,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_cron__interval_type__minutes
 msgid "Minutes"
-msgstr ""
+msgstr "মিনিট"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -15228,7 +16407,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 #: model_terms:ir.ui.view,arch_db:base.view_translation_search
 msgid "Model"
-msgstr ""
+msgstr "মডেল"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -15270,7 +16449,7 @@ msgstr ""
 #: model:ir.model,name:base.model_ir_model_data
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__model_data_id
 msgid "Model Data"
-msgstr ""
+msgstr "মডেল তথ্য"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__name
@@ -15337,7 +16516,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.ir_model_model_menu
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 msgid "Models"
-msgstr ""
+msgstr "মডেল সমূহ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_updated
@@ -15410,7 +16589,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_module_module_exclusion
 msgid "Module exclusion"
-msgstr ""
+msgstr "মডিউল বাদ"
 
 #. module: base
 #: code:addons/convert.py:0
@@ -15419,6 +16598,8 @@ msgid ""
 "Module loading %s failed: file %s could not be processed:\n"
 " %s"
 msgstr ""
+"মডিউল লোড করা %sব্যর্থ হয়েছে: ফাইল %sপ্রক্রিয়া করা যায়নি:\n"
+"%s"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_translation__module
@@ -15538,7 +16719,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.mm
 msgid "Myanmar"
-msgstr ""
+msgstr "মায়ানমার"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_N
@@ -15546,8 +16727,13 @@ msgid "N ADMINISTRATIVE AND SUPPORT SERVICE ACTIVITIES"
 msgstr ""
 
 #. module: base
-#: model:res.country,vat_label:base.gt
+#: model:res.country,vat_label:base.co model:res.country,vat_label:base.gt
 msgid "NIT"
+msgstr ""
+
+#. module: base
+#: model:res.country,vat_label:base.id
+msgid "NPWP"
 msgstr ""
 
 #. module: base
@@ -15583,7 +16769,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_partner_simple_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_tree
 msgid "Name"
-msgstr ""
+msgstr "নাম"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -15639,14 +16825,14 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_change_password_user__new_passwd
 msgid "New Password"
-msgstr ""
+msgstr "নতুন পাসওয়ার্ড"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_url__target__new
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window__target__new
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_client__target__new
 msgid "New Window"
-msgstr ""
+msgstr "নতুন উইন্ডো"
 
 #. module: base
 #: model:res.country,name:base.nz
@@ -15746,7 +16932,7 @@ msgstr ""
 #: code:addons/fields.py:0
 #, python-format
 msgid "No inverse field %r found for %r"
-msgstr ""
+msgstr "% r এর জন্য কোনও বিপরীত ক্ষেত্র % r পাওয়া যায়নি"
 
 #. module: base
 #: code:addons/base/wizard/base_update_translations.py:0
@@ -15811,7 +16997,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_mail_server__smtp_encryption__none
 msgid "None"
-msgstr ""
+msgstr "কিছুই না"
 
 #. module: base
 #: model:res.country,name:base.nf
@@ -15842,6 +17028,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_no
 msgid "Norway - Accounting"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_no_saft
+msgid "Norwegian Standard Audit File for Tax"
 msgstr ""
 
 #. module: base
@@ -15906,7 +17097,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_module_update__added
 msgid "Number of modules added"
-msgstr ""
+msgstr "সংযুক্ত মডিউল সংখ্যা"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_module_update__updated
@@ -15963,7 +17154,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "Object:"
-msgstr ""
+msgstr "জিনিস:"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_blog
@@ -17071,6 +18262,16 @@ msgid "Odoo helps you easily track all activities related to a vendor."
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_odoo_referral
+msgid "Odoo referral program"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_odoo_referral_portal
+msgid "Odoo referral program bridge with portal (Deprecated)"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__padding
 msgid ""
 "Odoo will automatically adds some '0' on the left of the 'Next Number' to "
@@ -17088,9 +18289,14 @@ msgid "OdooBot for livechat"
 msgstr ""
 
 #. module: base
+#: model:res.partner.category,name:base.res_partner_category_12
+msgid "Office Supplies"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.demo_failures_dialog
 msgid "Ok"
-msgstr ""
+msgstr "বেশ"
 
 #. module: base
 #: model:res.country,name:base.om
@@ -17127,6 +18333,14 @@ msgstr ""
 msgid ""
 "One of the records you are trying to modify has already been deleted "
 "(Document type: %s)."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/ir_module.py:0
+#, python-format
+msgid ""
+"One or more of the selected modules have already been uninstalled, if you "
+"believe this to be an error, you may try again later or contact support."
 msgstr ""
 
 #. module: base
@@ -17198,6 +18412,9 @@ msgid ""
 "(<xpath/>) are applied, and the result is used as if it were this view's\n"
 "actual arch.\n"
 msgstr ""
+"কেবলমাত্র প্রযোজ্য যদি ইহা অন্য একটি উত্তরিধিকার থেকে হয়(উত্তরিধিকার_আইডি মিথ্যা/খালি না হয়)\n"
+"*এক্সটেনশান যদি(ডিফল্ট), যদি এই ভিউর নিকটতম প্রাথমিক ভিউ অনুরোধ করা হয়  ভিউ'স মডেল প্রয়োগ করা হয়\n"
+"*যদি প্রাথমিক, নিকটতম প্রাথমিক ভিউ সম্পূর্ণরূপে সমাধান করা হয় ( ইহার চেয়ে এমনকি যদি বিভিন্ন মডেল ব্যবহার করে),  তারপর এই ভিউ এর উত্তরাধিকার স্পেসিফিকেশন(<xpath/>)প্রয়োগ করা হয়, ফলাফল এই ভিউ হিসাবে ব্যবহার করা হয় প্রকৃত তোরনে।\n"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_currency_rate_unique_name_per_day
@@ -17269,7 +18486,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_partner_merge_automatic_wizard__state__option
 msgid "Option"
-msgstr ""
+msgstr "বিকল্প"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_act_window__domain
@@ -17309,7 +18526,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
 msgid "Options"
-msgstr ""
+msgstr "বিকল্প সমূহ"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_event_track
@@ -17633,6 +18850,11 @@ msgid "POS Adyen"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pos_six
+msgid "POS Six"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_pad_project
 msgid "Pad on tasks"
 msgstr ""
@@ -17708,7 +18930,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.py
 msgid "Paraguay"
-msgstr ""
+msgstr "প্যারাগুয়ে"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_ir_property
@@ -17748,13 +18970,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_ui_menu__parent_id
 #: model:ir.model.fields,field_description:base.field_wizard_ir_model_menu_create__menu_id
 msgid "Parent Menu"
-msgstr ""
+msgstr "মূল মেনু"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_menu__parent_path
 #: model:ir.model.fields,field_description:base.field_res_partner_category__parent_path
 msgid "Parent Path"
-msgstr ""
+msgstr "মূল পথ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__parent_name
@@ -17813,7 +19035,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__partner_id
 msgid "Partner-related data of the user"
-msgstr ""
+msgstr "ব্যবহারকারীর অংশীদার সম্পর্কিত তথ্য"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_category__partner_ids
@@ -17832,13 +19054,13 @@ msgstr ""
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "Partners: "
-msgstr ""
+msgstr "সহযোগীদের:"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_pass
 #: model:ir.model.fields,field_description:base.field_res_users__password
 msgid "Password"
-msgstr ""
+msgstr "শব্দচাবি"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy
@@ -17879,7 +19101,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment
 msgid "Payment Acquirer"
-msgstr ""
+msgstr "পেমেন্ট অর্জিত"
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment
@@ -18115,6 +19337,11 @@ msgid "Point of Sale"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pos_cash_rounding
+msgid "Point of Sale Cash Rounding"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_discount
 msgid "Point of Sale Discounts"
 msgstr ""
@@ -18167,6 +19394,16 @@ msgid "Portugal - Accounting"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pos_kitchen_printer
+msgid "Pos Kitchen Printer"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_social_linkedin_company_support
+msgid "Post on your LinkedIn company pages instead of you personnal accounts"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_model_constraint__definition
 msgid "PostgreSQL constraint definition"
 msgstr ""
@@ -18189,7 +19426,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
 msgid "Preferences"
-msgstr ""
+msgstr "পছন্দসমূহ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__prefix
@@ -18209,7 +19446,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__preview
 msgid "Preview"
-msgstr ""
+msgstr "পূর্বরূপ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_layout__image
@@ -18308,6 +19545,11 @@ msgid "Private methods (such as %s) cannot be called remotely."
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Process Analysis"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_stock
 msgid "Product Availability"
 msgstr ""
@@ -18360,6 +19602,16 @@ msgstr ""
 #. module: base
 #: model:res.partner.title,name:base.res_partner_title_prof
 msgid "Professor"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Program/Project Management"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Programming and Custom Module Development"
 msgstr ""
 
 #. module: base
@@ -18503,6 +19755,11 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:res.partner.category,name:base.res_partner_category_2
+msgid "Prospects"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__link_field_id
 #: model:ir.model.fields,help:base.field_ir_cron__link_field_id
 msgid ""
@@ -18513,7 +19770,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_public
 msgid "Public"
-msgstr ""
+msgstr "পাবলিক"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_O
@@ -18535,7 +19792,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event
 msgid "Publish events, sell tickets"
-msgstr ""
+msgstr "ইভেন্ট প্রকাশ করুন, টিকিট বিক্রয় করুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_customer
@@ -18619,7 +19876,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_server_object_lines__evaluation_type__equation
 msgid "Python expression"
-msgstr ""
+msgstr "পাইথন এক্সপ্রেশন"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_Q
@@ -18630,7 +19887,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__qweb
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "QWeb"
-msgstr ""
+msgstr "কিউওয়েব"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.act_report_xml_view
@@ -18651,7 +19908,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_manufacturing_quality
 #: model:ir.module.module,shortdesc:base.module_quality_control
 msgid "Quality"
-msgstr ""
+msgstr "গুণমান"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality
@@ -18709,7 +19966,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb
 msgid "Qweb"
-msgstr ""
+msgstr "কিউওয়েব"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field
@@ -18724,7 +19981,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr ""
+msgstr "কিউওয়েব যোগাযোগ ক্ষেত্র "
 
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_date
@@ -18878,7 +20135,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 msgid "Record Rule"
-msgstr ""
+msgstr "রেকর্ড নিয়ম"
 
 #. module: base
 #: code:addons/base/models/res_users.py:0
@@ -18931,6 +20188,12 @@ msgid "Recruitment resumés and letters from documents"
 msgstr ""
 
 #. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid "Recursion Detected."
+msgstr ""
+
+#. module: base
 #: code:addons/base/models/ir_module.py:0
 #, python-format
 msgid "Recursion error in modules dependencies !"
@@ -18943,25 +20206,19 @@ msgid "Recursion found in child server actions"
 msgstr ""
 
 #. module: base
-#: code:addons/models.py:0
-#, python-format
-msgid "Recursion Detected."
-msgstr ""
-
-#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_data__reference
 #: model:ir.model.fields,field_description:base.field_res_partner__ref
 #: model:ir.model.fields,field_description:base.field_res_users__ref
 #: model:ir.model.fields.selection,name:base.selection__ir_server_object_lines__evaluation_type__reference
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Reference"
-msgstr ""
+msgstr "রেফারেন্স"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Reference date"
-msgstr ""
+msgstr "রেফারেন্স তারিখ"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_referrals
@@ -19037,14 +20294,9 @@ msgid "Reload from Attachment"
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,summary:base.module_hw_posbox_upgrade
-msgid "Remotely upgrade the IoTBox software"
-msgstr ""
-
-#. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
 msgid "Remove"
-msgstr ""
+msgstr "সরিয়ে ফেলুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -19168,6 +20420,11 @@ msgid "Reporting"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_ar_reports
+msgid "Reporting for Argentinian Localization"
+msgstr ""
+
+#. module: base
 #: model:ir.actions.act_window,name:base.ir_action_report
 #: model:ir.actions.act_window,name:base.reports_action
 #: model:ir.model.fields,field_description:base.field_ir_module_module__reports_by_module
@@ -19185,6 +20442,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_partner_assign
 msgid "Resellers"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_partner_commission
+msgid "Resellers Commissions For Subscription"
 msgstr ""
 
 #. module: base
@@ -19257,6 +20519,11 @@ msgid "Restaurant"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_pos_kitchen_printer
+msgid "Restaurant Kitchen Printer extensions for the Point of Sale "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_pos_restaurant
 msgid "Restaurant extensions for the Point of Sale "
 msgstr ""
@@ -19279,6 +20546,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__direction__rtl
 msgid "Right-to-Left"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Roadmap Development"
 msgstr ""
 
 #. module: base
@@ -19321,7 +20593,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
 msgid "Rule Definition (Domain Filter)"
-msgstr ""
+msgstr "বিধি সংজ্ঞা (ডোমেন ফিল্টার)"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_rule_no_access_rights
@@ -19348,7 +20620,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid "Run"
-msgstr ""
+msgstr "চালাও"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_form
@@ -19413,7 +20685,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sms
 msgid "SMS gateway"
-msgstr ""
+msgstr "এসএমএস গেটওয়ে"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_sms
@@ -19463,7 +20735,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.kn
 msgid "Saint Kitts and Nevis"
-msgstr ""
+msgstr "সেন্ট কিটস ও নেভিস"
 
 #. module: base
 #: model:res.country,name:base.lc
@@ -19488,6 +20760,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_contract_salary
 msgid "Salary Package Configurator"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_be_sale_intrastat
+msgid "Sale BE Intrastat Bridge"
 msgstr ""
 
 #. module: base
@@ -19638,7 +20915,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Save"
-msgstr ""
+msgstr "সংরক্ষণ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_report__attachment
@@ -19710,7 +20987,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Search"
-msgstr ""
+msgstr "অনুসন্ধান"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_search
@@ -19760,7 +21037,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_config_settings_view_form
 msgid "Search..."
-msgstr ""
+msgstr "অনুসন্ধান..."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__secondary_color
@@ -19993,7 +21270,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_sequence_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_tree
 msgid "Sequence"
-msgstr ""
+msgstr "ক্রম"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__code
@@ -20040,7 +21317,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 msgid "Server Action"
-msgstr ""
+msgstr "সার্ভার অ্যাকশন"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_server_object_lines
@@ -20058,6 +21335,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__ir_actions_server_id
 msgid "Server action"
+msgstr ""
+
+#. module: base
+#: model:res.partner.category,name:base.res_partner_category_11
+msgid "Services"
 msgstr ""
 
 #. module: base
@@ -20112,7 +21394,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.res_config_settings_view_form
 #: model:res.groups,name:base.group_system
 msgid "Settings"
-msgstr ""
+msgstr "সেটিংস"
 
 #. module: base
 #: model:res.country,name:base.sc
@@ -20153,7 +21435,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
 msgid "Show active currencies"
-msgstr ""
+msgstr "সক্রিয় মুদ্রা দেখান"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
@@ -20219,7 +21501,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__size
 msgid "Size"
-msgstr ""
+msgstr "আকার"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_model_fields_size_gt_zero
@@ -20300,7 +21582,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_media
 msgid "Social Media"
-msgstr ""
+msgstr "সামাজিক যোগাযোগ মাধ্যম"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_push_notifications
@@ -20325,17 +21607,6 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.so
 msgid "Somalia"
-msgstr ""
-
-#. module: base
-#: code:addons/models.py:0
-#, python-format
-msgid ""
-"Some records are incompatible with the company of the %(document_descr)s.\n"
-"\n"
-"Incompatibilities:\n"
-"Fields: %(fields)s\n"
-"Record ids: %(records)s\n"
 msgstr ""
 
 #. module: base
@@ -20407,12 +21678,6 @@ msgid "Sort"
 msgstr ""
 
 #. module: base
-#: code:addons/models.py:0
-#, python-format
-msgid "Sorting field %s not found on model %s"
-msgstr ""
-
-#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_translation_form
 msgid "Source Term"
 msgstr ""
@@ -20440,7 +21705,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.gs
 msgid "South Georgia and the South Sandwich Islands"
-msgstr ""
+msgstr "দক্ষিণ জর্জিয়া এবং দক্ষিণ স্যান্ডউইচ দ্বীপপুঞ্জ"
 
 #. module: base
 #: model:res.country,name:base.kr
@@ -20499,6 +21764,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_sequence__implementation__standard
 msgid "Standard"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_account_saft
+msgid "Standard Audit File for Tax Base module"
 msgstr ""
 
 #. module: base
@@ -20759,11 +22029,16 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__7
 msgid "Sunday"
-msgstr ""
+msgstr "রবিবার"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_client__params
 msgid "Supplementary arguments"
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Support"
 msgstr ""
 
 #. module: base
@@ -20795,6 +22070,21 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.se
 msgid "Sweden"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_reports
+msgid "Sweden - Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_ocr
+msgid "Sweden - Structured Communication OCR"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se
+msgid "Swedish - Accounting"
 msgstr ""
 
 #. module: base
@@ -20858,7 +22148,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.st
 msgid "São Tomé and Príncipe"
-msgstr ""
+msgstr "সাও টম এবং প্রিন্সিপেট"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_T
@@ -20880,7 +22170,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_mail_server__smtp_encryption__starttls
 msgid "TLS (STARTTLS)"
-msgstr ""
+msgstr "টিএলএস (STARTTLS)"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__tabloid
@@ -21110,6 +22400,27 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
+"দুটি অক্ষরে আইএসও দেশের কোড।\n"
+"আপনি দ্রুত অনুসন্ধানের জন্য এই ক্ষেত্রটি ব্যবহার করতে পারেন।"
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid ""
+"The Jackson Group is an active and leading partner of Odoo in the US.\n"
+"As Odoo's longest active US partner, we help our clients leverage new methods, cost-effective tools and fresh technologies to simplify infrastructure, lower cost, and improve operations.<br> <br>\n"
+"Our goal is to help our clients become high-performing, competitive and profitable businesses.\n"
+"We leverage robust model that combines:<br>"
+msgstr ""
+
+#. module: base
+#: model:res.partner,website_short_description:base.res_partner_10
+msgid ""
+"The Jackson Group is an active and leading partner of Odoo in the US. As "
+"Odoo's longest active US partner, we help our clients leverage new methods, "
+"cost-effective tools and fresh technologies to simplify infrastructure, "
+"lower cost, and improve operations. Our goal is to help our clients "
+"become..."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__url_code
@@ -21311,11 +22622,21 @@ msgid "The list of models that extends the current model."
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_model.py:0
+#, python-format
+msgid ""
+"The m2o field %s is required but declares its ondelete policy as being 'set "
+"null'. Only 'restrict' and 'cascade' make sense."
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_filters__action_id
 msgid ""
 "The menu action this filter applies to. When left empty the filter applies "
 "to all menus for this model."
 msgstr ""
+"এই ফিল্টারটি প্রয়োগ করে মেনু ক্রিয়া। খালি রেখে গেলে ফিল্টারটি এই মডেলের "
+"জন্য সমস্ত মেনুতে প্রযোজ্য।"
 
 #. module: base
 #: code:addons/base/models/res_company.py:0
@@ -21368,7 +22689,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_module_module_name_uniq
 msgid "The name of the module must be unique!"
-msgstr ""
+msgstr "মডিউলটির নামটি অবশ্যই অনন্য হতে হবে!"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__number_increment
@@ -21566,7 +22887,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_theme
 msgid "Theme"
-msgstr ""
+msgstr "থিম"
 
 #. module: base
 #: model:ir.actions.act_url,name:base.action_theme_store
@@ -21624,7 +22945,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__code
 msgid "This field is used to set/get locales for user"
-msgstr ""
+msgstr "এই ক্ষেত্র ব্যবহারকারীর জন্য লোকেল সেট/গেট ব্যবহৃত হয়"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch
@@ -21737,6 +23058,14 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_test_web_cohort
+msgid ""
+"This module contains tests related to web cohort. Those are\n"
+"contained in a separate module as it contains models used only to perform\n"
+"tests independently to functional aspects of other models. "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_test_website
 msgid ""
 "This module contains tests related to website. Those are\n"
@@ -21812,8 +23141,18 @@ msgid "Time Off"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_hr_holidays_calendar
+msgid "Time Off - Calendar"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_gantt
 msgid "Time off Gantt"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_hr_holidays_gantt_calendar
+msgid "Time off Gantt - Calendar"
 msgstr ""
 
 #. module: base
@@ -21846,7 +23185,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner__tz
 #: model:ir.model.fields,field_description:base.field_res_users__tz
 msgid "Timezone"
-msgstr ""
+msgstr "টাইমজোন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__tz_offset
@@ -21864,7 +23203,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner_title__name
 #: model:ir.model.fields,field_description:base.field_res_users__title
 msgid "Title"
-msgstr ""
+msgstr "শিরোনাম"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range__date_to
@@ -22002,6 +23341,11 @@ msgid "Track your recruitment pipeline"
 msgstr ""
 
 #. module: base
+#: model_terms:res.partner,website_description:base.res_partner_10
+msgid "Training"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_event
 msgid "Trainings, Conferences, Meetings, Exhibitions, Registrations"
 msgstr ""
@@ -22048,7 +23392,9 @@ msgid "Translatable"
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_translation.py:0
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_search
+#, python-format
 msgid "Translate"
 msgstr ""
 
@@ -22130,7 +23476,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_ui_view__type__tree
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Tree"
-msgstr ""
+msgstr "শাখী"
 
 #. module: base
 #: model:res.country,name:base.tt
@@ -22145,7 +23491,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.tn
 msgid "Tunisia"
-msgstr ""
+msgstr "টিউনিস্"
 
 #. module: base
 #: model:res.country,name:base.tr
@@ -22199,7 +23545,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Type"
-msgstr ""
+msgstr "ধরণ"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__state
@@ -22224,7 +23570,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "Type:"
-msgstr ""
+msgstr "ধরণ:"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_U
@@ -22244,6 +23590,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_uk_reports
 msgid "UK - Accounting Reports"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_product_unspsc
+#: model:ir.module.module,summary:base.module_product_unspsc
+msgid "UNSPSC product codes"
 msgstr ""
 
 #. module: base
@@ -22281,6 +23633,11 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.um
 msgid "USA Minor Outlying Islands"
+msgstr ""
+
+#. module: base
+#: model:res.country,vat_label:base.at
+msgid "USt"
 msgstr ""
 
 #. module: base
@@ -22434,6 +23791,12 @@ msgstr ""
 #. module: base
 #: code:addons/models.py:0
 #, python-format
+msgid "Unknown database error: '%s'"
+msgstr ""
+
+#. module: base
+#: code:addons/models.py:0
+#, python-format
 msgid "Unknown database identifier '%s'"
 msgstr ""
 
@@ -22552,7 +23915,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__url
 msgid "Url"
-msgstr ""
+msgstr "ইউআরএল"
 
 #. module: base
 #: model:res.country,name:base.uy
@@ -22624,6 +23987,10 @@ msgid ""
 "This allow the user to send badges to employees instead of simple users.\n"
 "Badge received are displayed on the user profile.\n"
 msgstr ""
+"গেমিফিকেশন প্রক্রিয়াটির জন্য এইচআর সংস্থানগুলি ব্যবহার করুন।\n"
+"এইচআর অফিসার এখন চ্যালেঞ্জ এবং ব্যাজ পরিচালনা করতে পারেন।\n"
+" এটি ব্যবহারকারীকে সাধারণ ব্যবহারকারীর পরিবর্তে ব্যাজগুলি কর্মচারীদের কাছে পাঠাতে দেয়।\n"
+" প্রাপ্ত ব্যাজটি ব্যবহারকারী প্রোফাইলে প্রদর্শিত হয়।\n"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -22739,7 +24106,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_user
 msgid "Username"
-msgstr ""
+msgstr "ব্যবহারকারীর নাম"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_res_users
@@ -22757,7 +24124,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_users_simple_form
 #: model_terms:ir.ui.view,arch_db:base.view_users_tree
 msgid "Users"
-msgstr ""
+msgstr "ব্যবহারকারীরা"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_users
@@ -22787,20 +24154,20 @@ msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__group_by_vat
-#: model:res.country,vat_label:base.at model:res.country,vat_label:base.be
-#: model:res.country,vat_label:base.bg model:res.country,vat_label:base.cy
-#: model:res.country,vat_label:base.cz model:res.country,vat_label:base.de
-#: model:res.country,vat_label:base.dk model:res.country,vat_label:base.ee
-#: model:res.country,vat_label:base.es model:res.country,vat_label:base.fi
-#: model:res.country,vat_label:base.fr model:res.country,vat_label:base.gr
-#: model:res.country,vat_label:base.hr model:res.country,vat_label:base.hu
-#: model:res.country,vat_label:base.ie model:res.country,vat_label:base.it
-#: model:res.country,vat_label:base.lt model:res.country,vat_label:base.lu
-#: model:res.country,vat_label:base.lv model:res.country,vat_label:base.mt
-#: model:res.country,vat_label:base.nl model:res.country,vat_label:base.pl
-#: model:res.country,vat_label:base.pt model:res.country,vat_label:base.ro
-#: model:res.country,vat_label:base.se model:res.country,vat_label:base.si
-#: model:res.country,vat_label:base.sk model:res.country,vat_label:base.uk
+#: model:res.country,vat_label:base.be model:res.country,vat_label:base.bg
+#: model:res.country,vat_label:base.cy model:res.country,vat_label:base.cz
+#: model:res.country,vat_label:base.de model:res.country,vat_label:base.dk
+#: model:res.country,vat_label:base.ee model:res.country,vat_label:base.es
+#: model:res.country,vat_label:base.fi model:res.country,vat_label:base.fr
+#: model:res.country,vat_label:base.gr model:res.country,vat_label:base.hr
+#: model:res.country,vat_label:base.hu model:res.country,vat_label:base.ie
+#: model:res.country,vat_label:base.it model:res.country,vat_label:base.lt
+#: model:res.country,vat_label:base.lu model:res.country,vat_label:base.lv
+#: model:res.country,vat_label:base.mt model:res.country,vat_label:base.nl
+#: model:res.country,vat_label:base.pl model:res.country,vat_label:base.pt
+#: model:res.country,vat_label:base.ro model:res.country,vat_label:base.se
+#: model:res.country,vat_label:base.si model:res.country,vat_label:base.sk
+#: model:res.country,vat_label:base.uk
 msgid "VAT"
 msgstr ""
 
@@ -22843,7 +24210,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_server_object_lines__evaluation_type__value
 #: model_terms:ir.ui.view,arch_db:base.ir_property_view
 msgid "Value"
-msgstr ""
+msgstr "মান"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -22895,7 +24262,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.vu
 msgid "Vanuatu"
-msgstr ""
+msgstr "ভানুয়াতু"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -22907,6 +24274,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__vat_label
 msgid "Vat Label"
+msgstr ""
+
+#. module: base
+#: model:res.partner.category,name:base.res_partner_category_0
+msgid "Vendor"
 msgstr ""
 
 #. module: base
@@ -22945,7 +24317,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__view_id
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "View"
-msgstr ""
+msgstr "দৃশ্য"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch
@@ -22954,7 +24326,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_view_form
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "View Architecture"
-msgstr ""
+msgstr "আর্কিটেকচার দেখুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_translation_search
@@ -22970,7 +24342,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__name
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__view_name
 msgid "View Name"
-msgstr ""
+msgstr "নাম দেখুন"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__view_id
@@ -22981,7 +24353,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window_view__view_mode
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__type
 msgid "View Type"
-msgstr ""
+msgstr "প্রকার দেখুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_reports
@@ -22991,7 +24363,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__mode
 msgid "View inheritance mode"
-msgstr ""
+msgstr "উত্তরাধিকারের মোড দেখুন"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_livechat
@@ -23030,7 +24402,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__inherit_children_ids
 msgid "Views which inherit from this one"
-msgstr ""
+msgstr "এই এক থেকে উত্তরাধিকারী দর্শন"
 
 #. module: base
 #: model:res.country,name:base.vg
@@ -23045,7 +24417,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category__visible
 msgid "Visible"
-msgstr ""
+msgstr "দৃশ্যমান"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_account
@@ -23070,16 +24442,17 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
 #: code:addons/base/models/ir_model.py:0 code:addons/base/models/ir_model.py:0
+#: code:addons/base/models/ir_model.py:0
 #: code:addons/base/models/res_partner.py:0 code:addons/models.py:0
 #, python-format
 msgid "Warning"
-msgstr ""
+msgstr "সতর্কীকরণ"
 
 #. module: base
 #: code:addons/base/models/res_config.py:0
 #, python-format
 msgid "Warning!"
-msgstr ""
+msgstr "সতর্কবাণী!"
 
 #. module: base
 #: code:addons/models.py:0
@@ -23093,8 +24466,29 @@ msgid "Water supply"
 msgstr ""
 
 #. module: base
+#: model:res.partner,website_short_description:base.res_partner_18
+msgid ""
+"We are a technology consulting & strategic advisory firm that creates value "
+"enhancing solutions through the use of advanced software for our clients "
+"worldwide. At Lumber Inc we bring operational experience combined..."
+msgstr ""
+
+#. module: base
+#: model_terms:res.partner,website_description:base.res_partner_18
+msgid ""
+"We are a technology consulting &amp; strategic advisory firm that creates value enhancing solutions through the use of advanced software for our clients worldwide.\n"
+" <br> <br>\n"
+"At Lumber Inc we bring operational experience combined with technological acumen. We understand that any software that supports business operations needs to be designed in such a way that facilitates the execution of critical operational processes, and serves as a tool to the users rather than a barrier. Our approach is focused on the process first, ensuring that it contributes to the goals of the company, we then optimize it, and design the software solutions to best support it."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_web
 msgid "Web"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_test_web_cohort
+msgid "Web Cohort Tests"
 msgstr ""
 
 #. module: base
@@ -23129,6 +24523,11 @@ msgid "Web Routing"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_test_web_cohort
+msgid "Web cohort Test"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_translation_search
 msgid "Web-only translations"
 msgstr ""
@@ -23142,7 +24541,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
 msgid "Website"
-msgstr ""
+msgstr "ওয়েবসাইট"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_management
@@ -23259,7 +24658,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__3
 msgid "Wednesday"
-msgstr ""
+msgstr "বুধবার"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_cron__interval_type__weeks
@@ -23687,6 +25086,16 @@ msgid "account_ponto"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_lt
+msgid "accounting, Lithuanian"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_lt_reports
+msgid "accounting, report, Lithuanian"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "allowed for groups %s"
@@ -23796,12 +25205,12 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid "e.g. Update order quantity"
-msgstr ""
+msgstr "উদাহরণস্বরূপ অর্ডার পরিমাণ আপডেট করুন"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_import_language
 msgid "e.g. en_US"
-msgstr ""
+msgstr "উদাহরণস্বরূপ en_US"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
@@ -23973,7 +25382,7 @@ msgstr ""
 #: code:addons/base/models/ir_fields.py:0
 #, python-format
 msgid "name"
-msgstr ""
+msgstr "নাম"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -23984,7 +25393,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_form
 msgid "on"
-msgstr ""
+msgstr "উপর"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__one2many
@@ -24029,7 +25438,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_snailmail_account
 msgid "snailmail_account"
-msgstr ""
+msgstr "স্নাইলমাইল_একাউন্ট"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_mimetypes
@@ -24044,6 +25453,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_read_group
 msgid "test read_group"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_test_xlsx_export
+msgid "test xlsx export"
 msgstr ""
 
 #. module: base
@@ -24131,7 +25545,7 @@ msgstr ""
 #: code:addons/base/models/ir_fields.py:0
 #, python-format
 msgid "yes"
-msgstr ""
+msgstr "হাঁ"
 
 #. module: base
 #: model:res.country,name:base.ax

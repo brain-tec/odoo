@@ -14,8 +14,8 @@
 # Morovat Guivi <tarjomac@gmail.com>, 2020
 # Hamid Darabi, 2020
 # Sahar Daraye <sahar.daraye.1369@gmail.com>, 2020
-# Hamed Mohammadi <hamed@dehongi.com>, 2020
 # Sepehr Khoshnood <sepehr.kho@gmail.com>, 2020
+# Hamed Mohammadi <hamed@dehongi.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -23,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-05 12:32+0000\n"
 "PO-Revision-Date: 2019-08-26 09:12+0000\n"
-"Last-Translator: Sepehr Khoshnood <sepehr.kho@gmail.com>, 2020\n"
+"Last-Translator: Hamed Mohammadi <hamed@dehongi.com>, 2020\n"
 "Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -122,6 +122,8 @@ msgid ""
 ".\n"
 "            Manual actions may be needed."
 msgstr ""
+".\n"
+"            ممکن است عملیات دستی نیاز باشد."
 
 #. module: mrp
 #: model:product.product,description:mrp.product_product_computer_desk_leg
@@ -133,7 +135,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
 #: model_terms:ir.ui.view,arch_db:mrp.stock_production_type_kanban
 msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
@@ -168,6 +170,9 @@ msgid ""
 "specific.\" role=\"img\" aria-label=\"Values set here are company-"
 "specific.\" groups=\"base.group_multi_company\"/>"
 msgstr ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
+"specific.\" role=\"img\" aria-label=\"Values set here are company-"
+"specific.\" groups=\"base.group_multi_company\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view
@@ -396,7 +401,7 @@ msgstr "فعالیت‌ها"
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_exception_decoration
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "دکوراسیون استثنا فعالیت"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_state
@@ -437,7 +442,7 @@ msgstr ""
 #. module: mrp
 #: model:res.groups,name:mrp.group_mrp_manager
 msgid "Administrator"
-msgstr ""
+msgstr "مدیریت"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.stock_production_type_kanban
@@ -513,6 +518,15 @@ msgstr "موافقت"
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_workcenter_search
 msgid "Archived"
 msgstr "بایگانی شده"
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_production.py:0
+#, python-format
+msgid ""
+"At least one work order has a quantity produced lower than the quantity "
+"produced in the manufacturing order. You must complete the work orders "
+"before posting the inventory."
+msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
@@ -1650,7 +1664,7 @@ msgstr "شمایل"
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__activity_exception_icon
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "آیکون برای نشان دادن یک فعالیت استثنا."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__product_id
@@ -2321,21 +2335,21 @@ msgstr "جدید"
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_date_deadline
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "موعد فعالیت بعدی"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_summary
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_summary
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "خلاصه فعالیت بعدی"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_type_id
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_type_id
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "نوع فعالیت بعدی"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__next_work_order_id
@@ -2420,7 +2434,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__message_has_error_counter
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "تعداد خطاها"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__message_needaction_counter
@@ -2575,7 +2589,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_mrp_dashboard
 msgid "Overview"
-msgstr ""
+msgstr "مرور"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__worksheet
@@ -3129,7 +3143,7 @@ msgstr "تعداد برای پردازش"
 #: code:addons/mrp/static/src/xml/mrp.xml:0
 #, python-format
 msgid "Quantity:"
-msgstr ""
+msgstr "تعداد:"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__move_raw_ids
@@ -3262,7 +3276,7 @@ msgstr "پاسخگو"
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_user_id
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "کاربر پاسخگو"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__routing_id
@@ -3311,7 +3325,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__message_has_sms_error
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "خطای تحویل پیامک"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_product_produce_wizard
@@ -3998,7 +4012,7 @@ msgstr "منطقه‌ زمانی"
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__state__to_close
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "To Close"
-msgstr ""
+msgstr "برای بستن"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_abstract_workorder_line__qty_to_consume
@@ -4231,7 +4245,7 @@ msgstr ""
 #: model:product.template,uom_name:mrp.product_product_wood_ply_product_template
 #: model:product.template,uom_name:mrp.product_product_wood_wear_product_template
 msgid "Units"
-msgstr ""
+msgstr "واحد ها"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view

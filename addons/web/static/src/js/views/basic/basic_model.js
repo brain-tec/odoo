@@ -1420,6 +1420,8 @@ var BasicModel = AbstractModel.extend({
      * @param {boolean} [options.doNotSetDirty=false] if this flag is set to
      *   true, then we will not tag the record as dirty.  This should be avoided
      *   for most situations.
+     * @param {boolean} [options.forceFail=false] if this flag is set to true, then
+     *   promise will fail when onchange fails (added as local patch only in stable)
      * @param {boolean} [options.notifyChange=true] if this flag is set to
      *   false, then we will not notify and not trigger the onchange, even though
      *   it was changed.
@@ -1458,7 +1460,9 @@ var BasicModel = AbstractModel.extend({
         }
 
         if (options.notifyChange === false) {
-            return Promise.resolve(_.keys(changes));
+            return Promise.all(defs).then(function () {
+                return Promise.resolve(_.keys(changes));
+            });
         }
 
         return Promise.all(defs).then(function () {
@@ -1482,7 +1486,12 @@ var BasicModel = AbstractModel.extend({
                         self._visitChildren(record, function (elem) {
                             _.extend(elem, initialData[elem.id]);
                         });
-                        resolve({});
+                        // safe fix for stable version, for opw-2267444
+                        if (!options.force_fail) {
+                            resolve({});
+                        } else {
+                            reject({});
+                        }
                     });
                 } else {
                     resolve(_.keys(changes));
@@ -2508,7 +2517,7 @@ var BasicModel = AbstractModel.extend({
         var toFetch = {};
         _.each(list.data, function (groupIndex) {
             var group = self.localData[groupIndex];
-            _.extend(toFetch, self._getDataToFetchByModel(group, fieldName));
+            self._getDataToFetchByModel(group, fieldName, toFetch);
         });
 
         var defs = [];
@@ -3410,13 +3419,18 @@ var BasicModel = AbstractModel.extend({
      *
      * @param {Object} list a valid resource object
      * @param {string} fieldName
+     * @param {Object} [toFetchAcc] an object to store fetching data. Used when
+     *  batching reference across multiple groups.
+     *    [modelName: string]: {
+     *        [recordId: number]: datapointId[]
+     *    }
      * @returns {Object} each key represent a model and contain a sub-object
      * where each key represent an id (res_id) containing an array of
      * webclient id (referred to a datapoint, so not a res_id).
      */
-    _getDataToFetchByModel: function (list, fieldName) {
+    _getDataToFetchByModel: function (list, fieldName, toFetchAcc) {
         var self = this;
-        var toFetch = {};
+        var toFetch = toFetchAcc || {};
         _.each(list.data, function (dataPoint) {
             var record = self.localData[dataPoint];
             var value = record.data[fieldName];

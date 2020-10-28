@@ -706,6 +706,57 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('notebook: pages with invisible modifiers', async function (assert) {
+        assert.expect(10);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <sheet>
+                        <field name="bar"/>
+                        <notebook>
+                            <page string="First" attrs='{"invisible": [["bar", "=", false]]}'>
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second" attrs='{"invisible": [["bar", "=", true]]}'>
+                                <field name="int_field"/>
+                            </page>
+                            <page string="Third">
+                                <field name="qux"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>`,
+            res_id: 1,
+        });
+
+        await testUtils.form.clickEdit(form);
+
+        assert.containsOnce(form, ".o_notebook .nav .nav-link.active",
+            "There should be only one active tab"
+        );
+        assert.isVisible(form.$(".o_notebook .nav .nav-item:first"));
+        assert.hasClass(form.$(".o_notebook .nav .nav-link:first"), "active");
+
+        assert.isNotVisible(form.$(".o_notebook .nav .nav-item:eq(1)"));
+        assert.doesNotHaveClass(form.$(".o_notebook .nav .nav-link:eq(1)"), "active");
+
+        await testUtils.dom.click(form.$(".o_field_widget[name=bar] input"));
+
+        assert.containsOnce(form, ".o_notebook .nav .nav-link.active",
+            "There should be only one active tab"
+        );
+        assert.isNotVisible(form.$(".o_notebook .nav .nav-item:first"));
+        assert.doesNotHaveClass(form.$(".o_notebook .nav .nav-link:first"), "active");
+
+        assert.isVisible(form.$(".o_notebook .nav .nav-item:eq(1)"));
+        assert.hasClass(form.$(".o_notebook .nav .nav-link:eq(1)"), "active");
+
+        form.destroy();
+    });
+
     QUnit.test('invisible attrs on first notebook page', async function (assert) {
         assert.expect(6);
 
@@ -1353,6 +1404,64 @@ QUnit.module('Views', {
         assert.hasAttrValue(form.$('button[name="13"]'), 'class', 'btn btn-link');
         assert.hasAttrValue(form.$('button[name="14"]'), 'class', 'btn btn-success');
         assert.hasAttrValue(form.$('button[name="15"]'), 'class', 'btn o_this_is_a_button');
+
+        form.destroy();
+    });
+
+    QUnit.test('button in form view and long willStart', async function (assert) {
+        assert.expect(6);
+
+        var rpcCount = 0;
+
+        var FieldChar = fieldRegistry.get('char');
+        fieldRegistry.add('asyncwidget', FieldChar.extend({
+            willStart: function () {
+                assert.step('load '+rpcCount);
+                if (rpcCount === 2) {
+                    return $.Deferred();
+                }
+                return $.Deferred().resolve();
+            },
+        }));
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="state" invisible="1"/>' +
+                    '<header>' +
+                        '<button name="post" class="p" string="Confirm" type="object"/>' +
+                    '</header>' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="foo" widget="asyncwidget"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function () {
+                rpcCount++;
+                return this._super.apply(this, arguments);
+            },
+        });
+        assert.verifySteps(['load 1']);
+
+        await testUtils.mock.intercept(form, 'execute_action', function (ev) {
+            ev.data.on_success();
+            ev.data.on_closed();
+        });
+
+        await testUtils.dom.click('.o_form_statusbar button.p', form);
+        assert.verifySteps(['load 2']);
+
+        testUtils.mock.intercept(form, 'execute_action', function (ev) {
+            ev.data.on_success();
+            ev.data.on_closed();
+        });
+
+        await testUtils.dom.click('.o_form_statusbar button.p', form);
+        assert.verifySteps(['load 3']);
 
         form.destroy();
     });

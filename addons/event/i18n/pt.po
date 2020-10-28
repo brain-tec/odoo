@@ -197,6 +197,8 @@ msgid ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
 "specific.\" groups=\"base.group_multi_company\"/>"
 msgstr ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Valores registados aqui são "
+"distintos por empresa.\" groups=\"base.group_multi_company\"/>"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_confirm
@@ -2084,7 +2086,7 @@ msgstr ""
 #. module: event
 #: model:ir.model.fields,field_description:event.field_res_config_settings__module_event_sale
 msgid "Tickets"
-msgstr ""
+msgstr "Tickets"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__date_tz

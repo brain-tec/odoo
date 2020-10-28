@@ -355,7 +355,7 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         check_company=True,
         help="When validating the transfer, the products will be assigned to this owner.")
-    printed = fields.Boolean('Printed')
+    printed = fields.Boolean('Printed', copy=False)
     is_locked = fields.Boolean(default=True, help='When the picking is not done this allows changing the '
                                'initial demand. When the picking is done this allows '
                                'changing the done quantities.')
@@ -395,7 +395,7 @@ class Picking(models.Model):
     def _compute_show_lots_text(self):
         group_production_lot_enabled = self.user_has_groups('stock.group_production_lot')
         for picking in self:
-            if not picking.move_line_ids:
+            if not picking.move_line_ids and not picking.picking_type_id.use_create_lots:
                 picking.show_lots_text = False
             elif group_production_lot_enabled and picking.picking_type_id.use_create_lots \
                     and not picking.picking_type_id.use_existing_lots and picking.state != 'done':
@@ -795,7 +795,7 @@ class Picking(models.Model):
             for pack in origin_packages:
                 if picking._check_move_lines_map_quant_package(pack):
                     package_level_ids = picking.package_level_ids.filtered(lambda pl: pl.package_id == pack)
-                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack)
+                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack and not ml.result_package_id)
                     if not package_level_ids:
                         self.env['stock.package_level'].create({
                             'picking_id': picking.id,
@@ -1208,7 +1208,13 @@ class Picking(models.Model):
                     done_to_keep = ml.qty_done
                     new_move_line = ml.copy(
                         default={'product_uom_qty': 0, 'qty_done': ml.qty_done})
-                    ml.write({'product_uom_qty': quantity_left_todo, 'qty_done': 0.0})
+                    vals = {'product_uom_qty': quantity_left_todo, 'qty_done': 0.0}
+                    if pick.picking_type_id.code == 'incoming':
+                        if ml.lot_id:
+                            vals['lot_id'] = False
+                        if ml.lot_name:
+                            vals['lot_name'] = False
+                    ml.write(vals)
                     new_move_line.write({'product_uom_qty': done_to_keep})
                     move_lines_to_pack |= new_move_line
             package_level = self.env['stock.package_level'].create({

@@ -14,14 +14,14 @@
 # Charles Vervaecke <cvk@odoo.com>, 2019
 # Wynand Tastenhoye <wta@odoo.com>, 2019
 # Laura Koedam <lko@odoo.com>, 2019
-# Gunther Clauwaert <gclauwae@hotmail.com>, 2019
 # Eric Geens <ericgeens@yahoo.com>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # ca2da8678cdb9cbd573eaf985f02c476, 2019
 # Antoine Gilard <ang@odoo.com>, 2020
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2020
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2020
 # Martin Trigaux, 2020
+# Gunther Clauwaert <gclauwae@hotmail.com>, 2020
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2020
 # 
 msgid ""
 msgstr ""
@@ -29,7 +29,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Martin Trigaux, 2020\n"
+"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2020\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -876,7 +876,7 @@ msgid ""
 "A journal entry consists of several journal items, each of\n"
 "                which is either a debit or a credit transaction."
 msgstr ""
-"Een boeking of joernaalpost bestaat uit verschillende boekingsregels die een"
+"Een boeking of journaalpost bestaat uit verschillende boekingsregels die een"
 " debet of credit verrichting weergeven."
 
 #. module: account
@@ -937,6 +937,8 @@ msgstr ""
 #, python-format
 msgid "A tag defined to be used on taxes must always have a country set."
 msgstr ""
+"Een label die is gedefinieerd om te worden gebruikt voor belastingen, moet "
+"altijd een landenset hebben."
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_fiscal_position_tax_tax_src_dest_uniq
@@ -5654,6 +5656,8 @@ msgid ""
 "If ticked, the accounting entry or invoice receives a hash as soon as it is "
 "posted and cannot be modified anymore."
 msgstr ""
+"Indien aangevinkt, ontvangt de boekhoudkundige boeking of factuur een hash "
+"zodra deze is geboekt en kan deze niet meer worden gewijzigd."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -7381,7 +7385,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__tax_negate
 msgid "Negate Tax Balance"
-msgstr ""
+msgstr "Negeer BTW evenwicht"
 
 #. module: account
 #. openerp-web
@@ -7625,7 +7629,7 @@ msgstr "November"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__num_journals_without_account
 msgid "Num Journals Without Account"
-msgstr ""
+msgstr "Aantal dagboeken zonder rekening"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_full_reconcile__name
@@ -8647,7 +8651,7 @@ msgstr ""
 #: code:addons/account/static/src/xml/account_reconciliation.xml:0
 #, python-format
 msgid "Presets config"
-msgstr ""
+msgstr "Voorinstellingen"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -9800,6 +9804,9 @@ msgid ""
 " first). This order is applied locally per section (so, children of the same"
 " line are always rendered one after the other)."
 msgstr ""
+"Volgorde die de volgorde van de regels in het rapport bepaalt (kleinere "
+"komen eerst). Deze volgorde wordt lokaal per sectie toegepast (dus "
+"onderliggende van dezelfde regel worden altijd achter elkaar weergegeven)."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__secure_sequence_id
@@ -10225,6 +10232,8 @@ msgid ""
 "Tag name and formula are mutually exclusive, they should not be set together"
 " on the same tax report line."
 msgstr ""
+"Labelnaam en formule sluiten elkaar uit, ze mogen niet samen op dezelfde "
+"BTW-rapportregel worden ingesteld."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__tag_ids
@@ -12977,6 +12986,8 @@ msgid ""
 "You cannot modify the taxes related to a posted journal item, you should "
 "reset the journal entry to draft to do so."
 msgstr ""
+"U kunt de BTW met betrekking tot een geboekte boekingsregel niet wijzigen, "
+"hiervoor moet u de boeking terugzetten naar concept."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -13062,7 +13073,7 @@ msgid ""
 "You cannot set a currency on this account as it already has some journal "
 "entries having a different foreign currency."
 msgstr ""
-"U kunt geen munteenheid toewijzen aan deze rekening daar de joernaalposten "
+"U kunt geen munteenheid toewijzen aan deze rekening daar de journaalposten "
 "reeds een andere munteenheid heeft toegewezen gekregen."
 
 #. module: account
@@ -13115,7 +13126,7 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You don't have the access rights to post an invoice."
-msgstr ""
+msgstr "U heeft geen toegangsrechten om een factuur te boeken."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -13195,6 +13206,12 @@ msgstr ""
 "U dient de 'wisselkoers verlies rekening' in te stellen in de financiële "
 "instellingen, om automatisch de boekingen te kunnen maken tussen twee "
 "verschillende valuta's."
+
+#. module: account
+#: code:addons/account/models/account_cash_rounding.py:33
+#, python-format
+msgid "Please set a positive rounding value."
+msgstr "Stel een positieve afrondingswaarde in."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form

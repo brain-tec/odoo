@@ -51,6 +51,7 @@ class AccountInvoiceSend(models.TransientModel):
         for wizard in self:
             if wizard.composer_id:
                 wizard.composer_id.template_id = wizard.template_id.id
+                wizard._compute_composition_mode()
                 wizard.composer_id.onchange_template_id_wrapper()
 
     @api.onchange('is_email')
@@ -62,6 +63,8 @@ class AccountInvoiceSend(models.TransientModel):
                     'composition_mode': 'comment' if len(res_ids) == 1 else 'mass_mail',
                     'template_id': self.template_id.id
                 })
+            else:
+                self.composer_id.template_id = self.template_id.id
             self.composer_id.onchange_template_id_wrapper()
 
     @api.onchange('is_email')

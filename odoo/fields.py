@@ -895,7 +895,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 model.flush([self.name])
 
         if self.required and not has_notnull:
-            model.pool.post_constraint(sql.set_not_null, model._cr, model._table, self.name)
+            model.pool.post_constraint(apply_required, model, self.name)
         elif not self.required and has_notnull:
             sql.drop_not_null(model._cr, model._table, self.name)
 
@@ -989,10 +989,8 @@ class Field(MetaField('DummyField', (object,), {})):
             if self.recursive:
                 recs = record
             else:
-                recs = env.records_to_compute(self)
-                # compute the field on real records only (if 'record' is real)
-                # or new records only (if 'record' is new)
-                recs = recs.filtered(lambda rec: bool(rec.id) == bool(record.id))
+                ids = expand_ids(record.id, env.all.tocompute[self])
+                recs = record.browse(itertools.islice(ids, PREFETCH_MAX))
             try:
                 self.compute_value(recs)
             except (AccessError, MissingError):
@@ -1580,7 +1578,7 @@ class Html(_String):
         (only a white list of attributes is accepted, default: ``True``)
     :param bool sanitize_attributes: whether to sanitize attributes
         (only a white list of attributes is accepted, default: ``True``)
-    :param bool sanitize_style: whether to sanitize style attributes (default: ``True``)
+    :param bool sanitize_style: whether to sanitize style attributes (default: ``False``)
     :param bool strip_style: whether to strip style attributes
         (removed and therefore not sanitized, default: ``False``)
     :param bool strip_classes: whether to strip classes attributes (default: ``False``)
@@ -1870,6 +1868,12 @@ class Binary(Field):
     def column_type(self):
         return None if self.attachment else ('bytea', 'bytea')
 
+    def _get_attrs(self, model, name):
+        attrs = super(Binary, self)._get_attrs(model, name)
+        if not attrs.get('store', True):
+            attrs['attachment'] = False
+        return attrs
+
     _description_attachment = property(attrgetter('attachment'))
 
     def convert_to_column(self, value, record, values=None, validate=True):
@@ -2011,20 +2015,21 @@ class Binary(Field):
         cache.update(records, self, [cache_value] * len(records))
 
         # retrieve the attachments that store the values, and adapt them
-        if self.store:
+        if self.store and any(records._ids):
+            real_records = records.filtered('id')
             atts = records.env['ir.attachment'].sudo()
             if not_null:
                 atts = atts.search([
                     ('res_model', '=', self.model_name),
                     ('res_field', '=', self.name),
-                    ('res_id', 'in', records.ids),
+                    ('res_id', 'in', real_records.ids),
                 ])
             if value:
                 # update the existing attachments
                 atts.write({'datas': value})
                 atts_records = records.browse(atts.mapped('res_id'))
                 # create the missing attachments
-                missing = (records - atts_records).filtered('id')
+                missing = (real_records - atts_records)
                 if missing:
                     atts.create([{
                             'name': self.name,
@@ -2077,7 +2082,18 @@ class Image(Binary):
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
-        new_value = self._image_process(value)
+        try:
+            new_value = self._image_process(value)
+        except UserError:
+            if not any(records._ids):
+                # Some crap is assigned to a new record. This can happen in an
+                # onchange, where the client sends the "bin size" value of the
+                # field instead of its full value (this saves bandwidth). In
+                # this case, we simply don't assign the field: its value will be
+                # taken from the records' origin.
+                return
+            raise
+
         super(Image, self).write(records, new_value)
         cache_value = self.convert_to_cache(value if self.related else new_value, records)
         records.env.cache.update(records, self, [cache_value] * len(records))
@@ -2563,9 +2579,13 @@ class Many2one(_Relational):
         """ Remove `records` from the cached values of the inverse fields of `self`. """
         cache = records.env.cache
         record_ids = set(records._ids)
+
+        # align(id) returns a NewId if records are new, a real id otherwise
+        align = (lambda id_: id_) if all(record_ids) else (lambda id_: id_ and NewId(id_))
+
         for invf in records._field_inverses[self]:
             corecords = records.env[self.comodel_name].browse(
-                id_ for id_ in cache.get_values(records, self)
+                align(id_) for id_ in cache.get_values(records, self)
             )
             for corecord in corecords:
                 ids0 = cache.get(corecord, invf, None)
@@ -2934,6 +2954,15 @@ class One2many(_RelationalMulti):
             domain = domain + [(inverse_field.model_field, '=', records._name)]
         return domain
 
+    def __get__(self, records, owner):
+        if records is not None and self.inverse_name is not None:
+            # force the computation of the inverse field to ensure that the
+            # cache value of self is consistent
+            inverse_field = records.pool[self.comodel_name]._fields[self.inverse_name]
+            if inverse_field.compute:
+                records.env[self.comodel_name].recompute([self.inverse_name])
+        return super().__get__(records, owner)
+
     def read(self, records):
         # retrieve the lines in the comodel
         context = {'active_test': False}
@@ -3077,6 +3106,11 @@ class One2many(_RelationalMulti):
 
         if self.store:
             inverse = self.inverse_name
+
+            # make sure self's inverse is in cache
+            inverse_field = comodel._fields[inverse]
+            for record in records:
+                cache.update(record[self.name], inverse_field, itertools.repeat(record.id))
 
             for recs, commands in records_commands_list:
                 for command in commands:
@@ -3624,6 +3658,16 @@ def prefetch_x2many_ids(record, field):
     return unique(id_ for ids in ids_list for id_ in ids)
 
 
+def apply_required(model, field_name):
+    """ Set a NOT NULL constraint on the given field, if necessary. """
+    # At the time this function is called, the model's _fields may have been reset, although
+    # the model's class is still the same. Retrieve the field to see whether the NOT NULL
+    # constraint still applies
+    field = model._fields[field_name]
+    if field.store and field.required:
+        sql.set_not_null(model.env.cr, model._table, field_name)
+
+
 # imported here to avoid dependency cycle issues
 from .exceptions import AccessError, MissingError, UserError
-from .models import check_pg_name, BaseModel, NewId, IdType
+from .models import check_pg_name, BaseModel, NewId, IdType, expand_ids, PREFETCH_MAX

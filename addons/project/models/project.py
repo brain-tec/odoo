@@ -417,8 +417,10 @@ class Project(models.Model):
     @api.model
     def _send_rating_all(self):
         projects = self.search([('rating_status', '=', 'periodic'), ('rating_request_deadline', '<=', fields.Datetime.now())])
-        projects.mapped('task_ids')._send_task_rating_mail()
-        projects._compute_rating_request_deadline()
+        for project in projects:
+            project.task_ids._send_task_rating_mail()
+            project._compute_rating_request_deadline()
+            self.env.cr.commit()
 
 
 class Task(models.Model):
@@ -724,6 +726,8 @@ class Task(models.Model):
                 if fname not in vals:
                     vals[fname] = value
         task = super(Task, self.with_context(context)).create(vals)
+        if task.project_id.privacy_visibility == 'portal':
+            task._portal_ensure_token()
         return task
 
     def write(self, vals):

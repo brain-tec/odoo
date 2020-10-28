@@ -351,7 +351,7 @@ class Base(models.AbstractModel):
                     for group in groups
                 }
             # retrieve all possible values, and return them with their label and counter
-            selection = self.fields_get([field_name])[field_name]
+            selection = self.fields_get([field_name])[field_name]['selection']
             for value, label in selection:
                 filter_values.append({
                     'id': value,
@@ -368,13 +368,15 @@ class ResCompany(models.Model):
     @api.model
     def create(self, values):
         res = super().create(values)
-        if 'primary_color' in values or 'secondary_color' in values or 'font' in values:
+        style_fields = {'external_report_layout_id', 'font', 'primary_color', 'secondary_color'}
+        if not style_fields.isdisjoint(values):
             self._update_asset_style()
         return res
 
     def write(self, values):
         res = super().write(values)
-        if 'primary_color' in values or 'secondary_color' in values or 'font' in values:
+        style_fields = {'external_report_layout_id', 'font', 'primary_color', 'secondary_color'}
+        if not style_fields.isdisjoint(values):
             self._update_asset_style()
         return res
 

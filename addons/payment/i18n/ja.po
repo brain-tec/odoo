@@ -12,6 +12,7 @@
 # Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2019
 # Tim Siu Lai <tl@roomsfor.hk>, 2019
 # 江口 和志 <k_eguchi@enzantrades.co.jp>, 2020
+# Tsuda Ryoko <ryoko04nov@gmail.com>, 2020
 # Yoshi Tashiro <tashiro@roomsfor.hk>, 2020
 # 
 msgid ""
@@ -1388,7 +1389,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Payment method set!"
-msgstr ""
+msgstr "支払方法の設定完了！"
 
 #. module: payment
 #: model:ir.model,name:payment.model_account_payment
@@ -1418,7 +1419,7 @@ msgstr "PayPal"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_user_type
 msgid "Paypal User Type"
-msgstr ""
+msgstr "PayPalユーザタイプ"
 
 #. module: payment
 #: model:ir.model.fields.selection,name:payment.selection__payment_transaction__state__pending
@@ -2124,4 +2125,4 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_acquirer_onboarding_wizard_form
 msgid "to choose another payment method."
-msgstr ""
+msgstr "他の支払方法を選択する"

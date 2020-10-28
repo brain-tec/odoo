@@ -113,10 +113,10 @@ class Location(models.Model):
             if not self.env.context.get('do_not_check_quant'):
                 children_location = self.env['stock.location'].with_context(active_test=False).search([('id', 'child_of', self.ids)])
                 internal_children_locations = children_location.filtered(lambda l: l.usage == 'internal')
-                children_quants = self.env['stock.quant'].search([('quantity', '!=', 0), ('reserved_quantity', '!=', 0), ('location_id', 'in', internal_children_locations.ids)])
+                children_quants = self.env['stock.quant'].search(['&', '|', ('quantity', '!=', 0), ('reserved_quantity', '!=', 0), ('location_id', 'in', internal_children_locations.ids)])
                 if children_quants and values['active'] == False:
                     raise UserError(_('You still have some product in locations %s') %
-                        (','.join(children_quants.mapped('location_id.name'))))
+                        (', '.join(children_quants.mapped('location_id.name'))))
                 else:
                     super(Location, children_location - self).with_context(do_not_check_quant=True).write({
                         'active': values['active'],
@@ -130,6 +130,8 @@ class Location(models.Model):
         args = args or []
         if operator == 'ilike' and not (name or '').strip():
             domain = []
+        elif operator in expression.NEGATIVE_TERM_OPERATORS:
+            domain = [('barcode', operator, name), ('complete_name', operator, name)]
         else:
             domain = ['|', ('barcode', operator, name), ('complete_name', operator, name)]
         location_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)

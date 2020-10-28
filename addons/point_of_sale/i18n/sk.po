@@ -14,6 +14,8 @@
 # Jan Prokop, 2019
 # Stefan Stieranka <stieranka@itec.sk>, 2020
 # Michal Matus <misko.matus@gmail.com>, 2020
+# Filip Boskovič <filip.boskovic@26house.com>, 2020
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # 
 msgid ""
 msgstr ""
@@ -21,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:12+0000\n"
-"Last-Translator: Michal Matus <misko.matus@gmail.com>, 2020\n"
+"Last-Translator: Rastislav Brencic <rastislav.brencic@azet.sk>, 2020\n"
 "Language-Team: Slovak (https://www.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -264,6 +266,9 @@ msgid ""
 "install a Chart of Accounts through the Invoicing/Accounting settings before"
 " launching a PoS session."
 msgstr ""
+"Účtovná osnova vo vašej súčasnej spoločnosti ešte nie je nainštalovaná. Pred"
+" spustením relácie PoS si nainštalujte účtovnú osnovu prostredníctvom "
+"nastavení Fakturácia / Účtovníctvo."
 
 #. module: point_of_sale
 #. openerp-web
@@ -402,7 +407,7 @@ msgstr "Stav aktivity"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_session_form
 msgid "Actual in Cash"
-msgstr ""
+msgstr "Skutočne v hotovosti"
 
 #. module: point_of_sale
 #. openerp-web
@@ -414,7 +419,7 @@ msgstr "Pridať tip"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "Add a custom message to header and footer"
-msgstr "Pridať vlastný text na záhlavie a zápätie"
+msgstr "Pridať vlastný text na záhlavie a päta"
 
 #. module: point_of_sale
 #. openerp-web
@@ -757,7 +762,7 @@ msgstr "Hotovosť"
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_cash_box_out
 msgid "Cash Box Out"
-msgstr ""
+msgstr "Mimo pokladne"
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/pos_config.py:0
@@ -1471,7 +1476,7 @@ msgstr "Zľava"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_pos_form
 msgid "Disc.%"
-msgstr ""
+msgstr "Disc.%"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.report_saledetails
@@ -1778,17 +1783,17 @@ msgstr "Odberatelia"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "Odberatelia (Kanály)"
+msgstr "Odberatelia (kanály)"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Odberatelia (Partneri)"
+msgstr "Odberatelia (partneri)"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "Footer"
-msgstr "Zápätie"
+msgstr "Päta"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_big_scrollbars
@@ -1879,7 +1884,7 @@ msgstr "Hlavička"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__is_header_or_footer
 msgid "Header & Footer"
-msgstr "Hlavička & pätička"
+msgstr "Hlavička & päta"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__hide_use_payment_terminal
@@ -2023,7 +2028,7 @@ msgstr "Interné kategórie"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__note
 msgid "Internal Notes"
-msgstr "Interné Poznámky"
+msgstr "Interné poznámky"
 
 #. module: point_of_sale
 #. openerp-web
@@ -2061,7 +2066,7 @@ msgstr "Účtovná kniha faktúr"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_order_filter
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_report_pos_order_search
 msgid "Invoiced"
-msgstr "Fakturovanej"
+msgstr "Fakturované"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__module_account
@@ -2092,7 +2097,7 @@ msgstr "Je odberateľ"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__is_invoiced
 msgid "Is Invoiced"
-msgstr ""
+msgstr "Je fakturované"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__is_in_company_currency
@@ -3597,7 +3602,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__receipt_footer
 msgid "Receipt Footer"
-msgstr "Zápätie potvrdenky"
+msgstr "Päta potvrdenky"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__receipt_header
@@ -3725,7 +3730,7 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/xml/pos.xml:0
 #, python-format
 msgid "Reverse"
-msgstr ""
+msgstr "Obrátiť"
 
 #. module: point_of_sale
 #. openerp-web
@@ -4232,7 +4237,7 @@ msgstr "SÚČET"
 #. module: point_of_sale
 #: model:ir.actions.act_window,name:point_of_sale.action_pos_box_out
 msgid "Take Money In/Out"
-msgstr ""
+msgstr "Zobrať peniaze do / von"
 
 #. module: point_of_sale
 #. openerp-web
@@ -4254,11 +4259,12 @@ msgstr "Zobrazenie dane"
 
 #. module: point_of_sale
 #. openerp-web
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #: code:addons/point_of_sale/static/src/xml/pos.xml:0
 #: code:addons/point_of_sale/static/src/xml/pos.xml:0
 #, python-format
 msgid "Tax ID"
-msgstr "Daňové ID"
+msgstr "DIČ"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__tax_regime
@@ -4487,7 +4493,7 @@ msgstr "Poskytnutý súbor nebolo možné prečítať kôli neznámj chybe"
 msgid ""
 "The rate of the currency to the currency of rate applicable at the date of "
 "the order"
-msgstr ""
+msgstr "Kurz meny za kurz meny platný v deň objednávky"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_print_skip_screen
@@ -4997,7 +5003,7 @@ msgstr "Merná jednotka"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__use_existing_lots
 msgid "Use Existing Lots/Serial Numbers"
-msgstr "Použiť existujúce Šarže / Sériové čísla"
+msgstr "Použiť existujúce šarže / sériové čísla"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__use_payment_terminal
@@ -5111,7 +5117,7 @@ msgstr "Sklad"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__website_message_ids
 msgid "Website Messages"
-msgstr "Správy Webových stránok"
+msgstr "Správy webstránok"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_session__website_message_ids
@@ -5376,7 +5382,7 @@ msgstr "zľava"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "e.g. Company Address, Website"
-msgstr "napr. adresa spoločnosti, webová stránka"
+msgstr "napr. adresa spoločnosti, webstránka"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form

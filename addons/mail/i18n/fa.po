@@ -15,8 +15,8 @@
 # Martin Trigaux, 2020
 # Hamid Darabi, 2020
 # Faraz Sadri Alamdari <ifarazir@gmail.com>, 2020
-# Hamed Mohammadi <hamed@dehongi.com>, 2020
 # Arash Sardari <arashss77@gmail.com>, 2020
+# Hamed Mohammadi <hamed@dehongi.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -24,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:11+0000\n"
-"Last-Translator: Arash Sardari <arashss77@gmail.com>, 2020\n"
+"Last-Translator: Hamed Mohammadi <hamed@dehongi.com>, 2020\n"
 "Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -271,6 +271,13 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
+#: code:addons/mail/static/src/js/tours/mail.js:26
+#, python-format
+msgid "<p>Create a public or private channel.</p>"
+msgstr ""
+
+#. module: mail
+#. openerp-web
 #: code:addons/mail/static/src/js/models/threads/create_mode_document_thread.js:0
 #, python-format
 msgid "<p>Creating a new record...</p>"
@@ -508,7 +515,7 @@ msgstr "فعالیت"
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_exception_decoration
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "دکوراسیون استثنا فعالیت"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_mixin
@@ -599,7 +606,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_mail__add_sign
 #: model:ir.model.fields,field_description:mail.field_mail_message__add_sign
 msgid "Add Sign"
-msgstr ""
+msgstr "افزودن امضاء"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__user_signature
@@ -770,6 +777,8 @@ msgid ""
 "Answers do not go in the original document discussion thread. This has an "
 "impact on the generated message-id."
 msgstr ""
+"جواب ها به سر رشته اولیه بحث نمی روند. این تاثیری بر شناسه پیام تولید شده "
+"دارد."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__model_id
@@ -1296,7 +1305,7 @@ msgstr "نگارش ایمیل"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__composition_mode
 msgid "Composition mode"
-msgstr ""
+msgstr "حالت نوشتار"
 
 #. module: mail
 #: model:ir.model,name:mail.model_res_config_settings
@@ -1420,7 +1429,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
 msgid "Created By"
-msgstr "ایجاد شده توسط"
+msgstr "ایجاد توسط"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__create_uid
@@ -1443,7 +1452,7 @@ msgstr "ایجاد شده توسط"
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__create_uid
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__create_uid
 msgid "Created by"
-msgstr "ایجاد شده توسط"
+msgstr "ایجاد توسط"
 
 #. module: mail
 #. openerp-web
@@ -1616,17 +1625,17 @@ msgstr "حذف"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__auto_delete
 msgid "Delete Emails"
-msgstr ""
+msgstr "حذف ایمیل ها"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__auto_delete_message
 msgid "Delete Message Copy"
-msgstr ""
+msgstr "حذف کپی پیام"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__auto_delete
 msgid "Delete sent emails (mass mailing only)"
-msgstr ""
+msgstr "حذف کردن ایمیل های فرستاده (تنها ایمیل های انبوه)"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_mail__state__exception
@@ -1844,7 +1853,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_document_file_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "منوی بازشو"
 
 #. module: mail
 #. openerp-web
@@ -2306,7 +2315,7 @@ msgstr "دنبال‌کنندگان"
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_channel_ids
 #: model:ir.model.fields,field_description:mail.field_res_users__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "پیروان (کانال ها)"
+msgstr "دنبال کنندگان (کانال ها)"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_partner_ids
@@ -2554,7 +2563,7 @@ msgstr "شمایل"
 #: model:ir.model.fields,help:mail.field_res_partner__activity_exception_icon
 #: model:ir.model.fields,help:mail.field_res_users__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "آیکون برای نشان دادن یک فعالیت استثنا."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_followers__res_id
@@ -2704,6 +2713,7 @@ msgstr "صندوق پستی"
 msgid ""
 "Indicates this activity has been created automatically and not by any user."
 msgstr ""
+"نشان دهنده این است که این فعالیت خودکار ایجاد شده و نه توسط هیچ کاربری."
 
 #. module: mail
 #. openerp-web
@@ -2722,7 +2732,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_mail_mail__parent_id
 #: model:ir.model.fields,help:mail.field_mail_message__parent_id
 msgid "Initial thread message."
-msgstr ""
+msgstr "پیام سر رشته ابتدایی."
 
 #. module: mail
 #: model:ir.ui.menu,name:mail.mail_channel_integrations_menu
@@ -2957,7 +2967,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__write_uid
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__write_uid
 msgid "Last Updated by"
-msgstr "آخرین تغییر توسط"
+msgstr "آخرین به روز رسانی توسط"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__write_date
@@ -3001,7 +3011,7 @@ msgstr "فعالیتهای اخیر"
 #: model:ir.model.fields,field_description:mail.field_mail_mail__email_layout_xmlid
 #: model:ir.model.fields,field_description:mail.field_mail_message__email_layout_xmlid
 msgid "Layout"
-msgstr ""
+msgstr "طرح بندی"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_kanban
@@ -3105,7 +3115,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__is_log
 msgid "Log an Internal Note"
-msgstr ""
+msgstr "ثبت یک یادداشت داخلی"
 
 #. module: mail
 #. openerp-web
@@ -3141,7 +3151,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_mail__mail_activity_type_id
 #: model:ir.model.fields,field_description:mail.field_mail_message__mail_activity_type_id
 msgid "Mail Activity Type"
-msgstr ""
+msgstr "نوع فعالیت ایمیل"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_blacklist
@@ -3621,7 +3631,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model,name:mail.model_base_module_uninstall
 msgid "Module Uninstall"
-msgstr ""
+msgstr "لغو نصب ماجول"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_date_deadline_range_type__months
@@ -3777,21 +3787,21 @@ msgstr "فعایتهای بعدی"
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_date_deadline
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "موعد فعالیت بعدی"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_summary
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_summary
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "خلاصه فعالیت بعدی"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_type_id
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_type_id
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "نوع فعالیت بعدی"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__has_recommended_activities
@@ -3948,12 +3958,12 @@ msgstr "اعلان‌ها"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__notify
 msgid "Notify followers"
-msgstr ""
+msgstr "اعلام به دنبال کنندگان"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__notify
 msgid "Notify followers of the document (mass post only)"
-msgstr ""
+msgstr "به دنبال کنندگان سند اطلاع بده (پست انبوه فقط)"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist__message_needaction_counter
@@ -3982,7 +3992,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_has_error_counter
 #: model:ir.model.fields,field_description:mail.field_res_users__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "تعداد خطاها"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_needaction_counter
@@ -4500,7 +4510,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Previous"
-msgstr ""
+msgstr "قبلی"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__previous_activity_type_id
@@ -4602,7 +4612,7 @@ msgstr "دریافت شد"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Received by Everyone"
-msgstr ""
+msgstr "دریافت شده توسط همه"
 
 #. module: mail
 #. openerp-web
@@ -4696,7 +4706,7 @@ msgstr "رد شده"
 #: model:ir.model.fields,field_description:mail.field_mail_message__res_id
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__res_id
 msgid "Related Document ID"
-msgstr ""
+msgstr "شناسه سند مربوطه"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__model
@@ -4707,7 +4717,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_template__model
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__res_model
 msgid "Related Document Model"
-msgstr ""
+msgstr "مدل سند مربوطه"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_followers__res_model
@@ -4836,7 +4846,7 @@ msgstr "پاسخگو"
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_user_id
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "کاربر پاسخگو"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
@@ -4885,12 +4895,12 @@ msgstr "ذخیره"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 msgid "Save as a new template"
-msgstr ""
+msgstr "ذخیره به عنوان قالب جدید"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 msgid "Save as new template"
-msgstr ""
+msgstr "ذخیره به عنوان قالب جدید"
 
 #. module: mail
 #. openerp-web
@@ -4972,7 +4982,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Seen by Everyone"
-msgstr ""
+msgstr "رؤیت شده توسط همه"
 
 #. module: mail
 #. openerp-web
@@ -5395,7 +5405,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__user_id
 #: model:ir.model.fields,help:mail.field_res_users__user_id
 msgid "The internal user in charge of this contact."
-msgstr ""
+msgstr "کاربر داخلی مسئول این تماس."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_alias__alias_model_id
@@ -5825,7 +5835,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__use_active_domain
 msgid "Use active domain"
-msgstr ""
+msgstr "استفاده از دامنه فعال"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__template_id
@@ -5897,7 +5907,7 @@ msgstr ""
 #: code:addons/mail/models/mail_message.py:0
 #, python-format
 msgid "User:"
-msgstr ""
+msgstr "کاربر:"
 
 #. module: mail
 #: model:ir.model,name:mail.model_res_users
@@ -6001,7 +6011,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_compose_message__is_log
 msgid "Whether the message is an internal note (comment mode only)"
-msgstr ""
+msgstr "آیا این پایم یک یادداشت داخلی است (فقط حالت توضیح)"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_ir_model__is_mail_activity
@@ -6144,6 +6154,14 @@ msgstr ""
 msgid ""
 "You do not have the rights to modify fields related to moderation on one of "
 "the channels you are modifying."
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_alias.py:89
+#, python-format
+msgid ""
+"You cannot use anything else than unaccented latin characters in the alias "
+"address."
 msgstr ""
 
 #. module: mail
