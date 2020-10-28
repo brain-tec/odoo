@@ -4,7 +4,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.tools import pycompat,float_is_zero
+from odoo.tools import pycompat, float_compare, float_is_zero
 from odoo.tools.float_utils import float_round
 from datetime import datetime
 import operator as py_operator
@@ -828,10 +828,12 @@ class UoM(models.Model):
         # Users can not update the factor if open stock moves are based on it
         if 'factor' in values or 'factor_inv' in values or 'category_id' in values:
             changed = self.filtered(
-                lambda u: any(u[f] != values[f] if f in values else False
-                              for f in {'factor', 'factor_inv'})) + self.filtered(
-                lambda u: any(u[f].id != int(values[f]) if f in values else False
-                              for f in {'category_id'}))
+                lambda u: any(float_compare(u[f], values[f], 5)
+                              if f in values else False
+                              for f in {'factor', 'factor_inv'}))
+            changed |= self.filtered(lambda u: any(
+                u[f].id != int(values[f]) if f in values else False
+                for f in {'category_id'}))
             if changed:
                 stock_move_lines = self.env['stock.move.line'].search_count([
                     ('product_uom_id', 'in', changed.ids),
