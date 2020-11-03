@@ -279,6 +279,13 @@ const UserValueWidget = Widget.extend({
      * Closes the widget (only meaningful for widgets that can be closed).
      */
     close: function () {
+        if (!this.el) {
+            // In case the method is called while the widget is not fully
+            // initialized yet. No need to prevent that case: asking a non
+            // initialized widget to close itself should just not be a problem
+            // and just be ignored.
+            return;
+        }
         this.trigger_up('user_value_widget_closing');
         this.el.classList.remove('o_we_widget_opened');
         this._userValueWidgets.forEach(widget => widget.close());
@@ -2714,11 +2721,7 @@ const SnippetOptionWidget = Widget.extend({
             value = value.split(params.saveUnit).join('');
         }
         if (params.extraClass) {
-            if (params.defaultValue === value) {
-                await this.editorHelpers.removeClass(context, this.$target[0], params.extraClass, context);
-            } else {
-                await this.editorHelpers.addClass(context, this.$target[0], params.extraClass, context);
-            }
+            await this.editorHelpers.setClass(context, this.$target[0], params.extraClass, params.defaultValue !== value)
         }
         return value;
     },
@@ -4166,11 +4169,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      */
     backgroundType: async function (previewMode, widgetValue, params) {
         const backgroundType = async (context)=> {
-            if (widgetValue === 'repeat-pattern') {
-                await this.editorHelpers.addClass(context, this.$target[0], 'o_bg_img_opt_repeat');
-            } else {
-                await this.editorHelpers.removeClass(context, this.$target[0], 'o_bg_img_opt_repeat');
-            }
+            await this.editorHelpers.setClass(context, this.$target[0], 'o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
             await this.editorHelpers.setStyle(context, this.$target[0], 'background-position', '');
             await this.editorHelpers.setStyle(context, this.$target[0], 'background-size', '');
         }
