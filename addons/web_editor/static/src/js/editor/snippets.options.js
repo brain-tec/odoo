@@ -3200,15 +3200,6 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     async willStart() {
         const _super = this._super.bind(this);
         await this._loadImageInfo();
-        // Make sure image is loaded because we need its naturalWidth to render XML
-        const img = this._getImg();
-        await new Promise((resolve, reject) => {
-            if (img.complete) {
-                return resolve();
-            }
-            img.addEventListener('load', resolve, {once: true});
-            img.addEventListener('error', resolve, {once: true});
-        });
         return _super(...arguments);
     },
 
@@ -3275,8 +3266,19 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    _computeWidgetState(methodName, params) {
+    async _computeWidgetState(methodName, params) {
         const img = this._getImg();
+
+        // Make sure image is loaded because we need its naturalWidth
+        await new Promise((resolve, reject) => {
+            if (img.complete) {
+                resolve();
+                return;
+            }
+            img.addEventListener('load', resolve, {once: true});
+            img.addEventListener('error', resolve, {once: true});
+        });
+
         switch (methodName) {
             case 'selectWidth':
                 return img.naturalWidth;
@@ -3831,10 +3833,10 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     _setBackground($target, backgroundURL) {
         if (backgroundURL) {
             $target.css('background-image', `url('${backgroundURL}')`);
-            $target.addClass('oe_img_bg');
+            $target.addClass('oe_img_bg o_bg_img_center');
         } else {
             $target.css('background-image', '');
-            $target.removeClass('oe_img_bg');
+            $target.removeClass('oe_img_bg o_bg_img_center');
         }
     },
 });
@@ -4283,7 +4285,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             return;
         }
         // TODO: change #wrapwrap after web_editor rework.
-        const content = document.querySelector('#wrapwrap *, jw-shadow::shadow /deep/ *').parentNode;
+        const content = document.querySelector('#wrapwrap') || (document.querySelector('jw-shadow') || {}).shadowRoot;
         const $wrapwrap = $(content);
         const targetOffset = this.$target.offset();
 
