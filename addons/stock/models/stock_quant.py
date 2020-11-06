@@ -669,6 +669,13 @@ class QuantPackage(models.Model):
     owner_id = fields.Many2one(
         'res.partner', 'Owner', compute='_compute_package_info', search='_search_owner',
         index=True, readonly=True, compute_sudo=True)
+    package_use = fields.Selection([
+        ('disposable', 'Disposable Box'),
+        ('reusable', 'Reusable Box'),
+        ], string='Package Use', default='disposable', required=True,
+        help="""Reusable boxes are used for batch picking and emptied afterwards to be reused. In the barcode application, scanning a reusable box will add the products in this box.
+        Disposable boxes aren't reused, when scanning a disposable box in the barcode application, the contained products are added to the transfer.""")
+
 
     @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity')
     def _compute_package_info(self):
