@@ -51,6 +51,7 @@ class CouponProgram(models.Model):
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     validity_duration = fields.Integer(default=30,
         help="Validity duration for a coupon after its generation")
+    total_order_count = fields.Integer("Total Order Count", compute="_compute_total_order_count")
 
     @api.constrains('promo_code')
     def _check_promo_code_constraint(self):
@@ -144,3 +145,17 @@ class CouponProgram(models.Model):
             domain = ast.literal_eval(self.rule_products_domain)
             return products.filtered_domain(domain)
         return products
+
+    def _generate_coupons(self, partner_id):
+        '''Generate coupons that can be used in the next order for the given partner_id.'''
+        generated_coupons = self.env['coupon.coupon']
+        for program in self:
+            generated_coupons |= self.env['coupon.coupon'].create({
+                'program_id': program.id,
+                'partner_id': partner_id,
+            })
+        return generated_coupons
+
+    def _compute_total_order_count(self):
+        for program in self:
+            program.total_order_count = 0
