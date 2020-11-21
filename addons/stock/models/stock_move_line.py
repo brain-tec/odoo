@@ -107,7 +107,7 @@ class StockMoveLine(models.Model):
 
     @api.constrains('qty_done')
     def _check_positive_qty_done(self):
-        if any([ml.qty_done < 0 for ml in self]):
+        if any(ml.qty_done < 0 for ml in self):
             raise ValidationError(_('You can not enter negative quantities.'))
 
     @api.onchange('product_id', 'product_uom_id')
@@ -404,7 +404,10 @@ class StockMoveLine(models.Model):
         moves = self.mapped('move_id')
         res = super(StockMoveLine, self).unlink()
         if moves:
-            moves._recompute_state()
+            # Add with_prefetch() to set the _prefecht_ids = _ids
+            # because _prefecht_ids generator look lazily on the cache of move_id
+            # which is clear by the unlink of move line
+            moves.with_prefetch()._recompute_state()
         return res
 
     def _action_done(self):

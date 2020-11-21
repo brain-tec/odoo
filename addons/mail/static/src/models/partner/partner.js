@@ -95,7 +95,8 @@ function factory(dependencies) {
                 if (partners.length < limit) {
                     if (
                         partner !== currentPartner &&
-                        searchRegexp.test(partner.name)
+                        searchRegexp.test(partner.name) &&
+                        partner.user
                     ) {
                         partners.push(partner);
                     }
@@ -311,7 +312,9 @@ function factory(dependencies) {
         hasCheckedUser: attr({
             default: false,
         }),
-        id: attr(),
+        id: attr({
+            required: true,
+        }),
         im_status: attr(),
         memberThreads: many2many('mail.thread', {
             inverse: 'members',
