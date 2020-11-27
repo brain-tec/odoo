@@ -45,8 +45,9 @@ class StockQuant(models.Model):
         if not self._is_inventory_mode():
             return
         domain = [('type', '=', 'product')]
-        if self.env.context.get('product_tmpl_id'):
-            domain = expression.AND([domain, [('product_tmpl_id', '=', self.env.context['product_tmpl_id'])]])
+        if self.env.context.get('product_tmpl_ids') or self.env.context.get('product_tmpl_id'):
+            products = self.env.context.get('product_tmpl_id', []) + [self.env.context.get('product_tmpl_id', 0)]
+            domain = expression.AND([domain, [('product_tmpl_id', 'in', products)]])
         return domain
 
     product_id = fields.Many2one(
@@ -239,7 +240,8 @@ class StockQuant(models.Model):
     @api.constrains('quantity')
     def check_quantity(self):
         for quant in self:
-            if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and quant.lot_id and quant.product_id.tracking == 'serial':
+            if quant.location_id.usage != 'inventory' and quant.lot_id and quant.product_id.tracking == 'serial' \
+                    and float_compare(abs(quant.quantity), 1, precision_rounding=quant.product_uom_id.rounding) > 0:
                 raise ValidationError(_('The serial number has already been assigned: \n Product: %s, Serial Number: %s') % (quant.product_id.display_name, quant.lot_id.name))
 
     @api.constrains('location_id')
@@ -726,8 +728,7 @@ class QuantPackage(models.Model):
 
         # Quant clean-up, mostly to avoid multiple quants of the same product. For example, unpack
         # 2 packages of 50, then reserve 100 => a quant of -50 is created at transfer validation.
-        self.env['stock.quant']._merge_quants()
-        self.env['stock.quant']._unlink_zero_quants()
+        self.env['stock.quant']._quant_tasks()
 
     def action_view_picking(self):
         action = self.env["ir.actions.actions"]._for_xml_id("stock.action_picking_tree_all")
