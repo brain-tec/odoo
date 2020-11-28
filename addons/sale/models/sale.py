@@ -190,7 +190,7 @@ class SaleOrder(models.Model):
         required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
-    currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True)
+    currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, ondelete="restrict")
     analytic_account_id = fields.Many2one(
         'account.analytic.account', 'Analytic Account',
         readonly=True, copy=False, check_company=True,  # Unrequired company
@@ -1361,7 +1361,7 @@ class SaleOrderLine(models.Model):
         related="product_id.product_tmpl_id", domain=[('sale_ok', '=', True)])
     product_updatable = fields.Boolean(compute='_compute_product_updatable', string='Can Edit Product', readonly=True, default=True)
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
-    product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]", ondelete="restrict")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     product_uom_readonly = fields.Boolean(compute='_compute_product_uom_readonly')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'sale_order_line_id', string="Custom Values", copy=True)
@@ -1552,7 +1552,12 @@ class SaleOrderLine(models.Model):
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
                     # has to be called to retrieve the subtotal without them.
                     # `price_reduce_taxexcl` cannot be used as it is computed from `price_subtotal` field. (see upper Note)
-                    price_subtotal = line.tax_id.compute_all(price_subtotal)['total_excluded']
+                    price_subtotal = line.tax_id.compute_all(
+                        price_subtotal,
+                        currency=line.order_id.currency_id,
+                        quantity=line.product_uom_qty,
+                        product=line.product_id,
+                        partner=line.order_id.partner_shipping_id)['total_excluded']
 
                 if any(line.invoice_lines.mapped(lambda l: l.discount != line.discount)):
                     # In case of re-invoicing with different discount we try to calculate manually the
