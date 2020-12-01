@@ -1035,7 +1035,8 @@ class AccountMove(models.Model):
     @api.depends('company_id', 'invoice_filter_type_domain')
     def _compute_suitable_journal_ids(self):
         for m in self:
-            domain = [('company_id', '=', m.company_id.id), ('type', '=?', m.invoice_filter_type_domain)]
+            journal_type = m.invoice_filter_type_domain or 'general'
+            domain = [('company_id', '=', m.company_id.id), ('type', '=', journal_type)]
             m.suitable_journal_ids = self.env['account.journal'].search(domain)
 
     @api.depends('posted_before', 'state', 'journal_id', 'date')
@@ -1813,7 +1814,7 @@ class AccountMove(models.Model):
             if (move.posted_before and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it has been posted once.'))
             if (move.name and move.name != '/' and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
-                raise UserError(_('You cannot edit the journal of an account move if it has already a sequence number assigned.'))
+                raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
             # You can't change the date of a move being inside a locked period.
             if 'date' in vals and move.date != vals['date']:

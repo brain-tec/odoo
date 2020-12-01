@@ -14,7 +14,7 @@ from lxml import etree
 from random import randint
 from werkzeug import urls
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
+from odoo import api, fields, models, tools, SUPERUSER_ID, _, Command
 from odoo.modules import get_module_resource
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
@@ -404,7 +404,7 @@ class Partner(models.Model):
             elif field.type == 'one2many':
                 raise AssertionError(_('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`'))
             elif field.type == 'many2many':
-                values[fname] = [(6, 0, self[fname].ids)]
+                values[fname] = [Command.set(self[fname].ids)]
             else:
                 values[fname] = self[fname]
         return values
@@ -527,16 +527,17 @@ class Partner(models.Model):
             vals['website'] = self._clean_website(vals['website'])
         if vals.get('parent_id'):
             vals['company_name'] = False
-        if vals.get('company_id'):
-            company = self.env['res.company'].browse(vals['company_id'])
+        if 'company_id' in vals:
+            company_id = vals['company_id']
             for partner in self:
-                if partner.user_ids:
+                if company_id and partner.user_ids:
+                    company = self.env['res.company'].browse(company_id)
                     companies = set(user.company_id for user in partner.user_ids)
                     if len(companies) > 1 or company not in companies:
                         raise UserError(
                             ("The selected company is not compatible with the companies of the related user(s)"))
                 if partner.child_ids:
-                    partner.child_ids.write({'company_id': company.id})
+                    partner.child_ids.write({'company_id': company_id})
         result = True
         # To write in SUPERUSER on field is_company and avoid access rights problems.
         if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.su:
@@ -616,7 +617,7 @@ class Partner(models.Model):
             # Set new company as my parent
             self.write({
                 'parent_id': new_company.id,
-                'child_ids': [(1, partner_id, dict(parent_id=new_company.id)) for partner_id in self.child_ids.ids]
+                'child_ids': [Command.update(partner_id, dict(parent_id=new_company.id)) for partner_id in self.child_ids.ids]
             })
         return True
 
