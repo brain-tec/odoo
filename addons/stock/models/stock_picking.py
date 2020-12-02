@@ -4,8 +4,7 @@
 import json
 import time
 from ast import literal_eval
-from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 from itertools import groupby
 from operator import itemgetter
 
@@ -66,6 +65,12 @@ class PickingType(models.Model):
         'Pre-fill Detailed Operations', default=True,
         help="If this checkbox is ticked, Odoo will automatically pre-fill the detailed "
         "operations with the corresponding products, locations and lot/serial numbers.")
+    reservation_method = fields.Selection(
+        [('by_date', 'before scheduled date'), ('at_confirm', 'At Confirmation'), ('manual', 'Manually')],
+        'Reservation Method', required=True, default='at_confirm',
+        help="How products in transfers of this operation type should be reserved.")
+    reservation_days_before = fields.Integer('Days', help="Maximum number of days before scheduled date that products should be reserved.")
+
 
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
@@ -779,7 +784,7 @@ class Picking(models.Model):
         else:
             for move in self.move_lines:
                 if not move.package_level_id:
-                    if move.state in ('assigned', 'done'):
+                    if move.state == 'assigned' and move.picking_id and not move.picking_id.immediate_transfer or move.state == 'done':
                         if any(not ml.package_level_id for ml in move.move_line_ids):
                             move_ids_without_package |= move
                     else:
@@ -1298,6 +1303,7 @@ class Picking(models.Model):
             picking_move_lines = self.move_line_ids
             if (
                 not self.picking_type_id.show_reserved
+                and not self.immediate_transfer
                 and not self.env.context.get('barcode_view')
             ):
                 picking_move_lines = self.move_line_nosuggest_ids
