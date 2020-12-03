@@ -948,6 +948,25 @@ class Field(MetaField('DummyField', (object,), {})):
             value = env.cache.get(record, self)
 
         except KeyError:
+            # behavior in case of cache miss:
+            #
+            #   on a real record:
+            #       stored -> fetch from database (computation done above)
+            #       not stored and computed -> compute
+            #       not stored and not computed -> default
+            #
+            #   on a new record w/ origin:
+            #       stored and not (computed and readonly) -> fetch from origin
+            #       stored and computed and readonly -> compute
+            #       not stored and computed -> compute
+            #       not stored and not computed -> default
+            #
+            #   on a new record w/o origin:
+            #       stored and computed -> compute
+            #       stored and not computed -> new delegate or default
+            #       not stored and computed -> compute
+            #       not stored and not computed -> default
+            #
             if self.store and record.id:
                 # real record: fetch from database
                 recs = record._in_cache_without(self)
@@ -964,7 +983,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     ]))
                 value = env.cache.get(record, self)
 
-            elif self.store and record._origin:
+            elif self.store and record._origin and not (self.compute and self.readonly):
                 # new record with origin: fetch from origin
                 value = self.convert_to_cache(record._origin[self.name], record)
                 env.cache.set(record, self, value)
