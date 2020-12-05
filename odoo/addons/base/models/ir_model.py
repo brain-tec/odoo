@@ -275,14 +275,16 @@ class IrModel(models.Model):
                 _logger.runbot('The model %s could not be dropped because it did not exist in the registry.', model.model)
         return True
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
         # Prevent manual deletion of module tables
-        if not self._context.get(MODULE_UNINSTALL_FLAG):
-            for model in self:
-                if model.state != 'manual':
-                    raise UserError(_("Model '%s' contains module data and cannot be removed.", model.name))
-                # prevent screwing up fields that depend on these models' fields
-                model.field_id._prepare_update()
+        for model in self:
+            if model.state != 'manual':
+                raise UserError(_("Model '%s' contains module data and cannot be removed.", model.name))
+
+    def unlink(self):
+        # prevent screwing up fields that depend on these models' fields
+        self.field_id._prepare_update()
 
         # delete fields whose comodel is being removed
         self.env['ir.model.fields'].search([('relation', 'in', self.mapped('model'))]).unlink()
@@ -799,14 +801,15 @@ class IrModelFields(models.Model):
             # the registry has been modified, restore it
             self.pool.setup_models(self._cr)
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
+        # Prevent manual deletion of module columns
+        if any(field.state != 'manual' for field in self):
+            raise UserError(_("This column contains module data and cannot be removed!"))
+
     def unlink(self):
         if not self:
             return True
-
-        # Prevent manual deletion of module columns
-        if not self._context.get(MODULE_UNINSTALL_FLAG) and \
-                any(field.state != 'manual' for field in self):
-            raise UserError(_("This column contains module data and cannot be removed!"))
 
         # prevent screwing up fields that depend on these fields
         self._prepare_update()
@@ -1341,7 +1344,8 @@ class IrModelSelection(models.Model):
 
         return result
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
         # Prevent manual deletion of module columns
         if (
             self.pool.ready
@@ -1351,6 +1355,7 @@ class IrModelSelection(models.Model):
                               'Please modify them through Python code, '
                               'preferably through a custom addon!'))
 
+    def unlink(self):
         self._process_ondelete()
         result = super().unlink()
 
@@ -2066,8 +2071,11 @@ class IrModelData(models.Model):
         # methods is not in cache it will be fetched, and fields that exist in the registry but not
         # in the database will be prefetched, this will of course fail and prevent the uninstall.
         for ir_field in self.env['ir.model.fields'].browse(field_ids):
-            field = self.pool[ir_field.model]._fields[ir_field.name]
-            field.prefetch = False
+            model = self.pool.get(ir_field.model)
+            if model is not None:
+                field = model._fields.get(ir_field.name)
+                if field is not None:
+                    field.prefetch = False
 
         # to collect external ids of records that cannot be deleted
         undeletable_ids = []

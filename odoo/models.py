@@ -672,6 +672,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # reset properties memoized on cls
         cls._constraint_methods = BaseModel._constraint_methods
+        cls._ondelete_methods = BaseModel._ondelete_methods
         cls._onchange_methods = BaseModel._onchange_methods
 
     @property
@@ -693,6 +694,18 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # optimization: memoize result on cls, it will not be recomputed
         cls._constraint_methods = methods
+        return methods
+
+    @property
+    def _ondelete_methods(self):
+        """ Return a list of methods implementing checks before unlinking. """
+        def is_ondelete(func):
+            return callable(func) and hasattr(func, '_ondelete')
+
+        cls = type(self)
+        methods = [func for _, func in getmembers(cls, is_ondelete)]
+        # optimization: memoize results on cls, it will not be recomputed
+        cls._ondelete_methods = methods
         return methods
 
     @property
@@ -3413,6 +3426,12 @@ Fields:
         self.check_access_rights('unlink')
         self._check_concurrency()
 
+        from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
+        for func in self._ondelete_methods:
+            # func._ondelete is True if it should be called during uninstallation
+            if func._ondelete or not self._context.get(MODULE_UNINSTALL_FLAG):
+                func(self)
+
         # mark fields that depend on 'self' to recompute them after 'self' has
         # been deleted (like updating a sum of lines after deleting one line)
         self.flush()
@@ -5267,7 +5286,7 @@ Fields:
                         model = model[fname]
                 if comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
                     value_esc = value.replace('_', '?').replace('%', '*').replace('[', '?')
-                records_ids = set()
+                records_ids = OrderedSet()
                 for rec in self:
                     data = rec.mapped(key)
                     if comparator in ('child_of', 'parent_of'):
@@ -6037,7 +6056,9 @@ Fields:
                         # diff(), therefore evaluating line._prefetch_ids with an empty
                         # cache simply returns nothing, which discards the prefetching
                         # optimization!
-                        record[name]
+                        record._cache[name] = tuple(
+                            line_snapshot['<record>'].id for line_snapshot in self[name]
+                        )
                         for line_snapshot in self[name]:
                             line = line_snapshot['<record>']
                             line = line._origin or line
@@ -6061,11 +6082,13 @@ Fields:
         nametree = PrefixTree(self.browse(), field_onchange)
 
         if first_call:
-            values.update(self.default_get([
-                name
-                for name in nametree
-                if name not in values
-            ]))
+            names = [name for name in values if name != 'id']
+            missing_names = [name for name in nametree if name not in values]
+            defaults = self.default_get(missing_names)
+            for name in missing_names:
+                values[name] = defaults.get(name, False)
+                if name in defaults:
+                    names.append(name)
 
         # prefetch x2many lines: this speeds up the initial snapshot by avoiding
         # to compute fields on new records as much as possible, as that can be

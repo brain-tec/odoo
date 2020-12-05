@@ -63,6 +63,9 @@ class Message extends Component {
                 isMessageChecked: message && threadView
                     ? message.isChecked(thread, threadStringifiedDomain)
                     : false,
+                isMessageSelected: message && threadView && threadView.threadViewer
+                    ? threadView.threadViewer.selectedMessage === message
+                    : false,
                 message: message ? message.__state : undefined,
                 notifications: message ? message.notifications.map(notif => notif.__state) : [],
                 originThread: originThread ? originThread.__state : undefined,
@@ -153,13 +156,6 @@ class Message extends Component {
     }
 
     /**
-     * @returns {mail.attachment[]}
-     */
-    get imageAttachments() {
-        return this.message.attachments.filter(attachment => attachment.fileType === 'image');
-    }
-
-    /**
      * Tell whether the bottom of this message is visible or not.
      *
      * @param {Object} param0
@@ -201,19 +197,24 @@ class Message extends Component {
     }
 
     /**
+     * Tell whether the message is selected in the current thread viewer.
+     *
+     * @returns {boolean}
+     */
+    get isSelected() {
+        return (
+            this.threadView &&
+            this.threadView.threadViewer &&
+            this.threadView.threadViewer.selectedMessage === this.message
+        );
+    }
+
+    /**
      * @returns {mail.message}
      */
     get message() {
         return this.env.models['mail.message'].get(this.props.messageLocalId);
     }
-
-    /**
-     * @returns {mail.attachment[]}
-     */
-    get nonImageAttachments() {
-        return this.message.attachments.filter(attachment => attachment.fileType !== 'image');
-    }
-
     /**
      * @returns {string}
      */
@@ -393,7 +394,7 @@ class Message extends Component {
                 message: this.message,
             });
         }
-        this._wasSelected = this.props.isSelected;
+        this._wasSelected = this.isSelected;
         this.message.refreshDateFromNow();
         clearInterval(this._intervalId);
         this._intervalId = setInterval(() => {
@@ -598,7 +599,6 @@ Object.assign(Message, {
         hasCheckbox: false,
         hasMarkAsReadIcon: false,
         hasReplyIcon: false,
-        isSelected: false,
         isSquashed: false,
     },
     props: {
@@ -610,7 +610,6 @@ Object.assign(Message, {
         hasCheckbox: Boolean,
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
-        isSelected: Boolean,
         isSquashed: Boolean,
         messageLocalId: String,
         threadViewLocalId: {
