@@ -325,17 +325,30 @@ def set_cookie_and_redirect(redirect_url):
     return redirect
 
 def clean_action(action, env):
-    action.setdefault('flags', {})
     action_type = action.setdefault('type', 'ir.actions.act_window_close')
     if action_type == 'ir.actions.act_window':
         action = fix_view_modes(action)
 
-    # When returning an action, only few information are really usefull
-    return {
+    # When returning an action, keep only relevant fields/properties
+    readable_fields = env[action['type']]._get_readable_fields()
+    action_type_fields = env[action['type']]._fields.keys()
+
+    cleaned_action = {
         field: value
         for field, value in action.items()
-        if field in env[action['type']]._get_readable_fields()
+        # keep allowed fields and custom properties fields
+        if field in readable_fields or field not in action_type_fields
     }
+
+    # Warn about custom properties fields, because use is discouraged
+    action_name = action.get('name') or action
+    custom_properties = action.keys() - readable_fields - action_type_fields
+    if custom_properties:
+        _logger.warning("Action %r contains custom properties %s. Passing them "
+            "via the `params` or `context` properties is recommended instead",
+            action_name, ', '.join(map(repr, custom_properties)))
+
+    return cleaned_action
 
 # I think generate_views,fix_view_modes should go into js ActionManager
 def generate_views(action):
@@ -1893,13 +1906,16 @@ class ExportFormat(object):
         model, fields, ids, domain, import_compat = \
             operator.itemgetter('model', 'fields', 'ids', 'domain', 'import_compat')(params)
 
+        Model = request.env[model].with_context(**params.get('context', {}))
+        if not Model._is_an_ordinary_table():
+            fields = [field for field in fields if field['name'] != 'id']
+
         field_names = [f['name'] for f in fields]
         if import_compat:
             columns_headers = field_names
         else:
             columns_headers = [val['label'].strip() for val in fields]
 
-        Model = request.env[model].with_context(**params.get('context', {}))
         groupby = params.get('groupby')
         if not import_compat and groupby:
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
@@ -1917,11 +1933,9 @@ class ExportFormat(object):
             Model = Model.with_context(import_compat=import_compat)
             records = Model.browse(ids) if ids else Model.search(domain, offset=0, limit=False, order=False)
 
-            if not Model._is_an_ordinary_table():
-                fields = [field for field in fields if field['name'] != 'id']
-
             export_data = records.export_data(field_names).get('datas',[])
             response_data = self.from_data(columns_headers, export_data)
+
         return request.make_response(response_data,
             headers=[('Content-Disposition',
                             content_disposition(self.filename(model))),
