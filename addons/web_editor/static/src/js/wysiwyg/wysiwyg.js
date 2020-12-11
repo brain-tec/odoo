@@ -232,6 +232,20 @@ var Wysiwyg = Widget.extend({
                             },
                         },
                     },
+
+                    // js_language_selector
+                    {
+                        selector: [node => {
+                            const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                            return attributes && attributes.classList.has('js_language_selector');
+                        }],
+                        properties: {
+                            editable: {
+                                value: false,
+                                cascading: true,
+                            },
+                        },
+                    },
                 ],
             };
         }
@@ -1233,6 +1247,9 @@ var Wysiwyg = Widget.extend({
             let $saveNode = $(renderedNode).find('[data-oe-expression][data-oe-id]');
             if ($saveNode.length === 0) {
                 $saveNode = $(renderedNode)
+            }
+            if (!$saveNode[0].dataset.oeId) {
+                $saveNode = $(renderedNode).find('[data-oe-id]');
             }
             const isStructureDirty = node instanceof JWEditorLib.OdooStructureNode && node.dirty;
             const isFieldDirty = node instanceof JWEditorLib.OdooFieldNode && node.fieldInfo.originalValue !== node.fieldInfo.value.get();
