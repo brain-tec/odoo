@@ -20068,7 +20068,10 @@ odoo.define('web_editor.jabberwock', (function(require) {
             if (!node.fieldInfo.isValid.get()) {
                 classList.add('jw-odoo-field-invalid');
             }
-            if (!node.descendants(AtomicNode).length) {
+            if (!node.descendants(AtomicNode).length &&
+                // A placeholder is visible, we don't want to collapse the field if
+                // it gives the impression of having content.
+                !node.modifiers.find(Attributes).has('placeholder')) {
                 classList.add('jw-odoo-field-empty');
             }
             container.attributes.class = classList;
@@ -21809,6 +21812,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
             super(params);
             this.breakable = false;
             this.dirty = false;
+            this.allowEmpty = true;
             this.xpath = params.xpath;
             this.viewId = params.viewId;
         }
@@ -21818,9 +21822,12 @@ odoo.define('web_editor.jabberwock', (function(require) {
         constructor() {
             super(...arguments);
             this.predicate = (item) => {
+                var _a, _b;
                 return (item instanceof Element &&
-                    item.classList.contains('oe_structure') &&
                     item.attributes &&
+                    (item.classList.contains('oe_structure') ||
+                        (((_a = item.attributes['data-oe-model']) === null || _a === void 0 ? void 0 : _a.value) === 'ir.ui.view' &&
+                            ((_b = item.attributes['data-oe-field']) === null || _b === void 0 ? void 0 : _b.value) === 'arch')) &&
                     item.attributes['data-oe-xpath'] &&
                     item.attributes['data-oe-id']);
             };
@@ -24016,6 +24023,9 @@ odoo.define('web_editor.jabberwock', (function(require) {
     class OdooWebsiteEditor extends JWEditor {
         constructor(options) {
             super();
+            if (typeof options.wrapMain === 'undefined') {
+                options.wrapMain = true;
+            }
             class CustomPlugin extends JWPlugin {
                 constructor() {
                     super(...arguments);
@@ -24075,6 +24085,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
                     [Iframe],
                     [Button],
                     [ReactiveEditorInfo],
+                    [Theme],
                     ...(options.plugins || []),
                 ],
             });
@@ -24144,14 +24155,23 @@ odoo.define('web_editor.jabberwock', (function(require) {
                     {
                         id: 'main',
                         render: async () => {
-                            const div = new DividerNode();
-                            div.modifiers.get(Attributes).set('contentEditable', 'true');
-                            div.modifiers.get(Attributes).classList.add('note-editable', 'o_editable');
-                            div.modifiers.get(Attributes).style.set('width', '100%');
-                            const zone = new ZoneNode({ managedZones: ['editable'] });
-                            zone.editable = true;
-                            div.append(zone);
-                            return [div];
+                            if (options.wrapMain) {
+                                const div = new DividerNode();
+                                div.modifiers.get(Attributes).set('contentEditable', 'true');
+                                div.modifiers
+                                    .get(Attributes)
+                                    .classList.add('note-editable', 'o_editable');
+                                div.modifiers.get(Attributes).style.set('width', '100%');
+                                const zone = new ZoneNode({ managedZones: ['editable'] });
+                                zone.editable = true;
+                                div.append(zone);
+                                return [div];
+                            }
+                            else {
+                                const zone = new ZoneNode({ managedZones: ['editable'] });
+                                zone.editable = true;
+                                return [zone];
+                            }
                         },
                     },
                     {
@@ -24451,7 +24471,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
                 for (const mutation of mutations) {
                     if (mutation.type === 'attributes') {
                         const formats = getFormats(domEngine, mutation.target);
-                        let vnodesOrFormats = ((formats === null || formats === void 0 ? void 0 : formats.length) && formats) || domEngine.getNodes(mutation.target);
+                        let vnodesOrFormats = ((formats === null || formats === void 0 ? void 0 : formats.length) && formats) || domEngine.getNodes(mutation.target, false);
                         const value = mutation.target.getAttribute(mutation.attributeName);
                         if (vnodesOrFormats.length) {
                             if (vnodesOrFormats[0] instanceof ContainerNode) {
@@ -24521,7 +24541,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
             for (const [observerNode, activeObservation] of activeObservers.entries()) {
                 // The observation might have been already removed by another call
                 // so we only delete and disconnect when it's still active.
-                if (activeObservation === activeObservation) {
+                if (activeObservation === observer) {
                     activeObservers.delete(observerNode);
                     observer.disconnect();
                     break;
@@ -24555,6 +24575,8 @@ odoo.define('web_editor.jabberwock', (function(require) {
                 break;
             ancestorsFormats.push(format);
         }
+        if (!ancestorsFormats.length)
+            return [];
         const greatestAncestorVNode = getVNodes(ancestors[0]);
         const allParentFormat = greatestAncestorVNode[0].modifiers.filter(m => m instanceof Format);
         // Now we can retrieve the format of `inlineNode`.
@@ -24678,7 +24700,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
     function removeNodes(originalParents, removedDomNodes, getVNode, getFirstFormat, replacementMap) {
         for (const removedDomNode of removedDomNodes) {
             const removedVNodes = getVNode(removedDomNode);
-            if (removedVNodes) {
+            if (removedVNodes === null || removedVNodes === void 0 ? void 0 : removedVNodes.length) {
                 const firstVNode = removedVNodes[0];
                 // If we remove a text node that has a format, as no textnode will
                 // represent the format after removing it, we need to insert an
