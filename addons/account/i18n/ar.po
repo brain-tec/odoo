@@ -11,7 +11,6 @@
 # Mustafa J. Kadhem <safi2266@gmail.com>, 2019
 # Firas Asad <firas101@gmail.com>, 2019
 # amal ahmed <amalalhashemy88@hotmail.com>, 2019
-# Waleed Mohsen <mohsen.waleed@gmail.com>, 2019
 # Mostafa Hanafy <mostafa.s.hanafy@gmail.com>, 2019
 # Zuhair Hammadi <zuhair12@gmail.com>, 2019
 # Abdulaziz Alkahlani <abdulaziz.alkahlani@gmail.com>, 2019
@@ -36,21 +35,24 @@
 # ADADI REDOUANE <odadi332014@gmail.com>, 2019
 # Othman Gabr <jabor4u@hotmail.com>, 2020
 # Tasneem Sarhan <tsa@odoo.com>, 2020
-# Mustafa Rawi <mustafa@cubexco.com>, 2020
 # Enjy Abu-Taleb <ema@odootec.com>, 2020
 # Amer Hazaa <eng.amer.it@gmail.com>, 2020
 # MOHAMMAD IBRAHIM <m.moamir@outlook.com>, 2020
 # Saleh Albannay <saleh@cm.codes>, 2020
 # Ali Alrehawi <alrehawi@hotmail.com>, 2020
 # Sherif Abd Ekmoniem <sherif.tsupport@gmail.com>, 2020
+# Waleed Mohsen <mohsen.waleed@gmail.com>, 2020
+# Nabil Jabraouti <nabil@bluechipcd.com>, 2020
+# Talal Albahra <talal.albahra@outlook.com>, 2020
+# Mustafa Rawi <mustafa@cubexco.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:21+0000\n"
+"POT-Creation-Date: 2020-07-01 12:20+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Sherif Abd Ekmoniem <sherif.tsupport@gmail.com>, 2020\n"
+"Last-Translator: Mustafa Rawi <mustafa@cubexco.com>, 2020\n"
 "Language-Team: Arabic (https://www.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1919,13 +1921,13 @@ msgstr "المبلغ:"
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "An Off-Balance account can not be reconcilable"
-msgstr ""
+msgstr "حساب من نوع \"خارج الميزانية\" لا يمكن أن يقبل التخصيص"
 
 #. module: account
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "An Off-Balance account can not have taxes"
-msgstr ""
+msgstr "حساب من نوع \"خارج الميزانية\" لا يمكن أن يتضمن ضرائب"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_fiscal_position_account_account_src_dest_uniq
@@ -1946,7 +1948,7 @@ msgstr ""
 "الحساب جزء من دفتر الأستاذ يتيح لمؤسستك\n"
 "                تسجيل جميع المعاملات الدائنة والمدينة.\n"
 "                تقدم المؤسسات حساباتها السنوية في جزئيين أساسيين: \n"
-"                ميزان المراجعة وقائمة الدخل (حساب الربح و الخسارة)\n"
+"                الميزانية العمومية وقائمة الدخل (حساب الربح و الخسارة)\n"
 "                بموجب القانون، تلتزم المؤسسات بتقديم والكشف عن\n"
 "               معلومات معينة في إقراراتها السنوية."
 
@@ -2393,7 +2395,7 @@ msgstr "كشف حساب بنكي %s"
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "Bank Statement %s.pdf"
-msgstr ""
+msgstr "قائم البنك %s.pdf"
 
 #. module: account
 #: model:ir.model,name:account.model_account_bank_statement_cashbox
@@ -2419,7 +2421,7 @@ msgstr "بنود كشف الحساب البنكي"
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "Bank Statement.pdf"
-msgstr ""
+msgstr "قائمة البنك.pdf"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_bank_statement_tree
@@ -2719,6 +2721,7 @@ msgstr "إلغاء القيد"
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__state__cancel
 #: model:ir.model.fields.selection,name:account.selection__account_move__state__cancel
 #: model:ir.model.fields.selection,name:account.selection__account_payment__state__cancelled
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "Cancelled"
 msgstr "ملغي"
 
@@ -2740,6 +2743,8 @@ msgid ""
 "Cannot create unbalanced journal entry. Ids: %s\n"
 "Differences debit - credit: %s"
 msgstr ""
+"لا يمكن إنشاء قيد يومية غير متوازن. السطور: %s\n"
+"الفروقات مدين - دائن: %s"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -2789,13 +2794,13 @@ msgstr "دفتر يومية الأساس النقدي"
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "Cash Basis Taxes"
-msgstr ""
+msgstr "ضرائب بأساس نقدي"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__cash_basis_transition_account_id
 #: model:ir.model.fields,field_description:account.field_account_tax_template__cash_basis_transition_account_id
 msgid "Cash Basis Transition Account"
-msgstr ""
+msgstr "حساب المناقلة للأساس النقدي"
 
 #. module: account
 #: model:ir.model,name:account.model_cash_box_out
@@ -3164,6 +3169,8 @@ msgid ""
 "Collect information and produce statistics on the trade in goods in Europe "
 "with intrastat"
 msgstr ""
+"تجميع المعلومات وتقديم الإحصاءات عن البضائع التجارية في أوروبا بواسطة "
+"Intrastat"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__color
@@ -3277,7 +3284,7 @@ msgstr "مجموعة كاملة من الضرائب"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_report_line__name
 msgid "Complete name for this report line, to be used in report."
-msgstr ""
+msgstr "اسم كامل لهذا السطر، ليتم استخدامه في التقرير."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__composer_id
@@ -3324,7 +3331,7 @@ msgstr "إعداد"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Configuration review"
-msgstr ""
+msgstr "مراجعة الإعدادات"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -3400,7 +3407,7 @@ msgstr "ضبط الوصول"
 #: code:addons/account/models/company.py:0
 #, python-format
 msgid "Corrupted data on journal entry with id %s."
-msgstr ""
+msgstr "بيانات معطوبة في قيد اليومية ذي الرقم %s."
 
 #. module: account
 #: model:account.account.type,name:account.data_account_type_direct_costs
@@ -3453,12 +3460,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_tag__country_id
 msgid "Country for which this tag is available, when applied on taxes."
-msgstr ""
+msgstr "البلد المتاح فيها هذه العلامة، عندما يتم استخدامها في الضرائب."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Coverage"
-msgstr ""
+msgstr "التغطية"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -3936,7 +3943,7 @@ msgstr "ضرائب العميل"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 msgid "Customer/Vendor"
-msgstr ""
+msgstr "العميل/المورد"
 
 #. module: account
 #. openerp-web
@@ -4007,12 +4014,12 @@ msgstr "أسفل"
 #. module: account
 #: model:ir.actions.server,name:account.action_check_hash_integrity
 msgid "Data Inalterability Check"
-msgstr ""
+msgstr "فحص عدم تغير البيانات"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Data consistency check"
-msgstr ""
+msgstr "التحقق من تناسق البيانات"
 
 #. module: account
 #. openerp-web
@@ -4135,7 +4142,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_default_pos_receivable_account_id
 msgid "Default PoS Receivable Account"
-msgstr ""
+msgstr "حساب المديونين الافتراضي لنقاط البيع"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_purchase_tax_id
@@ -5883,11 +5890,6 @@ msgid "Internal Group"
 msgstr "مجموعة داخلية"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_move__narration
-msgid "Internal Note"
-msgstr "ملاحظة داخلية"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__note
 msgid "Internal Notes"
 msgstr "ملاحظات داخلية"
@@ -6261,6 +6263,14 @@ msgid ""
 msgstr ""
 "لا يسمح بحذف أمر دفع أنشأ بالفعل قيد يومية لأنه سيتسبب في وجود فجوة "
 "بالأرقام. يجب إنشاء قيد اليومية مرة أخرى وإلغاؤه باستخدام العودة العادية."
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"It seems that the taxes have been modified since the creation of the journal"
+" entry. You should create the credit note manually instead."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -7628,7 +7638,7 @@ msgstr "غير متوازن"
 #. module: account
 #: model:account.account.type,name:account.data_account_off_sheet
 msgid "Off-Balance Sheet"
-msgstr "صحيفة عدم التوازن"
+msgstr "خارج الميزانية"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_line_form
@@ -7704,7 +7714,7 @@ msgstr "حساب مفتوح"
 #. module: account
 #: model:ir.model,name:account.model_account_financial_year_op
 msgid "Opening Balance of Financial Year"
-msgstr "الرصيد الابتدائي للعام المالي"
+msgstr "الرصيد الافتتاحي للعام المالي"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_financial_year_op__opening_date
@@ -8391,6 +8401,18 @@ msgid ""
 "Please install a chart of accounts or create a miscellaneous journal before "
 "proceeding."
 msgstr "برجاء تثبيت دليل محاسبي أو إنشاء دفتر يومية عام قبل المتابعة."
+
+#. module: account
+#: code:addons/account/models/account_cash_rounding.py:0
+#, python-format
+msgid "Please set a positive rounding value."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_cash_rounding.py:33
+#, python-format
+msgid "Please set a strictly positive rounding value."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -9124,6 +9146,11 @@ msgid "Revenue/Expense Account"
 msgstr "حساب الإيرادات/المصروفات"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move__reversal_move_id
+msgid "Reversal Move"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_reversal__date
 msgid "Reversal date"
 msgstr "تاريخ الانعكاس"
@@ -9604,6 +9631,12 @@ msgid "Send Money"
 msgstr "سند صرف"
 
 #. module: account
+#: code:addons/account/wizard/account_payment_send.py:0
+#, python-format
+msgid "Send Payment"
+msgstr ""
+
+#. module: account
 #: model:ir.actions.act_window,name:account.action_open_account_onboarding_sample_invoice
 msgid "Send a sample invoice"
 msgstr "إرسال فاتورة عينة"
@@ -9622,6 +9655,11 @@ msgstr "إرسال الفواتير ومتابعة الدفع عن طريق ال
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action
 msgid "Send receipt by email"
 msgstr "إرسال الإيصال عن طريق البريد الإلكتروني"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action_multi
+msgid "Send receipts by email"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_sample_invoice_step
@@ -10694,6 +10732,11 @@ msgid "Terms & Conditions"
 msgstr "الشروط والأحكام"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move__narration
+msgid "Terms and Conditions"
+msgstr "الشروط والأحكام"
+
+#. module: account
 #. openerp-web
 #: code:addons/account/static/src/xml/account_reconciliation.xml:0
 #, python-format
@@ -10992,6 +11035,14 @@ msgid ""
 msgstr ""
 "الفواتير التالية لن ترسل عبر البريد الالكتروني ،بسبب أن العميل لا يملك عنوان"
 " بريد الكتروني."
+
+#. module: account
+#: code:addons/account/wizard/account_payment_send.py:0
+#, python-format
+msgid ""
+"The following payment(s) will not be sent by email, because the customers "
+"don't have email address."
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/chart_template.py:0
@@ -12470,6 +12521,12 @@ msgid "You can only send invoices."
 msgstr "يمكنك فقط إرسال الفواتير."
 
 #. module: account
+#: code:addons/account/wizard/account_payment_send.py:0
+#, python-format
+msgid "You can only send payments."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid ""
@@ -12595,6 +12652,12 @@ msgstr "لا يمكنك حذف دفعة تم ترحيلها."
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You cannot delete an entry which has been posted once."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "You cannot delete an item linked to a posted entry."
 msgstr ""
 
 #. module: account
@@ -12880,12 +12943,6 @@ msgstr ""
 "المحاسبة للفروق بين أسعار الصرف تلقائيًا."
 
 #. module: account
-#: code:addons/account/models/account_cash_rounding.py:33
-#, python-format
-msgid "Please set a positive rounding value."
-msgstr ""
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
 msgid "Zip Range"
 msgstr "نطاق الرمز البريدي"
@@ -13001,6 +13058,11 @@ msgstr "من الشهر الجاري"
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__option__day_following_month
 msgid "of the following month"
 msgstr "من الشهر التالي"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid "on"
+msgstr "في"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form

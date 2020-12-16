@@ -13,6 +13,7 @@
 # Michal Matus <misko.matus@gmail.com>, 2020
 # Alexandra Brencicova <alexandra.brencicova@gmail.com>, 2020
 # Damian Brencic <brencicdamian12313@gmail.com>, 2020
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2020
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # 
 msgid ""
@@ -1544,7 +1545,7 @@ msgstr "Prvý hlas zvolenia"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.question_dropdown
 msgid "Flag"
-msgstr ""
+msgstr "vlajka"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_flag
@@ -2954,6 +2955,8 @@ msgid ""
 "This community is for professional and enthusiast users, partners and "
 "programmers."
 msgstr ""
+"Táto komunita je pre profesionálnych a nadšených používateľov, partnerov a "
+"programátorov."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -2961,6 +2964,8 @@ msgid ""
 "This community is for professional and enthusiast users, partners and "
 "programmers. You can ask questions about:"
 msgstr ""
+"Táto komunita je pre profesionálnych a nadšených používateľov, partnerov a "
+"programátorov. Môžete klásť otázky týkajúce sa:"
 
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help

@@ -159,12 +159,13 @@ class StockRule(models.Model):
         """
         new_date = fields.Datetime.to_string(move.date_expected + relativedelta(days=self.delay))
         if self.auto == 'transparent':
+            old_dest_location = move.location_dest_id
             move.write({
                 'date': new_date,
                 'date_expected': new_date,
                 'location_dest_id': self.location_id.id})
             # avoid looping if a push rule is not well configured; otherwise call again push_apply to see if a next step is defined
-            if self.location_id != move.location_dest_id:
+            if self.location_id != old_dest_location:
                 # TDE FIXME: should probably be done in the move model IMO
                 move._push_apply()
         else:
@@ -458,11 +459,14 @@ class ProcurementGroup(models.Model):
             ('product_id', '=', values['product_id'].id)]
 
     @api.model
-    def _get_moves_to_assign_domain(self):
-        return expression.AND([
-            [('state', 'in', ['confirmed', 'partially_available'])],
-            [('product_uom_qty', '!=', 0.0)]
-        ])
+    def _get_moves_to_assign_domain(self, company_id):
+        moves_domain = [
+            ('state', 'in', ['confirmed', 'partially_available']),
+            ('product_uom_qty', '!=', 0.0)
+        ]
+        if company_id:
+            moves_domain = expression.AND([[('company_id', '=', company_id)], moves_domain])
+        return moves_domain
 
     @api.model
     def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
@@ -470,7 +474,7 @@ class ProcurementGroup(models.Model):
         self.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id)
 
         # Search all confirmed stock_moves and try to assign them
-        domain = self._get_moves_to_assign_domain()
+        domain = self._get_moves_to_assign_domain(company_id)
         moves_to_assign = self.env['stock.move'].search(domain, limit=None,
             order='priority desc, date_expected asc')
         for moves_chunk in split_every(100, moves_to_assign.ids):

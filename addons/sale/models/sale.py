@@ -360,6 +360,7 @@ class SaleOrder(models.Model):
         - Payment terms
         - Invoice address
         - Delivery address
+        - Sales Team
         """
         if not self.partner_id:
             self.update({
@@ -386,13 +387,17 @@ class SaleOrder(models.Model):
         if self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms') and self.env.company.invoice_terms:
             values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
         if not self.env.context.get('not_self_saleperson') or not self.team_id:
-            values['team_id'] = self.env['crm.team']._get_default_team_id(domain=['|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],user_id=user_id)
+            values['team_id'] = self.env['crm.team'].with_context(
+                default_team_id=self.partner_id.team_id.id
+            )._get_default_team_id(domain=['|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)], user_id=user_id)
         self.update(values)
 
     @api.onchange('user_id')
     def onchange_user_id(self):
         if self.user_id:
-            self.team_id = self.env['crm.team']._get_default_team_id(user_id=self.user_id.id)
+            self.team_id = self.env['crm.team'].with_context(
+                default_team_id=self.team_id.id
+            )._get_default_team_id(user_id=self.user_id.id)
 
     @api.onchange('partner_id')
     def onchange_partner_id_warning(self):
@@ -622,9 +627,9 @@ class SaleOrder(models.Model):
                 if line.display_type == 'line_section':
                     pending_section = line
                     continue
-                if float_is_zero(line.qty_to_invoice, precision_digits=precision):
+                if line.display_type != 'line_note' and float_is_zero(line.qty_to_invoice, precision_digits=precision):
                     continue
-                if line.qty_to_invoice > 0 or (line.qty_to_invoice < 0 and final):
+                if line.qty_to_invoice > 0 or (line.qty_to_invoice < 0 and final) or line.display_type == 'line_note':
                     if pending_section:
                         invoice_vals['invoice_line_ids'].append((0, 0, pending_section._prepare_invoice_line()))
                         pending_section = None
@@ -950,7 +955,7 @@ class SaleOrder(models.Model):
             'currency_id': currency.id,
             'partner_id': partner.id,
             'sale_order_ids': [(6, 0, self.ids)],
-            'type': self[0]._get_payment_type(),
+            'type': self[0]._get_payment_type(vals.get('type')=='form_save'),
         })
 
         transaction = self.env['payment.transaction'].create(vals)
@@ -1007,9 +1012,9 @@ class SaleOrder(models.Model):
             return self.get_portal_url(query_string='&%s' % auth_param)
         return super(SaleOrder, self)._get_share_url(redirect, signup_partner, pid)
 
-    def _get_payment_type(self):
+    def _get_payment_type(self, tokenize=False):
         self.ensure_one()
-        return 'form'
+        return 'form_save' if tokenize else 'form'
 
     def _get_portal_return_action(self):
         """ Return the action used to display orders when returning from customer portal. """
@@ -1084,6 +1089,7 @@ class SaleOrderLine(models.Model):
             else:
                 line.product_updatable = True
 
+    # no trigger product_id.invoice_policy to avoid retroactively changing SO
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'order_id.state')
     def _get_to_invoice_qty(self):
         """
@@ -1444,7 +1450,12 @@ class SaleOrderLine(models.Model):
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
                     # has to be called to retrieve the subtotal without them.
                     # `price_reduce_taxexcl` cannot be used as it is computed from `price_subtotal` field. (see upper Note)
-                    price_subtotal = line.tax_id.compute_all(price_subtotal)['total_excluded']
+                    price_subtotal = line.tax_id.compute_all(
+                        price_subtotal,
+                        currency=line.order_id.currency_id,
+                        quantity=line.product_uom_qty,
+                        product=line.product_id,
+                        partner=line.order_id.partner_shipping_id)['total_excluded']
 
                 if any(line.invoice_lines.mapped(lambda l: l.discount != line.discount)):
                     # In case of re-invoicing with different discount we try to calculate manually the
@@ -1526,7 +1537,7 @@ class SaleOrderLine(models.Model):
             )
 
         if self.order_id.pricelist_id.discount_policy == 'with_discount':
-            return product.with_context(pricelist=self.order_id.pricelist_id.id).price
+            return product.with_context(pricelist=self.order_id.pricelist_id.id, uom=self.product_uom.id).price
         product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
 
         final_price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(product or self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
@@ -1766,8 +1777,10 @@ class SaleOrderLine(models.Model):
         for ptav in (no_variant_ptavs - custom_ptavs):
             name += "\n" + ptav.with_context(lang=self.order_id.partner_id.lang).display_name
 
+        # Sort the values according to _order settings, because it doesn't work for virtual records in onchange
+        custom_values = sorted(self.product_custom_attribute_value_ids, key=lambda r: (r.custom_product_template_attribute_value_id.id, r.id))
         # display the is_custom values
-        for pacv in self.product_custom_attribute_value_ids:
+        for pacv in custom_values:
             name += "\n" + pacv.with_context(lang=self.order_id.partner_id.lang).display_name
 
         return name

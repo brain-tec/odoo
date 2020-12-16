@@ -3884,7 +3884,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_form
 msgid "Page views"
-msgstr ""
+msgstr "بازدیدهای صفحه"
 
 #. module: website
 #: code:addons/website/models/website.py:0
@@ -3918,7 +3918,7 @@ msgstr "منوی مادر"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__parent_path
 msgid "Parent Path"
-msgstr ""
+msgstr "مسیر والد"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__partner_id
@@ -5268,7 +5268,7 @@ msgstr "نوع نما"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page__mode
 msgid "View inheritance mode"
-msgstr ""
+msgstr "مشاهده حالت وراٍت"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.website_visitor_view_action
@@ -5358,7 +5358,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_graph
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_search
 msgid "Visitors"
-msgstr ""
+msgstr "بازدید کنندگان"
 
 #. module: website
 #. openerp-web
@@ -5415,7 +5415,7 @@ msgstr "ما اینها را یافتیم:"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_tree
 msgid "Web Visitors"
-msgstr ""
+msgstr "بازدید کنندگان وب"
 
 #. module: website
 #. openerp-web
@@ -5758,6 +5758,12 @@ msgid ""
 msgstr ""
 "شما این صفحه را از نتایج جستجو پنهان کرده اید. این صفحه توسط موتورهای جستجو "
 "ایندکس نخواهد شد."
+
+#. module: website
+#: code:addons/website/models/website.py:162
+#, python-format
+msgid "You must keep at least one website."
+msgstr ""
 
 #. module: website
 #. openerp-web

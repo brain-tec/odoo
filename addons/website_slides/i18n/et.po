@@ -2465,7 +2465,7 @@ msgstr "Sõnumid"
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_category_demo_1_1
 msgid "Methods"
-msgstr ""
+msgstr "Meetodid"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_0_2
@@ -3094,7 +3094,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
 #, python-format
 msgid "Review"
-msgstr ""
+msgstr "Ülevaade"
 
 #. module: website_slides
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_courses_reviews
@@ -3902,7 +3902,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid "View fullscreen"
-msgstr ""
+msgstr "Vaata täisekraanil"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__total_views

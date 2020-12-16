@@ -42,7 +42,6 @@
 # Pedro M. Baeza <pedro.baeza@gmail.com>, 2020
 # Juan José Scarafía <scarafia.juanjose@gmail.com>, 2020
 # Jose Alejandro Echeverri Valencia <josealejandroeche@gmail.com>, 2020
-# 0bbd034d1b285e7568819a743ec2b501_2b84791 <d5c81972596cfedcd53204f47f6a8434_940895>, 2020
 # Susanna Pujol, 2020
 # 
 msgid ""
@@ -934,7 +933,7 @@ msgstr "Productos disponibles"
 #: code:addons/stock/models/product.py:581
 #, python-format
 msgid "Available quantity should be set to zero before changing type"
-msgstr "Available quantity should be set to zero before changing type"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__backorder_id
@@ -6547,6 +6546,16 @@ msgstr ""
 "productos que está devolviendo ahora, asegúrese de <b>anular</b> el albarán "
 "devuelto para evitar que se apliquen de nuevo las reglas de logísticas (lo "
 "que crearía operaciones duplicadas)"
+
+#. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product has been used in at least one inventory movement. It is not "
+"advised to change the Product Type since it can lead to inconsistencies. A "
+"better solution could be to archive the product and create a new one "
+"instead."
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_change_product_qty__new_quantity
