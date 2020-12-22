@@ -1772,7 +1772,7 @@ exports.Orderline = Backbone.Model.extend({
             this.order.remove_orderline(this);
             return;
         }else{
-            var quant = field_utils.parse.float('' + quantity) || 0;
+            var quant = typeof(quantity) === 'number' ? quantity : (field_utils.parse.float('' + quantity) || 0);
             var unit = this.get_unit();
             if(unit){
                 if (unit.rounding) {
@@ -2338,6 +2338,13 @@ exports.Orderline = Backbone.Model.extend({
       this.order.assert_editable();
       this.product.lst_price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
       this.trigger('change',this);
+    },
+    is_last_line: function() {
+        var order = this.pos.get_order();
+        var last_id = Object.keys(order.orderlines._byId)[Object.keys(order.orderlines._byId).length-1];
+        var selectedLine = order? order.selected_orderline: null;
+
+        return !selectedLine ? false : last_id === selectedLine.cid;
     },
 });
 
