@@ -1578,7 +1578,7 @@ class AccountMove(models.Model):
         if not moves:
             return
 
-        self.flush()
+        self.flush(['name', 'journal_id', 'move_type', 'state'])
 
         # /!\ Computed stored fields are not yet inside the database.
         self._cr.execute('''
@@ -3409,7 +3409,7 @@ class AccountMoveLine(models.Model):
 
             # Convert the unit price to the invoice's currency.
             company = line.move_id.company_id
-            line.price_unit = company.currency_id._convert(line.price_unit, line.move_id.currency_id, company, line.move_id.date)
+            line.price_unit = company.currency_id._convert(line.price_unit, line.move_id.currency_id, company, line.move_id.date, round=False)
 
     @api.onchange('product_uom_id')
     def _onchange_uom_id(self):
@@ -3426,7 +3426,7 @@ class AccountMoveLine(models.Model):
 
         # Convert the unit price to the invoice's currency.
         company = self.move_id.company_id
-        self.price_unit = company.currency_id._convert(price_unit, self.move_id.currency_id, company, self.move_id.date)
+        self.price_unit = company.currency_id._convert(price_unit, self.move_id.currency_id, company, self.move_id.date, round=False)
 
     @api.onchange('account_id')
     def _onchange_account_id(self):
