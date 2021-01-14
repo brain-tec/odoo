@@ -20683,6 +20683,12 @@ msgstr ""
 "skúste to prosím znovu po obnovení."
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid ""
@@ -22934,7 +22940,7 @@ msgstr "Sprostredkovatelia"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_partner_commission
 msgid "Resellers Commissions For Subscription"
-msgstr "Provízie za ďalší predaj"
+msgstr "Provízie predajcu za predplatné"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__reset_mode
@@ -23313,7 +23319,7 @@ msgstr "Marža výpredaja"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_dashboard
 msgid "Sale Subscription Dashboard"
-msgstr "Informačný panel predplatného na predaj"
+msgstr "Kontrolný panel predaj predplatného "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_purchase
@@ -24611,7 +24617,7 @@ msgstr "Predplatné a časový rozvrh"
 #: model:ir.module.category,name:base.module_category_sales_subscriptions
 #: model:ir.module.module,shortdesc:base.module_sale_subscription
 msgid "Subscriptions"
-msgstr "Odbery"
+msgstr "Predplatné"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__date_range_ids

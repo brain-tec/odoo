@@ -21077,6 +21077,12 @@ msgstr ""
 "еще раз после обновления."
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid ""
@@ -22430,7 +22436,7 @@ msgstr "Профессор"
 #: model:ir.module.category,name:base.module_category_services_project
 #: model:ir.module.module,shortdesc:base.module_project
 msgid "Project"
-msgstr "Проект"
+msgstr "Управление проектами"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_enterprise
@@ -27021,7 +27027,7 @@ msgstr "Удалить"
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 #, python-format
 msgid "Uninstall module"
-msgstr "неустановленный модуль"
+msgstr "Удаление модуля"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__uninstallable
