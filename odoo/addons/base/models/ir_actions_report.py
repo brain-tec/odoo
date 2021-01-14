@@ -23,7 +23,7 @@ from lxml import etree
 from contextlib import closing
 from distutils.version import LooseVersion
 from reportlab.graphics.barcode import createBarcodeDrawing
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfFileWriter, PdfFileReader, utils
 from collections import OrderedDict
 from collections.abc import Iterable
 from PIL import Image, ImageFile
@@ -507,6 +507,9 @@ class IrActionsReport(models.Model):
             barcode_type = 'EAN13'
             if len(value) in (11, 12):
                 value = '0%s' % value
+        elif barcode_type == 'auto':
+            symbology_guess = {8: 'EAN8', 13: 'EAN13'}
+            barcode_type = symbology_guess.get(len(value), 'Code128')
         try:
             width, height, humanreadable, quiet = int(width), int(height), bool(int(humanreadable)), bool(int(quiet))
             # for `QR` type, `quiet` is not supported. And is simply ignored.
@@ -678,7 +681,10 @@ class IrActionsReport(models.Model):
         if len(streams) == 1:
             result = streams[0].getvalue()
         else:
-            result = self._merge_pdfs(streams)
+            try:
+                result = self._merge_pdfs(streams)
+            except utils.PdfReadError:
+                raise UserError(_("One of the documents, you try to merge is encrypted"))
 
         # We have to close the streams after PdfFileWriter's call to write()
         close_streams(streams)

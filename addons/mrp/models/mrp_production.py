@@ -74,7 +74,7 @@ class MrpProduction(models.Model):
     name = fields.Char(
         'Reference', copy=False, readonly=True, default=lambda x: _('New'))
     priority = fields.Selection(
-        PROCUREMENT_PRIORITIES, string='Priority', default='0', index=True,
+        PROCUREMENT_PRIORITIES, string='Priority', default='0',
         help="Components will be reserved first for the MO with the highest priorities.")
     backorder_sequence = fields.Integer("Backorder Sequence", default=0, copy=False, help="Backorder sequence, if equals to 0 means there is not related backorder")
     origin = fields.Char(
@@ -136,8 +136,8 @@ class MrpProduction(models.Model):
     date_deadline = fields.Datetime(
         'Deadline', copy=False, store=True, readonly=True, compute='_compute_date_deadline', inverse='_set_date_deadline',
         help="Informative date allowing to define when the manufacturing order should be processed at the latest to fulfill delivery on time.")
-    date_start = fields.Datetime('Start Date', copy=False, index=True, readonly=True)
-    date_finished = fields.Datetime('End Date', copy=False, index=True, readonly=True)
+    date_start = fields.Datetime('Start Date', copy=False, readonly=True, help="Date of the WO")
+    date_finished = fields.Datetime('End Date', copy=False, readonly=True, help="Date when the MO has been close")
     bom_id = fields.Many2one(
         'mrp.bom', 'Bill of Material',
         readonly=True, states={'draft': [('readonly', False)]},
@@ -397,6 +397,8 @@ class MrpProduction(models.Model):
 
     @api.depends('product_id', 'company_id')
     def _compute_production_location(self):
+        if not self.company_id:
+            return
         location_by_company = self.env['stock.location'].read_group([
             ('company_id', 'in', self.company_id.ids),
             ('usage', '=', 'production')
@@ -520,7 +522,7 @@ class MrpProduction(models.Model):
         return ['|', ('move_raw_ids', 'in', late_stock_moves.ids), ('move_finished_ids', 'in', late_stock_moves.ids)]
 
     @api.onchange('company_id')
-    def onchange_company_id(self):
+    def _onchange_company_id(self):
         if self.company_id:
             if self.move_raw_ids:
                 self.move_raw_ids.update({'company_id': self.company_id})
@@ -531,7 +533,7 @@ class MrpProduction(models.Model):
                 ], limit=1).id
 
     @api.onchange('product_id', 'picking_type_id', 'company_id')
-    def onchange_product_id(self):
+    def _onchange_product_id(self):
         """ Finds UoM of changed product. """
         if not self.product_id:
             self.bom_id = False
@@ -643,16 +645,12 @@ class MrpProduction(models.Model):
         self.move_finished_ids = update_value_list
 
     @api.onchange('picking_type_id')
-    def onchange_picking_type(self):
-        location = self.env.ref('stock.stock_location_stock')
-        try:
-            location.check_access_rule('read')
-        except (AttributeError, AccessError):
-            location = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1).lot_stock_id
-        self.move_raw_ids.update({'picking_type_id': self.picking_type_id})
-        self.move_finished_ids.update({'picking_type_id': self.picking_type_id})
-        self.location_src_id = self.picking_type_id.default_location_src_id.id or location.id
-        self.location_dest_id = self.picking_type_id.default_location_dest_id.id or location.id
+    def _onchange_picking_type(self):
+        if not self.picking_type_id.default_location_src_id or not self.picking_type_id.default_location_dest_id.id:
+            company_id = self.company_id.id if (self.company_id and self.company_id in self.env.companies) else self.env.company.id
+            fallback_loc = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
+        self.location_src_id = self.picking_type_id.default_location_src_id.id or fallback_loc.id
+        self.location_dest_id = self.picking_type_id.default_location_dest_id.id or fallback_loc.id
 
     @api.onchange('qty_producing', 'lot_producing_id')
     def _onchange_producing(self):
@@ -800,7 +798,6 @@ class MrpProduction(models.Model):
                         'product_uom_id': production.product_uom_id.id,
                         'operation_id': operation.id,
                         'state': 'pending',
-                        'consumption': production.consumption,
                     }]
             production.workorder_ids = [(5, 0)] + [(0, 0, value) for value in workorders_values]
             for workorder in production.workorder_ids:

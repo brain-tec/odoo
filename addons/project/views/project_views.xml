@@ -164,7 +164,6 @@
                     <field name="fold" optional="show"/>
                     <field name="mail_template_id" optional="show"/>
                     <field name="rating_template_id" optional="show"/>
-                    <field name="auto_validation_kanban_state" optional="hide" />
                     <field name="description" optional="hide"/>
                     <field name="project_ids" optional="show" widget="many2many_tags" options="{'color_field': 'color'}" />
                 </tree>
@@ -294,7 +293,7 @@
                                 <group>
                                     <field name="active" invisible="1"/>
                                     <field name="user_id" string="Project Manager" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
-                                    <field name="partner_id" string="Customer"/>
+                                    <field name="partner_id" string="Customer" widget="res_partner_many2one"/>
                                     <field name="partner_phone" widget="phone"
                                            attrs="{'invisible': [('partner_id', '=', False)]}"/>
                                     <field name="partner_email" widget="email"
@@ -678,9 +677,9 @@
                         </group>
                         <group>
                             <field name="active" invisible="1"/>
-                            <field name="partner_id" class="o_task_customer_field"/>
+                            <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
                             <field name="partner_email" widget="email" invisible="1"/>
-                            <field name="partner_phone" widget="phone" attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                            <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
                             <field name="legend_blocked" invisible="1"/>
                             <field name="legend_normal" invisible="1"/>
                             <field name="legend_done" invisible="1"/>

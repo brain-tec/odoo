@@ -11,7 +11,7 @@ from lxml import etree
 import math
 
 from odoo.tools import html_escape as escape, posix_to_ldml, float_utils, format_date, format_duration, pycompat
-from odoo.tools.misc import get_lang
+from odoo.tools.misc import get_lang, babel_locale_parse
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -236,7 +236,7 @@ class DateTimeConverter(models.AbstractModel):
         options = options or {}
 
         lang = self.user_lang()
-        locale = babel.Locale.parse(lang.code)
+        locale = babel_locale_parse(lang.code)
         format_func = babel.dates.format_datetime
         if isinstance(value, str):
             value = fields.Datetime.from_string(value)
@@ -559,7 +559,7 @@ class DurationConverter(models.AbstractModel):
     def value_to_html(self, value, options):
         units = {unit: duration for unit, label, duration in TIMEDELTA_UNITS}
 
-        locale = babel.Locale.parse(self.user_lang().code)
+        locale = babel_locale_parse(self.user_lang().code)
         factor = units[options.get('unit', 'second')]
         round_to = units[options.get('round', 'second')]
 
@@ -617,7 +617,7 @@ class RelativeDatetimeConverter(models.AbstractModel):
 
     @api.model
     def value_to_html(self, value, options):
-        locale = babel.Locale.parse(self.user_lang().code)
+        locale = babel_locale_parse(self.user_lang().code)
 
         if isinstance(value, str):
             value = fields.Datetime.from_string(value)
@@ -651,17 +651,25 @@ class BarcodeConverter(models.AbstractModel):
             width=dict(type='integer', string=_('Width'), default_value=600),
             height=dict(type='integer', string=_('Height'), default_value=100),
             humanreadable=dict(type='integer', string=_('Human Readable'), default_value=0),
+            quiet=dict(type='integer', string='Quiet', default_value=1),
+            mask=dict(type='string', string='Mask', default_value='')
         )
         return options
 
     @api.model
     def value_to_html(self, value, options=None):
+        if not value:
+            return ''
         barcode_symbology = options.get('symbology', 'Code128')
         barcode = self.env['ir.actions.report'].barcode(
             barcode_symbology,
             value,
-            **{key: value for key, value in options.items() if key in ['width', 'height', 'humanreadable']})
-        return u'<img src="data:png;base64,%s">' % base64.b64encode(barcode).decode('ascii')
+            **{key: value for key, value in options.items() if key in ['width', 'height', 'humanreadable', 'quiet', 'mask']})
+        img_attributes = {k[4:]: v for k, v in options.items() if k.startswith('img_')}
+        if 'alt' not in img_attributes:
+            img_attributes.update({'alt': 'Barcode %s' % value})
+        attributes = ' '.join(['%s="%s"' % attrs for attrs in img_attributes.items()])
+        return u'<img src="data:png;base64,%s" %s>' % (base64.b64encode(barcode).decode('ascii'), attributes)
 
 
 class Contact(models.AbstractModel):

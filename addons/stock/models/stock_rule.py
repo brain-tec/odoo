@@ -85,7 +85,7 @@ class StockRule(models.Model):
     auto = fields.Selection([
         ('manual', 'Manual Operation'),
         ('transparent', 'Automatic No Step Added')], string='Automatic Move',
-        default='manual', index=True, required=True,
+        default='manual', required=True,
         help="The 'Manual Operation' value will create a stock move after the current one. "
              "With 'Automatic No Step Added', the location is replaced in the original move.")
     rule_message = fields.Html(compute='_compute_action_message')
@@ -489,10 +489,8 @@ class ProcurementGroup(models.Model):
             ('state', 'in', ['confirmed', 'partially_available']),
             ('product_uom_qty', '!=', 0.0)
         ]
-        # TODO: make picking_type_id/reservation method one value on stock.move
-        moves_domain = expression.AND([moves_domain, ['|', '|', ('picking_type_id.reservation_method', '=', 'at_confirm'),
-                                                                ('picking_id.picking_type_id.reservation_method', '=', 'at_confirm'),
-                                                                ('reservation_date', '<=', fields.Date.today())]])
+        moves_domain = expression.AND([moves_domain, ['|', ('picking_type_id.reservation_method', '=', 'at_confirm'),
+                                                           ('reservation_date', '<=', fields.Date.today())]])
         if company_id:
             moves_domain = expression.AND([[('company_id', '=', company_id)], moves_domain])
         return moves_domain
@@ -506,18 +504,17 @@ class ProcurementGroup(models.Model):
         # recomputed
         orderpoints.sudo()._compute_qty_to_order()
         orderpoints.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id, raise_user_error=False)
+        if use_new_cursor:
+            self._cr.commit()
 
         # Search all confirmed stock_moves and try to assign them
         domain = self._get_moves_to_assign_domain(company_id)
         moves_to_assign = self.env['stock.move'].search(domain, limit=None,
             order='priority desc, date asc')
         for moves_chunk in split_every(100, moves_to_assign.ids):
-            self.env['stock.move'].browse(moves_chunk)._action_assign()
+            self.env['stock.move'].browse(moves_chunk).sudo()._action_assign()
             if use_new_cursor:
                 self._cr.commit()
-
-        if use_new_cursor:
-            self._cr.commit()
 
         # Merge duplicated quants
         self.env['stock.quant']._quant_tasks()

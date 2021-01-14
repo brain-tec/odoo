@@ -218,10 +218,12 @@ class MockEmail(common.BaseCase):
         mail = self._find_mail(author, recipients, mail_message)
         self.assertEqual(mail.state, 'exception')
 
-    def assertMailMail(self, recipients, status, check_mail_mail=True, mail_message=None, author=None, email_values=None):
+    def assertMailMail(self, recipients, status, check_mail_mail=True, mail_message=None, author=None, email_values=None, fields_values=None):
         if check_mail_mail:
             mail = self._find_mail_mail_wpartners(recipients, status, mail_message=mail_message, author=author)
             self.assertTrue(bool(mail))
+            for fname, fvalue in (fields_values or {}).items():
+                self.assertEqual(mail[fname], fvalue)
         if status == 'sent':
             for recipient in recipients:
                 self.assertSentEmail(author, [recipient], **email_values)
@@ -242,7 +244,7 @@ class MockEmail(common.BaseCase):
             for fname, fvalue in (fields_values or {}).items():
                 self.assertEqual(sent_mail[fname], fvalue)
 
-    def assertNoMail(self, author, recipients, mail_message):
+    def assertNoMail(self, author, recipients, mail_message=None):
         try:
             self._find_mail_mail_wpartners(recipients, False, mail_message=mail_message, author=author)
         except AssertionError:
@@ -421,6 +423,25 @@ class MailCase(MockEmail):
             create_values.update(template_values)
         cls.email_template = cls.env['mail.template'].create(create_values)
         return cls.email_template
+
+
+    def _generate_notify_recipients(self, partners):
+        """ Tool method to generate recipients data according to structure used
+        in notification methods. Purpose is to allow testing of internals of
+        some notification methods, notably testing links or group-based notification
+        details.
+
+        See notably ``MailThread._notify_compute_recipients()``.
+        """
+        return [
+            {'id': partner.id,
+             'active': True,
+             'share': partner.partner_share,
+             'groups': partner.user_ids.groups_id.ids,
+             'notif': partner.user_ids.notification_type or 'email',
+             'type': 'user' if partner.user_ids and not partner.partner_share else partner.user_ids and 'portal' or 'customer',
+            } for partner in partners
+        ]
 
     # ------------------------------------------------------------
     # MAIL ASSERTS WRAPPERS
@@ -660,6 +681,9 @@ class MailCommon(common.TransactionCase, MailCase):
         cls.partner_admin = cls.env.ref('base.partner_admin')
         cls.company_admin = cls.user_admin.company_id
         cls.company_admin.write({'email': 'company@example.com'})
+        # have root available at hand, just in case
+        cls.user_root = cls.env.ref('base.user_root')
+        cls.partner_root = cls.user_root.partner_id
 
         # test standard employee
         cls.user_employee = mail_new_test_user(
@@ -679,3 +703,24 @@ class MailCommon(common.TransactionCase, MailCase):
             name='Chell Gladys', notification_type='email')
         cls.partner_portal = cls.user_portal.partner_id
         return cls.user_portal
+
+    @classmethod
+    def _activate_multi_company(cls):
+        """ Create another company, add it to admin and create an user that
+        belongs to that new company. It allows to test flows with users from
+        different companies. """
+        cls.company_2 = cls.env['res.company'].create({
+            'name': 'Company 2',
+            'email': 'company_2@test.example.com',
+        })
+        cls.user_admin.write({'company_ids': [(4, cls.company_2.id)]})
+
+        cls.user_employee_c2 = mail_new_test_user(
+            cls.env, login='employee_c2',
+            groups='base.group_user',
+            company_id=cls.company_2.id,
+            name='Enguerrand Employee C2',
+            notification_type='inbox',
+            signature='--\nEnguerrand'
+        )
+        cls.partner_employee_c2 = cls.user_employee_c2.partner_id
