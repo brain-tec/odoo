@@ -4,6 +4,7 @@ odoo.define('web_editor.snippets.options', function (require) {
 var core = require('web.core');
 const {ColorpickerWidget} = require('web.Colorpicker');
 const Dialog = require('web.Dialog');
+const rpc = require('web.rpc');
 const time = require('web.time');
 var Widget = require('web.Widget');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
@@ -3950,50 +3951,66 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @param {function} computeShapeData function to compute the new shape data.
      */
     _handlePreviewState(previewMode, computeShapeData) {
-        if (previewMode === 'reset') {
-            if (this.prevShape) {
-                this.$target[0].dataset.oeShapeData = this.prevShape;
-            } else {
-                delete this.$target[0].dataset.oeShapeData;
+        const target = this.$target[0];
+        const insertShapeContainer = newContainer => {
+            const shapeContainer = target.querySelector(':scope > .o_we_shape');
+            if (shapeContainer) {
+                shapeContainer.remove();
             }
+            if (newContainer) {
+                const preShapeLayerElement = this._getLastPreShapeLayerElement();
+                if (preShapeLayerElement) {
+                    $(preShapeLayerElement).after(newContainer);
+                } else {
+                    this.$target.prepend(newContainer);
+                }
+            }
+            return newContainer;
+        };
+
+        let changedShape = false;
+        if (previewMode === 'reset') {
+            insertShapeContainer(this.prevShapeContainer);
+            if (this.prevShape) {
+                target.dataset.oeShapeData = this.prevShape;
+            } else {
+                delete target.dataset.oeShapeData;
+            }
+            return;
         } else {
             if (previewMode === true) {
-                this.prevShape = this.$target[0].dataset.oeShapeData;
+                const shapeContainer = target.querySelector(':scope > .o_we_shape');
+                this.prevShapeContainer = shapeContainer && shapeContainer.cloneNode(true);
+                this.prevShape = target.dataset.oeShapeData;
             }
+            const curShapeData = target.dataset.oeShapeData || {};
             const newShapeData = computeShapeData();
+            const {shape: curShape} = curShapeData;
+            changedShape = newShapeData.shape !== curShape;
             this._markShape(newShapeData);
-            if (previewMode === false) {
-                this.prevShape = this.$target[0].dataset.oeShapeData;
-                if (newShapeData.hasOwnProperty('shape')) {
-                    // Need to rerender for correct number of colorpickers
-                    this.rerender = true;
-                }
+            if (previewMode === false && changedShape) {
+                // Need to rerender for correct number of colorpickers
+                this.rerender = true;
             }
         }
 
         // Updates/removes the shape container as needed and gives it the
         // correct background shape
-        const json = this.$target[0].dataset.oeShapeData;
+        const json = target.dataset.oeShapeData;
         const {shape, colors, flip = []} = json ? JSON.parse(json) : {};
-        const target = this.$target[0];
         let shapeContainer = target.querySelector(':scope > .o_we_shape');
         if (!shape) {
-            if (shapeContainer) {
-                shapeContainer.remove();
-            }
-            return;
+            return insertShapeContainer(null);
+        }
+        // When changing shape we want to reset the shape container (for transparency color)
+        if (changedShape) {
+            shapeContainer = insertShapeContainer(null);
         }
         if (!shapeContainer) {
-            shapeContainer = document.createElement('div');
-            const preShapeLayerElement = this._getLastPreShapeLayerElement();
-            if (preShapeLayerElement) {
-                $(preShapeLayerElement).after(shapeContainer);
-            } else {
-                target.prepend(shapeContainer);
-            }
+            shapeContainer = insertShapeContainer(document.createElement('div'));
             target.style.position = 'relative';
+            shapeContainer.className = `o_we_shape o_${shape.replace(/\//g, '_')}`;
         }
-        shapeContainer.className = `o_we_shape o_${shape.replace(/\//g, '_')}`;
         // Compat: remove old flip classes as flipping is now done inside the svg
         shapeContainer.classList.remove('o_we_flip_x', 'o_we_flip_y');
 
@@ -4015,6 +4032,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             // Remove custom bg image and let the shape class set the bg shape
             $(shapeContainer).css('background-image', '');
             $(shapeContainer).css('background-position', '');
+        }
+        if (previewMode === false) {
+            this.prevShapeContainer = shapeContainer.cloneNode(true);
+            this.prevShape = target.dataset.oeShapeData;
         }
     },
     /**
@@ -4675,27 +4696,54 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                     classes: 'btn-primary',
                     close: true,
                     click: async () => {
-                        const snippetName = dialog.el.querySelector('.o_we_snippet_name_input').value;
-                        const targetCopyEl = this.$target[0].cloneNode(true);
-                        delete targetCopyEl.dataset.name;
+                        const save = await new Promise(resolve => {
+                            Dialog.confirm(this, _t("To save a snippet, we need to save all your previous modifications and reload the page."), {
+                                buttons: [
+                                    {
+                                        text: _t("Save and Reload"),
+                                        classes: 'btn-primary',
+                                        close: true,
+                                        click: () => resolve(true),
+                                    }, {
+                                        text: _t("Cancel"),
+                                        close: true,
+                                        click: () => resolve(false),
+                                    }
+                                ]
+                            });
+                        });
+                        if (!save) {
+                            return;
+                        }
                         const snippetKey = this.$target[0].dataset.snippet;
                         let thumbnailURL;
                         this.trigger_up('snippet_thumbnail_url_request', {
                             key: snippetKey,
                             onSuccess: url => thumbnailURL = url,
                         });
-                        await this._rpc({
-                            model: 'ir.ui.view',
-                            method: 'save_snippet',
-                            kwargs: {
-                                'name': snippetName,
-                                'arch': targetCopyEl.outerHTML,
-                                'template_key': this.options.snippets,
-                                'snippet_key': snippetKey,
-                                'thumbnail_url': thumbnailURL,
+                        this.trigger_up('request_save', {
+                            reloadEditor: true,
+                            onSuccess: async () => {
+                                const snippetName = dialog.el.querySelector('.o_we_snippet_name_input').value;
+                                const targetCopyEl = this.$target[0].cloneNode(true);
+                                delete targetCopyEl.dataset.name;
+                                // By the time onSuccess is called after request_save, the
+                                // current widget has been destroyed and is orphaned, so this._rpc
+                                // will not work as it can't trigger_up. For this reason, we need
+                                // to bypass the service provider and use the global RPC directly
+                                await rpc.query({
+                                    model: 'ir.ui.view',
+                                    method: 'save_snippet',
+                                    kwargs: {
+                                        'name': snippetName,
+                                        'arch': targetCopyEl.outerHTML,
+                                        'template_key': this.options.snippets,
+                                        'snippet_key': snippetKey,
+                                        'thumbnail_url': thumbnailURL,
+                                    },
+                                });
                             },
                         });
-                        this.trigger_up('reload_snippet_template');
                     },
                 }, {
                     text: _t("Discard"),
