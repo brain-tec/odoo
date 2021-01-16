@@ -1244,10 +1244,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             yield dbid, xid, converted, dict(extras, record=stream.index)
 
-    def _validate_fields(self, field_names):
+    def _validate_fields(self, field_names, excluded_names=()):
+        """ Invoke the constraint methods for which at least one field name is
+        in ``field_names`` and none is in ``excluded_names``.
+        """
         field_names = set(field_names)
+        excluded_names = set(excluded_names)
         for check in self._constraint_methods:
-            if not field_names.isdisjoint(check._constrains):
+            if (not field_names.isdisjoint(check._constrains)
+                    and excluded_names.isdisjoint(check._constrains)):
                 check(self)
 
     @api.model
@@ -3680,7 +3685,7 @@ Fields:
 
             # validate non-inversed fields first
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(set(vals) - set(inverse_fields))
+            real_recs._validate_fields(vals, inverse_fields)
 
             for fields in determine_inverses.values():
                 # inverse records that are not being computed
@@ -3895,7 +3900,7 @@ Fields:
 
         # check Python constraints for non-stored inversed fields
         for data in data_list:
-            data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
+            data['record']._validate_fields(data['inversed'], data['stored'])
 
         if self._check_company_auto:
             records._check_company()
@@ -6208,16 +6213,10 @@ Fields:
         todo = list(unique(itertools.chain(names, nametree))) if first_call else list(names)
         done = set()
 
-        # dummy assignment: trigger invalidations on the record
-        for name in todo:
-            if name == 'id':
-                continue
-            value = record[name]
-            field = self._fields[name]
-            if field.type == 'many2one' and field.delegate and not value:
-                # do not nullify all fields of parent record for new records
-                continue
-            record[name] = value
+        # mark fields to do as modified to trigger recomputations
+        protected = [self._fields[name] for name in names]
+        with self.env.protecting(protected, record):
+            record.modified(todo)
 
         result = {'warnings': OrderedSet()}
 
