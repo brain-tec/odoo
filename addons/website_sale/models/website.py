@@ -197,7 +197,7 @@ class Website(models.Model):
         addr = partner.address_get(['delivery'])
         if not request.website.is_public_user():
             last_sale_order = self.env['sale.order'].sudo().search([('partner_id', '=', partner.id)], limit=1, order="date_order desc, id desc")
-            if last_sale_order:  # first = me
+            if last_sale_order and last_sale_order.partner_shipping_id.active:  # first = me
                 addr['delivery'] = last_sale_order.partner_shipping_id.id
         default_user_id = partner.parent_id.user_id.id or partner.user_id.id
         values = {
@@ -213,6 +213,8 @@ class Website(models.Model):
         company = self.company_id or pricelist.company_id
         if company:
             values['company_id'] = company.id
+            if self.env['ir.config_parameter'].sudo().get_param('sale.use_sale_note'):
+                values['note'] = company.sale_note or ""
 
         return values
 

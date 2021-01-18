@@ -110,6 +110,7 @@ class Registry(Mapping):
         self._assertion_report = assertion_report.assertion_report()
         self._fields_by_model = None
         self._post_init_queue = deque()
+        self._notnull_errors = {}
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -246,8 +247,15 @@ class Registry(Mapping):
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
-        lazy_property.reset_all(self)
         env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+
+        # Uninstall registry hooks. Because of the condition, this only happens
+        # on a fully loaded registry, and not on a registry being loaded.
+        if self.ready:
+            for model in env.values():
+                model._unregister_hook()
+
+        lazy_property.reset_all(self)
 
         # add manual models
         if self._init_modules:
@@ -270,6 +278,12 @@ class Registry(Mapping):
             model._setup_complete()
 
         self.registry_invalidated = True
+
+        # Reinstall registry hooks. Because of the condition, this only happens
+        # on a fully loaded registry, and not on a registry being loaded.
+        if self.ready:
+            for model in env.values():
+                model._register_hook()
 
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """

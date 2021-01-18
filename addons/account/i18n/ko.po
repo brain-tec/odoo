@@ -7945,6 +7945,12 @@ msgid ""
 msgstr "계정과목 일람표를 설치하거나 처리 전에 기타 분개장을 생성해 주십시오."
 
 #. module: account
+#: code:addons/account/models/account_cash_rounding.py:33
+#, python-format
+msgid "Please set a strictly positive rounding value."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "Please use the following communication for your payment :"
 msgstr "지불 방법은 다음과 같습니다 :"

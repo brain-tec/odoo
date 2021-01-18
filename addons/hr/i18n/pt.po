@@ -3,13 +3,14 @@
 # * hr
 # 
 # Translators:
-# Manuela Silva <inactive+h_manuela_rodsilva@transifex.com>, 2018
+# 425fe09b3064b9f906f637fff94056ae_a00ea56 <0fa3588fa89906bfcb3a354600956e0e_308047>, 2018
 # José Gomes <jg@opencloud.pro>, 2018
 # Joao Felix <jrmfelix@gmail.com>, 2018
 # Martin Trigaux, 2018
 # Manuela Silva <manuelarodsilva@gmail.com>, 2018
 # Diogo Fonseca <dsf@thinkopensolutions.pt>, 2018
 # Ricardo Martins <ricardo.nbs.martins@gmail.com>, 2019
+# Reinaldo Ramos <reinaldo.ramos@arxi.pt>, 2020
 # Nuno Silva <nuno.silva@arxi.pt>, 2020
 # 
 msgid ""
@@ -40,7 +41,7 @@ msgstr "&amp;nbsp;"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -248,7 +249,7 @@ msgstr ""
 #. module: hr
 #: selection:hr.employee,certificate:0
 msgid "Bachelor"
-msgstr ""
+msgstr "Licenciatura"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__bank_account_id

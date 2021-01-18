@@ -982,9 +982,20 @@ class Worker(object):
 
 class WorkerHTTP(Worker):
     """ HTTP Request workers """
+    def __init__(self, multi):
+        super(WorkerHTTP, self).__init__(multi)
+
+        # The ODOO_HTTP_SOCKET_TIMEOUT environment variable allows to control socket timeout for
+        # extreme latency situations. It's generally better to use a good buffering reverse proxy
+        # to quickly free workers rather than increasing this timeout to accomodate high network
+        # latencies & b/w saturation. This timeout is also essential to protect against accidental
+        # DoS due to idle HTTP connections.
+        sock_timeout = os.environ.get("ODOO_HTTP_SOCKET_TIMEOUT")
+        self.sock_timeout = float(sock_timeout) if sock_timeout else 2
+
     def process_request(self, client, addr):
         client.setblocking(1)
-        client.settimeout(2)
+        client.settimeout(self.sock_timeout)
         client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         # Prevent fd inherientence close_on_exec
         flags = fcntl.fcntl(client, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
@@ -1163,7 +1174,7 @@ def preload_registries(dbnames):
                 t0 = time.time()
                 t0_sql = odoo.sql_db.sql_counter
                 module_names = (registry.updated_modules if update_module else
-                                registry._init_modules)
+                                sorted(registry._init_modules))
                 _logger.info("Starting post tests")
                 with odoo.api.Environment.manage():
                     for module_name in module_names:

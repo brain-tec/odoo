@@ -341,9 +341,17 @@ class MailActivity(models.Model):
         for activity in self:
             if activity.date_deadline <= fields.Date.today():
                 self.env['bus.bus'].sendone(
-                    (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
+                    (self._cr.dbname, 'res.partner', activity.user_id.sudo().partner_id.id),
                     {'type': 'activity_updated', 'activity_deleted': True})
         return super(MailActivity, self.sudo()).unlink()
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for record in self:
+            name = record.summary or record.activity_type_id.display_name
+            res.append((record.id, name))
+        return res
 
     @api.multi
     def action_notify(self):
@@ -482,7 +490,7 @@ class MailActivity(models.Model):
         activity_data = defaultdict(dict)
         for group in grouped_activities:
             res_id = group['res_id']
-            activity_type_id = group['activity_type_id'][0]
+            activity_type_id = (group.get('activity_type_id') or (False, False))[0]
             activity_type_ids |= self.env['mail.activity.type'].browse(activity_type_id)  # we will get the name when reading mail_template_ids
             res_id_to_deadline[res_id] = group['date_deadline'] if (res_id not in res_id_to_deadline or group['date_deadline'] < res_id_to_deadline[res_id]) else res_id_to_deadline[res_id]
             state = self._compute_state_from_date(group['date_deadline'], self.user_id.sudo().tz)

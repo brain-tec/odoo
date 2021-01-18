@@ -149,12 +149,21 @@ var MediaWidget = Widget.extend({
     },
     /**
      * @override
+     * @return {Deferred}
      */
     goToPage: function (page) {
         this.page = page;
         if (page > this.lastLoadedPage) {
             return this.fetchPage(page);
         }
+        return $.when();
+    },
+    /**
+     * Method to be overridden when component support pagination
+     *
+     * @return {Deferred}
+     */
+    fetchPage: function() {
         return $.when();
     },
     /**
@@ -375,6 +384,10 @@ var ImageWidget = MediaWidget.extend({
             self._renderImages();
         });
     },
+    /**
+     * @override
+     * @param {integer} pageNum
+     */
     fetchPage: function (pageNum) {
         // TODO: Expand this for adding SVG
         var domain = this.domain.concat([
@@ -1468,6 +1481,9 @@ var LinkDialog = Dialog.extend({
         // Hide the duplicate color buttons (most of the times, primary = alpha
         // and secondary = beta for example but this may depend on the theme)
         this.opened().then(function () {
+            if (self.__showDuplicateColorButtons) {
+                return;
+            }
             var colors = [];
             _.each(self.$('.o_btn_preview.o_link_dialog_color_item'), function (btn) {
                 var $btn = $(btn);

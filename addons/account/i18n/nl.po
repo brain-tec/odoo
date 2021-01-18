@@ -793,7 +793,7 @@ msgid ""
 "A journal entry consists of several journal items, each of\n"
 "                which is either a debit or a credit transaction."
 msgstr ""
-"Een boeking of joernaalpost bestaat uit verschillende boekingsregels die een"
+"Een boeking of journaalpost bestaat uit verschillende boekingsregels die een"
 " debet of credit verrichting weergeven."
 
 #. module: account
@@ -8177,6 +8177,12 @@ msgid ""
 msgstr ""
 "U dient een grootboekschema te installeren of een overig dagboek aan te "
 "maken voordat u verder gaat."
+
+#. module: account
+#: code:addons/account/models/account_cash_rounding.py:33
+#, python-format
+msgid "Please set a strictly positive rounding value."
+msgstr "Stel een strikt positieve afrondingswaarde in."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document

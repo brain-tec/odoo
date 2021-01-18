@@ -19,6 +19,10 @@ class PurchaseOrder(models.Model):
     _description = "Purchase Order"
     _order = 'date_order desc, id desc'
 
+    def _default_currency_id(self):
+        company_id = self.env.context.get('force_company') or self.env.context.get('company_id') or self.env.user.company_id.id
+        return self.env['res.company'].browse(company_id).currency_id
+
     @api.depends('order_line.price_total')
     def _amount_all(self):
         for order in self:
@@ -54,11 +58,7 @@ class PurchaseOrder(models.Model):
 
             if any(float_compare(line.qty_invoiced, line.product_qty if line.product_id.purchase_method == 'purchase' else line.qty_received, precision_digits=precision) == -1 for line in order.order_line):
                 order.invoice_status = 'to invoice'
-            elif all(
-                (line.product_qty if line.product_id.purchase_method == 'purchase' else line.qty_received)
-                and float_compare(line.qty_invoiced, line.product_qty if line.product_id.purchase_method == 'purchase' else line.qty_received, precision_digits=precision) >= 0
-                for line in order.order_line
-            ):
+            elif all(float_compare(line.qty_invoiced, line.product_qty if line.product_id.purchase_method == 'purchase' else line.qty_received, precision_digits=precision) >= 0 for line in order.order_line) and order.invoice_ids:
                 order.invoice_status = 'invoiced'
             else:
                 order.invoice_status = 'no'
@@ -94,8 +94,9 @@ class PurchaseOrder(models.Model):
     dest_address_id = fields.Many2one('res.partner', string='Drop Ship Address', states=READONLY_STATES,
         help="Put an address if you want to deliver directly from the vendor to the customer. "
              "Otherwise, keep empty to deliver to your own company.")
-    currency_id = fields.Many2one('res.currency', 'Currency', required=True, states=READONLY_STATES,
-        default=lambda self: self.env.user.company_id.currency_id.id)
+    currency_id = fields.Many2one(
+        'res.currency', 'Currency', required=True, states=READONLY_STATES,
+        default=_default_currency_id)
     state = fields.Selection([
         ('draft', 'RFQ'),
         ('sent', 'RFQ Sent'),
@@ -159,9 +160,10 @@ class PurchaseOrder(models.Model):
 
     @api.model
     def create(self, vals):
+        company_id = vals.get('company_id', self.default_get(['company_id'])['company_id'])
         if vals.get('name', 'New') == 'New':
-            vals['name'] = self.env['ir.sequence'].next_by_code('purchase.order') or '/'
-        return super(PurchaseOrder, self).create(vals)
+            vals['name'] = self.env['ir.sequence'].with_context(force_company=company_id).next_by_code('purchase.order') or '/'
+        return super(PurchaseOrder, self.with_context(company_id=company_id)).create(vals)
 
     @api.multi
     def unlink(self):

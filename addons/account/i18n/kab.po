@@ -4,7 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2018
-# Selyan Sliman Ɛmiri <selyan.kab@gmail.com>, 2018
+# Slimane Selyan AMIRI <selyan.kab@gmail.com>, 2018
 # Muḥend Belqasem <belkacem77@gmail.com>, 2019
 # 
 msgid ""
@@ -7786,6 +7786,12 @@ msgstr "Ma ulac aɣilif, mudded-ed agzum n uɣemis iqnen ɣer tfaturt agi"
 msgid ""
 "Please install a chart of accounts or create a miscellaneous journal before "
 "proceeding."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_cash_rounding.py:33
+#, python-format
+msgid "Please set a strictly positive rounding value."
 msgstr ""
 
 #. module: account

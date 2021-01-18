@@ -4,7 +4,7 @@
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
-from odoo.tools import pycompat
+from odoo.tools import pycompat,float_is_zero
 from odoo.tools.float_utils import float_round
 from datetime import datetime
 import operator as py_operator
@@ -217,14 +217,28 @@ class Product(models.Model):
         other_locations = locations - hierarchical_locations
         loc_domain = []
         dest_loc_domain = []
+
+        # To avoid to have a giant request which will cause memory error, minimize the domain
+        def minimize_domain_parent_path(location_parent_path):
+            # Sorted to get the most "parent" first
+            result = []
+            location_parent_path = sorted(location_parent_path)
+            ids_encounter = set()
+            for location_parent in location_parent_path:
+                ids_parent = location_parent.split('/')[:-1]  # Remove last one because always finish by '/'
+                if not (ids_encounter & set(ids_parent)):  # If there is a intersection, parent_path is already take in account
+                    ids_encounter.add(ids_parent[-1])  # Add only myself
+                    result.append(location_parent)
+            return result
+
         # this optimizes [('location_id', 'child_of', hierarchical_locations.ids)]
         # by avoiding the ORM to search for children locations and injecting a
         # lot of location ids into the main query
-        for location in hierarchical_locations:
+        for parent_path in minimize_domain_parent_path(hierarchical_locations.mapped('parent_path')):
             loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
-            loc_domain.append(('location_id.parent_path', '=like', location.parent_path + '%'))
+            loc_domain.append(('location_id.parent_path', '=like', parent_path + '%'))
             dest_loc_domain = dest_loc_domain and ['|'] + dest_loc_domain or dest_loc_domain
-            dest_loc_domain.append(('location_dest_id.parent_path', '=like', location.parent_path + '%'))
+            dest_loc_domain.append(('location_dest_id.parent_path', '=like', parent_path + '%'))
         if other_locations:
             loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
             loc_domain = loc_domain + [('location_id', operator, other_locations.ids)]
@@ -576,6 +590,8 @@ class ProductTemplate(models.Model):
             ])
             if existing_move_lines:
                 raise UserError(_("You can not change the type of a product that is currently reserved on a stock move. If you need to change the type, you should first unreserve the stock move."))
+        if 'type' in vals and vals['type'] != 'product' and self.filtered(lambda p: p.type == 'product' and not float_is_zero(p.qty_available, precision_rounding=p.uom_id.rounding)):
+            raise UserError(_("Available quantity should be set to zero before changing type"))
         return super(ProductTemplate, self).write(vals)
 
     def action_update_quantity_on_hand(self):

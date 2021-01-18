@@ -1266,7 +1266,7 @@ class MailThread(models.AbstractModel):
             message_dict.pop('parent_id', None)
 
             # check it does not directly contact catchall
-            if catchall_alias and all(email_localpart == catchall_alias for email_localpart in email_to_localparts):
+            if catchall_alias and email_to_localparts and all(email_localpart == catchall_alias for email_localpart in email_to_localparts):
                 _logger.info('Routing mail from %s to %s with Message-Id %s: direct write to catchall, bounce', email_from, email_to, message_id)
                 body = self.env.ref('mail.mail_bounce_catchall').render({
                     'message': message,
@@ -1336,7 +1336,7 @@ class MailThread(models.AbstractModel):
 
                 # disabled subscriptions during message_new/update to avoid having the system user running the
                 # email gateway become a follower of all inbound messages
-                MessageModel = Model.sudo(user_id).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
+                MessageModel = Model.sudo(self.env.uid == 1 and user_id or None).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
                 if thread_id and hasattr(MessageModel, 'message_update'):
                     thread = MessageModel.browse(thread_id)
                     thread.message_update(message_dict)
@@ -1587,7 +1587,7 @@ class MailThread(models.AbstractModel):
 
                 # 0) Inline Attachments -> attachments, with a third part in the tuple to match cid / attachment
                 if filename and part.get('content-id'):
-                    inner_cid = part.get('content-id').strip('><')
+                    inner_cid = str(part.get('content-id')).strip('><')
                     attachments.append(self._Attachment(filename, part.get_payload(decode=True), {'cid': inner_cid}))
                     continue
                 # 1) Explicit Attachments -> attachments
@@ -1662,10 +1662,10 @@ class MailThread(models.AbstractModel):
             msg_dict['subject'] = tools.decode_smtp_header(message.get('Subject'))
 
         # Envelope fields not stored in mail.message but made available for message_new()
-        msg_dict['from'] = tools.decode_smtp_header(message.get('from'))
-        msg_dict['to'] = tools.decode_smtp_header(message.get('to'))
-        msg_dict['cc'] = tools.decode_smtp_header(message.get('cc'))
-        msg_dict['email_from'] = tools.decode_smtp_header(message.get('from'))
+        msg_dict['from'] = tools.decode_smtp_header(message.get('from'), quoted=True)
+        msg_dict['to'] = tools.decode_smtp_header(message.get('to'), quoted=True)
+        msg_dict['cc'] = tools.decode_smtp_header(message.get('cc'), quoted=True)
+        msg_dict['email_from'] = tools.decode_smtp_header(message.get('from'), quoted=True)
         partner_ids = self._message_find_partners(message, ['To', 'Cc'])
         msg_dict['partner_ids'] = [(4, partner_id) for partner_id in partner_ids]
 

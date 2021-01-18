@@ -12,6 +12,7 @@
 # Pietro Della Notte <pdellanotte@gmail.com>, 2018
 # maiolif <maiolif@mgftools.com>, 2018
 # Lorenzo Battistini <lb@takobi.online>, 2019
+# Iacopo Simonelli <lsi@odoo.com>, 2020
 # Sergio Zanchetta <primes2h@gmail.com>, 2020
 # 
 msgid ""
@@ -110,7 +111,7 @@ msgstr "Giorno della settimana"
 #: model:ir.model.fields,field_description:resource.field_res_company__resource_calendar_id
 #: model:ir.model.fields,field_description:resource.field_res_users__resource_calendar_id
 msgid "Default Working Hours"
-msgstr "Ore lavorative predefinite"
+msgstr "Orario lavorativo predefinito"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_res_users__resource_calendar_id
@@ -258,13 +259,13 @@ msgstr "Permesso"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 msgid "Leave Date"
-msgstr ""
+msgstr "Data permesso"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_form
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_tree
 msgid "Leave Detail"
-msgstr "Dettaglio del permesso"
+msgstr "Dettaglio permesso"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__leave_ids
@@ -351,7 +352,7 @@ msgstr "Dettaglio risorsa permessi"
 #. module: resource
 #: model:ir.model,name:resource.model_resource_mixin
 msgid "Resource Mixin"
-msgstr ""
+msgstr "Mixin risorsa"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_resource__resource_type
@@ -442,7 +443,7 @@ msgstr "Data d'Inizio"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 msgid "Starting Date of Leave"
-msgstr ""
+msgstr "Data inizio permesso"
 
 #. module: resource
 #: selection:resource.calendar.attendance,dayofweek:0
@@ -487,6 +488,11 @@ msgid ""
 "the efficiency factor is 200%, however the expected duration will be 30 "
 "minutes."
 msgstr ""
+"Questo campo viene utilizzato per calcolare la durata prevista di un ordine "
+"di lavoro nel centro di lavoro. Ad esempio, se un ordine di lavoro richiede "
+"un'ora e il fattore di efficienza è del 100%, la durata prevista sarà di "
+"un'ora. Se il fattore di efficienza è del 200%, tuttavia la durata prevista "
+"sarà di 30 minuti."
 
 #. module: resource
 #: selection:resource.calendar.attendance,dayofweek:0
