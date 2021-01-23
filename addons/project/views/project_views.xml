@@ -269,20 +269,20 @@
                                     Customer Satisfaction
                                 </span>
                             </div>
-                        </button>                            
+                        </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <div class="oe_title">
                         <h1>
                             <field name="name" class="o_text_overflow" placeholder="Project Name"/>
                         </h1>
-                        <div name="options_active">
-                            <div>
-                                <label for="label_tasks" class="oe_inline" string="Name of the tasks:"/>
-                                <field name="label_tasks" class="oe_inline oe_input_align"/>
-                            </div>
-                        </div>
                     </div>
+                    <group>
+                        <group>
+                            <field name="label_tasks" string="Name of the tasks"/>
+                            <field name="partner_id" widget="res_partner_many2one"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" nolabel="1" placeholder="Describe your project..." type="html"/>
@@ -293,11 +293,6 @@
                                 <group>
                                     <field name="active" invisible="1"/>
                                     <field name="user_id" string="Project Manager" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
-                                    <field name="partner_id" string="Customer" widget="res_partner_many2one"/>
-                                    <field name="partner_phone" widget="phone"
-                                           attrs="{'invisible': [('partner_id', '=', False)]}"/>
-                                    <field name="partner_email" widget="email"
-                                           attrs="{'invisible': [('partner_id', '=', False)]}"/>
                                     <div name="alias_def" colspan="2" attrs="{'invisible': [('alias_domain', '=', False)]}">
                                         <!-- Always display the whole alias in edit mode. It depends in read only -->
                                         <label for="alias_enabled" class="font-weight-bold" string="Create tasks by sending an email"/>
@@ -442,6 +437,37 @@
                     <field name="label_tasks" optional="hide"/>
                     <field name="company_id" optional="show"  groups="base.group_multi_company"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="project_view_kanban" model="ir.ui.view">
+            <field name="name">project.project.kanban</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile">
+                    <field name="user_id" string="Project Manager"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_content oe_kanban_global_click o_kanban_get_form">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <strong><field name="name" string="Project Name"/></strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-8">
+                                        <field name="partner_id" string="Contact"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="oe_kanban_bottom_right float-right">
+                                            <field name="user_id" widget="many2one_avatar_user"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
 
@@ -679,7 +705,6 @@
                         <group>
                             <field name="active" invisible="1"/>
                             <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
-                            <field name="partner_email" widget="email" invisible="1"/>
                             <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
                             <field name="legend_blocked" invisible="1"/>
                             <field name="legend_normal" invisible="1"/>
@@ -731,7 +756,6 @@
                             </group>
                             <group attrs="{'invisible': ['|', ('recurring_task', '=', False), ('recurrence_message', '=', False)]}">
                                 <div class="alert alert-success o_form_project_recurrence_message" role="status">
-                                    <p><span class="fa fa-check-circle"></span> Next Occurrences:</p>
                                     <field name="recurrence_message" widget="html" class="mb-0" />
                                 </div>
                             </group>

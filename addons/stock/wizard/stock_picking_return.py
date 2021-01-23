@@ -13,7 +13,7 @@ class ReturnPickingLine(models.TransientModel):
 
     product_id = fields.Many2one('product.product', string="Product", required=True, domain="[('id', '=', product_id)]")
     quantity = fields.Float("Quantity", digits='Product Unit of Measure', required=True)
-    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='move_id.product_uom', readonly=False)
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='product_id.uom_id')
     wizard_id = fields.Many2one('stock.return.picking', string="Wizard")
     move_id = fields.Many2one('stock.move', "Move")
 
@@ -176,6 +176,7 @@ class ReturnPicking(models.TransientModel):
         # Override the context to disable all the potential filters that could have been set previously
         ctx = dict(self.env.context)
         ctx.update({
+            'default_partner_id': self.picking_id.partner_id.id,
             'search_default_picking_type_id': pick_type_id,
             'search_default_draft': False,
             'search_default_assigned': False,

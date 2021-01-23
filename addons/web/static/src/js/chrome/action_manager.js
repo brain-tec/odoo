@@ -396,7 +396,7 @@ var ActionManager = Widget.extend({
                 widget.setParent(dialog);
                 dom.append(dialog.$el, widget.$el, {
                     in_DOM: true,
-                    callbacks: [{widget: dialog}, {widget: controller.widget}],
+                    callbacks: [{widget: controller.widget}],
                 });
                 widget.renderButtons(dialog.$footer);
                 dialog.rebindButtonBehavior();
@@ -536,7 +536,7 @@ var ActionManager = Widget.extend({
                 var message = _t('A popup window has been blocked. You ' +
                              'may need to change your browser settings to allow ' +
                              'popup windows for this page.');
-                this.do_warn(false, message, true);
+                this.do_warn(false, message, false);
             }
         }
 

@@ -61,7 +61,7 @@ class StockMoveLine(models.Model):
     picking_type_use_existing_lots = fields.Boolean(related='picking_id.picking_type_id.use_existing_lots', readonly=True)
     picking_type_entire_packs = fields.Boolean(related='picking_id.picking_type_id.show_entire_packs', readonly=True)
     state = fields.Selection(related='move_id.state', store=True, related_sudo=False)
-    is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable', readonly=False)
+    is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable')
     is_locked = fields.Boolean(related='move_id.is_locked', default=True, readonly=True)
     consume_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'consume_line_id', 'produce_line_id', help="Technical link to see who consumed what. ")
     produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
@@ -463,14 +463,17 @@ class StockMoveLine(models.Model):
                             # If a picking type is linked, we may have to create a production lot on
                             # the fly before assigning it to the move line if the user checked both
                             # `use_create_lots` and `use_existing_lots`.
-                            if ml.lot_name and not ml.lot_id:
-                                lot = self.env['stock.production.lot'].search([
-                                    ('company_id', '=', ml.company_id.id),
-                                    ('product_id', '=', ml.product_id.id),
-                                    ('name', '=', ml.lot_name),
-                                ], limit=1)
-                                if lot:
-                                    ml.lot_id = lot.id
+                            if ml.lot_name:
+                                if ml.product_id.tracking == 'lot' and not ml.lot_id:
+                                    lot = self.env['stock.production.lot'].search([
+                                        ('company_id', '=', ml.company_id.id),
+                                        ('product_id', '=', ml.product_id.id),
+                                        ('name', '=', ml.lot_name),
+                                    ], limit=1)
+                                    if lot:
+                                        ml.lot_id = lot.id
+                                    else:
+                                        ml_ids_to_create_lot.add(ml.id)
                                 else:
                                     ml_ids_to_create_lot.add(ml.id)
                         elif not picking_type_id.use_create_lots and not picking_type_id.use_existing_lots:
@@ -513,8 +516,7 @@ class StockMoveLine(models.Model):
                 if not ml._should_bypass_reservation(ml.location_id) and float_compare(ml.qty_done, ml.product_uom_qty, precision_rounding=rounding) > 0:
                     qty_done_product_uom = ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP')
                     extra_qty = qty_done_product_uom - ml.product_qty
-                    ml_to_ignore = self.env['stock.move.line'].browse(ml_ids_to_ignore)
-                    ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_to_ignore=ml_to_ignore)
+                    ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_ids_to_ignore=ml_ids_to_ignore)
                 # unreserve what's been reserved
                 if not ml._should_bypass_reservation(ml.location_id) and ml.product_id.type == 'product' and ml.product_qty:
                     try:
@@ -591,18 +593,18 @@ class StockMoveLine(models.Model):
             data['owner_name'] = self.env['res.partner'].browse(vals.get('owner_id')).name
         record.message_post_with_view(template, values={'move': move, 'vals': dict(vals, **data)}, subtype_id=self.env.ref('mail.mt_note').id)
 
-    def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, ml_to_ignore=None):
+    def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, ml_ids_to_ignore=None):
         """ When editing a done move line or validating one with some forced quantities, it is
         possible to impact quants that were not reserved. It is therefore necessary to edit or
         unlink the move lines that reserved a quantity now unavailable.
 
-        :param ml_to_ignore: recordset of `stock.move.line` that should NOT be unreserved
+        :param ml_ids_to_ignore: OrderedSet of `stock.move.line` ids that should NOT be unreserved
         """
         self.ensure_one()
 
-        if ml_to_ignore is None:
-            ml_to_ignore = self.env['stock.move.line']
-        ml_to_ignore |= self
+        if ml_ids_to_ignore is None:
+            ml_ids_to_ignore = OrderedSet()
+        ml_ids_to_ignore |= self.ids
 
         # Check the available quantity, with the `strict` kw set to `True`. If the available
         # quantity is greather than the quantity now unavailable, there is nothing to do.
@@ -620,8 +622,9 @@ class StockMoveLine(models.Model):
                 ('owner_id', '=', owner_id.id if owner_id else False),
                 ('package_id', '=', package_id.id if package_id else False),
                 ('product_qty', '>', 0.0),
-                ('id', 'not in', ml_to_ignore.ids),
+                ('id', 'not in', tuple(ml_ids_to_ignore)),
             ]
+
             # We take the current picking first, then the pickings with the latest scheduled date
             current_picking_first = lambda cand: (
                 cand.picking_id != self.move_id.picking_id,

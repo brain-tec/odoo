@@ -448,10 +448,10 @@ class AccountMove(models.Model):
 
         self._recompute_dynamic_lines(recompute_tax_base_amount=True)
 
-    @api.onchange('payment_reference')
+    @api.onchange('payment_reference', 'ref')
     def _onchange_payment_reference(self):
         for line in self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-            line.name = self.payment_reference
+            line.name = self.payment_reference or self.ref
 
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
@@ -943,7 +943,8 @@ class AccountMove(models.Model):
             # Recompute amls: update existing line or create new one for each payment term.
             new_terms_lines = self.env['account.move.line']
             for date_maturity, balance, amount_currency in to_compute:
-                if self.journal_id.company_id.currency_id.is_zero(balance) and len(to_compute) > 1:
+                currency = self.journal_id.company_id.currency_id
+                if currency and currency.is_zero(balance) and len(to_compute) > 1:
                     continue
 
                 if existing_terms_lines_index < len(existing_terms_lines):
@@ -3606,7 +3607,7 @@ class AccountMoveLine(models.Model):
         for record in self:
             if not record.tax_repartition_line_id and not record.tax_ids :
                 # Invoices imported from other softwares might only have kept the tags, not the taxes.
-                record.tax_tag_invert = record.tax_tag_ids and record.moved_id.is_inbound()
+                record.tax_tag_invert = record.tax_tag_ids and record.move_id.is_inbound()
 
             elif record.move_id.move_type == 'entry':
                 # For misc operations, cash basis entries and write-offs from the bank reconciliation widget
@@ -3674,10 +3675,10 @@ class AccountMoveLine(models.Model):
                 raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.', account.display_name))
 
             failed_check = False
-            if journal.type_control_ids or journal.account_control_ids:
+            if (journal.type_control_ids - journal.default_account_id.user_type_id) or journal.account_control_ids:
                 failed_check = True
                 if journal.type_control_ids:
-                    failed_check = account.user_type_id not in journal.type_control_ids
+                    failed_check = account.user_type_id not in (journal.type_control_ids - journal.default_account_id.user_type_id)
                 if failed_check and journal.account_control_ids:
                     failed_check = account not in journal.account_control_ids
 
@@ -3867,56 +3868,58 @@ class AccountMoveLine(models.Model):
                             or (account_type != 'payable' and account_to_write.user_type_id.type == 'payable'):
                         raise UserError(_("You can only set an account having the payable type on payment terms lines for vendor bill."))
 
-        # Get all tracked fields (without related fields because these fields must be manage on their own model)
-        tracking_fields = []
-        for value in vals:
-            field = self._fields[value]
-            if hasattr(field, 'related') and field.related:
-                continue # We don't want to track related field.
-            if hasattr(field, 'tracking') and field.tracking:
-                tracking_fields.append(value)
-        ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
+        # Tracking stuff can be skipped for perfs using tracking_disable context key
+        if not self.env.context.get('tracking_disable', False):
+            # Get all tracked fields (without related fields because these fields must be manage on their own model)
+            tracking_fields = []
+            for value in vals:
+                field = self._fields[value]
+                if hasattr(field, 'related') and field.related:
+                    continue # We don't want to track related field.
+                if hasattr(field, 'tracking') and field.tracking:
+                    tracking_fields.append(value)
+            ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
 
-        # Get initial values for each line
-        move_initial_values = {}
-        for line in self.filtered(lambda l: l.move_id.posted_before): # Only lines with posted once move.
-            for field in tracking_fields:
-                # Group initial values by move_id
-                if line.move_id.id not in move_initial_values:
-                    move_initial_values[line.move_id.id] = {}
-                move_initial_values[line.move_id.id].update({field: line[field]})
+            # Get initial values for each line
+            move_initial_values = {}
+            for line in self.filtered(lambda l: l.move_id.posted_before): # Only lines with posted once move.
+                for field in tracking_fields:
+                    # Group initial values by move_id
+                    if line.move_id.id not in move_initial_values:
+                        move_initial_values[line.move_id.id] = {}
+                    move_initial_values[line.move_id.id].update({field: line[field]})
 
-        # Create the dict for the message post
-        tracking_values = {} # Tracking values to write in the message post
-        for move_id, modified_lines in move_initial_values.items():
-            tmp_move = {move_id: []}
-            for line in self.filtered(lambda l: l.move_id.id == move_id):
-                changes, tracking_value_ids = line._mail_track(ref_fields, modified_lines) # Return a tuple like (changed field, ORM command)
-                tmp = {'line_id': line.id}
-                if tracking_value_ids:
-                    selected_field = tracking_value_ids[0][2] # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
-                    tmp.update({
-                        **{'field_name': selected_field.get('field_desc')},
-                        **self._get_formated_values(selected_field)
-                    })
-                elif changes:
-                    field_name = line._fields[changes.pop()].string # Get the field name
-                    tmp.update({
-                        'error': True,
-                        'field_error': field_name
-                    })
-                else:
-                    continue
-                tmp_move[move_id].append(tmp)
-            if len(tmp_move[move_id]) > 0:
-                tracking_values.update(tmp_move)
+            # Create the dict for the message post
+            tracking_values = {} # Tracking values to write in the message post
+            for move_id, modified_lines in move_initial_values.items():
+                tmp_move = {move_id: []}
+                for line in self.filtered(lambda l: l.move_id.id == move_id):
+                    changes, tracking_value_ids = line._mail_track(ref_fields, modified_lines) # Return a tuple like (changed field, ORM command)
+                    tmp = {'line_id': line.id}
+                    if tracking_value_ids:
+                        selected_field = tracking_value_ids[0][2] # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
+                        tmp.update({
+                            **{'field_name': selected_field.get('field_desc')},
+                            **self._get_formated_values(selected_field)
+                        })
+                    elif changes:
+                        field_name = line._fields[changes.pop()].string # Get the field name
+                        tmp.update({
+                            'error': True,
+                            'field_error': field_name
+                        })
+                    else:
+                        continue
+                    tmp_move[move_id].append(tmp)
+                if len(tmp_move[move_id]) > 0:
+                    tracking_values.update(tmp_move)
 
-        # Write in the chatter.
-        for move in self.mapped('move_id'):
-            fields = tracking_values.get(move.id, [])
-            if len(fields) > 0:
-                msg = self._get_tracking_field_string(tracking_values.get(move.id))
-                move.message_post(body=msg) # Write for each concerned move the message in the chatter
+            # Write in the chatter.
+            for move in self.mapped('move_id'):
+                fields = tracking_values.get(move.id, [])
+                if len(fields) > 0:
+                    msg = self._get_tracking_field_string(tracking_values.get(move.id))
+                    move.message_post(body=msg) # Write for each concerned move the message in the chatter
 
         result = True
         for line in self:
@@ -4601,6 +4604,12 @@ class AccountMoveLine(models.Model):
             # Don't copy the name of a payment term line.
             if line.move_id.is_invoice() and line.account_id.user_type_id.type in ('receivable', 'payable'):
                 values['name'] = ''
+            # Don't copy restricted fields of notes
+            if line.display_type in ('line_section', 'line_note'):
+                values['amount_currency'] = 0
+                values['debit'] = 0
+                values['credit'] = 0
+                values['account_id'] = False
             if self._context.get('include_business_fields'):
                 line._copy_data_extend_business_fields(values)
         return res
