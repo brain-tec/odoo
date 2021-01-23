@@ -9,7 +9,6 @@ from datetime import timedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.loglevels import exception_to_unicode
-from odoo.addons.microsoft_account.models.microsoft_service import MICROSOFT_TOKEN_ENDPOINT
 from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCalendarService, InvalidSyncToken
 
 _logger = logging.getLogger(__name__)
@@ -20,6 +19,20 @@ class User(models.Model):
 
     microsoft_calendar_sync_token = fields.Char('Microsoft Next Sync Token', copy=False)
     microsoft_synchronization_stopped = fields.Boolean('Outlook Synchronization stopped', copy=False)
+
+    def __init__(self, pool, cr):
+        """ Override of __init__ to add access rights.
+            Access rights are disabled by default, but allowed
+            on some specific fields defined in self.SELF_{READ/WRITE}ABLE_FIELDS.
+        """
+        microsoft_calendar_fields = [
+            'microsoft_synchronization_stopped',
+        ]
+        init_res = super(User, self).__init__(pool, cr)
+        # duplicate list to avoid modifying the original reference
+        type(self).SELF_READABLE_FIELDS = type(self).SELF_READABLE_FIELDS + microsoft_calendar_fields
+        type(self).SELF_WRITEABLE_FIELDS = type(self).SELF_WRITEABLE_FIELDS + microsoft_calendar_fields
+        return init_res
 
     def _microsoft_calendar_authenticated(self):
         return bool(self.sudo().microsoft_calendar_rtoken)
@@ -51,7 +64,8 @@ class User(models.Model):
         }
 
         try:
-            dummy, response, dummy = self.env['microsoft.service']._do_request(MICROSOFT_TOKEN_ENDPOINT, params=data, headers=headers, method='POST', preuri='')
+            endpoint = self.env['microsoft.service']._get_token_endpoint()
+            dummy, response, dummy = self.env['microsoft.service']._do_request(endpoint, params=data, headers=headers, method='POST', preuri='')
             ttl = response.get('expires_in')
             self.write({
                 'microsoft_calendar_token': response.get('access_token'),
@@ -108,10 +122,10 @@ class User(models.Model):
 
     def stop_microsoft_synchronization(self):
         self.ensure_one()
-        self.sudo().microsoft_synchronization_stopped = True
+        self.microsoft_synchronization_stopped = True
 
     def restart_microsoft_synchronization(self):
         self.ensure_one()
-        self.sudo().microsoft_synchronization_stopped = False
+        self.microsoft_synchronization_stopped = False
         self.env['calendar.recurrence']._restart_microsoft_sync()
         self.env['calendar.event']._restart_microsoft_sync()

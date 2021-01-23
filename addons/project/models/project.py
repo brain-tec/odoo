@@ -427,7 +427,7 @@ class Project(models.Model):
         """
         res = super(Project, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
         project_subtypes = self.env['mail.message.subtype'].browse(subtype_ids) if subtype_ids else None
-        task_subtypes = project_subtypes.mapped('parent_id').ids if project_subtypes else None
+        task_subtypes = (project_subtypes.mapped('parent_id') | project_subtypes.filtered(lambda sub: sub.internal or sub.default)).ids if project_subtypes else None
         if not subtype_ids or task_subtypes:
             self.mapped('tasks').message_subscribe(
                 partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=task_subtypes)
@@ -746,7 +746,7 @@ class Task(models.Model):
             task.repeat_show_dow = task.recurring_task and task.repeat_unit == 'week'
             task.repeat_show_month = task.recurring_task and task.repeat_unit == 'year'
 
-    @api.depends('recurring_task', 'repeat_unit')
+    @api.depends('recurring_task')
     def _compute_repeat(self):
         rec_fields = self._get_recurrence_fields()
         defaults = self.default_get(rec_fields)
@@ -774,7 +774,8 @@ class Task(models.Model):
         self.recurrence_message = False
         for task in self.filtered(lambda t: t.recurring_task and t._is_recurrence_valid()):
             date = fields.Date.today()
-            number_occurrences = min(5, task.repeat_number if task.repeat_type == 'after' else 5)
+            recurrence_left = task.recurrence_id.recurrence_left if task.recurrence_id  else task.repeat_number
+            number_occurrences = min(5, recurrence_left if task.repeat_type == 'after' else 5)
             delta = task.repeat_interval if task.repeat_unit == 'day' else 1
             recurring_dates = self.env['project.task.recurrence']._get_next_recurring_dates(
                 date + timedelta(days=delta),
@@ -790,10 +791,13 @@ class Task(models.Model):
                 task.repeat_month,
                 count=number_occurrences)
             date_format = self.env['res.lang']._lang_get(self.env.user.lang).date_format
-            task.recurrence_message = '<ul>'
-            for date in recurring_dates[:5]:
-                task.recurrence_message += '<li>%s</li>' % date.strftime(date_format)
-            if task.repeat_type == 'after' and task.repeat_number > 5 or task.repeat_type == 'forever' or len(recurring_dates) > 5:
+            if recurrence_left == 0:
+                recurrence_title = _('There are no more occurrences.')
+            else:
+                recurrence_title = _('Next Occurrences:')
+            task.recurrence_message = '<p><span class="fa fa-check-circle"></span> %s</p><ul>' % recurrence_title
+            task.recurrence_message += ''.join(['<li>%s</li>' % date.strftime(date_format) for date in recurring_dates[:5]])
+            if task.repeat_type == 'after' and recurrence_left > 5 or task.repeat_type == 'forever' or len(recurring_dates) > 5:
                 task.recurrence_message += '<li>...</li>'
             task.recurrence_message += '</ul>'
             if task.repeat_type == 'until':
@@ -1208,13 +1212,13 @@ class Task(models.Model):
             return self.env.ref('project.mt_task_stage')
         return super(Task, self)._track_subtype(init_values)
 
-    def _notify_get_groups(self):
+    def _notify_get_groups(self, msg_vals=None):
         """ Handle project users and managers recipients that can assign
         tasks and create new one directly from notification emails. Also give
         access button to portal users and portal customers. If they are notified
         they should probably have access to the document. """
-        groups = super(Task, self)._notify_get_groups()
-
+        groups = super(Task, self)._notify_get_groups(msg_vals=msg_vals)
+        msg_vals = msg_vals or {}
         self.ensure_one()
 
         project_user_group_id = self.env.ref('project.group_project_user').id
@@ -1226,7 +1230,7 @@ class Task(models.Model):
         new_group = ('group_project_user', group_func, {})
 
         if not self.user_id and not self.stage_id.fold:
-            take_action = self._notify_get_action_link('assign')
+            take_action = self._notify_get_action_link('assign', **msg_vals)
             project_actions = [{'url': take_action, 'title': _('I take it')}]
             new_group[2]['actions'] = project_actions
 

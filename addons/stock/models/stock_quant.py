@@ -56,7 +56,7 @@ class StockQuant(models.Model):
         ondelete='restrict', readonly=True, required=True, index=True, check_company=True)
     product_tmpl_id = fields.Many2one(
         'product.template', string='Product Template',
-        related='product_id.product_tmpl_id', readonly=False)
+        related='product_id.product_tmpl_id')
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         readonly=True, related='product_id.uom_id')
@@ -66,7 +66,7 @@ class StockQuant(models.Model):
         domain=lambda self: self._domain_location_id(),
         auto_join=True, ondelete='restrict', readonly=True, required=True, index=True, check_company=True)
     lot_id = fields.Many2one(
-        'stock.production.lot', 'Lot/Serial Number',
+        'stock.production.lot', 'Lot/Serial Number', index=True,
         ondelete='restrict', readonly=True, check_company=True,
         domain=lambda self: self._domain_lot_id())
     package_id = fields.Many2one(
@@ -389,13 +389,12 @@ class StockQuant(models.Model):
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
 
         incoming_dates = [d for d in quants.mapped('in_date') if d]
-        incoming_dates = [fields.Datetime.from_string(incoming_date) for incoming_date in incoming_dates]
         if in_date:
             incoming_dates += [in_date]
         # If multiple incoming dates are available for a given lot_id/package_id/owner_id, we
         # consider only the oldest one as being relevant.
         if incoming_dates:
-            in_date = fields.Datetime.to_string(min(incoming_dates))
+            in_date = min(incoming_dates)
         else:
             in_date = fields.Datetime.now()
 
@@ -412,6 +411,9 @@ class StockQuant(models.Model):
                 if e.pgcode == '55P03':  # could not obtain the lock
                     continue
                 else:
+                    # Because savepoint doesn't flush, we need to invalidate the cache
+                    # when there is a error raise from the write (other than lock-error)
+                    self.clear_caches()
                     raise
         else:
             self.create({
@@ -423,7 +425,7 @@ class StockQuant(models.Model):
                 'owner_id': owner_id and owner_id.id,
                 'in_date': in_date,
             })
-        return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=False, allow_negative=True), fields.Datetime.from_string(in_date)
+        return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=False, allow_negative=True), in_date
 
     @api.model
     def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
@@ -667,7 +669,6 @@ class QuantPackage(models.Model):
         help="""Reusable boxes are used for batch picking and emptied afterwards to be reused. In the barcode application, scanning a reusable box will add the products in this box.
         Disposable boxes aren't reused, when scanning a disposable box in the barcode application, the contained products are added to the transfer.""")
 
-
     @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity')
     def _compute_package_info(self):
         for package in self:
@@ -681,17 +682,6 @@ class QuantPackage(models.Model):
             package.location_id = values['location_id']
             package.company_id = values.get('company_id')
             package.owner_id = values['owner_id']
-
-    def name_get(self):
-        return list(self._compute_complete_name().items())
-
-    def _compute_complete_name(self):
-        """ Forms complete name of location from parent location to child location. """
-        res = {}
-        for package in self:
-            name = package.name
-            res[package.id] = name
-        return res
 
     def _search_owner(self, operator, value):
         if value:

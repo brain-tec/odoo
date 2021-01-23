@@ -10,6 +10,7 @@ const { ComponentWrapper } = require('web.OwlCompatibility');
 const DropdownMenu = require('web.DropdownMenu');
 const { DEFAULT_INTERVAL, INTERVAL_OPTIONS } = require('web.searchUtils');
 const { qweb } = require('web.core');
+const { _t } = require('web.core');
 
 class CarretDropdownMenu extends DropdownMenu {
     /**
@@ -119,14 +120,14 @@ var GraphController = AbstractController.extend({
             // Instantiate and append MeasureMenu
             this.measures.forEach(m => m.isActive = m.fieldName === state.measure);
             this.measureMenu = new ComponentWrapper(this, CarretDropdownMenu, {
-                title: "Measures",
+                title: _t("Measures"),
                 items: this.measures,
             });
             this.buttonDropdownPromises = [this.measureMenu.mount(fragment)];
             if (this.isEmbedded) {
                 // Instantiate and append GroupBy menu
                 this.groupByMenu = new ComponentWrapper(this, CarretDropdownMenu, {
-                    title: "Group By",
+                    title: _t("Group By"),
                     icon: 'fa fa-bars',
                     items: this._getGroupBys(state.groupBy),
                 });
@@ -164,7 +165,7 @@ var GraphController = AbstractController.extend({
             .toggleClass('active', !!state.orderBy);
 
         if (this.withButtons) {
-            this._attachDropdownComponents();
+            return this._attachDropdownComponents();
         }
     },
 
@@ -179,6 +180,9 @@ var GraphController = AbstractController.extend({
      */
     async _attachDropdownComponents() {
         await Promise.all(this.buttonDropdownPromises);
+        if (this.isDestroyed()) {
+            return;
+        }
         const actionsContainer = this.$buttons[0];
         // Attach "measures" button
         actionsContainer.appendChild(this.measureMenu.el);

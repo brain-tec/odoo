@@ -3,16 +3,16 @@
 
 import logging
 import threading
+from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from psycopg2 import sql
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
+from odoo.addons.phone_validation.tools import phone_validation
+from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
 from odoo.tools.translate import _
-from odoo.tools import email_re, email_split
-from odoo.exceptions import UserError, AccessError
-from odoo.addons.phone_validation.tools import phone_validation
-from collections import OrderedDict, defaultdict
+from odoo.tools import email_re, email_split, safe_eval
 
 from . import crm_stage
 
@@ -82,17 +82,26 @@ class Lead(models.Model):
                 'mail.activity.mixin',
                 'utm.mixin',
                 'format.address.mixin',
-                'phone.validation.mixin']
+               ]
     _primary_email = 'email_from'
+    _check_company_auto = True
 
     # Description
     name = fields.Char(
         'Opportunity', index=True, required=True,
         compute='_compute_name', readonly=False, store=True)
-    user_id = fields.Many2one('res.users', string='Salesperson', index=True, tracking=True, default=lambda self: self.env.user)
+    user_id = fields.Many2one(
+        'res.users', string='Salesperson', default=lambda self: self.env.user,
+        domain="['&', ('share', '=', False), ('company_ids', 'in', user_company_ids)]",
+        check_company=True, index=True, tracking=True)
+    user_company_ids = fields.Many2many(
+        'res.company', compute='_compute_user_company_ids',
+        help='UX: Limit to lead company or all if no company')
     user_email = fields.Char('User Email', related='user_id.email', readonly=True)
     user_login = fields.Char('User Login', related='user_id.login', readonly=True)
-    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company.id)
+    company_id = fields.Many2one(
+        'res.company', string='Company', index=True,
+        compute='_compute_company_id', readonly=False, store=True)
     referred = fields.Char('Referred By')
     description = fields.Text('Notes')
     active = fields.Boolean('Active', default=True, tracking=True)
@@ -104,7 +113,8 @@ class Lead(models.Model):
         crm_stage.AVAILABLE_PRIORITIES, string='Priority', index=True,
         default=crm_stage.AVAILABLE_PRIORITIES[0][0])
     team_id = fields.Many2one(
-        'crm.team', string='Sales Team', index=True, tracking=True,
+        'crm.team', string='Sales Team', check_company=True, index=True, tracking=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         compute='_compute_team_id', readonly=False, store=True)
     stage_id = fields.Many2one(
         'crm.stage', string='Stage', index=True, tracking=True,
@@ -149,7 +159,7 @@ class Lead(models.Model):
     date_deadline = fields.Date('Expected Closing', help="Estimate of the date on which the opportunity will be won.")
     # Customer / contact
     partner_id = fields.Many2one(
-        'res.partner', string='Customer', index=True, tracking=10,
+        'res.partner', string='Customer', check_company=True, index=True, tracking=10,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
@@ -240,6 +250,15 @@ class Lead(models.Model):
     def _search_activity_date_deadline_my(self, operator, operand):
         return ['&', ('activity_ids.user_id', '=', self._uid), ('activity_ids.date_deadline', operator, operand)]
 
+    @api.depends('company_id')
+    def _compute_user_company_ids(self):
+        all_companies = self.env['res.company'].search([])
+        for lead in self:
+            if not lead.company_id:
+                lead.user_company_ids = all_companies
+            else:
+                lead.user_company_ids = lead.company_id
+
     @api.depends('user_id', 'type')
     def _compute_team_id(self):
         """ When changing the user, also set a team_id or restrict team id
@@ -249,11 +268,37 @@ class Lead(models.Model):
             if not lead.user_id:
                 continue
             user = lead.user_id
-            if lead.team_id and user in lead.team_id.member_ids | lead.team_id.user_id:
+            if lead.team_id and user in (lead.team_id.member_ids | lead.team_id.user_id):
                 continue
             team_domain = [('use_leads', '=', True)] if lead.type == 'lead' else [('use_opportunities', '=', True)]
             team = self.env['crm.team']._get_default_team_id(user_id=user.id, domain=team_domain)
             lead.team_id = team.id
+
+    @api.depends('user_id', 'team_id')
+    def _compute_company_id(self):
+        """ Compute company_id coherency. """
+        for lead in self:
+            proposal = lead.company_id
+
+            # invalidate wrong configuration: company not in responsible companies or in team company if set
+            if proposal and lead.user_id and proposal not in lead.user_id.company_ids:
+                proposal = False
+            if proposal and lead.team_id.company_id and proposal != lead.team_id.company_id:
+                proposal = False
+
+            # propose a new company based on responsible, limited by team
+            if not proposal:
+                if not lead.user_id or lead.user_id == self.env.user:
+                    proposal = self.env.company
+                elif lead.user_id:
+                    proposal = lead.user_id.company_id
+
+                if lead.team_id.company_id and proposal != lead.team_id.company_id:
+                    proposal = False
+
+            # set a new company
+            if lead.company_id != proposal:
+                lead.company_id = proposal
 
     @api.depends('team_id', 'type')
     def _compute_stage_id(self):
@@ -330,8 +375,8 @@ class Lead(models.Model):
                     lead.partner_id.phone = lead.phone
                 # compare formatted values as we may have encoding differences between equivalent numbers
                 else:
-                    lead_phone_formatted = lead.phone_format(lead.phone)
-                    partner_phone_formatted = lead.phone_format(lead.partner_id.phone)
+                    lead_phone_formatted = lead.phone_get_sanitized_number(number_fname='phone')
+                    partner_phone_formatted = lead.partner_id.phone_get_sanitized_number(number_fname='phone')
                     if lead_phone_formatted != partner_phone_formatted:
                         lead.partner_id.phone = lead.phone
 
@@ -414,8 +459,8 @@ class Lead(models.Model):
                     will_write_phone = True
                 # otherwise compare formatted values as we may have encoding differences
                 else:
-                    lead_phone_formatted = lead.phone_format(lead.phone)
-                    partner_phone_formatted = lead.phone_format(lead.partner_id.phone)
+                    lead_phone_formatted = lead.phone_get_sanitized_number(number_fname='phone')
+                    partner_phone_formatted = lead.partner_id.phone_get_sanitized_number(number_fname='phone')
                     if lead_phone_formatted != partner_phone_formatted:
                         will_write_phone = True
 
@@ -456,12 +501,12 @@ class Lead(models.Model):
     @api.onchange('phone', 'country_id', 'company_id')
     def _onchange_phone_validation(self):
         if self.phone:
-            self.phone = self.phone_format(self.phone)
+            self.phone = self.phone_get_sanitized_number(number_fname='phone', force_format='INTERNATIONAL') or self.phone
 
     @api.onchange('mobile', 'country_id', 'company_id')
     def _onchange_mobile_validation(self):
         if self.mobile:
-            self.mobile = self.phone_format(self.mobile)
+            self.mobile = self.phone_get_sanitized_number(number_fname='mobile', force_format='INTERNATIONAL') or self.mobile
 
     def _prepare_values_from_partner(self, partner):
         """ Get a dictionary with values coming from partner information to
@@ -509,7 +554,7 @@ class Lead(models.Model):
 
         for lead, values in zip(leads, vals_list):
             if any(field in ['active', 'stage_id'] for field in values):
-                lead._handle_won_lost(vals)
+                lead._handle_won_lost(values)
 
         return leads
 
@@ -857,6 +902,43 @@ class Lead(models.Model):
         return True
 
     # ------------------------------------------------------------
+    # VIEWS
+    # ------------------------------------------------------------
+
+    def redirect_lead_opportunity_view(self):
+        self.ensure_one()
+        return {
+            'name': _('Lead or Opportunity'),
+            'view_mode': 'form',
+            'res_model': 'crm.lead',
+            'domain': [('type', '=', self.type)],
+            'res_id': self.id,
+            'view_id': False,
+            'type': 'ir.actions.act_window',
+            'context': {'default_type': self.type}
+        }
+
+    @api.model
+    def get_empty_list_help(self, help):
+        help_title, sub_title = "", ""
+        if self._context.get('default_type') == 'lead':
+            help_title = _('Create a new lead')
+        else:
+            help_title = _('Create an opportunity to start playing with your pipeline.')
+        alias_record = self.env['mail.alias'].search([
+            ('alias_name', '!=', False),
+            ('alias_name', '!=', ''),
+            ('alias_model_id.model', '=', 'crm.lead'),
+            ('alias_parent_model_id.model', '=', 'crm.team'),
+            ('alias_force_thread_id', '=', False)
+        ], limit=1)
+        if alias_record and alias_record.alias_domain and alias_record.alias_name:
+            email = '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)
+            email_link = "<b><a href='mailto:%s'>%s</a></b>" % (email, email)
+            sub_title = _('Use the top left <i>Create</i> button, or send an email to %s to test the email gateway.') % (email_link)
+        return '<p class="o_view_nocontent_smiling_face">%s</p><p class="oe_view_nocontent_alias">%s</p>' % (help_title, sub_title)
+
+    # ------------------------------------------------------------
     # BUSINESS
     # ------------------------------------------------------------
 
@@ -872,7 +954,7 @@ class Lead(models.Model):
         return self.message_post(body=message)
 
     # ------------------------------------------------------------
-    # MERGE LEADS / OPPS
+    # MERGE AND CONVERT LEADS / OPPORTUNITIES
     # ------------------------------------------------------------
 
     def _merge_get_result_type(self):
@@ -962,7 +1044,7 @@ class Lead(models.Model):
         which fields has been merged and their new value. `self` is the resulting
         merge crm.lead record.
 
-        :param opportunities: see ``merge_dependences``
+        :param opportunities: see ``_merge_dependences``
         """
         # TODO JEM: mail template should be used instead of fix body, subject text
         self.ensure_one()
@@ -979,7 +1061,7 @@ class Lead(models.Model):
         """ Move mail.message from the given opportunities to the current one. `self` is the
             crm.lead record destination for message of `opportunities`.
 
-        :param opportunities: see ``merge_dependences``
+        :param opportunities: see ``_merge_dependences``
         """
         self.ensure_one()
         for opportunity in opportunities:
@@ -998,7 +1080,7 @@ class Lead(models.Model):
         """ Move attachments of given opportunities to the current one `self`, and rename
             the attachments having same name than native ones.
 
-        :param opportunities: see ``merge_dependences``
+        :param opportunities: see ``_merge_dependences``
         """
         self.ensure_one()
 
@@ -1020,7 +1102,7 @@ class Lead(models.Model):
                 attachment.write(values)
         return True
 
-    def merge_dependences(self, opportunities):
+    def _merge_dependences(self, opportunities):
         """ Merge dependences (messages, attachments, ...). These dependences will be
             transfered to `self`, the most important lead.
 
@@ -1038,15 +1120,25 @@ class Lead(models.Model):
                 - merge at least 1 opp with anything else (lead or opp) = 1 new opp
             The resulting lead/opportunity will be the most important one (based on its confidence level)
             updated with values from other opportunities to merge.
-            :param user_id : the id of the saleperson. If not given, will be determined by `_merge_data`.
-            :param team : the id of the Sales Team. If not given, will be determined by `_merge_data`.
-            :return crm.lead record resulting of th merge
+
+        :param user_id : the id of the saleperson. If not given, will be determined by `_merge_data`.
+        :param team : the id of the Sales Team. If not given, will be determined by `_merge_data`.
+
+        :return crm.lead record resulting of th merge
         """
+        return self._merge_opportunity(user_id=user_id, team_id=team_id, auto_unlink=auto_unlink)
+
+    def _merge_opportunity(self, user_id=False, team_id=False, auto_unlink=True, max_length=5):
+        """ Private merging method. This one allows to relax rules on record set
+        length allowing to merge more than 5 opportunities at once if requested.
+        This should not be called by action buttons.
+
+        See ``merge_opportunity`` for more details. """
         if len(self.ids) <= 1:
             raise UserError(_('Please select more than one element (lead or opportunity) from the list view.'))
 
-        if len(self.ids) > 5 and not self.env.is_superuser():
-            raise UserError(_("To prevent data loss, Leads and Opportunities can only be merged by groups of 5."))
+        if max_length and len(self.ids) > max_length and not self.env.is_superuser():
+            raise UserError(_("To prevent data loss, Leads and Opportunities can only be merged by groups of %(max_length)s."))
 
         opportunities = self._sort_by_confidence_level(reverse=True)
 
@@ -1065,7 +1157,7 @@ class Lead(models.Model):
             merged_data['team_id'] = team_id
 
         # merge other data (mail.message, attachments, ...) from tail into head
-        opportunities_head.merge_dependences(opportunities_tail)
+        opportunities_head._merge_dependences(opportunities_tail)
 
         # check if the stage is in the stages of the Sales Team. If not, assign the stage with the lowest sequence
         if merged_data.get('team_id'):
@@ -1082,16 +1174,6 @@ class Lead(models.Model):
             opportunities_tail.sudo().unlink()
 
         return opportunities_head
-
-    def _sort_by_confidence_level(self, reverse=False):
-        """ Sorting the leads/opps according to the confidence level of its stage, which relates to the probability of winning it
-        The confidence level increases with the stage sequence
-        An Opportunity always has higher confidence level than a lead
-        """
-        def opps_key(opportunity):
-            return opportunity.type == 'opportunity', opportunity.stage_id.sequence, -opportunity._origin.id
-
-        return self.sorted(key=opps_key, reverse=reverse)
 
     def _convert_opportunity_data(self, customer, team_id=False):
         """ Extract the data from a lead to create the opportunity
@@ -1122,9 +1204,56 @@ class Lead(models.Model):
             lead.write(vals)
 
         if user_ids or team_id:
-            self.handle_salesmen_assignment(user_ids, team_id)
+            self._handle_salesmen_assignment(user_ids=user_ids, team_id=team_id)
 
         return True
+
+    def _handle_partner_assignment(self, force_partner_id=False, create_missing=True):
+        """ Update customer (partner_id) of leads. Purpose is to set the same
+        partner on most leads; either through a newly created partner either
+        through a given partner_id.
+
+        :param int force_partner_id: if set, update all leads to that customer;
+        :param create_missing: for leads without customer, create a new one
+          based on lead information;
+        """
+        for lead in self:
+            if force_partner_id:
+                lead.partner_id = force_partner_id
+            if not lead.partner_id and create_missing:
+                partner = lead._create_customer()
+                lead.partner_id = partner.id
+
+    def _handle_salesmen_assignment(self, user_ids=False, team_id=False):
+        """ Assign salesmen and salesteam to a batch of leads.  If there are more
+        leads than salesmen, these salesmen will be assigned in round-robin. E.g.
+        4 salesmen (S1, S2, S3, S4) for 6 leads (L1, L2, ... L6) will assigned as
+        following: L1 - S1, L2 - S2, L3 - S3, L4 - S4, L5 - S1, L6 - S2.
+
+        :param list user_ids: salesmen to assign
+        :param int team_id: salesteam to assign
+        """
+        update_vals = {'team_id': team_id} if team_id else {}
+        if not user_ids and team_id:
+            self.write(update_vals)
+        else:
+            lead_ids = self.ids
+            steps = len(user_ids)
+            # pass 1 : lead_ids[0:6:3] = [L1,L4]
+            # pass 2 : lead_ids[1:6:3] = [L2,L5]
+            # pass 3 : lead_ids[2:6:3] = [L3,L6]
+            # ...
+            for idx in range(0, steps):
+                subset_ids = lead_ids[idx:len(lead_ids):steps]
+                update_vals['user_id'] = user_ids[idx]
+                self.env['crm.lead'].browse(subset_ids).write(update_vals)
+
+    # ------------------------------------------------------------
+    # MERGE / CONVERT TOOLS
+    # ---------------------------------------------------------
+
+    # CLASSIFICATION TOOLS
+    # --------------------------------------------------
 
     def _get_lead_duplicates(self, partner=None, email=None, include_lost=False):
         """ Search for leads that seem duplicated based on partner / email.
@@ -1154,6 +1283,43 @@ class Lead(models.Model):
             domain += ['&', ('active', '=', True), '|', ('probability', '=', False), ('probability', '<', 100)]
 
         return self.with_context(active_test=False).search(domain)
+
+    def _sort_by_confidence_level(self, reverse=False):
+        """ Sorting the leads/opps according to the confidence level of its stage, which relates to the probability of winning it
+        The confidence level increases with the stage sequence
+        An Opportunity always has higher confidence level than a lead
+        """
+        def opps_key(opportunity):
+            return opportunity.type == 'opportunity', opportunity.stage_id.sequence, -opportunity._origin.id
+
+        return self.sorted(key=opps_key, reverse=reverse)
+
+    # CUSTOMER TOOLS
+    # --------------------------------------------------
+
+    def _find_matching_partner(self, email_only=False):
+        """ Try to find a matching partner with available information on the
+        lead, using notably customer's name, email, ...
+
+        :param email_only: Only find a matching based on the email. To use
+            for automatic process where ilike based on name can be too dangerous
+        :return: partner browse record
+        """
+        self.ensure_one()
+        partner = self.partner_id
+
+        if not partner and self.email_from:
+            partner = self.env['res.partner'].search([('email', '=', self.email_from)], limit=1)
+
+        if not partner and not email_only:
+            # search through the existing partners based on the lead's partner or contact name
+            # to be aligned with _create_customer, search on lead's name as last possibility
+            for customer_potential_name in [self[field_name] for field_name in ['partner_name', 'contact_name', 'name'] if self[field_name]]:
+                partner = self.env['res.partner'].search([('name', 'ilike', '%' + customer_potential_name + '%')], limit=1)
+                if partner:
+                    break
+
+        return partner
 
     def _create_customer(self):
         """ Create a partner from lead data and link it to the lead.
@@ -1188,7 +1354,7 @@ class Lead(models.Model):
 
         :return: dictionary of values to give at res_partner.create()
         """
-        email_split = tools.email_split(self.email_from)
+        email_parts = tools.email_split(self.email_from)
         res = {
             'name': partner_name,
             'user_id': self.env.context.get('default_user_id') or self.user_id.id,
@@ -1197,7 +1363,7 @@ class Lead(models.Model):
             'parent_id': parent_id,
             'phone': self.phone,
             'mobile': self.mobile,
-            'email': email_split[0] if email_split else False,
+            'email': email_parts[0] if email_parts else False,
             'title': self.title.id,
             'function': self.function,
             'street': self.street,
@@ -1213,107 +1379,6 @@ class Lead(models.Model):
         if self.lang_id:
             res['lang'] = self.lang_id.code
         return res
-
-    def _find_matching_partner(self, email_only=False):
-        """ Try to find a matching partner with available information on the
-        lead, using notably customer's name, email, ...
-
-        :param email_only: Only find a matching based on the email. To use
-            for automatic process where ilike based on name can be too dangerous
-        :return: partner browse record
-        """
-        self.ensure_one()
-        partner = self.partner_id
-
-        if not partner and self.email_from:
-            partner = self.env['res.partner'].search([('email', '=', self.email_from)], limit=1)
-
-        if not partner and not email_only:
-            # search through the existing partners based on the lead's partner or contact name
-            # to be aligned with _create_customer, search on lead's name as last possibility
-            for customer_potential_name in [self[field_name] for field_name in ['partner_name', 'contact_name', 'name'] if self[field_name]]:
-                partner = self.env['res.partner'].search([('name', 'ilike', '%' + customer_potential_name + '%')], limit=1)
-                if partner:
-                    break
-
-        return partner
-
-    def handle_partner_assignment(self, force_partner_id=False, create_missing=True):
-        """ Update customer (partner_id) of leads. Purpose is to set the same
-        partner on most leads; either through a newly created partner either
-        through a given partner_id.
-
-        :param int force_partner_id: if set, update all leads to that customer;
-        :param create_missing: for leads without customer, create a new one
-          based on lead information;
-        """
-        for lead in self:
-            if force_partner_id:
-                lead.partner_id = force_partner_id
-            if not lead.partner_id and create_missing:
-                partner = lead._create_customer()
-                lead.partner_id = partner.id
-
-    def handle_salesmen_assignment(self, user_ids=None, team_id=False):
-        """ Assign salesmen and salesteam to a batch of leads.  If there are more
-        leads than salesmen, these salesmen will be assigned in round-robin. E.g.
-        4 salesmen (S1, S2, S3, S4) for 6 leads (L1, L2, ... L6) will assigned as
-        following: L1 - S1, L2 - S2, L3 - S3, L4 - S4, L5 - S1, L6 - S2.
-
-        :param list user_ids: salesmen to assign
-        :param int team_id: salesteam to assign
-        """
-        update_vals = {'team_id': team_id} if team_id else {}
-        if not user_ids:
-            self.write(update_vals)
-        else:
-            lead_ids = self.ids
-            steps = len(user_ids)
-            # pass 1 : lead_ids[0:6:3] = [L1,L4]
-            # pass 2 : lead_ids[1:6:3] = [L2,L5]
-            # pass 3 : lead_ids[2:6:3] = [L3,L6]
-            # ...
-            for idx in range(0, steps):
-                subset_ids = lead_ids[idx:len(lead_ids):steps]
-                update_vals['user_id'] = user_ids[idx]
-                self.env['crm.lead'].browse(subset_ids).write(update_vals)
-
-    # ------------------------------------------------------------
-    # TOOLS
-    # ------------------------------------------------------------
-
-    def redirect_lead_opportunity_view(self):
-        self.ensure_one()
-        return {
-            'name': _('Lead or Opportunity'),
-            'view_mode': 'form',
-            'res_model': 'crm.lead',
-            'domain': [('type', '=', self.type)],
-            'res_id': self.id,
-            'view_id': False,
-            'type': 'ir.actions.act_window',
-            'context': {'default_type': self.type}
-        }
-
-    @api.model
-    def get_empty_list_help(self, help):
-        help_title, sub_title = "", ""
-        if self._context.get('default_type') == 'lead':
-            help_title = _('Create a new lead')
-        else:
-            help_title = _('Create an opportunity to start playing with your pipeline.')
-        alias_record = self.env['mail.alias'].search([
-            ('alias_name', '!=', False),
-            ('alias_name', '!=', ''),
-            ('alias_model_id.model', '=', 'crm.lead'),
-            ('alias_parent_model_id.model', '=', 'crm.team'),
-            ('alias_force_thread_id', '=', False)
-        ], limit=1)
-        if alias_record and alias_record.alias_domain and alias_record.alias_name:
-            email = '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)
-            email_link = "<b><a href='mailto:%s'>%s</a></b>" % (email, email)
-            sub_title = _('Use the top left <i>Create</i> button, or send an email to %s to test the email gateway.') % (email_link)
-        return '<p class="o_view_nocontent_smiling_face">%s</p><p class="oe_view_nocontent_alias">%s</p>' % (help_title, sub_title)
 
     # ------------------------------------------------------------
     # MAILING
@@ -1336,24 +1401,29 @@ class Lead(models.Model):
             return self.env.ref('crm.mt_lead_lost')
         return super(Lead, self)._track_subtype(init_values)
 
-    def _notify_get_groups(self):
+    def _notify_get_groups(self, msg_vals=None):
         """ Handle salesman recipients that can convert leads into opportunities
         and set opportunities as won / lost. """
-        groups = super(Lead, self)._notify_get_groups()
+        groups = super(Lead, self)._notify_get_groups(msg_vals=msg_vals)
+        msg_vals = msg_vals or {}
 
         self.ensure_one()
         if self.type == 'lead':
-            convert_action = self._notify_get_action_link('controller', controller='/lead/convert')
+            convert_action = self._notify_get_action_link('controller', controller='/lead/convert', **msg_vals)
             salesman_actions = [{'url': convert_action, 'title': _('Convert to opportunity')}]
         else:
-            won_action = self._notify_get_action_link('controller', controller='/lead/case_mark_won')
-            lost_action = self._notify_get_action_link('controller', controller='/lead/case_mark_lost')
+            won_action = self._notify_get_action_link('controller', controller='/lead/case_mark_won', **msg_vals)
+            lost_action = self._notify_get_action_link('controller', controller='/lead/case_mark_lost', **msg_vals)
             salesman_actions = [
                 {'url': won_action, 'title': _('Won')},
                 {'url': lost_action, 'title': _('Lost')}]
 
         if self.team_id:
-            salesman_actions.append({'url': self._notify_get_action_link('view', res_id=self.team_id.id, model=self.team_id._name), 'title': _('Sales Team Settings')})
+            custom_params = dict(msg_vals, res_id=self.team_id.id, model=self.team_id._name)
+            salesman_actions.append({
+                'url': self._notify_get_action_link('view', **custom_params),
+                'title': _('Sales Team Settings')
+            })
 
         salesman_group_id = self.env.ref('sales_team.group_sale_salesman').id
         new_group = (
@@ -1397,17 +1467,12 @@ class Lead(models.Model):
             through message_process.
             This override updates the document according to the email.
         """
-
-        # remove external users
-        if self.env.user.has_group('base.group_portal'):
-            self = self.with_context(default_user_id=False)
-
         # remove default author when going through the mail gateway. Indeed we
-        # do not want to explicitly set user_id to False; however we do not
-        # want the gateway user to be responsible if no other responsible is
-        # found.
-        if self._uid == self.env.ref('base.user_root').id:
-            self = self.with_context(default_user_id=False)
+        # do not want to explicitly set an user as responsible. We prefer that
+        # assignment is done automatically (scoring) or manually. Otherwise it
+        # would always be either root (gateway user) either alias owner (through
+        # alias_user_id). It also allows to exclude portal / public users.
+        self = self.with_context(default_user_id=False)
 
         if custom_values is None:
             custom_values = {}

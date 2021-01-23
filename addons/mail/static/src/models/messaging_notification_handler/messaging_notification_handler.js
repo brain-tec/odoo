@@ -418,12 +418,10 @@ function factory(dependencies) {
             } else if (type === 'moderator') {
                 return this._handleNotificationPartnerModerator(data);
             } else if (type === 'simple_notification') {
-                const escapedTitle = owl.utils.escape(data.title);
                 const escapedMessage = owl.utils.escape(data.message);
                 this.env.services['notification'].notify({
                     message: escapedMessage,
                     sticky: data.sticky,
-                    title: escapedTitle,
                     type: data.warning ? 'warning' : 'danger',
                 });
             } else if (type === 'toggle_star') {
@@ -491,7 +489,6 @@ function factory(dependencies) {
                         this.env._t("You have been invited to: %s"),
                         owl.utils.escape(channel.name)
                     ),
-                    title: this.env._t("Invitation"),
                     type: 'info',
                 });
             }
@@ -508,7 +505,7 @@ function factory(dependencies) {
         _handleNotificationPartnerDeletion({ message_ids }) {
             const moderationMailbox = this.env.messaging.moderation;
             for (const id of message_ids) {
-                const message = this.env.models['mail.message'].find(message => message.id === id);
+                const message = this.env.models['mail.message'].findFromIdentifyingData({ id });
                 if (message) {
                     if (
                         message.moderation_status === 'pending_moderation' &&
@@ -561,7 +558,7 @@ function factory(dependencies) {
                 // Furthermore, server should not send back all message_ids marked as read
                 // but something like last read message_id or something like that.
                 // (just imagine you mark 1000 messages as read ... )
-                const message = this.env.models['mail.message'].find(m => m.id === message_id);
+                const message = this.env.models['mail.message'].findFromIdentifyingData({ id: message_id });
                 if (message) {
                     message.update({
                         isNeedaction: false,
@@ -574,10 +571,10 @@ function factory(dependencies) {
             let channels;
             if (channel_ids) {
                 channels = channel_ids
-                    .map(id => this.env.models['mail.thread'].find(thread =>
-                        thread.id === id &&
-                        thread.model === 'mail.channel'
-                    ))
+                    .map(id => this.env.models['mail.thread'].findFromIdentifyingData({
+                        id,
+                        model: 'mail.channel',
+                    }))
                     .filter(thread => !!thread);
             } else {
                 // flux specific: channel_ids unset means "mark all as read"
@@ -620,9 +617,9 @@ function factory(dependencies) {
         _handleNotificationPartnerToggleStar({ message_ids = [], starred }) {
             const starredMailbox = this.env.messaging.starred;
             for (const messageId of message_ids) {
-                const message = this.env.models['mail.message'].find(message =>
-                    message.id === messageId
-                );
+                const message = this.env.models['mail.message'].findFromIdentifyingData({
+                    id: messageId,
+                });
                 if (!message) {
                     continue;
                 }
@@ -665,10 +662,10 @@ function factory(dependencies) {
          * @param {integer} channelId
          */
         _handleNotificationPartnerUnsubscribe(channelId) {
-            const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId &&
-                thread.model === 'mail.channel'
-            );
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id: channelId,
+                model: 'mail.channel',
+            });
             if (!channel) {
                 return;
             }
@@ -690,7 +687,6 @@ function factory(dependencies) {
             channel.update({ isServerPinned: false });
             this.env.services['notification'].notify({
                 message,
-                title: this.env._t("Unsubscribed"),
                 type: 'info',
             });
         }
