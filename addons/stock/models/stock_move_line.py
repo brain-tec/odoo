@@ -3,7 +3,7 @@
 
 from collections import Counter
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, tools, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import OrderedSet
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
@@ -174,6 +174,15 @@ class StockMoveLine(models.Model):
                 message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
                 res['warning'] = {'title': _('Warning'), 'message': message}
         return res
+
+    def init(self):
+        if not tools.index_exists(self._cr, 'stock_move_line_free_reservation_index'):
+            self._cr.execute("""
+                CREATE INDEX stock_move_line_free_reservation_index
+                ON
+                    stock_move_line (id, company_id, product_id, lot_id, location_id, owner_id, package_id)
+                WHERE
+                    (state IS NULL OR state NOT IN ('cancel', 'done')) AND product_qty > 0""")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -454,14 +463,17 @@ class StockMoveLine(models.Model):
                             # If a picking type is linked, we may have to create a production lot on
                             # the fly before assigning it to the move line if the user checked both
                             # `use_create_lots` and `use_existing_lots`.
-                            if ml.lot_name and not ml.lot_id:
-                                lot = self.env['stock.production.lot'].search([
-                                    ('company_id', '=', ml.company_id.id),
-                                    ('product_id', '=', ml.product_id.id),
-                                    ('name', '=', ml.lot_name),
-                                ], limit=1)
-                                if lot:
-                                    ml.lot_id = lot.id
+                            if ml.lot_name:
+                                if ml.product_id.tracking == 'lot' and not ml.lot_id:
+                                    lot = self.env['stock.production.lot'].search([
+                                        ('company_id', '=', ml.company_id.id),
+                                        ('product_id', '=', ml.product_id.id),
+                                        ('name', '=', ml.lot_name),
+                                    ], limit=1)
+                                    if lot:
+                                        ml.lot_id = lot.id
+                                    else:
+                                        ml_ids_to_create_lot.add(ml.id)
                                 else:
                                     ml_ids_to_create_lot.add(ml.id)
                         elif not picking_type_id.use_create_lots and not picking_type_id.use_existing_lots:

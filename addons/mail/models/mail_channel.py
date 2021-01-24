@@ -364,12 +364,12 @@ class Channel(models.Model):
         ]).unlink()
         self.invalidate_cache(fnames=['channel_partner_ids', 'channel_last_seen_partner_ids'])
 
-    def _notify_get_groups(self):
+    def _notify_get_groups(self, msg_vals=None):
         """ All recipients of a message on a channel are considered as partners.
         This means they will receive a minimal email, without a link to access
         in the backend. Mailing lists should indeed send minimal emails to avoid
         the noise. """
-        groups = super(Channel, self)._notify_get_groups()
+        groups = super(Channel, self)._notify_get_groups(msg_vals=msg_vals)
         for (index, (group_name, group_func, group_data)) in enumerate(groups):
             if group_name != 'customer':
                 groups[index] = (group_name, lambda partner: False, group_data)
@@ -622,13 +622,7 @@ class Channel(models.Model):
         direct_channel_partners = all_partner_channel.filtered(lambda pc: channel_dict[pc.channel_id.id].channel_type == 'chat')
         direct_partners = direct_channel_partners.mapped('partner_id')
         partner_infos = self.partner_info(all_partners, direct_partners)
-
-        # add last message preview (only used in mobile)
-        addPreview = self._context.get('isMobile', False)
-        if addPreview:
-            channel_previews = {channel_preview['id']: channel_preview for channel_preview in self.channel_fetch_preview()}
-        else:
-            channel_last_message_ids = dict((r['id'], r['message_id']) for r in self._channel_last_message_ids())
+        channel_last_message_ids = dict((r['id'], r['message_id']) for r in self._channel_last_message_ids())
 
         for channel in self:
             info = {
@@ -649,14 +643,7 @@ class Channel(models.Model):
                 info['info'] = extra_info
 
             # add last message preview (only used in mobile)
-            if addPreview:
-                if channel in channel_previews:
-                    info['last_message'] = channel_previews[channel]
-                    info['last_message_id'] = channel_previews[channel]['last_message']['id']
-                else:
-                    info['last_message_id'] = False
-            else:
-                info['last_message_id'] = channel_last_message_ids.get(channel.id, False)
+            info['last_message_id'] = channel_last_message_ids.get(channel.id, False)
             # listeners of the channel
             channel_partners = all_partner_channel.filtered(lambda pc: channel.id == pc.channel_id.id)
 
