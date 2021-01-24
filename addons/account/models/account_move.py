@@ -445,10 +445,10 @@ class AccountMove(models.Model):
 
         self._recompute_dynamic_lines(recompute_tax_base_amount=True)
 
-    @api.onchange('payment_reference')
+    @api.onchange('payment_reference', 'ref')
     def _onchange_payment_reference(self):
         for line in self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-            line.name = self.payment_reference
+            line.name = self.payment_reference or self.ref
 
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
@@ -945,7 +945,8 @@ class AccountMove(models.Model):
             # Recompute amls: update existing line or create new one for each payment term.
             new_terms_lines = self.env['account.move.line']
             for date_maturity, balance, amount_currency in to_compute:
-                if self.journal_id.company_id.currency_id.is_zero(balance) and len(to_compute) > 1:
+                currency = self.journal_id.company_id.currency_id
+                if currency and currency.is_zero(balance) and len(to_compute) > 1:
                     continue
 
                 if existing_terms_lines_index < len(existing_terms_lines):
@@ -3635,10 +3636,10 @@ class AccountMoveLine(models.Model):
                 raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.', account.display_name))
 
             failed_check = False
-            if journal.type_control_ids or journal.account_control_ids:
+            if (journal.type_control_ids - journal.default_account_id.user_type_id) or journal.account_control_ids:
                 failed_check = True
                 if journal.type_control_ids:
-                    failed_check = account.user_type_id not in journal.type_control_ids
+                    failed_check = account.user_type_id not in (journal.type_control_ids - journal.default_account_id.user_type_id)
                 if failed_check and journal.account_control_ids:
                     failed_check = account not in journal.account_control_ids
 
@@ -4562,6 +4563,12 @@ class AccountMoveLine(models.Model):
             # Don't copy the name of a payment term line.
             if line.move_id.is_invoice() and line.account_id.user_type_id.type in ('receivable', 'payable'):
                 values['name'] = ''
+            # Don't copy restricted fields of notes
+            if line.display_type in ('line_section', 'line_note'):
+                values['amount_currency'] = 0
+                values['debit'] = 0
+                values['credit'] = 0
+                values['account_id'] = False
             if self._context.get('include_business_fields'):
                 line._copy_data_extend_business_fields(values)
         return res
