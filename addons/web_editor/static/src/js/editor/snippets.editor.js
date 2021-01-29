@@ -297,6 +297,8 @@ var SnippetEditor = Widget.extend({
     removeSnippet: async function () {
         this.toggleOverlay(false);
         this.toggleOptions(false);
+        // If it is an invisible element, we must close it before deleting it (e.g. modal)
+        await this.toggleTargetVisibility(!this.$target.hasClass('o_snippet_invisible'));
 
         await new Promise(resolve => {
             this.trigger_up('call_for_each_child_snippet', {
@@ -664,9 +666,14 @@ var SnippetEditor = Widget.extend({
                 }
             },
         });
+
+        // If a modal is open, the scroll target must be that modal
+        const $openModal = self.$editable.find('.modal:visible');
+        self.draggableComponent.$scrollTarget = $openModal.length ? $openModal : self.$scrollingElement;
+
         // Trigger a scroll on the draggable element so that jQuery updates
         // the position of the drop zones.
-        this.$scrollingElement.on('scroll.scrolling_element', function () {
+        self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function () {
             self.$el.trigger('scroll');
         });
     },
@@ -729,7 +736,7 @@ var SnippetEditor = Widget.extend({
         this.trigger_up('drag_and_drop_stop', {
             $snippet: this.$target,
         });
-        this.$scrollingElement.off('scroll.scrolling_element');
+        this.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
     },
     /**
      * @private
@@ -1079,7 +1086,7 @@ var SnippetsMenu = Widget.extend({
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
         this.$scrollingElement = $().getScrollingElement();
-        this.$scrollingElement.on('scroll.snippets_menu', _.throttle(() => {
+        this._onScrollingElementScroll = _.throttle(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
             }
@@ -1091,7 +1098,12 @@ var SnippetsMenu = Widget.extend({
                     editor.cover();
                 }
             }, 250);
-        }, 50));
+        }, 50)
+        // We use addEventListener instead of jQuery because we need 'capture'.
+        // Setting capture to true allows to take advantage of event bubbling
+        // for events that otherwise don’t support it. (e.g. useful when
+        // scrolling a modal)
+        this.$scrollingElement[0].addEventListener('scroll', this._onScrollingElementScroll, {capture: true});
 
         // Auto-selects text elements with a specific class and remove this
         // on text changes
@@ -1156,7 +1168,7 @@ var SnippetsMenu = Widget.extend({
             this.$snippetEditorArea.remove();
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
-            this.$scrollingElement.off('.snippets_menu');
+            this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         delete this.cacheSnippetTemplate[this.options.snippets];
@@ -1256,6 +1268,13 @@ var SnippetsMenu = Widget.extend({
     _activateInsertionZones: function ($selectorSiblings, $selectorChildren) {
         var self = this;
 
+        // If a modal is open, the drop zones must be created only in this modal
+        const $openModal = self.getEditableArea().find('.modal:visible');
+        if ($openModal.length) {
+            $selectorSiblings = $openModal.find($selectorSiblings);
+            $selectorChildren = $openModal.find($selectorChildren);
+        }
+
         // Check if the drop zone should be horizontal or vertical
         function setDropZoneDirection($elem, $parent, $sibling) {
             var vertical = false;
@@ -1337,16 +1356,26 @@ var SnippetsMenu = Widget.extend({
             $selectorSiblings = $(_.uniq(($selectorSiblings || $()).add($selectorChildren.children()).get()));
         }
 
+        var noDropZonesSelector = '[data-invisible="1"], .o_we_no_overlay, :not(:visible)';
         if ($selectorSiblings) {
-            $selectorSiblings.not('.oe_drop_zone, .oe_drop_clone').each(function () {
+            $selectorSiblings.not(`.oe_drop_zone, .oe_drop_clone, ${noDropZonesSelector}`).each(function () {
                 var data;
                 var $zone = $(this);
+                var $zoneToCheck = $zone;
 
-                if (!$zone.prev('.oe_drop_zone:visible, .oe_drop_clone').length) {
+                while ($zoneToCheck.prev(noDropZonesSelector).length) {
+                    $zoneToCheck = $zoneToCheck.prev();
+                }
+                if (!$zoneToCheck.prev('.oe_drop_zone:visible, .oe_drop_clone').length) {
                     data = setDropZoneDirection($zone, $zone.parent());
                     self._insertDropzone($('<we-hook/>').insertBefore($zone), data.vertical, data.style);
                 }
-                if (!$zone.next('.oe_drop_zone:visible, .oe_drop_clone').length) {
+
+                $zoneToCheck = $zone;
+                while ($zoneToCheck.next(noDropZonesSelector).length) {
+                    $zoneToCheck = $zoneToCheck.next();
+                }
+                if (!$zoneToCheck.next('.oe_drop_zone:visible, .oe_drop_clone').length) {
                     data = setDropZoneDirection($zone, $zone.parent());
                     self._insertDropzone($('<we-hook/>').insertAfter($zone), data.vertical, data.style);
                 }
@@ -1502,9 +1531,15 @@ var SnippetsMenu = Widget.extend({
     },
     /**
      * @private
+     * @param {jQuery|null|undefined} [$el]
+     *        The DOM element whose inside editors need to be destroyed.
+     *        If no element is given, all the editors are destroyed.
      */
-    _destroyEditors: async function () {
+    _destroyEditors: async function ($el) {
         const proms = _.map(this.snippetEditors, async function (snippetEditor) {
+            if ($el && !$el.has(snippetEditor.$target).length) {
+                return;
+            }
             await snippetEditor.cleanForSave();
             snippetEditor.destroy();
         });
@@ -2001,9 +2036,13 @@ var SnippetsMenu = Widget.extend({
                         },
                     });
 
+                    // If a modal is open, the scroll target must be that modal
+                    const $openModal = self.getEditableArea().find('.modal:visible');
+                    self.draggableComponent.$scrollTarget = $openModal.length ? $openModal : $scrollingElement;
+
                     // Trigger a scroll on the draggable element so that jQuery updates
                     // the position of the drop zones.
-                    $scrollingElement.on('scroll.scrolling_element', function () {
+                    self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function () {
                         self.$el.trigger('scroll');
                     });
 
@@ -2012,7 +2051,7 @@ var SnippetsMenu = Widget.extend({
                 },
                 stop: async function (ev, ui) {
                     $toInsert.removeClass('oe_snippet_body');
-                    $scrollingElement.off('scroll.scrolling_element');
+                    self.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
 
                     if (!dropped && ui.position.top > 3 && ui.position.left + ui.helper.outerHeight() < self.el.getBoundingClientRect().left) {
                         var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
@@ -2268,7 +2307,11 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onDragAndDropStop: async function (ev) {
-        await this._destroyEditors();
+        const $modal = ev.data.$snippet.closest('.modal');
+        // If the snippet is in a modal, destroy editors only in that modal.
+        // This to prevent the modal from closing because of the cleanForSave
+        // on each editors.
+        await this._destroyEditors($modal.length ? $modal : null);
         await this._activateSnippet(ev.data.$snippet);
     },
     /**
