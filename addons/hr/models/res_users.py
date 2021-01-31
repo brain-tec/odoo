@@ -35,6 +35,7 @@ class User(models.Model):
     private_country_id = fields.Many2one(related='address_home_id.country_id', string="Private Country", readonly=False, related_sudo=False)
     is_address_home_a_company = fields.Boolean(related='employee_id.is_address_home_a_company', readonly=False, related_sudo=False)
     private_email = fields.Char(related='address_home_id.email', string="Private Email", readonly=False)
+    private_lang = fields.Selection(related='address_home_id.lang', string="Employee Lang", readonly=False)
     km_home_work = fields.Integer(related='employee_id.km_home_work', readonly=False, related_sudo=False)
     # res.users already have a field bank_account_id and country_id from the res.partner inheritance: don't redefine them
     employee_bank_account_id = fields.Many2one(related='employee_id.bank_account_id', string="Employee's Bank Account Number", related_sudo=False, readonly=False)
@@ -64,6 +65,7 @@ class User(models.Model):
     hr_presence_state = fields.Selection(related='employee_id.hr_presence_state')
     last_activity = fields.Date(related='employee_id.last_activity')
     last_activity_time = fields.Char(related='employee_id.last_activity_time')
+    employee_type = fields.Selection(related='employee_id.employee_type', readonly=False, related_sudo=False)
 
     can_edit = fields.Boolean(compute='_compute_can_edit')
 
@@ -141,6 +143,8 @@ class User(models.Model):
             'certificate',
             'study_field',
             'study_school',
+            'private_lang',
+            'employee_type',
         ]
 
         init_res = super(User, self).__init__(pool, cr)

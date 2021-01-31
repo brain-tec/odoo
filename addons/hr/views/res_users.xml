@@ -137,6 +137,7 @@
 
                                 <field name="private_email" string="Email" attrs="{'readonly': [('can_edit', '=', False)], 'invisible': [('address_home_id', '=', False)]}"/>
                                 <field name="employee_phone" string="Phone" class="o_force_ltr" attrs="{'readonly': [('can_edit', '=', False)], 'invisible': [('address_home_id', '=', False)]}" options="{'enable_sms': false}"/>
+                                <field name="private_lang" string="Language" attrs="{'readonly': [('can_edit', '=', False)], 'invisible': [('address_home_id', '=', False)]}"/>
                                 <field name="employee_bank_account_id" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                                 <field name="km_home_work" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                             </group>
@@ -175,7 +176,9 @@
                     </page>
                      <page name="hr_settings" string="HR Settings">
                         <group>
-                            <group string='Status' name="active_group" invisible="1"></group>
+                            <group string='Status' name="active_group">
+                                <field name="employee_type" attrs="{'readonly': [('can_edit', '=', False)]}"/>
+                            </group>
                             <group string="Attendance" name="identification_group">
                                 <field name="pin" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                                 <field name="barcode" attrs="{'readonly': [('can_edit', '=', False)]}"/>
