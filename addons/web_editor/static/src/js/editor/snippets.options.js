@@ -3369,8 +3369,11 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
 
         if (update) {
             img.classList.add('o_modified_image_to_save');
-            return loadImage(dataURL, img);
+            const loadedImg = await loadImage(dataURL, img);
+            this._applyImage(loadedImg);
+            return loadedImg;
         }
+        return img;
     },
     /**
      * Loads the image's attachment info.
@@ -3416,6 +3419,14 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @returns {Int} the maximum width at which the image can be displayed
      */
     _computeMaxDisplayWidth() {},
+    /**
+     * Use the processed image when it's needed in the DOM.
+     *
+     * @private
+     * @abstract
+     * @param {HTMLImageElement} img
+     */
+    _applyImage(img) {},
 });
 
 /**
@@ -3555,15 +3566,6 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         return 1920;
     },
     /**
-     * @override
-     */
-    async _applyOptions(update = true) {
-        await this._super(...arguments);
-        if (update) {
-            this.$target.css('background-image', `url('${this._getImg().getAttribute('src')}')`);
-        }
-    },
-    /**
      * Initializes this.img to an image with the background image url as src.
      *
      * @override
@@ -3593,6 +3595,12 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
             'flex': '0 0 0', // But force no forced width
             'margin-left': 'auto',
         });
+    },
+    /**
+     * @override
+     */
+    _applyImage(img) {
+        this.$target.css('background-image', `url('${img.getAttribute('src')}')`);
     },
 
     //--------------------------------------------------------------------------
@@ -4759,77 +4767,57 @@ registry.SnippetSave = SnippetOptionWidget.extend({
      */
     saveSnippet: function (previewMode, widgetValue, params) {
         return new Promise(resolve => {
-            const dialog = new Dialog(this, {
-                title: _t("Save Your Block"),
-                size: 'small',
-                $content: $(qweb.render('web_editor.dialog.save_snippet', {
-                    currentSnippetName: _.str.sprintf(_t("Custom %s"), this.data.snippetName),
-                })),
-                buttons: [{
-                    text: _t("Save"),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: async () => {
-                        const save = await new Promise(resolve => {
-                            Dialog.confirm(this, _t("To save a snippet, we need to save all your previous modifications and reload the page."), {
-                                buttons: [
-                                    {
-                                        text: _t("Save and Reload"),
-                                        classes: 'btn-primary',
-                                        close: true,
-                                        click: () => resolve(true),
-                                    }, {
-                                        text: _t("Cancel"),
-                                        close: true,
-                                        click: () => resolve(false),
-                                    }
-                                ]
+            Dialog.confirm(this, _t("To save a snippet, we need to save all your previous modifications and reload the page."), {
+                cancel_callback: () => resolve(false),
+                buttons: [
+                    {
+                        text: _t("Save and Reload"),
+                        classes: 'btn-primary',
+                        close: true,
+                        click: () => {
+                            const snippetKey = this.$target[0].dataset.snippet;
+                            let thumbnailURL;
+                            this.trigger_up('snippet_thumbnail_url_request', {
+                                key: snippetKey,
+                                onSuccess: url => thumbnailURL = url,
                             });
-                        });
-                        if (!save) {
-                            return;
+                            let context;
+                            this.trigger_up('context_get', {
+                                callback: ctx => context = ctx,
+                            });
+                            this.trigger_up('request_save', {
+                                reloadEditor: true,
+                                onSuccess: async () => {
+                                    const defaultSnippetName = _.str.sprintf(_t("Custom %s"), this.data.snippetName);
+                                    const targetCopyEl = this.$target[0].cloneNode(true);
+                                    delete targetCopyEl.dataset.name;
+                                    // By the time onSuccess is called after request_save, the
+                                    // current widget has been destroyed and is orphaned, so this._rpc
+                                    // will not work as it can't trigger_up. For this reason, we need
+                                    // to bypass the service provider and use the global RPC directly
+                                    await rpc.query({
+                                        model: 'ir.ui.view',
+                                        method: 'save_snippet',
+                                        kwargs: {
+                                            'name': defaultSnippetName,
+                                            'arch': targetCopyEl.outerHTML,
+                                            'template_key': this.options.snippets,
+                                            'snippet_key': snippetKey,
+                                            'thumbnail_url': thumbnailURL,
+                                            'context': context,
+                                        },
+                                    });
+                                },
+                            });
+                            resolve(true);
                         }
-                        const snippetKey = this.$target[0].dataset.snippet;
-                        let thumbnailURL;
-                        this.trigger_up('snippet_thumbnail_url_request', {
-                            key: snippetKey,
-                            onSuccess: url => thumbnailURL = url,
-                        });
-                        let context;
-                        this.trigger_up('context_get', {
-                            callback: ctx => context = ctx,
-                        });
-                        this.trigger_up('request_save', {
-                            reloadEditor: true,
-                            onSuccess: async () => {
-                                const snippetName = dialog.el.querySelector('.o_we_snippet_name_input').value;
-                                const targetCopyEl = this.$target[0].cloneNode(true);
-                                delete targetCopyEl.dataset.name;
-                                // By the time onSuccess is called after request_save, the
-                                // current widget has been destroyed and is orphaned, so this._rpc
-                                // will not work as it can't trigger_up. For this reason, we need
-                                // to bypass the service provider and use the global RPC directly
-                                await rpc.query({
-                                    model: 'ir.ui.view',
-                                    method: 'save_snippet',
-                                    kwargs: {
-                                        'name': snippetName,
-                                        'arch': targetCopyEl.outerHTML,
-                                        'template_key': this.options.snippets,
-                                        'snippet_key': snippetKey,
-                                        'thumbnail_url': thumbnailURL,
-                                        'context': context,
-                                    },
-                                });
-                            },
-                        });
-                    },
-                }, {
-                    text: _t("Discard"),
-                    close: true,
-                }],
-            }).open();
-            dialog.on('closed', this, () => resolve());
+                    }, {
+                        text: _t("Cancel"),
+                        close: true,
+                        click: () => resolve(false),
+                    }
+                ]
+            });
         });
     },
 });

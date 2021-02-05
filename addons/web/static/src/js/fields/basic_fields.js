@@ -568,6 +568,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     className: 'o_field_char',
     tagName: 'span',
     supportedFieldTypes: ['char'],
+    isQuickEditable: true,
 
     //--------------------------------------------------------------------------
     // Private
@@ -657,6 +658,7 @@ var FieldDateRange = InputField.extend({
         '/web/static/lib/daterangepicker/daterangepicker.css',
     ],
     supportedFieldTypes: ['date', 'datetime'],
+    isQuickEditable: true,
     /**
      * @override
      */
@@ -800,7 +802,7 @@ var FieldDateRange = InputField.extend({
      */
     _onDateRangePickerShow() {
         this._onScroll = ev => {
-            if (!this.$pickerContainer.get(0).contains(ev.target)) {
+            if (!config.device.isMobile && !this.$pickerContainer.get(0).contains(ev.target)) {
                 this.$el.data('daterangepicker').hide();
             }
         };
@@ -813,6 +815,7 @@ var FieldDate = InputField.extend({
     className: "o_field_date",
     tagName: "span",
     supportedFieldTypes: ['date', 'datetime'],
+    isQuickEditable: true,
     // we don't need to listen on 'input' nor 'change' events because the
     // datepicker widget is already listening, and will correctly notify changes
     events: AbstractField.prototype.events,
@@ -885,6 +888,15 @@ var FieldDate = InputField.extend({
     _doDebouncedAction: function () {
         this.datewidget.changeDatetime();
     },
+    /**
+     * @private
+     * @override
+     */
+    _quickEdit: function () {
+        if (this.datewidget) {
+            this.datewidget.$input.click();
+        }
+    },
 
     /**
      * return the datepicker value
@@ -949,6 +961,7 @@ var FieldDate = InputField.extend({
 var FieldDateTime = FieldDate.extend({
     description: _lt("Date & Time"),
     supportedFieldTypes: ['datetime'],
+    isQuickEditable: true,
 
     /**
      * @override
@@ -1055,6 +1068,7 @@ var FieldMonetary = NumericField.extend({
     tagName: 'span',
     supportedFieldTypes: ['float', 'monetary'],
     resetOnAnyFieldChange: true, // Have to listen to currency changes
+    isQuickEditable: true,
 
     /**
      * Float fields using a monetary widget have an additional currency_field
@@ -1165,6 +1179,7 @@ var FieldInteger = NumericField.extend({
     description: _lt("Integer"),
     className: 'o_field_integer o_field_number',
     supportedFieldTypes: ['integer'],
+    isQuickEditable: true,
 
     //--------------------------------------------------------------------------
     // Private
@@ -1199,6 +1214,7 @@ var FieldFloat = NumericField.extend({
     description: _lt("Decimal"),
     className: 'o_field_float o_field_number',
     supportedFieldTypes: ['float'],
+    isQuickEditable: true,
 
     /**
      * Float fields have an additional precision parameter that is read from
@@ -1221,6 +1237,7 @@ var FieldFloatTime = FieldFloat.extend({
     // 'float_time', but for the sake of clarity, we explicitely define a
     // FieldFloatTime widget with formatType = 'float_time'.
     formatType: 'float_time',
+    isQuickEditable: true,
 
     init: function () {
         this._super.apply(this, arguments);
@@ -1232,6 +1249,7 @@ var FieldFloatFactor = FieldFloat.extend({
     supportedFieldTypes: ['float'],
     className: 'o_field_float_factor',
     formatType: 'float_factor',
+    isQuickEditable: true,
 
     /**
      * @constructor
@@ -1423,6 +1441,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
     className: 'o_field_text',
     supportedFieldTypes: ['text', 'html'],
     tagName: 'span',
+    isQuickEditable: true,
 
     /**
      * @constructor
@@ -1463,6 +1482,19 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
             }
         });
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+    
+    /**
+     * @private
+     * @override
+     */
+    _quickEdit: function () {
+        this.activate({noselect: true, noAutomaticCreate: true});
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -1519,6 +1551,7 @@ var FieldEmail = InputField.extend({
     }),
     prefix: 'mailto',
     supportedFieldTypes: ['char'],
+    isQuickEditable: true,
 
     /**
      * In readonly, emails should be a link, not a span.
@@ -1527,7 +1560,7 @@ var FieldEmail = InputField.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+        this.tagName = this.mode === 'readonly' ? 'div' : 'input';
     },
 
     //--------------------------------------------------------------------------
@@ -1540,7 +1573,7 @@ var FieldEmail = InputField.extend({
      * @override
      */
     getFocusableElement: function () {
-        return this.mode === 'readonly' ? this.$el : this._super.apply(this, arguments);
+        return this.mode === 'readonly' ? this.$el.find('a') : this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -1555,11 +1588,12 @@ var FieldEmail = InputField.extend({
      */
     _renderReadonly: function () {
         if (this.value) {
-            this.$el.text(this.value)
-                .addClass('o_form_uri o_text_overflow')
-                .attr('href', this.prefix + ':' + this.value);
-        } else {
-            this.$el.text('');
+            this.el.classList.add("o_form_uri", "o_text_overflow");
+            const anchorEl = Object.assign(document.createElement('a'), {
+                text: this.value,
+                href: `${this.prefix}:${this.value}`,
+            });
+            this.el.appendChild(anchorEl);
         }
     },
     /**
@@ -1622,6 +1656,7 @@ var UrlWidget = InputField.extend({
         'click': '_onClick',
     }),
     supportedFieldTypes: ['char'],
+    isQuickEditable: true,
 
     /**
      * Urls are links in readonly mode.
@@ -1630,7 +1665,7 @@ var UrlWidget = InputField.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+        this.tagName = this.mode === 'readonly' ? 'div' : 'input';
         this.websitePath = this.nodeOptions.website_path || false;
     },
 
@@ -1644,7 +1679,7 @@ var UrlWidget = InputField.extend({
      * @override
      */
     getFocusableElement: function () {
-        return this.mode === 'readonly' ? this.$el : this._super.apply(this, arguments);
+        return this.mode === 'readonly' ? this.$el.find('a') : this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -1664,10 +1699,13 @@ var UrlWidget = InputField.extend({
             const regex = /^(?:[fF]|[hH][tT])[tT][pP][sS]?:\/\//;
             href = !regex.test(this.value) ? `http://${href}` : href;
         }
-        this.$el.text(this.attrs.text || this.value)
-            .addClass('o_form_uri o_text_overflow')
-            .attr('target', '_blank')
-            .attr('href', href);
+        this.el.classList.add("o_form_uri", "o_text_overflow");
+        const anchorEl = Object.assign(document.createElement('a'), {
+            text: this.attrs.text || this.value,
+            href: href,
+            target: '_blank',
+        });
+        this.el.appendChild(anchorEl);
     },
 
     //--------------------------------------------------------------------------
@@ -2669,6 +2707,7 @@ var LabelSelection = AbstractField.extend({
 var BooleanToggle = FieldBoolean.extend({
     description: _lt("Toggle"),
     className: FieldBoolean.prototype.className + ' o_boolean_toggle',
+    isQuickEditable: true,
     events: {
         'click': '_onClick'
     },
@@ -2737,6 +2776,7 @@ var FieldPercentPie = AbstractField.extend({
     description: _lt("Percentage Pie"),
     template: 'FieldPercentPie',
     supportedFieldTypes: ['integer', 'float'],
+    isQuickEditable: true,
 
     /**
      * Register some useful references for later use throughout the widget.

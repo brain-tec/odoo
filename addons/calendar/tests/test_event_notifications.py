@@ -162,11 +162,14 @@ class TestEventNotifications(TransactionCase, MailCase):
         triggers_after = self.env['ir.cron.trigger'].search([('cron_id', '=', cron_id)])
         new_triggers = triggers_after - triggers_before
         new_triggers.ensure_one()
-        self.assertEqual(new_triggers.call_at, now - relativedelta(minutes=5))
+        self.assertEqual(
+            new_triggers.call_at,
+            now.replace(second=0) - relativedelta(minutes=5),
+        )
 
         with patch.object(fields.Datetime, 'now', lambda: now):
             with self.assertSinglePostNotifications([{'partner': self.partner, 'type': 'inbox'}], {
                 'message_type': 'user_notification',
                 'subtype': 'mail.mt_note',
             }):
-                self.env['calendar.alarm_manager'].with_context(lastcall=now - relativedelta(minutes=15))._send_reminder_email(self.partner)
+                self.env['calendar.alarm_manager'].with_context(lastcall=now - relativedelta(minutes=15))._send_reminder()

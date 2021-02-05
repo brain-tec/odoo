@@ -70,7 +70,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
         });
 
-        var $phoneLink = form.$('a.o_form_uri.o_field_widget');
+        var $phoneLink = form.$('div.o_form_uri.o_field_widget.o_field_phone > a');
         assert.strictEqual($phoneLink.length, 1,
             "should have a anchor with correct classes");
         assert.strictEqual($phoneLink.text(), 'yop',
@@ -90,7 +90,7 @@ QUnit.module('basic_fields', {
 
         // save
         await testUtils.form.clickSave(form);
-        $phoneLink = form.$('a.o_form_uri.o_field_widget');
+        $phoneLink = form.$('div.o_form_uri.o_field_widget.o_field_phone > a');
         assert.strictEqual($phoneLink.text(), 'new',
             "new value should be displayed properly");
         assert.hasAttrValue($phoneLink, 'href', 'tel:new',
@@ -114,7 +114,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) a').first().text(), 'yop',
             "value should be displayed properly");
 
-        var $phoneLink = list.$('a.o_form_uri.o_field_widget');
+        var $phoneLink = list.$('div.o_form_uri.o_field_widget.o_field_phone > a');
         assert.strictEqual($phoneLink.length, 3,
             "should have anchors with correct classes");
         assert.hasAttrValue($phoneLink.first(), 'href', 'tel:yop',
@@ -134,7 +134,7 @@ QUnit.module('basic_fields', {
         assert.doesNotHaveClass($cell.parent(), 'o_selected_row', 'should not be in edit mode anymore');
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) a').first().text(), 'new',
             "value should be properly updated");
-        $phoneLink = list.$('a.o_form_uri.o_field_widget');
+        $phoneLink = list.$('div.o_form_uri.o_field_widget.o_field_phone > a');
         assert.strictEqual($phoneLink.length, 3,
             "should still have anchors with correct classes");
         assert.hasAttrValue($phoneLink.first(), 'href', 'tel:new',
@@ -170,6 +170,55 @@ QUnit.module('basic_fields', {
         await testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), val,
             "value should have been correctly escaped");
+
+        form.destroy();
+    });
+
+    QUnit.module('FieldDateRange');
+
+    QUnit.test('date field: toggle daterangepicker then scroll', async function (assert) {
+        assert.expect(4);
+        const scrollEvent = new UIEvent('scroll');
+
+        function scrollAtHeight(height) {
+            window.scrollTo(0, height);
+            document.dispatchEvent(scrollEvent);
+        }
+        this.data.partner.fields.date_end = {string: 'Date End', type: 'date'};
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="date" widget="daterange" options="{\'related_end_date\': \'date_end\'}"/>' +
+                    '<field name="date_end" widget="daterange" options="{\'related_start_date\': \'date\'}"/>' +
+                '</form>',
+            session: {
+                getTZOffset: function () {
+                    return 330;
+                },
+            },
+        });
+
+        // Check date range picker initialization
+        assert.containsN(document.body, '.daterangepicker', 2,
+            "should initialize 2 date range picker");
+
+        // Open date range picker
+        await testUtils.dom.click("input[name=date]");
+        assert.isVisible($('.daterangepicker:first'),
+            "date range picker should be opened");
+
+        // Scroll
+        scrollAtHeight(50);
+        assert.isVisible($('.daterangepicker:first'),
+            "date range picker should be opened");
+
+        // Close picker
+        await testUtils.dom.click($('.daterangepicker:first .cancelBtn'));
+        assert.isNotVisible($('.daterangepicker:first'),
+            "date range picker should be closed");
 
         form.destroy();
     });
