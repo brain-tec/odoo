@@ -11,15 +11,15 @@
 # RGB Consulting <odoo@rgbconsulting.com>, 2020
 # M Palau <mpalau@tda.ad>, 2020
 # César López Ramírez <cesar.lopez@coopdevs.org>, 2020
-# Eugeni Chafert <eugeni@chafer.cat>, 2020
+# Eugeni Chafer <eugeni@chafer.cat>, 2020
 # Arnau Ros, 2020
 # Quim - eccit <quim@eccit.com>, 2020
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2020
 # Martin Trigaux, 2020
 # Sandra Franch <sandra.franch@upc.edu>, 2020
 # Susanna Pujol, 2020
-# jabelchi <jabelchi@gmail.com>, 2020
 # Carles Antoli <carlesantoli@hotmail.com>, 2021
+# jabelchi <jabelchi@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -27,7 +27,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-01-12 07:31+0000\n"
 "PO-Revision-Date: 2016-08-05 12:55+0000\n"
-"Last-Translator: Carles Antoli <carlesantoli@hotmail.com>, 2021\n"
+"Last-Translator: jabelchi <jabelchi@gmail.com>, 2021\n"
 "Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1584,7 +1584,7 @@ msgstr "Afegir un diari"
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_journal_group_list
 msgid "Add a journal group"
-msgstr "Afegir un grup de diari"
+msgstr "Afegir un grup de diaris"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -13994,8 +13994,7 @@ msgstr "No pot ficar/treure diners d'un extracte bancari tancat."
 #, python-format
 msgid ""
 "You cannot reduce the number of decimal places of a currency which has "
-"already been used to make accounting entries. If you really need to do that,"
-" please contact tech support."
+"already been used to make accounting entries."
 msgstr ""
 
 #. module: account

@@ -770,7 +770,7 @@ var FieldMany2One = AbstractField.extend({
         }
         const firstValue = this.suggestions.find(s => s.id);
         if (firstValue) {
-            this.reinitialize(firstValue.id);
+            this.reinitialize({ id: firstValue.id, display_name: firstValue.name });
         } else if (this.can_create) {
             new M2ODialog(this, this.string, this.$input.val()).open();
         }
@@ -3041,22 +3041,6 @@ var FieldRadio = FieldSelection.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * @override
-     * @returns {jQuery}
-     */
-    getFocusableElement: function () {
-        return this.mode === 'edit' && this.$input || this.$el;
-    },
-
-    /**
-     * @override
-     * @returns {boolean} always true
-     */
-    isSet: function () {
-        return true;
-    },
-
-    /**
      * Returns the currently-checked radio button, or the first one if no radio
      * button is checked.
      *
@@ -3065,6 +3049,14 @@ var FieldRadio = FieldSelection.extend({
     getFocusableElement: function () {
         var checked = this.$("[checked='true']");
         return checked.length ? checked : this.$("[data-index='0']");
+    },
+
+    /**
+     * @override
+     * @returns {boolean} always true
+     */
+    isSet: function () {
+        return true;
     },
 
     /**
