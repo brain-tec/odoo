@@ -2887,6 +2887,57 @@ class AccountMove(models.Model):
 
         return rslt
 
+    @api.returns('mail.message', lambda value: value.id)
+    def message_post(self, **kwargs):
+        # OVERRIDE
+        # When posting a message, check the attachment to see if it's an invoice and update with the imported data.
+        res = super().message_post(**kwargs)
+
+        attachment_ids = kwargs.get('attachment_ids', [])
+        if len(self) != 1 or not attachment_ids or self.env.context.get('no_new_invoice') or not self.is_invoice(include_receipts=True):
+            return res
+
+        attachments = self.env['ir.attachment'].browse(attachment_ids)
+        odoobot = self.env.ref('base.partner_root')
+        if attachments and self.state != 'draft':
+            self.message_post(body='The invoice is not a draft, it was not updated from the attachment.',
+                              message_type='comment',
+                              subtype_xmlid='mail.mt_note',
+                              author_id=odoobot.id)
+            return res
+        if attachments and self.line_ids:
+            self.message_post(body='The invoice already contains lines, it was not updated from the attachment.',
+                              message_type='comment',
+                              subtype_xmlid='mail.mt_note',
+                              author_id=odoobot.id)
+            return res
+
+        decoders = self.env['account.move']._get_update_invoice_from_attachment_decoders(self)
+        for decoder in sorted(decoders, key=lambda d: d[0]):
+            # start with message_main_attachment_id, that way if OCR is installed, only that one will be parsed.
+            # this is based on the fact that the ocr will be the last decoder.
+            for attachment in attachments.sorted(lambda x: x != self.message_main_attachment_id):
+                invoice = decoder[1](attachment, self)
+                if invoice:
+                    return res
+
+        return res
+
+    def _get_create_invoice_from_attachment_decoders(self):
+        """ Returns a list of method that are able to create an invoice from an attachment and a priority.
+
+        :returns:   A list of tuples (priority, method) where method takes an attachment as parameter.
+        """
+        return []
+
+    def _get_update_invoice_from_attachment_decoders(self, invoice):
+        """ Returns a list of method that are able to create an invoice from an attachment and a priority.
+
+        :param invoice: The invoice on which to update the data.
+        :returns:       A list of tuples (priority, method) where method takes an attachment as parameter.
+        """
+        return []
+
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
@@ -3903,38 +3954,6 @@ class AccountMoveLine(models.Model):
                         move_initial_values[line.move_id.id] = {}
                     move_initial_values[line.move_id.id].update({field: line[field]})
 
-            # Create the dict for the message post
-            tracking_values = {} # Tracking values to write in the message post
-            for move_id, modified_lines in move_initial_values.items():
-                tmp_move = {move_id: []}
-                for line in self.filtered(lambda l: l.move_id.id == move_id):
-                    changes, tracking_value_ids = line._mail_track(ref_fields, modified_lines) # Return a tuple like (changed field, ORM command)
-                    tmp = {'line_id': line.id}
-                    if tracking_value_ids:
-                        selected_field = tracking_value_ids[0][2] # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
-                        tmp.update({
-                            **{'field_name': selected_field.get('field_desc')},
-                            **self._get_formated_values(selected_field)
-                        })
-                    elif changes:
-                        field_name = line._fields[changes.pop()].string # Get the field name
-                        tmp.update({
-                            'error': True,
-                            'field_error': field_name
-                        })
-                    else:
-                        continue
-                    tmp_move[move_id].append(tmp)
-                if len(tmp_move[move_id]) > 0:
-                    tracking_values.update(tmp_move)
-
-            # Write in the chatter.
-            for move in self.mapped('move_id'):
-                fields = tracking_values.get(move.id, [])
-                if len(fields) > 0:
-                    msg = self._get_tracking_field_string(tracking_values.get(move.id))
-                    move.message_post(body=msg) # Write for each concerned move the message in the chatter
-
         result = True
         for line in self:
             cleaned_vals = line.move_id._cleanup_write_orm_values(line, vals)
@@ -3979,6 +3998,39 @@ class AccountMoveLine(models.Model):
             self.mapped('move_id')._check_balanced()
 
         self.mapped('move_id')._synchronize_business_models({'line_ids'})
+
+        if not self.env.context.get('tracking_disable', False):
+            # Create the dict for the message post
+            tracking_values = {}  # Tracking values to write in the message post
+            for move_id, modified_lines in move_initial_values.items():
+                tmp_move = {move_id: []}
+                for line in self.filtered(lambda l: l.move_id.id == move_id):
+                    changes, tracking_value_ids = line._mail_track(ref_fields, modified_lines)  # Return a tuple like (changed field, ORM command)
+                    tmp = {'line_id': line.id}
+                    if tracking_value_ids:
+                        selected_field = tracking_value_ids[0][2]  # Get the last element of the tuple in the list of ORM command. (changed, [(0, 0, THIS)])
+                        tmp.update({
+                            **{'field_name': selected_field.get('field_desc')},
+                            **self._get_formated_values(selected_field)
+                        })
+                    elif changes:
+                        field_name = line._fields[changes.pop()].string  # Get the field name
+                        tmp.update({
+                            'error': True,
+                            'field_error': field_name
+                        })
+                    else:
+                        continue
+                    tmp_move[move_id].append(tmp)
+                if len(tmp_move[move_id]) > 0:
+                    tracking_values.update(tmp_move)
+
+            # Write in the chatter.
+            for move in self.mapped('move_id'):
+                fields = tracking_values.get(move.id, [])
+                if len(fields) > 0:
+                    msg = self._get_tracking_field_string(tracking_values.get(move.id))
+                    move.message_post(body=msg)  # Write for each concerned move the message in the chatter
 
         return result
 
