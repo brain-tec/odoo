@@ -1377,6 +1377,12 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(attribute_record.company.foo, 'DEF')
         self.assertEqual(attribute_record.bar, 'DEFDEF')
 
+        # a low priviledge user should be able to search on company_dependent fields
+        company_record.env.user.groups_id -= self.env.ref('base.group_system')
+        self.assertFalse(company_record.env.user.has_group('base.group_system'))
+        company_records = self.env['test_new_api.company'].search([('foo', '=', 'DEF')])
+        self.assertEqual(len(company_records), 1)
+
     def test_30_read(self):
         """ test computed fields as returned by read(). """
         discussion = self.env.ref('test_new_api.discussion_0')
@@ -1686,6 +1692,13 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(len(new_move.line_ids), 1)
         self.assertFalse(new_move.line_ids.id)
         self.assertEqual(new_move.line_ids.quantity, 2)
+
+        # assign line to new move without origin
+        new_move = move.new()
+        new_move.line_ids = line
+        self.assertFalse(new_move.line_ids.id)
+        self.assertEqual(new_move.line_ids._origin, line)
+        self.assertEqual(new_move.line_ids.move_id, new_move)
 
     @mute_logger('odoo.addons.base.models.ir_model')
     def test_41_new_related(self):
