@@ -203,6 +203,7 @@ class Attendee(models.Model):
                 email_values = {
                     'model': None,  # We don't want to have the mail in the tchatter while in queue!
                     'res_id': None,
+                    'author_id': attendee.event_id.user_id.partner_id.id or self.env.user.partner_id.id,
                 }
                 if ics_file:
                     email_values['attachment_ids'] = [
@@ -1122,6 +1123,9 @@ class Meeting(models.Model):
 
         if 'id' not in order_fields:
             order_fields.append('id')
+
+        # code does not handle '!' operator
+        domain = expression.distribute_not(expression.normalize_domain(domain))
 
         leaf_evaluations = None
         recurrent_ids = [meeting.id for meeting in self if meeting.recurrency and meeting.rrule]
