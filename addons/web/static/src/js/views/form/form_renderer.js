@@ -1062,7 +1062,7 @@ var FormRenderer = BasicRenderer.extend({
         var $form = this._renderNode(this.arch).addClass(this.className);
         delete this.defs;
 
-        return Promise.all(defs).then(function () {
+        return Promise.all(defs).then(() => this.__renderView()).then(function () {
             self._updateView($form.contents());
             if (self.state.res_id in self.alertFields) {
                 self.displayTranslationAlert();
@@ -1075,6 +1075,14 @@ var FormRenderer = BasicRenderer.extend({
             $form.remove();
         });
     },
+    /**
+     * Meant to be overridden if asynchronous work needs to be done when
+     * rendering the view. This is called right before attaching the new view
+     * content.
+     * @private
+     * @returns {Promise<any>}
+     */
+    async __renderView() {},
     /**
      * This method is overridden to activate the first notebook page if the
      * current active page is invisible due to modifiers. This is done after
@@ -1154,10 +1162,8 @@ var FormRenderer = BasicRenderer.extend({
         const entry = Object.entries(this.idsForLabels)
             .find(x => x[1] === idForLabel);
         if (entry) {
-            const fieldWidget = this.allFieldWidgets[this.state.id]
-                .find(field => field[symbol] === entry[0]);
             this.trigger_up('quick_edit', {
-                fieldName: fieldWidget.name,
+                fieldName: this.fieldIdsToNames[entry[0]],
                 target: ev.currentTarget,
                 extraInfo: {},
             });
