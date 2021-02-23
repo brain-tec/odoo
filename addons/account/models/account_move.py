@@ -598,7 +598,7 @@ class AccountMoveLine(models.Model):
             #computing the `reconciled` field.
             reconciled = False
             digits_rounding_precision = line.company_id.currency_id.rounding
-            if (line.matched_debit_ids or line.matched_credit_ids) and float_is_zero(amount, precision_rounding=digits_rounding_precision):
+            if float_is_zero(amount, precision_rounding=digits_rounding_precision):
                 if line.currency_id and line.amount_currency:
                     if float_is_zero(amount_residual_currency, precision_rounding=line.currency_id.rounding):
                         reconciled = True
@@ -1731,10 +1731,10 @@ class AccountPartialReconcile(models.Model):
                 for line in move.line_ids:
                     if not line.tax_exigible:
                         #amount is the current cash_basis amount minus the one before the reconciliation
-                        if percentage_after == 1.0 and line.amount_residual:
+                        amount = line.balance * percentage_after - line.balance * percentage_before
+                        if percentage_after == 1.0 and percentage_before > 0.0 and line.amount_residual < 0 and amount < 0 and float_compare(line.amount_residual, amount, precision_rounding=line.company_id.currency_id.rounding) < 0:
+                            # when registering the final payment we use directly the amount_residual to correct rounding issues
                             amount = line.amount_residual
-                        else:
-                            amount = line.balance * percentage_after - line.balance * percentage_before
                         rounded_amt = self._get_amount_tax_cash_basis(amount, line)
                         if float_is_zero(rounded_amt, precision_rounding=line.company_id.currency_id.rounding):
                             continue

@@ -440,6 +440,15 @@ class Picking(models.Model):
             else:
                 picking.show_validate = True
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        for picking in self:
+            picking_id = isinstance(picking.id, int) and picking.id or getattr(picking, '_origin', False) and picking._origin.id
+            if picking_id:
+                moves = self.env['stock.move'].search([('picking_id', '=', picking_id)])
+                for move in moves:
+                    move.write({'partner_id': picking.partner_id.id})
+
     @api.onchange('picking_type_id', 'partner_id')
     def onchange_picking_type(self):
         if self.picking_type_id:
@@ -625,7 +634,7 @@ class Picking(models.Model):
                                                     'picking_type_id': pick.picking_type_id.id,
                                                    })
                     ops.move_id = new_move.id
-                    new_move._action_confirm()
+                    new_move = new_move._action_confirm()
                     todo_moves |= new_move
                     #'qty_done': ops.qty_done})
         todo_moves._action_done()
