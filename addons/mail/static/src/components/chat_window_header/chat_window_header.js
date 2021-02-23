@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/chat_window_header/chat_window_header.js
 const components = {
     ThreadIcon: require('mail/static/src/components/thread_icon/thread_icon.js'),
 };
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 const {
     isEventHandled,
@@ -19,13 +20,19 @@ class ChatWindowHeader extends Component {
      */
     constructor(...args) {
         super(...args);
+        useShouldUpdateBasedOnProps();
         useStore(props => {
             const chatWindow = this.env.models['mail.chat_window'].get(props.chatWindowLocalId);
             const thread = chatWindow && chatWindow.thread;
             return {
-                chatWindow: chatWindow ? chatWindow.__state : undefined,
+                chatWindow,
+                chatWindowHasShiftNext: chatWindow && chatWindow.hasShiftNext,
+                chatWindowHasShiftPrev: chatWindow && chatWindow.hasShiftPrev,
+                chatWindowName: chatWindow && chatWindow.name,
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                thread: thread ? thread.__state : undefined,
+                thread,
+                threadLocalMessageUnreadCounter: thread && thread.localMessageUnreadCounter,
+                threadMassMailing: thread && thread.mass_mailing,
             };
         });
     }
@@ -70,9 +77,6 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        if (isEventHandled(ev, 'ChatWindowHeader.openProfile')) {
-            return;
-        }
         if (isEventHandled(ev, 'ChatWindowHeader.ClickShiftNext')) {
             return;
         }
@@ -81,17 +85,6 @@ class ChatWindowHeader extends Component {
         }
         const chatWindow = this.chatWindow;
         this.trigger('o-clicked', { chatWindow });
-    }
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickName(ev) {
-        if (this.chatWindow.thread && this.chatWindow.thread.correspondent) {
-            markEventHandled(ev, 'ChatWindowHeader.openProfile');
-            this.chatWindow.thread.correspondent.openProfile();
-        }
     }
 
     /**

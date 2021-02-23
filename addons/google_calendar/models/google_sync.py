@@ -46,18 +46,8 @@ def after_commit(func):
 
 @contextmanager
 def google_calendar_token(user):
-    try:
-        yield user._get_google_calendar_token()
-    except requests.HTTPError as e:
-        if e.response.status_code == 401:  # Invalid token.
-            # The transaction should be rolledback, but the user's tokens
-            # should be reset. The user will be asked to authenticate again next time.
-            # Rollback manually first to avoid concurrent access errors/deadlocks.
-            user.env.cr.rollback()
-            with user.pool.cursor() as cr:
-                env = user.env(cr=cr)
-                user.with_env(env)._set_auth_tokens(False, False, 0)
-        raise e
+    yield user._get_google_calendar_token()
+
 
 class GoogleSync(models.AbstractModel):
     _name = 'google.calendar.sync'
@@ -94,13 +84,6 @@ class GoogleSync(models.AbstractModel):
             record._google_insert(google_service, record._google_values(), timeout=3)
         return records
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_synchronized(self):
-        if self.env.context.get('archive_on_error') and self._active_name:
-            return
-        if self.filtered('google_id'):
-            raise UserError(_("You cannot delete a record synchronized with Google Calendar, archive it instead."))
-
     def unlink(self):
         """We can't delete an event that is also in Google Calendar. Otherwise we would
         have no clue that the event must must deleted from Google Calendar at the next sync.
@@ -110,6 +93,12 @@ class GoogleSync(models.AbstractModel):
         if self.env.context.get('archive_on_error') and self._active_name:
             synced.write({self._active_name: False})
             self = self - synced
+        elif synced:
+            # Since we can not delete such an event (see method comment), we archive it.
+            # Notice that archiving an event will delete the associated event on Google.
+            # Then, since it has been deleted on Google, the event is also deleted on Odoo DB (_sync_google2odoo).
+            self.action_archive()
+            return True
         return super().unlink()
 
     @api.model
@@ -216,7 +205,11 @@ class GoogleSync(models.AbstractModel):
                     '&', ('google_id', '=', False), is_active_clause,
                     ('need_sync', '=', True),
             ]])
-        return self.with_context(active_test=False).search(domain)
+        # We want to limit to 200 event sync per transaction, it shouldn't be a problem for the day to day
+        # but it allows to run the first synchro within an acceptable time without timeout.
+        # If there is a lot of event to synchronize to google the first time,
+        # they will be synchronized eventually with the cron running few times a day
+        return self.with_context(active_test=False).search(domain, limit=200)
 
     @api.model
     def _odoo_values(self, google_event: GoogleEvent, default_reminders=()):
