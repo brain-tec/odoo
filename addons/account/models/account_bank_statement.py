@@ -781,8 +781,10 @@ class AccountBankStatementLine(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('currency_id', 'amount', 'foreign_currency_id', 'amount_currency',
-                 'move_id.line_ids', 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
+    @api.depends('journal_id', 'currency_id', 'amount', 'foreign_currency_id', 'amount_currency',
+                 'move_id.line_ids.account_id', 'move_id.line_ids.amount_currency',
+                 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.currency_id',
+                 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
     def _compute_is_reconciled(self):
         ''' Compute the field indicating if the statement lines are already reconciled with something.
         This field is used for display purpose (e.g. display the 'cancel' button on the statement lines).
@@ -1169,6 +1171,12 @@ class AccountBankStatementLine(models.Model):
 
                 counterpart_vals['account_id'] = open_balance_account.id
                 counterpart_vals['partner_id'] = partner.id
+            else:
+                if self.amount > 0:
+                    open_balance_account = self.company_id.partner_id.with_company(self.company_id).property_account_receivable_id
+                else:
+                    open_balance_account = self.company_id.partner_id.with_company(self.company_id).property_account_payable_id
+                counterpart_vals['account_id'] = open_balance_account.id
 
             open_balance_vals = self._prepare_counterpart_move_line_vals(counterpart_vals)
         else:

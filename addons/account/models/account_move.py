@@ -457,7 +457,7 @@ class AccountMove(models.Model):
     @api.onchange('payment_reference', 'ref')
     def _onchange_payment_reference(self):
         for line in self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-            line.name = self.payment_reference or self.ref
+            line.name = self.payment_reference or self.ref or ''
 
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
@@ -961,7 +961,7 @@ class AccountMove(models.Model):
                     # Create new line.
                     create_method = in_draft_mode and self.env['account.move.line'].new or self.env['account.move.line'].create
                     candidate = create_method({
-                        'name': self.payment_reference or '',
+                        'name': self.payment_reference or self.ref or '',
                         'debit': balance < 0.0 and -balance or 0.0,
                         'credit': balance > 0.0 and balance or 0.0,
                         'quantity': 1.0,
@@ -1106,7 +1106,11 @@ class AccountMove(models.Model):
         final_batches = []
         for journal_group in grouped.values():
             for date_group in journal_group.values():
-                if not final_batches or final_batches[-1]['format'] != date_group['format']:
+                if (
+                    not final_batches
+                    or final_batches[-1]['format'] != date_group['format']
+                    or final_batches[-1]['format_values'] != date_group['format_values']
+                ):
                     final_batches += [date_group]
                 elif date_group['reset'] == 'never':
                     final_batches[-1]['records'] += date_group['records']
@@ -2536,7 +2540,8 @@ class AccountMove(models.Model):
         return action
 
     def action_post(self):
-        return self._post(soft=False)
+        self._post(soft=False)
+        return False
 
     def js_assign_outstanding_line(self, line_id):
         ''' Called by the 'payment' widget to reconcile a suggested journal item to the present
@@ -2878,17 +2883,15 @@ class AccountMove(models.Model):
 
         return rslt
 
-    @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, **kwargs):
+    def _message_post_after_hook(self, new_message, message_values):
         # OVERRIDE
         # When posting a message, check the attachment to see if it's an invoice and update with the imported data.
-        res = super().message_post(**kwargs)
+        res = super()._message_post_after_hook(new_message, message_values)
 
-        attachment_ids = kwargs.get('attachment_ids', [])
-        if len(self) != 1 or not attachment_ids or self.env.context.get('no_new_invoice') or not self.is_invoice(include_receipts=True):
+        attachments = new_message.attachment_ids
+        if len(self) != 1 or not attachments or self.env.context.get('no_new_invoice') or not self.is_invoice(include_receipts=True):
             return res
 
-        attachments = self.env['ir.attachment'].browse(attachment_ids)
         odoobot = self.env.ref('base.partner_root')
         if attachments and self.state != 'draft':
             self.message_post(body=_('The invoice is not a draft, it was not updated from the attachment.'),
@@ -3665,22 +3668,19 @@ class AccountMoveLine(models.Model):
             # A constraint on account.tax.repartition.line ensures both those fields are mutually exclusive
             record.tax_line_id = rep_line.invoice_tax_id or rep_line.refund_tax_id
 
-    @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id')
+    @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id', 'debit', 'credit', 'tax_tag_ids')
     def _compute_tax_tag_invert(self):
         for record in self:
-            rep_line = record.tax_repartition_line_id
-
-            if not rep_line and not record.tax_ids :
+            if not record.tax_repartition_line_id and not record.tax_ids :
                 # Invoices imported from other softwares might only have kept the tags, not the taxes.
                 record.tax_tag_invert = record.tax_tag_ids and record.move_id.is_inbound()
 
             elif record.move_id.move_type == 'entry':
                 # For misc operations, cash basis entries and write-offs from the bank reconciliation widget
+                rep_line = record.tax_repartition_line_id
                 if rep_line:
                     tax_type = (rep_line.refund_tax_id or rep_line.invoice_tax_id).type_tax_use
                     is_refund = bool(rep_line.refund_tax_id)
-                    if rep_line.factor_percent < 0:
-                        is_refund = not is_refund
                 elif record.tax_ids:
                     tax_type = record.tax_ids[0].type_tax_use
                     is_refund = (tax_type == 'sale' and record.debit) or (tax_type == 'purchase' and record.credit)
@@ -3689,10 +3689,7 @@ class AccountMoveLine(models.Model):
 
             else:
                 # For invoices with taxes
-                rslt = record.move_id.is_inbound()
-                if rep_line and rep_line.factor_percent < 0:
-                    rslt = not rslt
-                record.tax_tag_invert = rslt
+                record.tax_tag_invert = record.move_id.is_inbound()
 
     @api.depends('tax_tag_ids', 'debit', 'credit', 'journal_id', 'tax_tag_invert')
     def _compute_tax_audit(self):
