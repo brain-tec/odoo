@@ -166,7 +166,7 @@ Database
 .. option:: --db_sslmode
 
     Control the SSL security of the connection between Odoo and PostgreSQL.
-    Value should bve one of 'disable', 'allow', 'prefer', 'require',
+    Value should be one of 'disable', 'allow', 'prefer', 'require',
     'verify-ca' or 'verify-full'
     Default value is 'prefer'
 
@@ -743,3 +743,20 @@ load. If the module works despite the presence of those files, they are probably
 not loaded and should therefore be removed from the module, or at least excluded
 in the manifest via ``cloc_exclude``.
 
+TSConfig Generator
+==================
+
+.. program:: odoo-bin tsconfig
+
+When working on javascript, there are ways to help your editor providing you with
+powerful auto-completion. One of those ways is the use of a tsconfig.json file.
+Originally meant for typescript, editors can use its information with plain javascript also.
+With this config file, you will now have full auto-completion across modules.
+
+The command to generate this files takes as many unnamed arguments as you need. Those are relative paths
+to your addon directories. In the example below, we move up one folder to save the tsconfig file in the folder
+containing community and enterprise.
+
+.. code-block:: console
+
+   $ community/odoo-bin tsconfig --addons-path community/addons,community/odoo/addons,enterprise > tsconfig.json

@@ -281,8 +281,18 @@ class IrQWeb(models.AbstractModel, QWeb):
 
     # method called by computing code
 
-    def get_asset_bundle(self, xmlid, files, env=None):
-        return AssetsBundle(xmlid, files, env=env)
+    def get_asset_bundle(self, xmlid, files, env=None, css=True, js=True):
+        return AssetsBundle(xmlid, files, env=env, css=css, js=js)
+
+    def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
+        """Generates asset nodes.
+        If debug=assets, the assets will be regenerated when a file which composes them has been modified.
+        Else, the assets will be generated only once and then stored in cache.
+        """
+        if debug and 'assets' in debug:
+            return self._generate_asset_nodes(xmlid, options, css, js, debug, async_load, defer_load, lazy_load, values)
+        else:
+            return self._generate_asset_nodes_cache(xmlid, options, css, js, debug, async_load, defer_load, lazy_load, values)
 
     @tools.conditional(
         # in non-xml-debug mode we want assets to be cached forever, and the admin can force a cache clear
@@ -290,9 +300,12 @@ class IrQWeb(models.AbstractModel, QWeb):
         'xml' not in tools.config['dev_mode'],
         tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
     )
-    def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
+    def _generate_asset_nodes_cache(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
+        return self._generate_asset_nodes(xmlid, options, css, js, debug, async_load, defer_load, lazy_load, values)
+
+    def _generate_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
         files, remains = self._get_asset_content(xmlid, options)
-        asset = self.get_asset_bundle(xmlid, files, env=self.env)
+        asset = self.get_asset_bundle(xmlid, files, env=self.env, css=css, js=js)
         remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] != 'link')]
         return remains + asset.to_node(css=css, js=js, debug=debug, async_load=async_load, defer_load=defer_load, lazy_load=lazy_load)
 
@@ -311,7 +324,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         IrQweb = self.env['ir.qweb'].with_context(options)
 
         def can_aggregate(url):
-            return not urls.url_parse(url).scheme and not urls.url_parse(url).netloc and not url.startswith('/web/content')
+            return not urls.url_parse(url).scheme and not urls.url_parse(url).netloc and not url.startswith('/web/assets')
 
         # TODO: This helper can be used by any template that wants to embedd the backend.
         #       It is currently necessary because the ir.ui.view bundle inheritance does not

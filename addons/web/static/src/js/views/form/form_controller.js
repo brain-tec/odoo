@@ -513,7 +513,7 @@ var FormController = BasicController.extend({
         var attrs = ev.data.attrs;
         if (attrs.confirm) {
             def = new Promise(function (resolve, reject) {
-                Dialog.confirm(this, attrs.confirm, {
+                Dialog.confirm(self, attrs.confirm, {
                     confirm_callback: saveAndExecuteAction,
                 }).on("closed", null, resolve);
             });
@@ -691,8 +691,10 @@ var FormController = BasicController.extend({
      */
     _onQuickEdit: async function (ev) {
         ev.stopPropagation();
-        await this._setEditMode();
-        this.renderer.quickEdit(ev.data);
+        if (this.activeActions.edit) {
+            await this._setEditMode();
+            this.renderer.quickEdit(ev.data);
+        }
     },
     /**
      * Called when the user wants to save the current record -> @see saveRecord

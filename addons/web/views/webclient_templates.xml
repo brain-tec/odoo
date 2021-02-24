@@ -635,6 +635,7 @@
         <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script>
         <script type="text/javascript" src="/web/static/lib/nearest/jquery.nearest.js"/>
         <script type="text/javascript" src="/web/static/lib/daterangepicker/daterangepicker.js"></script>
+        <script type="text/javascript" src="/web/static/lib/stacktracejs/stacktrace.js"></script>
         <script type="text/javascript" src="/web/static/src/js/libs/daterangepicker.js"></script>
 
         <script type="text/javascript" src="/web/static/tests/main_tests.js"></script>
@@ -776,6 +777,8 @@
         <script type="text/javascript" src="/web/static/tests/widgets/domain_selector_tests.js"/>
         <script type="text/javascript" src="/web/static/tests/widgets/model_field_selector_tests.js"/>
         <script type="text/javascript" src="/web/static/tests/widgets/rainbow_man_tests.js"/>
+
+        <script type="text/javascript" src="/web/static/tests/report/client_action_tests.js"/>
 
         <script type="text/javascript" src="/web/static/tests/tools/debug_manager_tests.js"/>
 

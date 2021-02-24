@@ -4,7 +4,7 @@ odoo.define('web.SearchBar', function (require) {
     const Domain = require('web.Domain');
     const field_utils = require('web.field_utils');
     const { useAutofocus } = require('web.custom_hooks');
-    const { useModel } = require('web/static/src/js/model.js');
+    const { useModel } = require('web.Model');
 
     const CHAR_FIELDS = ['char', 'html', 'many2many', 'many2one', 'one2many', 'text'];
     const { Component, hooks } = owl;
@@ -278,7 +278,7 @@ odoo.define('web.SearchBar', function (require) {
                 const labelValue = source.label || this.state.inputValue;
                 this.model.dispatch('addAutoCompletionValues', {
                     filterId: source.filterId,
-                    value: source.value || this._parseWithSource(labelValue, source),
+                    value: "value" in source ? source.value : this._parseWithSource(labelValue, source),
                     label: labelValue,
                     operator: source.filterOperator || source.operator,
                 });
@@ -421,6 +421,7 @@ odoo.define('web.SearchBar', function (require) {
                     /* falls through */
                 case 'Tab':
                     if (this.state.inputValue.length) {
+                        ev.preventDefault(); // keep the focus inside the search bar
                         this._selectSource(currentItem);
                     }
                     break;

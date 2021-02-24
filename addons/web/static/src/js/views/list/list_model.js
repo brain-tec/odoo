@@ -1,7 +1,6 @@
-odoo.define('web.ListModel', function (require) {
-    "use strict";
+/** @odoo-module alias=web.ListModel **/
 
-    var BasicModel = require('web.BasicModel');
+    import BasicModel from 'web.BasicModel';
 
     var ListModel = BasicModel.extend({
 
@@ -82,10 +81,17 @@ odoo.define('web.ListModel', function (require) {
                     self._parseServerData(fieldNames, record, record.data);
                 });
             }).then(function () {
-                return Promise.all([
-                    self._fetchX2ManysBatched(list),
-                    self._fetchReferencesBatched(list)
-                ]);
+                if (!list.groupedBy.length) {
+                    return Promise.all([
+                        self._fetchX2ManysBatched(list),
+                        self._fetchReferencesBatched(list)
+                    ]);
+                } else {
+                    return Promise.all([
+                        self._fetchX2ManysSingleBatch(list),
+                        self._fetchReferencesSingleBatch(list)
+                    ]);
+                }
             });
         },
 
@@ -159,9 +165,9 @@ odoo.define('web.ListModel', function (require) {
                         viewType: 'groupby',
                     });
                     dp.groupData = groupDp.id;
+                    self._parseServerData(groupFields, groupDp, groupDp.data);
                 });
             });
         },
     });
-    return ListModel;
-});
+    export default ListModel;

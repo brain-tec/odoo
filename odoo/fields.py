@@ -93,7 +93,7 @@ _global_seq = iter(itertools.count())
 class Field(MetaField('DummyField', (object,), {})):
     """The field descriptor contains the field definition, and manages accesses
     and assignments of the corresponding field on records. The following
-    attributes may be provided when instanciating a field:
+    attributes may be provided when instantiating a field:
 
     :param str string: the label of the field seen by users; if not
         set, the ORM takes the field name in the class (capitalized).
@@ -204,6 +204,7 @@ class Field(MetaField('DummyField', (object,), {})):
     column_type = None                  # database column type (ident, spec)
     column_format = '%s'                # placeholder for value in queries
     column_cast_from = ()               # column types that may be cast to this
+    write_sequence = 0                  # field ordering for write()
 
     args = None                         # the parameters given to __init__()
     _module = None                      # the field's module name
@@ -1280,11 +1281,11 @@ class Float(Field):
 
     .. admonition:: Example
 
-        To round a quantity with the precision of the unit of mesure::
+        To round a quantity with the precision of the unit of measure::
 
             fields.Float.round(self.product_uom_qty, precision_rounding=self.product_uom_id.rounding)
 
-        To check if the quantity is zero with the precision of the unit of mesure::
+        To check if the quantity is zero with the precision of the unit of measure::
 
             fields.Float.is_zero(self.product_uom_qty, precision_rounding=self.product_uom_id.rounding)
 
@@ -1371,6 +1372,8 @@ class Monetary(Field):
         this monetary field is expressed in (default: `\'currency_id\'`)
     """
     type = 'monetary'
+    write_sequence = 10
+
     column_type = ('numeric', 'numeric')
     column_cast_from = ('float8',)
 
@@ -2984,6 +2987,7 @@ class Command(enum.IntEnum):
 
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
+    write_sequence = 20
 
     # Important: the cache contains the ids of all the records in the relation,
     # including inactive records.  Inactive records are filtered out by
@@ -3632,6 +3636,7 @@ class Many2many(_RelationalMulti):
         context.update(self.context)
         comodel = records.env[self.comodel_name].with_context(**context)
         domain = self.get_domain_list(records)
+        comodel._flush_search(domain)
         wquery = comodel._where_calc(domain)
         comodel._apply_ir_rules(wquery, 'read')
         order_by = comodel._generate_order_by(None, wquery)
