@@ -262,6 +262,38 @@ class TestBoM(TestMrpCommon):
             # Check consumed materials in production order.
             self.assertEqual(mrp_order.move_raw_ids.product_id, consumed_products)
 
+    def test_13_bom_kit_qty(self):
+        self.env['mrp.bom'].create({
+            'product_id': self.product_7_3.id,
+            'product_tmpl_id': self.product_7_template.id,
+            'product_uom_id': self.uom_unit.id,
+            'product_qty': 4.0,
+            'type': 'phantom',
+            'bom_line_ids': [
+                (0, 0, {
+                    'product_id': self.product_2.id,
+                    'product_qty': 2,
+                }),
+                (0, 0, {
+                    'product_id': self.product_3.id,
+                    'product_qty': 2,
+                })
+            ]
+        })
+        location = self.env.ref('stock.stock_location_stock')
+        self.env['stock.quant']._update_available_quantity(self.product_2, location, 4.0)
+        self.env['stock.quant']._update_available_quantity(self.product_3, location, 8.0)
+        # Force the kit product available qty to be computed at the same time than its component quantities
+        # Because `qty_available` of a bom kit "recurse" on `qty_available` of its component,
+        # and this is a tricky thing for the ORM:
+        # `qty_available` gets called for `product_7_3`, `product_2` and `product_3`
+        # which then recurse on calling `qty_available` for `product_2` and `product_3` to compute the quantity of
+        # the kit `product_7_3`. `product_2` and `product_3` gets protected at the first call of the compute method,
+        # ending the recurse call to not call the compute method and just left the Falsy value `0.0`
+        # for the components available qty.
+        kit_product_qty, _, _ = (self.product_7_3 + self.product_2 + self.product_3).mapped("qty_available")
+        self.assertEqual(kit_product_qty, 2)
+
     def test_20_bom_report(self):
         """ Simulate a crumble receipt with mrp and open the bom structure
         report and check that data insde are correct.
@@ -299,6 +331,27 @@ class TestBoM(TestMrpCommon):
             'name': 'Deserts Table'
         })
 
+        operation_1 = self.env['mrp.routing.workcenter'].create({
+            'workcenter_id': workcenter.id,
+            'name': 'Prepare biscuits',
+            'time_cycle_manual': 5,
+            'bom_id': bom_crumble.id
+        })
+
+        operation_2 = self.env['mrp.routing.workcenter'].create({
+            'workcenter_id': workcenter.id,
+            'name': 'Prepare butter',
+            'time_cycle_manual': 3,
+            'bom_id': bom_crumble.id
+        })
+
+        operation_3 = self.env['mrp.routing.workcenter'].create({
+            'workcenter_id': workcenter.id,
+            'name': 'Mix manually',
+            'time_cycle_manual': 5,
+            'bom_id': bom_crumble.id
+        })
+
         with Form(bom_crumble) as bom:
             with bom.bom_line_ids.new() as line:
                 line.product_id = butter
@@ -308,21 +361,9 @@ class TestBoM(TestMrpCommon):
                 line.product_id = biscuit
                 line.product_uom_id = uom_kg
                 line.product_qty = 6
-            with bom.operation_ids.new() as operation:
-                operation.workcenter_id = workcenter
-                operation.name = 'Prepare biscuits'
-                operation.time_cycle_manual = 5
-                operation.bom_id = bom_crumble  # Can't handle by the testing env
-            with bom.operation_ids.new() as operation:
-                operation.workcenter_id = workcenter
-                operation.name = 'Prepare butter'
-                operation.time_cycle_manual = 3
-                operation.bom_id = bom_crumble
-            with bom.operation_ids.new() as operation:
-                operation.workcenter_id = workcenter
-                operation.name = 'Mix manually'
-                operation.time_cycle_manual = 5
-                operation.bom_id = bom_crumble
+            bom.operation_ids.add(operation_1)
+            bom.operation_ids.add(operation_2)
+            bom.operation_ids.add(operation_3)
 
         # TEST BOM STRUCTURE VALUE WITH BOM QUANTITY
         report_values = self.env['report.mrp.report_bom_structure']._get_report_data(bom_id=bom_crumble.id, searchQty=11, searchVariant=False)
@@ -399,6 +440,20 @@ class TestBoM(TestMrpCommon):
             'time_stop': 15
         })
 
+        operation_4 = self.env['mrp.routing.workcenter'].create({
+            'workcenter_id': workcenter.id,
+            'name': 'Mix cheese and crumble',
+            'time_cycle_manual': 10,
+            'bom_id': bom_cheese_cake.id
+        })
+
+        operation_5 = self.env['mrp.routing.workcenter'].create({
+            'workcenter_id': workcenter_2.id,
+            'name': 'Cake mounting',
+            'time_cycle_manual': 5,
+            'bom_id': bom_cheese_cake.id
+        })
+
         with Form(bom_cheese_cake) as bom:
             with bom.bom_line_ids.new() as line:
                 line.product_id = cream
@@ -408,16 +463,8 @@ class TestBoM(TestMrpCommon):
                 line.product_id = crumble
                 line.product_uom_id = uom_kg
                 line.product_qty = 5.4
-            with bom.operation_ids.new() as operation:
-                operation.workcenter_id = workcenter
-                operation.name = 'Mix cheese and crumble'
-                operation.time_cycle_manual = 10
-                operation.bom_id = bom_cheese_cake
-            with bom.operation_ids.new() as operation:
-                operation.workcenter_id = workcenter_2
-                operation.name = 'Cake mounting'
-                operation.time_cycle_manual = 5
-                operation.bom_id = bom_cheese_cake
+            bom.operation_ids.add(operation_4)
+            bom.operation_ids.add(operation_5)
 
 
         # TEST CHEESE BOM STRUCTURE VALUE WITH BOM QUANTITY

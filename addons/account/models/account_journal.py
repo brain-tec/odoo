@@ -436,8 +436,9 @@ class AccountJournal(models.Model):
         result = super(AccountJournal, self).write(vals)
 
         # Ensure the liquidity accounts are sharing the same foreign currency.
-        for journal in self.filtered(lambda journal: journal.type in ('bank', 'cash')):
-            journal.default_account_id.currency_id = journal.currency_id
+        if 'currency_id' in vals:
+            for journal in self.filtered(lambda journal: journal.type in ('bank', 'cash')):
+                journal.default_account_id.currency_id = journal.currency_id
 
         # Create the bank_account_id if necessary
         if 'bank_acc_number' in vals:
@@ -613,7 +614,16 @@ class AccountJournal(models.Model):
         invoices = self.env['account.move']
         for attachment in attachments:
             attachment.write({'res_model': 'mail.compose.message'})
-            invoices += self._create_invoice_from_single_attachment(attachment)
+            decoders = self.env['account.move']._get_create_invoice_from_attachment_decoders()
+            invoice = False
+            for decoder in sorted(decoders, key=lambda d: d[0]):
+                invoice = decoder[1](attachment)
+                if invoice:
+                    break
+            if not invoice:
+                invoice = self.env['account.move'].create({})
+            invoice.with_context(no_new_invoice=True).message_post(attachment_ids=[attachment.id])
+            invoices += invoice
 
         action_vals = {
             'name': _('Generated Documents'),
@@ -638,12 +648,11 @@ class AccountJournal(models.Model):
     def _create_invoice_from_single_attachment(self, attachment):
         """ Creates an invoice and post the attachment. If the related modules
             are installed, it will trigger OCR or the import from the EDI.
+            DEPRECATED : use create_invoice_from_attachment instead
 
             :returns: the created invoice.
         """
-        invoice = self.env['account.move'].create({})
-        invoice.message_post(attachment_ids=[attachment.id])
-        return invoice
+        return self.create_invoice_from_attachment(attachment.ids)
 
     def _create_secure_sequence(self, sequence_fields):
         """This function creates a no_gap sequence on each journal in self that will ensure
