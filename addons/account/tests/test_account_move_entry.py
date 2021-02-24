@@ -380,6 +380,11 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertEqual(copy2.name, 'MISC2/2016/01/0001')
         with Form(copy2) as move_form:  # It is editable in the form
             move_form.name = 'MyMISC/2016/0001'
+            move_form.journal_id = self.test_move.journal_id
+            self.assertEqual(move_form.name, '/')
+            move_form.journal_id = new_journal
+            self.assertEqual(move_form.name, 'MISC2/2016/01/0001')
+            move_form.name = 'MyMISC/2016/0001'
         copy2.action_post()
         self.assertEqual(copy2.name, 'MyMISC/2016/0001')
 
@@ -469,6 +474,32 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertEqual(invoice2.name, 'INV/2016/01/0002')
         self.assertEqual(refund.name, 'RINV/2016/01/0001')
         self.assertEqual(refund2.name, 'RINV/2016/01/0002')
+
+    def test_journal_sequence_groupby_compute(self):
+        # Setup two journals with a sequence that resets yearly
+        journals = self.env['account.journal'].create([{
+            'name': f'Journal{i}',
+            'code': f'J{i}',
+            'type': 'general',
+        } for i in range(2)])
+        account = self.env['account.account'].search([], limit=1)
+        moves = self.env['account.move'].create([{
+            'journal_id': journals[i].id,
+            'line_ids': [(0, 0, {'account_id': account.id, 'name': 'line'})],
+        } for i in range(2)])._post()
+        year = moves[0].date.year
+        for i in range(2):
+            moves[i].name = f'J{i}/{year}/00001'
+
+        # Check that the moves are correctly batched
+        moves = self.env['account.move'].create([{
+            'journal_id': journals[i].id,
+            'line_ids': [(0, 0, {'account_id': account.id, 'name': 'line'})],
+        } for i in [1, 0, 1]])._post()
+        self.assertEqual(
+            moves.mapped('name'),
+            [f'J1/{year}/00002', f'J0/{year}/00002', f'J1/{year}/00003'],
+        )
 
     def test_journal_override_sequence_regex(self):
         other_moves = self.env['account.move'].search([('journal_id', '=', self.test_move.journal_id.id)]) - self.test_move

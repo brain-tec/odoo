@@ -45,9 +45,6 @@
     </template>
 
     <template id="language_selector" name="Language Selector">
-        <t t-if="lang not in (lg[0] for lg in languages)">
-            <t t-set="lang" t-value="website.default_lang_id.code"/>
-        </t>
         <t t-set="active_lang" t-value="list(filter(lambda lg : lg[0] == lang, languages))[0]"/>
         <t t-set="language_selector_visible" t-value="len(languages) &gt; 1"/>
         <div t-attf-class="js_language_selector #{_div_classes}" t-if="language_selector_visible">
@@ -299,7 +296,7 @@
                     </div>
                     <t t-raw="0"/>
                 </div>
-                <form t-if="searchbar_inputs" class="form-inline o_portal_search_panel ml-lg-4">
+                <form t-if="searchbar_inputs" class="form-inline o_portal_search_panel ml-lg-4 col-xl-4 col-md-5">
                     <div class="input-group input-group-sm w-100">
                         <div class="input-group-prepend">
                             <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"/>

@@ -9,10 +9,11 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
     tour.register('mass_mailing_tour', {
         url: '/web',
         rainbowManMessage: _t('Congratulations, I love your first mailing. :)'),
+        sequence: 200,
     }, [tour.stepUtils.showAppsMenuItem(), {
         trigger: '.o_app[data-menu-xmlid="mass_mailing.mass_mailing_menu_root"]',
         content: _t("Let's try the Email Marketing app."),
-        width: 210,
+        width: 225,
         position: 'bottom',
         edition: 'enterprise',
     }, {
@@ -37,21 +38,28 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         run: 'click',
         auto: true,
     }, {
-        trigger: 'div[name="body_arch"] jw-template[name="template-template-newsletter"]',
+        trigger: 'div[name="body_arch"] iframe #newsletter',
         content: _t('Choose this <b>theme</b>.'),
         position: 'left',
         edition: 'enterprise',
         run: 'click',
     }, {
-        trigger: 'div[name="body_arch"] jw-template[name="template-template-default"]',
+        trigger: 'div[name="body_arch"] iframe #default',
         content: _t('Choose this <b>theme</b>.'),
         position: 'right',
         edition: 'community',
         run: 'click',
     }, {
-        trigger: 'div[name="body_arch"] .note-editing-area',
+        trigger: 'div[name="body_arch"] iframe div.o_mail_block_paragraph',
         content: _t('Click on this paragraph to edit it.'),
-        position: 'right',
+        position: 'top',
+        edition: 'enterprise',
+        run: 'click',
+    }, {
+        trigger: 'div[name="body_arch"] iframe div.o_mail_block_title_text',
+        content: _t('Click on this paragraph to edit it.'),
+        position: 'top',
+        edition: 'community',
         run: 'click',
     }, {
         trigger: 'button[name="action_test"]',
@@ -62,7 +70,7 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         content: _t("Check the email address and click send."),
         position: 'bottom',
     }, {
-        trigger: 'button[name="action_put_in_queue"]',
+        trigger: 'button[name="action_launch"]',
         content: _t("Ready for take-off!"),
         position: 'bottom',
     }, {

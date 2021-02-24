@@ -458,8 +458,14 @@ class Users(models.Model):
 
     @api.constrains('company_id', 'company_ids')
     def _check_company(self):
-        if any(user.company_id not in user.company_ids for user in self):
-            raise ValidationError(_('The chosen company is not in the allowed companies for this user'))
+        for user in self:
+            if user.company_id not in user.company_ids:
+                raise ValidationError(
+                    _('Company %(company_name)s is not in the allowed companies for user %(user_name)s (%(company_allowed)s).',
+                      company_name=user.company_id.name,
+                      user_name=user.name,
+                      company_allowed=', '.join(user.mapped('company_ids.name')))
+                )
 
     @api.constrains('action_id')
     def _check_action_id(self):
@@ -1658,7 +1664,11 @@ class APIKeys(models.Model):
     def _check_credentials(self, *, scope, key):
         assert scope, "scope is required"
         index = key[:INDEX_SIZE]
-        self.env.cr.execute('SELECT user_id, key FROM res_users_apikeys WHERE index = %s AND (scope IS NULL OR scope = %s)', [index, scope])
+        self.env.cr.execute('''
+            SELECT user_id, key
+            FROM res_users_apikeys INNER JOIN res_users u ON (u.id = user_id)
+            WHERE u.active and index = %s AND (scope IS NULL OR scope = %s)
+        ''', [index, scope])
         for user_id, current_key in self.env.cr.fetchall():
             if KEY_CRYPT_CONTEXT.verify(key, current_key):
                 return user_id

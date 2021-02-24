@@ -1076,7 +1076,7 @@ header {
                         white-space: initial;
                     }
                     .dropdown-menu {
-                        position: relative;
+                        position: static;
                     }
                 }
             }
@@ -1156,14 +1156,17 @@ header {
         z-index: 1000;
 
         > .navbar {
+            @include o-apply-colors(1); // Reset to default colored components
             background-color: transparent !important;
             border-color: transparent;
             color: inherit;
 
             .nav-item {
                 > .nav-link {
-                    background-color: transparent;
-                    color: inherit;
+                    &, &:hover {
+                        background-color: transparent;
+                        color: inherit;
+                    }
 
                     &.active {
                         font-weight: bolder;
@@ -1403,5 +1406,13 @@ $ribbon-padding: 100px;
 #website_cookies_bar {
     :not(.o_cookies_popup) {
         bottom: 0;
+    }
+}
+
+.o_website_btn_loading {
+    cursor: wait;
+    opacity: $btn-disabled-opacity;
+    .fa:not(.fa-spin) {
+        display: none;
     }
 }

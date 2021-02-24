@@ -604,7 +604,7 @@ var ListController = BasicController.extend({
     _toggleCreateButton: function () {
         if (this.hasButtons) {
             var state = this.model.get(this.handle);
-            var createHidden = this.renderer.isEditable() && state.groupedBy.length && state.data.length;
+            var createHidden = this.editable && state.groupedBy.length && state.data.length;
             this.$buttons.find('.o_list_button_add').toggleClass('o_hidden', !!createHidden);
         }
     },
@@ -837,6 +837,9 @@ var ListController = BasicController.extend({
             ev.data.onFailure = saveMulti; // will show the appropriate dialog
             // disable onchanges as we'll save directly
             ev.data.notifyChange = false;
+            // In multi edit mode, we will be asked if we want to write on the selected
+            // records, so the force_save for readonly is not necessary.
+            ev.data.force_save = false;
         }
         this._super.apply(this, arguments);
     },

@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import float_is_zero
+from odoo.tools import float_is_zero, OrderedSet
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -54,13 +54,13 @@ class StockMove(models.Model):
         :rtype: recordset
         """
         self.ensure_one()
-        res = self.env['stock.move.line']
+        res = OrderedSet()
         for move_line in self.move_line_ids:
             if move_line.owner_id and move_line.owner_id != move_line.company_id.partner_id:
                 continue
             if not move_line.location_id._should_be_valued() and move_line.location_dest_id._should_be_valued():
-                res |= move_line
-        return res
+                res.add(move_line.id)
+        return self.env['stock.move.line'].browse(res)
 
     def _is_in(self):
         """Check if the move should be considered as entering the company so that the cost method
@@ -179,6 +179,7 @@ class StockMove(models.Model):
             svl_vals.update(move._prepare_common_svl_vals())
             if forced_quantity:
                 svl_vals['description'] = 'Correction of %s (modification of past move)' % move.picking_id.name or move.name
+            svl_vals['description'] += svl_vals.pop('rounding_adjustment', '')
             svl_vals_list.append(svl_vals)
         return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
 

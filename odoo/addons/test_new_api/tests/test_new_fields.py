@@ -450,20 +450,42 @@ class TestFields(TransactionCaseWithUserDemo):
         b = self.env['test_new_api.recursive'].create({'name': 'B', 'parent': a.id})
         c = self.env['test_new_api.recursive'].create({'name': 'C', 'parent': b.id})
         d = self.env['test_new_api.recursive'].create({'name': 'D', 'parent': c.id})
+        self.assertEqual(a.full_name, 'A')
+        self.assertEqual(b.full_name, 'A / B')
+        self.assertEqual(c.full_name, 'A / B / C')
+        self.assertEqual(d.full_name, 'A / B / C / D')
         self.assertEqual(a.display_name, 'A')
         self.assertEqual(b.display_name, 'A / B')
         self.assertEqual(c.display_name, 'A / B / C')
         self.assertEqual(d.display_name, 'A / B / C / D')
 
+        a.name = 'A1'
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'A1 / B')
+        self.assertEqual(c.full_name, 'A1 / B / C')
+        self.assertEqual(d.full_name, 'A1 / B / C / D')
+        self.assertEqual(a.display_name, 'A1')
+        self.assertEqual(b.display_name, 'A1 / B')
+        self.assertEqual(c.display_name, 'A1 / B / C')
+        self.assertEqual(d.display_name, 'A1 / B / C / D')
+
         b.parent = False
-        self.assertEqual(a.display_name, 'A')
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'B')
+        self.assertEqual(c.full_name, 'B / C')
+        self.assertEqual(d.full_name, 'B / C / D')
+        self.assertEqual(a.display_name, 'A1')
         self.assertEqual(b.display_name, 'B')
         self.assertEqual(c.display_name, 'B / C')
         self.assertEqual(d.display_name, 'B / C / D')
 
         # rename several records to trigger several recomputations at once
         (d + c + b).write({'name': 'X'})
-        self.assertEqual(a.display_name, 'A')
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'X')
+        self.assertEqual(c.full_name, 'X / X')
+        self.assertEqual(d.full_name, 'X / X / X')
+        self.assertEqual(a.display_name, 'A1')
         self.assertEqual(b.display_name, 'X')
         self.assertEqual(c.display_name, 'X / X')
         self.assertEqual(d.display_name, 'X / X / X')
@@ -472,6 +494,14 @@ class TestFields(TransactionCaseWithUserDemo):
         # to recompute, but recomputation should not fail...
         b.unlink()
         self.assertEqual((a + b + c + d).exists(), a)
+
+    def test_12_recursive_tree(self):
+        foo = self.env['test_new_api.recursive.tree'].create({'name': 'foo'})
+        self.assertEqual(foo.display_name, 'foo()')
+        bar = foo.create({'name': 'bar', 'parent_id': foo.id})
+        self.assertEqual(foo.display_name, 'foo(bar())')
+        baz = foo.create({'name': 'baz', 'parent_id': bar.id})
+        self.assertEqual(foo.display_name, 'foo(bar(baz()))')
 
     def test_12_cascade(self):
         """ test computed field depending on computed field """
@@ -525,7 +555,6 @@ class TestFields(TransactionCaseWithUserDemo):
         (foo1 + foo2).write({'display_name': 'Bar'})
         self.assertEqual(foo1.name, 'Bar')
         self.assertEqual(foo2.name, 'Bar')
-
 
         # create/write on 'foo' should only invoke the compute method
         log = []
@@ -646,6 +675,38 @@ class TestFields(TransactionCaseWithUserDemo):
             discussion.name = "X"
             discussion.flush()
 
+    def test_15_constraint_inverse(self):
+        """ test constraint method on normal field and field with inverse """
+        log = []
+        model = self.env['test_new_api.compute.inverse'].with_context(log=log, log_constraint=True)
+
+        # create/write with normal field only
+        log.clear()
+        record = model.create({'baz': 'Hi'})
+        self.assertCountEqual(log, ['constraint'])
+
+        log.clear()
+        record.write({'baz': 'Ho'})
+        self.assertCountEqual(log, ['constraint'])
+
+        # create/write with inverse field only
+        log.clear()
+        record = model.create({'bar': 'Hi'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        log.clear()
+        record.write({'bar': 'Ho'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        # create/write with both fields only
+        log.clear()
+        record = model.create({'bar': 'Hi', 'baz': 'Hi'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        log.clear()
+        record.write({'bar': 'Ho', 'baz': 'Ho'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
     def test_16_compute_unassigned(self):
         model = self.env['test_new_api.compute.unassigned']
 
@@ -666,27 +727,45 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(record.bares, False)
 
     def test_16_compute_unassigned_access_error(self):
-        # create a real record
-        record = self.env['test_new_api.compute.unassigned'].create({})
-        record.flush()
+        # create two records
+        records = self.env['test_new_api.compute.unassigned'].create([{}, {}])
+        records.flush()
 
-        # alter access rights: regular users cannot read 'record'
+        # alter access rights: regular users cannot read 'records'
         access = self.env.ref('test_new_api.access_test_new_api_compute_unassigned')
         access.perm_read = False
+        access.flush()
 
         # switch to environment with user demo
-        record = record.with_user(self.user_demo)
-        record.env.cache.invalidate()
+        records = records.with_user(self.user_demo)
+        records.env.cache.invalidate()
 
-        # check that the record is not accessible
+        # check that records are not accessible
         with self.assertRaises(AccessError):
-            record.bars
+            records[0].bars
+        with self.assertRaises(AccessError):
+            records[1].bars
 
-        # modify the record and flush() changes with the current environment:
-        # this should not trigger an access error, even if unassigned computed
-        # fields are fetched from database
-        record.foo = "X"
-        record.flush()
+        # Modify the records and flush() changes with the current environment:
+        # this should not trigger an access error, whatever the order in which
+        # records are considered.  It may fail in the following scenario:
+        #  - mark field 'bars' to compute on records
+        #  - access records[0].bars
+        #     - recompute bars on records (both) -> assign records[0] only
+        #     - return records[0].bars from cache
+        #  - access records[1].bars
+        #     - recompute nothing (done already)
+        #     - records[1].bars is not in cache
+        #     - fetch records[1].bars -> access error
+        records[0].foo = "assign"
+        records[1].foo = "x"
+        records.flush()
+
+        # try the other way around, too
+        records.env.cache.invalidate()
+        records[0].foo = "x"
+        records[1].foo = "assign"
+        records.flush()
 
     def test_20_float(self):
         """ test rounding of float fields """
@@ -1131,6 +1210,32 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(bar.foo, oof)
         self.assertIn(bar, bar.search([('foo', 'in', oof.ids)]))
 
+    def test_25_one2many_inverse_related(self):
+        left = self.env['test_new_api.trigger.left'].create({})
+        right = self.env['test_new_api.trigger.right'].create({})
+        self.assertFalse(left.right_id)
+        self.assertFalse(right.left_ids)
+        self.assertFalse(right.left_size)
+
+        # create middle: this should trigger left.right_id by traversing
+        # middle.left_id, and right.left_size by traversing left.right_id
+        # after its computation!
+        middle = self.env['test_new_api.trigger.middle'].create({
+            'left_id': left.id,
+            'right_id': right.id,
+        })
+        self.assertEqual(left.right_id, right)
+        self.assertEqual(right.left_ids, left)
+        self.assertEqual(right.left_size, 1)
+
+        # delete middle: this should trigger left.right_id by traversing
+        # middle.left_id, and right.left_size by traversing left.right_id
+        # before its computation!
+        middle.unlink()
+        self.assertFalse(left.right_id)
+        self.assertFalse(right.left_ids)
+        self.assertFalse(right.left_size)
+
     def test_26_inherited(self):
         """ test inherited fields. """
         # a bunch of fields are inherited from res_partner
@@ -1271,6 +1376,12 @@ class TestFields(TransactionCaseWithUserDemo):
         company_record.foo = 'DEF'
         self.assertEqual(attribute_record.company.foo, 'DEF')
         self.assertEqual(attribute_record.bar, 'DEFDEF')
+
+        # a low priviledge user should be able to search on company_dependent fields
+        company_record.env.user.groups_id -= self.env.ref('base.group_system')
+        self.assertFalse(company_record.env.user.has_group('base.group_system'))
+        company_records = self.env['test_new_api.company'].search([('foo', '=', 'DEF')])
+        self.assertEqual(len(company_records), 1)
 
     def test_30_read(self):
         """ test computed fields as returned by read(). """
@@ -1582,6 +1693,13 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertFalse(new_move.line_ids.id)
         self.assertEqual(new_move.line_ids.quantity, 2)
 
+        # assign line to new move without origin
+        new_move = move.new()
+        new_move.line_ids = line
+        self.assertFalse(new_move.line_ids.id)
+        self.assertEqual(new_move.line_ids._origin, line)
+        self.assertEqual(new_move.line_ids.move_id, new_move)
+
     @mute_logger('odoo.addons.base.models.ir_model')
     def test_41_new_related(self):
         """ test the behavior of related fields starting on new records. """
@@ -1652,8 +1770,8 @@ class TestFields(TransactionCaseWithUserDemo):
             [('author_partner.name', '=', 'Marc Demo')])
         self.assertEqual(messages, self.env.ref('test_new_api.message_0_1'))
 
-    def test_60_x2many_domain(self):
-        """ test the cache consistency of a x2many field with a domain """
+    def test_60_one2many_domain(self):
+        """ test the cache consistency of a one2many field with a domain """
         discussion = self.env.ref('test_new_api.discussion_0')
         message = discussion.messages[0]
         self.assertNotIn(message, discussion.important_messages)
@@ -1666,6 +1784,31 @@ class TestFields(TransactionCaseWithUserDemo):
         discussion.write({'very_important_messages': [Command.clear()]})
         self.assertFalse(discussion.very_important_messages)
         self.assertFalse(message.exists())
+
+    def test_60_many2many_domain(self):
+        """ test the cache consistency of a many2many field with a domain """
+        discussion = self.env.ref('test_new_api.discussion_0')
+        category = self.env['test_new_api.category'].create({'name': "Foo"})
+        discussion.categories = category
+        discussion.flush()
+        discussion.invalidate_cache()
+
+        # patch the many2many field to give it a domain (this simply avoids
+        # adding yet another test model)
+        field = discussion._fields['categories']
+        self.patch(field, 'domain', [('color', '!=', 42)])
+        self.registry.setup_models(self.cr)
+
+        # the category is in the many2many
+        self.assertIn(category, discussion.categories)
+
+        # modify the category; it should not longer be in the many2many
+        category.color = 42
+        self.assertNotIn(category, discussion.categories)
+
+        # modify again the category; it should be back in the many2many
+        category.color = 69
+        self.assertIn(category, discussion.categories)
 
     def test_70_x2many_write(self):
         discussion = self.env.ref('test_new_api.discussion_0')

@@ -6,6 +6,7 @@ helpers and classes to write tests.
 """
 import base64
 import collections
+import difflib
 import functools
 import importlib
 import inspect
@@ -14,33 +15,37 @@ import json
 import logging
 import operator
 import os
+import pathlib
 import platform
+import pprint
 import re
-import requests
 import shutil
 import signal
-import socket
 import subprocess
 import sys
 import tempfile
 import threading
 import time
 import unittest
-import difflib
 import warnings
-import werkzeug.urls
+from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime, date
-from unittest.mock import patch
-
-from collections import defaultdict
-from decorator import decorator
 from itertools import zip_longest as izip_longest
-from lxml import etree, html
+from unittest.mock import patch
 from xmlrpc import client as xmlrpclib
 
+import requests
+import werkzeug.urls
+import werkzeug.urls
+from decorator import decorator
+from lxml import etree, html
+
+import odoo
+from odoo import api
 from odoo.models import BaseModel
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
+from odoo.service import security
 from odoo.sql_db import Cursor
 from odoo.tools import float_compare, single_email_re
 from odoo.tools.misc import find_in_path
@@ -51,13 +56,6 @@ try:
 except ImportError:
     # chrome headless tests will be skipped
     websocket = None
-
-
-import odoo
-import pprint
-from odoo import api
-from odoo.service import security
-
 
 
 _logger = logging.getLogger(__name__)
@@ -135,13 +133,18 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
 
     groups_id = [(6, 0, [env.ref(g.strip()).id for g in groups.split(',')])]
     create_values = dict(kwargs, login=login, groups_id=groups_id)
+    # automatically generate a name as "Login (groups)" to ease user comprehension
     if not create_values.get('name'):
         create_values['name'] = '%s (%s)' % (login, groups)
-    if not create_values.get('email'):
+    # generate email if not given as most test require an email
+    if 'email' not in create_values:
         if single_email_re.match(login):
             create_values['email'] = login
         else:
             create_values['email'] = '%s.%s@example.com' % (login[0], login[0])
+    # ensure company_id + allowed company constraint works if not given at create
+    if 'company_id' in create_values and 'company_ids' not in create_values:
+        create_values['company_ids'] = [(4, create_values['company_id'])]
 
     return env['res.users'].with_context(**context).create(create_values)
 
@@ -764,8 +767,18 @@ class ChromeBrowser():
     def _spawn_chrome(self, cmd):
         if os.name != 'posix':
             return
+
         pid = os.fork()
         if pid != 0:
+            port_file = pathlib.Path(self.user_data_dir, 'DevToolsActivePort')
+            for _ in range(100):
+                time.sleep(0.1)
+                if port_file.is_file():
+                    with port_file.open('r', encoding='utf-8') as f:
+                        self.devtools_port = int(f.readline())
+                    break
+            else:
+                raise unittest.SkipTest('Failed to detect chrome devtools port after 2.5s.')
             return pid
         else:
             if platform.system() != 'Darwin':
@@ -783,11 +796,6 @@ class ChromeBrowser():
     def _chrome_start(self):
         if self.chrome_pid is not None:
             return
-        with socket.socket() as s:
-            s.bind(('localhost', 0))
-            if hasattr(socket, 'SO_REUSEADDR'):
-                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            _, self.devtools_port = s.getsockname()
 
         switches = {
             '--headless': '',
@@ -811,9 +819,8 @@ class ChromeBrowser():
             '--autoplay-policy': 'no-user-gesture-required',
             '--window-size': self.window_size,
             '--remote-debugging-address': HOST,
-            '--remote-debugging-port': str(self.devtools_port),
+            '--remote-debugging-port': '0',
             '--no-sandbox': '',
-            '--disable-crash-reporter': '',
             '--disable-gpu': '',
         }
         cmd = [self.executable]

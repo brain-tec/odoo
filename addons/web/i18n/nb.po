@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~14.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-11 07:29+0000\n"
+"POT-Creation-Date: 2021-01-25 13:06+0000\n"
 "PO-Revision-Date: 2016-08-05 13:11+0000\n"
 "Last-Translator: Marius Stedjan <marius@stedjan.com>, 2020\n"
 "Language-Team: Norwegian Bokmål (https://www.transifex.com/odoo/teams/41243/nb/)\n"
@@ -44,13 +44,6 @@ msgstr "oppføringer"
 #, python-format
 msgid "# Code editor"
 msgstr "# kodeeditor"
-
-#. module: web
-#. openerp-web
-#: code:addons/web/static/src/js/fields/basic_fields.js:0
-#, python-format
-msgid "${-diffDays} days ago"
-msgstr ""
 
 #. module: web
 #. openerp-web
@@ -92,6 +85,13 @@ msgstr "%d år siden"
 #: code:addons/web/static/src/js/views/file_upload_mixin.js:0
 #, python-format
 msgid "%s Files"
+msgstr ""
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/js/fields/basic_fields.js:0
+#, python-format
+msgid "%s days ago"
 msgstr ""
 
 #. module: web
@@ -225,8 +225,8 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.frontend_layout
 msgid ""
-"<span class=\"o_footer_copyright_name mr-2 oe_structure\">Copyright "
-"&amp;copy; Company name</span>"
+"<span class=\"o_footer_copyright_name mr-2\">Copyright &amp;copy; Company "
+"name</span>"
 msgstr ""
 
 #. module: web
@@ -1994,6 +1994,7 @@ msgstr "Grønn"
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/js/control_panel/groupby_menu.js:0
+#: code:addons/web/static/src/js/views/graph/graph_controller.js:0
 #, python-format
 msgid "Group By"
 msgstr "Grupper etter"
@@ -2097,7 +2098,7 @@ msgstr "Bilde"
 #. openerp-web
 #: code:addons/web/static/src/js/fields/basic_fields.js:0
 #, python-format
-msgid "In ${diffDays} days"
+msgid "In %s days"
 msgstr ""
 
 #. module: web
@@ -2448,6 +2449,7 @@ msgstr "Vurder å laste inn applikasjonen på nytt ved å trykke F5..."
 
 #. module: web
 #. openerp-web
+#: code:addons/web/static/src/js/views/graph/graph_controller.js:0
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "Measures"

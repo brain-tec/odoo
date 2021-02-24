@@ -25,7 +25,7 @@
 # 传红 周 <zch1354@qq.com>, 2017
 # v2exerer <9010446@qq.com>, 2017
 # Connie Xiao <connie.xiao@elico-corp.com>, 2017
-# jack adam <jackadam@sina.com>, 2017
+# 上官飞鸿 <jackadam@sina.com>, 2017
 # sunny sun <sunxiaoxia@inspur.com>, 2018
 # Maie <m@maie.name>, 2018
 # 0023d6d916c2d56e4d76ed7a6e80ad5b, 2018
@@ -58,7 +58,6 @@
 # 夏 冰 <qndym@126.com>, 2019
 # waveyeung <waveyeung@qq.com>, 2019
 # yuan wenpu <1140021222@qq.com>, 2019
-# Manga Tsang <mts@odoo.com>, 2019
 # ryan ryan <itechr@outlook.com>, 2019
 # keecome <7017511@qq.com>, 2020
 # WK Leong <zsdicky@gmail.com>, 2020
@@ -73,22 +72,24 @@
 # liAnGjiA <liangjia@qq.com>, 2020
 # 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2020
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2020
-# ChinaMaker <liuct@chinamaker.net>, 2020
 # 晋 宋 <56457576@qq.com>, 2020
 # Mandy Choy <mnc@odoo.com>, 2020
 # zilin wu <binggue@qq.com>, 2020
 # shan wang <wangshan0901@gmail.com>, 2020
 # Martin Trigaux, 2020
-# Jeffery CHEN Fan <jeffery9@gmail.com>, 2020
-# 稀饭~~ <wangwhai@qq.com>, 2020
+# Daniel Yang <daniel.yang.zhenyu@gmail.com>, 2021
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2021
+# ChinaMaker <liuct@chinamaker.net>, 2021
+# Manga Tsang <mts@odoo.com>, 2021
+# 稀饭~~ <wangwhai@qq.com>, 2021
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~14.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-11 07:28+0000\n"
+"POT-Creation-Date: 2021-01-12 07:31+0000\n"
 "PO-Revision-Date: 2016-08-05 12:55+0000\n"
-"Last-Translator: 稀饭~~ <wangwhai@qq.com>, 2020\n"
+"Last-Translator: 稀饭~~ <wangwhai@qq.com>, 2021\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -443,24 +444,6 @@ msgstr "<i class=\"fa fa-print\"/> 打印"
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
-msgid "<li>%(link)s cancelling {percent:f}%% of {amount}</li>"
-msgstr ""
-
-#. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
-msgid "<li>%(link)s postponing it to {new_date}</li>"
-msgstr ""
-
-#. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
-msgid "<li>%(link)s</li>"
-msgstr ""
-
-#. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
 msgid ""
 "<li>{amount} ({debit_credit}) from <strong>%s</strong> were transferred to "
 "<strong>{account_target_name}</strong> by {link}</li>"
@@ -695,11 +678,6 @@ msgstr ""
 "groups=\"base.group_multi_currency\"> 在 </span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "<span class=\"oe_inline o_form_label mx-3\"> to </span>"
-msgstr ""
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.setup_bank_account_wizard
 msgid ""
 "<span class=\"text-muted\">Leave empty to create a new journal for this bank"
@@ -776,11 +754,6 @@ msgstr "<span>已付金额</span>"
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "<span>Balance</span>"
 msgstr "<span>余额</span>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "<span>Create one journal entry per month automatically</span>"
-msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -1797,12 +1770,23 @@ msgid ""
 msgstr "此重新分区行将分配的其他标记，以便在财务报告中使用"
 
 #. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
-msgid "Adjusting Entries created:<ul>"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
+msgid "Adjusting Amount"
+msgstr "调整金额"
 
 #. module: account
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+#, python-format
+msgid ""
+"Adjusting Entries have been created for this invoice:<ul><li>%(link1)s "
+"cancelling {percent:f}%% of {amount}</li><li>%(link0)s postponing it to "
+"{new_date}</li></ul>"
+msgstr ""
+"已为此结算单创建调整条目：<ul><li>%(link1)s 取消 {percent:f}%% 的 {amount}</li><li>%(link0)s"
+" 推迟到 {new_date}</li></ul>"
+
+#. module: account
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
@@ -1812,20 +1796,23 @@ msgstr "调整分录"
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
-msgid "Adjusting Entry generated for these journal entries:<ul>"
-msgstr ""
-
-#. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
-msgid "Adjusting Entry made on {date} ({percent:f}%)"
-msgstr ""
+msgid ""
+"Adjusting Entry for {link}: {percent:f}% of {amount} recognized on "
+"{new_date}"
+msgstr "调整分录 {link}: {percent:f}% of {amount}在上识别 {new_date}"
 
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
 msgid "Adjusting Entry of {date} ({percent:f}% recognized on {new_date})"
 msgstr "调整分录{date} ({percent:f}% 在上识别 {new_date})"
+
+#. module: account
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+#, python-format
+msgid ""
+"Adjusting Entry {link}: {percent:f}% of {amount} recognized from {date}"
+msgstr "调整分录 {link}: {percent:f}% of {amount} 从中识别 {date}"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard__adjustment_type
@@ -1933,12 +1920,6 @@ msgid ""
 msgstr "为了验证对账单，必须处理所有的账户分录行。"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__chg_period_time_division
-msgid ""
-"Allocate the balance to different periods considering their number of days."
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_template__reconcile
 msgid "Allow Invoices & payments Matching"
 msgstr "允许发票和付款匹配"
@@ -2015,7 +1996,6 @@ msgid ""
 msgstr "此匹配所涉及的金额始终为正，以外币借方行表示。"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__balance
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__amount
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__amount
 #: model:ir.model.fields,field_description:account.field_account_payment__amount
@@ -2490,11 +2470,6 @@ msgstr "自动输入"
 #: model:ir.model.fields,field_description:account.field_res_company__automatic_entry_default_journal_id
 msgid "Automatic Entry Default Journal"
 msgstr "自动录入默认日记帐"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "Automatic re-allocation"
-msgstr ""
 
 #. module: account
 #: model:ir.model,name:account.model_sequence_mixin
@@ -3285,12 +3260,6 @@ msgid "Check if difference is zero."
 msgstr "检查差额是否是零"
 
 #. module: account
-#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
-#, python-format
-msgid "Check the dates. The period cannot start later than its own end."
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,help:account.field_account_account__reconcile
 msgid ""
 "Check this box if this account allows invoices & payments matching of "
@@ -3772,11 +3741,6 @@ msgid "Create Automatic Entries"
 msgstr "创建自动条目"
 
 #. module: account
-#: model:ir.model,name:account.model_account_automatic_entry_wizard_line
-msgid "Create Automatic Entries Line"
-msgstr ""
-
-#. module: account
 #: model:ir.actions.act_window,name:account.account_automatic_entry_wizard_action
 msgid "Create Automatic Entries for selected Journal Items"
 msgstr "为选定的日记帐项目创建自动分录"
@@ -3935,7 +3899,6 @@ msgstr "创建你的第一张发票。"
 #: model:ir.model.fields,field_description:account.field_account_account_type__create_uid
 #: model:ir.model.fields,field_description:account.field_account_analytic_default__create_uid
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__create_uid
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__create_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__create_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__create_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__create_uid
@@ -3999,7 +3962,6 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:account.field_account_account_type__create_date
 #: model:ir.model.fields,field_description:account.field_account_analytic_default__create_date
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__create_date
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__create_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__create_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__create_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__create_date
@@ -4137,7 +4099,6 @@ msgstr "币种"
 #. module: account
 #: model:ir.model,name:account.model_res_currency
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__company_currency_id
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__company_currency_id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__currency_id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__currency_id
 #: model:ir.model.fields,field_description:account.field_account_cashbox_line__currency_id
@@ -4325,6 +4286,11 @@ msgid "Customize your layout."
 msgstr "自定义布局。"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "Cut-Off"
+msgstr "切断"
+
+#. module: account
 #: model:account.incoterms,name:account.incoterm_DAP
 msgid "DELIVERED AT PLACE"
 msgstr "交货地点"
@@ -4363,7 +4329,7 @@ msgstr "数据一致性检查"
 #. openerp-web
 #: code:addons/account/controllers/portal.py:0
 #: code:addons/account/static/src/xml/account_resequence.xml:0
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__date
+#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__date
 #: model:ir.model.fields,field_description:account.field_account_move__date
@@ -4399,31 +4365,11 @@ msgid "Date Mode"
 msgstr "日期模式"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__chg_period_date_to
-msgid "Date at which the smoothing of the balance will end."
-msgstr ""
-
-#. module: account
-#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__chg_period_date_from
-msgid "Date at which the smoothing of the balance will start."
-msgstr ""
-
-#. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_date_from
-msgid "Date from"
-msgstr "日期从"
-
-#. module: account
 #: model:ir.model.fields,help:account.field_account_financial_year_op__opening_date
 msgid ""
 "Date from which the accounting is managed in Odoo. It is the date of the "
 "opening entry."
 msgstr "会计在Odoo中管理的日期。这是开户凭证的日期。"
-
-#. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_date_to
-msgid "Date to"
-msgstr "日期到"
 
 #. module: account
 #. openerp-web
@@ -4776,7 +4722,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_analytic_line__display_name
 #: model:ir.model.fields,field_description:account.field_account_analytic_tag__display_name
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__display_name
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__display_name
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__display_name
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__display_name
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__display_name
@@ -5624,7 +5569,6 @@ msgstr "空闲"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__email_from
 #: model:ir.model.fields,field_description:account.field_account_tour_upload_bill__email_from
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_group_form
 msgid "From"
 msgstr "来自"
@@ -5876,7 +5820,6 @@ msgstr "在订单和发票中如何计算总税额"
 #: model:ir.model.fields,field_description:account.field_account_analytic_line__id
 #: model:ir.model.fields,field_description:account.field_account_analytic_tag__id
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__id
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__id
@@ -6052,7 +5995,7 @@ msgid ""
 "If this checkbox is ticked, it means that the user was not sure of all the "
 "related information at the time of the creation of the move and that the "
 "move needs to be checked again."
-msgstr ""
+msgstr "如果勾选此复选框，则表示用户在创建凭证时不确定所有相关信息，并且需要再次检查凭证。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__auto_post
@@ -6390,7 +6333,9 @@ msgid "Internal Notes"
 msgstr "内部备注"
 
 #. module: account
+#: code:addons/account/models/account_payment.py:0
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
+#, python-format
 msgid "Internal Transfer"
 msgstr "内部转账"
 
@@ -7123,7 +7068,6 @@ msgstr "上个哈希"
 #: model:ir.model.fields,field_description:account.field_account_analytic_line____last_update
 #: model:ir.model.fields,field_description:account.field_account_analytic_tag____last_update
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard____last_update
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line____last_update
 #: model:ir.model.fields,field_description:account.field_account_bank_statement____last_update
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox____last_update
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance____last_update
@@ -7206,7 +7150,6 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:account.field_account_account_type__write_uid
 #: model:ir.model.fields,field_description:account.field_account_analytic_default__write_uid
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__write_uid
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__write_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__write_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__write_uid
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__write_uid
@@ -7270,7 +7213,6 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:account.field_account_account_type__write_date
 #: model:ir.model.fields,field_description:account.field_account_analytic_default__write_date
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__write_date
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__write_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__write_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_cashbox__write_date
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_closebalance__write_date
@@ -7427,11 +7369,6 @@ msgid "Line subtotals tax display"
 msgstr "税目汇总表"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_line_ids
-msgid "Lines"
-msgstr "明细行"
-
-#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Lines from \"Off-Balance Sheet\" accounts cannot be reconciled"
@@ -7551,11 +7488,6 @@ msgstr "管理"
 #: model:account.payment.method,name:account.account_payment_method_manual_out
 msgid "Manual"
 msgstr "手动"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "Manual re-allocation"
-msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__inbound_payment_method_ids
@@ -8342,6 +8274,7 @@ msgstr "只有管理员才能加载会计科目表"
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/models/ir_actions_report.py:0
 #, python-format
 msgid "Only invoices could be printed."
 msgstr "只能打印发票。"
@@ -9044,10 +8977,21 @@ msgid "Percent"
 msgstr "百分比"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_percentage
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__percentage
+#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__percentage
 msgid "Percentage"
 msgstr "百分比"
+
+#. module: account
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+#, python-format
+msgid "Percentage can only be set for Change Period method"
+msgstr "只能为更改期间方法设置百分比"
+
+#. module: account
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+#, python-format
+msgid "Percentage must be between 0 and 100"
+msgstr "百分比必须介于0到100之间"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax__amount_type__percent
@@ -9068,7 +9012,7 @@ msgid "Percentage of balance"
 msgstr "余额百分比"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard_line__percentage
+#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__percentage
 msgid "Percentage of each line to execute the action on."
 msgstr "要执行操作的每行的百分比。"
 
@@ -9273,7 +9217,6 @@ msgid ""
 msgstr "请在发票和付款匹配期间创建会计凭证"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Preview"
 msgstr "预览"
@@ -9516,16 +9459,6 @@ msgid "Re-Sequence"
 msgstr "重新排序"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_move_form
-msgid "Re-allocate"
-msgstr ""
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "Re-allocation percentage"
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_reversal__reason
 #: model:ir.model.fields,field_description:account.field_cash_box_out__name
 msgid "Reason"
@@ -9589,6 +9522,11 @@ msgstr "收款银行账号"
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_send_wizard_form
 msgid "Recipients"
 msgstr "收件人"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
+msgid "Recognition Date"
+msgstr "确认日期"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__recompute_tax_line
@@ -11827,6 +11765,8 @@ msgid ""
 "The %(date_field)s (%(date)s) doesn't match the %(sequence_field)s (%(sequence)s).\n"
 "You might want to clear the field %(sequence_field)s before proceeding with the change of the date."
 msgstr ""
+"%(date_field)s与%(date)s不匹配%(sequence_field)s（%(sequence)s）(。\n"
+"您可能需要在更改日期之前清除字段%(sequence_field)s。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__internal_group
@@ -11871,14 +11811,6 @@ msgid ""
 "The Journal Entry sequence is not conform to the current format. Only the "
 "Advisor can change it."
 msgstr "日记条目顺序与当前格式不符。只有顾问才能改变。"
-
-#. module: account
-#: code:addons/account/models/account_journal.py:0
-#, python-format
-msgid ""
-"The account %(account_name)s can't be shared between multiple journals: "
-"%(journals)s"
-msgstr "科目%(account_name)s 不能在多个日记帐之间共享：%(journals)s"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -12193,6 +12125,19 @@ msgid "The holder of a journal's bank account must be the company (%s)."
 msgstr "日记账银行账的所有者必须是公司：%s"
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The invoice already contains lines, it was not updated from the attachment."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "The invoice is not a draft, it was not updated from the attachment."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid ""
@@ -12406,7 +12351,6 @@ msgstr "创建此条目的付款"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment__currency_id
-#: model:ir.model.fields,help:account.field_account_payment__destination_account_id
 #: model:ir.model.fields,help:account.field_account_payment_register__currency_id
 #: model:ir.model.fields,help:account.field_account_payment_register__source_currency_id
 msgid "The payment's currency."
@@ -12933,11 +12877,6 @@ msgid ""
 msgstr "默认情况下，当单击 \"Send &amp; 时将选择这些选项在发票上打印"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_time_division
-msgid "Time Division"
-msgstr ""
-
-#. module: account
 #: model:digest.tip,name:account.digest_tip_account_0
 #: model_terms:digest.tip,tip_description:account.digest_tip_account_0
 msgid "Tip: No need to print, put in an envelop and post your invoices"
@@ -12990,7 +12929,6 @@ msgid "Total Amount"
 msgstr "金额总计"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_tree_grouped
 msgid "Total Balance"
 msgstr "总余额"
@@ -13027,11 +12965,6 @@ msgid "Total Payable"
 msgstr "应付总计"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
-msgid "Total Percentage"
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit
 #: model:ir.model.fields,field_description:account.field_res_users__credit
 msgid "Total Receivable"
@@ -13046,7 +12979,6 @@ msgstr "总签字"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__total_amount
-#: model:ir.model.fields,help:account.field_account_automatic_entry_wizard_line__balance
 msgid "Total amount impacted by the automatic entry."
 msgstr "受自动输入影响的总金额。"
 
@@ -13102,7 +13034,7 @@ msgid "Transfer"
 msgstr "调拨"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__date
+#: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
 msgid "Transfer Date"
 msgstr "调拔日期"
 
@@ -13616,7 +13548,6 @@ msgid "View accounts detail"
 msgstr "查看账户明细"
 
 #. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__chg_period_warning_message
 #: model:ir.model.fields.selection,name:account.selection__res_partner__invoice_warn__warning
 msgid "Warning"
 msgstr "警告"
@@ -13720,11 +13651,6 @@ msgstr "使用 Odoo，您不必手动记录账单"
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_search
 msgid "With tax"
 msgstr "含税"
-
-#. module: account
-#: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard_line__wizard_id
-msgid "Wizard"
-msgstr "向导"
 
 #. module: account
 #. openerp-web
@@ -14042,7 +13968,7 @@ msgstr "由于在凭证上激活了限制模式，您无法编辑以下字段:%s
 msgid ""
 "You cannot edit the journal of an account move if it already has a sequence "
 "number assigned."
-msgstr ""
+msgstr "您不能编辑会计分录的凭证，如果它已经分配了序列号。"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14117,9 +14043,8 @@ msgstr "你不能从从已经关闭的银行对账单中放／取钱"
 #, python-format
 msgid ""
 "You cannot reduce the number of decimal places of a currency which has "
-"already been used to make accounting entries. If you really need to do that,"
-" please contact tech support."
-msgstr "不能减少已用于进行记帐分录的货币的小数位数。如果您确实需要这样做，请联系技术支持。"
+"already been used to make accounting entries."
+msgstr "‎不能减少已用于进行记帐分录的货币的小数位数。‎"
 
 #. module: account
 #: code:addons/account/models/account_journal.py:0
@@ -14285,6 +14210,7 @@ msgstr "邮编范围到"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
 msgid "[Not set]"

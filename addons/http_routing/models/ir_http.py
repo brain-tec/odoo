@@ -195,8 +195,7 @@ def url_for(url_from, lang_code=None, no_rewrite=False):
             and not path.startswith('/web/')
     )):
         new_url = request.env['ir.http'].url_rewrite(path)
-        new_url = new_url and qs and new_url + '?%s' % qs
-
+        new_url = new_url if not qs else new_url + '?%s' % qs
 
     return url_lang(new_url or url_from, lang_code=lang_code)
 
@@ -206,7 +205,7 @@ def is_multilang_url(local_url, lang_url_codes=None):
         To be considered as translatable, the URL should either:
         1. Match a POST (non-GET actually) controller that is `website=True` and
            either `multilang` specified to True or if not specified, with `type='http'`.
-        2. If not matching 1., everything not under /static/ will be translatable
+        2. If not matching 1., everything not under /static/ or /web/ will be translatable
     '''
     if not lang_url_codes:
         lang_url_codes = [url_code for _, url_code, *_ in request.env['res.lang'].get_available()]
@@ -218,26 +217,24 @@ def is_multilang_url(local_url, lang_url_codes=None):
 
     url = local_url.partition('#')[0].split('?')
     path = url[0]
-    query_string = url[1] if len(url) > 1 else None
-    router = request.httprequest.app.get_db_router(request.db).bind('')
 
-    def is_multilang_func(func):
-        return (func and func.routing.get('website', False) and
-                func.routing.get('multilang', func.routing['type'] == 'http'))
+    # Consider /static/ and /web/ files as non-multilang
+    if '/static/' in path or path.startswith('/web/'):
+        return False
+
+    query_string = url[1] if len(url) > 1 else None
+
     # Try to match an endpoint in werkzeug's routing table
     try:
-        func = router.match(path, method='POST', query_args=query_string)[0]
-        return is_multilang_func(func)
-    except werkzeug.exceptions.MethodNotAllowed:
-        func = router.match(path, method='GET', query_args=query_string)[0]
-        return is_multilang_func(func)
-    except werkzeug.exceptions.NotFound:
-        # Consider /static/ files as non-multilang
-        static_index = path.find('/static/', 1)
-        if static_index != -1 and static_index == path.find('/', 1):
-            return False
-        return True
-    except Exception:
+        _, func = request.env['ir.http'].url_rewrite(path, query_args=query_string)
+
+        # /page/xxx has no endpoint/func but is multilang
+        return (not func or (
+            func.routing.get('website', False)
+            and func.routing.get('multilang', func.routing['type'] == 'http')
+        ))
+    except Exception as exception:
+        _logger.warning(exception)
         return False
 
 
@@ -260,7 +257,7 @@ class ModelConverter(ir_http.ModelConverter):
             # limited support for negative IDs due to our slug pattern, assume abs() if not found
             if not env[self.model].browse(record_id).exists():
                 record_id = abs(record_id)
-        return env[self.model].browse(record_id)
+        return env[self.model].with_context(_converter_value=value).browse(record_id)
 
 
 class IrHttp(models.AbstractModel):
@@ -440,7 +437,7 @@ class IrHttp(models.AbstractModel):
             # most of the time the browser is loading and inexisting assets or image. A standard 404 is enough.
             # Earlier check would be difficult since we don't want to break data modules
             path_components = request.httprequest.path.split('/')
-            request.is_frontend = len(path_components) < 3 or path_components[2] != 'static' or not '.' in path_components[-1]
+            request.is_frontend = len(path_components) < 3 or path_components[2] != 'static' or '.' not in path_components[-1]
             routing_error = e
 
         request.is_frontend_multilang = not func or (func and request.is_frontend and func.routing.get('multilang', func.routing['type'] == 'http'))
@@ -580,7 +577,7 @@ class IrHttp(models.AbstractModel):
             code = exception.code
 
         values.update(
-            status_message=werkzeug.http.HTTP_STATUS_CODES.get(code,''),
+            status_message=werkzeug.http.HTTP_STATUS_CODES.get(code, ''),
             status_code=code,
         )
 
@@ -655,20 +652,20 @@ class IrHttp(models.AbstractModel):
         return werkzeug.wrappers.Response(html, status=code, content_type='text/html;charset=utf-8')
 
     @api.model
-    @tools.ormcache('path')
-    def url_rewrite(self, path):
+    @tools.ormcache('path', 'query_args')
+    def url_rewrite(self, path, query_args=None):
         new_url = False
         req = request.httprequest
         router = req.app.get_db_router(request.db).bind('')
+        endpoint = False
         try:
-            _ = router.match(path, method='POST')
-        except werkzeug.exceptions.MethodNotAllowed as e:
-            _ = router.match(path, method='GET')
+            endpoint = router.match(path, method='POST', query_args=query_args)
+        except werkzeug.exceptions.MethodNotAllowed:
+            endpoint = router.match(path, method='GET', query_args=query_args)
         except werkzeug.routing.RequestRedirect as e:
             new_url = e.new_url[7:]  # remove scheme
-        except werkzeug.exceptions.NotFound as e:
+            _, endpoint = self.url_rewrite(new_url, query_args)
+            endpoint = endpoint and [endpoint]
+        except werkzeug.exceptions.NotFound:
             new_url = path
-        except Exception as e:
-            raise e
-
-        return new_url or path
+        return new_url or path, endpoint and endpoint[0]

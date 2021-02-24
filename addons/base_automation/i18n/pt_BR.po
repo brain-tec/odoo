@@ -16,7 +16,7 @@
 # grazziano <gra.negocia@gmail.com>, 2020
 # Fernando Colus <fcolus1@gmail.com>, 2020
 # PopSolutions Cooperativa Digital <popsolutions.co@gmail.com>, 2020
-# Éder Brito <britoederr@gmail.com>, 2020
+# Éder Brito <britoederr@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -24,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-12-11 07:29+0000\n"
 "PO-Revision-Date: 2017-02-15 10:48+0000\n"
-"Last-Translator: Éder Brito <britoederr@gmail.com>, 2020\n"
+"Last-Translator: Éder Brito <britoederr@gmail.com>, 2021\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -150,7 +150,7 @@ msgstr "Tipo de Ligação"
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__binding_view_types
 msgid "Binding View Types"
-msgstr ""
+msgstr "Tipo de Visualização de Ligação"
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__child_ids
@@ -330,7 +330,7 @@ msgstr "Msg de Menor Atraso"
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__link_field_id
 msgid "Link Field"
-msgstr ""
+msgstr "Campo de Vínculo"
 
 #. module: base_automation
 #: model:ir.model.fields.selection,name:base_automation.selection__base_automation__trg_date_range_type__minutes
@@ -489,6 +489,8 @@ msgid ""
 "The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
 "\"%(state_value)s\" action type"
 msgstr ""
+"O \"%(trigger_value)s\" %(trigger_label)s pode ser utilizado apenas com o "
+"tipo de ação \"%(state_value)s\" "
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trigger_field_ids
@@ -496,6 +498,8 @@ msgid ""
 "The action will be triggered if and only if one of these fields is "
 "updated.If empty, all fields are watched."
 msgstr ""
+"A ação será acionada se e somente se um desses campos for atualizado. Se "
+"estiver vazio, todos os campos serão monitorados."
 
 #. module: base_automation
 #. openerp-web
@@ -505,6 +509,8 @@ msgid ""
 "The error occurred during the execution of the automated action\n"
 "                    \""
 msgstr ""
+"O erro ocorreu durante a execução da ação automatizada\n"
+"                    \""
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trigger
@@ -520,7 +526,7 @@ msgstr "Data de Disparo"
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trigger_field_ids
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid "Trigger Fields"
-msgstr ""
+msgstr "Campos de Acionamento"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__state
@@ -575,6 +581,11 @@ msgid ""
 "                opportunity which still has status pending after 14 days might\n"
 "                trigger an automatic reminder email."
 msgstr ""
+"Use ações automatizadas para acionar ações automaticamente para\n"
+"                várias telas. Exemplo: um lead criado por um usuário específico pode\n"
+"                ser definido automaticamente para uma equipe de vendas específica, ou uma\n"
+"                oportunidade que ainda tem status pendente após 14 dias pode\n"
+"                acionar um lembrete automático por e-mail."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__activity_user_field_name
@@ -642,6 +653,8 @@ msgstr ""
 msgid ""
 "You can ask an administrator to disable or correct this automated action."
 msgstr ""
+"Você pode pedir a um administrador para desabilitar ou corrigir esta ação "
+"automatizada."
 
 #. module: base_automation
 #. openerp-web
@@ -649,6 +662,8 @@ msgstr ""
 #, python-format
 msgid "You can disable this automated action or edit it to solve the issue."
 msgstr ""
+"Você pode desativar essa ação automatizada ou editá-la para resolver o "
+"problema."
 
 #. module: base_automation
 #: code:addons/base_automation/models/base_automation.py:0

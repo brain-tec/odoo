@@ -143,6 +143,7 @@ var FileWidget = SearchableMediaWidget.extend({
 
         this.options = _.extend({
             mediaWidth: media && media.parentElement && $(media.parentElement).width(),
+            useMediaLibrary: true,
         }, options || {});
 
         this.attachments = [];
@@ -250,15 +251,7 @@ var FileWidget = SearchableMediaWidget.extend({
      * @override
      */
     _clear: function () {
-        if (this.$media.is('img')) {
-            return;
-        }
-        var allImgClasses = /(^|\s+)((img(\s|$)|img-(?!circle|rounded|thumbnail))[^\s]*)/g;
-        var allImgClassModifiers = /(^|\s+)(rounded-circle|shadow|rounded|img-thumbnail|mx-auto)([^\s]*)/g;
-        this.media.className = this.media.className && this.media.className
-            .replace('o_we_custom_image', '')
-            .replace(allImgClasses, ' ')
-            .replace(allImgClassModifiers, ' ');
+        this.media.className = this.media.className && this.media.className.replace(/(^|\s+)(o_image)(?=\s|$)/g, ' ');
     },
     /**
      * Returns the domain for attachments used in media dialog.
@@ -300,6 +293,9 @@ var FileWidget = SearchableMediaWidget.extend({
         domain = domain.concat(this.options.mimetypeDomain);
         if (needle && needle.length) {
             domain.push(['name', 'ilike', needle]);
+        }
+        if (!this.options.useMediaLibrary) {
+            domain.push('!', ['url', '=ilike', '/web_editor/shape/%']);
         }
         domain.push('!', ['name', '=like', '%.crop']);
         domain.push('|', ['type', '=', 'binary'], '!', ['url', '=like', '/%/static/%']);
@@ -414,7 +410,7 @@ var FileWidget = SearchableMediaWidget.extend({
         }
 
         const img = selected[0];
-        if (!img || !img.id) {
+        if (!img || !img.id || this.$media.attr('src') === img.image_src) {
             return this.media;
         }
 
@@ -454,19 +450,13 @@ var FileWidget = SearchableMediaWidget.extend({
             }
             href += 'unique=' + img.checksum + '&download=true';
             this.$media.attr('href', href);
-            this.$media.addClass('o_image').attr('title', img.name);
-            this.$media.append($(`<img src="${this._getFileImageUrl(img.mimetype, img.name, this.$media.data('ext'))}"/>`))
+            this.$media.addClass('o_image').attr('title', img.name).attr('data-mimetype', img.mimetype);
         }
 
         this.$media.attr('alt', img.alt || img.description || '');
         var style = this.style;
         if (style) {
             this.$media.css(style);
-        }
-
-        if (this.options.onUpload) {
-            // We consider that when selecting an image it is as if we upload it in the html content.
-            this.options.onUpload(img);
         }
 
         // Remove image modification attributes
@@ -527,142 +517,6 @@ var FileWidget = SearchableMediaWidget.extend({
             .prop('disabled', !isURL);
         this.$urlSuccess.toggleClass('d-none', !isURL);
         this.$urlError.toggleClass('d-none', emptyValue || isURL);
-    },
-    /**
-     * Returns the static url of an image representing the given mimetype.
-     *
-     * @see /web/static/src/scss/mimetypes.scss
-     *
-     * @param {string} mimetype
-     * @param {string} [title]
-     * @param {string} [ext]
-     * @returns {string}
-     */
-    _getFileImageUrl: function(mimetype, title, ext) {
-        title = title || '';
-        ext = ext || '';
-        const prefix = '/web/static/src/img/mimetypes';
-        if (mimetype.startsWith('image')) {
-            return `${prefix}/image.svg`;
-        } else if (mimetype.startsWith('audio')) {
-            return `${prefix}/audio.svg`;
-        } else if (
-            mimetype.startsWith('text') ||
-            mimetype.endsWith('rtf')
-        ) {
-            return `${prefix}/text.svg`;
-        } else if (
-            mimetype.includes('octet-stream') ||
-            mimetype.includes('download') ||
-            mimetype.includes('python')
-        ) {
-            return `${prefix}/binary.svg`;
-        } else if (
-            mimetype.startsWith('video') ||
-            title.endsWith('.mp4') ||
-            title.endsWith('.avi')
-        ) {
-            return `${prefix}/video.svg`;
-        } else if (
-            mimetype.endsWith('archive') ||
-            mimetype.endsWith('compressed') ||
-            mimetype.includes('zip') ||
-            mimetype.endsWith('tar') ||
-            mimetype.includes('package')
-        ) {
-            return `${prefix}/archive.svg`;
-        } else if (mimetype === 'application/pdf') {
-            return `${prefix}/pdf.svg`;
-        } else if (
-            mimetype.startsWith('text-master') ||
-            mimetype.includes('document') ||
-            mimetype.includes('msword') ||
-            mimetype.includes('wordprocessing')
-        ) {
-            return `${prefix}/document.svg`;
-        } else if (
-            mimetype.includes('application/xml') ||
-            mimetype.endsWith('html')
-        ) {
-            return `${prefix}/web_code.svg`;
-        } else if (
-            mimetype.endsWith('css') ||
-            mimetype.endsWith('less') ||
-            ext.endsWith('less')
-        ) {
-            return `${prefix}/web_style.svg`;
-        } else if (
-            mimetype.includes('-image') ||
-            mimetype.includes('diskimage') ||
-            ext.endsWith('dmg')
-        ) {
-            return `${prefix}/disk.svg`;
-        } else if (
-            mimetype.endsWith('csv') ||
-            mimetype.includes('vc') ||
-            mimetype.includes('excel') ||
-            mimetype.endsWith('numbers') ||
-            mimetype.endsWith('calc') ||
-            mimetype.includes('mods') ||
-            mimetype.includes('spreadsheet')
-        ) {
-            return `${prefix}/spreadsheet.svg`;
-        } else if (mimetype.startsWith('key')) {
-            return `${prefix}/certificate.svg`;
-        } else if (
-            mimetype.includes('presentation') ||
-            mimetype.includes('keynote') ||
-            mimetype.includes('teacher') ||
-            mimetype.includes('slideshow') ||
-            mimetype.includes('powerpoint')) {
-            return `${prefix}/presentation.svg`;
-        } else if (
-            mimetype.includes('cert') ||
-            mimetype.includes('rules') ||
-            mimetype.includes('pkcs') ||
-            mimetype.endsWith('stl') ||
-            mimetype.endsWith('crl')
-        ) {
-            return `${prefix}/certificate.svg`;
-        } else if (
-            mimetype.includes('-font') ||
-            mimetype.includes('font-') ||
-            ext.endsWith('ttf')
-        ) {
-            return `${prefix}/font.svg`;
-        } else if (mimetype.includes('-dvi')) {
-            return `${prefix}/print.svg`;
-        } else if (
-            mimetype.includes('script') ||
-            mimetype.includes('x-sh') ||
-            ext.includes('bat') ||
-            mimetype.endsWith('bat') ||
-            mimetype.endsWith('cgi') ||
-            mimetype.endsWith('-c') ||
-            mimetype.includes('java') ||
-            mimetype.includes('ruby')
-        ) {
-            return `${prefix}/script.svg`;
-        } else if (mimetype.includes('javascript')) {
-            return `${prefix}/javascript.svg`;
-        } else if (
-            mimetype.includes('calendar') ||
-            mimetype.endsWith('ldif')
-        ) {
-            return `${prefix}/calendar.svg`;
-        } else if (
-            mimetype.endsWith('postscript') ||
-            mimetype.endsWith('cdr') ||
-            mimetype.endsWith('xara') ||
-            mimetype.endsWith('cgm') ||
-            mimetype.endsWith('graphics') ||
-            mimetype.endsWith('draw') ||
-            mimetype.includes('svg')
-        ) {
-            return `${prefix}/vector.svg`;
-        } else {
-            return `${prefix}/unknown.svg`;
-        }
     },
 
     //--------------------------------------------------------------------------
@@ -914,7 +768,7 @@ var ImageWidget = FileWidget.extend({
                 attachment.thumbnail_src = newURL.pathname + newURL.search;
             }
         });
-        if (this.needle) {
+        if (this.needle && this.options.useMediaLibrary) {
             try {
                 const response = await this._rpc({
                     route: '/web_editor/media_library_search',
@@ -1115,6 +969,14 @@ var ImageWidget = FileWidget.extend({
         this.libraryMedia = [];
         this._super(...arguments);
     },
+    /**
+     * @override
+     */
+    _clear: function (type) {
+        // Not calling _super: we don't want to call the document widget's _clear method on images
+        var allImgClasses = /(^|\s+)(img|img-\S*|o_we_custom_image|rounded-circle|rounded|thumbnail|shadow)(?=\s|$)/g;
+        this.media.className = this.media.className && this.media.className.replace(allImgClasses, ' ');
+    },
 });
 
 
@@ -1194,9 +1056,11 @@ var IconWidget = SearchableMediaWidget.extend({
             var cls = classes[i];
             if (_.contains(this.alias, cls)) {
                 this.selectedIcon = cls;
+                this.initialIcon = cls;
                 this._highlightSelectedIcon();
             }
         }
+        // Kept for compat in stable, no longer in use: remove in master
         this.nonIconClasses = _.without(classes, 'media_iframe_video', this.selectedIcon);
 
         return this._super.apply(this, arguments);
@@ -1212,7 +1076,6 @@ var IconWidget = SearchableMediaWidget.extend({
     save: function () {
         var style = this.$media.attr('style') || '';
         var iconFont = this._getFont(this.selectedIcon) || {base: 'fa', font: ''};
-        var finalClasses = _.uniq(this.nonIconClasses.concat([iconFont.base, iconFont.font]));
         if (!this.$media.is('span, i')) {
             var $span = $('<span/>');
             $span.data(this.$media.data());
@@ -1220,10 +1083,8 @@ var IconWidget = SearchableMediaWidget.extend({
             this.media = this.$media[0];
             style = style.replace(/\s*width:[^;]+/, '');
         }
-        this.$media.attr({
-            class: _.compact(finalClasses).join(' '),
-            style: style || null,
-        });
+        this.$media.removeClass(this.initialIcon).addClass([iconFont.base, iconFont.font]);
+        this.$media.attr('style', style || null);
         return Promise.resolve(this.media);
     },
     /**
@@ -1261,7 +1122,7 @@ var IconWidget = SearchableMediaWidget.extend({
      * @override
      */
     _clear: function () {
-        var allFaClasses = /(^|\s)(fa(\s|$)|fa-[^\s]*)/g;
+        var allFaClasses = /(^|\s)(fa|(text-|bg-|fa-)\S*|rounded-circle|rounded|thumbnail|shadow)(?=\s|$)/g;
         this.media.className = this.media.className && this.media.className.replace(allFaClasses, ' ');
     },
     /**

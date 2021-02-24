@@ -39,13 +39,13 @@ var MediaDialog = Dialog.extend({
     init: function (parent, options, media) {
         var $media = $(media);
         media = $media[0];
-        var is_backend = parent.$el.hasClass("o_field_widget");
+        this.media = media;
 
         options = _.extend({}, options);
         var onlyImages = options.onlyImages || this.multiImages || (media && ($media.parent().data('oeField') === 'image' || $media.parent().data('oeType') === 'image'));
         options.noDocuments = onlyImages || options.noDocuments;
         options.noIcons = onlyImages || options.noIcons;
-        options.noVideos = onlyImages || options.noVideos || is_backend;
+        options.noVideos = onlyImages || options.noVideos;
 
         this._super(parent, _.extend({}, {
             title: _t("Select a Media"),
@@ -76,6 +76,7 @@ var MediaDialog = Dialog.extend({
         } else {
             this.activeWidget = [this.imageWidget, this.documentWidget, this.videoWidget, this.iconWidget].find(w => !!w);
         }
+        this.initiallyActiveWidget = this.activeWidget;
     },
     /**
      * Adds the appropriate class to the current modal and appends the media
@@ -154,7 +155,16 @@ var MediaDialog = Dialog.extend({
         var _super = this._super;
         var args = arguments;
         return this.activeWidget.save().then(function (data) {
-            self._clearWidgets();
+            if (self.activeWidget !== self.initiallyActiveWidget) {
+                self._clearWidgets();
+            }
+            // Restore classes if the media was replaced (when changing type)
+            if (self.media !== data) {
+                var oldClasses = self.media && _.toArray(self.media.classList);
+                if (oldClasses) {
+                    data.className = _.union(_.toArray(data.classList), oldClasses).join(' ');
+                }
+            }
             self.final_data = data;
             _super.apply(self, args);
             $(data).trigger('content_changed');

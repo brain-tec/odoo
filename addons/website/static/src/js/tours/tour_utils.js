@@ -170,6 +170,7 @@ function clickOnSnippet(snippet, position = "bottom") {
 function clickOnSave(position = "bottom") {
     return {
         trigger: "button[data-action=save]",
+        in_modal: false,
         content: _t("Good job! It's time to <b>Save</b> your work."),
         position: position,
     };
@@ -254,7 +255,7 @@ function prepend_trigger(steps, prepend_text='') {
 
 function registerThemeHomepageTour(name, steps) {
     tour.register(name, {
-        url: "/",
+        url: "/?enable_editor=1",
         sequence: 1010,
         saveAs: "homepage",
     }, prepend_trigger(
