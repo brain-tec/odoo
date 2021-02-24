@@ -3174,7 +3174,7 @@ msgstr "Selezionare i campi da salvare nell'elenco di esportazione..."
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "Please update translations of :"
-msgstr "Aggiornare le traduzioni di:"
+msgstr "Aggiornare la traduzione di"
 
 #. module: web
 #. openerp-web
@@ -4039,8 +4039,8 @@ msgid ""
 "The type of the field '%s' must be a many2many field with a relation to "
 "'ir.attachment' model."
 msgstr ""
-"Il tipo del campo \"%s\" deve essere: \"molti a molti\" con una relazione al"
-" modello \"ir.attachment\"."
+"La tipologia per il campo \"%s\" deve essere una relazione molti a molti con"
+" il modello \"ir.attachment\"."
 
 #. module: web
 #: code:addons/web/controllers/main.py:0

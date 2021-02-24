@@ -2701,7 +2701,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.actions.server,name:mrp.production_order_server_action
 msgid "Mrp: Plan Production Orders"
-msgstr "Mrp: piano di produzione degli ordini"
+msgstr "MRP: pianifica ordini di produzione"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_document__name
@@ -3034,7 +3034,7 @@ msgid ""
 "Paste the url of your Google Slide. Make sure the access to the document is "
 "public."
 msgstr ""
-"Incollare URL della presentazione Google. Assicurarsi che l'accesso al "
+"Incollare URL della presentazione Google. Controllare che l'accesso al "
 "documento sia pubblico."
 
 #. module: mrp

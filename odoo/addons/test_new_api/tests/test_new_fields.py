@@ -1374,6 +1374,12 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(attribute_record.company.foo, 'DEF')
         self.assertEqual(attribute_record.bar, 'DEFDEF')
 
+        # a low priviledge user should be able to search on company_dependent fields
+        company_record.env.user.groups_id -= self.env.ref('base.group_system')
+        self.assertFalse(company_record.env.user.has_group('base.group_system'))
+        company_records = self.env['test_new_api.company'].search([('foo', '=', 'DEF')])
+        self.assertEqual(len(company_records), 1)
+
     def test_30_read(self):
         """ test computed fields as returned by read(). """
         discussion = self.env.ref('test_new_api.discussion_0')
@@ -1684,6 +1690,13 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertFalse(new_move.line_ids.id)
         self.assertEqual(new_move.line_ids.quantity, 2)
 
+        # assign line to new move without origin
+        new_move = move.new()
+        new_move.line_ids = line
+        self.assertFalse(new_move.line_ids.id)
+        self.assertEqual(new_move.line_ids._origin, line)
+        self.assertEqual(new_move.line_ids.move_id, new_move)
+
     @mute_logger('odoo.addons.base.models.ir_model')
     def test_41_new_related(self):
         """ test the behavior of related fields starting on new records. """
@@ -1754,8 +1767,8 @@ class TestFields(TransactionCaseWithUserDemo):
             [('author_partner.name', '=', 'Marc Demo')])
         self.assertEqual(messages, self.env.ref('test_new_api.message_0_1'))
 
-    def test_60_x2many_domain(self):
-        """ test the cache consistency of a x2many field with a domain """
+    def test_60_one2many_domain(self):
+        """ test the cache consistency of a one2many field with a domain """
         discussion = self.env.ref('test_new_api.discussion_0')
         message = discussion.messages[0]
         self.assertNotIn(message, discussion.important_messages)
@@ -1768,6 +1781,31 @@ class TestFields(TransactionCaseWithUserDemo):
         discussion.write({'very_important_messages': [(5,)]})
         self.assertFalse(discussion.very_important_messages)
         self.assertFalse(message.exists())
+
+    def test_60_many2many_domain(self):
+        """ test the cache consistency of a many2many field with a domain """
+        discussion = self.env.ref('test_new_api.discussion_0')
+        category = self.env['test_new_api.category'].create({'name': "Foo"})
+        discussion.categories = category
+        discussion.flush()
+        discussion.invalidate_cache()
+
+        # patch the many2many field to give it a domain (this simply avoids
+        # adding yet another test model)
+        field = discussion._fields['categories']
+        self.patch(field, 'domain', [('color', '!=', 42)])
+        self.registry.setup_models(self.cr)
+
+        # the category is in the many2many
+        self.assertIn(category, discussion.categories)
+
+        # modify the category; it should not longer be in the many2many
+        category.color = 42
+        self.assertNotIn(category, discussion.categories)
+
+        # modify again the category; it should be back in the many2many
+        category.color = 69
+        self.assertIn(category, discussion.categories)
 
     def test_70_x2many_write(self):
         discussion = self.env.ref('test_new_api.discussion_0')

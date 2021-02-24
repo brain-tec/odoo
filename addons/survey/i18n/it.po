@@ -2970,6 +2970,9 @@ msgid ""
 "Please make sure you have at least one question in your survey. You also "
 "need at least one section if you chose the \"Page per section\" layout.<br/>"
 msgstr ""
+"Controllare che sia presente almeno una domanda nel sondaggio. Se è stata "
+"scelta la struttura \"Pagina per sezione\", è necessaria inoltre almeno una "
+"sezione.<br/>"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_3
@@ -3639,7 +3642,7 @@ msgstr "Filtro sondaggio"
 #. module: survey
 #: model:ir.actions.server,name:survey.survey_action_server_clean_test_answers
 msgid "Survey: Clean test answers"
-msgstr ""
+msgstr "Sondaggio: pulizia risposte ai test"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_form

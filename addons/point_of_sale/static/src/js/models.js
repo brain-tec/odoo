@@ -971,8 +971,12 @@ exports.PosModel = Backbone.Model.extend({
 
         return new Promise(function (resolve, reject) {
             self.flush_mutex.exec(function () {
-                var flushed = self._flush_orders([self.db.get_order(order_id)], opts);
-
+                var order = self.db.get_order(order_id);
+                if (order){
+                    var flushed = self._flush_orders([order], opts);
+                } else {
+                    var flushed = Promise.resolve([]);
+                }
                 flushed.then(resolve, reject);
 
                 return flushed;
@@ -1536,7 +1540,7 @@ exports.Product = Backbone.Model.extend({
     // product.pricelist.item records are loaded with a search_read
     // and were automatically sorted based on their _order by the
     // ORM. After that they are added in this order to the pricelists.
-    get_price: function(pricelist, quantity){
+    get_price: function(pricelist, quantity, price_extra){
         var self = this;
         var date = moment().startOf('day');
 
@@ -1565,6 +1569,9 @@ exports.Product = Backbone.Model.extend({
         });
 
         var price = self.lst_price;
+        if (price_extra){
+            price += price_extra;
+        }
         _.find(pricelist_items, function (rule) {
             if (rule.min_quantity && quantity < rule.min_quantity) {
                 return false;
@@ -1792,7 +1799,7 @@ exports.Orderline = Backbone.Model.extend({
 
         // just like in sale.order changing the quantity will recompute the unit price
         if(! keep_price && ! this.price_manually_set){
-            this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity()) + this.get_price_extra());
+            this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity(), this.get_price_extra()));
             this.order.fix_tax_included_price(this);
         }
         this.trigger('change', this);
@@ -2734,7 +2741,6 @@ exports.Order = Backbone.Model.extend({
             pricelist_id: this.pricelist ? this.pricelist.id : false,
             partner_id: this.get_client() ? this.get_client().id : false,
             user_id: this.pos.user.id,
-            employee_id: this.pos.get_cashier().id,
             uid: this.uid,
             sequence_number: this.sequence_number,
             creation_date: this.validation_date || this.creation_date, // todo: rename creation_date in master
@@ -2955,7 +2961,7 @@ exports.Order = Backbone.Model.extend({
             return ! line.price_manually_set;
         });
         _.each(lines_to_recompute, function (line) {
-            line.set_unit_price(line.product.get_price(self.pricelist, line.get_quantity()) + line.get_price_extra());
+            line.set_unit_price(line.product.get_price(self.pricelist, line.get_quantity(), line.get_price_extra()));
             self.fix_tax_included_price(line);
         });
         this.trigger('change');
@@ -2991,7 +2997,7 @@ exports.Order = Backbone.Model.extend({
 
         if (options.price_extra !== undefined){
             line.price_extra = options.price_extra;
-            line.set_unit_price(line.get_unit_price() + options.price_extra);
+            line.set_unit_price(line.product.get_price(this.pricelist, line.get_quantity(), options.price_extra));
             this.fix_tax_included_price(line);
         }
 

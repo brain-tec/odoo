@@ -36,6 +36,10 @@ var SnippetEditor = Widget.extend({
         'snippet_option_update': '_onSnippetOptionUpdate',
         'snippet_option_visibility_update': '_onSnippetOptionVisibilityUpdate',
     },
+    layoutElementsSelector: [
+        '.o_we_shape',
+        '.o_we_bg_filter',
+    ].join(','),
 
     /**
      * @constructor
@@ -326,6 +330,17 @@ var SnippetEditor = Widget.extend({
         }
 
         if ($parent.closest(':data("snippet-editor")').length) {
+            const isEmptyAndRemovable = ($el, editor) => {
+                editor = editor || $el.data('snippet-editor');
+                const isEmpty = $el.text().trim() === ''
+                    && $el.children().toArray().every(el => {
+                        // Consider layout-only elements (like bg-shapes) as empty
+                        return el.matches(this.layoutElementsSelector);
+                    });
+                return isEmpty && !$el.hasClass('oe_structure')
+                    && (!editor || editor.isTargetParentEditable);
+            };
+
             var editor = $parent.data('snippet-editor');
             while (!editor) {
                 var $nextParent = $parent.parent();
@@ -349,17 +364,10 @@ var SnippetEditor = Widget.extend({
         this.trigger_up('snippet_removed');
         this.destroy();
         $parent.trigger('content_changed');
-
         // TODO Page content changed, some elements may need to be adapted
         // according to it. While waiting for a better way to handle that this
         // window trigger will handle most cases.
         $(window).trigger('resize');
-
-        function isEmptyAndRemovable($el, editor) {
-            editor = editor || $el.data('snippet-editor');
-            return $el.children().length === 0 && $el.text().trim() === ''
-                && !$el.hasClass('oe_structure') && (!editor || editor.isTargetParentEditable);
-        }
     },
     /**
      * Displays/Hides the editor overlay.
@@ -652,10 +660,12 @@ var SnippetEditor = Widget.extend({
 
         this.$editable.find('.oe_drop_zone').droppable({
             over: function () {
-                if (!self.dropped) {
-                    self.dropped = true;
-                    $(this).first().after(self.$target).addClass('invisible');
+                if (self.dropped) {
+                    self.$target.detach();
+                    $('.oe_drop_zone').removeClass('invisible');
                 }
+                self.dropped = true;
+                $(this).first().after(self.$target).addClass('invisible');
             },
             out: function () {
                 var prev = self.$target.prev();
@@ -2019,11 +2029,14 @@ var SnippetsMenu = Widget.extend({
 
                     self.getEditableArea().find('.oe_drop_zone').droppable({
                         over: function () {
-                            if (!dropped) {
-                                dropped = true;
-                                $(this).first().after($toInsert).addClass('invisible');
-                                $toInsert.removeClass('oe_snippet_body');
+                            if (dropped) {
+                                $toInsert.detach();
+                                $toInsert.addClass('oe_snippet_body');
+                                $('.oe_drop_zone').removeClass('invisible');
                             }
+                            dropped = true;
+                            $(this).first().after($toInsert).addClass('invisible');
+                            $toInsert.removeClass('oe_snippet_body');
                         },
                         out: function () {
                             var prev = $toInsert.prev();
@@ -2208,22 +2221,29 @@ var SnippetsMenu = Widget.extend({
     async _execWithLoadingEffect(action, contentLoading = true, delay = 500) {
         const mutexExecResult = this._mutex.exec(action);
         if (!this.loadingTimers[contentLoading]) {
-            this.loadingTimers[contentLoading] = setTimeout(() => {
+            const addLoader = () => {
                 this.loadingElements[contentLoading] = this._createLoadingElement();
                 if (contentLoading) {
                     this.$snippetEditorArea.append(this.loadingElements[contentLoading]);
                 } else {
                     this.el.appendChild(this.loadingElements[contentLoading]);
                 }
-            }, delay);
+            };
+            if (delay) {
+                this.loadingTimers[contentLoading] = setTimeout(addLoader, delay);
+            } else {
+                addLoader();
+            }
             this._mutex.getUnlockedDef().then(() => {
                 // Note: we remove the loading element at the end of the
                 // execution queue *even if subsequent actions are content
                 // related or not*. This is a limitation of the loading feature,
                 // the goal is still to limit the number of elements in that
                 // queue anyway.
-                clearTimeout(this.loadingTimers[contentLoading]);
-                this.loadingTimers[contentLoading] = undefined;
+                if (delay) {
+                    clearTimeout(this.loadingTimers[contentLoading]);
+                    this.loadingTimers[contentLoading] = undefined;
+                }
 
                 if (this.loadingElements[contentLoading]) {
                     this.loadingElements[contentLoading].remove();

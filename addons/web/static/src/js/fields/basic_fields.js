@@ -756,7 +756,7 @@ var FieldDateRange = InputField.extend({
      */
     _onDateRangePickerShow() {
         this._onScroll = ev => {
-            if (!this.$pickerContainer.get(0).contains(ev.target)) {
+            if (!config.device.isMobile && !this.$pickerContainer.get(0).contains(ev.target)) {
                 this.$el.data('daterangepicker').hide();
             }
         };
@@ -1509,7 +1509,9 @@ var FieldEmail = InputField.extend({
      */
     _renderReadonly: function () {
         if (this.value) {
-            this.$el.text(this.value)
+            // Odoo legacy widgets can have multiple nodes inside their $el JQuery object
+            // so, select the proper one (other nodes are assumed not to contain proper data)
+            this.$el.closest("." + this.className).text(this.value)
                 .addClass('o_form_uri o_text_overflow')
                 .attr('href', this.prefix + ':' + this.value);
         } else {
