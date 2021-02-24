@@ -145,10 +145,10 @@ class Product(models.Model):
                 '|',
                     '&',
                         ('state', '=', 'done'),
-                        ('date', '<=', from_date),
+                        ('date', '>=', from_date),
                     '&',
                         ('state', '!=', 'done'),
-                        ('date_expected', '<=', from_date),
+                        ('date_expected', '>=', from_date),
             ]
             domain_move_in += date_date_expected_domain_from
             domain_move_out += date_date_expected_domain_from
@@ -531,6 +531,8 @@ class Product(models.Model):
         owner_id = self.env['res.partner'].browse(owner_id)
         to_uom = self.env['uom.uom'].browse(to_uom)
         quants = self.env['stock.quant']._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+        if lot_id:
+            quants = quants.filtered(lambda q: q.lot_id == lot_id)
         theoretical_quantity = sum([quant.quantity for quant in quants])
         if to_uom and product_id.uom_id != to_uom:
             theoretical_quantity = product_id.uom_id._compute_quantity(theoretical_quantity, to_uom)
