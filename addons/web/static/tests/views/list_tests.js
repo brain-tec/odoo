@@ -2299,6 +2299,39 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('groupby node with a button with modifiers using a many2one', async function (assert) {
+        assert.expect(5);
+
+        this.data.res_currency.fields.m2o = {string: "Currency M2O", type: "many2one", relation: "bar"};
+        this.data.res_currency.records[0].m2o = 1;
+
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `
+                <tree expand="1">
+                    <field name="foo"/>
+                    <groupby name="currency_id">
+                        <field name="m2o"/>
+                        <button string="Button 1" type="object" name="button_method" attrs='{"invisible": [("m2o", "=", false)]}'/>
+                    </groupby>
+                </tree>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                return this._super(...arguments);
+            },
+            groupBy: ['currency_id'],
+        });
+
+        assert.containsOnce(list, '.o_group_header:eq(0) button.o_invisible_modifier');
+        assert.containsOnce(list, '.o_group_header:eq(1) button:not(.o_invisible_modifier)');
+
+        assert.verifySteps(['web_read_group', 'read']);
+
+        list.destroy();
+    });
+
     QUnit.test('reload list view with groupby node', async function (assert) {
         assert.expect(2);
 
@@ -4634,7 +4667,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('reference field batched in grouped list', async function (assert) {
-        assert.expect(7);
+        assert.expect(8);
 
         this.data.foo.records= [
             // group 1
@@ -4660,7 +4693,7 @@ QUnit.module('Views', {
                     if (args.model === 'bar') {
                         assert.deepEqual(args.args[0], [1, 2 ,3]);
                     }
-                    if (args.model === "res.currency") {
+                    if (args.model === "res_currency") {
                         assert.deepEqual(args.args[0], [1]);
                     }
                 }
@@ -4674,6 +4707,82 @@ QUnit.module('Views', {
         ]);
         assert.containsN(list, '.o_group_header', 2);
         const allNames = Array.from(list.el.querySelectorAll('.o_data_cell'), node => node.textContent);
+        assert.deepEqual(allNames, [
+            'Value 1',
+            'Value 2',
+            'USD',
+            'Value 2',
+            'Value 3',
+        ]);
+        list.destroy();
+    });
+
+    QUnit.test('multi edit reference field batched in grouped list', async function (assert) {
+        assert.expect(18);
+
+        this.data.foo.records= [
+            // group 1
+            {id: 1, foo: '1', reference: 'bar,1'},
+            {id: 2, foo: '1', reference: 'bar,2'},
+            //group 2
+            {id: 3, foo: '2', reference: 'res_currency,1'},
+            {id: 4, foo: '2', reference: 'bar,2'},
+            {id: 5, foo: '2', reference: 'bar,3'},
+        ];
+        // Field boolean_toggle just to simplify the test flow
+        let nameGetCount = 0;
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `<tree expand="1" editable="1">
+                       <field name="foo" invisible="1"/>
+                       <field name="bar" widget="boolean_toggle"/>
+                       <field name="reference"/>
+                   </tree>`,
+            groupBy: ['foo'],
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                if (args.method === 'write') {
+                    assert.deepEqual(args.args, [[1,2,3], {bar: true}]);
+                }
+                if (args.method === 'name_get') {
+                    if (nameGetCount === 2) {
+                        assert.strictEqual(args.model, 'bar');
+                        // not a list of ids because the read is on one record only
+                        assert.deepEqual(args.args[0], [1,2]);
+                    }
+                    if (nameGetCount === 3) {
+                        assert.strictEqual(args.model, 'res_currency');
+                        assert.deepEqual(args.args[0], [1]);
+                    }
+                    nameGetCount++;
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        assert.verifySteps([
+            'web_read_group',
+            'name_get',
+            'name_get',
+        ]);
+        await testUtils.dom.click(list.$('.o_data_row .o_list_record_selector input')[0]);
+        await testUtils.dom.click(list.$('.o_data_row .o_list_record_selector input')[1]);
+        await testUtils.dom.click(list.$('.o_data_row .o_list_record_selector input')[2]);
+        await testUtils.dom.click(list.$('.o_data_row .o_field_boolean')[0]);
+        assert.containsOnce(document.body, '.modal');
+        await testUtils.dom.click($('.modal .modal-footer .btn-primary'));
+        assert.containsNone(document.body, '.modal');
+        assert.verifySteps([
+            'write',
+            'read',
+            'name_get',
+            'name_get',
+        ]);
+        assert.containsN(list, '.o_group_header', 2);
+
+        const allNames = Array.from(list.el.querySelectorAll('.o_data_cell'))
+            .filter(node => !node.children.length).map(n=>n.textContent);
         assert.deepEqual(allNames, [
             'Value 1',
             'Value 2',
@@ -5170,6 +5279,38 @@ QUnit.module('Views', {
 
         assert.containsN(list, '.o_data_row', 4,
             "should not create a new row as we were in multi edition");
+
+        list.destroy();
+    });
+
+    QUnit.test('editable list view: m2m tags in grouped list', async function (assert) {
+        assert.expect(2);
+
+        const list = await createView({
+            arch: `
+                <tree editable="top">
+                    <field name="bar"/>
+                    <field name="m2m" widget="many2many_tags"/>
+                </tree>`,
+            data: this.data,
+            groupBy: ['bar'],
+            model: 'foo',
+            View: ListView,
+        });
+
+        // Opens first group
+        await testUtils.dom.click(list.$('.o_group_header:first'));
+
+        assert.notEqual(list.$('.o_data_row:first').text(), list.$('.o_data_row:last').text(),
+            "First row and last row should have different values");
+
+        await testUtils.dom.click(list.$('thead .o_list_record_selector:first input'));
+        await testUtils.dom.click(list.$('.o_data_row:first .o_data_cell:eq(1)'));
+        await testUtils.dom.click(list.$('.o_selected_row .o_field_many2manytags .o_delete:first'));
+        await testUtils.dom.click($('.modal .btn-primary'));
+
+        assert.strictEqual(list.$('.o_data_row:first').text(), list.$('.o_data_row:last').text(),
+            "All rows should have been correctly updated");
 
         list.destroy();
     });
