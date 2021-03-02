@@ -3,6 +3,7 @@ odoo.define('mail/static/src/models/messaging_notification_handler/messaging_not
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { one2one } = require('mail/static/src/model/model_field.js');
+const { decrement, increment } = require('mail/static/src/model/model_field_command.js');
 const { htmlToTextContentInline } = require('mail.utils');
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
@@ -15,8 +16,10 @@ function factory(dependencies) {
          * @override
          */
         _willDelete() {
-            this.env.services['bus_service'].off('notification');
-            this.env.services['bus_service'].stopPolling();
+            if (this.env.services['bus_service']) {
+                this.env.services['bus_service'].off('notification');
+                this.env.services['bus_service'].stopPolling();
+            }
             return super._willDelete(...arguments);
         }
 
@@ -86,9 +89,6 @@ function factory(dependencies) {
                             return;
                         }
                         return this._handleNotificationPartner(Object.assign({}, message));
-                    default:
-                        console.warn(`mail.messaging_notification_handler: Unhandled notification "${model}"`);
-                        return;
                 }
             });
             await this.async(() => Promise.all(proms));
@@ -218,7 +218,7 @@ function factory(dependencies) {
                     oldMessageWasModeratedByCurrentPartner
                 ) {
                     const moderation = this.env.messaging.moderation;
-                    moderation.update({ counter: moderation.counter - 1 });
+                    moderation.update({ counter: decrement() });
                 }
                 return;
             }
@@ -262,7 +262,7 @@ function factory(dependencies) {
                     channel.markAsFetched();
                 }
                 // (re)open chat on receiving new message
-                if (channel.channel_type !== 'channel') {
+                if (channel.channel_type !== 'channel' && !this.env.messaging.device.isMobile) {
                     this.env.messaging.chatWindowManager.openThread(channel);
                 }
             }
@@ -378,15 +378,10 @@ function factory(dependencies) {
             const message = this.env.models['mail.message'].insert(
                 this.env.models['mail.message'].convertData(data)
             );
-            const inboxMailbox = this.env.messaging.inbox;
-            inboxMailbox.update({ counter: inboxMailbox.counter + 1 });
-            for (const thread of message.threads) {
-                if (
-                    thread.channel_type === 'channel' &&
-                    message.isNeedaction
-                ) {
-                    thread.update({ message_needaction_counter: thread.message_needaction_counter + 1 });
-                }
+            this.env.messaging.inbox.update({ counter: increment() });
+            const originThread = message.originThread;
+            if (originThread && message.isNeedaction) {
+                originThread.update({ message_needaction_counter: increment() });
             }
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
@@ -511,7 +506,7 @@ function factory(dependencies) {
                         message.moderation_status === 'pending_moderation' &&
                         message.originThread.isModeratedByCurrentPartner
                     ) {
-                        moderationMailbox.update({ counter: moderationMailbox.counter - 1 });
+                        moderationMailbox.update({ counter: decrement() });
                     }
                     message.delete();
                 }
@@ -547,11 +542,9 @@ function factory(dependencies) {
          * @param {Object} param0
          * @param {integer[]} [param0.channel_ids
          * @param {integer[]} [param0.message_ids=[]]
+         * @param {integer} [param0.needaction_inbox_counter]
          */
-        _handleNotificationPartnerMarkAsRead({ channel_ids, message_ids = [] }) {
-            const inboxMailbox = this.env.messaging.inbox;
-
-            // 1. move messages from inbox to history
+        _handleNotificationPartnerMarkAsRead({ channel_ids, message_ids = [], needaction_inbox_counter }) {
             for (const message_id of message_ids) {
                 // We need to ignore all not yet known messages because we don't want them
                 // to be shown partially as they would be linked directly to mainCache
@@ -559,34 +552,33 @@ function factory(dependencies) {
                 // but something like last read message_id or something like that.
                 // (just imagine you mark 1000 messages as read ... )
                 const message = this.env.models['mail.message'].findFromIdentifyingData({ id: message_id });
-                if (message) {
-                    message.update({
-                        isNeedaction: false,
-                        isHistory: true,
-                    });
+                if (!message) {
+                    continue;
                 }
+                // update thread counter
+                const originThread = message.originThread;
+                if (originThread && message.isNeedaction) {
+                    originThread.update({ message_needaction_counter: decrement() });
+                }
+                // move messages from Inbox to history
+                message.update({
+                    isHistory: true,
+                    isNeedaction: false,
+                });
             }
-
-            // 2. remove "needaction" from channels
-            let channels;
-            if (channel_ids) {
-                channels = channel_ids
-                    .map(id => this.env.models['mail.thread'].findFromIdentifyingData({
-                        id,
-                        model: 'mail.channel',
-                    }))
-                    .filter(thread => !!thread);
+            const inbox = this.env.messaging.inbox;
+            if (needaction_inbox_counter !== undefined) {
+                inbox.update({ counter: needaction_inbox_counter });
             } else {
-                // flux specific: channel_ids unset means "mark all as read"
-                channels = this.env.models['mail.thread'].all(thread =>
-                    thread.model === 'mail.channel'
-                );
+                // kept for compatibility in stable
+                inbox.update({ counter: decrement(message_ids.length) });
             }
-            for (const channel of channels) {
-                channel.update({ message_needaction_counter: 0 });
+            if (inbox.counter > inbox.mainCache.fetchedMessages.length) {
+                // Force refresh Inbox because depending on what was marked as
+                // read the cache might become empty even though there are more
+                // messages on the server.
+                inbox.mainCache.update({ hasToLoadMessages: true });
             }
-            inboxMailbox.update({ counter: inboxMailbox.counter - message_ids.length });
-
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
         }
@@ -602,7 +594,7 @@ function factory(dependencies) {
             );
             const moderationMailbox = this.env.messaging.moderation;
             if (moderationMailbox) {
-                moderationMailbox.update({ counter: moderationMailbox.counter + 1 });
+                moderationMailbox.update({ counter: increment() });
             }
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
@@ -625,9 +617,7 @@ function factory(dependencies) {
                 }
                 message.update({ isStarred: starred });
                 starredMailbox.update({
-                    counter: starred
-                        ? starredMailbox.counter + 1
-                        : starredMailbox.counter - 1,
+                    counter: starred ? increment() : decrement(),
                 });
             }
         }
@@ -706,7 +696,7 @@ function factory(dependencies) {
             const chat = await this.async(() =>
                 this.env.messaging.getChat({ partnerId: partner_id }
             ));
-            if (!chat) {
+            if (!chat || this.env.messaging.device.isMobile) {
                 return;
             }
             this.env.messaging.chatWindowManager.openThread(chat);
@@ -747,7 +737,7 @@ function factory(dependencies) {
             }
             const notificationContent = htmlToTextContentInline(message.body).substr(0, PREVIEW_MSG_MAX_SIZE);
             this.env.services['bus_service'].sendNotification(notificationTitle, notificationContent);
-            messaging.update({ outOfFocusUnreadMessageCounter: messaging.outOfFocusUnreadMessageCounter + 1 });
+            messaging.update({ outOfFocusUnreadMessageCounter: increment() });
             const titlePattern = messaging.outOfFocusUnreadMessageCounter === 1
                 ? this.env._t("%d Message")
                 : this.env._t("%d Messages");
