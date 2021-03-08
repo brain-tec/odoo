@@ -13,7 +13,7 @@ from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
 from odoo.tools.translate import _
-from odoo.tools import date_utils, email_re, email_split
+from odoo.tools import date_utils, email_re, email_split, is_html_empty
 
 from . import crm_stage
 
@@ -567,9 +567,13 @@ class Lead(models.Model):
         return {'contact_name': contact_name or self.contact_name}
 
     def _prepare_partner_name_from_partner(self, partner):
+        """ Company name: name of partner parent (if set) or name of partner
+        (if company) or company_name of partner (if not a company). """
         partner_name = partner.parent_id.name
         if not partner_name and partner.is_company:
             partner_name = partner.name
+        elif not partner_name and partner.company_name:
+            partner_name = partner.company_name
         return {'partner_name': partner_name or self.partner_name}
 
     # ------------------------------------------------------------
@@ -781,10 +785,12 @@ class Lead(models.Model):
         stage_ids = stages._search(search_domain, order=order, access_rights_uid=SUPERUSER_ID)
         return stages.browse(stage_ids)
 
-    def _stage_find(self, team_id=False, domain=None, order='sequence'):
+    def _stage_find(self, team_id=False, domain=None, order='sequence', limit=1):
         """ Determine the stage of the current lead with its teams, the given domain and the given team_id
             :param team_id
             :param domain : base search domain for stage
+            :param order : base search order for stage
+            :param limit : base search limit for stage
             :returns crm.stage recordset
         """
         # collect all team_ids by adding given one, and the ones related to the current leads
@@ -803,7 +809,7 @@ class Lead(models.Model):
         if domain:
             search_domain += list(domain)
         # perform search, return the first found
-        return self.env['crm.stage'].search(search_domain, order=order, limit=1)
+        return self.env['crm.stage'].search(search_domain, order=order, limit=limit)
 
     # ------------------------------------------------------------
     # ACTIONS
@@ -835,7 +841,18 @@ class Lead(models.Model):
         # group the leads by team_id, in order to write once by values couple (each write leads to frequency increment)
         leads_by_won_stage = {}
         for lead in self:
-            stage_id = lead._stage_find(domain=[('is_won', '=', True)])
+            won_stages = self._stage_find(domain=[('is_won', '=', True)], limit=None)
+            # ABD : We could have a mixed pipeline, with "won" stages being separated by "standard"
+            # stages. In the future, we may want to prevent any "standard" stage to have a higher
+            # sequence than any "won" stage. But while this is not the case, searching
+            # for the "won" stage while alterning the sequence order (see below) will correctly
+            # handle such a case :
+            #       stage sequence : [x] [x (won)] [y] [y (won)] [z] [z (won)]
+            #       when in stage [y] and marked as "won", should go to the stage [y (won)],
+            #       not in [x (won)] nor [z (won)]
+            stage_id = next((stage for stage in won_stages if stage.sequence > lead.stage_id.sequence), None)
+            if not stage_id:
+                stage_id = next((stage for stage in reversed(won_stages) if stage.sequence <= lead.stage_id.sequence), won_stages)
             if stage_id in leads_by_won_stage:
                 leads_by_won_stage[stage_id] |= lead
             else:
@@ -942,6 +959,14 @@ class Lead(models.Model):
         }
         return action
 
+    def action_reschedule_meeting(self):
+        self.ensure_one()
+        action = self.action_schedule_meeting()
+        next_activity = self.activity_ids.filtered(lambda activity: activity.user_id == self.env.user)[:1]
+        if next_activity.calendar_event_id:
+            action['context']['initial_date'] = next_activity.calendar_event_id.start
+        return action
+
     def action_snooze(self):
         self.ensure_one()
         today = date.today()
@@ -975,6 +1000,13 @@ class Lead(models.Model):
 
     @api.model
     def get_empty_list_help(self, help):
+        """ This method returns the action helpers for the leads. If help is already provided
+            on the action, the same is returned. Otherwise, we build the help message which
+            contains the alias responsible for creating the lead (if available) and return it.
+        """
+        if not is_html_empty(help):
+            return help
+
         help_title, sub_title = "", ""
         if self._context.get('default_type') == 'lead':
             help_title = _('Create a new lead')

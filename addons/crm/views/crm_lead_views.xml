@@ -428,6 +428,8 @@
                             'default_company_name': type == 'opportunity' and partner_name,
                             'default_phone': phone,
                             'default_email': email_from,
+                            'default_user_id': user_id,
+                            'default_team_id': team_id,
                             'show_vat': True}"/>
                         <field name="name" placeholder="e.g. Product Pricing" />
                         <field name="email_from" string="Email" />
@@ -676,10 +678,11 @@
                     <field name="user_id" widget="many2one_avatar_user" optional="show"
                         domain="[('share', '=', False)]"/>
                     <field name="team_id" optional="hide"/>
-                    <field name="priority" optional="hide"/>
+                    <field name="priority" optional="hide" widget="priority"/>
                     <field name="activity_ids" widget="list_activity"/>
                     <field name="activity_user_id" optional="hide" string="Activity by" widget="many2one_avatar_user"/>
                     <field name="activity_date_deadline_my" string="My Deadline" widget="remaining_days" options="{'allow_order': '1'}"/>
+                    <field name="activity_calendar_event_id" invisible="1"/>
                     <field name="campaign_id" optional="hide"/>
                     <field name="medium_id" optional="hide"/>
                     <field name="source_id" optional="hide"/>
@@ -694,9 +697,13 @@
                     <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="referred" invisible="1"/>
                     <field name="message_needaction" invisible="1"/>
-                    <button name="action_snooze" class="text-warning" type="object" string="Snooze 7d" icon="fa-bell-slash"
-                        attrs="{'invisible': [('activity_date_deadline_my', '=', False)]}"/>
                     <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="fa-envelope"/>
+                    <button name="action_reschedule_meeting" class="text-warning" type="object" string="Reschedule"
+                        icon="fa-calendar" attrs="{'invisible': ['|', ('activity_date_deadline_my', '=', False),
+                        ('activity_calendar_event_id', '=', False)]}"/>
+                    <button name="action_snooze" class="text-warning" type="object" string="Snooze 7d"
+                        icon="fa-bell-slash" attrs="{'invisible': ['|', ('activity_date_deadline_my', '=', False),
+                        ('activity_calendar_event_id', '!=', False)]}"/>
                 </tree>
             </field>
         </record>
@@ -880,6 +887,13 @@ if record:
                     'search_default_to_process':1,
                 }
             </field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a Lead
+                </p><p>
+                    Leads are the qualification step before the creation of an opportunity.
+                </p>
+            </field>
         </record>
 
         <record id="crm_lead_all_leads_view_tree" model="ir.actions.act_window.view">
@@ -931,6 +945,13 @@ if record:
             <field name="search_view_id" ref="crm.view_crm_case_my_activities_filter"/>
             <field name="context">{'default_type': 'opportunity',
                     'search_default_assigned_to_me': 1}
+            </field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Looks like nothing is planned.
+                </p><p>
+                    Schedule activities to keep track of everything you have to do.
+                </p>
             </field>
         </record>
 

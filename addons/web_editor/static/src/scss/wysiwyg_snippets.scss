@@ -1174,6 +1174,51 @@ body.editor_enable.editor_has_snippets {
             }
         }
 
+        // Lists
+        we-list {
+            > div {
+                flex-flow: row wrap;
+            }
+            .o_we_table_wrapper {
+                width: 100%;
+                max-height: 200px;
+                overflow-y: auto;
+                margin-bottom: $o-we-sidebar-content-field-spacing / 2;
+
+                table {
+                    table-layout: auto;
+                    width: 100%;
+
+                    input {
+                        width: 100%;
+                        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+                        border-radius: $o-we-sidebar-content-field-border-radius;
+                        padding: 0 $o-we-sidebar-content-field-clickable-spacing;
+                        background-color: $o-we-sidebar-content-field-input-bg;
+                        color: inherit;
+                        font-family: $o-we-sidebar-content-field-input-font-family;
+                    }
+                    tr {
+                        border: none;
+                    }
+                    td {
+                        padding-bottom: $o-we-sidebar-content-field-spacing / 2;
+
+                        &:first-child, &:last-child {
+                            width: 1px;
+                        }
+
+                        we-button.o_we_checkbox_wrapper {
+                            margin: 0 0 0 0.3em;
+                        }
+                    }
+                }
+            }
+            .o_we_user_value_widget {
+                flex: 1 1 auto;
+            }
+        }
+
         // Multi widgets
         we-multi.o_we_user_value_widget {
             margin-top: 0;
@@ -1357,6 +1402,10 @@ body.editor_enable.editor_has_snippets {
             margin-left: $o-we-sidebar-content-field-label-spacing * 2;
         }
 
+        .o_we_external_warning {
+            margin-top: $o-we-sidebar-content-field-spacing;
+        }
+
         .o_we_tag {
             padding: ($o-we-sidebar-content-field-label-spacing / 2) $o-we-sidebar-content-field-label-spacing;
             border-radius: 5px;
@@ -1472,6 +1521,21 @@ body.editor_enable.editor_has_snippets {
         @extend %we-generic-button;
     }
     .o_colorpicker_sections {
+        .o_colorpicker_widget {
+            .o_hex_div, .o_rgba_div  {
+                &:focus-within {
+                    border-color: $o-we-sidebar-content-field-input-border-color;
+                }
+            }
+            .o_color_picker_inputs {
+                input {
+                    border: none;
+                    &:focus {
+                        outline: none;
+                    }
+                }
+            }
+        }   
 
         .o_we_color_btn, .o_we_color_combination_btn {
             float: left;

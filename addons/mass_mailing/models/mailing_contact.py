@@ -31,13 +31,17 @@ class MassMailingContactListRel(models.Model):
     def create(self, vals_list):
         now = fields.Datetime.now()
         for vals in vals_list:
-            if 'opt_out' in vals:
+            if 'opt_out' in vals and 'unsubscription_date' not in vals:
                 vals['unsubscription_date'] = now if vals['opt_out'] else False
+            if vals.get('unsubscription_date'):
+                vals['opt_out'] = True
         return super().create(vals_list)
 
     def write(self, vals):
-        if 'opt_out' in vals:
+        if 'opt_out' in vals and 'unsubscription_date' not in vals:
             vals['unsubscription_date'] = fields.Datetime.now() if vals['opt_out'] else False
+        if vals.get('unsubscription_date'):
+            vals['opt_out'] = True
         return super(MassMailingContactListRel, self).write(vals)
 
 
@@ -141,6 +145,15 @@ class MassMailingContact(models.Model):
                 vals['subscription_list_ids'] = subscription_ids
 
         return super(MassMailingContact, self.with_context(default_list_ids=False)).create(vals_list)
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        """ Cleans the default_list_ids while duplicating mailing contact in context of
+        a mailing list because we already have subscription lists copied over for newly
+        created contact, no need to add the ones from default_list_ids again """
+        if self.env.context.get('default_list_ids'):
+            self = self.with_context(default_list_ids=False)
+        return super().copy(default)
 
     @api.model
     def name_create(self, name):

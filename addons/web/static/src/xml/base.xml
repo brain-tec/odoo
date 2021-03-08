@@ -631,12 +631,13 @@
 </t>
 
 <t t-name="web.ViewSwitcherButton" owl="1">
+    <t t-set="buttonLabel">View %s</t>
     <button type="button"
         t-att-accesskey="view.accessKey"
         t-attf-class="btn btn-secondary fa fa-lg o_switch_view o_{{ view.type }} {{ view.icon }}"
         t-att-class="{ active: env.view.type === view.type }"
-        t-attf-aria-label="View {{ view.type }}"
-        t-attf-title="View {{ view.type }}"
+        t-att-aria-label="sprintf(buttonLabel.toString(), view.type)"
+        t-att-title="sprintf(buttonLabel.toString(), view.type)"
         data-toggle="tooltip"
         tabindex="-1"
         t-on-click="trigger('switch-view', { view_type: view.type })"
@@ -1733,11 +1734,11 @@
             </span>
         </a>
         <div class="dropdown-menu dropdown-menu-right" role="menu">
-            <t t-foreach="widget.user_companies" t-as="company">
-                <div class="dropdown-item d-flex py-0 px-0" data-menu="company" t-att-data-company-id="company[0]">
-                    <t t-set="is_allowed" t-value="widget.allowed_company_ids.includes(company[0])"/>
-                    <t t-set="is_current" t-value="company[0] === widget.current_company"/>
-                    <div role="menuitemcheckbox" t-att-aria-checked="is_allowed" t-att-aria-label="company[1]" tabindex="0" class="ml-auto pl-3 pr-3 border border-top-0 border-left-0 border-bottom-0 toggle_company o_py">
+            <t t-foreach="_.values(widget.user_companies)" t-as="company">
+                <div class="dropdown-item d-flex py-0 px-0" data-menu="company" t-att-data-company-id="company.id">
+                    <t t-set="is_allowed" t-value="widget.allowed_company_ids.includes(company.id)"/>
+                    <t t-set="is_current" t-value="company.id === widget.current_company"/>
+                    <div role="menuitemcheckbox" t-att-aria-checked="is_allowed" t-att-aria-label="company.name" tabindex="0" class="ml-auto pl-3 pr-3 border border-top-0 border-left-0 border-bottom-0 toggle_company o_py">
                         <span style="height: 2rem;">
                             <t t-if="is_allowed">
                                 <i class="fa fa-fw fa-check-square pt-2"></i>
@@ -1750,12 +1751,12 @@
                     <div role="button" t-att-aria-pressed="is_current" aria-label="Switch to this company" tabindex="0" class="d-flex flex-grow-1 align-items-center py-0 log_into pl-3 o_py" t-att-style="is_current ? 'background-color: lightgrey;' : ''">
                         <t t-if="is_allowed">
                             <span class='mr-3 company_label'>
-                                <t t-esc="company[1]"/>
+                                <t t-esc="company.name"/>
                             </span>
                         </t>
                         <t t-if="!is_allowed">
                             <span class='mr-3 company_label text-muted'>
-                                <t t-esc="company[1]"/>
+                                <t t-esc="company.name"/>
                             </span>
                         </t>
                     </div>
