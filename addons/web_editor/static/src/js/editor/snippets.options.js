@@ -1469,15 +1469,14 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
      */
     async start() {
         await this._super(...arguments);
-        const iconEl = document.createElement('i');
         if (this.options.dataAttributes.buttonStyle) {
+            const iconEl = document.createElement('i');
             iconEl.classList.add('fa', 'fa-fw', 'fa-camera');
+            $(this.containerEl).prepend(iconEl);
         } else {
-            iconEl.classList.add('fa', 'fa-fw', 'fa-refresh', 'mr-1');
-            this.el.classList.add('o_we_no_toggle');
+            this.el.classList.add('o_we_no_toggle', 'o_we_bg_success');
             this.containerEl.textContent = _t("Replace");
         }
-        $(this.containerEl).prepend(iconEl);
     },
 
     //--------------------------------------------------------------------------
@@ -2013,9 +2012,7 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
             [min, max] = [max, min];
             this.input.classList.add('o_we_inverted_range');
         }
-        this.input.setAttribute('min', min);
-        this.input.setAttribute('max', max);
-        this.input.setAttribute('step', step);
+        this._setInputAttributes(min, max, step);
         this.containerEl.appendChild(this.input);
     },
 
@@ -2026,9 +2023,31 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     /**
      * @override
      */
+    loadMethodsData(validMethodNames) {
+        this._super(...arguments);
+        for (const methodName of this._methodsNames) {
+            const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+            if (possibleValues.length > 1) {
+                this._setInputAttributes(0, possibleValues.length - 1, 1);
+                break;
+            }
+        }
+    },
+    /**
+     * @override
+     */
     async setValue(value, methodName) {
         await this._super(...arguments);
-        this.input.value = this._value;
+        const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+        this.input.value = possibleValues.length > 1 ? possibleValues.indexOf(value) : this._value;
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        const value = this._super(...arguments);
+        const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+        return possibleValues.length > 1 ? possibleValues[+value] : value;
     },
 
     //--------------------------------------------------------------------------
@@ -2041,6 +2060,14 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     _onInputChange(ev) {
         this._value = ev.target.value;
         this._onUserValueChange(ev);
+    },
+    /**
+     * @private
+     */
+    _setInputAttributes(min, max, step) {
+        this.input.setAttribute('min', min);
+        this.input.setAttribute('max', max);
+        this.input.setAttribute('step', step);
     },
 });
 
