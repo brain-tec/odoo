@@ -6,6 +6,7 @@ const { attr, many2many, many2one, one2many, one2one } = require('mail/static/sr
 const { clear } = require('mail/static/src/model/model_field_command.js');
 const throttle = require('mail/static/src/utils/throttle/throttle.js');
 const Timer = require('mail/static/src/utils/timer/timer.js');
+const { cleanSearchTerm } = require('mail/static/src/utils/utils.js');
 const mailUtils = require('mail.utils');
 
 function factory(dependencies) {
@@ -139,9 +140,7 @@ function factory(dependencies) {
          * @return {Object}
          */
         static convertData(data) {
-            const data2 = {
-                messagesAsServerChannel: [],
-            };
+            const data2 = {};
             if ('model' in data) {
                 data2.model = data.model;
             }
@@ -171,12 +170,20 @@ function factory(dependencies) {
                 data2.isServerPinned = data.is_pinned;
             }
             if ('last_message' in data && data.last_message) {
-                data2.messagesAsServerChannel.push(['insert', { id: data.last_message.id }]);
-                data2.serverLastMessageId = data.last_message.id;
+                const messageData = this.env.models['mail.message'].convertData({
+                    id: data.last_message.id,
+                    model: data2.model,
+                    res_id: data2.id,
+                });
+                data2.serverLastMessage = [['insert', messageData]];
             }
             if ('last_message_id' in data && data.last_message_id) {
-                data2.messagesAsServerChannel.push(['insert', { id: data.last_message_id }]);
-                data2.serverLastMessageId = data.last_message_id;
+                const messageData = this.env.models['mail.message'].convertData({
+                    id: data.last_message_id,
+                    model: data2.model,
+                    res_id: data2.id,
+                });
+                data2.serverLastMessage = [['insert', messageData]];
             }
             if ('mass_mailing' in data) {
                 data2.mass_mailing = data.mass_mailing;
@@ -271,6 +278,82 @@ function factory(dependencies) {
             }
 
             return data2;
+        }
+
+        /**
+         * Fetches threads matching the given composer search state to extend
+         * the JS knowledge and to update the suggestion list accordingly.
+         * More specifically only thread of model 'mail.channel' are fetched.
+         *
+         * @static
+         * @param {string} searchTerm
+         * @param {Object} [options={}]
+         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         *  result in the context of given thread
+         */
+        static async fetchSuggestions(searchTerm, { thread } = {}) {
+            const channelsData = await this.env.services.rpc(
+                {
+                    model: 'mail.channel',
+                    method: 'get_mention_suggestions',
+                    kwargs: { search: searchTerm },
+                },
+                { shadow: true },
+            );
+            this.env.models['mail.thread'].insert(channelsData.map(channelData =>
+                Object.assign(
+                    { model: 'mail.channel' },
+                    this.env.models['mail.thread'].convertData(channelData),
+                )
+            ));
+        }
+
+        /**
+         * Returns a sort function to determine the order of display of threads
+         * in the suggestion list.
+         *
+         * @static
+         * @param {string} searchTerm
+         * @param {Object} [options={}]
+         * @param {mail.thread} [options.thread] prioritize result in the
+         *  context of given thread
+         * @returns {function}
+         */
+        static getSuggestionSortFunction(searchTerm, { thread } = {}) {
+            const cleanedSearchTerm = cleanSearchTerm(searchTerm);
+            return (a, b) => {
+                const isAPublic = a.model === 'mail.channel' && a.public === 'public';
+                const isBPublic = b.model === 'mail.channel' && b.public === 'public';
+                if (isAPublic && !isBPublic) {
+                    return -1;
+                }
+                if (!isAPublic && isBPublic) {
+                    return 1;
+                }
+                const isMemberOfA = a.model === 'mail.channel' && a.members.includes(this.env.messaging.currentPartner);
+                const isMemberOfB = b.model === 'mail.channel' && b.members.includes(this.env.messaging.currentPartner);
+                if (isMemberOfA && !isMemberOfB) {
+                    return -1;
+                }
+                if (!isMemberOfA && isMemberOfB) {
+                    return 1;
+                }
+                const cleanedAName = cleanSearchTerm(a.name || '');
+                const cleanedBName = cleanSearchTerm(b.name || '');
+                if (cleanedAName.startsWith(cleanedSearchTerm) && !cleanedBName.startsWith(cleanedSearchTerm)) {
+                    return -1;
+                }
+                if (!cleanedAName.startsWith(cleanedSearchTerm) && cleanedBName.startsWith(cleanedSearchTerm)) {
+                    return 1;
+                }
+                if (cleanedAName < cleanedBName) {
+                    return -1;
+                }
+                if (cleanedAName > cleanedBName) {
+                    return 1;
+                }
+                return a.id - b.id;
+            };
         }
 
         /**
@@ -542,6 +625,41 @@ function factory(dependencies) {
             }
         }
 
+        /*
+         * Returns threads that match the given search term. More specially only
+         * threads of model 'mail.channel' are suggested, and if the context
+         * thread is a private channel, only itself is returned if it matches
+         * the search term.
+         *
+         * @static
+         * @param {string} searchTerm
+         * @param {Object} [options={}]
+         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         *  result in the context of given thread
+         * @returns {[mail.threads[], mail.threads[]]}
+         */
+        static searchSuggestions(searchTerm, { thread } = {}) {
+            let threads;
+            if (thread && thread.model === 'mail.channel' && thread.public !== 'public') {
+                // Only return the current channel when in the context of a
+                // non-public channel. Indeed, the message with the mention
+                // would appear in the target channel, so this prevents from
+                // inadvertently leaking the private message into the mentioned
+                // channel.
+                threads = [thread];
+            } else {
+                threads = this.env.models['mail.thread'].all();
+            }
+            const cleanedSearchTerm = cleanSearchTerm(searchTerm);
+            return [threads.filter(thread =>
+                !thread.isTemporary &&
+                thread.model === 'mail.channel' &&
+                thread.channel_type === 'channel' &&
+                thread.name &&
+                cleanSearchTerm(thread.name).includes(cleanedSearchTerm)
+            )];
+        }
+
         /**
          * @param {string} [stringifiedDomain='[]']
          * @returns {mail.thread_cache}
@@ -605,6 +723,15 @@ function factory(dependencies) {
             }));
             this.refreshFollowers();
             this.fetchAndUpdateSuggestedRecipients();
+        }
+
+        /**
+         * Returns the text that identifies this thread in a mention.
+         *
+         * @returns {string}
+         */
+        getMentionText() {
+            return this.name;
         }
 
         /**
@@ -752,17 +879,10 @@ function factory(dependencies) {
         }
 
         /**
-         * Open a dialog to add channels as followers.
-         */
-        promptAddChannelFollower() {
-            this._promptAddFollower({ mail_invite_follower_channel_only: true });
-        }
-
-        /**
          * Open a dialog to add partners as followers.
          */
         promptAddPartnerFollower() {
-            this._promptAddFollower({ mail_invite_follower_channel_only: false });
+            this._promptAddFollower();
         }
 
         async refresh() {
@@ -1254,7 +1374,7 @@ function factory(dependencies) {
             // By default trust the server up to the last message it used
             // because it's not possible to do better.
             let baseCounter = this.serverMessageUnreadCounter;
-            let countFromId = this.serverLastMessageId;
+            let countFromId = this.serverLastMessage ? this.serverLastMessage.id : 0;
             // But if the client knows the last seen message that the server
             // returned (and by assumption all the messages that come after),
             // the counter can be computed fully locally, ignoring potentially
@@ -1530,10 +1650,8 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @param {Object} [param0={}]
-         * @param {boolean} [param0.mail_invite_follower_channel_only=false]
          */
-        _promptAddFollower({ mail_invite_follower_channel_only = false } = {}) {
+        _promptAddFollower() {
             const action = {
                 type: 'ir.actions.act_window',
                 res_model: 'mail.wizard.invite',
@@ -1544,7 +1662,6 @@ function factory(dependencies) {
                 context: {
                     default_res_model: this.model,
                     default_res_id: this.id,
-                    mail_invite_follower_channel_only,
                 },
             };
             this.env.bus.trigger('do-action', {
@@ -1853,7 +1970,7 @@ function factory(dependencies) {
                 'lastSeenByCurrentPartnerMessageId',
                 'messagingCurrentPartner',
                 'orderedMessages',
-                'serverLastMessageId',
+                'serverLastMessage',
                 'serverMessageUnreadCounter',
             ],
         }),
@@ -1902,13 +2019,6 @@ function factory(dependencies) {
          */
         messagesAsOriginThreadIsNeedaction: attr({
             related: 'messagesAsOriginThread.isNeedaction',
-        }),
-        /**
-         * All messages that are contained on this channel on the server.
-         * Equivalent to the inverse of python field `channel_ids`.
-         */
-        messagesAsServerChannel: many2many('mail.message', {
-            inverse: 'serverChannels',
         }),
         /**
          * Contains the message fetched/seen indicators for all messages of this thread.
@@ -2087,15 +2197,13 @@ function factory(dependencies) {
             default: 'closed',
         }),
         /**
-         * Last message id considered by the server.
+         * Last message considered by the server.
          *
          * Useful to compute localMessageUnreadCounter field.
          *
          * @see localMessageUnreadCounter
          */
-        serverLastMessageId: attr({
-            default: 0,
-        }),
+        serverLastMessage: many2one('mail.message'),
         /**
          * Message unread counter coming from server.
          *

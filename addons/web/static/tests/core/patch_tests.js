@@ -1,7 +1,7 @@
 odoo.define("web.patch_tests", function (require) {
 "use strict";
 
-const { patch, unpatch } = require('web.utils');
+const { AlreadyDefinedPatchError, patch, unpatch, UnknownPatchError } = require('web.utils');
 
 function makeBaseClass(assert, assertInSetup) {
     class BaseClass {
@@ -122,7 +122,7 @@ QUnit.module('core', {}, function () {
             // keys should be unique
             assert.throws(() => {
                 patch(A.prototype, 'patch');
-            });
+            }, AlreadyDefinedPatchError);
         });
 
         QUnit.test('unpatch', async function (assert) {
@@ -278,6 +278,15 @@ QUnit.module('core', {}, function () {
             ]);
         });
 
+        QUnit.test('unpatch a class that has not been patched', async function (assert) {
+            assert.expect(1);
+
+            const A = class {};
+            assert.throws(() => {
+                unpatch(A.prototype, 'patch');
+            }, UnknownPatchError);
+        });
+
         QUnit.test('unpatch twice the same patch name', async function (assert) {
             assert.expect(1);
 
@@ -287,7 +296,53 @@ QUnit.module('core', {}, function () {
             unpatch(A.prototype, 'patch');
             assert.throws(() => {
                 unpatch(A.prototype, 'patch');
+            }, UnknownPatchError);
+        });
+
+        QUnit.test('unpatch and re-patch', async function (assert) {
+            assert.expect(13);
+
+            const BaseClass = makeBaseClass(assert);
+
+            patch(BaseClass.prototype, 'patch', {
+                setup() {
+                    this._super();
+                    assert.step('patch.setup');
+                },
+                fn() {
+                    this._super();
+                    assert.step('patch.fn');
+                },
             });
+
+            (new BaseClass()).fn();
+
+            assert.verifySteps([
+                'base.setup',
+                'patch.setup',
+                'base.fn',
+                'patch.fn',
+            ]);
+
+            const p = unpatch(BaseClass.prototype, 'patch');
+
+            (new BaseClass()).fn();
+
+            assert.verifySteps([
+                'base.setup',
+                'base.fn',
+            ]);
+
+            patch(BaseClass.prototype, 'patch', p);
+
+            (new BaseClass()).fn();
+
+            assert.verifySteps([
+                'base.setup',
+                'patch.setup',
+                'base.fn',
+                'patch.fn',
+            ]);
         });
 
         QUnit.test('patch for specialization', async function (assert) {

@@ -558,6 +558,8 @@ class HolidaysRequest(models.Model):
 
     @api.constrains('date_from', 'date_to', 'employee_id')
     def _check_date(self):
+        if self.env.context.get('leave_skip_date_check', False):
+            return
         for holiday in self.filtered('employee_id'):
             domain = [
                 ('date_from', '<', holiday.date_to),
@@ -830,6 +832,9 @@ class HolidaysRequest(models.Model):
         else:
             for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
                 raise UserError(error_message % (state_description_values.get(holiday.state),))
+
+    def unlink(self):
+        return super(HolidaysRequest, self.with_context(leave_skip_date_check=True)).unlink()
 
     def copy_data(self, default=None):
         if default and 'date_from' in default and 'date_to' in default:
@@ -1235,13 +1240,13 @@ class HolidaysRequest(models.Model):
 
         return [new_group] + groups
 
-    def message_subscribe(self, partner_ids=None, channel_ids=None, subtype_ids=None):
+    def message_subscribe(self, partner_ids=None, subtype_ids=None):
         # due to record rule can not allow to add follower and mention on validated leave so subscribe through sudo
         if self.state in ['validate', 'validate1']:
             self.check_access_rights('read')
             self.check_access_rule('read')
-            return super(HolidaysRequest, self.sudo()).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
-        return super(HolidaysRequest, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
+            return super(HolidaysRequest, self.sudo()).message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
+        return super(HolidaysRequest, self).message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
 
     @api.model
     def get_unusual_days(self, date_from, date_to=None):

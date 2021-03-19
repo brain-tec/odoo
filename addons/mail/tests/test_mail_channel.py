@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.exceptions import AccessError, ValidationError, UserError
@@ -9,6 +10,7 @@ from odoo.tests.common import users
 from odoo.tools import mute_logger, formataddr
 
 
+@tagged('mail_channel')
 class TestChannelAccessRights(MailCommon):
 
     @classmethod
@@ -92,7 +94,6 @@ class TestChannelAccessRights(MailCommon):
         with self.assertRaises(AccessError):
             self.env['mail.channel'].browse(self.group_private.id).unlink()
 
-
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models')
     @users('user_portal')
     def test_access_portal(self):
@@ -140,6 +141,7 @@ class TestChannelAccessRights(MailCommon):
             })
 
 
+@tagged('mail_channel')
 class TestChannelInternals(MailCommon):
 
     @classmethod
@@ -180,22 +182,18 @@ class TestChannelInternals(MailCommon):
     @users('employee')
     def test_channel_members(self):
         channel = self.env['mail.channel'].browse(self.test_channel.ids)
-        self.assertEqual(channel.message_channel_ids, channel)
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
         channel._action_add_members(self.test_partner)
-        self.assertEqual(channel.message_channel_ids, channel)
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.test_partner)
 
         channel._action_remove_members(self.test_partner)
-        self.assertEqual(channel.message_channel_ids, channel)
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
         channel.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
-        self.assertEqual(channel.message_channel_ids, channel)
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
@@ -208,7 +206,8 @@ class TestChannelInternals(MailCommon):
         with self.mock_mail_gateway():
             new_msg = channel.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertNotSentEmail()
-        self.assertEqual(new_msg.channel_ids, channel)
+        self.assertEqual(new_msg.model, self.test_channel._name)
+        self.assertEqual(new_msg.res_id, self.test_channel.id)
         self.assertEqual(new_msg.partner_ids, self.env['res.partner'])
         self.assertEqual(new_msg.notified_partner_ids, self.env['res.partner'])
 
@@ -225,7 +224,8 @@ class TestChannelInternals(MailCommon):
                 channel = self.env['mail.channel'].browse(self.test_channel.ids)
                 new_msg = channel.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertNotSentEmail()
-        self.assertEqual(new_msg.channel_ids, self.test_channel)
+        self.assertEqual(new_msg.model, self.test_channel._name)
+        self.assertEqual(new_msg.res_id, self.test_channel.id)
         self.assertEqual(new_msg.partner_ids, self.env['res.partner'])
         self.assertEqual(new_msg.notified_partner_ids, self.env['res.partner'])
 
@@ -245,6 +245,7 @@ class TestChannelInternals(MailCommon):
 
         # test mailing with with inbox notification type
         self.user_admin.write({'notification_type': 'inbox'})
+        self.user_admin.flush()
         with self.mock_mail_gateway():
             with self.with_user('employee'):
                 channel = self.env['mail.channel'].browse(self.test_channel.ids)
@@ -252,12 +253,13 @@ class TestChannelInternals(MailCommon):
         self.assertSentEmail(self.partner_employee, [self.test_partner])
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
-    def test_channel_recipients_noalias(self):
-        """ Posting a message on a classic channel should work like classic post """
+    def test_channel_recipients_mention(self):
+        """ Posting a message on a classic channel should support mentioning somebody """
         self.test_channel.write({'alias_name': False})
-        self.test_channel.message_subscribe([self.user_employee.partner_id.id, self.test_partner.id, self.partner_employee_nomail.id])
         with self.mock_mail_gateway():
-            self.test_channel.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
+            self.test_channel.message_post(
+                body="Test", partner_ids=self.test_partner.ids,
+                message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertSentEmail(self.test_channel.env.user.partner_id, [self.test_partner])
 
     @mute_logger('odoo.models.unlink')
@@ -320,12 +322,8 @@ class TestChannelInternals(MailCommon):
         channel.write({'channel_type': 'chat'})
         channel.action_follow()
 
-        msg_1 = self._add_messages(
-            self.test_channel, 'Body1', author=self.user_employee.partner_id,
-            channel_ids=[self.test_channel.id])
-        msg_2 = self._add_messages(
-            self.test_channel, 'Body2', author=self.user_employee.partner_id,
-            channel_ids=[self.test_channel.id])
+        msg_1 = self._add_messages(self.test_channel, 'Body1', author=self.user_employee.partner_id)
+        msg_2 = self._add_messages(self.test_channel, 'Body2', author=self.user_employee.partner_id)
 
         self.test_channel.channel_seen(msg_2.id)
         self.assertEqual(
@@ -341,6 +339,52 @@ class TestChannelInternals(MailCommon):
             "Last message id should stay the same after mark channel as seen with an older message"
         )
 
+    @mute_logger('odoo.models.unlink')
+    def test_channel_unsubscribe_auto(self):
+        """ Archiving / deleting a user should automatically unsubscribe related
+        partner from private channels """
+        test_user = self.env['res.users'].create({
+            "login": "adam",
+            "name": "Jonas",
+        })
+        test_partner = test_user.partner_id
+        test_channel_private = self.env['mail.channel'].with_context(self._test_context).create({
+            'name': 'Winden caves',
+            'description': 'Channel to travel through time',
+            'public': 'private',
+            'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
+        })
+        test_channel_group = self.env['mail.channel'].with_context(self._test_context).create({
+            'name': 'Sic Mundus',
+            'public': 'groups',
+            'group_public_id': self.env.ref('base.group_user').id,
+            'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
+        })
+        self.test_channel.with_context(self._test_context).write({
+            'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
+        })
+        test_chat = self.env['mail.channel'].with_context(self._test_context).create({
+            'name': 'test',
+            'channel_type': 'chat',
+            'public': 'private',
+            'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
+        })
+
+        # Unsubscribe archived user from the private channels, but not from public channels and not from chat
+        self.user_employee.active = False
+        (test_chat | self.test_channel).invalidate_cache(fnames=['channel_partner_ids'])
+        self.assertEqual(test_channel_private.channel_partner_ids, test_partner)
+        self.assertEqual(test_channel_group.channel_partner_ids, test_partner)
+        self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | test_partner)
+        self.assertEqual(test_chat.channel_partner_ids, self.user_employee.partner_id | test_partner)
+
+        # Unsubscribe deleted user from the private channels, but not from public channels and not from chat
+        test_user.unlink()
+        self.assertEqual(test_channel_private.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(test_channel_group.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | test_partner)
+        self.assertEqual(test_chat.channel_partner_ids, self.user_employee.partner_id | test_partner)
+
     def test_multi_company_chat(self):
         self._activate_multi_company()
         self.assertEqual(self.env.user.company_id, self.company_admin)
@@ -352,7 +396,7 @@ class TestChannelInternals(MailCommon):
             self.assertTrue(initial_channel_info, 'should be able to chat with multi company user')
 
 
-@tagged('moderation')
+@tagged('moderation', 'mail_channel')
 class TestChannelModeration(MailCommon):
 
     @classmethod
@@ -394,27 +438,22 @@ class TestChannelModeration(MailCommon):
         msg_c1_emplo2 = self._add_messages(self.channel, 'Body21', author=self.partner_employee_2, moderation_status='pending_moderation')
 
         self._reset_bus()
-        self.assertFalse(msg_c1_admin1.channel_ids | msg_c1_admin2.channel_ids | msg_c1_emplo2.channel_ids)
 
         # accept
-        msg_c1_admin1.with_user(self.user_employee)._moderate('accept')
-        self.assertEqual(msg_c1_admin1.channel_ids, self.channel)
+        with self.assertBus([(self.cr.dbname, 'mail.channel', self.channel.id)]):
+            msg_c1_admin1.with_user(self.user_employee)._moderate('accept')
         self.assertEqual(msg_c1_admin1.moderation_status, 'accepted')
         self.assertEqual(msg_c1_admin2.moderation_status, 'pending_moderation')
-        self.assertBusNotifications([(self.cr.dbname, 'mail.channel', self.channel.id)])
 
         # allow
         self._reset_bus()
-        (msg_c1_admin1 | msg_c1_emplo2).with_user(self.user_employee)._moderate('allow')
-        self.assertEqual(msg_c1_admin1.channel_ids, self.channel)
-        self.assertEqual(msg_c1_admin2.channel_ids, self.channel)
-        self.assertEqual(msg_c1_emplo2.channel_ids, self.channel)
+        with self.assertBus([
+                (self.cr.dbname, 'mail.channel', self.channel.id),
+                (self.cr.dbname, 'mail.channel', self.channel.id)]):
+            (msg_c1_admin1 | msg_c1_emplo2).with_user(self.user_employee)._moderate('allow')
         self.assertEqual(msg_c1_admin1.moderation_status, 'accepted')
         self.assertEqual(msg_c1_admin2.moderation_status, 'accepted')
         self.assertEqual(msg_c1_emplo2.moderation_status, 'accepted')
-        self.assertBusNotifications([
-            (self.cr.dbname, 'mail.channel', self.channel.id),
-            (self.cr.dbname, 'mail.channel', self.channel.id)])
 
     @mute_logger('odoo.models.unlink')
     def test_message_moderate_reject(self):
@@ -423,8 +462,6 @@ class TestChannelModeration(MailCommon):
         msg_c1_emplo2 = self._add_messages(self.channel, '<p>Body21</p>', author=self.partner_employee_2, moderation_status='pending_moderation')
         msg_c1_portal = self._add_messages(self.channel, '<p>Body12</p>', author=self.partner_portal, moderation_status='pending_moderation')
         id2, id4 = msg_c1_admin2.id, msg_c1_portal.id  # save ids because unlink will discard them
-
-        self.assertFalse(msg_c1_admin1.channel_ids | msg_c1_admin2.channel_ids | msg_c1_emplo2.channel_ids | msg_c1_portal.channel_ids)
 
         # test reject: should also send a rejection email
         with self.mock_mail_gateway():
@@ -438,17 +475,16 @@ class TestChannelModeration(MailCommon):
 
         # test discard: silently remove
         self._reset_bus()
-        (msg_c1_admin2 + msg_c1_portal).with_user(self.user_employee)._moderate_discard()
-
-        # check all generated bus notifications
-        self.assertBusNotifications(
-            [(self.cr.dbname, 'res.partner', self.partner_admin.id),
-             (self.cr.dbname, 'res.partner', self.partner_employee.id),
-             (self.cr.dbname, 'res.partner', self.partner_portal.id)],
-            [{'type': 'deletion', 'message_ids': [id2]},  # author of 1 message
-             {'type': 'deletion', 'message_ids': [id2, id4]},  # moderator
-             {'type': 'deletion', 'message_ids': [id4]}]  # author of 1 message
-        )
+        with self.assertBus(
+                [(self.cr.dbname, 'res.partner', self.partner_admin.id),
+                 (self.cr.dbname, 'res.partner', self.partner_employee.id),
+                 (self.cr.dbname, 'res.partner', self.partner_portal.id)],
+                message_items=[
+                    {'type': 'deletion', 'message_ids': [id2]},  # author of 1 message
+                    {'type': 'deletion', 'message_ids': [id2, id4]},  # moderator
+                    {'type': 'deletion', 'message_ids': [id4]}  # author of 1 message
+                ]):
+            (msg_c1_admin2 + msg_c1_portal).with_user(self.user_employee)._moderate_discard()
 
     @mute_logger('odoo.models.unlink')
     def test_message_notify_moderators(self):
@@ -625,5 +661,3 @@ class TestChannelModeration(MailCommon):
         self.assertFalse(msg_email1)
         self.assertEqual(msg_admin, pending_messages)
         self.assertEqual(accepted_messages, msg_moderator | msg_email2 | msg_notif)
-        self.assertFalse(msg_admin.channel_ids)
-        self.assertEqual(msg_email2.channel_ids, channel)

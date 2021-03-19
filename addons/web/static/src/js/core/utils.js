@@ -227,7 +227,22 @@ function _getExtractorFrom(criterion) {
     }
 }
 
+class AlreadyDefinedPatchError extends Error {
+    constructor() {
+        super(...arguments);
+        this.name = 'AlreadyDefinedPatchError';
+    }
+}
+class UnknownPatchError extends Error {
+    constructor() {
+        super(...arguments);
+        this.name = 'UnknownPatchError';
+    }
+}
+
 var utils = {
+    AlreadyDefinedPatchError,
+    UnknownPatchError,
 
     /**
      * Throws an error if the given condition is not true
@@ -627,7 +642,7 @@ var utils = {
         }
         const objDesc = patchMap.get(obj);
         if (objDesc.patches.some(p => p.name === patchName)) {
-            throw new Error(`Class ${obj.name} already has a patch ${patchName}`);
+            throw new AlreadyDefinedPatchError(`Patch ${patchName} is already defined`);
         }
         objDesc.patches.push({
             name: patchName,
@@ -897,11 +912,12 @@ var utils = {
      *
      * @param {Object} obj
      * @param {string} patchName
+     * @returns {Object} the removed patch
      */
     unpatch: function (obj, patchName) {
         const objDesc = patchMap.get(obj);
-        if (!objDesc.patches.some(p => p.name === patchName)) {
-            throw new Error(`Class ${obj.name} does not have any patch ${patchName}`);
+        if (!objDesc || !objDesc.patches.some(p => p.name === patchName)) {
+            throw new UnknownPatchError(`Could not find patch ${patchName}`);
         }
         patchMap.delete(obj);
 
@@ -915,11 +931,16 @@ var utils = {
         }
 
         // Re-apply the patches except the one to remove.
+        let removedPatch;
         for (const patchDesc of objDesc.patches) {
             if (patchDesc.name !== patchName) {
                 utils.patch(obj, patchDesc.name, patchDesc.patch);
+            } else {
+                removedPatch = patchDesc.patch;
             }
         }
+
+        return removedPatch;
     },
     /**
      * @param {any} node
