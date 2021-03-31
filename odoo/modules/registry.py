@@ -338,6 +338,8 @@ class Registry(Mapping):
         """ Clear the cache and mark it as invalidated. """
         self.cache.clear()
         self.cache_invalidated = True
+        import traceback
+        _logger.info(''.join(["Caches Invalidated at:\n"] + traceback.format_stack()))
 
     def clear_caches(self):
         """ Clear the caches associated to methods decorated with
