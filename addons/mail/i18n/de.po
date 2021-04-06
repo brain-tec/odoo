@@ -4501,6 +4501,18 @@ msgid "Online"
 msgstr "Online"
 
 #. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to export mail message"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to use grouped read on message model"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""
@@ -5383,7 +5395,7 @@ msgstr "Als neue Vorlage speichern"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
 msgid "Schedule"
-msgstr "Ausführungsplan"
+msgstr "Planen"
 
 #. module: mail
 #. openerp-web

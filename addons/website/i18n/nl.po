@@ -518,9 +518,9 @@ msgid ""
 "                    <code class=\"ml-4\">Allow: *</code>"
 msgstr ""
 "<br/><br/>\n"
-"                    Voorbeeld van regel:<br/>\n"
-"                    <code class=\"ml-4\">Niet toestaan: /web/login</code><br/>\n"
-"                    <code class=\"ml-4\">Toestaan: *</code>"
+"                    Voorbeeld van een regel:<br/>\n"
+"                    <code class=\"ml-4\">Disallow: /web/login</code><br/>\n"
+"                    <code class=\"ml-4\">Allow: *</code>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -6589,7 +6589,7 @@ msgstr "Tweede menu"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid "Second feature"
-msgstr "Mogelijkheid twee"
+msgstr "Functie twee"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -9074,7 +9074,7 @@ msgstr "dagen"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "e.g. /my-awesome-page"
-msgstr "bijvoorbeeld /my-awesome-page"
+msgstr "Bijv. /my-awesome-page"
 
 #. module: website
 #. openerp-web
@@ -9086,7 +9086,7 @@ msgstr "Bijv. Over ons"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
 msgid "e.g. De Brouckere, Brussels, Belgium"
-msgstr "b.v. De Brouckere, Brussel, België"
+msgstr "Bijv. De Brouckere, Brussel, België"
 
 #. module: website
 #: model:ir.ui.menu,name:website.menu_website_dashboard

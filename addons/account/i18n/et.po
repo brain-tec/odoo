@@ -20,7 +20,7 @@
 # Eneli Õigus <enelioigus@gmail.com>, 2020
 # Piia Paurson <piia@avalah.ee>, 2021
 # Martin Trigaux, 2021
-# atriine <triine@avalah.ee>, 2021
+# Triine Aavik <triine@avalah.ee>, 2021
 # Andre Roomet <andreroomet@gmail.com>, 2021
 # 
 msgid ""
@@ -11976,6 +11976,8 @@ msgid ""
 "The %(date_field)s (%(date)s) doesn't match the %(sequence_field)s (%(sequence)s).\n"
 "You might want to clear the field %(sequence_field)s before proceeding with the change of the date."
 msgstr ""
+"%(date_field)s (%(date)s) ei sobi kokku %(sequence_field)s (%(sequence)s).\n"
+"Võiksid tühjendada välja %(sequence_field)s enne kuupäeva muutmise jätkamist."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__internal_group
@@ -12313,6 +12315,13 @@ msgstr ""
 msgid ""
 "The following invoice(s) will not be sent by email, because the customers "
 "don't have email address."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_reconcile_model.py:0
+#, python-format
+msgid ""
+"The following regular expression is invalid to create a partner mapping: %s"
 msgstr ""
 
 #. module: account

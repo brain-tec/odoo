@@ -1786,7 +1786,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/theme_preview.xml:0
 #, python-format
 msgid "Building your website..."
-msgstr ""
+msgstr "Construirea site-ului dvs. web ..."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -5013,7 +5013,7 @@ msgstr "Linkedin"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
-msgstr ""
+msgstr "Link-uri"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
