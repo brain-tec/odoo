@@ -582,6 +582,7 @@ var BasicModel = AbstractModel.extend({
                 getFieldNames: element.getFieldNames,
                 id: element.id,
                 isDirty: element.isDirty,
+                isNew: element.isNew,
                 limit: element.limit,
                 model: element.model,
                 offset: element.offset,
@@ -640,6 +641,7 @@ var BasicModel = AbstractModel.extend({
             groupsOffset: element.groupsOffset,
             id: element.id,
             isDirty: element.isDirty,
+            isNew: element.isNew,
             isOpen: element.isOpen,
             isSample: this.isSampleModel,
             limit: element.limit,
@@ -2053,7 +2055,9 @@ var BasicModel = AbstractModel.extend({
             case 'UPDATE':
                 list._changes.push({operation: 'UPDATE', id: command.id});
                 if (command.data) {
-                    defs.push(this._applyChange(command.id, command.data, { viewType: view.type }));
+                    defs.push(this._applyChange(command.id, command.data, {
+                        viewType: view && view.type,
+                    }));
                 }
                 break;
             case 'FORGET':
@@ -2436,7 +2440,7 @@ var BasicModel = AbstractModel.extend({
 
                     this.do_warn(
                         _.str.sprintf(
-                            _t(`'%s' is unsynchronized with ''.`),
+                            _t(`'%s' is unsynchronized with '%s'.`),
                             referenceFieldName,
                             modelFieldName,
                         ),
@@ -4127,6 +4131,7 @@ var BasicModel = AbstractModel.extend({
         dataPoint.getDomain = this._getDomain.bind(this, dataPoint);
         dataPoint.getFieldNames = this._getFieldNames.bind(this, dataPoint);
         dataPoint.isDirty = this.isDirty.bind(this, dataPoint.id);
+        dataPoint.isNew = this.isNew.bind(this, dataPoint.id);
 
         this.localData[dataPoint.id] = dataPoint;
 

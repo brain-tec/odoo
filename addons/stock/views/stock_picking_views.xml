@@ -43,10 +43,12 @@
                                 <field name="sequence_id" groups="base.group_no_one"/>
                                 <field name="sequence_code"/>
                                 <field name="warehouse_id" groups="stock.group_stock_multi_warehouses" force_save="1"/>
-                                <label for="reservation_method" attrs="{'invisible': [('code', '=', 'incoming')]}"/>
-                                <div class="o_row" attrs="{'invisible': [('code', '=', 'incoming')]}">
-                                    <field name="reservation_method" widget="radio"/>
-                                    <span attrs='{"invisible": [("reservation_method", "!=", "by_date")]}' class="oe_left"><field name="reservation_days_before" style="width: 30px; padding-top: 0px"/> days</span>
+                                <field name="print_label" attrs="{'invisible': [('code', '!=', 'internal')]}"/>
+                                <field name="reservation_method" attrs="{'invisible': [('code', '=', 'incoming')]}" widget="radio"/>
+                                <label for="reservation_days_before" string="Reserve before scheduled date" attrs="{'invisible': ['|', ('code', '=', 'incoming'), ('reservation_method', '!=', 'by_date')]}"/>
+                                <div class="o_row" attrs="{'invisible': ['|', ('code', '=', 'incoming'), ('reservation_method', '!=', 'by_date')]}">
+                                    <span><field name="reservation_days_before" style="width: 23px;"/> days before/</span>
+                                    <span><field name="reservation_days_before_priority" style="width: 23px;"/> days before when starred</span>
                                 </div>
                             </group>
                             <group>
@@ -116,7 +118,7 @@
             parent="menu_stock_root" sequence="0"
             name="Overview"/>
 
-        <menuitem id="menu_pickingtype" name="Operations Types" parent="stock.menu_warehouse_config" action="action_picking_type_list" sequence="4"/>
+        <menuitem id="menu_pickingtype" name="Operations Types" parent="stock.menu_warehouse_config" action="action_picking_type_list" sequence="5"/>
 
         <record model="ir.ui.view" id="stock_picking_calendar">
             <field name="name">stock.picking.calendar</field>
@@ -231,6 +233,7 @@
                     <button name="action_assign" attrs="{'invisible': [('show_check_availability', '=', False)]}" string="Check Availability" type="object" class="oe_highlight" groups="base.group_user"/>
                     <button name="button_validate" attrs="{'invisible': ['|', ('state', 'in', ('waiting','confirmed')), ('show_validate', '=', False)]}" string="Validate" type="object" class="oe_highlight" groups="stock.group_stock_user"/>
                     <button name="button_validate" attrs="{'invisible': ['|', ('state', 'not in', ('waiting', 'confirmed')), ('show_validate', '=', False)]}" string="Validate" type="object" groups="stock.group_stock_user" class="o_btn_validate"/>
+                    <button name="action_set_quantities_to_reservation" attrs="{'invisible': [('show_validate', '=', False)]}" string="Set quantities" type="object" groups="stock.group_stock_user" class="o_btn_validate"/>
                     <widget name="signature" string="Sign" highlight="1"
                             attrs="{'invisible': ['|', '|', ('id', '=', False), ('picking_type_code', '!=', 'outgoing'), ('state', '!=', 'done')]}"
                             full_name="partner_id" groups="stock.group_stock_sign_delivery"/>

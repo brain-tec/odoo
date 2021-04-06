@@ -38,7 +38,7 @@ class AccountMove(models.Model):
     @api.constrains('move_type', 'journal_id')
     def _check_moves_use_documents(self):
         """ Do not let to create not invoices entries in journals that use documents """
-        not_invoices = self.filtered(lambda x: x.company_id.country_id.code == "AR" and x.journal_id.type in ['sale', 'purchase'] and x.l10n_latam_use_documents and not x.is_invoice())
+        not_invoices = self.filtered(lambda x: x.company_id.account_fiscal_country_id.code == "AR" and x.journal_id.type in ['sale', 'purchase'] and x.l10n_latam_use_documents and not x.is_invoice())
         if not_invoices:
             raise ValidationError(_("The selected Journal can't be used in this transaction, please select one that doesn't use documents as these are just for Invoices."))
 
@@ -49,7 +49,7 @@ class AccountMove(models.Model):
 
         In this method we exclude the argentinian document type 99 from the generic constraint """
         ar_doctype_99 = self.filtered(
-            lambda x: x.l10n_latam_country_code == 'AR' and
+            lambda x: x.country_code == 'AR' and
             x.l10n_latam_document_type_id.code == '99' and
             x.move_type in ['out_refund', 'in_refund'])
 
@@ -62,7 +62,7 @@ class AccountMove(models.Model):
 
     @api.depends('invoice_line_ids', 'invoice_line_ids.product_id', 'invoice_line_ids.product_id.type', 'journal_id')
     def _compute_l10n_ar_afip_concept(self):
-        recs_afip = self.filtered(lambda x: x.company_id.country_id.code == "AR" and x.l10n_latam_use_documents)
+        recs_afip = self.filtered(lambda x: x.company_id.account_fiscal_country_id.code == "AR" and x.l10n_latam_use_documents)
         for rec in recs_afip:
             rec.l10n_ar_afip_concept = rec._get_concept()
         remaining = self - recs_afip
@@ -89,7 +89,7 @@ class AccountMove(models.Model):
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
         domain = super()._get_l10n_latam_documents_domain()
-        if self.journal_id.company_id.country_id.code == "AR":
+        if self.journal_id.company_id.account_fiscal_country_id.code == "AR":
             letters = self.journal_id._get_journal_letter(counterpart_partner=self.partner_id.commercial_partner_id)
             domain += ['|', ('l10n_ar_letter', '=', False), ('l10n_ar_letter', 'in', letters)]
             codes = self.journal_id._get_journal_codes()
@@ -125,7 +125,7 @@ class AccountMove(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_afip_responsibility(self):
-        if self.company_id.country_id.code == 'AR' and self.l10n_latam_use_documents and self.partner_id \
+        if self.company_id.account_fiscal_country_id.code == 'AR' and self.l10n_latam_use_documents and self.partner_id \
            and not self.partner_id.l10n_ar_afip_responsibility_type_id:
             return {'warning': {
                 'title': _('Missing Partner Configuration'),
@@ -136,7 +136,7 @@ class AccountMove(models.Model):
     def _onchange_partner_journal(self):
         """ This method is used when the invoice is created from the sale or subscription """
         expo_journals = ['FEERCEL', 'FEEWS', 'FEERCELP']
-        for rec in self.filtered(lambda x: x.company_id.country_id.code == "AR" and x.journal_id.type == 'sale'
+        for rec in self.filtered(lambda x: x.company_id.account_fiscal_country_id.code == "AR" and x.journal_id.type == 'sale'
                                  and x.l10n_latam_use_documents and x.partner_id.l10n_ar_afip_responsibility_type_id):
             res_code = rec.partner_id.l10n_ar_afip_responsibility_type_id.code
             domain = [('company_id', '=', rec.company_id.id), ('l10n_latam_use_documents', '=', True), ('type', '=', 'sale')]
@@ -158,7 +158,7 @@ class AccountMove(models.Model):
                 raise RedirectWarning(msg, action.id, _('Go to Journals'))
 
     def _post(self, soft=True):
-        ar_invoices = self.filtered(lambda x: x.company_id.country_id.code == "AR" and x.l10n_latam_use_documents)
+        ar_invoices = self.filtered(lambda x: x.company_id.account_fiscal_country_id.code == "AR" and x.l10n_latam_use_documents)
         for rec in ar_invoices:
             rec.l10n_ar_afip_responsibility_type_id = rec.commercial_partner_id.l10n_ar_afip_responsibility_type_id.id
             if rec.company_id.currency_id == rec.currency_id:
@@ -220,7 +220,7 @@ class AccountMove(models.Model):
 
     def _get_last_sequence_domain(self, relaxed=False):
         where_string, param = super(AccountMove, self)._get_last_sequence_domain(relaxed)
-        if self.company_id.country_id.code == "AR" and self.l10n_latam_use_documents:
+        if self.company_id.account_fiscal_country_id.code == "AR" and self.l10n_latam_use_documents:
             if not self.journal_id.l10n_ar_share_sequences:
                 where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s"
                 param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
@@ -263,25 +263,22 @@ class AccountMove(models.Model):
                 'other_perc_amount': sign * sum(tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code == '09' and r.tax_line_id.tax_group_id != profits_tax_group).mapped(amount_field)),
                 }
 
-    def _get_vat(self, company_currency=False):
+    def _get_vat(self):
         """ Applies on wsfe web service and in the VAT digital books """
-        amount_field = company_currency and 'balance' or 'price_subtotal'
-        # if we use balance we need to correct sign (on price_subtotal is positive for refunds and invoices)
-        sign = -1 if (company_currency and self.is_inbound()) else 1
         res = []
         vat_taxable = self.env['account.move.line']
         # get all invoice lines that are vat taxable
         for line in self.line_ids:
-            if any(tax.tax_group_id.l10n_ar_vat_afip_code and tax.tax_group_id.l10n_ar_vat_afip_code not in ['0', '1', '2'] for tax in line.tax_line_id) and line[amount_field]:
+            if any(tax.tax_group_id.l10n_ar_vat_afip_code and tax.tax_group_id.l10n_ar_vat_afip_code not in ['0', '1', '2'] for tax in line.tax_line_id) and line['price_subtotal']:
                 vat_taxable |= line
         for vat in vat_taxable:
-            base_imp = sum(self.invoice_line_ids.filtered(lambda x: x.tax_ids.filtered(lambda y: y.tax_group_id.l10n_ar_vat_afip_code == vat.tax_line_id.tax_group_id.l10n_ar_vat_afip_code)).mapped(amount_field))
+            base_imp = sum(self.invoice_line_ids.filtered(lambda x: x.tax_ids.filtered(lambda y: y.tax_group_id.l10n_ar_vat_afip_code == vat.tax_line_id.tax_group_id.l10n_ar_vat_afip_code)).mapped('price_subtotal'))
             res += [{'Id': vat.tax_line_id.tax_group_id.l10n_ar_vat_afip_code,
-                     'BaseImp': sign * base_imp,
-                     'Importe': sign * vat[amount_field]}]
+                     'BaseImp': base_imp,
+                     'Importe': vat['price_subtotal']}]
 
         # Report vat 0%
-        vat_base_0 = sign * sum(self.invoice_line_ids.filtered(lambda x: x.tax_ids.filtered(lambda y: y.tax_group_id.l10n_ar_vat_afip_code == '3')).mapped(amount_field))
+        vat_base_0 = sum(self.invoice_line_ids.filtered(lambda x: x.tax_ids.filtered(lambda y: y.tax_group_id.l10n_ar_vat_afip_code == '3')).mapped('price_subtotal'))
         if vat_base_0:
             res += [{'Id': '3', 'BaseImp': vat_base_0, 'Importe': 0.0}]
 
@@ -289,6 +286,6 @@ class AccountMove(models.Model):
 
     def _get_name_invoice_report(self):
         self.ensure_one()
-        if self.l10n_latam_use_documents and self.company_id.country_id.code == 'AR':
+        if self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == 'AR':
             return 'l10n_ar.report_invoice_document'
         return super()._get_name_invoice_report()

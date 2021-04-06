@@ -3,7 +3,6 @@
 
 {
     'name': 'Germany - Accounting',
-    'icon': '/base/static/img/country_flags/de.png',
     'author': 'openbig.org',
     'website': 'http://www.openbig.org',
     'category': 'Accounting/Localizations',
@@ -26,4 +25,9 @@ German accounting chart and localization.
         'report/din5008_report.xml',
         'data/report_layout.xml',
     ],
+    'assets': {
+        'web.report_assets_common': [
+            'l10n_de/static/src/**/*',
+        ],
+    }
 }

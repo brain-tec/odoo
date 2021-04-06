@@ -48,18 +48,8 @@ def after_commit(func):
 
 @contextmanager
 def microsoft_calendar_token(user):
-    try:
-        yield user._get_microsoft_calendar_token()
-    except requests.HTTPError as e:
-        if e.response.status_code == 401:  # Invalid token.
-            # The transaction should be rolledback, but the user's tokens
-            # should be reset. The user will be asked to authenticate again next time.
-            # Rollback manually first to avoid concurrent access errors/deadlocks.
-            user.env.cr.rollback()
-            with user.pool.cursor() as cr:
-                env = user.env(cr=cr)
-                user.with_env(env)._set_microsoft_auth_tokens(False, False, 0)
-        raise e
+    yield user._get_microsoft_calendar_token()
+
 
 class MicrosoftSync(models.AbstractModel):
     _name = 'microsoft.calendar.sync'
@@ -139,6 +129,7 @@ class MicrosoftSync(models.AbstractModel):
             records_to_sync = self
         cancelled_records = self - records_to_sync
 
+        records_to_sync._ensure_attendees_have_email()
         updated_records = records_to_sync.filtered('microsoft_id')
         new_records = records_to_sync - updated_records
         for record in cancelled_records.filtered('microsoft_id'):
@@ -307,6 +298,7 @@ class MicrosoftSync(models.AbstractModel):
     def _microsoft_patch(self, microsoft_service: MicrosoftCalendarService, microsoft_id, values, timeout=TIMEOUT):
         with microsoft_calendar_token(self.env.user.sudo()) as token:
             if token:
+                self._ensure_attendees_have_email()
                 microsoft_service.patch(microsoft_id, values, token=token, timeout=timeout)
                 self.need_sync_m = False
 
@@ -316,6 +308,7 @@ class MicrosoftSync(models.AbstractModel):
             return
         with microsoft_calendar_token(self.env.user.sudo()) as token:
             if token:
+                self._ensure_attendees_have_email()
                 microsoft_id = microsoft_service.insert(values, token=token, timeout=timeout)
                 self.write({
                     'microsoft_id': microsoft_id,
@@ -351,6 +344,9 @@ class MicrosoftSync(models.AbstractModel):
         according to the Microsoft Calendar API
         :return: dict of Microsoft formatted values
         """
+        raise NotImplementedError()
+
+    def _ensure_attendees_have_email(self):
         raise NotImplementedError()
 
     def _get_microsoft_sync_domain(self):

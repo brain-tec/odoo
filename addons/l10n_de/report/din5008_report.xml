@@ -16,12 +16,6 @@
             <field name="header_spacing">45</field>
         </record>
 
-        <template id="assets_common" name="l10n_de_din5008_report" inherit_id="web.report_assets_common">
-            <xpath expr="." position="inside">
-                <link rel="stylesheet" type="text/scss" href="/l10n_de/static/src/scss/report_din5008.scss"/>
-            </xpath>
-        </template>
-
         <!-- New report layout for din5008 format -->
         <template id="external_layout_din5008">
             <t t-if="not o and doc">
@@ -104,7 +98,7 @@
                             <li t-if="company.phone"><i class="fa fa-phone"/> <span t-field="company.phone"/></li>
                             <li t-if="company.email"><i class="fa fa-at"/> <span t-field="company.email"/></li>
                             <li t-if="company.website"><i class="fa fa-globe"/> <span t-field="company.website"/></li>
-                            <li t-if="company.vat"><i class="fa fa-building-o"/><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
+                            <li t-if="company.vat"><i class="fa fa-building-o"/><t t-esc="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                         </ul>
                         <div t-field="company.report_footer"/>
                     </div>

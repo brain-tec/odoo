@@ -134,7 +134,7 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='account.use_invoice_terms')
 
     # Technical field to hide country specific fields from accounting configuration
-    country_code = fields.Char(related='company_id.country_id.code', readonly=True)
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()
@@ -193,15 +193,3 @@ class ResConfigSettings(models.TransientModel):
             # We display the preview button only if the terms_type is html in the setting but also on the company
             # to avoid landing on an error page (see terms.py controller)
             setting.preview_ready = self.env.company.terms_type == 'html' and setting.terms_type == 'html'
-
-    @api.model
-    def create(self, values):
-        # Optimisation purpose, saving a res_config even without changing any values will trigger the write of all
-        # related values, including the currency_id field on res_company. This in turn will trigger the recomputation
-        # of account_move_line related field company_currency_id which can be slow depending on the number of entries
-        # in the database. Thus, if we do not explicitly change the currency_id, we should not write it on the company
-        if ('company_id' in values and 'currency_id' in values):
-            company = self.env['res.company'].browse(values.get('company_id'))
-            if company.currency_id.id == values.get('currency_id'):
-                values.pop('currency_id')
-        return super(ResConfigSettings, self).create(values)

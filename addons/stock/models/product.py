@@ -96,6 +96,7 @@ class Product(models.Model):
     reordering_max_qty = fields.Float(
         compute='_compute_nbr_reordering_rules', compute_sudo=False)
     putaway_rule_ids = fields.One2many('stock.putaway.rule', 'product_id', 'Putaway Rules')
+    storage_category_capacity_ids = fields.One2many('stock.storage.category.capacity', 'product_id', 'Storage Category Capacity')
 
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     @api.depends_context(
@@ -118,10 +119,6 @@ class Product(models.Model):
         services.outgoing_qty = 0.0
         services.virtual_available = 0.0
         services.free_qty = 0.0
-
-    def _product_available(self, field_names=None, arg=False):
-        """ Compatibility method """
-        return self._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), self._context.get('to_date'))
 
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
         domain_quant_loc, domain_move_in_loc, domain_move_out_loc = self._get_domain_locations()
@@ -490,6 +487,18 @@ class Product(models.Model):
         ]
         return self.env['product.template']._get_action_view_related_putaway_rules(domain)
 
+    def action_view_storage_category_capacity(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_storage_category_capacity")
+        action['context'] = {
+            'hide_package_type': True,
+        }
+        if len(self) == 1:
+            action['context'].update({
+                'default_product_id': self.id,
+            })
+        action['domain'] = [('product_id', 'in', self.ids)]
+        return action
+
     def action_open_product_lot(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("stock.action_production_lot_form")
@@ -574,7 +583,7 @@ class Product(models.Model):
             seen_rules = self.env['stock.rule']
         rule = self.env['procurement.group']._get_rule(self, location, {
             'route_ids': route_ids,
-            'warehouse_id': location.get_warehouse()
+            'warehouse_id': location.warehouse_id
         })
         if not rule:
             return seen_rules
@@ -660,11 +669,11 @@ class ProductTemplate(models.Model):
         self.has_available_route_ids = self.env['stock.location.route'].search_count([('product_selectable', '=', True)])
 
     @api.depends(
-        'product_variant_ids',
-        'product_variant_ids.stock_move_ids.product_qty',
-        'product_variant_ids.stock_move_ids.state',
+        'product_variant_ids.qty_available',
+        'product_variant_ids.virtual_available',
+        'product_variant_ids.incoming_qty',
+        'product_variant_ids.outgoing_qty',
     )
-    @api.depends_context('company')
     def _compute_quantities(self):
         res = self._compute_quantities_dict()
         for template in self:
@@ -673,12 +682,10 @@ class ProductTemplate(models.Model):
             template.incoming_qty = res[template.id]['incoming_qty']
             template.outgoing_qty = res[template.id]['outgoing_qty']
 
-    def _product_available(self, name, arg):
-        return self._compute_quantities_dict()
-
     def _compute_quantities_dict(self):
-        # TDE FIXME: why not using directly the function fields ?
-        variants_available = self.with_context(active_test=False).mapped('product_variant_ids')._product_available()
+        variants_available = {
+            p['id']: p for p in self.with_context(active_test=False).product_variant_ids.read(['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty'])
+        }
         prod_available = {}
         for template in self:
             qty_available = 0
@@ -817,6 +824,22 @@ class ProductTemplate(models.Model):
             raise UserError(_("Available quantity should be set to zero before changing type"))
         return super(ProductTemplate, self).write(vals)
 
+    def copy(self, default=None):
+        res = super().copy(default=default)
+        # Since we don't copy product variants directly, we need to match the newly
+        # created product variants with the old one, and copy the storage category
+        # capacity from them.
+        new_product_dict = {}
+        for product in res.product_variant_ids:
+            product_attribute_value = product.product_template_attribute_value_ids.product_attribute_value_id
+            new_product_dict[product_attribute_value] = product.id
+        storage_category_capacity_vals = []
+        for storage_category_capacity in self.product_variant_ids.storage_category_capacity_ids:
+            product_attribute_value = storage_category_capacity.product_id.product_template_attribute_value_ids.product_attribute_value_id
+            storage_category_capacity_vals.append(storage_category_capacity.copy_data({'product_id': new_product_dict[product_attribute_value]})[0])
+        self.env['stock.storage.category.capacity'].create(storage_category_capacity_vals)
+        return res
+
     # Be aware that the exact same function exists in product.product
     def action_open_quants(self):
         return self.with_context(active_test=False).product_variant_ids.filtered(lambda p: p.active or p.qty_available != 0).action_open_quants()
@@ -826,7 +849,7 @@ class ProductTemplate(models.Model):
             'stock.group_stock_multi_locations',
             'stock.group_production_lot',
             'stock.group_tracking_owner',
-            'product.group_stock_packaging'
+            'product.group_tracking_lot'
         ]
         if (self.env.user.user_has_groups(','.join(advanced_option_groups))):
             return self.action_open_quants()
@@ -848,6 +871,10 @@ class ProductTemplate(models.Model):
                 ('category_id', '=', self.categ_id.id),
         ]
         return self._get_action_view_related_putaway_rules(domain)
+
+    def action_view_storage_category_capacity(self):
+        self.ensure_one()
+        return self.product_variant_ids.action_view_storage_category_capacity()
 
     def action_view_orderpoints(self):
         return self.product_variant_ids.action_view_orderpoints()
@@ -930,17 +957,26 @@ class UoM(models.Model):
                 lambda u: any(u[f].id != int(values[f]) if f in values else False
                               for f in {'category_id'}))
             if changed:
-                stock_move_lines = self.env['stock.move.line'].search_count([
-                    ('product_uom_id.category_id', 'in', changed.mapped('category_id.id')),
-                    ('state', '!=', 'cancel'),
-                ])
-
-                if stock_move_lines:
-                    raise UserError(_(
-                        "You cannot change the ratio of this unit of measure as some"
-                        " products with this UoM have already been moved or are "
-                        "currently reserved."
-                    ))
+                error_msg = _(
+                    "You cannot change the ratio of this unit of mesure"
+                    " as some products with this UoM have already been moved"
+                    " or are currently reserved."
+                )
+                if self.env['stock.move'].sudo().search_count([
+                    ('product_uom', 'in', changed.ids),
+                    ('state', 'not in', ('cancel', 'done'))
+                ]):
+                    raise UserError(error_msg)
+                if self.env['stock.move.line'].sudo().search_count([
+                    ('product_uom_id', 'in', changed.ids),
+                    ('state', 'not in', ('cancel', 'done')),
+                ]):
+                    raise UserError(error_msg)
+                if self.env['stock.quant'].sudo().search_count([
+                    ('product_id.product_tmpl_id.uom_id', 'in', changed.ids),
+                    ('quantity', '!=', 0),
+                ]):
+                    raise UserError(error_msg)
         return super(UoM, self).write(values)
 
     def _adjust_uom_quantities(self, qty, quant_uom):

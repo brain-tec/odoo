@@ -49,17 +49,13 @@
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="recurrency_monday"/>
-                            <field name="recurrency_tuesday"/>
-                            <field name="recurrency_wednesday"/>
-                            <field name="recurrency_thursday"/>
-                            <field name="recurrency_friday"/>
-                            <field name="recurrency_saturday"/>
-                            <field name="recurrency_sunday"/>
                             <label for="notification_time" attrs="{'invisible': [['mode', '!=', 'chat']]}"/>
-                            <div class="o_row" attrs="{'invisible': [['mode', '!=', 'chat']]}">
-                                <field name="notification_time" attrs="{'required': [('mode', '=', 'chat')]}" widget="float_time"/>
-                                <field name="notification_moment"/>
+                            <div class="o_col">
+                                <widget name="week_days"/>
+                                <div class="o_row" attrs="{'invisible': [['mode', '!=', 'chat']]}">
+                                    <field name="notification_time" attrs="{'required': [('mode', '=', 'chat')]}" widget="float_time"/>
+                                    <field name="notification_moment"/>
+                                </div>
                             </div>
                             <field name="tz" groups="base.group_no_one"/>
                         </group>

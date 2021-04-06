@@ -3,7 +3,7 @@ odoo.define('mail/static/src/models/attachment/attachment.js', function (require
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
-const { clear } = require('mail/static/src/model/model_field_command.js');
+const { clear, insert, link, replace } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -41,10 +41,10 @@ function factory(dependencies) {
 
             // relation
             if ('res_id' in data && 'res_model' in data) {
-                data2.originThread = [['insert', {
+                data2.originThread = insert({
                     id: data.res_id,
                     model: data.res_model,
-                }]];
+                });
             }
 
             return data2;
@@ -88,8 +88,8 @@ function factory(dependencies) {
                 return;
             }
             this.env.messaging.dialogManager.open('mail.attachment_viewer', {
-                attachment: [['link', attachment]],
-                attachments: [['replace', attachments]],
+                attachment: link(attachment),
+                attachments: replace(attachments),
             });
         }
 
@@ -134,7 +134,7 @@ function factory(dependencies) {
          */
         _computeComposers() {
             if (this.isUploading) {
-                return [];
+                return;
             }
             const relatedUploadingAttachment = this.env.models['mail.attachment']
                 .find(attachment =>
@@ -144,9 +144,9 @@ function factory(dependencies) {
             if (relatedUploadingAttachment) {
                 const composers = relatedUploadingAttachment.composers;
                 relatedUploadingAttachment.delete();
-                return [['replace', composers]];
+                return replace(composers);
             }
-            return [];
+            return;
         }
 
         /**
@@ -176,7 +176,7 @@ function factory(dependencies) {
                 return `https://www.youtube.com/embed/${token}`;
             }
             if (this.fileType === 'video') {
-                return `/web/image/${this.id}?model=ir.attachment`;
+                return `/web/content/${this.id}?model=ir.attachment`;
             }
             return clear();
         }
@@ -215,16 +215,39 @@ function factory(dependencies) {
             } else if (!this.mimetype) {
                 return clear();
             }
-            const match = this.type === 'url'
-                ? this.url.match('(youtu|.png|.jpg|.gif)')
-                : this.mimetype.match('(image|video|application/pdf|text)');
-            if (!match) {
+            switch (this.mimetype) {
+                case 'application/pdf':
+                    return 'application/pdf';
+                case 'image/bmp':
+                case 'image/gif':
+                case 'image/jpeg':
+                case 'image/png':
+                case 'image/svg+xml':
+                case 'image/tiff':
+                case 'image/x-icon':
+                    return 'image';
+                case 'application/javascript':
+                case 'application/json':
+                case 'text/css':
+                case 'text/html':
+                case 'text/plain':
+                    return 'text';
+                case 'audio/mpeg':
+                case 'video/x-matroska':
+                case 'video/mp4':
+                case 'video/webm':
+                    return 'video';
+            }
+            if (!this.url) {
                 return clear();
             }
-            if (match[1].match('(.png|.jpg|.gif)')) {
+            if (this.url.match('(.png|.jpg|.gif)')) {
                 return 'image';
             }
-            return match[1];
+            if (this.url.includes('youtu')) {
+                return 'youtu';
+            }
+            return clear();
         }
 
         /**
@@ -243,7 +266,7 @@ function factory(dependencies) {
             if (!this.fileType) {
                 return false;
             }
-            return this.fileType.includes('text');
+            return this.fileType === 'text';
         }
 
         /**
@@ -251,15 +274,32 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeIsViewable() {
-            return (
-                this.mediaType === 'image' ||
-                this.mediaType === 'video' ||
-                this.mimetype === 'application/pdf' ||
-                this.isTextFile
-            );
+            switch (this.mimetype) {
+                case 'application/javascript':
+                case 'application/json':
+                case 'application/pdf':
+                case 'audio/mpeg':
+                case 'image/bmp':
+                case 'image/gif':
+                case 'image/jpeg':
+                case 'image/png':
+                case 'image/svg+xml':
+                case 'image/tiff':
+                case 'image/x-icon':
+                case 'text/css':
+                case 'text/html':
+                case 'text/plain':
+                case 'video/x-matroska':
+                case 'video/mp4':
+                case 'video/webm':
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /**
+         * @deprecated
          * @private
          * @returns {string}
          */
@@ -284,7 +324,7 @@ function factory(dependencies) {
                 }
                 return this.uploadingAbortController;
             }
-            return undefined;
+            return;
         }
     }
 
@@ -352,11 +392,12 @@ function factory(dependencies) {
         isViewable: attr({
             compute: '_computeIsViewable',
             dependencies: [
-                'mediaType',
-                'isTextFile',
                 'mimetype',
             ],
         }),
+        /**
+         * @deprecated
+         */
         mediaType: attr({
             compute: '_computeMediaType',
             dependencies: ['mimetype'],

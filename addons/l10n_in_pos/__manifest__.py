@@ -3,6 +3,7 @@
 
 {
     'name': 'Indian - Point of Sale',
+    'icon': '/l10n_in/static/description/icon.png',
     'version': '1.0',
     'description': """GST Point of Sale""",
     'category': 'Accounting/Localizations/Point of Sale',
@@ -10,14 +11,16 @@
         'l10n_in',
         'point_of_sale'
     ],
-    'data': [
-        'views/point_of_sale.xml',
-    ],
     'demo': [
         'data/product_demo.xml',
     ],
-    'qweb': [
-        'static/src/xml/pos_receipt.xml',
-    ],
     'auto_install': True,
+    'assets': {
+        'point_of_sale.assets': [
+            'l10n_in_pos/static/src/js/**/*',
+        ],
+        'web.assets_qweb': [
+            'l10n_in_pos/static/src/xml/**/*',
+        ],
+    }
 }

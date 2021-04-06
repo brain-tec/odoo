@@ -105,12 +105,16 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', help="The country this chart of accounts belongs to. None if it's generic.")
+
     account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
     account_journal_payment_debit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Receipts Account')
     account_journal_payment_credit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Payments Account')
+
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
+
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account')
     property_account_expense_categ_id = fields.Many2one('account.account.template', string='Category of Expense Account')
@@ -244,11 +248,11 @@ class AccountChartTemplate(models.Model):
             ).unlink()
 
             # delete account, journal, tax, fiscal position and reconciliation model
-            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.move', 'account.journal', 'account.group']
+            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.move.line', 'account.move', 'account.journal', 'account.tax', 'account.group']
             for model in models_to_delete:
                 res = self.env[model].sudo().search([('company_id', '=', company.id)])
                 if len(res):
-                    res.unlink()
+                    res.with_context(force_delete=True).unlink()
             existing_accounts.unlink()
 
         company.write({'currency_id': self.currency_id.id,
@@ -331,6 +335,10 @@ class AccountChartTemplate(models.Model):
         company.account_sale_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company.id)], limit=1).id
         company.account_purchase_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('purchase', 'all')), ('company_id', '=', company.id)], limit=1).id
 
+        if self.country_id:
+            # If this CoA is made for only one country, set it as the fiscal country of the company.
+            company.account_fiscal_country_id = self.country_id
+
         return {}
 
     @api.model
@@ -339,11 +347,11 @@ class AccountChartTemplate(models.Model):
         the provided company (meaning hence that its chart of accounts cannot
         be changed anymore).
         """
-        model_to_check = ['account.move.line', 'account.payment', 'account.bank.statement']
+        model_to_check = ['account.payment', 'account.bank.statement']
         for model in model_to_check:
             if self.env[model].sudo().search([('company_id', '=', company_id.id)], limit=1):
                 return True
-        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('name', '!=', '/')], limit=1):
+        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('state', '!=', 'draft')], limit=1):
             return True
         return False
 
@@ -1010,6 +1018,10 @@ class AccountTaxTemplate(models.Model):
             for template in templates:
                 if all(child.id in tax_template_to_tax for child in template.children_tax_ids):
                     vals = template._get_tax_vals(company, tax_template_to_tax)
+
+                    if self.chart_template_id.country_id:
+                        vals['country_id'] = self.chart_template_id.country_id.id
+
                     tax_template_vals.append((template, vals))
                 else:
                     # defer the creation of this tax to the next batch

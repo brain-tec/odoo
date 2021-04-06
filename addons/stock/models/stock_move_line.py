@@ -62,6 +62,7 @@ class StockMoveLine(models.Model):
     picking_type_entire_packs = fields.Boolean(related='picking_id.picking_type_id.show_entire_packs', readonly=True)
     state = fields.Selection(related='move_id.state', store=True, related_sudo=False)
     is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable')
+    is_inventory = fields.Boolean(related='move_id.is_inventory')
     is_locked = fields.Boolean(related='move_id.is_locked', default=True, readonly=True)
     consume_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'consume_line_id', 'produce_line_id', help="Technical link to see who consumed what. ")
     produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
@@ -112,11 +113,18 @@ class StockMoveLine(models.Model):
         if any(ml.qty_done < 0 for ml in self):
             raise ValidationError(_('You can not enter negative quantities.'))
 
+    @api.onchange('result_package_id')
+    def _onchange_result_package_id(self):
+        if self.result_package_id:
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations'):
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, package=self.result_package_id)
+
     @api.onchange('product_id', 'product_uom_id')
     def _onchange_product_id(self):
         if self.product_id:
-            if not self.id and self.user_has_groups('stock.group_stock_multi_locations'):
-                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id) or self.location_dest_id
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and not self.result_package_id:
+                qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, qty_done)
             if self.picking_id:
                 product = self.product_id.with_context(lang=self.picking_id.partner_id.lang or self.env.user.lang)
                 self.description_picking = product._get_description(self.picking_id.picking_type_id)
@@ -177,11 +185,15 @@ class StockMoveLine(models.Model):
         help him. This onchange will warn him if he set `qty_done` to a non-supported value.
         """
         res = {}
-        if self.qty_done and self.product_id.tracking == 'serial':
+        if self.qty_done:
             qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
-            if float_compare(qty_done, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0:
-                message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
-                res['warning'] = {'title': _('Warning'), 'message': message}
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and not self.result_package_id:
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, qty_done)
+            if self.product_id.tracking == 'serial':
+                qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
+                if float_compare(qty_done, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0:
+                    message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
+                    res['warning'] = {'title': _('Warning'), 'message': message}
         return res
 
     def init(self):
@@ -500,7 +512,7 @@ class StockMoveLine(models.Model):
                             # checkboxes on the picking type, he's allowed to enter tracked
                             # products without a `lot_id`.
                             continue
-                    elif ml.move_id.inventory_id:
+                    elif ml.is_inventory:
                         # If an inventory adjustment is linked, the user is allowed to enter
                         # tracked products without a `lot_id`.
                         continue
@@ -509,7 +521,7 @@ class StockMoveLine(models.Model):
                         ml_ids_tracked_without_lot.add(ml.id)
             elif qty_done_float_compared < 0:
                 raise UserError(_('No negative quantities allowed'))
-            else:
+            elif not ml.is_inventory:
                 ml_ids_to_delete.add(ml.id)
 
         if ml_ids_tracked_without_lot:

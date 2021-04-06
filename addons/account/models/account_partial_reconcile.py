@@ -107,8 +107,16 @@ class AccountPartialReconcile(models.Model):
         if not self:
             return True
 
-        # Reverse all exchange moves at once.
+        # Retrieve the matching number to unlink.
+        full_to_unlink = self.full_reconcile_id
+
+        # Retrieve the CABA entries to reverse.
         moves_to_reverse = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self.ids)])
+
+        # Unlink partials before doing anything else to avoid 'Record has already been deleted' due to the recursion.
+        res = super().unlink()
+
+        # Reverse CABA entries.
         today = fields.Date.context_today(self)
         default_values_list = [{
             'date': move.date if move.date > (move.company_id.period_lock_date or date.min) else today,
@@ -116,10 +124,9 @@ class AccountPartialReconcile(models.Model):
         } for move in moves_to_reverse]
         moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
-        # Unlink partials then the full in this order to avoid a recursive call to the same partials.
-        full_to_unlink = self.full_reconcile_id
-        res = super().unlink()
+        # Remove the matching numbers.
         full_to_unlink.unlink()
+
         return res
 
     # -------------------------------------------------------------------------
@@ -364,104 +371,6 @@ class AccountPartialReconcile(models.Model):
             tax_line.tax_repartition_line_id.id,
         )
 
-    @api.model
-    def _fix_cash_basis_full_balance_coverage(self, move_values, partial_values, pending_cash_basis_lines, partial_lines_to_create):
-        ''' This method is used to ensure the full coverage of the current move when it becomes fully paid.
-        For example, suppose a line of 0.03 paid 50-50. Without this method, each cash basis entry will report
-        0.03 / 0.5 = 0.015 ~ 0.02 per cash entry on the tax report as base amount, for a total of 0.04.
-        This is wrong because we expect 0.03.on the tax report as base amount. This is wrong because we expect 0.03.
-
-        :param move_values:                 The collected values about cash basis for the current move.
-        :param partial_values:              The collected values about cash basis for the current partial.
-        :param pending_cash_basis_lines:    The previously generated lines during this reconciliation but not yet created.
-        :param partial_lines_to_create:     The generated lines for the current and last partial making the move fully paid.
-        '''
-        # DEPRECATED: TO BE REMOVED IN MASTER
-        residual_amount_per_group = {}
-        move = move_values['move']
-
-        # ==========================================================================
-        # Part 1:
-        # Add the balance of all journal items that are not tax exigible in order to
-        # ensure the exact balance will be report on the Tax Report.
-        # This part is needed when the move will be fully paid after the current
-        # reconciliation.
-        # ==========================================================================
-
-        for line in move_values['to_process_lines']:
-            if line.tax_repartition_line_id:
-                # Tax line.
-                grouping_key = self._get_cash_basis_tax_line_grouping_key_from_record(
-                    line,
-                    account=line.tax_repartition_line_id.account_id,
-                )
-                residual_amount_per_group.setdefault(grouping_key, 0.0)
-                residual_amount_per_group[grouping_key] += line['amount_currency']
-
-            elif line.tax_ids:
-                # Base line.
-                grouping_key = self._get_cash_basis_base_line_grouping_key_from_record(
-                    line,
-                    account=line.company_id.account_cash_basis_base_account_id,
-                )
-                residual_amount_per_group.setdefault(grouping_key, 0.0)
-                residual_amount_per_group[grouping_key] += line['amount_currency']
-
-        # ==========================================================================
-        # Part 2:
-        # Subtract all previously created cash basis journal items during previous
-        # reconciliation.
-        # ==========================================================================
-
-        previous_tax_cash_basis_moves = self.env['account.move'].search([
-            '|',
-            ('tax_cash_basis_rec_id', 'in', self.ids),
-            ('tax_cash_basis_move_id', '=', move.id),
-        ])
-        for line in previous_tax_cash_basis_moves.line_ids:
-            if line.tax_repartition_line_id:
-                # Tax line.
-                grouping_key = self._get_cash_basis_tax_line_grouping_key_from_record(line)
-            elif line.tax_ids:
-                # Base line.
-                grouping_key = self._get_cash_basis_base_line_grouping_key_from_record(line)
-            else:
-                continue
-
-            if grouping_key not in residual_amount_per_group:
-                # The grouping_key is unknown regarding the current lines.
-                # Maybe this move has been created before migration and then,
-                # we are not able to ensure the full coverage of the balance.
-                return
-
-            residual_amount_per_group[grouping_key] -= line['amount_currency']
-
-        # ==========================================================================
-        # Part 3:
-        # Subtract all pending cash basis journal items that will be created during
-        # this reconciliation.
-        # ==========================================================================
-
-        for grouping_key, balance in pending_cash_basis_lines:
-            residual_amount_per_group[grouping_key] -= balance
-
-        # ==========================================================================
-        # Part 4:
-        # Fix the current cash basis journal items in progress by replacing the
-        # balance by the residual one.
-        # ==========================================================================
-
-        for grouping_key, aggregated_vals in partial_lines_to_create.items():
-            line_vals = aggregated_vals['vals']
-
-            amount_currency = residual_amount_per_group[grouping_key]
-            balance = partial_values['payment_rate'] and amount_currency / partial_values['payment_rate'] or 0.0
-            line_vals.update({
-                'debit': balance if balance > 0.0 else 0.0,
-                'credit': -balance if balance < 0.0 else 0.0,
-                'amount_currency': amount_currency,
-            })
-
     def _create_tax_cash_basis_moves(self):
         ''' Create the tax cash basis journal entries.
         :return: The newly created journal entries.
@@ -486,6 +395,7 @@ class AccountPartialReconcile(models.Model):
                     'line_ids': [],
                     'tax_cash_basis_rec_id': partial.id,
                     'tax_cash_basis_move_id': move.id,
+                    'fiscal_position_id': move.fiscal_position_id,
                 }
 
                 # Tracking of lines grouped all together.

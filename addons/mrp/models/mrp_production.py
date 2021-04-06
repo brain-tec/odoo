@@ -509,7 +509,7 @@ class MrpProduction(models.Model):
     @api.depends('product_uom_qty', 'date_planned_start')
     def _compute_forecasted_issue(self):
         for order in self:
-            warehouse = order.location_dest_id.get_warehouse()
+            warehouse = order.location_dest_id.warehouse_id
             order.forecasted_issue = False
             if order.product_id:
                 virtual_available = order.product_id.with_context(warehouse=warehouse.id, to_date=order.date_planned_start).virtual_available
@@ -540,7 +540,7 @@ class MrpProduction(models.Model):
         if not self.product_id:
             self.bom_id = False
         elif not self.bom_id or self.bom_id.product_tmpl_id != self.product_tmpl_id or (self.bom_id.product_id and self.bom_id.product_id != self.product_id):
-            bom = self.env['mrp.bom']._bom_find(product=self.product_id, picking_type=self.picking_type_id, company_id=self.company_id.id, bom_type='normal')
+            bom = self.env['mrp.bom']._bom_find(self.product_id, picking_type=self.picking_type_id, company_id=self.company_id.id, bom_type='normal')[self.product_id]
             if bom:
                 self.bom_id = bom.id
                 self.product_qty = self.bom_id.product_qty
@@ -631,7 +631,7 @@ class MrpProduction(models.Model):
     def _onchange_location(self):
         source_location = self.location_src_id
         self.move_raw_ids.update({
-            'warehouse_id': source_location.get_warehouse().id,
+            'warehouse_id': source_location.warehouse_id.id,
             'location_id': source_location.id,
         })
 
@@ -641,7 +641,7 @@ class MrpProduction(models.Model):
         update_value_list = []
         for move in self.move_finished_ids:
             update_value_list += [(1, move.id, ({
-                'warehouse_id': destination_location.get_warehouse().id,
+                'warehouse_id': destination_location.warehouse_id.id,
                 'location_dest_id': destination_location.id,
             }))]
         self.move_finished_ids = update_value_list
@@ -834,7 +834,7 @@ class MrpProduction(models.Model):
             'location_dest_id': self.location_dest_id.id,
             'company_id': self.company_id.id,
             'production_id': self.id,
-            'warehouse_id': self.location_dest_id.get_warehouse().id,
+            'warehouse_id': self.location_dest_id.warehouse_id.id,
             'origin': self.name,
             'group_id': self.procurement_group_id.id,
             'propagate_cancel': self.propagate_cancel,
@@ -895,7 +895,7 @@ class MrpProduction(models.Model):
             'procure_method': 'make_to_stock',
             'origin': self.name,
             'state': 'draft',
-            'warehouse_id': source_location.get_warehouse().id,
+            'warehouse_id': source_location.warehouse_id.id,
             'group_id': self.procurement_group_id.id,
             'propagate_cancel': self.propagate_cancel,
         }
@@ -976,7 +976,7 @@ class MrpProduction(models.Model):
             moves_to_confirm |= additional_byproducts
 
         if moves_to_confirm:
-            moves_to_confirm._action_confirm()
+            moves_to_confirm = moves_to_confirm._action_confirm()
             # run scheduler for moves forecasted to not have enough in stock
             moves_to_confirm._trigger_scheduler()
 
@@ -1326,7 +1326,7 @@ class MrpProduction(models.Model):
                 move.product_uom_qty = move.quantity_done
             # MRP do not merge move, catch the result of _action_done in order
             # to get extra moves.
-            moves_to_do = moves_to_do._action_done()
+            moves_to_do = moves_to_do._action_done(cancel_backorder=cancel_backorder)
             moves_to_do = order.move_raw_ids.filtered(lambda x: x.state == 'done') - moves_not_to_do
 
             finish_moves = order.move_finished_ids.filtered(lambda m: m.product_id == order.product_id and m.state not in ('done', 'cancel'))

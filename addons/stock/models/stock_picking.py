@@ -58,6 +58,9 @@ class PickingType(models.Model):
     use_existing_lots = fields.Boolean(
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
+    print_label = fields.Boolean(
+        'Print Label',
+        help="If this checkbox is ticked, label will be print in this operation.")
     show_operations = fields.Boolean(
         'Show Detailed Operations', default=_default_show_operations,
         help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
@@ -66,11 +69,11 @@ class PickingType(models.Model):
         help="If this checkbox is ticked, Odoo will automatically pre-fill the detailed "
         "operations with the corresponding products, locations and lot/serial numbers.")
     reservation_method = fields.Selection(
-        [('by_date', 'before scheduled date'), ('at_confirm', 'At Confirmation'), ('manual', 'Manually')],
+        [('at_confirm', 'At Confirmation'), ('manual', 'Manually'), ('by_date', 'Before scheduled date')],
         'Reservation Method', required=True, default='at_confirm',
         help="How products in transfers of this operation type should be reserved.")
     reservation_days_before = fields.Integer('Days', help="Maximum number of days before scheduled date that products should be reserved.")
-
+    reservation_days_before_priority = fields.Integer('Days when starred', help="Maximum number of days before scheduled date that priority picking products should be reserved.")
 
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
@@ -175,15 +178,19 @@ class PickingType(models.Model):
         if self.code == 'incoming':
             self.default_location_src_id = self.env.ref('stock.stock_location_suppliers').id
             self.default_location_dest_id = stock_location.id
+            self.print_label = False
         elif self.code == 'outgoing':
             self.default_location_src_id = stock_location.id
             self.default_location_dest_id = self.env.ref('stock.stock_location_customers').id
-        elif self.code == 'internal' and not self.user_has_groups('stock.group_stock_multi_locations'):
-            return {
-                'warning': {
-                    'message': _('You need to activate storage locations to be able to do internal operation types.')
+            self.print_label = True
+        elif self.code == 'internal':
+            self.print_label = False
+            if not self.user_has_groups('stock.group_stock_multi_locations'):
+                return {
+                    'warning': {
+                        'message': _('You need to activate storage locations to be able to do internal operation types.')
+                    }
                 }
-            }
 
     @api.onchange('company_id')
     def _onchange_company_id(self):
@@ -920,6 +927,12 @@ class Picking(models.Model):
         pickings_not_to_backorder.with_context(cancel_backorder=True)._action_done()
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
         return True
+
+    def action_set_quantities_to_reservation(self):
+        for move in self.move_lines.filtered(lambda move: move.state in ('partially_available', 'assigned')):
+            if move.product_id.tracking == 'none':
+                for move_line in move.move_line_ids:
+                    move_line.qty_done = move_line.product_uom_qty
 
     def _pre_action_done_hook(self):
         if not self.env.context.get('skip_immediate'):

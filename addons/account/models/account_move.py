@@ -184,7 +184,7 @@ class AccountMove(models.Model):
         string='Partner', change_default=True)
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
         compute='_compute_commercial_partner_id')
-    country_code = fields.Char(related='company_id.country_id.code', readonly=True)
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
     user_id = fields.Many2one(string='User', related='invoice_user_id',
         help='Technical field used to fit the generic behavior in mail templates.')
     is_move_sent = fields.Boolean(
@@ -228,6 +228,8 @@ class AccountMove(models.Model):
         compute='_compute_amount', currency_field='company_currency_id')
     amount_total_signed = fields.Monetary(string='Total Signed', store=True, readonly=True,
         compute='_compute_amount', currency_field='company_currency_id')
+    amount_total_in_currency_signed = fields.Monetary(string='Total in Currency Signed', store=True, readonly=True,
+        compute='_compute_amount', currency_field='currency_id')
     amount_residual_signed = fields.Monetary(string='Amount Due Signed', store=True,
         compute='_compute_amount', currency_field='company_currency_id')
     amount_by_group = fields.Binary(string="Tax amount by group",
@@ -327,6 +329,7 @@ class AccountMove(models.Model):
     display_inactive_currency_warning = fields.Boolean(
         compute="_compute_display_inactive_currency_warning",
         help="Technical field used for tracking the status of the currency")
+    tax_country_id = fields.Many2one(comodel_name='res.country', compute='_compute_tax_country_id', help="Technical field to filter the available taxes depending on the fiscal country and fiscal position.")
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
     show_reset_to_draft_button = fields.Boolean(compute='_compute_show_reset_to_draft_button')
@@ -1308,6 +1311,7 @@ class AccountMove(models.Model):
             move.amount_tax_signed = -total_tax
             move.amount_total_signed = abs(total) if move.move_type == 'entry' else -total
             move.amount_residual_signed = total_residual
+            move.amount_total_in_currency_signed = abs(move.amount_total) if move.move_type == 'entry' else -(sign * move.amount_total)
 
             currency = len(currencies) == 1 and currencies.pop() or move.company_id.currency_id
 
@@ -1572,6 +1576,14 @@ class AccountMove(models.Model):
         for move in self:
             move.show_reset_to_draft_button = not move.restrict_mode_hash_table and move.state in ('posted', 'cancel')
 
+    @api.depends('company_id.account_fiscal_country_id', 'fiscal_position_id.country_id', 'fiscal_position_id.foreign_vat')
+    def _compute_tax_country_id(self):
+        for record in self:
+            if record.fiscal_position_id.foreign_vat:
+                record.tax_country_id = record.fiscal_position_id.country_id
+            else:
+                record.tax_country_id = record.company_id.account_fiscal_country_id
+
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------
@@ -1705,6 +1717,17 @@ class AccountMove(models.Model):
 
             if record.is_sale_document() and journal_type != 'sale' or record.is_purchase_document() and journal_type != 'purchase':
                 raise ValidationError(_("The chosen journal has a type that is not compatible with your invoice type. Sales operations should go to 'sale' journals, and purchase operations to 'purchase' ones."))
+
+    @api.constrains('line_ids', 'fiscal_position_id', 'company_id')
+    def _validate_taxes_country(self):
+        """ By playing with the fiscal position in the form view, it is possible to keep taxes on the invoices from
+        a different country than the one allowed by the fiscal country or the fiscal position.
+        This contrains ensure such account.move cannot be kept, as they could generate inconsistencies in the reports.
+        """
+        self._compute_tax_country_id() # We need to ensure this field has been computed, as we use it in our check
+        for record in self:
+            if record.line_ids.tax_ids and record.line_ids.tax_ids.country_id != record.tax_country_id:
+                raise ValidationError(_("This entry contains some tax from an unallowed country. Please check its fiscal position and your tax configuration."))
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -1900,9 +1923,13 @@ class AccountMove(models.Model):
         return res
 
     @api.ondelete(at_uninstall=False)
-    def _unlink_except_posted_before(self):
-        if not self._context.get('force_delete') and any(move.posted_before for move in self):
-            raise UserError(_("You cannot delete an entry which has been posted once."))
+    def _unlink_forbid_parts_of_chain(self):
+        """ Moves with a sequence number can only be deleted if they are the last element of a chain of sequence.
+        If they are not, deleting them would create a gap. If the user really wants to do this, he still can
+        explicitly empty the 'name' field of the move; but we discourage that practice.
+        """
+        if not self._context.get('force_delete') and any(move.name != '/' and not move._is_last_from_seq_chain() for move in self):
+            raise UserError(_("You cannot delete this entry, as it has already consumed a sequence number and is not the last one in the chain. Probably you should revert it instead."))
 
     def unlink(self):
         self.line_ids.unlink()
@@ -2562,7 +2589,10 @@ class AccountMove(models.Model):
         return action
 
     def action_post(self):
-        self._post(soft=False)
+        if self.payment_id:
+            self.payment_id.action_post()
+        else:
+            self._post(soft=False)
         return False
 
     def js_assign_outstanding_line(self, line_id):
@@ -2982,6 +3012,7 @@ class AccountMove(models.Model):
         """
         return []
 
+
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
@@ -3002,7 +3033,6 @@ class AccountMoveLine(models.Model):
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
         help='Utility field to express amount currency')
-    tax_fiscal_country_id = fields.Many2one(comodel_name='res.country', related='move_id.company_id.account_tax_fiscal_country_id')
     account_id = fields.Many2one('account.account', string='Account',
         index=True, ondelete="cascade",
         domain="[('deprecated', '=', False), ('company_id', '=', 'company_id'),('is_off_balance', '=', False)]",
@@ -3043,7 +3073,7 @@ class AccountMoveLine(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
     partner_id = fields.Many2one('res.partner', string='Partner', ondelete='restrict')
     product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]", ondelete="restrict")
-    product_id = fields.Many2one('product.product', string='Product')
+    product_id = fields.Many2one('product.product', string='Product', ondelete='restrict')
     product_uom_category_id = fields.Many2one('uom.category', related='product_id.uom_id.category_id')
 
     # ==== Origin fields ====
@@ -3298,7 +3328,7 @@ class AccountMoveLine(models.Model):
         # adapt the price_unit to the new tax.
         # E.g. mapping a 10% price-included tax to a 20% price-included tax for a price_unit of 110 should preserve
         # 100 as balance but set 120 as price_unit.
-        if self.tax_ids and self.move_id.fiscal_position_id:
+        if self.tax_ids and self.move_id.fiscal_position_id and self.move_id.fiscal_position_id.tax_ids:
             price_subtotal = self._get_price_total_and_subtotal()['price_subtotal']
             self.tax_ids = self.move_id.fiscal_position_id.map_tax(
                 self.tax_ids._origin,

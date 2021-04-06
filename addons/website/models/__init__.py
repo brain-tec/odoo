@@ -3,6 +3,7 @@
 
 from . import assets
 from . import ir_actions
+from . import ir_asset
 from . import ir_attachment
 from . import ir_http
 from . import ir_module_module
@@ -24,3 +25,4 @@ from . import res_lang
 from . import theme_models
 from . import website_visitor
 from . import website_snippet_filter
+from . import website_configurator_feature

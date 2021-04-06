@@ -11,22 +11,34 @@
     // without duplicating the css.
     @include print-variable('o-we-toolbar-height', $o-navbar-height);
 
-    // Need info about the color of each color palette
-    @for $index from 1 through length($o-color-palettes) - 1 { // Not the user one
-        @each $name, $color in nth($o-color-palettes, $index) {
-            @include print-variable('o-palette-#{$index}-#{$name}', $color);
+    @include print-variable('priority-palette-prefix', $o-palette-priority-prefix);
+
+    // Need the colors and name of each color palette
+    $palette-names: ();
+    @each $palette-name, $palette in $o-color-palettes {
+        @if $palette-name != 'user-palette' {
+            @each $key, $value in $palette {
+                @include print-variable('o-palette-#{$palette-name}-#{$key}', $value);
+            }
+            $palette-names: append($palette-names, $palette-name);
         }
+    }
+    @include print-variable('palette-names', $palette-names);
+
+    // Need info about the base grays which are used to compute the final grays
+    @each $name, $color in $o-base-gray-color-palette {
+        @include print-variable('base-#{$name}', $color);
     }
 }
 
 // EDITOR TOP BAR AND POPOVER
-.o_we_website_top_actions {
-    @include o-position-absolute($top: 0, $right: 0);
-    z-index: ($zindex-fixed + $zindex-modal-backdrop) / 2 + 2; // $o-we-zindex
+#oe_snippets .o_we_website_top_actions {
     display: flex;
     justify-content: flex-end;
     width: $o-we-sidebar-width;
     height: $o-we-sidebar-top-height;
+    // Firefox css fix
+    min-height: $o-we-sidebar-top-height;
     background-color: $o-we-sidebar-tabs-bg;
 
     .btn-group, .btn {
@@ -61,11 +73,12 @@
 }
 
 #oe_snippets {
-    top: $o-we-sidebar-top-height;
-}
-
-.note-statusbar {
-    display: none;
+    top: 0;
+    .oe-toolbar {
+        .color-indicator {
+            padding: 0 2px 2px 2px;
+        }
+    }
 }
 
 // TRANSLATIONS
@@ -130,6 +143,33 @@ $i: 1;
             width: auto;
             margin-right: $o-we-item-spacing;
             margin-left: $o-we-item-spacing * .5;
+        }
+    }
+
+    we-button.o_we_mobile {
+        > div {
+            // FIXME maybe there is some refactoring to do so that all SVG icons
+            // can be properly aligned with extra CSS rules...
+            display: flex;
+            align-items: center;
+
+            svg {
+                width: 15px;
+                fill: $o-we-color-danger;
+                margin-bottom: 0;
+                margin-left: -3px;
+
+                &:hover {
+                    fill: darken($o-we-color-danger, 7.5%);
+                }
+            }
+        }
+        &.active > div > svg {
+            fill: $o-we-sidebar-content-field-color;
+
+            &:hover {
+                fill: $o-we-sidebar-content-field-pressed-color;
+            }
         }
     }
 

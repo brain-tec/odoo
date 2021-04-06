@@ -8,9 +8,9 @@ var Dialog = require('web.Dialog');
 const dom = require('web.dom');
 const weUtils = require('web_editor.utils');
 var options = require('web_editor.snippets.options');
+const wLinkPopoverWidget = require('@website/js/widgets/link_popover_widget')[Symbol.for("default")];
 const wUtils = require('website.utils');
 require('website.s_popup_options');
-const weWidgets = require('wysiwyg.widgets');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -489,6 +489,10 @@ options.Class.include({
             case 'color':
                 await this._customizeWebsiteColor(widgetValue, params);
                 break;
+            default:
+                if (params.customCustomization) {
+                    await params.customCustomization.call(this, widgetValue, params);
+                }
         }
 
         if (params.reload || config.isDebug('assets')) {
@@ -512,19 +516,31 @@ options.Class.include({
     /**
      * @private
      */
-    _customizeWebsiteColor: async function (color, params) {
+    async _customizeWebsiteColor(color, params) {
+        await this._customizeWebsiteColors({[params.color]: color}, params);
+    },
+    /**
+     * @private
+     */
+     async _customizeWebsiteColors(colors, params) {
+        colors = colors || {};
+
         const baseURL = '/website/static/src/scss/options/colors/';
         const colorType = params.colorType ? (params.colorType + '_') : '';
         const url = `${baseURL}user_${colorType}color_palette.scss`;
 
-        if (color) {
-            if (weUtils.isColorCombinationName(color)) {
-                color = parseInt(color);
-            } else if (!ColorpickerWidget.isCSSColor(color)) {
-                color = `'${color}'`;
+        const finalColors = {};
+        for (const [colorName, color] of Object.entries(colors)) {
+            finalColors[colorName] = color;
+            if (color) {
+                if (weUtils.isColorCombinationName(color)) {
+                    finalColors[colorName] = parseInt(color);
+                } else if (!ColorpickerWidget.isCSSColor(color)) {
+                    finalColors[colorName] = `'${color}'`;
+                }
             }
         }
-        return this._makeSCSSCusto(url, {[params.color]: color});
+        return this._makeSCSSCusto(url, finalColors);
     },
     /**
      * @private
@@ -794,11 +810,69 @@ options.registry.BackgroundVideo = options.Class.extend({
 });
 
 options.registry.OptionsTab = options.Class.extend({
+    /**
+     * @override
+     */
+    init() {
+        this._super(...arguments);
+        this.grayParams = {};
+        this.grays = {};
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async updateUI() {
+        await this._super(...arguments);
+
+        // The bg-XXX classes have been updated (and could be updated by another
+        // option like changing color palette) -> remove the inline style that
+        // was added for gray previews.
+        this.$el.find(".o_we_gray_preview").each((_, e) => {
+            e.style.removeProperty("background-color");
+        });
+    },
 
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    async customizeGray(previewMode, widgetValue, params) {
+        // Gray parameters are used *on the JS side* to compute the grays that
+        // will be saved in the database. We indeed need those grays to be
+        // computed here for faster previews so this allows to not duplicate
+        // most of the logic. Also, this gives flexibility to maybe allow full
+        // customization of grays in custo and themes. Also, this allows to ease
+        // migration if the computation here was to change: the user grays would
+        // still be unchanged as saved in the database.
+
+        this.grayParams[params.param] = parseInt(widgetValue);
+        for (let i = 1; i < 10; i++) {
+            const key = (100 * i).toString();
+            this.grays[key] = this._buildGray(key);
+        }
+
+        // Preview UI update
+        this.$el.find(".o_we_gray_preview").each((_, e) => {
+            e.style.setProperty("background-color", this.grays[e.getAttribute('variable')], "important");
+        });
+
+        // Save all computed (JS side) grays in database
+        await this._customizeWebsite(previewMode, undefined, Object.assign({}, params, {
+            customCustomization: () => { // TODO this could be prettier
+                return this._customizeWebsiteColors(this.grays, Object.assign({}, params, {
+                    colorType: 'gray',
+                }));
+            },
+        }));
+    },
     /**
      * @see this.selectClass for parameters
      */
@@ -930,6 +1004,20 @@ options.registry.OptionsTab = options.Class.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @private
+     * @param {String} id
+     * @returns {String} the adjusted color of gray
+     */
+    _buildGray(id) {
+        const gray = weUtils.getCSSVariableValue(`base-${id}`);
+        const grayRGB = ColorpickerWidget.convertCSSColorToRgba(gray);
+        const hsl = ColorpickerWidget.convertRgbToHsl(grayRGB.red, grayRGB.green, grayRGB.blue);
+        const adjustedGrayRGB = ColorpickerWidget.convertHslToRgb(this.grayParams['gray-hue'],
+            Math.min(Math.max(hsl.saturation + this.grayParams['gray-extra-saturation'], 0), 100),
+            hsl.lightness);
+        return ColorpickerWidget.convertRgbaToCSSColor(adjustedGrayRGB.red, adjustedGrayRGB.green, adjustedGrayRGB.blue);
+    },
+    /**
      * @override
      */
     async _checkIfWidgetsUpdateNeedWarning(widgets) {
@@ -939,7 +1027,7 @@ options.registry.OptionsTab = options.Class.extend({
         }
         for (const widget of widgets) {
             if (widget.getMethodsNames().includes('customizeWebsiteVariable')
-                    && widget.getMethodsParams('customizeWebsiteVariable').variable === 'color-palettes-number') {
+                    && widget.getMethodsParams('customizeWebsiteVariable').variable === 'color-palettes-name') {
                 const hasCustomizedColors = weUtils.getCSSVariableValue('has-customized-colors');
                 if (hasCustomizedColors && hasCustomizedColors !== 'false') {
                     return _t("Changing the color palette will reset all your color customizations, are you sure you want to proceed?");
@@ -958,6 +1046,25 @@ options.registry.OptionsTab = options.Class.extend({
                 return "NONE";
             }
             return weUtils.getCSSVariableValue('body-image-type');
+        }
+        if (methodName === 'customizeGray') {
+            // If the gray palette has been generated by Odoo standard option,
+            // the hue of all gray is the same and the saturation has been
+            // increased/decreased by the same amount for all grays in
+            // comparaison with BS grays. However the system supports any
+            // gray palette so we base our hue and extra saturation displayed
+            // values on one gray, let's say the middle one: gray-500.
+            const gray = weUtils.getCSSVariableValue('500');
+            const grayRGB = ColorpickerWidget.convertCSSColorToRgba(gray);
+            const hsl = ColorpickerWidget.convertRgbToHsl(grayRGB.red, grayRGB.green, grayRGB.blue);
+
+            const baseGray = weUtils.getCSSVariableValue('base-500');
+            const baseGrayRGB = ColorpickerWidget.convertCSSColorToRgba(baseGray);
+            const baseHSL = ColorpickerWidget.convertRgbToHsl(baseGrayRGB.red, baseGrayRGB.green, baseGrayRGB.blue);
+
+            this.grayParams['gray-hue'] = hsl.hue;
+            this.grayParams['gray-extra-saturation'] = hsl.saturation - baseHSL.saturation;
+            return this.grayParams[params.param];
         }
         return this._super(...arguments);
     },
@@ -1035,17 +1142,27 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-number"]');
+        const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-name"]');
         const style = window.getComputedStyle(document.documentElement);
-        const nbPalettes = parseInt(weUtils.getCSSVariableValue('number-of-color-palettes', style));
-        for (let i = 1; i <= nbPalettes; i++) {
+        const priorityPrefix = weUtils.getCSSVariableValue('priority-palette-prefix', style).replace(/'/g, "");
+        const allPaletteNames = weUtils.getCSSVariableValue('palette-names', style).split(' ').map((name) => {
+            return name.replace(/'/g, "");
+        });
+        const themePaletteNames = allPaletteNames.filter((name) => {
+            return name.startsWith(priorityPrefix);
+        });
+        const otherPaletteNames = allPaletteNames.filter((name) => {
+            return !name.startsWith(priorityPrefix);
+        });
+        const sortedPaletteNames = themePaletteNames.concat(otherPaletteNames);
+        for (const paletteName of sortedPaletteNames) {
             const btnEl = document.createElement('we-button');
             btnEl.classList.add('o_palette_color_preview_button');
-            btnEl.dataset.customizeWebsiteVariable = i;
+            btnEl.dataset.customizeWebsiteVariable = `'${paletteName}'`;
             for (let c = 1; c <= 5; c++) {
                 const colorPreviewEl = document.createElement('span');
                 colorPreviewEl.classList.add('o_palette_color_preview');
-                const color = weUtils.getCSSVariableValue(`o-palette-${i}-o-color-${c}`, style);
+                const color = weUtils.getCSSVariableValue(`o-palette-${paletteName}-o-color-${c}`, style);
                 colorPreviewEl.style.backgroundColor = color;
                 btnEl.appendChild(colorPreviewEl);
             }
@@ -1068,44 +1185,26 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
 
 options.registry.menu_data = options.Class.extend({
     /**
-     * When the users selects a menu, a dialog is opened to ask him if he wants
-     * to follow the link (and leave editor), edit the menu or do nothing.
+     * When the users selects a menu, a popover is shown with 4 possible
+     * actions: follow the link in a new tab, copy the menu link, edit the menu,
+     * or edit the menu tree.
+     * The popover shows a preview of the menu link. Remote URL only show the
+     * favicon.
      *
      * @override
      */
-    onFocus: function () {
-        var self = this;
-        (new Dialog(this, {
-            title: _t("Confirmation"),
-            $content: $(core.qweb.render('website.leaving_current_page_edition')),
-            buttons: [
-                {text: _t("Go to Link"), classes: 'btn-primary', click: function () {
-                    self.trigger_up('request_save', {
-                        reload: false,
-                        onSuccess: function () {
-                            window.location.href = self.$target.attr('href');
-                        },
-                    });
-                }},
-                {text: _t("Edit the menu"), classes: 'btn-primary', close: true, click: function () {
-                    this.trigger_up('action_demand', {
-                        actionName: 'edit_menu',
-                        params: [
-                            function () {
-                                var prom = new Promise(function (resolve, reject) {
-                                    self.trigger_up('request_save', {
-                                        onSuccess: resolve,
-                                        onFailure: reject,
-                                    });
-                                });
-                                return prom;
-                            },
-                        ],
-                    });
-                }},
-                {text: _t("Stay on this page"), close: true}
-            ]
-        })).open();
+    start: function () {
+        wLinkPopoverWidget.createFor(this, this.$target[0]);
+        return this._super(...arguments);
+    },
+    /**
+      * When the users selects another element on the page, makes sure the
+      * popover is closed.
+      *
+      * @override
+      */
+    onBlur: function () {
+        this.$target.popover('hide');
     },
 });
 
@@ -1971,6 +2070,20 @@ options.registry.topMenuColor = options.Class.extend({
  * Manage the visibility of snippets on mobile.
  */
 options.registry.MobileVisibility = options.Class.extend({
+    isTopOption: true,
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async updateUI() {
+        await this._super(...arguments);
+        const $button = this.$el.find('we-button');
+        $button.attr('title', $button.hasClass('active') ? _t("Visible on mobile") : _t("Hidden on mobile"));
+    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -2312,6 +2425,29 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
 
         $content.empty().append($template);
     },
+    /**
+     * @override
+     */
+    onTargetShow: async function () {
+        // @see this.onTargetHide
+        this.$target.parent('#website_cookies_bar').show();
+        this._super(...arguments);
+
+    },
+    /**
+     * @override
+     */
+    onTargetHide: async function () {
+        // We hide the parent because contenteditable="true" would force the bar to stay visible in hidden mode.
+        this.$target.parent('#website_cookies_bar').hide();
+        this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    cleanForSave: function () {
+        this.$target.parent('#website_cookies_bar').show();
+    },
 });
 
 /**
@@ -2605,7 +2741,7 @@ options.registry.ReplaceImage = options.Class.extend({
 
         return this._super(...arguments);
     },
-    
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------

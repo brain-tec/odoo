@@ -11,6 +11,7 @@ import datetime
 import hmac as hmac_lib
 import hashlib
 import io
+import itertools
 import os
 import pickle as pickle_
 import re
@@ -168,7 +169,7 @@ def file_path(file_path, filter_ext=('',)):
         # final path sep required to avoid partial match
         parent_path = os.path.normpath(os.path.normcase(addons_dir)) + os.sep
         fpath = (normalized_path if is_abs else
-                 os.path.normpath(os.path.normcase(os.path.join(parent_path, file_path))))
+                 os.path.normpath(os.path.normcase(os.path.join(parent_path, normalized_path))))
         if fpath.startswith(parent_path) and os.path.exists(fpath):
             return fpath
 
@@ -1013,18 +1014,34 @@ class StackMap(MutableMapping):
 class OrderedSet(MutableSet):
     """ A set collection that remembers the elements first insertion order. """
     __slots__ = ['_map']
+
     def __init__(self, elems=()):
-        self._map = OrderedDict((elem, None) for elem in elems)
+        self._map = dict.fromkeys(elems)
+
     def __contains__(self, elem):
         return elem in self._map
+
     def __iter__(self):
         return iter(self._map)
+
     def __len__(self):
         return len(self._map)
+
     def add(self, elem):
         self._map[elem] = None
+
     def discard(self, elem):
         self._map.pop(elem, None)
+
+    def update(self, elems):
+        self._map.update(zip(elems, itertools.repeat(None)))
+
+    def difference_update(self, elems):
+        for elem in elems:
+            self.discard(elem)
+
+    def __repr__(self):
+        return f'{type(self).__name__}({list(self)!r})'
 
 
 class LastOrderedSet(OrderedSet):
@@ -1335,7 +1352,8 @@ def format_time(env, value, tz=False, time_format='medium', lang_code=False):
 
         :param value: the time to format
         :type value: `datetime.time` instance. Could be timezoned to display tzinfo according to format (e.i.: 'full' format)
-        :param format: one of “full”, “long”, “medium”, or “short”, or a custom date/time pattern
+        :param tz: name of the timezone  in which the given datetime should be localized
+        :param time_format: one of “full”, “long”, “medium”, or “short”, or a custom time pattern
         :param lang_code: ISO
 
         :rtype str
@@ -1343,12 +1361,25 @@ def format_time(env, value, tz=False, time_format='medium', lang_code=False):
     if not value:
         return ''
 
+    if isinstance(value, datetime.time):
+        localized_datetime = value
+    else:
+        if isinstance(value, str):
+            value = odoo.fields.Datetime.from_string(value)
+        tz_name = tz or env.user.tz or 'UTC'
+        utc_datetime = pytz.utc.localize(value, is_dst=False)
+        try:
+            context_tz = pytz.timezone(tz_name)
+            localized_datetime = utc_datetime.astimezone(context_tz)
+        except Exception:
+            localized_datetime = utc_datetime
+
     lang = get_lang(env, lang_code)
     locale = babel_locale_parse(lang.code)
     if not time_format:
         time_format = posix_to_ldml(lang.time_format, locale=locale)
 
-    return babel.dates.format_time(value, format=time_format, locale=locale)
+    return babel.dates.format_time(localized_datetime, format=time_format, locale=locale)
 
 
 def _format_time_ago(env, time_delta, lang_code=False, add_direction=True):

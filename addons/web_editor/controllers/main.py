@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import io
+import json
 import logging
 import re
 import time
@@ -18,7 +19,7 @@ from odoo.exceptions import UserError
 from odoo.modules.module import get_module_path, get_resource_path
 from odoo.tools.misc import file_open
 
-from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
+from ..models.ir_attachment import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_IMAGE_MIMETYPES
 
 logger = logging.getLogger(__name__)
 DEFAULT_LIBRARY_ENDPOINT = 'https://media-api.odoo.com'
@@ -163,11 +164,21 @@ class Web_Editor(http.Controller):
         return True
 
     @http.route('/web_editor/attachment/add_data', type='json', auth='user', methods=['POST'], website=True)
-    def add_data(self, name, data, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
-        try:
-            data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
-        except UserError:
-            pass  # not an image
+    def add_data(self, name, data, is_image, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
+        if is_image:
+            format_error_msg = _("Uploaded image's format is not supported. Try with: %s", ', '.join(SUPPORTED_IMAGE_EXTENSIONS))
+            try:
+                data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
+                img_extension = tools.base64_to_image(data).format.lower()
+                if img_extension not in [ext.replace('.', '') for ext in SUPPORTED_IMAGE_EXTENSIONS]:
+                    return {'error': format_error_msg}
+            except UserError:
+                # considered as an image by the brower file input, but not
+                # recognized as such by PIL, eg .webp
+                return {'error': format_error_msg}
+            except ValueError as e:
+                return {'error': e.args[0]}
+
         self._clean_context()
         attachment = self._attachment_create(name=name, data=data, res_id=res_id, res_model=res_model)
         return attachment._get_media_info()
@@ -243,6 +254,10 @@ class Web_Editor(http.Controller):
 
     def _attachment_create(self, name='', data=False, url=False, res_id=False, res_model='ir.ui.view'):
         """Create and return a new attachment."""
+        if name.lower().endswith('.bmp'):
+            # Avoid mismatch between content type and mimetype, see commit msg
+            name = name[:-4]
+
         if not name and url:
             name = url.split("/").pop()
 
@@ -341,7 +356,8 @@ class Web_Editor(http.Controller):
         url_infos = dict()
         for v in views:
             for asset_call_node in etree.fromstring(v["arch"]).xpath("//t[@t-call-assets]"):
-                if asset_call_node.get(resources_type_info['t_call_assets_attribute']) == "false":
+                attr = asset_call_node.get(resources_type_info['t_call_assets_attribute'])
+                if attr and not json.loads(attr.lower()):
                     continue
                 asset_name = asset_call_node.get("t-call-assets")
 
@@ -372,10 +388,7 @@ class Web_Editor(http.Controller):
                 # scss data is returned sorted by bundle, with the bundles
                 # names and xmlids
                 if len(files_data):
-                    files_data_by_bundle.append([
-                        {'xmlid': asset_name, 'name': request.env.ref(asset_name).name},
-                        files_data
-                    ])
+                    files_data_by_bundle.append([asset_name, files_data])
 
         # Filter bundles/files:
         # - A file which appears in multiple bundles only appears in the
@@ -386,8 +399,8 @@ class Web_Editor(http.Controller):
             bundle_1 = files_data_by_bundle[i]
             for j in range(0, len(files_data_by_bundle)):
                 bundle_2 = files_data_by_bundle[j]
-                # In unwanted bundles, keep only the files which are in wanted bundles too (_assets_helpers)
-                if bundle_1[0]["xmlid"] not in bundles_restriction and bundle_2[0]["xmlid"] in bundles_restriction:
+                # In unwanted bundles, keep only the files which are in wanted bundles too (web._helpers)
+                if bundle_1[0] not in bundles_restriction and bundle_2[0] in bundles_restriction:
                     bundle_1[1] = [item_1 for item_1 in bundle_1[1] if item_1 in bundle_2[1]]
         for i in range(0, len(files_data_by_bundle)):
             bundle_1 = files_data_by_bundle[i]
@@ -400,7 +413,7 @@ class Web_Editor(http.Controller):
         # Only keep bundles which still have files and that were requested
         files_data_by_bundle = [
             data for data in files_data_by_bundle
-            if (len(data[1]) > 0 and (not bundles_restriction or data[0]["xmlid"] in bundles_restriction))
+            if (len(data[1]) > 0 and (not bundles_restriction or data[0] in bundles_restriction))
         ]
 
         # Fetch the arch of each kept file, in each bundle
@@ -425,7 +438,7 @@ class Web_Editor(http.Controller):
         return files_data_by_bundle
 
     @http.route("/web_editor/save_asset", type="json", auth="user", website=True)
-    def save_asset(self, url, bundle_xmlid, content, file_type):
+    def save_asset(self, url, bundle, content, file_type):
         """
         Save a given modification of a scss/js file.
 
@@ -433,18 +446,18 @@ class Web_Editor(http.Controller):
             url (str):
                 the original url of the scss/js file which has to be modified
 
-            bundle_xmlid (str):
-                the xmlid of the bundle in which the scss/js file addition can
+            bundle (str):
+                the name of the bundle in which the scss/js file addition can
                 be found
 
             content (str): the new content of the scss/js file
 
             file_type (str): 'scss' or 'js'
         """
-        request.env['web_editor.assets'].save_asset(url, bundle_xmlid, content, file_type)
+        request.env['web_editor.assets'].save_asset(url, bundle, content, file_type)
 
     @http.route("/web_editor/reset_asset", type="json", auth="user", website=True)
-    def reset_asset(self, url, bundle_xmlid):
+    def reset_asset(self, url, bundle):
         """
         The reset_asset route is in charge of reverting all the changes that
         were done to a scss/js file.
@@ -453,11 +466,11 @@ class Web_Editor(http.Controller):
             url (str):
                 the original URL of the scss/js file to reset
 
-            bundle_xmlid (str):
-                the xmlid of the bundle in which the scss/js file addition can
+            bundle (str):
+                the name of the bundle in which the scss/js file addition can
                 be found
         """
-        request.env['web_editor.assets'].reset_asset(url, bundle_xmlid)
+        request.env['web_editor.assets'].reset_asset(url, bundle)
 
     @http.route("/web_editor/public_render_template", type="json", auth="public", website=True)
     def public_render_template(self, args):

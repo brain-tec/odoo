@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Belgium - E-Invoicing (UBL 2.0, e-fff)',
+    'icon': '/l10n_be/static/description/icon.png',
     'version': '0.1',
     'category': 'Accounting/Localizations/EDI',
     'summary': 'E-Invoicing, Universal Business Language (UBL 2.0), e-fff protocol',
@@ -13,7 +14,8 @@ Belgian e-invoicing uses the UBL 2.0 using the e-fff protocol.
     """,
     'depends': ['l10n_be', 'account_edi_ubl'],
     'data': [
-        'data/account_edi_data.xml'
+        'data/account_edi_data.xml',
+        'data/ubl_templates.xml',
     ],
     'installable': True,
     'auto_install': True,

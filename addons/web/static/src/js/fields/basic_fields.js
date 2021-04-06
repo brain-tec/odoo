@@ -781,6 +781,16 @@ var FieldDateRange = InputField.extend({
         });
     },
 
+    /**
+     * @private
+     * @override
+     */
+     _quickEdit: function () {
+        if (this.$el) {
+            this.$el.click()
+        }
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -1695,6 +1705,9 @@ var UrlWidget = InputField.extend({
      * @private
      */
     _renderReadonly: function () {
+        if (!this.value) {
+            return;
+        }
         let href = this.value;
         if (this.value && !this.websitePath) {
             const regex = /^(?:[fF]|[hH][tT])[tT][pP][sS]?:\/\//;
@@ -2629,6 +2642,32 @@ var StateSelectionWidget = AbstractField.extend({
         this._setValue(value);
         if (this.mode === 'edit') {
             this._render();
+        }
+    },
+});
+
+const ListStateSelectionWidget = StateSelectionWidget.extend({
+    /**
+     * display the label next to the icon
+     * @override
+     */
+    _render() {
+        this._super.apply(this, arguments);
+
+        const hideLabel = utils.toBoolElse(this.nodeOptions.hide_label || '', false);
+        if (!hideLabel) {
+            const states = this._prepareDropdownValues();
+            const currentState = states.find(state => state.name === this.value) || states[0];
+            const statusEL = this.el.querySelector('.o_status_label');
+            if (statusEL) {
+                statusEL.innerText = currentState.state_name;
+            } else {
+                const labelEL = Object.assign(document.createElement('span'), {
+                    innerText: currentState.state_name,
+                    className: 'o_status_label align-middle',
+                });
+                this.el.appendChild(labelEL);
+            }
         }
     },
 });
@@ -3814,6 +3853,7 @@ return {
     AttachmentImage: AttachmentImage,
     LabelSelection: LabelSelection,
     StateSelectionWidget: StateSelectionWidget,
+    ListStateSelectionWidget: ListStateSelectionWidget,
     FavoriteWidget: FavoriteWidget,
     PriorityWidget: PriorityWidget,
     StatInfo: StatInfo,

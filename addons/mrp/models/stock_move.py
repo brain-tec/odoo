@@ -219,7 +219,7 @@ class StockMove(models.Model):
             if not move.picking_type_id or (move.production_id and move.production_id.product_id == move.product_id):
                 moves_ids_to_return.add(move.id)
                 continue
-            bom = self.env['mrp.bom'].sudo()._bom_find(product=move.product_id, company_id=move.company_id.id, bom_type='phantom')
+            bom = self.env['mrp.bom'].sudo()._bom_find(move.product_id, company_id=move.company_id.id, bom_type='phantom')[move.product_id]
             if not bom:
                 moves_ids_to_return.add(move.id)
                 continue
@@ -401,3 +401,10 @@ class StockMove(models.Model):
             self.move_line_ids = self._set_quantity_done_prepare_vals(new_qty)
         else:
             self.quantity_done = new_qty
+
+    def _update_candidate_moves_list(self, candidate_moves_list):
+        super()._update_candidate_moves_list(candidate_moves_list)
+        for production in self.mapped('raw_material_production_id'):
+            candidate_moves_list.append(production.move_raw_ids)
+        for production in self.mapped('production_id'):
+            candidate_moves_list.append(production.move_finished_ids)

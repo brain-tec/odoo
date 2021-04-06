@@ -139,7 +139,7 @@ def trigger_tree_merge(node1, node2):
     """ Merge two trigger trees. """
     for key, val in node2.items():
         if key is None:
-            node1.setdefault(None, set())
+            node1.setdefault(None, OrderedSet())
             node1[None].update(val)
         else:
             node1.setdefault(key, {})
@@ -1230,10 +1230,16 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             type = 'warning' if isinstance(exception, Warning) else 'error'
             # logs the logical (not human-readable) field name for automated
             # processing of response, but injects human readable in message
-            exc_vals = dict(base, record=record, field=field_names[field])
+            field_name = field_names[field]
+            exc_vals = dict(base, record=record, field=field_name)
             record = dict(base, type=type, record=record, field=field,
                           message=str(exception.args[0]) % exc_vals)
-            if len(exception.args) > 1 and exception.args[1]:
+            # ensure to add field_name to the exception. Used in import to concatenate multiple errors in the same block
+            if len(exception.args) > 1:
+                if not exception.args[1]:
+                    exception.args = (exception.args[0], {'field_name': field_name})
+                else:
+                    exception.args[1]['field_name'] = field_name
                 record.update(exception.args[1])
             log(record)
 
@@ -3918,9 +3924,9 @@ Fields:
         quote = '"{}"'.format
 
         # insert rows
-        ids = []                        # ids of created records
-        other_fields = set()            # non-column fields
-        translated_fields = set()       # translated fields
+        ids = []                                # ids of created records
+        other_fields = OrderedSet()             # non-column fields
+        translated_fields = OrderedSet()        # translated fields
 
         for data in data_list:
             # determine column values

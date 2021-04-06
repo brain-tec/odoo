@@ -54,11 +54,11 @@ odoo.define('website_sale.editor', function (require) {
 
 var options = require('web_editor.snippets.options');
 var publicWidget = require('web.public.widget');
-const {Class: EditorMenuBar} = require('web_editor.editor');
+const Wysiwyg = require('web_editor.wysiwyg');
 const {qweb, _t} = require('web.core');
 
-EditorMenuBar.include({
-    custom_events: Object.assign(EditorMenuBar.prototype.custom_events, {
+Wysiwyg.include({
+    custom_events: Object.assign(Wysiwyg.prototype.custom_events, {
         get_ribbons: '_onGetRibbons',
         get_ribbon_classes: '_onGetRibbonClasses',
         delete_ribbon: '_onDeleteRibbon',
@@ -88,7 +88,7 @@ EditorMenuBar.include({
     /**
      * @override
      */
-    async save() {
+    async _saveViewBlocks() {
         const _super = this._super.bind(this);
         await this._saveRibbons();
         return _super(...arguments);
@@ -693,31 +693,6 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 y: y,
             },
         }).then(reload);
-    },
-});
-
-options.registry.ProductsRecentlyViewed = options.Class.extend({
-    /**
-     * @override
-     */
-    onBuilt: function () {
-        this.displayNotification({
-            type: 'info',
-            title: '',
-            message: _t('The snippet will be visible once one has seen one product'),
-        });
-    },
-    /**
-     * @override
-     */
-    onTargetShow: async function () {
-        this.$target.removeClass('d-none');
-    },
-    /**
-     * @override
-     */
-    onTargetHide: function () {
-        this.$target.addClass('d-none');
     },
 });
 });

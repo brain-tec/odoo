@@ -153,7 +153,7 @@
                                     Let your customers log in to see their documents
                                 </div>
                                 <div class="mt8">
-                                    <field name="auth_signup_uninvited" class="o_light_label" widget="radio" required="True"/>
+                                    <field name="auth_signup_uninvited" class="o_light_label" widget="radio" options="{'horizontal': true}" required="True"/>
                                 </div>
                             </div>
                         </div>
@@ -419,7 +419,7 @@
                                     Product used for down payments
                                 </div>
                                 <div class="text-muted">
-                                    <field name="deposit_default_product_id"/>
+                                    <field name="deposit_default_product_id" context="{'default_type': 'service'}"/>
                                 </div>
                             </div>
                         </div>

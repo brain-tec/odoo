@@ -148,10 +148,38 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
 
     return env['res.users'].with_context(**context).create(create_values)
 
+
+class RecordCapturer:
+    def __init__(self, model, domain):
+        self._model = model
+        self._domain = domain
+
+    def __enter__(self):
+        self._before = self._model.search(self._domain)
+        self._after = None
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if exc_type is None:
+            self._after = self._model.search(self._domain) - self._before
+
+    @property
+    def records(self):
+        if self._after is None:
+            return self._model.search(self._domain) - self._before
+        return self._after
+
 # ------------------------------------------------------------
 # Main classes
 # ------------------------------------------------------------
 class OdooSuite(unittest.suite.TestSuite):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from odoo.http import root
+        if not root._loaded:
+            root.load_addons()
+            root._loaded = True
 
     if sys.version_info < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
@@ -259,6 +287,27 @@ class MetaCase(type):
             cls.test_module = cls.__module__.split('.')[2]
             cls.test_class = cls.__name__
             cls.test_sequence = 0
+
+
+def _normalize_arch_for_assert(arch_string, parser_method="xml"):
+    """Takes some xml and normalize it to make it comparable to other xml
+    in particular, blank text is removed, and the output is pretty-printed
+    :param arch_string: the string representing an XML arch
+    :type arch_string: str
+    :param parser_method: an string representing which lxml.Parser class to use
+        when normalizing both archs. Takes either "xml" or "html"
+    :type parser_method: str
+    :return: the normalized arch
+    :rtype str:
+    """
+    Parser = None
+    if parser_method == 'xml':
+        Parser = etree.XMLParser
+    elif parser_method == 'html':
+        Parser = etree.HTMLParser
+    parser = Parser(remove_blank_text=True)
+    arch_string = etree.fromstring(arch_string, parser=parser)
+    return etree.tostring(arch_string, pretty_print=True, encoding='unicode')
 
 
 class BaseCase(unittest.TestCase, metaclass=MetaCase):
@@ -585,6 +634,28 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
 
         for c1, c2 in izip_longest(n1, n2):
             self.assertTreesEqual(c1, c2, msg)
+
+    def _assertXMLEqual(self, original, expected, parser="xml"):
+        """Asserts that two xmls archs are equal
+        :param original: the xml arch to test
+        :type original: str
+        :param expected: the xml arch of reference
+        :type expected: str
+        :param parser: an string representing which lxml.Parser class to use
+            when normalizing both archs. Takes either "xml" or "html"
+        :type parser: str
+        """
+        if original:
+            original = _normalize_arch_for_assert(original, parser)
+        if expected:
+            expected = _normalize_arch_for_assert(expected, parser)
+        self.assertEqual(original, expected)
+
+    def assertXMLEqual(self, original, expected):
+        return self._assertXMLEqual(original, expected)
+
+    def assertHTMLEqual(self, original, expected):
+        return self._assertXMLEqual(original, expected, 'html')
 
 
 savepoint_seq = itertools.count()

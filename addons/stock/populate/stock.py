@@ -67,11 +67,34 @@ class Warehouse(models.Model):
         ]
 
 
+class StorageCategory(models.Model):
+    _inherit = 'stock.storage.category'
+
+    _populate_sizes = {'small': 10, 'medium': 20, 'large': 50}
+
+    def _populate(self, size):
+        # Activate options used in the stock populate to have a ready Database
+
+        self.env['res.config.settings'].create({
+            'group_stock_storage_categories': True,  # Activate storage categories
+        }).execute()
+
+        return super()._populate(size)
+
+    def _populate_factories(self):
+
+        return [
+            ('name', populate.constant("SC-{counter}")),
+            ('max_weight', populate.iterate([10, 100, 500, 1000])),
+            ('allow_new_product', populate.randomize(['empty', 'same', 'mixed'], [0.1, 0.1, 0.8])),
+        ]
+
+
 class Location(models.Model):
     _inherit = 'stock.location'
 
     _populate_sizes = {'small': 50, 'medium': 2_000, 'large': 50_000}
-    _populate_dependencies = ['stock.warehouse']
+    _populate_dependencies = ['stock.warehouse', 'stock.storage.category']
 
     def _populate(self, size):
         locations = super()._populate(size)
@@ -132,19 +155,75 @@ class Location(models.Model):
         # Change 20 % the usage of some no-leaf location into 'view' (instead of 'internal')
         to_views = locations_sample.filtered_domain([('child_ids', '!=', [])]).ids
         random = populate.Random('stock_location_views')
-        self.browse(random.sample(to_views, int(len(to_views) * 0.1))).usage = 'view'
+        view_locations = self.browse(random.sample(to_views, int(len(to_views) * 0.1)))
+        view_locations.write({
+            'usage': 'view',
+            'storage_category_id': False,
+        })
 
         return locations
 
     def _populate_factories(self):
         company_ids = self.env.registry.populated_models['res.company'][:COMPANY_NB_WITH_STOCK]
         removal_strategies = self.env['product.removal'].search([])
+        storage_category_ids = self.env.registry.populated_models['stock.storage.category']
+
+        def get_storage_category_id(values, counter, random):
+            if random.random() > 0.5:
+                return random.choice(storage_category_ids)
+            return False
 
         return [
             ('name', populate.constant("Loc-{counter}")),
             ('usage', populate.constant('internal')),
             ('removal_strategy_id', populate.randomize(removal_strategies.ids + [False])),
             ('company_id', populate.iterate(company_ids)),
+            ('storage_category_id', populate.compute(get_storage_category_id)),
+        ]
+
+
+class StockPutawayRule(models.Model):
+    _inherit = 'stock.putaway.rule'
+
+    _populate_sizes = {'small': 10, 'medium': 20, 'large': 50}
+    _populate_dependencies = ['stock.location', 'product.product']
+
+    def _populate_factories(self):
+        company_ids = self.env.registry.populated_models['res.company'][:COMPANY_NB_WITH_STOCK]
+        product_ids = self.env['product.product'].browse(self.env.registry.populated_models['product.product']).filtered(lambda p: p.type == 'product').ids
+        product_categ_ids = self.env.registry.populated_models['product.category']
+        storage_categ_ids = self.env.registry.populated_models['stock.storage.category']
+        location_ids = self.env['stock.location'].browse(self.env.registry.populated_models['stock.location']).filtered(lambda loc: loc.usage == 'internal')
+
+        def get_product_id(values, counter, random):
+            if random.random() > 0.5:
+                return random.choice(product_ids)
+            return False
+
+        def get_category_id(values, counter, random):
+            if not values['product_id']:
+                return random.choice(product_categ_ids)
+            return False
+
+        def get_location_in_id(values, counter, random):
+            locations = location_ids.filtered(lambda loc: loc.company_id.id == values['company_id'])
+            return random.choice(locations.ids)
+
+        def get_location_out_id(values, counter, random):
+            child_locs = self.env['stock.location'].search([
+                ('id', 'child_of', values['location_in_id']),
+                ('usage', '=', 'internal')
+            ]) + self.env['stock.location'].browse(values['location_in_id'])
+            return random.choice(child_locs.ids)
+
+        return [
+            ('company_id', populate.randomize(company_ids)),
+            ('product_id', populate.compute(get_product_id)),
+            ('category_id', populate.compute(get_category_id)),
+            ('location_in_id', populate.compute(get_location_in_id)),
+            ('location_out_id', populate.compute(get_location_out_id)),
+            ('sequence', populate.randint(1, 1000)),
+            ('storage_category_id', populate.randomize(storage_categ_ids)),
         ]
 
 
@@ -224,139 +303,6 @@ class StockWarehouseOrderpoint(models.Model):
         ]
 
 
-class Inventory(models.Model):
-    _inherit = 'stock.inventory'
-
-    _populate_sizes = {'small': 5, 'medium': 10, 'large': 20}
-    _populate_dependencies = ['stock.location']
-
-    def _populate(self, size):
-        inventories = super()._populate(size)
-
-        def start_inventory_sample(sample_ratio):
-            random = populate.Random('start_inventory_sample')
-            inventories_to_start = self.browse(random.sample(inventories.ids, int(len(inventories.ids) * sample_ratio)))
-            # Start empty to let the stock.inventory.line populate create lines
-            inventories_to_start.start_empty = True
-            for inventory in inventories_to_start:
-                inventory.action_start()
-
-        # Start 80 % of adjustment inventory
-        start_inventory_sample(0.8)
-
-        return inventories
-
-    def _populate_factories(self):
-
-        company_ids = self.env.registry.populated_models['res.company'][:COMPANY_NB_WITH_STOCK]
-        valid_locations = self.env['stock.location'].search([
-            ('company_id', 'in', company_ids),
-            ('usage', 'in', ['internal', 'transit'])
-        ])
-        locations_by_company = dict(groupby(valid_locations, key=lambda loc: loc.company_id.id))
-        locations_by_company = {company_id: self.env['stock.location'].concat(*locations) for company_id, locations in locations_by_company.items()}
-        products = self.env['product.product'].browse(self.env.registry.populated_models['product.product']).filtered(lambda p: p.type == 'product')
-
-        def get_locations_ids(values, counter, random):
-            location_ids_company = locations_by_company[values['company_id']]
-            # We set locations to ease the creation of stock.inventory.line
-            # Should be larger enough to avoid the emptiness of generator_product_loc_dict
-            return random.sample(location_ids_company.ids, int(len(location_ids_company.ids) * 0.5))
-
-        def get_product_ids(values, counter, random):
-            # We set products to ease the creation of stock.inventory.line
-            # Should be larger enough to avoid the emptiness of generator_product_loc_dict
-            return random.sample(products.ids, int(len(products.ids) * 0.5))
-
-        return [
-            ('name', populate.constant("Inventory-Pop-{counter}")),
-            ('company_id', populate.iterate(company_ids)),
-            ('location_ids', populate.compute(get_locations_ids)),
-            ('product_ids', populate.compute(get_product_ids)),
-        ]
-
-
-class InventoryLine(models.Model):
-    _inherit = 'stock.inventory.line'
-
-    _populate_sizes = {'small': 500, 'medium': 5_000, 'large': 20_000}
-    _populate_dependencies = ['stock.inventory']
-
-    def _populate(self, size):
-        inventory_lines = super()._populate(size)
-
-        def create_missing_lots():
-            _logger.info("Create lot/serial for inventory line to be ready to validate")
-            lots_values = []
-            for line in inventory_lines:
-                if line.product_tracking == 'none':
-                    continue
-                lots_values.append({
-                    'name': "InLine-%d" % line.id,
-                    'product_id': line.product_id.id,
-                    'company_id': line.inventory_id.company_id.id
-                })
-            lots = self.env['stock.production.lot'].create(lots_values).ids[::-1]
-            for line in inventory_lines:
-                if line.product_tracking == 'none':
-                    continue
-                line.prod_lot_id = lots.pop()
-
-        def validate_inventory_sample(sample_ratio):
-            # Validate the inventory adjustment, useful to have a stock at beginning
-            inventories_ids = inventory_lines.inventory_id.ids
-            random = populate.Random('validate_inventory')
-            inventories_to_done = self.env['stock.inventory'].browse(random.sample(inventories_ids, int(len(inventories_ids) * sample_ratio)))
-            _logger.info("Validate %d inventory adjustment" % len(inventories_to_done))
-            for inventory in inventories_to_done:
-                inventory.action_validate()
-
-        # Create missing tracking lot/serial in batch
-        create_missing_lots()
-
-        # (Un)comment to test a DB with a current stock.
-        # validate_inventory_sample(0.8)
-
-        return inventory_lines
-
-    def _populate_factories(self):
-
-        inventories = self.env['stock.inventory'].browse(self.env.registry.populated_models['stock.inventory'])
-        inventories = inventories.filtered(lambda i: i.state == 'confirm')
-
-        def compute_product_location(iterator, field_name, model_name):
-            random = populate.Random('compute_product_location')
-
-            # To avoid create twice the same line inventory (avoid _check_no_duplicate_line) : product/location (limitation for lot)
-            # Use generator to avoid cartisian product in memory
-            generator_product_loc_dict = {}
-            for inventory in inventories:
-                # TODO: randomize cartesian product
-                generator_product_loc_dict[inventory.id] = cartesian_product(
-                    random.sample(inventory.location_ids, len(inventory.location_ids)),
-                    random.sample(inventory.product_ids, len(inventory.product_ids))
-                )
-
-            for values in iterator:
-                loc_id, product = next(generator_product_loc_dict[values['inventory_id']])
-                values['product_id'] = product.id
-                values['location_id'] = loc_id.id
-                yield values
-
-        def get_product_qty(values, counter, random):
-            product = self.env['product.product'].browse(values['product_id'])
-            if product.tracking == 'serial':
-                return 1.0
-            else:
-                return random.randint(5, 25)
-
-        return [
-            ('inventory_id', populate.iterate(inventories.ids)),
-            ('_compute_product_location', compute_product_location),
-            ('product_qty', populate.compute(get_product_qty)),
-        ]
-
-
 class PickingType(models.Model):
     _inherit = 'stock.picking.type'
 
@@ -380,7 +326,7 @@ class PickingType(models.Model):
                 locations_company = locations_by_company[values['company_id']]
                 # TODO : choice only location child of warehouse.lot_stock_id
                 inter_location = random.choice(locations_company)
-                values['warehouse_id'] = inter_location.get_warehouse().id
+                values['warehouse_id'] = inter_location.warehouse_id.id
                 if values['code'] == 'internal':
                     values['default_location_src_id'] = inter_location.id
                     values['default_location_dest_id'] = random.choice(locations_company - inter_location).id
@@ -497,7 +443,7 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     _populate_sizes = {'small': 1_000, 'medium': 20_000, 'large': 1_000_000}
-    _populate_dependencies = ['stock.picking']
+    _populate_dependencies = ['stock.picking', 'product.product']
 
     def _populate(self, size):
         moves = super()._populate(size)

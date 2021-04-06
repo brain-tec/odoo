@@ -2,6 +2,7 @@ odoo.define('web.relational_fields_tests', function (require) {
 "use strict";
 
 var AbstractStorageService = require('web.AbstractStorageService');
+var FormController = require('web.FormController');
 var FormView = require('web.FormView');
 var ListView = require('web.ListView');
 var RamStorage = require('web.RamStorage');
@@ -531,7 +532,7 @@ QUnit.module('relational_fields', {
     });
 
     QUnit.test('one2many, onchange, edition and multipage...', async function (assert) {
-        assert.expect(7);
+        assert.expect(8);
 
         this.data.partner.onchanges = {
             turtles: function (obj) {
@@ -562,6 +563,7 @@ QUnit.module('relational_fields', {
             },
         });
         await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+        await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
         await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
 
         assert.verifySteps([
@@ -569,6 +571,7 @@ QUnit.module('relational_fields', {
             'read turtle',
             'onchange turtle',
             'onchange partner',
+            "onchange partner",
             'onchange turtle',
             'onchange partner',
         ]);

@@ -21,6 +21,10 @@ var FormController = BasicController.extend({
         quick_edit: '_onQuickEdit',
     }),
     /**
+     * Time between multiple clicks (used to detect double click text selection)
+     */
+    multiClickTime: 350,
+    /**
      * @override
      *
      * @param {boolean} params.hasActionMenus
@@ -35,6 +39,9 @@ var FormController = BasicController.extend({
         this.defaultButtons = params.defaultButtons;
         this.hasActionMenus = params.hasActionMenus;
         this.toolbarActions = params.toolbarActions || {};
+        // Quick edit is delayed by `multiClickTime` time. If a subsequent click
+        // happens within this time, the quick edit is aborted.
+        this.quickEditTimeout = undefined;
     },
     /**
      * Called each time the form view is attached into the DOM
@@ -689,11 +696,21 @@ var FormController = BasicController.extend({
      * @private
      * @param {OdooEvent} ev
      */
-    _onQuickEdit: async function (ev) {
+    _onQuickEdit: function (ev) {
         ev.stopPropagation();
-        if (this.activeActions.edit) {
-            await this._setEditMode();
-            this.renderer.quickEdit(ev.data);
+        clearTimeout(this.quickEditTimeout);
+        if (this.activeActions.edit && !window.getSelection().toString()) {
+            const quickEdit = async () => {
+                if (!this.isDestroyed()) {
+                    await this._setEditMode();
+                    this.renderer.quickEdit(ev.data);
+                }
+            };
+            if (this.multiClickTime > 0) {
+                this.quickEditTimeout = setTimeout(quickEdit, this.multiClickTime);
+            } else {
+                quickEdit();
+            }
         }
     },
     /**

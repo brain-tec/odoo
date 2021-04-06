@@ -6,6 +6,7 @@ from datetime import datetime
 
 from freezegun import freeze_time
 
+from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.mass_mailing.tests.common import MassMailCommon
 from odoo.tests.common import users, Form
 from odoo.tools import formataddr, mute_logger
@@ -19,7 +20,13 @@ class TestMassMailValues(MassMailCommon):
 
     @users('user_marketing')
     def test_mailing_body_responsive(self):
-        """ Testing mail mailing responsive mail body """
+        """ Testing mail mailing responsive mail body
+
+        Reference: https://litmus.com/community/learning/24-how-to-code-a-responsive-email-from-scratch
+        https://www.campaignmonitor.com/css/link-element/link-in-head/
+
+        This template is meant to put inline CSS into an email's head
+        """
         recipient = self.env['res.partner'].create({
             'name': 'Mass Mail Partner',
             'email': 'Customer <test.customer@example.com>',
@@ -47,6 +54,7 @@ class TestMassMailValues(MassMailCommon):
         self.assertIn('<!DOCTYPE html>', body_html)
         self.assertIn('<head>', body_html)
         self.assertIn('viewport', body_html)
+        # This is important: we need inline css, and not <link/>
         self.assertIn('@media', body_html)
         self.assertIn('I am Responsive body', body_html)
 
@@ -125,7 +133,7 @@ class TestMassMailValues(MassMailCommon):
         self.assertEqual(mailing_form.mailing_model_real, 'res.partner')
 
 
-class TestMassMailFeatures(MassMailCommon):
+class TestMassMailFeatures(MassMailCommon, CronMixinCase):
 
     @classmethod
     def setUpClass(cls):
@@ -176,7 +184,7 @@ class TestMassMailFeatures(MassMailCommon):
         """ Technical test to ensure the cron is triggered at the correct
         time """
 
-        ir_cron_triggers = self.env['ir.cron.trigger'].sudo()
+        cron_id = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').id
         partner = self.env['res.partner'].create({
             'name': 'Jean-Alphonce',
             'email': 'jeanalph@example.com',
@@ -196,17 +204,14 @@ class TestMassMailFeatures(MassMailCommon):
         with freeze_time(now):
             for (test, truth) in [(False, now), (then, then)]:
                 with self.subTest(schedule_date=test):
-                    triggers_before = ir_cron_triggers.search([])
-                    mailing = self.env['mailing.mailing'].create({
-                        **common_mailing_values,
-                        'schedule_date': test,
-                    })
-                    mailing.action_put_in_queue()
-
-                    triggers_after = ir_cron_triggers.search([])
-                    new_triggers = triggers_after - triggers_before
-                    new_triggers.ensure_one()
-                    self.assertLessEqual(new_triggers.call_at, truth)
+                    with self.capture_triggers(cron_id) as capt:
+                        mailing = self.env['mailing.mailing'].create({
+                            **common_mailing_values,
+                            'schedule_date': test,
+                        })
+                        mailing.action_put_in_queue()
+                    capt.records.ensure_one()
+                    self.assertLessEqual(capt.records.call_at, truth)
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')

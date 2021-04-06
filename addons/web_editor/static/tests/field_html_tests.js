@@ -2,6 +2,7 @@ odoo.define('web_editor.field_html_tests', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
+var FormController = require('web.FormController');
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 var weTestUtils = require('web_editor.test_utils');
@@ -202,12 +203,6 @@ QUnit.module('web_editor', {}, function () {
                 res_id: 1,
             });
 
-            // Summernote needs a RootWidget to set as parent of the ColorPaletteWidget. In the
-            // tests, there is no RootWidget, so we set it here to the parent of the form view, which
-            // can act as RootWidget, as it will honor rpc requests correctly (to the MockServer).
-            const rootWidget = odoo.__DEBUG__.services['root.widget'];
-            odoo.__DEBUG__.services['root.widget'] = form.getParent();
-
             await testUtils.form.clickEdit(form);
             var $field = form.$('.oe_form_field[name="body"]');
 
@@ -216,12 +211,13 @@ QUnit.module('web_editor', {}, function () {
             Wysiwyg.setRange(pText, 1, pText, 10);
             // text is selected
 
-            var range = Wysiwyg.getRange($field[0]);
+            var range = Wysiwyg.getRange();
+
             assert.strictEqual(range.sc, pText,
                 "should select the text");
 
             async function openColorpicker(selector) {
-                const $colorpicker = $field.find(selector);
+                const $colorpicker = $(selector);
                 const openingProm = new Promise(resolve => {
                     $colorpicker.one('shown.bs.dropdown', () => resolve());
                 });
@@ -229,17 +225,18 @@ QUnit.module('web_editor', {}, function () {
                 return openingProm;
             }
 
-            await openColorpicker('.note-toolbar .note-back-color-preview');
-            assert.ok($field.find('.note-back-color-preview').hasClass('show'),
+
+            await openColorpicker('#toolbar .note-back-color-preview');
+            assert.ok($('.note-back-color-preview').hasClass('show'),
                 "should display the color picker");
 
-            await testUtils.dom.click($field.find('.note-toolbar .note-back-color-preview .o_we_color_btn[style="background-color:#00FFFF;"]'));
+            await testUtils.dom.click($('#toolbar .note-back-color-preview .o_we_color_btn[style="background-color:#00FFFF;"]'));
 
             assert.ok(!$field.find('.note-back-color-preview').hasClass('show'),
                 "should close the color picker");
 
             assert.strictEqual($field.find('.note-editable').html(),
-                '<p>t<font style="background-color: rgb(0, 255, 255);">oto toto&nbsp;</font>toto</p><p>tata</p>',
+                '<p>t<font style="background-color: rgb(0, 255, 255);">oto toto </font>toto</p><p>tata</p>',
                 "should have rendered the field correctly in edit");
 
             var fontContent = $field.find('.note-editable font').contents()[0];
@@ -249,7 +246,7 @@ QUnit.module('web_editor', {}, function () {
                 ec: fontContent,
                 eo: fontContent.length,
             };
-            range = Wysiwyg.getRange($field[0]);
+            range = Wysiwyg.getRange();
             assert.deepEqual(_.pick(range, 'sc', 'so', 'ec', 'eo'), rangeControl,
                 "should select the text after color change");
 
@@ -258,14 +255,13 @@ QUnit.module('web_editor', {}, function () {
             Wysiwyg.setRange(fontContent, 5, pText, 2);
             // text is selected
 
-            await openColorpicker('.note-toolbar .note-back-color-preview');
-            await testUtils.dom.click($field.find('.note-toolbar .note-back-color-preview .o_we_color_btn.bg-o-color-3'));
+            await openColorpicker('#toolbar .note-back-color-preview');
+            await testUtils.dom.click($('#toolbar .note-back-color-preview .o_we_color_btn.bg-o-color-3'));
 
             assert.strictEqual($field.find('.note-editable').html(),
-                '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font style="" class="bg-o-color-3">oto&nbsp;</font><font class="bg-o-color-3" style="">to</font>to</p><p>tata</p>',
+                '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font style="" class=" bg-o-color-3">oto to</font>to</p><p>tata</p>',
                 "should have rendered the field correctly in edit");
 
-            odoo.__DEBUG__.services['root.widget'] = rootWidget;
             form.destroy();
         });
 
@@ -311,9 +307,11 @@ QUnit.module('web_editor', {}, function () {
             });
 
             var pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 1);
+            Wysiwyg.setRange(pText, 1, pText, 2);
 
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-file-image-o)'));
+            await new Promise((resolve) => setTimeout(resolve));
+
+            await testUtils.dom.click($('#toolbar #media-insert'));
 
             // load static xml file (dialog, media dialog, unsplash image widget)
             await defMediaDialog;
@@ -363,9 +361,9 @@ QUnit.module('web_editor', {}, function () {
             });
 
             var pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 1);
+            Wysiwyg.setRange(pText, 1, pText, 2);
 
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-file-image-o)'));
+            await testUtils.dom.click($('#toolbar #media-insert'));
 
             // load static xml file (dialog, media dialog, unsplash image widget)
             await defMediaDialog;
@@ -376,7 +374,7 @@ QUnit.module('web_editor', {}, function () {
             var $editable = form.$('.oe_form_field[name="body"] .note-editable');
 
             assert.strictEqual($editable.data('wysiwyg').getValue(),
-                '<p>t<span class="fa fa-glass"></span>oto toto toto</p><p>tata</p>',
+                '<p>t<span class="fa fa-glass"></span>to toto toto</p><p>tata</p>',
                 "should have the image in the dom");
 
             testUtils.mock.unpatch(MediaDialog);
@@ -414,8 +412,8 @@ QUnit.module('web_editor', {}, function () {
             });
 
             let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 1);
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-link)'));
+            Wysiwyg.setRange(pText.firstChild, 0, pText.firstChild, pText.firstChild.length);
+            await testUtils.dom.click($('#toolbar #create-link'));
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
             $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
@@ -462,8 +460,8 @@ QUnit.module('web_editor', {}, function () {
             });
 
             let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 1);
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-link)'));
+            Wysiwyg.setRange(pText.firstChild, 0, pText.firstChild, pText.firstChild.length);
+            await testUtils.dom.click($('#toolbar #create-link'));
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
             $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
@@ -510,8 +508,8 @@ QUnit.module('web_editor', {}, function () {
             });
 
             let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 0, pText, "New external link".length);
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-link)'));
+            Wysiwyg.setRange(pText, 0, pText, pText.length);
+            await testUtils.dom.click($('#toolbar #create-link'));
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
             $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
@@ -559,8 +557,8 @@ QUnit.module('web_editor', {}, function () {
             });
 
             let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 0, pText, "New internal link".length);
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-link)'));
+            Wysiwyg.setRange(pText, 0, pText, pText.length);
+            await testUtils.dom.click($('#toolbar #create-link'));
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
             $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
@@ -581,8 +579,8 @@ QUnit.module('web_editor', {}, function () {
 
             $field = form.$('.oe_form_field[name="body"]');
             pText = $field.find('.note-editable a').eq(0).contents()[0];
-            Wysiwyg.setRange(pText, 1);
-            await testUtils.dom.click($field.find('.note-toolbar .note-insert button:has(.fa-link)'));
+            Wysiwyg.setRange(pText, 0, pText, pText.length);
+            await testUtils.dom.click($('#toolbar #create-link'));
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
             $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
@@ -599,7 +597,7 @@ QUnit.module('web_editor', {}, function () {
         });
 
         QUnit.test('save', async function (assert) {
-            assert.expect(1);
+            assert.expect(0);
 
             var form = await testUtils.createView({
                 View: FormView,
@@ -620,26 +618,35 @@ QUnit.module('web_editor', {}, function () {
                 },
             });
             await testUtils.form.clickEdit(form);
-            var $field = form.$('.oe_form_field[name="body"]');
-
-            // select the text
-            var pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText, 1, pText, 10);
-            // text is selected
-
-            async function openColorpicker(selector) {
-                const $colorpicker = $field.find(selector);
-                const openingProm = new Promise(resolve => {
-                    $colorpicker.one('shown.bs.dropdown', () => resolve());
-                });
-                await testUtils.dom.click($colorpicker.find('button:first'));
-                return openingProm;
-            }
-
-            await openColorpicker('.note-toolbar .note-back-color-preview');
-            await testUtils.dom.click($field.find('.note-toolbar .note-back-color-preview .o_we_color_btn.bg-o-color-3'));
-
             await testUtils.form.clickSave(form);
+
+            form.destroy();
+        });
+
+        QUnit.test('Quick Edition: click on link inside html field', async function (assert) {
+            assert.expect(3);
+
+            this.data['note.note'].records[0]['body'] = '<p><a href="#">hello</a> world</p>';
+
+            const form = await testUtils.createView({
+                View: FormView,
+                model: 'note.note',
+                data: this.data,
+                arch: '<form>' +
+                    '<field name="body" widget="html" style="height: 100px"/>' +
+                    '</form>',
+                res_id: 1,
+            });
+
+            assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+            await testUtils.dom.click(form.$('.oe_form_field[name="body"] a'));
+            await testUtils.nextTick();
+            assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+            await testUtils.dom.click(form.$('.oe_form_field[name="body"] p'));
+            await testUtils.nextTick();
+            assert.containsOnce(form, '.o_form_view.o_form_editable');
 
             form.destroy();
         });
@@ -657,6 +664,7 @@ QUnit.module('web_editor', {}, function () {
                     '<field name="body" widget="html" style="height: 100px" options="{\'cssReadonly\': \'template.assets\'}"/>' +
                     '</form>',
                 res_id: 1,
+                debug: 1,
             });
             var $field = form.$('.oe_form_field[name="body"]');
             var $iframe = $field.find('iframe.o_readonly');
@@ -673,9 +681,7 @@ QUnit.module('web_editor', {}, function () {
             await testUtils.form.clickEdit(form);
 
             $field = form.$('.oe_form_field[name="body"]');
-            assert.strictEqual($field.find('.note-editable').html(),
-                '<p>toto toto toto</p><p>tata</p>',
-                "should have rendered the field correctly in edit");
+            assert.strictEqual($field.find('#iframe_target').length, 0);
 
             form.destroy();
         });

@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/attachment_viewer/attachment_viewer.js',
 const useRefs = require('mail/static/src/component_hooks/use_refs/use_refs.js');
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const { link } = require('mail/static/src/model/model_field_command.js');
 
 const { Component, QWeb } = owl;
 const { useRef } = owl.hooks;
@@ -23,6 +24,7 @@ class AttachmentViewer extends Component {
         useShouldUpdateBasedOnProps();
         useStore(props => {
             const attachmentViewer = this.env.models['mail.attachment_viewer'].get(props.localId);
+            const device = this.env.messaging && this.env.messaging.device;
             return {
                 attachment: attachmentViewer && attachmentViewer.attachment
                     ? attachmentViewer.attachment.__state
@@ -31,6 +33,8 @@ class AttachmentViewer extends Component {
                     ? attachmentViewer.attachments.map(attachment => attachment.__state)
                     : [],
                 attachmentViewer: attachmentViewer ? attachmentViewer.__state : undefined,
+                deviceIsMobile: device && device.isMobile,
+                deviceSizeClass: device && device.sizeClass,
             };
         });
         /**
@@ -178,7 +182,7 @@ class AttachmentViewer extends Component {
         );
         const nextIndex = (index + 1) % attachmentViewer.attachments.length;
         attachmentViewer.update({
-            attachment: [['link', attachmentViewer.attachments[nextIndex]]],
+            attachment: link(attachmentViewer.attachments[nextIndex]),
         });
     }
 
@@ -196,7 +200,7 @@ class AttachmentViewer extends Component {
             ? attachmentViewer.attachments.length - 1
             : index - 1;
         attachmentViewer.update({
-            attachment: [['link', attachmentViewer.attachments[nextIndex]]],
+            attachment: link(attachmentViewer.attachments[nextIndex]),
         });
     }
 

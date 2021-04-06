@@ -128,7 +128,8 @@ var FileWidget = SearchableMediaWidget.extend({
     }),
     existingAttachmentsTemplate: undefined,
 
-    IMAGE_MIMETYPES: ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/svg+xml'],
+    IMAGE_MIMETYPES: ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/svg+xml', 'image/gif'],
+    IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.jpe', '.png', '.svg', '.gif'],
     NUMBER_OF_ATTACHMENTS_TO_DISPLAY: 30,
     MAX_DB_ATTACHMENTS: 5,
 
@@ -557,40 +558,52 @@ var FileWidget = SearchableMediaWidget.extend({
      * @private
      * @returns {Promise}
      */
-    _addData: function () {
-        var self = this;
+    async _addData() {
+        let files = this.$fileInput[0].files;
+        if (!files.length) {
+            // Case if the input is emptied, return resolved promise
+            return;
+        }
+
         var uploadMutex = new concurrency.Mutex();
 
         // Upload the smallest file first to block the user the least possible.
-        var files = _.sortBy(this.$fileInput[0].files, 'size');
-
-        _.each(files, function (file) {
+        files = _.sortBy(files, 'size');
+        await this._setUpProgressToast(files);
+        this.hasError = false;
+        _.each(files, (file, index) => {
             // Upload one file at a time: no need to parallel as upload is
             // limited by bandwidth.
-            uploadMutex.exec(function () {
-                return utils.getDataURLFromFile(file).then(function (result) {
-                    return self._rpc({
+            uploadMutex.exec(() => {
+                return utils.getDataURLFromFile(file).then(result => {
+                    return this._rpcShowProgress({
                         route: '/web_editor/attachment/add_data',
                         params: {
                             'name': file.name,
                             'data': result.split(',')[1],
-                            'res_id': self.options.res_id,
-                            'res_model': self.options.res_model,
+                            'res_id': this.options.res_id,
+                            'res_model': this.options.res_model,
+                            'is_image': this.widgetType === 'image',
                             'width': 0,
                             'quality': 0,
-                        },
-                    }).then(function (attachment) {
-                        self._handleNewAttachment(attachment);
+                        }
+                    }, index).then(attachment => {
+                        if (!attachment.error) {
+                            this._handleNewAttachment(attachment);
+                        }
                     });
                 });
             });
         });
 
-        return uploadMutex.getUnlockedDef().then(function () {
-            if (!self.options.multiImages && !self.noSave) {
-                self.trigger_up('save_request');
+        return uploadMutex.getUnlockedDef().then(() => {
+            if (!this.hasError) {
+                this._closeProgressToast();
             }
-            self.noSave = false;
+            if (!this.options.multiImages && !this.noSave) {
+                this.trigger_up('save_request');
+            }
+            this.noSave = false;
         });
     },
     /**
@@ -636,7 +649,7 @@ var FileWidget = SearchableMediaWidget.extend({
         var emptyValue = (inputValue === '');
 
         var isURL = /^.+\..+$/.test(inputValue); // TODO improve
-        var isImage = _.any(['.gif', '.jpeg', '.jpe', '.jpg', '.png'], function (format) {
+        var isImage = _.any(this.IMAGE_EXTENSIONS, function (format) {
             return inputValue.endsWith(format);
         });
 
@@ -695,6 +708,92 @@ var FileWidget = SearchableMediaWidget.extend({
         this.numberOfAttachmentsToDisplay = this.NUMBER_OF_ATTACHMENTS_TO_DISPLAY;
         this._super.apply(this, arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Sets up a progress bar for every file being uploaded in a toast.
+     *
+     * @private
+     * @param {Object[]} files
+     */
+    _setUpProgressToast: async function (files) {
+        this.$progress = $('<div/>');
+        _.each(files, (file, index) => {
+            let fileSize = file.size;
+            if (!fileSize) {
+                fileSize = null;
+            } else if (fileSize < 1024) {
+                fileSize = fileSize.toFixed(2) + " bytes";
+            } else if (fileSize < 1048576) {
+                fileSize = (fileSize / 1024).toFixed(2) + " KB";
+            } else {
+                fileSize = (fileSize / 1048576).toFixed(2) + " MB";
+            }
+
+            this.$progress.append(QWeb.render('wysiwyg.widgets.upload.progressbar', {
+                fileId: index,
+                fileName: file.name,
+                fileSize: fileSize,
+            }));
+        });
+        this.connectionNotificationID = this.displayNotification({
+            type: 'info',
+            sticky: true,
+            contentEl: this.$progress,
+        });
+    },
+    /**
+     * Closes the toast holding the file(s) progress bar(s).
+     *
+     * @private
+     */
+    _closeProgressToast: function () {
+        this.call('notification', 'close', this.connectionNotificationID, false, 3000);
+    },
+    /**
+     * Calls a RPC and shows its progress status.
+     *
+     * @private
+     * @param {Object} params regular `_rpc()` parameters
+     * @param {integer} index file index to retrieve its related progress bar
+     * @returns {Promise}
+     */
+    _rpcShowProgress: function (params, index) {
+        let $progressBar = this.$progress.find(`.js_progressbar_${index}`);
+        return this._rpc(params, {
+            xhr: function () {
+                var xhr = $.ajaxSettings.xhr();
+                xhr.upload.onprogress = function (ev) {
+                    var prcComplete = ev.loaded / ev.total * 100;
+                    $progressBar.find('.progress-bar').css({
+                        width: parseInt(prcComplete) + '%',
+                    }).text(prcComplete.toFixed(2) + '%');
+                };
+                xhr.upload.onload = function () {
+                    // Don't show yet success as backend code only starts now
+                    $progressBar.find('.progress-bar').css({width: '100%'}).text('100%');
+                };
+                return xhr;
+            },
+        }).then(attachment => {
+            $progressBar.find('.fa-spinner, .progress').addClass('d-none');
+            if (attachment.error) {
+                this.hasError = true;
+                $progressBar.find('.js_progressbar_txt .text-danger').removeClass('d-none');
+                $progressBar.find('.js_progressbar_txt .text-danger .o_we_error_text').text(attachment.error);
+            } else {
+                $progressBar.find('.js_progressbar_txt .text-success').removeClass('d-none');
+            }
+            return attachment;
+        }).guardedCatch(() => {
+            this.hasError = true;
+            $progressBar.find('.fa-spinner, .progress').addClass('d-none');
+            $progressBar.find('.js_progressbar_txt .text-danger').removeClass('d-none');
+        });
+    },
 });
 
 /**
@@ -714,6 +813,7 @@ var ImageWidget = FileWidget.extend({
      */
     init: function (parent, media, options) {
         this.searchService = 'all';
+        this.widgetType = 'image';
         options = _.extend({
             accept: 'image/*',
             mimetypeDomain: [['mimetype', 'in', this.IMAGE_MIMETYPES]],
@@ -808,12 +908,10 @@ var ImageWidget = FileWidget.extend({
      */
     _updateAddUrlUi: function (emptyValue, isURL, isImage) {
         this._super.apply(this, arguments);
-        this.$addUrlButton.text((isURL && !isImage) ? _t("Add as document") : _t("Add image"));
         const warning = isURL && !isImage;
         this.$urlWarning.toggleClass('d-none', !warning);
-        if (warning) {
-            this.$urlSuccess.addClass('d-none');
-        }
+        this.$addUrlButton.prop('disabled', warning || !isURL);
+        this.$urlSuccess.toggleClass('d-none', warning || !isURL);
     },
     /**
      * @override
@@ -1005,18 +1103,6 @@ var DocumentWidget = FileWidget.extend({
     /**
      * @override
      */
-    _updateAddUrlUi: function (emptyValue, isURL, isImage) {
-        this._super.apply(this, arguments);
-        this.$addUrlButton.text((isURL && isImage) ? _t("Add as image") : _t("Add document"));
-        const warning = isURL && isImage;
-        this.$urlWarning.toggleClass('d-none', !warning);
-        if (warning) {
-            this.$urlSuccess.addClass('d-none');
-        }
-    },
-    /**
-     * @override
-     */
     _getAttachmentsDomain: function (needle) {
         var domain = this._super.apply(this, arguments);
         // the assets should not be part of the documents
@@ -1175,7 +1261,7 @@ var IconWidget = SearchableMediaWidget.extend({
 });
 
 /**
- * Let users choose a video, support all summernote video, and embed iframe.
+ * Let users choose a video, support embed iframe.
  */
 var VideoWidget = MediaWidget.extend({
     template: 'wysiwyg.widgets.video',

@@ -12,6 +12,7 @@ The kernel of Odoo, needed for all installation.
 """,
     'depends': [],
     'data': [
+        'data/res_bank.xml',
         'data/res.lang.csv',
         'data/res_lang_data.xml',
         'data/res_partner_data.xml',
@@ -28,8 +29,10 @@ The kernel of Odoo, needed for all installation.
         'views/res_config_views.xml',
         'data/res.country.state.csv',
         'views/ir_actions_views.xml',
+        'views/ir_asset_views.xml',
         'views/ir_config_parameter_views.xml',
         'views/ir_cron_views.xml',
+        'views/ir_cron_trigger_views.xml',
         'views/ir_filters_views.xml',
         'views/ir_mail_server_views.xml',
         'views/ir_model_views.xml',

@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/composer/composer_tests.js', function (r
 const components = {
     Composer: require('mail/static/src/components/composer/composer.js'),
 };
+const { create } = require('mail/static/src/model/model_field_command.js');
 const {
     afterEach,
     afterNextRender,
@@ -58,7 +59,7 @@ QUnit.test('composer text input: basic rendering when posting a message', async 
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
-        composer: [['create', { isLog: false }]],
+        composer: create({ isLog: false }),
         id: 20,
         model: 'res.partner',
     });
@@ -94,7 +95,7 @@ QUnit.test('composer text input: basic rendering when logging note', async funct
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
-        composer: [['create', { isLog: true }]],
+        composer: create({ isLog: true }),
         id: 20,
         model: 'res.partner',
     });
@@ -790,6 +791,85 @@ QUnit.test('display command suggestions on typing "/"', async function (assert) 
     );
 });
 
+QUnit.test('do not send typing notification on typing "/" command', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({ id: 20 });
+    this.data['mail.channel_command'].records.push({
+        channel_types: ['channel'],
+        help: "List users in the current channel",
+        name: "who",
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel',
+    });
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+        document.execCommand('insertText', false, "/");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown'));
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keyup'));
+    });
+    assert.verifySteps([], "No rpc done");
+});
+
+QUnit.test('do not send typing notification on typing after selecting suggestion from "/" command', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({ id: 20 });
+    this.data['mail.channel_command'].records.push({
+        channel_types: ['channel'],
+        help: "List users in the current channel",
+        name: "who",
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel',
+    });
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+        document.execCommand('insertText', false, "/");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown'));
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keyup'));
+    });
+    await afterNextRender(() =>
+        document.querySelector('.o_ComposerSuggestion').click()
+    );
+    await afterNextRender(() => {
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+        document.execCommand('insertText', false, " is user?");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown'));
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keyup'));
+    });
+    assert.verifySteps([], "No rpc done");
+});
+
 QUnit.test('use a command for a specific channel type', async function (assert) {
     assert.expect(4);
 
@@ -872,8 +952,8 @@ QUnit.test("channel with no commands should not prompt any command suggestions o
     );
 });
 
-QUnit.test('use a command after some text', async function (assert) {
-    assert.expect(5);
+QUnit.test('command suggestion should only open if command is the first character', async function (assert) {
+    assert.expect(4);
 
     this.data['mail.channel'].records.push({ channel_type: 'channel', id: 20 });
     this.data['mail.channel_command'].records.push(
@@ -915,18 +995,10 @@ QUnit.test('use a command after some text', async function (assert) {
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('keyup'));
     });
-    assert.containsOnce(
+    assert.containsNone(
         document.body,
         '.o_ComposerSuggestion',
-        "should have a command suggestion"
-    );
-    await afterNextRender(() =>
-        document.querySelector('.o_ComposerSuggestion').click()
-    );
-    assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_textarea`).value.replace(/\s/, " "),
-        "bluhbluh /who ",
-        "text content of composer should have previous content + used command + additional whitespace afterwards"
+        "should not have a command suggestion"
     );
 });
 
@@ -1901,7 +1973,7 @@ QUnit.test('warning on send with shortcut when attempting to post message with s
         },
     });
     const thread = this.env.models['mail.thread'].create({
-        composer: [['create', { isLog: false }]],
+        composer: create({ isLog: false }),
         id: 20,
         model: 'res.partner',
     });
@@ -2102,7 +2174,7 @@ QUnit.test("Show a default status in the recipient status text when the thread d
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
-        composer: [['create', { isLog: false }]],
+        composer: create({ isLog: false }),
         id: 20,
         model: 'res.partner',
     });
@@ -2120,7 +2192,7 @@ QUnit.test("Show a thread name in the recipient status text.", async function (a
     await this.start();
     const thread = this.env.models['mail.thread'].create({
         name: "test name",
-        composer: [['create', { isLog: false }]],
+        composer: create({ isLog: false }),
         id: 20,
         model: 'res.partner',
     });

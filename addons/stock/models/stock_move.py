@@ -130,7 +130,7 @@ class StockMove(models.Model):
         help='If checked, when this move is cancelled, cancel the linked move too')
     delay_alert_date = fields.Datetime('Delay Alert Date', help='Process at this date to be on time', compute="_compute_delay_alert_date", store=True)
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', compute='_compute_picking_type_id', store=True, check_company=True)
-    inventory_id = fields.Many2one('stock.inventory', 'Inventory', check_company=True)
+    is_inventory = fields.Boolean('Inventory')
     move_line_ids = fields.One2many('stock.move.line', 'move_id')
     move_line_nosuggest_ids = fields.One2many('stock.move.line', 'move_id', domain=['|', ('product_qty', '=', 0.0), ('qty_done', '!=', 0.0)])
     origin_returned_move_id = fields.Many2one(
@@ -184,6 +184,7 @@ class StockMove(models.Model):
                 move.state in ('partially_available', 'assigned', 'confirmed') and
                 move.picking_type_id.use_create_lots and
                 not move.picking_type_id.use_existing_lots
+                and not move.origin_returned_move_id.id
             )
 
     @api.depends('picking_id.priority')
@@ -408,7 +409,7 @@ class StockMove(models.Model):
             move.forecast_availability = move.product_qty
 
         product_moves = (self - not_product_moves)
-        warehouse_by_location = {loc: loc.get_warehouse() for loc in product_moves.location_id}
+        warehouse_by_location = {loc: loc.warehouse_id for loc in product_moves.location_id}
 
         outgoing_unreserved_moves_per_warehouse = defaultdict(lambda: self.env['stock.move'])
         for move in product_moves:
@@ -495,13 +496,14 @@ class StockMove(models.Model):
                     move_lines_commands.append((0, 0, move_line_vals))
             move.write({'move_line_ids': move_lines_commands})
 
-    @api.depends('picking_type_id', 'date')
+    @api.depends('picking_type_id', 'date', 'priority')
     def _compute_reservation_date(self):
         for move in self:
-            if move.state not in ['draft', 'confirmed', 'waiting', 'partially_available']:
-                continue
-            if move.picking_type_id and move.picking_type_id.reservation_method == 'by_date':
-                move.reservation_date = fields.Date.to_date(move.date) - timedelta(days=move.picking_type_id.reservation_days_before)
+            if move.picking_type_id.reservation_method == 'by_date' and move.state in ['draft', 'confirmed', 'waiting', 'partially_available']:
+                days = move.picking_type_id.reservation_days_before
+                if move.priority == '1':
+                    days = move.picking_type_id.reservation_days_before_priority
+                move.reservation_date = fields.Date.to_date(move.date) - timedelta(days=days)
 
     @api.constrains('product_uom')
     def _check_uom(self):
@@ -668,9 +670,9 @@ class StockMove(models.Model):
             'move_to_match_ids': self.ids,
         }
         if self.picking_type_id.code == 'outgoing':
-            warehouse = self.location_id.get_warehouse()
+            warehouse = self.location_id.warehouse_id
         else:
-            warehouse = self.location_dest_id.get_warehouse()
+            warehouse = self.location_dest_id.warehouse_id
 
         if warehouse:
             action['context']['warehouse'] = warehouse.id
@@ -795,6 +797,10 @@ class StockMove(models.Model):
         """Cleanup hook used when merging moves"""
         self.write({'propagate_cancel': False})
 
+    def _update_candidate_moves_list(self, candidate_moves_list):
+        for picking in self.mapped('picking_id'):
+            candidate_moves_list.append(picking.move_lines)
+
     def _merge_moves(self, merge_into=False):
         """ This method will, for each move in `self`, go up in their linked picking and try to
         find in their existing moves a candidate into which we can merge the move.
@@ -805,8 +811,7 @@ class StockMove(models.Model):
 
         candidate_moves_list = []
         if not merge_into:
-            for picking in self.mapped('picking_id'):
-                candidate_moves_list.append(picking.move_lines)
+            self._update_candidate_moves_list(candidate_moves_list)
         else:
             candidate_moves_list.append(merge_into | self)
 
@@ -878,7 +883,7 @@ class StockMove(models.Model):
 
     def _get_forecast_availability_incoming(self):
         self.ensure_one()
-        warehouse = self.location_dest_id.get_warehouse()
+        warehouse = self.location_dest_id.warehouse_id
         self.forecast_availability = self.product_id.with_context(warehouse=warehouse.id, to_date=self.date).virtual_available
         if self.state == 'draft':
             self.forecast_availability += self.product_uom_qty
@@ -1040,10 +1045,10 @@ class StockMove(models.Model):
         if origin_move_line:
             location_dest = origin_move_line.location_dest_id
         else:
-            location_dest = self.location_dest_id._get_putaway_strategy(self.product_id)
+            location_dest = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=1)
         move_line_vals = {
             'picking_id': self.picking_id.id,
-            'location_dest_id': location_dest.id or self.location_dest_id.id,
+            'location_dest_id': location_dest.id,
             'location_id': self.location_id.id,
             'product_id': self.product_id.id,
             'product_uom_id': self.product_id.uom_id.id,
@@ -1143,6 +1148,9 @@ class StockMove(models.Model):
 
         move_to_confirm.write({'state': 'confirmed'})
         (move_waiting | move_create_proc).write({'state': 'waiting'})
+        # procure_method sometimes changes with certain workflows so just in case, apply to all moves
+        (move_to_confirm | move_waiting | move_create_proc).filtered(lambda m: m.picking_type_id.reservation_method == 'at_confirm')\
+            .write({'reservation_date': fields.Date.today()})
 
         # assign picking in batch for all confirmed move that share the same details
         for moves_ids in to_assign.values():
@@ -1193,7 +1201,7 @@ class StockMove(models.Model):
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         self.ensure_one()
         # apply putaway
-        location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id).id or self.location_dest_id.id
+        location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=quantity or 0).id
         vals = {
             'move_id': self.id,
             'product_id': self.product_id.id,
@@ -1484,30 +1492,11 @@ class StockMove(models.Model):
 
             merge_into_self = all(self[field] == extra_move[field] for field in self._prepare_merge_moves_distinct_fields())
 
-            if merge_into_self and extra_move.picking_id:
+            if merge_into_self:
                 extra_move = extra_move._action_confirm(merge_into=self)
                 return extra_move
             else:
                 extra_move = extra_move._action_confirm()
-
-            # link it to some move lines. We don't need to do it for move since they should be merged.
-            if not merge_into_self or not extra_move.picking_id:
-                for move_line in self.move_line_ids.filtered(lambda ml: ml.qty_done):
-                    if float_compare(move_line.qty_done, extra_move_quantity, precision_rounding=rounding) <= 0:
-                        # move this move line to our extra move
-                        move_line.move_id = extra_move.id
-                        extra_move_quantity -= move_line.qty_done
-                    else:
-                        # split this move line and assign the new part to our extra move
-                        quantity_split = float_round(
-                            move_line.qty_done - extra_move_quantity,
-                            precision_rounding=self.product_uom.rounding,
-                            rounding_method='UP')
-                        move_line.qty_done = quantity_split
-                        move_line.copy(default={'move_id': extra_move.id, 'qty_done': extra_move_quantity, 'product_uom_qty': 0})
-                        extra_move_quantity -= extra_move_quantity
-                    if extra_move_quantity == 0.0:
-                        break
         return extra_move | self
 
     def _action_done(self, cancel_backorder=False):
@@ -1518,13 +1507,13 @@ class StockMove(models.Model):
         # Cancel moves where necessary ; we should do it before creating the extra moves because
         # this operation could trigger a merge of moves.
         for move in moves:
-            if move.quantity_done <= 0:
+            if move.quantity_done <= 0 and not move.is_inventory:
                 if float_compare(move.product_uom_qty, 0.0, precision_rounding=move.product_uom.rounding) == 0 or cancel_backorder:
                     move._action_cancel()
 
         # Create extra moves where necessary
         for move in moves:
-            if move.state == 'cancel' or move.quantity_done <= 0:
+            if move.state == 'cancel' or (move.quantity_done <= 0 and not move.is_inventory):
                 continue
 
             moves_ids_todo |= move._create_extra_move().ids
@@ -1799,6 +1788,9 @@ class StockMove(models.Model):
 
     def _trigger_scheduler(self):
         """ Check for auto-triggered orderpoints and trigger them. """
+        if not self or self.env['ir.config_parameter'].sudo().get_param('stock.no_auto_scheduler'):
+            return
+
         orderpoints_by_company = defaultdict(lambda: self.env['stock.warehouse.orderpoint'])
         for move in self:
             orderpoint = self.env['stock.warehouse.orderpoint'].search([
@@ -1822,8 +1814,9 @@ class StockMove(models.Model):
         domains = []
         for move in self:
             domains.append([('product_id', '=', move.product_id.id), ('location_id', '=', move.location_dest_id.id)])
-        static_domain = [('state', 'in', ['confirmed', 'partially_available']), ('procure_method', '=', 'make_to_stock')]
-        reservation_domain = ['|', ('picking_type_id.reservation_method', '=', 'at_confirm'),
-                                   ('reservation_date', '<=', fields.Date.today())]
-        moves_to_reserve = self.env['stock.move'].search(expression.AND([static_domain, expression.OR(domains), reservation_domain]))
+        static_domain = [('state', 'in', ['confirmed', 'partially_available']),
+                         ('procure_method', '=', 'make_to_stock'),
+                         ('reservation_date', '<=', fields.Date.today())]
+        moves_to_reserve = self.env['stock.move'].search(expression.AND([static_domain, expression.OR(domains)]),
+                                                         order='reservation_date, priority desc, date asc')
         moves_to_reserve._action_assign()

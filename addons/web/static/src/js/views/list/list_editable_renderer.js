@@ -223,9 +223,17 @@ ListRenderer.include({
 
             _.each(oldData, function (rec) {
                 if (rec.id !== id) {
+                    // update modifiers of the other rows for the upcoming rendering
+                    self._updateAllModifiers(rec);
+                    // destroy the widgets of the other rows as new ones will be instantiated
                     self._destroyFieldWidgets(rec.id);
                 }
             });
+
+             // Keep ref of the current row's widgets 
+             const currentRowFieldWidgets = self.allFieldWidgets[id];
+             // Remove it from the list just for a clean start for generating the new content (avoid later memory leak)
+             delete self.allFieldWidgets[id];
 
             // re-render whole body (outside the dom)
             self.defs = [];
@@ -234,6 +242,12 @@ ListRenderer.include({
             delete self.defs;
 
             return Promise.all(defs).then(function () {
+                // All the field widgets have now be recreated, but we don't want the current row's ones.
+                // We destroy it and get it back from our reference. 
+                // This manipulation avoids a memory leak, where field widgets in the current row wouldn't be destroyed and were kept in memory.
+                self._destroyFieldWidgets(id);
+                self.allFieldWidgets[id] = currentRowFieldWidgets;
+
                 // update registered modifiers to edit 'mode' because the call to
                 // _renderBody set baseModeByRecord as 'readonly'
                 _.each(self.columns, function (node) {
@@ -269,6 +283,19 @@ ListRenderer.include({
                 $newRow.nextAll('.o_data_row').get().reverse().forEach(function (row) {
                     $(row).insertAfter($editedRow);
                 });
+
+                // Call on_attach_callback methods on widgets that implement it
+                if (self._isInDom) {
+                    for (const handle in self.allFieldWidgets) {
+                        if (handle !== id) {
+                            self.allFieldWidgets[handle].forEach(widget => {
+                                if (widget.on_attach_callback) {
+                                    widget.on_attach_callback();
+                                }
+                            });
+                        }
+                    }
+                }
 
                 if (self.currentRow !== null) {
                     var newRowIndex = $editedRow.prop('rowIndex') - 1;
@@ -468,11 +495,14 @@ ListRenderer.include({
      * prevent subsequent editions. These edits would be lost, because the list
      * view only saves records when unselecting a row.
      *
+     * @param {Object} [options]
+     * @param {boolean} [options.canDiscard=false] when set to true,
+     *   discard the record if it is new and not dirty otherwise save it
      * @returns {Promise} The promise resolves if the row was unselected (and
      *   possibly removed). If may be rejected, when the row is dirty and the
      *   user refuses to discard its changes.
      */
-    unselectRow: function () {
+    unselectRow: function (options={}) {
         // Protect against calling this method when no row is selected
         if (this.currentRow === null) {
             return Promise.resolve();
@@ -487,7 +517,23 @@ ListRenderer.include({
         }
 
         toggleWidgets(true);
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const record = this._getRecord(recordID);
+            if (options.canDiscard && record.isNew()) {
+                await this.commitChanges(recordID);
+                if (!record.isDirty()) {
+                    this.trigger_up('mutexify', {
+                        action: () => {
+                            return this.trigger_up('discard_changes', {
+                                recordID: recordID,
+                                onSuccess: resolve,
+                                onFailure: reject,
+                            });
+                        },
+                    });
+                    return;
+                }
+            }
             this.trigger_up('save_line', {
                 recordID: recordID,
                 onSuccess: resolve,
@@ -1298,7 +1344,7 @@ ListRenderer.include({
         var recordId = this._getRecordID(rowIndex);
         // To select a row, the currently selected one must be unselected first
         var self = this;
-        return this.unselectRow().then((selectNextRow = true) => {
+        return this.unselectRow({ canDiscard: true }).then((selectNextRow = true) => {
             if (!selectNextRow) {
                 return Promise.resolve();
             }
@@ -1826,7 +1872,11 @@ ListRenderer.include({
             return;
         }
 
-        this.unselectRow();
+        this.unselectRow({
+            // if save button is clicked then save the record forcefully even if
+            // it is non dirty
+            canDiscard: ![...event.target.classList].includes('o_list_button_save')
+        });
     },
 });
 

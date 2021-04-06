@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
     _name = "product.template"
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product Template"
-    _order = "name"
+    _order = "priority desc, name"
 
     @tools.ormcache()
     def _get_default_category_id(self):
@@ -139,6 +139,11 @@ class ProductTemplate(models.Model):
 
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed', store=True)
     has_configurable_attributes = fields.Boolean("Is a configurable product", compute='_compute_has_configurable_attributes', store=True)
+
+    priority = fields.Selection([
+        ('0', 'Normal'),
+        ('1', 'Favorite'),
+    ], default='0', string="Priority")
 
     def _compute_item_count(self):
         for template in self:
@@ -284,14 +289,14 @@ class ProductTemplate(models.Model):
         """
         product_weight_in_lbs_param = self.env['ir.config_parameter'].sudo().get_param('product.weight_in_lbs')
         if product_weight_in_lbs_param == '1':
-            return self.env.ref('uom.product_uom_lb', False) or self.env['uom.uom'].search([('measure_type', '=' , 'weight'), ('uom_type', '=', 'reference')], limit=1)
+            return self.env.ref('uom.product_uom_lb')
         else:
-            return self.env.ref('uom.product_uom_kgm', False) or self.env['uom.uom'].search([('measure_type', '=' , 'weight'), ('uom_type', '=', 'reference')], limit=1)
+            return self.env.ref('uom.product_uom_kgm')
 
     @api.model
     def _get_length_uom_id_from_ir_config_parameter(self):
         """ Get the unit of measure to interpret the `length`, 'width', 'height' field.
-        By default, we considerer that length are expressed in meters. Users can configure
+        By default, we considerer that length are expressed in millimeters. Users can configure
         to express them in feet by adding an ir.config_parameter record with "product.volume_in_cubic_feet"
         as key and "1" as value.
         """
@@ -299,7 +304,7 @@ class ProductTemplate(models.Model):
         if product_length_in_feet_param == '1':
             return self.env.ref('uom.product_uom_foot')
         else:
-            return self.env.ref('uom.product_uom_meter')
+            return self.env.ref('uom.product_uom_millimeter')
 
     @api.model
     def _get_volume_uom_id_from_ir_config_parameter(self):
@@ -340,8 +345,7 @@ class ProductTemplate(models.Model):
     @api.depends('product_variant_ids.product_tmpl_id')
     def _compute_product_variant_count(self):
         for template in self:
-            # do not pollute variants to be prefetched when counting variants
-            template.product_variant_count = len(template.with_prefetch().product_variant_ids)
+            template.product_variant_count = len(template.product_variant_ids)
 
     @api.depends('product_variant_ids', 'product_variant_ids.default_code')
     def _compute_default_code(self):

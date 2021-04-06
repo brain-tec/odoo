@@ -108,11 +108,12 @@
                 <div class="o_panel_header">Dynamic Content</div>
                 <div class="o_panel_body">
                     <t id="form_form_hook"/>
-                    <t t-snippet="website.s_google_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
+                    <t t-set="google_maps_api_key" t-value="request.env['website'].get_current_website().google_maps_api_key"/>
+                    <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg"/>
+                    <t t-if="debug or google_maps_api_key" t-snippet="website.s_google_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_snippet.svg"/>
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet_carousel" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_carousel.svg"/>
                     <t id="sale_products_hook"/>
-                    <t id="sale_recently_viewed_product_hook"/>
                     <t id="sale_product_search_section_hook"/>
                     <t id="blog_posts_hook"/>
                     <t id="event_local_events_hook"/>
@@ -437,11 +438,6 @@
         <we-button class="fa fa-fw fa-angle-right" data-move-snippet="next" data-no-preview="true" data-name="move_right_opt"/>
     </div>
 
-    <!-- Replace an image -->
-    <div data-js="ReplaceImage" data-selector="img">
-        <we-button class="fa fa-refresh" data-replace-image="true" data-no-preview="true"/>
-    </div>
-
     <!-- Background -->
     <t t-set="only_bg_color_selector" t-value="'section .row > div, .s_text_highlight'"/>
     <t t-set="only_bg_color_exclude" t-value="'.s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .o_mega_menu .row > div, .s_image_gallery .row > div'"/>
@@ -451,7 +447,7 @@
     <t t-set="only_bg_image_exclude" t-value="''"/>
 
     <t t-set="both_bg_color_image_selector" t-value="'section, .carousel-item, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .parallax'"/>
-    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map'"/>
+    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map, .s_map'"/>
 
     <t t-call="web_editor.snippet_options_background_options">
         <t t-set="selector" t-value="both_bg_color_image_selector"/>
@@ -485,9 +481,11 @@
     </div>
 
     <!-- Mobile display options -->
-    <div data-js="MobileVisibility" data-selector="section .row > div"
+    <div data-js="MobileVisibility" data-selector="section, section .row > div"
          data-exclude=".s_col_no_resize.row > div">
-        <we-checkbox string="Shown On Mobile" data-show-on-mobile="true" data-no-preview="true"/>
+        <we-button class="o_we_link o_we_mobile" data-show-on-mobile="true" data-no-preview="true"
+                   data-img="/website/static/src/img/snippets_options/mobile_invisible.svg"
+                   data-active-img="/website/static/src/img/snippets_options/mobile_visible.svg"/>
     </div>
 
     <div data-js="sizing_y"
@@ -504,7 +502,7 @@
         t-att-data-selector="so_snippet_addition_selector"
         data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
 
-    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge</t>
+    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge</t>
     <div id="so_content_addition"
         t-att-data-selector="so_content_addition_selector"
         t-attf-data-drop-near="p, h1, h2, h3, .row > div > img, #{so_content_addition_selector}"
@@ -1006,7 +1004,7 @@
     <!-- Min height of section -->
     <div data-option-name="minHeight" data-selector="section">
         <we-button-group string="Height">
-            <we-button data-select-class="" title="Fit content">Auto</we-button>
+            <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>
             <we-button data-select-class="o_half_screen_height" title="Half screen">50%</we-button>
             <we-button data-select-class="o_full_screen_height" title="Full screen">100%</we-button>
         </we-button-group>
@@ -1092,7 +1090,7 @@
                             data-use-css-color="true"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"
                             data-use-css-color="true"/>
-            <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-number"/>
+            <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-name"/>
         </we-row>
     </div>
     <div data-js="OptionsTab" data-selector="theme-options" data-no-check="true">
@@ -1211,6 +1209,20 @@
             <we-colorpicker title="Warning" data-customize-website-color="" data-color-type="theme" data-color="warning"/>
             <we-colorpicker title="Error" data-customize-website-color="" data-color-type="theme" data-color="danger"/>
         </we-row>
+        <we-collapse>
+            <we-row string="Grays" class="o_we_gray_preview o_we_collapse_toggler">
+                <t t-foreach="9" t-as="i">
+                    <t t-set="grayCode" t-value="str((9 - i) * 100)"/>
+                    <span t-attf-title="Gray #{grayCode}"
+                          t-attf-variable="#{grayCode}"
+                          t-attf-class="o_we_user_value_widget o_we_gray_preview bg-#{grayCode}"/>
+                </t>
+            </we-row>
+            <we-range string="⌙ Hue" data-customize-gray="" data-min="0" data-max="360"
+                data-param="gray-hue" class="o_we_slider_tint"/>
+            <we-range string="⌙ Saturation" data-customize-gray="" data-min="-20" data-max="100"
+                data-param="gray-extra-saturation"/>
+        </we-collapse>
     </div>
     <div data-js="OptionsTab" data-selector="website-settings" data-no-check="true">
         <we-row string="Theme">

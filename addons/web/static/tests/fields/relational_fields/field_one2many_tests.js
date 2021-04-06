@@ -5,6 +5,7 @@ var AbstractField = require('web.AbstractField');
 var AbstractStorageService = require('web.AbstractStorageService');
 const ControlPanel = require('web.ControlPanel');
 const fieldRegistry = require('web.field_registry');
+var FormController = require('web.FormController');
 var FormView = require('web.FormView');
 var KanbanRecord = require('web.KanbanRecord');
 var ListRenderer = require('web.ListRenderer');
@@ -163,7 +164,7 @@ QUnit.module('fields', {}, function () {
                     }]
                 },
             };
-        }
+        },
     }, function () {
         QUnit.module('FieldOne2Many');
 
@@ -2661,9 +2662,10 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            // add a record, then click in form view to confirm it
+            // add a record, add value to turtle_foo then click in form view to confirm it
             await testUtils.form.clickEdit(form);
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$el);
 
             assert.strictEqual(form.$('.o_field_widget[name=turtles] .o_pager').text().trim(), '1-4 / 5',
@@ -2863,11 +2865,12 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            // edit mode, then click on Add an item 2 times
+            // edit mode, then click on Add an item, enter value in turtle_foo and Add an item again
             assert.containsOnce(form, 'tr.o_data_row',
                 "should have 1 data rows");
             await testUtils.form.clickEdit(form);
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
             assert.containsN(form, 'tr.o_data_row', 3,
                 "should have 3 data rows");
@@ -2998,7 +3001,8 @@ QUnit.module('fields', {}, function () {
             // the record currently being added should not count in the pager
             assert.containsNone(form, '.o_field_widget[name=turtles] .o_pager');
 
-            // unselect the row
+            // enter value in turtle_foo field and click outside to unselect the row
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$el);
             assert.containsNone(form, '.o_selected_row');
             assert.containsNone(form, '.o_field_widget[name=turtles] .o_pager');
@@ -3139,8 +3143,11 @@ QUnit.module('fields', {}, function () {
             // add 4 records (to have more records than the limit)
             await testUtils.form.clickEdit(form);
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            await testUtils.fields.editInput(form.$('input[name="turtle_foo"]'), 'nora');
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
 
             assert.containsN(form, 'tr.o_data_row', 5);
@@ -8061,9 +8068,11 @@ QUnit.module('fields', {}, function () {
             assert.strictEqual($('.o_data_cell').text(), "");
 
             // click add pizza
-            // save the modal
+            // press enter to save the record
             // check it's pizza
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a:eq(1)'));
+            const $input = form.$('.o_field_widget[name="p"] .o_selected_row .o_field_widget[name="display_name"]');
+            await testUtils.fields.triggerKeydown($input, 'enter');
             // click add pasta
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a:eq(2)'));
             await testUtils.form.clickSave(form);
@@ -9764,6 +9773,161 @@ QUnit.module('fields', {}, function () {
 
             form.destroy();
         });
+
+        QUnit.test('update a one2many from a custom field widget', async function (assert) {
+            // In this test, we define a custom field widget to render/update a one2many
+            // field. For the update part, we ensure that updating primitive fields of a sub
+            // record works. There is no guarantee that updating a relational field on the sub
+            // record would work. Deleting a sub record works as well. However, creating sub
+            // records isn't supported. There are obviously a lot of limitations, but the code
+            // hasn't been designed to support all this. This test simply encodes what can be
+            // done, and this comment explains what can't (and won't be implemented in stable
+            // versions).
+            assert.expect(3);
+
+            this.data.partner.records[0].p = [1, 2];
+            const MyRelationalField = AbstractField.extend({
+                events: {
+                    'click .update': '_onUpdate',
+                    'click .delete': '_onDelete',
+                },
+                async _render() {
+                    const records = await this._rpc({
+                        method: 'read',
+                        model: 'partner',
+                        args: [this.value.res_ids],
+                    });
+                    this.$el.text(records.map(r => `${r.display_name}/${r.int_field}`).join(', '));
+                    this.$el.append($('<button class="update fa fa-edit">'));
+                    this.$el.append($('<button class="delete fa fa-trash">'));
+                },
+                _onUpdate() {
+                    this._setValue({
+                        operation: 'UPDATE',
+                        id: this.value.data[0].id,
+                        data: {
+                            display_name: 'new name',
+                            int_field: 44,
+                        },
+                    });
+                },
+                _onDelete() {
+                    this._setValue({
+                        operation: 'DELETE',
+                        ids: [this.value.data[0].id],
+                    });
+                },
+            });
+            fieldRegistry.add('my_relational_field', MyRelationalField);
+
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="p" widget="my_relational_field"/>
+                    </form>`,
+                res_id: 1,
+            });
+
+            assert.strictEqual(form.$('.o_field_widget[name=p]').text(), 'first record/10, second record/9');
+
+            await testUtils.dom.click(form.$('button.update'));
+
+            assert.strictEqual(form.$('.o_field_widget[name=p]').text(), 'new name/44, second record/9');
+
+            await testUtils.dom.click(form.$('button.delete'));
+
+            assert.strictEqual(form.$('.o_field_widget[name=p]').text(), 'second record/9');
+
+            form.destroy();
+            delete fieldRegistry.map.my_relational_field;
+        });
+
+        QUnit.test("Editable list's field widgets call on_attach_callback on row update", async function (assert) {
+            // We use here a badge widget (owl component, does have a on_attach_callback method) and check its decoration
+            // is properly managed in this scenario.       
+            assert.expect(3);
+
+            this.data.partner.records[0].p = [1, 2];
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="int_field"/>
+                                <field name="color" widget="badge" decoration-warning="int_field == 9"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                res_id: 1,
+            });
+
+            assert.containsN(form, '.o_data_row', 2);
+            assert.hasClass(form.$('.o_data_row:nth(1) .o_field_badge'), 'bg-warning-light');
+
+            await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+            await testUtils.owlCompatibilityExtraNextTick();
+            await testUtils.fields.editInput(form.$('.o_selected_row .o_field_integer'), '44');
+            await testUtils.owlCompatibilityExtraNextTick();
+
+            assert.hasClass(form.$('.o_data_row:nth(1) .o_field_badge'), 'bg-warning-light');
+
+            form.destroy();
+        });
+
+        QUnit.test('Editable list renderer confirmUpdate method does not create a memory leak by no deleted currently modified row widgets but recreating them anyway.', async function (assert) {
+            assert.expect(5);
+
+            let count = 0;
+            const MyField = AbstractField.extend({
+                init() {
+                    this._super(...arguments);
+                    count++;
+                },
+                destroy() {
+                    this._super(...arguments);
+                    count--;
+                }
+            });
+            fieldRegistry.add('myfield', MyField);
+
+            this.data.partner.records[0].p = [1, 2];
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="int_field"/>
+                                <field name="foo" widget="myfield"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                res_id: 1,
+            });
+
+            assert.containsN(form, '.o_data_row', 2);
+            assert.strictEqual(count, 2);
+
+            await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+            assert.strictEqual(count, 2);
+
+            await testUtils.fields.editInput(form.$('.o_selected_row .o_field_integer'), '44');
+            assert.strictEqual(count, 2);
+
+            form.destroy();
+            delete fieldRegistry.map.my_field;
+
+            assert.strictEqual(count, 0);
+        });
+
     });
 });
 });

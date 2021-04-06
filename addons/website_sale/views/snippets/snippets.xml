@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_products_recently_viewed" name="Viewed Products">
-    <section class="s_wsale_products_recently_viewed o_snippet_invisible pt24 pb24 d-none" style="min-height: 400px;">
-        <div class="container">
-            <h3 class="text-center mb32">Recently Viewed Products</h3>
-            <div class="slider o_not_editable"/>
-        </div>
-    </section>
-</template>
-
 <template id="snippets" inherit_id="website.snippets" name="e-commerce snippets">
     <xpath expr="//t[@id='sale_products_hook']" position="replace">
-        <t t-snippet="website_sale.s_dynamic_snippet_products" t-thumbnail="/website_sale/static/src/img/snippets_thumbs/s_products_recently_viewed.svg"/>
-    </xpath>
-    <xpath expr="//t[@id='sale_recently_viewed_product_hook']" position="replace">
-        <t t-snippet="website_sale.s_products_recently_viewed" t-thumbnail="/website_sale/static/src/img/snippets_thumbs/s_products_recently_viewed.svg"/>
+        <t t-snippet="website_sale.s_dynamic_snippet_products" t-thumbnail="/website_sale/static/src/img/snippets_thumbs/s_dynamic_products.svg"/>
     </xpath>
     <xpath expr="//t[@id='sale_product_search_section_hook']" position="replace">
         <t t-snippet="website_sale.s_products_searchbar" t-thumbnail="/website_sale/static/src/img/snippets_thumbs/s_products_searchbar.svg"/>
@@ -81,7 +69,7 @@
                 </we-select>
                 <we-select string="⌙ Position">
                     <we-button data-set-ribbon-position="left">Left</we-button>
-                    <we-button data-set-ribbon-position="right">Right (only on grid view)</we-button>
+                    <we-button data-set-ribbon-position="right">Right</we-button>
                 </we-select>
             </div>
 
@@ -100,8 +88,12 @@
                         data-no-preview="true"
                         data-reload="/"/>
         </div>
-
-        <div data-js="ProductsRecentlyViewed" data-selector=".s_wsale_products_recently_viewed"/>
+        <div data-selector="#product_detail #o-carousel-product" data-no-check="true">
+            <we-button-group string="Thumbnails Position" data-no-preview="true" data-reload="/">
+                <we-button title="Left" data-customize-website-views="website_sale.carousel_product_indicators_left"><i class="fa fa-fw fa-long-arrow-left"/></we-button>
+                <we-button title="Bottom" data-customize-website-views="website_sale.carousel_product_indicators_bottom"><i class="fa fa-fw fa-long-arrow-down"/></we-button>
+            </we-button-group>
+        </div>
     </xpath>
 </template>
 

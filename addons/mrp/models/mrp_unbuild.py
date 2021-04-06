@@ -119,7 +119,7 @@ class MrpUnbuild(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
-            self.bom_id = self.env['mrp.bom']._bom_find(product=self.product_id, company_id=self.company_id.id)
+            self.bom_id = self.env['mrp.bom']._bom_find(self.product_id, company_id=self.company_id.id)[self.product_id]
             self.product_uom_id = self.product_id.uom_id.id
 
     @api.constrains('product_qty')
@@ -257,7 +257,7 @@ class MrpUnbuild(models.Model):
             'procure_method': 'make_to_stock',
             'location_dest_id': location_dest_id.id,
             'location_id': location_id.id,
-            'warehouse_id': location_dest_id.get_warehouse().id,
+            'warehouse_id': location_dest_id.warehouse_id.id,
             'unbuild_id': self.id,
             'company_id': move.company_id.id,
         })
@@ -266,7 +266,7 @@ class MrpUnbuild(models.Model):
         product_prod_location = product.with_company(self.company_id).property_stock_production
         location_id = bom_line_id and product_prod_location or self.location_id
         location_dest_id = bom_line_id and self.location_dest_id or product_prod_location
-        warehouse = location_dest_id.get_warehouse()
+        warehouse = location_dest_id.warehouse_id
         return self.env['stock.move'].create({
             'name': self.name,
             'date': self.create_date,
