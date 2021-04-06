@@ -6,6 +6,7 @@ var basicFields = require('web.basic_fields');
 var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
+var FormController = require('web.FormController');
 var FormView = require('web.FormView');
 var KanbanView = require('web.KanbanView');
 var ListView = require('web.ListView');
@@ -150,7 +151,7 @@ QUnit.module('basic_fields', {
                 }]
             },
         };
-    }
+    },
 }, function () {
 
     QUnit.module('DebouncedField');
@@ -2098,6 +2099,29 @@ QUnit.module('basic_fields', {
             "value should be properly updated");
 
         list.destroy();
+    });
+
+    QUnit.test('url widget with falsy value', async function (assert) {
+        assert.expect(4);
+
+        this.data.partner.records[0].foo = false;
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form><field name="foo" widget="url"/></form>',
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, 'div.o_field_widget[name=foo]');
+        assert.strictEqual(form.$('.o_field_widget[name=foo]').text(), "");
+
+        await testUtils.form.clickEdit(form);
+
+        assert.containsOnce(form, 'input.o_field_widget[name=foo]');
+        assert.strictEqual(form.$('.o_field_widget[name=foo]').val(), "");
+
+        form.destroy();
     });
 
     QUnit.module('CopyClipboard');

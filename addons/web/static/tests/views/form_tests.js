@@ -8,6 +8,7 @@ var concurrency = require('web.concurrency');
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
 const fieldRegistryOwl = require('web.field_registry_owl');
+const FormController = require('web.FormController');
 const FormRenderer = require('web.FormRenderer');
 var FormView = require('web.FormView');
 var mixins = require('web.mixins');
@@ -10642,6 +10643,7 @@ QUnit.module('Views', {
         assert.containsNone(document.body, '.modal');
 
         await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+        await testUtils.nextTick(); // wait for quick edit
 
         assert.containsOnce(form, '.o_form_view.o_form_editable',
             'should switch into edit mode');
@@ -11062,6 +11064,56 @@ QUnit.module('Views', {
 
         assert.containsOnce(form, '.o_form_view.o_form_readonly');
         assert.containsOnce(form, '.o_clipboard_button');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: selecting text of quick editable field', async function (assert) {
+        assert.expect(5);
+
+        const MULTI_CLICK_TIME = 50;
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="display_name"/>
+                    </group>
+                </form>`,
+            formMultiClickTime: MULTI_CLICK_TIME,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        // text selected by holding and dragging doesn't start quick edit
+        window.getSelection().removeAllRanges();
+        const range = document.createRange();
+        await range.selectNode(form.$('.o_field_widget[name="display_name"]')[0]);
+        window.getSelection().addRange(range);
+        await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
+        await concurrency.delay(MULTI_CLICK_TIME);
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        // double click selecting text doesn't start quick edit
+        window.getSelection().removeAllRanges();
+        await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
+        range.selectNode(form.$('.o_field_widget[name="display_name"]')[0]);
+        window.getSelection().addRange(range);
+        await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
+        await concurrency.delay(MULTI_CLICK_TIME);
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        // quick edit happens after timeout
+        window.getSelection().removeAllRanges();
+        await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
+        await testUtils.nextTick();
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        await concurrency.delay(MULTI_CLICK_TIME);
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
 
         form.destroy();
     });

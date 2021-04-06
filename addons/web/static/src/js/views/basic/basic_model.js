@@ -2053,7 +2053,9 @@ var BasicModel = AbstractModel.extend({
             case 'UPDATE':
                 list._changes.push({operation: 'UPDATE', id: command.id});
                 if (command.data) {
-                    defs.push(this._applyChange(command.id, command.data, { viewType: view.type }));
+                    defs.push(this._applyChange(command.id, command.data, {
+                        viewType: view && view.type,
+                    }));
                 }
                 break;
             case 'FORGET':
@@ -2436,7 +2438,7 @@ var BasicModel = AbstractModel.extend({
 
                     this.do_warn(
                         _.str.sprintf(
-                            _t(`'%s' is unsynchronized with ''.`),
+                            _t(`'%s' is unsynchronized with '%s'.`),
                             referenceFieldName,
                             modelFieldName,
                         ),
