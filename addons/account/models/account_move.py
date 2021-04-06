@@ -1162,9 +1162,15 @@ class AccountMove(models.Model):
             if sequence_number_reset == 'year':
                 where_string += " AND date_trunc('year', date::timestamp without time zone) = date_trunc('year', %(date)s) "
                 param['date'] = self.date
+                param['anti_regex'] = re.sub(r"\?P<\w+>", "?:", self._sequence_monthly_regex.split('(?P<seq>')[0]) + '$'
             elif sequence_number_reset == 'month':
                 where_string += " AND date_trunc('month', date::timestamp without time zone) = date_trunc('month', %(date)s) "
                 param['date'] = self.date
+            else:
+                param['anti_regex'] = re.sub(r"\?P<\w+>", "?:", self._sequence_yearly_regex.split('(?P<seq>')[0]) + '$'
+
+            if param.get('anti_regex') and not self.journal_id.sequence_override_regex:
+                where_string += " AND sequence_prefix !~ %(anti_regex)s "
 
         if self.journal_id.refund_sequence:
             if self.move_type in ('out_refund', 'in_refund'):
@@ -3229,7 +3235,7 @@ class AccountMoveLine(models.Model):
         # adapt the price_unit to the new tax.
         # E.g. mapping a 10% price-included tax to a 20% price-included tax for a price_unit of 110 should preserve
         # 100 as balance but set 120 as price_unit.
-        if self.tax_ids and self.move_id.fiscal_position_id:
+        if self.tax_ids and self.move_id.fiscal_position_id and self.move_id.fiscal_position_id.tax_ids:
             price_subtotal = self._get_price_total_and_subtotal()['price_subtotal']
             self.tax_ids = self.move_id.fiscal_position_id.map_tax(
                 self.tax_ids._origin,
