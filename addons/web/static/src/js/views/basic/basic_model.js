@@ -2053,7 +2053,9 @@ var BasicModel = AbstractModel.extend({
             case 'UPDATE':
                 list._changes.push({operation: 'UPDATE', id: command.id});
                 if (command.data) {
-                    defs.push(this._applyChange(command.id, command.data, { viewType: view.type }));
+                    defs.push(this._applyChange(command.id, command.data, {
+                        viewType: view && view.type,
+                    }));
                 }
                 break;
             case 'FORGET':
@@ -2434,11 +2436,19 @@ var BasicModel = AbstractModel.extend({
                     const modelFieldName = record.fields[modelField].string;
                     const referenceFieldName = record.fields[fieldName].string;
 
-                    this.do_warn(_t(`'${referenceFieldName}' is unsynchronized
-                                     with '${modelFieldName}'.`),
-                                 _t(`If you change ${modelFieldName} or
-                                     ${referenceFieldName}, the synchronization
-                                     will be reapplied and the data will be modified.`), true);
+                    this.do_warn(
+                        _.str.sprintf(
+                            _t(`'%s' is unsynchronized with '%s'.`),
+                            referenceFieldName,
+                            modelFieldName,
+                        ),
+                        _.str.sprintf(
+                            _t(`If you change %s or %s, the synchronization will be reapplied and the data will be modified.`),
+                            modelFieldName,
+                            referenceFieldName,
+                        ),
+                        true,
+                    );
                     return false;
                 }
                 return {
