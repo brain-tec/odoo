@@ -11,6 +11,7 @@
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2021
 # Damian Brencic <brencicdamian12313@gmail.com>, 2021
+# rastislav Brencic <rastislav.brencic99@gmail.com>, 2021
 # trendspotter, 2021
 # 
 msgid ""
@@ -62,7 +63,7 @@ msgstr "záznamy"
 #: code:addons/web/static/src/xml/base.xml:655
 #, python-format
 msgid "# Code editor"
-msgstr ""
+msgstr "# Editor kódu"
 
 #. module: web
 #. openerp-web
@@ -172,7 +173,7 @@ msgstr "'%s' není platné celé číslo"
 #: code:addons/web/static/src/js/fields/field_utils.js:548
 #, python-format
 msgid "'%s' is not a correct monetary field"
-msgstr ""
+msgstr "'%s' není správné peněžní pole"
 
 #. module: web
 #. openerp-web
@@ -1679,7 +1680,7 @@ msgstr "Stisknutím tlačítka DOWN přejděte na níže uvedený seznam"
 #: code:addons/web/static/src/xml/base.xml:439
 #, python-format
 msgid "Hit ENTER to"
-msgstr ""
+msgstr "Stiskněte ENTER do"
 
 #. module: web
 #. openerp-web
@@ -3057,7 +3058,7 @@ msgstr "Sdílet se všemi uživateli"
 #: code:addons/web/static/src/xml/menu.xml:114
 #, python-format
 msgid "Shortcuts"
-msgstr ""
+msgstr "Klávesové zkratky"
 
 #. module: web
 #. openerp-web
@@ -3452,7 +3453,7 @@ msgstr "V tomto systému nelze najít Wkhtmltopdf. Zpráva se zobrazí v html."
 #: code:addons/web/static/src/js/views/list/list_controller.js:162
 #, python-format
 msgid "Unarchive"
-msgstr ""
+msgstr "Zrušit archivaci"
 
 #. module: web
 #. openerp-web
