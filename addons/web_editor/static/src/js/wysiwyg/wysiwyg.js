@@ -7,6 +7,7 @@ const customColors = require('web_editor.custom_colors');
 const {ColorPaletteWidget} = require('web_editor.ColorPalette');
 const {ColorpickerWidget} = require('web.Colorpicker');
 const concurrency = require('web.concurrency');
+const { device } = require('web.config');
 const weContext = require('web_editor.context');
 const OdooEditorLib = require('web_editor.odoo-editor');
 const snippetsEditor = require('web_editor.snippet.editor');
@@ -120,12 +121,14 @@ const Wysiwyg = Widget.extend({
 
             self.openMediaDialog(params);
         });
-        this.$editable.on('dblclick', 'a', function () {
-            if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
-                self.showTooltip = false;
-                self.toggleLinkTools(true, this);
-            }
-        });
+        if (!this.options.preventLinkDoubleClick) {
+            this.$editable.on('dblclick', 'a', function () {
+                if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
+                    self.showTooltip = false;
+                    self.toggleLinkTools(true, this);
+                }
+            });
+        }
 
         if (options.snippets) {
             $('body').addClass('editor_enable');
@@ -177,7 +180,7 @@ const Wysiwyg = Widget.extend({
     renderElement: function () {
         this.$editable = this.options.editable || $('<div class="note-editable">');
 
-        if (this.options.resizable) {
+        if (this.options.resizable && !device.isMobile) {
             const $wrapper = $('<div class="o_wysiwyg_wrapper odoo-editor">');
             $wrapper.append(this.$editable);
             this.$resizer = $(`<div class="o_wysiwyg_resizer">
@@ -961,7 +964,7 @@ const Wysiwyg = Widget.extend({
             this._updateFaResizeButtons();
         }
         const link = getInSelection(this.odooEditor.document, 'a');
-        if (link || isInMedia) {
+        if (isInMedia || link && !this.options.preventLinkDoubleClick) {
             // Handle the media/link's tooltip.
             this.showTooltip = true;
             setTimeout(() => {
