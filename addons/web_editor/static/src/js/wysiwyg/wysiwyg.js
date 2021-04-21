@@ -544,6 +544,16 @@ const Wysiwyg = Widget.extend({
             if (forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
                 this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this}, this.odooEditor.editable, {}, $btn, link);
+                const _onMousedown = ev => {
+                    if (!ev.target.closest('.oe-toolbar')) {
+                        // Destroy the link tools on click anywhere outside the
+                        // toolbar.
+                        this.linkTools && this.linkTools.destroy();
+                        this.linkTools = undefined;
+                        this.odooEditor.document.removeEventListener('mousedown', _onMousedown, true);
+                    }
+                };
+                this.odooEditor.document.addEventListener('mousedown', _onMousedown, true);
                 this.linkTools.appendTo(this.toolbar.$el);
             } else {
                 this.linkTools = undefined;
@@ -561,6 +571,11 @@ const Wysiwyg = Widget.extend({
                     linkWidget.$link = $(linkWidget.getOrCreateLink(this.$editable[0]));
                 }
                 linkWidget.applyLinkToDom(data);
+                // At this point, the dialog is still open and prevents the
+                // focus in the editable, even though that is where the
+                // selection is. This waits so the dialog is destroyed when we
+                // set the focus.
+                setTimeout(() => this.odooEditor.editable.focus(), 0);
             });
         }
     },
@@ -891,9 +906,6 @@ const Wysiwyg = Widget.extend({
         // Remove the alt tools.
         this.altTools && this.altTools.destroy();
         this.altTools = undefined;
-        // Remove the link tools.
-        this.linkTools && this.linkTools.destroy();
-        this.linkTools = undefined;
         // Hide the create-link button if the selection spans several blocks.
         const selection = this.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
