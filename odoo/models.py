@@ -438,6 +438,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
               >>> str(datetime.datetime.utcnow())
               '2013-06-18 08:31:32.821177'
         """
+        if self._abstract:
+            return
+
         def add(name, field):
             """ add ``field`` with the given ``name`` if it does not exist yet """
             if name not in self._fields:
@@ -448,6 +451,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # this field 'id' must override any other column or field
         self._add_field('id', fields.Id(automatic=True))
+
+        # this field must override any other column or field
+        self._add_field(self.CONCURRENCY_CHECK_FIELD, fields.Datetime(
+            string='Last Modified on', compute='_compute_concurrency_field',
+            compute_sudo=False, automatic=True))
 
         add('display_name', fields.Char(string='Display Name', automatic=True,
             compute='_compute_display_name'))
@@ -461,24 +469,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 'res.users', string='Last Updated by', automatic=True, readonly=True))
             add('write_date', fields.Datetime(
                 string='Last Updated on', automatic=True, readonly=True))
-            last_modified_name = 'compute_concurrency_field_with_access'
+
+    @api.depends(lambda model: ('create_date', 'write_date') if model._log_access else ())
+    def _compute_concurrency_field(self):
+        fname = self.CONCURRENCY_CHECK_FIELD
+        if self._log_access:
+            for record in self:
+                record[fname] = record.write_date or record.create_date or Datetime.now()
         else:
-            last_modified_name = 'compute_concurrency_field'
-
-        # this field must override any other column or field
-        self._add_field(self.CONCURRENCY_CHECK_FIELD, fields.Datetime(
-            string='Last Modified on', compute=last_modified_name,
-            compute_sudo=False, automatic=True))
-
-    def compute_concurrency_field(self):
-        for record in self:
-            record[self.CONCURRENCY_CHECK_FIELD] = odoo.fields.Datetime.now()
-
-    @api.depends('create_date', 'write_date')
-    def compute_concurrency_field_with_access(self):
-        for record in self:
-            record[self.CONCURRENCY_CHECK_FIELD] = \
-                record.write_date or record.create_date or odoo.fields.Datetime.now()
+            self[fname] = odoo.fields.Datetime.now()
 
     #
     # Goal: try to apply inheritance at the instantiation level and
@@ -2538,6 +2537,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return True
 
     def _check_removed_columns(self, log=False):
+        if self._abstract:
+            return
         # iterate on the database columns to drop the NOT NULL constraints of
         # fields which were required but have been removed (or will be added by
         # another module)
@@ -2718,7 +2719,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _add_inherited_fields(self):
         """ Determine inherited fields. """
-        if not self._inherits:
+        if self._abstract or not self._inherits:
             return
 
         # determine which fields can be inherited
