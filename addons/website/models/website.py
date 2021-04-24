@@ -9,6 +9,7 @@ import requests
 import re
 
 
+from lxml import html
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
 from werkzeug.exceptions import NotFound
@@ -321,6 +322,9 @@ class Website(models.Model):
                     view_id = self.env['website'].with_context(website_id=website.id).viewref(snippet)
                     if view_id:
                         rendered_snippet = pycompat.to_text(view_id._render())
+                        el = html.fragment_fromstring(rendered_snippet)
+                        el.attrib['data-snippet'] = snippet.split('.', 1)[-1]
+                        rendered_snippet = pycompat.to_text(html.tostring(el))
                         rendered_snippets.append(rendered_snippet)
                 except ValueError as e:
                     logger.warning(e)
@@ -331,6 +335,9 @@ class Website(models.Model):
                 try:
                     response = requests.get(image['url'], timeout=3)
                     response.raise_for_status()
+                except Exception as e:
+                    logger.warning("Failed to download image: %s.\n%s", image['url'], e)
+                else:
                     self.env['ir.attachment'].create({
                         'name': image['name'],
                         'website_id': website.id,
@@ -338,8 +345,6 @@ class Website(models.Model):
                         'type': 'binary',
                         'raw': response.content,
                     })
-                except requests.HTTPError:
-                    logger.warning("Failed to download image '%s'", image['url'])
 
         website = self.get_current_website()
 
