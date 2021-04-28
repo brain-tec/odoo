@@ -1158,17 +1158,20 @@ var SnippetsMenu = Widget.extend({
      */
     async start() {
         var defs = [this._super.apply(this, arguments)];
-        this.$el.data('snippetMenu', this);
         this.ownerDocument = this.$el[0].ownerDocument;
         this.$document = $(this.ownerDocument);
         this.window = this.ownerDocument.defaultView;
         this.$window = $(this.window);
+        // In an iframe, we need to make sure the element is using jquery on its
+        // own window and not on the top window lest jquery behave unexpectedly.
+        this.$el = this.window.$(this.$el);
+        this.$el.data('snippetMenu', this);
 
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
         this._addToolbar();
         this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this)
-        $(document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+        $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
