@@ -80,6 +80,9 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
             margin-bottom: 0.125rem;
         }
     }
+    .dropdown-toggle::after {
+        display: none;
+    }
     .dropdown-menu.show { // To overcome .note-XXX .dropdown-menu rules
         min-width: 0;
     }
@@ -117,10 +120,10 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     #colorInputButtonGroup label:last-of-type .btn {
         margin: 0 1px 0 -1px;
     }
-    .tablepicker {
+    .oe-tablepicker {
         margin: 1px 2px -8px 2px !important;
 
-        .tablepicker-cell {
+        .oe-tablepicker-cell {
             width: 5px !important;
         }
     }
@@ -238,6 +241,10 @@ body .modal {
                     &:hover {
                         color: $o-we-color-danger;
                     }
+                }
+
+                .o_file_name {
+                    @include o-text-overflow;
                 }
 
                 &:hover {
