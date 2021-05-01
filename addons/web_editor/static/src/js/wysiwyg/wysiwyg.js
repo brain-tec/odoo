@@ -561,7 +561,7 @@ const Wysiwyg = Widget.extend({
                 const $btn = this.toolbar.$el.find('#create-link');
                 this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this}, this.odooEditor.editable, {}, $btn, options.link);
                 const _onMousedown = ev => {
-                    if (!ev.target.closest('.oe-toolbar')) {
+                    if (!ev.target.closest('.oe-toolbar') && !ev.target.closest('.ui-autocomplete')) {
                         // Destroy the link tools on click anywhere outside the
                         // toolbar.
                         this.linkTools && this.linkTools.destroy();
@@ -609,6 +609,14 @@ const Wysiwyg = Widget.extend({
      */
     openMediaDialog(params = {}) {
         const sel = this.odooEditor.document.getSelection();
+        const fontawesomeIcon = getInSelection(this.odooEditor.document, '.fa');
+        if (fontawesomeIcon && sel.toString().trim() === "") {
+            params.node = $(fontawesomeIcon);
+            // save layouting classes from icons to not break the page if you edit an icon
+            params.htmlClass = [...fontawesomeIcon.classList].filter((className) => {
+                return !className.startsWith('fa') || faZoomClassRegex.test(className);
+            }).join(' ');
+        }
         if (!sel.rangeCount) {
             return;
         }
