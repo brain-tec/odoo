@@ -412,7 +412,7 @@ class Picking(models.Model):
         pickings.products_availability = _('Available')
         for picking in pickings:
             forecast_date = max(picking.move_lines.filtered('forecast_expected_date').mapped('forecast_expected_date'), default=False)
-            if any(float_compare(move.forecast_availability, move.product_qty, move.product_id.uom_id.rounding) == -1 for move in picking.move_lines):
+            if any(float_compare(move.forecast_availability, move.product_qty, precision_rounding=move.product_id.uom_id.rounding) == -1 for move in picking.move_lines):
                 picking.products_availability = _('Not Available')
                 picking.products_availability_state = 'late'
             elif forecast_date:
@@ -573,6 +573,15 @@ class Picking(models.Model):
     def _search_delay_alert_date(self, operator, value):
         late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
         return [('move_lines', 'in', late_stock_moves.ids)]
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        for picking in self:
+            picking_id = isinstance(picking.id, int) and picking.id or getattr(picking, '_origin', False) and picking._origin.id
+            if picking_id:
+                moves = self.env['stock.move'].search([('picking_id', '=', picking_id)])
+                for move in moves:
+                    move.write({'partner_id': picking.partner_id.id})
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
