@@ -339,7 +339,7 @@ class Registry(Mapping):
         self.cache.clear()
         self.cache_invalidated = True
         import traceback
-        _logger.info(''.join(["Caches Invalidated at:\n"] + traceback.format_stack()))
+        _logger.debug(''.join(["Caches Invalidated at:\n"] + traceback.format_stack()))
 
     def clear_caches(self):
         """ Clear the caches associated to methods decorated with
