@@ -756,7 +756,7 @@ class IrModelFields(models.Model):
                 for dep in model._dependent_fields(field):
                     if dep.manual:
                         failed_dependencies.append((field, dep))
-                for inverse in model._field_inverses.get(field, ()):
+                for inverse in model.pool.field_inverses[field]:
                     if inverse.manual and inverse.type == 'one2many':
                         failed_dependencies.append((field, inverse))
 
@@ -815,6 +815,7 @@ class IrModelFields(models.Model):
         self._prepare_update()
 
         # determine registry fields corresponding to self
+        triggers = self.pool.field_triggers
         fields = []
         for record in self:
             try:
@@ -838,7 +839,7 @@ class IrModelFields(models.Model):
                 if field is not None:
                     discard_fields(subtree)
 
-        discard_fields(self.pool.field_triggers)
+        discard_fields(triggers)
         self.pool.registry_invalidated = True
 
         # The field we just deleted might be inherited, and the registry is
@@ -991,7 +992,7 @@ class IrModelFields(models.Model):
             'store': bool(field.store),
             'copied': bool(field.copy),
             'on_delete': field.ondelete if field.type == 'many2one' else None,
-            'related': ".".join(field.related) if field.related else None,
+            'related': field.related or None,
             'readonly': bool(field.readonly),
             'required': bool(field.required),
             'selectable': bool(field.search or field.store),

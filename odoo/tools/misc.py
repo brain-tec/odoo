@@ -940,42 +940,56 @@ def clean_context(context):
     """ This function take a dictionary and remove each entry with its key starting with 'default_' """
     return {k: v for k, v in context.items() if not k.startswith('default_')}
 
+
 class frozendict(dict):
     """ An implementation of an immutable dictionary. """
+    __slots__ = ()
+
     def __delitem__(self, key):
         raise NotImplementedError("'__delitem__' not supported on frozendict")
+
     def __setitem__(self, key, val):
         raise NotImplementedError("'__setitem__' not supported on frozendict")
+
     def clear(self):
         raise NotImplementedError("'clear' not supported on frozendict")
+
     def pop(self, key, default=None):
         raise NotImplementedError("'pop' not supported on frozendict")
+
     def popitem(self):
         raise NotImplementedError("'popitem' not supported on frozendict")
+
     def setdefault(self, key, default=None):
         raise NotImplementedError("'setdefault' not supported on frozendict")
+
     def update(self, *args, **kwargs):
         raise NotImplementedError("'update' not supported on frozendict")
+
     def __hash__(self):
         return hash(frozenset((key, freehash(val)) for key, val in self.items()))
 
-class Collector(Mapping):
-    """ A mapping from keys to lists. This is essentially a space optimization
-        for ``defaultdict(list)``.
+
+class Collector(dict):
+    """ A mapping from keys to tuples.  This implements a relation, and can be
+        seen as a space optimization for ``defaultdict(tuple)``.
     """
-    __slots__ = ['_map']
-    def __init__(self):
-        self._map = {}
-    def add(self, key, val):
-        vals = self._map.setdefault(key, [])
-        if val not in vals:
-            vals.append(val)
+    __slots__ = ()
+
     def __getitem__(self, key):
-        return self._map.get(key, ())
-    def __iter__(self):
-        return iter(self._map)
-    def __len__(self):
-        return len(self._map)
+        return self.get(key, ())
+
+    def __setitem__(self, key, val):
+        val = tuple(val)
+        if val:
+            super().__setitem__(key, val)
+        else:
+            super().pop(key, None)
+
+    def add(self, key, val):
+        vals = self[key]
+        if val not in vals:
+            self[key] = vals + (val,)
 
 
 class StackMap(MutableMapping):

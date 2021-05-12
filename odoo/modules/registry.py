@@ -20,7 +20,8 @@ import odoo
 from .. import SUPERUSER_ID
 from odoo.sql_db import TestCursor
 from odoo.tools import (config, existing_tables, ignore,
-                        lazy_classproperty, lazy_property, sql, OrderedSet)
+                        lazy_classproperty, lazy_property, sql,
+                        Collector, OrderedSet)
 from odoo.tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
@@ -132,8 +133,9 @@ class Registry(Mapping):
         self.ready = False              # whether everything is set up
 
         # field dependencies
-        self.field_depends = {}
-        self.field_depends_context = {}
+        self.field_depends = Collector()
+        self.field_depends_context = Collector()
+        self.field_inverses = Collector()
 
         # Inter-process signaling:
         # The `base_registry_signaling` sequence indicates the whole registry
@@ -270,20 +272,23 @@ class Registry(Mapping):
         for model in models:
             model._prepare_setup()
 
-        # do the actual setup from a clean state
-        self._m2m = defaultdict(list)
+        self.field_depends.clear()
+        self.field_depends_context.clear()
+        self.field_inverses.clear()
+
+        # do the actual setup
         for model in models:
             model._setup_base()
 
+        self._m2m = defaultdict(list)
         for model in models:
             model._setup_fields()
+        del self._m2m
 
         for model in models:
             model._setup_complete()
 
         # determine field_depends and field_depends_context
-        self.field_depends.clear()
-        self.field_depends_context.clear()
         for model in models:
             for field in model._fields.values():
                 depends, depends_context = field.get_depends(model)

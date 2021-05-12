@@ -472,7 +472,7 @@ class BaseModel(metaclass=MetaModel):
         * If :attr:`._name` is set, name(s) of parent models to inherit from
         * If :attr:`._name` is unset, name of a single model to extend in-place
     """
-    _inherits = {}
+    _inherits = frozendict()
     """dictionary {'parent_model': 'm2o_field'} mapping the _name of the parent business
     objects to the names of the corresponding foreign key fields to use::
 
@@ -519,7 +519,7 @@ class BaseModel(metaclass=MetaModel):
     as attribute.
     """
 
-    _depends = {}
+    _depends = frozendict()
     """dependencies of models backed up by SQL views
     ``{model_name: field_names}``, where ``field_names`` is an iterable.
     This is only used to determine the changes to flush to database before
@@ -618,7 +618,7 @@ class BaseModel(metaclass=MetaModel):
             ModelClass._build_model_check_base(cls)
             check_parent = ModelClass._build_model_check_parent
         else:
-            ModelClass = type(name, (BaseModel,), {
+            ModelClass = type(name, (cls,), {
                 '_name': name,
                 '_register': False,
                 '_original_module': cls._module,
@@ -636,7 +636,7 @@ class BaseModel(metaclass=MetaModel):
                 raise TypeError("Model %r inherits from non-existing model %r." % (name, parent))
             parent_class = pool[parent]
             if parent == name:
-                for base in parent_class.__bases__:
+                for base in parent_class.__base_classes:
                     bases.add(base)
             else:
                 check_parent(cls, parent_class)
@@ -644,7 +644,9 @@ class BaseModel(metaclass=MetaModel):
                 ModelClass._inherit_module[parent] = cls._module
                 parent_class._inherit_children.add(name)
 
-        ModelClass.__bases__ = tuple(bases)
+        # ModelClass.__bases__ must be assigned those classes; however, this
+        # operation is quite slow, so we do it once in method _prepare_setup()
+        ModelClass.__base_classes = tuple(bases)
 
         # determine the attributes of the model's class
         ModelClass._build_model_attributes(pool)
@@ -697,11 +699,11 @@ class BaseModel(metaclass=MetaModel):
         cls._table = cls._name.replace('.', '_')
         cls._sequence = None
         cls._log_access = cls._auto
-        cls._inherits = {}
-        cls._depends = {}
+        inherits = {}
+        depends = {}
         cls._sql_constraints = {}
 
-        for base in reversed(cls.__bases__):
+        for base in reversed(cls.__base_classes):
             if is_definition_class(base):
                 # the following attributes are not taken from registry classes
                 if cls._name not in base._inherit and not base._description:
@@ -711,16 +713,22 @@ class BaseModel(metaclass=MetaModel):
                 cls._sequence = base._sequence or cls._sequence
                 cls._log_access = getattr(base, '_log_access', cls._log_access)
 
-            cls._inherits.update(base._inherits)
+            inherits.update(base._inherits)
 
             for mname, fnames in base._depends.items():
-                cls._depends.setdefault(mname, []).extend(fnames)
+                depends.setdefault(mname, []).extend(fnames)
 
             for cons in base._sql_constraints:
                 cls._sql_constraints[cons[0]] = cons
 
         cls._sequence = cls._sequence or (cls._table + '_id_seq')
         cls._sql_constraints = list(cls._sql_constraints.values())
+
+        # avoid assigning an empty dict to save memory
+        if inherits:
+            cls._inherits = inherits
+        if depends:
+            cls._depends = depends
 
         # update _inherits_children of parent models
         for parent_name in cls._inherits:
@@ -748,9 +756,18 @@ class BaseModel(metaclass=MetaModel):
         def is_constraint(func):
             return callable(func) and hasattr(func, '_constrains')
 
+        def wrap(func, names):
+            # wrap func into a proxy function with explicit '_constrains'
+            @api.constrains(*names)
+            def wrapper(self):
+                return func(self)
+            return wrapper
+
         cls = type(self)
         methods = []
         for attr, func in getmembers(cls, is_constraint):
+            if callable(func._constrains):
+                func = wrap(func, func._constrains(self))
             for name in func._constrains:
                 field = cls._fields.get(name)
                 if not field:
@@ -2525,7 +2542,7 @@ class BaseModel(metaclass=MetaModel):
         while field.inherited:
             # retrieve the parent model where field is inherited from
             parent_model = self.env[field.related_field.model_name]
-            parent_fname = field.related[0]
+            parent_fname = field.related.split('.')[0]
             # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
             parent_alias = query.left_join(
                 alias, parent_fname, parent_model._table, 'id', parent_fname,
@@ -2801,7 +2818,7 @@ class BaseModel(metaclass=MetaModel):
                 self._add_field(name, field.new(
                     inherited=True,
                     inherited_field=field,
-                    related=(parent_fname, name),
+                    related=f"{parent_fname}.{name}",
                     related_sudo=False,
                     copy=field.copy,
                     readonly=field.readonly,
@@ -2830,7 +2847,7 @@ class BaseModel(metaclass=MetaModel):
                     field.required = True
                 if field.ondelete.lower() not in ('cascade', 'restrict'):
                     field.ondelete = 'cascade'
-                self._inherits[field.comodel_name] = field.name
+                type(self)._inherits = {**self._inherits, field.comodel_name: field.name}
                 self.pool[field.comodel_name]._inherits_children.add(self._name)
 
     @api.model
@@ -2838,6 +2855,10 @@ class BaseModel(metaclass=MetaModel):
         """ Prepare the setup of the model. """
         cls = type(self)
         cls._setup_done = False
+
+        # changing base classes is costly, do it only when necessary
+        if cls.__bases__ != cls.__base_classes:
+            cls.__bases__ = cls.__base_classes
 
         # reset those attributes on the model's class for _setup_fields() below
         for attr in ('_rec_name', '_active_name'):
@@ -2883,8 +2904,6 @@ class BaseModel(metaclass=MetaModel):
         self._add_inherited_fields()
 
         # 4. initialize more field metadata
-        cls._field_inverses = Collector()   # inverse fields for related fields
-
         cls._setup_done = True
 
         for field in cls._fields.values():
@@ -3675,7 +3694,7 @@ Fields:
                 # DLE P150: `test_cancel_propagation`, `test_manufacturing_3_steps`, `test_manufacturing_flow`
                 # TODO: check whether still necessary
                 records_to_inverse[field] = self.filtered('id')
-            if field.relational or self._field_inverses[field]:
+            if field.relational or self.pool.field_inverses[field]:
                 relational_names.append(fname)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
@@ -4064,7 +4083,7 @@ Fields:
                 else:
                     cache_value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, cache_value)
-                    if field.type in ('many2one', 'many2one_reference') and record._field_inverses[field]:
+                    if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
 
         for (field, value), record_ids in inverses_update.items():
@@ -4488,7 +4507,7 @@ Fields:
                     # `self.env['stock.picking'].search([('product_id', '=', product.id)])`
                     # Should flush `stock.move.picking_ids` as `product_id` on `stock.picking` is defined as:
                     # `product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id', readonly=False)`
-                    for f in field.related:
+                    for f in field.related.split('.'):
                         rfield = model._fields.get(f)
                         if rfield:
                             to_flush[model._name].add(f)
@@ -4650,7 +4669,7 @@ Fields:
                 with the record ids corresponding to ``old`` and ``new``.
             """
             if field.inherited:
-                pname = field.related[0]
+                pname = field.related.split('.')[0]
                 return get_trans(field.related_field, old[pname], new[pname])
             return "%s,%s" % (field.model_name, field.name), old.id, new.id
 
@@ -4662,7 +4681,7 @@ Fields:
             if not field.copy:
                 continue
 
-            if field.inherited and field.related[0] in excluded:
+            if field.inherited and field.related.split('.')[0] in excluded:
                 # inherited fields that come from a user-provided parent record
                 # must not copy translations, as the parent record is not a copy
                 # of the old parent record
@@ -5215,7 +5234,7 @@ Fields:
                 inv_recs = self[field.name].filtered(lambda r: not r.id)
                 if not inv_recs:
                     continue
-                for invf in self._field_inverses[field]:
+                for invf in self.pool.field_inverses[field]:
                     # DLE P98: `test_40_new_fields`
                     # /home/dle/src/odoo/master-nochange-fp/odoo/addons/test_new_api/tests/test_new_fields.py
                     # Be careful to not break `test_onchange_taxes_1`, `test_onchange_taxes_2`, `test_onchange_taxes_3`
@@ -5798,7 +5817,7 @@ Fields:
 
         # invalidate fields and inverse fields, too
         spec = [(f, ids) for f in fields] + \
-               [(invf, None) for f in fields for invf in self._field_inverses[f]]
+               [(invf, None) for f in fields for invf in self.pool.field_inverses[f]]
         self.env.cache.invalidate(spec)
 
     def modified(self, fnames, create=False, before=False):
@@ -5899,7 +5918,7 @@ Fields:
             else:
                 # val is another tree of dependencies
                 model = self.env[key.model_name]
-                for invf in model._field_inverses[key]:
+                for invf in model.pool.field_inverses[key]:
                     # use an inverse of field without domain
                     if not (invf.type in ('one2many', 'many2many') and invf.domain):
                         if invf.type == 'many2one_reference':

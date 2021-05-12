@@ -260,7 +260,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __init__(self, string=Default, **kwargs):
         kwargs['string'] = string
-        self._sequence = kwargs['_sequence'] = next(_global_seq)
+        self._sequence = next(_global_seq)
         self.args = {key: val for key, val in kwargs.items() if val is not Default}
 
     def new(self, **kwargs):
@@ -363,7 +363,7 @@ class Field(MetaField('DummyField', (object,), {})):
         attrs['model_name'] = model_class._name
         attrs['name'] = name
         attrs['_module'] = modules[-1] if modules else None
-        attrs['_modules'] = set(modules)
+        attrs['_modules'] = tuple(set(modules))
 
         # initialize ``self`` with ``attrs``
         if name == 'state':
@@ -419,7 +419,9 @@ class Field(MetaField('DummyField', (object,), {})):
         if extra_keys:
             attrs['_extra_keys'] = extra_keys
 
-        self.__dict__.update(attrs)
+        for key, val in attrs.items():
+            if getattr(self, key, Default) != val:
+                setattr(self, key, val)
 
         # prefetch only stored, column, non-manual and non-deprecated fields
         if not (self.store and self.column_type) or self.manual or self.deprecated:
@@ -484,7 +486,7 @@ class Field(MetaField('DummyField', (object,), {})):
             else:
                 related_model = model.env[self.related_field.model_name]
                 depends, depends_context = self.related_field.get_depends(related_model)
-            return ['.'.join(self.related)], depends_context
+            return [self.related], depends_context
 
         if not self.compute:
             return (), self._depends_context or ()
@@ -517,13 +519,11 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def setup_related(self, model):
         """ Setup the attributes of a related field. """
-        # fix the type of self.related if necessary
-        if isinstance(self.related, str):
-            self.related = tuple(self.related.split('.'))
+        assert isinstance(self.related, str), self.related
 
         # determine the chain of fields, and make sure they are all set up
         model_name = self.model_name
-        for name in self.related:
+        for name in self.related.split('.'):
             field = model.pool[model_name]._fields[name]
             if not field._setup_done:
                 field.setup(model.env[model_name])
@@ -562,13 +562,13 @@ class Field(MetaField('DummyField', (object,), {})):
             # add modules from delegate and target fields; the first one ensures
             # that inherited fields introduced via an abstract model (_inherits
             # being on the abstract model) are assigned an XML id
-            self._modules.update(model._fields[self.related[0]]._modules)
-            self._modules.update(field._modules)
+            delegate_field = model._fields[self.related.split('.')[0]]
+            self._modules = tuple({*self._modules, *delegate_field._modules, *field._modules})
 
     def traverse_related(self, record):
         """ Traverse the fields of the related field `self` except for the last
         one, and return it as a pair `(last_record, last_field)`. """
-        for name in self.related[:-1]:
+        for name in self.related.split('.')[:-1]:
             record = first(record[name])
         return record, self.related_field
 
@@ -601,7 +601,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # computation.
         #
         values = list(records)
-        for name in self.related[:-1]:
+        for name in self.related.split('.')[:-1]:
             try:
                 values = [first(value[name]) for value in values]
             except AccessError as e:
@@ -634,7 +634,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _search_related(self, records, operator, value):
         """ Determine the domain to search on field ``self``. """
-        return [('.'.join(self.related), operator, value)]
+        return [(self.related, operator, value)]
 
     # properties used by setup_related() to copy values from related field
     _related_comodel_name = property(attrgetter('comodel_name'))
@@ -721,7 +721,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     yield tuple(field_seq)
 
                 if field.type in ('one2many', 'many2many'):
-                    for inv_field in Model._field_inverses[field]:
+                    for inv_field in Model.pool.field_inverses[field]:
                         yield tuple(field_seq) + (inv_field,)
 
                 model_name = field.comodel_name
@@ -889,12 +889,12 @@ class Field(MetaField('DummyField', (object,), {})):
         # optimization for computing simple related fields like 'foo_id.bar'
         if (
             not column
-            and len(self.related or ()) == 2
+            and self.related and self.related.count('.') == 1
             and self.related_field.store and not self.related_field.compute
             and not (self.related_field.type == 'binary' and self.related_field.attachment)
             and self.related_field.type not in ('one2many', 'many2many')
         ):
-            join_field = model._fields[self.related[0]]
+            join_field = model._fields[self.related.split('.')[0]]
             if (
                 join_field.type == 'many2one'
                 and join_field.store and not join_field.compute
@@ -956,6 +956,7 @@ class Field(MetaField('DummyField', (object,), {})):
     def update_db_related(self, model):
         """ Compute a stored related field directly in SQL. """
         comodel = model.env[self.related_field.model_name]
+        join_field, comodel_field = self.related.split('.')
         model.env.cr.execute("""
             UPDATE "{model_table}" AS x
             SET "{model_field}" = y."{comodel_field}"
@@ -965,8 +966,8 @@ class Field(MetaField('DummyField', (object,), {})):
             model_table=model._table,
             model_field=self.name,
             comodel_table=comodel._table,
-            comodel_field=self.related[1],
-            join_field=self.related[0],
+            comodel_field=comodel_field,
+            join_field=join_field,
         ))
 
     ############################################################################
@@ -1110,7 +1111,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 # values as record for the corresponding inherited fields
                 def is_inherited_field(name):
                     field = record._fields[name]
-                    return field.inherited and field.related[0] == self.name
+                    return field.inherited and field.related.split('.')[0] == self.name
 
                 parent = record.env[self.comodel_name].new({
                     name: value
@@ -1195,7 +1196,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
             if self.inherited:
                 # special case: also assign parent records if they are new
-                parents = records[self.related[0]]
+                parents = records[self.related.split('.')[0]]
                 parents.filtered(lambda r: not r.id)[self.name] = value
 
         if other_ids:
@@ -2845,7 +2846,7 @@ class Many2one(_Relational):
         # align(id) returns a NewId if records are new, a real id otherwise
         align = (lambda id_: id_) if all(record_ids) else (lambda id_: id_ and NewId(id_))
 
-        for invf in records._field_inverses[self]:
+        for invf in records.pool.field_inverses[self]:
             corecords = records.env[self.comodel_name].browse(
                 align(id_) for id_ in cache.get_values(records, self)
             )
@@ -2861,7 +2862,7 @@ class Many2one(_Relational):
             return
         cache = records.env.cache
         corecord = self.convert_to_record(value, records)
-        for invf in records._field_inverses[self]:
+        for invf in records.pool.field_inverses[self]:
             valid_records = records.filtered_domain(invf.get_domain_list(corecord))
             if not valid_records:
                 continue
@@ -2904,7 +2905,7 @@ class Many2oneReference(Integer):
         record_ids = set(records._ids)
         model_ids = self._record_ids_per_res_model(records)
 
-        for invf in records._field_inverses[self]:
+        for invf in records.pool.field_inverses[self]:
             records = records.browse(model_ids[invf.model_name])
             if not records:
                 continue
@@ -2924,7 +2925,7 @@ class Many2oneReference(Integer):
         cache = records.env.cache
         model_ids = self._record_ids_per_res_model(records)
 
-        for invf in records._field_inverses[self]:
+        for invf in records.pool.field_inverses[self]:
             records = records.browse(model_ids[invf.model_name])
             if not records:
                 continue
@@ -3197,7 +3198,7 @@ class _RelationalMulti(_Relational):
                 return val._origin if isinstance(val, BaseModel) else val
 
             # make result with new and existing records
-            inv_names = {field.name for field in record._field_inverses[self]}
+            inv_names = {field.name for field in record.pool.field_inverses[self]}
             result = [Command.set([])]
             for record in value:
                 origin = record._origin
@@ -3331,8 +3332,8 @@ class One2many(_RelationalMulti):
             if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 # integer inverses (res_model/res_id pairs) are not supported
-                model._field_inverses.add(self, invf)
-            comodel._field_inverses.add(invf, self)
+                model.pool.field_inverses.add(self, invf)
+            comodel.pool.field_inverses.add(invf, self)
 
     _description_relation_field = property(attrgetter('inverse_name'))
 
@@ -3678,10 +3679,10 @@ class Many2many(_RelationalMulti):
                 raise TypeError(msg % (self, field))
             fields.append(self)
 
-            # retrieve inverse fields, and link them in _field_inverses
+            # retrieve inverse fields, and link them in field_inverses
             for field in m2m[(self.relation, self.column2, self.column1)]:
-                model._field_inverses.add(self, field)
-                model.env[field.model_name]._field_inverses.add(field, self)
+                model.pool.field_inverses.add(self, field)
+                model.pool.field_inverses.add(field, self)
 
     def update_db(self, model, columns):
         cr = model._cr
@@ -3853,7 +3854,7 @@ class Many2many(_RelationalMulti):
             y_to_xs = defaultdict(set)
             for x, y in pairs:
                 y_to_xs[y].add(x)
-            for invf in records._field_inverses[self]:
+            for invf in records.pool.field_inverses[self]:
                 domain = invf.get_domain_list(comodel)
                 valid_ids = set(records.filtered_domain(domain)._ids)
                 if not valid_ids:
@@ -3891,7 +3892,7 @@ class Many2many(_RelationalMulti):
                 cr.execute(query, params)
 
             # update the cache of inverse fields
-            for invf in records._field_inverses[self]:
+            for invf in records.pool.field_inverses[self]:
                 for y, xs in y_to_xs.items():
                     corecord = comodel.browse(y)
                     try:
@@ -3967,7 +3968,7 @@ class Many2many(_RelationalMulti):
             y_to_xs = defaultdict(set)
             for x, y in pairs:
                 y_to_xs[y].add(x)
-            for invf in records._field_inverses[self]:
+            for invf in records.pool.field_inverses[self]:
                 domain = invf.get_domain_list(comodel)
                 valid_ids = set(records.filtered_domain(domain)._ids)
                 if not valid_ids:
@@ -3988,7 +3989,7 @@ class Many2many(_RelationalMulti):
             y_to_xs = defaultdict(set)
             for x, y in pairs:
                 y_to_xs[y].add(x)
-            for invf in records._field_inverses[self]:
+            for invf in records.pool.field_inverses[self]:
                 for y, xs in y_to_xs.items():
                     corecord = comodel.browse([y])
                     try:
