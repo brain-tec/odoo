@@ -1544,7 +1544,7 @@ class Lead(models.Model):
         if include_lost:
             domain += ['|', ('type', '=', 'opportunity'), ('active', '=', True)]
         else:
-            domain += ['&', ('active', '=', True), '|', ('probability', '=', False), ('probability', '<', 100)]
+            domain += ['&', ('active', '=', True), '|', ('stage_id', '=', False), ('stage_id.is_won', '=', False)]
 
         return self.with_context(active_test=False).search(domain)
 
@@ -1777,6 +1777,10 @@ class Lead(models.Model):
                     partner_info['full_name'] = tools.formataddr((self.contact_name or self.partner_name, email))
                     break
         return result
+
+    def _phone_get_number_fields(self):
+        """ Use mobile or phone fields to compute sanitized phone number """
+        return ['mobile', 'phone']
 
     @api.model
     def get_import_templates(self):
