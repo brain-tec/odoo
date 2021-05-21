@@ -694,8 +694,8 @@ class MrpProduction(models.Model):
             if 'date_planned_start' in vals and not self.env.context.get('force_date', False):
                 if production.state in ['done', 'cancel']:
                     raise UserError(_('You cannot move a manufacturing order once it is cancelled or done.'))
-                if any(wo.date_planned_start and wo.date_planned_finished for wo in production.workorder_ids):
-                    raise UserError(_('You cannot move a manufacturing order once it has a planned workorder, move related workorder(s) instead.'))
+                if production.is_planned:
+                    production.button_unplan()
             if vals.get('date_planned_start'):
                 production.move_raw_ids.write({'date': production.date_planned_start, 'date_deadline': production.date_planned_start})
             if vals.get('date_planned_finished'):
@@ -1515,6 +1515,8 @@ class MrpProduction(models.Model):
         for production in self:
             if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 raise UserError(_('The quantity to produce must be positive!'))
+            if not any(production.move_raw_ids.mapped('quantity_done')):
+                raise UserError(_("You must indicate a non-zero amount consumed for at least one of your components"))
 
         consumption_issues = self._get_consumption_issues()
         if consumption_issues:
