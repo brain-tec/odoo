@@ -150,12 +150,12 @@ class AccountInvoice(models.Model):
             currency_id = self.currency_id
             for payment in self.payment_move_line_ids:
                 payment_currency_id = False
-                if self.type in ('out_invoice', 'in_refund'):
+                if self.type in ('out_invoice', 'in_refund') and self.amount_total>0:
                     amount = sum([p.amount for p in payment.matched_debit_ids if p.debit_move_id in self.move_id.line_ids])
                     amount_currency = sum([p.amount_currency for p in payment.matched_debit_ids if p.debit_move_id in self.move_id.line_ids])
                     if payment.matched_debit_ids:
                         payment_currency_id = all([p.currency_id == payment.matched_debit_ids[0].currency_id for p in payment.matched_debit_ids]) and payment.matched_debit_ids[0].currency_id or False
-                elif self.type in ('in_invoice', 'out_refund'):
+                if self.type in ('in_invoice', 'out_refund') or self.amount_total<0:
                     amount = sum([p.amount for p in payment.matched_credit_ids if p.credit_move_id in self.move_id.line_ids])
                     amount_currency = sum([p.amount_currency for p in payment.matched_credit_ids if p.credit_move_id in self.move_id.line_ids])
                     if payment.matched_credit_ids:
