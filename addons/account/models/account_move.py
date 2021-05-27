@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re
+from odoo.tools import float_compare, date_utils, email_split, email_re, html_escape
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 from datetime import date, timedelta
@@ -1864,7 +1864,12 @@ class AccountMove(models.Model):
             default['date'] = self.company_id._get_user_fiscal_lock_date() + timedelta(days=1)
         if self.move_type == 'entry':
             default['partner_id'] = False
-        return super(AccountMove, self).copy(default)
+        copied_am = super().copy(default)
+        copied_am._message_log(body=_(
+            'This entry has been duplicated from <a href=# data-oe-model=account.move data-oe-id=%(id)d>%(title)s</a>',
+            id=self.id, title=html_escape(self.display_name)
+        ))
+        return copied_am
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -2173,9 +2178,9 @@ class AccountMove(models.Model):
         :return:            A string representing the invoice.
         '''
         self.ensure_one()
-        draft_name = ''
+        name = ''
         if self.state == 'draft':
-            draft_name += {
+            name += {
                 'out_invoice': _('Draft Invoice'),
                 'out_refund': _('Draft Credit Note'),
                 'in_invoice': _('Draft Bill'),
@@ -2184,11 +2189,12 @@ class AccountMove(models.Model):
                 'in_receipt': _('Draft Purchase Receipt'),
                 'entry': _('Draft Entry'),
             }[self.move_type]
-            if not self.name or self.name == '/':
-                draft_name += ' (* %s)' % str(self.id)
-            else:
-                draft_name += ' ' + self.name
-        return (draft_name or self.name) + (show_ref and self.ref and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '') or '')
+            name += ' '
+        if not self.name or self.name == '/':
+            name += '(* %s)' % str(self.id)
+        else:
+            name += self.name
+        return name + (show_ref and self.ref and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '') or '')
 
     def _get_invoice_delivery_partner_id(self):
         ''' Hook allowing to retrieve the right delivery address depending of installed modules.
