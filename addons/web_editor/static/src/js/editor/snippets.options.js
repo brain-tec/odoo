@@ -1286,12 +1286,16 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         const _super = this._super.bind(this);
         const args = arguments;
 
-        // TODO review in master, this was done in stable to keep the speed fix
-        // as stable as possible (to have a reference to a widget even if not a
-        // colorPalette widget).
-        this.colorPalette = new Widget(this);
-        this.colorPalette.getColorNames = () => [];
-        await this.colorPalette.appendTo(document.createDocumentFragment());
+        if (this.options.dataAttributes.lazyPalette === 'true') {
+            // TODO review in master, this was done in stable to keep the speed
+            // fix as stable as possible (to have a reference to a widget even
+            // if not a colorPalette widget).
+            this.colorPalette = new Widget(this);
+            this.colorPalette.getColorNames = () => [];
+            await this.colorPalette.appendTo(document.createDocumentFragment());
+        } else {
+            await this._renderColorPalette();
+        }
 
         // Build the select element with a custom span to hold the color preview
         this.colorPreviewEl = document.createElement('span');
@@ -2765,7 +2769,7 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @type {boolean}
      */
-    displayHandles: false,
+    displayOverlayOptions: false,
 
     /**
      * The option `$el` is supposed to be the associated DOM UI element.
@@ -3842,7 +3846,7 @@ const registry = {};
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 registry.sizing = SnippetOptionWidget.extend({
-    displayHandles: true,
+    displayOverlayOptions: true,
 
     /**
      * @override
@@ -4101,28 +4105,6 @@ registry['sizing_y'] = registry.sizing.extend({
  * Allows for media to be replaced.
  */
 registry.ReplaceMedia = SnippetOptionWidget.extend({
-    /**
-     * @override
-     */
-    start() {
-        const $button = this.$el.find('we-button.fa');
-        this.$overlayRemove = this.$overlay.find('.oe_snippet_remove');
-        $button.insertBefore(this.$overlayRemove);
-
-        return this._super(...arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async updateUIVisibility() {
-        this.$overlayRemove.toggleClass('d-none', this.$target.is('.fa'));
-        return this._super(...arguments);
-    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -4138,20 +4120,6 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         // to be refactored when the new editor is merged
         this.$target.dblclick();
     },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async _computeWidgetVisibility(widgetName, params) {
-        if (widgetName === 'replace_media_overlay_opt') {
-            return !this.$target.is('.fa');
-        }
-        return this._super(...arguments);
-    }
 });
 
 /**
@@ -4493,27 +4461,10 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        const isLocalURL = href => new URL(href, window.location.origin).origin === window.location.origin;
-
         const img = this._getImg();
         if (!this.originalSrc || !['image/png', 'image/jpeg'].includes(img.dataset.mimetype)) {
-            return [...uiFragment.childNodes].forEach(node => {
-                if (node.matches('.o_we_external_warning')) {
-                    node.classList.remove('d-none');
-                    if (isLocalURL(img.getAttribute('src'))) {
-                        const title = node.querySelector('we-title');
-                        title.textContent = ` ${_t("Quality options unavailable")}`;
-                        $(title).prepend('<i class="fa fa-warning" />');
-                        if (img.dataset.mimetype) {
-                            title.setAttribute('title', _t("Only PNG and JPEG images support quality options and image filtering"));
-                        } else {
-                            title.setAttribute('title', _t("Due to technical limitations, you can only change optimization settings on this image by choosing it again in the media-dialog or reuploading it (double click on the image)"));
-                        }
-                    }
-                } else {
-                    node.remove();
-                }
-            });
+            [...uiFragment.childNodes].forEach(node => node.remove());
+            return;
         }
         const $select = $(uiFragment).find('we-select[data-name=width_select_opt]');
         (await this._computeAvailableWidths()).forEach(([value, label]) => {
