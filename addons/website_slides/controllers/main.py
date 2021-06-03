@@ -434,8 +434,7 @@ class WebsiteSlides(WebsiteProfile):
     def _get_top3_users(self):
         return request.env['res.users'].sudo().search_read([
             ('karma', '>', 0),
-            ('website_published', '=', True),
-            ('image_1920', '!=', False)], ['id'], limit=3, order='karma desc')
+            ('website_published', '=', True)], ['id'], limit=3, order='karma desc')
 
     @http.route([
         '/slides/<model("slide.channel"):channel>',
@@ -1155,13 +1154,13 @@ class WebsiteSlides(WebsiteProfile):
         # slide, the error will be the website.403 page instead of the one of the website_slides.embed_slide.
         # Do not forget the rendering here will be displayed in the embedded iframe
 
-        # determine if it is embedded from external web page
-        referrer_url = request.httprequest.headers.get('Referer', '')
-        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        is_embedded = referrer_url and not bool(base_url in referrer_url) or False
         # try accessing slide, and display to corresponding template
         try:
             slide = request.env['slide.slide'].browse(slide_id)
+            # determine if it is embedded from external web page
+            referrer_url = request.httprequest.headers.get('Referer', '')
+            base_url = slide.get_base_url()
+            is_embedded = referrer_url and not bool(base_url in referrer_url) or False
             if is_embedded:
                 request.env['slide.embed'].sudo()._add_embed_url(slide.id, referrer_url)
             values = self._get_slide_detail(slide)

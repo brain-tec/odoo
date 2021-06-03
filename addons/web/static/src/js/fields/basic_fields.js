@@ -1732,7 +1732,7 @@ var UrlWidget = InputField.extend({
         }
         let href = this.value;
         if (this.value && !this.websitePath) {
-            const regex = /^(?:[fF]|[hH][tT])[tT][pP][sS]?:\/\//;
+            const regex = /^((ftp|http)s?:\/)?\//i; // http(s)://... ftp(s)://... /...
             href = !regex.test(this.value) ? `http://${href}` : href;
         }
         this.el.classList.add("o_form_uri", "o_text_overflow");
@@ -2071,8 +2071,7 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
                 this.$el.addClass(this.attrs.class);
             }
 
-            const image_field = this.field.manual ? this.name:'image_128';
-            var urlThumb = this._getImageUrl(this.model, this.res_id, image_field, unique);
+            var urlThumb = this._getImageUrl(this.model, this.res_id, this.name, unique);
 
             this.$el.empty();
             $img = this.$el;

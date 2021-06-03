@@ -8,7 +8,6 @@ import hashlib
 import requests
 import re
 
-
 from lxml import html
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
@@ -41,10 +40,12 @@ DEFAULT_CDN_FILTERS = [
 
 DEFAULT_ENDPOINT = 'https://website.api.odoo.com'
 
+
 class Website(models.Model):
 
     _name = "website"
     _description = "Website"
+    _order = "sequence, id"
 
     @api.model
     def website_domain(self, website_id=False):
@@ -59,8 +60,8 @@ class Website(models.Model):
         return def_lang_id or self._active_languages()[0]
 
     name = fields.Char('Website Name', required=True)
-    domain = fields.Char('Website Domain',
-        help='Will be prefixed by http in canonical URLs if no scheme is specified')
+    sequence = fields.Integer(default=10)
+    domain = fields.Char('Website Domain', help='E.g. https://www.mydomain.com')
     country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
                                          string='Country Groups', help='Used when multiple websites have the same domain.')
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.company, required=True)
@@ -169,13 +170,14 @@ class Website(models.Model):
 
     @api.model
     def create(self, vals):
-        self._handle_favicon(vals)
+        self._handle_create_write(vals)
 
         if 'user_id' not in vals:
             company = self.env['res.company'].browse(vals.get('company_id'))
             vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
 
         res = super(Website, self).create(vals)
+        res.company_id._compute_website_id()
         res._bootstrap_homepage()
 
         if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
@@ -187,7 +189,8 @@ class Website(models.Model):
 
     def write(self, values):
         public_user_to_change_websites = self.env['website']
-        self._handle_favicon(values)
+        original_company = self.company_id
+        self._handle_create_write(values)
 
         self.clear_caches()
 
@@ -198,9 +201,14 @@ class Website(models.Model):
                 super(Website, public_user_to_change_websites).write(dict(values, user_id=company and company._get_public_user().id))
 
         result = super(Website, self - public_user_to_change_websites).write(values)
+
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
             # invalidate the caches from static node at compile time
             self.env['ir.qweb'].clear_caches()
+
+        # invalidate cache for `company.website_id` to be recomputed
+        if 'sequence' in values or 'company_id' in values:
+            (original_company | self.company_id)._compute_website_id()
 
         if 'cookies_bar' in values:
             existing_policy_page = self.env['website.page'].search([
@@ -225,9 +233,21 @@ class Website(models.Model):
         return result
 
     @api.model
+    def _handle_create_write(self, vals):
+        self._handle_favicon(vals)
+        self._handle_domain(vals)
+
+    @api.model
     def _handle_favicon(self, vals):
         if 'favicon' in vals:
             vals['favicon'] = tools.image_process(vals['favicon'], size=(256, 256), crop='center', output_format='ICO')
+
+    @api.model
+    def _handle_domain(self, vals):
+        if 'domain' in vals and vals['domain']:
+            if not vals['domain'].startswith('http'):
+                vals['domain'] = 'https://%s' % vals['domain']
+            vals['domain'] = vals['domain'].rstrip('/')
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_last_remaining_website(self):
@@ -245,7 +265,10 @@ class Website(models.Model):
             ('url', 'ilike', '.assets\\_'),
         ])
         attachments_to_unlink.unlink()
-        return super(Website, self).unlink()
+        companies = self.company_id
+        res = super(Website, self).unlink()
+        companies._compute_website_id()
+        return res
 
     def create_and_redirect_configurator(self):
         self._force()
@@ -910,7 +933,7 @@ class Website(models.Model):
                 endpoint.routing['auth'] in ('none', 'public') and
                 endpoint.routing.get('website', False) and
                 all(hasattr(converter, 'generate') for converter in converters)):
-                return False
+            return False
 
         # dont't list routes without argument having no default value or converter
         sign = inspect.signature(endpoint.method.original_func)
@@ -1097,10 +1120,6 @@ class Website(models.Model):
         res = urls.url_parse(self.domain)
         return 'http://' + self.domain if not res.scheme else self.domain
 
-    def get_base_url(self):
-        self.ensure_one()
-        return self._get_http_domain() or super(BaseModel, self).get_base_url()
-
     def _get_canonical_url_localized(self, lang, canonical_params):
         """Returns the canonical URL for the current request with translatable
         elements appropriately translated in `lang`.
@@ -1161,28 +1180,3 @@ class Website(models.Model):
 
     def _get_cached(self, field):
         return self._get_cached_values()[field]
-
-
-class BaseModel(models.AbstractModel):
-    _inherit = 'base'
-
-    def get_base_url(self):
-        """
-        Returns baseurl about one given record.
-        If a website_id field exists in the current record we use the url
-        from this website as base url.
-
-        :return: the base url for this record
-        :rtype: string
-
-        """
-        self.ensure_one()
-        if 'website_id' in self and self.website_id.domain:
-            return self.website_id._get_http_domain()
-        else:
-            return super(BaseModel, self).get_base_url()
-
-    def get_website_meta(self):
-        # dummy version of 'get_website_meta' above; this is a graceful fallback
-        # for models that don't inherit from 'website.seo.metadata'
-        return {}

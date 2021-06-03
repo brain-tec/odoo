@@ -3320,7 +3320,8 @@ Fields:
         :rtype: string
 
         """
-        self.ensure_one()
+        if len(self) > 1:
+            raise ValueError("Expected singleton or no record: %s" % self)
         return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
     def _check_concurrency(self):
@@ -6353,13 +6354,6 @@ Fields:
             result['warning'] = dict(title=title, message=message, type='dialog')
 
         return result
-
-    def _get_placeholder_filename(self, field=None):
-        """ Returns the filename of the placeholder to use,
-            set on web/static/img by default, or the
-            complete path to access it (eg: module/path/to/image.png).
-        """
-        return 'placeholder.png'
 
     def _populate_factories(self):
         """ Generates a factory for the different fields of the model.
