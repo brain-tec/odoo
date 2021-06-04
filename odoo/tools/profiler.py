@@ -5,7 +5,6 @@ import datetime
 import gc
 import json
 import logging
-import os
 import sys
 import time
 import threading
@@ -269,20 +268,18 @@ class Profiler:
     Context manager to use to start the recording of some execution.
     Will save sql and async stack trace by default.
     """
-    def __init__(self, db=..., path=None, collectors=None, profile_session=None,
+    def __init__(self, collectors=None, db=..., profile_session=None,
                  description=None, disable_gc=False, params=None):
         """
         :param db: database name to use to save results.
             Will try to define database automatically by default.
             Use value ``None`` to not save results in a database.
-        :param path: path to use to save result
         :param collectors: list of string and Collector object Ex: ['sql', PeriodicCollector(interval=0.2)]. Use `None` for default collectors
         :param profile_session: session description to use to reproup multiple profile. use make_session(name) for default format.
         :param description: description of the current profiler Suggestion: (route name/test method/loading module, ...)
         :param disable_gc: flag to disable gc durring profiling (usefull to avoid gc while profiling, especially during sql execution)
         :param params: parameters usable by collectors (like frame interval)
         """
-        self.path = path
         self.start_time = 0
         self.duration = 0
         self.profile_session = profile_session or make_session()
@@ -297,7 +294,7 @@ class Profiler:
         if db is ...:
             # determine database from current thread
             db = getattr(threading.current_thread(), 'dbname', None)
-            if not db and not path:
+            if not db:
                 # only raise if path is not given and db is not explicitely disabled
                 raise Exception('Database name cannot be defined automaticaly. \n Please provide a valid/falsy dbname or path parameter')
         self.db = db
@@ -319,8 +316,6 @@ class Profiler:
     def __enter__(self):
         self.init_thread = threading.current_thread()
         self.init_frame = get_current_frame(self.init_thread)
-        if self.init_frame.f_code.co_name == 'enter_context':
-            self.init_frame = self.init_frame.f_back  # profiler used in a ExitStack case
         self.init_stack_trace = _get_stack_trace(self.init_frame)
         if self.description is None:
             frame = self.init_frame
@@ -339,25 +334,6 @@ class Profiler:
                 collector.stop()
             self.duration = time.time() - self.start_time
             self._add_file_lines(self.init_stack_trace)
-            if self.path:
-                save_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-                dirname = os.path.dirname(self.path)
-                os.makedirs(dirname, exist_ok=True)
-                for collector in self.collectors:
-                    formatted_path = self.path.format(len=len(collector.entries), time=save_time)
-                    row = collector.name
-                    description = re.sub("[^0-9a-zA-Z-]+", "_", self.description)
-                    path = f'{formatted_path}_{description}_{row}.json'
-                    _logger.warning('saving to %s', path)
-                    with open(path, 'w', encoding='utf-8') as f:
-                        json.dump({
-                            "name": self.description,
-                            "session": self.profile_session,
-                            "create_date": save_time,
-                            "init_stack_trace": _format_stack(self.init_stack_trace),
-                            "duration": self.duration,
-                            'result': collector.entries,
-                        }, f, indent=4)
 
             if self.db:
                 # pylint: disable=import-outside-toplevel
@@ -369,6 +345,7 @@ class Profiler:
                         "create_date": datetime.datetime.now(),
                         "init_stack_trace": json.dumps(_format_stack(self.init_stack_trace)),
                         "duration": self.duration,
+                        "entry_count": self.entry_count(),
                     }
                     for collector in self.collectors:
                         if collector.entries:
@@ -403,3 +380,65 @@ class Profiler:
             if filelines is not None:
                 line = filelines[lineno - 1]
                 stack[index] = (filename, lineno, name, line)
+
+    def entry_count(self):
+        """ Return the total number of entries collected in this profiler. """
+        return sum(len(collector.entries) for collector in self.collectors)
+
+    def format_path(self, path):
+        """
+        Utility function to format a path for this profiler.
+        This is mainly useful to uniquify a path between executions.
+        """
+        return path.format(
+            time=datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+            len=self.entry_count(),
+            desc=re.sub("[^0-9a-zA-Z-]+", "_", self.description)
+        )
+
+    def json(self):
+        """
+        Utility function to generate a json version of this profiler.
+        This is useful to write profiling entries into a file, such as::
+
+            with Profiler(db=None) as profiler:
+                do_stuff()
+
+            filename = p.format_path('/home/foo/{desc}_{len}.json')
+            with open(filename, 'w') as f:
+                f.write(profiler.json())
+        """
+        return json.dumps({
+            "name": self.description,
+            "session": self.profile_session,
+            "create_date": datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+            "init_stack_trace": _format_stack(self.init_stack_trace),
+            "duration": self.duration,
+            "collectors": {collector.name: collector.entries for collector in self.collectors},
+        }, indent=4)
+
+
+class Nested:
+    """
+    Utility to nest another context manager inside a profiler.
+
+    The profiler should only be called directly in the "with" without nesting it
+    with ExitStack. If not, the retrieval of the 'init_frame' may be incorrect
+    and lead to an error "Limit frame was not found" when profiling. Since the
+    stack will ignore all stack frames inside this file, the nested frames will
+    be ignored, too. This is also why Nested() does not use
+    contextlib.contextmanager.
+    """
+    def __init__(self, profiler, context_manager):
+        self.profiler = profiler
+        self.context_manager = context_manager
+
+    def __enter__(self):
+        self.profiler.__enter__()
+        return self.context_manager.__enter__()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return self.context_manager.__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.profiler.__exit__(exc_type, exc_value, traceback)

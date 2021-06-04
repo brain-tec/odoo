@@ -57,14 +57,14 @@ class PaymentAcquirer(models.Model):
         if self.state == 'enabled':
             api_urls = {
                 'flexcheckout': 'https://secure.ogone.com/Tokenization/HostedPage',
-                'directlink': 'https://secure.ogone.com/ncol/prod/orderdirect.asp',
-                'maintenancedirect': 'https://secure.ogone.com/ncol/prod/maintenancedirect.asp',
+                'directlink': 'https://secure.ogone.com/ncol/prod/orderdirect_utf8.asp',
+                'maintenancedirect': 'https://secure.ogone.com/ncol/prod/maintenancedirect_utf8.asp',
             }
         else:  # 'test'
             api_urls = {
                 'flexcheckout': 'https://ogone.test.v-psp.com/Tokenization/HostedPage',
-                'directlink': 'https://ogone.test.v-psp.com/ncol/test/orderdirect.asp',
-                'maintenancedirect': 'https://ogone.test.v-psp.com/ncol/test/maintenancedirect.asp',
+                'directlink': 'https://ogone.test.v-psp.com/ncol/test/orderdirect_utf8.asp',
+                'maintenancedirect': 'https://ogone.test.v-psp.com/ncol/test/maintenancedirect_utf8.asp',
             }
         return api_urls.get(api_key)
 
@@ -120,3 +120,9 @@ class PaymentAcquirer(models.Model):
             _logger.exception("invalid API request at %s with data %s", url, payload)
             raise ValidationError("Ogone: " + _("The communication with the API failed."))
         return response.content
+
+    def _get_default_payment_method(self):
+        self.ensure_one()
+        if self.provider != 'ogone':
+            return super()._get_default_payment_method()
+        return self.env.ref('payment_ogone.payment_method_ogone').id
