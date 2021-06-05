@@ -82,6 +82,7 @@
                             </div>
                             <field name="acquisition_date" attrs="{'invisible': [('vehicle_type', '!=', 'car')]}"/>
                             <field name="vin_sn"/>
+                            <field name="trailer_hook"/>
                             <field name="car_value" widget="monetary"/>
                             <field name="net_car_value" widget="monetary"/>
                             <field name="residual_value" widget="monetary"/>
@@ -167,6 +168,7 @@
                 <field string="Vehicle" name="name" filter_domain="['|', ('name', 'ilike', self), ('license_plate', 'ilike', self)]"/>
                 <field string="Drivers" name="log_drivers" filter_domain="[('log_drivers.driver_id.name', 'ilike', self)]"/>
                 <field string="Current Driver" name="driver_id"/>
+                <field name="model_id"/>
                 <field name="future_driver_id"/>
                 <field name="tag_ids"/>
                 <field name="location"/>
@@ -175,6 +177,7 @@
                     domain="['&amp;', ('future_driver_id', '=', False), '|', ('driver_id', '=', False), '|', '&amp;', ('plan_to_change_car', '=', True), ('vehicle_type', '=', 'car'), '&amp;', ('plan_to_change_bike', '=', True), ('vehicle_type', '=', 'bike')]"/>
                 <filter string="Bikes" name="bikes" domain="[('vehicle_type', '=', 'bike')]"/>
                 <filter string="Cars" name="cars" domain="[('vehicle_type', '=', 'car')]"/>
+                <filter string="Trailer Hook" name="trailer_hook" domain="[('trailer_hook', '=', True)]"/>
                 <filter name="planned" string="Planned for Change" domain="['|', '&amp;', ('vehicle_type', '=', 'bike'), ('plan_to_change_bike', '=', True), '&amp;', ('vehicle_type', '=', 'car'), ('plan_to_change_car', '=', True)]"/>
                 <separator/>
                 <filter string="Need Action" name="alert_true" domain="['|', ('contract_renewal_due_soon', '=', True), ('contract_renewal_overdue', '=', True)]"/>
@@ -192,6 +195,7 @@
                     <filter string="Status" name="groupby_status" context="{'group_by': 'state_id'}"/>
                     <filter string="Model" name="groupby_model" context="{'group_by': 'model_id'}"/>
                     <filter string="Brand" name="groupby_make" context="{'group_by': 'brand_id'}"/>
+                    <filter string="Fuel Type" name="groupby_fueltype" context="{'group_by': 'fuel_type'}"/>
                 </group>
            </search>
         </field>
