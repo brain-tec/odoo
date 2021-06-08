@@ -36,7 +36,7 @@ class ProductTemplate(models.Model):
 
     name = fields.Char('Name', index=True, required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1, help='Gives the sequence order when displaying a product list')
-    description = fields.Text(
+    description = fields.Html(
         'Description', translate=True)
     description_purchase = fields.Text(
         'Purchase Description', translate=True)
@@ -441,6 +441,12 @@ class ProductTemplate(models.Model):
                 'image_128',
                 'can_image_1024_be_zoomed',
             ])
+            # Touch all products that will fall back on the template field
+            # This is done because __last_update is used to compute the 'unique' SHA in image URLs
+            # for making sure that images are not retrieved from the browser cache after a change
+            # Performance discussion outcome:
+            # Actually touch all variants to avoid using filtered on the image_variant_1920 field
+            self.product_variant_ids.write({})
         return res
 
     @api.returns('self', lambda value: value.id)
