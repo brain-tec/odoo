@@ -2769,7 +2769,7 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @type {boolean}
      */
-    displayHandles: false,
+    displayOverlayOptions: false,
 
     /**
      * The option `$el` is supposed to be the associated DOM UI element.
@@ -3846,7 +3846,7 @@ const registry = {};
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 registry.sizing = SnippetOptionWidget.extend({
-    displayHandles: true,
+    displayOverlayOptions: true,
 
     /**
      * @override
@@ -4216,7 +4216,10 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     /**
      * @see this.selectClass for parameters
      */
-    setQuality(previewMode, widgetValue, params) {
+    async setQuality(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         this._getImg().dataset.quality = widgetValue;
         return this._applyOptions();
     },
