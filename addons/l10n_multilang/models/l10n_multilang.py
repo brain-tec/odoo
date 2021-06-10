@@ -29,20 +29,23 @@ class AccountChartTemplate(models.Model):
             #find the value from Translation
             value = xlat_obj._get_ids(in_ids._name + ',' + in_field, 'model', lang, in_ids.ids)
             counter = 0
-            for element in in_ids.with_context(lang=None):
-                if value[element.id]:
-                    #copy Translation from Source to Destination object
-                    xlat_obj.create({
-                        'name': out_ids._name + ',' + in_field,
-                        'type': 'model',
-                        'res_id': out_ids[counter].id,
-                        'lang': lang,
-                        'src': element.name,
-                        'value': value[element.id],
-                    })
-                else:
-                    _logger.info('Language: %s. Translation from template: there is no translation available for %s!' % (lang, element.name))
-                counter += 1
+            try:
+                for element in in_ids.with_context(lang=None):
+                    if value[element.id]:
+                        #copy Translation from Source to Destination object
+                        xlat_obj.create({
+                            'name': out_ids._name + ',' + in_field,
+                            'type': 'model',
+                            'res_id': out_ids[counter].id,
+                            'lang': lang,
+                            'src': element.name,
+                            'value': value[element.id],
+                        })
+                    else:
+                        _logger.info('Language: %s. Translation from template: there is no translation available for %s!' % (lang, element.name))
+                    counter += 1
+            except IndexError:
+                pass
         return True
 
     @api.multi
