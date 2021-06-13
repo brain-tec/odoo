@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import ast
+import logging
+import time
 
 from functools import partial
-import logging
 
 from lxml import etree
 from lxml.builder import E
@@ -175,6 +176,9 @@ class TestViewInheritance(ViewCase):
         self.view_ids[name] = view
         return view
 
+    def get_views(self, names):
+        return self.View.concat(*(self.view_ids[name] for name in names))
+
     def setUp(self):
         super(TestViewInheritance, self).setUp()
 
@@ -199,12 +203,23 @@ class TestViewInheritance(ViewCase):
         self.c = self.makeView('C', arch=self.arch_for("C", 'tree'))
         self.c.write({'priority': 1})
 
-    def test_get_inheriting_views_arch(self):
+    def test_get_inheriting_views(self):
         self.assertEqual(
-            self.view_ids['A'].get_inheriting_views_arch(self.model),
-            self.view_ids['A1'] | self.view_ids['A2'] | self.view_ids['A12'] | self.view_ids['A21'] | self.view_ids['A22'] | self.view_ids['A221'])
-        self.assertEqual(self.view_ids['A21'].get_inheriting_views_arch(self.model), self.View)
-        self.assertEqual(self.view_ids['A11'].get_inheriting_views_arch(self.model), self.view_ids['A111'])
+            self.view_ids['A']._get_inheriting_views(),
+            self.get_views('A A1 A2 A12 A21 A22 A221'.split()),
+        )
+        self.assertEqual(
+            self.view_ids['A21']._get_inheriting_views(),
+            self.get_views(['A21']),
+        )
+        self.assertEqual(
+            self.view_ids['A11']._get_inheriting_views(),
+            self.get_views(['A11', 'A111']),
+        )
+        self.assertEqual(
+            (self.view_ids['A11'] + self.view_ids['A'])._get_inheriting_views(),
+            self.get_views('A A1 A2 A11 A111 A12 A21 A22 A221'.split()),
+        )
 
     def test_default_view(self):
         default = self.View.default_view(model=self.model, view_type='form')
@@ -678,7 +693,7 @@ class TestTemplating(ViewCase):
             """
         })
 
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -721,7 +736,7 @@ class TestTemplating(ViewCase):
             """
         })
 
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -776,7 +791,7 @@ class TestTemplating(ViewCase):
             """
         })
 
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -831,7 +846,7 @@ class TestTemplating(ViewCase):
                 </xpath>
             """
         })
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
@@ -871,7 +886,7 @@ class TestTemplating(ViewCase):
                 </data>
             """
         })
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
@@ -901,7 +916,7 @@ class TestTemplating(ViewCase):
             """
         })
 
-        arch_string = view2.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view2.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -948,7 +963,7 @@ class TestTemplating(ViewCase):
             </xpath>"""
         })
 
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -985,7 +1000,7 @@ class TestTemplating(ViewCase):
             </root>""",
         })
 
-        arch_string = view.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
@@ -1006,7 +1021,7 @@ class TestTemplating(ViewCase):
             </root>""",
         })
 
-        arch_string = view.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
@@ -1021,7 +1036,7 @@ class TestTemplating(ViewCase):
             </root>""",
         })
 
-        arch_string = view.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
@@ -1048,7 +1063,7 @@ class TestTemplating(ViewCase):
             </xpath>"""
         })
 
-        arch_string = view1.with_context(inherit_branding=True).read_combined(['arch'])['arch']
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
@@ -2741,7 +2756,7 @@ class TestViewCombined(ViewCase):
 
     def test_basic_read(self):
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.a1.with_context(context).read_combined(['arch'])['arch']
+        arch = self.a1.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2752,7 +2767,7 @@ class TestViewCombined(ViewCase):
 
     def test_read_from_child(self):
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.a3.with_context(context).read_combined(['arch'])['arch']
+        arch = self.a3.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2763,7 +2778,7 @@ class TestViewCombined(ViewCase):
 
     def test_read_from_child_primary(self):
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.a4.with_context(context).read_combined(['arch'])['arch']
+        arch = self.a4.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2775,7 +2790,7 @@ class TestViewCombined(ViewCase):
 
     def test_cross_model_simple(self):
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.c2.with_context(context).read_combined(['arch'])['arch']
+        arch = self.c2.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2789,7 +2804,7 @@ class TestViewCombined(ViewCase):
 
     def test_cross_model_double(self):
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.d1.with_context(context).read_combined(['arch'])['arch']
+        arch = self.d1.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2800,6 +2815,37 @@ class TestViewCombined(ViewCase):
                 E.a3(),
                 E.a2(),
             ), arch)
+
+    def test_primary_after_extensions(self):
+        # Here is a tricky use-case:                        a*
+        #  - views a and d are primary                     / \
+        #  - views b and c are extensions                 b   c
+        #  - depth-first order is: a, b, d, c             |
+        #  - combination order is: a, b, c, d             d*
+        #
+        # The arch of d has been chosen to fail if d is applied before c.
+        # Because this child of 'b' is primary, it must be applied *after* the
+        # other extensions of a!
+        a = self.View.create({
+            'model': 'a',
+            'arch': '<qweb><a/></qweb>',
+        })
+        b = self.View.create({
+            'model': 'a',
+            'inherit_id': a.id,
+            'arch': '<a position="after"><b/></a>'
+        })
+        c = self.View.create({  # pylint: disable=unused-variable
+            'model': 'a',
+            'inherit_id': a.id,
+            'arch': '<a position="after"><c/></a>'
+        })
+        d = self.View.create({  # pylint: disable=unused-variable
+            'model': 'a',
+            'inherit_id': b.id,
+            'mode': 'primary',
+            'arch': '<a position="replace"/>',
+        })
 
 
 class TestOptionalViews(ViewCase):
@@ -2840,7 +2886,7 @@ class TestOptionalViews(ViewCase):
         """ mandatory and enabled views should be applied
         """
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.v0.with_context(context).read_combined(['arch'])['arch']
+        arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2856,7 +2902,7 @@ class TestOptionalViews(ViewCase):
         """
         self.v2.toggle_active()
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.v0.with_context(context).read_combined(['arch'])['arch']
+        arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2867,7 +2913,7 @@ class TestOptionalViews(ViewCase):
 
         self.v3.toggle_active()
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.v0.with_context(context).read_combined(['arch'])['arch']
+        arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -2879,7 +2925,7 @@ class TestOptionalViews(ViewCase):
 
         self.v2.toggle_active()
         context = {'check_view_ids': self.View.search([]).ids}
-        arch = self.v0.with_context(context).read_combined(['arch'])['arch']
+        arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
             etree.fromstring(arch),
             E.qweb(
@@ -3042,3 +3088,26 @@ class TestAllViews(common.TransactionCase):
                 _logger.info('checked %s/%s views', index, len(views))
             with self.subTest(name=view.name):
                 view._check_xml()
+
+@common.tagged('post_install', '-at_install', '-standard', 'render_all_views')
+class TestRenderAllViews(common.TransactionCase):
+
+    @common.users('demo', 'admin')
+    def test_render_all_views(self):
+        env = self.env(context={'lang': 'en_US'})
+        count = 0
+        elapsed = 0
+        for model in env.values():
+            if not model._abstract and model.check_access_rights('read', False):
+                with self.subTest(model=model):
+                    times = []
+                    for _ in range(5):
+                        model.invalidate_cache()
+                        before = time.perf_counter()
+                        model.fields_view_get()
+                        times.append(time.perf_counter() - before)
+                    count += 1
+                    elapsed += min(times)
+
+        _logger.info('Rendered %d views as %s using (best of 5) %ss',
+            count, self.env.user.name, elapsed)
