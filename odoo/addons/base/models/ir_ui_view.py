@@ -420,13 +420,14 @@ actual arch.
                     combined_archs = combined_archs[0]
                 for view_arch in combined_archs:
                     check = valid_view(view_arch, env=self.env, model=view.model)
-                    view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                     if not check:
+                        view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         raise ValidationError(_(
                             'Invalid view %(name)s definition in %(file)s',
                             name=view_name, file=view.arch_fs
                         ))
                     if check == "Warning":
+                        view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
             except ValueError as e:
                 lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
@@ -504,6 +505,16 @@ actual arch.
                 values['name'] = "%s %s" % (values.get('model'), values['type'])
             # Create might be called with either `arch` (xml files), `arch_base` (form view) or `arch_db`.
             values['arch_prev'] = values.get('arch_base') or values.get('arch_db') or values.get('arch')
+            # write on arch: bypass _inverse_arch()
+            if 'arch' in values:
+                values['arch_db'] = values.pop('arch')
+                if 'install_filename' in self._context:
+                    # we store the relative path to the resource instead of the absolute path, if found
+                    # (it will be missing e.g. when importing data-only modules using base_import_module)
+                    path_info = get_resource_from_path(self._context['install_filename'])
+                    if path_info:
+                        values['arch_fs'] = '/'.join(path_info[0:2])
+                        values['arch_updated'] = False
             values.update(self._compute_defaults(values))
 
         self.clear_caches()
@@ -941,7 +952,9 @@ actual arch.
         if model not in self.env:
             self.handle_view_error(_('Model not found: %(model)s', model=model), node)
 
-        self._postprocess_on_change(model, node)
+        if not validate:
+            # validation mode does not care about on_change
+            self._postprocess_on_change(model, node)
 
         name_manager = NameManager(validate, self.env[model])
         self.postprocess(node, [], editable, name_manager)
@@ -949,7 +962,9 @@ actual arch.
         name_manager.check_view_fields(self)
         name_manager.update_view_fields()
 
-        self._postprocess_access_rights(model, node)
+        if not validate:
+            # validation mode does not care about access rights
+            self._postprocess_access_rights(model, node)
 
         return etree.tostring(node, encoding="unicode").replace('\t', ''), name_manager
 

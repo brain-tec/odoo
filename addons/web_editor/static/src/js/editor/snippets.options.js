@@ -4365,7 +4365,10 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     /**
      * @see this.selectClass for parameters
      */
-    setQuality(previewMode, widgetValue, params) {
+    async setQuality(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         this._getImg().dataset.quality = widgetValue;
         return this._applyOptions();
     },
@@ -5135,6 +5138,17 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             const btnContentInnerDiv = document.createElement('div');
             btnContentInnerDiv.classList.add('o_we_shape');
             btnContent.appendChild(btnContentInnerDiv);
+
+            if (btn.dataset.animated) {
+                const animatedLabelEl = document.createElement('span');
+                animatedLabelEl.classList.add('o_we_shape_animated_label');
+                const labelStr = _t("Animated");
+                animatedLabelEl.textContent = labelStr[0];
+                const spanEl = document.createElement('span');
+                spanEl.textContent = labelStr.substr(1);
+                animatedLabelEl.appendChild(spanEl);
+                btnContent.appendChild(animatedLabelEl);
+            }
 
             const {shape} = btn.dataset;
             const shapeEl = btnContent.querySelector('.o_we_shape');
