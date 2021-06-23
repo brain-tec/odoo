@@ -145,7 +145,7 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
                     // the legacy guardedCatch code
                     reject({ message: reason, event: $.Event(), legacy: true });
                 } else if (reason instanceof ConnectionAbortedError) {
-                    reject({ message: reason.name, event: $.Event("abort") });
+                    reject({ message: reason.message, event: $.Event("abort") });
                 } else {
                     reject(reason);
                 }
@@ -278,4 +278,15 @@ export function makeLegacyCrashManagerService(legacyEnv) {
             };
         },
     };
+}
+
+export function wrapSuccessOrFail(promise, { on_success, on_fail } = {}) {
+    return promise.then(on_success || (() => {})).catch((reason) => {
+        if (on_fail) {
+            on_fail(reason);
+        }
+        if (reason instanceof Error) {
+            throw reason;
+        }
+    });
 }
