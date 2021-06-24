@@ -8,8 +8,7 @@ import core from "web.core";
 import AbstractAction from "web.AbstractAction";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
-import { makeFakeRouterService } from "../../helpers/mock_services";
-import { getFixture, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
+import { click, getFixture, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
 import {
     createWebClient,
     doAction,
@@ -17,13 +16,13 @@ import {
     loadState,
     setupWebClientServiceRegistry,
 } from "./../helpers";
+import { errorService } from "@web/core/errors/error_service";
 
 const { Component, mount, tags } = owl;
 
 let serverData;
 
 const actionRegistry = registry.category("actions");
-const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.beforeEach(() => {
@@ -359,7 +358,7 @@ QUnit.module("ActionManager", (hooks) => {
             "breadcrumbs should contain the display_name of the opened record"
         );
         await doAction(webClient, 3, {
-            resId: 2,
+            props: { resId: 2 },
             viewType: "form",
         });
         assert.containsN(
@@ -815,7 +814,7 @@ QUnit.module("ActionManager", (hooks) => {
             assert.step(route);
         };
         const webClient = await createWebClient({ serverData, mockRPC });
-        await doAction(webClient, 999, { viewType: "form", resId: 2 });
+        await doAction(webClient, 999, { viewType: "form", props: { resId: 2 } });
         assert.containsOnce(webClient, ".o_form_view");
         assert.containsN(webClient, ".breadcrumb-item", 2);
         assert.strictEqual(
@@ -927,4 +926,44 @@ QUnit.module("ActionManager", (hooks) => {
             );
         }
     );
+
+    QUnit.test("initial action crashes", async (assert) => {
+        assert.expect(7);
+
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+
+        patchWithCleanup(QUnit, {
+            onUnhandledRejection: () => {},
+        });
+
+        browser.location.hash = "#action=__test__client__action__&menu_id=1";
+        const ClientAction = registry.category("actions").get("__test__client__action__");
+        class Override extends ClientAction {
+            setup() {
+                super.setup();
+                assert.step("clientAction setup");
+                throw new Error("my error");
+            }
+        }
+        registry.category("actions").add("__test__client__action__", Override, { force: true });
+
+        registry.category("services").add("error", errorService);
+
+        const webClient = await createWebClient({ serverData });
+        assert.verifySteps(["clientAction setup"]);
+        await click(webClient.el, "nav .o_navbar_apps_menu .o_dropdown_toggler ");
+        assert.containsN(webClient, ".o_dropdown_item.o_app", 3);
+        assert.containsNone(webClient, ".o_menu_brand");
+        assert.containsOnce(webClient, ".o_dialog_error");
+        assert.strictEqual(webClient.el.querySelector(".o_action_manager").innerHTML, "");
+        assert.deepEqual(webClient.env.services.router.current.hash, {
+            action: "__test__client__action__",
+            menu_id: 1,
+        });
+    });
 });

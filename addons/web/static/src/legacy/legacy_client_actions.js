@@ -11,6 +11,11 @@ import { breadcrumbsToLegacy } from "./utils";
 const { Component, hooks, tags } = owl;
 const actionRegistry = registry.category("actions");
 
+const legacyClientActionTemplate = tags.xml`
+    <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
+                         onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
+                         t-on-scrollTo.stop="onScrollTo"/>`;
+
 // registers an action from the legacy action registry to the wowl one, ensuring
 // that widget actions are actually Components
 function registerClientAction(name, action) {
@@ -21,12 +26,17 @@ function registerClientAction(name, action) {
                 super(...arguments);
                 this.controllerRef = hooks.useRef("controller");
                 this.Widget = action;
-                this.widgetArgs = [
-                    this.props.action,
-                    Object.assign({}, this.props.options, {
-                        breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs),
-                    }),
-                ];
+                const options = {};
+                for (const key in this.props) {
+                    if (key === "action" || key === "actionId") {
+                        continue;
+                    } else if (key === "breadcrumbs") {
+                        options[key] = breadcrumbsToLegacy(this.props[key]);
+                    } else {
+                        options[key] = this.props[key];
+                    }
+                }
+                this.widgetArgs = [this.props.action, options];
                 this.widget = this.props.state && this.props.state.__legacy_widget__;
                 this.onReverseBreadcrumb =
                     this.props.state && this.props.state.__on_reverse_breadcrumb__;
@@ -39,11 +49,7 @@ function registerClientAction(name, action) {
                 };
             }
         }
-        Action.template = tags.xml`
-      <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
-                           onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
-                           t-on-scrollTo.stop="onScrollTo"/>
-    `;
+        Action.template = legacyClientActionTemplate;
         Action.components = { ClientActionAdapter };
         Action.isLegacy = true;
         Action.target = action.prototype.target;
