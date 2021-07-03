@@ -38,6 +38,7 @@ const ColorPaletteWidget = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
+        this.customColorsArray = [].concat(...customColors);
         this.style = window.getComputedStyle(document.documentElement);
         this.options = _.extend({
             selectedColor: false,
@@ -51,8 +52,6 @@ const ColorPaletteWidget = Widget.extend({
         this.selectedColor = '';
         this.resetButton = this.options.resetButton;
         this.withCombinations = this.options.withCombinations;
-
-        this.trigger_up('request_editable', {callback: val => this.options.$editable = val});
     },
     /**
      * @override
@@ -175,7 +174,7 @@ const ColorPaletteWidget = Widget.extend({
             return;
         }
         this.el.querySelectorAll('.o_custom_color').forEach(el => el.remove());
-        const existingColors = new Set(customColors.concat(
+        const existingColors = new Set(this.customColorsArray.concat(
             Object.keys(this.colorToColorNames)
         ));
         this.trigger_up('get_custom_colors', {
