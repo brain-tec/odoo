@@ -1418,7 +1418,6 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
     _renderColorPalette: function () {
         const options = {
             selectedColor: this._value,
-            $editable: this.$target.closest('.o_editable'),
         };
         if (this.options.dataAttributes.excluded) {
             options.excluded = this.options.dataAttributes.excluded.replace(/ /g, '').split(',');
@@ -1493,10 +1492,11 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      */
     _onClick: function (ev) {
         // Do not close the colorpalette on colorpicker click
-        if (!ev.originalEvent.__isColorpickerClick) {
-            this._super(...arguments);
+        if (ev.originalEvent.__isColorpickerClick) {
+            ev.stopPropagation();
+            return;
         }
-        ev.stopPropagation();
+        return this._super(...arguments);
     },
 });
 
