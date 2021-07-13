@@ -982,6 +982,18 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
     },
 
     //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _shouldIgnoreClick(ev) {
+        return !!ev.target.closest('[role="button"]');
+    },
+
+    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
@@ -991,7 +1003,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      * @private
      */
     _onClick: function (ev) {
-        if (ev.target.closest('[role="button"]')) {
+        if (this._shouldIgnoreClick(ev)) {
             return;
         }
 
@@ -1435,6 +1447,12 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         }
         return this.colorPalette.appendTo(document.createDocumentFragment());
     },
+    /**
+     * @override
+     */
+    _shouldIgnoreClick(ev) {
+        return ev.originalEvent.__isColorpickerClick || this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1487,17 +1505,6 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      */
     _onEnterKey: function () {
         this.close();
-    },
-    /**
-     * @override
-     */
-    _onClick: function (ev) {
-        // Do not close the colorpalette on colorpicker click
-        if (ev.originalEvent.__isColorpickerClick) {
-            ev.stopPropagation();
-            return;
-        }
-        return this._super(...arguments);
     },
 });
 
@@ -2227,6 +2234,12 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    _shouldIgnoreClick(ev) {
+        return !!ev.target.closest('.o_we_pager_header') || this._super(...arguments);
+    },
     /**
      * Updates the pager's page number display.
      *
@@ -6361,6 +6374,75 @@ registry.DynamicSvg = SnippetOptionWidget.extend({
     _onImageChanged(methodName, params) {
         return this.updateUI();
     },
+});
+
+/**
+ * Allows to handle snippets with a list of items.
+ */
+registry.MultipleItems = SnippetOptionWidget.extend({
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @see this.selectClass for parameters
+     */
+    async addItem(previewMode, widgetValue, params) {
+        const $target = this.$(params.item);
+        const addBeforeItem = params.addBefore === 'true';
+        if ($target.length) {
+            await new Promise(resolve => {
+                this.trigger_up('clone_snippet', {
+                    $snippet: $target,
+                    onSuccess: resolve,
+                });
+            });
+            if (addBeforeItem) {
+                $target.before($target.next());
+            }
+            if (params.selectItem !== 'false') {
+                this.trigger_up('activate_snippet', {
+                    $snippet: addBeforeItem ? $target.prev() : $target.next(),
+                });
+            }
+            this._addItemCallback($target);
+        }
+    },
+    /**
+     * @see this.selectClass for parameters
+     */
+    async removeItem(previewMode, widgetValue, params) {
+        const $target = this.$(params.item);
+        if ($target.length) {
+            await new Promise(resolve => {
+                this.trigger_up('remove_snippet', {
+                    $snippet: $target,
+                    onSuccess: resolve,
+                });
+            });
+            this._removeItemCallback($target);
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Allows to add behaviour when item added.
+     *
+     * @private
+     * @abstract
+     * @param {jQueryElement} $target
+     */
+    _addItemCallback($target) {},
+    /**
+     * @private
+     * @abstract
+     * @param {jQueryElement} $target
+     */
+    _removeItemCallback($target) {},
 });
 
 return {
