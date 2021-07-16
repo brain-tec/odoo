@@ -152,7 +152,7 @@ def ensure_db(redirect='/web/database/selector'):
             query_string = iri_to_uri(r.query_string)
             url_redirect = url_redirect.replace(query=query_string)
         request.session.db = db
-        abort_and_redirect(url_redirect)
+        abort_and_redirect(url_redirect.to_url())
 
     # if db not provided, use the session one
     if not db and request.session.db and http.db_filter([request.session.db]):
@@ -1367,7 +1367,9 @@ class View(http.Controller):
 class Binary(http.Controller):
 
     @staticmethod
-    def placeholder(image='placeholder.png'):
+    def placeholder(image=False):
+        if not image:
+            image = 'placeholder.png'
         image_path = image.lstrip('/').split('/') if '/' in image else ['web', 'static', 'img', image]
         with tools.file_open(get_resource_path(*image_path), 'rb') as fd:
             return fd.read()
@@ -1460,7 +1462,10 @@ class Binary(http.Controller):
         if status in [301, 304] or (status != 200 and download):
             return request.env['ir.http']._response_by_status(status, headers, image_base64)
         if not image_base64:
-            placeholder_content = Binary.placeholder()
+            placeholder_filename = False
+            if model in request.env:
+                placeholder_filename = request.env[model]._get_placeholder_filename(field)
+            placeholder_content = Binary.placeholder(image=placeholder_filename)
             # Since we set a placeholder for any missing image, the status must be 200. In case one
             # wants to configure a specific 404 page (e.g. though nginx), a 404 status will cause
             # troubles.

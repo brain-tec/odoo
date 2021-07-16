@@ -195,8 +195,17 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web._assets_frontend_helpers'),
 
             'web/static/lib/bootstrap/scss/_variables.scss',
+            'web/static/lib/luxon/luxon.js',
 
             ('include', 'web._assets_bootstrap'),
+
+            'web/static/src/env.js',
+            'web/static/src/core/utils/transitions.scss', # included early because used by other files
+            'web/static/src/core/**/*',
+            # TODO: split debug files correctly when converting frontend debug
+            # manager so we don't need action-service and stuff
+            ('remove', 'web/static/src/core/debug/**/*'),
+            'web/static/src/public/error_notifications.js',
 
             'web/static/src/legacy/scss/base_frontend.scss',
             'web/static/src/legacy/scss/lazyloader.scss',
@@ -204,11 +213,15 @@ This module provides the core of the Odoo Web Client.
 
             ('include', 'web.assets_frontend_minimal'),
 
+            'web/static/src/legacy/utils.js',
+            'web/static/src/legacy/js/owl_compatibility.js',
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/js/public/public_env.js',
             'web/static/src/legacy/js/public/public_root.js',
             'web/static/src/legacy/js/public/public_root_instance.js',
             'web/static/src/legacy/js/public/public_widget.js',
+            'web/static/src/legacy/legacy_promise_error_handler.js',
+            'web/static/src/legacy/legacy_rpc_error_handler.js',
 
             ('include', 'web.frontend_legacy'),
         ],
