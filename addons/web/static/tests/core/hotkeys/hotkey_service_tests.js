@@ -139,12 +139,6 @@ QUnit.test("hook", async (assert) => {
 QUnit.test("non-MacOS usability", async (assert) => {
     assert.expect(6);
 
-    patchWithCleanup(browser, {
-        navigator: {
-            platform: "OdooOS",
-        },
-    });
-
     const hotkey = env.services.hotkey;
     const key = "q";
 
@@ -181,12 +175,98 @@ QUnit.test("non-MacOS usability", async (assert) => {
     removeHotkey();
 });
 
+QUnit.test("the overlay of hotkeys is correctly displayed", async (assert) => {
+    assert.expect(7);
+
+    const displayHotkeysOverlay = () =>
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "alt", altKey: true }));
+
+    class MyComponent extends Component {
+        onClick(ev) {
+            assert.step(`click ${ev.target.dataset.hotkey}`);
+        }
+    }
+    MyComponent.template = xml`
+        <div>
+        <button t-on-click="onClick" data-hotkey="b"/>
+        <button t-on-click="onClick" data-hotkey="c"/>
+        </div>
+    `;
+    const comp = await mount(MyComponent, { env, target });
+    const getOverlays = () =>
+        [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
+
+    displayHotkeysOverlay();
+    assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
+
+    // apply an existent hotkey
+    triggerHotkey(`alt+b`);
+    await nextTick();
+    assert.verifySteps(["click b"]);
+    assert.deepEqual(getOverlays(), [], "shouldn't display the overlay");
+
+    displayHotkeysOverlay();
+    assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
+
+    // apply a non-existent hotkey
+    triggerHotkey(`alt+x`);
+    await nextTick();
+    assert.deepEqual(getOverlays(), [], "shouldn't display the overlay");
+    assert.verifySteps([]);
+});
+
+QUnit.test("the overlay of hotkeys is correctly displayed on MacOs", async (assert) => {
+    assert.expect(7);
+
+    patchWithCleanup(browser, {
+        navigator: {
+            userAgent: browser.navigator.userAgent.replace(/\([^)]*\)/, "(MacOs)"),
+        },
+    });
+
+    const displayHotkeysOverlay = () =>
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "control", ctrlKey: true }));
+
+    class MyComponent extends Component {
+        onClick(ev) {
+            assert.step(`click ${ev.target.dataset.hotkey}`);
+        }
+    }
+    MyComponent.template = xml`
+        <div>
+        <button t-on-click="onClick" data-hotkey="b"/>
+        <button t-on-click="onClick" data-hotkey="c"/>
+        </div>
+    `;
+    const comp = await mount(MyComponent, { env, target });
+    const getOverlays = () =>
+        [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
+
+    displayHotkeysOverlay();
+    assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
+
+    // apply an existent hotkey
+    triggerHotkey(`alt+b`);
+    await nextTick();
+    assert.verifySteps(["click b"]);
+    assert.deepEqual(getOverlays(), [], "shouldn't display the overlay");
+
+    displayHotkeysOverlay();
+    assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
+
+    // apply a non-existent hotkey
+    triggerHotkey(`alt+x`);
+    await nextTick();
+    assert.deepEqual(getOverlays(), [], "shouldn't display the overlay");
+    assert.verifySteps([]);
+});
+
 QUnit.test("MacOS usability", async (assert) => {
     assert.expect(6);
 
     patchWithCleanup(browser, {
         navigator: {
-            platform: "Mac",
+            userAgent: browser.navigator.userAgent.replace(/\([^)]*\)/, "(MacOs)"),
         },
     });
 
@@ -491,12 +571,6 @@ QUnit.test("registrations and elements belong to the correct UI owner", async (a
 QUnit.test("replace the overlayModifier for non-MacOs", async (assert) => {
     assert.expect(3);
 
-    patchWithCleanup(browser, {
-        navigator: {
-            platform: "OdooOS",
-        },
-    });
-
     const hotkeyService = serviceRegistry.get("hotkey");
     patchWithCleanup(hotkeyService, {
         overlayModifier: "alt+shift",
@@ -531,7 +605,7 @@ QUnit.test("replace the overlayModifier for MacOs", async (assert) => {
 
     patchWithCleanup(browser, {
         navigator: {
-            platform: "Mac",
+            userAgent: browser.navigator.userAgent.replace(/\([^)]*\)/, "(MacOs)"),
         },
     });
 
