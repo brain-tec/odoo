@@ -347,6 +347,7 @@ class MrpProduction(models.Model):
                 if (
                     production.bom_id.consumption == 'flexible'
                     and float_compare(production.qty_produced, production.product_qty, precision_rounding=production.product_uom_id.rounding) == -1
+                    and production.state != 'done'
                 ):
                     production.state = 'progress'
                 else:
@@ -942,6 +943,9 @@ class MrpProduction(models.Model):
                         + "You must complete the work orders before posting the inventory."
                     )
                 )
+
+            if not any(order.move_raw_ids.mapped('quantity_done')):
+                raise UserError(_("You must indicate a non-zero amount consumed for at least one of your components"))
 
             moves_not_to_do = order.move_raw_ids.filtered(lambda x: x.state == 'done')
             moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))

@@ -27,7 +27,10 @@
 # Febrasari Almania <febrasari.almania@gmail.com>, 2020
 # Muhammad Syarif <mhdsyarif.ms@gmail.com>, 2020
 # Ryanto The <ry.the77@gmail.com>, 2020
-# whenweresober <gulmugurzu@yevme.com>, 2020
+# Imbar Budiman <imbarbudiman@yahoo.com>, 2021
+# whenwesober <gulmugurzu@yevme.com>, 2021
+# Altela Eleviansyah Pramardhika <altela_pramardhika@yahoo.com>, 2021
+# Daffi Prabowo <hammet217@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -35,7 +38,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: whenweresober <gulmugurzu@yevme.com>, 2020\n"
+"Last-Translator: Daffi Prabowo <hammet217@gmail.com>, 2021\n"
 "Language-Team: Indonesian (https://www.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -4074,6 +4077,9 @@ msgid ""
 "Repair Products from helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"Produk Perbaikan dari tiket bantuan/helpdesk\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_fetchmail
@@ -5892,7 +5898,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "+1 (650) 691-3277"
-msgstr ""
+msgstr "+1 (650) 691-3277"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -7083,7 +7089,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window_view
 msgid "Action Window View"
-msgstr ""
+msgstr "Jendela Tindakan"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_sequence_actions
@@ -7508,7 +7514,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_step
 msgid "All done!"
-msgstr ""
+msgstr "Selesai"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__lang
@@ -7582,7 +7588,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode_quality_control
 msgid "Allows the usage of quality checks within the barcode views"
-msgstr ""
+msgstr "Memungkinkan penggunaan cek kualitas dalam tampilan barcode"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_map
@@ -7736,6 +7742,8 @@ msgid ""
 "Appears by default on the top right corner of your printed documents (report"
 " header)."
 msgstr ""
+"Muncul secara standar pada bagian pojok kanan atas dari dokumen yang dicetak"
+" (kop kepala dokumen)."
 
 #. module: base
 #: model:ir.model,name:base.model_ir_module_category
@@ -12381,7 +12389,7 @@ msgstr "Folio (210 x 330 mm)"
 #: model:ir.model.fields,field_description:base.field_base_document_layout__font
 #: model:ir.model.fields,field_description:base.field_res_company__font
 msgid "Font"
-msgstr ""
+msgstr "Font"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_I
@@ -13132,7 +13140,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTP routing"
 
 #. module: base
 #: model:res.country,name:base.ht
@@ -15342,7 +15350,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_language_install
 msgid "Load"
-msgstr ""
+msgstr "Muat"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_view_base_language_install
@@ -15402,7 +15410,7 @@ msgstr "Warna Primer Logo"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_secondary_color
 msgid "Logo Secondary Color"
-msgstr ""
+msgstr "Warna Sekunder Logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__logo_web
@@ -16291,7 +16299,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_model_access
 msgid "Model Access"
-msgstr ""
+msgstr "Akses Model"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_model_constraint
@@ -18180,6 +18188,16 @@ msgid "Odoo helps you easily track all activities related to a vendor."
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"Odoo is unable to merge the PDFs attached to the following records:\n"
+"%s\n"
+"\n"
+"Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
 msgid "Odoo referral program"
 msgstr ""
@@ -18245,6 +18263,12 @@ msgstr ""
 msgid ""
 "One of the documents you are trying to access has been deleted, please try "
 "again after refreshing."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
 msgstr ""
 
 #. module: base
@@ -19379,7 +19403,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__preview_logo
 msgid "Preview logo"
-msgstr ""
+msgstr "Pratinjau logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_layout__pdf
@@ -19413,7 +19437,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_base_document_layout__primary_color
 #: model:ir.model.fields,field_description:base.field_res_company__primary_color
 msgid "Primary Color"
-msgstr ""
+msgstr "Warna Primer"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ca_check_printing
@@ -19944,7 +19968,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_image
 msgid "Qweb Field Image"
-msgstr ""
+msgstr "Kolom Gambar Qweb"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_integer
@@ -20406,7 +20430,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Reset to logo colors"
-msgstr ""
+msgstr "Setel ulang ke warna logo"
 
 #. module: base
 #: code:addons/models.py:0
@@ -20971,7 +20995,7 @@ msgstr "Cari ..."
 #: model:ir.model.fields,field_description:base.field_base_document_layout__secondary_color
 #: model:ir.model.fields,field_description:base.field_res_company__secondary_color
 msgid "Secondary Color"
-msgstr ""
+msgstr "Warna Sekunder"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_security
@@ -22395,6 +22419,8 @@ msgid ""
 "The Tax Identification Number. Complete it if the contact is subjected to "
 "government taxes. Used in some legal statements."
 msgstr ""
+"Nomor Pokok Wajib Pajak. Diisi jika perusahaan merupakan Pengusaha Kena "
+"Pajak (PKP)."
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_lang_url_code_uniq
@@ -22556,6 +22582,12 @@ msgstr "Nama lengkap negara"
 #: model:ir.model.fields,help:base.field_res_partner__user_id
 #: model:ir.model.fields,help:base.field_res_users__user_id
 msgid "The internal user in charge of this contact."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_country.py:106
+#, python-format
+msgid "The layout contains an invalid format key"
 msgstr ""
 
 #. module: base
@@ -23569,7 +23601,7 @@ msgstr "URL"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__url_code
 msgid "URL Code"
-msgstr ""
+msgstr "Kode URL"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_us_reports
@@ -23695,7 +23727,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module_dependency__state__uninstallable
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module_exclusion__state__uninstallable
 msgid "Uninstallable"
-msgstr "Dapat Dibongkar"
+msgstr "Tidak Dapat Dipasang"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -24307,7 +24339,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window_view__view_mode
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__type
 msgid "View Type"
-msgstr ""
+msgstr "Tipe Tampilan"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_reports
@@ -24878,7 +24910,7 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
-msgid "You cannot archive a contact linked to an internal user."
+msgid "You cannot archive a contact linked to a portal or internal user."
 msgstr ""
 
 #. module: base
@@ -25171,7 +25203,7 @@ msgstr "misalnya: Bapak"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "e.g. Opening hours, bank accounts (one per line)"
-msgstr ""
+msgstr "sebagai contoh jam buka akun bank (satu per baris)"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form

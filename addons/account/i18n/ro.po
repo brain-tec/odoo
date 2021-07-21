@@ -7,8 +7,9 @@
 # Cozmin Candea <office@terrabit.ro>, 2020
 # Hongu Cosmin <cosmin513@gmail.com>, 2020
 # Martin Trigaux, 2020
-# Dorin Hongu <dhongu@gmail.com>, 2020
-# Foldi Robert <foldirobert@nexterp.ro>, 2020
+# Dorin Hongu <dhongu@gmail.com>, 2021
+# Marian Heiner <heinermarian@gmail.com>, 2021
+# Foldi Robert <foldirobert@nexterp.ro>, 2021
 # 
 msgid ""
 msgstr ""
@@ -16,7 +17,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-01 12:20+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Foldi Robert <foldirobert@nexterp.ro>, 2020\n"
+"Last-Translator: Foldi Robert <foldirobert@nexterp.ro>, 2021\n"
 "Language-Team: Romanian (https://www.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1680,7 +1681,7 @@ msgstr "Toate conturile de pe linii trebuie să fie de aceeași tip."
 #: code:addons/account/models/company.py:0
 #, python-format
 msgid "All entries are hashed."
-msgstr ""
+msgstr "All entries are hashed."
 
 #. module: account
 #. openerp-web
@@ -4774,7 +4775,7 @@ msgstr "Diferență curs"
 #: model:ir.model.fields,field_description:account.field_res_company__currency_exchange_journal_id
 #: model:ir.model.fields,field_description:account.field_res_config_settings__currency_exchange_journal_id
 msgid "Exchange Gain or Loss Journal"
-msgstr ""
+msgstr "Jurnal de Profit sau Pierdere din schimb valutar"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_full_reconcile__exchange_move_id
@@ -5262,7 +5263,7 @@ msgstr "Declarații generice"
 #. module: account
 #: model:ir.model,name:account.model_report_account_report_hash_integrity
 msgid "Get hash integrity result as PDF."
-msgstr ""
+msgstr "Obțineți rezultatul integrității hash în format PDF"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -6468,7 +6469,7 @@ msgstr "Elemente jurnal"
 #. module: account
 #: model:ir.actions.act_window,name:account.action_move_line_select_tax_audit
 msgid "Journal Items for Tax Audit"
-msgstr ""
+msgstr "Articolele jurnalului pentru auditul fiscal"
 
 #. module: account
 #. openerp-web
@@ -7707,7 +7708,7 @@ msgstr "În afara bilanțului"
 #. module: account
 #: model:account.account.type,name:account.data_account_off_sheet
 msgid "Off-Balance Sheet"
-msgstr ""
+msgstr "În Afara bilanțului"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_line_form
@@ -7904,6 +7905,12 @@ msgstr "Origine"
 #: model:ir.actions.report,name:account.action_account_original_vendor_bill
 msgid "Original Bills"
 msgstr "Facturi Originale"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree_grouped
+msgid "Original Currency"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__payment_id
@@ -9738,7 +9745,7 @@ msgstr "Trimiteți o factură pentru a testa portalul clienților."
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Send invoices and payment follow-ups by post"
-msgstr ""
+msgstr "Trimiteți facturi și urmăriri de plată prin poștă"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action
@@ -11192,9 +11199,11 @@ msgstr ""
 #. module: account
 #: code:addons/account/models/account.py:0
 #, python-format
-msgid "The holder of a journal's bank account must be the company (%s)."
+msgid ""
+"The holder of the bank account of a \"Bank\" type journal must be the company (%s).\n"
+"However, the holder of \"%s\" is \"%s\".\n"
+"Please select another bank account or change the holder of \"%s\"."
 msgstr ""
-"Deținătorul contului bancar al unui jurnal trebuie să fie compania (%s)."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__code
@@ -12192,6 +12201,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Use budgets to compare actual with expected revenues and costs"
 msgstr ""
+"Utilizați bugetele pentru a compara veniturile și costurile preconizate"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__template_id
@@ -12201,7 +12211,7 @@ msgstr "Utilizați șablon"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__used
 msgid "Used"
-msgstr ""
+msgstr "Folosit"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_type__include_initial_balance
@@ -12696,6 +12706,8 @@ msgstr ""
 msgid ""
 "You cannot add/modify entries prior to and inclusive of the lock date %s."
 msgstr ""
+"Nu puteți adăuga / modifica intrările anterioare și inclusiv datei de "
+"blocare %s."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -12943,6 +12955,9 @@ msgid ""
 "create a credit note instead. Use the action menu to transform it into a "
 "credit note or refund."
 msgstr ""
+"Nu puteți valida o factură cu o sumă totală negativă. În schimb, ar trebui "
+"să creați o notă de credit. Utilizați meniul de acțiuni pentru a transforma "
+"documentul într-o notă de credit sau rambursare."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -12978,6 +12993,12 @@ msgstr ""
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "You must first define an opening move."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "The entry %s (id %s) is already posted."
 msgstr ""
 
 #. module: account
@@ -13074,7 +13095,7 @@ msgstr "code"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__option__day_after_invoice_date
 msgid "days after the invoice date"
-msgstr ""
+msgstr "zile după data de facturare"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.setup_bank_account_wizard
@@ -13215,6 +13236,15 @@ msgstr "compania părinte"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "to check"
 msgstr "a verifica"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The chosen journal has a type that is not compatible with your invoice type."
+" Sales operations should go to 'sale' journals, and purchase operations to "
+"'purchase' ones."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form

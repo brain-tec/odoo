@@ -4,7 +4,7 @@
 from ast import literal_eval
 from datetime import date
 from itertools import groupby
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 import time
 
 from odoo import api, fields, models, SUPERUSER_ID, _
@@ -472,8 +472,11 @@ class Picking(models.Model):
             picking.move_line_exist = bool(picking.move_line_ids)
 
     def _compute_has_packages(self):
+        domain = [('picking_id', 'in', self.ids), ('result_package_id', '!=', False)]
+        cnt_by_picking = self.env['stock.move.line'].read_group(domain, ['picking_id'], ['picking_id'])
+        cnt_by_picking = {d['picking_id'][0]: d['picking_id_count'] for d in cnt_by_picking}
         for picking in self:
-            picking.has_packages = picking.move_line_ids.filtered(lambda ml: ml.result_package_id)
+            picking.has_packages = bool(cnt_by_picking.get(picking.id, False))
 
     def _compute_show_check_availability(self):
         """ According to `picking.show_check_availability`, the "check availability" button will be
@@ -721,7 +724,7 @@ class Picking(models.Model):
                                                     'company_id': pick.company_id.id,
                                                    })
                     ops.move_id = new_move.id
-                    new_move._action_confirm()
+                    new_move = new_move._action_confirm()
                     todo_moves |= new_move
                     #'qty_done': ops.qty_done})
         todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))
@@ -768,14 +771,15 @@ class Picking(models.Model):
         all_in = True
         pack_move_lines = self.move_line_ids.filtered(lambda ml: ml.package_id == package)
         keys = ['product_id', 'lot_id']
+        keys_ids = ["{}.id".format(fname) for fname in keys]
         precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         grouped_quants = {}
-        for k, g in groupby(sorted(package.quant_ids, key=itemgetter(*keys)), key=itemgetter(*keys)):
+        for k, g in groupby(sorted(package.quant_ids, key=attrgetter(*keys_ids)), key=itemgetter(*keys)):
             grouped_quants[k] = sum(self.env['stock.quant'].concat(*list(g)).mapped('quantity'))
 
         grouped_ops = {}
-        for k, g in groupby(sorted(pack_move_lines, key=itemgetter(*keys)), key=itemgetter(*keys)):
+        for k, g in groupby(sorted(pack_move_lines, key=attrgetter(*keys_ids)), key=itemgetter(*keys)):
             grouped_ops[k] = sum(self.env['stock.move.line'].concat(*list(g)).mapped('product_qty'))
         if any(not float_is_zero(grouped_quants.get(key, 0) - grouped_ops.get(key, 0), precision_digits=precision_digits) for key in grouped_quants) \
                 or any(not float_is_zero(grouped_ops.get(key, 0) - grouped_quants.get(key, 0), precision_digits=precision_digits) for key in grouped_ops):
@@ -941,7 +945,9 @@ class Picking(models.Model):
         """
         quantity_todo = {}
         quantity_done = {}
-        for move in self.mapped('move_lines'):
+        # If a preceding move has been canceled and propagated state to its
+        # destination move, we don't take quantities into account
+        for move in self.mapped('move_lines').filtered(lambda m: m.state != "cancel"):
             quantity_todo.setdefault(move.product_id.id, 0)
             quantity_done.setdefault(move.product_id.id, 0)
             quantity_todo[move.product_id.id] += move.product_uom_qty

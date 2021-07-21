@@ -365,6 +365,9 @@ class ProductProduct(models.Model):
         self.clear_caches()
         return res
 
+    def _filter_to_unlink(self, check_access=True):
+        return self
+
     def _unlink_or_archive(self, check_access=True):
         """Unlink or archive products.
         Try in batch as much as possible because it is much faster.
@@ -382,6 +385,10 @@ class ProductProduct(models.Model):
             self.check_access_rights('write')
             self.check_access_rule('write')
             self = self.sudo()
+            to_unlink = self._filter_to_unlink()
+            to_archive = self - to_unlink
+            to_archive.write({'active': False})
+            self = to_unlink
 
         try:
             with self.env.cr.savepoint(), tools.mute_logger('odoo.sql_db'):
@@ -415,6 +422,12 @@ class ProductProduct(models.Model):
         if self._context.get('search_default_categ_id'):
             args.append((('categ_id', 'child_of', self._context['search_default_categ_id'])))
         return super(ProductProduct, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
+
+    @api.depends_context('display_default_code')
+    def _compute_display_name(self):
+        # `display_name` is calling `name_get()`` which is overidden on product
+        # to depend on `display_default_code`
+        return super()._compute_display_name()
 
     def name_get(self):
         # TDE: this could be cleaned a bit I think

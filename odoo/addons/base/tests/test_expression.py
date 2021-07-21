@@ -106,6 +106,17 @@ class TestExpression(TransactionCase):
         test('not ilike', 'B', ['0', 'a'])
         test('not like', 'AB', ['0', 'a', 'b', 'a b'])
 
+    def test_09_hierarchy_filtered_domain(self):
+        Partner = self.env['res.partner']
+        p = Partner.create({'name': 'dummy'})
+
+        # hierarchy without parent
+        self.assertFalse(p.parent_id)
+        p2 = self._search(Partner, [('parent_id', 'child_of', p.id)], [('id', '=', p.id)])
+        self.assertEqual(p2, p)
+        p3 = self._search(Partner, [('parent_id', 'parent_of', p.id)], [('id', '=', p.id)])
+        self.assertEqual(p3, p)
+
     def test_10_hierarchy_in_m2m(self):
         Partner = self.env['res.partner']
         Category = self.env['res.partner.category']
@@ -568,6 +579,17 @@ class TestExpression(TransactionCase):
         domain = [('x', 'in', ['y', 'z']), ('a.v', '=', 'e'), '|', '|', ('a', '=', 'b'), '!', ('c', '>', 'd'), ('e', '!=', 'f'), ('g', '=', 'h')]
         norm_domain = ['&', '&', '&'] + domain
         self.assertEqual(norm_domain, expression.normalize_domain(domain), "Non-normalized domains should be properly normalized")
+
+    def test_35_negating_thruty_leafs(self):
+        self.assertEqual(expression.distribute_not(['!', '!', expression.TRUE_LEAF]), [expression.TRUE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', '!', expression.FALSE_LEAF]), [expression.FALSE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', '!', '!', '!', expression.TRUE_LEAF]), [expression.TRUE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', '!', '!', '!', expression.FALSE_LEAF]), [expression.FALSE_LEAF], "distribute_not applied wrongly")
+
+        self.assertEqual(expression.distribute_not(['!', expression.TRUE_LEAF]), [expression.FALSE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', expression.FALSE_LEAF]), [expression.TRUE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', '!', '!', expression.TRUE_LEAF]), [expression.FALSE_LEAF], "distribute_not applied wrongly")
+        self.assertEqual(expression.distribute_not(['!', '!', '!', expression.FALSE_LEAF]), [expression.TRUE_LEAF], "distribute_not applied wrongly")
 
     def test_40_negating_long_expression(self):
         source = ['!', '&', ('user_id', '=', 4), ('partner_id', 'in', [1, 2])]

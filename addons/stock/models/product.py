@@ -95,7 +95,7 @@ class Product(models.Model):
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     @api.depends_context(
         'lot_id', 'owner_id', 'package_id', 'from_date', 'to_date',
-        'company_owned', 'force_company',
+        'company_owned', 'force_company', 'location', 'warehouse',
     )
     def _compute_quantities(self):
         products = self.filtered(lambda p: p.type != 'service')
@@ -145,10 +145,10 @@ class Product(models.Model):
                 '|',
                     '&',
                         ('state', '=', 'done'),
-                        ('date', '<=', from_date),
+                        ('date', '>=', from_date),
                     '&',
                         ('state', '!=', 'done'),
-                        ('date_expected', '<=', from_date),
+                        ('date_expected', '>=', from_date),
             ]
             domain_move_in += date_date_expected_domain_from
             domain_move_out += date_date_expected_domain_from
@@ -531,6 +531,8 @@ class Product(models.Model):
         owner_id = self.env['res.partner'].browse(owner_id)
         to_uom = self.env['uom.uom'].browse(to_uom)
         quants = self.env['stock.quant']._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+        if lot_id:
+            quants = quants.filtered(lambda q: q.lot_id == lot_id)
         theoretical_quantity = sum([quant.quantity for quant in quants])
         if to_uom and product_id.uom_id != to_uom:
             theoretical_quantity = product_id.uom_id._compute_quantity(theoretical_quantity, to_uom)
@@ -547,6 +549,13 @@ class Product(models.Model):
                     msg += '- %s \n' % product.display_name
                 raise UserError(msg)
         return res
+
+    def _filter_to_unlink(self):
+        domain = [('product_id', 'in', self.ids)]
+        lines = self.env['stock.production.lot'].read_group(domain, ['product_id'], ['product_id'])
+        linked_product_ids = [group['product_id'][0] for group in lines]
+        return super(Product, self - self.browse(linked_product_ids))._filter_to_unlink()
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -613,7 +622,7 @@ class ProductTemplate(models.Model):
         'product_variant_ids.stock_move_ids.product_qty',
         'product_variant_ids.stock_move_ids.state',
     )
-    @api.depends_context('company_owned', 'force_company')
+    @api.depends_context('company_owned', 'force_company', 'location', 'warehouse')
     def _compute_quantities(self):
         res = self._compute_quantities_dict()
         for template in self:
@@ -848,17 +857,26 @@ class UoM(models.Model):
                 u[f].id != int(values[f]) if f in values else False
                 for f in {'category_id'}))
             if changed:
-                stock_move_lines = self.env['stock.move.line'].search_count([
+                error_msg = _(
+                    "You cannot change the ratio of this unit of mesure"
+                    " as some products with this UoM have already been moved"
+                    " or are currently reserved."
+                )
+                if self.env['stock.move'].sudo().search_count([
+                    ('product_uom', 'in', changed.ids),
+                    ('state', 'not in', ('cancel', 'done'))
+                ]):
+                    raise UserError(error_msg)
+                if self.env['stock.move.line'].sudo().search_count([
                     ('product_uom_id', 'in', changed.ids),
-                    ('state', '!=', 'cancel'),
-                ])
-
-                if stock_move_lines:
-                    raise UserError(_(
-                        "You cannot change the ratio of this unit of mesure as some"
-                        " products with this UoM have already been moved or are "
-                        "currently reserved."
-                    ))
+                    ('state', 'not in', ('cancel', 'done')),
+                ]):
+                    raise UserError(error_msg)
+                if self.env['stock.quant'].sudo().search_count([
+                    ('product_id.product_tmpl_id.uom_id', 'in', changed.ids),
+                    ('quantity', '!=', 0),
+                ]):
+                    raise UserError(error_msg)
         return super(UoM, self).write(values)
 
     def _adjust_uom_quantities(self, qty, quant_uom):

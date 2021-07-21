@@ -25,7 +25,6 @@
 # Bettina Pfeifer <betzilla@web.de>, 2019
 # Philipp Fürstos <pfu@odoo.com>, 2019
 # e2f <projects@e2f.com>, 2019
-# Wolfgang Taferner, 2019
 # JackTheHunter <Maximilian.N98@gmail.com>, 2019
 # Michael Schütt <michael.schuett.lwl@gmail.com>, 2019
 # Philipp Hug <philipp@hug.cx>, 2019
@@ -50,9 +49,12 @@
 # Serkan Oezcan <serkan.oezcan@braintec-group.com>, 2020
 # Damian Bürgin <damian.buergin@braintec-group.com>, 2020
 # Florian Pose <fp@igh.de>, 2020
-# Martin Trigaux, 2020
-# Felix Schubert <felix.schubert@go-erp.com>, 2020
-# Andreas Jonderko <a.jonderko@gastronovi.com>, 2020
+# Udo Hennig <info@udohennig.de>, 2021
+# Andreas Jonderko <a.jonderko@gastronovi.com>, 2021
+# Wolfgang Taferner, 2021
+# Martin Trigaux, 2021
+# Felix Schubert <felix.schubert@go-erp.com>, 2021
+# EugenBrodskiSAMSAIT <eugen.brodski@samsa-it.de>, 2021
 # 
 msgid ""
 msgstr ""
@@ -60,7 +62,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-01 12:20+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Andreas Jonderko <a.jonderko@gastronovi.com>, 2020\n"
+"Last-Translator: EugenBrodskiSAMSAIT <eugen.brodski@samsa-it.de>, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -706,7 +708,7 @@ msgstr "<span>Steuern</span>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<span>Unit Price</span>"
-msgstr "<span>Preis pro Einheit</span>"
+msgstr "<span>Einzelpreis</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -1088,7 +1090,7 @@ msgstr "Kontoinhaber"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__acc_holder_name
 msgid "Account Holder Name"
-msgstr "Kontoinhaber"
+msgstr "Abweichender Kontoinhaber"
 
 #. module: account
 #: model:ir.model,name:account.model_account_invoice_send
@@ -2509,7 +2511,7 @@ msgstr "Grundbetrag"
 #: model:ir.model.fields,field_description:account.field_account_tax__cash_basis_base_account_id
 #: model:ir.model.fields,field_description:account.field_account_tax_template__cash_basis_base_account_id
 msgid "Base Tax Received Account"
-msgstr "Konto für erhaltenen Steuerbetrag"
+msgstr "Konto für die Steuerbasis"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__repartition_type
@@ -2602,7 +2604,7 @@ msgstr "Ausstehende Rechnungen"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Bills to Validate"
-msgstr "Zu prüfende Rechnungen"
+msgstr "Lieferantenrechnungen zu prüfen"
 
 #. module: account
 #: code:addons/account/models/account_journal_dashboard.py:0
@@ -2836,7 +2838,7 @@ msgstr "Steuern auf Kassenbasis"
 #: model:ir.model.fields,field_description:account.field_account_tax__cash_basis_transition_account_id
 #: model:ir.model.fields,field_description:account.field_account_tax_template__cash_basis_transition_account_id
 msgid "Cash Basis Transition Account"
-msgstr "Cash-Basis-Übergangskonto"
+msgstr "Übergangskonto für die Steuer"
 
 #. module: account
 #: model:ir.model,name:account.model_cash_box_out
@@ -4660,7 +4662,7 @@ msgid ""
 "%s"
 msgstr ""
 "Doppelte Lieferantenreferenz entdeckt. Sie haben wahrscheinlich zweimal "
-"dieselbe Lieferantenrechnung/Gutschrift verwendet"
+"dieselbe Lieferantenrechnung/Gutschrift verwendet %s"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_reports
@@ -4772,7 +4774,7 @@ msgstr "Buchungen sortiert nach"
 #: code:addons/account/models/company.py:0
 #, python-format
 msgid "Entries are hashed from %s (%s)"
-msgstr "Einträge werden von"
+msgstr "Einträge werden von %s (%s) gehashed."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -5307,7 +5309,7 @@ msgstr "Konto für Kurserträge"
 #: model:ir.actions.act_window,name:account.action_account_moves_ledger_general
 #: model:ir.ui.menu,name:account.menu_action_account_moves_ledger_general
 msgid "General Ledger"
-msgstr "Umsätze nach Konten und Perioden"
+msgstr "Hauptbuch"
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_finance_entries_generate_entries
@@ -5329,7 +5331,7 @@ msgstr "Erzeugte Datensätze"
 #. module: account
 #: model:ir.ui.menu,name:account.account_reports_legal_statements_menu
 msgid "Generic Statements"
-msgstr "Allgemeine Bankbelege"
+msgstr "Generische Berichte"
 
 #. module: account
 #: model:ir.model,name:account.model_report_account_report_hash_integrity
@@ -6010,7 +6012,6 @@ msgstr ""
 msgid "Internal Group"
 msgstr "Interne Gruppe"
 
-
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__note
 msgid "Internal Notes"
@@ -6292,7 +6293,7 @@ msgstr "Ihnen zugeordnete Rechnungen"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Invoices to Validate"
-msgstr "Zu validierende Rechnungen"
+msgstr "Rechnungen zu prüfen"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment__reconciled_invoice_ids
@@ -6407,11 +6408,13 @@ msgid ""
 "It seems that the taxes have been modified since the creation of the journal"
 " entry. You should create the credit note manually instead."
 msgstr ""
+"Es sieht so aus als wären die Steuern seid der Erstellung des Eintrages "
+"geändert worden. Sie sollten eine manuelle Gutschrift erstellen."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Items"
-msgstr "Artikel"
+msgstr "Posten"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
@@ -6613,7 +6616,7 @@ msgstr "Journale"
 #. module: account
 #: model:ir.actions.report,name:account.action_report_journal
 msgid "Journals Audit"
-msgstr "Audit Journale"
+msgstr "Journalaudit"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__json_activity_data
@@ -7118,7 +7121,7 @@ msgstr "Hauptwährung Ihres Unternehmens"
 #: model:ir.ui.menu,name:account.account_reports_management_menu
 #: model:ir.ui.menu,name:account.menu_finance_entries_management
 msgid "Management"
-msgstr "Verwaltung"
+msgstr "Controlling"
 
 #. module: account
 #: model:account.payment.method,name:account.account_payment_method_manual_in
@@ -7157,7 +7160,7 @@ msgstr ""
 "Manuell: Lassen Sie sich per Bargeld, Scheck oder einer anderen Methode außerhalb von Odoo bezahlen.\n"
 "Elektronisch: Lassen Sie sich automatisch durch einen Zahlungserwerber bezahlen, indem Sie eine Transaktion auf einer Karte anfordern, die vom Kunden beim Kauf oder bei der Anmeldung im Internet gespeichert ist (Zahlungstoken).\n"
 "Überprüfen: Bezahlen Sie die Rechnung per Scheck und drucken Sie sie bei Odoo aus.\n"
-"Batch-Einzahlung: Verpacken Sie mehrere Kundenschecks auf einmal, indem Sie eine Batch-Einzahlung generieren, die Sie an Ihre Bank senden. Bei der Kodierung des Kontoauszugs in Odoo wird Ihnen vorgeschlagen, die Transaktion mit der Chargeneinzahlung abzustimmen, da für die Chargeneinzahlung das Modul account_batch_payment installiert sein muss.\n"
+"Batch-Zahlung: Verpacken Sie mehrere Kundenschecks auf einmal, indem Sie eine Batch-Zahlung generieren, die Sie an Ihre Bank senden. Bei der Kodierung des Kontoauszugs in Odoo wird Ihnen vorgeschlagen, die Transaktion mit der Chargeneinzahlung abzustimmen, da für die Chargeneinzahlung das Modul account_batch_payment installiert sein muss.\n"
 "SEPA-Überweisung: Zahlen Sie die Rechnung aus einer SEPA-Überweisungsdatei, die Sie an Ihre Bank senden. Um eine sepa-Überweisung zu ermöglichen, muss das Modul account_sepa installiert sein"
 
 #. module: account
@@ -7998,6 +8001,12 @@ msgid "Original Bills"
 msgstr "Originalrechnungen"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree_grouped
+msgid "Original Currency"
+msgstr "Originalwährung"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__payment_id
 msgid "Originator Payment"
 msgstr "Zahlender"
@@ -8186,7 +8195,7 @@ msgstr "Partner ist ausgewählt & stimmt überein"
 #: model:ir.actions.act_window,name:account.action_account_moves_ledger_partner
 #: model:ir.ui.menu,name:account.menu_action_account_moves_ledger_partner
 msgid "Partner Ledger"
-msgstr "Partner-Kontoauszug"
+msgstr "Partner-Buch"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__partner_name
@@ -8585,7 +8594,7 @@ msgstr "Voreinstellung Bitte stellen Sie einen positiven Rundungswert ein."
 #: code:addons/account/models/account_cash_rounding.py:33
 #, python-format
 msgid "Please set a strictly positive rounding value."
-msgstr "Bitte geben Sie einen rein positiven Rundungswert an."
+msgstr "Bitte geben Sie einen positiven Rundungswert an."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -9121,7 +9130,7 @@ msgstr "Steuerrückerstattung"
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 #, python-format
 msgid "Register Payment"
-msgstr "Einzahlung erfassen"
+msgstr "Zahlung erfassen"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_tree
@@ -9824,7 +9833,7 @@ msgstr "Geld schicken"
 #: code:addons/account/wizard/account_payment_send.py:0
 #, python-format
 msgid "Send Payment"
-msgstr ""
+msgstr "Sende Zahlung"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_open_account_onboarding_sample_invoice
@@ -9849,7 +9858,7 @@ msgstr "Quittung per E-Mail senden"
 #. module: account
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action_multi
 msgid "Send receipts by email"
-msgstr ""
+msgstr "Sende Beleg per E-Mail."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_sample_invoice_step
@@ -10323,8 +10332,9 @@ msgid ""
 "Tag name %(tag)s is used by more than one tax report line in %(country)s. "
 "Each tag name should only be used once per country."
 msgstr ""
-"Der Tag-Name %(tag)s wird von mehr als einer Steuerberichtszeile in %(Land) "
-"verwendet. Jeder Tag-Name sollte nur einmal pro Land verwendet werden."
+"Der Tag-Name %(tag)s wird von mehr als einer Steuerberichtszeile in "
+"%(country)s verwendet. Jeder Tag-Name sollte nur einmal pro Land verwendet "
+"werden."
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -10442,7 +10452,7 @@ msgstr "Steuererklärung"
 #: model:ir.model.fields,field_description:account.field_account_tax__tax_exigibility
 #: model:ir.model.fields,field_description:account.field_account_tax_template__tax_exigibility
 msgid "Tax Due"
-msgstr "Fällige Steuer"
+msgstr "Steuerfälligkeit"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
@@ -10996,7 +11006,7 @@ msgstr "Geschäftsbedingungen"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move__narration
 msgid "Terms and Conditions"
-msgstr "Bedingungen und Konditionen"
+msgstr "Allgemeine Geschäftsbedingungen"
 
 #. module: account
 #. openerp-web
@@ -11348,6 +11358,8 @@ msgid ""
 "The following payment(s) will not be sent by email, because the customers "
 "don't have email address."
 msgstr ""
+"Die folgenden Zahlungsavis werden nicht per e-Mail gesendet, da der Kunde "
+"keine e-Mail Adresse hat."
 
 #. module: account
 #: code:addons/account/models/chart_template.py:0
@@ -11374,10 +11386,14 @@ msgstr ""
 #. module: account
 #: code:addons/account/models/account.py:0
 #, python-format
-msgid "The holder of a journal's bank account must be the company (%s)."
+msgid ""
+"The holder of the bank account of a \"Bank\" type journal must be the company (%s).\n"
+"However, the holder of \"%s\" is \"%s\".\n"
+"Please select another bank account or change the holder of \"%s\"."
 msgstr ""
-"Der Inhaber, eines im Journal verwendeten Bankkontos, muss das Unternehmen "
-"(%s) sein."
+"Die Firma (%s) muss der Inhaber des Bankkontos eines \"Bank\"-Journals sein.\n"
+"Der Inhaber von \"%s\" ist jedoch \"%s\".\n"
+"Bitte wählen Sie ein anderes Bankkonto oder ändern Sie den Inhaber von \"%s\"."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__code
@@ -12337,12 +12353,12 @@ msgstr "Unverteilte Gewinne/Verluste"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__price_unit
 msgid "Unit Price"
-msgstr "Stückpreis"
+msgstr "Einzelpreis"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Unit Price:"
-msgstr "Stückpreis:"
+msgstr "Einzelpreis:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__product_uom_id
@@ -12661,7 +12677,7 @@ msgstr "Zahlungsbedingungen des Lieferanten"
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 msgid "Vendor Payments"
-msgstr "Zahlungen des Lieferant"
+msgstr "Zahlungen des Lieferanten"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_product_product__supplier_taxes_id
@@ -12884,9 +12900,7 @@ msgstr "Sie können die Periode nur für Posten in diesen Kontoarten ändern: "
 #: code:addons/account/wizard/account_accrual_accounting.py:0
 #, python-format
 msgid "You can only change the period for items that are not yet reconciled."
-msgstr ""
-"Sie können die Periode nur für Artikel ändern, die noch nicht abgestimmt "
-"sind."
+msgstr "Sie können die Periode nur für Posten in diesen Kontoarten ändern: "
 
 #. module: account
 #: code:addons/account/wizard/account_accrual_accounting.py:0
@@ -12931,7 +12945,7 @@ msgstr "Sie können nur Rechnungen versenden."
 #: code:addons/account/wizard/account_payment_send.py:0
 #, python-format
 msgid "You can only send payments."
-msgstr ""
+msgstr "Sie können nur Zahlungsavis senden."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -13082,6 +13096,8 @@ msgstr "Sie können einen einmal gebuchten Eintrag nicht löschen."
 #, python-format
 msgid "You cannot delete an item linked to a posted entry."
 msgstr ""
+"Sie können keinen Eintrag löschen, der mit einem gebuchtem Eintrag verbunden"
+" ist."
 
 #. module: account
 #: code:addons/account/models/res_config_settings.py:0
@@ -13356,6 +13372,12 @@ msgstr "Sie müssen zuerst eine Eröffnungsbuchung definieren."
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
+msgid "The entry %s (id %s) is already posted."
+msgstr "Der Eintrag %s (id %s) wurde bereits gebucht."
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
 msgid "You need to add a line before posting."
 msgstr "Sie müssen vor der Buchung eine Zeile hinzufügen."
 
@@ -13421,7 +13443,7 @@ msgstr "PLZ Bereich bis"
 #: code:addons/account/static/src/xml/account_reconciliation.xml:0
 #, python-format
 msgid "and follow-up customers"
-msgstr "und Mahnungs-Kunden"
+msgstr "und Kunden mahnen"
 
 #. module: account
 #. openerp-web
@@ -13587,6 +13609,18 @@ msgstr "der Mutterkonzern"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "to check"
 msgstr "zu Überprüfen"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The chosen journal has a type that is not compatible with your invoice type."
+" Sales operations should go to 'sale' journals, and purchase operations to "
+"'purchase' ones."
+msgstr ""
+"Das ausgewählte Journaltyp ist nicht mit Ihrem Rechnungstyp kompatibel. "
+"Verkäufe müssen in einem Verkaufsjournal und Einkäufe in einem "
+"Einkaufsjournal verbucht werden."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form

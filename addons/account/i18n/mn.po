@@ -19,8 +19,9 @@
 # Cheemee Bumtsend <cheemeesun@gmail.com>, 2020
 # Батболд <batbold.ts@gmail.com>, 2020
 # tserendavaa tsogtoo <tseegii011929@gmail.com>, 2020
-# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2020
 # Martin Trigaux, 2020
+# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2021
+# Nomin Erdenchimeg <nomin.bmde@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -28,7 +29,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-01 12:20+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Martin Trigaux, 2020\n"
+"Last-Translator: Nomin Erdenchimeg <nomin.bmde@gmail.com>, 2021\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -7858,6 +7859,12 @@ msgid "Original Bills"
 msgstr "Эх өглөгийн нэхэмжлэх"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree_grouped
+msgid "Original Currency"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__payment_id
 msgid "Originator Payment"
 msgstr "Төлбөрийн эх сурвалж"
@@ -11120,8 +11127,11 @@ msgstr ""
 #. module: account
 #: code:addons/account/models/account.py:0
 #, python-format
-msgid "The holder of a journal's bank account must be the company (%s)."
-msgstr "Журналын банкны дансны эзэмшигч нь (%s) компани байх ёстой."
+msgid ""
+"The holder of the bank account of a \"Bank\" type journal must be the company (%s).\n"
+"However, the holder of \"%s\" is \"%s\".\n"
+"Please select another bank account or change the holder of \"%s\"."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__code
@@ -12969,7 +12979,7 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You don't have the access rights to post an invoice."
-msgstr ""
+msgstr "Танд нэхэмжлэх баталгаажуулах эрх байхгүй байна."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -13005,8 +13015,14 @@ msgstr "Эхлээд та нээлтийн ажил гүйлгээ бүртгэ�
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
+msgid "The entry %s (id %s) is already posted."
+msgstr "Уг гүйлгээ %s (id %s)аль хэдийн баталгаажсан байна."
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
 msgid "You need to add a line before posting."
-msgstr ""
+msgstr "Гүйлгээг батлахаас өмнө мөр нэмэх хэрэгтэй"
 
 #. module: account
 #. openerp-web
@@ -13126,8 +13142,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "for this customer. You can allocate them to mark this invoice as paid."
 msgstr ""
-"энэ захиалагчийн хувьд эдгээр нэхэмжлэлийг төлөгдсөн гэж тэмдэглэх "
-"боломжтой. "
+"Та уг нэхэмжлэлийг төлбөрийн бүртгэлтэй холбож төлөгдсөн болгох боломжтой."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -13182,7 +13197,7 @@ msgstr "өглөгийн дебетүүд"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "outstanding payments"
-msgstr "Авлагын кредитүүд"
+msgstr "энэ захиалагчийн хувьд Авлагын төлөлт бүртгэгдсэн байна."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__invoice_payment_state__paid
@@ -13237,6 +13252,15 @@ msgstr "Толгой компани"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "to check"
+msgstr "Шалгах"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The chosen journal has a type that is not compatible with your invoice type."
+" Sales operations should go to 'sale' journals, and purchase operations to "
+"'purchase' ones."
 msgstr ""
 
 #. module: account

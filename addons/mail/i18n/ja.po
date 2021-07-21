@@ -5,7 +5,7 @@
 # Translators:
 # 城谷 龍弥 <tatsuya.shirotani@pro-spire.co.jp>, 2019
 # kent_ocean <ke.tanabe@gmail.com>, 2019
-# NOKA Shigekazu <shigekazu.noka@gmail.com>, 2019
+# Shigekazu N. <shigekazu.noka@gmail.com>, 2019
 # 高木正勝 <masakatsu.takagi@pro-spire.co.jp>, 2019
 # 前園義博 <yoshihiro.maezono@pro-spire.co.jp>, 2019
 # SHIMIZU Taku <shimizu.taku@gmail.com>, 2019
@@ -18,8 +18,9 @@
 # 江口 和志 <k_eguchi@enzantrades.co.jp>, 2020
 # Konno Takatsugu <konno@token-express.com>, 2020
 # Hau Dao <hau@quartile.co>, 2020
-# Yoshi Tashiro <tashiro@roomsfor.hk>, 2020
-# Noma Yuki, 2020
+# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2021
+# Kakurai Ai <ai@quartile.co>, 2021
+# Noma Yuki, 2021
 # 
 msgid ""
 msgstr ""
@@ -27,7 +28,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:11+0000\n"
-"Last-Translator: Noma Yuki, 2020\n"
+"Last-Translator: Noma Yuki, 2021\n"
 "Language-Team: Japanese (https://www.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -282,7 +283,7 @@ msgstr "<p>ここでチャネルを作成します。</p>"
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/tours/mail.js:26
+#: code:addons/mail/static/src/js/tours/mail.js:0
 #, python-format
 msgid "<p>Create a public or private channel.</p>"
 msgstr "<p>パブリックチャネルまたはプライベートチャネルを作成します。</p>"
@@ -321,8 +322,8 @@ msgid ""
 "                                    If you want to use only selected records please uncheck this selection box :\n"
 "                                </span>"
 msgstr ""
-"<span attrs=\"{'invisible': '('use_active_domain', '=', "
-"True)'}\">検索条件に一致するすべてのレコードに送信する場合は、このボックス</span><span attrs=\"{'invisible':"
+"<span attrs=\"{'invisible': [('use_active_domain', '=', "
+"True)]}\">検索条件に一致するすべてのレコードに送信する場合は、このボックス</span><span attrs=\"{'invisible':"
 " [('use_active_domain', '=', "
 "False)]}\">をオンにします。選択したレコードのみを使用する場合は、この選択ボックスのチェックを外してください。</span>"
 
@@ -1450,7 +1451,7 @@ msgstr "新しい%(document)sを作成しましょう"
 #: code:addons/mail/models/mail_thread.py:0
 #, python-format
 msgid "Create a new %(document)s by sending an email to %(email_link)s"
-msgstr ""
+msgstr "%(email_link)sに電子メールを送信して、新しい%(document)sを作成します"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
@@ -2389,6 +2390,12 @@ msgstr "フォロワーのみ"
 #, python-format
 msgid "Following"
 msgstr "フォロー中"
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "Following invites are invalid as user groups do not match: %s"
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__icon
@@ -4142,6 +4149,18 @@ msgid "Online"
 msgstr "オンライン"
 
 #. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to export mail message"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to use grouped read on message model"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""
@@ -4250,7 +4269,7 @@ msgstr "目標項目が空白の場合に使う値"
 #: code:addons/mail/static/src/js/models/threads/dm_chat.js:0
 #, python-format
 msgid "Out of office until %s"
-msgstr ""
+msgstr "%sまで不在"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_mail__state__outgoing
@@ -6254,20 +6273,20 @@ msgid ""
 msgstr "グループ全体が他のモジュールで必要とされるため、これらのグループを削除することはできません。"
 
 #. module: mail
+#: code:addons/mail/models/mail_alias.py:0
+#, python-format
+msgid ""
+"You cannot use anything else than unaccented latin characters in the alias "
+"address."
+msgstr "エイリアスアドレスには、アクセントのないラテン文字以外は使用できません。"
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""
 "You do not have the rights to modify fields related to moderation on one of "
 "the channels you are modifying."
 msgstr "変更するチャネルの1つで、モデレートに関連するフィールドを変更する権限がありません。"
-
-#. module: mail
-#: code:addons/mail/models/mail_alias.py:89
-#, python-format
-msgid ""
-"You cannot use anything else than unaccented latin characters in the alias "
-"address."
-msgstr "エイリアスアドレスには、アクセントのないラテン文字以外は使用できません。"
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:0

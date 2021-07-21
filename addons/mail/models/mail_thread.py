@@ -723,7 +723,7 @@ class MailThread(models.AbstractModel):
             for model in [bl_model for bl_model in bl_models if bl_model.model in self.env]:  # transient test mode
                 rec_bounce_w_email = self.env[model.model].sudo().search([('email_normalized', '=', bounced_email)])
                 rec_bounce_w_email._message_receive_bounce(bounced_email, bounced_partner)
-                bounced_record_done = bool(bounced_record and model.model == bounced_model and bounced_record in rec_bounce_w_email)
+                bounced_record_done = bounced_record_done or (bounced_record and model.model == bounced_model and bounced_record in rec_bounce_w_email)
 
             # set record as bounced unless already done due to blacklist mixin
             if bounced_record and not bounced_record_done and issubclass(type(bounced_record), self.pool['mail.thread']):
@@ -782,9 +782,9 @@ class MailThread(models.AbstractModel):
 
         _generic_bounce_body_html = """<div>
 <p>Hello,</p>
-<p>The following email sent to %s cannot be accepted because this is a private email address.
+<p>The following email sent to {to} cannot be accepted because this is a private email address.
    Only allowed people can contact us at this address.</p>
-</div><blockquote>%s</blockquote>""" % (message_dict.get('to'), message_dict.get('body'))
+</div><blockquote>{body}</blockquote>"""
 
         # Wrong model
         if not model:
@@ -835,7 +835,14 @@ class MailThread(models.AbstractModel):
                 check_result = self.env['mail.alias.mixin']._alias_check_contact_on_record(obj, message, message_dict, alias)
             if check_result is not True:
                 self._routing_warn(_('alias %s: %s') % (alias.alias_name, check_result.get('error_message', _('unknown error'))), message_id, route, False)
-                self._routing_create_bounce_email(email_from, check_result.get('error_template', _generic_bounce_body_html), message)
+                self._routing_create_bounce_email(
+                    email_from,
+                    check_result.get('error_template', _generic_bounce_body_html.format(
+                        to=alias.display_name.lower(),
+                        body=message_dict.get('body')
+                    )),
+                    message
+                )
                 return False
 
         return (model, thread_id, route[2], route[3], route[4])
@@ -895,6 +902,7 @@ class MailThread(models.AbstractModel):
             raise TypeError('message must be an email.message.Message at this point')
         catchall_alias = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.alias")
         bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
+        bounce_alias_static = tools.str2bool(self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias.static", "False"))
         fallback_model = model
 
         # get email.message.Message variables for future processing
@@ -903,7 +911,11 @@ class MailThread(models.AbstractModel):
 
         # compute references to find if message is a reply to an existing thread
         thread_references = message_dict['references'] or message_dict['in_reply_to']
-        msg_references = [ref for ref in tools.mail_header_msgid_re.findall(thread_references) if 'reply_to' not in ref]
+        msg_references = [
+            re.sub(r'[\r\n\t ]+', r'', ref)  # "Unfold" buggy references
+            for ref in tools.mail_header_msgid_re.findall(thread_references)
+            if 'reply_to' not in ref
+        ]
         mail_messages = self.env['mail.message'].sudo().search([('message_id', 'in', msg_references)], limit=1, order='id desc, message_id')
         is_a_reply = bool(mail_messages)
         reply_model, reply_thread_id = mail_messages.model, mail_messages.res_id
@@ -938,6 +950,9 @@ class MailThread(models.AbstractModel):
             if bounce_match:
                 self._routing_handle_bounce(message, message_dict)
                 return []
+        if bounce_alias and bounce_alias_static and any(email == bounce_alias for email in email_to_localparts):
+            self._routing_handle_bounce(message, message_dict)
+            return []
         if message.get_content_type() == 'multipart/report' or email_from_localpart == 'mailer-daemon':
             self._routing_handle_bounce(message, message_dict)
             return []
@@ -982,7 +997,7 @@ class MailThread(models.AbstractModel):
             message_dict.pop('parent_id', None)
 
             # check it does not directly contact catchall
-            if catchall_alias and all(email_localpart == catchall_alias for email_localpart in email_to_localparts):
+            if catchall_alias and email_to_localparts and all(email_localpart == catchall_alias for email_localpart in email_to_localparts):
                 _logger.info('Routing mail from %s to %s with Message-Id %s: direct write to catchall, bounce', email_from, email_to, message_id)
                 body = self.env.ref('mail.mail_bounce_catchall').render({
                     'message': message,
@@ -2225,7 +2240,7 @@ class MailThread(models.AbstractModel):
 
         model = msg_vals.get('model') if msg_vals else message.model
         model_name = model_description or (self.with_lang().env['ir.model']._get(model).display_name if model else False) # one query for display name
-        recipients_groups_data = self._notify_classify_recipients(partners_data, model_name)
+        recipients_groups_data = self._notify_classify_recipients(partners_data, model_name, msg_vals=msg_vals)
 
         if not recipients_groups_data:
             return True
@@ -2368,7 +2383,10 @@ class MailThread(models.AbstractModel):
             if add_sign:
                 signature = "<p>-- <br/>%s</p>" % author.name
 
-        company = self.company_id.sudo() if self and 'company_id' in self else user.company_id
+        # company value should fall back on env.company if:
+        # - no company_id field on record
+        # - company_id field available but not set
+        company = self.company_id.sudo() if self and 'company_id' in self and self.company_id else self.env.company
         if company.website:
             website_url = 'http://%s' % company.website if not company.website.lower().startswith(('http:', 'https:')) else company.website
         else:
@@ -2492,22 +2510,23 @@ class MailThread(models.AbstractModel):
         return hm
 
     def _notify_get_action_link(self, link_type, **kwargs):
-        local_kwargs = dict(kwargs)  # do not modify in-place, modify copy instead
-        base_params = {
+        """ Prepare link to an action: view document, follow document, ... """
+        params = {
             'model': kwargs.get('model', self._name),
             'res_id': kwargs.get('res_id', self.ids and self.ids[0] or False),
         }
-
-        local_kwargs.pop('message_id', None)
-        local_kwargs.pop('model', None)
-        local_kwargs.pop('res_id', None)
+        # whitelist accepted parameters: action (deprecated), token (assign), access_token
+        # (view), auth_signup_token and auth_login (for auth_signup support)
+        params.update(dict(
+            (key, value)
+            for key, value in kwargs.items()
+            if key in ('action', 'token', 'access_token', 'auth_signup_token', 'auth_login')
+        ))
 
         if link_type in ['view', 'assign', 'follow', 'unfollow']:
-            params = dict(base_params, **local_kwargs)
             base_link = '/mail/%s' % link_type
         elif link_type == 'controller':
-            controller = local_kwargs.pop('controller')
-            params = dict(base_params, **local_kwargs)
+            controller = kwargs.get('controller')
             params.pop('model')
             base_link = '%s' % controller
         else:
@@ -2523,7 +2542,7 @@ class MailThread(models.AbstractModel):
 
         return link
 
-    def _notify_get_groups(self):
+    def _notify_get_groups(self, msg_vals=None):
         """ Return groups used to classify recipients of a notification email.
         Groups is a list of tuple containing of form (group_name, group_func,
         group_data) where
@@ -2562,7 +2581,7 @@ class MailThread(models.AbstractModel):
             )
         ]
 
-    def _notify_classify_recipients(self, recipient_data, model_name):
+    def _notify_classify_recipients(self, recipient_data, model_name, msg_vals=None):
         """ Classify recipients to be notified of a message in groups to have
         specific rendering depending on their group. For example users could
         have access to buttons customers should not have in their emails.
@@ -2593,10 +2612,10 @@ class MailThread(models.AbstractModel):
         }]
         only return groups with recipients
         """
-
-        groups = self._notify_get_groups()
-
-        access_link = self._notify_get_action_link('view')
+        # keep a local copy of msg_vals as it may be modified to include more information about groups or links
+        local_msg_vals = dict(msg_vals) if msg_vals else {}
+        groups = self._notify_get_groups(msg_vals=local_msg_vals)
+        access_link = self._notify_get_action_link('view', **local_msg_vals)
 
         if model_name:
             view_title = _('View %s') % model_name
@@ -2605,6 +2624,8 @@ class MailThread(models.AbstractModel):
 
         # fill group_data with default_values if they are not complete
         for group_name, group_func, group_data in groups:
+            group_data.setdefault('notification_group_name', group_name)
+            group_data.setdefault('notification_is_customer', False)
             group_data.setdefault('has_button_access', True)
             group_button_access = group_data.setdefault('button_access', {})
             group_button_access.setdefault('url', access_link)
@@ -2772,7 +2793,7 @@ class MailThread(models.AbstractModel):
         if not subtype_ids:
             self.env['mail.followers']._insert_followers(
                 self._name, self.ids, partner_ids, None, channel_ids, None,
-                customer_ids=customer_ids)
+                customer_ids=customer_ids, check_existing=False, existing_policy='skip')
         else:
             self.env['mail.followers']._insert_followers(
                 self._name, self.ids,

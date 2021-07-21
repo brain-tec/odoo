@@ -16,7 +16,9 @@
 # Hamid Darabi, 2020
 # Faraz Sadri Alamdari <ifarazir@gmail.com>, 2020
 # Arash Sardari <arashss77@gmail.com>, 2020
-# Hamed Mohammadi <hamed@dehongi.com>, 2020
+# Mohsen Mohammadi <iammohsen.123@gmail.com>, 2021
+# Hamed Mohammadi <hamed@dehongi.com>, 2021
+# Far Hariri <fhari1234@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -24,7 +26,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:11+0000\n"
-"Last-Translator: Hamed Mohammadi <hamed@dehongi.com>, 2020\n"
+"Last-Translator: Far Hariri <fhari1234@gmail.com>, 2021\n"
 "Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -288,7 +290,7 @@ msgstr "<p>یک کانال اینجا ایجاد کن.</p>"
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/tours/mail.js:26
+#: code:addons/mail/static/src/js/tours/mail.js:0
 #, python-format
 msgid "<p>Create a public or private channel.</p>"
 msgstr "<p>یک کانال عمومی یا خصوصی ایجاد کن.</p>"
@@ -340,6 +342,8 @@ msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
 "                                    <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
+"<span class=\"o_stat_text\">افزودن</span>\n"
+"                                    <span class=\"o_stat_text\">عمل زمینه‌ای</span>"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -347,6 +351,8 @@ msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
 "                                    <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
+"<span class=\"o_stat_text\">حذف</span>\n"
+"                                    <span class=\"o_stat_text\">عمل زمینه‌ای</span>"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
@@ -537,7 +543,7 @@ msgstr "دکوراسیون استثنا فعالیت"
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_mixin
 msgid "Activity Mixin"
-msgstr ""
+msgstr "میکسین فعالیت"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_mixin__activity_state
@@ -599,7 +605,7 @@ msgstr "افزودن کانالها"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_view_form
 msgid "Add Email Blacklist"
-msgstr ""
+msgstr "افزودن لیست سیاه ایمیل"
 
 #. module: mail
 #. openerp-web
@@ -660,7 +666,7 @@ msgstr "افزودن پیوست"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_wizard_invite_form
 msgid "Add channels to notify..."
-msgstr ""
+msgstr "افزودن کانالها برای اعلان..."
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
@@ -673,7 +679,7 @@ msgstr "افزودن تماس ها برای درجریان قرار دادن..."
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Add this email address to white list of people"
-msgstr ""
+msgstr "افزودن این ایمیل به لیست سفید افراد"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_ids
@@ -911,6 +917,8 @@ msgid ""
 "Author of the message. If not set, email_from may hold an email address that"
 " did not match any partner."
 msgstr ""
+"نویسنده پیام. اگر تعیین نشده باشد، email_from آدرس ایمیلی را نگه دارد که با "
+"هیچ همکاری مطابقت ندارد."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__author_avatar
@@ -1995,7 +2003,7 @@ msgstr "پیکربندی ایمیل"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_preview_form
 msgid "Email Preview"
-msgstr ""
+msgstr "پیشنمایش ایمیل"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
@@ -2016,7 +2024,7 @@ msgstr "قالب ایمیل"
 #. module: mail
 #: model:ir.model,name:mail.model_email_template_preview
 msgid "Email Template Preview"
-msgstr ""
+msgstr "پیشنمایش قالب ایمیل"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_template
@@ -2376,10 +2384,16 @@ msgid "Following"
 msgstr "دنبال می کند"
 
 #. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "Following invites are invalid as user groups do not match: %s"
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__icon
 #: model:ir.model.fields,help:mail.field_mail_activity_type__icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
+msgstr "آیکون فونت عالی به عبارتی fa-tasks"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__email_from
@@ -4124,6 +4138,18 @@ msgid "Online"
 msgstr "آنلاین"
 
 #. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to export mail message"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Only administrators are allowed to use grouped read on message model"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""
@@ -4254,7 +4280,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_mail__mail_server_id
 #: model:ir.model.fields,field_description:mail.field_mail_message__mail_server_id
 msgid "Outgoing mail server"
-msgstr ""
+msgstr "میل سرور خروجی"
 
 #. module: mail
 #. openerp-web
@@ -4526,7 +4552,7 @@ msgstr "پیش نمایش"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_preview_form
 msgid "Preview of"
-msgstr ""
+msgstr "پیشنمایشِ"
 
 #. module: mail
 #. openerp-web
@@ -5268,6 +5294,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"وضعیت بر اساس فعالیت\n"
+"Overdue: Due date is already passed\n"
+"امروز:تاریخ فعالیت امروز است\n"
+"برنامه‌ریزی شده: برنامه‌های آینده."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__sub_model_object_field
@@ -5377,12 +5407,12 @@ msgstr ""
 #. module: mail
 #: model:ir.actions.act_window,name:mail.wizard_email_template_preview
 msgid "Template Preview"
-msgstr ""
+msgstr "پیشنمایش قالب"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__preview_lang
 msgid "Template Preview Language"
-msgstr ""
+msgstr "زبان پیشنمایش قالب"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_email_template_tree_all
@@ -5836,14 +5866,14 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Uploaded"
-msgstr ""
+msgstr "آپلود شده"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Uploading"
-msgstr ""
+msgstr "در حال آپلود"
 
 #. module: mail
 #. openerp-web
@@ -6196,19 +6226,19 @@ msgid ""
 msgstr ""
 
 #. module: mail
+#: code:addons/mail/models/mail_alias.py:0
+#, python-format
+msgid ""
+"You cannot use anything else than unaccented latin characters in the alias "
+"address."
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""
 "You do not have the rights to modify fields related to moderation on one of "
 "the channels you are modifying."
-msgstr ""
-
-#. module: mail
-#: code:addons/mail/models/mail_alias.py:89
-#, python-format
-msgid ""
-"You cannot use anything else than unaccented latin characters in the alias "
-"address."
 msgstr ""
 
 #. module: mail

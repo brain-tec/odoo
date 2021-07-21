@@ -137,9 +137,8 @@ class AccountTaxReportLine(models.Model):
                 plus_child_tags.write({'name': '+' + vals['tag_name']})
 
             else:
-                # tag_name was set empty, so we remove the tags
-                self._delete_tags_from_taxes(self.mapped('tag_ids.id'))
-                self.write({'tag_ids': [(2, tag.id, 0) for tag in self.mapped('tag_ids')]})
+                # tag_name was set empty, so we remove the tags that are not shared
+                self._remove_tax_used_only_by_self()
 
         if 'country_id' in vals and self.tag_ids:
             # Writing the country of a tax report line should overwrite the country of its tags
@@ -148,16 +147,26 @@ class AccountTaxReportLine(models.Model):
         return rslt
 
     def unlink(self):
-        self._delete_tags_from_taxes(self.mapped('tag_ids.id'))
+        self._remove_tax_used_only_by_self()
         children = self.mapped('children_line_ids')
         if children:
             children.unlink()
         return super(AccountTaxReportLine, self).unlink()
 
+    def _remove_tax_used_only_by_self(self):
+        """ Deletes and removes from taxes and move lines all the
+        tags from the provided tax report lines that are not linked
+        to any other tax report lines.
+        """
+        all_tags = self.mapped('tag_ids')
+        tags_to_unlink = all_tags.filtered(lambda x: not (x.tax_report_line_ids - self))
+        self.write({'tag_ids': [(3, tag.id, 0) for tag in tags_to_unlink]})
+        self._delete_tags_from_taxes(tags_to_unlink.ids)
+
     def _delete_tags_from_taxes(self, tag_ids_to_delete):
         """ Based on a list of tag ids, removes them first from the
         repartition lines they are linked to, then deletes them
-        from the account move lines.
+        from the account move lines, and finally unlink them.
         """
         if not tag_ids_to_delete:
             # Nothing to do, then!
@@ -172,6 +181,8 @@ class AccountTaxReportLine(models.Model):
 
         self.env['account.move.line'].invalidate_cache(fnames=['tag_ids'])
         self.env['account.tax.repartition.line'].invalidate_cache(fnames=['tag_ids'])
+
+        self.env['account.account.tag'].browse(tag_ids_to_delete).unlink()
 
     @api.constrains('formula', 'tag_name')
     def _validate_formula(self):
@@ -357,10 +368,12 @@ class AccountAccount(models.Model):
             record.opening_credit = opening_credit
 
     def _set_opening_debit(self):
-        self._set_opening_debit_credit(self.opening_debit, 'debit')
+        for record in self:
+            record._set_opening_debit_credit(record.opening_debit, 'debit')
 
     def _set_opening_credit(self):
-        self._set_opening_debit_credit(self.opening_credit, 'credit')
+        for record in self:
+            record._set_opening_debit_credit(record.opening_credit, 'credit')
 
     def _set_opening_debit_credit(self, amount, field):
         """ Generic function called by both opening_debit and opening_credit's
@@ -843,7 +856,10 @@ class AccountJournal(models.Model):
                 # A bank account can belong to a customer/supplier, in which case their partner_id is the customer/supplier.
                 # Or they are part of a bank journal and their partner_id must be the company's partner_id.
                 if journal.bank_account_id.partner_id != journal.company_id.partner_id:
-                    raise ValidationError(_('The holder of a journal\'s bank account must be the company (%s).') % journal.company_id.name)
+                    raise ValidationError(_('The holder of the bank account of a "Bank" type journal must be the company (%s).\n'
+                                            'However, the holder of "%s" is "%s".\n'
+                                            'Please select another bank account or change the holder of "%s".'
+                                            ) % (self.company_id.name, self.bank_account_id.acc_number, self.bank_account_id.partner_id.name, self.bank_account_id.acc_number))
 
     @api.constrains('company_id')
     def _check_company_consistency(self):
@@ -1708,7 +1724,7 @@ class AccountTax(models.Model):
                         incl_fixed_amount += quantity * tax.amount * sum_repartition_factor
                     else:
                         # tax.amount_type == other (python)
-                        tax_amount = tax._compute_amount(base, sign * price_unit, quantity, product, partner) * sum_repartition_factor
+                        tax_amount = tax._compute_amount(base, sign * price_unit, abs(quantity), product, partner) * sum_repartition_factor
                         incl_fixed_amount += tax_amount
                         # Avoid unecessary re-computation
                         cached_tax_amounts[i] = tax_amount
@@ -1845,8 +1861,8 @@ class AccountTaxRepartitionLine(models.Model):
     repartition_type = fields.Selection(string="Based On", selection=[('base', 'Base'), ('tax', 'of tax')], required=True, default='tax', help="Base on which the factor will be applied.")
     account_id = fields.Many2one(string="Account", comodel_name='account.account', help="Account on which to post the tax amount")
     tag_ids = fields.Many2many(string="Tax Grids", comodel_name='account.account.tag', domain=[('applicability', '=', 'taxes')], copy=True)
-    invoice_tax_id = fields.Many2one(comodel_name='account.tax', help="The tax set to apply this repartition on invoices. Mutually exclusive with refund_tax_id")
-    refund_tax_id = fields.Many2one(comodel_name='account.tax', help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
+    invoice_tax_id = fields.Many2one(comodel_name='account.tax', ondelete='cascade', help="The tax set to apply this repartition on invoices. Mutually exclusive with refund_tax_id")
+    refund_tax_id = fields.Many2one(comodel_name='account.tax', ondelete='cascade', help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
     tax_id = fields.Many2one(comodel_name='account.tax', compute='_compute_tax_id')
     country_id = fields.Many2one(string="Country", comodel_name='res.country', related='company_id.country_id',  help="Technical field used to restrict tags domain in form view.")
     company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True, default=lambda x: x.env.company, help="The company this repartition line belongs to.")

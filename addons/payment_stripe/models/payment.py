@@ -44,11 +44,13 @@ class PaymentAcquirerStripe(models.Model):
             'line_items[][quantity]': 1,
             'line_items[][name]': tx_values['reference'],
             'client_reference_id': tx_values['reference'],
-            'success_url': urls.url_join(base_url, StripeController._success_url) + '?reference=%s' % tx_values['reference'],
-            'cancel_url': urls.url_join(base_url, StripeController._cancel_url) + '?reference=%s' % tx_values['reference'],
+            'success_url': urls.url_join(base_url, StripeController._success_url) + '?reference=%s' % urls.url_quote_plus(tx_values['reference']),
+            'cancel_url': urls.url_join(base_url, StripeController._cancel_url) + '?reference=%s' % urls.url_quote_plus(tx_values['reference']),
             'payment_intent_data[description]': tx_values['reference'],
             'customer_email': tx_values.get('partner_email') or tx_values.get('billing_partner_email'),
         }
+        if tx_values['type'] == 'form_save':
+            stripe_session_data['payment_intent_data[setup_future_usage]'] = 'off_session'
 
         self._add_available_payment_method_types(stripe_session_data, tx_values)
 
@@ -205,8 +207,9 @@ class PaymentTransactionStripe(models.Model):
         return res
 
     def form_feedback(self, data, acquirer_name):
-        if data.get('reference') and acquirer_name == 'stripe':
-            transaction = self.env['payment.transaction'].search([('reference', '=', data['reference'])])
+        reference = data.get('metadata', {}).get("reference") or data.get("reference")
+        if reference and acquirer_name == 'stripe':
+            transaction = self.env['payment.transaction'].search([('reference', '=', reference)])
 
             url = 'payment_intents/%s' % transaction.stripe_payment_intent
             resp = transaction.acquirer_id._stripe_request(url)
@@ -214,6 +217,8 @@ class PaymentTransactionStripe(models.Model):
                 resp = resp.get('charges').get('data')[0]
 
             data.update(resp)
+            if 'metadata' in data and not data.get('metadata').get('reference'):
+                data['metadata']['reference'] = reference
             _logger.info('Stripe: entering form_feedback with post data %s' % pprint.pformat(data))
         return super(PaymentTransactionStripe, self).form_feedback(data, acquirer_name)
 
@@ -270,7 +275,7 @@ class PaymentTransactionStripe(models.Model):
     def _stripe_form_get_tx_from_data(self, data):
         """ Given a data dict coming from stripe, verify it and find the related
         transaction record. """
-        reference = data.get('reference')
+        reference = data.get('metadata', {}).get("reference") or data.get("reference")
         if not reference:
             stripe_error = data.get('error', {}).get('message', '')
             _logger.error('Stripe: invalid reply received from stripe API, looks like '
@@ -343,7 +348,7 @@ class PaymentTransactionStripe(models.Model):
         invalid_parameters = []
         if data.get('amount') != int(self.amount if self.currency_id.name in INT_CURRENCIES else float_round(self.amount * 100, 2)):
             invalid_parameters.append(('Amount', data.get('amount'), self.amount * 100))
-        if data.get('currency').upper() != self.currency_id.name:
+        if data.get('currency') and data.get('currency').upper() != self.currency_id.name:
             invalid_parameters.append(('Currency', data.get('currency'), self.currency_id.name))
         if data.get('payment_intent') and data.get('payment_intent') != self.stripe_payment_intent:
             invalid_parameters.append(('Payment Intent', data.get('payment_intent'), self.stripe_payment_intent))

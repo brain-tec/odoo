@@ -168,7 +168,7 @@ class SaleCouponProgram(models.Model):
             message = {'error': _('A minimum of %s %s should be purchased to get the reward') % (self.rule_minimum_amount, self.currency_id.name)}
         elif self.promo_code and self.promo_code == order.promo_code:
             message = {'error': _('The promo code is already applied on this order')}
-        elif not self.promo_code and self in order.no_code_promo_program_ids:
+        elif self in order.no_code_promo_program_ids:
             message = {'error': _('The promotional offer is already applied on this order')}
         elif not self.active:
             message = {'error': _('Promo code is invalid')}
@@ -310,7 +310,7 @@ class SaleCouponProgram(models.Model):
         return programs
 
     def _is_valid_partner(self, partner):
-        if self.rule_partners_domain:
+        if self.rule_partners_domain and self.rule_partners_domain != '[]':
             domain = safe_eval(self.rule_partners_domain) + [('id', '=', partner.id)]
             return bool(self.env['res.partner'].search_count(domain))
         else:

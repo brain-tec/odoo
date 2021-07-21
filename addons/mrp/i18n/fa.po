@@ -15,7 +15,9 @@
 # Hamid Darabi, 2020
 # Sahar Daraye <sahar.daraye.1369@gmail.com>, 2020
 # Sepehr Khoshnood <sepehr.kho@gmail.com>, 2020
-# Hamed Mohammadi <hamed@dehongi.com>, 2020
+# Hamed Mohammadi <hamed@dehongi.com>, 2021
+# Mohsen Mohammadi <iammohsen.123@gmail.com>, 2021
+# Far Hariri <fhari1234@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -23,7 +25,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-05 12:32+0000\n"
 "PO-Revision-Date: 2019-08-26 09:12+0000\n"
-"Last-Translator: Hamed Mohammadi <hamed@dehongi.com>, 2020\n"
+"Last-Translator: Far Hariri <fhari1234@gmail.com>, 2021\n"
 "Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -349,6 +351,13 @@ msgstr ""
 #, python-format
 msgid "A Manufacturing Order is already done or cancelled."
 msgstr "یک سفارش تولید از قبل انجام شده یا لغو شده است."
+
+#. module: mrp
+#: code:addons/mrp/models/stock_warehouse.py:0
+#, python-format
+msgid ""
+"A product with a kit-type bill of materials can not have a reordering rule."
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_workcenter.py:0
@@ -1052,6 +1061,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
+"تبدیل بین واحدهای اندازه‌گیری تنها در صورتی می تواند رخ دهد که به یک دسته "
+"تعلق داشته باشد. تبدیل بر اساس نسبت‌ها انجام خواهد شد."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__costs_hour
@@ -1318,7 +1329,7 @@ msgstr "پیشنویس"
 #: model:product.product,name:mrp.product_product_drawer_drawer
 #: model:product.template,name:mrp.product_product_drawer_drawer_product_template
 msgid "Drawer Black"
-msgstr ""
+msgstr "کشو سیاه"
 
 #. module: mrp
 #: model:product.product,name:mrp.product_product_drawer_case
@@ -2009,12 +2020,12 @@ msgstr "دلیل زیان"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_product_produce_line_kanban
 msgid "Lot"
-msgstr ""
+msgstr "لات"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_production_lot
 msgid "Lot/Serial"
-msgstr ""
+msgstr "لات/سریال"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_abstract_workorder__finished_lot_id
@@ -2025,7 +2036,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__finished_lot_id
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder_line__lot_id
 msgid "Lot/Serial Number"
-msgstr ""
+msgstr "شماره لات/سریال"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__lot_id
@@ -2045,7 +2056,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_mrp_traceability
 msgid "Lots/Serial Numbers"
-msgstr ""
+msgstr "شماره‌های لات/سریال"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_document__priority__1
@@ -3620,6 +3631,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"وضعیت بر اساس فعالیت\n"
+"Overdue: Due date is already passed\n"
+"امروز:تاریخ فعالیت امروز است\n"
+"برنامه‌ریزی شده: برنامه‌های آینده."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_warehouse__sam_type_id
@@ -4283,7 +4298,7 @@ msgstr "شمارنده پیام‌های خوانده‌نشده"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid "Unreserve"
-msgstr ""
+msgstr "رزرو نشده"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -4725,6 +4740,14 @@ msgstr ""
 #: code:addons/mrp/models/mrp_bom.py:0
 #, python-format
 msgid ""
+"You can not create a kit-type bill of materials for products that have at "
+"least one reordering rule."
+msgstr ""
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_bom.py:0
+#, python-format
+msgid ""
 "You can not delete a Bill of Material with running manufacturing orders.\n"
 "Please close or cancel it first."
 msgstr ""
@@ -4824,6 +4847,14 @@ msgstr ""
 #, python-format
 msgid "You have to produce at least one %s."
 msgstr "شما باید حداق یک %sتولید کنید."
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_production.py:0
+#, python-format
+msgid ""
+"You must indicate a non-zero amount consumed for at least one of your "
+"components"
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_workorder.py:0

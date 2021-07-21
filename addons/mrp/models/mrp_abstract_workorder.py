@@ -162,12 +162,6 @@ class MrpAbstractWorkorder(models.AbstractModel):
                 if float_compare(qty_todo, 0.0, precision_rounding=rounding) > 0:
                     for values in self._generate_lines_values(move, qty_todo):
                         line_values['to_create'].append(values)
-        # wo lines without move_id should also be deleted
-        for wo_line in self._workorder_line_ids().filtered(lambda w: not w.move_id and (not w.finished_workorder_id or w.product_id != w.finished_workorder_id.product_id)):
-            if not line_values['to_delete']:
-                line_values['to_delete'] = wo_line
-            elif wo_line not in line_values['to_delete']:
-                line_values['to_delete'] |= wo_line
         return line_values
 
     @api.model
@@ -335,14 +329,6 @@ class MrpAbstractWorkorderLine(models.AbstractModel):
     qty_done = fields.Float('Consumed', digits='Product Unit of Measure')
     qty_reserved = fields.Float('Reserved', digits='Product Unit of Measure')
     company_id = fields.Many2one('res.company', compute='_compute_company_id')
-
-    @api.onchange('lot_id')
-    def _onchange_lot_id(self):
-        """ When the user is encoding a produce line for a tracked product, we apply some logic to
-        help him. This onchange will automatically switch `qty_done` to 1.0.
-        """
-        if self.product_id.tracking == 'serial':
-            self.qty_done = 1
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
