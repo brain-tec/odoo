@@ -725,6 +725,9 @@ ListRenderer.include({
             }
         });
 
+        // set max-width before setting table-layout fixed
+        this.$el.css({ 'max-width': this.$el.width() });
+
         // Set the table layout to fixed
         table.style.tableLayout = 'fixed';
     },
@@ -1751,7 +1754,7 @@ ListRenderer.include({
 
         // Fix container width to prevent the table from overflowing when being resized
         if (!this.el.style.width) {
-            this.el.style.width = `${initialTableWidth}px`;
+            this.el.style.width = `${this.el.offsetWidth}px`;
         }
 
         // Apply classes to table and selected column
