@@ -342,15 +342,15 @@
 
     <template id="sort" inherit_id="website_sale.products" customize_show="True" name="Show Sort by">
         <xpath expr="//div[hasclass('products_header')]/t[@t-call='website_sale.pricelist_list']" position="after">
-            <t t-set="list_price_desc_label">Price - High to Low</t>
             <t t-set="list_price_asc_label">Price - Low to High</t>
-            <t t-set="name_asc_label">Name - A to Z</t>
-            <t t-set="name_desc_label">Name - Z to A</t>
+            <t t-set="list_price_desc_label">Price - High to Low</t>
+            <t t-set="newest_arrivals_desc_label">Newest arrivals</t>
+            <t t-set="name_asc_label">Name</t>
             <t t-set="website_sale_sortable" t-value="[
-                (list_price_desc_label, 'list_price desc'),
                 (list_price_asc_label, 'list_price asc'),
-                (name_asc_label, 'name asc'),
-                (name_desc_label, 'name desc')
+                (list_price_desc_label, 'list_price desc'),
+                (newest_arrivals_desc_label, 'create_date desc'),
+                (name_asc_label, 'name asc')
             ]"/>
             <t t-set="website_sale_sortable_current" t-value="[sort for sort in website_sale_sortable if sort[1]==request.params.get('order', '')]"/>
             <div class="o_sortby_dropdown dropdown dropdown_sorty_by ml-3 pb-2">
@@ -993,7 +993,7 @@
                             </t>
                         </td>
                         <td class="text-center td-qty">
-                            <div class="css_quantity input-group mx-auto">
+                            <div class="css_quantity input-group mx-auto justify-content-center">
                                 <t t-if="not line._is_not_sellable_line()">
                                     <t t-if="show_qty">
                                         <div class="input-group-prepend">
@@ -1014,6 +1014,7 @@
                                 </t>
                                 <t t-else="">
                                     <span class="text-muted w-100" t-esc="int(line.product_uom_qty)"/>
+                                    <input type="hidden" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="line.product_uom_qty" />
                                 </t>
                             </div>
                         </td>

@@ -58,6 +58,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/promise_extension.js',
             'web/static/src/boot.js',
             'web/static/src/session.js',
+            'web/static/src/legacy/js/core/cookie_utils.js',
         ],
         'web.assets_common': [
             ('include', 'web._assets_helpers'),
@@ -75,6 +76,7 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/legacy/js/promise_extension.js'),
             ('remove', 'web/static/src/boot.js'),
             ('remove', 'web/static/src/session.js'),
+            ('remove', 'web/static/src/legacy/js/core/cookie_utils.js'),
         ],
         'web.assets_backend': [
             ('include', 'web._assets_helpers'),
@@ -96,7 +98,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/env.js',
 
             'web/static/lib/jquery.scrollTo/jquery.scrollTo.js',
-            'web/static/lib/fuzzy-master/fuzzy.js',
             'web/static/lib/luxon/luxon.js',
             'web/static/lib/py.js/lib/py.js',
             'web/static/lib/py.js/lib/py_extras.js',

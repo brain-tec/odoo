@@ -1877,7 +1877,11 @@ const ListUserValueWidget = UserValueWidget.extend({
         }
         currentValues.forEach(value => {
             if (typeof value === 'object') {
-                this._addItemToTable(value.id, value.display_name);
+                const recordData = value;
+                const { id, display_name } = recordData;
+                delete recordData.id;
+                delete recordData.display_name;
+                this._addItemToTable(id, display_name, recordData);
             } else {
                 this._addItemToTable(value, value);
             }
@@ -1897,16 +1901,18 @@ const ListUserValueWidget = UserValueWidget.extend({
         return this._value;
     },
 
-    //----------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Private
-    //----------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     /**
      * @private
      * @param {string || integer} id
-     * @param {string} text
+     * @param {string} [text]
+     * @param {Object} [recordData] key, values that will be added to the
+     *     element's dataset
      */
-    _addItemToTable(id, text = _t("Item")) {
+    _addItemToTable(id, text = _t("Item"), recordData) {
         const trEl = document.createElement('tr');
         if (!this.el.dataset.unsortable) {
             const draggableEl = document.createElement('we-button');
@@ -1923,6 +1929,11 @@ const ListUserValueWidget = UserValueWidget.extend({
         }
         if (id) {
             inputEl.name = id;
+        }
+        if (recordData) {
+            for (const key of Object.keys(recordData)) {
+                inputEl.dataset[key] = recordData[key];
+            }
         }
         inputEl.disabled = !this.isCustom;
         const buttonEl = document.createElement('we-button');
@@ -1977,11 +1988,11 @@ const ListUserValueWidget = UserValueWidget.extend({
         const values = [...this.listTable.querySelectorAll('input')].map(el => {
             const id = this.isCustom ? el.value : el.name;
             const idInt = parseInt(id);
-            return {
+            return Object.assign({
                 id: isNaN(idInt) ? id : idInt,
                 name: el.value,
                 display_name: el.value,
-            };
+            }, el.dataset);
         });
         if (this.hasDefault) {
             const checkboxes = [...this.listTable.querySelectorAll('we-button.o_we_checkbox_wrapper.active')];
@@ -2096,8 +2107,11 @@ const ListUserValueWidget = UserValueWidget.extend({
                 return;
             }
             prepare();
-            const { id, display_name } = JSON.parse(widget.getMethodsParams('addRecord').recordData);
-            this._addItemToTable(id, display_name);
+            const recordData = JSON.parse(widget.getMethodsParams('addRecord').recordData);
+            const { id, display_name } = recordData;
+            delete recordData.id;
+            delete recordData.display_name;
+            this._addItemToTable(id, display_name, recordData);
             this._notifyCurrentState();
         }
         return this._super(ev);
@@ -2604,7 +2618,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
 });
 
 const Many2manyUserValueWidget = UserValueWidget.extend({
-    configAttributes: ['model', 'recordId', 'm2oField', 'createMethod'],
+    configAttributes: ['model', 'recordId', 'm2oField', 'createMethod', 'fakem2m'],
 
     /**
      * @override
@@ -2624,6 +2638,12 @@ const Many2manyUserValueWidget = UserValueWidget.extend({
      */
     async willStart() {
         await this._super(...arguments);
+        // If the widget does not have a real m2m field in the database
+        // We do not need to fetch anything from the DB
+        if (this.options.fakem2m) {
+            this.m2oModel = this.options.model;
+            return;
+        }
         const { model, recordId, m2oField } = this.options;
         const [record] = await this._rpc({
             model: model,
@@ -4211,7 +4231,7 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      */
     async willStart() {
         const _super = this._super.bind(this);
-        await this._loadImageInfo();
+        await this._initializeImage();
         return _super(...arguments);
     },
     /**
@@ -4418,9 +4438,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      *
      * @private
      */
-    async _loadImageInfo() {
+    async _loadImageInfo(attachmentSrc = '') {
         const img = this._getImg();
-        await loadImageInfo(img, this._rpc.bind(this));
+        await loadImageInfo(img, this._rpc.bind(this), attachmentSrc);
         if (!img.dataset.originalId) {
             this.originalId = null;
             this.originalSrc = null;
@@ -4473,6 +4493,12 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     _getImageMimetype(img) {
         return img.dataset.mimetype;
     },
+    /**
+     * @private
+     */
+    async _initializeImage() {
+        return this._loadImageInfo();
+    }
 });
 
 /**
@@ -4583,9 +4609,11 @@ registry.ImageOptimize = ImageHandlerOption.extend({
     async _applyOptions() {
         const img = await this._super(...arguments);
         if (img && img.dataset.shape) {
-            // Reapplying the shape
             await this._loadShape(img.dataset.shape);
-            await this._applyShapeAndColors(true, (img.dataset.shapeColors && img.dataset.shapeColors.split(';')));
+            if (/^data:/.test(img.src)) {
+                // Reapplying the shape
+                await this._applyShapeAndColors(true, (img.dataset.shapeColors && img.dataset.shapeColors.split(';')));
+            }
         }
         return img;
     },
@@ -4629,7 +4657,7 @@ registry.ImageOptimize = ImageHandlerOption.extend({
             // shape's colors by the current palette's
             newColors = oldColors.map((color, i) => color !== null ? this._getCSSColorValue(`o-color-${(i + 1)}`) : null);
         }
-        newColors.forEach((color, i) => shape = shape.replace(new RegExp(oldColors[i], 'g'), color));
+        newColors.forEach((color, i) => shape = shape.replace(new RegExp(oldColors[i], 'g'), this._getCSSColorValue(color)));
         await this._writeShape(shape);
         if (save) {
             img.dataset.shapeColors = newColors.join(';');
@@ -4772,10 +4800,28 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      * @returns {string}
      */
     _getCSSColorValue(color) {
-        if (ColorpickerWidget.isCSSColor(color)) {
+        if (!color || ColorpickerWidget.isCSSColor(color)) {
             return color;
         }
         return weUtils.getCSSVariableValue(color);
+    },
+    /**
+     * Overridden to set attachment data on theme images (with default shapes).
+     *
+     * @override
+     * @private
+     */
+    async _initializeImage() {
+        const img = this._getImg();
+        const match = img.src.match(/\/web_editor\/image_shape\/(\w+\.\w+)/);
+        if (img.dataset.shape && match) {
+            await this._loadImageInfo(`/web/image/${match[1]}`);
+            // Image data-mimetype should be changed to SVG since loadImageInfo()
+            // will set the original attachment mimetype on it.
+            img.dataset.mimetype = 'image/svg+xml';
+            return;
+        }
+        return this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------
