@@ -725,9 +725,6 @@ ListRenderer.include({
             }
         });
 
-        // set max-width before setting table-layout fixed
-        this.$el.css({ 'max-width': this.$el.width() });
-
         // Set the table layout to fixed
         table.style.tableLayout = 'fixed';
     },
@@ -1769,6 +1766,7 @@ ListRenderer.include({
             const newWidth = Math.max(10, initialWidth + delta);
             const tableDelta = newWidth - initialWidth;
             th.style.width = `${newWidth}px`;
+            th.style.maxWidth = `${newWidth}px`;
             table.style.width = `${initialTableWidth + tableDelta}px`;
             if (optionalDropdown) {
                 optionalDropdown.style.left = `${initialDropdownX + tableDelta}px`;
