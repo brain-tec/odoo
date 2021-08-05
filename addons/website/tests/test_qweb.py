@@ -17,6 +17,22 @@ class TestQweb(TransactionCaseWithUserDemo):
                            get_module_resource(module, *args),
                            {}, 'init', False, 'test')
 
+    def test_qweb_post_processing_att(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name="attr-escaping">
+                <img src="http://test.external.img/img.png"/>
+                <img t-att-src="url"/>
+            </t>'''
+        })
+        result = """
+                <img src="http://test.external.img/img.png" loading="lazy"/>
+                <img src="http://test.external.img/img2.png" loading="lazy"/>
+            """
+        rendered = self.env['ir.qweb']._render(t.id, {'url': 'http://test.external.img/img2.png'})
+        self.assertEqual(rendered.strip(), result.strip())
+
     def test_qweb_cdn(self):
         self._load('website', 'tests', 'template_qweb_test.xml')
 
@@ -38,7 +54,7 @@ class TestQweb(TransactionCaseWithUserDemo):
         asset_xmlid = asset_data.attrib.get('data-asset-bundle')
         asset_version = asset_data.attrib.get('data-asset-version')
 
-        html = html.strip().decode('utf8')
+        html = html.strip()
         html = re.sub(r'\?unique=[^"]+', '', html).encode('utf8')
 
         attachments = demo_env['ir.attachment'].search([('url', '=like', '/web/assets/%-%/website.test_bundle.%')])

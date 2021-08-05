@@ -141,6 +141,7 @@ class AccountMove(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
         copy=False,
+        tracking=True,
         default=fields.Date.context_today
     )
     ref = fields.Char(string='Reference', copy=False, tracking=True)
@@ -391,11 +392,14 @@ class AccountMove(models.Model):
         """
         tax_lock_date = self.company_id.tax_lock_date
         today = fields.Date.today()
-        if invoice_date and tax_lock_date and has_tax and invoice_date <= tax_lock_date:
+        lock_violated = invoice_date and tax_lock_date and has_tax and invoice_date <= tax_lock_date
+        if lock_violated:
             invoice_date = tax_lock_date + timedelta(days=1)
 
         if self.is_sale_document(include_receipts=True):
-            return max(invoice_date, today)
+            if lock_violated:
+                return max(invoice_date, today)
+            return invoice_date
         elif self.is_purchase_document(include_receipts=True):
             highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
             number_reset = self._deduce_sequence_number_reset(highest_name)
@@ -549,6 +553,7 @@ class AccountMove(models.Model):
         '''
         return {
             'tax_repartition_line_id': tax_line.tax_repartition_line_id.id,
+            'group_tax_id': tax_line.group_tax_id.id,
             'account_id': tax_line.account_id.id,
             'currency_id': tax_line.currency_id.id,
             'analytic_tag_ids': [(6, 0, tax_line.tax_line_id.analytic and tax_line.analytic_tag_ids.ids or [])],
@@ -569,6 +574,7 @@ class AccountMove(models.Model):
         account = base_line._get_default_tax_account(tax_repartition_line) or base_line.account_id
         return {
             'tax_repartition_line_id': tax_vals['tax_repartition_line_id'],
+            'group_tax_id': tax_vals['group'].id if tax_vals['group'] else False,
             'account_id': account.id,
             'currency_id': base_line.currency_id.id,
             'analytic_tag_ids': [(6, 0, tax_vals['analytic'] and base_line.analytic_tag_ids.ids or [])],
@@ -2072,6 +2078,8 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         if not self.is_invoice(include_receipts=True):
+            if self.payment_id and 'state' in init_values:
+                self.payment_id.message_track(['state'], {self.payment_id.id: init_values})
             return super(AccountMove, self)._track_subtype(init_values)
 
         if 'payment_state' in init_values and self.payment_state == 'paid':
@@ -3228,6 +3236,12 @@ class AccountMoveLine(models.Model):
         context={'active_test': False},
         check_company=True,
         help="Taxes that apply on the base amount")
+    group_tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        string="Originator Group of Taxes",
+        index=True,
+        help="The group of taxes generator of this tax line",
+    )
     tax_line_id = fields.Many2one('account.tax', string='Originator Tax', ondelete='restrict', store=True,
         compute='_compute_tax_line_id', help="Indicates that this journal item is a tax line")
     tax_group_id = fields.Many2one(related='tax_line_id.tax_group_id', string='Originator tax group',
