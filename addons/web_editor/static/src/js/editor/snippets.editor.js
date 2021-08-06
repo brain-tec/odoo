@@ -346,6 +346,10 @@ var SnippetEditor = Widget.extend({
             return;
         }
 
+        const transform = window.getComputedStyle(targetEl).getPropertyValue('transform');
+        const transformOrigin = window.getComputedStyle(targetEl).getPropertyValue('transform-origin');
+        targetEl.classList.add('o_transform_removal');
+
         // Now cover the element
         const offset = $target.offset();
         var manipulatorOffset = this.$el.parent().offset();
@@ -353,10 +357,15 @@ var SnippetEditor = Widget.extend({
         offset.left -= manipulatorOffset.left;
         this.$el.css({
             width: $target.outerWidth(),
+            height: $target.outerHeight(),
             left: offset.left,
             top: offset.top,
+            transform,
+            'transform-origin': transformOrigin,
         });
         this.$('.o_handles').css('height', $target.outerHeight());
+
+        targetEl.classList.remove('o_transform_removal');
 
         const editableOffsetTop = this.$editable.offset().top - manipulatorOffset.top;
         this.$el.toggleClass('o_top_cover', offset.top - editableOffsetTop < 25);
@@ -1098,6 +1107,8 @@ var SnippetsMenu = Widget.extend({
         'user_value_widget_closing': '_onUserValueWidgetClosing',
         'reload_snippet_template': '_onReloadSnippetTemplate',
         'request_editable': '_onRequestEditable',
+        'disable_loading_effect': '_onDisableLoadingEffect',
+        'enable_loading_effect': '_onEnableLoadingEffect',
     },
     // enum of the SnippetsMenu's tabs.
     tabs: {
@@ -1143,10 +1154,12 @@ var SnippetsMenu = Widget.extend({
             '.ui-autocomplete',
             '.modal .close',
             '.o_we_crop_widget',
+            '.transfo-container',
         ].join(', ');
 
         this.loadingTimers = {};
         this.loadingElements = {};
+        this._loadingEffectDisabled = false;
     },
     /**
      * @override
@@ -2477,6 +2490,9 @@ var SnippetsMenu = Widget.extend({
         const mutexExecResult = this._mutex.exec(action);
         if (!this.loadingTimers[contentLoading]) {
             const addLoader = () => {
+                if (this._loadingEffectDisabled) {
+                    return;
+                }
                 this.loadingElements[contentLoading] = this._createLoadingElement();
                 if (contentLoading) {
                     this.$snippetEditorArea.append(this.loadingElements[contentLoading]);
@@ -3077,6 +3093,28 @@ var SnippetsMenu = Widget.extend({
      */
     _onRequestEditable: function (ev) {
         ev.data.callback($(this.options.wysiwyg.odooEditor.editable));
+    },
+    /**
+     * Enable loading effects
+     * 
+     * @private
+     */
+    _onEnableLoadingEffect: function () {
+        this._loadingEffectDisabled = false;
+    },
+    /**
+     * Disable loading effects and cancel the one displayed
+     * 
+     * @private
+     */
+    _onDisableLoadingEffect: function () {
+        this._loadingEffectDisabled = true;
+        Object.keys(this.loadingElements).forEach(key => {
+            if (this.loadingElements[key]) {
+                this.loadingElements[key].remove();
+                this.loadingElements[key] = null;
+            }
+        });
     },
 });
 

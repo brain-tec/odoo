@@ -9,7 +9,7 @@ import pytz
 import re
 
 from odoo import api, fields, models, tools, _
-from odoo.tools import float_is_zero, float_round
+from odoo.tools import float_is_zero, float_round, float_repr
 from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
 from odoo.osv.expression import AND
@@ -202,11 +202,19 @@ class PosOrder(models.Model):
         invoice_lines = []
         for line in self.lines:
             invoice_lines.append((0, None, self._prepare_invoice_line(line)))
+            if line.order_id.pricelist_id.discount_policy == 'without_discount' and line.price_unit != line.product_id.lst_price:
+                invoice_lines.append((0, None, {
+                    'name': _('Price discount from %s -> %s',
+                              float_repr(line.product_id.lst_price, self.currency_id.decimal_places),
+                              float_repr(line.price_unit, self.currency_id.decimal_places)),
+                    'display_type': 'line_note',
+                }))
             if line.customer_note:
                 invoice_lines.append((0, None, {
                     'name': line.customer_note,
                     'display_type': 'line_note',
                 }))
+
 
         return invoice_lines
 
@@ -1126,7 +1134,7 @@ class ReportSaleDetails(models.AbstractModel):
                 products_sold[key] += line.qty
 
                 if line.tax_ids_after_fiscal_position:
-                    line_taxes = line.tax_ids_after_fiscal_position.compute_all(line.price_unit * (1-(line.discount or 0.0)/100.0), currency, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
+                    line_taxes = line.tax_ids_after_fiscal_position.sudo().compute_all(line.price_unit * (1-(line.discount or 0.0)/100.0), currency, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
                     for tax in line_taxes['taxes']:
                         taxes.setdefault(tax['id'], {'name': tax['name'], 'tax_amount':0.0, 'base_amount':0.0})
                         taxes[tax['id']]['tax_amount'] += tax['amount']
