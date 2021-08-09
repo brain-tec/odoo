@@ -57,7 +57,7 @@ var QtyAtDateWidget = Widget.extend({
         if (!this.data.scheduled_date) {
             return;
         }
-        this.data.delivery_date = this.data.scheduled_date.clone().add(this.getSession().getTZOffset(this.data.scheduled_date), 'minutes').format(time.getLangDateFormat());
+        this.data._delivery_date = this.data.scheduled_date.clone().add(this.getSession().getTZOffset(this.data.scheduled_date), 'minutes').format(time.getLangDateFormat());
         // The grid view need a specific date format that could be different than
         // the user one.
         this.data.delivery_date_grid = this.data.scheduled_date.clone().add(this.getSession().getTZOffset(this.data.scheduled_date), 'minutes').format('YYYY-MM-DD');

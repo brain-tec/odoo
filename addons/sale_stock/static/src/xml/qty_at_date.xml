@@ -15,7 +15,7 @@
             <tbody>
                 <t t-if="!data.is_mto">
                     <tr>
-                        <td><strong>Forecasted Stock</strong><br /><small>On <span t-esc="data.delivery_date"/></small></td>
+                        <td><strong>Forecasted Stock</strong><br /><small>On <span t-esc="data._delivery_date"/></small></td>
                         <td><t t-esc='data.virtual_available_at_date'/>
                         <t t-esc='data.product_uom.data.display_name'/></td>
                     </tr>
@@ -28,7 +28,7 @@
                 <t t-else="">
                     <tr>
                         <td><strong>Expected Delivery</strong></td>
-                        <td class="oe-right"><span t-esc="data.delivery_date"/></td>
+                        <td class="oe-right"><span t-esc="data._delivery_date"/></td>
                     </tr>
                     <tr>
                         <p>This product is replenished on demand.</p>
