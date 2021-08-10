@@ -15,13 +15,14 @@ class SaleOrder(models.Model):
         line_id = values.get('line_id')
 
         for line in self.order_line:
-            if line.product_id.type == 'product' and line.product_id.inventory_availability in ['always', 'threshold']:
+            if line.product_id.type == 'product' and not line.product_id.allow_out_of_stock_order:
                 cart_qty = sum(self.order_line.filtered(lambda p: p.product_id.id == line.product_id.id).mapped('product_uom_qty'))
                 # The quantity should be computed based on the warehouse of the website, not the
                 # warehouse of the SO.
                 website = self.env['website'].get_current_website()
-                if cart_qty > line.product_id.with_context(warehouse=website.warehouse_id.id).virtual_available and (line_id == line.id):
-                    qty = line.product_id.with_context(warehouse=website.warehouse_id.id).virtual_available - cart_qty
+                avl_qty = line.product_id.with_context(warehouse=website.warehouse_id.id).free_qty
+                if cart_qty > avl_qty and (line_id == line.id):
+                    qty = avl_qty - cart_qty
                     new_val = super(SaleOrder, self)._cart_update(line.product_id.id, line.id, qty, 0, **kwargs)
                     values.update(new_val)
 

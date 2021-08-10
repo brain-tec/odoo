@@ -31,14 +31,14 @@ class TestWebsiteSaleStockProductWarehouse(TestWebsiteSaleProductAttributeValueC
         # Create two stockable products
         product_1 = self.env['product.product'].create({
             'name': 'Product A',
-            'inventory_availability': 'always',
+            'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM1',
         })
 
         product_2 = self.env['product.product'].create({
             'name': 'Product B',
-            'inventory_availability': 'always',
+            'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM2',
         })
@@ -66,10 +66,10 @@ class TestWebsiteSaleStockProductWarehouse(TestWebsiteSaleProductAttributeValueC
         combination_info = product.product_tmpl_id.with_context(website_sale_stock_get_quantity=True)._get_combination_info()
 
         # Check available quantity of product is according to warehouse
-        self.assertEqual(combination_info['virtual_available'], 10, "10 units of Product A should be available in warehouse 1.")
+        self.assertEqual(combination_info['free_qty'], 10, "10 units of Product A should be available in warehouse 1.")
 
         product = product_2.with_context(website_id=current_website.id)
         combination_info = product.product_tmpl_id.with_context(website_sale_stock_get_quantity=True)._get_combination_info()
 
         # Check available quantity of product is according to warehouse
-        self.assertEqual(combination_info['virtual_available'], 0, "Product B should not be available in warehouse 1.")
+        self.assertEqual(combination_info['free_qty'], 0, "Product B should not be available in warehouse 1.")
