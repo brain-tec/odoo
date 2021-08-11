@@ -1977,7 +1977,7 @@
             <button type="button" t-attf-class="btn btn-default dropdown-toggle dropdown-toggle-split" t-att-id="'dopprod-%s' % object.id" data-toggle="dropdown"/>
             <div class="dropdown-menu" role="menu" t-att-aria-labelledby="'dopprod-%s' % object.id">
                 <t t-out="0"/>
-                <a role="menuitem" t-attf-href="/web#view_type=form&amp;model=#{object._name}&amp;id=#{object.id}&amp;action=#{action}&amp;menu_id=#{menu or object.env['ir.model.data'].xmlid_to_res_id('website.menu_website_configuration')}"
+                <a role="menuitem" t-attf-href="/web#view_type=form&amp;model=#{object._name}&amp;id=#{object.id}&amp;action=#{action}&amp;menu_id=#{menu or object.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration')}"
                     title='Edit in backend' class="dropdown-item" t-if="publish_edit">Edit</a>
             </div>
         </div>
@@ -2425,9 +2425,6 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
 </template>
 
 <template id="website_configurator" name="Website Configurator" inherit_id="web.frontend_layout" primary="True">
-    <xpath expr="//html" position="attributes">
-        <attribute name="lang"><t t-esc='lang'/></attribute>
-    </xpath>
     <xpath expr="//head/t[@t-call-assets][last()]" position="after">
         <t t-call-assets="website.website_configurator_assets_js" lazy_load="True"/>
     </xpath>
