@@ -145,6 +145,13 @@ export class OdooEditor extends EventTarget {
                 isRootEditable: true,
                 defaultLinkAttributes: {},
                 getContentEditableAreas: () => [],
+                getPowerboxElement: () => {
+                    const selection = document.getSelection();
+                    if (selection.isCollapsed && selection.rangeCount) {
+                        return closestElement(selection.anchorNode, 'P, DIV');
+                    }
+                },
+                isHintBlacklisted: () => false,
                 _t: string => string,
             },
             options,
@@ -1312,6 +1319,7 @@ export class OdooEditor extends EventTarget {
             onShow: () => {
                 this.commandbarTablePicker.hide();
             },
+            shouldActivate: () => !!this.options.getPowerboxElement(),
             onActivate: () => {
                 this._beforeCommandbarStepIndex = this._historySteps.length - 1;
                 this.observerUnactive();
@@ -1417,9 +1425,13 @@ export class OdooEditor extends EventTarget {
         const block = closestBlock(sel.anchorNode);
         for (const [style, tag, isList] of [
             ['paragraph', 'P', false],
+            ['pre', 'PRE', false],
             ['heading1', 'H1', false],
             ['heading2', 'H2', false],
             ['heading3', 'H3', false],
+            ['heading4', 'H4', false],
+            ['heading5', 'H5', false],
+            ['heading6', 'H6', false],
             ['blockquote', 'BLOCKQUOTE', false],
             ['unordered', 'UL', true],
             ['ordered', 'OL', true],
@@ -1827,15 +1839,16 @@ export class OdooEditor extends EventTarget {
 
         for (const [selector, text] of Object.entries(selectors)) {
             for (const el of this.editable.querySelectorAll(selector)) {
-                this._makeHint(el, text);
+                if (!this.options.isHintBlacklisted(el)) {
+                    this._makeHint(el, text);
+                }
             }
         }
 
-        const selection = document.getSelection();
-        if (!selection.isCollapsed || !selection.rangeCount) return;
-
-        const block = closestElement(selection.anchorNode, 'P, DIV');
-        this._makeHint(block, 'Type "/" for commands', true);
+        const block = this.options.getPowerboxElement();
+        if (block) {
+            this._makeHint(block, 'Type "/" for commands', true);
+        }
     }
     _makeHint(block, text, temporary = false) {
         const content = block && block.innerHTML.trim();
