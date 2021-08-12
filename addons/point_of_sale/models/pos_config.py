@@ -467,7 +467,12 @@ class PosConfig(models.Model):
 
     def write(self, vals):
         opened_session = self.mapped('session_ids').filtered(lambda s: s.state != 'closed')
-        if opened_session:
+
+        # Modification to allow edition of pos.configs with open sessions.
+        # We should only permit that for pos.configs used in the TCPOS process,
+        # where POS orders are created automatically and not with the
+        # Odoo POS UI
+        if opened_session and not self._context.get('allow_edition'):
             raise UserError(_('Unable to modify this PoS Configuration because there is an open PoS Session based on it.'))
         result = super(PosConfig, self).write(vals)
 
