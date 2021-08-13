@@ -3,13 +3,12 @@
 
 import base64
 import logging
-import psycopg2
 import werkzeug.utils
 import werkzeug.wrappers
 
 from werkzeug.urls import url_encode
 
-from odoo import api, http, registry, SUPERUSER_ID, _
+from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import consteq
@@ -251,24 +250,11 @@ class MailController(http.Controller):
 
     @http.route('/mail/needaction', type='json', auth='user')
     def needaction(self):
-        return request.env['res.partner'].get_needaction_count()
+        return request.env.user.partner_id._get_needaction_count()
 
     @http.route('/mail/init_messaging', type='json', auth='user')
     def mail_init_messaging(self):
-        values = {
-            'needaction_inbox_counter': request.env['res.partner'].get_needaction_count(),
-            'starred_counter': request.env['res.partner'].get_starred_count(),
-            'channel_slots': request.env['mail.channel'].channel_fetch_slot(),
-            'mail_failures': request.env['mail.message'].message_fetch_failed(),
-            'commands': request.env['mail.channel'].get_mention_commands(),
-            'shortcodes': request.env['mail.shortcode'].sudo().search_read([], ['source', 'substitution', 'description']),
-            'menu_id': request.env['ir.model.data']._xmlid_to_res_id('mail.menu_root_discuss'),
-            'partner_root': request.env.ref('base.partner_root').sudo().mail_partner_format(),
-            'public_partners': [partner.mail_partner_format() for partner in request.env.ref('base.group_public').sudo().with_context(active_test=False).users.partner_id],
-            'current_partner': request.env.user.partner_id.mail_partner_format(),
-            'current_user_id': request.env.user.id,
-        }
-        return values
+        return request.env.user._init_messaging()
 
     @http.route('/mail/get_partner_info', type='json', auth='user')
     def message_partner_info_from_emails(self, model, res_ids, emails, link_mail=False):

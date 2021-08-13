@@ -3,13 +3,11 @@
 
 import base64
 import logging
-import re
 from uuid import uuid4
 
 from odoo import _, api, fields, models, modules, tools, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import ormcache, formataddr
 
 _logger = logging.getLogger(__name__)
 
@@ -362,6 +360,8 @@ class Channel(models.Model):
 
         recipients_data = []
         if pids:
+            self.env['res.partner'].flush(fnames=['active', 'email', 'partner_share'])
+            self.env['res.users'].flush(fnames=['notification_type', 'partner_id'])
             sql_query = """
                 SELECT DISTINCT ON (partner.id) partner.id,
                        partner.partner_share,
@@ -507,24 +507,6 @@ class Channel(models.Model):
     #   - when a message is posted on a channel (to the channel, using _notify() method)
     # ------------------------------------------------------------
 
-    @api.model
-    def _get_channel_partner_info(self, all_partners, direct_partners):
-        """
-        Return the information needed by channel to display channel members
-            :param all_partners: list of res.parner():
-            :param direct_partners: list of res.parner():
-            :returns: a list of {'id', 'name', 'email'} for each partner and adds {im_status} for direct_partners.
-            :rtype : list(dict)
-        """
-        partner_infos = {partner['id']: partner for partner in all_partners.sudo().read(['id', 'name', 'email'])}
-        # add im _status for direct_partners
-        direct_partners_im_status = {partner['id']: partner for partner in direct_partners.sudo().read(['im_status'])}
-
-        for i in direct_partners_im_status.keys():
-            partner_infos[i].update(direct_partners_im_status[i])
-
-        return partner_infos
-
     def channel_info(self, extra_info=False):
         """ Get the informations header for the current channels
             :returns a list of channels values
@@ -533,17 +515,7 @@ class Channel(models.Model):
         if not self:
             return []
         channel_infos = []
-        # all relations partner_channel on those channels
-        all_partner_channel = self.env['mail.channel.partner'].sudo().search([('channel_id', 'in', self.ids)]).sudo(False)
-
-        # all partner infos on those channels
-        channel_dict = {channel.id: channel for channel in self}
-        all_partners = all_partner_channel.mapped('partner_id')
-        direct_channel_partners = all_partner_channel.filtered(lambda pc: channel_dict[pc.channel_id.id].channel_type == 'chat')
-        direct_partners = direct_channel_partners.mapped('partner_id')
-        partner_infos = self._get_channel_partner_info(all_partners, direct_partners)
         channel_last_message_ids = dict((r['id'], r['message_id']) for r in self._channel_last_message_ids())
-
         for channel in self:
             info = {
                 'id': channel.id,
@@ -563,16 +535,13 @@ class Channel(models.Model):
             # add last message preview (only used in mobile)
             info['last_message_id'] = channel_last_message_ids.get(channel.id, False)
             # listeners of the channel
-            channel_partners = all_partner_channel.filtered(lambda pc: channel.id == pc.channel_id.id)
+            channel_partners = channel.channel_last_seen_partner_ids
 
             # find the channel partner state, if logged user
             if self.env.user and self.env.user.partner_id:
-                # add needaction and unread counter, since the user is logged
                 info['message_needaction_counter'] = channel.message_needaction_counter
                 info['message_unread_counter'] = channel.message_unread_counter
-
-                # add user session state, if available and if user is logged
-                partner_channel = channel_partners.filtered(lambda pc: pc.partner_id.id == self.env.user.partner_id.id)
+                partner_channel = channel_partners.filtered(lambda pc: pc.partner_id == self.env.user.partner_id)
                 if partner_channel:
                     partner_channel = partner_channel[0]
                     info['state'] = partner_channel.fold_state or 'open'
@@ -580,21 +549,18 @@ class Channel(models.Model):
                     info['seen_message_id'] = partner_channel.seen_message_id.id
                     info['custom_channel_name'] = partner_channel.custom_channel_name
                     info['is_pinned'] = partner_channel.is_pinned
-
             # add members infos
             if channel.channel_type != 'channel':
                 # avoid sending potentially a lot of members for big channels
                 # exclude chat and other small channels from this optimization because they are
                 # assumed to be smaller and it's important to know the member list for them
-                partner_ids = channel_partners.mapped('partner_id').ids
-                info['members'] = [partner_infos[partner] for partner in partner_ids]
-            if channel.channel_type != 'channel':
-                info['seen_partners_info'] = [{
+                info['members'] = sorted(list(channel_partners.partner_id.mail_partner_format().values()), key=lambda p: p['id'])
+                info['seen_partners_info'] = sorted([{
                     'id': cp.id,
                     'partner_id': cp.partner_id.id,
                     'fetched_message_id': cp.fetched_message_id.id,
                     'seen_message_id': cp.seen_message_id.id,
-                } for cp in channel_partners]
+                } for cp in channel_partners], key=lambda p: p['partner_id'])
 
             channel_infos.append(info)
         return channel_infos
@@ -825,27 +791,6 @@ class Channel(models.Model):
     # ------------------------------------------------------------
 
     @api.model
-    def channel_fetch_slot(self):
-        """ Return the channels of the user grouped by 'slot' (channel, direct_message or private_group), and
-            the mapping between partner_id/channel_id for direct_message channels.
-            :returns dict : the grouped channels and the mapping
-        """
-        values = {}
-        my_partner_id = self.env.user.partner_id.id
-        pinned_channels = self.env['mail.channel.partner'].search([('partner_id', '=', my_partner_id), ('is_pinned', '=', True)]).mapped('channel_id')
-
-        # get the group/public channels
-        values['channel_channel'] = self.search([('channel_type', '=', 'channel'), ('public', 'in', ['public', 'groups']), ('channel_partner_ids', 'in', [my_partner_id])]).channel_info()
-
-        # get the pinned 'direct message' channel
-        direct_message_channels = self.search([('channel_type', '=', 'chat'), ('id', 'in', pinned_channels.ids)])
-        values['channel_direct_message'] = direct_message_channels.channel_info()
-
-        # get the private group
-        values['channel_private_group'] = self.search([('channel_type', '=', 'channel'), ('public', '=', 'private'), ('channel_partner_ids', 'in', [my_partner_id])]).channel_info()
-        return values
-
-    @api.model
     def channel_search_to_join(self, name=None, domain=None):
         """ Return the channel info of the channel the current partner can join
             :param name : the name of the researched channels
@@ -945,26 +890,6 @@ class Channel(models.Model):
     # COMMANDS
     # ------------------------------------------------------------
 
-    @api.model
-    @ormcache()
-    def get_mention_commands(self):
-        """ Returns the allowed commands in channels """
-        commands = []
-        for n in dir(self):
-            match = re.search('^_define_command_(.+?)$', n)
-            if match:
-                command = getattr(self, n)()
-                command['name'] = match.group(1)
-                commands.append(command)
-        return commands
-
-    def execute_command(self, command='', **kwargs):
-        """ Executes a given command """
-        self.ensure_one()
-        command_callback = getattr(self, '_execute_command_' + command, False)
-        if command_callback:
-            command_callback(**kwargs)
-
     def _send_transient_message(self, partner_to, content):
         """ Notifies partner_to that a message (not stored in DB) has been
             written in this channel """
@@ -977,10 +902,7 @@ class Channel(models.Model):
             }
         )
 
-    def _define_command_help(self):
-        return {'help': _("Show a helper message")}
-
-    def _execute_command_help(self, **kwargs):
+    def execute_command_help(self, **kwargs):
         partner = self.env.user.partner_id
         if self.channel_type == 'channel':
             msg = _("You are in channel <b>#%s</b>.", self.name)
@@ -994,9 +916,6 @@ class Channel(models.Model):
 
         self._send_transient_message(partner, msg)
 
-    def _define_command_leave(self):
-        return {'help': _("Leave this channel")}
-
     def _execute_command_help_message_extra(self):
         msg = _("""<br><br>
             Type <b>@username</b> to mention someone, and grab his attention.<br>
@@ -1004,19 +923,13 @@ class Channel(models.Model):
             Type <b>/command</b> to execute a command.<br>""")
         return msg
 
-    def _execute_command_leave(self, **kwargs):
+    def execute_command_leave(self, **kwargs):
         if self.channel_type == 'channel':
             self.action_unfollow()
         else:
             self.channel_pin(self.uuid, False)
 
-    def _define_command_who(self):
-        return {
-            'channel_types': ['channel', 'chat'],
-            'help': _("List users in the current channel")
-        }
-
-    def _execute_command_who(self, **kwargs):
+    def execute_command_who(self, **kwargs):
         partner = self.env.user.partner_id
         members = [
             '<a href="#" data-oe-id='+str(p.id)+' data-oe-model="res.partner">@'+p.name+'</a>'

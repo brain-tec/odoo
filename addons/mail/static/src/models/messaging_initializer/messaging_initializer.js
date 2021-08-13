@@ -65,8 +65,7 @@ function factory(dependencies) {
         /**
          * @private
          * @param {Object} param0
-         * @param {Object} param0.channel_slots
-         * @param {Array} [param0.commands=[]]
+         * @param {Object[]} param0.channels
          * @param {Object} param0.current_partner
          * @param {integer} param0.current_user_id
          * @param {Object} [param0.mail_failures={}]
@@ -77,7 +76,7 @@ function factory(dependencies) {
          * @param {integer} [param0.starred_counter=0]
          */
         async _init({
-            channel_slots,
+            channels,
             commands = [],
             current_partner,
             current_user_id,
@@ -105,9 +104,9 @@ function factory(dependencies) {
             });
             // various suggestions in no particular order
             this._initCannedResponses(shortcodes);
-            this._initCommands(commands);
+            this._initCommands();
             // channels when the rest of messaging is ready
-            await this.async(() => this._initChannels(channel_slots));
+            await this.async(() => this._initChannels(channels));
             // failures after channels
             this._initMailFailures(mail_failures);
             discuss.update({ menu_id });
@@ -125,17 +124,9 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @param {Object} [param0={}]
-         * @param {Object[]} [param0.channel_channel=[]]
-         * @param {Object[]} [param0.channel_direct_message=[]]
-         * @param {Object[]} [param0.channel_private_group=[]]
+         * @param {Object[]} channelsData
          */
-        async _initChannels({
-            channel_channel = [],
-            channel_direct_message = [],
-            channel_private_group = [],
-        } = {}) {
-            const channelsData = channel_channel.concat(channel_direct_message, channel_private_group);
+        async _initChannels(channelsData) {
             return executeGracefully(channelsData.map(channelData => () => {
                 const convertedData = this.env.models['mail.thread'].convertData(channelData);
                 if (!convertedData.members) {
@@ -160,11 +151,27 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @param {Object[]} commandsData
          */
-        _initCommands(commandsData) {
+        _initCommands() {
             this.messaging.update({
-                commands: insert(commandsData),
+                commands: insert([
+                    {
+                        help: this.env._t("Show a helper message"),
+                        methodName: 'execute_command_help',
+                        name: "help",
+                    },
+                    {
+                        help: this.env._t("Leave this channel"),
+                        methodName: 'execute_command_leave',
+                        name: "leave",
+                    },
+                    {
+                        channel_types: ['channel', 'chat'],
+                        help: this.env._t("List users in the current channel"),
+                        methodName: 'execute_command_who',
+                        name: "who",
+                    }
+                ]),
             });
         }
 

@@ -6,7 +6,6 @@ import logging
 from odoo import _, api, fields, models, tools
 from odoo.addons.bus.models.bus_presence import AWAY_TIMER
 from odoo.addons.bus.models.bus_presence import DISCONNECTION_TIMER
-from odoo.exceptions import AccessError
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
@@ -71,46 +70,72 @@ class Partner(models.Model):
         return self.create(create_values)
 
     def mail_partner_format(self):
+        partners_format = dict()
+        for partner in self:
+            internal_users = partner.user_ids - partner.user_ids.filtered('share')
+            main_user = internal_users[0] if len(internal_users) > 0 else partner.user_ids[0] if len(partner.user_ids) > 0 else self.env['res.users']
+            partners_format[partner] = {
+                "id": partner.id,
+                "display_name": partner.display_name,
+                "name": partner.name,
+                "email": partner.email,
+                "active": partner.active,
+                "im_status": partner.im_status,
+                "user_id": main_user.id,
+                "is_internal_user": not partner.partner_share,
+            }
+        return partners_format
+
+    def _get_needaction_count(self):
+        """ compute the number of needaction of the current partner """
         self.ensure_one()
-        internal_users = self.user_ids - self.user_ids.filtered('share')
-        main_user = internal_users[0] if len(internal_users) > 0 else self.user_ids[0] if len(self.user_ids) > 0 else self.env['res.users']
-        res = {
-            "id": self.id,
-            "display_name": self.display_name,
-            "name": self.name,
-            "email": self.email,
-            "active": self.active,
-            "im_status": self.im_status,
-            "user_id": main_user.id,
-        }
-        if main_user:
-            res["is_internal_user"] = not main_user.share
-        return res
+        self.env['mail.notification'].flush(['is_read', 'res_partner_id'])
+        self.env.cr.execute("""
+            SELECT count(*) as needaction_count
+            FROM mail_notification R
+            WHERE R.res_partner_id = %s AND (R.is_read = false OR R.is_read IS NULL)""", (self.id,))
+        return self.env.cr.dictfetchall()[0].get('needaction_count')
 
-    @api.model
-    def get_needaction_count(self):
-        """ compute the number of needaction of the current user """
-        if self.env.user.partner_id:
-            self.env['mail.notification'].flush(['is_read', 'res_partner_id'])
-            self.env.cr.execute("""
-                SELECT count(*) as needaction_count
-                FROM mail_notification R
-                WHERE R.res_partner_id = %s AND (R.is_read = false OR R.is_read IS NULL)""", (self.env.user.partner_id.id,))
-            return self.env.cr.dictfetchall()[0].get('needaction_count')
-        _logger.error('Call to needaction_count without partner_id')
-        return 0
+    def _get_starred_count(self):
+        """ compute the number of starred of the current partner """
+        self.ensure_one()
+        self.env.cr.execute("""
+            SELECT count(*) as starred_count
+            FROM mail_message_res_partner_starred_rel R
+            WHERE R.res_partner_id = %s """, (self.id,))
+        return self.env.cr.dictfetchall()[0].get('starred_count')
 
-    @api.model
-    def get_starred_count(self):
-        """ compute the number of starred of the current user """
-        if self.env.user.partner_id:
-            self.env.cr.execute("""
-                SELECT count(*) as starred_count
-                FROM mail_message_res_partner_starred_rel R
-                WHERE R.res_partner_id = %s """, (self.env.user.partner_id.id,))
-            return self.env.cr.dictfetchall()[0].get('starred_count')
-        _logger.error('Call to starred_count without partner_id')
-        return 0
+    def _message_fetch_failed(self):
+        """Returns all messages, sent by the current partner, that have errors, in
+        the format expected by the web client."""
+        self.ensure_one()
+        messages = self.env['mail.message'].search([
+            ('has_error', '=', True),
+            ('author_id', '=', self.id),
+            ('res_id', '!=', 0),
+            ('model', '!=', False),
+            ('message_type', '!=', 'user_notification')
+        ])
+        return messages._message_notification_format()
+
+    def _get_channels_as_member(self):
+        """Returns the channels of the partner."""
+        self.ensure_one()
+        channels = self.env['mail.channel']
+        # get the channels
+        channels |= self.env['mail.channel'].search([
+            ('channel_type', '=', 'channel'),
+            ('channel_partner_ids', 'in', [self.id]),
+        ])
+        # get the pinned direct messages
+        channels |= self.env['mail.channel'].search([
+            ('channel_type', '=', 'chat'),
+            ('channel_last_seen_partner_ids', 'in', self.env['mail.channel.partner'].sudo()._search([
+                ('partner_id', '=', self.id),
+                ('is_pinned', '=', True),
+            ])),
+        ])
+        return channels
 
     @api.model
     def search_for_channel_invite(self, search_term, channel_id=None, limit=30):
@@ -163,7 +188,7 @@ class Partner(models.Model):
         if remaining_limit > 0:
             partners |= self.search(expression.AND([[('id', 'not in', partners.ids)], search_dom]), limit=remaining_limit)
 
-        return [partner.mail_partner_format() for partner in partners]
+        return list(partners.mail_partner_format().values())
 
     @api.model
     def im_search(self, name, limit=20):
