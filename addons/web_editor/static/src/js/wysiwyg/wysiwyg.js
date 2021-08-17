@@ -81,6 +81,17 @@ const Wysiwyg = Widget.extend({
             getContentEditableAreas: this.options.getContentEditableAreas,
             defaultLinkAttributes: this.options.userGeneratedContent ? {rel: 'ugc' } : {},
             getContextFromParentRect: options.getContextFromParentRect,
+            getPowerboxElement: () => {
+                const selection = document.getSelection();
+                if (selection.isCollapsed && selection.rangeCount) {
+                    const node = closestElement(selection.anchorNode, 'P, DIV');
+                    return !(node && node.hasAttribute && node.hasAttribute('data-oe-model')) && node;
+                }
+            },
+            isHintBlacklisted: node => {
+                return node.hasAttribute &&
+                    (node.hasAttribute('data-target') || node.hasAttribute('data-oe-model'));
+            },
             noScrollSelector: 'body, .note-editable, .o_content, #wrapwrap',
             commands: commands,
         });
