@@ -135,13 +135,53 @@ function _getNumericAndUnit(value) {
  * @returns {boolean}
  */
 function _areCssValuesEqual(value1, value2, cssProp, $target) {
-    // If not colors, they will be left untouched
-    value1 = ColorpickerWidget.normalizeCSSColor(value1);
-    value2 = ColorpickerWidget.normalizeCSSColor(value2);
-
     // String comparison first
     if (value1 === value2) {
         return true;
+    }
+
+    // It could be a CSS variable, in that case the actual value has to be
+    // retrieved before comparing.
+    if (value1.startsWith('var(--')) {
+        value1 = _getCSSVariableValue(value1.substring(6, value1.length - 1));
+    }
+    if (value2.startsWith('var(--')) {
+        value2 = _getCSSVariableValue(value2.substring(6, value2.length - 1));
+    }
+    if (value1 === value2) {
+        return true;
+    }
+
+    // They may be colors, normalize then re-compare the resulting string
+    const color1 = ColorpickerWidget.normalizeCSSColor(value1);
+    const color2 = ColorpickerWidget.normalizeCSSColor(value2);
+    if (color1 === color2) {
+        return true;
+    }
+
+    // They may be gradients
+    const value1IsGradient = _isColorGradient(value1);
+    const value2IsGradient = _isColorGradient(value2);
+    if (value1IsGradient !== value2IsGradient) {
+        return false;
+    }
+    if (value1IsGradient) {
+        // Kinda hacky and probably inneficient but probably the easiest way:
+        // applied the value as background-image of two fakes elements and
+        // compare their computed value.
+        const temp1El = document.createElement('div');
+        temp1El.style.backgroundImage = value1;
+        document.body.appendChild(temp1El);
+        value1 = getComputedStyle(temp1El).backgroundImage;
+        document.body.removeChild(temp1El);
+
+        const temp2El = document.createElement('div');
+        temp2El.style.backgroundImage = value2;
+        document.body.appendChild(temp2El);
+        value2 = getComputedStyle(temp2El).backgroundImage;
+        document.body.removeChild(temp2El);
+
+        return value1 === value2;
     }
 
     // Convert the second value in the unit of the first one and compare
@@ -222,7 +262,8 @@ function _normalizeColor(color) {
  * @returns {string|false} the src of the image or false if not parsable
  */
 function _getBgImageURL(el) {
-    const string = $(el).css('background-image');
+    const parts = _backgroundImageCssToParts($(el).css('background-image'));
+    const string = parts.url || '';
     const match = string.match(/^url\((['"])(.*?)\1\)$/);
     if (!match) {
         return '';
@@ -235,6 +276,47 @@ function _getBgImageURL(el) {
     }
     return matchedURL;
 }
+/**
+ * Extracts url and gradient parts from the background-image CSS property.
+ *
+ * @param {string} CSS 'background-image' property value
+ * @returns {Object} contains the separated 'url' and 'gradient' parts
+ */
+function _backgroundImageCssToParts(css) {
+    const parts = {};
+    css = css || '';
+    if (css.startsWith('url(')) {
+        const urlEnd = css.indexOf(')') + 1;
+        parts.url = css.substring(0, urlEnd).trim();
+        const commaPos = css.indexOf(',', urlEnd);
+        css = commaPos > 0 ? css.substring(commaPos + 1) : '';
+    }
+    if (_isColorGradient(css)) {
+        parts.gradient = css.trim();
+    }
+    return parts;
+}
+/**
+ * Combines url and gradient parts into a background-image CSS property value
+ *
+ * @param {Object} contains the separated 'url' and 'gradient' parts
+ * @returns {string} CSS 'background-image' property value
+ */
+function _backgroundImagePartsToCss(parts) {
+    let css = parts.url || '';
+    if (parts.gradient) {
+        css += (css ? ', ' : '') + parts.gradient;
+    }
+    return css || 'none';
+}
+/**
+ * @param {string} [value]
+ * @returns {boolean}
+ */
+function _isColorGradient(value) {
+    // FIXME duplicated in odoo-editor/utils.js
+    return value && value.includes('-gradient(');
+}
 
 return {
     CSS_SHORTHANDS: CSS_SHORTHANDS,
@@ -246,9 +328,12 @@ return {
     getNumericAndUnit: _getNumericAndUnit,
     areCssValuesEqual: _areCssValuesEqual,
     isColorCombinationName: _isColorCombinationName,
+    isColorGradient: _isColorGradient,
     computeColorClasses: _computeColorClasses,
     getCSSVariableValue: _getCSSVariableValue,
     normalizeColor: _normalizeColor,
     getBgImageURL: _getBgImageURL,
+    backgroundImageCssToParts: _backgroundImageCssToParts,
+    backgroundImagePartsToCss: _backgroundImagePartsToCss,
 };
 });

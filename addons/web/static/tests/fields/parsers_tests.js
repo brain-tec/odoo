@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import { defaultLocalization } from "../../helpers/mock_services";
+import { defaultLocalization } from "../helpers/mock_services";
 import {
-    formatFloat,
-    humanNumber,
     parseFloat,
     parseFloatTime,
     parseInteger,
     parsePercentage,
-} from "@web/core/l10n/numbers";
+    parseMonetary,
+} from "@web/fields/parsers";
 import { localization } from "@web/core/l10n/localization";
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchWithCleanup } from "../helpers/utils";
+import { session } from "@web/session";
 
 function expectInvalidNumberError(assert, func, value, options) {
     let message = `${func.name} fails on value: "${value}"`;
@@ -20,63 +20,14 @@ function expectInvalidNumberError(assert, func, value, options) {
     assert.throws(() => func(value, options), message);
 }
 
-QUnit.module("utils", (hooks) => {
+QUnit.module("Fields", (hooks) => {
     hooks.beforeEach(() => {
         patchWithCleanup(localization, defaultLocalization);
     });
 
-    QUnit.module("numbers");
-
-    QUnit.test("formatFloat", async (assert) => {
-        assert.expect(5);
-
-        assert.strictEqual(formatFloat(1000000), "1,000,000.00");
-
-        patchWithCleanup(localization, { grouping: [3, 2, -1] });
-        assert.strictEqual(formatFloat(106500), "1,06,500.00");
-
-        patchWithCleanup(localization, { grouping: [1, 2, -1] });
-        assert.strictEqual(formatFloat(106500), "106,50,0.00");
-
-        patchWithCleanup(localization, { grouping: [2, 0], decimalPoint: "!", thousandsSep: "@" });
-        assert.strictEqual(formatFloat(6000), "60@00!00");
-        assert.strictEqual(formatFloat(false), "");
-    });
-
-    QUnit.test("humanNumber", async (assert) => {
-        assert.expect(26);
-
-        assert.strictEqual(humanNumber(1020, { decimals: 2, minDigits: 1 }), "1.02k");
-        assert.strictEqual(humanNumber(1020000, { decimals: 2, minDigits: 2 }), "1,020k");
-        assert.strictEqual(humanNumber(10200000, { decimals: 2, minDigits: 2 }), "10.2M");
-        assert.strictEqual(humanNumber(1020, { decimals: 2, minDigits: 1 }), "1.02k");
-        assert.strictEqual(humanNumber(1002, { decimals: 2, minDigits: 1 }), "1k");
-        assert.strictEqual(humanNumber(101, { decimals: 2, minDigits: 1 }), "101");
-        assert.strictEqual(humanNumber(64.2, { decimals: 2, minDigits: 1 }), "64");
-        assert.strictEqual(humanNumber(1e18), "1E");
-        assert.strictEqual(humanNumber(1e21, { decimals: 2, minDigits: 1 }), "1e+21");
-        assert.strictEqual(humanNumber(1.0045e22, { decimals: 2, minDigits: 1 }), "1e+22");
-        assert.strictEqual(humanNumber(1.0045e22, { decimals: 3, minDigits: 1 }), "1.005e+22");
-        assert.strictEqual(humanNumber(1.012e43, { decimals: 2, minDigits: 1 }), "1.01e+43");
-        assert.strictEqual(humanNumber(1.012e43, { decimals: 2, minDigits: 2 }), "1.01e+43");
-        assert.strictEqual(humanNumber(-1020, { decimals: 2, minDigits: 1 }), "-1.02k");
-        assert.strictEqual(humanNumber(-1020000, { decimals: 2, minDigits: 2 }), "-1,020k");
-        assert.strictEqual(humanNumber(-10200000, { decimals: 2, minDigits: 2 }), "-10.2M");
-        assert.strictEqual(humanNumber(-1020, { decimals: 2, minDigits: 1 }), "-1.02k");
-        assert.strictEqual(humanNumber(-1002, { decimals: 2, minDigits: 1 }), "-1k");
-        assert.strictEqual(humanNumber(-101, { decimals: 2, minDigits: 1 }), "-101");
-        assert.strictEqual(humanNumber(-64.2, { decimals: 2, minDigits: 1 }), "-64");
-        assert.strictEqual(humanNumber(-1e18), "-1E");
-        assert.strictEqual(humanNumber(-1e21, { decimals: 2, minDigits: 1 }), "-1e+21");
-        assert.strictEqual(humanNumber(-1.0045e22, { decimals: 2, minDigits: 1 }), "-1e+22");
-        assert.strictEqual(humanNumber(-1.0045e22, { decimals: 3, minDigits: 1 }), "-1.004e+22");
-        assert.strictEqual(humanNumber(-1.012e43, { decimals: 2, minDigits: 1 }), "-1.01e+43");
-        assert.strictEqual(humanNumber(-1.012e43, { decimals: 2, minDigits: 2 }), "-1.01e+43");
-    });
+    QUnit.module("Parsers");
 
     QUnit.test("parseFloat", async (assert) => {
-        assert.expect(10);
-
         assert.strictEqual(parseFloat(""), 0);
         assert.strictEqual(parseFloat("0"), 0);
         assert.strictEqual(parseFloat("100.00"), 100);
@@ -92,8 +43,6 @@ QUnit.module("utils", (hooks) => {
     });
 
     QUnit.test("parseFloatTime", function (assert) {
-        assert.expect(12);
-
         assert.strictEqual(parseFloatTime("0"), 0);
         assert.strictEqual(parseFloatTime("100"), 100);
         assert.strictEqual(parseFloatTime("100.00"), 100);
@@ -110,8 +59,6 @@ QUnit.module("utils", (hooks) => {
     });
 
     QUnit.test("parseInteger", function (assert) {
-        assert.expect(11);
-
         assert.strictEqual(parseInteger(""), 0);
         assert.strictEqual(parseInteger("0"), 0);
         assert.strictEqual(parseInteger("100"), 100);
@@ -129,8 +76,6 @@ QUnit.module("utils", (hooks) => {
     });
 
     QUnit.test("parsePercentage", function (assert) {
-        assert.expect(9);
-
         assert.strictEqual(parsePercentage(""), 0);
         assert.strictEqual(parsePercentage("0"), 0);
         assert.strictEqual(parsePercentage("0.5"), 0.005);
@@ -143,5 +88,45 @@ QUnit.module("utils", (hooks) => {
 
         assert.strictEqual(parsePercentage("1.234,56"), 12.3456);
         assert.strictEqual(parsePercentage("6,02"), 0.0602);
+    });
+
+    QUnit.test("parseMonetary", function (assert) {
+        assert.expect(17);
+
+        patchWithCleanup(session, {
+            currencies: {
+                1: {
+                    digits: [69, 2],
+                    position: "after",
+                    symbol: "€",
+                },
+                3: {
+                    digits: [69, 2],
+                    position: "before",
+                    symbol: "$",
+                },
+            },
+        });
+
+        assert.strictEqual(parseMonetary(""), 0);
+        assert.strictEqual(parseMonetary("0"), 0);
+        assert.strictEqual(parseMonetary("100.00&nbsp;€"), 100);
+        assert.strictEqual(parseMonetary("-100.00"), -100);
+        assert.strictEqual(parseMonetary("1,000.00"), 1000);
+        assert.strictEqual(parseMonetary("1,000,000.00"), 1000000);
+        assert.strictEqual(parseMonetary("$&nbsp;125.00", { currencyId: 3 }), 125);
+        assert.strictEqual(parseMonetary("1,000.00&nbsp;€", { currencyId: 1 }), 1000);
+
+        assert.throws(() => parseMonetary("&nbsp;", { currencyId: 3 }));
+        assert.throws(() => parseMonetary("1&nbsp;", { currencyId: 3 }));
+        assert.throws(() => parseMonetary("&nbsp;1", { currencyId: 3 }));
+
+        assert.throws(() => parseMonetary("12.00 €"));
+        assert.throws(() => parseMonetary("$ 12.00", { currencyId: 3 }));
+        assert.throws(() => parseMonetary("1&nbsp;$", { currencyId: 1 }));
+        assert.throws(() => parseMonetary("$&nbsp;1")); // "€" is the default currency here
+
+        assert.throws(() => parseMonetary("1$&nbsp;1", { currencyId: 1 }));
+        assert.throws(() => parseMonetary("$&nbsp;12.00&nbsp;34", { currencyId: 3 }));
     });
 });

@@ -610,6 +610,15 @@ blockquote {
     font-style: italic;
 }
 
+// Extend bootstrap to create background and text utilities for some colors
+// outside of the $theme-colors too (but not btn-, alert-, etc).
+@for $index from 1 through 5 {
+    $-color-name: 'o-color-#{$index}';
+    $-color: color($-color-name);
+    @include bg-variant(".bg-#{$-color-name}", $-color);
+    @include text-emphasis-variant(".text-#{$-color-name}", $-color);
+}
+
 // Bg/text color classes generation
 .o_cc {
     #{$o-color-extras-nesting-selector} {
@@ -748,15 +757,6 @@ blockquote {
     }
 }
 
-// Extend bootstrap to create background and text utilities for some colors
-// outside of the $theme-colors too (but not btn-, alert-, etc).
-@for $index from 1 through 5 {
-    $-color-name: 'o-color-#{$index}';
-    $-color: color($-color-name);
-    @include bg-variant(".bg-#{$-color-name}", $-color);
-    @include text-emphasis-variant(".text-#{$-color-name}", $-color);
-}
-
 // Base snippet rules
 %o-we-background-layer-parent {
     &, & > * {
@@ -786,4 +786,12 @@ section, .oe_img_bg, [data-oe-shape-data] {
 }
 .o_we_bg_filter {
     @extend %o-we-background-layer;
+}
+
+// Gradient
+// TODO should be in the editor lib since it is handled there... but could not
+// find the right place for it.
+.text-gradient {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

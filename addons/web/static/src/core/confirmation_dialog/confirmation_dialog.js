@@ -35,9 +35,13 @@ ConfirmationDialog.props = {
     cancel: { type: Function, optional: true },
     close: Function,
 };
+ConfirmationDialog.defaultProps = {
+    title: _lt("Confirmation"),
+};
 
 ConfirmationDialog.bodyTemplate = "web.ConfirmationDialogBody";
 ConfirmationDialog.footerTemplate = "web.ConfirmationDialogFooter";
+ConfirmationDialog.size = "modal-md";
 
 export class AlertDialog extends ConfirmationDialog {
     setup() {
