@@ -6,9 +6,11 @@ import {
     addMessagingToEnv,
     addTimeControlToEnv,
 } from '@mail/env/test_env';
-import { ModelManager } from '@mail/model/model_manager';
 import ChatWindowService from '@mail/services/chat_window_service/chat_window_service';
+import MessagingService from '@mail/services/messaging/messaging';
+import { makeDeferred } from '@mail/utils/deferred/deferred';
 import DialogService from '@mail/services/dialog_service/dialog_service';
+import { getMessagingComponent } from '@mail/utils/messaging_component';
 import { nextTick } from '@mail/utils/utils';
 import DiscussWidget from '@mail/widgets/discuss/discuss';
 import MessagingMenuWidget from '@mail/widgets/messaging_menu/messaging_menu';
@@ -24,8 +26,6 @@ import {
 import Widget from 'web.Widget';
 import { createWebClient, getActionManagerServerData } from "@web/../tests/webclient/helpers";
 
-import { ComponentAdapter } from "web.OwlCompatibility";
-import LegacyMockServer from "web.MockServer";
 import LegacyRegistry from "web.Registry";
 
 const {
@@ -34,6 +34,7 @@ const {
     unpatch: legacyUnpatch,
 } = mock;
 const { Component } = owl;
+const { EventBus } = owl.core;
 
 //------------------------------------------------------------------------------
 // Private
@@ -321,15 +322,18 @@ function beforeEach(self) {
         unpatch,
         widget: undefined
     });
+
+    Object.defineProperty(self, 'messaging', {
+        get() {
+            if (!this.env || !this.env.services.messaging) {
+                return undefined;
+            }
+            return this.env.services.messaging.messaging;
+        },
+    });
 }
 
 function afterEach(self) {
-    if (self.env) {
-        self.env.bus.off('hide_home_menu', null);
-        self.env.bus.off('show_home_menu', null);
-        self.env.bus.off('will_hide_home_menu', null);
-        self.env.bus.off('will_show_home_menu', null);
-    }
     // The components must be destroyed before the widget, because the
     // widget might destroy the models before destroying the components,
     // and the components might still rely on messaging (or other) record(s).
@@ -340,6 +344,9 @@ function afterEach(self) {
     if (self.widget) {
         self.widget.destroy();
         self.widget = undefined;
+    }
+    if (self.messaging) {
+        self.messaging.delete();
     }
     self.env = undefined;
     self.unpatch();
@@ -353,13 +360,14 @@ function afterEach(self) {
  * the test, which will happen when `afterEach` is called.
  *
  * @param {Object} self the current QUnit instance
- * @param {Class} Component the component class to create
+ * @param {string} componentName the class name of the component to create
  * @param {Object} param2
  * @param {Object} [param2.props={}] forwarded to component constructor
  * @param {DOM.Element} param2.target mount target for the component
  * @returns {owl.Component} the new component instance
  */
-async function createRootComponent(self, Component, { props = {}, target }) {
+async function createRootMessagingComponent(self, componentName, { props = {}, target }) {
+    const Component = getMessagingComponent(componentName);
     Component.env = self.env;
     const component = new Component(null, props);
     delete Component.env;
@@ -400,6 +408,7 @@ async function createRootComponent(self, Component, { props = {}, target }) {
  *     `env.testUtils`.
  * @param {boolean} [param0.hasView=false] if set, use createView to create a
  *   view instead of a generic widget.
+ * @param {integer} [param0.loadingBaseDelayDuration=0]
  * @param {Deferred|Promise} [param0.messagingBeforeCreationDeferred=Promise.resolve()]
  *   Deferred that let tests block messaging creation and simulate resolution.
  *   Useful for testing working components when messaging is not yet created.
@@ -451,6 +460,7 @@ async function start(param0 = {}) {
         hasMessagingMenu = false,
         hasTimeControl = false,
         hasView = false,
+        loadingBaseDelayDuration = 0,
         messagingBeforeCreationDeferred = Promise.resolve(),
         waitUntilEvent,
         waitUntilMessagingCondition = 'initialized',
@@ -477,6 +487,7 @@ async function start(param0 = {}) {
     if (hasMessagingMenu) {
         callbacks = _useMessagingMenu(callbacks);
     }
+    const messagingBus = new EventBus();
     const {
         init: initCallbacks,
         mount: mountCallbacks,
@@ -485,7 +496,7 @@ async function start(param0 = {}) {
     } = callbacks;
     const { debug = false } = param0;
     initCallbacks.forEach(callback => callback(param0));
-
+    const testSetupDoneDeferred = makeDeferred();
     let env = Object.assign(providedEnv || {});
     env.session = Object.assign(
         {
@@ -522,6 +533,56 @@ async function start(param0 = {}) {
             _listenHomeMenu: () => {},
         }),
         local_storage: AbstractStorageService.extend({ storage: new RamStorage() }),
+        messaging: MessagingService.extend({
+            /**
+             * Override to bind the getters on the actual env that is given,
+             * because the env in the scope of this test might only serve as
+             * template and not be the one actually used.
+             *
+             * @override
+             */
+            init() {
+                this._super(...arguments);
+                Object.defineProperty(this.env, 'messaging', {
+                    get() {
+                        return this.modelManager.messaging;
+                    },
+                });
+                Object.defineProperty(this.env, 'models', {
+                    get() {
+                        return this.modelManager.models;
+                    },
+                });
+            },
+            /**
+             * Override to control when messaging is created, useful to test
+             * spinners and race conditions.
+             *
+             * @override
+             */
+            async start() {
+                const _super = this._super.bind(this);
+                await messagingBeforeCreationDeferred;
+                await _super();
+            },
+            /**
+             * Override to ensure the test setup is complete before starting
+             * otherwise for example the mock server might not be ready yet.
+             * And also override to give test values to messaging.
+             *
+             * @override
+             */
+            async startModelManager() {
+                await testSetupDoneDeferred;
+                await this._modelManager.start({
+                    autofetchPartnerImStatus: false,
+                    disableAnimation: true,
+                    isQUnitTest: true,
+                    loadingBaseDelayDuration,
+                    messagingBus,
+                });
+            },
+        }),
     }, param0.services);
 
     const kwargs = Object.assign({}, param0, {
@@ -542,9 +603,6 @@ async function start(param0 = {}) {
                 destroyCallbacks.forEach(callback => callback({ widget }));
                 this._super(...arguments);
                 legacyUnpatch(widget);
-                if (testEnv) {
-                    testEnv.destroyMessaging();
-                }
             }
         });
     } else if (hasWebClient) {
@@ -593,9 +651,6 @@ async function start(param0 = {}) {
                 destroyCallbacks.forEach(callback => callback({ widget }));
                 this._super(...arguments);
                 legacyUnpatch(widget);
-                if (testEnv) {
-                    testEnv.destroyMessaging();
-                }
             }
         });
     } else {
@@ -609,44 +664,11 @@ async function start(param0 = {}) {
                 delete widget.destroy;
                 destroyCallbacks.forEach(callback => callback({ widget }));
                 parent.destroy();
-                if (testEnv) {
-                    testEnv.destroyMessaging();
-                }
             },
         });
     }
-
+    // get the final test env after execution of createView/createWebClient/addMockEnvironment
     testEnv = Component.env;
-
-    /**
-     * Components cannot use web.bus, because they cannot use
-     * EventDispatcherMixin, and webclient cannot easily access env.
-     * Communication between webclient and components by core.bus
-     * (usable by webclient) and messagingBus (usable by components), which
-     * the messaging service acts as mediator since it can easily use both
-     * kinds of buses.
-     */
-    testEnv.bus.on(
-        'hide_home_menu',
-        null,
-        () => testEnv.messagingBus.trigger('hide_home_menu')
-    );
-    testEnv.bus.on(
-        'show_home_menu',
-        null,
-        () => testEnv.messagingBus.trigger('show_home_menu')
-    );
-    testEnv.bus.on(
-        'will_hide_home_menu',
-        null,
-        () => testEnv.messagingBus.trigger('will_hide_home_menu')
-    );
-    testEnv.bus.on(
-        'will_show_home_menu',
-        null,
-        () => testEnv.messagingBus.trigger('will_show_home_menu')
-    );
-
     /**
      * Returns a promise resolved after the expected event is received.
      *
@@ -674,7 +696,7 @@ async function start(param0 = {}) {
         });
         // Set up the promise to resolve if the event is triggered.
         const eventProm = new Promise(resolve => {
-            testEnv.messagingBus.on(eventName, null, data => {
+            messagingBus.on(eventName, null, data => {
                 if (!predicate || predicate(data)) {
                     resolve();
                 }
@@ -691,51 +713,34 @@ async function start(param0 = {}) {
         await funcRes;
     });
 
+    let waitUntilEventPromise;
+    if (waitUntilEvent) {
+        waitUntilEventPromise = afterEvent({ func: () => testSetupDoneDeferred.resolve(), ...waitUntilEvent, });
+    } else {
+        testSetupDoneDeferred.resolve();
+        waitUntilEventPromise = Promise.resolve();
+    }
+
     const result = {
         afterEvent,
         env: testEnv,
         mockServer,
         widget,
     };
-
-    const start = async () => {
-        messagingBeforeCreationDeferred.then(async () => {
-            /**
-             * Some models require session data, like locale text direction
-             * (depends on fully loaded translation).
-             */
-            await env.session.is_bound;
-
-            testEnv.modelManager = new ModelManager(testEnv);
-            testEnv.modelManager.start();
-            /**
-             * Create the messaging singleton record.
-             */
-            testEnv.messaging = testEnv.models['mail.messaging'].create();
-            testEnv.messaging.start().then(() =>
-                testEnv.messagingInitializedDeferred.resolve()
-            );
-            testEnv.messagingCreatedPromise.resolve();
-        });
-        if (waitUntilMessagingCondition === 'created') {
-            await testEnv.messagingCreatedPromise;
-        }
-        if (waitUntilMessagingCondition === 'initialized') {
-            await testEnv.messagingInitializedDeferred;
-        }
-
-        if (mountCallbacks.length > 0) {
-            await afterNextRender(async () => {
-                await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
-            });
-        }
-        returnCallbacks.forEach(callback => callback(result));
-    };
-    if (waitUntilEvent) {
-        await afterEvent(Object.assign({ func: start }, waitUntilEvent));
-    } else {
-        await start();
+    if (waitUntilMessagingCondition === 'created') {
+        await testEnv.messagingCreatedPromise;
     }
+    if (waitUntilMessagingCondition === 'initialized') {
+        await testEnv.messagingCreatedPromise;
+        await testEnv.modelManager.messaging.initializedPromise;
+    }
+    if (mountCallbacks.length > 0) {
+        await afterNextRender(async () => {
+            await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
+        });
+    }
+    returnCallbacks.forEach(callback => callback(result));
+    await waitUntilEventPromise;
     return result;
 }
 
@@ -796,7 +801,7 @@ export {
     afterEach,
     afterNextRender,
     beforeEach,
-    createRootComponent,
+    createRootMessagingComponent,
     dragenterFiles,
     dropFiles,
     nextAnimationFrame,

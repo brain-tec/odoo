@@ -141,19 +141,25 @@
                                     <label for="legend_normal" string=" " class="o_status mt4"
                                         title="Task in progress. Click to block or set as done."
                                         aria-label="Task in progress. Click to block or set as done." role="img"/>
-                                    <field name="legend_normal" class="col-11 pl-0" nolabel="1"/>
+                                    <div class="col-11 pl-0">
+                                        <field name="legend_normal"/>
+                                    </div>
                                 </div>
                                 <div class="row ml-1" colspan="2">
                                     <label for="legend_blocked" string=" " class="o_status o_status_red mt4"
                                         title="Task is blocked. Click to unblock or set as done."
                                         aria-label="Task is blocked. Click to unblock or set as done." role="img"/>
-                                    <field name="legend_blocked" class="col-11 pl-0" nolabel="1"/>
+                                    <div class="col-11 pl-0">
+                                        <field name="legend_blocked"/>
+                                    </div>
                                 </div>
                                 <div class="row ml-1" colspan="2">
                                     <label for="legend_done" string=" " class="o_status o_status_green mt4"
                                         title="This step is done. Click to block or set in progress."
                                         aria-label="This step is done. Click to block or set in progress." role="img"/>
-                                    <field name="legend_done" class="col-11 pl-0" nolabel="1"/>
+                                    <div class="col-11 pl-0">
+                                        <field name="legend_done"/>
+                                    </div>
                                 </div>
 
                                 <p class="text-muted mt-2" colspan="2">
@@ -543,7 +549,7 @@
             <field name="name">project.project.kanban</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" sample="1">
+                <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" js_class="project_project_kanban" sample="1">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="commercial_partner_id"/>
@@ -918,7 +924,7 @@
             <field name="name">project.task.kanban</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_project_tasks" on_create="quick_create" quick_create_view="project.quick_create_task_form" examples="project" js_class="project_kanban" sample="1">
+                <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_project_tasks" on_create="quick_create" quick_create_view="project.quick_create_task_form" examples="project" js_class="project_task_kanban" sample="1">
                     <field name="color"/>
                     <field name="priority"/>
                     <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
@@ -996,7 +1002,7 @@
                                     </div>
                                     <div class="oe_kanban_bottom_right" t-if="!selection_mode">
                                         <field name="kanban_state" widget="state_selection" groups="base.group_user" invisible="context.get('fsm_mode', False)"/>
-                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                        <t t-if="record.user_id.raw_value"><field name="user_id" widget="many2one_avatar_user"/></t>
                                     </div>
                                 </div>
                             </div>

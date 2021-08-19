@@ -1,12 +1,7 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { AttachmentList } from '@mail/components/attachment_list/attachment_list';
-import { MessageSeenIndicator } from '@mail/components/message_seen_indicator/message_seen_indicator';
-import { NotificationPopover } from '@mail/components/notification_popover/notification_popover';
-import { PartnerImStatusIcon } from '@mail/components/partner_im_status_icon/partner_im_status_icon';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { _lt } from 'web.core';
@@ -18,12 +13,6 @@ const { useRef } = owl.hooks;
 
 const READ_MORE = _lt("read more");
 const READ_LESS = _lt("read less");
-const components = {
-    AttachmentList,
-    MessageSeenIndicator,
-    NotificationPopover,
-    PartnerImStatusIcon,
-};
 
 export class Message extends Component {
 
@@ -39,8 +28,6 @@ export class Message extends Component {
              */
             isClicked: false,
         });
-        useShouldUpdateBasedOnProps();
-        useModels();
         useUpdate({ func: () => this._update() });
         /**
          * The intent of the reply button depends on the last rendered state.
@@ -419,7 +406,7 @@ export class Message extends Component {
                 el.remove();
             }
             this._insertReadMoreLess($(this._contentRef.el));
-            this.env.messagingBus.trigger('o-component-message-read-more-less-inserted', {
+            this.message.messaging.messagingBus.trigger('o-component-message-read-more-less-inserted', {
                 message: this.message,
             });
         }
@@ -441,7 +428,7 @@ export class Message extends Component {
      */
     _onClick(ev) {
         if (ev.target.closest('.o_channel_redirect')) {
-            this.env.messaging.openProfile({
+            this.message.messaging.openProfile({
                 id: Number(ev.target.dataset.oeId),
                 model: 'mail.channel',
             });
@@ -451,7 +438,7 @@ export class Message extends Component {
         }
         if (ev.target.tagName === 'A') {
             if (ev.target.dataset.oeId && ev.target.dataset.oeModel) {
-                this.env.messaging.openProfile({
+                this.message.messaging.openProfile({
                     id: Number(ev.target.dataset.oeId),
                     model: ev.target.dataset.oeModel,
                 });
@@ -540,7 +527,7 @@ export class Message extends Component {
         // before the current handler is executed. Indeed because it does a
         // toggle it needs to take into account the value before the click.
         if (this._wasSelected) {
-            this.env.messaging.discuss.clearReplyingToMessage();
+            this.message.messaging.discuss.clearReplyingToMessage();
         } else {
             this.message.replyTo();
         }
@@ -548,7 +535,6 @@ export class Message extends Component {
 }
 
 Object.assign(Message, {
-    components,
     defaultProps: {
         hasMarkAsReadIcon: false,
         hasReplyIcon: false,
@@ -571,3 +557,5 @@ Object.assign(Message, {
     },
     template: 'mail.Message',
 });
+
+registerMessagingComponent(Message);

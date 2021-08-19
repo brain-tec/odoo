@@ -1,13 +1,12 @@
 /** @odoo-module **/
 
-import { DialogManager } from '@mail/components/dialog_manager/dialog_manager';
+import { getMessagingComponent } from "@mail/utils/messaging_component";
 
 import AbstractService from 'web.AbstractService';
 import { bus, serviceRegistry } from 'web.core';
 
-const components = { DialogManager };
-
 const DialogService = AbstractService.extend({
+    dependencies: ['messaging'],
     /**
      * @override {web.AbstractService}
      */
@@ -41,8 +40,6 @@ const DialogService = AbstractService.extend({
      * @private
      */
     _listenHomeMenu() {
-        bus.on('hide_home_menu', this, this._onHideHomeMenu.bind(this));
-        bus.on('show_home_menu', this, this._onShowHomeMenu.bind(this));
         bus.on('web_client_ready', this, this._onWebClientReady.bind(this));
     },
     /**
@@ -53,7 +50,7 @@ const DialogService = AbstractService.extend({
             this.component.destroy();
             this.component = undefined;
         }
-        const DialogManagerComponent = components.DialogManager;
+        const DialogManagerComponent = getMessagingComponent("DialogManager");
         this.component = new DialogManagerComponent(null);
         const parentNode = this._getParentNode();
         await this.component.mount(parentNode);
@@ -63,27 +60,6 @@ const DialogService = AbstractService.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
-    /**
-     * @private
-     */
-    async _onHideHomeMenu() {
-        if (!this._webClientReady) {
-            return;
-        }
-        if (document.querySelector('.o_DialogManager')) {
-            return;
-        }
-        await this._mount();
-    },
-    async _onShowHomeMenu() {
-        if (!this._webClientReady) {
-            return;
-        }
-        if (document.querySelector('.o_DialogManager')) {
-            return;
-        }
-        await this._mount();
-    },
     /**
      * @private
      */

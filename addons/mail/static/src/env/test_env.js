@@ -3,24 +3,16 @@
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 import { nextTick } from '@mail/utils/utils';
 
-const { EventBus } = owl.core;
-
 /**
  * @param {Object} [providedEnv={}]
  * @returns {Object}
  */
-function addMessagingToEnv(providedEnv = {}) {
-    const env = Object.assign(providedEnv);
-
-    /**
-     * Registry of models.
-     */
-    env.models = {};
+export function addMessagingToEnv(providedEnv = {}) {
+    const env = { ...providedEnv };
     /**
      * Environment keys used in messaging.
      */
     Object.assign(env, {
-        autofetchPartnerImStatus: false,
         browser: Object.assign({
             innerHeight: 1080,
             innerWidth: 1920,
@@ -31,34 +23,14 @@ function addMessagingToEnv(providedEnv = {}) {
                 },
             }, (env.browser && env.browser.Notification) || {}),
         }, env.browser),
-        destroyMessaging() {
-            if (env.modelManager) {
-                env.modelManager.deleteAll();
-                env.messaging = undefined;
-            }
-        },
-        disableAnimation: true,
         isMessagingInitialized() {
             if (!this.messaging) {
                 return false;
             }
             return this.messaging.isInitialized;
         },
-        /**
-         * States whether the environment is in QUnit test or not.
-         *
-         * Useful to prevent some behaviour in QUnit tests, like applying
-         * style of attachment that uses url.
-         */
-        isQUnitTest: true,
-        loadingBaseDelayDuration: providedEnv.loadingBaseDelayDuration || 0,
-        messaging: undefined,
         messagingCreatedPromise: makeDeferred(),
-        messagingInitializedDeferred: makeDeferred(),
-        messagingBus: new EventBus(),
-        modelManager: undefined,
     });
-
     return env;
 }
 
@@ -66,10 +38,8 @@ function addMessagingToEnv(providedEnv = {}) {
  * @param {Object} [providedEnv={}]
  * @returns {Object}
  */
-function addTimeControlToEnv(providedEnv = {}) {
-
-    let env = Object.assign({}, providedEnv);
-
+export function addTimeControlToEnv(providedEnv = {}) {
+    const env = { ...providedEnv };
     if (!env.browser) {
         env.browser = {};
     }
@@ -125,9 +95,4 @@ function addTimeControlToEnv(providedEnv = {}) {
         },
     });
     return env;
-}
-
-export {
-    addMessagingToEnv,
-    addTimeControlToEnv,
 }

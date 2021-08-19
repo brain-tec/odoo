@@ -86,7 +86,7 @@ function factory(dependencies) {
             if (!attachments.includes(attachment)) {
                 return;
             }
-            this.env.messaging.dialogManager.open('mail.attachment_viewer', {
+            this.messaging.dialogManager.open('mail.attachment_viewer', {
                 attachment: link(attachment),
                 attachments: replace(attachments),
             });
@@ -315,7 +315,7 @@ function factory(dependencies) {
                 if (!this.uploadingAbortController) {
                     const abortController = new AbortController();
                     abortController.signal.onabort = () => {
-                        this.env.messagingBus.trigger('o-attachment-upload-abort', {
+                        this.messaging.messagingBus.trigger('o-attachment-upload-abort', {
                             attachment: this
                         });
                     };

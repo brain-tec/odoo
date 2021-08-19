@@ -5,6 +5,8 @@ import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_
 import { create } from '@mail/model/model_field_command';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
+const { EventBus } = owl.core;
+
 function factory(dependencies) {
 
     class Messaging extends dependencies['mail.model'] {
@@ -92,10 +94,10 @@ function factory(dependencies) {
                     res_id: id,
                 },
             });
-            if (this.env.messaging.device.isMobile) {
+            if (this.messaging.device.isMobile) {
                 // messaging menu has a higher z-index than views so it must
                 // be closed to ensure the visibility of the view
-                this.env.messaging.messagingMenu.close();
+                this.messaging.messagingMenu.close();
             }
         }
 
@@ -132,7 +134,7 @@ function factory(dependencies) {
                 }
                 return channel.openProfile();
             }
-            return this.env.messaging.openDocument({ id, model });
+            return this.messaging.openDocument({ id, model });
         }
 
         /**
@@ -159,6 +161,17 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {owl.EventBus}
+         */
+        _computeMessagingBus() {
+            if (this.messagingBus) {
+                return;
+            }
+            return new EventBus();
+        }
+
+        /**
+         * @private
          * @returns {boolean}
          */
         _computeIsNotificationPermissionDefault() {
@@ -179,10 +192,24 @@ function factory(dependencies) {
     }
 
     Messaging.fields = {
+        /**
+         * Inverse of the messaging field present on all models. This field
+         * therefore contains all existing records.
+         */
+        allRecords: one2many('mail.model', {
+            inverse: 'messaging',
+            isCausal: true,
+        }),
+        /**
+         * Determines whether a loop should be started at initialization to
+         * periodically fetch the im_status of all users.
+         */
+        autofetchPartnerImStatus: attr({
+            default: true,
+        }),
         cannedResponses: one2many('mail.canned_response'),
         chatWindowManager: one2one('mail.chat_window_manager', {
             default: create(),
-            inverse: 'messaging',
             isCausal: true,
             readonly: true,
         }),
@@ -199,9 +226,14 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
+        /**
+         * Determines whether animations should be disabled.
+         */
+        disableAnimation: attr({
+            default: false,
+        }),
         discuss: one2one('mail.discuss', {
             default: create(),
-            inverse: 'messaging',
             isCausal: true,
             readonly: true,
         }),
@@ -223,7 +255,6 @@ function factory(dependencies) {
         }),
         initializer: one2one('mail.messaging_initializer', {
             default: create(),
-            inverse: 'messaging',
             isCausal: true,
             readonly: true,
         }),
@@ -238,14 +269,36 @@ function factory(dependencies) {
         isNotificationPermissionDefault: attr({
             compute: '_computeIsNotificationPermissionDefault',
         }),
+        /**
+         * States whether the current environment is QUnit test. Useful to
+         * disable some features that are not possible to test due to
+         * technical limitations.
+         */
+        isQUnitTest: attr({
+            default: false,
+        }),
         locale: one2one('mail.locale', {
             default: create(),
             isCausal: true,
             readonly: true,
         }),
+        /**
+         * Determines after how much time in ms a "loading" indicator should be
+         * shown. Useful to avoid flicker for almost instant loading.
+         */
+        loadingBaseDelayDuration: attr({
+            default: 400,
+        }),
+        /**
+         * Determines the bus that is used to communicate messaging events.
+         */
+        messagingBus: attr({
+            compute: '_computeMessagingBus',
+            readonly: true,
+            required: true,
+        }),
         messagingMenu: one2one('mail.messaging_menu', {
             default: create(),
-            inverse: 'messaging',
             isCausal: true,
             readonly: true,
         }),
@@ -256,7 +309,6 @@ function factory(dependencies) {
         }),
         notificationHandler: one2one('mail.messaging_notification_handler', {
             default: create(),
-            inverse: 'messaging',
             isCausal: true,
             readonly: true,
         }),

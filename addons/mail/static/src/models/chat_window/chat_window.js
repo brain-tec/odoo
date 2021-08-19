@@ -1,34 +1,12 @@
 /** @odoo-module **/
 
 import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
+import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, create, link, unlink, update } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
     class ChatWindow extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
-        _created() {
-            const res = super._created(...arguments);
-            this._onShowHomeMenu.bind(this);
-            this._onHideHomeMenu.bind(this);
-
-            this.env.messagingBus.on('hide_home_menu', this, this._onHideHomeMenu);
-            this.env.messagingBus.on('show_home_menu', this, this._onShowHomeMenu);
-            return res;
-        }
-
-        /**
-         * @override
-         */
-        _willDelete() {
-            this.env.messagingBus.off('hide_home_menu', this, this._onHideHomeMenu);
-            this.env.messagingBus.off('show_home_menu', this, this._onShowHomeMenu);
-            return super._willDelete(...arguments);
-        }
 
         //----------------------------------------------------------------------
         // Public
@@ -42,22 +20,23 @@ function factory(dependencies) {
          */
         close({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.env.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isMobile;
             }
-            const thread = this.thread;
-            this.delete();
-            // Flux specific: 'closed' fold state should only be saved on the
-            // server when manually closing the chat window. Delete at destroy
-            // or sync from server value for example should not save the value.
-            if (thread && notifyServer) {
-                thread.notifyFoldStateToServer('closed');
-            }
-            if (this.env.device.isMobile && !this.env.messaging.discuss.isOpen) {
+            if (this.env.device.isMobile && !this.messaging.discuss.isOpen) {
                 // If we are in mobile and discuss is not open, it means the
                 // chat window was opened from the messaging menu. In that
                 // case it should be re-opened to simulate it was always
                 // there in the background.
-                this.env.messaging.messagingMenu.update({ isOpen: true });
+                this.messaging.messagingMenu.update({ isOpen: true });
+            }
+            // Flux specific: 'closed' fold state should only be saved on the
+            // server when manually closing the chat window. Delete at destroy
+            // or sync from server value for example should not save the value.
+            if (this.thread && notifyServer) {
+                this.thread.notifyFoldStateToServer('closed');
+            }
+            if (this.exists()) {
+                this.delete();
             }
         }
 
@@ -95,7 +74,7 @@ function factory(dependencies) {
          */
         fold({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.env.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isMobile;
             }
             this.update({ isFolded: true });
             // Flux specific: manually folding the chat window should save the
@@ -149,7 +128,7 @@ function factory(dependencies) {
          */
         unfold({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.env.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isMobile;
             }
             this.update({ isFolded: false });
             // Flux specific: manually opening the chat window should save the
@@ -332,30 +311,6 @@ function factory(dependencies) {
                 nextToFocus = orderedVisible[nextIndex];
             }
             return nextToFocus;
-        }
-
-        //----------------------------------------------------------------------
-        // Handlers
-        //----------------------------------------------------------------------
-
-        /**
-         * @private
-         */
-        async _onHideHomeMenu() {
-            if (!this.threadView) {
-                return;
-            }
-            this.threadView.addComponentHint('home-menu-hidden');
-        }
-
-        /**
-         * @private
-         */
-        async _onShowHomeMenu() {
-            if (!this.threadView) {
-                return;
-            }
-            this.threadView.addComponentHint('home-menu-shown');
         }
 
     }

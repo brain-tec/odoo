@@ -1,27 +1,13 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { EditableText } from '@mail/components/editable_text/editable_text';
-import { ThreadIcon } from '@mail/components/thread_icon/thread_icon';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { isEventHandled } from '@mail/utils/utils';
 
 import Dialog from 'web.Dialog';
 
 const { Component } = owl;
 
-const components = { EditableText, ThreadIcon };
-
 export class DiscussSidebarItem extends Component {
-
-    /**
-     * @override
-     */
-    constructor(...args) {
-        super(...args);
-        useShouldUpdateBasedOnProps();
-        useModels();
-    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -133,7 +119,7 @@ export class DiscussSidebarItem extends Component {
      */
     async _onClickLeave(ev) {
         ev.stopPropagation();
-        if (this.thread.creator === this.env.messaging.currentUser) {
+        if (this.thread.creator === this.discuss.messaging.currentUser) {
             await this._askAdminConfirmation();
         }
         this.thread.unsubscribe();
@@ -188,9 +174,10 @@ export class DiscussSidebarItem extends Component {
 }
 
 Object.assign(DiscussSidebarItem, {
-    components,
     props: {
         threadLocalId: String,
     },
     template: 'mail.DiscussSidebarItem',
 });
+
+registerMessagingComponent(DiscussSidebarItem);

@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
-import { clear, create, link, replace, unlink, unlinkAll, update } from '@mail/model/model_field_command';
+import { clear, create, link, unlink, unlinkAll, update } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -116,7 +116,7 @@ function factory(dependencies) {
          * @param {integer} ui.item.id
          */
         handleAddChatAutocompleteSelect(ev, ui) {
-            this.env.messaging.openChat({ partnerId: ui.item.id });
+            this.messaging.openChat({ partnerId: ui.item.id });
             this.clearIsAddingItem();
         }
 
@@ -187,7 +187,7 @@ function factory(dependencies) {
                 return;
             }
             thread.open();
-            if (this.env.messaging.device.isMobile && thread.channel_type) {
+            if (this.messaging.device.isMobile && thread.channel_type) {
                 this.update({ activeMobileNavbarTabId: thread.channel_type });
             }
         }
@@ -281,7 +281,7 @@ function factory(dependencies) {
                 return false;
             }
             if (
-                this.env.messaging.device.isMobile &&
+                this.messaging.device.isMobile &&
                 (
                     this.activeMobileNavbarTabId !== 'mailbox' ||
                     this.thread.model !== 'mail.box'
@@ -343,23 +343,9 @@ function factory(dependencies) {
          * @returns {mail.thread|undefined}
          */
         _computeThread() {
-            let thread = this.thread;
-            if (this.env.messaging &&
-                this.env.messaging.inbox &&
-                this.env.messaging.device.isMobile &&
-                this.activeMobileNavbarTabId === 'mailbox' &&
-                this.initActiveId !== 'mail.box_inbox' &&
-                !thread
-            ) {
-                // After loading Discuss from an arbitrary tab other then 'mailbox',
-                // switching to 'mailbox' requires to also set its inner-tab ;
-                // by default the 'inbox'.
-                return replace(this.env.messaging.inbox);
-            }
-            if (!thread || !thread.isPinned) {
+            if (!this.thread || !this.thread.isPinned) {
                 return unlink();
             }
-            return;
         }
 
         /**
@@ -453,9 +439,6 @@ function factory(dependencies) {
          */
         menu_id: attr({
             default: null,
-        }),
-        messaging: one2one('mail.messaging', {
-            inverse: 'discuss',
         }),
         renamingThreads: one2many('mail.thread'),
         /**

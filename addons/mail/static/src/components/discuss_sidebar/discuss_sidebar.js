@@ -1,15 +1,10 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { AutocompleteInput } from '@mail/components/autocomplete_input/autocomplete_input';
-import { DiscussSidebarItem } from '@mail/components/discuss_sidebar_item/discuss_sidebar_item';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
-
-const components = { AutocompleteInput, DiscussSidebarItem };
 
 export class DiscussSidebar extends Component {
 
@@ -18,8 +13,6 @@ export class DiscussSidebar extends Component {
      */
     constructor(...args) {
         super(...args);
-        useShouldUpdateBasedOnProps();
-        useModels();
         useUpdate({ func: () => this._update() });
         /**
          * Reference of the quick search input. Useful to filter channels and
@@ -59,16 +52,16 @@ export class DiscussSidebar extends Component {
         return this.env.models['mail.thread']
             .all(thread => thread.isPinned && thread.model === 'mail.box')
             .sort((mailbox1, mailbox2) => {
-                if (mailbox1 === this.env.messaging.inbox) {
+                if (mailbox1 === this.discuss.messaging.inbox) {
                     return -1;
                 }
-                if (mailbox2 === this.env.messaging.inbox) {
+                if (mailbox2 === this.discuss.messaging.inbox) {
                     return 1;
                 }
-                if (mailbox1 === this.env.messaging.starred) {
+                if (mailbox1 === this.discuss.messaging.starred) {
                     return -1;
                 }
-                if (mailbox2 === this.env.messaging.starred) {
+                if (mailbox2 === this.discuss.messaging.starred) {
                     return 1;
                 }
                 const mailbox1Name = mailbox1.displayName;
@@ -242,6 +235,9 @@ export class DiscussSidebar extends Component {
      */
     _onHideAddingItem(ev) {
         ev.stopPropagation();
+        if (!this.discuss) {
+            return;
+        }
         this.discuss.clearIsAddingItem();
     }
 
@@ -259,7 +255,8 @@ export class DiscussSidebar extends Component {
 }
 
 Object.assign(DiscussSidebar, {
-    components,
     props: {},
     template: 'mail.DiscussSidebar',
 });
+
+registerMessagingComponent(DiscussSidebar);

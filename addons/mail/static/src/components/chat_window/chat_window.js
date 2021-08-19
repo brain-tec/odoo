@@ -1,17 +1,11 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { AutocompleteInput } from '@mail/components/autocomplete_input/autocomplete_input';
-import { ChatWindowHeader } from '@mail/components/chat_window_header/chat_window_header';
-import { ThreadView } from '@mail/components/thread_view/thread_view';
 import { isEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
-
-const components = { AutocompleteInput, ChatWindowHeader, ThreadView };
 
 export class ChatWindow extends Component {
 
@@ -20,8 +14,6 @@ export class ChatWindow extends Component {
      */
     constructor(...args) {
         super(...args);
-        useShouldUpdateBasedOnProps();
-        useModels();
         useUpdate({ func: () => this._update() });
         /**
          * Reference of the header of the chat window.
@@ -41,8 +33,6 @@ export class ChatWindow extends Component {
          * it has one!
          */
         this._threadRef = useRef('thread');
-        this._onWillHideHomeMenu = this._onWillHideHomeMenu.bind(this);
-        this._onWillShowHomeMenu = this._onWillShowHomeMenu.bind(this);
         // the following are passed as props to children
         this._onAutocompleteSelect = this._onAutocompleteSelect.bind(this);
         this._onAutocompleteSource = this._onAutocompleteSource.bind(this);
@@ -53,16 +43,6 @@ export class ChatWindow extends Component {
      * Allows patching constructor.
      */
     _constructor() {}
-
-    mounted() {
-        this.env.messagingBus.on('will_hide_home_menu', this, this._onWillHideHomeMenu);
-        this.env.messagingBus.on('will_show_home_menu', this, this._onWillShowHomeMenu);
-    }
-
-    willUnmount() {
-        this.env.messagingBus.off('will_hide_home_menu', this, this._onWillHideHomeMenu);
-        this.env.messagingBus.off('will_show_home_menu', this, this._onWillShowHomeMenu);
-    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -95,7 +75,7 @@ export class ChatWindow extends Component {
      * @private
      */
     _applyVisibleOffset() {
-        const textDirection = this.env.messaging.locale.textDirection;
+        const textDirection = this.chatWindow.messaging.locale.textDirection;
         const offsetFrom = textDirection === 'rtl' ? 'left' : 'right';
         const oppositeFrom = offsetFrom === 'right' ? 'left' : 'right';
         this.el.style[offsetFrom] = this.chatWindow.visibleOffset + 'px';
@@ -131,12 +111,15 @@ export class ChatWindow extends Component {
     _saveThreadScrollTop() {
         if (
             !this._threadRef.comp ||
-            !this.chatWindow.threadViewer ||
-            !this.chatWindow.threadViewer.threadView
+            !this.chatWindow ||
+            !this.chatWindow.threadViewer
         ) {
             return;
         }
-        if (this.chatWindow.threadViewer.threadView.componentHintList.length > 0) {
+        if (
+            this.chatWindow.threadViewer.threadView &&
+            this.chatWindow.threadViewer.threadView.componentHintList.length > 0
+        ) {
             // the current scroll position is likely incorrect due to the
             // presence of hints to adjust it
             return;
@@ -178,11 +161,11 @@ export class ChatWindow extends Component {
      * @param {integer} ui.item.id
      */
     async _onAutocompleteSelect(ev, ui) {
-        const chat = await this.env.messaging.getChat({ partnerId: ui.item.id });
+        const chat = await this.chatWindow.messaging.getChat({ partnerId: ui.item.id });
         if (!chat) {
             return;
         }
-        this.env.messaging.chatWindowManager.openThread(chat, {
+        this.chatWindow.messaging.chatWindowManager.openThread(chat, {
             makeActive: true,
             replaceNewMessage: true,
         });
@@ -223,7 +206,7 @@ export class ChatWindow extends Component {
      */
     _onClickedHeader(ev) {
         ev.stopPropagation();
-        if (this.env.messaging.device.isMobile) {
+        if (this.chatWindow.messaging.device.isMobile) {
             return;
         }
         if (this.chatWindow.isFolded) {
@@ -295,34 +278,9 @@ export class ChatWindow extends Component {
         }
     }
 
-    /**
-     * Save the scroll positions of the chat window in the store.
-     * This is useful in order to remount chat windows and keep previous
-     * scroll positions. This is necessary because when toggling on/off
-     * home menu, the chat windows have to be remade from scratch.
-     *
-     * @private
-     */
-    async _onWillHideHomeMenu() {
-        this._saveThreadScrollTop();
-    }
-
-    /**
-     * Save the scroll positions of the chat window in the store.
-     * This is useful in order to remount chat windows and keep previous
-     * scroll positions. This is necessary because when toggling on/off
-     * home menu, the chat windows have to be remade from scratch.
-     *
-     * @private
-     */
-    async _onWillShowHomeMenu() {
-        this._saveThreadScrollTop();
-    }
-
 }
 
 Object.assign(ChatWindow, {
-    components,
     defaultProps: {
         hasCloseAsBackButton: false,
         isExpandable: false,
@@ -336,3 +294,5 @@ Object.assign(ChatWindow, {
     },
     template: 'mail.ChatWindow',
 });
+
+registerMessagingComponent(ChatWindow);

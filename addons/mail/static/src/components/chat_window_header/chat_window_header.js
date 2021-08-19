@@ -1,27 +1,14 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import {
     isEventHandled,
     markEventHandled,
 } from '@mail/utils/utils';
-import { ThreadIcon } from '@mail/components/thread_icon/thread_icon';
 
 const { Component } = owl;
 
-const components = { ThreadIcon };
-
 export class ChatWindowHeader extends Component {
-
-    /**
-     * @override
-     */
-    constructor(...args) {
-        super(...args);
-        useShouldUpdateBasedOnProps();
-        useModels();
-    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -38,7 +25,7 @@ export class ChatWindowHeader extends Component {
      * @returns {string}
      */
     get shiftNextText() {
-        if (this.env.messaging.locale.textDirection === 'rtl') {
+        if (this.chatWindow.messaging.locale.textDirection === 'rtl') {
             return this.env._t("Shift left");
         }
         return this.env._t("Shift right");
@@ -48,7 +35,7 @@ export class ChatWindowHeader extends Component {
      * @returns {string}
      */
     get shiftPrevText() {
-        if (this.env.messaging.locale.textDirection === 'rtl') {
+        if (this.chatWindow.messaging.locale.textDirection === 'rtl') {
             return this.env._t("Shift right");
         }
         return this.env._t("Shift left");
@@ -115,7 +102,6 @@ export class ChatWindowHeader extends Component {
 }
 
 Object.assign(ChatWindowHeader, {
-    components,
     defaultProps: {
         hasCloseAsBackButton: false,
         isExpandable: false,
@@ -127,3 +113,5 @@ Object.assign(ChatWindowHeader, {
     },
     template: 'mail.ChatWindowHeader',
 });
+
+registerMessagingComponent(ChatWindowHeader);

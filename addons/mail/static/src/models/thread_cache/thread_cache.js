@@ -27,13 +27,16 @@ function factory(dependencies) {
             let fetchedMessages;
             let success;
             try {
-                fetchedMessages = await this.async(() => this._loadMessages({
+                fetchedMessages = await this._loadMessages({
                     extraDomain: [['id', '<', Math.min(...messageIds)]],
                     limit,
-                }));
+                });
                 success = true;
-            }  catch (e) {
+            } catch (e) {
                 success = false;
+            }
+            if (!this.exists()) {
+                return;
             }
             if (success) {
                 if (fetchedMessages.length < limit) {
@@ -217,13 +220,13 @@ function factory(dependencies) {
          */
         _extendMessageDomain(domain) {
             const thread = this.thread;
-            if (thread === this.env.messaging.inbox) {
+            if (thread === this.messaging.inbox) {
                 return domain.concat([['needaction', '=', true]]);
-            } else if (thread === this.env.messaging.starred) {
+            } else if (thread === this.messaging.starred) {
                 return domain.concat([
-                    ['starred_partner_ids', 'in', [this.env.messaging.currentPartner.id]],
+                    ['starred_partner_ids', 'in', [this.messaging.currentPartner.id]],
                 ]);
-            } else if (thread === this.env.messaging.history) {
+            } else if (thread === this.messaging.history) {
                 return domain.concat([['needaction', '=', false]]);
             } else {
                 // Avoid to load user_notification as these messages are not
@@ -254,19 +257,22 @@ function factory(dependencies) {
             const context = this.env.session.user_context;
             let messages;
             try {
-                messages = await this.async(() =>
-                    this.env.models['mail.message'].performRpcMessageFetch(
-                        domain,
-                        limit,
-                        context,
-                    )
+                messages = await this.env.models['mail.message'].performRpcMessageFetch(
+                    domain,
+                    limit,
+                    context,
                 );
-            } catch(e) {
-                this.update({
-                    hasLoadingFailed: true,
-                    isLoading: false,
-                });
+            } catch (e) {
+                if (this.exists()) {
+                    this.update({
+                        hasLoadingFailed: true,
+                        isLoading: false,
+                    });
+                }
                 throw e;
+            }
+            if (!this.exists()) {
+                return;
             }
             this.update({
                 fetchedMessages: link(messages),
@@ -277,7 +283,7 @@ function factory(dependencies) {
             if (!extraDomain && messages.length < limit) {
                 this.update({ isAllHistoryLoaded: true });
             }
-            this.env.messagingBus.trigger('o-thread-cache-loaded-messages', {
+            this.messaging.messagingBus.trigger('o-thread-cache-loaded-messages', {
                 fetchedMessages: messages,
                 threadCache: this,
             });
@@ -339,7 +345,7 @@ function factory(dependencies) {
             if (!this.hasToLoadMessages) {
                 return;
             }
-            const fetchedMessages = await this.async(() => this._loadMessages());
+            const fetchedMessages = await this._loadMessages();
             for (const threadView of this.threadViews) {
                 threadView.addComponentHint('messages-loaded', { fetchedMessages });
             }

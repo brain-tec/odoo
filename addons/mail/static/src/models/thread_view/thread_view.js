@@ -48,7 +48,7 @@ function factory(dependencies) {
             this.update({
                 componentHintList: this.componentHintList.filter(h => h !== hint),
             });
-            this.env.messagingBus.trigger('o-thread-view-hint-processed', {
+            this.messaging.messagingBus.trigger('o-thread-view-hint-processed', {
                 hint,
                 threadViewer: this.threadViewer,
             });
@@ -94,11 +94,14 @@ function factory(dependencies) {
             if (!this.thread) {
                 return;
             }
+            if (!this.messaging.device) {
+                return;
+            }
             // Actually in mobile there is a send button, so we need there 'enter' to allow new line.
             // Hence, we want to use a different shortcut 'ctrl/meta enter' to send for small screen
             // size with a non-mailing channel.
             // here send will be done on clicking the button or using the 'ctrl/meta enter' shortcut.
-            if (this.env.messaging.device.isMobile) {
+            if (this.messaging.device.isMobile) {
                 return ['ctrl-enter', 'meta-enter'];
             }
             return ['enter'];

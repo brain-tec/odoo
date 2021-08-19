@@ -55,7 +55,7 @@ function factory(dependencies) {
                 data2.email_from = data.email_from;
             }
             if ('history_partner_ids' in data) {
-                data2.isHistory = data.history_partner_ids.includes(this.env.messaging.currentPartner.id);
+                data2.isHistory = data.history_partner_ids.includes(this.messaging.currentPartner.id);
             }
             if ('id' in data) {
                 data2.id = data.id;
@@ -89,7 +89,7 @@ function factory(dependencies) {
                 data2.originThread = insert(originThreadData);
             }
             if ('needaction_partner_ids' in data) {
-                data2.isNeedaction = data.needaction_partner_ids.includes(this.env.messaging.currentPartner.id);
+                data2.isNeedaction = data.needaction_partner_ids.includes(this.messaging.currentPartner.id);
             }
             if ('notifications' in data) {
                 data2.notifications = insert(data.notifications.map(notificationData =>
@@ -97,10 +97,10 @@ function factory(dependencies) {
                 ));
             }
             if ('partner_ids' in data) {
-                data2.isCurrentPartnerMentioned = data.partner_ids.includes(this.env.messaging.currentPartner.id);
+                data2.isCurrentPartnerMentioned = data.partner_ids.includes(this.messaging.currentPartner.id);
             }
             if ('starred_partner_ids' in data) {
-                data2.isStarred = data.starred_partner_ids.includes(this.env.messaging.currentPartner.id);
+                data2.isStarred = data.starred_partner_ids.includes(this.messaging.currentPartner.id);
             }
             if ('subject' in data) {
                 data2.subject = data.subject;
@@ -171,6 +171,9 @@ function factory(dependencies) {
                     limit,
                 },
             }, { shadow: true });
+            if (!this.messaging) {
+                return;
+            }
             const messages = this.env.models['mail.message'].insert(messagesData.map(
                 messageData => this.env.models['mail.message'].convertData(messageData)
             ));
@@ -239,7 +242,7 @@ function factory(dependencies) {
          * that Discuss and Inbox are already opened.
          */
         replyTo() {
-            this.env.messaging.discuss.replyToMessage(this);
+            this.messaging.discuss.replyToMessage(this);
         }
 
         /**
@@ -290,8 +293,8 @@ function factory(dependencies) {
         _computeIsCurrentPartnerAuthor() {
             return !!(
                 this.author &&
-                this.env.messaging.currentPartner &&
-                this.env.messaging.currentPartner === this.author
+                this.messaging.currentPartner &&
+                this.messaging.currentPartner === this.author
             );
         }
 
@@ -427,14 +430,14 @@ function factory(dependencies) {
          */
         _computeThreads() {
             const threads = [];
-            if (this.isHistory) {
-                threads.push(this.env.messaging.history);
+            if (this.isHistory && this.messaging.history) {
+                threads.push(this.messaging.history);
             }
-            if (this.isNeedaction) {
-                threads.push(this.env.messaging.inbox);
+            if (this.isNeedaction && this.messaging.inbox) {
+                threads.push(this.messaging.inbox);
             }
-            if (this.isStarred) {
-                threads.push(this.env.messaging.starred);
+            if (this.isStarred && this.messaging.starred) {
+                threads.push(this.messaging.starred);
             }
             if (this.originThread) {
                 threads.push(this.originThread);

@@ -1,24 +1,13 @@
 odoo.define('snailmail/static/src/components/message/message.js', function (require) {
 'use strict';
 
-const { Message } = require('@mail/components/message/message');
-
-const components = {
-    Message,
-    SnailmailErrorDialog: require('snailmail/static/src/components/snailmail_error_dialog/snailmail_error_dialog.js'),
-    SnailmailNotificationPopover: require('snailmail/static/src/components/snailmail_notification_popover/snailmail_notification_popover.js'),
-};
+const { Message } = require("@mail/components/message/message");
 
 const { patch } = require('web.utils');
 
 const { useState } = owl;
 
-Object.assign(components.Message.components, {
-    SnailmailErrorDialog: components.SnailmailErrorDialog,
-    SnailmailNotificationPopover: components.SnailmailNotificationPopover,
-});
-
-patch(components.Message.prototype, 'snailmail/static/src/components/message/message.js', {
+patch(Message.prototype, 'snailmail/static/src/components/message/message.js', {
     /**
      * @override
      */
@@ -48,7 +37,7 @@ patch(components.Message.prototype, 'snailmail/static/src/components/message/mes
             switch (this.message.notifications[0].failure_type) {
                 case 'sn_credit':
                     // URL only used in this component, not received at init
-                    this.env.messaging.fetchSnailmailCreditsUrl();
+                    this.message.messaging.fetchSnailmailCreditsUrl();
                     this.snailmailState.hasDialog = true;
                     break;
                 case 'sn_error':
@@ -65,7 +54,7 @@ patch(components.Message.prototype, 'snailmail/static/src/components/message/mes
                     break;
                 case 'sn_trial':
                     // URL only used in this component, not received at init
-                    this.env.messaging.fetchSnailmailCreditsUrlTrial();
+                    this.message.messaging.fetchSnailmailCreditsUrlTrial();
                     this.snailmailState.hasDialog = true;
                     break;
             }

@@ -1,13 +1,11 @@
 /** @odoo-module **/
 
-import { Discuss } from '@mail/components/discuss/discuss';
+import { getMessagingComponent } from "@mail/utils/messaging_component";
 
 import AbstractAction from 'web.AbstractAction';
 import { action_registry } from 'web.core';
 
 const { Component } = owl;
-
-const components = { Discuss };
 
 const DiscussWidget = AbstractAction.extend({
     template: 'mail.widgets.Discuss',
@@ -33,20 +31,15 @@ const DiscussWidget = AbstractAction.extend({
         this.component = undefined;
 
         this._lastPushStateActiveThread = null;
-    },
-    /**
-     * @override
-     */
-    async willStart() {
-        await this._super(...arguments);
         this.env = Component.env;
-        await this.env.messagingCreatedPromise;
-        const initActiveId = this.options.active_id ||
-            (this.action.context && this.action.context.active_id) ||
-            (this.action.params && this.action.params.default_active_id) ||
-            'mail.box_inbox';
-        this.discuss = this.env.messaging.discuss;
-        this.discuss.update({ initActiveId });
+        this.env.messagingCreatedPromise.then(() => {
+            const initActiveId = this.options.active_id ||
+                (this.action.context && this.action.context.active_id) ||
+                (this.action.params && this.action.params.default_active_id) ||
+                'mail.box_inbox';
+            this.discuss = this.env.messaging.discuss;
+            this.discuss.update({ initActiveId });
+        });
     },
     /**
      * @override {web.AbstractAction}
@@ -70,7 +63,7 @@ const DiscussWidget = AbstractAction.extend({
             // prevent twice call to on_attach_callback (FIXME)
             return;
         }
-        const DiscussComponent = components.Discuss;
+        const DiscussComponent = getMessagingComponent("Discuss");
         this.component = new DiscussComponent();
         this._pushStateActionManagerEventListener = ev => {
             ev.stopPropagation();

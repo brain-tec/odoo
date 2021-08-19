@@ -1,16 +1,12 @@
 /** @odoo-module **/
 
-import { useModels } from '@mail/component_hooks/use_models/use_models';
+import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useRefs } from '@mail/component_hooks/use_refs/use_refs';
 import { useRenderedValues } from '@mail/component_hooks/use_rendered_values/use_rendered_values';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { Message } from '@mail/components/message/message';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
-
-const components = { Message };
 
 export class MessageList extends Component {
 
@@ -19,7 +15,6 @@ export class MessageList extends Component {
      */
     setup() {
         super.setup();
-        useShouldUpdateBasedOnProps();
         this._getRefs = useRefs();
         /**
          * States whether there was at least one programmatic scroll since the
@@ -61,10 +56,6 @@ export class MessageList extends Component {
                 threadViewer: threadView && threadView.threadViewer,
             };
         });
-        // useModels must be defined after useRenderedValues, indeed records and
-        // fields accessed during useRenderedValues should be observed by
-        // useModels as if they were part of the OWL rendering itself.
-        useModels();
         // useUpdate must be defined after useRenderedValues, indeed they both
         // use onMounted/onPatched, and the calls from useRenderedValues must
         // happen first to save the values before useUpdate accesses them.
@@ -119,8 +110,6 @@ export class MessageList extends Component {
         for (const hint of componentHintList) {
             switch (hint.type) {
                 case 'change-of-thread-cache':
-                case 'home-menu-hidden':
-                case 'home-menu-shown':
                     // thread just became visible, the goal is to restore its
                     // saved position if it exists or scroll to the end
                     this._adjustScrollFromModel();
@@ -516,7 +505,7 @@ export class MessageList extends Component {
             return;
         }
         const scrollTop = this._getScrollableElement().scrollTop;
-        this.env.messagingBus.trigger('o-component-message-list-scrolled', {
+        this.threadView.messaging.messagingBus.trigger('o-component-message-list-scrolled', {
             orderedMessages,
             scrollTop,
             thread,
@@ -547,7 +536,6 @@ export class MessageList extends Component {
 }
 
 Object.assign(MessageList, {
-    components,
     defaultProps: {
         hasScrollAdjust: true,
         hasSquashCloseMessages: false,
@@ -576,3 +564,5 @@ Object.assign(MessageList, {
     },
     template: 'mail.MessageList',
 });
+
+registerMessagingComponent(MessageList);

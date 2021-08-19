@@ -28,6 +28,14 @@ function factory(dependencies) {
         /**
          * @override
          */
+        _created() {
+            // Bind necessary until OWL supports arrow function in handlers: https://github.com/odoo/owl/issues/876
+            this.onClickActivityBoxTitle = this.onClickActivityBoxTitle.bind(this);
+        }
+
+        /**
+         * @override
+         */
         _willDelete() {
             this._stopAttachmentsLoading();
             return super._willDelete(...arguments);
@@ -39,6 +47,13 @@ function factory(dependencies) {
 
         focus() {
             this.update({ isDoFocus: true });
+        }
+
+        /**
+         * Handles click on activity box title.
+         */
+        onClickActivityBoxTitle() {
+            this.update({ isActivityBoxVisible: !this.isActivityBoxVisible });
         }
 
         async refresh() {
@@ -64,10 +79,6 @@ function factory(dependencies) {
             this.update({ isComposerVisible: true });
             this.thread.composer.update({ isLog: false });
             this.focus();
-        }
-
-        toggleActivityBoxVisibility() {
-            this.update({ isActivityBoxVisible: !this.isActivityBoxVisible });
         }
 
         //----------------------------------------------------------------------
@@ -134,7 +145,7 @@ function factory(dependencies) {
                     this.thread.refresh();
                 }
             } else if (!this.thread || !this.thread.isTemporary) {
-                const currentPartner = this.env.messaging.currentPartner;
+                const currentPartner = this.messaging.currentPartner;
                 const message = this.env.models['mail.message'].create({
                     author: link(currentPartner),
                     body: this.env._t("Creating a new record..."),
@@ -161,6 +172,7 @@ function factory(dependencies) {
         _onThreadIsLoadingAttachmentsChanged() {
             if (!this.thread || !this.thread.isLoadingAttachments) {
                 this._stopAttachmentsLoading();
+                this.update({ isShowingAttachmentsLoading: false });
                 return;
             }
             if (this._isPreparingAttachmentsLoading || this.isShowingAttachmentsLoading) {
@@ -177,7 +189,7 @@ function factory(dependencies) {
             this._attachmentsLoaderTimeout = this.env.browser.setTimeout(() => {
                 this.update({ isShowingAttachmentsLoading: true });
                 this._isPreparingAttachmentsLoading = false;
-            }, this.env.loadingBaseDelayDuration);
+            }, this.messaging.loadingBaseDelayDuration);
         }
 
         /**
@@ -186,7 +198,6 @@ function factory(dependencies) {
         _stopAttachmentsLoading() {
             this.env.browser.clearTimeout(this._attachmentsLoaderTimeout);
             this._attachmentsLoaderTimeout = null;
-            this.update({ isShowingAttachmentsLoading: false });
             this._isPreparingAttachmentsLoading = false;
         }
 

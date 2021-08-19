@@ -1,19 +1,17 @@
 /** @odoo-module **/
 
-import { ChatWindowManager } from '@mail/components/chat_window_manager/chat_window_manager';
+import { getMessagingComponent } from "@mail/utils/messaging_component";
 
 import AbstractService from 'web.AbstractService';
 import { bus, serviceRegistry } from 'web.core';
 
-const components = { ChatWindowManager };
-
 const ChatWindowService = AbstractService.extend({
+    dependencies: ['messaging'],
     /**
      * @override {web.AbstractService}
      */
     start() {
         this._super(...arguments);
-        this._webClientReady = false;
         this._listenHomeMenu();
     },
     /**
@@ -41,8 +39,6 @@ const ChatWindowService = AbstractService.extend({
      * @private
      */
     _listenHomeMenu() {
-        bus.on('hide_home_menu', this, this._onHideHomeMenu.bind(this));
-        bus.on('show_home_menu', this, this._onShowHomeMenu.bind(this));
         bus.on('web_client_ready', this, this._onWebClientReady.bind(this));
     },
     /**
@@ -53,7 +49,7 @@ const ChatWindowService = AbstractService.extend({
             this.component.destroy();
             this.component = undefined;
         }
-        const ChatWindowManagerComponent = components.ChatWindowManager;
+        const ChatWindowManagerComponent = getMessagingComponent("ChatWindowManager");
         this.component = new ChatWindowManagerComponent(null);
         const parentNode = this._getParentNode();
         await this.component.mount(parentNode);
@@ -66,33 +62,8 @@ const ChatWindowService = AbstractService.extend({
     /**
      * @private
      */
-    async _onHideHomeMenu() {
-        if (!this._webClientReady) {
-            return;
-        }
-        if (document.querySelector('.o_ChatWindowManager')) {
-            return;
-        }
-        await this._mount();
-    },
-    /**
-     * @private
-     */
-    async _onShowHomeMenu() {
-        if (!this._webClientReady) {
-            return;
-        }
-        if (document.querySelector('.o_ChatWindowManager')) {
-            return;
-        }
-        await this._mount();
-    },
-    /**
-     * @private
-     */
     async _onWebClientReady() {
         await this._mount();
-        this._webClientReady = true;
     },
 });
 
