@@ -14,19 +14,22 @@ export class DiscussMobileMailboxSelection extends Component {
      * @returns {mail.thread[]}
      */
     get orderedMailboxes() {
-        return this.env.models['mail.thread']
+        if (!this.messaging) {
+            return [];
+        }
+        return this.messaging.models['mail.thread']
             .all(thread => thread.isPinned && thread.model === 'mail.box')
             .sort((mailbox1, mailbox2) => {
-                if (mailbox1 === this.discuss.messaging.inbox) {
+                if (mailbox1 === this.messaging.inbox) {
                     return -1;
                 }
-                if (mailbox2 === this.discuss.messaging.inbox) {
+                if (mailbox2 === this.messaging.inbox) {
                     return 1;
                 }
-                if (mailbox1 === this.discuss.messaging.starred) {
+                if (mailbox1 === this.messaging.starred) {
                     return -1;
                 }
-                if (mailbox2 === this.discuss.messaging.starred) {
+                if (mailbox2 === this.messaging.starred) {
                     return 1;
                 }
                 const mailbox1Name = mailbox1.displayName;
@@ -39,7 +42,7 @@ export class DiscussMobileMailboxSelection extends Component {
      * @returns {mail.discuss}
      */
     get discuss() {
-        return this.env.messaging && this.env.messaging.discuss;
+        return this.messaging && this.messaging.discuss;
     }
 
     //--------------------------------------------------------------------------
@@ -54,7 +57,7 @@ export class DiscussMobileMailboxSelection extends Component {
      */
     _onClick(ev) {
         const { mailboxLocalId } = ev.currentTarget.dataset;
-        const mailbox = this.env.models['mail.thread'].get(mailboxLocalId);
+        const mailbox = this.messaging.models['mail.thread'].get(mailboxLocalId);
         if (!mailbox) {
             return;
         }

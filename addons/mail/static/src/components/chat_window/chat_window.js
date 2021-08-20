@@ -52,7 +52,7 @@ export class ChatWindow extends Component {
      * @returns {mail.chat_window}
      */
     get chatWindow() {
-        return this.env.models['mail.chat_window'].get(this.props.chatWindowLocalId);
+        return this.messaging && this.messaging.models['mail.chat_window'].get(this.props.chatWindowLocalId);
     }
 
     /**
@@ -75,7 +75,7 @@ export class ChatWindow extends Component {
      * @private
      */
     _applyVisibleOffset() {
-        const textDirection = this.chatWindow.messaging.locale.textDirection;
+        const textDirection = this.messaging.locale.textDirection;
         const offsetFrom = textDirection === 'rtl' ? 'left' : 'right';
         const oppositeFrom = offsetFrom === 'right' ? 'left' : 'right';
         this.el.style[offsetFrom] = this.chatWindow.visibleOffset + 'px';
@@ -161,11 +161,11 @@ export class ChatWindow extends Component {
      * @param {integer} ui.item.id
      */
     async _onAutocompleteSelect(ev, ui) {
-        const chat = await this.chatWindow.messaging.getChat({ partnerId: ui.item.id });
+        const chat = await this.messaging.getChat({ partnerId: ui.item.id });
         if (!chat) {
             return;
         }
-        this.chatWindow.messaging.chatWindowManager.openThread(chat, {
+        this.messaging.chatWindowManager.openThread(chat, {
             makeActive: true,
             replaceNewMessage: true,
         });
@@ -181,7 +181,7 @@ export class ChatWindow extends Component {
      * @param {function} res
      */
     _onAutocompleteSource(req, res) {
-        this.env.models['mail.partner'].imSearch({
+        this.messaging.models['mail.partner'].imSearch({
             callback: (partners) => {
                 const suggestions = partners.map(partner => {
                     return {
@@ -206,7 +206,7 @@ export class ChatWindow extends Component {
      */
     _onClickedHeader(ev) {
         ev.stopPropagation();
-        if (this.chatWindow.messaging.device.isMobile) {
+        if (this.messaging.device.isMobile) {
             return;
         }
         if (this.chatWindow.isFolded) {

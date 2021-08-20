@@ -3,11 +3,10 @@
 import { getMessagingComponent } from "@mail/utils/messaging_component";
 
 import AbstractAction from 'web.AbstractAction';
-import { action_registry } from 'web.core';
 
 const { Component } = owl;
 
-const DiscussWidget = AbstractAction.extend({
+export const DiscussWidget = AbstractAction.extend({
     template: 'mail.widgets.Discuss',
     /**
      * @override {web.AbstractAction}
@@ -32,12 +31,13 @@ const DiscussWidget = AbstractAction.extend({
 
         this._lastPushStateActiveThread = null;
         this.env = Component.env;
-        this.env.messagingCreatedPromise.then(() => {
+        Component.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+            const messaging = Component.env.services.messaging.modelManager.messaging;
             const initActiveId = this.options.active_id ||
                 (this.action.context && this.action.context.active_id) ||
                 (this.action.params && this.action.params.default_active_id) ||
                 'mail.box_inbox';
-            this.discuss = this.env.messaging.discuss;
+            this.discuss = messaging.discuss;
             this.discuss.update({ initActiveId });
         });
     },
@@ -129,7 +129,3 @@ const DiscussWidget = AbstractAction.extend({
         });
     },
 });
-
-action_registry.add('mail.widgets.discuss', DiscussWidget);
-
-export default DiscussWidget;

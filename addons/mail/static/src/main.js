@@ -1,38 +1,29 @@
 /** @odoo-module **/
 
-import MessagingService from '@mail/services/messaging/messaging';
-import { makeDeferred } from '@mail/utils/deferred/deferred';
+import { ChatWindowService } from '@mail/services/chat_window_service/chat_window_service';
+import { DialogService } from '@mail/services/dialog_service/dialog_service';
+import { MessagingService } from '@mail/services/messaging/messaging';
+import { DiscussWidget } from '@mail/widgets/discuss/discuss';
+import { MessagingMenuWidget } from '@mail/widgets/messaging_menu/messaging_menu';
 
-import env from 'web.commonEnv';
+import { action_registry } from 'web.core';
 import { serviceRegistry } from 'web.core';
+import SystrayMenu from 'web.SystrayMenu';
 
-/**
- * Environment keys used in messaging.
- */
-Object.assign(env, {
-    isMessagingInitialized() {
-        if (!this.modelManager || !this.modelManager.messaging) {
-            return false;
-        }
-        return this.modelManager.messaging.isInitialized;
-    },
-    /**
-     * Promise which becomes resolved when messaging is created.
-     *
-     * Useful for discuss widget to know when messaging is created, because this
-     * is an essential condition to make it work.
-     */
-    messagingCreatedPromise: makeDeferred(),
-});
-Object.defineProperty(env, 'messaging', {
-    get() {
-        return this.modelManager && this.modelManager.messaging;
-    },
-});
-Object.defineProperty(env, 'models', {
-    get() {
-        return this.modelManager && this.modelManager.models;
-    },
-});
-
+serviceRegistry.add('chat_window', ChatWindowService);
+serviceRegistry.add('dialog', DialogService);
 serviceRegistry.add('messaging', MessagingService);
+
+action_registry.add('mail.widgets.discuss', DiscussWidget);
+
+// Systray menu items display order matches order in the list
+// lower index comes first, and display is from right to left.
+// For messagin menu, it should come before activity menu, if any
+// otherwise, it is the next systray item.
+const activityMenuIndex = SystrayMenu.Items.findIndex(SystrayMenuItem =>
+    SystrayMenuItem.prototype.name === 'activity_menu');
+if (activityMenuIndex > 0) {
+    SystrayMenu.Items.splice(activityMenuIndex, 0, MessagingMenuWidget);
+} else {
+    SystrayMenu.Items.push(MessagingMenuWidget);
+}

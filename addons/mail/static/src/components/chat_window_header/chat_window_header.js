@@ -18,14 +18,14 @@ export class ChatWindowHeader extends Component {
      * @returns {mail.chat_window}
      */
     get chatWindow() {
-        return this.env.models['mail.chat_window'].get(this.props.chatWindowLocalId);
+        return this.messaging && this.messaging.models['mail.chat_window'].get(this.props.chatWindowLocalId);
     }
 
     /**
      * @returns {string}
      */
     get shiftNextText() {
-        if (this.chatWindow.messaging.locale.textDirection === 'rtl') {
+        if (this.messaging.locale.textDirection === 'rtl') {
             return this.env._t("Shift left");
         }
         return this.env._t("Shift right");
@@ -35,7 +35,7 @@ export class ChatWindowHeader extends Component {
      * @returns {string}
      */
     get shiftPrevText() {
-        if (this.chatWindow.messaging.locale.textDirection === 'rtl') {
+        if (this.messaging.locale.textDirection === 'rtl') {
             return this.env._t("Shift right");
         }
         return this.env._t("Shift left");

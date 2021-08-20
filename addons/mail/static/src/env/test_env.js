@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { makeDeferred } from '@mail/utils/deferred/deferred';
 import { nextTick } from '@mail/utils/utils';
 
 /**
@@ -23,13 +22,6 @@ export function addMessagingToEnv(providedEnv = {}) {
                 },
             }, (env.browser && env.browser.Notification) || {}),
         }, env.browser),
-        isMessagingInitialized() {
-            if (!this.messaging) {
-                return false;
-            }
-            return this.messaging.isInitialized;
-        },
-        messagingCreatedPromise: makeDeferred(),
     });
     return env;
 }

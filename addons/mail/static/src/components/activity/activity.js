@@ -36,7 +36,7 @@ export class Activity extends Component {
      * @returns {mail.activity}
      */
     get activity() {
-        return this.env.models['mail.activity'].get(this.props.activityLocalId);
+        return this.messaging && this.messaging.models['mail.activity'].get(this.props.activityLocalId);
     }
 
     /**
@@ -123,7 +123,7 @@ export class Activity extends Component {
             ev.target.dataset.oeId &&
             ev.target.dataset.oeModel
         ) {
-            this.activity.messaging.openProfile({
+            this.messaging.openProfile({
                 id: Number(ev.target.dataset.oeId),
                 model: ev.target.dataset.oeModel,
             });

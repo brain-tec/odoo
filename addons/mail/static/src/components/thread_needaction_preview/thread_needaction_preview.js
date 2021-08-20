@@ -59,7 +59,7 @@ export class ThreadNeedactionPreview extends Component {
      * @returns {mail.thread}
      */
     get thread() {
-        return this.env.models['mail.thread'].get(this.props.threadLocalId);
+        return this.messaging && this.messaging.models['mail.thread'].get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -77,8 +77,8 @@ export class ThreadNeedactionPreview extends Component {
             return;
         }
         this.thread.open();
-        if (!this.thread.messaging.device.isMobile) {
-            this.thread.messaging.messagingMenu.close();
+        if (!this.messaging.device.isMobile) {
+            this.messaging.messagingMenu.close();
         }
     }
 
@@ -87,7 +87,7 @@ export class ThreadNeedactionPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
-        this.env.models['mail.message'].markAllAsRead([
+        this.messaging.models['mail.message'].markAllAsRead([
             ['model', '=', this.thread.model],
             ['res_id', '=', this.thread.id],
         ]);

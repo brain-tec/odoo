@@ -53,7 +53,7 @@ export class ThreadPreview extends Component {
      * @returns {mail.thread}
      */
     get thread() {
-        return this.env.models['mail.thread'].get(this.props.threadLocalId);
+        return this.messaging && this.messaging.models['mail.thread'].get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -71,8 +71,8 @@ export class ThreadPreview extends Component {
             return;
         }
         this.thread.open();
-        if (!this.thread.messaging.device.isMobile) {
-            this.thread.messaging.messagingMenu.close();
+        if (!this.messaging.device.isMobile) {
+            this.messaging.messagingMenu.close();
         }
     }
 
