@@ -109,19 +109,19 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
      * @override
      */
     willStart: function () {
-        let getPricelit;
+        let getPricelist;
         // started without a selected pricelist in context? just get the first one
         if (this.context.default_pricelist) {
-            getPricelit = Promise.resolve([this.context.default_pricelist]);
+            getPricelist = Promise.resolve([this.context.default_pricelist]);
         } else {
-            getPricelit = this._rpc({
+            getPricelist = this._rpc({
                 model: 'product.pricelist',
                 method: 'search',
                 args: [[]],
                 kwargs: {limit: 1}
-            })
+            });
         }
-        const fieldSetup = getPricelit.then(pricelistIds => {
+        const fieldSetup = getPricelist.then(pricelistIds => {
             return this.model.makeRecord('report.product.report_pricelist', [{
                 name: 'pricelist_id',
                 type: 'many2one',
@@ -147,6 +147,8 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
      */
     start: function () {
         this.controlPanelProps.cp_content = this._renderComponent();
+        const $content = this.controlPanelProps.cp_content;
+        $content["$searchview"][0].querySelector('.o_is_visible_title').addEventListener('click', this._onClickVisibleTitle.bind(this));
         return this._super.apply(this, arguments).then(() => {
             this.$('.o_content').html(this.reportHtml);
         });
@@ -156,12 +158,12 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
      * the proper context.
      * @override
      */
-    getState: function() {
+    getState: function () {
         return {
             active_model: this.context.active_model,
         };
     },
-    getTitle: function() {
+    getTitle: function () {
         return _t('Pricelist Report');
     },
 
@@ -169,6 +171,21 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Returns the expected data for the report rendering call (html or pdf)
+     *
+     * @private
+     * @returns {Object}
+     */
+    _prepareActionReportParams: function () {
+        return {
+            active_model: this.context.active_model,
+            active_ids: this.context.active_ids,
+            is_visible_title: this.context.is_visible_title || '',
+            pricelist_id: this.context.pricelist_id || '',
+            quantities: this.context.quantities || [1],
+        };
+    },
     /**
      * Get template to display report.
      *
@@ -179,7 +196,9 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
         return this._rpc({
             model: 'report.product.report_pricelist',
             method: 'get_html',
-            kwargs: {context: this.context},
+            kwargs: {
+                data: this._prepareActionReportParams(),
+            },
         }).then(result => {
             this.reportHtml = result;
         });
@@ -219,6 +238,17 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
     //--------------------------------------------------------------------------
 
     /**
+     * Checkbox is checked, the report title will show.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onClickVisibleTitle(ev) {
+        this.context.is_visible_title = ev.currentTarget.checked;
+        this._reload();
+    },
+
+    /**
      * Open form view of particular record when link clicked.
      *
      * @private
@@ -240,17 +270,12 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
      * @private
      */
     _onClickPrint: function () {
-        const reportName = _.str.sprintf('product.report_pricelist?active_model=%s&active_ids=%s&pricelist_id=%s&quantities=%s',
-            this.context.active_model,
-            this.context.active_ids,
-            this.context.pricelist_id || '',
-            this.context.quantities.toString() || '1',
-        );
         return this.do_action({
             type: 'ir.actions.report',
             report_type: 'qweb-pdf',
-            report_name: reportName,
+            report_name: 'product.report_pricelist',
             report_file: 'product.report_pricelist',
+            data: this._prepareActionReportParams(),
         });
     },
     /**

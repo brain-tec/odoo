@@ -55,7 +55,7 @@
                     <field name="attribute_line_ids" widget="one2many" context="{'show_attribute': False}">
                         <tree string="Variants" editable="bottom">
                             <field name="attribute_id" attrs="{'readonly': [('id', '!=', False)]}"/>
-                            <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True}" context="{'default_attribute_id': attribute_id, 'show_attribute': False}"/>
+                            <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True, 'color_field': 'color'}" context="{'default_attribute_id': attribute_id, 'show_attribute': False}"/>
                         </tree>
                     </field>
                         <p class="oe_grey oe_edit_only">
@@ -150,7 +150,7 @@
     </record>
 
     <record id="action_product_template_price_list_report" model="ir.actions.server">
-        <field name="name">Generate Pricelist</field>
+        <field name="name">Generate Pricelist Report</field>
         <field name="groups_id" eval="[(4, ref('product.group_product_pricelist'))]"/>
         <field name="model_id" ref="product.model_product_template"/>
         <field name="binding_model_id" ref="product.model_product_template"/>
