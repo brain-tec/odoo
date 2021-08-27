@@ -68,7 +68,6 @@ const GoogleCalendarModel = CalendarModel.include({
             params: {
                 model: this.modelName,
                 fromurl: window.location.href,
-                local_context: context, // LUL TODO remove this local_context
             }
         }, {shadow}).then(function (result) {
             if (["need_config_from_admin", "need_auth", "sync_stopped"].includes(result.status)) {
@@ -172,15 +171,35 @@ const GoogleCalendarController = CalendarController.include({
         });
     },
 
-    _onArchiveRecord: function (event) {
-        var self = this;
-        Dialog.confirm(this, _t("Are you sure you want to archive this record ?"), {
-            confirm_callback: function () {
-                self.model.archiveRecords([event.data.id], self.modelName).then(function () {
+    _onArchiveRecord: async function (event) {
+        const self = this;
+        if (event.data.event.record.recurrency) {
+            const recurrenceUpdate = await this._askRecurrenceUpdatePolicy();
+            event.data = Object.assign({}, event.data, {
+                    'recurrenceUpdate': recurrenceUpdate,
+                });
+                if (recurrenceUpdate === 'self_only') {
+                    self.model.archiveRecords([event.data.id], self.modelName).then(function () {
                     self.reload();
                 });
-            }
-        });
+                } else {
+                    return this._rpc({
+                        model: self.modelName,
+                        method: 'action_mass_archive',
+                        args: [[event.data.id], recurrenceUpdate],
+                    }).then( function () {
+                        self.reload();
+                    });
+                }
+        } else {
+            Dialog.confirm(this, _t("Are you sure you want to delete this record ?"), {
+                confirm_callback: function () {
+                    self.model.archiveRecords([event.data.id], self.modelName).then(function () {
+                        self.reload();
+                    });
+                }
+            });
+        }
     },
 });
 
@@ -190,8 +209,8 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
     }),
 
     events: _.extend({}, CalendarRenderer.prototype.events, {
-        'click .o_google_sync_button': '_onGoogleSyncCalendar',
-        'click .o_stop_google_sync_button': '_onStopGoogleSynchronization',
+        'click .o_google_sync_pending': '_onGoogleSyncCalendar',
+        'click .o_google_sync_button_configured': '_onStopGoogleSynchronization',
     }),
 
     //--------------------------------------------------------------------------
@@ -199,31 +218,26 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
     //--------------------------------------------------------------------------
 
     _initGooglePillButton: function() {
-        this.$googleStopButton.css({"cursor":"pointer", "font-size":"0.9em"});
-        var switchBadgeClass = (elem) => {elem.toggleClass('badge-primary'); elem.toggleClass('badge-danger');};
-        this.$('.o_stop_google_sync_button').hover(() => {
-            switchBadgeClass(this.$googleStopButton);
-            this.$googleStopButton.html("<i class='fa mr-2 fa-times'/>".concat(_t("Stop the Synchronization")));
+        // hide the pending button
+        this.$calendarSyncContainer.find('#google_sync_pending').hide();
+        const switchBadgeClass = elem => elem.toggleClass(['badge-primary', 'badge-danger']);
+        this.$('#google_sync_configured').hover(() => {
+            switchBadgeClass(this.$calendarSyncContainer.find('#google_sync_configured'));
+            this.$calendarSyncContainer.find('#google_check').hide();
+            this.$calendarSyncContainer.find('#google_stop').show();
         }, () => {
-            switchBadgeClass(this.$googleStopButton);
-            this.$googleStopButton.html("<i class='fa mr-2 fa-check'/>".concat(_t("Synched with Google")));
+            switchBadgeClass(this.$calendarSyncContainer.find('#google_sync_configured'));
+            this.$calendarSyncContainer.find('#google_stop').hide();
+            this.$calendarSyncContainer.find('#google_check').show();
         });
     },
 
     _getGoogleButton: function () {
-        return $('<button/>', {
-            type: 'button',
-            html: _t("Sync with <b>Google</b>"),
-            class: 'o_google_sync_button w-100 m-auto btn btn-secondary'
-        });
+        this.$calendarSyncContainer.find('#google_sync_pending').show();
     },
 
     _getGoogleStopButton: function () {
-        return  $('<span/>', {
-            html: _t("Synched with Google"),
-            class: 'w-100 badge badge-pill badge-primary border-0 o_stop_google_sync_button'
-        })
-        .prepend($('<i/>', {class: "fa mr-2 fa-check"}));
+        this.$calendarSyncContainer.find('#google_sync_configured').show();
     },
 
     /**
@@ -234,14 +248,14 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
     _initSidebar: function () {
         var self = this;
         this._super.apply(this, arguments);
-        this.$googleButton = $();
-        this.$googleStopButton = $();
+        this.$googleButton = this.$('#google_sync_pending');
+        this.$googleStopButton = this.$('#google_sync_configured');
         if (this.model === "calendar.event") {
             if (this.state.google_is_sync) {
-                this.$googleStopButton = this._getGoogleStopButton().appendTo(self.$sidebar);
                 this._initGooglePillButton();
             } else {
-                this.$googleButton = this._getGoogleButton().appendTo(self.$sidebar);
+                // Hide the button needed when the calendar sync is configured
+                self.$googleStopButton.hide();
             }
         }
     },
@@ -264,10 +278,6 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
                 self.$googleButton.prop('disabled', false);
             },
             on_refresh: function () {
-                if (_.isEmpty(self.$googleStopButton)) {
-                    self.$googleStopButton = self._getGoogleStopButton();
-                }
-                self.$googleButton.replaceWith(self.$googleStopButton);
                 self._initGooglePillButton();
             }
         });
@@ -278,10 +288,8 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
         this.$googleStopButton.prop('disabled', true);
         this.trigger_up('stopGoogleSynchronization' , {
             on_confirm: function () {
-                if (_.isEmpty(self.$googleButton)) {
-                    self.$googleButton = self._getGoogleButton();
-                }
-                self.$googleStopButton.replaceWith(self.$googleButton);
+                self.$googleStopButton.hide();
+                self.$googleButton.show();
             },
             on_always: function() {
                 self.$googleStopButton.prop('disabled', false);
@@ -291,7 +299,7 @@ const GoogleCalendarRenderer = CalendarRenderer.include({
 
     _onArchiveEvent: function (event) {
         this._unselectEvent();
-        this.trigger_up('archiveRecord', {id: parseInt(event.data.id, 10)});
+        this.trigger_up('archiveRecord', {id: parseInt(event.data.id, 10), event: event.target.event.extendedProps});
     },
 });
 

@@ -23,14 +23,16 @@ QUnit.module('discuss_tests.js', {
         beforeEach(this);
 
         this.start = async params => {
-            const { afterEvent, env, widget } = await start(Object.assign({}, params, {
+            const res = await start(Object.assign({}, params, {
                 autoOpenDiscuss: true,
                 data: this.data,
                 hasDiscuss: true,
             }));
+            const { afterEvent, env, widget } = res;
             this.afterEvent = afterEvent;
             this.env = env;
             this.widget = widget;
+            return res;
         };
     },
     afterEach() {
@@ -48,6 +50,34 @@ QUnit.test('messaging not created', async function (assert) {
     });
     assert.containsOnce(document.body, '.o_Discuss_messagingNotInitialized', "should display messaging not initialized");
     messagingBeforeCreationDeferred.resolve();
+});
+
+QUnit.test('discuss should be marked as opened if the component is already rendered and messaging becomes created afterwards', async function (assert) {
+    assert.expect(1);
+
+    const messagingBeforeCreationDeferred = makeTestPromise();
+    await this.start({
+        messagingBeforeCreationDeferred,
+        waitUntilMessagingCondition: 'none',
+    });
+
+    await afterNextRender(() => messagingBeforeCreationDeferred.resolve());
+    assert.ok(
+        this.messaging.discuss.isOpen,
+        "discuss should be marked as opened if the component is already rendered and messaging becomes created afterwards"
+    );
+});
+
+QUnit.test('discuss should be marked as closed when the component is unmounted', async function (assert) {
+    assert.expect(1);
+
+    const { widget } = await this.start();
+
+    await afterNextRender(() => widget.destroy());
+    assert.notOk(
+        this.messaging.discuss.isOpen,
+        "discuss should be marked as closed when the component is unmounted"
+    );
 });
 
 QUnit.test('messaging not initialized', async function (assert) {
@@ -606,7 +636,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
 });
 
 QUnit.test('sidebar: basic chat rendering', async function (assert) {
-    assert.expect(10);
+    assert.expect(9);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat and a random name that will be asserted in the test
@@ -655,13 +685,8 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     );
     assert.strictEqual(
         chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_command`).length,
-        2,
-        "should have 2 commands"
-    );
-    assert.strictEqual(
-        chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandRename`).length,
         1,
-        "should have 'rename' command"
+        "should have 1 command"
     );
     assert.strictEqual(
         chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandUnpin`).length,
@@ -676,7 +701,7 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
 });
 
 QUnit.test('sidebar: chat rendering with unread counter', async function (assert) {
-    assert.expect(5);
+    assert.expect(4);
 
     // chat expected to be found in the sidebar
     this.data['mail.channel'].records.push({
@@ -699,13 +724,8 @@ QUnit.test('sidebar: chat rendering with unread counter', async function (assert
     );
     assert.strictEqual(
         chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_command`).length,
-        1,
-        "should have single command"
-    );
-    assert.strictEqual(
-        chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandRename`).length,
-        1,
-        "should have 'rename' command"
+        0,
+        "should have no command"
     );
     assert.strictEqual(
         chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandUnpin`).length,
@@ -853,70 +873,6 @@ QUnit.test('sidebar: chat custom name', async function (assert) {
         chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).textContent,
         "Marc",
         "chat should have custom name as name"
-    );
-});
-
-QUnit.test('sidebar: rename chat', async function (assert) {
-    assert.expect(8);
-
-    // expected correspondent, with a random unique id that will be used to link
-    // partner to chat, and a random name not used in the scope of this test but set for consistency
-    this.data['res.partner'].records.push({ id: 101, name: "Marc Demo" });
-    // chat expected to be found in the sidebar
-    this.data['mail.channel'].records.push({
-        channel_type: 'chat', // testing a chat is the goal of the test
-        custom_channel_name: "Marc", // testing a custom name is the goal of the test
-        members: [this.data.currentPartnerId, 101], // expected partners
-        public: 'private', // expected value for testing a chat
-    });
-    await this.start();
-    const chat = document.querySelector(`.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategory_item`);
-    assert.strictEqual(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).textContent,
-        "Marc",
-        "chat should have custom name as name"
-    );
-    assert.notOk(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).classList.contains('o-editable'),
-        "chat name should not be editable"
-    );
-
-    await afterNextRender(() =>
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_commandRename`).click()
-    );
-    assert.ok(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).classList.contains('o-editable'),
-        "chat should have editable name"
-    );
-    assert.strictEqual(
-        chat.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_nameInput`).length,
-        1,
-        "chat should have editable name input"
-    );
-    assert.strictEqual(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_nameInput`).value,
-        "Marc",
-        "editable name input should have custom chat name as value by default"
-    );
-    assert.strictEqual(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_nameInput`).placeholder,
-        "Marc Demo",
-        "editable name input should have partner name as placeholder"
-    );
-
-    await afterNextRender(() => {
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_nameInput`).value = "Demo";
-        const kevt = new window.KeyboardEvent('keydown', { key: "Enter" });
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_nameInput`).dispatchEvent(kevt);
-    });
-    assert.notOk(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).classList.contains('o-editable'),
-        "chat should no longer show editable name"
-    );
-    assert.strictEqual(
-        chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).textContent,
-        "Demo",
-        "chat should have renamed name as name"
     );
 });
 

@@ -357,6 +357,7 @@
                                     <field name="is_quantity_done_editable" invisible="1"/>
                                     <field name="quantity_done" string="Produced" attrs="{'column_invisible': [('parent.state', '=', 'draft')], 'readonly': [('is_quantity_done_editable', '=', False)]}"/>
                                     <field name="product_uom" groups="uom.group_uom"/>
+                                    <field name="cost_share" optional="hide"/>
                                     <field name="show_details_visible" invisible="1"/>
                                     <field name="lot_ids" widget="many2many_tags"
                                         groups="stock.group_production_lot"
@@ -468,7 +469,10 @@
             <field name="arch" type="xml">
                 <graph string="Manufacturing Orders" type="bar" stacked="False" sample="1">
                     <field name="date_planned_finished"/>
-                    <field name="product_uom_qty" type="measure" />                    
+                    <field name="product_uom_qty" type="measure"/>
+                    <field name="backorder_sequence" invisible="1"/>
+                    <field name="qty_producing" string="Quantity Produced"/>
+                    <field name="product_uom_qty" string= "Product Quantity"/>
                 </graph>
             </field>
         </record>
@@ -574,7 +578,13 @@
             <field name="res_model">mrp.production</field>
             <field name="view_mode">graph,pivot,form</field>
             <field name="target">current</field>
-            <field name="context">{'search_default_scheduled_date': 1, 'search_default_product': 2, 'default_company_id': allowed_company_ids[0]}</field>
+            <field name="context">{
+                'search_default_product': 1,
+                'search_default_scheduled_date': 2,
+                'search_default_filter_confirmed': True,
+                'search_default_filter_planned': True,
+                'default_company_id': allowed_company_ids[0]
+            }</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     No data yet!
@@ -601,7 +611,7 @@
             parent="menu_mrp_reporting"
             action="mrp_workorder_report"
             groups="group_mrp_routings"
-            sequence="11"/>
+            sequence="10"/>
 
         <record id="action_mrp_production_form" model="ir.actions.act_window">
             <field name="name">Manufacturing Orders</field>

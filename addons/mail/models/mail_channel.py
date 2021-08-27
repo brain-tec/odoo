@@ -39,9 +39,10 @@ class Channel(models.Model):
     name = fields.Char('Name', required=True, translate=True)
     active = fields.Boolean(default=True, help="Set active to false to hide the channel without removing it.")
     channel_type = fields.Selection([
-        ('chat', 'Chat Discussion'),
-        ('channel', 'Channel')],
-        string='Channel Type', default='channel')
+        ('chat', 'Chat'),
+        ('channel', 'Channel'),
+        ('group', 'Group')],
+        string='Channel Type', default='channel', help="Chat is private and unique between 2 persons. Group is private among invited persons. Channel can be freely joined (depending on its configuration).")
     is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat')
     description = fields.Text('Description')
     image_128 = fields.Image("Image", max_width=128, max_height=128, default=_get_default_image)
@@ -238,6 +239,14 @@ class Channel(models.Model):
         notification = _('<div class="o_mail_notification">left the channel</div>')
         # post 'channel left' message as root since the partner just unsubscribed from the channel
         self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
+            'type': 'mail.channel_update',
+            'payload': {
+                'id': self.id,
+                'memberCount': len(self.channel_partner_ids),
+                'members': [('insert-and-unlink', {'id': partner.id})],
+            },
+        })
         return result
 
     def add_members(self, partner_ids):
@@ -283,6 +292,18 @@ class Channel(models.Model):
                     new_partner_name=channel_partner.partner_id.name,
                 )
             channel_partner.channel_id.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment", notify_by_email=False)
+            self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', channel_partner.channel_id.id), {
+                'type': 'mail.channel_update',
+                'payload': {
+                    'id': channel_partner.channel_id.id,
+                    'memberCount': len(channel_partner.channel_id.channel_partner_ids),
+                    'members': [('insert', {
+                        'id': channel_partner.partner_id.id,
+                        'im_status': channel_partner.partner_id.im_status,
+                        'name': channel_partner.partner_id.name,
+                    })],
+                },
+            })
 
     def _action_remove_members(self, partners):
         """ Private implementation to remove members from channels. Done as sudo
@@ -554,7 +575,7 @@ class Channel(models.Model):
             info['last_message_id'] = channel_last_message_ids.get(channel.id, False)
             # listeners of the channel
             channel_partners = channel.channel_last_seen_partner_ids
-
+            info['memberCount'] = len(channel_partners)
             # find the channel partner state, if logged user
             if self.env.user and self.env.user.partner_id:
                 info['message_needaction_counter'] = channel.message_needaction_counter
@@ -610,6 +631,8 @@ class Channel(models.Model):
         """
         if self.env.user.partner_id.id not in partners_to:
             partners_to.append(self.env.user.partner_id.id)
+        if len(partners_to) > 2:
+            raise UserError(_("A chat should not be created with more than 2 persons. Create a group instead."))
         # determine type according to the number of partner in the channel
         self.flush()
         self.env.cr.execute("""
@@ -825,10 +848,6 @@ class Channel(models.Model):
             notifications.append([channel.uuid, data]) # notify frontend users
         self.env['bus.bus'].sendmany(notifications)
 
-    # ------------------------------------------------------------
-    # IM VIEW SPECIFIC (Slack Client Action)
-    # ------------------------------------------------------------
-
     @api.model
     def channel_search_to_join(self, name=None, domain=None):
         """ Return the channel info of the channel the current partner can join
@@ -872,6 +891,22 @@ class Channel(models.Model):
         channel_info = new_channel.channel_info('creation')[0]
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_info)
         return channel_info
+
+    @api.model
+    def create_group(self, partners_to):
+        """ Create a group channel.
+            :param partners_to : list of res.partner ids to add to the conversation
+            :returns: channel_info of the created channel
+            :rtype: dict
+        """
+        channel = self.create({
+            'channel_last_seen_partner_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to],
+            'channel_type': 'group',
+            'name': '',  # default name is computed client side from the list of members
+            'public': 'private',
+        })
+        channel._broadcast(partners_to)
+        return channel.channel_info()[0]
 
     @api.model
     def get_mention_suggestions(self, search, limit=8):
@@ -925,6 +960,15 @@ class Channel(models.Model):
             """, (tuple(self.ids),))
         return self.env.cr.dictfetchall()
 
+    def load_more_members(self, known_member_ids):
+        self.ensure_one()
+        partners = self.env['res.partner'].with_context(active_test=False).search_read(
+            domain=[('id', 'not in', known_member_ids), ('channel_ids', 'in', self.id)],
+            fields=['id', 'name', 'im_status'],
+            limit=30
+        )
+        return [('insert', partners)]
+
     # ------------------------------------------------------------
     # COMMANDS
     # ------------------------------------------------------------
@@ -963,7 +1007,7 @@ class Channel(models.Model):
         return msg
 
     def execute_command_leave(self, **kwargs):
-        if self.channel_type == 'channel':
+        if self.channel_type in ('channel', 'group'):
             self.action_unfollow()
         else:
             self.channel_pin(self.uuid, False)

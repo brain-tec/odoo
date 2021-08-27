@@ -105,8 +105,9 @@ function factory(dependencies) {
          * @override
          */
         _created() {
+            super._created();
             this.onClick = this.onClick.bind(this);
-            return super._created();
+            this.onClickLoadMoreMembers = this.onClickLoadMoreMembers.bind(this);
         }
 
         /**
@@ -213,6 +214,9 @@ function factory(dependencies) {
                     res_id: data2.id,
                 });
                 data2.serverLastMessage = insert(messageData);
+            }
+            if ('memberCount' in data) {
+                data2.memberCount = data.memberCount;
             }
             if ('message_needaction_counter' in data) {
                 data2.message_needaction_counter = data.message_needaction_counter;
@@ -827,6 +831,26 @@ function factory(dependencies) {
         }
 
         /**
+         * Handles click on the avatar of the given member in the member list of
+         * this channel.
+         *
+         * @param {mail.partner} member
+         */
+        onClickMemberAvatar(member) {
+            member.openChat();
+        }
+
+        /**
+         * Handles click on the name of the given member in the member list of
+         * this channel.
+         *
+         * @param {mail.partner} member
+         */
+        onClickMemberName(member) {
+            member.openProfile();
+        }
+
+        /**
          * Opens this thread either as form view, in discuss app, or as a chat
          * window. The thread will be opened in an "active" matter, which will
          * interrupt current user flow.
@@ -1186,6 +1210,9 @@ function factory(dependencies) {
             if (this.channel_type === 'chat' && this.correspondent) {
                 return this.custom_channel_name || this.correspondent.nameOrDisplayName;
             }
+            if (this.channel_type === 'group') {
+                return this.name || this.members.map(partner => partner.nameOrDisplayName).join(', ');
+            }
             return this.name;
         }
 
@@ -1202,10 +1229,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasInviteFeature() {
-            if (this.model !== 'mail.channel') {
-                return false;
-            }
-            return this.channel_type === 'channel';
+            return this.model === 'mail.channel';
         }
 
         /**
@@ -1224,7 +1248,7 @@ function factory(dependencies) {
         * @returns {boolean}
         */
         _computeIsChannelDescriptionChangeable() {
-            return this.model === 'mail.channel' && this.channel_type === 'channel';
+            return this.model === 'mail.channel' && ['channel', 'group'].includes(this.channel_type);
         }
 
         /**
@@ -1234,8 +1258,16 @@ function factory(dependencies) {
         _computeIsChannelRenamable() {
             return (
                 this.model === 'mail.channel' &&
-                ['chat', 'channel'].includes(this.channel_type)
+                ['chat', 'channel', 'group'].includes(this.channel_type)
             );
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeHasMemberListFeature() {
+            return this.model === 'mail.channel' && ['channel', 'group'].includes(this.channel_type);
         }
 
         /**
@@ -1453,6 +1485,22 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOfflineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => !member.isOnline)));
+        }
+
+        /**
+         * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOnlineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => member.isOnline)));
+        }
+
+        /**
+         * @private
          * @returns {mail.message[]}
          */
         _computeOrderedMessages() {
@@ -1532,6 +1580,14 @@ function factory(dependencies) {
                 this.orderedOtherTypingMembers[0].nameOrDisplayName,
                 this.orderedOtherTypingMembers[1].nameOrDisplayName
             );
+        }
+
+        /**
+         * @private
+         * @returns {integer}
+         */
+        _computeUnknownMemberCount() {
+            return this.memberCount - this.members.length;
         }
 
         /**
@@ -1649,6 +1705,25 @@ function factory(dependencies) {
             });
         }
 
+        /**
+         * @private
+         * @param {mail.partner[]} members
+         * @returns {mail.partner[]}
+         */
+        _sortMembers(members) {
+            return [...members].sort((a, b) => {
+                const cleanedAName = cleanSearchTerm(a.nameOrDisplayName || '');
+                const cleanedBName = cleanSearchTerm(b.nameOrDisplayName || '');
+                if (cleanedAName < cleanedBName) {
+                    return -1;
+                }
+                if (cleanedAName > cleanedBName) {
+                    return 1;
+                }
+                return a.id - b.id;
+            });
+        }
+
         //----------------------------------------------------------------------
         // Handlers
         //----------------------------------------------------------------------
@@ -1658,6 +1733,21 @@ function factory(dependencies) {
          */
         async onClick() {
             await this.open();
+        }
+
+        /**
+         * Handles click on the "load more members" button.
+         */
+        async onClickLoadMoreMembers() {
+            const members = await this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'load_more_members',
+                args: [[this.id]],
+                kwargs: {
+                    'known_member_ids': this.members.map(partner => partner.id),
+                },
+            });
+            this.update({ members });
         }
 
         /**
@@ -1785,6 +1875,12 @@ function factory(dependencies) {
             compute: '_computeHasInviteFeature',
         }),
         /**
+         * Determines whether it makes sense for this thread to have a member list.
+         */
+        hasMemberListFeature: attr({
+            compute: '_computeHasMemberListFeature',
+        }),
+        /**
          * Determine whether this thread has the seen indicators (V and VV)
          * enabled or not.
          */
@@ -1905,6 +2001,11 @@ function factory(dependencies) {
         localMessageUnreadCounter: attr({
             compute: '_computeLocalMessageUnreadCounter',
         }),
+        /**
+         * States the number of members in this thread according to the server.
+         * Only makes sense if this thread is a channel.
+         */
+        memberCount: attr(),
         members: many2many('mail.partner', {
             inverse: 'memberThreads',
         }),
@@ -1952,6 +2053,18 @@ function factory(dependencies) {
          */
         needactionMessagesAsOriginThread: many2many('mail.message', {
             compute: '_computeNeedactionMessagesAsOriginThread',
+        }),
+        /**
+         * All offline members ordered like they are displayed.
+         */
+        orderedOfflineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOfflineMembers',
+        }),
+        /**
+         * All online members ordered like they are displayed.
+         */
+        orderedOnlineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOnlineMembers',
         }),
         /**
          * All messages ordered like they are displayed.
@@ -2071,6 +2184,14 @@ function factory(dependencies) {
         typingStatusText: attr({
             compute: '_computeTypingStatusText',
             default: '',
+        }),
+        /**
+         * States how many members are currently unknown on the client side.
+         * This is the difference between the total number of members of the
+         * channel as reported in memberCount and those actually in members.
+         */
+        unknownMemberCount: attr({
+            compute: '_computeUnknownMemberCount',
         }),
         /**
          * URL to access to the conversation.

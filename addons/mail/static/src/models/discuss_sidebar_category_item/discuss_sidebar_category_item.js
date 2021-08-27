@@ -14,14 +14,10 @@ function factory(dependencies) {
          * @override
          */
         _created() {
-            this.onCancelRenaming = this.onCancelRenaming.bind(this);
             this.onClick = this.onClick.bind(this);
             this.onClickCommandLeave = this.onClickCommandLeave.bind(this);
-            this.onClickCommandRename = this.onClickCommandRename.bind(this);
             this.onClickCommandSettings = this.onClickCommandSettings.bind(this);
             this.onClickCommandUnpin = this.onClickCommandUnpin.bind(this);
-            this.onClickedEditableText = this.onClickedEditableText.bind(this);
-            this.onValidateEditableText = this.onValidateEditableText.bind(this);
         }
 
         //--------------------------------------------------------------------------
@@ -42,6 +38,7 @@ function factory(dependencies) {
         _computeAvatarUrl() {
             switch (this.channelType) {
                 case 'channel':
+                case 'group':
                     return `/web/image/mail.channel/${this.channelId}/image_128`;
                 case 'chat':
                     return this.channel.correspondent.avatarUrl;
@@ -68,6 +65,7 @@ function factory(dependencies) {
                 case 'channel':
                     return this.channel.message_needaction_counter;
                 case 'chat':
+                case 'group':
                     return this.channel.localMessageUnreadCounter;
             }
         }
@@ -77,17 +75,11 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasLeaveCommand() {
-            return this.channelType === 'channel' &&
+            return (
+                ['channel', 'group'].includes(this.channelType) &&
                 !this.channel.message_needaction_counter &&
-                !this.channel.group_based_subscription;
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
-        _computeHasRenameCommand() {
-            return this.channelType === 'chat';
+                !this.channel.group_based_subscription
+            );
         }
 
         /**
@@ -118,14 +110,6 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
-        _computeIsRenaming() {
-            return this.messaging.discuss && this.hasRenameCommand && this.messaging.discuss.renamingThreads.includes(this.channel);
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
         _computeIsUnread() {
             if (!this.channel) {
                 return clear();
@@ -141,6 +125,7 @@ function factory(dependencies) {
             switch (this.channelType) {
                 case 'channel':
                 case 'chat':
+                case 'group':
                     return true;
             }
         }
@@ -148,13 +133,6 @@ function factory(dependencies) {
         //--------------------------------------------------------------------------
         // Handlers
         //--------------------------------------------------------------------------
-
-        /**
-         * @param {MouseEvent} ev
-         */
-        onCancelRenaming(ev) {
-            this.messaging.discuss.cancelThreadRenaming(this.channel);
-        }
 
         /**
          * @param {MouseEvent} ev
@@ -171,18 +149,13 @@ function factory(dependencies) {
          */
         async onClickCommandLeave(ev) {
             ev.stopPropagation();
-            if (this.channel.creator === this.messaging.currentUser) {
+            if (this.channel.channel_type !== 'group' && this.channel.creator === this.messaging.currentUser) {
                 await this._askAdminConfirmation();
             }
-            this.channel.unsubscribe();
-        }
-
-        /**
-         * @param {MouseEvent} ev
-         */
-        onClickCommandRename(ev) {
-            ev.stopPropagation();
-            this.messaging.discuss.setThreadRenaming(this.channel);
+            if (this.channel.channel_type === 'group') {
+                await this._askLeaveGroupConfirmation();
+            }
+            this.channel.leave();
         }
 
         /**
@@ -212,25 +185,6 @@ function factory(dependencies) {
         }
 
         /**
-         * Stop propagation to prevent selecting this item.
-         *
-         * @param {CustomEvent} ev
-         */
-        onClickedEditableText(ev) {
-            ev.stopPropagation();
-        }
-
-        /**
-         * @param {CustomEvent} ev
-         * @param {Object} ev.detail
-         * @param {string} ev.detail.newName
-         */
-        onValidateEditableText(ev) {
-            ev.stopPropagation();
-            this.messaging.discuss.onValidateEditableText(this.channel, ev.detail.newName);
-        }
-
-        /**
          * @private
          * @returns {Promise}
          */
@@ -255,6 +209,33 @@ function factory(dependencies) {
                 );
             });
         }
+
+        /**
+         * @private
+         * @returns {Promise}
+         */
+        _askLeaveGroupConfirmation() {
+            return new Promise(resolve => {
+                Dialog.confirm(this,
+                    this.env._t("You are about to leave this group conversation and will no longer have access to it unless you are invited again. Are you sure you want to continue?"),
+                    {
+                        buttons: [
+                            {
+                                text: this.env._t("Leave"),
+                                classes: 'btn-primary',
+                                close: true,
+                                click: resolve
+                            },
+                            {
+                                text: this.env._t("Discard"),
+                                close: true
+                            }
+                        ]
+                    }
+                );
+            });
+        }
+
     }
 
     DiscussSidebarCategoryItem.fields = {
@@ -275,12 +256,6 @@ function factory(dependencies) {
          */
         hasLeaveCommand: attr({
             compute: '_computeHasLeaveCommand',
-        }),
-        /**
-         * Boolean determines whether the item has a "rename" command.
-         */
-        hasRenameCommand: attr({
-            compute: '_computeHasRenameCommand',
         }),
         /**
          * Boolean determines whether the item has a "settings" command.
@@ -305,12 +280,6 @@ function factory(dependencies) {
          */
         isActive: attr({
             compute: '_computeIsActive',
-        }),
-        /**
-         * Boolean determines whether the item is currently being renamed.
-         */
-        isRenaming: attr({
-            compute: '_computeIsRenaming',
         }),
         /**
          * Boolean determines whether the item has any unread messages.

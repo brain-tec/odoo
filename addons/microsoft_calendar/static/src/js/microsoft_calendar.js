@@ -161,15 +161,35 @@ const MicrosoftCalendarController = CalendarController.include({
         });
     },
 
-    _onArchiveRecord: function (event) {
-        var self = this;
-        Dialog.confirm(this, _t("Are you sure you want to archive this record ?"), {
-            confirm_callback: function () {
-                self.model.archiveRecords([event.data.id], self.modelName).then(function () {
+    _onArchiveRecord: async function (event) {
+        const self = this;
+        if (event.data.event.record.recurrency) {
+            const recurrenceUpdate = await this._askRecurrenceUpdatePolicy();
+            event.data = Object.assign({}, event.data, {
+                    'recurrenceUpdate': recurrenceUpdate,
+                });
+                if (recurrenceUpdate === 'self_only') {
+                    self.model.archiveRecords([event.data.id], self.modelName).then(function () {
                     self.reload();
                 });
-            }
-        });
+                } else {
+                    return this._rpc({
+                        model: self.modelName,
+                        method: 'action_mass_archive',
+                        args: [[event.data.id], recurrenceUpdate],
+                    }).then( function () {
+                        self.reload();
+                    });
+                }
+        } else {
+            Dialog.confirm(this, _t("Are you sure you want to delete this record ?"), {
+                confirm_callback: function () {
+                    self.model.archiveRecords([event.data.id], self.modelName).then(function () {
+                        self.reload();
+                    });
+                }
+            });
+        }
     },
 });
 
@@ -179,8 +199,8 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
     }),
 
     events: _.extend({}, CalendarRenderer.prototype.events, {
-        'click .o_microsoft_sync_button': '_onSyncMicrosoftCalendar',
-        'click .o_stop_microsoft_sync_button': '_onStopMicrosoftSynchronization',
+        'click .o_microsoft_sync_pending': '_onSyncMicrosoftCalendar',
+        'click .o_microsoft_sync_button_configured': '_onStopMicrosoftSynchronization',
     }),
 
     //--------------------------------------------------------------------------
@@ -188,31 +208,28 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
     //--------------------------------------------------------------------------
 
     _initMicrosoftPillButton: function() {
-        this.$microsoftStopButton.css({"cursor":"pointer", "font-size":"0.9em"});
-        var switchBadgeClass = (elem) => {elem.toggleClass('badge-primary'); elem.toggleClass('badge-danger');};
-        this.$('.o_stop_microsoft_sync_button').hover(() => {
-            switchBadgeClass(this.$microsoftStopButton);
-            this.$microsoftStopButton.html("<i class='fa mr-2 fa-times'/>".concat(_t("Stop the Synchronization")));
+        // hide the pending button
+        this.$calendarSyncContainer.find('#microsoft_sync_pending').hide();
+        const switchBadgeClass = elem => elem.toggleClass(['badge-primary', 'badge-danger']);
+        this.$('#microsoft_sync_configured').hover(() => {
+            switchBadgeClass(this.$calendarSyncContainer.find('#microsoft_sync_configured'));
+            this.$calendarSyncContainer.find('#microsoft_check').hide();
+            this.$calendarSyncContainer.find('#microsoft_stop').show();
         }, () => {
-            switchBadgeClass(this.$microsoftStopButton);
-            this.$microsoftStopButton.html("<i class='fa mr-2 fa-check'/>".concat(_t("Synched with Outlook")));
+            switchBadgeClass(this.$calendarSyncContainer.find('#microsoft_sync_configured'));
+            this.$calendarSyncContainer.find('#microsoft_stop').hide();
+            this.$calendarSyncContainer.find('#microsoft_check').show();
         });
     },
 
     _getMicrosoftButton: function () {
-        return $('<button/>', {
-            type: 'button',
-            html: _t("Sync with <b>Outlook</b>"),
-            class: 'o_microsoft_sync_button w-100 m-auto btn btn-secondary'
-        });
+        this.$calendarSyncContainer.find('#microsoft_sync_configured').hide();
+        this.$calendarSyncContainer.find('#microsoft_sync_pending').show();
     },
 
     _getMicrosoftStopButton: function () {
-        return  $('<span/>', {
-            html: _t("Synched with Outlook"),
-            class: 'w-100 badge badge-pill badge-primary border-0 o_stop_microsoft_sync_button'
-        })
-        .prepend($('<i/>', {class: "fa mr-2 fa-check"}));
+        this.$calendarSyncContainer.find('#microsoft_sync_configured').show();
+        this.$calendarSyncContainer.find('#microsoft_sync_pending').hide();
     },
 
     /**
@@ -223,14 +240,14 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
     _initSidebar: function () {
         var self = this;
         this._super.apply(this, arguments);
-        this.$microsoftButton = $();
-        this.$microsoftStopButton = $();
+        this.$microsoftButton = this.$('#microsoft_sync_pending');
+        this.$microsoftStopButton = this.$('#microsoft_sync_configured');
         if (this.model === "calendar.event") {
             if (this.state.microsoft_is_sync) {
-                this.$microsoftStopButton = this._getMicrosoftStopButton().appendTo(self.$sidebar);
                 this._initMicrosoftPillButton();
             } else {
-                this.$microsoftButton = this._getMicrosoftButton().appendTo(self.$sidebar);
+                // Hide the button needed when the calendar sync is configured
+                self.$microsoftStopButton.hide();
             }
         }
     },
@@ -253,10 +270,6 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
                 self.$microsoftButton.prop('disabled', false);
             },
             on_refresh: function () {
-                if (_.isEmpty(self.$microsoftStopButton)) {
-                    self.$microsoftStopButton = self._getMicrosoftStopButton();
-                }
-                self.$microsoftButton.replaceWith(self.$microsoftStopButton);
                 self._initMicrosoftPillButton();
             }
         });
@@ -267,10 +280,8 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
         this.$microsoftStopButton.prop('disabled', true);
         this.trigger_up('stopMicrosoftSynchronization' , {
             on_confirm: function () {
-                if (_.isEmpty(self.$microsoftButton)) {
-                    self.$microsoftButton = self._getMicrosoftButton();
-                }
-                self.$microsoftStopButton.replaceWith(self.$microsoftButton);
+                self.$microsoftStopButton.hide();
+                self.$microsoftButton.show();
             },
             on_always: function() {
                 self.$microsoftStopButton.prop('disabled', false);
@@ -280,7 +291,7 @@ const MicrosoftCalendarRenderer = CalendarRenderer.include({
 
     _onArchiveEvent: function (event) {
         this._unselectEvent();
-        this.trigger_up('archiveRecord', {id: parseInt(event.data.id, 10)});
+        this.trigger_up('archiveRecord', {id: parseInt(event.data.id, 10), event: event.target.event.extendedProps});
     },
 });
 
