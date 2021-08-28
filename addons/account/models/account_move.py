@@ -1558,30 +1558,31 @@ class AccountMove(models.Model):
 
     def _get_reconciled_info_JSON_values(self):
         self.ensure_one()
-
         reconciled_vals = []
         for partial, amount, counterpart_line in self._get_reconciled_invoices_partials():
-            if counterpart_line.move_id.ref:
-                reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
-            else:
-                reconciliation_ref = counterpart_line.move_id.name
-
-            reconciled_vals.append({
-                'name': counterpart_line.name,
-                'journal_name': counterpart_line.journal_id.name,
-                'amount': amount,
-                'currency': self.currency_id.symbol,
-                'digits': [69, self.currency_id.decimal_places],
-                'position': self.currency_id.position,
-                'date': counterpart_line.date,
-                'payment_id': counterpart_line.id,
-                'partial_id': partial.id,
-                'account_payment_id': counterpart_line.payment_id.id,
-                'payment_method_name': counterpart_line.payment_id.payment_method_line_id.name,
-                'move_id': counterpart_line.move_id.id,
-                'ref': reconciliation_ref,
-            })
+            reconciled_vals.append(self._get_reconciled_vals(partial, amount, counterpart_line))
         return reconciled_vals
+
+    def _get_reconciled_vals(self, partial, amount, counterpart_line):
+        if counterpart_line.move_id.ref:
+            reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
+        else:
+            reconciliation_ref = counterpart_line.move_id.name
+        return {
+            'name': counterpart_line.name,
+            'journal_name': counterpart_line.journal_id.name,
+            'amount': amount,
+            'currency': self.currency_id.symbol,
+            'digits': [69, self.currency_id.decimal_places],
+            'position': self.currency_id.position,
+            'date': counterpart_line.date,
+            'payment_id': counterpart_line.id,
+            'partial_id': partial.id,
+            'account_payment_id': counterpart_line.payment_id.id,
+            'payment_method_name': counterpart_line.payment_id.payment_method_line_id.name,
+            'move_id': counterpart_line.move_id.id,
+            'ref': reconciliation_ref,
+        }
 
     @api.depends('move_type', 'line_ids.amount_residual')
     def _compute_payments_widget_reconciled_info(self):
@@ -5007,6 +5008,11 @@ class AccountMoveLine(models.Model):
         for move_line in self:
             amount = (move_line.credit or 0.0) - (move_line.debit or 0.0)
             default_name = move_line.name or (move_line.ref or '/' + ' -- ' + (move_line.partner_id and move_line.partner_id.name or '/'))
+            category = 'other'
+            if move_line.move_id.is_sale_document():
+                category = 'invoice'
+            elif move_line.move_id.is_purchase_document():
+                category = 'vendor_bill'
             result.append({
                 'name': default_name,
                 'date': move_line.date,
@@ -5023,6 +5029,7 @@ class AccountMoveLine(models.Model):
                 'user_id': move_line.move_id.invoice_user_id.id or self._uid,
                 'partner_id': move_line.partner_id.id,
                 'company_id': move_line.analytic_account_id.company_id.id or move_line.move_id.company_id.id,
+                'category': category,
             })
         return result
 
