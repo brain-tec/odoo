@@ -206,6 +206,16 @@ class PickingType(models.Model):
         if self.show_operations and self.code != 'incoming':
             self.show_reserved = True
 
+    @api.model
+    def action_view_picking_type(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.stock_picking_type_action")
+        if self.user_has_groups('stock.group_stock_multi_locations'):
+            context = literal_eval(action['context'])
+            context['search_default_groupby_warehouse_id'] = True
+            action['context'] = context
+
+        return action
+
     def _get_action(self, action_xmlid):
         action = self.env["ir.actions.actions"]._for_xml_id(action_xmlid)
         if self:
@@ -1420,6 +1430,20 @@ class Picking(models.Model):
 
     def action_view_reception_report(self):
         return self.env["ir.actions.actions"]._for_xml_id("stock.stock_reception_action")
+
+    def action_open_label_layout(self):
+        view = self.env.ref('stock.product_label_layout_form_picking')
+        return {
+            'name': _('Choose Labels Layout'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.label.layout',
+            'views': [(view.id, 'form')],
+            'target': 'new',
+            'context': {
+                'default_product_ids': self.move_lines.product_id.ids,
+                'default_move_line_ids': self.move_line_ids.ids,
+                'default_picking_quantity': 'picking'},
+        }
 
     def _attach_sign(self):
         """ Render the delivery report in pdf and attach it to the picking in `self`. """

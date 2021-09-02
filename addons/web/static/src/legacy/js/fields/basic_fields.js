@@ -2198,6 +2198,7 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
                     timer: zoomDelay,
                     attach: '.o_content',
                     attachToTarget: true,
+                    disabledOnMobile: false,
                     onShow: function () {
                         var zoomHeight = Math.ceil(this.$zoom.height());
                         var zoomWidth = Math.ceil(this.$zoom.width());
@@ -2504,13 +2505,8 @@ var PriorityWidget = AbstractField.extend({
         var checked = this.$("[aria-checked='true']");
         return checked.length ? checked : this.$("[data-index='1']");
     },
-    init: function () {
-        this._super.apply(this, arguments);
-        console.log("init ", this.mode)
-    },
 
     on_attach_callback() {
-        console.log("on_attach_callback ")
         const self = this;
         if (self.viewType === "form") {
             let provide = () => {

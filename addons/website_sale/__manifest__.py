@@ -36,13 +36,14 @@
     ],
     'installable': True,
     'application': True,
-    'pre_init_hook': 'pre_init_hook',
+    'post_init_hook': '_post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_frontend': [
             'website_sale/static/src/scss/website_sale.scss',
             'website_sale/static/src/scss/website_mail.scss',
             'website_sale/static/src/scss/website_sale_frontend.scss',
+            'website/static/lib/multirange/multirange_custom.scss',
             'sale/static/src/scss/sale_portal.scss',
             'sale/static/src/scss/product_configurator.scss',
             'sale/static/src/js/variant_mixin.js',
@@ -53,6 +54,7 @@
             'website_sale/static/src/js/website_sale_validate.js',
             'website_sale/static/src/js/website_sale_recently_viewed.js',
             'website_sale/static/src/js/website_sale_tracking.js',
+            'website/static/lib/multirange/multirange_custom.js',
         ],
         'web._assets_primary_variables': [
             'website_sale/static/src/scss/primary_variables.scss',

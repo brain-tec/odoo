@@ -254,6 +254,22 @@
         </div>
     </template>
 
+    <template id="products_breadcrumb" name="Products Breadcrumb">
+        <ol t-if="category" t-attf-class="breadcrumb #{_classes}">
+            <li class="breadcrumb-item">
+                <a href="/shop">Products</a>
+            </li>
+            <t t-foreach="category.parents_and_self" t-as="cat">
+                <li t-if="cat == category" class="breadcrumb-item">
+                    <span class="d-inline-block" t-field="cat.name"/>
+                </li>
+                <li t-else="" class="breadcrumb-item">
+                    <a t-att-href="keep('/shop/category/%s' % slug(cat), category=0)" t-field="cat.name"/>
+                </li>
+            </t>
+        </ol>
+    </template>
+
     <!-- /shop product listing -->
     <template id="products" name="Products">
         <t t-call="website.layout">
@@ -267,6 +283,9 @@
                             <div class="products_attributes_filters"/>
                         </div>
                         <div id="products_grid" t-attf-class="col #{'o_wsale_layout_list' if layout_mode == 'list' else ''}">
+                            <t t-call="website_sale.products_breadcrumb">
+                                <t t-set="_classes" t-valuef="w-100"/>
+                            </t>
                             <div class="products_header form-inline flex-md-nowrap justify-content-end mb-4">
                                 <t t-call="website_sale.search">
                                     <t t-set="_classes" t-valuef="w-100 w-md-auto mr-auto mb-2"/>
@@ -518,6 +537,22 @@
                         </t>
                     </ul>
                 </form>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="filter_products_price" inherit_id="website_sale.products" active="False" customize_show="True" name="Filter by Prices">
+        <xpath expr="//div[@id='products_grid_before']" position="before">
+            <t t-set="enable_left_column" t-value="True"/>
+        </xpath>
+        <xpath expr="//div[@id='products_grid_before']" position="inside">
+            <div t-if="available_min_price != available_max_price" id="o_wsale_price_range_option">
+                <label>Price</label>
+                <input type="range" multiple="multiple" class="custom-range range-with-input"
+                       t-att-data-currency="pricelist.currency_id.symbol"
+                       t-att-data-currency-position="pricelist.currency_id.position"
+                       t-att-step="pricelist.currency_id.rounding" t-att-min="'%f' % (available_min_price)"
+                       t-att-max="'%f' % (available_max_price)" t-att-value="'%f,%f' % (min_price, max_price)"/>
             </div>
         </xpath>
     </template>
