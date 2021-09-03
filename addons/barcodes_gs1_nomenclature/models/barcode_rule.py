@@ -15,22 +15,24 @@ class BarcodeRule(models.Model):
         ondelete={'gs1-128': 'set default'})
     type = fields.Selection(
         selection_add=[
-            ('qty_done', 'Quantity'),
+            ('quantity', 'Quantity'),
             ('location', 'Location'),
             ('location_dest', 'Destination location'),
             ('lot', 'Lot number'),
             ('package', 'Package'),
             ('use_date', 'Best before Date'),
             ('expiration_date', 'Expiration Date'),
+            ('package_type', 'Packaging Type'),
             ('packaging_date', 'Packaging Date'),
         ], ondelete={
-            'qty_done': 'set default',
+            'quantity': 'set default',
             'location': 'set default',
             'location_dest': 'set default',
             'lot': 'set default',
             'package': 'set default',
             'use_date': 'set default',
             'expiration_date': 'set default',
+            'package_type': 'set default',
             'packaging_date': 'set default',
         })
     is_gs1_nomenclature = fields.Boolean(related="barcode_nomenclature_id.is_gs1_nomenclature")

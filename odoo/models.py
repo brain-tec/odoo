@@ -802,10 +802,16 @@ class BaseModel(metaclass=MetaModel):
         cls = type(self)
         methods = defaultdict(list)
         for attr, func in getmembers(cls, is_onchange):
+            missing = []
             for name in func._onchange:
                 if name not in cls._fields:
-                    _logger.warning("@onchange%r parameters must be field names", func._onchange)
+                    missing.append(name)
                 methods[name].append(func)
+            if missing:
+                _logger.warning(
+                    "@api.onchange%r parameters must be field names -> not valid: %s",
+                    func._onchange, missing
+                )
 
         # add onchange methods to implement "change_default" on fields
         def onchange_default(field, self):
@@ -1186,6 +1192,9 @@ class BaseModel(metaclass=MetaModel):
 
         info = {'rows': {'to': -1}}
         for id, xid, record, info in converted:
+            if self.env.context.get('import_file') and self.env.context.get('import_skip_records'):
+                if any([record.get(field) is None for field in self.env.context['import_skip_records']]):
+                    continue
             if xid:
                 xid = xid if '.' in xid else "%s.%s" % (current_module, xid)
                 batch_xml_ids.add(xid)
@@ -6469,7 +6478,7 @@ Fields:
             set on web/static/img by default, or the
             complete path to access it (eg: module/path/to/image.png).
 
-            If a falsy value is returned, Binary.placeholder() will use
+            If a falsy value is returned, "ir.http"._placeholder() will use
             the default placeholder 'web/static/img/placeholder.png'.
         """
         return False

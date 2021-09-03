@@ -13,13 +13,6 @@
         <t id="default_snippets">
             <t t-set="cta_btn_text" t-value="False"/>
             <t t-set="cta_btn_href">/contactus</t>
-            <div id="snippet_mega_menu" class="o_panel d-none">
-                <div class="o_panel_header">Mega Menu</div>
-                <div class="o_panel_body">
-                    <t t-snippet="website.s_mega_menu_multi_menus" t-thumbnail="/website/static/src/img/snippets_thumbs/s_mega_menu_multi_menus.svg"/>
-                    <t t-snippet="website.s_mega_menu_menu_image_menu" t-thumbnail="/website/static/src/img/snippets_thumbs/s_mega_menu_menu_image_menu.svg"/>
-                </div>
-            </div>
 
             <div id="snippet_structure" class="o_panel">
                 <div class="o_panel_header">Structure</div>
@@ -530,7 +523,7 @@
     <t t-set="so_snippet_addition_selector" t-translation="off">section, .parallax, .s_popup</t>
     <div id="so_snippet_addition"
         t-att-data-selector="so_snippet_addition_selector"
-        data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
+        data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
 
     <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge, .s_embed_code</t>
     <div id="so_content_addition"
@@ -993,14 +986,26 @@
     </div>
 
     <!-- Mega Menu settings -->
-    <div data-selector=".o_mega_menu">
+    <div data-js="MegaMenuLayout" data-selector=".o_mega_menu">
+            <we-select string="Template"
+                data-name="mega_menu_template_opt">
+                    <we-button data-select-label="Multi Menus" title="Multi Menus" data-select-template="website.s_mega_menu_multi_menus" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_multi_menus.svg">Multi Menus</we-button>
+                    <we-button data-select-label="Image Menu" title="Image Menu" data-select-template="website.s_mega_menu_menu_image_menu" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_menu_image_menu.svg">Image Menu</we-button>
+                    <we-button data-select-label="Odoo Menu" title="Odoo Menu" data-select-template="website.s_mega_menu_odoo_menu" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_odoo_menu.svg">Odoo Menu</we-button>
+                    <we-button data-select-label="Little Icons" title="Little Icons" data-select-template="website.s_mega_menu_little_icons" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_little_icons.svg">Little Icons</we-button>
+                    <we-button data-select-label="Big Icons Subtitles" title="Big Icons Subtitles" data-select-template="website.s_mega_menu_big_icons_subtitles" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_big_icons_subtitles.svg">Big Icons Subtitles</we-button>
+                    <we-button data-select-label="Images Subtitles" title="Images Subtitles" data-select-template="website.s_mega_menu_images_subtitles" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_images_subtitles.svg">Images Subtitles</we-button>
+                    <we-button data-select-label="Logos" title="Logos" data-select-template="website.s_mega_menu_menus_logos" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_menus_logos.svg">Logos</we-button>
+                    <we-button data-select-label="Thumbnails" title="Thumbnails" data-select-template="website.s_mega_menu_thumbnails" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_thumbnails.svg">Thumbnails</we-button>
+                    <we-button data-select-label="Cards" title="Cards" data-select-template="website.s_mega_menu_cards" data-img="/website/static/src/img/snippets_thumbs/s_mega_menu_cards.svg">Cards</we-button>
+            </we-select>
         <we-select string="Size">
             <we-button data-select-class="">Full-Width</we-button>
             <we-button data-select-class="o_mega_menu_container_size">Narrow</we-button>
         </we-select>
     </div>
 
-    <div data-selector=".o_mega_menu .nav-link"
+    <div data-selector=".o_mega_menu .nav > .nav-link"
          data-drop-in=".o_mega_menu nav"
          data-drop-near=".o_mega_menu .nav-link"/>
 
@@ -1207,7 +1212,7 @@
             <we-button data-select-class="o_anim_flip_in_x">Flip-In-X</we-button>
             <we-button data-select-class="o_anim_flip_in_y">Flip-In-Y</we-button>
         </we-select>
-        <we-select string="Animation Launch" data-dependencies="!no_animation_opt">
+        <we-select string="Animation Launch" data-dependencies="!no_animation_opt" data-name="animation_launch_opt">
             <we-button data-select-class="">First Time Only</we-button>
             <we-button data-select-class="o_animate_both_scroll">Every Time</we-button>
         </we-select>

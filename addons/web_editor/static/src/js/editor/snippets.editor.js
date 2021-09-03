@@ -549,6 +549,7 @@ var SnippetEditor = Widget.extend({
         // Show/hide overlay in preview mode or not
         this.$el.toggleClass('oe_active', show);
         this.cover();
+        this.toggleOverlayVisibility(show);
     },
     /**
      * Updates the UI of the editor (+ parent) options and call onFocus/onBlur
@@ -1525,6 +1526,16 @@ var SnippetsMenu = Widget.extend({
     activateCustomTab: function (content) {
         this._updateRightPanelContent({content: content, tab: this.tabs.CUSTOM});
     },
+    /**
+     * Public method to activate a snippet.
+     *
+     * @see this._activateSnippet
+     * @param {jQuery} $snippet
+     * @returns {Promise}
+     */
+    activateSnippet: async function ($snippet) {
+        return this._activateSnippet($snippet);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -2125,9 +2136,11 @@ var SnippetsMenu = Widget.extend({
         }
 
         var def;
-        var $parent = globalSelector.closest($snippet.parent());
-        if ($parent.length) {
-            def = this._createSnippetEditor($parent);
+        if (!$snippet[0].classList.contains('o_no_parent_editor')) {
+            var $parent = globalSelector.closest($snippet.parent());
+            if ($parent.length) {
+                def = this._createSnippetEditor($parent);
+            }
         }
 
         return Promise.resolve(def).then(function (parentEditor) {
@@ -3042,9 +3055,20 @@ var SnippetsMenu = Widget.extend({
     _onSnippetOptionUpdate(ev) {
         ev.stopPropagation();
         (async () => {
-            const editors = this._enabledEditorHierarchy;
+            // Only update editors whose DOM target is still inside the document
+            // as a top option may have removed currently-enabled child items.
+            const editors = this._enabledEditorHierarchy.filter(editor => !!editor.$target[0].closest('body'));
+
             await Promise.all(editors.map(editor => editor.updateOptionsUI()));
             await Promise.all(editors.map(editor => editor.updateOptionsUIVisibility()));
+
+            // Always enable the deepest editor whose DOM target is still inside
+            // the document.
+            if (editors[0] !== this._enabledEditorHierarchy[0]) {
+                // No awaiting this as the mutex is currently locked here.
+                this._activateSnippet(editors[0].$target);
+            }
+
             ev.data.onSuccess();
         })();
     },

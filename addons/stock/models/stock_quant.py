@@ -53,7 +53,7 @@ class StockQuant(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         domain=lambda self: self._domain_product_id(),
-        ondelete='restrict', readonly=True, required=True, index=True, check_company=True)
+        ondelete='restrict', required=True, index=True, check_company=True)
     product_tmpl_id = fields.Many2one(
         'product.template', string='Product Template',
         related='product_id.product_tmpl_id')
@@ -64,18 +64,18 @@ class StockQuant(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Location',
         domain=lambda self: self._domain_location_id(),
-        auto_join=True, ondelete='restrict', readonly=True, required=True, index=True, check_company=True)
+        auto_join=True, ondelete='restrict', required=True, index=True, check_company=True)
     lot_id = fields.Many2one(
         'stock.production.lot', 'Lot/Serial Number', index=True,
-        ondelete='restrict', readonly=True, check_company=True,
+        ondelete='restrict', check_company=True,
         domain=lambda self: self._domain_lot_id())
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
         domain="[('location_id', '=', location_id)]",
-        help='The package containing this quant', readonly=True, ondelete='restrict', check_company=True)
+        help='The package containing this quant', ondelete='restrict', check_company=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
-        help='This is the owner of the quant', readonly=True, check_company=True)
+        help='This is the owner of the quant', check_company=True)
     quantity = fields.Float(
         'Quantity',
         help='Quantity of products in this quant, in the default unit of measure of the product',
@@ -201,6 +201,15 @@ class StockQuant(models.Model):
             res._check_company()
         return res
 
+    def _load_records_create(self, values):
+        """ Add default location if import file did not fill it"""
+        company_user = self.env.company
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        for value in values:
+            if 'location_id' not in value:
+                value['location_id'] = warehouse.lot_stock_id.id
+        return super()._load_records_create(values)
+
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         """ Override to set the `inventory_quantity` field if we're in "inventory mode" as well
@@ -276,13 +285,10 @@ class StockQuant(models.Model):
             'context': ctx,
             'domain': [('location_id.usage', 'in', ['internal', 'transit'])],
             'help': """
-                <p class="o_view_nocontent_barcode_scanner">
-                    Want to speed up your inventory counts? Try our Barcode app
+                <p class="o_view_nocontent_smiling_face">
+                    Your stock is currently empty
                 </p><p>
-                    Barcode scanner can be activated via inventory settings.
-                    Manual inventory adjustments can also be performed and pre-filled with
-                    suggested counted quantity.
-                </p>
+                    Press the CREATE button to define quantity for each product in your stock or import them from a spreadsheet throughout Favorites <span class="fa fa-long-arrow-right"/> Import</p>
                 """
         }
         return action
@@ -301,19 +307,6 @@ class StockQuant(models.Model):
         # for some reason if multi-record, env.context doesn't pass to wizards...
         ctx = dict(self.env.context or {})
         ctx['default_quant_ids'] = self.ids
-        quants_not_entered = self.filtered(lambda quant: not quant.inventory_quantity_set)
-        if quants_not_entered:
-            view = self.env.ref('stock.inventory_warning_apply_view', False)
-            return {
-                'name': _('Quantities Not Entered'),
-                'type': 'ir.actions.act_window',
-                'view_mode': 'form',
-                'views': [(view.id, 'form')],
-                'view_id': view.id,
-                'res_model': 'stock.inventory.warning',
-                'target': 'new',
-                'context': ctx,
-            }
         quants_outdated = self.filtered(lambda quant: quant.is_outdated)
         if quants_outdated:
             ctx['default_quant_to_fix_ids'] = quants_outdated.ids
@@ -867,12 +860,11 @@ class StockQuant(models.Model):
         if target_action:
             action['id'] = target_action.id
 
+        form_view = self.env.ref('stock.view_stock_quant_form_editable').id
         if self.env.context.get('inventory_mode') and self.user_has_groups('stock.group_stock_manager'):
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
-            form_view = self.env.ref('stock.view_stock_quant_form_editable').id
         else:
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree').id
-            form_view = self.env.ref('stock.view_stock_quant_form').id
         action.update({
             'views': [
                 (action['view_id'], 'list'),

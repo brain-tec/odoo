@@ -102,7 +102,7 @@ class SaleOrder(models.Model):
 
         return self.env['sale.order.line'].sudo().search(domain)
 
-    def _website_product_id_change(self, order_id, product_id, qty=0):
+    def _website_product_id_change(self, order_id, product_id, qty=0, **kwargs):
         order = self.sudo().browse(order_id)
         product_context = dict(self.env.context)
         product_context.setdefault('lang', order.partner_id.lang)
@@ -120,6 +120,11 @@ class SaleOrder(models.Model):
             # 'sale.order.line'.
             price, rule_id = order.pricelist_id.with_context(product_context).get_product_price_rule(product, qty or 1.0, order.partner_id)
             pu, currency = request.env['sale.order.line'].with_context(product_context)._get_real_price_currency(product, rule_id, qty, product.uom_id, order.pricelist_id.id)
+            if order.pricelist_id and order.partner_id:
+                order_line = order._cart_find_product_line(product.id)
+                if order_line:
+                    price = self.env['account.tax']._fix_tax_included_price_company(price, product.taxes_id, order_line[0].tax_id, self.company_id)
+                    pu = self.env['account.tax']._fix_tax_included_price_company(pu, product.taxes_id, order_line[0].tax_id, self.company_id)
             if pu != 0:
                 if order.pricelist_id.currency_id != currency:
                     # we need new_list_price in the same currency as price, which is in the SO's pricelist's currency
@@ -196,7 +201,7 @@ class SaleOrder(models.Model):
 
             product_id = product.id
 
-            values = self._website_product_id_change(self.id, product_id, qty=1)
+            values = self._website_product_id_change(self.id, product_id, qty=1, **kwargs)
 
             # add no_variant attributes that were not received
             for ptav in combination.filtered(lambda ptav: ptav.attribute_id.create_variant == 'no_variant' and ptav not in received_no_variant_values):
@@ -255,7 +260,7 @@ class SaleOrder(models.Model):
         else:
             # update line
             no_variant_attributes_price_extra = [ptav.price_extra for ptav in order_line.product_no_variant_attribute_value_ids]
-            values = self.with_context(no_variant_attributes_price_extra=tuple(no_variant_attributes_price_extra))._website_product_id_change(self.id, product_id, qty=quantity)
+            values = self.with_context(no_variant_attributes_price_extra=tuple(no_variant_attributes_price_extra))._website_product_id_change(self.id, product_id, qty=quantity, **kwargs)
             order = self.sudo().browse(self.id)
             if self.pricelist_id.discount_policy == 'with_discount' and not self.env.context.get('fixed_price'):
                 product_context.update({
@@ -266,12 +271,6 @@ class SaleOrder(models.Model):
                 })
             product_with_context = self.env['product.product'].with_context(product_context).with_company(order.company_id.id)
             product = product_with_context.browse(product_id)
-            values['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(
-                order_line._get_display_price(product),
-                order_line.product_id.taxes_id,
-                order_line.tax_id,
-                self.company_id
-                )
 
             order_line.write(values)
 

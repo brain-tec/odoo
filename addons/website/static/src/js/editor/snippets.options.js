@@ -3125,6 +3125,15 @@ options.registry.WebsiteAnimate = options.Class.extend({
             this.$target.toggleClass('o_animate_preview o_animate', !!widgetValue);
         }
     },
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        if (widgetName === 'animation_launch_opt') {
+            return !this.$target[0].closest('.dropdown');
+        }
+        return this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -3145,6 +3154,35 @@ options.registry.WebsiteAnimate = options.Class.extend({
             $scrollingElement[0].classList.remove('o_wanim_overflow_x_hidden');
             this.$target.removeClass('o_animating');
         });
+    },
+});
+
+/**
+ * Replaces current target with the specified template layout
+ */
+options.registry.MegaMenuLayout = options.registry.SelectTemplate.extend({
+    /**
+     * @override
+     */
+    init() {
+        this._super(...arguments);
+        this.selectTemplateWidgetName = 'mega_menu_template_opt';
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        if (methodName === 'selectTemplate') {
+            const templateDefiningClass = this.containerEl.querySelector('section')
+                .classList.value.split(' ').filter(cl => cl.startsWith('s_mega_menu'))[0];
+            return `website.${templateDefiningClass}`;
+        }
+        return this._super(...arguments);
     },
 });
 
