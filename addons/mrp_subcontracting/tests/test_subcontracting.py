@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase
 from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCommon
@@ -42,7 +43,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         # Nothing should be tracked
         self.assertTrue(all(m.product_uom_qty == m.reserved_availability for m in picking_receipt.move_lines))
         self.assertEqual(picking_receipt.state, 'assigned')
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         # Check the created manufacturing order
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
@@ -67,7 +68,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         self.env['procurement.group'].run_scheduler()
         picking = self.env['stock.picking'].search([('group_id', '=', pg1.id)])
         self.assertEqual(len(picking), 1)
-        self.assertEqual(picking.picking_type_id, wh.out_type_id)
+        self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)
         picking_receipt.move_lines.quantity_done = 1
         picking_receipt.button_validate()
         self.assertEqual(mo.state, 'done')
@@ -127,7 +128,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.action_confirm()
 
         # Nothing should be tracked
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         # Pickings should directly be created
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
@@ -139,7 +140,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         wh = picking.picking_type_id.warehouse_id
 
         # The picking should be a delivery order
-        self.assertEqual(picking.picking_type_id, wh.out_type_id)
+        self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)
         # The date planned should be correct
         self.assertEqual(picking_receipt.scheduled_date, picking.scheduled_date + relativedelta(days=self.finished.produce_delay))
 
@@ -195,7 +196,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.action_confirm()
 
         # Nothing should be tracked
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         # Pickings should directly be created
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
@@ -209,7 +210,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
 
         # The picking should be a delivery order
         wh = picking_receipt.picking_type_id.warehouse_id
-        self.assertEqual(mo.picking_ids.picking_type_id, wh.out_type_id)
+        self.assertEqual(mo.picking_ids.picking_type_id, wh.subcontracting_resupply_type_id)
 
         self.assertEqual(mo.picking_type_id, wh.subcontracting_type_id)
         self.assertFalse(mo.picking_type_id.active)
@@ -391,7 +392,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
 
         picking_receipt.move_lines.quantity_done = 3.0
         picking_receipt._action_done()
-        mo = picking_receipt._get_subcontracted_productions()
+        mo = picking_receipt._get_subcontract_production()
         move_comp1 = mo.move_raw_ids.filtered(lambda m: m.product_id == self.comp1)
         move_comp3 = mo.move_raw_ids.filtered(lambda m: m.product_id == comp3)
         self.assertEqual(sum(move_comp1.mapped('product_uom_qty')), 3.0)
@@ -492,6 +493,103 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
         self.assertEqual(len(mo), 1)
 
+    def test_flow_flexible_bom_1(self):
+        """ Record Component for a bom subcontracted with a flexible and flexible + warning consumption """
+        self.bom.consumption = 'flexible'
+        # Create a receipt picking from the subcontractor
+        picking_form = Form(self.env['stock.picking'])
+        picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
+        picking_form.partner_id = self.subcontractor_partner1
+        with picking_form.move_ids_without_package.new() as move:
+            move.product_id = self.finished
+            move.product_uom_qty = 1
+        picking_receipt = picking_form.save()
+        picking_receipt.action_confirm()
+
+        self.assertEqual(picking_receipt.display_action_record_components, 'facultative')
+        action = picking_receipt.action_record_components()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        mo_form = Form(mo.with_context(**action['context']), view=action['view_id'])
+        mo_form.qty_producing = 1
+        with mo_form.move_line_raw_ids.edit(0) as ml:
+            self.assertEqual(ml.product_id, self.comp1)
+            self.assertEqual(ml.qty_done, 1)
+            ml.qty_done = 2
+        mo = mo_form.save()
+        mo.subcontracting_record_component()
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.qty_done, 2)
+
+        # We should not be able to call the 'record_components' button
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
+
+        picking_receipt.button_validate()
+        self.assertEqual(mo.state, 'done')
+        avail_qty_comp1 = self.env['stock.quant']._get_available_quantity(self.comp1, self.subcontractor_partner1.property_stock_subcontractor, allow_negative=True)
+        self.assertEqual(avail_qty_comp1, -2)
+
+    def test_flow_warning_bom_1(self):
+        """ Record Component for a bom subcontracted with a flexible and flexible + warning consumption """
+        self.bom.consumption = 'warning'
+        # Create a receipt picking from the subcontractor
+        picking_form = Form(self.env['stock.picking'])
+        picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
+        picking_form.partner_id = self.subcontractor_partner1
+        with picking_form.move_ids_without_package.new() as move:
+            move.product_id = self.finished
+            move.product_uom_qty = 1
+        picking_receipt = picking_form.save()
+        picking_receipt.action_confirm()
+
+        self.assertEqual(picking_receipt.display_action_record_components, 'facultative')
+        action = picking_receipt.action_record_components()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        mo_form = Form(mo.with_context(**action['context']), view=action['view_id'])
+        mo_form.qty_producing = 1
+        with mo_form.move_line_raw_ids.edit(0) as ml:
+            self.assertEqual(ml.product_id, self.comp1)
+            self.assertEqual(ml.qty_done, 1)
+            ml.qty_done = 2
+        mo = mo_form.save()
+        action_warning = mo.subcontracting_record_component()
+        warning = Form(self.env['mrp.consumption.warning'].with_context(**action_warning['context']))
+        warning = warning.save()
+        warning.action_cancel()
+
+        action_warning = mo.subcontracting_record_component()
+        warning = Form(self.env['mrp.consumption.warning'].with_context(**action_warning['context']))
+        warning = warning.save()
+        warning.action_confirm()
+
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.qty_done, 2)
+
+        # We should not be able to call the 'record_components' button
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
+
+        picking_receipt.button_validate()
+        self.assertEqual(mo.state, 'done')
+        avail_qty_comp1 = self.env['stock.quant']._get_available_quantity(self.comp1, self.subcontractor_partner1.property_stock_subcontractor, allow_negative=True)
+        self.assertEqual(avail_qty_comp1, -2)
+
+    def test_mrp_report_bom_structure_subcontracting(self):
+        self.comp2_bom.write({'type': 'subcontract', 'subcontractor_ids': [Command.link(self.subcontractor_partner1.id)]})
+        self.env['product.supplierinfo'].create({
+            'product_tmpl_id': self.finished.product_tmpl_id.id,
+            'name': self.subcontractor_partner1.id,
+            'price': 10,
+        })
+        supplier = self.env['product.supplierinfo'].create({
+            'product_tmpl_id': self.comp2.product_tmpl_id.id,
+            'name': self.subcontractor_partner1.id,
+            'price': 5,
+        })
+        self.assertTrue(supplier.is_subcontractor)
+        self.comp1.standard_price = 5
+        report_values = self.env['report.mrp.report_bom_structure']._get_report_data(self.bom.id, searchQty=1, searchVariant=False)
+        subcontracting_values = report_values['lines']['subcontracting']
+        self.assertEqual(subcontracting_values['name'], self.subcontractor_partner1.display_name)
+        self.assertEqual(subcontracting_values['bom_cost'], 10)
+        self.assertEqual(report_values['lines']['total'], 20)  # 10 For subcontracting + 5 for comp1 + 5 for subcontracting of comp2_bom
+
 
 class TestSubcontractingTracking(TransactionCase):
     def setUp(self):
@@ -527,6 +625,7 @@ class TestSubcontractingTracking(TransactionCase):
         })
         bom_form = Form(self.env['mrp.bom'])
         bom_form.type = 'subcontract'
+        bom_form.consumption = 'strict'
         bom_form.subcontractor_ids.add(self.subcontractor_partner1)
         bom_form.product_tmpl_id = self.finished_product.product_tmpl_id
         with bom_form.bom_line_ids.new() as bom_line:
@@ -551,7 +650,7 @@ class TestSubcontractingTracking(TransactionCase):
         picking_receipt.action_confirm()
 
         # We should be able to call the 'record_components' button
-        self.assertTrue(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'mandatory')
 
         # Check the created manufacturing order
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom_tracked.id)])
@@ -576,7 +675,7 @@ class TestSubcontractingTracking(TransactionCase):
         self.env['procurement.group'].run_scheduler()
         picking = self.env['stock.picking'].search([('group_id', '=', pg1.id)])
         self.assertEqual(len(picking), 1)
-        self.assertEqual(picking.picking_type_id, wh.out_type_id)
+        self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)
 
         lot_id = self.env['stock.production.lot'].create({
             'name': 'lot1',
@@ -600,7 +699,7 @@ class TestSubcontractingTracking(TransactionCase):
         mo.subcontracting_record_component()
 
         # We should not be able to call the 'record_components' button
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         picking_receipt.button_validate()
         self.assertEqual(mo.state, 'done')
@@ -629,7 +728,7 @@ class TestSubcontractingTracking(TransactionCase):
         picking_receipt.action_confirm()
 
         # We shouldn't be able to call the 'record_components' button
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         wh = picking_receipt.picking_type_id.warehouse_id
         lot_names_finished = [f"subtracked_{i}" for i in range(nb_finished_product)]
@@ -676,7 +775,7 @@ class TestSubcontractingTracking(TransactionCase):
         picking_receipt.action_confirm()
 
         # We should be able to call the 'record_components' button
-        self.assertTrue(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'mandatory')
 
         # Check the created manufacturing order
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom_tracked.id)])
@@ -720,7 +819,7 @@ class TestSubcontractingTracking(TransactionCase):
             mo.subcontracting_record_component()
 
         # We should not be able to call the 'record_components' button
-        self.assertFalse(picking_receipt.display_action_record_components)
+        self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
         picking_receipt.button_validate()
         self.assertEqual(mo.state, 'done')

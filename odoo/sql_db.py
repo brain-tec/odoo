@@ -24,8 +24,6 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ
 from psycopg2.pool import PoolError
 from werkzeug import urls
 
-from odoo.api import Environment
-
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 _logger = logging.getLogger(__name__)
@@ -63,28 +61,18 @@ from inspect import currentframe
 
 
 def flush_env(cr, *, clear=True):
-    """ Retrieve and flush an environment corresponding to the given cursor.
-        Also clear the environment if ``clear`` is true.
-    """
-    env_to_flush = None
-    for env in list(Environment.envs):
-        # don't flush() on another cursor or with a RequestUID
-        if env.cr is cr and (isinstance(env.uid, int) or env.uid is None):
-            env_to_flush = env
-            if env.uid is not None:
-                break               # prefer an environment with a real uid
+    warnings.warn("Since Odoo 15.0, use cr.flush() instead of flush_env(cr).",
+                  DeprecationWarning, stacklevel=2)
+    cr.flush()
+    if clear:
+        cr.clear()
 
-    if env_to_flush is not None:
-        env_to_flush['base'].flush()
-        if clear:
-            env_to_flush.clear()    # clear remaining new records to compute
 
 def clear_env(cr):
-    """ Retrieve and clear an environment corresponding to the given cursor """
-    for env in list(Environment.envs):
-        if env.cr is cr:
-            env.clear()
-            break
+    warnings.warn("Since Odoo 15.0, use cr.clear() instead of clear_env(cr).",
+                  DeprecationWarning, stacklevel=2)
+    cr.clear()
+
 
 import re
 re_from = re.compile('.* from "?([a-zA-Z_0-9]+)"? .*$')
@@ -109,6 +97,29 @@ class BaseCursor:
         self.postcommit = tools.Callbacks()
         self.prerollback = tools.Callbacks()
         self.postrollback = tools.Callbacks()
+        # By default a cursor has no transaction object.  A transaction object
+        # for managing environments is instantiated by registry.cursor().  It
+        # is not done here in order to avoid cyclic module dependencies.
+        self.transaction = None
+
+    def flush(self):
+        """ Flush the current transaction, and run precommit hooks. """
+        if self.transaction is not None:
+            self.transaction.flush()
+        self.precommit.run()
+
+    def clear(self):
+        """ Clear the current transaction, and clear precommit hooks. """
+        if self.transaction is not None:
+            self.transaction.clear()
+        self.precommit.clear()
+
+    def reset(self):
+        """ Reset the current transaction (this invalidates more that clear()).
+            This method should be called only right after commit() or rollback().
+        """
+        if self.transaction is not None:
+            self.transaction.reset()
 
     @contextmanager
     @check
@@ -116,18 +127,15 @@ class BaseCursor:
         """context manager entering in a new savepoint"""
         name = uuid.uuid1().hex
         if flush:
-            flush_env(self, clear=False)
-            self.precommit.run()
+            self.flush()
         self.execute('SAVEPOINT "%s"' % name)
         try:
             yield
             if flush:
-                flush_env(self, clear=False)
-                self.precommit.run()
+                self.flush()
         except Exception:
             if flush:
-                clear_env(self)
-                self.precommit.clear()
+                self.clear()
             self.execute('ROLLBACK TO SAVEPOINT "%s"' % name)
             raise
         else:
@@ -455,9 +463,9 @@ class Cursor(BaseCursor):
     @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
-        flush_env(self)
-        self.precommit.run()
+        self.flush()
         result = self._cnx.commit()
+        self.clear()
         self._now = None
         self.prerollback.clear()
         self.postrollback.clear()
@@ -467,8 +475,7 @@ class Cursor(BaseCursor):
     @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
-        clear_env(self)
-        self.precommit.clear()
+        self.clear()
         self.postcommit.clear()
         self.prerollback.run()
         result = self._cnx.rollback()
@@ -514,6 +521,7 @@ class TestCursor(BaseCursor):
     _savepoint_seq = itertools.count()
 
     def __init__(self, cursor, lock):
+        super().__init__()
         self._closed = False
         self._cursor = cursor
         # we use a lock to serialize concurrent requests
@@ -536,9 +544,9 @@ class TestCursor(BaseCursor):
     @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
-        flush_env(self)
-        self.precommit.run()
+        self.flush()
         self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
+        self.clear()
         self.prerollback.clear()
         self.postrollback.clear()
         self.postcommit.clear()         # TestCursor ignores post-commit hooks
@@ -546,8 +554,7 @@ class TestCursor(BaseCursor):
     @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
-        clear_env(self)
-        self.precommit.clear()
+        self.clear()
         self.postcommit.clear()
         self.prerollback.run()
         self._cursor.execute('ROLLBACK TO SAVEPOINT "%s"' % self._savepoint)

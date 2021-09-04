@@ -109,7 +109,7 @@
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_snippet.svg"/>
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet_carousel" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_carousel.svg"/>
                     <t id="sale_products_hook"/>
-                    <t id="sale_product_search_section_hook"/>
+                    <t t-snippet="website.s_searchbar" t-thumbnail="/website/static/src/img/snippets_thumbs/s_searchbar.svg"/>
                     <t id="blog_posts_hook"/>
                     <t id="event_local_events_hook"/>
                     <t id="snippet_google_map_hook"/>
@@ -123,6 +123,7 @@
                     <t id="mail_group_hook"/>
                     <t id="twitter_favorite_tweets_hook"/>
                     <t t-snippet="website.s_embed_code" t-thumbnail="/website/static/src/img/snippets_thumbs/s_embed_code.svg"/>
+                    <t id="snippet_donation_hook"/>
                 </div>
             </div>
 
@@ -138,7 +139,7 @@
                     </t>
                     <t t-snippet="website.s_card" t-thumbnail="/website/static/src/img/snippets_thumbs/s_card.svg"/>
                     <t t-snippet="website.s_share" t-thumbnail="/website/static/src/img/snippets_thumbs/s_share.svg"/>
-                    <t id="sale_product_search_input_hook"/>
+                    <t t-snippet="website.s_searchbar_input" t-thumbnail="/website/static/src/img/snippets_thumbs/s_searchbar_inline.svg"/>
                     <t id="mass_mailing_newsletter_hook"/>
                     <t t-snippet="website.s_text_highlight" t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_highlight.svg"/>
                     <t t-snippet="website.s_chart" t-thumbnail="/website/static/src/img/snippets_thumbs/s_chart.svg">
@@ -152,6 +153,7 @@
                         <keywords>cite</keywords>
                     </t>
                     <t id="event_speaker_bio_hook"/>
+                    <t id="snippet_donation_button_hook"/>
                 </div>
             </div>
         </t>
@@ -167,9 +169,11 @@
         <t id="newsletter_popup_snippet" t-install="mass_mailing" string="Newsletter Popup" t-thumbnail="/website/static/src/img/snippets_thumbs/newsletter_subscribe_popup.svg"/>
         <t t-install="website_mail_group" string="Discussion Group" t-thumbnail="/website/static/src/img/snippets_thumbs/s_group.svg"/>
         <t t-install="website_twitter" string="Twitter Scroller" t-thumbnail="/website/static/src/img/snippets_thumbs/s_twitter_scroll.svg"/>
+        <t t-install="website_payment" string="Donation" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation.svg"/>
     </xpath>
     <xpath expr="//div[@id='snippet_content']//t[@t-snippet][last()]" position="after">
         <t id="newsletter_snippet" t-install="mass_mailing" string="Newsletter" t-thumbnail="/website/static/src/img/snippets_thumbs/s_newsletter_subscribe_form.svg"/>
+        <t t-install="website_payment" string="Donation Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
     </xpath>
 </template>
 
@@ -315,6 +319,14 @@
         data-no-preview="true"
         t-att-data-model="model" t-att-data-call-with="call_with" data-select-record="" t-att-data-fields="data_fields"
         data-allow-delete="true" data-fakem2m="true"/>
+</template>
+
+<template id="snippet_options_header_brand">
+    <we-select t-att-string="label" data-reload="/" t-att-data-dependencies="dependencies">
+        <we-button data-customize-website-views="" data-name="option_header_brand_none">None</we-button>
+        <we-button data-customize-website-views="website.option_header_brand_name">Text</we-button>
+        <we-button data-customize-website-views="website.option_header_brand_logo">Image</we-button>
+    </we-select>
 </template>
 
 <template id="snippet_options">
@@ -525,7 +537,7 @@
         t-att-data-selector="so_snippet_addition_selector"
         data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
 
-    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge, .s_embed_code</t>
+    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge, .s_embed_code, .s_donation</t>
     <div id="so_content_addition"
         t-att-data-selector="so_content_addition_selector"
         t-attf-data-drop-near="p, h1, h2, h3, ul, ol, .row > div > img, #{so_content_addition_selector}"
@@ -584,11 +596,6 @@
                        data-customize-website-views="website.template_header_contact"
                        data-customize-website-variable="'Contact'"
                        data-img="/website/static/src/img/snippets_options/header_template_contact.svg"/>
-            <we-button title="Minimalist"
-                       data-name="header_minimalist_opt"
-                       data-customize-website-views="website.template_header_minimalist"
-                       data-customize-website-variable="'minimalist'"
-                       data-img="/website/static/src/img/snippets_options/header_template_minimalist.svg"/>
             <we-button title="Boxed"
                        data-name="header_boxed_opt"
                        data-customize-website-views="website.template_header_boxed"
@@ -753,8 +760,8 @@
                    data-variable="hamburger-position"
                    data-reload="/">
             <we-button data-customize-website-views="" data-customize-website-variable="'left'">Left</we-button>
-            <we-button data-customize-website-views="website.template_header_default_align_center, website.template_header_hamburger_align_center" data-customize-website-variable="'center'">Center</we-button>
-            <we-button data-customize-website-views="website.template_header_default_align_right, website.template_header_hamburger_align_right" data-customize-website-variable="'right'">Right</we-button>
+            <we-button data-customize-website-views="website.template_header_default_align_center, website.template_header_hamburger_align_center, website.template_header_slogan_align_center" data-customize-website-variable="'center'">Center</we-button>
+            <we-button data-customize-website-views="website.template_header_default_align_right, website.template_header_hamburger_align_right, website.template_header_slogan_align_right" data-customize-website-variable="'right'">Right</we-button>
         </we-select>
 
         <!-- Generic Hamburger Options (mobile or not) -->
@@ -762,11 +769,15 @@
                    data-name="header_hamburger_type_opt"
                    data-variable="hamburger-type"
                    data-reload="/">
-            <we-button data-customize-website-variable="'default'"
+            <we-button data-name="default_hamburger_opt"
+                       data-customize-website-variable="'default'"
                        data-customize-website-views="">Default</we-button>
             <we-button data-name="off_canvas_menu_opt"
                        data-customize-website-variable="'off-canvas'"
                        data-customize-website-views="website.option_header_off_canvas, website.option_header_off_canvas_template_header_hamburger, website.option_header_off_canvas_template_header_sidebar, website.option_header_off_canvas_template_header_hamburger_full">Off-Canvas</we-button>
+            <we-button data-name="no_hamburger_opt"
+                       data-customize-website-variable="'no-hamburger'"
+                       data-customize-website-views="website.option_header_no_mobile_hamburger">Same as desktop</we-button>
         </we-select>
 
         <we-select string="⌙ Off-Canvas Logo" data-dependencies="off_canvas_menu_opt" data-reload="/">
@@ -806,26 +817,9 @@
             <we-button data-select-class="" data-name="header_dropdown_on_click_opt">On Click</we-button>
         </we-select>
 
-        <we-select string="Logo type" data-reload="/">
-            <we-button data-customize-website-views="" data-name="option_header_brand_none">None</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_name">Text</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_logo">Image</we-button>
-        </we-select>
-        <we-input string="⌙ Height"
-                  data-dependencies="!option_header_brand_none"
-                  data-customize-website-variable="null"
-                  data-variable="logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"/>
-        <we-input string="⌙ Height (Scrolled)"
-                  data-name="option_logo_height_scrolled"
-                  data-customize-website-variable="null"
-                  data-variable="fixed-logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"
-                  data-dependencies="!header_effect_scroll_opt"/>
-
         <we-checkbox string="Show Sign In" data-customize-website-views="portal.user_sign_in" data-reload="/"/>
+        <we-checkbox string="Call to Action" data-customize-website-views="website.header_call_to_action"
+                     data-reset-view-arch="true" data-reload="/"/>
         <we-select string="Language Selector" data-reload="/">
             <we-button data-name="header_language_selector_none_opt"
                        data-customize-website-views="">None</we-button>
@@ -837,6 +831,29 @@
             <we-button data-customize-website-views="website.header_language_selector_flag, website.header_language_selector_no_text">Flag</we-button>
             <we-button data-customize-website-views="website.header_language_selector_flag">Flag and Text</we-button>
         </we-select>
+        <t t-call="website.snippet_options_header_brand">
+            <t t-set="label">Logo Type</t>
+            <t t-set="dependencies" t-valuef="option_header_brand_none"/>
+        </t>
+    </div>
+    <div data-selector="#wrapwrap > header nav.navbar .navbar-brand img" data-no-check="true">
+        <t t-call="website.snippet_options_header_brand">
+            <t t-set="label">Type</t>
+        </t>
+
+        <we-input string="Height"
+                  data-dependencies="!option_header_brand_none"
+                  data-customize-website-variable="null"
+                  data-variable="logo-height"
+                  data-unit="px"
+                  data-save-unit="rem"/>
+        <we-input string="Height (Scrolled)"
+                  data-name="option_logo_height_scrolled"
+                  data-customize-website-variable="null"
+                  data-variable="fixed-logo-height"
+                  data-unit="px"
+                  data-save-unit="rem"
+                  data-dependencies="!header_effect_scroll_opt"/>
     </div>
 
     <!-- Footer - Colors & Layouts -->
@@ -1349,7 +1366,7 @@
             <we-input string="⌙ Small" data-customize-website-variable="" data-variable="input-font-size-sm" data-unit="px" data-save-unit="rem"/>
             <we-input string="⌙ Large" data-customize-website-variable="" data-variable="input-font-size-lg" data-unit="px" data-save-unit="rem"/>
         </we-collapse>
-        <we-input string="Border Width" data-customize-website-variable="" data-variable="input-border-width" data-unit="px" data-save-unit="rem"/>>
+        <we-input string="Border Width" data-customize-website-variable="" data-variable="input-border-width" data-unit="px" data-save-unit="rem"/>
         <we-collapse>
             <we-input string="Border Radius" data-customize-website-variable="" data-variable="input-border-radius" data-unit="px" data-save-unit="rem"/>
             <we-input string="⌙ Small" data-customize-website-variable="" data-variable="input-border-radius-sm" data-unit="px" data-save-unit="rem"/>

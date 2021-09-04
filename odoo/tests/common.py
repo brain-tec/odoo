@@ -44,6 +44,7 @@ from lxml import etree, html
 import odoo
 from odoo import api
 from odoo.models import BaseModel
+from odoo.exceptions import AccessError
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
 from odoo.service import security
 from odoo.sql_db import Cursor
@@ -413,7 +414,13 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
         """ Context manager that clears the environment upon failure. """
         with super(BaseCase, self).assertRaises(exception, msg=msg) as cm:
             if hasattr(self, 'env'):
-                with self.env.clear_upon_failure():
+                with self.env.cr.savepoint():
+                    if issubclass(exception, AccessError):
+                        # The savepoint() above calls flush(), which leaves the
+                        # record cache with lots of data.  This can prevent
+                        # access errors to be detected. In order to avoid this
+                        # issue, we clear the cache before proceeding.
+                        self.env.cr.clear()
                     yield cm
             else:
                 yield cm
@@ -443,14 +450,14 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
 
         if flush:
             self.env.user.flush()
-            self.env.cr.precommit.run()
+            self.env.cr.flush()
 
         with patch('odoo.sql_db.Cursor.execute', execute):
             with patch('odoo.osv.expression.get_unaccent_wrapper', get_unaccent_wrapper):
                 yield actual_queries
                 if flush:
                     self.env.user.flush()
-                    self.env.cr.precommit.run()
+                    self.env.cr.flush()
 
         self.assertEqual(
             len(actual_queries), len(expected),
@@ -485,12 +492,12 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                 expected = counters.get(login, default)
                 if flush:
                     self.env.user.flush()
-                    self.env.cr.precommit.run()
+                    self.env.cr.flush()
                 count0 = self.cr.sql_log_count
                 yield
                 if flush:
                     self.env.user.flush()
-                    self.env.cr.precommit.run()
+                    self.env.cr.flush()
                 count = self.cr.sql_log_count - count0
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
@@ -509,11 +516,11 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
             # same operations, otherwise the caches might not be ready!
             if flush:
                 self.env.user.flush()
-                self.env.cr.precommit.run()
+                self.env.cr.flush()
             yield
             if flush:
                 self.env.user.flush()
-                self.env.cr.precommit.run()
+                self.env.cr.flush()
 
     def assertRecordValues(self, records, expected_values):
         ''' Compare a recordset with a list of dictionaries representing the expected results.
@@ -699,7 +706,6 @@ class TransactionCase(BaseCase):
         cls.addClassCleanup(cls.cr.close)
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
-        cls.addClassCleanup(cls.env.reset)
 
     def setUp(self):
         super().setUp()
@@ -755,7 +761,6 @@ class SingleTransactionCase(BaseCase):
         cls.addClassCleanup(cls.cr.close)
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
-        cls.addClassCleanup(cls.env.reset)
 
     def setUp(self):
         super(SingleTransactionCase, self).setUp()
@@ -1419,7 +1424,11 @@ class HttpCase(TransactionCase):
             cls.browser = None
 
     def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True, head=False):
-        self.env['base'].flush()
+        # Flush and clear the current transaction.  This is useful in case we
+        # make a request to the server, as the request is made with a test
+        # cursor, which uses a different cache than this transaction.
+        self.cr.flush()
+        self.cr.clear()
         if url.startswith('/'):
             url = "http://%s:%s%s" % (HOST, odoo.tools.config['http_port'], url)
         if head:
@@ -1462,6 +1471,11 @@ class HttpCase(TransactionCase):
         session.db = db
 
         if user: # if authenticated
+            # Flush and clear the current transaction.  This is useful, because
+            # the call below opens a test cursor, which uses a different cache
+            # than this transaction.
+            self.cr.flush()
+            self.cr.clear()
             uid = self.registry['res.users'].authenticate(db, user, password, {'interactive': False})
             env = api.Environment(self.cr, uid, {})
             session.uid = uid
@@ -1514,7 +1528,11 @@ class HttpCase(TransactionCase):
 
         try:
             self.authenticate(login, login)
-            self.env['base'].flush()
+            # Flush and clear the current transaction.  This is useful in case
+            # we make requests to the server, as these requests are made with
+            # test cursors, which uses different caches than this transaction.
+            self.cr.flush()
+            self.cr.clear()
             url = werkzeug.urls.url_join(self.base_url(), url_path)
             self._logger.info('Open "%s" in browser', url)
 
@@ -1558,12 +1576,7 @@ class HttpCase(TransactionCase):
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours['%s'].ready" % tour_name)
-        res = self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
-        # some tests read the result after the tour, and as  the tour does not
-        # use this environment's cache, invalidate it to fetch the data from the
-        # database
-        self.env.cache.invalidate()
-        return res
+        return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
 
 
 # kept for backward compatibility

@@ -46,6 +46,7 @@ class Channel(models.Model):
     def _generate_random_token(self):
         # Built to be shared on invitation link. It uses non-ambiguous characters and it is of a
         # reasonable length: enough to avoid brute force, but short enough to be shareable easily.
+        # This token should not contain "mail.guest"._cookie_separator value.
         return ''.join(choice('abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ23456789') for _i in range(10))
 
     # description
@@ -532,6 +533,22 @@ class Channel(models.Model):
         """
         self._set_last_seen_message(message)
         return super()._message_post_after_hook(message=message, msg_vals=msg_vals)
+
+    def _check_can_update_message_content(self, message):
+        """ We don't call super in this override as we want to ignore the
+        mail.thread behavior completely """
+        if not message.message_type == 'comment':
+            raise UserError(_("Only messages type comment can have their content updated on model 'mail.channel'"))
+
+    def _message_update_content_after_hook(self, message):
+        self.ensure_one()
+        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
+            'type': 'mail.message_update',
+            'payload': {
+                'id': message.id,
+                'body': message.body,
+            },
+        })
 
     def _message_subscribe(self, partner_ids=None, subtype_ids=None, customer_ids=None):
         """ Do not allow follower subscription on channels. Only members are
