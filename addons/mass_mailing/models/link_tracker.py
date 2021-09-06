@@ -9,6 +9,9 @@ class LinkTracker(models.Model):
 
     mass_mailing_id = fields.Many2one('mailing.mailing', string='Mass Mailing')
 
+    _sql_constraints = [
+        ('url_utms_uniq', 'unique (url, campaign_id, medium_id, source_id, mass_mailing_id)', 'The URL and the UTM combination must be unique')
+    ]
 
 class LinkTrackerClick(models.Model):
     _inherit = "link.tracker.click"
