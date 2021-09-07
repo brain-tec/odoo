@@ -1122,8 +1122,10 @@ class Field(MetaField('DummyField', (object,), {})):
                     for name, value in record._cache.items()
                     if is_inherited_field(name)
                 })
-                value = self.convert_to_cache(parent, record)
-                env.cache.set(record, self, value)
+                # in case the delegate field has inverse one2many fields, this
+                # updates the inverse fields as well
+                record._update_cache({self.name: parent}, validate=False)
+                value = env.cache.get(record, self)
 
             else:
                 # non-stored field or stored field on new record: default value
@@ -2370,6 +2372,9 @@ class Selection(Field):
         attrs = super()._get_attrs(model_class, name)
         # arguments 'selection' and 'selection_add' are processed below
         attrs.pop('selection_add', None)
+        # Selection fields have an optional default implementation of a group_expand function
+        if attrs.get('group_expand') is True:
+            attrs['group_expand'] = self._default_group_expand
         return attrs
 
     def _setup_attrs(self, model_class, name):
@@ -2486,6 +2491,10 @@ class Selection(Field):
             return env['ir.translation'].get_field_selection(self.model_name, self.name)
         else:
             return selection
+
+    def _default_group_expand(self, records, groups, domain, order):
+        # return a group per selection option, in definition order
+        return self.get_values(records.env)
 
     def get_values(self, env):
         """Return a list of the possible values."""
