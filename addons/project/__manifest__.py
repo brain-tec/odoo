@@ -59,19 +59,21 @@
     'post_init_hook': '_project_post_init',
     'assets': {
         'web.assets_backend': [
+            'project/static/src/burndown_chart/*',
+            'project/static/src/project_control_panel/*',
             'project/static/src/css/project.css',
             'project/static/src/js/project_activity.js',
             'project/static/src/js/project_control_panel.js',
             'project/static/src/js/project_form.js',
-            'project/static/src/js/project_graph.js',
+            'project/static/src/js/project_graph_view.js',
             'project/static/src/js/project_kanban.js',
             'project/static/src/js/project_list.js',
-            'project/static/src/js/project_pivot.js',
-            'project/static/src/js/project_rating_reporting.js',
+            'project/static/src/js/project_pivot_view.js',
+            'project/static/src/js/project_rating_graph_view.js',
+            'project/static/src/js/project_rating_pivot_view.js',
             'project/static/src/js/project_task_kanban_examples.js',
             'project/static/src/js/tours/project.js',
             'project/static/src/js/project_calendar.js',
-            'project/static/src/js/burndown_chart/*',
             'project/static/src/js/right_panel/*',
             'project/static/src/js/update/*',
             'project/static/src/js/widgets/*',
@@ -85,7 +87,7 @@
             'project/static/src/js/portal_rating.js',
         ],
         'web.assets_qweb': [
-            'project/static/src/xml/**/*',
+            'project/static/src/**/*.xml',
         ],
         'web.qunit_suite_tests': [
             'project/static/tests/burndown_chart_tests.js',
@@ -100,6 +102,7 @@
         'project.webclient': [
             ('include', 'web.assets_backend'),
             ('remove', 'web/static/src/webclient/menu_service.js'),
+            ('remove', 'web/static/src/webclient/commands/menu_providers.js'),
 
             # Remove Longpolling bus and packages needed this bus
             ('remove', 'bus/static/src/js/services/assets_watchdog_service.js'),

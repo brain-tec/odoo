@@ -451,7 +451,7 @@
             <field name="model">event.event</field>
             <field name="arch" type="xml">
                 <graph string="Events" sample="1">
-                    <field name="name" type="row"/>
+                    <field name="name"/>
                     <field name="seats_available" type="measure"/>
                 </graph>
             </field>
@@ -648,7 +648,7 @@
             <field name="name">event.registration.pivot</field>
             <field name="model">event.registration</field>
             <field name="arch" type="xml">
-                <pivot string="Registration" display_quantity="True" sample="1">
+                <pivot string="Registration" display_quantity="1" sample="1">
                     <field name="event_id" type="row"/>
                 </pivot>
             </field>
