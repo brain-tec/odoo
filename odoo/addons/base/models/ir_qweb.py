@@ -5,7 +5,6 @@ import copy
 import logging
 import re
 import markupsafe
-from time import time
 from lxml import html, etree
 
 from odoo import api, models, tools
@@ -13,6 +12,7 @@ from odoo.tools.safe_eval import check_values, assert_valid_codeobj, _BUILTINS, 
 from odoo.tools.misc import get_lang
 from odoo.http import request
 from odoo.modules.module import get_resource_path
+from odoo.tools.profiler import QwebTracker
 
 from odoo.addons.base.models.qweb import QWeb
 from odoo.addons.base.models.assetsbundle import AssetsBundle
@@ -51,6 +51,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     _available_objects = dict(_BUILTINS)
     _empty_lines = re.compile(r'\n\s*\n')
 
+    @QwebTracker.wrap_render
     @api.model
     def _render(self, template, values=None, **options):
         """ render(template, values, **options)
@@ -67,10 +68,10 @@ class IrQWeb(models.AbstractModel, QWeb):
                   instead of `str`)
         :rtype: MarkupSafe
         """
-        context = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
-        context.update(options)
+        compile_options = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
+        compile_options.update(options)
 
-        result = super(IrQWeb, self)._render(template, values=values, **context)
+        result = super()._render(template, values=values, **compile_options)
 
         if not values or not values.get('__keep_empty_lines'):
             result = markupsafe.Markup(IrQWeb._empty_lines.sub('\n', result.strip()))
@@ -109,19 +110,20 @@ class IrQWeb(models.AbstractModel, QWeb):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_get_template``. """
-        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id']
+        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id', 'profile']
 
     # apply ormcache_context decorator unless in dev mode...
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
         tools.ormcache('id_or_xml_id', 'tuple(options.get(k) for k in self._get_template_cache_keys())'),
     )
+    @QwebTracker.wrap_compile
     def _compile(self, id_or_xml_id, options):
         try:
             id_or_xml_id = int(id_or_xml_id)
         except:
             pass
-        return super(IrQWeb, self)._compile(id_or_xml_id, options=options)
+        return super()._compile(id_or_xml_id, options=options)
 
     def _load(self, name, options):
         lang = options.get('lang', get_lang(self.env).code)
@@ -153,7 +155,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     # order
 
     def _directives_eval_order(self):
-        directives = super(IrQWeb, self)._directives_eval_order()
+        directives = super()._directives_eval_order()
         directives.insert(directives.index('foreach'), 'groups')
         directives.insert(directives.index('call'), 'lang')
         directives.insert(directives.index('field'), 'call-assets')
@@ -164,9 +166,13 @@ class IrQWeb(models.AbstractModel, QWeb):
     def _compile_node(self, el, options, indent):
         if el.get("groups"):
             el.set("t-groups", el.attrib.pop("groups"))
-        return super(IrQWeb, self)._compile_node(el, options, indent)
+        return super()._compile_node(el, options, indent)
 
     # compile directives
+
+    @QwebTracker.wrap_compile_directive
+    def _compile_directive(self, el, options, directive, indent):
+        return super()._compile_directive(el, options, directive, indent)
 
     def _compile_directive_groups(self, el, options, indent):
         """Compile `t-groups` expressions into a python code as a list of
@@ -359,7 +365,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         values['false'] = False
         if 'request' not in values:
             values['request'] = request
-        return super(IrQWeb, self)._prepare_values(values, options)
+        return super()._prepare_values(values, options)
 
     def _compile_expr(self, expr, raise_on_missing=False):
         """ Compiles a purported Python expression to compiled code, verifies
@@ -368,6 +374,6 @@ class IrQWeb(models.AbstractModel, QWeb):
 
         :param expr: string
         """
-        namespace_expr = super(IrQWeb, self)._compile_expr(expr, raise_on_missing=raise_on_missing)
+        namespace_expr = super()._compile_expr(expr, raise_on_missing=raise_on_missing)
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(namespace_expr, '<>', 'eval'), expr)
         return namespace_expr

@@ -2,11 +2,10 @@
     .o_timeoff_container {
         height: auto;
         box-shadow: inset 0 -1px 0 $border-color;
-
-    }
-
-    .o_calendar_container {
-        height: auto;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: $o-webclient-background-color;
     }
 
     .o_timeoff_card {
@@ -26,6 +25,13 @@
                 .fc-dayGridMonth-view {
                     .fc-has-event {
                         background-color: unset;
+                    }
+                }
+                .fc-content-skeleton {
+                    padding: 0;
+
+                    tbody { 
+                        display: none;
                     }
                 }
             }
@@ -59,5 +65,20 @@
     }
     .fc-week-number {
         color: #adb5bd;
+    }
+
+    .o_calendar_view .o_calendar_widget .fc-dayGridMonth-view {
+        .fc-week-number {
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.3rem !important;
+            padding-left: 0.3rem !important;
+            line-height: unset;
+            span {
+                font-size: 0.85rem;
+            }
+        }
+        .fc-week-number.fc-widget-header {
+            font-size: 0.85rem;
+        }
     }
 }

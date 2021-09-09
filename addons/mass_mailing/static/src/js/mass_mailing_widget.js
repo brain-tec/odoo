@@ -65,6 +65,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
             self._isDirty = self.wysiwyg.isDirty();
+            self._doAction();
 
             convertInline.attachmentThumbnailToLinkImg($editable);
             convertInline.fontToImg($editable);
@@ -84,6 +85,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 changes: _.object([fieldName], [self._unWrap($editable.html())])
             });
 
+            $editable.html(self.value);
             if (self._isDirty && self.mode === 'edit') {
                 return self._doAction();
             }
@@ -138,8 +140,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
      * @override
      */
     _renderEdit: function () {
-        this._isFromInline = !!this.value;
-        this._wysiwygSnippetsActive = !(this._isFromInline && $(this.value).is('.o_layout.o_basic_theme'));
+        this._wysiwygSnippetsActive = !$(this.value).is('.o_layout.o_basic_theme');
         if (!this.value) {
             this.value = this.recordData[this.nodeOptions['inline-field']];
         }
@@ -335,9 +336,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
      * @override
      */
     _onLoadWysiwyg: function () {
-        if (this._isFromInline) {
-            this._fromInline();
-        }
         if (this.snippetsLoaded) {
             this._onSnippetsLoaded(this.snippetsLoaded);
         }
@@ -529,7 +527,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             // Wait the next tick because some mutation have to be processed by
             // the Odoo editor before resetting the history.
             setTimeout(() => {
-                this.wysiwyg.resetHistory();
+                this.wysiwyg.historyReset();
             }, 0);
         });
 
