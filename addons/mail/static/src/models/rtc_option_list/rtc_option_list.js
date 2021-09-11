@@ -12,7 +12,9 @@ function factory(dependencies) {
          */
         _created() {
             super._created();
-            this.onClickFullScreen = this.onClickFullScreen.bind(this);
+            this.onClickDownloadLogs = this.onClickDownloadLogs.bind(this);
+            this.onClickActivateFullScreen = this.onClickActivateFullScreen.bind(this);
+            this.onClickDeactivateFullScreen = this.onClickDeactivateFullScreen.bind(this);
             this.onClickLayout = this.onClickLayout.bind(this);
             this.onClickOptions = this.onClickOptions.bind(this);
         }
@@ -22,10 +24,39 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
 
         /**
+         * Creates and download a file that contains the logs of the current RTC call.
+         *
          * @param {MouseEvent} ev
          */
-        onClickFullScreen(ev) {
-            this.rtcController.callViewer.toggleFullScreen();
+        async onClickDownloadLogs(ev) {
+            const channel = this.rtcController.callViewer.threadView.thread;
+            if (!channel.mailRtc) {
+                return;
+            }
+            const data = window.JSON.stringify(channel.mailRtc.logs);
+            const blob = new window.Blob([data], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `RtcLogs_Channel${channel.id}_Session${channel.mailRtc.currentRtcSession.id}_${window.moment().format('YYYY-MM-DD_HH-mm')}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            this.component.trigger('o-popover-close');
+        }
+
+        /**
+         * @param {MouseEvent} ev
+         */
+        onClickActivateFullScreen(ev) {
+            this.rtcController.callViewer.activateFullScreen();
+            this.component.trigger('o-popover-close');
+        }
+
+        /**
+         * @param {MouseEvent} ev
+         */
+        onClickDeactivateFullScreen(ev) {
+            this.rtcController.callViewer.deactivateFullScreen();
             this.component.trigger('o-popover-close');
         }
 
@@ -54,6 +85,7 @@ function factory(dependencies) {
         component: attr(),
         rtcController: one2one('mail.rtc_controller', {
             inverse: 'rtcOptionList',
+            required: true,
         }),
     };
 

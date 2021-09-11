@@ -168,17 +168,16 @@ const Wysiwyg = Widget.extend({
 
             self.openMediaDialog(params);
         });
-        if (!this.options.preventLinkDoubleClick) {
-            this.$editable.on('dblclick', 'a', function () {
-                if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
-                    self.showTooltip = false;
-                    self.toggleLinkTools({
-                        forceOpen: true,
-                        link: this,
-                    });
-                }
-            });
-        }
+        this.$editable.on('dblclick', 'a', function (ev) {
+            if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
+                self.showTooltip = false;
+                self.toggleLinkTools({
+                    forceOpen: true,
+                    link: this,
+                    noFocusUrl: $(ev.target).data('popover-widget-initialized'),
+                });
+            }
+        });
 
         if (options.snippets) {
             $(this.odooEditor.document.body).addClass('editor_enable');
@@ -796,6 +795,7 @@ const Wysiwyg = Widget.extend({
      * @param {boolean} [options.forceOpen] default: false
      * @param {boolean} [options.forceDialog] force to open the dialog
      * @param {boolean} [options.link] The anchor element to edit if it is known.
+     * @param {boolean} [options.noFocusUrl=false] Disable the automatic focusing of the URL field.
      */
     toggleLinkTools(options = {}) {
         if (this.snippetsMenu && !options.forceDialog) {
@@ -804,7 +804,7 @@ const Wysiwyg = Widget.extend({
             }
             if (options.forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
+                this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
                 const _onMousedown = ev => {
                     if (!ev.target.closest('.oe-toolbar') && !ev.target.closest('.ui-autocomplete')) {
                         // Destroy the link tools on click anywhere outside the
@@ -1096,6 +1096,7 @@ const Wysiwyg = Widget.extend({
                             backgroundGradient = backgroundImage;
                         }
                     }
+                    const hadNonCollapsedSelection = range && !selection.isCollapsed;
                     colorpicker = new ColorPaletteWidget(this, {
                         excluded: ['transparent_grayscale'],
                         $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
@@ -1103,10 +1104,16 @@ const Wysiwyg = Widget.extend({
                         withGradients: true,
                     });
                     colorpicker.on('custom_color_picked color_picked', null, ev => {
+                        if (hadNonCollapsedSelection) {
+                            this.odooEditor.historyResetLatestComputedSelection(true);
+                        }
                         this._processAndApplyColor(eventName, ev.data.color);
                         this.odooEditor.historyStep();
                     });
                     colorpicker.on('color_hover color_leave', null, ev => {
+                        if (hadNonCollapsedSelection) {
+                            this.odooEditor.historyResetLatestComputedSelection(true);
+                        }
                         this._processAndApplyColor(eventName, ev.data.color);
                     });
                     colorpicker.on('enter_key_color_colorpicker', null, () => {
@@ -1286,7 +1293,7 @@ const Wysiwyg = Widget.extend({
             this._updateFaResizeButtons();
         }
         const link = getInSelection(this.odooEditor.document, 'a');
-        if (isInMedia || link && !this.options.preventLinkDoubleClick) {
+        if (isInMedia || link) {
             // Handle the media/link's tooltip.
             this.showTooltip = true;
             setTimeout(() => {

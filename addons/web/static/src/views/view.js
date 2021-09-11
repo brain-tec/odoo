@@ -3,7 +3,9 @@
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { KeepLast } from "@web/core/utils/concurrency";
 import { WithSearch } from "@web/search/with_search/with_search";
+import { useActionLinks } from "@web/views/helpers/view_hook";
 
 const viewRegistry = registry.category("views");
 
@@ -27,9 +29,9 @@ const { Component } = owl;
  *  @property {Object[]} [irFilters]
  *  @property {boolean} [loadIrFilters=false]
  *
+ *  @property {Object} [comparison]
  *  @property {Object} [context={}]
  *  @property {DomainRepr} [domain]
- *  @property {Object[]} [domains]
  *  @property {string[]} [groupBy]
  *  @property {string[]} [orderBy]
  *
@@ -71,9 +73,9 @@ const STANDARD_PROPS = new Set([
     "irFilters",
     "loadIrFilters",
 
+    "comparison",
     "context",
     "domain",
-    "domains",
     "groupBy",
     "orderBy",
 
@@ -116,6 +118,11 @@ export class View extends Component {
         this.viewService = useService("view");
 
         this.withSearchProps = null;
+
+        owl.hooks.useSubEnv({
+            keepLast: new KeepLast(),
+        });
+        useActionLinks({ resModel });
     }
 
     async willStart() {
@@ -194,15 +201,12 @@ export class View extends Component {
             rootAttrs[attrName] = rootNode.getAttribute(attrName);
         }
 
-        //////////////////////////////////////////////////////////////////
-        /** @todo take care of banner_route rootAttribute*/
-        //////////////////////////////////////////////////////////////////
-
         // determine ViewClass to instantiate (if not already done)
-
         if (rootAttrs.js_class) {
             ViewClass = viewRegistry.get(rootAttrs.js_class);
         }
+
+        const bannerRoute = rootAttrs.banner_route;
 
         // prepare the view props
         let viewProps = {
@@ -221,6 +225,7 @@ export class View extends Component {
             fields,
             resModel,
             useSampleModel: false,
+            bannerRoute,
         };
 
         if ("useSampleModel" in this.props) {
@@ -280,9 +285,9 @@ export class View extends Component {
 
     async willUpdateProps(nextProps) {
         // we assume that nextProps can only vary in the search keys:
-        // context, domain, domains, groupBy, orderBy
-        const { context, domain, domains, groupBy, orderBy } = nextProps;
-        Object.assign(this.withSearchProps, { context, domain, domains, groupBy, orderBy });
+        // comparison, context, domain, groupBy, orderBy
+        const { comparison, context, domain, groupBy, orderBy } = nextProps;
+        Object.assign(this.withSearchProps, { comparison, context, domain, groupBy, orderBy });
     }
 }
 
