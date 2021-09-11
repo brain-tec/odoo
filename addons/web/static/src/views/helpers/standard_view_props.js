@@ -19,9 +19,10 @@ export const standardViewProps = {
     },
     resModel: String,
     arch: { type: String },
+    comparison: { validate: () => true }, // fix problem with validation with type: [Object, null]
+    // Issue OWL: https://github.com/odoo/owl/issues/910
     context: { type: Object },
     domain: { type: Array },
-    domains: { type: Array, elements: Object },
     fields: { type: Object, elements: Object },
     groupBy: { type: Array, elements: String },
     limit: { type: Number, optional: 1 },
@@ -30,4 +31,5 @@ export const standardViewProps = {
     state: { type: Object, optional: 1 },
     resId: { type: Number, optional: 1 },
     resIds: { type: Array, optional: 1 },
+    bannerRoute: { type: String, optional: 1 },
 };
