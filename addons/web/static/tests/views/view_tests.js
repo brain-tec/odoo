@@ -6,7 +6,10 @@ import { ormService } from "@web/core/orm_service";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { registry } from "@web/core/registry";
 import { View } from "@web/views/view";
+import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { viewService } from "@web/views/view_service";
+import { click, makeDeferred } from "../helpers/utils";
+import { actionService } from "@web/webclient/actions/action_service";
 
 const { Component, mount, hooks, tags } = owl;
 const { useState } = hooks;
@@ -94,6 +97,7 @@ QUnit.module("Views", (hooks) => {
         }
         ToyView.template = xml`<div t-att-class="class"><t t-call="{{ template }}"/></div>`;
         ToyView.type = "toy";
+        ToyView.components = { Banner: OnboardingBanner };
 
         class ToyViewImp extends ToyView {
             setup() {
@@ -107,6 +111,16 @@ QUnit.module("Views", (hooks) => {
 
         serviceRegistry.add("orm", ormService);
         serviceRegistry.add("view", viewService);
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction() {},
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
     });
 
     QUnit.module("View component");
@@ -654,6 +668,471 @@ QUnit.module("Views", (hooks) => {
             assert.strictEqual(view.el.innerText, "Specific arch content");
         }
     );
+
+    QUnit.test("can click on action-bound links -- 1", async (assert) => {
+        assert.expect(5);
+
+        const expectedAction = {
+            action: {
+                type: "ir.actions.client",
+                tag: "someAction",
+            },
+            options: {},
+        };
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy>
+                <a type="action" data-method="setTheControl" data-model="animal" />
+            </toy>`;
+
+        const mockRPC = (route) => {
+            if (route.includes("setTheControl")) {
+                assert.step(route);
+                return {
+                    type: "ir.actions.client",
+                    tag: "someAction",
+                };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
+        assert.verifySteps(["/web/dataset/call_kw/animal/setTheControl"]);
+    });
+
+    QUnit.test("can click on action-bound links -- 2", async (assert) => {
+        assert.expect(3);
+
+        const expectedAction = {
+            action: "myLittleAction",
+            options: {
+                additionalContext: {
+                    somekey: "somevalue",
+                },
+            },
+        };
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy>
+                <a type="action" name="myLittleAction" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
+            </toy>`;
+
+        const toy = await makeView({
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
+    });
+
+    QUnit.test("can click on action-bound links -- 3", async (assert) => {
+        assert.expect(3);
+
+        const expectedAction = {
+            action: {
+                domain: [["field", "=", "val"]],
+                name: "myTitle",
+                res_id: 66,
+                res_model: "animal",
+                target: "current",
+                type: "ir.actions.act_window",
+                views: [[55, "toy"]],
+            },
+            options: {
+                additionalContext: {
+                    somekey: "somevalue",
+                },
+            },
+        };
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy>
+                <a type="action" title="myTitle" data-model="animal" data-resId="66" data-views="[[55, 'toy']]" data-domain="[['field', '=', 'val']]" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
+            </toy>`;
+
+        const toy = await makeView({
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
+    });
+
+    QUnit.test("renders banner_route", async (assert) => {
+        assert.expect(3);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: `<div class="setmybodyfree">myBanner</div>` };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+    });
+
+    QUnit.test("renders banner_route with js and css assets", async (assert) => {
+        assert.expect(7);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const bannerArch = `
+            <div class="setmybodyfree">
+                <link rel="stylesheet" href="/mystyle" />
+                <script type="text/javascript" src="/myscript" />
+                myBanner
+            </div>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+        };
+
+        const docCreateElement = document.createElement.bind(document);
+        const createElement = (tagName) => {
+            const elem = docCreateElement(tagName);
+            if (tagName === "link") {
+                Object.defineProperty(elem, "href", {
+                    set(href) {
+                        if (href.includes("/mystyle")) {
+                            assert.step("css loaded");
+                        }
+                        Promise.resolve().then(() => elem.dispatchEvent(new Event("load")));
+                    },
+                });
+            } else if (tagName === "script") {
+                Object.defineProperty(elem, "src", {
+                    set(src) {
+                        if (src.includes("/myscript")) {
+                            assert.step("js loaded");
+                        }
+                        Promise.resolve().then(() => elem.dispatchEvent(new Event("load")));
+                    },
+                });
+            }
+            return elem;
+        };
+
+        patchWithCleanup(document, { createElement });
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage", "js loaded", "css loaded"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+        assert.containsNone(toy, "script");
+        assert.containsNone(toy, "link");
+    });
+
+    QUnit.test("banner can re-render with new HTML", async (assert) => {
+        assert.expect(10);
+        assert.expect(8);
+
+        serviceRegistry.add("action", actionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const banners = [
+            `<div class="banner1">
+                <a type="action" data-method="setTheControl" data-model="animal" data-reload-on-close="true" />
+            </div>`,
+            `<div class="banner2">
+                MyBanner
+            /div>`,
+        ];
+        const mockRPC = async (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: banners.shift() };
+            }
+            if (route.includes("setTheControl")) {
+                return {
+                    type: "ir.actions.act_window_close",
+                };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".banner1");
+        assert.containsNone(toy, ".banner2");
+        await click(toy.el.querySelector("a"));
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsNone(toy, ".banner1");
+        assert.containsOnce(toy, ".banner2");
+    });
+
+    QUnit.test("banner does not reload on render", async (assert) => {
+        assert.expect(5);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const bannerArch = `
+            <div class="setmybodyfree">
+                myBanner
+            </div>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+        await toy.render();
+        await nextTick();
+        assert.verifySteps([]);
+        assert.containsOnce(toy, ".setmybodyfree");
+    });
+
+    QUnit.test("click on action-bound links in banner (concurrency)", async (assert) => {
+        assert.expect(1);
+
+        const prom = makeDeferred();
+
+        const expectedAction = {
+            type: "ir.actions.client",
+            tag: "gout",
+        };
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action) {
+                        assert.deepEqual(action, expectedAction);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/banner_route">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+                <a type="action" data-method="setTheControl" data-model="animal" />
+            </toy>`;
+
+        const mockRPC = async (route) => {
+            if (route.includes("banner_route")) {
+                return {
+                    html: `<div><a type="action" data-method="heartOfTheSun" data-model="animal" /></div>`,
+                };
+            }
+            if (route.includes("setTheControl")) {
+                await prom;
+                return {
+                    type: "ir.actions.client",
+                    tag: "toug",
+                };
+            }
+            if (route.includes("heartOfTheSun")) {
+                return {
+                    type: "ir.actions.client",
+                    tag: "gout",
+                };
+            }
+        };
+
+        const toy = await makeView({
+            mockRPC,
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        await click(toy.el.querySelector("a[data-method='setTheControl']"));
+        click(toy.el.querySelector("a[data-method='heartOfTheSun']"));
+        prom.resolve();
+        await nextTick();
+    });
+
+    QUnit.test("real life banner", async (assert) => {
+        assert.expect(10);
+
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const bannerArch = `
+            <div class="modal o_onboarding_modal o_technical_modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Remove Configuration Tips</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-label="Close">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Do you want to remove this configuration panel?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="action" class="btn btn-primary" data-dismiss="modal" data-toggle="collapse" href=".o_onboarding_container" data-model="mah.model" data-method="mah_method">Remove</a>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="o_onboarding_container collapse show">
+                <div class="o_onboarding" />
+                    <div class="o_onboarding_wrap" />
+                        <a href="#" data-toggle="modal" data-target=".o_onboarding_modal" class="float-right o_onboarding_btn_close">
+                            <i class="fa fa-times" title="Close the onboarding panel" id="closeOnboarding"></i>
+                        </a>
+                        <div class="bannerContent">Content</div>
+                    </div>
+                </div>
+            </div>`;
+
+        const mockRPC = (route, args) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+            if (args.method === "mah_method") {
+                assert.step(args.method);
+                return true;
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        const prom = new Promise((resolve) => {
+            const complete = (ev) => {
+                if (ev.target.classList.contains("o_onboarding_container")) {
+                    resolve();
+                }
+            };
+            // We need to handle both events, because the transition is not
+            // always executed
+            toy.el.addEventListener("transitionend", complete);
+            toy.el.addEventListener("transitioncancel", complete);
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.isNotVisible(toy.el.querySelector(".modal"));
+        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse show");
+
+        await click(toy.el.querySelector("#closeOnboarding"));
+        assert.isVisible(toy.el.querySelector(".modal"));
+
+        await click(toy.el.querySelector(".modal a[type='action']"));
+        assert.verifySteps(["mah_method"]);
+        await prom;
+        assert.doesNotHaveClass(toy.el.querySelector(".o_onboarding_container"), "show");
+        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse");
+        assert.isNotVisible(toy.el.querySelector(".modal"));
+    });
 
     ////////////////////////////////////////////////////////////////////////////
     // js_class
