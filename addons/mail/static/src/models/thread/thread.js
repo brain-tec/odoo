@@ -200,6 +200,12 @@ function factory(dependencies) {
             if ('id' in data) {
                 data2.id = data.id;
             }
+            if ('invitedGuests' in data) {
+                data2.invitedGuests = data.invitedGuests;
+            }
+            if ('invitedPartners' in data) {
+                data2.invitedPartners = data.invitedPartners;
+            }
             if ('is_minimized' in data && 'state' in data) {
                 data2.serverFoldState = data.is_minimized ? data.state : 'closed';
             }
@@ -261,8 +267,8 @@ function factory(dependencies) {
             if ('rtc_inviting_session' in data) {
                 data2.rtcInvitingSession = insert(data.rtc_inviting_session);
             }
-            if ('rtc_sessions' in data) {
-                data2.rtcSessions = insert(data.rtc_sessions.map(record => this.messaging.models['mail.rtc_session'].convertData(record)));
+            if ('rtcSessions' in data) {
+                data2.rtcSessions = data.rtcSessions;
             }
             if ('seen_partners_info' in data) {
                 if (!data.seen_partners_info) {
@@ -325,8 +331,6 @@ function factory(dependencies) {
                 this.messaging.soundEffects.channelLeave.play();
             }
             this.update({
-                invitedGuests: clear(),
-                invitedPartners: clear(),
                 mailRtc: unlink(),
                 rtcInvitingSession: unlink(),
             });
@@ -698,9 +702,7 @@ function factory(dependencies) {
                 orderBy: [{ name: 'id', asc: false }],
             }, { shadow: true }));
             this.update({
-                originThreadAttachments: insertAndReplace(attachmentsData.map(data =>
-                    this.messaging.models['mail.attachment'].convertData(data)
-                )),
+                originThreadAttachments: insertAndReplace(attachmentsData),
             });
             this.update({ areAttachmentsLoaded: true });
         }
@@ -776,12 +778,15 @@ function factory(dependencies) {
                     channel_id: this.id,
                 },
             }, { shadow: true }));
+            if (!this.exists()) {
+                return;
+            }
             this.update({
                 mailRtc: link(this.messaging.mailRtc),
                 rtcInvitingSession: unlink(),
-                rtcSessions: insertAndReplace(rtcSessions.map(record => this.messaging.models['mail.rtc_session'].convertData(record))),
-                invitedGuests: insertAndReplace(invitedGuests),
-                invitedPartners: insertAndReplace(invitedPartners),
+                rtcSessions,
+                invitedGuests,
+                invitedPartners,
             });
             await this.async(() => this.messaging.mailRtc.initSession({
                 currentSessionId: sessionId,
@@ -806,9 +811,7 @@ function factory(dependencies) {
          */
         updateRtcSessions(rtcSessions) {
             const oldCount = this.rtcSessions.length;
-            this.update({
-                rtcSessions: insertAndReplace(rtcSessions.map(record => this.messaging.models['mail.rtc_session'].convertData(record)))
-            });
+            this.update({ rtcSessions });
             if (this.mailRtc) {
                 const newCount = this.rtcSessions.length;
                 if (newCount > oldCount) {
@@ -1182,6 +1185,20 @@ function factory(dependencies) {
                 args: [this.id],
                 kwargs: { name: newName },
             });
+        }
+
+        /**
+         * Starts editing the last message of this thread from the current user.
+         */
+        startEditingLastMessageFromCurrentUser() {
+            for (const threadView of this.threadViews) {
+                const messages = threadView.threadCache.orderedMessages;
+                messages.reverse();
+                const message = messages.find(message => message.isCurrentUserOrGuestAuthor && message.canBeDeleted);
+                if (message) {
+                    message.startEditing();
+                }
+            }
         }
 
         /**
@@ -1969,6 +1986,16 @@ function factory(dependencies) {
         }),
         allAttachments: many2many('mail.attachment', {
             compute: '_computeAllAttachments',
+        }),
+        /**
+         * Determines the attachment list that will be used to display the attachments.
+         */
+        attachmentList: one2one('mail.attachment_list', {
+            default: create(),
+            inverse: 'thread',
+            isCausal: true,
+            readonly: true,
+            required: true,
         }),
         areAttachmentsLoaded: attr({
             default: false,

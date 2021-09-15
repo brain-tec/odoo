@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
-import { clear, create, insert, insertAndReplace, replace, unlinkAll } from '@mail/model/model_field_command';
+import { clear, create, insert, insertAndReplace, link, replace, unlinkAll } from '@mail/model/model_field_command';
 import emojis from '@mail/js/emojis';
 import { addLink, htmlToTextContentInline, parseAndTransform, timeFromNow } from '@mail/js/utils';
 
@@ -276,6 +276,28 @@ function factory(dependencies) {
             this.messaging.discuss.replyToMessage(this);
         }
 
+        startEditing() {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(this.body.replaceAll('<br>', '\n').replaceAll('</br>', '\n'), "text/html");
+            const textInputContent = htmlDoc.body.textContent;
+            const composerData = {
+                doFocus: true,
+                isLastStateChangeProgrammatic: true,
+                textInputCursorStart: textInputContent.length,
+                textInputCursorEnd: textInputContent.length,
+                textInputSelectionDirection: 'none',
+                textInputContent,
+            };
+            if (this.composerInEditing) {
+                this.composerInEditing.update(composerData);
+            } else {
+                this.messaging.models['mail.composer'].create({
+                    messageInEditing: link(this),
+                    ...composerData,
+                });
+            }
+            this.update({ isEditing: true });
+        }
         /**
          * Toggle the starred status of the provided message.
          */
@@ -289,15 +311,16 @@ function factory(dependencies) {
 
         /**
          * Updates the message's content.
-         * 
+         *
          * @param {Object} param0
          * @param {string} param0.body the new body of the message
          */
-        async updateContent({ body }) {
+        async updateContent({ body, attachment_ids }) {
             const messageData = await this.env.services.rpc({
                 route: '/mail/message/update_content',
                 params: {
                     body,
+                    attachment_ids,
                     message_id: this.id,
                 },
             });
@@ -535,6 +558,16 @@ function factory(dependencies) {
         attachments: many2many('mail.attachment', {
             inverse: 'messages',
         }),
+        /**
+         * Determines the attachment list that will be used to display the attachments.
+         */
+        attachmentList: one2one('mail.attachment_list', {
+            default: create(),
+            inverse: 'message',
+            isCausal: true,
+            readonly: true,
+            required: true,
+        }),
         author: many2one('mail.partner', {
             inverse: 'messagesAsAuthor',
         }),
@@ -558,6 +591,13 @@ function factory(dependencies) {
          */
         canStarBeToggled: attr({
             compute: '_computeCanStarBeToggled',
+        }),
+        /**
+        * The composer in editing mode of a message.
+        */
+        composerInEditing: one2one('mail.composer', {
+            inverse: 'messageInEditing',
+            isCausal: true,
         }),
         /**
          * Determines the date of the message as a moment object.
@@ -605,6 +645,12 @@ function factory(dependencies) {
          */
         isBodyEqualSubtypeDescription: attr({
             compute: '_computeIsBodyEqualSubtypeDescription',
+            default: false,
+        }),
+        /*
+         * Determines whether the current user is currently editing this message.
+         */
+        isEditing: attr({
             default: false,
         }),
         /**
