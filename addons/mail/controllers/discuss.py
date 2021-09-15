@@ -68,17 +68,23 @@ class DiscussController(http.Controller):
 
     @http.route('/mail/channel/<int:channel_id>/partner/<int:partner_id>/avatar_128', methods=['GET'], type='http', auth='public')
     def mail_channel_partner_avatar_128(self, channel_id, partner_id, **kwargs):
-        channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        if not channel_partner_sudo.env['mail.channel.partner'].search([('channel_id', '=', int(channel_id)), ('partner_id', '=', int(partner_id))], limit=1):
-            raise NotFound()
-        return channel_partner_sudo.env['ir.http']._content_image(model='res.partner', res_id=int(partner_id), field='avatar_128')
+        channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request(request=request, channel_id=channel_id)
+        if not channel_partner_sudo or not channel_partner_sudo.env['mail.channel.partner'].search([('channel_id', '=', channel_id), ('partner_id', '=', partner_id)], limit=1):
+            if request.env.user.share:
+                placeholder = channel_partner_sudo.env['res.partner'].browse(partner_id).exists()._avatar_get_placeholder()
+                return channel_partner_sudo.env['ir.http']._placeholder_image_get_response(placeholder)
+            return channel_partner_sudo.sudo(False).env['ir.http']._content_image(model='res.partner', res_id=partner_id, field='avatar_128')
+        return channel_partner_sudo.env['ir.http']._content_image(model='res.partner', res_id=partner_id, field='avatar_128')
 
     @http.route('/mail/channel/<int:channel_id>/guest/<int:guest_id>/avatar_128', methods=['GET'], type='http', auth='public')
     def mail_channel_guest_avatar_128(self, channel_id, guest_id, **kwargs):
-        channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        if not channel_partner_sudo.env['mail.channel.partner'].search([('channel_id', '=', int(channel_id)), ('guest_id', '=', int(guest_id))], limit=1):
-            raise NotFound()
-        return channel_partner_sudo.env['ir.http']._content_image(model='mail.guest', res_id=int(guest_id), field='avatar_128')
+        channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request(request=request, channel_id=channel_id)
+        if not channel_partner_sudo or not channel_partner_sudo.env['mail.channel.partner'].search([('channel_id', '=', channel_id), ('guest_id', '=', guest_id)], limit=1):
+            if request.env.user.share:
+                placeholder = channel_partner_sudo.env['mail.guest'].browse(guest_id).exists()._avatar_get_placeholder()
+                return channel_partner_sudo.env['ir.http']._placeholder_image_get_response(placeholder)
+            return channel_partner_sudo.sudo(False).env['ir.http']._content_image(model='mail.guest', res_id=guest_id, field='avatar_128')
+        return channel_partner_sudo.env['ir.http']._content_image(model='mail.guest', res_id=guest_id, field='avatar_128')
 
     @http.route('/mail/channel/<int:channel_id>/attachment/<int:attachment_id>', methods=['GET'], type='http', auth='public')
     def mail_channel_attachment(self, channel_id, attachment_id, **kwargs):
@@ -412,7 +418,7 @@ class DiscussController(http.Controller):
             :param int channel_id: id of the channel to join
         """
         channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        return channel_partner_sudo.channel_id._join_call()
+        return channel_partner_sudo._rtc_join_call()
 
     @http.route('/mail/rtc/channel/leave_call', methods=['POST'], type="json", auth="public")
     def channel_call_leave(self, channel_id):
@@ -420,7 +426,7 @@ class DiscussController(http.Controller):
             :param int channel_id: id of the channel from which to disconnect
         """
         channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        channel_partner_sudo.channel_id._leave_call()
+        return channel_partner_sudo._rtc_leave_call()
 
     @http.route('/mail/rtc/channel/cancel_call_invitation', methods=['POST'], type="json", auth="public")
     def channel_call_cancel_invitation(self, channel_id, partner_ids=None, guest_ids=None):
@@ -431,7 +437,7 @@ class DiscussController(http.Controller):
             if either partner_ids or guest_ids is set, only the specified ids will be invited.
         """
         channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        channel_partner_sudo.channel_id._cancel_rtc_invitations(partner_ids=partner_ids, guest_ids=guest_ids, inviting_member=channel_partner_sudo)
+        return channel_partner_sudo.channel_id._rtc_cancel_invitations(partner_ids=partner_ids, guest_ids=guest_ids)
 
     @http.route('/mail/rtc/audio_worklet_processor', methods=['GET'], type='http', auth='public')
     def audio_worklet_processor(self):
