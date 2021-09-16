@@ -2970,12 +2970,15 @@ options.registry.ConditionalVisibility = options.Class.extend({
         await this._super(...arguments);
 
         for (const widget of this._userValueWidgets) {
-            if (widget.el.classList.contains('o_we_m2m')) {
-                const dataAttributes = widget.options.dataAttributes;
+            const params = widget.getMethodsParams();
+            if (params.saveAttribute) {
                 this.optionsAttributes.push({
-                    saveAttribute: dataAttributes.saveAttribute,
-                    attributeName: dataAttributes.attributeName,
-                    callWith: dataAttributes.callWith,
+                    saveAttribute: params.saveAttribute,
+                    attributeName: params.attributeName,
+                    // If callWith dataAttribute is not specified, the default
+                    // field to check on the record will be .value for values
+                    // coming from another widget than M2M.
+                    callWith: params.callWith || 'value',
                 });
             }
         }
@@ -3025,6 +3028,24 @@ options.registry.ConditionalVisibility = options.Class.extend({
         this._updateCSSSelectors();
     },
     /**
+     * Selects a value for target's data-attributes.
+     * Should be used instead of selectRecord if the visibility is not related
+     * to database values.
+     *
+     * @see this.selectClass for parameters
+     */
+    selectValue(previewMode, widgetValue, params) {
+        if (widgetValue) {
+            const widgetValueIndex = params.possibleValues.indexOf(widgetValue);
+            const value = [{value: widgetValue, id: widgetValueIndex}];
+            this.$target[0].dataset[params.saveAttribute] = JSON.stringify(value);
+        } else {
+            delete this.$target[0].dataset[params.saveAttribute];
+        }
+
+        this._updateCSSSelectors();
+    },
+    /**
      * Opens the toggler when 'conditional' is selected.
      *
      * @override
@@ -3065,6 +3086,10 @@ options.registry.ConditionalVisibility = options.Class.extend({
     async _computeWidgetState(methodName, params) {
         if (methodName === 'selectRecord') {
             return this.$target[0].dataset[params.saveAttribute] || '[]';
+        }
+        if (methodName === 'selectValue') {
+            const selectedValue = this.$target[0].dataset[params.saveAttribute];
+            return selectedValue ? JSON.parse(selectedValue)[0].value : params.attributeDefaultValue;
         }
         return this._super(...arguments);
     },
@@ -3146,6 +3171,36 @@ options.registry.ConditionalVisibility = options.Class.extend({
 });
 
 options.registry.WebsiteAnimate = options.Class.extend({
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        this.isAnimatedText = this.$target.hasClass('o_animated_text');
+        this.$optionsSection = this.$overlay.data('$optionsSection');
+    },
+    /**
+     * @override
+     */
+    onFocus() {
+        if (this.isAnimatedText) {
+            // For animated text, the animation options must be in the editor
+            // toolbar.
+            const $toolbar = this.options.wysiwyg.toolbar.$el;
+            $toolbar.append(this.$el);
+            this.$optionsSection.addClass('d-none');
+        }
+    },
+    /**
+     * @override
+     */
+    onBlur() {
+        if (this.isAnimatedText) {
+            // For animated text, the options must be returned to their
+            // original location as they were moved in the toolbar.
+            this.$optionsSection.append(this.$el);
+        }
+    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -3190,6 +3245,15 @@ options.registry.WebsiteAnimate = options.Class.extend({
             $scrollingElement[0].classList.remove('o_wanim_overflow_x_hidden');
             this.$target.removeClass('o_animating');
         });
+    },
+    /**
+     * @override
+     */
+    _computeWidgetVisibility(widgetName, params) {
+        if (widgetName === 'no_animation_opt') {
+            return !this.isAnimatedText;
+        }
+        return this._super(...arguments);
     },
 });
 
