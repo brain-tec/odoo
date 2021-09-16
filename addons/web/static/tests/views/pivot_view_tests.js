@@ -337,7 +337,7 @@ QUnit.module("Views", (hooks) => {
 
         // this is important for export functionality.
         assert.strictEqual(
-            pivot.model.meta.title,
+            pivot.model.metaData.title,
             pivot.env._t("Untitled"),
             "should have a valid title"
         );
@@ -496,6 +496,117 @@ QUnit.module("Views", (hooks) => {
         await triggerEvents(pivot.el, "tbody tr:nth-of-type(2) td:nth-of-type(2)", ["mouseout"]);
         assert.containsNone(pivot, ".o_cell_hover");
     });
+
+    QUnit.test("columns are highlighted when hovering a measure", async function (assert) {
+        assert.expect(15);
+
+        patchDate(2016, 11, 20, 1, 0, 0);
+
+        serverData.models.partner.records[0].date = "2016-11-15";
+        serverData.models.partner.records[1].date = "2016-12-17";
+        serverData.models.partner.records[2].date = "2016-11-22";
+        serverData.models.partner.records[3].date = "2016-11-03";
+
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="product_id" type="row"/>
+                    <field name="date" type="col"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="date_filter" date="date" domain="[]" default_period='this_month'/>
+                </search>`,
+            context: { search_default_date_filter: true },
+        });
+
+        await toggleComparisonMenu(pivot);
+        await toggleMenuItem(pivot, "Date: Previous period");
+
+        // hover Count in first group
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(1)", ["mouseover"]);
+        assert.containsN(pivot, ".o_cell_hover", 3);
+        for (let i = 1; i <= 3; i++) {
+            assert.hasClass(
+                pivot.el.querySelector(`tbody tr:nth-of-type(${i}) td:nth-of-type(1)`),
+                "o_cell_hover"
+            );
+        }
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(1)", ["mouseout"]);
+        assert.containsNone(pivot, ".o_cell_hover");
+
+        // hover Count in second group
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(2)", ["mouseover"]);
+        assert.containsN(pivot, ".o_cell_hover", 3);
+        for (let i = 1; i <= 3; i++) {
+            assert.hasClass(
+                pivot.el.querySelector(`tbody tr:nth-of-type(${i}) td:nth-of-type(4)`),
+                "o_cell_hover"
+            );
+        }
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(2)", ["mouseout"]);
+        assert.containsNone(pivot, ".o_cell_hover");
+
+        // hover Count in total column
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(3)", ["mouseover"]);
+        assert.containsN(pivot, ".o_cell_hover", 3);
+        for (let i = 1; i <= 3; i++) {
+            assert.hasClass(
+                pivot.el.querySelector(`tbody tr:nth-of-type(${i}) td:nth-of-type(7)`),
+                "o_cell_hover"
+            );
+        }
+        await triggerEvents(pivot.el, "th.o_pivot_measure_row:nth-of-type(3)", ["mouseout"]);
+        assert.containsNone(pivot, ".o_cell_hover");
+    });
+
+    QUnit.test(
+        "columns are highlighted when hovering an origin (comparison mode)",
+        async function (assert) {
+            assert.expect(5);
+
+            patchDate(2016, 11, 20, 1, 0, 0);
+
+            serverData.models.partner.records[0].date = "2016-11-15";
+            serverData.models.partner.records[1].date = "2016-12-17";
+            serverData.models.partner.records[2].date = "2016-11-22";
+            serverData.models.partner.records[3].date = "2016-11-03";
+
+            const pivot = await makeView({
+                type: "pivot",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <pivot>
+                    <field name="product_id" type="row"/>
+                    <field name="date" type="col"/>
+                </pivot>`,
+                searchViewArch: `
+                <search>
+                    <filter name="date_filter" date="date" domain="[]" default_period='this_month'/>
+                </search>`,
+                context: { search_default_date_filter: true },
+            });
+
+            await toggleComparisonMenu(pivot);
+            await toggleMenuItem(pivot, "Date: Previous period");
+
+            // hover the second origin in second group
+            await triggerEvents(pivot.el, "th.o_pivot_origin_row:nth-of-type(5)", ["mouseover"]);
+            assert.containsN(pivot, ".o_cell_hover", 3);
+            for (let i = 1; i <= 3; i++) {
+                assert.hasClass(
+                    pivot.el.querySelector(`tbody tr:nth-of-type(${i}) td:nth-of-type(5)`),
+                    "o_cell_hover"
+                );
+            }
+            await triggerEvents(pivot.el, "th.o_pivot_origin_row:nth-of-type(5)", ["mouseout"]);
+            assert.containsNone(pivot, ".o_cell_hover");
+        }
+    );
 
     QUnit.test('pivot view with disable_linking="True"', async function (assert) {
         const fakeActionService = {
@@ -4844,6 +4955,300 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(getCurrentValues(webClient), ["32", "12", "12", "20"].join(","));
     });
+
+    QUnit.test("consecutively toggle several measures", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            additionalMeasures: ["product_id"],
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Toggle several measures (the reload is blocked, so all measures should be toggled in once)
+        def = makeDeferred();
+        await toggleMenu(pivot, "Measures");
+        await toggleMenuItem(pivot, "Product"); // add product
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+        await toggleMenuItem(pivot, "Foo"); // remove foo
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+        await toggleMenuItem(pivot, "Count"); // add count
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["2", "4", "1", "1", "1", "3"].join(","));
+    });
+
+    QUnit.test("flip axis while loading a filter", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="date" type="col"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 41)]"/>
+                </search>`,
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        const values = ["29", "1", "2", "32", "12", "12", "17", "1", "2", "20"];
+        assert.strictEqual(getCurrentValues(pivot), values.join(","));
+
+        // Set a domain (this reload is delayed)
+        def = makeDeferred();
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My Filter");
+        assert.strictEqual(getCurrentValues(pivot), values.join(","));
+
+        // Flip axis
+        await click(pivot.el.querySelector(".o_pivot_flip_button"));
+        assert.strictEqual(getCurrentValues(pivot), values.join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["20", "1", "17", "2"].join(","));
+    });
+
+    QUnit.test("sort rows while loading a filter", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 41)]"/>
+                </search>`,
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Set a domain (this reload is delayed)
+        def = makeDeferred();
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My Filter");
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Sort rows (this operation should be ignored as it concerns the old
+        // table, which will be replaced soon)
+        await click(pivot.el.querySelector("th.o_pivot_measure_row"));
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["20", "20"].join(","));
+    });
+
+    QUnit.test("close a group while loading a filter", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 41)]"/>
+                </search>`,
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Set a domain (this reload is delayed)
+        def = makeDeferred();
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My Filter");
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Close a group (this operation should be ignored as it concerns the old
+        // table, which will be replaced soon)
+        await click(pivot.el.querySelector("tbody .o_pivot_header_cell_opened"));
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["20", "20"].join(","));
+    });
+
+    QUnit.test("add a groupby while loading a filter", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 41)]"/>
+                </search>`,
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Set a domain (this reload is delayed)
+        def = makeDeferred();
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My Filter");
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        // Add a groupby (this operation should be ignored as it concerns the old
+        // table, which will be replaced soon)
+        await click(pivot.el.querySelector("thead .o_pivot_header_cell_closed"));
+        await click(pivot.el.querySelector("thead .o_dropdown_menu .o_dropdown_item"));
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["20", "20"].join(","));
+    });
+
+    QUnit.test("expand a group while loading a filter", async function (assert) {
+        let def;
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>`,
+            searchViewArch: `
+                <search>
+                    <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 41)]"/>
+                </search>`,
+            mockRPC(route, args) {
+                if (args.method === "read_group") {
+                    return Promise.resolve(def);
+                }
+            },
+        });
+
+        // Add a groupby, to have a group to expand afterwards
+        await click(pivot.el.querySelector("tbody .o_pivot_header_cell_closed"));
+        await click(pivot.el.querySelector("tbody .o_dropdown_menu .o_dropdown_item"));
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "12", "20"].join(","));
+
+        // Set a domain (this reload is delayed)
+        def = makeDeferred();
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My Filter");
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "12", "20"].join(","));
+
+        // Expand a group (this operation should be ignored as it concerns the old
+        // table, which will be replaced soon)
+        await click(pivot.el.querySelectorAll("tbody .o_pivot_header_cell_closed")[1]);
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "12", "20"].join(","));
+
+        def.resolve();
+        await nextTick();
+
+        assert.strictEqual(getCurrentValues(pivot), ["20", "20"].join(","));
+    });
+
+    QUnit.test(
+        "concurrent reloads: add a filter, and directly toggle a measure",
+        async function (assert) {
+            let def;
+            const pivot = await makeView({
+                type: "pivot",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <pivot>
+                        <field name="foo" type="measure"/>
+                        <field name="product_id" type="row"/>
+                    </pivot>`,
+                searchViewArch: `
+                    <search>
+                        <filter name="my_filter" string="My Filter" domain="[('product_id', '=', 37)]"/>
+                    </search>`,
+                mockRPC(route, args) {
+                    if (args.method === "read_group") {
+                        return Promise.resolve(def);
+                    }
+                },
+            });
+
+            assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+            // Set a domain (this reload is delayed)
+            def = makeDeferred();
+            await toggleFilterMenu(pivot);
+            await toggleMenuItem(pivot, "My Filter");
+
+            assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+            // Toggle a measure
+            await toggleMenu(pivot, "Measures");
+            await toggleMenuItem(pivot, "Count");
+
+            assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+            def.resolve();
+            await nextTick();
+
+            assert.strictEqual(getCurrentValues(pivot), ["12", "1", "12", "1"].join(","));
+        }
+    );
 
     QUnit.test(
         "if no measure is set in arch, 'Count' is used as measure initially",

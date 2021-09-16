@@ -24,18 +24,18 @@ export class PivotView extends Component {
         let modelParams = {};
         if (this.props.state) {
             modelParams.data = this.props.state.data;
-            modelParams.meta = this.props.state.meta;
+            modelParams.metaData = this.props.state.metaData;
         } else {
             const { arch } = this.props;
 
             // parse arch
-            const archInfo = new this.constructor.archParser().parse(arch);
+            const archInfo = new this.constructor.ArchParser().parse(arch);
 
             if (!archInfo.activeMeasures.length || archInfo.displayQuantity) {
                 archInfo.activeMeasures.unshift("__count");
             }
 
-            modelParams.meta = {
+            modelParams.metaData = {
                 activeMeasures: archInfo.activeMeasures,
                 additionalMeasures: this.props.additionalMeasures,
                 colGroupBys: archInfo.colGroupBys,
@@ -46,7 +46,6 @@ export class PivotView extends Component {
                 resModel: this.props.resModel,
                 rowGroupBys: archInfo.rowGroupBys,
                 title: this.props.title || archInfo.title || this.env._t("Untitled"),
-                useSampleModel: Boolean(this.props.useSampleModel),
                 widgets: archInfo.widgets,
             };
         }
@@ -54,23 +53,21 @@ export class PivotView extends Component {
         this.model = useModel(this.constructor.Model, modelParams);
 
         useSetupView({
-            exportLocalState: () => {
-                const { data, meta } = this.model;
-                return { data, meta };
+            getLocalState: () => {
+                const { data, metaData } = this.model;
+                return { data, metaData };
             },
-            saveParams: () => this.saveParams(), // FIXME: rename this
+            getContext: () => this.getContext(),
         });
     }
     /**
      * @returns {Object}
      */
-    saveParams() {
+    getContext() {
         return {
-            context: {
-                pivot_measures: this.model.meta.activeMeasures,
-                pivot_column_groupby: this.model.meta.fullColGroupBys,
-                pivot_row_groupby: this.model.meta.fullRowGroupBys,
-            },
+            pivot_measures: this.model.metaData.activeMeasures,
+            pivot_column_groupby: this.model.metaData.fullColGroupBys,
+            pivot_row_groupby: this.model.metaData.fullRowGroupBys,
         };
     }
 
@@ -121,7 +118,7 @@ export class PivotView extends Component {
      * @param {CustomEvent} ev
      */
     onOpenView(cell) {
-        if (cell.value === undefined || this.model.meta.disableLinking) {
+        if (cell.value === undefined || this.model.metaData.disableLinking) {
             return;
         }
 
@@ -147,7 +144,7 @@ export class PivotView extends Component {
 
         this.actionService.doAction({
             type: "ir.actions.act_window",
-            name: this.model.meta.title,
+            name: this.model.metaData.title,
             res_model: this.props.resModel,
             views: this.views,
             view_mode: "list",
@@ -175,7 +172,7 @@ PivotView.defaultProps = {
 
 PivotView.Model = PivotModel;
 
-PivotView.archParser = PivotArchParser;
+PivotView.ArchParser = PivotArchParser;
 
 PivotView.type = "pivot";
 PivotView.display_name = _lt("Pivot");

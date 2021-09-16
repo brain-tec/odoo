@@ -73,8 +73,10 @@ function factory(dependencies) {
             if (this.threadView.channelInvitationForm.component) {
                 return;
             }
-            this.threadView.channelInvitationForm.update({ doFocusOnSearchInput: true });
-            this.threadView.channelInvitationForm.searchPartnersToInvite();
+            if (!this.messaging.isCurrentUserGuest) {
+                this.threadView.channelInvitationForm.update({ doFocusOnSearchInput: true });
+                this.threadView.channelInvitationForm.searchPartnersToInvite();
+            }
         }
 
         /**
@@ -93,6 +95,10 @@ function factory(dependencies) {
          */
         onClickTopbarThreadName(ev) {
             if (!this.thread || !this.thread.isChannelRenamable) {
+                return;
+            }
+            // Guests cannot edit thread name
+            if (this.messaging.isCurrentUserGuest) {
                 return;
             }
             const selection = window.getSelection();
@@ -114,6 +120,10 @@ function factory(dependencies) {
          */
         onClickTopbarThreadDescription(ev) {
             if (!this.thread || !this.thread.isChannelDescriptionChangeable) {
+                return;
+            }
+            // Guests cannot edit description
+            if (this.messaging.isCurrentUserGuest) {
                 return;
             }
             const selection = window.getSelection();

@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
+import { annotateTraceback } from "@web/core/errors/error_utils";
 
 import { registerNewModel } from '@mail/model/model_core';
-import { attr, one2one } from '@mail/model/model_field';
-import { clear, insert } from '@mail/model/model_field_command';
+import { attr, one2many, one2one } from '@mail/model/model_field';
+import { clear, create, insert, unlink } from '@mail/model/model_field_command';
 
 import { monitorAudio } from '@mail/utils/media_monitoring/media_monitoring';
 
@@ -366,16 +367,17 @@ function factory(dependencies) {
          * @param {String} [param2.step] current step of the flow
          * @param {String} [param2.state] current state of the connection
          */
-        _addLogEntry(token, entry, { step, state } = {}) {
+        async _addLogEntry(token, entry, { step, state } = {}) {
             if (!this.env.isDebug()) {
                 return;
             }
             if (!(token in this.logs)) {
                 this.logs[token] = { step: '', state: '', logs: [] };
             }
+            const trace = await annotateTraceback(window.Error());
             this.logs[token].logs.push({
                 event: `${window.moment().format('h:mm:ss')}: ${entry}`,
-                trace: window.Error().stack.split('\n').slice(1, 15),
+                trace: trace.split('\n'),
             });
             if (step) {
                 this.logs[token].step = step;
@@ -622,21 +624,17 @@ function factory(dependencies) {
             if (!targetTokens.length || !this.channel || !this.currentRtcSession) {
                 return;
             }
-            const content = JSON.stringify({
-                event,
-                channelId: this.channel.id,
-                payload,
-            });
-
             if (type === 'server') {
-                await this.env.services.rpc({
-                    route: '/mail/rtc/session/notify_call_members',
-                    params: {
-                        sender_session_id: this.currentRtcSession.id,
-                        target_session_ids: targetTokens,
-                        content,
-                    },
-                }, { shadow: true });
+                this.update({
+                    peerNotificationsToSend: create({
+                        channelId: this.channel.id,
+                        event,
+                        payload,
+                        senderId: this.currentRtcSession.id,
+                        targetTokens
+                    }),
+                });
+                await this._sendPeerNotifications();
             }
 
             if (type === 'peerToPeer') {
@@ -645,7 +643,11 @@ function factory(dependencies) {
                     if (!dataChannel || dataChannel.readyState !== 'open') {
                         continue;
                     }
-                    dataChannel.send(content);
+                    dataChannel.send(JSON.stringify({
+                        event,
+                        channelId: this.channel.id,
+                        payload,
+                    }));
                 }
             }
         }
@@ -734,6 +736,50 @@ function factory(dependencies) {
                     transceiver.stop();
                 } catch (e) {
                     // transceiver may already be stopped by the remote.
+                }
+            }
+        }
+
+        /**
+         * Sends this peer notifications to send as soon as the last pending
+         * sending finishes.
+         *
+         * @private
+         */
+        async _sendPeerNotifications() {
+            if (this.isNotifyPeersRPCInProgress) {
+                return;
+            }
+            this.update({ isNotifyPeersRPCInProgress: true });
+            await new Promise(resolve => setTimeout(resolve, this.peerNotificationWaitDelay));
+            const peerNotifications = this.peerNotificationsToSend;
+            try {
+                await this.env.services.rpc({
+                    route: '/mail/rtc/session/notify_call_members',
+                    params: {
+                        'peer_notifications': peerNotifications.map(peerNotification =>
+                            [
+                                peerNotification.senderId,
+                                peerNotification.targetTokens,
+                                JSON.stringify({
+                                    event: peerNotification.event,
+                                    channelId: peerNotification.channelId,
+                                    payload: peerNotification.payload,
+                                }),
+                            ],
+                        ),
+                    },
+                }, { shadow: true });
+                if (!this.exists()) {
+                    return;
+                }
+                this.update({ peerNotificationsToSend: unlink(peerNotifications) });
+            } finally {
+                if (this.exists()) {
+                    this.update({ isNotifyPeersRPCInProgress: false });
+                    if (this.peerNotificationsToSend.length > 0) {
+                        this._sendPeerNotifications();
+                    }
                 }
             }
         }
@@ -1096,13 +1142,6 @@ function factory(dependencies) {
             inverse: 'mailRtc',
         }),
         /**
-         * true if the browser supports webRTC
-         */
-        isClientRtcCompatible: attr({
-            compute: '_computeIsClientRtcCompatible',
-            default: true,
-        }),
-        /**
          * ICE servers used by RTCPeerConnection to retrieve the public IP address (STUN)
          * or to relay packets when necessary (TURN).
          */
@@ -1117,11 +1156,34 @@ function factory(dependencies) {
             ],
         }),
         /**
+         * true if the browser supports webRTC
+         */
+        isClientRtcCompatible: attr({
+            compute: '_computeIsClientRtcCompatible',
+            default: true,
+        }),
+        isNotifyPeersRPCInProgress: attr({
+            default: false,
+        }),
+        /**
          * Contains the logs of the current session by token.
          * { token: { name<String>, logs<Array> } }
          */
         logs: attr({
             default: {},
+        }),
+        peerNotificationsToSend: one2many('mail.rtc_peer_notification', {
+            isCausal: true,
+        }),
+        /**
+         * Determines the delay to wait (in ms) before sending peer
+         * notifications to the server. Sending many notifications at once
+         * significantly increase the connection time because the server can't
+         * handle too many requests at once, but handles much faster one bigger
+         * request, even with a delay. The delay should however not be too high.
+         */
+        peerNotificationWaitDelay: attr({
+            default: 50,
         }),
         /**
          * How long to wait before considering a connection as needing recovery in ms.
