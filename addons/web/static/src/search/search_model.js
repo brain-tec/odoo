@@ -427,7 +427,7 @@ export class SearchModel extends EventBus {
         if (!this._context) {
             this._context = this._getContext();
         }
-        return this._context;
+        return deepCopy(this._context);
     }
 
     /**
@@ -437,7 +437,7 @@ export class SearchModel extends EventBus {
         if (!this._domain) {
             this._domain = this._getDomain();
         }
-        return this._domain;
+        return deepCopy(this._domain);
     }
 
     /**
@@ -476,7 +476,7 @@ export class SearchModel extends EventBus {
                 }
             }
         }
-        return this._comparison;
+        return deepCopy(this._comparison);
     }
 
     get facets() {
@@ -506,7 +506,7 @@ export class SearchModel extends EventBus {
         if (!this._groupBy) {
             this._groupBy = this._getGroupBy();
         }
-        return this._groupBy;
+        return deepCopy(this._groupBy);
     }
 
     /**
@@ -516,7 +516,7 @@ export class SearchModel extends EventBus {
         if (!this._orderBy) {
             this._orderBy = this._getOrderBy();
         }
-        return this._orderBy;
+        return deepCopy(this._orderBy);
     }
 
     //--------------------------------------------------------------------------
@@ -1745,9 +1745,9 @@ export class SearchModel extends EventBus {
      */
     _getIrFilterDescription(params = {}) {
         const { description, isDefault, isShared } = params;
-        const fns = this.env.__saveParams__.callbacks;
-        const saveParams = Object.assign({}, ...fns.map((fn) => fn()));
-        const context = makeContext(this._getContext(), saveParams.context);
+        const fns = this.env.__getContext__.callbacks;
+        const localContext = Object.assign({}, ...fns.map((fn) => fn()));
+        const context = makeContext(this._getContext(), localContext);
         const userContext = this.userService.context;
         for (const key in context) {
             if (key in userContext || /^search(panel)?_default_/.test(key)) {
@@ -1758,7 +1758,7 @@ export class SearchModel extends EventBus {
         const domain = this._getDomain({ raw: true, withGlobal: false }).toString();
         const groupBys = this._getGroupBy();
         const comparison = this.getFullComparison();
-        const orderBy = saveParams.orderBy ? saveParams.orderBy : this._getOrderBy() || [];
+        const orderBy = this._getOrderBy();
         const userId = isShared ? false : this.userService.userId;
 
         const preFavorite = {
@@ -1851,9 +1851,7 @@ export class SearchModel extends EventBus {
             case "favorite":
             case "filter": {
                 //Return a deep copy of the filter/favorite to avoid the view to modify the context
-                return makeContext(
-                    searchItem.context && JSON.parse(JSON.stringify(searchItem.context))
-                );
+                return makeContext(searchItem.context && deepCopy(searchItem.context));
             }
             default: {
                 return null;

@@ -331,6 +331,10 @@ function factory(dependencies) {
                     this.messageInEditing.originThread.unregisterCurrentPartnerIsTyping({ immediateNotify: true });
                 }
             }
+            if (!this.textInputContent) {
+                this.messageInEditing.actionList.update({ showDeleteConfirm: true });
+                return;
+            }
             const escapedAndCompactContent = escapeAndCompactTextContent(this.textInputContent);
             let body = escapedAndCompactContent.replace(/&nbsp;/g, ' ').trim();
             body = this._generateMentionsLinks(body);
@@ -365,7 +369,8 @@ function factory(dependencies) {
             if (!this.activeThread) {
                 return;
             }
-            if (!this.messaging.currentPartner) {
+            // not supported for guests
+            if (this.messaging.isCurrentUserGuest) {
                 return;
             }
             if (
@@ -485,7 +490,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeCanPostMessage() {
-            if (!this.textInputContent && this.attachments.length === 0) {
+            if (!this.messageInEditing && !this.textInputContent && this.attachments.length === 0) {
                 return false;
             }
             return !this.hasUploadingAttachment && !this.isPostingMessage;
