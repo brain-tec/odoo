@@ -1473,7 +1473,7 @@ export class OdooEditor extends EventTarget {
         const OFFSET = 10;
         let isBottom = false;
         this.toolbar.classList.toggle('toolbar-bottom', false);
-        this.toolbar.style.maxWidth = this.editable.offsetWidth - OFFSET * 2 + 'px';
+        this.toolbar.style.maxWidth = window.innerWidth - OFFSET * 2 + 'px';
         const sel = this.document.getSelection();
         const range = sel.getRangeAt(0);
         const isSelForward =
@@ -1483,7 +1483,6 @@ export class OdooEditor extends EventTarget {
         const toolbarHeight = this.toolbar.offsetHeight;
         const editorRect = this.editable.getBoundingClientRect();
         const parentContextRect = this.options.getContextFromParentRect();
-        const editorLeftPos = Math.max(0, editorRect.left);
         const editorTopPos = Math.max(0, editorRect.top);
         const scrollX = this.document.defaultView.scrollX;
         const scrollY = this.document.defaultView.scrollY;
@@ -1491,9 +1490,9 @@ export class OdooEditor extends EventTarget {
         // Get left position.
         let left = selRect.left + OFFSET;
         // Ensure the toolbar doesn't overflow the editor on the left.
-        left = Math.max(editorLeftPos + OFFSET, left);
+        left = Math.max(OFFSET, left);
         // Ensure the toolbar doesn't overflow the editor on the right.
-        left = Math.min(editorLeftPos + this.editable.offsetWidth - OFFSET - toolbarWidth, left);
+        left = Math.min(window.innerWidth - OFFSET - toolbarWidth, left);
         // Offset left to compensate for parent context position (eg. Iframe).
         left += parentContextRect.left;
         this.toolbar.style.left = scrollX + left + 'px';
@@ -1507,7 +1506,7 @@ export class OdooEditor extends EventTarget {
             isBottom = true;
         }
         // Ensure the toolbar doesn't overflow the editor on the bottom.
-        top = Math.min(editorTopPos + this.editable.offsetHeight - OFFSET - toolbarHeight, top);
+        top = Math.min(window.innerHeight - OFFSET - toolbarHeight, top);
         // Offset top to compensate for parent context position (eg. Iframe).
         top += parentContextRect.top;
         this.toolbar.style.top = scrollY + top + 'px';
@@ -1677,10 +1676,14 @@ export class OdooEditor extends EventTarget {
                     setCursor(range.endContainer, range.endOffset);
                 }
                 // Check for url after user insert a space so we won't transform an incomplete url.
-                if (ev.data && ev.data.includes(' ') && selection && selection.anchorNode) {
-                    ev.preventDefault();
+                if (
+                    ev.data && 
+                    ev.data.includes(' ') &&
+                    selection &&
+                    selection.anchorNode &&
+                    !this.commandBar._active
+                ) {
                     this._convertUrlInElement(closestElement(selection.anchorNode));
-                    this.execCommand('insertText', ev.data);
                 }
                 this.sanitize();
                 this.historyStep();
@@ -1980,14 +1983,16 @@ export class OdooEditor extends EventTarget {
      * @param {int} length
      */
     _createLinkWithUrlInTextNode(textNode, url, index, length) {
-        setCursor(textNode, index, textNode, index + length);
-        this.document.execCommand('createLink', false, url);
-        const sel = this.document.getSelection();
-        const link = closestElement(sel.anchorNode, 'a');
+        const link = this.document.createElement('a')
+        link.setAttribute('href', url)
         for (const [param, value] of Object.entries(this.options.defaultLinkAttributes)) {
             link.setAttribute(param, `${value}`);
         }
-        sel.collapseToEnd();
+        const range = this.document.createRange()
+        range.setStart(textNode, index)
+        range.setEnd(textNode, index+length)
+        link.appendChild(range.extractContents())
+        range.insertNode(link)
     }
 
     /**
