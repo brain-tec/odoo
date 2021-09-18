@@ -441,6 +441,8 @@ class AccountMove(models.Model):
             if accounting_date != self.date:
                 self.date = accounting_date
                 self._onchange_currency()
+            else:
+                self._onchange_recompute_dynamic_lines()
 
     @api.onchange('journal_id')
     def _onchange_journal(self):
@@ -2192,9 +2194,10 @@ class AccountMove(models.Model):
             id=self.id, title=html_escape(self.display_name)
         ))
 
-        # Make sure to recompute payment terms. This could be necessary if the date is different for example.
-        # Also, this is necessary when creating a credit note because the current invoice is copied.
-        copied_am._recompute_payment_terms_lines()
+        if copied_am.is_invoice(include_receipts=True):
+            # Make sure to recompute payment terms. This could be necessary if the date is different for example.
+            # Also, this is necessary when creating a credit note because the current invoice is copied.
+            copied_am._recompute_payment_terms_lines()
 
         return copied_am
 
