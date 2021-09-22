@@ -83,7 +83,12 @@ class PosPaymentMethod(models.Model):
         return bool(fields and self.open_session_ids)
 
     def write(self, vals):
-        if self._is_write_forbidden(set(vals.keys())):
+        # Modification to allow edition of pos.payment.methods with open
+        # sessions. We should only permit that for pos.payment.methods used
+        # in the TCPOS process, where POS orders are created automatically
+        # and not with the Odoo POS UI
+        if not self._context.get('allow_edition') and \
+                self._is_write_forbidden(set(vals.keys())):
             raise UserError('Please close and validate the following open PoS Sessions before modifying this payment method.\n'
                             'Open sessions: %s' % (' '.join(self.open_session_ids.mapped('name')),))
         return super(PosPaymentMethod, self).write(vals)
