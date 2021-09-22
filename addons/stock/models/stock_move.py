@@ -11,7 +11,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
-from odoo.tools.misc import OrderedSet
+from odoo.tools.misc import clean_context, OrderedSet
 
 PROCUREMENT_PRIORITIES = [('0', 'Normal'), ('1', 'Urgent')]
 
@@ -564,6 +564,8 @@ class StockMove(models.Model):
         # messages according to the state of the stock.move records.
         receipt_moves_to_reassign = self.env['stock.move']
         move_to_recompute_state = self.env['stock.move']
+        if 'product_uom' in vals and any(move.state == 'done' for move in self):
+            raise UserError(_('You cannot change the UoM for a stock move that has been set to \'Done\'.'))
         if 'product_uom_qty' in vals:
             move_to_unreserve = self.env['stock.move']
             for move in self.filtered(lambda m: m.state not in ('done', 'draft') and m.picking_id):
@@ -1175,7 +1177,7 @@ class StockMove(models.Model):
 
         # assign picking in batch for all confirmed move that share the same details
         for moves_ids in to_assign.values():
-            self.browse(moves_ids)._assign_picking()
+            self.browse(moves_ids).with_context(clean_context(self.env.context))._assign_picking()
         new_push_moves = self.filtered(lambda m: not m.picking_id.immediate_transfer)._push_apply()
         self._check_company()
         moves = self

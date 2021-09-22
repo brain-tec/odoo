@@ -1,16 +1,17 @@
 /** @odoo-module **/
 
 import { BORDER_WHITE, DEFAULT_BG } from "@web/views/graph/colors";
-import { click, makeDeferred, nextTick, triggerEvent } from "@web/../tests/helpers/utils";
-import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { GraphArchParser } from "@web/views/graph/graph_arch_parser";
-import { makeView } from "./helpers";
 import { registry } from "@web/core/registry";
-import { setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
+import { makeView } from "./helpers";
+import { click, makeDeferred, nextTick, triggerEvent } from "@web/../tests/helpers/utils";
+import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import {
     editFavoriteName,
     saveFavorite,
+    setupControlPanelServiceRegistry,
     switchView,
     toggleFavoriteMenu,
     toggleFilterMenu,
@@ -2066,7 +2067,7 @@ QUnit.module("Views", (hooks) => {
             type: "graph",
             resModel: "foo",
             arch: `
-                <graph string="Gloups">
+                <graph>
                     <field name="product_id"/>
                 </graph>
             `,
@@ -2864,6 +2865,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test('graph view with attribute disable_linking="1"', async function (assert) {
         assert.expect(4);
 
+        serviceRegistry.add("localization", makeFakeLocalizationService());
         serviceRegistry.add(
             "action",
             {
@@ -3324,7 +3326,7 @@ QUnit.module("Views", (hooks) => {
                     </graph>`,
                 searchViewArch: `
                     <search>
-                        <filter name="my_filter" string="My Filter" domain="[('id', '&lt;', 2)]"/>
+                        <filter name="my_filter" string="My Filter" domain="[('id', '&lt;', 6)]"/>
                     </search>`,
                 mockRPC: function (route, args) {
                     if (args.method === "web_read_group") {
@@ -3361,7 +3363,7 @@ QUnit.module("Views", (hooks) => {
             await nextTick();
 
             checkDatasets(assert, graph, ["data", "label"], {
-                data: [82, 157],
+                data: [82, 4],
                 label: "Foo",
             });
         }
