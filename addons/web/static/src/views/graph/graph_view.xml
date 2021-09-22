@@ -8,7 +8,7 @@
                 <t t-set="activeMeasures" t-value="[model.metaData.measure]"/>
             </t>
         </div>
-        <t t-if="props.display and props.display['bottom-right'] === false">
+        <t t-if="props.displayGroupByMenu">
             <div class="btn-group" role="toolbar" aria-label="Group By">
                 <GroupByMenu showCaretDown="true"/>
             </div>
@@ -60,10 +60,9 @@
                     </t>
                     <Renderer
                         class="o_renderer"
-                        data="model.data"
-                        metaData="model.metaData"
+                        model="model"
                         t-att-class="{ o_sample_data_disabled: model.useSampleModel }"
-                        t-on-inspect-domain-records="onInspectDomainRecords"
+                        onGraphClicked="(domain) => onGraphClicked(domain)"
                     />
                 </t>
                 <t t-else="" t-call="web.NoContentHelper">
