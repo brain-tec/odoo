@@ -76,8 +76,8 @@ function factory(dependencies) {
              * This is distinct from this._recoverConnection which tries to restores
              * connection that were established but failed or timed out.
              */
-            browser.setInterval(() => {
-                this.channel_id && this.currentRtcSession && this._callSessions();
+            this._intervalId = browser.setInterval(() => {
+                this.channel && this.currentRtcSession && this._callSessions();
             }, 30000); // 30 seconds
         }
 
@@ -88,6 +88,7 @@ function factory(dependencies) {
             browser.removeEventListener('beforeunload', this._onBeforeUnload);
             browser.removeEventListener('keydown', this._onKeyDown);
             browser.removeEventListener('keyup', this._onKeyUp);
+            browser.clearInterval(this._intervalId);
             return super._willDelete(...arguments);
         }
 
@@ -1133,13 +1134,13 @@ function factory(dependencies) {
          * The channel that is hosting the current RTC call.
          */
         channel: one2one('mail.thread', {
-            inverse: 'mailRtc',
+            inverse: 'rtc',
         }),
         /**
          * String, peerToken of the current session used to identify him during the peer-to-peer transactions.
          */
         currentRtcSession: one2one('mail.rtc_session', {
-            inverse: 'mailRtc',
+            inverse: 'rtc',
         }),
         /**
          * ICE servers used by RTCPeerConnection to retrieve the public IP address (STUN)
