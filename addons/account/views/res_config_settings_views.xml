@@ -276,7 +276,7 @@
                                 <div class="o_setting_right_pane" name="show_sale_receipts_right_pane">
                                     <label for="group_show_sale_receipts"/>
                                     <div class="text-muted">
-                                        Active to create sale receipt
+                                        Activate to create sale receipt
                                     </div>
                                 </div>
                             </div>
@@ -406,7 +406,7 @@
                         <div class="row mt16 o_settings_container" id="print_vendor_checks_setting_container">
                             <div class="col-12 col-lg-6 o_setting_box" id="print_checks" groups="account.group_account_user">
                                 <div class="o_setting_left_pane">
-                                    <field name="module_account_check_printing" widget="upgrade_boolean"/>
+                                    <field name="module_account_check_printing"/>
                                 </div>
                                 <div class="o_setting_right_pane">
                                     <label string="Checks" for="module_account_check_printing"/>
