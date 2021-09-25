@@ -46,7 +46,7 @@
                     <group expand="0" string="Group By">
                         <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
                         <filter string="Personal Stage" name="personal_stage" context="{'group_by': 'personal_stage_type_ids'}"/>
-                        <filter string="Assigned to" name="user" context="{'group_by': 'user_ids'}"/>
+                        <filter string="Assignees" name="user" context="{'group_by': 'user_ids'}"/>
                         <filter string="Project" name="project" context="{'group_by': 'project_id'}"/>
                         <filter string="Customer" name="customer" context="{'group_by': 'partner_id'}"/>
                         <filter string="Kanban State" name="kanban_state" context="{'group_by': 'kanban_state'}"/>
@@ -860,7 +860,7 @@
                     </group>
                     <notebook>
                         <page name="description_page" string="Description">
-                            <field name="description" type="html"/>
+                            <field name="description" type="html" options="{'collaborative': true}"/>
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
                             <field name="child_ids" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id, 'default_partner_id': partner_id}">

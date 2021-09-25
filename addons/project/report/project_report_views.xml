@@ -28,7 +28,7 @@
             <field name="name">report.project.task.user.view.tree</field>
             <field name="model">report.project.task.user</field>
             <field name="arch" type="xml">
-                <tree string="Tasks Analysis">
+                <tree string="Tasks Analysis" editable="top" delete="false">
                     <field name="name"/>
                     <field name="partner_id" optional="hide"/>
                     <field name="project_id" optional="show"/>
@@ -75,7 +75,7 @@
                     <group expand="1" string="Group By">
                         <filter string="Project" name="project" context="{'group_by': 'project_id'}"/>
                         <filter string="Stage" name="Stage" context="{'group_by': 'stage_id'}"/>
-                        <filter string="Assigned to" name="User" context="{'group_by': 'user_ids'}"/>
+                        <filter string="Assignees" name="User" context="{'group_by': 'user_ids'}"/>
                         <filter string="Customer" name="Customer" context="{'group_by': 'partner_id'}"/>
                         <filter string="Deadline" name="deadline" context="{'group_by': 'date_deadline'}"/>
                     </group>
