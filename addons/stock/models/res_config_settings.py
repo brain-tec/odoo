@@ -17,7 +17,7 @@ class ResConfigSettings(models.TransientModel):
     group_stock_production_lot = fields.Boolean("Lots & Serial Numbers",
         implied_group='stock.group_production_lot')
     group_lot_on_delivery_slip = fields.Boolean("Display Lots & Serial Numbers on Delivery Slips",
-        implied_group='stock.group_lot_on_delivery_slip')
+        implied_group='stock.group_lot_on_delivery_slip', group='base.group_user,base.group_portal')
     group_stock_tracking_lot = fields.Boolean("Delivery Packages",
         implied_group='stock.group_tracking_lot')
     group_stock_tracking_owner = fields.Boolean("Consignment",
@@ -64,31 +64,27 @@ class ResConfigSettings(models.TransientModel):
             self.group_stock_multi_locations = True
 
     def set_values(self):
-        super(ResConfigSettings, self).set_values()
+        previous_group = self.default_get(['group_stock_multi_locations', 'group_stock_production_lot', 'group_stock_tracking_lot'])
+        res = super(ResConfigSettings, self).set_values()
 
         if not self.user_has_groups('stock.group_stock_manager'):
             return
 
-        """ If we are not in multiple locations, we can deactivate the internal
+        """ If we disable multiple locations, we can deactivate the internal
         operation types of the warehouses, so they won't appear in the dashboard.
         Otherwise, activate them.
         """
         warehouse_obj = self.env['stock.warehouse']
-        if self.group_stock_multi_locations:
+        if self.group_stock_multi_locations and not previous_group.get('group_stock_multi_locations'):
             # override active_test that is false in set_values
-            warehouses = warehouse_obj.with_context(active_test=True).search([])
-            active = True
-        else:
-            warehouses = warehouse_obj.search([
+            warehouse_obj.with_context(active_test=True).search([]).mapped('int_type_id').write({'active': True})
+        elif not self.group_stock_multi_locations and previous_group.get('group_stock_multi_locations'):
+            warehouse_obj.search([
                 ('reception_steps', '=', 'one_step'),
-                ('delivery_steps', '=', 'ship_only')])
-            active = False
-        warehouses.mapped('int_type_id').write({'active': active})
+                ('delivery_steps', '=', 'ship_only')]
+            ).mapped('int_type_id').write({'active': False})
 
-    def execute(self):
-        res = super(ResConfigSettings, self).execute()
-        self.ensure_one()
-        if self.group_stock_multi_locations or self.group_stock_production_lot or self.group_stock_tracking_lot:
+        if any(self[group] and not prev_value for group, prev_value in previous_group.items()):
             picking_types = self.env['stock.picking.type'].with_context(active_test=False).search([
                 ('code', '!=', 'incoming'),
                 ('show_operations', '=', False)

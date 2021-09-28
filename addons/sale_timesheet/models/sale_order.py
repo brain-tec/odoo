@@ -6,6 +6,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval
+from odoo.tools.sql import column_exists, create_column
 
 
 class SaleOrder(models.Model):
@@ -42,7 +43,7 @@ class SaleOrder(models.Model):
     @api.depends('order_line.product_id.project_id')
     def _compute_tasks_ids(self):
         for order in self:
-            order.tasks_ids = self.env['project.task'].search([('sale_line_id', 'in', order.order_line.ids)])
+            order.tasks_ids = self.env['project.task'].search(['|', ('sale_line_id', 'in', order.order_line.ids), ('sale_order_id', '=', order.id)])
             order.tasks_count = len(order.tasks_ids)
 
     @api.depends('order_line.product_id.service_tracking')
@@ -67,11 +68,7 @@ class SaleOrder(models.Model):
         for sale_order in self:
             duration_list = []
             for timesheet in sale_order.timesheet_ids:
-                timesheet_uom = timesheet.product_uom_id or timesheet.company_id.project_time_mode_id
-                if timesheet_uom != sale_order.timesheet_encode_uom_id and timesheet_uom.category_id == sale_order.timesheet_encode_uom_id.category_id:
-                    duration_list.append(timesheet_uom._compute_quantity(timesheet.unit_amount, sale_order.timesheet_encode_uom_id))
-                else:
-                    duration_list.append(timesheet.unit_amount)
+                duration_list.append(timesheet.unit_amount)
             sale_order.timesheet_total_duration = sum(duration_list)
 
     @api.onchange('project_id')
@@ -83,9 +80,10 @@ class SaleOrder(models.Model):
     def _action_confirm(self):
         """ On SO confirmation, some lines should generate a task or a project. """
         result = super(SaleOrder, self)._action_confirm()
-        self.mapped('order_line').sudo().with_context(
-            force_company=self.company_id.id,
-        )._timesheet_service_generation()
+        for order in self:
+            order.mapped('order_line').sudo().with_context(
+                force_company=order.company_id.id,
+            )._timesheet_service_generation()
         return result
 
     def action_view_task(self):
@@ -194,6 +192,21 @@ class SaleOrderLine(models.Model):
                 line.product_updatable = False
             else:
                 super(SaleOrderLine, line)._compute_product_updatable()
+
+    def _auto_init(self):
+        """
+        Create column to stop ORM from computing it himself (too slow)
+        """
+        if not column_exists(self.env.cr, 'sale_order_line', 'is_service'):
+            create_column(self.env.cr, 'sale_order_line', 'is_service', 'bool')
+            self.env.cr.execute("""
+                UPDATE sale_order_line line
+                SET is_service = (pt.type = 'service')
+                FROM product_product pp
+                LEFT JOIN product_template pt ON pt.id = pp.product_tmpl_id
+                WHERE pp.id = line.product_id
+            """)
+        return super()._auto_init()
 
     @api.model_create_multi
     def create(self, vals_list):

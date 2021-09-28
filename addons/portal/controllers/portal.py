@@ -141,6 +141,10 @@ class CustomerPortal(Controller):
         return groups
 
     def _prepare_portal_layout_values(self):
+        """Values for /my/* templates rendering.
+
+        Does not include the record counts.
+        """
         # get customer sales rep
         sales_user = False
         partner = request.env.user.partner_id
@@ -153,9 +157,16 @@ class CustomerPortal(Controller):
             'archive_groups': [],
         }
 
+    def _prepare_home_portal_values(self):
+        """Values for /my & /my/home routes template rendering.
+
+        Includes the record count for the displayed badges.
+        """
+        return self._prepare_portal_layout_values()
+
     @route(['/my', '/my/home'], type='http', auth="user", website=True)
     def home(self, **kw):
-        values = self._prepare_portal_layout_values()
+        values = self._prepare_home_portal_values()
         return request.render("portal.portal_my_home", values)
 
     @route(['/my/account'], type='http', auth='user', website=True)
@@ -366,7 +377,7 @@ class CustomerPortal(Controller):
         if report_type not in ('html', 'pdf', 'text'):
             raise UserError(_("Invalid report type: %s") % report_type)
 
-        report_sudo = request.env.ref(report_ref).sudo()
+        report_sudo = request.env.ref(report_ref).with_user(SUPERUSER_ID)
 
         if not isinstance(report_sudo, type(request.env['ir.actions.report'])):
             raise UserError(_("%s is not the reference of a report") % report_ref)

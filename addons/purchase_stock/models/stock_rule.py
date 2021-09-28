@@ -99,7 +99,7 @@ class StockRule(models.Model):
             procurements = self._merge_procurements(procurements_to_merge)
 
             po_lines_by_product = {}
-            grouped_po_lines = groupby(po.order_line.filtered(lambda l: not l.display_type and l.product_uom == l.product_id.uom_po_id).sorted('product_id'), key=lambda l: l.product_id.id)
+            grouped_po_lines = groupby(po.order_line.filtered(lambda l: not l.display_type and l.product_uom == l.product_id.uom_po_id).sorted(lambda l: l.product_id.id), key=lambda l: l.product_id.id)
             for product, po_lines in grouped_po_lines:
                 po_lines_by_product[product] = self.env['purchase.order.line'].concat(*list(po_lines))
             po_line_values = []
@@ -233,8 +233,13 @@ class StockRule(models.Model):
         product_lang = product_id.with_prefetch().with_context(
             lang=partner.lang,
             partner_id=partner.id,
+            supplier_info=seller,
         )
-        name = product_lang.display_name
+        name_product_description = product_lang.name_get()
+        if not name_product_description:
+            name = product_lang.display_name  # Fallback to original behavior in case of problem
+        else:
+            name = name_product_description[0][1]  # name_product_description will be of the form list[tuple(product_id, name)]
         if product_lang.description_purchase:
             name += '\n' + product_lang.description_purchase
 
@@ -266,6 +271,7 @@ class StockRule(models.Model):
 
         procurement_date_planned = min(dates)
         schedule_date = (procurement_date_planned - relativedelta(days=company_id.po_lead))
+        supplier_delay = max([int(value['supplier'].delay) for value in values])
 
         # Since the procurements are grouped if they share the same domain for
         # PO but the PO does not exist. In this case it will create the PO from
@@ -273,7 +279,7 @@ class StockRule(models.Model):
         # arbitrary procurement. In this case the first.
         values = values[0]
         partner = values['supplier'].name
-        purchase_date = schedule_date - relativedelta(days=int(values['supplier'].delay))
+        purchase_date = schedule_date - relativedelta(days=supplier_delay)
 
         fpos = self.env['account.fiscal.position'].with_context(force_company=company_id.id).get_fiscal_position(partner.id)
 

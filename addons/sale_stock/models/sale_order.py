@@ -46,14 +46,14 @@ class SaleOrder(models.Model):
         for order in self:
             pickings = order.picking_ids.filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
             dates_list = [date for date in pickings.mapped('date_done') if date]
-            order.effective_date = min(dates_list).date() if dates_list else False
+            order.effective_date = fields.Date.context_today(order, min(dates_list)) if dates_list else False
 
     @api.depends('picking_policy')
     def _compute_expected_date(self):
         super(SaleOrder, self)._compute_expected_date()
         for order in self:
             dates_list = []
-            for line in order.order_line.filtered(lambda x: x.state != 'cancel' and not x._is_delivery()):
+            for line in order.order_line.filtered(lambda x: x.state != 'cancel' and not x._is_delivery() and not x.display_type):
                 dt = line._expected_date()
                 dates_list.append(dt)
             if dates_list:
@@ -148,7 +148,7 @@ class SaleOrder(models.Model):
             picking_id = picking_id[0]
         else:
             picking_id = pickings[0]
-        action['context'] = dict(self._context, default_partner_id=self.partner_id.id, default_picking_id=picking_id.id, default_picking_type_id=picking_id.picking_type_id.id, default_origin=self.name, default_group_id=picking_id.group_id.id)
+        action['context'] = dict(self._context, default_partner_id=self.partner_id.id, default_picking_type_id=picking_id.picking_type_id.id, default_origin=self.name, default_group_id=picking_id.group_id.id)
         return action
 
     def action_cancel(self):
@@ -157,7 +157,7 @@ class SaleOrder(models.Model):
             if sale_order.state == 'sale' and sale_order.order_line:
                 sale_order_lines_quantities = {order_line: (order_line.product_uom_qty, 0) for order_line in sale_order.order_line}
                 documents = self.env['stock.picking']._log_activity_get_documents(sale_order_lines_quantities, 'move_ids', 'UP')
-        self.mapped('picking_ids').action_cancel()
+        self.mapped('picking_ids').filtered(lambda p: p.state != 'done').action_cancel()
         if documents:
             filtered_documents = {}
             for (parent, responsible), rendering_context in documents.items():
@@ -215,12 +215,12 @@ class SaleOrderLine(models.Model):
     is_mto = fields.Boolean(compute='_compute_is_mto')
     display_qty_widget = fields.Boolean(compute='_compute_qty_to_deliver')
 
-    @api.depends('product_id', 'product_uom_qty', 'qty_delivered', 'state')
+    @api.depends('product_id', 'product_uom_qty', 'qty_delivered', 'state', 'product_uom')
     def _compute_qty_to_deliver(self):
         """Compute the visibility of the inventory widget."""
         for line in self:
             line.qty_to_deliver = line.product_uom_qty - line.qty_delivered
-            if line.state == 'draft' and line.product_type == 'product' and line.qty_to_deliver > 0:
+            if line.state == 'draft' and line.product_type == 'product' and line.product_uom and line.qty_to_deliver > 0:
                 line.display_qty_widget = True
             else:
                 line.display_qty_widget = False
@@ -237,7 +237,7 @@ class SaleOrderLine(models.Model):
         # We first loop over the SO lines to group them by warehouse and schedule
         # date in order to batch the read of the quantities computed field.
         for line in self:
-            if not line.display_qty_widget:
+            if not (line.product_id and line.display_qty_widget):
                 continue
             line.warehouse_id = line.order_id.warehouse_id
             if line.order_id.commitment_date:
@@ -353,6 +353,14 @@ class SaleOrderLine(models.Model):
 
     @api.depends('order_id.state')
     def _compute_invoice_status(self):
+        def check_moves_state(moves):
+            # All moves states are either 'done' or 'cancel', and there is at least one 'done'
+            at_least_one_done = False
+            for move in moves:
+                if move.state not in ['done', 'cancel']:
+                    return False
+                at_least_one_done = at_least_one_done or move.state == 'done'
+            return at_least_one_done
         super(SaleOrderLine, self)._compute_invoice_status()
         for line in self:
             # We handle the following specific situation: a physical product is partially delivered,
@@ -364,7 +372,7 @@ class SaleOrderLine(models.Model):
                     and line.product_id.type in ['consu', 'product']\
                     and line.product_id.invoice_policy == 'delivery'\
                     and line.move_ids \
-                    and all(move.state in ['done', 'cancel'] for move in line.move_ids):
+                    and check_moves_state(line.move_ids):
                 line.invoice_status = 'invoiced'
 
     @api.depends('move_ids')

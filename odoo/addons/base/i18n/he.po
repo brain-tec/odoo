@@ -6,7 +6,6 @@
 # Fishfur A Banter <fishfurbanter@gmail.com>, 2019
 # Moshe Flam <pashute@gmail.com>, 2019
 # Leandro Noijovich <eliel.sorcerer@gmail.com>, 2019
-# hed shefetr <hed@laylinetech.com>, 2019
 # Amit Spilman <amit@laylinetech.com>, 2019
 # Mor Kir <morki@013.net.il>, 2019
 # ExcaliberX <excaliberx@gmail.com>, 2019
@@ -16,6 +15,9 @@
 # Martin Trigaux, 2020
 # Yihya Hugirat <hugirat@gmail.com>, 2020
 # דודי מלכה <Dudimalka6@gmail.com>, 2020
+# Yves Goldberg <admin@ygol.com>, 2020
+# hed shefetr <hed@laylinetech.com>, 2020
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -23,7 +25,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: דודי מלכה <Dudimalka6@gmail.com>, 2020\n"
+"Last-Translator: Lilach Gilliam <lilach.gilliam@gmail.com>, 2021\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9358,6 +9360,12 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr "אין אפשרות לבטל שפה נמצאת כעת בשימוש על-ידי משתמשים"
 
@@ -11348,7 +11356,7 @@ msgstr "מוצרים דיגיטליים"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Digital formatting"
-msgstr "עיצוב ספרות"
+msgstr "עיצוב דיגיטאלי"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_decimal_precision__digits
@@ -14512,7 +14520,7 @@ msgstr "ביישומים"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_iap
 msgid "In-App Purchases"
-msgstr ""
+msgstr "רכישות In-App"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
@@ -15102,7 +15110,7 @@ msgstr "ישראל"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_il
 msgid "Israel - Accounting"
-msgstr ""
+msgstr "ישראל - הנהלת חשבונות"
 
 #. module: base
 #: model:res.country,name:base.it
@@ -17511,7 +17519,7 @@ msgstr "אין מספיק הרשאות במזהה החיצוני:"
 #: code:addons/base/models/ir_rule.py:0
 #, python-format
 msgid "Note: this might be a multi-company issue."
-msgstr ""
+msgstr "הערה: שגיאה זו עשויה להיות קשורה לבין-חברתי"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__comment
@@ -18715,6 +18723,16 @@ msgid "Odoo helps you easily track all activities related to a vendor."
 msgstr "Odoo מסייע לך לעקוב בקלות אחר כל הפעילויות הקשורות לספק.."
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"Odoo is unable to merge the PDFs attached to the following records:\n"
+"%s\n"
+"\n"
+"Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
 msgid "Odoo referral program"
 msgstr ""
@@ -18781,6 +18799,12 @@ msgid ""
 "One of the documents you are trying to access has been deleted, please try "
 "again after refreshing."
 msgstr "אחד המסמכים שאליהם אתה מנסה לגשת נמחק, נסה שוב לאחר הרענון."
+
+#. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:0
@@ -23114,6 +23138,12 @@ msgid "The internal user in charge of this contact."
 msgstr "המשתמש הפנימי הממונה על איש קשר זה."
 
 #. module: base
+#: code:addons/base/models/res_country.py:106
+#, python-format
+msgid "The layout contains an invalid format key"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
 msgid "The list of models that extends the current model."
 msgstr "רשימת הדגמים שמרחיבה את המודל הנוכחי."
@@ -23269,6 +23299,10 @@ msgid ""
 "%(multi_company_warning)s\n"
 "(Records: %(example_records)s, User: %(user_id)s)"
 msgstr ""
+"התהליך המבוקש (\"%(operation)s\" על \"%(document_kind)s\" (%(document_model)s)) נחסם בעקבות החוקים הבאים:\n"
+"%(rules_list)s\n"
+"%(multi_company_warning)s\n"
+"(רשומות: %(example_records)s, משתמש: %(user_id)s)"
 
 #. module: base
 #: code:addons/models.py:0
@@ -25467,8 +25501,8 @@ msgstr "לא ניתן להפעיל את משתמש-העל."
 #. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
-msgid "You cannot archive a contact linked to an internal user."
-msgstr "לא ניתן לשלוח לארכיון איש קשר המקושר למשתמש פנימי."
+msgid "You cannot archive a contact linked to a portal or internal user."
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0

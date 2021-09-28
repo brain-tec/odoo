@@ -115,7 +115,8 @@ class PosConfig(models.Model):
         'account.journal', string='Sales Journal',
         domain=[('type', '=', 'sale')],
         help="Accounting journal used to post sales entries.",
-        default=_default_sale_journal)
+        default=_default_sale_journal,
+        ondelete='restrict')
     invoice_journal_id = fields.Many2one(
         'account.journal', string='Invoice Journal',
         domain=[('type', '=', 'sale')],
@@ -151,7 +152,7 @@ class PosConfig(models.Model):
     proxy_ip = fields.Char(string='IP Address', size=45,
         help='The hostname or ip address of the hardware proxy, Will be autodetected if left empty.')
     active = fields.Boolean(default=True)
-    uuid = fields.Char(readonly=True, default=lambda self: str(uuid4()),
+    uuid = fields.Char(readonly=True, default=lambda self: str(uuid4()), copy=False,
         help='A globally unique identifier for this pos configuration, used to prevent conflicts in client-generated data.')
     sequence_id = fields.Many2one('ir.sequence', string='Order IDs Sequence', readonly=True,
         help="This sequence is automatically created by Odoo but you can change it "
@@ -371,6 +372,8 @@ class PosConfig(models.Model):
     @api.onchange('iface_print_via_proxy')
     def _onchange_iface_print_via_proxy(self):
         self.iface_print_auto = self.iface_print_via_proxy
+        if not self.iface_print_via_proxy:
+            self.iface_cashdrawer = False
 
     @api.onchange('module_account')
     def _onchange_module_account(self):
@@ -592,7 +595,7 @@ class PosConfig(models.Model):
         self = self.sudo()
         if not companies:
             companies = self.env['res.company'].search([])
-        for company in companies:
+        for company in companies.filtered('account_default_pos_receivable_account_id'):
             if company.chart_template_id:
                 cash_journal = self.env['account.journal'].search([('company_id', '=', company.id), ('type', '=', 'cash')], limit=1)
                 pos_receivable_account = company.account_default_pos_receivable_account_id

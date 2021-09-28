@@ -890,7 +890,7 @@
                     <div>Tel:<t t-esc='receipt.company.phone' /></div>
                 </t>
                 <t t-if='receipt.company.vat'>
-                    <div>VAT:<t t-esc='receipt.company.vat' /></div>
+                    <div><t t-esc='receipt.company.vat_label'/>:<t t-esc='receipt.company.vat' /></div>
                 </t>
                 <t t-if='receipt.company.email'>
                     <div><t t-esc='receipt.company.email' /></div>
@@ -959,7 +959,7 @@
                 <br/>
                 <div>Subtotal<span t-esc='widget.format_currency(receipt.subtotal)' class="pos-receipt-right-align"/></div>
                 <t t-foreach='receipt.tax_details' t-as='tax'>
-                    <div>
+                    <div class="pos-receipt-tax-line">
                         <t t-esc='tax.name' />
                         <span t-esc='widget.format_currency_no_symbol(tax.amount)' class="pos-receipt-right-align"/>
                     </div>
@@ -1019,12 +1019,10 @@
                 <t t-raw='receipt.footer_html'/>
             </div>
 
-            <div t-if='!receipt.footer_html and receipt.footer'  class="pos-receipt-center-align">
-                <br/>
+            <div t-if='!receipt.footer_html and receipt.footer'  class="pos-receipt-center-align" style="white-space:pre-line">
                 <t t-esc='receipt.footer'/>
-                <br/>
-                <br/>
             </div>
+            <br/>
 
             <div class='after-footer'>
                 <t t-foreach='paymentlines' t-as='line'>
@@ -1406,7 +1404,7 @@
                 <img t-att-src='image_url' alt="Product image"/>
                 <t t-if="!product.to_weight">
                     <span class="price-tag">
-                        <t t-esc="widget.format_currency(product.get_price(pricelist, 1),'Product Price')"/>
+                        <t t-esc="widget.format_currency(product.get_display_price(pricelist, 1),'Product Price')"/>
                     </span>
                 </t>
                 <t t-if="product.to_weight">

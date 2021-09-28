@@ -10,7 +10,7 @@
 # Fredrik Ahlsen <fredrik@gdx.no>, 2020
 # Martin Trigaux, 2020
 # Jorunn D. Newth, 2020
-# Marius Stedjan <marius@stedjan.com>, 2020
+# Marius Stedjan <marius@stedjan.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -18,7 +18,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Marius Stedjan <marius@stedjan.com>, 2020\n"
+"Last-Translator: Marius Stedjan <marius@stedjan.com>, 2021\n"
 "Language-Team: Norwegian Bokmål (https://www.transifex.com/odoo/teams/41243/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6919,7 +6919,7 @@ msgstr "Regnskap - MRP"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_test
 msgid "Accounting Consistency Tests"
-msgstr ""
+msgstr "Regnskapskonsistens-tester"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_reports
@@ -7891,7 +7891,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_asset
 msgid "Assets Management"
-msgstr "Ressursadministrasjon"
+msgstr "Administrasjon av eiendeler"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_paperformat__report_ids
@@ -8071,7 +8071,7 @@ msgid ""
 "Automatically set to let administators find new terms that might need to be "
 "translated"
 msgstr ""
-"Satt automatisk til å la administratorer finne nye begreper som kan trenge "
+"Satt automatisk for å la administratorer finne nye begreper som kan trenge "
 "oversetting"
 
 #. module: base
@@ -8877,6 +8877,12 @@ msgstr ""
 msgid ""
 "Cannot create new '%s' records from their name alone. Please create those "
 "records manually and try importing again."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
 msgstr ""
 
 #. module: base
@@ -12212,6 +12218,8 @@ msgid ""
 "File from where the view originates.\n"
 "                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
+"Filen hvor visningen stammer fra.\n"
+"                                                          Nyttig for å tilbakestille defekte visninger, eller for å lese inn arch fra fil i dev-xml modus."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__filter
@@ -13159,12 +13167,12 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_operations_helpdesk
 #: model:ir.module.module,shortdesc:base.module_helpdesk
 msgid "Helpdesk"
-msgstr "Kundestøtte"
+msgstr "Kundeservice"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_account
 msgid "Helpdesk Account"
-msgstr ""
+msgstr "Kundeservicekonto"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale
@@ -13194,12 +13202,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_timesheet
 msgid "Helpdesk Timesheet"
-msgstr "Timeliste for kundestøtte"
+msgstr "Timeliste for kundeservice"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_forum
 msgid "Helpdesk: Knowledge Base"
-msgstr "Kundestøtte: Kunnskapsbase"
+msgstr "Kundeservice: Kunnskapsbase"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_point_of_sale
@@ -13219,7 +13227,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_sales
 msgid "Helps you handle your quotations, sale orders and invoicing."
-msgstr "Hjelper deg å håndtere pristilbud, salgsordrer og fakturering."
+msgstr "Hjelper deg å håndtere tilbud, salgsordrer og fakturering."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_operations_timesheets
@@ -13239,7 +13247,7 @@ msgstr "Hjelper deg å administrere arrangementer."
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_appraisals
 msgid "Helps you manage your appraisals."
-msgstr "Hjelper deg å administrere ansattvurderinger."
+msgstr "Hjelper deg å administrere vurderinger av ansatte."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_approvals
@@ -14438,7 +14446,7 @@ msgstr "Fakturering"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hw_posbox_homepage
 msgid "IoT Box Homepage"
-msgstr ""
+msgstr "IoT Box Nettside"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_iot_pairing
@@ -14630,7 +14638,7 @@ msgstr "Kiribati"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_forum
 msgid "Knowledge base for helpdesk based on Odoo Forum"
-msgstr "Kunnskapsbase for kundestøtte basert på Odoo Forum"
+msgstr "Kunnskapsbase for kundeservice basert på Odoo Forum"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_si
@@ -16003,7 +16011,7 @@ msgstr "Slå sammen følgende kontakter"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
 msgid "Merge with Manual Check"
-msgstr "Sammenslåing med manuell kontroll"
+msgstr "Slå sammen med manuell kontroll"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_logging__message
@@ -16355,7 +16363,7 @@ msgstr "Modeller"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_updated
 msgid "Modified Architecture"
-msgstr ""
+msgstr "Modifisert arkitektur"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_module_module
@@ -16515,7 +16523,7 @@ msgstr "Mosambik"
 #. module: base
 #: model:res.partner.title,shortcut:base.res_partner_title_mister
 msgid "Mr."
-msgstr "Hr."
+msgstr "Herr"
 
 #. module: base
 #: model:res.partner.title,shortcut:base.res_partner_title_madam
@@ -16743,7 +16751,7 @@ msgstr "Niue"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_config_settings_view_form
 msgid "No Record Found"
-msgstr "Ingen oppføringer funnet"
+msgstr "Ingen poster funnet"
 
 #. module: base
 #: code:addons/models.py:0
@@ -16754,7 +16762,7 @@ msgstr "Fant ingen standardvisning av type '%s'!"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_sequence__implementation__no_gap
 msgid "No gap"
-msgstr "Ingen gap"
+msgstr "Ingen hull"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -16912,12 +16920,12 @@ msgstr "Antall apper"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__numbercall
 msgid "Number of Calls"
-msgstr "Antall kall"
+msgstr "Antall kjøringer"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__companies_count
 msgid "Number of Companies"
-msgstr "Antall firma"
+msgstr "Antall firmaer"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__accesses_count
@@ -18097,6 +18105,16 @@ msgid "Odoo helps you easily track all activities related to a vendor."
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"Odoo is unable to merge the PDFs attached to the following records:\n"
+"%s\n"
+"\n"
+"Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
 msgid "Odoo referral program"
 msgstr ""
@@ -18160,6 +18178,12 @@ msgstr "On delete attributt for mange-til-en felt"
 msgid ""
 "One of the documents you are trying to access has been deleted, please try "
 "again after refreshing."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
 msgstr ""
 
 #. module: base
@@ -18313,7 +18337,7 @@ msgstr "Operasjoner"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_crm
 msgid "Opportunity to Quotation"
-msgstr "Salgsmulighet til pristilbud"
+msgstr "Tilbudsmulighet"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_partner_merge_automatic_wizard__state__option
@@ -19312,7 +19336,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_prev
 msgid "Previous View Architecture"
-msgstr ""
+msgstr "Forrige vindusarkitektur"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_cron__lastcall
@@ -19382,7 +19406,7 @@ msgstr ""
 #: code:addons/models.py:0
 #, python-format
 msgid "Private methods (such as %s) cannot be called remotely."
-msgstr "Private metoder (sånn som %s) kan ikke bli påkalt eksternt."
+msgstr "Private metoder (som %s) kan ikke bli påkalt eksternt."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_10
@@ -19547,7 +19571,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale_timesheet
 msgid "Project, Helpdesk, Timesheet and Sale Orders"
-msgstr "Prosjekt, kundestøtte, timelister og salgsordrer"
+msgstr "Prosjekt, kundeservice, timelister og salgsordrer"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_account
@@ -20373,7 +20397,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__soft
 msgid "Restore previous version (soft reset)."
-msgstr ""
+msgstr "Gjenopprett forrige versjon (myk nullstilling)."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__on_delete__restrict
@@ -22464,6 +22488,12 @@ msgid "The internal user in charge of this contact."
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/res_country.py:106
+#, python-format
+msgid "The layout contains an invalid format key"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
 msgid "The list of models that extends the current model."
 msgstr "Listen over modeller som utvider gjeldende modell."
@@ -22792,7 +22822,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_base
 msgid "This field is the same as `arch` field without translations"
-msgstr ""
+msgstr "Dette feltet er det samme som `arch`-feltet, uten oversettelser"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__code
@@ -24430,12 +24460,12 @@ msgstr "Nettstedskjema"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk
 msgid "Website Helpdesk"
-msgstr "Kundestøtte på nettsted"
+msgstr "Kundeservice på nettsted"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_livechat
 msgid "Website IM Livechat Helpdesk"
-msgstr "Kundestøtte-chat på nettsted"
+msgstr "Kundeservice-chat på nettsted"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__website
@@ -24783,7 +24813,7 @@ msgstr "Du kan ikke aktivere superbrukeren."
 #. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
-msgid "You cannot archive a contact linked to an internal user."
+msgid "You cannot archive a contact linked to a portal or internal user."
 msgstr ""
 
 #. module: base

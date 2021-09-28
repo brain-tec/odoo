@@ -231,12 +231,13 @@ var VariantMixin = {
 
         $container.find(variantsValuesSelectors.join(',')).each(function (){
             var $variantValueInput = $(this);
+            var singleNoCustom = $variantValueInput.data('is_single') && !$variantValueInput.data('is_custom');
 
             if ($variantValueInput.is('select')){
                 $variantValueInput = $variantValueInput.find('option[value=' + $variantValueInput.val() + ']');
             }
 
-            if ($variantValueInput.length !== 0){
+            if ($variantValueInput.length !== 0 && !singleNoCustom){
                 noVariantAttributeValues.push({
                     'custom_product_template_attribute_value_id': $variantValueInput.data('value_id'),
                     'attribute_value_name': $variantValueInput.data('value_name'),
@@ -341,7 +342,7 @@ var VariantMixin = {
         $parent
             .find('option, input, label')
             .removeClass('css_not_available')
-            .attr('title', '')
+            .attr('title', function () { return $(this).data('value_name') || ''; })
             .data('excluded-by', '');
 
         // exclusion rules: array of ptav
@@ -444,6 +445,7 @@ var VariantMixin = {
         var $price = $parent.find(".oe_price:first .oe_currency_value");
         var $default_price = $parent.find(".oe_default_price:first .oe_currency_value");
         var $optional_price = $parent.find(".oe_optional:first .oe_currency_value");
+
         $price.text(self._priceToStr(combination.price));
         $default_price.text(self._priceToStr(combination.list_price));
 
@@ -493,6 +495,14 @@ var VariantMixin = {
                 isCombinationPossible
             );
         }
+
+        // $parent.find("#add_to_cart").toggleClass('disabled', !combination.is_available);
+        // if(!combination.is_available){
+        //     $parent.find("#product_is_not_available_warning").css('display', 'inline');
+        // }
+        // else{
+        //     $parent.find("#product_is_not_available_warning").css('display', 'none');
+        // }
 
         $parent
             .find('.product_id')

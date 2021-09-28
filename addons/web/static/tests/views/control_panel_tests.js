@@ -3,6 +3,7 @@ odoo.define('web.control_panel_tests', function (require) {
 
 const AbstractAction = require('web.AbstractAction');
 const ControlPanelView = require('web.ControlPanelView');
+const config = require('web.config');
 const core = require('web.core');
 const testUtils = require('web.test_utils');
 
@@ -624,6 +625,49 @@ QUnit.module('Views', {
         controlPanel.destroy();
     });
 
+    QUnit.test('load favorite with group_by', async function (assert) {
+        assert.expect(3);
+
+        var controlPanel = await createControlPanel({
+            model: 'partner',
+            arch: "<search></search>",
+            data: this.data,
+            intercepts: {
+                load_filters: function (ev) {
+                    ev.data.on_success([
+                        {
+                            user_id: [2,"Mitchell Admin"],
+                            name: 'favorite 1',
+                            id: 5,
+                            context: "{'group_by': ['company_id'], 'test': 'test', 'test2': True}",
+                            sort: "[]",
+                            domain: "[('user_id', '=', uid)]",
+                        }
+                    ]);
+                }
+            },
+            session: {
+                user_context: { uid: 2 },
+            },
+            searchMenuTypes: ['favorite'],
+        });
+
+        _.each(controlPanel.exportState().filters, function (filter) {
+            if (filter.type === 'favorite') {
+                assert.deepEqual(filter.context, { test: 'test', test2: true }, 'group_by should not be in context anymore');
+                assert.deepEqual(filter.groupBys, ['company_id'], 'group_by should have been moved from context to groupBys');
+            }
+        });
+
+        await testUtils.dom.click(controlPanel.$('.o_favorites_menu_button'));
+        await testUtils.dom.click(controlPanel.$('.o_menu_item:contains(favorite 1)'));
+
+        assert.strictEqual(controlPanel.$('.o_control_panel .o_facet_values').text().trim(),
+            'favorite 1', 'favorite should be applied with True in its initial context string');
+
+        controlPanel.destroy();
+    });
+
     QUnit.test('groupby menu is not rendered if searchMenuTypes does not have groupBy', async function (assert) {
         assert.expect(2);
 
@@ -644,6 +688,48 @@ QUnit.module('Views', {
             "there should not be groupby dropdown");
 
         controlPanel.destroy();
+    });
+
+    QUnit.test('search field should be autofocused', async function (assert) {
+        assert.expect(2);
+
+        testUtils.mock.patch(config.device, {
+            isMobileDevice: false,
+        });
+
+        const controlPanel = await createControlPanel({
+            model: 'partner',
+            arch: '<search></search>',
+            data: this.data,
+        });
+
+        assert.containsOnce(controlPanel, '.o_searchview_input', "has a search field");
+        assert.containsOnce(controlPanel, '.o_searchview_input:focus-within',
+            "has autofocused search field");
+
+        controlPanel.destroy();
+        testUtils.mock.unpatch(config.device);
+    });
+
+    QUnit.test("search field's autofocus should be disabled on mobile device", async function (assert) {
+        assert.expect(2);
+
+        testUtils.mock.patch(config.device, {
+            isMobileDevice: true,
+        });
+
+        const controlPanel = await createControlPanel({
+            model: 'partner',
+            arch: '<search></search>',
+            data: this.data,
+        });
+
+        assert.containsOnce(controlPanel, '.o_searchview_input', "has a search field");
+        assert.containsNone(controlPanel, '.o_searchview_input:focus-within',
+            "hasn't autofocused search field");
+
+        controlPanel.destroy();
+        testUtils.mock.unpatch(config.device);
     });
 });
 });

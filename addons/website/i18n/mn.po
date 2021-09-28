@@ -1436,7 +1436,7 @@ msgstr "Зураг сонгох"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_customize
 msgid "Choose the theme colors"
-msgstr "Арьсны өнгө сонгох"
+msgstr "Загварын өнгө сонгох"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_customize
@@ -2652,7 +2652,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.facebook_page.xml:0
 #, python-format
 msgid "Hide Cover Photo"
-msgstr ""
+msgstr "Нуугдсан ковер зураг"
 
 #. module: website
 #. openerp-web
@@ -3523,7 +3523,7 @@ msgstr "Шинэ Блог Нийтлэл"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "New Course"
-msgstr "Шинэ эх"
+msgstr "Шинэ курс"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
@@ -5794,6 +5794,12 @@ msgstr "Та энэ Analytics Бүртгэл рүү хандах эрхгүй ю
 msgid ""
 "You have hidden this page from search results. It won't be indexed by search"
 " engines."
+msgstr ""
+
+#. module: website
+#: code:addons/website/models/website.py:162
+#, python-format
+msgid "You must keep at least one website."
 msgstr ""
 
 #. module: website

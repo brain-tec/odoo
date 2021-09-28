@@ -6,8 +6,11 @@ import re
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import mod10r
+from odoo.tools.image import image_data_uri
+import base64
 
 import werkzeug.urls
+import werkzeug.exceptions
 
 ISR_SUBSCRIPTION_CODE = {'CHF': '01', 'EUR': '03'}
 CLEARING = "09000"
@@ -85,7 +88,7 @@ class ResPartnerBank(models.Model):
     def _compute_l10n_ch_show_subscription(self):
         for bank in self:
             if bank.partner_id:
-                bank.l10n_ch_show_subscription = bool(bank.partner_id.ref_company_ids)
+                bank.l10n_ch_show_subscription = bank.partner_id.ref_company_ids.country_id.code =='CH'
             elif bank.company_id:
                 bank.l10n_ch_show_subscription = bank.company_id.country_id.code == 'CH'
             else:
@@ -186,26 +189,11 @@ class ResPartnerBank(models.Model):
         else:
             return ''
 
-    @api.model
-    def build_swiss_code_url(self, amount, currency_name, not_used_anymore_1, debtor_partner, not_used_anymore_2, structured_communication, free_communication):
-        comment = ""
-        if free_communication:
-            comment = (free_communication[:137] + '...') if len(free_communication) > 140 else free_communication
-
+    def _prepare_swiss_code_url_vals(self, amount, currency_name, debtor_partner, reference_type, reference, comment):
         creditor_addr_1, creditor_addr_2 = self._get_partner_address_lines(self.partner_id)
         debtor_addr_1, debtor_addr_2 = self._get_partner_address_lines(debtor_partner)
 
-        # Compute reference type (empty by default, only mandatory for QR-IBAN,
-        # and must then be 27 characters-long, with mod10r check digit as the 27th one,
-        # just like ISR number for invoices)
-        reference_type = 'NON'
-        reference = ''
-        if self._is_qr_iban():
-            # _check_for_qr_code_errors ensures we can't have a QR-IBAN without a QR-reference here
-            reference_type = 'QRR'
-            reference = structured_communication
-
-        qr_code_vals =  [
+        return [
             'SPC',                                                # QR Type
             '0200',                                               # Version
             '1',                                                  # Coding Type
@@ -227,7 +215,7 @@ class ResPartnerBank(models.Model):
             '{:.2f}'.format(amount),                              # Amount
             currency_name,                                        # Currency
             'K',                                                  # Ultimate Debtor Address Type
-            debtor_partner.name[:70],                             # Ultimate Debtor Name
+            debtor_partner.commercial_partner_id.name[:70],       # Ultimate Debtor Name
             debtor_addr_1,                                        # Ultimate Debtor Address Line 1
             debtor_addr_2,                                        # Ultimate Debtor Address Line 2
             '',                                                   # Ultimate Debtor Postal Code (not to be provided for address type K)
@@ -239,8 +227,39 @@ class ResPartnerBank(models.Model):
             'EPD',                                                # Mandatory trailer part
         ]
 
+
+    def _build_swiss_code_vals(self, amount, currency_name, debtor_partner, structured_communication, free_communication):
+        comment = ""
+        if free_communication:
+            comment = (free_communication[:137] + '...') if len(free_communication) > 140 else free_communication
+
+        # Compute reference type (empty by default, only mandatory for QR-IBAN,
+        # and must then be 27 characters-long, with mod10r check digit as the 27th one,
+        # just like ISR number for invoices)
+        reference_type = 'NON'
+        reference = ''
+        if self._is_qr_iban():
+            # _check_for_qr_code_errors ensures we can't have a QR-IBAN without a QR-reference here
+            reference_type = 'QRR'
+            reference = structured_communication
+
+        return self._prepare_swiss_code_url_vals(amount, currency_name, debtor_partner, reference_type, reference, comment)
+
+    @api.model
+    def build_swiss_code_url(self, amount, currency_name, not_used_anymore_1, debtor_partner, not_used_anymore_2, structured_communication, free_communication):
+        qr_code_vals = self._build_swiss_code_vals(amount, currency_name, debtor_partner, structured_communication, free_communication)
         # use quiet to remove blank around the QR and make it easier to place it
         return '/report/barcode/?type=%s&value=%s&width=%s&height=%s&quiet=1' % ('QR', werkzeug.urls.url_quote_plus('\n'.join(qr_code_vals)), 256, 256)
+
+    @api.model
+    def build_swiss_code_base64(self, amount, currency_name, not_used_anymore_1, debtor_partner, not_used_anymore_2, structured_communication, free_communication):
+        qr_code_vals = self._build_swiss_code_vals(amount, currency_name, debtor_partner, structured_communication, free_communication)
+        try:
+            barcode = self.env['ir.actions.report'].barcode('QR', '\n'.join(qr_code_vals), width=256, height=256, quiet=1)
+        except (ValueError, AttributeError):
+            raise werkzeug.exceptions.HTTPException(description='Cannot convert into barcode.')
+
+        return image_data_uri(base64.b64encode(barcode))
 
     def _get_partner_address_lines(self, partner):
         """ Returns a tuple of two elements containing the address lines to use
@@ -252,25 +271,25 @@ class ResPartnerBank(models.Model):
         line_2 = partner.zip + ' ' + partner.city
         return line_1[:70], line_2[:70]
 
+    def _check_qr_iban_range(self, iban):
+        if not iban or len(iban) < 9:
+            return False
+        iid_start_index = 4
+        iid_end_index = 8
+        iid = iban[iid_start_index : iid_end_index+1]
+        return re.match('\d+', iid) \
+               and 30000 <= int(iid) <= 31999 # Those values for iid are reserved for QR-IBANs only
+
     def _is_qr_iban(self):
         """ Tells whether or not this bank account has a QR-IBAN account number.
         QR-IBANs are specific identifiers used in Switzerland as references in
         QR-codes. They are formed like regular IBANs, but are actually something
         different.
         """
-        # for conveniance when invoice.invoice_partner_bank_id, could be replaced
-        # by a computed field
-        if not self:
-            return False
-
         self.ensure_one()
-
-        iid_start_index = 4
-        iid_end_index = 8
-        iid = self.sanitized_acc_number[iid_start_index : iid_end_index+1]
-        return self.acc_type == 'iban' \
-               and re.match('\d+', iid) \
-               and 30000 <= int(iid) <= 31999 # Those values for iid are reserved for QR-IBANs only
+        return self.sanitized_acc_number.startswith('CH')\
+               and self.acc_type == 'iban'\
+               and self._check_qr_iban_range(self.sanitized_acc_number)
 
     @api.model
     def _is_qr_reference(self, reference):

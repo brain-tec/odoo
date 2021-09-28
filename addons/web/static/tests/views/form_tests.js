@@ -706,6 +706,57 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('notebook: pages with invisible modifiers', async function (assert) {
+        assert.expect(10);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <sheet>
+                        <field name="bar"/>
+                        <notebook>
+                            <page string="First" attrs='{"invisible": [["bar", "=", false]]}'>
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second" attrs='{"invisible": [["bar", "=", true]]}'>
+                                <field name="int_field"/>
+                            </page>
+                            <page string="Third">
+                                <field name="qux"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>`,
+            res_id: 1,
+        });
+
+        await testUtils.form.clickEdit(form);
+
+        assert.containsOnce(form, ".o_notebook .nav .nav-link.active",
+            "There should be only one active tab"
+        );
+        assert.isVisible(form.$(".o_notebook .nav .nav-item:first"));
+        assert.hasClass(form.$(".o_notebook .nav .nav-link:first"), "active");
+
+        assert.isNotVisible(form.$(".o_notebook .nav .nav-item:eq(1)"));
+        assert.doesNotHaveClass(form.$(".o_notebook .nav .nav-link:eq(1)"), "active");
+
+        await testUtils.dom.click(form.$(".o_field_widget[name=bar] input"));
+
+        assert.containsOnce(form, ".o_notebook .nav .nav-link.active",
+            "There should be only one active tab"
+        );
+        assert.isNotVisible(form.$(".o_notebook .nav .nav-item:first"));
+        assert.doesNotHaveClass(form.$(".o_notebook .nav .nav-link:first"), "active");
+
+        assert.isVisible(form.$(".o_notebook .nav .nav-item:eq(1)"));
+        assert.hasClass(form.$(".o_notebook .nav .nav-link:eq(1)"), "active");
+
+        form.destroy();
+    });
+
     QUnit.test('invisible attrs on first notebook page', async function (assert) {
         assert.expect(6);
 
@@ -739,6 +790,44 @@ QUnit.module('Views', {
         assert.hasClass(form.$('.o_notebook .nav .nav-item:first()'), 'o_invisible_modifier');
         assert.hasClass(form.$('.o_notebook .nav .nav-link:nth(1)'), 'active');
         assert.hasClass(form.$('.o_notebook .tab-content .tab-pane:nth(1)'), 'active');
+        form.destroy();
+    });
+
+    QUnit.test('invisible attrs on notebook page which has only one page', async function (assert) {
+        assert.expect(4);
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<field name="bar"/>' +
+                        '<notebook>' +
+                            '<page string="Foo" attrs=\'{"invisible": [["bar", "!=", false]]}\'>' +
+                                '<field name="foo"/>' +
+                            '</page>' +
+                        '</notebook>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+        });
+
+        assert.notOk(form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
+            'first tab should not be active');
+        assert.ok(form.$('.o_notebook .nav .nav-item:first()').hasClass('o_invisible_modifier'),
+            'first tab should be invisible');
+
+        // enable checkbox
+        await testUtils.dom.click(form.$('.o_field_boolean input'));
+        assert.ok(form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
+            'first tab should be active');
+        assert.notOk(form.$('.o_notebook .nav .nav-item:first()').hasClass('o_invisible_modifier'),
+            'first tab should be visible');
+
         form.destroy();
     });
 
@@ -4806,6 +4895,66 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('one2manys (list editable) inside one2manys discard and edit o2m again', async function (assert) {
+        assert.expect(3);
+
+        this.data.partner.records[0].p = [2]; // one2many
+        this.data.partner.records[1].p = [4]; // one2many
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<field name="p">' +
+                            '<tree>' +
+                                '<field name="p"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</sheet>' +
+                '</form>',
+            archs: {
+                "partner,false,form": '<form>' +
+                        '<field name="p">' +
+                            '<tree editable="top">' +
+                                '<field name="display_name"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</form>'
+            },
+            res_id: 1,
+        });
+
+        await testUtils.form.clickEdit(form);
+
+        // add a o2m subrecord
+        await testUtils.dom.click(form.$('.o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.dom.click($('.modal-body .o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.fields.editInput($('.modal-body input'), 'xtv');
+        await testUtils.dom.click($('.modal-footer button:first'));
+        assert.strictEqual($('.modal').length, 0,
+            "dialog should be closed");
+
+        // Discard record and edit record again
+        await testUtils.form.clickDiscard(form);
+        await testUtils.dom.click($('.modal .modal-footer .btn-primary:first'));
+        await testUtils.form.clickEdit(form);
+
+        await testUtils.dom.click(form.$('.o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.dom.click($('.modal-body .o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.fields.editInput($('.modal-body input'), 'xtv');
+        await testUtils.dom.click($('.modal-footer button:first'));
+        assert.strictEqual($('.modal').length, 0,
+            "dialog should be closed");
+
+        var row = form.$('.o_field_one2many .o_list_view .o_data_row');
+        assert.strictEqual(row.children()[0].textContent, '1 record',
+            "the cell should contains the number of record: 1");
+
+        form.destroy();
+    });
+
     QUnit.test('oe_read_only className is handled in list views', async function (assert) {
         assert.expect(7);
 
@@ -5131,6 +5280,44 @@ QUnit.module('Views', {
 
         assert.containsOnce(form.$('.o_control_panel'), 'button.infooter');
         assert.containsNone(form.$('.o_form_view'), 'button.infooter');
+
+        form.destroy();
+    });
+
+    QUnit.test('open new record even with warning message', async function (assert) {
+        assert.expect(3);
+
+        this.data.partner.onchanges = { foo: true };
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<group><field name="foo"/></group>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function (route, args) {
+                if (args.method === 'onchange') {
+                    return Promise.resolve({
+                        warning: {
+                            title: "Warning",
+                            message: "Any warning."
+                        }
+                    });
+                }
+                return this._super.apply(this, arguments);
+            },
+
+        });
+        await testUtils.dom.click(form.$buttons.find('.o_form_button_edit'));
+        assert.strictEqual(form.$('input').val(), 'blip', 'input should contain record value');
+        form.$('input').first().val("tralala").trigger('input');
+        assert.strictEqual(form.$('input').val(), 'tralala', 'input should contain new value');
+
+        await form.reload({ currentId: false });
+        assert.strictEqual(form.$('input').val(), 'My little Foo Value',
+            'input should contain default value after reload');
 
         form.destroy();
     });

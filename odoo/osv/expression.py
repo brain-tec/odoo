@@ -116,6 +116,7 @@ start the server specifying the ``--unaccent`` flag.
 import collections
 
 import logging
+import reprlib
 import traceback
 from functools import partial
 from zlib import crc32
@@ -309,7 +310,10 @@ def distribute_not(domain):
             if negate:
                 left, operator, right = token
                 if operator in TERM_OPERATORS_NEGATION:
-                    result.append((left, TERM_OPERATORS_NEGATION[operator], right))
+                    if token in (TRUE_LEAF, FALSE_LEAF):
+                        result.append(FALSE_LEAF if token == TRUE_LEAF else TRUE_LEAF)
+                    else:
+                        result.append((left, TERM_OPERATORS_NEGATION[operator], right))
                 else:
                     result.append(NOT_OPERATOR)
                     result.append(token)
@@ -337,6 +341,17 @@ def _quote(to_quote):
     return to_quote
 
 
+def _shorten_alias(alias):
+    # Use an alternate alias scheme if length exceeds the PostgreSQL limit
+    # of 63 characters.
+    if len(alias) >= 64:
+    # We have to fit a crc32 hash and one underscore
+    # into a 63 character alias. The remaining space we can use to add
+    # a human readable prefix.
+        alias = "%s_%08x" % (alias[:54], crc32(alias.encode('utf-8')))
+    return alias
+
+
 def generate_table_alias(src_table_alias, joined_tables=[]):
     """ Generate a standard table alias name. An alias is generated as following:
         - the base is the source table name (that can already be an alias)
@@ -361,16 +376,7 @@ def generate_table_alias(src_table_alias, joined_tables=[]):
         return '%s' % alias, '%s' % _quote(alias)
     for link in joined_tables:
         alias += '__' + link[1]
-    # Use an alternate alias scheme if length exceeds the PostgreSQL limit
-    # of 63 characters.
-    if len(alias) >= 64:
-        # We have to fit a crc32 hash and one underscore
-        # into a 63 character alias. The remaining space we can use to add
-        # a human readable prefix.
-        alias_hash = hex(crc32(alias.encode('utf-8')))[2:]
-        ALIAS_PREFIX_LENGTH = 63 - len(alias_hash) - 1
-        alias = "%s_%s" % (
-            alias[:ALIAS_PREFIX_LENGTH], alias_hash)
+    alias = _shorten_alias(alias)
     return '%s' % alias, '%s as %s' % (_quote(joined_tables[-1][0]), _quote(alias))
 
 
@@ -582,7 +588,7 @@ class ExtendedLeaf(object):
         alias = self._models[0]._table
         for context in self.join_context:
             previous_alias = alias
-            alias += '__' + context[4]
+            alias = _shorten_alias(alias + '__' + context[4])
             conditions.append('"%s"."%s"="%s"."%s"' % (previous_alias, context[2], alias, context[3]))
         return conditions
 
@@ -929,6 +935,7 @@ class expression(object):
                         right = comodel.search([('.'.join(path[1:]), operator, right)], order='id').ids
                         operator = 'in'
                     domain = field.determine_domain(model, operator, right)
+                    model._flush_search(domain, order='id')
 
                 # replace current leaf by normalized domain
                 for elem in reversed(normalize_domain(domain)):
@@ -950,7 +957,7 @@ class expression(object):
 
             elif field.type == 'one2many':
                 domain = field.get_domain_list(model)
-                inverse_is_int = comodel._fields[field.inverse_name].type == 'integer'
+                inverse_is_int = comodel._fields[field.inverse_name].type in ('integer', 'many2one_reference')
                 unwrap_inverse = (lambda ids: ids) if inverse_is_int else (lambda recs: recs.ids)
 
                 if right is not False:
@@ -1082,7 +1089,7 @@ class expression(object):
                     push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect, params)), model, internal=True))
                 else:
                     _logger.error("Binary field '%s' stored in attachment: ignore %s %s %s",
-                                  field.string, left, operator, right)
+                                  field.string, left, operator, reprlib.repr(right))
                     leaf.leaf = TRUE_LEAF
                     push(leaf)
 

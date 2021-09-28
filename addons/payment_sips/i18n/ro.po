@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2019
+# Hongu Cosmin <cosmin513@gmail.com>, 2020
 # Foldi Robert <foldirobert@nexterp.ro>, 2020
 # 
 msgid ""
@@ -36,7 +37,7 @@ msgstr "; nu a fost găsit nici un rezultat"
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "Currency not supported by Wordline"
-msgstr ""
+msgstr "Moneda nu este acceptată de Wordline"
 
 #. module: payment_sips
 #: code:addons/payment_sips/models/payment.py:0
@@ -47,12 +48,12 @@ msgstr ""
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_version
 msgid "Interface Version"
-msgstr ""
+msgstr "Versiune Intefață"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_merchant_id
 msgid "Merchant ID"
-msgstr ""
+msgstr "ID Comerciant"
 
 #. module: payment_sips
 #: model:ir.model,name:payment_sips.model_payment_acquirer
@@ -67,7 +68,7 @@ msgstr "Tranzacție plată"
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_prod_url
 msgid "Production url"
-msgstr ""
+msgstr "url producție"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__provider
@@ -93,9 +94,9 @@ msgstr ""
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_test_url
 msgid "Test url"
-msgstr ""
+msgstr "url Test"
 
 #. module: payment_sips
 #: model:ir.model.fields,help:payment_sips.field_payment_acquirer__sips_merchant_id
 msgid "Used for production only"
-msgstr ""
+msgstr "Folosit numai pentru producție"

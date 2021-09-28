@@ -78,7 +78,7 @@ class SurveyUserInput(models.Model):
                 score = (sum(user_input.user_input_line_ids.mapped('answer_score')) / total_possible_score) * 100
                 user_input.quizz_score = round(score, 2) if score > 0 else 0
 
-    @api.depends('quizz_score', 'survey_id.passing_score')
+    @api.depends('quizz_score', 'survey_id')
     def _compute_quizz_passed(self):
         for user_input in self:
             user_input.quizz_passed = user_input.quizz_score >= user_input.survey_id.passing_score
@@ -423,6 +423,7 @@ class SurveyUserInputLine(models.Model):
 
         comment_answer = post.pop(("%s_%s" % (answer_tag, 'comment')), '').strip()
         if comment_answer:
+            vals.pop('answer_score', False)
             vals.update({'answer_type': 'text', 'value_text': comment_answer, 'skipped': False, 'value_suggested': False})
             self.create(vals)
 

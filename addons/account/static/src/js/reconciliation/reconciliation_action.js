@@ -116,15 +116,19 @@ var StatementAction = AbstractAction.extend({
                     self.model.context = {'active_id': self.params.context.active_id,
                                           'active_model': self.params.context.active_model};
                 }
-                if (self.params.context.journal_id) {
-                    self.model.context.active_id = self.params.context.journal_id;
-                    self.model.context.active_model = 'account.journal';
+                var journal_id = self.params.context.journal_id;
+                if (!journal_id && self.model.context.active_model === 'account.journal') {
+                    if (self.model.context.active_ids && self.model.context.active_ids.length){
+                        journal_id = self.model.context.active_ids[0];
+                    } else if (self.model.context.active_id) {
+                        journal_id = self.model.context.active_id;
+                    }
                 }
-                if (self.model.context.active_id && self.model.context.active_model === 'account.journal') {
+                if (journal_id) {
                     var promise = self._rpc({
                             model: 'account.journal',
                             method: 'read',
-                            args: [self.model.context.active_id, ['display_name']],
+                            args: [journal_id, ['display_name']],
                         });
                 } else {
                     var promise = Promise.resolve();
@@ -133,7 +137,7 @@ var StatementAction = AbstractAction.extend({
                         var title = result && result[0] ? result[0]['display_name'] : self.params.display_name || ''
                         self._setTitle(title);
                         self.renderer = new self.config.ActionRenderer(self, self.model, {
-                            'bank_statement_line_id': self.model.bank_statement_line_id,
+                            'bank_statement_id': self.model.bank_statement_id,
                             'valuenow': self.model.valuenow,
                             'valuemax': self.model.valuemax,
                             'defaultDisplayQty': self.model.defaultDisplayQty,
@@ -375,11 +379,11 @@ var StatementAction = AbstractAction.extend({
      */
     _onCloseStatement: function (event) {
         var self = this;
-        return this.model.closeStatement().then(function (result) {
+        return this.model.closeStatement().then(function () {
             self.do_action({
                 name: 'Bank Statements',
-                res_model: 'account.bank.statement.line',
-                res_id: result,
+                res_model: 'account.bank.statement',
+                res_id: self.model.bank_statement_id.id,
                 views: [[false, 'form']],
                 type: 'ir.actions.act_window',
                 view_mode: 'form',
@@ -410,6 +414,7 @@ var StatementAction = AbstractAction.extend({
             self.renderer.update({
                 'valuenow': self.model.valuenow,
                 'valuemax': self.model.valuemax,
+                'bank_statement_id': self.model.bank_statement_id,
                 'title': self.title,
                 'time': Date.now()-self.time,
                 'notifications': result.notifications,

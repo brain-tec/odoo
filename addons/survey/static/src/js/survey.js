@@ -3,8 +3,8 @@ odoo.define('survey.survey', function (require) {
 
 require('web.dom_ready');
 var core = require('web.core');
+var session = require('web.session');
 var time = require('web.time');
-var ajax = require('web.ajax');
 var field_utils = require('web.field_utils');
 var Dialog = require('web.Dialog');
 
@@ -159,7 +159,7 @@ if(!the_form.length) {
         success: function(response, status, xhr, wfe){ // submission attempt
             if(_.has(response, 'errors')){  // some questions have errors
                 _.each(_.keys(response.errors), function(key){
-                    $("#" + key + '>.js_errzone').append('<p>' + response.errors[key] + '</p>').show();
+                    $("#" + key + '>.js_errzone').append($('<p>', {'text': response.errors[key]})).show();
                     if (_.keys(response.errors)[_.keys(response.errors).length - 1] === key) {
                          $('html, body').animate({
                             scrollTop: $('.js_errzone:visible:first').closest('.js_question-wrapper').offset().top - $('.o_main_navbar').height()
@@ -183,15 +183,10 @@ if(!the_form.length) {
         }
     });
 
-    function load_locale(){
-        var url = "/web/webclient/locale/" + (document.documentElement.getAttribute('lang') || 'en_US').replace('-', '_');
-        return ajax.loadJS(url);
-    }
-
     // datetimepicker use moment locale to display date format according to language
     // frontend does not load moment locale at all.
     // so wait until DOM ready with locale then init datetimepicker
-    load_locale().then(function(){
+    session.load_translations().then(function(){
         _.each($('.input-group.date'), function(date_field){
             var disabledDates = [];
             var minDate, maxDate;

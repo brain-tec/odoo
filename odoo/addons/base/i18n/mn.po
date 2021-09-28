@@ -7,7 +7,6 @@
 # nasaaskii <nasaaskii@gmail.com>, 2019
 # nurbakhit nurka <nurbakhit@bumanit.mn>, 2019
 # Otgonbayar.A <gobi.mn@gmail.com>, 2019
-# Khishigbat Ganbold <khishigbat@asterisk-tech.mn>, 2019
 # Onii Onii <onii0223@yahoo.com>, 2019
 # Nurbahyt Kh <nurbahyt.kh@gmail.com>, 2019
 # baaska sh <sh.baaskash@gmail.com>, 2020
@@ -16,8 +15,9 @@
 # Minj P <pminj322@gmail.com>, 2020
 # Батболд <batbold.ts@gmail.com>, 2020
 # Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2020
-# tserendavaa tsogtoo <tseegii011929@gmail.com>, 2020
 # Uuganbayar Batbaatar <uuganaaub33@gmail.com>, 2020
+# tserendavaa tsogtoo <tseegii011929@gmail.com>, 2020
+# Khishigbat Ganbold <khishigbat@asterisk-tech.mn>, 2021
 # 
 msgid ""
 msgstr ""
@@ -25,7 +25,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Uuganbayar Batbaatar <uuganaaub33@gmail.com>, 2020\n"
+"Last-Translator: Khishigbat Ganbold <khishigbat@asterisk-tech.mn>, 2021\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -7978,7 +7978,7 @@ msgstr "Үйлдлийн хэрэглээ"
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window
 msgid "Action Window"
-msgstr ""
+msgstr "Үйлдлийн цонх"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window_close
@@ -7988,7 +7988,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window_view
 msgid "Action Window View"
-msgstr ""
+msgstr "Үйлдлийн цонх харах"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_sequence_actions
@@ -9835,6 +9835,12 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr ""
 
@@ -10183,7 +10189,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_cohort
 msgid "Cohort View"
-msgstr ""
+msgstr "Бүлэгийн харагдац"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad
@@ -13717,7 +13723,7 @@ msgstr "Ерөнхий Тохиргоо"
 #: model:ir.ui.menu,name:base.menu_wizard_update_translations
 #: model_terms:ir.ui.view,arch_db:base.wizard_update_translations
 msgid "Generate Missing Terms"
-msgstr ""
+msgstr "Нэр томьёог ижилтгэх"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm
@@ -16247,7 +16253,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_company_step
 msgid "Let's start!"
-msgstr ""
+msgstr "Эхлүүлье!"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__letter
@@ -17430,7 +17436,7 @@ msgstr "Серверийн үйлдэл ажилладаг модель."
 #: code:addons/model.py:0 code:addons/model.py:0
 #, python-format
 msgid "Model:"
-msgstr ""
+msgstr "Загвар:"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_model_model
@@ -19189,6 +19195,16 @@ msgid "Odoo helps you easily track all activities related to a vendor."
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"Odoo is unable to merge the PDFs attached to the following records:\n"
+"%s\n"
+"\n"
+"Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
 msgid "Odoo referral program"
 msgstr ""
@@ -19257,6 +19273,12 @@ msgid ""
 msgstr ""
 "Таны хандахыг оролдож буй баримтуудын нэг устгагдсан байна, дахин ачаалласны"
 " дараа дахин оролдоно уу."
+
+#. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:0
@@ -23633,6 +23655,12 @@ msgid "The internal user in charge of this contact."
 msgstr "Энэ гэрээнд системын хэрэглэгч холбогдсон байна."
 
 #. module: base
+#: code:addons/base/models/res_country.py:106
+#, python-format
+msgid "The layout contains an invalid format key"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
 msgid "The list of models that extends the current model."
 msgstr "Тухайн моделийг өргөтгөсөн моделийн жагсаалт."
@@ -26036,8 +26064,8 @@ msgstr "Системын супер хэрэглэгчийг идэвхжүүл�
 #. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
-msgid "You cannot archive a contact linked to an internal user."
-msgstr "Системын хэрэглэгчтэй холбоотой тул архивлах боломжгүй."
+msgid "You cannot archive a contact linked to a portal or internal user."
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0

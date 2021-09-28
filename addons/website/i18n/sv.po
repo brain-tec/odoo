@@ -7,14 +7,17 @@
 # Robin Chatfield <robin.chatfield@gmail.com>, 2019
 # lasch a <bmail440@gmail.com>, 2019
 # Haojun Zou <apollo_zhj@msn.com>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # Kristoffer Grundström <lovaren@gmail.com>, 2019
 # Martin Trigaux, 2019
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2019
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2019
 # Robert Frykelius <robert.frykelius@linserv.se>, 2019
 # Kim Asplund <kim.asplund@gmail.com>, 2020
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2020
+# Anto Nilsson <anton.nilsson@vertel.se>, 2020
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
+# STefan Rundgren <stefanrundgren@cellglas.com>, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# Simon S, 2021
 # 
 msgid ""
 msgstr ""
@@ -22,7 +25,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:15+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2020\n"
+"Last-Translator: Simon S, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -565,7 +568,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "<i class=\"fa fa-fw fa-star\"/> Stars"
-msgstr ""
+msgstr "<i class=\"fa fa-fw fa-star\"/> Stjärnor"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -668,7 +671,7 @@ msgstr "<i title=\"Is the page published?\" class=\"fa fa-eye\"/>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "<i>Instant setup, satisfied or reimbursed.</i>"
-msgstr ""
+msgstr "<i>omedelbar installation, avstämd eller utestående</i>"
 
 #. module: website
 #. openerp-web
@@ -686,7 +689,7 @@ msgstr ""
 #: code:addons/website/static/src/js/tours/banner.js:0
 #, python-format
 msgid "<p><b>Click here</b> to create a new page.</p>"
-msgstr ""
+msgstr "<p><b>Klicka här</b> för att skapa en ny sida.</p>"
 
 #. module: website
 #. openerp-web
@@ -754,12 +757,12 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "<span class=\"fa fa-pencil mr-2\"/>Edit"
-msgstr ""
+msgstr "<span class=\"fa fa-pencil mr-2\"/>Redigera"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "<span class=\"fa fa-plus mr-2\"/>New"
-msgstr ""
+msgstr "<span class=\"fa fa-plus mr-2\"/>Ny"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.list_website_pages
@@ -1585,6 +1588,8 @@ msgid ""
 "Contact us about anything related to our company or services.<br/>\n"
 "                                                                We'll do our best to get back to you as soon as possible."
 msgstr ""
+"Kontakta oss om allt som relateras till vårt företag eller våra tjänster.<br/>\n"
+"        Vi kommer återknyta så snart som möjligt."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_activated
@@ -1849,7 +1854,7 @@ msgstr "Inaktivera"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Discard"
-msgstr "Förkasta"
+msgstr "Avbryt"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
@@ -1971,7 +1976,7 @@ msgstr ""
 #: code:addons/website/static/src/js/tours/banner.js:0
 #, python-format
 msgid "Drag the block and drop it in your new page."
-msgstr ""
+msgstr "Dra blocket och släpp på din nya sida."
 
 #. module: website
 #. openerp-web
@@ -1991,7 +1996,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.contentMenu.xml:0
 #, python-format
 msgid "Dropdown menu"
-msgstr ""
+msgstr "Dropdown meny"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -2021,7 +2026,7 @@ msgstr "Ändra menyn"
 #: code:addons/website/static/src/xml/website.contentMenu.xml:0
 #, python-format
 msgid "Edit Menu Item"
-msgstr ""
+msgstr "Ändra menyn"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -2063,7 +2068,7 @@ msgstr ""
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 #, python-format
 msgid "Edit the menu"
-msgstr ""
+msgstr "Ändra menyn"
 
 #. module: website
 #: model:res.groups,name:website.group_website_designer
@@ -2277,7 +2282,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Follow your website traffic in Odoo."
-msgstr ""
+msgstr "Följ din webbplats trafik i Odoo."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_customize
@@ -2321,7 +2326,7 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields.selection,name:website.selection__website__auth_signup_uninvited__b2c
 msgid "Free sign up"
-msgstr ""
+msgstr "Bli medlem gratis"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_customize
@@ -2378,7 +2383,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "Go to"
-msgstr ""
+msgstr "Gå till"
 
 #. module: website
 #. openerp-web
@@ -2398,7 +2403,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 #, python-format
 msgid "Go to Website"
-msgstr ""
+msgstr "Gå till Webbplats"
 
 #. module: website
 #. openerp-web
@@ -2667,7 +2672,7 @@ msgstr "Hemsida"
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "How to get my Client ID"
-msgstr ""
+msgstr "Hur får jag klient ID"
 
 #. module: website
 #. openerp-web
@@ -2835,7 +2840,7 @@ msgstr "Installera språk"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Install new language"
-msgstr ""
+msgstr "Installera nytt språk"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
@@ -3122,7 +3127,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Let your customers log in to see their documents"
-msgstr ""
+msgstr "Låt dina kunder logga in för att se sina dokument"
 
 #. module: website
 #. openerp-web
@@ -3473,7 +3478,7 @@ msgstr "Nytt blogginlägg"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "New Course"
-msgstr ""
+msgstr "Ny kurs"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
@@ -3516,7 +3521,7 @@ msgstr "Nytt fönster"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "New page"
-msgstr ""
+msgstr "Ny sida"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.external_snippets
@@ -3595,7 +3600,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
 msgid "Not published"
-msgstr ""
+msgstr "Opublicerad"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
@@ -3615,7 +3620,7 @@ msgstr "Notera: göm denna sidan genom att avkryssa den från \"Anpassa\"-menyn"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_language_count
 msgid "Number of languages"
-msgstr ""
+msgstr "Antal språk"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_visitor__visit_count
@@ -3693,7 +3698,7 @@ msgstr "På webbplats"
 #. module: website
 #: model:ir.model.fields.selection,name:website.selection__website__auth_signup_uninvited__b2b
 msgid "On invitation"
-msgstr ""
+msgstr "Vid inbjudan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -3912,7 +3917,7 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields,help:website.field_website__partner_id
 msgid "Partner-related data of the user"
-msgstr ""
+msgstr "Partnerrelaterad data om användaren"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.visitor_partner_action
@@ -4054,7 +4059,7 @@ msgstr ""
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb
 msgid "Qweb"
-msgstr ""
+msgstr "Qweb"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_contact
@@ -4178,7 +4183,7 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website_page__website_id
 #: model:ir.model.fields,help:website.field_website_published_multi_mixin__website_id
 msgid "Restrict publishing to this website."
-msgstr ""
+msgstr "Begränsa publicering på denna webbplats."
 
 #. module: website
 #: model:res.groups,name:website.group_website_publisher
@@ -4515,7 +4520,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "Start now"
-msgstr ""
+msgstr "Börja nu"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
@@ -4702,7 +4707,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.seo.xml:0
 #, python-format
 msgid "The language of the keyword and related keywords."
-msgstr ""
+msgstr "Nyckelordets språk och relaterade nyckelord."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -5268,7 +5273,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "Visible"
-msgstr ""
+msgstr "Synlig"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__group_ids
@@ -5351,7 +5356,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_kanban
 #, python-format
 msgid "Visits"
-msgstr ""
+msgstr "Besök"
 
 #. module: website
 #: model_terms:ir.actions.act_window,help:website.website_visitor_view_action
@@ -5547,6 +5552,10 @@ msgid ""
 "the User by this site. The User may configure his / her browser to notify "
 "and reject the installation of the cookies sent by us."
 msgstr ""
+"Webbplatsen kan använda kakor för att anpassa och underlätta maximal "
+"navigering av användaren av denna webbplats. Användaren kan konfigurera sin "
+"webbläsare för att meddela och avvisa installationen av de kakor som "
+"skickats av oss."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.menu_tree
@@ -5729,6 +5738,12 @@ msgid ""
 msgstr ""
 
 #. module: website
+#: code:addons/website/models/website.py:162
+#, python-format
+msgid "You must keep at least one website."
+msgstr ""
+
+#. module: website
 #. openerp-web
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
@@ -5817,7 +5832,7 @@ msgstr "eg. Om oss"
 #. module: website
 #: model:ir.ui.menu,name:website.menu_website_dashboard
 msgid "eCommerce Dashboard"
-msgstr ""
+msgstr "eCommerce kontrollpanel"
 
 #. module: website
 #. openerp-web

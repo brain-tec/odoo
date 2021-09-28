@@ -37,6 +37,7 @@ class AccountBankStmtCashWizard(models.Model):
     """
     _name = 'account.bank.statement.cashbox'
     _description = 'Bank Statement Cashbox'
+    _rec_name = 'id'
 
     cashbox_lines_ids = fields.One2many('account.cashbox.line', 'cashbox_id', string='Cashbox Lines')
     start_bank_stmt_ids = fields.One2many('account.bank.statement', 'cashbox_start_id')
@@ -340,7 +341,14 @@ class AccountBankStatement(models.Model):
 
     def action_bank_reconcile_bank_statements(self):
         self.ensure_one()
-        bank_stmt_lines = self.mapped('line_ids')
+        limit = int(self.env["ir.config_parameter"].sudo().get_param("account.reconcile.batch", 1000))
+        bank_stmt_lines = self.env['account.bank.statement.line'].search([
+            ('statement_id', 'in', self.ids),
+            # take not reconciled lines only. See _check_lines_reconciled method
+            ('account_id', '=', False),
+            ('journal_entry_ids', '=', False),
+            ('amount', '!=', 0),
+        ], limit=limit)
         return {
             'type': 'ir.actions.client',
             'tag': 'bank_statement_reconciliation_view',
@@ -814,6 +822,7 @@ class AccountBankStatementLine(models.Model):
             aml_dict['payment_id'] = payment and payment.id or False
             aml_obj.with_context(check_move_validity=False).create(aml_dict)
 
+            move.update_lines_tax_exigibility() # Needs to be called manually as lines were created 1 by 1
             move.post()
             #record the move name on the statement line to be able to retrieve it in case of unreconciliation
             self.write({'move_name': move.name})
