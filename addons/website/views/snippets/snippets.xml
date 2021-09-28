@@ -1030,6 +1030,8 @@
         </we-select>
     </div>
 
+    <div data-js="MegaMenuNoDelete" data-selector=".o_mega_menu > section"/>
+
     <div data-selector=".o_mega_menu .nav > .nav-link"
          data-drop-in=".o_mega_menu nav"
          data-drop-near=".o_mega_menu .nav-link"/>
@@ -1219,7 +1221,7 @@
     <!-- Website Animate -->
     <div data-js="WebsiteAnimate"
          data-selector=".o_animable, section .row > div, img, .fa, .btn, .o_animated_text"
-         data-exclude=".o_not-animable">
+         data-exclude=".o_not-animable, .s_col_no_resize.row > div, .s_col_no_resize">
         <we-select string="Animate" data-is-animation-type-selection="true">
             <we-button data-select-class="" data-name="no_animation_opt">No Animation</we-button>
             <we-divider/>
