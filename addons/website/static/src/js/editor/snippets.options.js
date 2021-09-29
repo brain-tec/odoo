@@ -39,7 +39,7 @@ const UrlPickerUserValueWidget = InputUserValueWidget.extend({
         linkButton.title = _t("Redirect to URL in a new tab");
         linkButton.appendChild(icon);
         this.containerEl.appendChild(linkButton);
-        this.el.classList.add('o_we_large_input');
+        this.el.classList.add('o_we_large');
         this.inputEl.classList.add('text-left');
         const options = {
             position: {
@@ -284,7 +284,7 @@ const GPSPicker = InputUserValueWidget.extend({
      */
     async start() {
         await this._super(...arguments);
-        this.el.classList.add('o_we_large_input');
+        this.el.classList.add('o_we_large');
         if (!this._gmapLoaded) {
             return;
         }
@@ -3270,6 +3270,25 @@ options.registry.MegaMenuLayout = options.registry.SelectTemplate.extend({
     },
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    notify(name, data) {
+        if (name === 'reset_template') {
+            const xmlid = this._getCurrentTemplateXMLID();
+            this._getTemplate(xmlid).then(template => {
+                this.containerEl.insertAdjacentHTML('beforeend', template);
+                data.onSuccess();
+            });
+        } else {
+            this._super(...arguments);
+        }
+    },
+
+    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
@@ -3278,11 +3297,40 @@ options.registry.MegaMenuLayout = options.registry.SelectTemplate.extend({
      */
     _computeWidgetState: function (methodName, params) {
         if (methodName === 'selectTemplate') {
-            const templateDefiningClass = this.containerEl.querySelector('section')
-                .classList.value.split(' ').filter(cl => cl.startsWith('s_mega_menu'))[0];
-            return `website.${templateDefiningClass}`;
+            return this._getCurrentTemplateXMLID();
         }
         return this._super(...arguments);
+    },
+    /**
+     * @private
+     * @returns {string} xmlid of the current template.
+     */
+    _getCurrentTemplateXMLID: function () {
+        const templateDefiningClass = this.containerEl.querySelector('section')
+            .classList.value.split(' ').filter(cl => cl.startsWith('s_mega_menu'))[0];
+        return `website.${templateDefiningClass}`;
+    },
+});
+
+/**
+ * Hides delete button for Mega Menu block.
+ */
+options.registry.MegaMenuNoDelete = options.Class.extend({
+    forceNoDeleteButton: true,
+
+    /**
+     * @override
+     */
+    async onRemove() {
+        await new Promise(resolve => {
+            this.trigger_up('option_update', {
+                optionName: 'MegaMenuLayout',
+                name: 'reset_template',
+                data: {
+                    onSuccess: () => resolve(),
+                }
+            });
+        });
     },
 });
 

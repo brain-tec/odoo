@@ -151,7 +151,7 @@ function factory(dependencies) {
             if (!this.isClientRtcCompatible) {
                 return;
             }
-            if (!this._peerConnections[sender] && (!channelId || channelId !== this.channel.id)) {
+            if (!this._peerConnections[sender] && (!channelId || !this.channel || channelId !== this.channel.id)) {
                 return;
             }
             switch (event) {
@@ -577,8 +577,19 @@ function factory(dependencies) {
             await this._updateRemoteTrack(peerConnection, 'audio', { token: fromToken });
             await this._updateRemoteTrack(peerConnection, 'video', { token: fromToken });
 
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
+            let answer;
+            try {
+                answer = await peerConnection.createAnswer();
+            } catch (e) {
+                this._addLogEntry(fromToken, 'offer handling: failed at creating answer');
+                return;
+            }
+            try {
+                await peerConnection.setLocalDescription(answer);
+            } catch (e) {
+                this._addLogEntry(fromToken, 'offer handling: failed at setting localDescription');
+                return;
+            }
 
             this._addLogEntry(fromToken, `sending notification: answer`, { step: 'sending answer' });
             await this._notifyPeers([fromToken], {
