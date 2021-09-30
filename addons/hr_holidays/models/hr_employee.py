@@ -4,7 +4,7 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.tools.float_utils import float_round
 
 
@@ -34,11 +34,10 @@ class HrEmployeeBase(models.AbstractModel):
     leaves_count = fields.Float('Number of Time Off', compute='_compute_remaining_leaves')
     allocation_count = fields.Float('Total number of days allocated.', compute='_compute_allocation_count')
     allocations_count = fields.Integer('Total number of allocations', compute="_compute_allocation_count")
-    allocation_used_count = fields.Float('Total number of days off used', compute='_compute_total_allocation_used')
     show_leaves = fields.Boolean('Able to see Remaining Time Off', compute='_compute_show_leaves')
     is_absent = fields.Boolean('Absent Today', compute='_compute_leave_status', search='_search_absent_employee')
     allocation_display = fields.Char(compute='_compute_allocation_count')
-    allocation_used_display = fields.Char(compute='_compute_total_allocation_used')
+    allocation_remaining_display = fields.Char(compute='_compute_allocation_remaining_display')
     hr_icon_display = fields.Selection(selection_add=[('presence_holiday_absent', 'On leave'),
                                                       ('presence_holiday_present', 'Present but on leave')])
 
@@ -78,10 +77,16 @@ class HrEmployeeBase(models.AbstractModel):
             employee.remaining_leaves = value
 
     def _compute_allocation_count(self):
+        # Don't get allocations that are expired
+        current_date = datetime.date.today()
         data = self.env['hr.leave.allocation'].read_group([
             ('employee_id', 'in', self.ids),
             ('holiday_status_id.active', '=', True),
+            ('holiday_status_id.requires_allocation', '=', 'yes'),
             ('state', '=', 'validate'),
+            '|',
+            ('date_to', '=', False),
+            ('date_to', '>=', current_date),
         ], ['number_of_days:sum', 'employee_id'], ['employee_id'])
         rg_results = dict((d['employee_id'][0], {"employee_id_count": d['employee_id_count'], "number_of_days": d['number_of_days']}) for d in data)
         for employee in self:
@@ -90,10 +95,22 @@ class HrEmployeeBase(models.AbstractModel):
             employee.allocation_display = "%g" % employee.allocation_count
             employee.allocations_count = result['employee_id_count'] if result else 0.0
 
-    def _compute_total_allocation_used(self):
+    def _compute_allocation_remaining_display(self):
+        current_date = datetime.date.today()
+        data_leave = self.env['hr.leave'].read_group([
+            ('employee_id', 'in', self.ids),
+            ('holiday_status_id.active', '=', True),
+            ('holiday_status_id.requires_allocation', '=', 'yes'),
+            ('state', '=', 'validate'),
+            '|',
+            ('holiday_allocation_id.date_to', '=', False),
+            ('holiday_allocation_id.date_to', '>=', current_date),
+        ], ['number_of_days:sum', 'employee_id'], ['employee_id'])
+        results_leave = dict((d['employee_id'][0], {"employee_id_count": d['employee_id_count'], "number_of_days": d['number_of_days']}) for d in data_leave)
         for employee in self:
-            employee.allocation_used_count = float_round(employee.allocation_count - employee.remaining_leaves, precision_digits=2)
-            employee.allocation_used_display = "%g" % employee.allocation_used_count
+            result = results_leave.get(employee.id)
+            leaves_taken = float_round(result['number_of_days'], precision_digits=2) if result else 0.0
+            employee.allocation_remaining_display = "%g" % float_round(employee.allocation_count - leaves_taken, precision_digits=2)
 
     def _compute_presence_state(self):
         super()._compute_presence_state()
@@ -229,3 +246,19 @@ class HrEmployee(models.Model):
 
     def _get_user_m2o_to_empty_on_archived_employees(self):
         return super()._get_user_m2o_to_empty_on_archived_employees() + ['leave_manager_id']
+
+    def action_time_off_dashboard(self):
+        domain = []
+        if self.env.context.get('active_ids'):
+            domain = [('employee_id', 'in', self.env.context.get('active_ids', []))]
+
+        return {
+            'name': _('Time Off Dashboard'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.leave',
+            'views': [[self.env.ref('hr_holidays.hr_leave_employee_view_dashboard').id, 'calendar']],
+            'domain': domain,
+            'context': {
+                'employee_id': self.ids,
+            },
+        }
