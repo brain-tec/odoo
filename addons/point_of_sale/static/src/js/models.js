@@ -1841,6 +1841,7 @@ exports.Orderline = Backbone.Model.extend({
             var pack_lot_line = new exports.Packlotline({}, {'json': _.extend(packlotline, {'order_line':this})});
             this.pack_lot_lines.add(pack_lot_line);
         }
+        this.tax_ids = json.tax_ids && json.tax_ids.length !== 0 ? json.tax_ids[0][2] : undefined;
         this.set_customer_note(json.customer_note);
         this.refunded_qty = json.refunded_qty;
         this.refunded_orderline_id = json.refunded_orderline_id;
@@ -2094,6 +2095,8 @@ exports.Orderline = Backbone.Model.extend({
         }else if (this.description !== orderline.description) {
             return false;
         }else if (orderline.get_customer_note() !== this.get_customer_note()) {
+            return false;
+        } else if (this.refunded_orderline_id) {
             return false;
         }else{
             return true;
@@ -3273,6 +3276,9 @@ exports.Order = Backbone.Model.extend({
         }
         if (options.refunded_orderline_id) {
             orderline.refunded_orderline_id = options.refunded_orderline_id;
+        }
+        if (options.tax_ids) {
+            orderline.tax_ids = options.tax_ids;
         }
     },
     get_selected_orderline: function(){

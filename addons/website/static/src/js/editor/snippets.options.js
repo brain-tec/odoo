@@ -6,7 +6,6 @@ const {ColorpickerWidget} = require('web.Colorpicker');
 const config = require('web.config');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
-const dom = require('web.dom');
 const weUtils = require('web_editor.utils');
 var options = require('web_editor.snippets.options');
 const wLinkPopoverWidget = require('@website/js/widgets/link_popover_widget')[Symbol.for("default")];
@@ -1231,28 +1230,20 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
     async _renderCustomXML(uiFragment) {
         const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-name"]');
         const style = window.getComputedStyle(document.documentElement);
-        const priorityPrefix = weUtils.getCSSVariableValue('priority-palette-prefix', style).replace(/'/g, "");
-        const allPaletteNames = weUtils.getCSSVariableValue('palette-names', style).split(' ').map((name) => {
+        const allPaletteNames = weUtils.getCSSVariableValue('palette-names', style).split(', ').map((name) => {
             return name.replace(/'/g, "");
         });
-        const themePaletteNames = allPaletteNames.filter((name) => {
-            return name.startsWith(priorityPrefix);
-        });
-        const otherPaletteNames = allPaletteNames.filter((name) => {
-            return !name.startsWith(priorityPrefix);
-        });
-        const sortedPaletteNames = themePaletteNames.concat(otherPaletteNames);
-        for (const paletteName of sortedPaletteNames) {
+        for (const paletteName of allPaletteNames) {
             const btnEl = document.createElement('we-button');
             btnEl.classList.add('o_palette_color_preview_button');
             btnEl.dataset.customizeWebsiteVariable = `'${paletteName}'`;
-            for (let c = 1; c <= 5; c++) {
+            [1, 3, 2].forEach(c => {
                 const colorPreviewEl = document.createElement('span');
                 colorPreviewEl.classList.add('o_palette_color_preview');
                 const color = weUtils.getCSSVariableValue(`o-palette-${paletteName}-o-color-${c}`, style);
                 colorPreviewEl.style.backgroundColor = color;
                 btnEl.appendChild(colorPreviewEl);
-            }
+            });
             paletteSelectorEl.appendChild(btnEl);
         }
 
