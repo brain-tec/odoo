@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { annotateTraceback } from "@web/core/errors/error_utils";
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2many, one2one } from '@mail/model/model_field';
@@ -76,14 +75,15 @@ function factory(dependencies) {
              * This is distinct from this._recoverConnection which tries to restores
              * connection that were established but failed or timed out.
              */
-            this._intervalId = browser.setInterval(() => {
-                if (!this.currentRtcSession) {
+            this._intervalId = browser.setInterval(async () => {
+                if (!this.currentRtcSession || !this.channel) {
                     return;
                 }
-                this._pingServer();
-                if (this.channel) {
-                    this._callSessions();
+                await this._pingServer();
+                if (!this.currentRtcSession || !this.channel) {
+                    return;
                 }
+                this._callSessions();
             }, 30000); // 30 seconds
         }
 
@@ -374,14 +374,14 @@ function factory(dependencies) {
          * @param {String} [param2.step] current step of the flow
          * @param {String} [param2.state] current state of the connection
          */
-        async _addLogEntry(token, entry, { step, state } = {}) {
+        _addLogEntry(token, entry, { step, state } = {}) {
             if (!this.env.isDebug()) {
                 return;
             }
             if (!(token in this.logs)) {
                 this.logs[token] = { step: '', state: '', logs: [] };
             }
-            const trace = await annotateTraceback(window.Error());
+            const trace = window.Error().stack || '';
             this.logs[token].logs.push({
                 event: `${window.moment().format('h:mm:ss')}: ${entry}`,
                 trace: trace.split('\n'),
@@ -687,12 +687,18 @@ function factory(dependencies) {
          * Pings the server to ensure this session is kept alive.
          */
         async _pingServer() {
-            await this.env.services.rpc({
-                route: '/mail/rtc/session/ping',
+            const channel = this.channel;
+            const { rtcSessions } = await this.env.services.rpc({
+                route: '/mail/channel/ping',
                 params: {
+                    'channel_id': channel.id,
+                    'check_rtc_session_ids': channel.rtcSessions.map(rtcSession => rtcSession.id),
                     'rtc_session_id': this.currentRtcSession.id,
                 },
             }, { shadow: true });
+            if (channel.exists()) {
+                channel.updateRtcSessions(rtcSessions);
+            }
         }
 
         /**
