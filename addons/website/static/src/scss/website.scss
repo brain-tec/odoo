@@ -224,7 +224,8 @@ body:not(.o_fullscreen) {
         }
     }
 }
-.navbar-brand, .navbar-text, .navbar .nav-link, .navbar a.js_change_lang span {
+.navbar-brand, .navbar-text, .navbar .nav-link, .navbar a.js_change_lang span,
+.navbar a.o_add_language {
     @if $o-theme-navbar-font != $o-theme-font {
         font-family: $o-theme-navbar-font;
     }
@@ -349,6 +350,13 @@ font[class*='bg-'] {
         background: transparent;
     }
 }
+// Smaller container
+.o_container_small {
+    @extend .container;
+    @include media-breakpoint-up(lg) {
+        max-width: map-get($container-max-widths, md);
+    }
+}
 
 // Buttons
 .btn {
@@ -461,6 +469,25 @@ table.table_desc tr td {
 // Jumbotron
 .jumbotron {
     border-radius: 0;
+}
+
+.o_full_screen_height {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-height: 100vh !important;
+}
+.o_half_screen_height {
+    @extend .o_full_screen_height;
+    min-height: 55vh !important;
+}
+
+// TODO remove cover_full and cover_mid classes (kept for compatibility for now)
+.cover_full {
+    @extend .o_full_screen_height;
+}
+.cover_mid {
+    @extend .o_half_screen_height;
 }
 
 // Allows custom border radius without contents overflowing.
@@ -988,8 +1015,20 @@ header {
             }
 
             .o_connected_user:not(.editor_has_snippets) header & {
-                top: -$o-navbar-height;
-                padding-top: $o-navbar-height;
+                // TODO this has to be reviewed
+                $-header-template: o-website-value('header-template');
+                @if not index(('Contact', 'boxed', 'magazine'), $-header-template) {
+                    top: -$o-navbar-height;
+                    padding-top: $o-navbar-height;
+                } @else if $-header-template == 'magazine' {
+                    @include media-breakpoint-up(lg) {
+                        position: fixed;
+
+                        #top_menu {
+                            align-items: normal !important;
+                        }
+                    }
+                }
             }
         }
         &.collapsing #top_menu {
@@ -1124,6 +1163,11 @@ header {
                         }
                     }
                 }
+            }
+        }
+        @include media-breakpoint-up(lg) {
+            #wrapwrap > header #top_menu {
+                align-items: center !important;
             }
         }
     }
@@ -1280,7 +1324,7 @@ header {
     margin-right: 0.2em;
     border-radius: $rounded-pill;
 }
-a.js_change_lang:hover {
+a.js_change_lang:hover, a.o_add_language:hover {
     text-decoration: none;
 
     span {
