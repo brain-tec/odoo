@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2one, one2many } from '@mail/model/model_field';
-import { clear, insert, unlink } from '@mail/model/model_field_command';
+import { clear, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
 function factory(dependencies) {
@@ -46,13 +46,9 @@ function factory(dependencies) {
 
         /**
          * cleanly removes the video stream of the session
-         *
-         * @param {Object} [param0]
-         * @param {Object} [param0.stopTracks] true if tracks have to be stopped,
-         * it is optional as tracks can be removed but still necessary for transceivers.
          */
-        removeVideo({ stopTracks = true } = {}) {
-            if (this.videoStream && stopTracks) {
+        removeVideo() {
+            if (this.videoStream) {
                 for (const track of this.videoStream.getTracks() || []) {
                     track.stop();
                 }
@@ -69,7 +65,6 @@ function factory(dependencies) {
          * @param {boolean} param0.isTalking
          */
         async setAudio({ audioStream, isMuted, isTalking }) {
-            this._removeAudio();
             const audioElement = this.audioElement || new window.Audio();
             try {
                 audioElement.srcObject = audioStream;
@@ -261,13 +256,6 @@ function factory(dependencies) {
         }
 
         /**
-         * @override
-         */
-        static _createRecordLocalId(data) {
-            return `${this.modelName}_${data.id}`;
-        }
-
-        /**
          * @private
          */
         _debounce(f, delay) {
@@ -358,6 +346,7 @@ function factory(dependencies) {
          * Id of the record on the server.
          */
         id: attr({
+            readonly: true,
             required: true,
         }),
         /**
@@ -470,7 +459,7 @@ function factory(dependencies) {
             methodName: '_onChangeVideoStream',
         }),
     ];
-
+    RtcSession.identifyingFields = ['id'];
     RtcSession.modelName = 'mail.rtc_session';
 
     return RtcSession;

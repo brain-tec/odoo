@@ -13,18 +13,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
 
     def setUp(self):
         super(TestSMSPerformance, self).setUp()
-        self.user_employee.write({
-            'login': 'employee',
-            'country_id': self.env.ref('base.be').id,
-        })
-        self.admin = self.env.user
 
-        self.customer = self.env['res.partner'].with_context(self._quick_create_ctx).create({
-            'name': 'Test Customer',
-            'email': 'test@example.com',
-            'mobile': '0456123456',
-            'country_id': self.env.ref('base.be').id,
-        })
         self.test_record = self.env['mail.test.sms'].with_context(self._quick_create_ctx).create({
             'name': 'Test',
             'customer_id': self.customer.id,
@@ -32,18 +21,15 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
         })
 
         # prepare recipients to test for more realistic workload
-        Partners = self.env['res.partner'].with_context(self._quick_create_ctx)
-        self.partners = self.env['res.partner']
-        for x in range(0, 10):
-            self.partners |= Partners.create({
-                'name': 'Test %s' % x,
-                'email': 'test%s@example.com' % x,
-                'mobile': '0456%s%s0000' % (x, x),
-                'country_id': self.env.ref('base.be').id,
-            })
+        self.partners = self.env['res.partner'].with_context(self._quick_create_ctx).create([
+            {'name': 'Test %s' % x,
+             'email': 'test%s@example.com' % x,
+             'mobile': '0456%s%s0000' % (x, x),
+             'country_id': self.env.ref('base.be').id,
+            } for x in range(0, 10)
+        ])
 
-        # patch registry to simulate a ready environment
-        self.patch(self.env.registry, 'ready', True)
+        self._init_mail_gateway()
 
     @mute_logger('odoo.addons.sms.models.sms_sms')
     @users('employee')
@@ -51,7 +37,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
     def test_message_sms_record_1_partner(self):
         record = self.test_record.with_user(self.env.user)
         pids = self.customer.ids
-        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=24):  # test_mail_enterprise: 19
+        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=26):  # test_mail_enterprise: 26
             messages = record._message_sms(
                 body='Performance Test',
                 partner_ids=pids,
@@ -66,7 +52,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
     def test_message_sms_record_10_partners(self):
         record = self.test_record.with_user(self.env.user)
         pids = self.partners.ids
-        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=42):
+        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=44):
             messages = record._message_sms(
                 body='Performance Test',
                 partner_ids=pids,
@@ -80,7 +66,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
     @warmup
     def test_message_sms_record_default(self):
         record = self.test_record.with_user(self.env.user)
-        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=27):
+        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=28):
             messages = record._message_sms(
                 body='Performance Test',
             )
@@ -94,15 +80,7 @@ class TestSMSMassPerformance(BaseMailPerformance, sms_common.MockSMS):
 
     def setUp(self):
         super(TestSMSMassPerformance, self).setUp()
-        be_country_id = self.env.ref('base.be').id,
-        self.user_employee.write({
-            'login': 'employee',
-            'country_id': be_country_id,
-        })
-        self.admin = self.env.user
-        self.admin.write({
-            'country_id': be_country_id,
-        })
+        be_country_id = self.env.ref('base.be').id
 
         self._test_body = 'MASS SMS'
 
@@ -143,7 +121,7 @@ class TestSMSMassPerformance(BaseMailPerformance, sms_common.MockSMS):
         })
 
         with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=106):
-                composer.action_send_sms()
+            composer.action_send_sms()
 
     @mute_logger('odoo.addons.sms.models.sms_sms')
     @users('employee')

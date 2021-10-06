@@ -1918,7 +1918,13 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.createWidget) {
             const selectedIds = currentValues.map(({ id }) => id)
                 .filter(id => typeof id === 'number');
-            this.createWidget.options.domain = [...this.createWidget.options.domain, ['id', 'not in', selectedIds]];
+            const selectedIdsDomain = ['id', 'not in', selectedIds];
+            const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain[0] === 'id' && domain[1] === 'not in');
+            if (selectedIdsDomainIndex > -1) {
+                this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+            } else {
+                this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+            }
             this.createWidget.setValue('');
             this.createWidget.inputEl.value = '';
             $(this.createWidget.inputEl).trigger('input');
@@ -2384,6 +2390,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     init(parent, title, options, $target) {
         this.afterSearch = [];
         this.displayNameCache = {};
+        this._rpcCache = {};
         const {dataAttributes} = options;
         Object.assign(options, {
             limit: '5',
@@ -2502,6 +2509,18 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Caches the rpc.
+     *
+     * @override
+     */
+    async _rpc() {
+        const cacheId = JSON.stringify(...arguments);
+        if (!this._rpcCache[cacheId]) {
+            this._rpcCache[cacheId] = this._super(...arguments);
+        }
+        return this._rpcCache[cacheId];
+    },
     /**
      * Searches the database for corresponding records and updates the dropdown
      *
@@ -3115,7 +3134,7 @@ const SnippetOptionWidget = Widget.extend({
         // method with background-color as property too, so it is automatically
         // reset anyway).
         let bgImageParts = undefined;
-        if (params.cssProperty === 'background-color') {
+        if (params.withGradients && params.cssProperty === 'background-color') {
             const styles = getComputedStyle(this.$target[0]);
             bgImageParts = backgroundImageCssToParts(styles['background-image']);
             delete bgImageParts.gradient;
@@ -3166,7 +3185,7 @@ const SnippetOptionWidget = Widget.extend({
         // In case of background-color edition, we could receive a gradient, in
         // which case the value has to be combined with the potential background
         // image (real image).
-        if (params.cssProperty === 'background-color' && weUtils.isColorGradient(widgetValue)) {
+        if (params.withGradients && params.cssProperty === 'background-color' && weUtils.isColorGradient(widgetValue)) {
             cssProps = ['background-image'];
             bgImageParts.gradient = widgetValue;
             widgetValue = backgroundImagePartsToCss(bgImageParts);
@@ -3531,7 +3550,7 @@ const SnippetOptionWidget = Widget.extend({
 
                 const styles = window.getComputedStyle(this.$target[0]);
 
-                if (params.cssProperty === 'background-color') {
+                if (params.withGradients && params.cssProperty === 'background-color') {
                     // Check if there is a gradient, in that case this is the
                     // value to be returned, we normally not allow color and
                     // gradient at the same time (the option would remove one
@@ -4178,6 +4197,10 @@ registry.sizing = SnippetOptionWidget.extend({
             $body.on('mouseup', bodyMouseUp);
         });
 
+        _.each(resizeValues, (value, key) => {
+            this.$handles.filter('.' + key).toggleClass('readonly', !value);
+        });
+
         return def;
     },
     /**
@@ -4185,12 +4208,6 @@ registry.sizing = SnippetOptionWidget.extend({
      */
     onFocus: function () {
         this._onResize();
-    },
-    /**
-     * @override
-     */
-    onBlur: function () {
-        this.$handles.addClass('readonly');
     },
 
     //--------------------------------------------------------------------------
@@ -4203,16 +4220,6 @@ registry.sizing = SnippetOptionWidget.extend({
     setTarget: function () {
         this._super(...arguments);
         this._onResize();
-    },
-    /**
-     * @override
-     */
-    updateUI: async function () {
-        await this._super(...arguments);
-        const resizeValues = this._getSize();
-        _.each(resizeValues, (value, key) => {
-            this.$handles.filter('.' + key).toggleClass('readonly', !value);
-        });
     },
 
     //--------------------------------------------------------------------------

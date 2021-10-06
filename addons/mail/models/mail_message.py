@@ -674,22 +674,20 @@ class Message(models.Model):
 
         return super(Message, self).export_data(fields_to_export)
 
-    def _update_content(self, body, attachment_ids):
+    # ------------------------------------------------------
+    # ACTIONS
+    # ----------------------------------------------------
+
+    def action_open_document(self):
+        """ Opens the related record based on the model and ID """
         self.ensure_one()
-        thread = self.env[self.model].browse(self.res_id)
-        thread._check_can_update_message_content(self)
-        self.body = body
-        if not attachment_ids:
-            self.attachment_ids.unlink()
-        else:
-            message_values = {
-                'model': self.model,
-                'body': body,
-                'res_id': self.res_id,
-            }
-            attachement_values = thread._message_post_process_attachments([], attachment_ids, message_values)
-            self.update(attachement_values)
-        thread._message_update_content_after_hook(self)
+        return {
+            'res_id': self.res_id,
+            'res_model': self.model,
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+        }
 
     # ------------------------------------------------------
     # DISCUSS API
@@ -802,6 +800,23 @@ class Message(models.Model):
         reaction = self.env['mail.message.reaction'].sudo().search([('message_id', '=', self.id), ('partner_id', '=', partner.id), ('guest_id', '=', guest.id), ('content', '=', content)])
         reaction.unlink()
         self.env[self.model].browse(self.res_id)._message_remove_reaction_after_hook(message=self, content=content)
+
+    def _update_content(self, body, attachment_ids):
+        self.ensure_one()
+        thread = self.env[self.model].browse(self.res_id)
+        thread._check_can_update_message_content(self)
+        self.body = body
+        if not attachment_ids:
+            self.attachment_ids.unlink()
+        else:
+            message_values = {
+                'model': self.model,
+                'body': body,
+                'res_id': self.res_id,
+            }
+            attachement_values = thread._message_post_process_attachments([], attachment_ids, message_values)
+            self.update(attachement_values)
+        thread._message_update_content_after_hook(self)
 
     # ------------------------------------------------------
     # MESSAGE READ / FETCH / FAILURE API

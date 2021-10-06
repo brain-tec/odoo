@@ -18,6 +18,26 @@ var qweb = core.qweb;
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
 
+options.UserValueWidget.include({
+    loadMethodsData() {
+        this._super(...arguments);
+
+        // Method names are sorted alphabetically by default. Exception here:
+        // we make sure, customizeWebsiteVariable is considered after
+        // customizeWebsiteViews so that the variable is used to show to active
+        // value when both methods are used at the same time.
+        // TODO find a better way.
+        const indexVariable = this._methodsNames.indexOf('customizeWebsiteVariable');
+        if (indexVariable >= 0) {
+            const indexView = this._methodsNames.indexOf('customizeWebsiteViews');
+            if (indexView >= 0) {
+                this._methodsNames[indexVariable] = 'customizeWebsiteViews';
+                this._methodsNames[indexView] = 'customizeWebsiteVariable';
+            }
+        }
+    },
+});
+
 const UrlPickerUserValueWidget = InputUserValueWidget.extend({
     custom_events: _.extend({}, InputUserValueWidget.prototype.custom_events || {}, {
         'website_url_chosen': '_onWebsiteURLChosen',
@@ -1230,28 +1250,20 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
     async _renderCustomXML(uiFragment) {
         const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-name"]');
         const style = window.getComputedStyle(document.documentElement);
-        const priorityPrefix = weUtils.getCSSVariableValue('priority-palette-prefix', style).replace(/'/g, "");
-        const allPaletteNames = weUtils.getCSSVariableValue('palette-names', style).split(' ').map((name) => {
+        const allPaletteNames = weUtils.getCSSVariableValue('palette-names', style).split(', ').map((name) => {
             return name.replace(/'/g, "");
         });
-        const themePaletteNames = allPaletteNames.filter((name) => {
-            return name.startsWith(priorityPrefix);
-        });
-        const otherPaletteNames = allPaletteNames.filter((name) => {
-            return !name.startsWith(priorityPrefix);
-        });
-        const sortedPaletteNames = themePaletteNames.concat(otherPaletteNames);
-        for (const paletteName of sortedPaletteNames) {
+        for (const paletteName of allPaletteNames) {
             const btnEl = document.createElement('we-button');
             btnEl.classList.add('o_palette_color_preview_button');
             btnEl.dataset.customizeWebsiteVariable = `'${paletteName}'`;
-            for (let c = 1; c <= 5; c++) {
+            [1, 3, 2].forEach(c => {
                 const colorPreviewEl = document.createElement('span');
                 colorPreviewEl.classList.add('o_palette_color_preview');
                 const color = weUtils.getCSSVariableValue(`o-palette-${paletteName}-o-color-${c}`, style);
                 colorPreviewEl.style.backgroundColor = color;
                 btnEl.appendChild(colorPreviewEl);
-            }
+            });
             paletteSelectorEl.appendChild(btnEl);
         }
 
@@ -2724,7 +2736,6 @@ options.registry.ConditionalVisibility = options.Class.extend({
             if (widgetValue === 'conditional') {
                 const collapseEl = this.$el.children('we-collapse')[0];
                 this._toggleCollapseEl(collapseEl);
-                this.trigger_up('snippet_option_visibility_update', { show: true });
             } else {
                 // TODO create a param to allow doing this automatically for genericSelectDataAttribute?
                 delete targetEl.dataset.visibility;
@@ -2733,8 +2744,8 @@ options.registry.ConditionalVisibility = options.Class.extend({
                     delete targetEl.dataset[attribute.saveAttribute];
                     delete targetEl.dataset[`${attribute.saveAttribute}Rule`];
                 }
-                this.trigger_up('snippet_option_visibility_update');
             }
+            this.trigger_up('snippet_option_visibility_update', {show: true});
         } else if (!params.isVisibilityCondition) {
             return;
         }
