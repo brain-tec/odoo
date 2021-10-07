@@ -96,7 +96,7 @@ export class Message extends Component {
         } else if (this.messageView.message.guestAuthor && (!this.messageView.message.originThread || this.messageView.message.originThread.model !== 'mail.channel')) {
             return this.messageView.message.guestAuthor.avatarUrl;
         } else if (this.messageView.message.guestAuthor && this.messageView.message.originThread && this.messageView.message.originThread.model === 'mail.channel') {
-            return `/mail/channel/${this.messageView.message.originThread.id}/guest/${this.messageView.message.guestAuthor.id}/avatar_128`;
+            return `/mail/channel/${this.messageView.message.originThread.id}/guest/${this.messageView.message.guestAuthor.id}/avatar_128?unique=${this.messageView.message.guestAuthor.name}`;
         } else if (this.messageView.message.message_type === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
@@ -205,11 +205,10 @@ export class Message extends Component {
      * @returns {boolean}
      */
     get isSelected() {
-        return (
+        return Boolean(
             this.threadView &&
             this.messageView &&
-            this.threadView.threadViewer &&
-            this.threadView.threadViewer.selectedMessage === this.messageView.message
+            this.threadView.replyingToMessageView === this.messageView
         );
     }
 
@@ -460,7 +459,9 @@ export class Message extends Component {
         this.messageView.message.refreshDateFromNow();
         clearInterval(this._intervalId);
         this._intervalId = setInterval(() => {
-            this.messageView.message.refreshDateFromNow();
+            if (this.messageView) {
+                this.messageView.message.refreshDateFromNow();
+            }
         }, 60 * 1000);
     }
 
@@ -498,7 +499,8 @@ export class Message extends Component {
             !isEventHandled(ev, 'Message.ClickAuthorName') &&
             !isEventHandled(ev, 'Message.ClickFailure') &&
             !isEventHandled(ev, 'MessageActionList.Click') &&
-            !isEventHandled(ev, 'MessageReactionGroup.Click')
+            !isEventHandled(ev, 'MessageReactionGroup.Click') &&
+            !isEventHandled(ev, 'MessageInReplyToView.ClickMessageInReplyTo')
         ) {
             this.state.isClicked = !this.state.isClicked;
         }

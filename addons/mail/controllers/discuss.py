@@ -151,8 +151,11 @@ class DiscussController(http.Controller):
             raise NotFound()
         return channel_partner_sudo.env['ir.http']._get_content_common(res_id=int(attachment_id), download=True)
 
-    @http.route('/mail/channel/<int:channel_id>/image/<int:attachment_id>/<int:width>x<int:height>', methods=['GET'], type='http', auth='public')
-    def fetch_image(self, channel_id, attachment_id, width, height, **kwargs):
+    @http.route([
+        '/mail/channel/<int:channel_id>/image/<int:attachment_id>',
+        '/mail/channel/<int:channel_id>/image/<int:attachment_id>/<int:width>x<int:height>',
+    ], methods=['GET'], type='http', auth='public')
+    def fetch_image(self, channel_id, attachment_id, width=0, height=0, **kwargs):
         channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
         if not channel_partner_sudo.env['ir.attachment'].search([('id', '=', int(attachment_id)), ('res_id', '=', int(channel_id)), ('res_model', '=', 'mail.channel')], limit=1):
             raise NotFound()
@@ -198,7 +201,7 @@ class DiscussController(http.Controller):
             thread = channel_partner_sudo.channel_id
         else:
             thread = request.env[thread_model].browse(int(thread_id)).exists()
-        allowed_params = {'attachment_ids', 'body', 'message_type', 'partner_ids', 'subtype_xmlid'}
+        allowed_params = {'attachment_ids', 'body', 'message_type', 'partner_ids', 'subtype_xmlid', 'parent_id'}
         return thread.message_post(**{key: value for key, value in post_data.items() if key in allowed_params}).message_format()[0]
 
     @http.route('/mail/message/update_content', methods=['POST'], type='json', auth='public')
@@ -258,7 +261,8 @@ class DiscussController(http.Controller):
             raise NotFound()
         if not request.env.user.share:
             # Check through standard access rights/rules for internal users.
-            return attachment_sudo.sudo(False).unlink()
+            attachment_sudo.sudo(False)._delete_and_notify()
+            return
         # For non-internal users 2 cases are supported:
         #   - Either the attachment is linked to a message: verify the request is made by the author of the message (portal user or guest).
         #   - Either a valid access token is given: also verify the message is pending (because unfortunately in portal a token is also provided to guest for viewing others' attachments).
@@ -272,7 +276,7 @@ class DiscussController(http.Controller):
                 raise NotFound()
             if attachment_sudo.res_model != 'mail.compose.message' or attachment_sudo.res_id != 0:
                 raise NotFound()
-        return attachment_sudo.unlink()
+        attachment_sudo._delete_and_notify()
 
     @http.route('/mail/message/add_reaction', methods=['POST'], type='json', auth='public')
     def mail_message_add_reaction(self, message_id, content):
@@ -543,8 +547,11 @@ class DiscussController(http.Controller):
     # --------------------------------------------------------------------------
 
     @http.route('/mail/guest/update_name', methods=['POST'], type='json', auth='public')
-    def mail_guest_update_name(self, name):
+    def mail_guest_update_name(self, guest_id, name):
         guest = request.env['mail.guest']._get_guest_from_request(request)
-        if not guest:
+        guest_to_rename_sudo = guest.env['mail.guest'].browse(guest_id).sudo().exists()
+        if not guest_to_rename_sudo:
             raise NotFound()
-        guest.sudo()._update_name(name)
+        if guest_to_rename_sudo != guest and not request.env.user._is_admin():
+            raise NotFound()
+        guest_to_rename_sudo._update_name(name)
