@@ -28,7 +28,7 @@ function factory(dependencies) {
             });
             if (this.isChannelTokenSecret) {
                 // Change the URL to avoid leaking the invitation link.
-                window.history.replaceState(window.history.state, null, `/discuss/channel/${this.channel.id}`);
+                window.history.replaceState(window.history.state, null, `/discuss/channel/${this.channel.id}${window.location.search}`);
             }
             if (this.channel.defaultDisplayMode === 'video_full_screen') {
                 await this.channel.toggleCall({ startWithVideo: true });
@@ -49,7 +49,7 @@ function factory(dependencies) {
                     pendingGuestName: this.messaging.currentGuest && this.messaging.currentGuest.name,
                 }),
             });
-            if (this.channel.defaultDisplayMode === 'video_full_screen') {
+            if (this.welcomeView.mediaPreview) {
                 this.welcomeView.mediaPreview.enableMicrophone();
                 this.welcomeView.mediaPreview.enableVideo();
             }
