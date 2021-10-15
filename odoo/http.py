@@ -501,7 +501,7 @@ def route(route=None, **kw):
                 routes = route
             else:
                 routes = [route]
-            routing['routes'] = routes
+            routing['routes'] = routes #['/odoo' +r for r in routes]
 
         @functools.wraps(f)
         def response_wrap(*args, **kw):
@@ -1226,7 +1226,11 @@ class Response(werkzeug.wrappers.Response):
         """
         env = request.env(user=self.uid or request.uid or odoo.SUPERUSER_ID)
         self.qcontext['request'] = request
-        return env["ir.ui.view"].render_template(self.template, self.qcontext)
+        res = env["ir.ui.view"].render_template(self.template, self.qcontext)
+
+        res = re.sub(b'(href|src)="/([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"', b'\\1="/odoo/\\2"', res)
+        res =res.replace(b'oReq.open("GET", \'/web', b'oReq.open("GET", \'/odoo/web')
+        return res
 
     def flatten(self):
         """ Forces the rendering of the response's template, sets the result

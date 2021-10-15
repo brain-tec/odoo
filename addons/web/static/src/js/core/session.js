@@ -11,6 +11,29 @@ var utils = require('web.utils');
 var _t = core._t;
 var qweb = core.qweb;
 
+$.ajaxSetup({
+              beforeSend: function(xhr, options) {
+                 if( options.url.indexOf('http') !== 0 ) {
+                    options.url = "/odoo" + options.url;
+                 }
+              }
+            });
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    // fired when a mutation occurs
+    console.log(mutations, observer);
+    // ...
+});
+observer.observe(document, {
+  subtree: true,
+  attributes: true,
+    attributeFilter: ["src", "href"],
+    attributeOldValue: true,
+  //...
+});
+
 // To do: refactor session. Session accomplishes several concerns (rpc,
 // configuration, currencies (wtf?), user permissions...). They should be
 // clarified and separated.
@@ -26,6 +49,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         * "use_cors"
      */
     init: function (parent, origin, options) {
+
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
         options = options || {};
@@ -94,7 +118,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             }
             return Promise.all([
                     promise,
-                    self.rpc('/web/webclient/bootstrap_translations', {mods: self.module_list})
+                    self.rpc('/odoo/web/webclient/bootstrap_translations', {mods: self.module_list})
                         .then(function (trans) {
                             _t.database.set_bundle(trans);
                         })
@@ -184,6 +208,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      *
      */
     load_modules: function () {
+
         var self = this;
         var modules = odoo._modules;
         var all_modules = _.uniq(self.module_list.concat(modules));
@@ -232,10 +257,17 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         });
     },
     load_js: function (files) {
+                $.ajaxSetup({
+                      beforeSend: function(xhr, options) {
+                         if( options.url.indexOf('http') !== 0 ) {
+                            options.url = "/odoo" + options.url;
+                         }
+                      }
+                    });
         var self = this;
         return new Promise(function (resolve, reject) {
             if (files.length !== 0) {
-                var file = files.shift();
+                var file = '/odoo' + files.shift();
                 var url = self.url(file, null);
                 ajax.loadJS(url).then(resolve);
             } else {

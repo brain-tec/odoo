@@ -206,7 +206,6 @@ class Cursor(object):
         self._default_log_exceptions = True
 
         self.cache = {}
-
         # event handlers, see method after() below
         self._event_handlers = {'commit': [], 'rollback': []}
 

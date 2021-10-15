@@ -860,7 +860,7 @@ class Website(models.Model):
 
     def get_base_url(self):
         self.ensure_one()
-        return self._get_http_domain() or super(BaseModel, self).get_base_url()
+        return self._get_http_domain() or super(BaseModel, self).get_base_url() or ""
 
     def _get_canonical_url_localized(self, lang, canonical_params):
         """Returns the canonical URL for the current request with translatable
