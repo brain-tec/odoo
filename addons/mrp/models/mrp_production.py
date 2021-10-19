@@ -1178,7 +1178,9 @@ class MrpProduction(models.Model):
         self.move_raw_ids._trigger_scheduler()
         self.picking_ids.filtered(
             lambda p: p.state not in ['cancel', 'done']).action_confirm()
-        self.state = 'confirmed'
+        # Force confirm state only for draft production not for more advanced state like
+        # 'progress' (in case of backorders with some qty_producing)
+        self.filtered(lambda mo: mo.state == 'draft').state = 'confirmed'
         return True
 
     def action_assign(self):
@@ -1518,7 +1520,6 @@ class MrpProduction(models.Model):
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
         backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.product_qty == 0).unlink()
-        backorders.move_raw_ids._recompute_state()
 
         for old_wo, wo in zip(self.workorder_ids, backorders.workorder_ids):
             wo.qty_produced = max(old_wo.qty_produced - old_wo.qty_producing, 0)
@@ -1810,7 +1811,13 @@ class MrpProduction(models.Model):
                     duplicates_unbuild = self.env['stock.move.line'].search_count(domain_unbuild + [
                         ('move_id.unbuild_id', '!=', False)
                     ])
-                    if not (duplicates_unbuild and duplicates - duplicates_unbuild == 0):
+                    removed = self.env['stock.move.line'].search_count([
+                        ('lot_id', '=', move_line.lot_id.id),
+                        ('state', '=', 'done'),
+                        ('location_dest_id.scrap_location', '=', True)
+                    ])
+                    # Either removed or unbuild
+                    if not ((duplicates_unbuild or removed) and duplicates - duplicates_unbuild - removed == 0):
                         raise UserError(message)
                 # Check presence of same sn in current production
                 duplicates = co_prod_move_lines.filtered(lambda ml: ml.qty_done and ml.lot_id == move_line.lot_id) - move_line
@@ -1846,7 +1853,13 @@ class MrpProduction(models.Model):
                     duplicates_unbuild = self.env['stock.move.line'].search_count(domain_unbuild + [
                             ('move_id.unbuild_id', '!=', False)
                         ])
-                    if not (duplicates_unbuild and duplicates - duplicates_unbuild == 0):
+                    removed = self.env['stock.move.line'].search_count([
+                        ('lot_id', '=', move_line.lot_id.id),
+                        ('state', '=', 'done'),
+                        ('location_dest_id.scrap_location', '=', True)
+                    ])
+                    # Either removed or unbuild
+                    if not ((duplicates_unbuild or removed) and duplicates - duplicates_unbuild - removed == 0):
                         raise UserError(message)
                 # Check presence of same sn in current production
                 duplicates = co_prod_move_lines.filtered(lambda ml: ml.qty_done and ml.lot_id == move_line.lot_id) - move_line
