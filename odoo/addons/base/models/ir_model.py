@@ -322,15 +322,18 @@ class IrModel(models.Model):
             self.pool.setup_models(self._cr)
         return res
 
-    @api.model
-    def create(self, vals):
-        res = super(IrModel, self).create(vals)
-        if vals.get('state', 'manual') == 'manual':
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(IrModel, self).create(vals_list)
+        manual_models = [
+            vals['model'] for vals in vals_list if vals.get('state', 'manual') == 'manual'
+        ]
+        if manual_models:
             # setup models; this automatically adds model in registry
             self.flush()
             self.pool.setup_models(self._cr)
             # update database schema
-            self.pool.init_models(self._cr, [vals['model']], dict(self._context, update_custom_fields=True))
+            self.pool.init_models(self._cr, manual_models, dict(self._context, update_custom_fields=True))
         return res
 
     @api.model
@@ -524,8 +527,7 @@ class IrModelFields(models.Model):
     def _compute_related_field_id(self):
         for rec in self:
             if rec.state == 'manual' and rec.related:
-                field = rec._related_field()
-                rec.related_field_id = self._get(field.model_name, field.name)
+                rec.related_field_id = rec._related_field()
             else:
                 rec.related_field_id = False
 
@@ -578,17 +580,17 @@ class IrModelFields(models.Model):
     ]
 
     def _related_field(self):
-        """ Return the ``Field`` instance corresponding to ``self.related``. """
+        """ Return the ``ir.model.fields`` record corresponding to ``self.related``. """
         names = self.related.split(".")
         last = len(names) - 1
-        model = self.env[self.model or self.model_id.model]
+        model_name = self.model
         for index, name in enumerate(names):
-            field = model._fields.get(name)
-            if field is None:
+            field = self._get(model_name, name)
+            if not field:
                 raise UserError(_("Unknown field name '%s' in related field '%s'") % (name, self.related))
-            if index < last and not field.relational:
+            model_name = field.relation
+            if index < last and not field.relation:
                 raise UserError(_("Non-relational field name '%s' in related field '%s'") % (name, self.related))
-            model = model[name]
         return field
 
     @api.constrains('related')
@@ -596,9 +598,9 @@ class IrModelFields(models.Model):
         for rec in self:
             if rec.state == 'manual' and rec.related:
                 field = rec._related_field()
-                if field.type != rec.ttype:
+                if field.ttype != rec.ttype:
                     raise ValidationError(_("Related field '%s' does not have type '%s'") % (rec.related, rec.ttype))
-                if field.relational and field.comodel_name != rec.relation:
+                if field.relation != rec.relation:
                     raise ValidationError(_("Related field '%s' does not have comodel '%s'") % (rec.related, rec.relation))
 
     @api.onchange('related')
@@ -608,8 +610,8 @@ class IrModelFields(models.Model):
                 field = self._related_field()
             except UserError as e:
                 return {'warning': {'title': _("Warning"), 'message': e}}
-            self.ttype = field.type
-            self.relation = field.comodel_name
+            self.ttype = field.ttype
+            self.relation = field.relation
             self.readonly = True
 
     @api.constrains('depends')
@@ -865,34 +867,41 @@ class IrModelFields(models.Model):
 
         return res
 
-    @api.model
-    def create(self, vals):
-        if 'model_id' in vals:
-            model_data = self.env['ir.model'].browse(vals['model_id'])
-            vals['model'] = model_data.model
+    @api.model_create_multi
+    def create(self, vals_list):
+        IrModel = self.env['ir.model']
+        models = set()
+        for vals in vals_list:
+            if 'model_id' in vals:
+                vals['model'] = IrModel.browse(vals['model_id']).model
+            assert vals.get('model'), f"missing model name for {vals}"
+            models.add(vals['model'])
 
         # for self._get_ids() in _update_selection()
         self.clear_caches()
 
-        res = super(IrModelFields, self).create(vals)
+        res = super(IrModelFields, self).create(vals_list)
 
-        if vals.get('state', 'manual') == 'manual':
-            if vals.get('relation') and not self.env['ir.model'].search([('model', '=', vals['relation'])]):
-                raise UserError(_("Model %s does not exist!", vals['relation']))
+        for vals in vals_list:
+            if vals.get('state', 'manual') == 'manual':
+                relation = vals.get('relation')
+                if relation and not IrModel._get_id(relation):
+                    raise UserError(_("Model %s does not exist!", vals['relation']))
 
-            if vals.get('ttype') == 'one2many':
-                if not self.search([('model_id', '=', vals['relation']), ('name', '=', vals['relation_field']), ('ttype', '=', 'many2one')]):
+                if vals.get('ttype') == 'one2many' and not self.search_count([
+                    ('ttype', '=', 'many2one'),
+                    ('model', '=', vals['relation']),
+                    ('name', '=', vals['relation_field']),
+                ]):
                     raise UserError(_("Many2one %s on model %s does not exist!") % (vals['relation_field'], vals['relation']))
 
-            self.clear_caches()                     # for _existing_field_data()
-
-            if vals['model'] in self.pool:
-                # setup models; this re-initializes model in registry
-                self.flush()
-                self.pool.setup_models(self._cr)
-                # update database schema of model and its descendant models
-                models = self.pool.descendants([vals['model']], '_inherits')
-                self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
+        if any(model in self.pool for model in models):
+            # setup models; this re-initializes model in registry
+            self.flush()
+            self.pool.setup_models(self._cr)
+            # update database schema of models and their descendants
+            models = self.pool.descendants(models, '_inherits')
+            self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
 
         return res
 
@@ -944,7 +953,6 @@ class IrModelFields(models.Model):
         res = super(IrModelFields, self).write(vals)
 
         self.flush()
-        self.clear_caches()                         # for _existing_field_data()
 
         if column_rename:
             # rename column in database, and its corresponding index if present
@@ -980,13 +988,6 @@ class IrModelFields(models.Model):
         for field in self:
             res.append((field.id, '%s (%s)' % (field.field_description, field.model)))
         return res
-
-    @tools.ormcache('model_name')
-    def _existing_field_data(self, model_name):
-        """ Return the given model's existing field data. """
-        cr = self._cr
-        cr.execute("SELECT * FROM ir_model_fields WHERE model=%s", [model_name])
-        return {row['name']: row for row in cr.dictfetchall()}
 
     def _reflect_field_params(self, field, model_id):
         """ Return the values to write to the database for the given field. """
@@ -1318,16 +1319,22 @@ class IrModelSelection(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         field_ids = {vals['field_id'] for vals in vals_list}
+        field_names = set()
         for field in self.env['ir.model.fields'].browse(field_ids):
+            field_names.add((field.model, field.name))
             if field.state != 'manual':
                 raise UserError(_('Properties of base fields cannot be altered in this manner! '
                                   'Please modify them through Python code, '
                                   'preferably through a custom addon!'))
         recs = super().create(vals_list)
 
-        # setup models; this re-initializes model in registry
-        self.flush()
-        self.pool.setup_models(self._cr)
+        if any(
+            model in self.pool and name in self.pool[model]._fields
+            for model, name in field_names
+        ):
+            # setup models; this re-initializes model in registry
+            self.flush()
+            self.pool.setup_models(self._cr)
 
         return recs
 
