@@ -58,14 +58,13 @@ def resolve_mro(model, name, predicate):
         classes are ignored.
     """
     result = []
-    for cls in type(model).mro():
-        if not is_registry_class(cls):
-            value = cls.__dict__.get(name, Default)
-            if value is Default:
-                continue
-            if not predicate(value):
-                break
-            result.append(value)
+    for cls in model._model_classes:
+        value = cls.__dict__.get(name, Default)
+        if value is Default:
+            continue
+        if not predicate(value):
+            break
+        result.append(value)
     return result
 
 
@@ -419,9 +418,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if extra_keys:
             attrs['_extra_keys'] = extra_keys
 
-        for key, val in attrs.items():
-            if getattr(self, key, Default) != val:
-                setattr(self, key, val)
+        self.__dict__.update(attrs)
 
         # prefetch only stored, column, non-manual and non-deprecated fields
         if not (self.store and self.column_type) or self.manual or self.deprecated:
@@ -554,7 +551,9 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # copy attributes from field to self (string, help, etc.)
         for attr, prop in self.related_attrs:
-            if not getattr(self, attr):
+            # check whether 'attr' is explicitly set on self (from its field
+            # definition), and ignore its class-level value (only a default)
+            if attr not in self.__dict__:
                 setattr(self, attr, getattr(field, prop))
 
         for attr in field._extra_keys:
@@ -4100,6 +4099,6 @@ def apply_required(model, field_name):
 # pylint: disable=wrong-import-position
 from .exceptions import AccessError, MissingError, UserError
 from .models import (
-    check_pg_name, expand_ids, is_definition_class, is_registry_class,
+    check_pg_name, expand_ids, is_definition_class,
     BaseModel, IdType, NewId, PREFETCH_MAX,
 )
