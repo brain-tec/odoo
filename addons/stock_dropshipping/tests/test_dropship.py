@@ -16,7 +16,7 @@ class TestDropship(common.TransactionCase):
         # add a vendor
         vendor1 = self.env['res.partner'].create({'name': 'vendor1'})
         seller1 = self.env['product.supplierinfo'].create({
-            'name': vendor1.id,
+            'partner_id': vendor1.id,
             'price': 8,
         })
         prod.write({'seller_ids': [(6, 0, [seller1.id])]})
@@ -84,7 +84,7 @@ class TestDropship(common.TransactionCase):
             'uom_po_id': self.env.ref('uom.product_uom_unit').id,
             'seller_ids': [(0, 0, {
                 'delay': 1,
-                'name': supplier_dropship.id,
+                'partner_id': supplier_dropship.id,
                 'min_qty': 2.0
             })]
         })
@@ -122,7 +122,7 @@ class TestDropship(common.TransactionCase):
         self.assertEqual(purchase.dropship_picking_count, 1)
 
         # Send the 200 pieces
-        purchase.picking_ids.move_lines.quantity_done = purchase.picking_ids.move_lines.product_qty
+        purchase.picking_ids.move_ids.quantity_done = purchase.picking_ids.move_ids.product_qty
         purchase.picking_ids.button_validate()
 
         # Check one move line was created in Customers location with 200 pieces

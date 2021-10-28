@@ -678,7 +678,11 @@ export class OdooEditor extends EventTarget {
             } else if (record.type === 'attributes') {
                 const node = this.idFind(record.id);
                 if (node) {
-                    this._safeSetAttribute(node, record.attributeName, record.value);
+                    if (this._collabClientId) {
+                        this._safeSetAttribute(node, record.attributeName, record.value);
+                    } else {
+                        node.setAttribute(record.attributeName, record.value);
+                    }
                 }
             } else if (record.type === 'remove') {
                 const toremove = this.idFind(record.id);
@@ -687,13 +691,16 @@ export class OdooEditor extends EventTarget {
                 }
             } else if (record.type === 'add') {
                 let node = this.idFind(record.oid) || this.unserializeNode(record.node);
-                const fakeNode = document.createElement('fake-el');
-                fakeNode.appendChild(node);
-                DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
-                node = fakeNode.childNodes[0];
-                if (!node) {
-                    continue;
+                if (this._collabClientId) {
+                    const fakeNode = document.createElement('fake-el');
+                    fakeNode.appendChild(node);
+                    DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
+                    node = fakeNode.childNodes[0];
+                    if (!node) {
+                        continue;
+                    }
                 }
+
                 this.idSet(node, true);
 
                 if (record.append && this.idFind(record.append)) {
@@ -797,7 +804,11 @@ export class OdooEditor extends EventTarget {
                     const node = this.idFind(mutation.id);
                     if (node) {
                         if (mutation.oldValue) {
-                            this._safeSetAttribute(node, mutation.attributeName, mutation.oldValue);
+                            if (this._collabClientId) {
+                                this._safeSetAttribute(node, mutation.attributeName, mutation.oldValue);
+                            } else {
+                                node.setAttribute(mutation.attributeName, mutation.oldValue);
+                            }
                         } else {
                             node.removeAttribute(mutation.attributeName);
                         }
@@ -1834,7 +1845,7 @@ export class OdooEditor extends EventTarget {
             }
         }
         this.updateColorpickerLabels();
-
+        const listUIClasses = {UL: 'fa-list-ul', OL: 'fa-list-ol', CL: 'fa-tasks'};
         const block = closestBlock(sel.anchorNode);
         let activeLabel = undefined;
         for (const [style, tag, isList] of [
@@ -1863,6 +1874,17 @@ export class OdooEditor extends EventTarget {
                 if (!isList && isActive) {
                     activeLabel = button.textContent;
                 }
+            }
+        }
+        if (block) {
+            const listMode = getListMode(block.parentElement);
+            const listDropdownButton = this.toolbar.querySelector('#listDropdownButton');
+            if (listDropdownButton) {
+                if (listMode) {
+                    listDropdownButton.classList.remove('fa-list-ul', 'fa-list-ol', 'fa-tasks');
+                    listDropdownButton.classList.add(listUIClasses[listMode]);
+                }
+                listDropdownButton.closest('button').classList.toggle('active', block.tagName === 'LI');
             }
         }
         if (!activeLabel) {

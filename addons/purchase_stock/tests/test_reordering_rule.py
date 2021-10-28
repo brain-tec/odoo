@@ -27,7 +27,7 @@ class TestReorderingRule(TransactionCase):
         product_form.detailed_type = 'product'
         product_form.description = 'Internal Notes'
         with product_form.seller_ids.new() as seller:
-            seller.name = cls.partner
+            seller.partner_id = cls.partner
         product_form.route_ids.add(cls.env.ref('purchase_stock.route_warehouse0_buy'))
         cls.product_01 = product_form.save()
 
@@ -84,17 +84,17 @@ class TestReorderingRule(TransactionCase):
         purchase_order.order_line.product_qty = 12
         purchase_order.button_confirm()
 
-        self.assertEqual(purchase_order.picking_ids.move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 12)
-        next_picking = purchase_order.picking_ids.move_lines.move_dest_ids.picking_id
+        self.assertEqual(purchase_order.picking_ids.move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 12)
+        next_picking = purchase_order.picking_ids.move_ids.move_dest_ids.picking_id
         self.assertEqual(len(next_picking), 2)
-        self.assertEqual(next_picking[0].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
-        self.assertEqual(next_picking[1].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 2)
+        self.assertEqual(next_picking[0].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
+        self.assertEqual(next_picking[1].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 2)
 
         # Increase the quantity on the PO
         purchase_order.order_line.product_qty = 15
-        self.assertEqual(purchase_order.picking_ids.move_lines.product_qty, 15)
-        self.assertEqual(next_picking[0].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
-        self.assertEqual(next_picking[1].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 5)
+        self.assertEqual(purchase_order.picking_ids.move_ids.product_qty, 15)
+        self.assertEqual(next_picking[0].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
+        self.assertEqual(next_picking[1].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 5)
 
     def test_reordering_rule_2(self):
         """
@@ -137,8 +137,8 @@ class TestReorderingRule(TransactionCase):
             move.product_id = self.product_01
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines[0].location_id = subloc_1.id
-        customer_picking.move_lines[1].location_id = subloc_2.id
+        customer_picking.move_ids[0].location_id = subloc_1.id
+        customer_picking.move_ids[1].location_id = subloc_2.id
 
         # picking confirm
         customer_picking.action_confirm()
@@ -165,8 +165,8 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(self.product_01.with_context(location=subloc_2.id).virtual_available, 0)
         self.assertEqual(self.product_01.with_context(location=warehouse_1.lot_stock_id.id).virtual_available, 10)  # 5 on the main loc, 5 on subloc_1
 
-        self.assertEqual(purchase_order.picking_ids.move_lines[-1].product_qty, 5)
-        self.assertEqual(purchase_order.picking_ids.move_lines[-1].location_dest_id, warehouse_1.lot_stock_id)
+        self.assertEqual(purchase_order.picking_ids.move_ids[-1].product_qty, 5)
+        self.assertEqual(purchase_order.picking_ids.move_ids[-1].location_dest_id, warehouse_1.lot_stock_id)
 
     def test_reordering_rule_3(self):
         """
@@ -205,7 +205,7 @@ class TestReorderingRule(TransactionCase):
         })
         vendor1 = self.env['res.partner'].create({'name': 'AAA', 'email': 'from.test@example.com'})
         supplier_info1 = self.env['product.supplierinfo'].create({
-            'name': vendor1.id,
+            'partner_id': vendor1.id,
             'price': 50,
         })
         product = self.env['product.product'].create({
@@ -265,7 +265,7 @@ class TestReorderingRule(TransactionCase):
         product_form.name = 'Simple Product'
         product_form.detailed_type = 'product'
         with product_form.seller_ids.new() as s:
-            s.name = partner
+            s.partner_id = partner
         product = product_form.save()
 
         product_form = Form(self.env['product.product'])
@@ -274,7 +274,7 @@ class TestReorderingRule(TransactionCase):
         product_form.route_ids.add(route_buy)
         product_form.route_ids.add(route_mto)
         with product_form.seller_ids.new() as s:
-            s.name = partner
+            s.partner_id = partner
         product_buy_mto = product_form.save()
 
         # Create Delivery Order of 20 product and 10 buy + MTO
@@ -291,7 +291,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
@@ -334,7 +334,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint'].flush()
 
@@ -363,7 +363,7 @@ class TestReorderingRule(TransactionCase):
         product_form.name = 'Simple Product'
         product_form.detailed_type = 'product'
         with product_form.seller_ids.new() as s:
-            s.name = partner
+            s.partner_id = partner
         product = product_form.save()
 
         product_form = Form(self.env['product.product'])
@@ -372,7 +372,7 @@ class TestReorderingRule(TransactionCase):
         product_form.route_ids.add(route_buy)
         product_form.route_ids.add(route_mto)
         with product_form.seller_ids.new() as s:
-            s.name = partner
+            s.partner_id = partner
         product_buy_mto = product_form.save()
 
         # Create Delivery Order of 20 product and 10 buy + MTO
@@ -389,7 +389,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
@@ -431,7 +431,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint'].flush()
 
@@ -470,12 +470,12 @@ class TestReorderingRule(TransactionCase):
             "name": "Supplier B",
         })
         self.env["product.supplierinfo"].create({
-            "name": default_vendor.id,
+            "partner_id": default_vendor.id,
             "product_tmpl_id": product.product_tmpl_id.id,
             "delay": 7,
         })
         self.env["product.supplierinfo"].create({
-            "name": secondary_vendor.id,
+            "partner_id": secondary_vendor.id,
             "product_tmpl_id": product.product_tmpl_id.id,
             "delay": 10,
         })
@@ -578,7 +578,7 @@ class TestReorderingRule(TransactionCase):
             "name": "Supplier A",
         })
         self.env["product.supplierinfo"].create({
-            "name": default_vendor.id,
+            "partner_id": default_vendor.id,
             "product_tmpl_id": product.product_tmpl_id.id,
             "delay": 7,
         })

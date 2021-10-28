@@ -8,7 +8,7 @@ from odoo.tools.float_utils import float_round
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    purchase_id = fields.Many2one('purchase.order', related='move_lines.purchase_line_id.order_id',
+    purchase_id = fields.Many2one('purchase.order', related='move_ids.purchase_line_id.order_id',
         string="Purchase Orders", readonly=True)
 
 
@@ -183,7 +183,7 @@ class Orderpoint(models.Model):
     supplier_id = fields.Many2one(
         'product.supplierinfo', string='Product Supplier', check_company=True,
         domain="['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]")
-    vendor_id = fields.Many2one(related='supplier_id.name', string="Vendor", store=True)
+    vendor_id = fields.Many2one(related='supplier_id.partner_id', string="Vendor", store=True)
 
     @api.depends('product_id.purchase_order_line_ids', 'product_id.purchase_order_line_ids.state')
     def _compute_qty(self):
