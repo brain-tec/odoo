@@ -1610,27 +1610,6 @@ export class OdooEditor extends EventTarget {
 
     _createCommandBar() {
         this.options.noScrollSelector = this.options.noScrollSelector || 'body';
-
-        const revertHistoryBeforeCommandbar = () => {
-            const lastStep = this._currentStep;
-            this.historyRevert(lastStep);
-            let stepIndex = this._historySteps.length - 1;
-            while (stepIndex > this._beforeCommandbarStepIndex) {
-                const step = this._historySteps[stepIndex];
-                const stepState = this._historyStepsStates.get(step.id);
-                if (step.clientId === this._collabClientId && stepState !== 'consumed') {
-                    this.historyRevert(this._historySteps[stepIndex]);
-                    this._historyStepsStates.set(step.id, 'consumed');
-                }
-                stepIndex--;
-            }
-            this.historyStep(true);
-            setTimeout(() => {
-                this.editable.focus();
-                getDeepRange(this.editable, { select: true });
-            });
-        };
-
         this.commandbarTablePicker = new TablePicker({
             document: this.document,
             floating: true,
@@ -1757,7 +1736,12 @@ export class OdooEditor extends EventTarget {
                 this.observerActive();
             },
             preValidate: () => {
-                revertHistoryBeforeCommandbar();
+                this._historyRevertUntil(this._beforeCommandbarStepIndex);
+                this.historyStep(true);
+                setTimeout(() => {
+                    this.editable.focus();
+                    getDeepRange(this.editable, { select: true });
+                });
             },
             postValidate: () => {
                 this.historyStep(true);
@@ -1775,6 +1759,21 @@ export class OdooEditor extends EventTarget {
             commands: [...mainCommands, ...(this.options.commands || [])],
         });
     }
+
+    _historyRevertUntil (toStepIndex) {
+        const lastStep = this._currentStep;
+        this.historyRevert(lastStep);
+        let stepIndex = this._historySteps.length - 1;
+        while (stepIndex > toStepIndex) {
+            const step = this._historySteps[stepIndex];
+            const stepState = this._historyStepsStates.get(step.id);
+            if (step.clientId === this._collabClientId && stepState !== 'consumed') {
+                this.historyRevert(this._historySteps[stepIndex]);
+                this._historyStepsStates.set(''+step.id, 'consumed');
+            }
+            stepIndex--;
+        }
+    };
 
     // TOOLBAR
     // =======
@@ -2269,7 +2268,7 @@ export class OdooEditor extends EventTarget {
 
     clean() {
         this.observerUnactive();
-        for (const hint of document.querySelectorAll('.oe-hint')) {
+        for (const hint of this.document.querySelectorAll('.oe-hint')) {
             hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
             hint.removeAttribute('placeholder');
         }
@@ -2297,7 +2296,7 @@ export class OdooEditor extends EventTarget {
             'CL LI': 'To-do',
         };
 
-        for (const hint of document.querySelectorAll('.oe-hint')) {
+        for (const hint of this.document.querySelectorAll('.oe-hint')) {
             if (hint.classList.contains('oe-command-temporary-hint') || !isEmptyBlock(hint)) {
                 this.observerUnactive();
                 hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
@@ -2653,7 +2652,18 @@ export class OdooEditor extends EventTarget {
                         },
                     ];
 
+                    const execCommandAtStepIndex = (index, callback) => {
+                        this._historyRevertUntil(index);
+                        this.historyStep(true);
+                        this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
+
+                        callback();
+
+                        this.historyStep(true);
+                    }
+
                     if (['jpg', 'jpeg', 'png', 'gif'].includes(urlFileExtention)) {
+                        const stepIndexBeforeInsert = this._historySteps.length - 1;
                         this.execCommand('insertText', splitAroundUrl[i]);
                         this.commandBar.open({
                             commands: [
@@ -2662,20 +2672,23 @@ export class OdooEditor extends EventTarget {
                                     title: 'Embed Image',
                                     description: 'Embed the image in the document.',
                                     fontawesome: 'fa-image',
+                                    shouldPreValidate: () => false,
                                     callback: () => {
-                                        this.historyUndo();
-                                        const img = document.createElement('IMG');
-                                        img.setAttribute('src', url);
-                                        const sel = this.document.getSelection();
-                                        if (sel.rangeCount) {
-                                            sel.getRangeAt(0).insertNode(img);
-                                            sel.collapseToEnd();
-                                        }
+                                        execCommandAtStepIndex(stepIndexBeforeInsert, () => {
+                                            const img = document.createElement('IMG');
+                                            img.setAttribute('src', url);
+                                            const sel = this.document.getSelection();
+                                            if (sel.rangeCount) {
+                                                sel.getRangeAt(0).insertNode(img);
+                                                sel.collapseToEnd();
+                                            }
+                                        });
                                     },
                                 },
                             ].concat(baseEmbedCommand),
                         });
                     } else if (youtubeUrl) {
+                        const stepIndexBeforeInsert = this._historySteps.length - 1;
                         this.execCommand('insertText', splitAroundUrl[i]);
                         this.commandBar.open({
                             commands: [
@@ -2684,27 +2697,34 @@ export class OdooEditor extends EventTarget {
                                     title: 'Embed Youtube Video',
                                     description: 'Embed the youtube video in the document.',
                                     fontawesome: 'fa-youtube-play',
+                                    shouldPreValidate: () => false,
                                     callback: () => {
-                                        this.historyUndo();
-                                        const video = document.createElement('iframe');
-                                        video.setAttribute('width', '560');
-                                        video.setAttribute('height', '315');
-                                        video.setAttribute(
-                                            'src',
-                                            `https://www.youtube.com/embed/${youtubeUrl[1]}`,
-                                        );
-                                        video.setAttribute('title', 'YouTube video player');
-                                        video.setAttribute('frameborder', '0');
-                                        video.setAttribute(
-                                            'allow',
-                                            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
-                                        );
-                                        video.setAttribute('allowfullscreen', '1');
-                                        const sel = this.document.getSelection();
-                                        if (sel.rangeCount) {
-                                            sel.getRangeAt(0).insertNode(video);
-                                            sel.collapseToEnd();
-                                        }
+                                        execCommandAtStepIndex(stepIndexBeforeInsert, () => {
+                                            let videoElement;
+                                            if (this.options.getYoutubeVideoElement) {
+                                                videoElement = this.options.getYoutubeVideoElement(youtubeUrl[0]);
+                                            } else {
+                                                videoElement = document.createElement('iframe');
+                                                videoElement.setAttribute('width', '560');
+                                                videoElement.setAttribute('height', '315');
+                                                videoElement.setAttribute(
+                                                    'src',
+                                                    `https://www.youtube.com/embed/${youtubeUrl[1]}`,
+                                                );
+                                                videoElement.setAttribute('title', 'YouTube video player');
+                                                videoElement.setAttribute('frameborder', '0');
+                                                videoElement.setAttribute(
+                                                    'allow',
+                                                    'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                                                );
+                                                videoElement.setAttribute('allowfullscreen', '1');
+                                            }
+                                            const sel = this.document.getSelection();
+                                            if (sel.rangeCount) {
+                                                sel.getRangeAt(0).insertNode(videoElement);
+                                                sel.collapseToEnd();
+                                            }
+                                        });
                                     },
                                 },
                             ].concat(baseEmbedCommand),
