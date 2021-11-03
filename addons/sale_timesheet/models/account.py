@@ -38,8 +38,8 @@ class AccountAnalyticLine(models.Model):
     # When user edit Sale Order Item(so_line) for timesheet make is_so_line_edited field true
     @api.onchange('so_line')
     def _onchange_so_line(self):
-        if not self.is_so_line_edited:
-            self.is_so_line_edited = True
+        # TODO: [XBO] remove me in master
+        return
 
     @api.depends('so_line.product_id', 'project_id', 'amount')
     def _compute_timesheet_invoice_type(self):
@@ -65,6 +65,10 @@ class AccountAnalyticLine(models.Model):
     def _compute_so_line(self):
         for timesheet in self.filtered(lambda t: not t.is_so_line_edited and t._is_not_billed()):  # Get only the timesheets are not yet invoiced
             timesheet.so_line = timesheet.project_id.allow_billable and timesheet._timesheet_determine_sale_line()
+    
+    @api.depends('timesheet_invoice_id.state')
+    def _compute_partner_id(self):
+        super(AccountAnalyticLine, self.filtered(lambda t: t._is_not_billed()))._compute_partner_id()
 
     def _is_not_billed(self):
         self.ensure_one()

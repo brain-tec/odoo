@@ -2991,8 +2991,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"橋接模組在門戶上增加評級功能. 它特別包括\n"
-"直接在客戶門戶中包含評級討論的小部件. "
+"橋接模組在網站登入上增加評級功能. 它特別包括\n"
+"直接在客戶網站登入中包含評級討論的小部件. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_account
@@ -4798,7 +4798,7 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-" 支援線上聊天\n"
+" 支援線上客服\n"
 "==========================\n"
 "\n"
 " 允許在\n"
@@ -7514,10 +7514,10 @@ msgid ""
 "a dependency towards website editing and customization capabilities."
 msgstr ""
 "\n"
-"此模組為完全整合的客戶門戶增加所需的基本代碼.\n"
-"它包含基本控制器類和基本模板. 業務外掛將增加其特定模板和控制器以延伸客戶門戶.\n"
+"此模組為完全整合的客戶網站登入增加所需的基本代碼.\n"
+"它包含基本控制器類和基本模板. 業務外掛將增加其特定模板和控制器以延伸客戶網站登入.\n"
 "\n"
-"該模組包含來自 odoo v10 website_portal 的大部分程式碼. 該模組的目的是允許在不依賴網站編輯和自定義功能的情況下顯示客戶門戶."
+"該模組包含來自 odoo v10 website_portal 的大部分程式碼. 該模組的目的是允許在不依賴網站編輯和自定義功能的情況下顯示客戶網站登入."
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_barcode
@@ -8644,13 +8644,13 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"幫助台模組的網站 IM 線上聊天整合\n"
+"幫助台模組的網站 IM 線上客服整合\n"
 "=======================================================\n"
 "\n"
 "功能:\n"
 "\n"
-" - 擁有一個與團隊相關的線上聊天渠道來回答您的客戶的問題。\n"
-" - 在該渠道中使用命令輕鬆建立新工單。 "
+" - 擁有一個與團隊相關的線上客服頻道來回答您的客戶的問題。\n"
+" - 在該頻道中使用命令輕鬆建立新線索。 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_helpdesk_slides
@@ -11071,7 +11071,7 @@ msgstr "自動安裝模組是指當它的所有依賴滿足時系統會自動安
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "An email is required for find_or_create to work"
-msgstr ""
+msgstr "find_or_create 需要電子郵件才能運作"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -11360,7 +11360,7 @@ msgstr "阿魯巴"
 #: model_terms:res.partner,website_description:base.res_partner_3
 #: model_terms:res.partner,website_description:base.res_partner_4
 msgid "As a team, we are happy to contribute to this event."
-msgstr ""
+msgstr "作為一個團隊，我們很高興為這次活動做出貢獻。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_appraisal
@@ -11624,28 +11624,28 @@ msgstr "頭像"
 #: model:ir.model.fields,field_description:base.field_res_partner__avatar_1024
 #: model:ir.model.fields,field_description:base.field_res_users__avatar_1024
 msgid "Avatar 1024"
-msgstr ""
+msgstr "頭像 1024"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_avatar_mixin__avatar_128
 #: model:ir.model.fields,field_description:base.field_res_partner__avatar_128
 #: model:ir.model.fields,field_description:base.field_res_users__avatar_128
 msgid "Avatar 128"
-msgstr ""
+msgstr "頭像 128"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_avatar_mixin__avatar_256
 #: model:ir.model.fields,field_description:base.field_res_partner__avatar_256
 #: model:ir.model.fields,field_description:base.field_res_users__avatar_256
 msgid "Avatar 256"
-msgstr ""
+msgstr "頭像 256"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_avatar_mixin__avatar_512
 #: model:ir.model.fields,field_description:base.field_res_partner__avatar_512
 #: model:ir.model.fields,field_description:base.field_res_users__avatar_512
 msgid "Avatar 512"
-msgstr ""
+msgstr "頭像 512"
 
 #. module: base
 #: model:ir.model,name:base.model_avatar_mixin
@@ -12088,7 +12088,7 @@ msgstr "伯利茲"
 msgid ""
 "Below text serves as a suggestion and doesn’t engage Odoo S.A. "
 "responsibility."
-msgstr ""
+msgstr "以下文字僅作為建議，不涉及 Odoo S.A. 的責任。"
 
 #. module: base
 #: model:res.country,name:base.bj
@@ -12471,7 +12471,7 @@ msgstr "CRM遊戲化"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_livechat
 msgid "CRM Livechat"
-msgstr "CRM 線上聊天"
+msgstr "CRM 線上客服"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_mail_plugin
@@ -13097,7 +13097,7 @@ msgstr "欄位指向在model表中的記錄"
 #: model_terms:res.partner,website_description:base.res_partner_3
 #: model_terms:res.partner,website_description:base.res_partner_4
 msgid "Come see us live, we hope to meet you !"
-msgstr ""
+msgstr "來看看我們的直播，我們希望見到你！"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__comm10e
@@ -13194,7 +13194,7 @@ msgstr "公司資料"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__company_details
 msgid "Company Details"
-msgstr ""
+msgstr "公司詳情"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__favicon
@@ -13820,7 +13820,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_form
 msgid "Create a Contact in your address book"
-msgstr ""
+msgstr "在通訊錄中創建聯繫人"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_country_group
@@ -13916,7 +13916,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_livechat
 msgid "Create lead from livechat conversation"
-msgstr "從線上聊天對話中建立銷售線索"
+msgstr "從線上客服對話中建立銷售線索"
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_crm
@@ -14151,7 +14151,7 @@ msgstr "克羅地亞-會計"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron_trigger__cron_id
 msgid "Cron"
-msgstr ""
+msgstr "玉米"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_trigger_view_form
@@ -15656,7 +15656,7 @@ msgstr "允许商品缓存，从而获得较低的POS加载时间。"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.enable_profiling_wizard
 msgid "Enable profiling"
-msgstr ""
+msgstr "啟用分析"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_enable_profiling_wizard__duration
@@ -16848,7 +16848,7 @@ msgstr "出於安全原因，您不能在一起合併超過 3 聯繫人.如果�
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.identity_check_wizard
 msgid "Forgot password?"
-msgstr ""
+msgstr "忘記密碼？"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__form
@@ -17604,7 +17604,7 @@ msgstr "處理員工的午餐訂單"
 #: model_terms:res.partner,website_description:base.res_partner_3
 #: model_terms:res.partner,website_description:base.res_partner_4
 msgid "Happy to be Sponsor"
-msgstr ""
+msgstr "很高興成為贊助商"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hw_escpos
@@ -17634,7 +17634,7 @@ msgstr "頁首邊距"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_company__company_details
 msgid "Header text displayed at the top of all reports."
-msgstr ""
+msgstr "顯示在所有報告頂部的標題文字"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_Q
@@ -19044,6 +19044,8 @@ msgid ""
 "Invalid server name !\n"
 " %s"
 msgstr ""
+"伺服器名稱無效！\n"
+" %s"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -19807,7 +19809,7 @@ msgstr "執行設定引導"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__layout_background
 msgid "Layout Background"
-msgstr ""
+msgstr "格式背景"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__address_format
@@ -19975,7 +19977,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__link_field_id
 #: model:ir.model.fields,field_description:base.field_ir_cron__link_field_id
 msgid "Link Field"
-msgstr ""
+msgstr "連結欄位"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_link_tracker
@@ -20038,7 +20040,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_website_live_chat
 #: model:ir.module.module,shortdesc:base.module_im_livechat
 msgid "Live Chat"
-msgstr "線上聊天"
+msgstr "線上客服"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_currency_rate_live
@@ -20232,7 +20234,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mail_plugin
 msgid "Mail Plugin"
-msgstr ""
+msgstr "郵件插件"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_mail_server
@@ -23025,7 +23027,7 @@ msgstr "Odoo幫助您輕鬆追蹤與供應商相關的所有活動。"
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_form
 msgid "Odoo helps you track all activities related to your contacts."
-msgstr ""
+msgstr "Odoo 可幫助您跟踪與您的聯繫人相關的所有活動。"
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0
@@ -23670,7 +23672,7 @@ msgstr "出向郵件伺服器"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_microsoft_calendar
 msgid "Outlook Calendar"
-msgstr ""
+msgstr "Outlook 行事曆"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_paperformat__dpi
@@ -24862,7 +24864,7 @@ msgstr "潛在客戶"
 msgid ""
 "Provide the field used to link the newly created record on the record used "
 "by the server action."
-msgstr ""
+msgstr "提供用於鏈接服務器操作使用的記錄上新創建的記錄的字段。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mail_mobile
@@ -25973,7 +25975,7 @@ msgstr "SSL/TLS"
 #. module: base
 #: model_terms:res.company,invoice_terms_html:base.main_company
 msgid "STANDARD TERMS AND CONDITIONS OF SALE"
-msgstr ""
+msgstr "標准銷售條款和條件"
 
 #. module: base
 #: model:res.country,name:base.bl
@@ -26394,7 +26396,7 @@ msgstr "安全"
 #: code:addons/base/models/res_users.py:0
 #, python-format
 msgid "Security Control"
-msgstr ""
+msgstr "資訊安全控制"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_mail_server_form
@@ -26699,6 +26701,8 @@ msgid ""
 "Server replied with following exception:\n"
 " %s"
 msgstr ""
+"伺服器回覆以下異常：\n"
+" %s"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_timesheet_margin
@@ -28042,7 +28046,7 @@ msgid ""
 "these were drawn up after these standard terms and conditions of sale. In "
 "order to be valid, any derogation must be expressly agreed to in advance in "
 "writing."
-msgstr ""
+msgstr "客戶明確放棄其自己的標準條款和條件，即使這些是在這些標准銷售條款和條件之後製定的。為了有效，任何減損必須事先以書面形式明確同意。"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_country_code_uniq
@@ -28829,7 +28833,7 @@ msgstr "週四"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_livechat
 msgid "Ticketing, Support, Livechat"
-msgstr "工單、支援、線上聊天"
+msgstr "工單、支援、線上客服"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_slides
@@ -29207,7 +29211,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_cron_trigger
 msgid "Triggered actions"
-msgstr ""
+msgstr "觸發動作"
 
 #. module: base
 #: model:res.country,name:base.tt
@@ -30063,7 +30067,7 @@ msgstr "增值稅號碼驗證"
 #: model:ir.model.fields,field_description:base.field_res_partner__vat
 #: model:ir.model.fields,field_description:base.field_res_users__vat
 msgid "VAT/Tax ID"
-msgstr ""
+msgstr "統一編號"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity_voip
@@ -30499,7 +30503,7 @@ msgstr "網站求助台"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_livechat
 msgid "Website IM Livechat Helpdesk"
-msgstr "網站 IM 線上聊天幫助台"
+msgstr "網站 IM 線上客服服務台"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_jitsi
@@ -31065,7 +31069,7 @@ msgstr "您可以嘗試其他搜尋條件。"
 #. module: base
 #: model_terms:res.company,invoice_terms_html:base.main_company
 msgid "You should update this document to reflect your T&amp;C."
-msgstr ""
+msgstr "您應該更新此文檔以反映您的 T&amp;C。"
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0

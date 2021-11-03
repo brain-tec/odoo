@@ -22,6 +22,7 @@ var Widget = require('web.Widget');
 var _t = core._t;
 var createView = testUtils.createView;
 
+const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 const { legacyExtraNextTick, patchWithCleanup } = require("@web/../tests/helpers/utils");
 const { createWebClient, doAction } = require('@web/../tests/webclient/helpers');
 
@@ -1416,6 +1417,60 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
+        assert.expect(4);
+
+        this.data.partner.records[0].product_ids = [37];
+        this.data.partner.records[0].trululu = false;
+        this.data.partner.onchanges = {
+            trululu(record) {
+                // when trululu changes, push another record in product_ids.
+                // only push a second record once.
+                if (record.product_ids.map(command => command[1]).includes(41)) {
+                    return;
+                }
+                // copy the list to force it as different from the original
+                record.product_ids = record.product_ids.slice();
+                record.product_ids.push([4,41,false]);
+            }
+        };
+
+        this.data.product.records[0].name = 'test';
+        // This one is necessary to have a valid, rendered widget
+        this.data.product.fields.int_field = { type:"integer", string: "intField" };
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+            <form>
+                <field name="trululu"/>
+                <field name="product_ids" attrs="{'readonly': [['trululu', '=', False]]}">
+                    <tree editable="top"><field name="int_field" widget="handle" /><field name="name"/></tree>
+                </field>
+            </form>
+            `,
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+        });
+
+        for (let value of [true, false, true, false]) {
+            if (value) {
+                await testUtils.fields.many2one.clickOpenDropdown('trululu')
+                await testUtils.fields.many2one.clickHighlightedItem('trululu')
+                assert.notOk($('.o_field_one2many[name="product_ids"]').hasClass("o_readonly_modifier"), 'lines should not be readonly')
+            } else {
+                await testUtils.fields.editAndTrigger(form.$('.o_field_many2one[name="trululu"] input'), '', ['keyup'])
+                assert.ok($('.o_field_one2many[name="product_ids"]').hasClass("o_readonly_modifier"), 'lines should be readonly')
+            }
+        }
+
+        form.destroy();
+    });
+
     QUnit.test('empty fields have o_form_empty class in readonly mode', async function (assert) {
         assert.expect(8);
 
@@ -1895,9 +1950,9 @@ QUnit.module('Views', {
             willStart: function () {
                 assert.step('load '+rpcCount);
                 if (rpcCount === 2) {
-                    return $.Deferred();
+                    return new Promise(() => {});
                 }
-                return $.Deferred().resolve();
+                return Promise.resolve();
             },
         }));
 
@@ -1924,18 +1979,13 @@ QUnit.module('Views', {
         });
         assert.verifySteps(['load 1']);
 
-        await testUtils.mock.intercept(form, 'execute_action', function (ev) {
+        testUtils.mock.intercept(form, 'execute_action', function (ev) {
             ev.data.on_success();
             ev.data.on_closed();
         });
 
         await testUtils.dom.click('.o_form_statusbar button.p', form);
         assert.verifySteps(['load 2']);
-
-        testUtils.mock.intercept(form, 'execute_action', function (ev) {
-            ev.data.on_success();
-            ev.data.on_closed();
-        });
 
         await testUtils.dom.click('.o_form_statusbar button.p', form);
         assert.verifySteps(['load 3']);
@@ -3664,7 +3714,7 @@ QUnit.module('Views', {
                         }
                         assert.strictEqual(params.title, 'Invalid fields:',
                             "should have a warning with correct title");
-                        assert.strictEqual(params.message, '<ul><li>Foo</li></ul>',
+                        assert.strictEqual(params.message.toString(), '<ul><li>Foo</li></ul>',
                             "should have a warning with correct message");
                     }
                 },
@@ -11195,6 +11245,43 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('Quick Edition: Selection radio click on value', async function (assert) {
+        assert.expect(5);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="state" widget="radio"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (args.model === 'partner' && args.method === 'write') {
+                    assert.step('Write');
+                }
+                return this._super(route, args);
+            },
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, 'input[type="radio"]:eq(0):checked');
+
+        // click on the last value
+        await testUtils.dom.click(form.$('.o_radio_item .o_form_label:contains(EF)'));
+
+        // should be switched in edit mode
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsOnce(form, 'input[type="radio"]:eq(2):checked');
+
+        assert.verifySteps([], "No write RPC done");
+
+        form.destroy();
+    });
+
     QUnit.test('Quick Edition: non-editable form', async function (assert) {
         assert.expect(3);
 
@@ -11276,9 +11363,32 @@ QUnit.module('Views', {
     });
 
     QUnit.test('Quick Edition: selecting text of quick editable field', async function (assert) {
-        assert.expect(5);
+        assert.expect(8);
 
-        const MULTI_CLICK_TIME = 50;
+        const MULTI_CLICK_DELAY = 6498651354; // arbitrary large number to identify setTimeout calls
+        let quickEditCB;
+        let quickEditTimeoutId;
+        let nextId = 1;
+        const originalSetTimeout = window.setTimeout;
+        const originalClearTimeout = window.clearTimeout;
+        patchWithCleanup(window, {
+            setTimeout(fn, delay) {
+                if (delay === MULTI_CLICK_DELAY) {
+                    quickEditCB = fn;
+                    quickEditTimeoutId = `quick_edit_${nextId++}`;
+                    return quickEditTimeoutId;
+                } else {
+                    return originalSetTimeout(...arguments);
+                }
+            },
+            clearTimeout(id) {
+                if (id === quickEditTimeoutId) {
+                    quickEditCB = undefined;
+                } else {
+                    return originalClearTimeout(...arguments);
+                }
+            },
+        });
 
         const form = await createView({
             View: FormView,
@@ -11290,7 +11400,7 @@ QUnit.module('Views', {
                         <field name="display_name"/>
                     </group>
                 </form>`,
-            formMultiClickTime: MULTI_CLICK_TIME,
+            formMultiClickTime: MULTI_CLICK_DELAY,
             res_id: 1,
         });
 
@@ -11302,7 +11412,8 @@ QUnit.module('Views', {
         await range.selectNode(form.$('.o_field_widget[name="display_name"]')[0]);
         window.getSelection().addRange(range);
         await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
-        await concurrency.delay(MULTI_CLICK_TIME);
+        await testUtils.nextTick();
+        assert.strictEqual(quickEditCB, undefined, "no quickEdit callback should have been set");
         assert.containsOnce(form, '.o_form_view.o_form_readonly');
 
         // double click selecting text doesn't start quick edit
@@ -11311,7 +11422,8 @@ QUnit.module('Views', {
         range.selectNode(form.$('.o_field_widget[name="display_name"]')[0]);
         window.getSelection().addRange(range);
         await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
-        await concurrency.delay(MULTI_CLICK_TIME);
+        await testUtils.nextTick();
+        assert.strictEqual(quickEditCB, undefined, "no quickEdit callback should have been set");
         assert.containsOnce(form, '.o_form_view.o_form_readonly');
 
         // quick edit happens after timeout
@@ -11319,7 +11431,10 @@ QUnit.module('Views', {
         await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
         await testUtils.nextTick();
         assert.containsOnce(form, '.o_form_view.o_form_readonly');
-        await concurrency.delay(MULTI_CLICK_TIME);
+        assert.ok(quickEditCB, "quickEdit callback should have been set");
+        quickEditCB();
+        await testUtils.nextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(form, '.o_form_view.o_form_editable');
 
         form.destroy();

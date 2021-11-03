@@ -4,6 +4,8 @@
 # 
 # Translators:
 # Martin Trigaux, 2021
+# Ahmed Aly <ahmed.aly@datenpol.at>, 2021
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
@@ -11,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:29+0000\n"
-"Last-Translator: Martin Trigaux, 2021\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -706,6 +708,10 @@ msgid ""
 "                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
 "                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
 msgstr ""
+"<span id=\"first\" class=\"mr-1 mr-sm-2\" title=\"First slide\" aria-label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
@@ -714,6 +720,9 @@ msgid ""
 "                                            <i class=\"fa fa-arrows-alt\"/>\n"
 "                                        </span>"
 msgstr ""
+"<span id=\"fullscreen\" class=\"ml-1 ml-sm-2\" title=\"View fullscreen\" aria-label=\"Fullscreen\" role=\"button\">\n"
+"                                            <i class=\"fa fa-arrows-alt\"/>\n"
+"                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
@@ -725,6 +734,12 @@ msgid ""
 "                                            <i class=\"fa fa-search-plus\"/>\n"
 "                                        </span>"
 msgstr ""
+"<span id=\"zoomout\" class=\"d-none d-sm-inline ml-2 mr-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/>\n"
+"                                        </span>\n"
+"                                        <span id=\"zoomin\" class=\"d-none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/>\n"
+"                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
@@ -1443,7 +1458,7 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel_tag_group
 msgid "Channel/Course Groups"
-msgstr ""
+msgstr "Kanal-/Kursgruppen"
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel_tag
@@ -1558,7 +1573,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_modal_header
 #, python-format
 msgid "Close"
-msgstr "Abschliessen"
+msgstr "Abschließen"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_tag_group_view_form
@@ -1901,7 +1916,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:website_slides.slide_channel_tag_group_action
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_config_course_groups
 msgid "Course Groups"
-msgstr ""
+msgstr "Kursgruppen"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_tree
@@ -2748,7 +2763,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__has_message
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Hat eine Nachricht"
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_0_3
@@ -3496,7 +3511,7 @@ msgstr "Beliebteste Kurse"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr ""
+msgstr "Deadline für meine Aktivitäten"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
@@ -4043,7 +4058,7 @@ msgstr "Name der Frage"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__question_ids
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "Questions"
-msgstr "Fragestellungen"
+msgstr "Fragen"
 
 #. module: website_slides
 #. openerp-web

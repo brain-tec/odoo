@@ -16,6 +16,7 @@
 # Andreas Schmidt <schmigo@gmail.com>, 2021
 # Andreas Väthröder <andreas.vaethroeder@alvarium-services.de>, 2021
 # Chris Egal <sodaswed@web.de>, 2021
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
@@ -23,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Chris Egal <sodaswed@web.de>, 2021\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -910,6 +911,8 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw mr-2\"/>\n"
 "                            <b>Events</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw mr-2\"/>\n"
+"                            <b>Veranstaltungen</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -917,6 +920,8 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw mr-2\"/>\n"
 "                            <b>About us</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw mr-2\"/>\n"
+"                            <b>Über uns</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -924,6 +929,8 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw mr-2\"/>\n"
 "                            <b>Partners</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw mr-2\"/>\n"
+"                            <b>Partner</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -952,6 +959,8 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw mr-2\"/>\n"
 "                            <b>Our blog</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw mr-2\"/>\n"
+"                            <b>Unser Blog</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -959,6 +968,8 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw mr-2\"/>\n"
 "                            <b>Customers</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw mr-2\"/>\n"
+"                            <b>Kunden</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -966,16 +977,22 @@ msgid ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw mr-2\"/>\n"
 "                            <b>Products</b>"
 msgstr ""
+"<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw mr-2\"/>\n"
+"                            <b>Produkte</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid "<i class=\"s_mega_menu_thumbnails_icon fa fa-comments mr-2\"/> Contact us"
 msgstr ""
+"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments mr-2\"/> Kontaktieren "
+"Sie uns"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid "<i class=\"s_mega_menu_thumbnails_icon fa fa-cube mr-2\"/> Free returns"
 msgstr ""
+"<i class=\"s_mega_menu_thumbnails_icon fa fa-cube mr-2\"/> Kostenlose "
+"Rücksendung"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -989,6 +1006,7 @@ msgstr ""
 msgid ""
 "<i class=\"s_mega_menu_thumbnails_icon fa fa-truck mr-2\"/> Express delivery"
 msgstr ""
+"<i class=\"s_mega_menu_thumbnails_icon fa fa-truck mr-2\"/> Expresslieferung"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.list_website_pages
@@ -1927,7 +1945,7 @@ msgstr "Immer unterstrichen"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "Always Visible"
-msgstr ""
+msgstr "Immer sichtbar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -2877,7 +2895,7 @@ msgstr "Diese Seite klonen"
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 #, python-format
 msgid "Close"
-msgstr "Abschliessen"
+msgstr "Abschließen"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
@@ -3293,8 +3311,8 @@ msgid ""
 "Create your page from scratch by dragging and dropping pre-made,\n"
 "                            fully customizable building blocks."
 msgstr ""
-"Erstellen Sie Ihre Seite von Grund auf durch Ziehen und Ablegen vorgefertigter\n"
-"                            vollständig anpassbare Bausteine."
+"Erstellen Sie eine neue Website per Drag-and-Drop vorgefertigter\n"
+"                            vollständig anpassbarer Bausteine."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_uid
@@ -4543,7 +4561,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_website_visitor__create_date
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_search
 msgid "First Connection"
-msgstr ""
+msgstr "Erster Zugriff"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
@@ -4846,7 +4864,7 @@ msgstr "Gehe zu"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_view_form_extend
 msgid "Go to Page Manager"
-msgstr "Gehe zur Seitenverwaltung"
+msgstr "Zum Page Manager"
 
 #. module: website
 #. openerp-web
@@ -4855,7 +4873,7 @@ msgstr "Gehe zur Seitenverwaltung"
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 #, python-format
 msgid "Go to Website"
-msgstr "Gehe zur Website"
+msgstr "Zur Website"
 
 #. module: website
 #. openerp-web
@@ -6028,7 +6046,7 @@ msgstr "Letzte Aktion"
 #: model:ir.model.fields,field_description:website.field_website_visitor__last_connection_datetime
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_search
 msgid "Last Connection"
-msgstr "Letzte Anmeldung"
+msgstr "Letzter Zugriff"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
@@ -6329,7 +6347,7 @@ msgstr "Links zu anderen Websites"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Little Icons"
-msgstr ""
+msgstr "Kleine Symbole"
 
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_live_chat
@@ -6985,7 +7003,7 @@ msgstr "Kein Partner für diesen Besucher verlinkt"
 #: code:addons/website/static/src/components/configurator/configurator.js:0
 #, python-format
 msgid "No result found, broaden your search."
-msgstr ""
+msgstr "Kein Ergebnis gefunden, erweitern Sie Ihre Suche."
 
 #. module: website
 #. openerp-web
@@ -8479,7 +8497,7 @@ msgstr "E-Mail versenden"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 msgid "Send us a message"
-msgstr "Schreibe uns eine Nachricht"
+msgstr "Schreiben Sie uns eine Nachricht"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_ui_view__seo_name
@@ -8590,7 +8608,7 @@ msgstr ""
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_shop
 msgid "Shop"
-msgstr "Shop"
+msgstr "Geschäft"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website__auto_redirect_lang
@@ -9272,6 +9290,8 @@ msgid ""
 "The current text selection cannot be animated. Try clearing the format and "
 "try again."
 msgstr ""
+"Die aktuelle Textauswahl kann nicht animiert werden. Versuchen Sie, das "
+"Format zu löschen und versuchen Sie es erneut."
 
 #. module: website
 #. openerp-web
@@ -10340,7 +10360,7 @@ msgstr "Sichtbar für"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Visible for Everyone"
-msgstr ""
+msgstr "Für jeden sichtbar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -10377,7 +10397,7 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_track__visit_datetime
 msgid "Visit Date"
-msgstr "Besuch Datum"
+msgstr "Datum des Besuchs"
 
 #. module: website
 #. openerp-web
@@ -10907,6 +10927,8 @@ msgid ""
 "Would you like to save before being redirected? Unsaved changes will be "
 "discarded."
 msgstr ""
+"Möchten Sie speichern, bevor Sie weitergeleitet werden? Nicht gespeicherte "
+"Änderungen werden verworfen."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_blockquote
@@ -10922,6 +10944,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
 msgid "Write one or two paragraphs describing your product or services."
 msgstr ""
+"Schreiben Sie einen oder zwei Absätze, in denen Sie Ihr Produkt oder Ihre "
+"Dienstleistungen beschreiben."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text

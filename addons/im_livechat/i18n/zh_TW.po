@@ -323,7 +323,7 @@ msgstr "聊天輸入預留位置"
 msgid ""
 "Chat is private and unique between 2 persons. Group is private among invited"
 " persons. Channel can be freely joined (depending on its configuration)."
-msgstr ""
+msgstr "2 人之間的聊天是私密且獨特的。群組在受邀者之間是私人的。頻道可以自由加入（取決於其配置）。"
 
 #. module: im_livechat
 #. openerp-web
@@ -785,7 +785,7 @@ msgstr "頻道的收聽者"
 #: model:ir.ui.menu,name:im_livechat.menu_livechat_root
 #: model_terms:ir.ui.view,arch_db:im_livechat.digest_digest_view_form_inherit
 msgid "Live Chat"
-msgstr "線上聊天"
+msgstr "線上客服"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_search
@@ -800,7 +800,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:im_livechat.res_users_form_view
 #, python-format
 msgid "Livechat"
-msgstr "線上聊天"
+msgstr "線上客服"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1591,7 +1591,7 @@ msgstr "使用者"
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_res_users_settings
 msgid "User Settings"
-msgstr ""
+msgstr "使用者設定"
 
 #. module: im_livechat
 #. openerp-web
