@@ -37,6 +37,7 @@
 # Wojciech Wrzeszcz <wojciech.wrze@gmail.com>, 2020
 # Jan Dziurz <jan.dziurzynski@openglobe.pl>, 2020
 # Piotr Strębski <strebski@gmail.com>, 2021
+# Mateusz Rydzewski, 2021
 # Rafał Kozak <rafal.kozak@openglobe.pl>, 2021
 # 
 msgid ""
@@ -584,6 +585,8 @@ msgid ""
 "<strong class=\"text-center\">Scan me with your banking "
 "app.</strong><br/><br/>"
 msgstr ""
+"<strong class=\"text-center\">Przeskanuj mnie aplikacją "
+"bankową</strong><br/><br/>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -744,7 +747,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_line
 msgid "A bank statement line is a financial transaction on a bank account"
-msgstr ""
+msgstr "Linia wyciągu bankowego jest transakcją finansową na koncie bannkowym"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_journal_line
@@ -932,7 +935,7 @@ msgstr "Dziennik"
 #. module: account
 #: model:ir.model,name:account.model_report_account_report_journal
 msgid "Account Journal Report"
-msgstr ""
+msgstr "Raport dziennika"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__account_ids
@@ -1637,13 +1640,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_amount_max
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__match_amount_max
 msgid "Amount Max Parameter"
-msgstr ""
+msgstr "Kwota maksymalna"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_amount_min
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__match_amount_min
 msgid "Amount Min Parameter"
-msgstr ""
+msgstr "Kwota minimalna"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_nature
@@ -1661,13 +1664,13 @@ msgstr "Kwota zapłacona"
 #: selection:account.reconcile.model,match_nature:0
 #: selection:account.reconcile.model.template,match_nature:0
 msgid "Amount Paid/Received"
-msgstr ""
+msgstr "Kwota zapłacona/otrzymana"
 
 #. module: account
 #: selection:account.reconcile.model,match_nature:0
 #: selection:account.reconcile.model.template,match_nature:0
 msgid "Amount Received"
-msgstr ""
+msgstr "Kwota otrzymana"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_line__price_subtotal_signed
@@ -2228,7 +2231,7 @@ msgstr ""
 #. module: account
 #: model:ir.model,name:account.model_account_bank_statement_closebalance
 msgid "Bank Statement Closing Balance"
-msgstr ""
+msgstr "Saldo zamknięcia wyciągu bankowego"
 
 #. module: account
 #: model:ir.model,name:account.model_account_bank_statement_line
@@ -2306,7 +2309,7 @@ msgstr "Konto otrzymane z podatku podstawowego"
 #: code:addons/account/models/company.py:19
 #, python-format
 msgid "Based on Customer"
-msgstr ""
+msgstr "Oparte na kliencie"
 
 #. module: account
 #: selection:account.tax,tax_exigibility:0
@@ -2339,7 +2342,7 @@ msgstr "Na podstawie płatności"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Batch Payments"
-msgstr ""
+msgstr "Płatność zbiorowa"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__belongs_to_company
@@ -2728,6 +2731,8 @@ msgid ""
 "Changing your company name is not allowed once invoices have been issued for"
 " your account. Please contact us directly for this operation."
 msgstr ""
+"Zmiana nazwy firmy jest niedozwolona po wystawieniu faktury na Twoim koncie."
+" Skontaktuj się z nami bezpośrednio, aby wykonać tę operację."
 
 #. module: account
 #: code:addons/account/controllers/portal.py:108
@@ -2870,7 +2875,7 @@ msgstr "Wybierz szablon planu kont"
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_onboarding_sale_tax_form
 #: model_terms:ir.ui.view,arch_db:account.onboarding_sale_tax_step
 msgid "Choose a default sales tax for your products."
-msgstr ""
+msgstr "Wybierz domyślny podatek sprzedażowy dla Twojego produktu"
 
 #. module: account
 #. openerp-web
@@ -3004,7 +3009,7 @@ msgstr ""
 #. module: account
 #: model:ir.model,name:account.model_account_common_journal_report
 msgid "Common Journal Report"
-msgstr ""
+msgstr "Wspólny raport dziennika"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_account_common_menu
@@ -3198,7 +3203,7 @@ msgstr "Gratulacje, wszystko skończyłeś!"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_onboarding_panel
 msgid "Congratulations! You are all set."
-msgstr ""
+msgstr "Gratulacje! Wszystko gotowe."
 
 #. module: account
 #: model:ir.model,name:account.model_res_partner
@@ -3314,7 +3319,7 @@ msgstr "Utwórz korektę"
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_invoice_tree1
 msgid "Create a customer invoice"
-msgstr ""
+msgstr "Utwórz fakturę klienta"
 
 #. module: account
 #: selection:account.invoice.refund,filter_refund:0
@@ -3324,7 +3329,7 @@ msgstr "Utwórz projekt korekty"
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_journal_line
 msgid "Create a journal entry"
-msgstr ""
+msgstr "Utwórz wpis dziennika"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_group_tree
@@ -3754,7 +3759,7 @@ msgstr "Dostosuj"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_invoice_layout_step
 msgid "Customize the look of your invoices."
-msgstr ""
+msgstr "Dostosuj wygląd faktur"
 
 #. module: account
 #: model:account.incoterms,name:account.incoterm_DAF
@@ -3853,7 +3858,7 @@ msgstr "Daty"
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__day_of_the_month
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_line_tree
 msgid "Day of the month"
-msgstr ""
+msgstr "Dzień miesiąca"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term_line__day_of_the_month
@@ -4677,13 +4682,13 @@ msgstr "Rok podatkowy"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.action_account_fiscal_year_form
 msgid "Fiscal Year 2018"
-msgstr ""
+msgstr "Rok podatkowy 2018"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.actions_account_fiscal_year
 #: model:ir.model.fields,field_description:account.field_res_config_settings__group_fiscal_year
 msgid "Fiscal Years"
-msgstr ""
+msgstr "Lata podatkowe"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_financial_year_op__fiscalyear_last_day
@@ -5390,7 +5395,7 @@ msgstr "Importuj wyciągi w formacie QIF"
 #: selection:account.invoice,state:0
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "In Payment"
-msgstr ""
+msgstr "W trakcie płatności"
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:345
@@ -5554,7 +5559,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_account__internal_group
 #: model:ir.model.fields,field_description:account.field_account_account_type__internal_group
 msgid "Internal Group"
-msgstr ""
+msgstr "Grupa wewnętrzna"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move__narration
@@ -5868,7 +5873,7 @@ msgstr "Jest mniejszy niż"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__printed
 msgid "Is Printed"
-msgstr ""
+msgstr "jest wydrukowane"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__is_second_tax_price_included
@@ -5995,7 +6000,7 @@ msgstr "Zapisy księgowe"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 msgid "Journal Entries by Date"
-msgstr ""
+msgstr "Zapisy dziennika według daty"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice__move_id
@@ -6717,7 +6722,7 @@ msgstr ""
 #: code:addons/account/models/chart_template.py:934
 #, python-format
 msgid "Match existing invoices/bills."
-msgstr ""
+msgstr "Dopasuj istniejące faktury/rachunki."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__matched_credit_ids
@@ -7833,7 +7838,7 @@ msgstr "Warunki płatności: 15 dni"
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term_2months
 msgid "Payment terms: 2 Months"
-msgstr ""
+msgstr "Warunki płatności: 2 miesiące"
 
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term_net
@@ -7848,7 +7853,7 @@ msgstr "Warunki płatności: 30% zaliczki do końca następnego miesiąca"
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term_45days
 msgid "Payment terms: 45 Days"
-msgstr ""
+msgstr "Warunki płatności: 45 dni"
 
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term
@@ -8801,7 +8806,7 @@ msgstr "Podatek sprzedaży"
 #. module: account
 #: model:ir.actions.act_window,name:account.action_open_account_onboarding_sale_tax
 msgid "Sales tax"
-msgstr ""
+msgstr "Podatek sprzedaży"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice__user_id
@@ -9065,7 +9070,7 @@ msgstr "Wyślij"
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_send_wizard_form
 #: model_terms:ir.ui.view,arch_db:account.invoice_form
 msgid "Send & Print"
-msgstr ""
+msgstr "Wyślij & drukuj"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__invoice_is_email
@@ -9077,7 +9082,7 @@ msgstr "Wyślij e-mail"
 #: code:addons/account/wizard/account_invoice_send.py:76
 #, python-format
 msgid "Send Invoice"
-msgstr ""
+msgstr "Wyślij fakturę"
 
 #. module: account
 #: selection:account.abstract.payment,payment_type:0
@@ -10994,7 +10999,7 @@ msgstr "Łączna kwota"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_tax_audit_tree
 msgid "Total Base Amount"
-msgstr ""
+msgstr "Łączna kwota bazowa"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
