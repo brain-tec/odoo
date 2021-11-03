@@ -10,13 +10,14 @@
 # Martin Trigaux, 2019
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2019
 # Haojun Zou <apollo_zhj@msn.com>, 2019
-# Kim Asplund <kim.asplund@gmail.com>, 2020
 # Mikael Holm <mikael.holm@vertel.se>, 2020
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2020
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2020
 # STefan Rundgren <stefanrundgren@cellglas.com>, 2021
 # Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
+# Fredrik Arvas <fredrik.arvas@vertel.se>, 2021
 # Simon S, 2021
 # 
 msgid ""
@@ -1334,6 +1335,9 @@ msgid ""
 "stage', then an email will be sent to the customer when the task reaches "
 "this step."
 msgstr ""
+"Om den är inställd och om projektets betygsinställning är 'Betyg vid byte av"
+" etapp' skickas ett e-postmeddelande till kunden när aktiviteten når denna "
+"etapp."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__active
@@ -1978,13 +1982,13 @@ msgstr ""
 #. module: project
 #: selection:project.project,rating_status:0
 msgid "Periodical Rating"
-msgstr ""
+msgstr "Periodiskt betyg"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_project_rating_partner_stat
 #: model_terms:ir.ui.view,arch_db:project.portal_project_rating_popover
 msgid "Placeholder"
-msgstr ""
+msgstr "Platshållare"
 
 #. module: project
 #: selection:project.task,activity_state:0
@@ -2132,7 +2136,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__rating_ids
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Rating"
-msgstr ""
+msgstr "Betyg"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__rating_template_id
@@ -2147,17 +2151,17 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr ""
+msgstr "Betyg Senaste Feedback"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_image
 msgid "Rating Last Image"
-msgstr ""
+msgstr "Betyg Senaste Bild"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_value
 msgid "Rating Last Value"
-msgstr ""
+msgstr "Betyg Senaste Värde"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_request_deadline
@@ -2167,7 +2171,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_count
 msgid "Rating count"
-msgstr ""
+msgstr "Betyg Antal"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__portal_show_rating
@@ -2177,7 +2181,7 @@ msgstr ""
 #. module: project
 #: selection:project.project,rating_status:0
 msgid "Rating when changing stage"
-msgstr ""
+msgstr "Betyg vid byte av etapp"
 
 #. module: project
 #: model:mail.message.subtype,description:project.mt_task_rating
@@ -2236,7 +2240,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__rating_last_feedback
 msgid "Reason of the rating"
-msgstr ""
+msgstr "Orsaken till betyget"
 
 #. module: project
 #: model:mail.template,subject:project.mail_template_data_project_task
@@ -2275,7 +2279,7 @@ msgstr "Nekad"
 #: code:addons/project/static/src/js/project.js:74
 #, python-format
 msgid "Remove Cover Image"
-msgstr ""
+msgstr "Ta bort Omslagsbild"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_project_report
@@ -2402,7 +2406,7 @@ msgstr ""
 #: code:addons/project/static/src/js/project.js:64
 #, python-format
 msgid "Set a Cover Image"
-msgstr ""
+msgstr "Sätt En Omslagsbild"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_config_settings_action
@@ -2441,12 +2445,12 @@ msgstr ""
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:29
 #, python-format
 msgid "Specifications"
-msgstr ""
+msgstr "Specifikationer"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Split your tasks to organize your work into sub-milestones"
-msgstr ""
+msgstr "Dela upp era aktiviteter för att organisera ert arbete i delmål."
 
 #. module: project
 #: code:addons/project/controllers/portal.py:107
@@ -2787,7 +2791,7 @@ msgstr "Det saknas aktiviteter."
 #: code:addons/project/static/src/xml/project.xml:11
 #, python-format
 msgid "There is no available image to be set as cover."
-msgstr ""
+msgstr "Det finns ingen bild tillgänglig att använda som omslag."
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.rating_rating_action_view_project_rating
@@ -2945,7 +2949,7 @@ msgstr "Räknare olästa meddelanden"
 #: code:addons/project/static/src/js/project.js:72
 #, python-format
 msgid "Upload and Set"
-msgstr ""
+msgstr "Ladda upp och ställ in"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_project_rating
