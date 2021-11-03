@@ -277,6 +277,7 @@ class PosSession(models.Model):
             session.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
             if not session.config_id.cash_control:
                 session.action_pos_session_close()
+        return True
 
     def _check_pos_session_balance(self):
         for session in self:
@@ -333,7 +334,7 @@ class PosSession(models.Model):
                 # Set the uninvoiced orders' state to 'done'
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
-                self.move_id.unlink()
+                self.move_id.sudo().unlink()
         else:
             statement = self.cash_register_id
             if not self.config_id.cash_control:
