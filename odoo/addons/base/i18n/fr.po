@@ -80,8 +80,8 @@
 # Gwladys Jouble <g.jouble@vieconnect.io>, 2021
 # Vallen Delobel <edv@odoo.com>, 2021
 # Camille Dantinne <cmd@odoo.com>, 2021
+# sakodoo <sak@odoo.com>, 2021
 # Cécile Collart <cco@odoo.com>, 2021
-# Sarah Kamli <sak@odoo.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -89,7 +89,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-27 13:50+0000\n"
 "PO-Revision-Date: 2020-09-07 08:09+0000\n"
-"Last-Translator: Sarah Kamli <sak@odoo.com>, 2021\n"
+"Last-Translator: Cécile Collart <cco@odoo.com>, 2021\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -8628,22 +8628,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid ""
 "<span class=\"o_form_label o_td_label\" name=\"address_name\">\n"
-"                                <b attrs=\"{'invisible': [('company_type', '!=', 'company')]}\">Company Address</b>\n"
-"                                <b attrs=\"{'invisible': ['|', ('type', '!=', 'invoice'), ('company_type', '=', 'company')]}\">Invoice Address</b>\n"
-"                                <b attrs=\"{'invisible': ['|', ('type', '!=', 'delivery'), ('company_type', '=', 'company')]}\">Delivery Address</b>\n"
-"                                <b attrs=\"{'invisible': ['|', ('type', '!=', 'other'), ('company_type', '=', 'company')]}\">Other Address</b>\n"
-"                                <b attrs=\"{'invisible': ['|', ('type', '!=', 'private'), ('company_type', '=', 'company')]}\">Private Address</b>\n"
-"                                <b attrs=\"{'invisible': ['|', ('type', 'not in', (False, 'contact')), ('company_type', '=', 'company')]}\">Address</b>\n"
+"                                <b attrs=\"{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'contact')]}\">Company Address</b>\n"
+"                                <b attrs=\"{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'invoice')]}\">Invoice Address</b>\n"
+"                                <b attrs=\"{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'delivery')]}\">Delivery Address</b>\n"
+"                                <b attrs=\"{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'other')]}\">Other Address</b>\n"
+"                                <b attrs=\"{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'private')]}\">Private Address</b>\n"
+"                                <b attrs=\"{'invisible': ['&amp;', ('parent_id', '!=', False), ('type', '!=', False)]}\">Address</b>\n"
 "                            </span>"
 msgstr ""
-"<span class=\"o_form_label o_td_label\" name=\"address_name\">\n"
-"<b attrs=\"{'invisible': [('company_type', '!=', 'company')]}\">Adresse de l'entreprise</b>\n"
-"<b attrs=\"{'invisible': ['|', ('type', '!=', 'invoice'), ('company_type', '=', 'company')]}\">Adresse de facturation</b>\n"
-"<b attrs=\"{'invisible': ['|', ('type', '!=', 'delivery'), ('company_type', '=', 'company')]}\">Adresse de livraison</b>\n"
-"<b attrs=\"{'invisible': ['|', ('type', '!=', 'other'), ('company_type', '=', 'company')]}\">Autre adresse</b>\n"
-"<b attrs=\"{'invisible': ['|', ('type', '!=', 'private'), ('company_type', '=', 'company')]}\">Adresse privée</b>\n"
-"<b attrs=\"{'invisible': ['|', ('type', 'not in', (False, 'contact')), ('company_type', '=', 'company')]}\">Adresse</b>\n"
-"</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
@@ -28817,7 +28809,7 @@ msgstr "Url"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_country__image_url
 msgid "Url of static flag image"
-msgstr ""
+msgstr "URL de l'image de drapeau statique"
 
 #. module: base
 #: model:res.country,name:base.uy

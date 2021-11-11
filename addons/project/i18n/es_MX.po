@@ -231,8 +231,7 @@ msgstr "31"
 #, python-format
 msgid "<b>Drag &amp; drop</b> the card to change your task from stage."
 msgstr ""
-"<b>Arrastre &amp; suelte</b> la tarjeta para cambiar su tarea desde la "
-"etapa."
+"<b>Arrastre y suelte</b> la tarjeta para cambiar su tarea desde la etapa."
 
 #. module: project
 #. openerp-web
@@ -1523,7 +1522,7 @@ msgstr "CC del correo electrónico"
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_type__until
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_type__until
 msgid "End Date"
-msgstr "Fecha final"
+msgstr "Fecha de finalización"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__date_end
@@ -1547,8 +1546,8 @@ msgstr "¡Error! No puede crear una jerarquía recursiva de tareas."
 #: model:ir.model.constraint,message:project.constraint_project_project_project_date_greater
 msgid "Error! project start-date must be lower than project end-date."
 msgstr ""
-"¡Error! La fecha de inicio del proyecto debe ser anterior a la fecha final "
-"del proyecto."
+"¡Error! La fecha de inicio del proyecto debe ser anterior a la fecha de "
+"finalización del proyecto."
 
 #. module: project
 #. openerp-web
@@ -2484,7 +2483,7 @@ msgstr "Número de documentos adjuntos"
 #: model:ir.model.fields,field_description:project.field_project_project__message_has_error_counter
 #: model:ir.model.fields,field_description:project.field_project_task__message_has_error_counter
 msgid "Number of errors"
-msgstr "Numero de errores"
+msgstr "Número de errores"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__message_needaction_counter
@@ -3452,8 +3451,8 @@ msgid ""
 msgstr ""
 "Estado basado en actividades\n"
 "Vencida: ya pasó la fecha límite\n"
-"Hoy: La fecha límite es hoy\n"
-"Planificada: futuras actividades."
+"Hoy: hoy es la fecha de la actividad\n"
+"Planeada: futuras actividades."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__subtask_project_id

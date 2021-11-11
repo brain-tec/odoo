@@ -8,7 +8,6 @@
 # Mikael Holm <mikael.holm@vertel.se>, 2021
 # 03992e16f8df6e39b9d1cc0ff635887e, 2021
 # Robert Frykelius <robert.frykelius@linserv.se>, 2021
-# Kim Asplund <kim.asplund@gmail.com>, 2021
 # Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # Fredrik Arvas <fredrik.arvas@vertel.se>, 2021
 # Kristoffer Grundström <lovaren@gmail.com>, 2021
@@ -17,6 +16,7 @@
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
 # STefan Rundgren <stefanrundgren@cellglas.com>, 2021
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
 # Simon S, 2021
 # 
 msgid ""
@@ -516,7 +516,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_contact__message_bounce
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_contact_subscription__message_bounce
 msgid "Bounce"
-msgstr "Stutsa"
+msgstr "Studsa"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__bounced
@@ -620,7 +620,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_steps
 msgid "Choose"
-msgstr ""
+msgstr "Välj"
 
 #. module: mass_mailing
 #. openerp-web
@@ -675,7 +675,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_two_cols
 msgid "Column title"
-msgstr ""
+msgstr "Kolumn titel"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.unsubscribe
@@ -744,7 +744,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.layout
 msgid "Copyright &amp;copy;"
-msgstr ""
+msgstr "Copyright &amp;copy;"
 
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__message_bounce
@@ -2492,7 +2492,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:mailing.list,toast_content:mass_mailing.mailing_list_data
 msgid "Thanks for subscribing!"
-msgstr ""
+msgstr "Tack för att du prenumererar!"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_paragraph
@@ -2630,7 +2630,7 @@ msgstr "Typ av undantagsaktivitet i posten"
 #: model:ir.model,name:mass_mailing.model_utm_campaign
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__campaign_id
 msgid "UTM Campaign"
-msgstr ""
+msgstr "UTM Kampanj"
 
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_mailing__medium_id

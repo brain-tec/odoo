@@ -18,6 +18,7 @@
 # Susanna Pujol, 2020
 # Carles Antoli <carlesantoli@hotmail.com>, 2021
 # Quim - eccit <quim@eccit.com>, 2021
+# Camille Dantinne <cmd@odoo.com>, 2021
 # jabelchi, 2021
 # 
 msgid ""
@@ -263,6 +264,44 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Benvolgut\n"
+"        % if object.partner_id.parent_id:\n"
+"            ${object.partner_id.name} (${object.partner_id.parent_id.name}),\n"
+"        % else:\n"
+"            ${object.partner_id.name},\n"
+"        % endif\n"
+"        <br/><br/>\n"
+"        Aquí està la seva\n"
+"        % if object.name:\n"
+"            factura <strong>${object.name}</strong>\n"
+"        % else:\n"
+"            factura\n"
+"        %endif\n"
+"        % if object.invoice_origin:\n"
+"            (amb referència: ${object.invoice_origin})\n"
+"        % endif\n"
+"        amb l'import total de <strong>${format_amount(object.amount_total, object.currency_id)}</strong>\n"
+"        de ${object.company_id.name}.\n"
+"        % if object.payment_state in ('paid', 'in_payment'):\n"
+"            Aquesta factura ja està pagada.\n"
+"        % else:\n"
+"            Siusplau, remeti el pagament tan aviat com pugui.\n"
+"            % if object.payment_reference:\n"
+"                <br/><br/>\n"
+"                Utilitzi la següent referència per al seu pagament: <strong>${object.payment_reference}</strong>.\n"
+"            % endif\n"
+"        % endif\n"
+"        <br/><br/>\n"
+"        No dubti en contactar-nos si tingués alguna pregunta.\n"
+"        % if object.invoice_user_id.signature:\n"
+"            <br/>\n"
+"            ${object.invoice_user_id.signature | safe}\n"
+"        % endif\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_home_menu_invoice
@@ -2968,7 +3007,7 @@ msgstr ""
 #. module: account
 #: model:ir.model,name:account.model_cash_box_out
 msgid "Cash Box Out"
-msgstr ""
+msgstr "Sortida de caixa"
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -3142,7 +3181,7 @@ msgstr "Plantilles de pla comptable"
 #: model_terms:ir.ui.view,arch_db:account.onboarding_chart_of_account_step
 #, python-format
 msgid "Chart of Accounts"
-msgstr "Resum de comptes"
+msgstr "Pla comptable"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_chart_template_form
@@ -4368,7 +4407,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__default_account_id
 msgid "Default Account"
-msgstr ""
+msgstr "Compte per defecte"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__default_account_type
@@ -4474,6 +4513,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Define the smallest coinage of the currency used to pay by cash"
 msgstr ""
+"Definiu la unitat de moneda més petita de la divisa utilitzada per a pagar "
+"en efectiu"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_fiscal_year_step
@@ -7360,7 +7401,7 @@ msgstr "Registrar una nota interna"
 #: code:addons/account/static/src/js/tours/account.js:0
 #, python-format
 msgid "Looks good. Let's continue."
-msgstr ""
+msgstr "Sembla bé. Continuem."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_invoice_layout_step
@@ -9531,7 +9572,7 @@ msgstr "Parts reconciliades"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Record transactions in foreign currencies"
-msgstr ""
+msgstr "Registrar transaccions en moneda estrangera "
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -10087,7 +10128,7 @@ msgstr "Guardar com a nova plantilla"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Save this page and come back here to set up the feature."
-msgstr ""
+msgstr "Guardeu aquesta pàgina i torneu per a configurar la característica."
 
 #. module: account
 #: code:addons/account/models/account_payment.py:0
@@ -11008,7 +11049,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.cash_box_out_form
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_form
 msgid "Take Money In/Out"
-msgstr ""
+msgstr "Posar o treure diners"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_common_journal_report__target_move

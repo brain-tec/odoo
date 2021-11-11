@@ -277,6 +277,7 @@ class PosSession(models.Model):
             session.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
             if not session.config_id.cash_control:
                 session.action_pos_session_close()
+        return True
 
     def _check_pos_session_balance(self):
         for session in self:
@@ -333,7 +334,7 @@ class PosSession(models.Model):
                 # Set the uninvoiced orders' state to 'done'
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
-                self.move_id.unlink()
+                self.move_id.sudo().unlink()
         else:
             statement = self.cash_register_id
             if not self.config_id.cash_control:
@@ -553,11 +554,11 @@ class PosSession(models.Model):
                     exp_key = move.product_id._get_product_accounts()['expense']
                     out_key = move.product_id.categ_id.property_stock_account_output_categ_id
                     amount = -sum(move.stock_valuation_layer_ids.mapped('value'))
-                    stock_expense[exp_key] = self._update_amounts(stock_expense[exp_key], {'amount': amount}, move.picking_id.date)
+                    stock_expense[exp_key] = self._update_amounts(stock_expense[exp_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
                     if move.location_id.usage == 'customer':
-                        stock_return[out_key] = self._update_amounts(stock_return[out_key], {'amount': amount}, move.picking_id.date)
+                        stock_return[out_key] = self._update_amounts(stock_return[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
                     else:
-                        stock_output[out_key] = self._update_amounts(stock_output[out_key], {'amount': amount}, move.picking_id.date)
+                        stock_output[out_key] = self._update_amounts(stock_output[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
         MoveLine = self.env['account.move.line'].with_context(check_move_validity=False)
 
         data.update({

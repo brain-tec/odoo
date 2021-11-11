@@ -53,12 +53,12 @@
 # Gilles Mangin <gilles.mangin@phidias.fr>, 2020
 # guillaume bauer <guillaume.bauer@syentys.fr>, 2020
 # Arnaud Willem <contact@arnaud-willem.eu>, 2020
-# Cécile Collart <cco@odoo.com>, 2020
 # Yael Terrettaz <yael.terrettaz@camptocamp.com>, 2021
 # Anthony Chaussin <chaussin.anthony@gmail.com>, 2021
 # Christophe Ricevuto <cri@nalios.be>, 2021
 # Alexis de Lattre <alexis@via.ecp.fr>, 2021
 # qdelcourte <delcourte.quentin@hotmail.com>, 2021
+# Cécile Collart <cco@odoo.com>, 2021
 # Thomas Deleval <thd@odoo.com>, 2021
 # 
 msgid ""
@@ -506,7 +506,7 @@ msgstr "<span>Attribuer numéro de série</span>"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_move_operations
 msgid "<span>Clear All</span>"
-msgstr ""
+msgstr "<span>Effacer tout</span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_lot_label
@@ -1317,7 +1317,7 @@ msgstr "Choisir la date"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_move_operations
 msgid "Clear Lines"
-msgstr ""
+msgstr "Effacer les lignes"
 
 #. module: stock
 #. openerp-web
@@ -1877,10 +1877,10 @@ msgstr "Routes par défaut à travers l'entrepôt"
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint
 msgid ""
 "Define a minimum stock rule so that Odoo creates automatically requests for "
-"quotations or draft manufacturing orders to resupply your stock."
+"quotations or confirmed manufacturing orders to resupply your stock."
 msgstr ""
-"Définissez une règle de stock minimum pour qu'Odoo crée automatiquement des "
-"demandes de prix ou des ordres de fabrication pour réassortir votre stock."
+"Définissez un règle de stock minimum afin qu' Odoo crée automatiquement des "
+"achats ou des ordres de fabrications pour réapprovisionner  votre stock"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_warehouse_form
@@ -7093,8 +7093,8 @@ msgid ""
 "better solution could be to archive the product and create a new one "
 "instead."
 msgstr ""
-"Ce produit a été utilisé dans au moins un mouvement de stock. Il n'est pas "
-"conseillé de changer le type de produit car cela peut entraîner des "
+"Ce produit a été utilisé dans au moins un mouvement d'inventaire. Il n'est "
+"pas conseillé de changer le type de produit car cela peut entraîner des "
 "incohérences. Une meilleure solution pourrait consister à archiver le "
 "produit et à en créer un nouveau à la place."
 

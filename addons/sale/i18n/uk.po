@@ -626,7 +626,7 @@ msgstr "<span class=\"o_form_label\">Електронний лист підтв�
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Down Payments</span>"
-msgstr "<span class=\"o_form_label\">Завантажити платежі</span>"
+msgstr "<span class=\"o_form_label\">Авансові платежі</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -2750,8 +2750,7 @@ msgstr "Онлайн-підпис"
 #: code:addons/sale/models/sale.py:0
 #, python-format
 msgid "Only draft orders can be marked as sent directly."
-msgstr ""
-"Лише чернетки замовлень можуть позначатися як надіслати безпосередньо."
+msgstr "Лише чернетки замовлень можуть позначатися як надіслані."
 
 #. module: sale
 #: model:ir.model.constraint,message:sale.constraint_product_attribute_custom_value_sol_custom_value_unique
@@ -3079,7 +3078,7 @@ msgstr "Товар"
 #. module: sale
 #: model:ir.model,name:sale.model_product_attribute_custom_value
 msgid "Product Attribute Custom Value"
-msgstr "Власне значення атрибуту товару"
+msgstr "Кастомне значення атрибуту товару"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -3748,7 +3747,7 @@ msgstr "Встановіть значення за замовчуванням д
 #: code:addons/sale/static/src/js/sale.js:0
 #, python-format
 msgid "Set an invoicing target: "
-msgstr "Встановити ціль рахунків:"
+msgstr "Встановіть ціль рахунків:"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -3831,7 +3830,7 @@ msgstr "Підписано"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__signed_on
 msgid "Signed On"
-msgstr "Підписано на"
+msgstr "Підписано"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__sales_count
@@ -4357,7 +4356,7 @@ msgstr "Всього з податками"
 #: model:ir.model.fields,field_description:sale.field_product_product__service_type
 #: model:ir.model.fields,field_description:sale.field_product_template__service_type
 msgid "Track Service"
-msgstr "Відслідковувати послугу"
+msgstr "Стежити за послугою"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__transaction_ids
@@ -4600,7 +4599,7 @@ msgid ""
 "You can select all orders and invoice them in batch,<br>\n"
 "                or check every order and invoice them one by one."
 msgstr ""
-"Ви можете вибирати всі замовлення та виставляти рахунки в пакеті,<br>\n"
+"Ви можете вибирати всі замовлення та виставляти рахунки групою,<br>\n"
 "                або перевіряти кожне замовлення та виставляти рахунки один за одним."
 
 #. module: sale

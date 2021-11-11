@@ -7,11 +7,11 @@
 # Martin Trigaux, 2021
 # Robin Chatfield <robin.chatfield@gmail.com>, 2021
 # lasch a <bmail440@gmail.com>, 2021
-# Kim Asplund <kim.asplund@gmail.com>, 2021
 # fah_odoo <fah@odoo.com>, 2021
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
 # Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
 # Simon S, 2021
 # 
 msgid ""
@@ -114,6 +114,9 @@ msgid ""
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
+"En lagringsbar produkt är en produkt som du hanterar lager för. Inventer appen måste installeras.\n"
+"En förbrukningsvara är en produkt för vilken lager inte hanteras.\n"
+"En tjänst är en icke-materiell produkt du tillhandahåller."
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
@@ -538,7 +541,7 @@ msgstr ""
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__product_packaging
 msgid "Package"
-msgstr "Emballage"
+msgstr "Förpackning"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__default_picking_policy
@@ -726,7 +729,7 @@ msgstr "Lagerpåfyllnadsrapport"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_rule
 msgid "Stock Rule"
-msgstr ""
+msgstr "Lagerregel"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_rules_report
