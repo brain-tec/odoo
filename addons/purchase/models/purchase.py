@@ -372,7 +372,7 @@ class PurchaseOrder(models.Model):
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
             'default_composition_mode': 'comment',
-            'custom_layout': "mail.mail_notification_paynow",
+            'default_email_layout_xmlid': "mail.mail_notification_paynow",
             'force_email': True,
             'mark_rfq_as_sent': True,
         })
@@ -716,8 +716,9 @@ class PurchaseOrder(models.Model):
                 self.id,
                 force_send=True,
                 raise_exception=False,
+                email_layout_xmlid="mail.mail_notification_paynow",
                 email_values={'email_to': self.env.user.email, 'recipient_ids': []},
-                notif_layout="mail.mail_notification_paynow")
+            )
             return {'toast_message': escape(_("A sample email has been sent to %s.", self.env.user.email))}
 
     def _send_reminder_open_composer(self,template_id):
@@ -735,7 +736,7 @@ class PurchaseOrder(models.Model):
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
             'default_composition_mode': 'comment',
-            'custom_layout': "mail.mail_notification_paynow",
+            'default_email_layout_xmlid': "mail.mail_notification_paynow",
             'force_email': True,
             'mark_rfq_as_sent': True,
         })
@@ -1068,10 +1069,9 @@ class PurchaseOrderLine(models.Model):
         """
         date_order = po.date_order if po else self.order_id.date_order
         if date_order:
-            date_planned = date_order + relativedelta(days=seller.delay if seller else 0)
+            return date_order + relativedelta(days=seller.delay if seller else 0)
         else:
-            date_planned = datetime.today() + relativedelta(days=seller.delay if seller else 0)
-        return self._convert_to_middle_of_day(date_planned)
+            return datetime.today() + relativedelta(days=seller.delay if seller else 0)
 
     @api.depends('product_id', 'date_order')
     def _compute_analytic_id_and_tag_ids(self):
