@@ -455,10 +455,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # determine the chain of fields, and make sure they are all set up
         model_name = self.model_name
         for name in self.related:
-            try:
-                field = model.pool[model_name]._fields[name]
-            except:
-                raise
+            field = model.pool[model_name]._fields[name]
             if field._setup_done != 'full':
                 field.setup_full(model.env[model_name])
             model_name = field.comodel_name
