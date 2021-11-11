@@ -399,7 +399,10 @@ class Registry(Mapping):
             self._is_install = install
 
             for model in models:
-                model._auto_init()
+                try:
+                    model._auto_init()
+                except:
+                    raise
                 model.init()
 
             env['ir.model']._reflect_models(model_names)
