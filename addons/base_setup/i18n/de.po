@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2021
+# Leon Grill <leg@odoo.com>, 2021
 # Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
@@ -175,7 +176,7 @@ msgstr "Fügen Sie lustiges Feedback hinzu und motivieren Sie Ihre Mitarbeiter"
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_mail_plugin
 msgid "Allow integration with the mail plugins"
-msgstr ""
+msgstr "Integration mit den Mail-Plugins zulassen"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_calendar
@@ -406,7 +407,7 @@ msgstr "Allgemeine Einstellungen"
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Geo Localization"
-msgstr ""
+msgstr "Geo Lokalisation"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_base_geolocalize
@@ -421,7 +422,7 @@ msgstr "GeoLokalisieren Sie Ihre Partner"
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_product_images
 msgid "Get product pictures using barcode"
-msgstr ""
+msgstr "Produktbilder mit Barcode abrufen"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -510,7 +511,7 @@ msgstr "Demo Daten laden"
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Mail Plugin"
-msgstr ""
+msgstr "Mail-Plugin"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -725,4 +726,4 @@ msgstr "mehr"
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_recaptcha
 msgid "reCAPTCHA"
-msgstr ""
+msgstr "reCAPTCHA"

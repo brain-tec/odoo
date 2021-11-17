@@ -3,6 +3,7 @@
 # 	* delivery
 # 
 # Translators:
+# Thomas Deleval <thd@odoo.com>, 2021
 # Martin Trigaux, 2021
 # 
 msgid ""
@@ -24,6 +25,12 @@ msgstr ""
 #, python-format
 msgid " (Estimated Cost: %s )"
 msgstr "(Coût estimé)%s"
+
+#. module: delivery
+#: code:addons/delivery/models/sale_order.py:0
+#, python-format
+msgid "Free Shipping"
+msgstr "Livraison gratuite"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_quant_package_weight_form
@@ -220,7 +227,7 @@ msgstr "Transporteur"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_stock_package_type__shipper_package_code
 msgid "Carrier Code"
-msgstr ""
+msgstr "Code Transporteur"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_choose_delivery_carrier__carrier_id
@@ -333,7 +340,7 @@ msgstr "Assistant de sélection d'emballage"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__delivery_package_type_id
 msgid "Delivery Package Type"
-msgstr ""
+msgstr "Type de colis de livraison"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__delivery_price
@@ -380,7 +387,7 @@ msgstr "Disponibilité de destination"
 #: model:ir.model.fields,field_description:delivery.field_stock_move_line__destination_country_code
 #: model:ir.model.fields,field_description:delivery.field_stock_picking__destination_country_code
 msgid "Destination Country"
-msgstr ""
+msgstr "Pays de Destination"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__sequence
@@ -859,7 +866,7 @@ msgstr "Stock déplacer"
 #. module: delivery
 #: model:ir.model,name:delivery.model_stock_package_type
 msgid "Stock package type"
-msgstr ""
+msgstr "Stock package type"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_stock_move_line__destination_country_code
@@ -1076,6 +1083,9 @@ msgid ""
 "The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
 "\n"
 msgstr ""
+"Vous ne pouvez pas mettre à jour les couts d'expéditions sur une commande si elle a déjà été facturée!\n"
+"\n"
+"Les lignes de livraison suivantes (produit, quantité facturée et prix) ont déjà été exécutées.\n"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.delivery_tracking_url_warning_form

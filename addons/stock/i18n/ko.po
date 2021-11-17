@@ -2018,8 +2018,8 @@ msgstr "창고를 통한 기본 경로"
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint
 msgid ""
 "Define a minimum stock rule so that Odoo creates automatically requests for "
-"quotations or draft manufacturing orders to resupply your stock."
-msgstr "Odoo가 자동으로 견적 요청 또는 제조 주문 초안을 작성하여 재고를 다시 공급하도록 최소 재고 규칙을 정의하십시오."
+"quotations or confirmed manufacturing orders to resupply your stock."
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_warehouse_form
@@ -6631,7 +6631,8 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"Serial number (%s) is not located in %s, but is located in location(s): %s. "
+"Serial number (%s) is not located in %s, but is located in location(s): %s.\n"
+"\n"
 "Please correct this to prevent inconsistent data."
 msgstr ""
 
@@ -6639,7 +6640,8 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"Serial number (%s) is not located in %s, but is located in location(s): %s. "
+"Serial number (%s) is not located in %s, but is located in location(s): %s.\n"
+"\n"
 "Source location for this move will be changed to %s"
 msgstr ""
 
@@ -7350,7 +7352,7 @@ msgstr ""
 msgid ""
 "The Serial Number (%s) is already used in these location(s): %s.\n"
 "\n"
-"Is this expected? For example this can occur if a delivery operation is validated before its corresponding receipt operation is validated. In this case the issue will be solved automatically once all steps are completed. Otherwise, the serial numbershould be corrected to prevent inconsistent data."
+"Is this expected? For example this can occur if a delivery operation is validated before its corresponding receipt operation is validated. In this case the issue will be solved automatically once all steps are completed. Otherwise, the serial number should be corrected to prevent inconsistent data."
 msgstr ""
 
 #. module: stock
@@ -8543,12 +8545,10 @@ msgstr "선별을 하지 않으면 초기 수요를 변결할 수 있습니다. 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_min_qty
 msgid ""
-"When the virtual stock equals to or goes below the Min Quantity specified "
-"for this field, Odoo generates a procurement to bring the forecasted "
-"quantity to the Max Quantity."
-msgstr ""
-"가상 재고가 이 필드에 지정된 최소 수량과 같거나 이보다 낮을 경우, Odoo는 예측 수량을 최대 수량으로 가져 오기 위해 조달을 "
-"생성합니다."
+"When the virtual stock goes below the Min Quantity specified for this field,"
+" Odoo generates a procurement to bring the forecasted quantity to the Max "
+"Quantity."
+msgstr "가상 재고가 이 필드에 지정된 최소 수량보다 낮아지면 Odoo는 예측 수량을 최대 수량으로 가져 오는 조달을 생성합니다."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_max_qty

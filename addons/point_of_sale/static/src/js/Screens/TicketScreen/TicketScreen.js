@@ -1,6 +1,7 @@
 odoo.define('point_of_sale.TicketScreen', function (require) {
     'use strict';
 
+    const { useState } = owl.hooks;
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
@@ -32,6 +33,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 triggerAtInput: 'update-selected-orderline',
             });
             this._state = this.env.pos.TICKET_SCREEN_STATE;
+            this.state = useState({
+                showSearchBar: !this.env.isMobile,
+            });
             const defaultUIState = this.props.reuseSavedUIState
                 ? this._state.ui
                 : {
@@ -545,6 +549,8 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     args: [idsNotInCache],
                     context: this.env.session.user_context,
                 });
+                // Check for missing products and load them in the PoS
+                await this.env.pos._loadMissingProducts(fetchedOrders);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `_onInvoiceOrder`.
                 fetchedOrders.forEach((order) => {

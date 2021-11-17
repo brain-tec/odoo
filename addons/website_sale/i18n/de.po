@@ -54,7 +54,7 @@ msgstr "&amp; Versand"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
 msgid "'. Showing results for '"
-msgstr ""
+msgstr "'. Es werden Ergebnisse angezeigt für '"
 
 #. module: website_sale
 #: model:product.template.attribute.value,name:website_sale.product_1_attribute_3_value_1
@@ -607,7 +607,7 @@ msgstr "In den Warenkorb"
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_banner
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_borderless_2
 msgid "Add to Cart <i class=\"fa fa-fw fa-shopping-cart\"/>"
-msgstr ""
+msgstr "Zu Einkaufswagen hinzufügen <i class=\"fa fa-fw fa-shopping-cart\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.wizard_checkout
@@ -931,6 +931,9 @@ msgid ""
 "Changing company name is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
+"Eine Änderung des Firmennamens ist nicht mehr möglich, sobald Dokumente für "
+"Ihr Konto ausgestellt wurden. Bitte wenden Sie sich für diesen Vorgang "
+"direkt an uns."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
@@ -1861,7 +1864,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
 msgid "No results"
-msgstr ""
+msgstr "Keine Treffer"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -1871,14 +1874,14 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
 msgid "No results found for '"
-msgstr ""
+msgstr "Kein Treffer gefunden für '"
 
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_utils.xml:0
 #, python-format
 msgid "No results found. Please try another search."
-msgstr ""
+msgstr "Kein Treffer, versuchen Sie es mit einem anderen Stichwort."
 
 #. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__res_config_settings__sale_delivery_settings__none
@@ -2187,6 +2190,7 @@ msgid "Previous Week"
 msgstr "Vorherige Woche"
 
 #. module: website_sale
+#. openerp-web
 #: code:addons/website_sale/controllers/backend.py:0
 #, python-format
 msgid "Previous Year"
@@ -3250,7 +3254,7 @@ msgstr "Warenkorb anzeigen ("
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_banner
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_centered
 msgid "View Product"
-msgstr ""
+msgstr "Produkt ansehen"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_attribute__visibility
@@ -3634,7 +3638,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "⌙ Position"
-msgstr ""
+msgstr "â Position"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options

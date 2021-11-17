@@ -166,6 +166,7 @@ var SnippetEditor = Widget.extend({
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
         this.displayOverlayOptions = false;
+        this._$toolbarContainer = $();
 
         this.__isStarted = new Promise(resolve => {
             this.__isStartedResolveFunc = resolve;
@@ -455,6 +456,10 @@ var SnippetEditor = Widget.extend({
         // and would thus produce a deadlock. Also, this awaited
         // 'activate_snippet' call would allow to remove the 'toggleOverlay' and
         // 'toggleOptions' calls at the start of this function.
+        // TODO also to be checked: this not being awaited, the DOM is removed
+        // first, destroying the related editors and not calling onBlur... to
+        // check if this has always been like this or not and this should be
+        // unit tested.
         const parent = this.$target[0].parentElement;
         const nextSibling = this.$target[0].nextElementSibling;
         const previousSibling = this.$target[0].previousElementSibling;
@@ -486,6 +491,7 @@ var SnippetEditor = Widget.extend({
                         return el.matches(this.layoutElementsSelector);
                     });
                 return isEmpty && !$el.hasClass('oe_structure') && !$el.hasClass('oe_unremovable')
+                    && !$el.parent().hasClass('carousel-item')
                     && (!editor || editor.isTargetParentEditable);
             };
 
@@ -567,7 +573,7 @@ var SnippetEditor = Widget.extend({
         }
 
         if (this.areOptionsShown() === show) {
-            return this._customize$Elements;
+            return null;
         }
 
         // All onFocus before all ui updates as the onFocus of an option might
@@ -833,6 +839,7 @@ var SnippetEditor = Widget.extend({
      * @private
      */
     _onDragAndDropStart: function () {
+        this.options.wysiwyg.odooEditor.observerUnactive('dragAndDropMoveSnippet');
         this.trigger_up('drag_and_drop_start');
         this.options.wysiwyg.odooEditor.automaticStepUnactive();
         var self = this;
@@ -946,6 +953,7 @@ var SnippetEditor = Widget.extend({
         this.$body.removeClass('move-important');
         $clone.remove();
 
+        this.options.wysiwyg.odooEditor.observerActive('dragAndDropMoveSnippet');
         if (this.dropped) {
             if (prev) {
                 this.$target.insertAfter(prev);
@@ -1782,7 +1790,8 @@ var SnippetsMenu = Widget.extend({
                 }
                 resolve(null);
             }).then(async editorToEnable => {
-                if (ifInactiveOptions && this._enabledEditorHierarchy.includes(editorToEnable)) {
+                if (!previewMode && this._enabledEditorHierarchy[0] === editorToEnable
+                        || ifInactiveOptions && this._enabledEditorHierarchy.includes(editorToEnable)) {
                     return editorToEnable;
                 }
 
@@ -1799,8 +1808,14 @@ var SnippetsMenu = Widget.extend({
                 for (let i = this.snippetEditors.length; i--;) {
                     const editor = this.snippetEditors[i];
                     editor.toggleOverlay(false, previewMode);
-                    if (!previewMode && !this._enabledEditorHierarchy.includes(editor)) {
-                        await editor.toggleOptions(false);
+                    if (!previewMode) {
+                        const wasShown = !!await editor.toggleOptions(false);
+                        if (wasShown) {
+                            this._updateRightPanelContent({
+                                content: [],
+                                tab: this.tabs.BLOCKS,
+                            });
+                        }
                     }
                 }
                 // ... then enable the right editor or look if some have been
@@ -2316,8 +2331,13 @@ var SnippetsMenu = Widget.extend({
                     return dragSnip;
                 },
                 start: function () {
+                    const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
+                    self._mutex.exec(() => prom);
+
                     self.options.wysiwyg.odooEditor.automaticStepUnactive();
+
                     self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
+                    self.options.wysiwyg.odooEditor.observerUnactive('dragAndDropCreateSnippet');
 
                     dropped = false;
                     $snippet = $(this);
@@ -2389,9 +2409,6 @@ var SnippetsMenu = Widget.extend({
                     self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function () {
                         self.$el.trigger('scroll');
                     });
-
-                    const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
-                    self._mutex.exec(() => prom);
                 },
                 stop: async function (ev, ui) {
                     const doc = self.options.wysiwyg.odooEditor.document;
@@ -2421,24 +2438,35 @@ var SnippetsMenu = Widget.extend({
 
                     self.getEditableArea().find('.oe_drop_zone').droppable('destroy').remove();
 
+                    let $toInsertParent;
+                    let prev;
+                    let next;
                     if (dropped) {
-                        var prev = $toInsert.first()[0].previousSibling;
-                        var next = $toInsert.last()[0].nextSibling;
+                        prev = $toInsert.first()[0].previousSibling;
+                        next = $toInsert.last()[0].nextSibling;
 
+                        $toInsertParent = $toInsert.parent();
+                        $toInsert.detach();
+                    }
+
+                    self.options.wysiwyg.odooEditor.observerActive('dragAndDropCreateSnippet');
+
+                    if (dropped) {
                         if (prev) {
-                            $toInsert.detach();
                             $toInsert.insertAfter(prev);
                         } else if (next) {
-                            $toInsert.detach();
                             $toInsert.insertBefore(next);
                         } else {
-                            var $parent = $toInsert.parent();
-                            $toInsert.detach();
-                            $parent.prepend($toInsert);
+                            $toInsertParent.prepend($toInsert);
                         }
 
                         var $target = $toInsert;
+
+
+                        self.options.wysiwyg.odooEditor.observerUnactive('dragAndDropCreateSnippet');
                         await self._scrollToSnippet($target, self.$scrollable);
+                        self.options.wysiwyg.odooEditor.observerActive('dragAndDropCreateSnippet');
+
 
                         _.defer(async function () {
                             // Free the mutex now to allow following operations
@@ -2522,6 +2550,7 @@ var SnippetsMenu = Widget.extend({
 
         this._currentTab = tab || this.tabs.BLOCKS;
 
+        this._$toolbarContainer[0].remove();
         if (content) {
             while (this.customizePanel.firstChild) {
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
@@ -3158,12 +3187,12 @@ var SnippetsMenu = Widget.extend({
         this.options.wysiwyg.toolbar.el.classList.remove('oe-floating');
 
         // Create toolbar custom container.
-        const $customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
+        this._$toolbarContainer = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
 
-        $customizeBlock.append($title);
-        $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
-        $(this.customizePanel).append($customizeBlock);
+        this._$toolbarContainer.append($title);
+        this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
+        $(this.customizePanel).append(this._$toolbarContainer);
 
         // Create table-options custom container.
         const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));

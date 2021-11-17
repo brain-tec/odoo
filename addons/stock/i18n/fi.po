@@ -23,7 +23,6 @@
 # Jussi Lehto <jussi@gulfeo.com>, 2021
 # Svante Suominen <svante.suominen@web-veistamo.fi>, 2021
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2021
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2021
 # Atte Isopuro <atte.isopuro@web-veistamo.fi>, 2021
 # Marko Happonen <marko.happonen@sprintit.fi>, 2021
 # Veikko Väätäjä <veikko.vaataja@gmail.com>, 2021
@@ -31,6 +30,7 @@
 # Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2021
 # Jussi Heikkilä <jussi.heikkila@panimo.com>, 2021
 # Mikko Virtanen <mikko.virtanen2013@gmail.com>, 2021
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2021
 # 
 msgid ""
 msgstr ""
@@ -38,7 +38,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Mikko Virtanen <mikko.virtanen2013@gmail.com>, 2021\n"
+"Last-Translator: Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2021\n"
 "Language-Team: Finnish (https://www.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2022,11 +2022,8 @@ msgstr "Oletusreitit varaston läpi"
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint
 msgid ""
 "Define a minimum stock rule so that Odoo creates automatically requests for "
-"quotations or draft manufacturing orders to resupply your stock."
+"quotations or confirmed manufacturing orders to resupply your stock."
 msgstr ""
-"Määritä varaston vähimmäissääntö, jotta Odoo luo automaattisesti "
-"tarjouspyynnöt tai valmistusmääräysluonnokset varastosi uudelleen "
-"toimittamiseksi."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_warehouse_form
@@ -6674,7 +6671,8 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"Serial number (%s) is not located in %s, but is located in location(s): %s. "
+"Serial number (%s) is not located in %s, but is located in location(s): %s.\n"
+"\n"
 "Please correct this to prevent inconsistent data."
 msgstr ""
 
@@ -6682,7 +6680,8 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"Serial number (%s) is not located in %s, but is located in location(s): %s. "
+"Serial number (%s) is not located in %s, but is located in location(s): %s.\n"
+"\n"
 "Source location for this move will be changed to %s"
 msgstr ""
 
@@ -7408,7 +7407,7 @@ msgstr ""
 msgid ""
 "The Serial Number (%s) is already used in these location(s): %s.\n"
 "\n"
-"Is this expected? For example this can occur if a delivery operation is validated before its corresponding receipt operation is validated. In this case the issue will be solved automatically once all steps are completed. Otherwise, the serial numbershould be corrected to prevent inconsistent data."
+"Is this expected? For example this can occur if a delivery operation is validated before its corresponding receipt operation is validated. In this case the issue will be solved automatically once all steps are completed. Otherwise, the serial number should be corrected to prevent inconsistent data."
 msgstr ""
 
 #. module: stock
@@ -8625,10 +8624,12 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_min_qty
 msgid ""
-"When the virtual stock equals to or goes below the Min Quantity specified "
-"for this field, Odoo generates a procurement to bring the forecasted "
-"quantity to the Max Quantity."
+"When the virtual stock goes below the Min Quantity specified for this field,"
+" Odoo generates a procurement to bring the forecasted quantity to the Max "
+"Quantity."
 msgstr ""
+"Kun virtuaalivarasto alittaa tälle kentälle määritellyn minimimäärän, Odoo "
+"luo hankinnan palauttaakseen ennustetun määrän maksimimääräksi."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_max_qty

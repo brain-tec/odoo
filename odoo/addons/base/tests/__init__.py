@@ -13,6 +13,7 @@ from . import test_float
 from . import test_func
 from . import test_http_case
 from . import test_image
+from . import test_avatar_mixin
 from . import test_ir_actions
 from . import test_ir_attachment
 from . import test_ir_cron
@@ -42,6 +43,7 @@ from . import test_res_partner
 from . import test_res_partner_bank
 from . import test_res_users
 from . import test_reports
+from . import test_test_suite
 from . import test_tests_tags
 from . import test_form_create
 from . import test_cloc
