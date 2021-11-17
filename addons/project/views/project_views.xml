@@ -289,35 +289,35 @@
                                 </span>
                             </div>
                         </button>
-                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', ('rating_active', '=', False), ('rating_percentage_satisfaction', '&lt;', 66.6)]}" class="oe_stat_button oe_read_only text-success" icon="fa-smile-o" groups="project.group_project_rating">
+                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', ('rating_active', '=', False), ('rating_percentage_satisfaction', '&lt;', 66.6)]}" class="oe_stat_button oe_read_only" icon="fa-smile-o text-success" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
                                     <field name="rating_percentage_satisfaction" nolabel="1"/>
                                     %
                                 </span>
-                                <span class="o_stat_text text-secondary">
+                                <span class="o_stat_text">
                                     Satisfaction
                                 </span>
                             </div>
                         </button>
-                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', '|', ('rating_active', '=', False), ('rating_percentage_satisfaction', '>=', 66.6), ('rating_percentage_satisfaction', '&lt;', 33.3)]}" class="oe_stat_button oe_read_only text-warning" icon="fa-meh-o" groups="project.group_project_rating">
+                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', '|', ('rating_active', '=', False), ('rating_percentage_satisfaction', '&gt;=', 66.6), ('rating_percentage_satisfaction', '&lt;', 33.3)]}" class="oe_stat_button oe_read_only" icon="fa-meh-o text-warning" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
                                     <field name="rating_percentage_satisfaction" nolabel="1"/>
                                     %
                                 </span>
-                                <span class="o_stat_text text-secondary">
+                                <span class="o_stat_text">
                                     Satisfaction
                                 </span>
                             </div>
                         </button>
-                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', ('rating_active', '=', False), '|', ('rating_percentage_satisfaction', '>=', 33.3),  ('rating_percentage_satisfaction', '&lt;', 0)]}" class="oe_stat_button oe_read_only text-danger" icon="fa-frown-o" groups="project.group_project_rating">
+                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', ('rating_active', '=', False), '|', ('rating_percentage_satisfaction', '&gt;=', 33.3),  ('rating_percentage_satisfaction', '&lt;', 0)]}" class="oe_stat_button oe_read_only" icon="fa-frown-o text-danger" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
                                     <field name="rating_percentage_satisfaction" nolabel="1"/>
                                     %
                                 </span>
-                                <span class="o_stat_text text-secondary">
+                                <span class="o_stat_text">
                                     Satisfaction
                                 </span>
                             </div>
@@ -658,10 +658,10 @@
                                                 <div t-if="record.alias_name.value and record.alias_domain.value" class="text-muted">
                                                     <span class="fa fa-envelope-o mr-2" aria-label="Domain Alias" title="Domain Alias"></span><t t-esc="record.alias_id.value"/>
                                                 </div>
-                                                <div t-if="record.rating_active.raw_value" class="text-muted" title="Percentage of happy ratings over the past 30 days." groups="project.group_project_rating">
+                                                <div t-if="record.rating_active.raw_value" class="text-muted" groups="project.group_project_rating">
                                                     <b>
                                                         <t t-if="record.rating_percentage_satisfaction.value != -1">
-                                                            <i class="fa fa-smile-o" role="img" aria-label="Percentage of satisfaction" title="Percentage of satisfaction"/> <t t-esc="record.rating_percentage_satisfaction.value"/>%
+                                                            <i class="fa fa-smile-o" role="img" aria-label="Average satisfaction rate for the last 30 days." title="Average satisfaction rate for the last 30 days."/> <t t-esc="record.rating_percentage_satisfaction.value"/>%
                                                         </t>
                                                     </b>
                                                 </div>
@@ -809,7 +809,7 @@
                     <field name="rating_count" invisible="1"/>
                     <header>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
-                            attrs="{'invisible' : &quot;[('user_ids', '=', uid)]&quot;}" data-hotkey="q"/>
+                            attrs="{'invisible' : &quot;[('user_ids', 'in', uid)]&quot;}" data-hotkey="q"/>
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]}"/>
                     </header>
                     <div class="alert alert-info oe_edit_only mb-0" role="status" attrs="{'invisible': ['|', ('recurring_task', '=', False), ('recurrence_id', '=', False)]}">
@@ -823,22 +823,22 @@
                         <span id="button_worksheet" invisible="1"/>
                         <!-- Dummy tag used to organize buttons, englobing the 3 buttons modifies the width of the button -->
                         <span id="start_rating_buttons" invisible="1"/>
-                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '&lt;', 66.6)]}" class="oe_stat_button text-success" icon="fa-smile-o" groups="project.group_project_rating">
+                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '&lt;', 66.6)]}" class="oe_stat_button" icon="fa-smile-o text-success" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="rating_percentage_satisfaction" widget="integer"/>%</span>
-                                <span class="o_stat_text text-secondary">Satisfaction</span>
+                                <span class="o_stat_text">Satisfaction</span>
                             </div>
                         </button>
-                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', '|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '>=', 66.6), ('rating_percentage_satisfaction', '&lt;', 33.3)]}" class="oe_stat_button text-warning" icon="fa-meh-o" groups="project.group_project_rating">
+                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', '|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '&gt;=', 66.6), ('rating_percentage_satisfaction', '&lt;', 33.3)]}" class="oe_stat_button" icon="fa-meh-o text-warning" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="rating_percentage_satisfaction" widget="integer"/>%</span>
-                                <span class="o_stat_text text-secondary">Satisfaction</span>
+                                <span class="o_stat_text">Satisfaction</span>
                             </div>
                         </button>
-                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', '|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '>=', 33.3),  ('rating_percentage_satisfaction', '&lt;', 0)]}" class="oe_stat_button text-danger" icon="fa-frown-o" groups="project.group_project_rating">
+                        <button name="action_open_ratings" type="object" attrs="{'invisible': ['|', '|', ('rating_count', '=', 0), ('rating_percentage_satisfaction', '&gt;=', 33.3),  ('rating_percentage_satisfaction', '&lt;', 0)]}" class="oe_stat_button" icon="fa-frown-o text-danger" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="rating_percentage_satisfaction" widget="integer"/>%</span>
-                                <span class="o_stat_text text-secondary">Satisfaction</span>
+                                <span class="o_stat_text">Satisfaction</span>
                             </div>
                         </button>
                         <!-- Dummy tag used to organize buttons -->
@@ -1436,7 +1436,7 @@
             action="rating_rating_action_project_report"
             parent="menu_project_report"
             groups="project.group_project_rating"
-            sequence="40"/>
+            sequence="51"/>
 
         <record id="project_view_kanban_inherit_project" model="ir.ui.view">
             <field name="name">project.kanban.inherit.project</field>

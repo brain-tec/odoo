@@ -133,7 +133,7 @@
     <!-- Search Bar input-group template -->
     <template id="search" name="Search Box">
         <t t-call="website.website_search_box_input">
-            <t t-set="_form_classes" t-valuef="o_wsale_products_searchbar_form w-100 w-md-auto mr-auto mb-2"/>
+            <t t-set="_form_classes" t-valuef="o_wsale_products_searchbar_form w-100 w-md-auto mr-auto mb-2 flex-grow-1"/>
             <t t-set="_classes" t-valuef=" "/>
             <t t-set="search_type" t-valuef="products"/>
             <t t-set="action" t-value="keep('/shop'+ ('/category/'+slug(category)) if category else None, search=0) or '/shop'"/>
@@ -160,33 +160,37 @@
 
         <t t-set="combination_info" t-value="product._get_combination_info(only_template=True, add_qty=add_qty or 1, pricelist=pricelist)"/>
 
-        <form action="/shop/cart/update" method="post" class="card oe_product_cart"
+        <form action="/shop/cart/update" method="post" class="oe_product_cart h-100 d-flex"
             t-att-data-publish="product.website_published and 'on' or 'off'"
             itemscope="itemscope" itemtype="http://schema.org/Product">
-            <a class="o_product_link css_editable_mode_hidden" t-att-href="product_href"/>
-            <div class="card-body p-1 oe_product_image">
+            <!-- <a class="o_product_link css_editable_mode_hidden" t-att-href="product_href"/> -->
+            <div class="oe_product_image position-relative h-100 flex-grow-0">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                <a t-att-href="product_href" class="d-block h-100" itemprop="url">
+                <a t-att-href="product_href" class="oe_product_image_link d-block h-100 position-relative" itemprop="url" contenteditable="false">
                     <t t-set="image_holder" t-value="product._get_image_holder()"/>
                     <span t-field="image_holder.image_1920"
-                        t-options="{'widget': 'image', 'preview_image': 'image_1024' if product_image_big else 'image_256', 'itemprop': 'image'}"
-                        class="d-flex h-100 justify-content-center align-items-center"/>
+                        t-options="{'widget': 'image', 'preview_image': 'image_1024', 'itemprop': 'image', 'class': 'h-100 w-100'}"
+                        class="oe_product_image_img_wrapper d-flex h-100 justify-content-center align-items-center position-absolute"/>
                 </a>
             </div>
-            <div class="card-body p-0 o_wsale_product_information">
-                <div class="p-2 o_wsale_product_information_text">
-                    <h6 class="o_wsale_products_item_title mb-1">
+            <div class="o_wsale_product_information position-relative d-flex flex-column flex-grow-1 flex-shrink-1">
+                <div class="o_wsale_product_information_text flex-grow-1">
+                    <h6 class="o_wsale_products_item_title mb-2">
                         <a class="text-primary text-decoration-none" itemprop="name" t-att-href="product_href" t-att-content="product.name" t-field="product.name" />
                         <a role="button" t-if="not product.website_published" t-att-href="product_href" class="btn btn-sm btn-danger" title="This product is unpublished.">Unpublished</a>
                     </h6>
-                    <div class="product_price mb-1" itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer">
-                        <span class="h5" t-if="combination_info['price']" t-esc="combination_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
-                        <del t-attf-class="text-danger ml-1 h6 {{'' if combination_info['has_discounted_price'] else 'd-none'}}" style="white-space: nowrap;" t-esc="combination_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}" />
+                </div>
+                <div class="o_wsale_product_sub d-flex justify-content-between align-items-end pb-1">
+                    <div class="o_wsale_product_btn"/>
+                    <div class="product_price" itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer">
+                        <del t-attf-class="text-muted mr-1 h6 mb-0 {{'' if combination_info['has_discounted_price'] else 'd-none'}}" style="white-space: nowrap;">
+                            <em class="small" t-esc="combination_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}" />
+                        </del>
+                        <span class="h6 mb-0" t-if="combination_info['price']" t-esc="combination_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
                         <span itemprop="price" style="display:none;" t-esc="combination_info['price']" />
                         <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name" />
                     </div>
                 </div>
-                <div class="o_wsale_product_btn pl-2"/>
             </div>
             <t t-set="bg_color" t-value="td_product['ribbon']['bg_color'] or ''"/>
             <t t-set="text_color" t-value="td_product['ribbon']['text_color']"/>
@@ -196,8 +200,8 @@
     </template>
 
     <template id="products_description" inherit_id="website_sale.products_item" active="False" customize_show="True" name="Product Description">
-        <xpath expr="//*[hasclass('product_price')]" position="after">
-            <div class="oe_subdescription" contenteditable="false">
+        <xpath expr="//*[hasclass('o_wsale_products_item_title')]" position="after">
+            <div class="oe_subdescription mb-2 text-muted small" contenteditable="false">
                 <div itemprop="description" t-field="product.description_sale"/>
             </div>
         </xpath>
@@ -296,10 +300,8 @@
                                                         t-att-rowspan="td_product['y'] != 1 and td_product['y']"
                                                         t-attf-class="oe_product"
                                                         t-att-data-ribbon-id="td_product['ribbon'].id">
-                                                        <div t-attf-class="o_wsale_product_grid_wrapper o_wsale_product_grid_wrapper_#{td_product['x']}_#{td_product['y']}">
-                                                            <t t-call="website_sale.products_item">
-                                                                <t t-set="product_image_big" t-value="td_product['x'] + td_product['y'] &gt; 2"/>
-                                                            </t>
+                                                        <div t-attf-class="o_wsale_product_grid_wrapper position-relative h-100 o_wsale_product_grid_wrapper_#{td_product['x']}_#{td_product['y']}">
+                                                            <t t-call="website_sale.products_item"/>
                                                         </div>
                                                     </td>
                                                 </t>
@@ -333,10 +335,44 @@
         </t>
     </template>
 
-    <!-- (Option) Products: Enable image full for all products : Images Full -->
-    <template id="products_images_full" name="Images Full" inherit_id="website_sale.products" active="False" customize_show="True">
-        <xpath expr="//t[@t-foreach='tr_product']//td" position="attributes">
-            <attribute name="t-attf-class" add="oe_image_full" separator=" "/>
+    <!-- (Option) Products: Enable "Card" or "Thumbnails" designs -->
+    <template id="products_design_card" name="Card Design" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_design_cards" separator=" "/>
+        </xpath>
+    </template>
+    <template id="products_design_thumbs" name="Thumbnails Design" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_design_thumbs" separator=" "/>
+        </xpath>
+    </template>
+    <template id="products_design_grid" name="Grid Design" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_design_grid" separator=" "/>
+        </xpath>
+    </template>
+
+    <!-- (Options) Products: Define products' default image ratio -->
+    <template id="products_thumb_4_3" name="thumb_4_3" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_context_thumb_4_3" separator=" "/>
+        </xpath>
+    </template>
+    <template id="products_thumb_4_5" name="thumb_4_5" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_context_thumb_4_5" separator=" "/>
+        </xpath>
+    </template>
+    <template id="products_thumb_2_3" name="thumb_2_3" inherit_id="website_sale.products" active="False">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_context_thumb_2_3" separator=" "/>
+        </xpath>
+    </template>
+
+    <!-- (Option) Products: Define products' images filling mode -->
+    <template id="products_thumb_cover" name="thumb_cover" inherit_id="website_sale.products" active="True">
+        <xpath expr="//table" position="attributes">
+            <attribute name="class" add="o_wsale_context_thumb_cover" separator=" "/>
         </xpath>
     </template>
 
@@ -370,7 +406,7 @@
 
     <template id="add_grid_or_list_option" inherit_id="website_sale.products" active="True" customize_show="True" name="Grid or List button">
         <xpath expr="//div[hasclass('products_header')]" position="inside">
-            <div class="btn-group btn-group-toggle ml-3 mb-2 d-none d-sm-inline-flex o_wsale_apply_layout" data-toggle="buttons">
+            <div class="btn-group btn-group-toggle ml-3 mb-2 d-inline-flex o_wsale_apply_layout" data-toggle="buttons">
                 <label t-attf-class="btn btn-light border-0 #{'active' if layout_mode != 'list' else None} fa fa-th-large o_wsale_apply_grid" title="Grid">
                     <input type="radio" name="wsale_products_layout" t-att-checked="'checked' if layout_mode != 'list' else None"/>
                 </label>
@@ -396,7 +432,7 @@
     </template>
 
     <template id="categorie_link" name="Category Link">
-        <div t-attf-onclick="location.href='#{keep('/shop/category/' + slug(c), category=0)}';" class="custom-control custom-radio mb-1 d-inline-block">
+        <div t-att-data-link-href="keep('/shop/category/' + slug(c), category=0)" class="custom-control custom-radio mb-1 d-inline-block">
             <input type="radio" style="pointer-events:none;" class="custom-control-input" t-att-id="c.id" t-att-value="c.id" t-att-checked="'true' if c.id == category.id else None"/>
             <label class="custom-control-label font-weight-normal" t-att-for="c.id" t-field="c.name"/>
         </div>
@@ -415,11 +451,11 @@
                 Show categories
             </button>
             <div class="collapse d-lg-block" id="wsale_products_categories_collapse">
-                <strong class="o_categories_collapse_title text-uppercase">Categories</strong>
+                <h6 class="o_categories_collapse_title"><b>Categories</b></h6>
                 <ul class="nav flex-column my-2">
                     <form>
                         <li class="nav-item">
-                            <div t-attf-onclick="location.href='#{keep('/shop', category=0)}';" class="custom-control custom-radio mb-1 d-inline-block">
+                            <div t-att-data-link-href="keep('/shop', category=0)" class="custom-control custom-radio mb-1 d-inline-block">
                                 <input type="radio" style="pointer-events:none;" class="custom-control-input o_not_editable" t-att-id="all_products" t-att-value="all_products" t-att-checked="'true' if not category else None"/>
                                 <label class="custom-control-label font-weight-normal" t-att-for="all_products">All Products</label>
                             </div>
@@ -438,7 +474,7 @@
             <t t-set="children" t-value="not search and c.child_id or c.child_id.filtered(lambda c: c.id in search_categories_ids)"/>
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <t t-call="website_sale.categorie_link"/>
-                <i t-if="children" t-attf-class="fa #{'fa-chevron-down' if c.id in category.parents_and_self.ids else 'fa-chevron-right'}"
+                <i t-if="children" t-attf-class="fa #{'fa-angle-down' if c.id in category.parents_and_self.ids else 'fa-angle-right'}"
                     t-attf-title="#{'Unfold' if c.id in category.parents_and_self.ids else 'Fold'}"
                     t-attf-aria-label="#{'Unfold' if c.id in category.parents_and_self.ids else 'Fold'}" role="img"/>
                 <ul t-if="children" class="nav flex-column w-100 nav-hierarchy" t-att-style="'display:block;' if c.id in category.parents_and_self.ids else 'display:none;'">
@@ -468,19 +504,19 @@
                 data-target="#wsale_products_attributes_collapse" data-toggle="collapse">
                 Show options
             </button>
-            <div class="collapse d-lg-block" id="wsale_products_attributes_collapse">
+            <div class="collapse d-lg-block mb-lg-3" id="wsale_products_attributes_collapse">
                 <form class="js_attributes mb-2" method="get">
                     <input t-if="category" type="hidden" name="category" t-att-value="category.id" />
                     <input type="hidden" name="search" t-att-value="search" />
-                    <a t-if="attrib_values" t-att-href="keep('/shop'+ ('/category/'+slug(category)) if category else None, attrib=0)" class="btn btn-link p-0">
-                        <i class="fa fa-eraser mr-1"/><u>Clear filters</u>
+                    <a t-if="attrib_values" t-att-href="keep('/shop'+ ('/category/'+slug(category)) if category else None, attrib=0)" class="btn btn-light btn-block py-0 mb-2">
+                        <small><b>Clear Filters</b></small><b class="pull-right">&#215;</b>
                     </a>
                     <ul class="nav flex-column">
                         <t t-foreach="attributes" t-as="a">
                             <li t-if="a.value_ids and len(a.value_ids) &gt; 1" class="nav-item mb-2">
-                                <div>
-                                    <strong t-field="a.name" class="o_products_attributes_title text-uppercase d-block my-2"/>
-                                </div>
+                                <h6>
+                                    <b t-field="a.name" class="o_products_attributes_title"/>
+                                </h6>
                                 <t t-if="a.display_type == 'select'">
                                     <select class="custom-select css_attribute_select" name="attrib">
                                         <option value="" />
@@ -520,7 +556,9 @@
         </xpath>
         <xpath expr="//div[@id='products_grid_before']" position="inside">
             <div t-if="available_min_price != available_max_price" id="o_wsale_price_range_option">
-                <label>Price</label>
+                <label class="m-0 h6 o_products_attributes_title">
+                    <b>Price Range</b>
+                </label>
                 <input type="range" multiple="multiple" class="custom-range range-with-input"
                        t-att-data-currency="pricelist.currency_id.symbol"
                        t-att-data-currency-position="pricelist.currency_id.position"
@@ -583,16 +621,16 @@
                                     <t t-set="_classes" t-value="'mb-2 mr-sm-2'"/>
                                 </t>
                                 <t t-call="website_sale.pricelist_list">
-                                    <t t-set="_classes" t-valuef="ml-1 mb-2 float-right"/>
+                                    <t t-set="_classes" t-valuef="ml-2 mb-2 float-right"/>
                                 </t>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mt-md-4">
+                        <div class="col-lg-6 mt-lg-4">
                             <t t-call="website_sale.shop_product_carousel"/>
                         </div>
-                        <div class="col-md-6 mt-md-4" id="product_details">
+                        <div class="col-lg-6 mt-md-4" id="product_details">
                             <h1 itemprop="name" t-field="product.name">Product Name</h1>
                             <span itemprop="url" style="display:none;" t-esc="product.website_url"/>
                             <t t-if="is_view_active('website_sale.product_comment')">
@@ -624,13 +662,22 @@
                                             <t t-set="parent_combination" t-value="None" />
                                         </t>
                                         <t t-else="">
-                                            <ul class="d-none js_add_cart_variants" t-att-data-attribute_exclusions="{'exclusions: []'}"/>
+                                            <ul class="d-none js_add_cart_variants mb-0" t-att-data-attribute_exclusions="{'exclusions: []'}"/>
                                         </t>
                                     </t>
                                     <p t-if="True" class="css_not_available_msg alert alert-warning">This combination does not exist.</p>
-                                    <div id="add_to_cart_wrap" class="d-inline">
-                                        <a role="button" id="add_to_cart" class="btn btn-primary btn-lg js_check_product a-submit my-1 mr-1 px-5 font-weight-bold flex-grow-1" href="#"><i class="fa fa-shopping-cart mr-2"/>ADD TO CART</a>
-                                        <div id="product_option_block" class="d-inline-block align-middle"/>
+                                    <div id="o_wsale_cta_wrapper" class="d-flex flex-wrap align-items-center">
+                                        <t t-set="hasQuantities" t-value="false"/>
+                                        <t t-set="hasBuyNow" t-value="false"/>
+                                        <t t-set="ctaSizeBig" t-value="not hasQuantities or not hasBuyNow"/>
+
+                                        <div id="add_to_cart_wrap" class="d-inline-flex align-items-center mb-2 mr-auto">
+                                            <a role="button" id="add_to_cart" t-attf-class="btn btn-primary js_check_product a-submit flex-grow-1 #{'btn-lg' if ctaSizeBig else ''}" href="#">
+                                                <i class="fa fa-shopping-cart mr-2"/>
+                                                <span style="font-weight: bold">ADD TO CART</span>
+                                            </a>
+                                        </div>
+                                        <div id="product_option_block" class="d-flex flex-wrap w-100"/>
                                     </div>
                                 </div>
                             </form>
@@ -651,7 +698,7 @@
                                     </t>
                                 </table>
                             </div>
-                            <div id="o_product_terms_and_share">
+                            <div id="o_product_terms_and_share" class="d-flex justify-content-between flex-column flex-md-row align-items-md-end mb-3">
                             </div>
                         </div>
                     </div>
@@ -664,8 +711,8 @@
 
     <template id="product_custom_text" inherit_id="website_sale.product" active="True" customize_show="True" name="Terms and Conditions" priority="21">
         <xpath expr="//div[@id='o_product_terms_and_share']" position="inside">
-            <p class="text-muted h6 mt-3">
-                <a href="/terms" class="text-muted">Terms and Conditions</a><br/>
+            <p class="text-muted mb-0">
+                <a href="/terms" class="text-muted"><u>Terms and Conditions</u></a><br/>
                 30-day money-back guarantee<br/>
                 Shipping: 2-3 Business Days
             </p>
@@ -674,7 +721,7 @@
 
     <template id="product_share_buttons" inherit_id="website_sale.product" active="True" customize_show="True" name="Share Buttons" priority="22">
         <xpath expr="//div[@id='o_product_terms_and_share']" position="inside">
-            <div class="h4 mt-3 d-flex justify-content-end" contenteditable="false">
+            <div class="h4 mt-3 mb-0 d-flex justify-content-md-end flex-shrink-0" contenteditable="false">
                 <t t-snippet-call="website.s_share">
                     <t t-set="_exclude_share_links" t-value="['whatsapp', 'linkedin']"/>
                     <t t-set="_no_title" t-value="True"/>
@@ -748,16 +795,19 @@
     </template>
 
     <template id="product_quantity" inherit_id="website_sale.product" customize_show="True" name="Select Quantity">
+        <xpath expr="//t[@t-set='hasQuantities']" position="attributes">
+            <attribute name="t-value" remove="false" add="true" separator=" "/>
+        </xpath>
       <xpath expr="//div[@id='add_to_cart_wrap']" position="before">
-        <div class="css_quantity input-group d-inline-flex mr-2 my-1 align-middle" contenteditable="false">
+        <div t-attf-class="css_quantity input-group d-inline-flex mr-2 mb-2 align-middle #{'input-group-lg' if ctaSizeBig else ''}" contenteditable="false">
             <div class="input-group-prepend">
-                <a t-attf-href="#" class="btn btn-primary js_add_cart_json" aria-label="Remove one" title="Remove one">
+                <a t-attf-href="#" class="btn btn-link js_add_cart_json" aria-label="Remove one" title="Remove one">
                     <i class="fa fa-minus"></i>
                 </a>
             </div>
-            <input type="text" class="form-control quantity" data-min="1" name="add_qty" t-att-value="add_qty or 1"/>
+            <input type="text" class="form-control quantity text-center" data-min="1" name="add_qty" t-att-value="add_qty or 1"/>
             <div class="input-group-append">
-                <a t-attf-href="#" class="btn btn-primary float_left js_add_cart_json" aria-label="Add one" title="Add one">
+                <a t-attf-href="#" class="btn btn-link float_left js_add_cart_json" aria-label="Add one" title="Add one">
                     <i class="fa fa-plus"></i>
                 </a>
             </div>
@@ -766,8 +816,14 @@
     </template>
 
     <template id="product_buy_now" inherit_id="website_sale.product" active="False" customize_show="True" name="Buy Now Button">
+        <xpath expr="//t[@t-set='hasBuyNow']" position="attributes">
+            <attribute name="t-value" remove="false" add="true" separator=" "/>
+        </xpath>
         <xpath expr="//a[@id='add_to_cart']" position="after">
-            <a role="button" class="btn btn-outline-primary btn-lg px-5 font-weight-bold o_we_buy_now" href="#"><i class="fa fa-bolt mr-2"/>BUY NOW</a>
+            <a role="button" t-attf-class="btn btn-outline-primary o_we_buy_now ml-1 #{'btn-lg' if ctaSizeBig else ''}" href="#">
+                <i class="fa fa-bolt mr-2"/>
+                <span style="font-weight:bold">BUY NOW</span>
+            </a>
         </xpath>
     </template>
 
@@ -807,7 +863,7 @@
             <t t-if="not product.has_dynamic_attributes() and not product._has_no_variant_attributes() and not product._has_is_custom_values()">
                 <t t-set="attribute_exclusions" t-value="product._get_attribute_exclusions()"/>
                 <t t-set="filtered_sorted_variants" t-value="product._get_possible_variants_sorted()"/>
-                <ul class="d-none js_add_cart_variants" t-att-data-attribute_exclusions="json.dumps(attribute_exclusions)"/>
+                <ul class="d-none js_add_cart_variants mb-0" t-att-data-attribute_exclusions="json.dumps(attribute_exclusions)"/>
                 <input type="hidden" class="product_template_id" t-att-value="product.id"/>
                 <input type="hidden" t-if="len(filtered_sorted_variants) == 1" class="product_id" name="product_id" t-att-value="filtered_sorted_variants[0].id"/>
                 <t t-if="len(filtered_sorted_variants) &gt; 1">
@@ -1912,8 +1968,7 @@
     <template id="carousel_product_indicators_bottom" inherit_id="website_sale.shop_product_carousel" name="Carousel Product Indicators Bottom">
         <xpath expr="//div[hasclass('o_carousel_product_outer')]" position="after">
             <t t-call="website_sale.carousel_product_indicators">
-                <t t-set="indicators_div_class" t-value="'pr-1 overflow-hidden'"/>
-                <t t-set="indicators_list_class" t-value="'p-1'"/>
+                <t t-set="indicators_div_class" t-value="'pt-2 overflow-hidden'"/>
             </t>
         </xpath>
     </template>
@@ -1925,17 +1980,20 @@
             </t>
         </xpath>
         <xpath expr="//div[@id='o-carousel-product']" position="attributes">
-            <attribute name="class" add="o_carousel_product_left_indicators d-flex pb-1" separator=" "/>
+            <attribute name="class" add="o_carousel_product_left_indicators d-flex" separator=" "/>
         </xpath>
     </template>
 
     <template id="carousel_product_indicators" name="Carousel Product">
         <div t-ignore="True" t-attf-class="o_carousel_product_indicators {{indicators_div_class}}">
-            <ol t-if="len(product_images) > 1" t-attf-class="carousel-indicators {{indicators_list_class}} position-static mx-auto my-0 text-left">
-                <t t-foreach="product_images" t-as="product_image"><li t-attf-class="m-1 mb-2 align-top {{'active' if product_image_first else ''}}" data-target="#o-carousel-product" t-att-data-slide-to="str(product_image_index)">
-                    <div t-field="product_image.image_128" t-options='{"widget": "image", "qweb_img_responsive": False, "class": "o_image_64_contain", "alt-field": "name"}'/>
-                    <i t-if="product_image._name == 'product.image' and product_image.embed_code" class="fa fa-2x fa-play-circle o_product_video_thumb"/>
-                </li></t>
+            <ol t-if="len(product_images) > 1" t-attf-class="carousel-indicators {{indicators_list_class}} position-static pt-2 pt-lg-0 mx-auto my-0 text-left">
+                <li t-foreach="product_images" t-as="product_image"
+                    t-attf-class="align-top position-relative {{'active' if product_image_first else ''}}"
+                    data-target="#o-carousel-product"
+                    t-att-data-slide-to="str(product_image_index)">
+                    <div t-field="product_image.image_128" t-options='{"widget": "image", "qweb_img_responsive": False, "class": "o_image_64_cover", "alt-field": "name"}'/>
+                    <i t-if="product_image._name == 'product.image' and product_image.embed_code" class="fa fa-2x fa-play-circle o_product_video_thumb bg-black-50 text-center"/>
+                </li>
             </ol>
         </div>
     </template>
@@ -1984,5 +2042,16 @@
         <xpath expr="//html" position="before">
             <t t-set="html_data" t-value="dict(html_data, **{'data-add2cart-redirect': website.cart_add_on_page and '1' or '0'})"/>
         </xpath>
+    </template>
+
+    <template id="product_category_extra_link" name="Product Category Extra Link">
+        <button  class="btn btn-link btn-sm pr-0" disabled="disabled">
+            <t t-if="len(categories) == 1">Category:</t>
+            <t t-else="">Categories:</t>
+        </button>
+        <t t-foreach="categories" t-as="category">
+            <button class="btn btn-link btn-sm p-0" t-out="category.name"
+                t-attf-onclick="location.href='/shop/category/#{slug(category)}';return false;"/>
+        </t>
     </template>
 </odoo>

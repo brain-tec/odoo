@@ -4,8 +4,7 @@ import { browser } from "@web/core/browser/browser";
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2one, one2many } from '@mail/model/model_field';
-import { clear, unlink } from '@mail/model/model_field_command';
-import { OnChange } from '@mail/model/model_onchange';
+import { clear } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -73,7 +72,13 @@ function factory(dependencies) {
                 console.error(error);
             }
             audioElement.load();
-            audioElement.volume = this.partner && this.partner.volumeSetting ? this.partner.volumeSetting.volume : this.volume;
+            if (this.partner && this.partner.volumeSetting) {
+                audioElement.volume = this.partner.volumeSetting.volume;
+            } else if (this.guest && this.guest.volumeSetting) {
+                audioElement.volume = this.guest.volumeSetting.volume;
+            } else {
+                audioElement.volume = this.volume;
+            }
             audioElement.muted = this.messaging.rtc.currentRtcSession.isDeaf;
             // Using both autoplay and play() as safari may prevent play() outside of user interactions
             // while some browsers may not support or block autoplay.
@@ -115,16 +120,23 @@ function factory(dependencies) {
             if (this.audioElement) {
                 this.audioElement.volume = volume;
             }
-            if (!this.partner || this.isOwnSession) {
+            if (this.isOwnSession) {
                 return;
             }
-            if (this.partner.volumeSetting) {
+            if (this.partner && this.partner.volumeSetting) {
                 this.partner.volumeSetting.update({ volume });
+            }
+            if (this.guest && this.guest.volumeSetting) {
+                this.guest.volumeSetting.update({ volume });
             }
             if (this.messaging.isCurrentUserGuest) {
                 return;
             }
-            this.messaging.userSetting.saveVolumeSetting(this.partner.id, volume);
+            this.messaging.userSetting.saveVolumeSetting({
+                partnerId: this.partner && this.partner.id,
+                guestId: this.guest && this.guest.id,
+                volume,
+            });
         }
 
         /**
@@ -249,6 +261,8 @@ function factory(dependencies) {
         _computeVolume() {
             if (this.partner && this.partner.volumeSetting) {
                 return this.partner.volumeSetting.volume;
+            } else if (this.guest && this.guest.volumeSetting) {
+                return this.guest.volumeSetting.volume;
             }
             if (this.audioElement) {
                 return this.audioElement.volume;
@@ -266,15 +280,6 @@ function factory(dependencies) {
                 }
                 f();
             }, delay);
-        }
-
-        /**
-         * @private
-         */
-        _onChangeVideoStream() {
-            if (!this.videoStream) {
-                this.update({ focusingMessaging: unlink() });
-            }
         }
 
         /**
@@ -334,13 +339,8 @@ function factory(dependencies) {
         connectionState: attr({
             default: 'Waiting for the peer to send a RTC offer',
         }),
-        guest: many2one('mail.guest'),
-        /**
-         * If this field is set, this session is 'focused' which means that it will
-         * be displayed as the main session.
-         */
-        focusingMessaging: one2one('mail.messaging', {
-            inverse: 'focusedRtcSession',
+        guest: many2one('mail.guest', {
+            inverse: 'rtcSessions',
         }),
         /**
          * Id of the record on the server.
@@ -453,12 +453,6 @@ function factory(dependencies) {
             compute: '_computeVolume',
         }),
     };
-    RtcSession.onChanges = [
-        new OnChange({
-            dependencies: ['videoStream'],
-            methodName: '_onChangeVideoStream',
-        }),
-    ];
     RtcSession.identifyingFields = ['id'];
     RtcSession.modelName = 'mail.rtc_session';
 

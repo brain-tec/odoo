@@ -115,6 +115,11 @@ const Wysiwyg = Widget.extend({
                 return node.hasAttribute &&
                     (node.hasAttribute('data-target') || node.hasAttribute('data-oe-model'));
             },
+            filterMutationRecords: (records) => {
+                return records.filter((record) => {
+                    return !(record.target.classList && record.target.classList.contains('o_header_standard'))
+                })
+            },
             noScrollSelector: 'body, .note-editable, .o_content, #wrapwrap',
             commands: commands,
             plugins: options.editorPlugins,
@@ -123,7 +128,7 @@ const Wysiwyg = Widget.extend({
         const $wrapwrap = $('#wrapwrap');
         if ($wrapwrap.length) {
             $wrapwrap[0].addEventListener('scroll', this.odooEditor.multiselectionRefresh, { passive: true });
-            this.$root = $wrapwrap;
+            this.$root = this.$root || $wrapwrap;
         }
 
         if (this._peerToPeerLoading) {
@@ -206,16 +211,18 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             await this._insertSnippetMenu();
+
+            this._onBeforeUnload = (event) => {
+                if (this.isDirty()) {
+                    event.returnValue = _t('This document is not saved!');
+                }
+            };
+            window.addEventListener('beforeunload', this._onBeforeUnload);
         }
         if (this.options.getContentEditableAreas) {
             $(this.options.getContentEditableAreas()).find('*').off('mousedown mouseup click');
         }
 
-        window.onbeforeunload = (event) => {
-            if (this.isDirty()) {
-                return _t('This document is not saved!');
-            }
-        };
         // The toolbar must be configured after the snippetMenu is loaded
         // because if snippetMenu is loaded in an iframe, binding of the color
         // buttons must use the jquery loaded in that iframe. See
@@ -237,7 +244,8 @@ const Wysiwyg = Widget.extend({
             }
 
             if ($target.is(this.customizableLinksSelector) && $target.is('a') && !$target.attr('data-oe-model') && !$target.find('> [data-oe-model]').length) {
-                if (!$target.data('popover-widget-initialized')) {
+                this.linkPopover = $target.data('popover-widget-initialized');
+                if (!this.linkPopover) {
                     // TODO this code is ugly maybe the mutex should be in the
                     // editor root widget / the popover should not depend on
                     // editor panel (like originally intended but...) / ...
@@ -249,7 +257,7 @@ const Wysiwyg = Widget.extend({
                             await this.snippetsMenu._mutex.exec(() => null);
                         }
                         this.linkPopover = await weWidgets.LinkPopoverWidget.createFor(this, ev.target, { wysiwyg: this });
-                        $target.data('popover-widget-initialized', true);
+                        $target.data('popover-widget-initialized', this.linkPopover);
                     })();
                 }
                 $target.focus();
@@ -669,7 +677,7 @@ const Wysiwyg = Widget.extend({
         await this._saveViewBlocks();
 
         this.trigger_up('edition_was_stopped');
-        window.onbeforeunload = null;
+        window.removeEventListener('beforeunload', this._onBeforeUnload);
         if (reload) {
             window.location.reload();
         }
@@ -886,24 +894,30 @@ const Wysiwyg = Widget.extend({
             return;
         }
         if (this.snippetsMenu && !options.forceDialog) {
-            if (this.linkTools) {
-                this.linkTools.destroy();
-            }
             if (options.forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
+                if (!this.linkTools || ![options.link, ...wysiwygUtils.ancestors(options.link)].includes(this.linkTools.$link[0])) {
+                    this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
+                }
                 const _onMousedown = ev => {
-                    if (!ev.target.closest('.oe-toolbar') && !ev.target.closest('.ui-autocomplete')) {
+                    if (
+                        !ev.target.closest('.oe-toolbar') &&
+                        !ev.target.closest('.ui-autocomplete') &&
+                        (!this.linkTools || ![ev.target, ...wysiwygUtils.ancestors(ev.target)].includes(this.linkTools.$link[0]))
+                    ) {
                         // Destroy the link tools on click anywhere outside the
-                        // toolbar.
+                        // toolbar if the target is the orgiginal target not in the original target.
                         this.linkTools && this.linkTools.destroy();
                         this.linkTools = undefined;
                         this.odooEditor.document.removeEventListener('mousedown', _onMousedown, true);
                     }
                 };
                 this.odooEditor.document.addEventListener('mousedown', _onMousedown, true);
-                this.linkTools.appendTo(this.toolbar.$el);
+                if (!this.linkTools.$el) {
+                    this.linkTools.appendTo(this.toolbar.$el);
+                }
             } else {
+                this.linkTools.destroy();
                 this.linkTools = undefined;
             }
         } else {

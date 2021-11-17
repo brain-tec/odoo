@@ -423,7 +423,6 @@ function factory(dependencies) {
                 usePushToTalk: settings.use_push_to_talk,
                 pushToTalkKey: settings.push_to_talk_key,
                 voiceActiveDuration: settings.voice_active_duration,
-                volumeSettings: settings.volume_settings && insert(settings.volume_settings.map(volumeSetting => this.messaging.models['mail.volume_setting'].convertData(volumeSetting))),
             });
         }
 
@@ -525,8 +524,6 @@ function factory(dependencies) {
                     message.delete();
                 }
             }
-            // deleting message might have deleted notifications, force recompute
-            this.messaging.notificationGroupManager.computeGroups();
         }
 
         /**
@@ -544,7 +541,6 @@ function factory(dependencies) {
                     message.update({ author: link(this.messaging.currentPartner) });
                 }
             }
-            this.messaging.notificationGroupManager.computeGroups();
         }
 
         /**

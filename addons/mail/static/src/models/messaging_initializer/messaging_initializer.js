@@ -224,7 +224,6 @@ function factory(dependencies) {
                     message.update({ author: link(this.messaging.currentPartner) });
                 }
             }));
-            this.messaging.notificationGroupManager.computeGroups();
         }
 
         /**
@@ -253,7 +252,7 @@ function factory(dependencies) {
                     usePushToTalk: use_push_to_talk,
                     pushToTalkKey: push_to_talk_key,
                     voiceActiveDuration: voice_active_duration,
-                    volumeSettings: insert(volume_settings.map(volumeSetting => this.messaging.models['mail.volume_setting'].convertData(volumeSetting))),
+                    volumeSettings: volume_settings,
                 }),
             });
             this.messaging.discuss.update({

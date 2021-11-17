@@ -163,7 +163,7 @@ function factory(dependencies) {
                 id: sessionId,
             });
             const focusedSessionId = this.focusedRtcSession && this.focusedRtcSession.id;
-            if (!sessionId || focusedSessionId === sessionId || !rtcSession.videoStream) {
+            if (!sessionId || focusedSessionId === sessionId) {
                 this.update({ focusedRtcSession: unlink() });
                 return;
             }
@@ -304,9 +304,7 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
-        focusedRtcSession: one2one('mail.rtc_session', {
-            inverse: 'focusingMessaging',
-        }),
+        focusedRtcSession: one2one('mail.rtc_session'),
         /**
          * Mailbox History.
          */
@@ -371,11 +369,6 @@ function factory(dependencies) {
             required: true,
         }),
         messagingMenu: one2one('mail.messaging_menu', {
-            default: insertAndReplace(),
-            isCausal: true,
-            readonly: true,
-        }),
-        notificationGroupManager: one2one('mail.notification_group_manager', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
