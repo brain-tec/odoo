@@ -357,13 +357,13 @@ class MailActivity(models.Model):
                 SELECT DISTINCT activity.id, activity.res_model, activity.res_id
                 FROM "%s" activity
                 WHERE activity.id = ANY (%%(ids)s)""" % self._table, dict(ids=list(sub_ids)))
-            activities_to_check = self._cr.dictfetchall()
+            activities_to_check += self._cr.dictfetchall()
 
         activity_to_documents = {}
         for activity in activities_to_check:
             activity_to_documents.setdefault(activity['res_model'], list()).append(activity['res_id'])
 
-        allowed_ids = []
+        allowed_ids = set()
         for doc_model, doc_ids in activity_to_documents.items():
             # fall back on related document access right checks. Use the same as defined for mail.thread
             # if available; otherwise fall back on read
@@ -375,9 +375,10 @@ class MailActivity(models.Model):
             right = DocumentModel.check_access_rights(doc_operation, raise_exception=False)
             if right:
                 valid_docs = DocumentModel.browse(doc_ids)._filter_access_rules(doc_operation)
-                allowed_ids += [
+                valid_doc_ids = set(valid_docs.ids)
+                allowed_ids.update(
                     activity['id'] for activity in activities_to_check
-                    if activity['res_model'] == doc_model and activity['res_id'] in valid_docs.ids]
+                    if activity['res_model'] == doc_model and activity['res_id'] in valid_doc_ids)
 
         if count:
             return len(allowed_ids)
