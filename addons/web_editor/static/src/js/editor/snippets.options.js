@@ -7,6 +7,7 @@ const Dialog = require('web.Dialog');
 const {scrollTo} = require('web.dom');
 const rpc = require('web.rpc');
 const time = require('web.time');
+const utils = require('web.utils');
 var Widget = require('web.Widget');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 const weUtils = require('web_editor.utils');
@@ -4397,6 +4398,10 @@ registry['sizing_x'] = registry.sizing.extend({
                 this.$target.addClass('offset-lg-' + offset);
             }
         }
+        this.trigger_up('option_update', {
+            optionName: 'StepsConnector',
+            name: 'change_column_size',
+        });
         this._super.apply(this, arguments);
     },
 });
@@ -4517,6 +4522,10 @@ registry.layout_column = SnippetOptionWidget.extend({
         } else if (previousNbColumns === 0) {
             this.trigger_up('activate_snippet', {$snippet: this.$('> .row').children().first()});
         }
+        this.trigger_up('option_update', {
+            optionName: 'StepsConnector',
+            name: 'change_columns',
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -4649,6 +4658,10 @@ registry.SnippetMove = SnippetOptionWidget.extend({
                 duration: 550,
             });
         }
+        this.trigger_up('option_update', {
+            optionName: 'StepsConnector',
+            name: 'move_snippet',
+        });
     },
 });
 
@@ -5102,6 +5115,8 @@ const _addAnimatedShapeLabel = function addAnimatedShapeLabel(containerEl) {
  * Controls image width and quality.
  */
 registry.ImageOptimize = ImageHandlerOption.extend({
+    MAX_SUGGESTED_WIDTH: 1920,
+
     /**
      * @constructor
      */
@@ -5285,20 +5300,36 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      * @override
      */
     _computeMaxDisplayWidth() {
-        // TODO: read widths from computed style in case container widths are not default
-        const displayWidth = this._getImg().clientWidth;
-        // If the image is in a column, it might get bigger on smaller screens.
-        // We use col-lg for this in snippets, so they get bigger on the md breakpoint
-        if (this.$target.closest('[class*="col-lg"]').length) {
-            // container and o_container_small have maximum inner width of 690px on the md breakpoint
-            if (this.$target.closest('.container, .o_container_small').length) {
-                return Math.min(1920, Math.max(displayWidth, 690));
-            }
-            // A container-fluid's max inner width is 962px on the md breakpoint
-            return Math.min(1920, Math.max(displayWidth, 962));
+        const img = this._getImg();
+        const computedStyles = window.getComputedStyle(img);
+        const displayWidth = parseFloat(computedStyles.getPropertyValue('width'));
+        const gutterWidth = parseFloat(computedStyles.getPropertyValue('--o-grid-gutter-width')) || 30;
+
+        // For the logos we don't want to suggest a width too small.
+        if (this.$target[0].closest('nav')) {
+            return Math.round(Math.min(displayWidth * 3, this.MAX_SUGGESTED_WIDTH));
+        // If the image is in a container(-small), it might get bigger on
+        // smaller screens. So we suggest the width of the current image unless
+        // it is smaller than the size of the container on the md breapoint
+        // (which is where our bootstrap columns fallback to full container
+        // width since we only use col-lg-* in Odoo).
+        } else if (img.closest('.container, .o_container_small')) {
+            const mdContainerMaxWidth = parseFloat(computedStyles.getPropertyValue('--o-md-container-max-width')) || 720;
+            const mdContainerInnerWidth = mdContainerMaxWidth - gutterWidth;
+            return Math.round(utils.confine(displayWidth, mdContainerInnerWidth, this.MAX_SUGGESTED_WIDTH));
+        // If the image is displayed in a container-fluid, it might also get
+        // bigger on smaller screens. The same way, we suggest the width of the
+        // current image unless it is smaller than the max size of the container
+        // on the md breakpoint (which is the LG breakpoint since the container
+        // fluid is full-width).
+        } else if (img.closest('.container-fluid')) {
+            const lgBp = parseFloat(computedStyles.getPropertyValue('--breakpoint-lg')) || 992;
+            const mdContainerFluidMaxInnerWidth = lgBp - gutterWidth;
+            return Math.round(utils.confine(displayWidth, mdContainerFluidMaxInnerWidth, this.MAX_SUGGESTED_WIDTH));
         }
-        // If it's not in a col-lg, it's probably not going to change size depending on breakpoints
-        return displayWidth;
+        // If it's not in a container, it's probably not going to change size
+        // depending on breakpoints. We still keep a margin safety.
+        return Math.round(Math.min(displayWidth * 1.5, this.MAX_SUGGESTED_WIDTH));
     },
     /**
      * @override
@@ -6602,6 +6633,10 @@ registry.ContainerWidth = SnippetOptionWidget.extend({
         } else if (previewMode) {
             this.$target.addClass('o_container_preview');
         }
+        this.trigger_up('option_update', {
+            optionName: 'StepsConnector',
+            name: 'change_container_width',
+        });
     },
 });
 
