@@ -413,12 +413,14 @@
 </form>
 <t t-name="GraphView.buttons">
     <div class="btn-group" role="toolbar" aria-label="Main actions">
-        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false" data-display="static">
             Measures
         </button>
         <div class="dropdown-menu o_graph_measures_list" role="menu">
             <t t-foreach="measures" t-as="measure">
-                <a role="menuitem" href="#" class="dropdown-item" t-att-data-field="measure[0]"><t t-esc="measure[1].string"/><t t-if="measure[1].type === 'many2one'"> (count)</t></a>
+                <li class="o_menu_item" role="menuitem">
+                    <a role="menuitem" href="#" class="dropdown-item" t-att-data-field="measure[0]"><t t-esc="measure[1].string"/><t t-if="measure[1].type === 'many2one'"> (count)</t></a>
+                </li>
             </t>
             <div role="separator" class="dropdown-divider"/>
             <a role="menuitem" href="#" class="dropdown-item" data-field="__count__">Count</a>
@@ -460,7 +462,7 @@
 </div>
 <t t-name="PivotView.buttons">
     <div class="btn-group" role="toolbar" aria-label="Main actions">
-        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false" data-display="static">
             Measures
         </button>
         <div class="dropdown-menu o_pivot_measures_list" role="menu">
