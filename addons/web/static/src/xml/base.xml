@@ -418,9 +418,7 @@
         </button>
         <div class="dropdown-menu o_graph_measures_list" role="menu">
             <t t-foreach="measures" t-as="measure">
-                <li class="o_menu_item" role="menuitem">
-                    <a role="menuitem" href="#" class="dropdown-item" t-att-data-field="measure[0]"><t t-esc="measure[1].string"/><t t-if="measure[1].type === 'many2one'"> (count)</t></a>
-                </li>
+                <a role="menuitem" href="#" class="dropdown-item" t-att-data-field="measure[0]"><t t-esc="measure[1].string"/><t t-if="measure[1].type === 'many2one'"> (count)</t></a>
             </t>
             <div role="separator" class="dropdown-divider"/>
             <a role="menuitem" href="#" class="dropdown-item" data-field="__count__">Count</a>
