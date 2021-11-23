@@ -200,7 +200,7 @@ msgstr ", fällig am"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_notification_email
 msgid "-&gt;"
-msgstr ""
+msgstr "-&gt;"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_activity_assigned
@@ -866,7 +866,7 @@ msgstr "Immer erlauben"
 #: code:addons/mail/models/res_partner.py:0
 #, python-format
 msgid "An email is required for find_or_create to work"
-msgstr ""
+msgstr "Eine E-Mail wird benötigt, damit find_or_create funktioniert"
 
 #. module: mail
 #. openerp-web
@@ -1620,14 +1620,14 @@ msgstr ""
 #: code:addons/mail/models/mail_thread.py:0
 #, python-format
 msgid "Create new %(document)s by sending an email to %(email_link)s"
-msgstr ""
+msgstr "%(document)s erstellen durch E-Mail an %(email_link)s"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/components/discuss/discuss.js:0
 #, python-format
 msgid "Create or search channel..."
-msgstr ""
+msgstr "Channel erstellen oder suchen..."
 
 #. module: mail
 #. openerp-web
@@ -4327,7 +4327,7 @@ msgstr "Benachrichtigung"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_notification__notification_type
 msgid "Notification Type"
-msgstr ""
+msgstr "Benachrichtigungstyp"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__moderation_notify_msg
@@ -6072,6 +6072,9 @@ msgid ""
 "The e-mail alias %(matching_alias_name)s is already linked with "
 "%(alias_model_name)s. Choose another alias or change it on the linked model."
 msgstr ""
+"Der E-Mail-Alias %(matching_alias_name)s ist bereits mit "
+"%(alias_model_name)s verknüpft. Wählen Sie einen anderen Alias oder ändern "
+"Sie ihn auf dem verknüpften Modell."
 
 #. module: mail
 #: code:addons/mail/models/mail_alias.py:0
@@ -6080,6 +6083,8 @@ msgid ""
 "The e-mail alias %(matching_alias_name)s is already used as "
 "%(alias_duplicate)s alias. Please choose another alias."
 msgstr ""
+"Der E-Mail-Alias %(matching_alias_name)swird bereits als %(alias_duplicate)s"
+" Alias verwendet. Bitte wählen Sie einen anderen Alias."
 
 #. module: mail
 #: code:addons/mail/models/mail_alias.py:0
@@ -6189,7 +6194,7 @@ msgstr "Dokumenttyp, mit dem diese Vorlage genutzt werden kann"
 #: code:addons/mail/static/src/components/message_list/message_list.xml:0
 #, python-format
 msgid "There are no messages in this conversation."
-msgstr ""
+msgstr "Es gibt keine Nachrichten in dieser Unterhaltung."
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_origin_link
@@ -6591,7 +6596,7 @@ msgstr "Dokument hochladen"
 #: code:addons/mail/static/src/xml/web_kanban_activity.xml:0
 #, python-format
 msgid "Upload file"
-msgstr ""
+msgstr "Datei hochladen"
 
 #. module: mail
 #. openerp-web
@@ -6633,7 +6638,7 @@ msgstr "Benutze Vorlage"
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_tracking_value__currency_id
 msgid "Used to display the currency when tracking monetary values"
-msgstr ""
+msgstr "Dient zur Anzeige der Währung bei der Verfolgung von Geldwerten"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_message_subtype__sequence
@@ -7273,7 +7278,7 @@ msgstr "Nicht richtig konfigurierter Alias (unbekannter Referenzdatensatz)"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_remove_view_form
 msgid "mail_blacklist_removal"
-msgstr ""
+msgstr "mail_blacklist_removal"
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:0

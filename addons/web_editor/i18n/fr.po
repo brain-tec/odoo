@@ -1610,7 +1610,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Remove link"
-msgstr ""
+msgstr "Supprimer le lien"
 
 #. module: web_editor
 #. openerp-web
@@ -2199,7 +2199,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 #, python-format
 msgid "Transform the picture"
-msgstr ""
+msgstr "Transformer l'image"
 
 #. module: web_editor
 #. openerp-web
