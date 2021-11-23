@@ -330,10 +330,10 @@ class AccountReconcileModel(models.Model):
         for tax_res in res['taxes']:
             tax = self.env['account.tax'].browse(tax_res['id'])
             balance = tax_res['amount']
-
+            name = ' '.join([x for x in [base_line_dict.get('name', ''), tax_res['name']] if x])
             new_aml_dicts.append({
                 'account_id': tax_res['account_id'] or base_line_dict['account_id'],
-                'name': tax_res['name'],
+                'name': name,
                 'partner_id': base_line_dict.get('partner_id'),
                 'balance': balance,
                 'debit': balance > 0 and balance or 0,
@@ -370,11 +370,11 @@ class AccountReconcileModel(models.Model):
             return []
 
         if st_line:
-            comp_curr = st_line.company_currency_id
+            currency = st_line.foreign_currency_id or st_line.currency_id
             matched_candidates_values = self._process_matched_candidates_data(st_line)
-            st_line_residual = matched_candidates_values['balance_sign'] * matched_candidates_values['residual_balance']
+            st_line_residual = matched_candidates_values['balance_sign'] * matched_candidates_values['residual_balance_curr']
         else:
-            comp_curr = self.company_id.currency_id
+            currency = self.company_id.currency_id
 
             # No statement line
             if any(x.amount_type == 'percentage_st_line' for x in self.line_ids):
@@ -383,10 +383,10 @@ class AccountReconcileModel(models.Model):
         lines_vals_list = []
         for line in self.line_ids:
             if line.amount_type == 'percentage':
-                balance = comp_curr.round(residual_balance * (line.amount / 100.0))
+                balance = currency.round(residual_balance * (line.amount / 100.0))
             elif line.amount_type == 'percentage_st_line':
                 if st_line:
-                    balance = comp_curr.round(st_line_residual * (line.amount / 100.0))
+                    balance = currency.round(st_line_residual * (line.amount / 100.0))
                 else:
                     balance = 0.0
             elif line.amount_type == 'regex':
@@ -401,9 +401,9 @@ class AccountReconcileModel(models.Model):
                 else:
                     balance = 0
             elif line.amount_type == 'fixed':
-                balance = comp_curr.round(line.amount * (1 if residual_balance > 0.0 else -1))
+                balance = currency.round(line.amount * (1 if residual_balance > 0.0 else -1))
 
-            if comp_curr.is_zero(balance):
+            if currency.is_zero(balance):
                 continue
 
             writeoff_line = {
@@ -412,10 +412,11 @@ class AccountReconcileModel(models.Model):
                 'debit': balance > 0 and balance or 0,
                 'credit': balance < 0 and -balance or 0,
                 'account_id': line.account_id.id,
-                'currency_id': comp_curr.id,
+                'currency_id': currency.id,
                 'analytic_account_id': line.analytic_account_id.id,
                 'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                 'reconcile_model_id': self.id,
+                'journal_id': line.journal_id.id,
             }
             lines_vals_list.append(writeoff_line)
 
@@ -846,7 +847,7 @@ class AccountReconcileModel(models.Model):
 
             # Create write-off lines (in company's currency).
             if 'allow_write_off' in status:
-                residual_balance_after_rec = matched_candidates_values['residual_balance'] + matched_candidates_values['candidates_balance']
+                residual_balance_after_rec = matched_candidates_values['residual_balance_curr'] + matched_candidates_values['candidates_balance_curr']
                 writeoff_vals_list = self._get_write_off_move_lines_dict(
                     st_line,
                     matched_candidates_values['balance_sign'] * residual_balance_after_rec,
@@ -1062,7 +1063,7 @@ class AccountReconcileModel(models.Model):
     def _get_writeoff_suggestion_rule_result(self, st_line, partner):
         # Create write-off lines.
         matched_candidates_values = self._process_matched_candidates_data(st_line)
-        residual_balance_after_rec = matched_candidates_values['residual_balance'] + matched_candidates_values['candidates_balance']
+        residual_balance_after_rec = matched_candidates_values['residual_balance_curr'] + matched_candidates_values['candidates_balance_curr']
         writeoff_vals_list = self._get_write_off_move_lines_dict(
             st_line,
             matched_candidates_values['balance_sign'] * residual_balance_after_rec,

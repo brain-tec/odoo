@@ -3,6 +3,7 @@
 
 from odoo import models, fields, api
 from psycopg2 import OperationalError
+import base64
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -22,14 +23,15 @@ class AccountEdiDocument(models.Model):
     error = fields.Html(help='The text of the last error that happened during Electronic Invoice operation.')
     blocking_level = fields.Selection(
         selection=[('info', 'Info'), ('warning', 'Warning'), ('error', 'Error')],
-        help="Blocks the document current operation depending on the error severity :\n"
+        help="Blocks the current operation of the document depending on the error severity:\n"
         "  * Info: the document is not blocked and everything is working as it should.\n"
-        "  * Warning : there is an error that doesn't prevent the current Electronic Invoicing operation to succeed.\n"
-        "  * Error : there is an error that blocks the current Electronic Invoicing operation.")
+        "  * Warning: there is an error that doesn't prevent the current Electronic Invoicing operation to succeed.\n"
+        "  * Error: there is an error that blocks the current Electronic Invoicing operation.")
 
     # == Not stored fields ==
     name = fields.Char(related='attachment_id.name')
     edi_format_name = fields.Char(string='Format Name', related='edi_format_id.name')
+    edi_content = fields.Binary(compute='_compute_edi_content', compute_sudo=True)
 
     _sql_constraints = [
         (
@@ -38,6 +40,28 @@ class AccountEdiDocument(models.Model):
             'Only one edi document by move by format',
         ),
     ]
+
+    @api.depends('move_id', 'error', 'state')
+    def _compute_edi_content(self):
+        for doc in self:
+            res = b''
+            if doc.state in ('to_send', 'to_cancel'):
+                move = doc.move_id
+                config_errors = doc.edi_format_id._check_move_configuration(move)
+                if config_errors:
+                    res = base64.b64encode('\n'.join(config_errors).encode('UTF-8'))
+                elif move.is_invoice(include_receipts=True) and doc.edi_format_id._is_required_for_invoice(move):
+                    res = base64.b64encode(doc.edi_format_id._get_invoice_edi_content(doc.move_id))
+                elif move.payment_id and doc.edi_format_id._is_required_for_payment(move):
+                    res = base64.b64encode(doc.edi_format_id._get_payment_edi_content(doc.move_id))
+            doc.edi_content = res
+
+    def action_export_xml(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url':  '/web/content/account.edi.document/%s/edi_content' % self.id
+        }
 
     def _prepare_jobs(self):
         """Creates a list of jobs to be performed by '_process_job' for the documents in self.

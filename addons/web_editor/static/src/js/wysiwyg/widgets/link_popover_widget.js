@@ -56,6 +56,10 @@ const LinkPopoverWidget = Widget.extend({
             placement: 'bottom',
             container: this.options.wysiwyg.odooEditor.document.body,
         });
+        const tooltips = [];
+        for (const el of this.$('[data-toggle="tooltip"]').toArray()) {
+            tooltips.push($(el).data('bs.tooltip'));
+        }
         let popoverShown = true;
         this.$target.popover({
             html: true,
@@ -78,10 +82,16 @@ const LinkPopoverWidget = Widget.extend({
         .on('hide.bs.popover.link_popover', () => {
             popoverShown = false;
         })
+        .on('hidden.bs.popover.link_popover', () => {
+            for (const tooltip of tooltips) {
+                tooltip.hide();
+            }
+        })
         .popover('show')
         .data('bs.popover').tip.classList.add('o_edit_menu_popover');
 
 
+        this.popover = this.$target.data('bs.popover');
         this.$target.on('mousedown.link_popover', (e) => {
             if (!popoverShown) {
                 this.$target.popover('show');
@@ -97,7 +107,7 @@ const LinkPopoverWidget = Widget.extend({
                             !hierarchy.some(x => x.tagName && x.tagName === 'A'))
                     )
                 ) {
-                    this.$target.popover('hide');
+                    this.popover.hide();
                 }
             }
         }

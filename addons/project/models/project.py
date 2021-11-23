@@ -674,35 +674,9 @@ class Project(models.Model):
         }
 
     def _get_tasks_analysis(self):
-        self.ensure_one()
-        counts = self._get_tasks_analysis_counts(updated=True)
-        data = [{
-            'name': _("Open Tasks"),
-            'action': {
-                'action': "project.action_project_task_user_tree",
-                'additional_context': json.dumps({
-                    'search_default_project_id': self.id,
-                    'active_id': self.id,
-                    'search_default_open_tasks': True,
-                    'search_default_Stage': True,
-                }),
-            },
-            'value': counts['open_tasks_count']
-        }, {
-            'name': _("Updated (Last 30 Days)"),
-            'action': {
-                'action': "project.action_project_task_burndown_chart_report",
-                'additional_context': json.dumps({
-                    'search_default_project_id': self.id,
-                    'active_id': self.id,
-                    'search_default_last_month': 1,
-                    'graph_mode': 'bar'
-                }),
-            },
-            'value': counts['updated_tasks_count']
-        }]
+        # Deprecated
         return {
-            'data': data,
+            'data': [],
         }
 
     def _get_milestones(self):
@@ -772,23 +746,8 @@ class Project(models.Model):
         return buttons
 
     def _get_tasks_analysis_counts(self, created=False, updated=False):
-        tasks = self.env['project.task'].search([('display_project_id', '=', self.id)])
-        open_tasks_count = created_tasks_count = updated_tasks_count = 0
-        tasks_count = len(tasks)
-        thirty_days_ago = datetime.combine(fields.Date.context_today(self) + timedelta(days=-30), datetime.min.time())
-        for t in tasks:
-            if not t.stage_id.fold and not t.stage_id.is_closed:
-                open_tasks_count += 1
-            if created and t.create_date > thirty_days_ago:
-                created_tasks_count += 1
-            if updated and t.write_date > thirty_days_ago:
-                updated_tasks_count += 1
-        return dict(
-            open_tasks_count=open_tasks_count,
-            created_tasks_count=created_tasks_count,
-            updated_tasks_count=updated_tasks_count,
-            tasks_count=tasks_count
-        )
+        # Deprecated
+        return {}
 
     # ---------------------------------------------------
     #  Business Methods
@@ -1676,6 +1635,7 @@ class Task(models.Model):
         # The sudo is required for a portal user as the record creation
         # requires the read access on other models, as mail.template
         # in order to compute the field tracking
+        was_in_sudo = self.env.su
         if is_portal_user:
             ctx = {
                 key: value for key, value in self.env.context.items()
@@ -1687,7 +1647,9 @@ class Task(models.Model):
         tasks = super(Task, self).create(vals_list)
         tasks._populate_missing_personal_stages()
         self._task_message_auto_subscribe_notify({task: task.user_ids - self.env.user for task in tasks})
-        if is_portal_user:
+
+        # in case we were already in sudo, we don't check the rights.
+        if is_portal_user and not was_in_sudo:
             # since we use sudo to create tasks, we need to check
             # if the portal user could really create the tasks based on the ir rule.
             tasks.with_user(self.env.user).check_access_rule('create')
@@ -1879,6 +1841,8 @@ class Task(models.Model):
                 )
 
     def _message_auto_subscribe_followers(self, updated_values, default_subtype_ids):
+        if 'user_ids' not in updated_values:
+            return []
         # Since the changes to user_ids becoming a m2m, the default implementation of this function
         #  could not work anymore, override the function to keep the functionality.
         new_followers = []
@@ -1900,8 +1864,8 @@ class Task(models.Model):
         # Track changes on depending tasks
         depends_tracked_fields = self._get_depends_tracked_fields()
         depends_changes = changes & depends_tracked_fields
-        if depends_changes and self.user_has_groups('project.group_project_task_dependencies') and self.allow_task_dependencies:
-            parent_ids = self.env['project.task'].search([('depend_on_ids', 'in', self.ids)])
+        if depends_changes and self.allow_task_dependencies and self.user_has_groups('project.group_project_task_dependencies'):
+            parent_ids = self.dependent_ids
             if parent_ids:
                 fields_to_ids = self.env['ir.model.fields']._get_ids('project.task')
                 field_ids = [fields_to_ids.get(name) for name in depends_changes]
@@ -1909,7 +1873,7 @@ class Task(models.Model):
                     tracking_values for tracking_values in tracking_value_ids
                     if tracking_values[2]['field'] in field_ids
                 ]
-                subtype = self.env.ref('project.mt_task_dependency_change')
+                subtype = self.env['ir.model.data']._xmlid_to_res_id('project.mt_task_dependency_change')
                 # We want to include the original subtype message coming from the child task
                 # for example when the stage changes the message in the chatter starts with 'Stage Changed'
                 child_subtype = self._track_subtype(dict((col_name, initial_values[col_name]) for col_name in changes))
@@ -1921,7 +1885,7 @@ class Task(models.Model):
                     'child_subtype': child_subtype_info,
                 })
                 for p in parent_ids:
-                    p.message_post(body=body, subtype_id=subtype.id, tracking_value_ids=depends_tracking_value_ids)
+                    p.message_post(body=body, subtype_id=subtype, tracking_value_ids=depends_tracking_value_ids)
         return result
 
     def _track_template(self, changes):
