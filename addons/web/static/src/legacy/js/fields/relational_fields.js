@@ -2001,7 +2001,7 @@ var FieldOne2Many = FieldX2Many.extend({
                         index = self.value.data.length - 1;
                     }
                     var newID = self.value.data[index].id;
-                    self.renderer.editRecord(newID);
+                    return self.renderer.editRecord(newID);
                 }
             }
         });
@@ -2123,6 +2123,7 @@ var FieldOne2Many = FieldX2Many.extend({
             parentID: this.value.id,
             viewInfo: this.view,
             deletable: this.activeActions.delete && params.deletable && this.canDelete,
+            editable: !this.hasReadonlyModifier,
             disable_multiple_selection: params.disable_multiple_selection,
         }));
     },

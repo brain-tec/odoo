@@ -3,8 +3,9 @@
 
 import ast
 import json
+from pytz import UTC
 from collections import defaultdict
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, time
 from random import randint
 
 from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _
@@ -99,7 +100,6 @@ class ProjectTaskType(models.Model):
         help="Automatically modify the kanban state when the customer replies to the feedback for this stage.\n"
             " * Good feedback from the customer will update the kanban state to 'ready for the new stage' (green bullet).\n"
             " * Neutral or bad feedback will set the kanban state to 'blocked' (red bullet).\n")
-    is_closed = fields.Boolean('Closing Stage', help="Tasks in this stage are considered as closed.")
     disabled_rating_warning = fields.Text(compute='_compute_disabled_rating_warning')
 
     user_id = fields.Many2one('res.users', 'Stage Owner', index=True)
@@ -308,7 +308,7 @@ class Project(models.Model):
         ('to_define', 'Set Status'),
     ], default='to_define', compute='_compute_last_update_status', store=True, readonly=False, required=True)
     last_update_color = fields.Integer(compute='_compute_last_update_color')
-    milestone_ids = fields.One2many('project.milestone', 'project_id')
+    milestone_ids = fields.One2many('project.milestone', 'project_id', copy=True)
     milestone_count = fields.Integer(compute='_compute_milestone_count')
 
     _sql_constraints = [
@@ -548,6 +548,7 @@ class Project(models.Model):
                     partners = set(task.message_partner_ids.ids) & set(partner_ids)
                     if partners:
                         task.message_subscribe(partner_ids=list(partners), subtype_ids=task_subtypes)
+                self.update_ids.message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
         return res
 
     def _alias_get_creation_values(self):
@@ -656,10 +657,6 @@ class Project(models.Model):
             'context': {'search_default_group_date': 1, 'default_account_id': self.analytic_account_id.id}
         }
 
-    def action_view_kanban_project(self):
-        # [XBO] TODO: remove me in master
-        return
-
     # ---------------------------------------------
     #  PROJECT UPDATES
     # ---------------------------------------------
@@ -703,7 +700,7 @@ class Project(models.Model):
                 'active_id': self.id,
             }),
             'show': True,
-            'sequence': 2,
+            'sequence': 3,
         }]
         if self.user_has_groups('project.group_project_rating'):
             buttons.append({
@@ -713,7 +710,7 @@ class Project(models.Model):
                 'action_type': 'object',
                 'action': 'action_view_all_rating',
                 'show': self.rating_active and self.rating_percentage_satisfaction > -1,
-                'sequence': 5,
+                'sequence': 15,
             })
         if self.user_has_groups('project.group_project_manager'):
             buttons.append({
@@ -725,7 +722,7 @@ class Project(models.Model):
                     'active_id': self.id,
                 }),
                 'show': True,
-                'sequence': 7,
+                'sequence': 60,
             })
             buttons.append({
                 'icon': 'users',
@@ -737,7 +734,7 @@ class Project(models.Model):
                     'active_id': self.id,
                 }),
                 'show': True,
-                'sequence': 23,
+                'sequence': 66,
             })
         if self.user_has_groups('analytic.group_analytic_accounting'):
             buttons.append({
@@ -747,7 +744,7 @@ class Project(models.Model):
                 'action_type': 'object',
                 'action': 'action_view_analytic_account_entries',
                 'show': True,
-                'sequence': 18,
+                'sequence': 24,
             })
         return buttons
 
@@ -857,7 +854,7 @@ class Task(models.Model):
         project_id = self.env.context.get('default_project_id')
         if not project_id:
             return False
-        return self.stage_find(project_id, [('fold', '=', False), ('is_closed', '=', False)])
+        return self.stage_find(project_id, [('fold', '=', False)])
 
     @api.model
     def _default_company_id(self):
@@ -962,7 +959,7 @@ class Task(models.Model):
     legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True, related_sudo=False)
     legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True, related_sudo=False)
     legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True, related_sudo=False)
-    is_closed = fields.Boolean(related="stage_id.is_closed", string="Closing Stage", readonly=True, related_sudo=False)
+    is_closed = fields.Boolean(related="stage_id.fold", string="Closing Stage", related_sudo=False, help="Folded in Kanban stages are closing stages.")
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks")
     child_text = fields.Char(compute="_compute_child_text")
@@ -1389,8 +1386,7 @@ class Task(models.Model):
         for task in self:
             if task.project_id:
                 if task.project_id not in task.stage_id.project_ids:
-                    task.stage_id = task.stage_find(task.project_id.id, [
-                        ('fold', '=', False), ('is_closed', '=', False)])
+                    task.stage_id = task.stage_find(task.project_id.id, [('fold', '=', False)])
             else:
                 task.stage_id = False
 
@@ -1431,6 +1427,8 @@ class Task(models.Model):
             default['name'] = _("%s (copy)", self.name)
         if self.recurrence_id:
             default['recurrence_id'] = self.recurrence_id.copy().id
+        if self.allow_subtasks:
+            default['child_ids'] = [child.copy().id for child in self.child_ids]
         return super(Task, self).copy(default)
 
     @api.model
@@ -1457,7 +1455,7 @@ class Task(models.Model):
         """ Returns the set of tracked field names for the current model.
         Those fields are the ones tracked in the parent task when using task dependencies.
 
-        See :meth:`mail.models.MailThread._get_tracked_fields`"""
+        See :meth:`mail.models.MailThread._track_get_fields`"""
         fields = {name for name, field in self._fields.items() if getattr(field, 'task_dependency_tracking', None)}
         return fields and set(self.fields_get(fields))
 
@@ -1777,7 +1775,7 @@ class Task(models.Model):
 
     def update_date_end(self, stage_id):
         project_task_type = self.env['project.task.type'].browse(stage_id)
-        if project_task_type.fold or project_task_type.is_closed:
+        if project_task_type.fold:
             return {'date_end': fields.Datetime.now()}
         return {'date_end': False}
 
@@ -1910,10 +1908,13 @@ class Task(models.Model):
 
     def _track_subtype(self, init_values):
         self.ensure_one()
-        if 'kanban_state_label' in init_values and self.kanban_state == 'blocked':
-            return self.env.ref('project.mt_task_blocked')
-        elif 'kanban_state_label' in init_values and self.kanban_state == 'done':
-            return self.env.ref('project.mt_task_ready')
+        mail_message_subtype_per_kanban_state = {
+            'blocked': 'project.mt_task_blocked',
+            'done': 'project.mt_task_ready',
+            'normal': 'project.mt_task_progress',
+        }
+        if 'kanban_state_label' in init_values and self.kanban_state in mail_message_subtype_per_kanban_state:
+            return self.env.ref(mail_message_subtype_per_kanban_state[self.kanban_state])
         elif 'stage_id' in init_values:
             return self.env.ref('project.mt_task_stage')
         return super(Task, self)._track_subtype(init_values)
@@ -1993,7 +1994,8 @@ class Task(models.Model):
             'name': msg.get('subject') or _("No Subject"),
             'email_from': msg.get('from'),
             'planned_hours': 0.0,
-            'partner_id': msg.get('author_id')
+            'partner_id': msg.get('author_id'),
+            'description': msg.get('body'),
         }
         defaults.update(custom_values)
 
@@ -2170,6 +2172,14 @@ class Task(models.Model):
     def _get_task_analytic_account_id(self):
         self.ensure_one()
         return self.analytic_account_id or self.project_analytic_account_id
+
+    @api.model
+    def get_unusual_days(self, date_from, date_to=None):
+        calendar = self.env.company.resource_calendar_id
+        return calendar._get_unusual_days(
+            datetime.combine(fields.Date.from_string(date_from), time.min).replace(tzinfo=UTC),
+            datetime.combine(fields.Date.from_string(date_to), time.max).replace(tzinfo=UTC)
+        )
 
 class ProjectTags(models.Model):
     """ Tags of project's tasks """

@@ -413,14 +413,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         return ret_val
 
     def onchange_module(self, field_value, module_name):
-        ModuleSudo = self.env['ir.module.module'].sudo()
-        modules = ModuleSudo.search(
-            [('name', '=', module_name.replace("module_", '')),
-            ('state', 'in', ['to install', 'installed', 'to upgrade'])])
-
-        if modules and not int(field_value):
-            deps = modules.sudo().downstream_dependencies()
-            dep_names = (deps | modules).mapped('shortdesc')
+        module_sudo = self.env['ir.module.module']._get(module_name[7:])
+        if not int(field_value) and module_sudo.state in ('to install', 'installed', 'to upgrade'):
+            deps = module_sudo.downstream_dependencies()
+            dep_names = (deps | module_sudo).mapped('shortdesc')
             message = '\n'.join(dep_names)
             return {
                 'warning': {
@@ -441,7 +437,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 self._onchange_methods[name].append(method)
 
     @api.model
-    def _get_classified_fields(self):
+    def _get_classified_fields(self, fnames=None):
         """ return a dictionary with the fields classified by category::
 
                 {   'default': [('default_foo', 'model', 'foo'), ...],
@@ -452,11 +448,19 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 }
         """
         IrModule = self.env['ir.module.module']
+        IrModelData = self.env['ir.model.data']
         Groups = self.env['res.groups']
-        ref = self.env.ref
+
+        def ref(xml_id):
+            res_model, res_id = IrModelData._xmlid_to_res_model_res_id(xml_id)
+            return self.env[res_model].browse(res_id)
+
+        if fnames is None:
+            fnames = self._fields.keys()
 
         defaults, groups, modules, configs, others = [], [], [], [], []
-        for name, field in self._fields.items():
+        for name in fnames:
+            field = self._fields[name]
             if name.startswith('default_'):
                 if not hasattr(field, 'default_model'):
                     raise Exception("Field %s without attribute 'default_model'" % field)
@@ -472,7 +476,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             elif name.startswith('module_'):
                 if field.type not in ('boolean', 'selection'):
                     raise Exception("Field %s must have type 'boolean' or 'selection'" % field)
-                module = IrModule.sudo().search([('name', '=', name[7:])], limit=1)
+                module = IrModule._get(name[7:])
                 modules.append((name, module))
             elif hasattr(field, 'config_parameter'):
                 if field.type not in ('boolean', 'integer', 'float', 'char', 'selection', 'many2one', 'datetime'):
@@ -493,7 +497,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     def default_get(self, fields):
         IrDefault = self.env['ir.default']
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
-        classified = self._get_classified_fields()
+        classified = self._get_classified_fields(fields)
 
         res = super(ResConfigSettings, self).default_get(fields)
 
@@ -555,6 +559,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         """
         self = self.with_context(active_test=False)
         classified = self._get_classified_fields()
+        current_settings = self.default_get(list(self.fields_get()))
 
         # default values fields
         IrDefault = self.env['ir.default'].sudo()
@@ -566,10 +571,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                     value = self[name].ids
             else:
                 value = self[name]
-            IrDefault.set(model, field, value)
+            if name not in current_settings or value != current_settings[name]:
+                IrDefault.set(model, field, value)
 
         # group fields: modify group / implied groups
-        current_settings = self.default_get(list(self.fields_get()))
         with self.env.norecompute():
             for name, groups, implied_group in sorted(classified['group'], key=lambda k: self[k[0]]):
                 groups = groups.sudo()
@@ -586,6 +591,12 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         for name, icp in classified['config']:
             field = self._fields[name]
             value = self[name]
+            current_value = current_settings[name]
+            if not field.relational and value == current_value:
+                # pre-check before the value is formatted
+                # because the values in current_settings are
+                # in field format, not in str/False parameter format
+                continue
             if field.type == 'char':
                 # storing developer keys as ir.config_parameter may lead to nasty
                 # bugs when users leave spaces around them
@@ -595,6 +606,9 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             elif field.type == 'many2one':
                 # value is a (possibly empty) recordset
                 value = value.id
+
+            if current_value == value:
+                continue
             IrConfigParameter.set_param(icp, value)
 
     def execute(self):
@@ -627,6 +641,8 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         lm = len('module_')
         for name, module in classified['module']:
             if int(self[name]):
+                if module.state == "installed":
+                    continue
                 to_install.append((name[lm:], module))
             else:
                 if module and module.state in ('installed', 'to upgrade'):

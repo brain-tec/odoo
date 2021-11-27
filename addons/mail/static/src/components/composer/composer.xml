@@ -8,10 +8,12 @@
                 'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
                 'o-has-footer': hasFooter,
                 'o-has-header': hasHeader,
+                'o-is-in-thread-view': composerView and composerView.threadView,
                 'o-is-compact': props.isCompact,
                 'o-messaging-in-editing': composerView and composerView.messageViewInEditing,
             }"
             t-on-keydown="_onKeydown"
+            t-ref="root"
         >
             <t t-if="composerView">
                 <t t-if="isDropZoneVisible.value">

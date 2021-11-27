@@ -456,7 +456,7 @@ class MrpProduction(models.Model):
         for production in self:
             if not production.state:
                 production.state = 'draft'
-            elif production.state == 'cancel' or (production.move_raw_ids and all(move.state == 'cancel' for move in production.move_raw_ids)):
+            elif production.state == 'cancel' or (production.move_finished_ids and all(move.state == 'cancel' for move in production.move_finished_ids)):
                 production.state = 'cancel'
             elif production.state == 'done' or (production.move_raw_ids and all(move.state in ('cancel', 'done') for move in production.move_raw_ids)):
                 production.state = 'done'
@@ -1359,9 +1359,6 @@ class MrpProduction(models.Model):
     def action_cancel(self):
         """ Cancels production order, unfinished stock moves and set procurement
         orders in exception """
-        if not self.move_raw_ids:
-            self.state = 'cancel'
-            return True
         self._action_cancel()
         return True
 
@@ -1549,7 +1546,7 @@ class MrpProduction(models.Model):
 
         backorders = productions_to_backorder._generate_backorder_productions(close_mo=close_mo)
         productions_not_to_backorder._post_inventory(cancel_backorder=True)
-        productions_to_backorder._post_inventory(cancel_backorder=False)
+        productions_to_backorder._post_inventory(cancel_backorder=True)
 
         # if completed products make other confirmed/partially_available moves available, assign them
         done_move_finished_ids = (productions_to_backorder.move_finished_ids | productions_not_to_backorder.move_finished_ids).filtered(lambda m: m.state == 'done')

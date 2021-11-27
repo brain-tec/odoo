@@ -1,73 +1,51 @@
 /** @odoo-module **/
 
-import { registerNewModel } from '@mail/model/model_core';
+import { registerModel } from '@mail/model/model_core';
 import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insert, insertAndReplace, link, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
-function factory(dependencies) {
+const getThreadNextTemporaryId = (function () {
+    let tmpId = 0;
+    return () => {
+        tmpId -= 1;
+        return tmpId;
+    };
+})();
 
-    const getThreadNextTemporaryId = (function () {
-        let tmpId = 0;
-        return () => {
-            tmpId -= 1;
-            return tmpId;
-        };
-    })();
+const getMessageNextTemporaryId = (function () {
+    let tmpId = 0;
+    return () => {
+        tmpId -= 1;
+        return tmpId;
+    };
+})();
 
-    const getMessageNextTemporaryId = (function () {
-        let tmpId = 0;
-        return () => {
-            tmpId -= 1;
-            return tmpId;
-        };
-    })();
-
-    class Chatter extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+registerModel({
+    name: 'mail.chatter',
+    identifyingFields: ['id'],
+    lifecycleHooks: {
         _created() {
             this._attachmentsLoaderTimeout = undefined;
             this._isPreparingAttachmentsLoading = undefined;
             // Bind necessary until OWL supports arrow function in handlers: https://github.com/odoo/owl/issues/876
-            this.onClickActivityBoxTitle = this.onClickActivityBoxTitle.bind(this);
             this.onClickButtonAttachments = this.onClickButtonAttachments.bind(this);
             this.onClickChatterTopbarClose = this.onClickChatterTopbarClose.bind(this);
             this.onClickLogNote = this.onClickLogNote.bind(this);
             this.onClickScheduleActivity = this.onClickScheduleActivity.bind(this);
             this.onClickSendMessage = this.onClickSendMessage.bind(this);
             this.onScrollScrollPanel = this.onScrollScrollPanel.bind(this);
-        }
-
-        /**
-         * @override
-         */
+        },
         _willDelete() {
             this._stopAttachmentsLoading();
-            return super._willDelete(...arguments);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         focus() {
             if (this.composerView) {
                 this.composerView.update({ doFocus: true });
             }
-        }
-
-        /**
-         * Handles click on activity box title.
-         *
-         * @param {MouseEvent} ev
-         */
-        onClickActivityBoxTitle(ev) {
-            this.update({ isActivityBoxVisible: !this.isActivityBoxVisible });
-        }
-
+        },
         /**
          * Handles click on the attachments button.
          *
@@ -75,8 +53,7 @@ function factory(dependencies) {
          */
         onClickButtonAttachments(ev) {
             this.update({ attachmentBoxView: this.attachmentBoxView ? clear() : insertAndReplace() });
-        }
-
+        },
         /**
          * Handles click on top bar close button.
          *
@@ -84,8 +61,7 @@ function factory(dependencies) {
          */
         onClickChatterTopbarClose(ev) {
             this.componentChatterTopbar.trigger('o-close-chatter');
-        }
-
+        },
         /**
          * Handles click on "log note" button.
          *
@@ -97,8 +73,7 @@ function factory(dependencies) {
             } else {
                 this.showLogNote();
             }
-        }
-
+        },
         /**
          * Handles click on "schedule activity" button.
          *
@@ -129,8 +104,7 @@ function factory(dependencies) {
                     },
                 },
             });
-        }
-
+        },
         /**
          * Handles click on "send message" button.
          *
@@ -142,8 +116,7 @@ function factory(dependencies) {
             } else {
                 this.showSendMessage();
             }
-        }
-
+        },
         /**
          * Handles scroll on this scroll panel.
          *
@@ -154,8 +127,7 @@ function factory(dependencies) {
                 return;
             }
             this.threadRef.comp.onScroll(ev);
-        }
-
+        },
         async refresh() {
             if (this.hasActivities) {
                 this.thread.refreshActivities();
@@ -167,24 +139,27 @@ function factory(dependencies) {
             if (this.hasMessageList) {
                 this.thread.refresh();
             }
-        }
-
+        },
         showLogNote() {
             this.update({ composerView: insertAndReplace() });
             this.composerView.composer.update({ isLog: true });
             this.focus();
-        }
-
+        },
         showSendMessage() {
             this.update({ composerView: insertAndReplace() });
             this.composerView.composer.update({ isLog: false });
             this.focus();
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeActivityBoxView() {
+            if (this.thread && this.thread.hasActivities && this.thread.activities.length > 0) {
+                return insertAndReplace();
+            }
+            return clear();
+        },
         /**
          * @private
          * @returns {boolean}
@@ -193,24 +168,21 @@ function factory(dependencies) {
             return (this.thread && this.thread.allAttachments.length > 0)
                 ? insertAndReplace()
                 : clear();
-        }
-
+        },
         /**
          * @private
          * @returns {boolean}
          */
         _computeHasThreadView() {
             return Boolean(this.thread && this.hasMessageList);
-        }
-
+        },
         /**
          * @private
          * @returns {boolean}
          */
         _computeIsDisabled() {
             return Boolean(!this.thread || this.thread.isTemporary);
-        }
-
+        },
         /**
          * @private
          * @returns {mail.thread_viewer}
@@ -221,8 +193,7 @@ function factory(dependencies) {
                 order: 'desc',
                 thread: this.thread ? link(this.thread) : unlink(),
             });
-        }
-
+        },
         /**
          * @private
          */
@@ -271,8 +242,7 @@ function factory(dependencies) {
                 });
                 this.thread.cache.update({ messages: link(message) });
             }
-        }
-
+        },
         /**
          * @private
          */
@@ -286,8 +256,7 @@ function factory(dependencies) {
                 return;
             }
             this._prepareAttachmentsLoading();
-        }
-
+        },
         /**
          * @private
          */
@@ -297,8 +266,7 @@ function factory(dependencies) {
                 this.update({ isShowingAttachmentsLoading: true });
                 this._isPreparingAttachmentsLoading = false;
             }, this.messaging.loadingBaseDelayDuration);
-        }
-
+        },
         /**
          * @private
          */
@@ -306,11 +274,14 @@ function factory(dependencies) {
             this.env.browser.clearTimeout(this._attachmentsLoaderTimeout);
             this._attachmentsLoaderTimeout = null;
             this._isPreparingAttachmentsLoading = false;
-        }
-
-    }
-
-    Chatter.fields = {
+        },
+    },
+    fields: {
+        activityBoxView: one2one('mail.activity_box_view', {
+            compute: '_computeActivityBoxView',
+            inverse: 'chatter',
+            isCausal: true,
+        }),
         attachmentBoxView: one2one('mail.attachment_box_view', {
             inverse: 'chatter',
             isCausal: true,
@@ -387,9 +358,6 @@ function factory(dependencies) {
             readonly: true,
             required: true,
         }),
-        isActivityBoxVisible: attr({
-            default: true,
-        }),
         /**
          * Determiners whether the attachment box is visible initially.
          */
@@ -435,9 +403,8 @@ function factory(dependencies) {
             readonly: true,
             required: true,
         }),
-    };
-    Chatter.identifyingFields = ['id'];
-    Chatter.onChanges = [
+    },
+    onChanges: [
         new OnChange({
             dependencies: ['threadId', 'threadModel'],
             methodName: '_onThreadIdOrThreadModelChanged',
@@ -446,11 +413,5 @@ function factory(dependencies) {
             dependencies: ['thread.isLoadingAttachments'],
             methodName: '_onThreadIsLoadingAttachmentsChanged',
         }),
-    ];
-
-    Chatter.modelName = 'mail.chatter';
-
-    return Chatter;
-}
-
-registerNewModel('mail.chatter', factory);
+    ],
+});

@@ -194,6 +194,7 @@ class Lead(models.Model):
         ('incorrect', 'Incorrect')], string='Email Quality', compute="_compute_email_state", store=True)
     website = fields.Char('Website', index=True, help="Website of the contact", compute="_compute_website", readonly=False, store=True)
     lang_id = fields.Many2one('res.lang', string='Language')
+    lang_code = fields.Char(related='lang_id.code')
     # Address fields
     street = fields.Char('Street', compute='_compute_partner_address_values', readonly=False, store=True)
     street2 = fields.Char('Street2', compute='_compute_partner_address_values', readonly=False, store=True)
@@ -213,7 +214,7 @@ class Lead(models.Model):
     automated_probability = fields.Float('Automated Probability', compute='_compute_probabilities', readonly=True, store=True)
     is_automated_probability = fields.Boolean('Is automated probability?', compute="_compute_is_automated_probability")
     # Won/Lost
-    lost_reason = fields.Many2one(
+    lost_reason_id = fields.Many2one(
         'crm.lost.reason', string='Lost Reason',
         index=True, ondelete='restrict', tracking=True)
     # Statistics
@@ -225,6 +226,10 @@ class Lead(models.Model):
     partner_email_update = fields.Boolean('Partner Email will Update', compute='_compute_partner_email_update')
     partner_phone_update = fields.Boolean('Partner Phone will Update', compute='_compute_partner_phone_update')
     is_partner_visible = fields.Boolean('Is Partner Visible', compute='_compute_is_partner_visible')
+    # UTMs - enforcing the fact that we want to 'set null' when relation is unlinked
+    campaign_id = fields.Many2one(ondelete='set null')
+    medium_id = fields.Many2one(ondelete='set null')
+    source_id = fields.Many2one(ondelete='set null')
 
     _sql_constraints = [
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
@@ -901,7 +906,7 @@ class Lead(models.Model):
         activated = self.filtered(lambda lead: lead.active)
         archived = self.filtered(lambda lead: not lead.active)
         if activated:
-            activated.write({'lost_reason': False})
+            activated.write({'lost_reason_id': False})
             activated._compute_probabilities()
         if archived:
             archived.write({'probability': 0, 'automated_probability': 0})
@@ -1355,9 +1360,9 @@ class Lead(models.Model):
             'type': lambda fname, leads: 'opportunity' if any(lead.type == 'opportunity' for lead in leads) else 'lead',
             'priority': lambda fname, leads: max(leads.mapped('priority')) if leads else False,
             'tag_ids': lambda fname, leads: leads.mapped('tag_ids'),
-            'lost_reason': lambda fname, leads:
+            'lost_reason_id': lambda fname, leads:
                 False if leads and leads[0].probability
-                else next((lead.lost_reason for lead in leads if lead.lost_reason), False),
+                else next((lead.lost_reason_id for lead in leads if lead.lost_reason_id), False),
         }
 
     def _merge_get_fields(self):
@@ -1723,7 +1728,7 @@ class Lead(models.Model):
         self.ensure_one()
         if 'stage_id' in init_values and self.probability == 100 and self.stage_id:
             return self.env.ref('crm.mt_lead_won')
-        elif 'lost_reason' in init_values and self.lost_reason:
+        elif 'lost_reason_id' in init_values and self.lost_reason_id:
             return self.env.ref('crm.mt_lead_lost')
         elif 'stage_id' in init_values:
             return self.env.ref('crm.mt_lead_stage')
@@ -1786,9 +1791,11 @@ class Lead(models.Model):
         try:
             for lead in self:
                 if lead.partner_id:
-                    lead._message_add_suggested_recipient(recipients, partner=lead.partner_id, reason=_('Customer'))
+                    lead._message_add_suggested_recipient(
+                        recipients, partner=lead.partner_id, lang=lead.lang_code, reason=_('Customer'))
                 elif lead.email_from:
-                    lead._message_add_suggested_recipient(recipients, email=lead.email_from, reason=_('Customer Email'))
+                    lead._message_add_suggested_recipient(
+                        recipients, email=lead.email_from, lang=lead.lang_code, reason=_('Customer Email'))
         except AccessError:  # no read access rights -> just ignore suggested recipients because this imply modifying followers
             pass
         return recipients
