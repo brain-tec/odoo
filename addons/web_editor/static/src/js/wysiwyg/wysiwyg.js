@@ -82,7 +82,11 @@ const Wysiwyg = Widget.extend({
         const commands = this._getCommands();
 
         let editorCollaborationOptions;
-        if (options.collaborationChannel) {
+        if (
+            options.collaborationChannel &&
+            // Hack: check if mail module is installed.
+            this.getSession()['notification_type']
+        ) {
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
         }
 
@@ -762,6 +766,7 @@ const Wysiwyg = Widget.extend({
     setValue: function (value) {
         this.$editable.html(value);
         this.odooEditor.sanitize();
+        this.odooEditor.historyStep();
     },
     /**
      * Undo one step of change in the editor.

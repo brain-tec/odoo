@@ -515,16 +515,17 @@ class Picking(models.Model):
             })
             picking_move_lines[picking_id.id].add(move.id)
         for picking in self:
-            if not picking_moves_state_map[picking.id]:
+            picking_id = (picking.ids and picking.ids[0]) or picking.id
+            if not picking_moves_state_map[picking_id]:
                 picking.state = 'draft'
-            elif picking_moves_state_map[picking.id]['any_draft']:
+            elif picking_moves_state_map[picking_id]['any_draft']:
                 picking.state = 'draft'
-            elif picking_moves_state_map[picking.id]['all_cancel']:
+            elif picking_moves_state_map[picking_id]['all_cancel']:
                 picking.state = 'cancel'
-            elif picking_moves_state_map[picking.id]['all_cancel_done']:
+            elif picking_moves_state_map[picking_id]['all_cancel_done']:
                 picking.state = 'done'
             else:
-                relevant_move_state = self.env['stock.move'].browse(picking_move_lines[picking.id])._get_relevant_state_among_moves()
+                relevant_move_state = self.env['stock.move'].browse(picking_move_lines[picking_id])._get_relevant_state_among_moves()
                 if picking.immediate_transfer and relevant_move_state not in ('draft', 'cancel', 'done'):
                     picking.state = 'assigned'
                 elif relevant_move_state == 'partially_available':
@@ -1380,18 +1381,28 @@ class Picking(models.Model):
                     ml.write(vals)
                     new_move_line.write({'product_uom_qty': done_to_keep})
                     move_lines_to_pack |= new_move_line
+            if not package.package_type_id:
+                package_type = move_lines_to_pack.move_id.product_packaging_id.package_type_id
+                if len(package_type) == 1:
+                    package.package_type_id = package_type
+            if len(move_lines_to_pack) == 1:
+                default_dest_location = move_lines_to_pack._get_default_dest_location()
+                move_lines_to_pack.location_dest_id = default_dest_location._get_putaway_strategy(
+                    product=move_lines_to_pack.product_id,
+                    quantity=move_lines_to_pack.product_uom_qty,
+                    package=package)
+            move_lines_to_pack.write({
+                'result_package_id': package.id,
+            })
             if create_package_level:
                 package_level = self.env['stock.package_level'].create({
                     'package_id': package.id,
                     'picking_id': pick.id,
                     'location_id': False,
-                    'location_dest_id': move_line_ids.mapped('location_dest_id').id,
+                    'location_dest_id': move_lines_to_pack.mapped('location_dest_id').id,
                     'move_line_ids': [(6, 0, move_lines_to_pack.ids)],
                     'company_id': pick.company_id.id,
                 })
-            move_lines_to_pack.write({
-                'result_package_id': package.id,
-            })
         return package
 
     def action_put_in_pack(self):
