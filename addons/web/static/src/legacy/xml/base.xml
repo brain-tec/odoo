@@ -242,7 +242,7 @@
 
 <t t-name="web.OwlDialog" owl="1">
     <Portal target="'body'">
-        <div class="o_dialog" t-on-focus="_onFocus" t-on-click="_onClick">
+        <div class="o_dialog" t-on-focus="_onFocus" t-on-click="_onClick" t-on-dialog-closed="_onDialogClosed">
             <div role="dialog" class="modal"
                 tabindex="-1"
                 t-att-class="{ o_technical_modal: props.technical, o_modal_full: props.fullscreen }"
@@ -1297,7 +1297,7 @@
         </div>
         <div class="o_sign_signature card-body"/>
     </div>
-    <div class="mt16 small">By clicking Adopt and Sign, I agree that the chosen signature/initials will be a valid electronic representation of my hand-written signature/initials for all purposes when it is used on documents, including legally binding contracts.</div>
+    <div class="mt16 small">By clicking Adopt &amp; Sign, I agree that the chosen signature/initials will be a valid electronic representation of my hand-written signature/initials for all purposes when it is used on documents, including legally binding contracts.</div>
 
     <div class="o_sign_font_dialog card">
         <div class="card-header">Styles</div>
