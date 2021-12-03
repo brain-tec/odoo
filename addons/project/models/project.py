@@ -936,8 +936,8 @@ class Task(models.Model):
         index=True,
         copy=False,
         readonly=True)
-    project_id = fields.Many2one('project.project', string='Project',
-        compute='_compute_project_id', recursive=True, store=True, readonly=False,
+    project_id = fields.Many2one('project.project', string='Project', recursive=True,
+        compute='_compute_project_id', store=True, readonly=False,
         index=True, tracking=True, check_company=True, change_default=True)
     # Defines in which project the task will be displayed / taken into account in statistics.
     # Example: 1 task A with 1 subtask B in project P
@@ -948,7 +948,7 @@ class Task(models.Model):
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
     # Tracking of this field is done in the write function
-    user_ids = fields.Many2many('res.users', relation='project_task_user_rel', column1='task_id', column2='user_id', string='Assignees')
+    user_ids = fields.Many2many('res.users', relation='project_task_user_rel', column1='task_id', column2='user_id', string='Assignees', context={'active_test': False})
     # User names displayed in project sharing views
     portal_user_names = fields.Char(compute='_compute_portal_user_names', compute_sudo=True, search='_search_portal_user_names')
     # Second Many2many containing the actual personal stage for the current user
@@ -967,8 +967,8 @@ class Task(models.Model):
         search='_search_personal_stage_type_id',
         help="The current user's personal task stage.")
     partner_id = fields.Many2one('res.partner',
-        string='Customer',
-        compute='_compute_partner_id', recursive=True, store=True, readonly=False, tracking=True,
+        string='Customer', recursive=True, tracking=True,
+        compute='_compute_partner_id', store=True, readonly=False,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     partner_is_company = fields.Boolean(related='partner_id.is_company', readonly=True)
     commercial_partner_id = fields.Many2one(related='partner_id.commercial_partner_id')
