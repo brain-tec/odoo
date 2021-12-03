@@ -1,23 +1,10 @@
-odoo.define('web_editor.convertInline', function (require) {
+/** @odoo-module alias=web_editor.convertInline */
 'use strict';
 
-var FieldHtml = require('web_editor.field.html');
+import FieldHtml from 'web_editor.field.html';
+import { isBlock, rgbToHex } from '../../../lib/odoo-editor/src/utils/utils';
 
 const SELECTORS_IGNORE = /(^\*$|:hover|:before|:after|:active|:link|::|'|\([^(),]+[,(])/;
-
-// Note: duplicated from odoo-editor utils.
-// DOES NOT SUPPORT RGBA (Outlook doesn't support transparency)
-function rgbToHex(rgb = '') {
-    return (
-        '#' +
-        (rgb.match(/\d{1,3}/g) || [])
-            .map(x => {
-                x = parseInt(x).toString(16);
-                return x.length === 1 ? '0' + x : x;
-            })
-            .join('')
-    );
-}
 
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
@@ -385,7 +372,11 @@ function _createTable(attributes = []) {
         delete layoutStyles['line-height'];
         $table.css(layoutStyles);
     } else {
-        $table.css(tableStyles);
+        for (const styleName in tableStyles) {
+            if (!('style' in attributes && attributes.style.value.includes(styleName + ':'))) {
+                $table.css(styleName, tableStyles[styleName]);
+            }
+        }
     }
     return $table;
 }
@@ -416,8 +407,11 @@ function bootstrapToTable($editable) {
     // height contents, which is only possible if the table itself has a set
     // height. We also need to restyle it because of the change in structure.
     $editable.find('.o_masonry_grid_container').css('padding', 0)
-        .find('> .o_fake_table').css('height', function() { return $(this).height() })
-        .find('.row').css('height', '');
+    .find('> .o_fake_table').css('height', function() { return $(this).height() });
+    for (const masonryRow of $editable.find('.o_masonry_grid_container > .o_fake_table > .row.h-100')) {
+        masonryRow.style.removeProperty('height');
+        masonryRow.parentElement.style.setProperty('height', '100%');
+    }
 
     // Now convert all containers with rows to tables.
     for (const container of $editable.find('.container:has(.row), .container-fluid:has(.row), .o_fake_table:has(.row)')) {
@@ -430,11 +424,17 @@ function bootstrapToTable($editable) {
             $table.append(child);
         }
         $table.removeClass('container container-fluid o_fake_table');
+        if (!$table[0].className) {
+            $table.removeAttr('class');
+        }
         $container.before($table);
         $container.remove();
 
 
         // ROWS
+        // First give all siblings of rows a separate row/col parent combo.
+        $table.children().filter((i, child) => isBlock(child) && !$(child).hasClass('row')).wrap('<div class="row"><div class="col-12"/></div>');
+
         const $bootstrapRows = $table.children().filter('.row');
         for (const bootstrapRow of $bootstrapRows) {
             const $bootstrapRow = $(bootstrapRow);
@@ -443,6 +443,9 @@ function bootstrapToTable($editable) {
                 $row.attr(attr.name, attr.value);
             }
             $row.removeClass('row');
+            if (!$row[0].className) {
+                $row.removeAttr('class');
+            }
             for (const child of [...bootstrapRow.childNodes]) {
                 $row.append(child);
             }
@@ -475,13 +478,13 @@ function bootstrapToTable($editable) {
                 if (gridIndex + columnSize < 12) {
                     $currentCol = grid[gridIndex];
                     _applyColspanToGridElement($currentCol, columnSize);
-                    gridIndex += columnSize;
                     if (columnIndex === $bootstrapColumns.length - 1) {
                         // We handled all the columns but there is still space
                         // in the row. Insert the columns and fill the row.
                         grid[gridIndex].attr('colspan', 12 - gridIndex);
                         $currentRow.append(...grid.filter(td => td.attr('colspan')));
                     }
+                    gridIndex += columnSize;
                 } else if (gridIndex + columnSize === 12) {
                     // Finish the row.
                     $currentCol = grid[gridIndex];
@@ -518,6 +521,9 @@ function bootstrapToTable($editable) {
                     }
                     const colMatch = bootstrapColumn.className.match(reColMatch);
                     $currentCol.removeClass(colMatch[0]);
+                    if (!$currentCol[0].className) {
+                        $currentCol.removeAttr('class');
+                    }
                     for (const child of [...bootstrapColumn.childNodes]) {
                         $currentCol.append(child);
                     }
@@ -645,22 +651,45 @@ function formatTables($editable) {
         const tablePaddingRight = +$table.css('padding-right').match(rePadding)[1];
         const tablePaddingBottom = +$table.css('padding-bottom').match(rePadding)[1];
         const tablePaddingLeft = +$table.css('padding-left').match(rePadding)[1];
-        for (const column of $table.find('td').filter((i, td) => $(td).closest('table').is($table))) {
+        const $columns = $table.find('td').filter((i, td) => $(td).closest('table').is($table));
+        let columnIndex = 0;
+        for (const column of $columns) {
             const $column = $(column);
             if ($column.css('padding')) {
-                const columnPaddingTop = +$column.css('padding-top').match(rePadding)[1];
                 const columnPaddingRight = +$column.css('padding-right').match(rePadding)[1];
-                const columnPaddingBottom = +$column.css('padding-bottom').match(rePadding)[1];
                 const columnPaddingLeft = +$column.css('padding-left').match(rePadding)[1];
                 $column.css({
-                    'padding-top': columnPaddingTop + tablePaddingTop,
                     'padding-right': columnPaddingRight + tablePaddingRight,
-                    'padding-bottom': columnPaddingBottom + tablePaddingBottom,
                     'padding-left': columnPaddingLeft + tablePaddingLeft,
                 });
+                if (!columnIndex) {
+                    const columnPaddingTop = +$column.css('padding-top').match(rePadding)[1];
+                    $column.css({
+                        'padding-top': columnPaddingTop + tablePaddingTop,
+                    });
+                }
+                if (columnIndex === $columns.length - 1) {
+                    const columnPaddingBottom = +$column.css('padding-bottom').match(rePadding)[1];
+                    $column.css({
+                        'padding-bottom': columnPaddingBottom + tablePaddingBottom,
+                    });
+                }
             }
+            columnIndex += 1;
         }
         $table.css('padding', '');
+    }
+    // Ensure a tbody in every table and cancel its default style.
+    for (const table of $editable.find('table:not(:has(tbody))')) {
+        $(table).contents().wrap('<tbody style="vertical-align: top"/>');
+    }
+    // Children will only take 100% height if the parent has a height property.
+    for (const node of $editable.find('*').filter((i, n) => (
+        n.style && n.style.getPropertyValue('height') === '100%' && (
+            !n.parentElement.style.getPropertyValue('height') ||
+            n.parentElement.style.getPropertyValue('height').includes('%'))
+    ))) {
+        node.parentElement.style.setProperty('height', '0');
     }
 }
 
@@ -695,6 +724,11 @@ function classToStyle($editable) {
         }
         if ($target.get(0).style.width) {
             $target.attr('width', $target.css('width')); // Widths need to be applied as attributes as well.
+        }
+
+        // Media list images should not have an inline height
+        if (node.nodeName === 'IMG' && $target.hasClass('s_media_list_img')) {
+            $target.css('height', '');
         }
         // Apple Mail
         if (node.nodeName === 'TD' && !node.childNodes.length) {
@@ -813,7 +847,7 @@ FieldHtml.include({
             $editable.find('img').attr(attribute, function(){
                 return $(this)[attribute]();
             }).css(attribute, function(){
-                return $(this).get(0).style[attribute] || $(this)[attribute]() || 'auto';
+                return $(this).get(0).style[attribute] || attribute === 'width' ? $(this)[attribute]() + 'px' : '';
             });
         });
         $odooEditor.addClass('odoo-editor');
@@ -824,7 +858,7 @@ FieldHtml.include({
     },
 });
 
-return {
+export default {
     fontToImg: fontToImg,
     bootstrapToTable: bootstrapToTable,
     cardToTable: cardToTable,
@@ -836,4 +870,3 @@ return {
     normalizeRem: normalizeRem,
     attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,
 };
-});

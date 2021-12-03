@@ -4370,6 +4370,43 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('form with domain widget: opening a many2many form and save should not crash', async function (assert) {
+        assert.expect(0);
+
+        // We just test that there is no crash in this situation
+        this.data.partner.records[0].timmy = [12];
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:
+                `<form string="Partners">
+                    <group>
+                        <field name="foo" widget="domain"/>
+                    </group>
+                    <field name="timmy">
+                        <tree>
+                            <field name="display_name"/>
+                        </tree>
+                        <form>
+                            <field name="name"/>
+                            <field name="color"/>
+                        </form>
+                    </field>
+                </form>`,
+            res_id: 1,
+        });
+
+        // switch to edit mode
+        await testUtils.form.clickEdit(form);
+
+        // open a form view and save many2many record
+        await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+        await testUtils.dom.click($('.modal-dialog footer button:first-child'));
+
+        form.destroy();
+    });
+
     QUnit.test('display_name not sent for onchanges if not in view', async function (assert) {
         assert.expect(7);
 
@@ -10856,7 +10893,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('Quick Edition: Readonly one2many list', async function (assert) {
-        assert.expect(7);
+        assert.expect(4);
 
         this.data.partner.records[0].p.push(2);
 
@@ -10883,13 +10920,8 @@ QUnit.module('Views', {
 
         await testUtils.dom.click(form.$('.o_field_cell:first'));
 
-        assert.containsOnce(form, '.o_form_view.o_form_editable',
-            'should switch into edit mode');
-        assert.containsNone(form, '.o_field_x2many_list_row_add',
-            'create line should still not be displayed');
-        assert.containsNone(form, '.o_list_record_remove',
-            'remove buttons should still not be displayed');
-        assert.containsNone(form, 'input');
+        assert.containsOnce(form, '.o_form_view.o_form_readonly',
+            'should not switch into edit mode');
 
         form.destroy();
     });
@@ -11247,7 +11279,7 @@ QUnit.module('Views', {
 
         await testUtils.dom.click(form.$('.o_field_widget[name="timmy"] label:eq(1)'));
 
-        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
         assert.containsNone(form, 'input[type="checkbox"]:not(:disabled)');
         assert.containsNone(form, 'input[type="checkbox"]:checked');
 
@@ -11329,9 +11361,9 @@ QUnit.module('Views', {
 
         await testUtils.dom.click(form.$('.o_field_widget[name="trululu"] label:eq(1)'));
 
-        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
         assert.containsOnce(form, 'input[type="radio"]:eq(2):checked');
-        assert.containsNone(form, 'input[type="checkbox"]:not(:disabled)');
+        assert.containsNone(form, 'input[type="radio"]:not(:disabled)');
 
         form.destroy();
     });

@@ -166,7 +166,7 @@ class HrExpense(models.Model):
                 residual_field = 'amount_residual'
             else:
                 residual_field = 'amount_residual_currency'
-            payment_term_lines = expense.sheet_id.account_move_id.line_ids \
+            payment_term_lines = expense.sheet_id.account_move_id.sudo().line_ids \
                 .filtered(lambda line: line.expense_id == self and line.account_internal_type in ('receivable', 'payable'))
             expense.amount_residual = -sum(payment_term_lines.mapped(residual_field))
 
@@ -706,7 +706,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
             'unit_amount': price,
             'product_id': product.id if product else None,
             'product_uom_id': product.uom_id.id,
-            'tax_ids': [(4, tax.id, False) for tax in product.supplier_taxes_id],
+            'tax_ids': [(4, tax.id, False) for tax in product.supplier_taxes_id.filtered(lambda r: r.company_id == company)],
             'quantity': 1,
             'company_id': company.id,
             'currency_id': currency_id.id

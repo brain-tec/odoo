@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { patch, unpatch } from "@web/core/utils/patch";
+import legacyUtils from "web.utils";
 
 function makeBaseClass(assert, assertInSetup) {
     class BaseClass {
@@ -437,6 +438,39 @@ QUnit.module("utils", () => {
             unpatch(BaseClass.prototype, "patch");
 
             instance.dynamic = "base";
+            assert.strictEqual(instance.dynamic, "base");
+        });
+
+        QUnit.test("patch getter/setter with value", async function (assert) {
+            assert.expect(4);
+
+            const BaseClass = makeBaseClass(assert, false);
+
+            const originalDescriptor = Object.getOwnPropertyDescriptor(
+                BaseClass.prototype,
+                "dynamic"
+            );
+            patch(BaseClass.prototype, "patch", {
+                dynamic: "patched",
+            });
+
+            const instance = new BaseClass();
+
+            assert.deepEqual(Object.getOwnPropertyDescriptor(BaseClass.prototype, "dynamic"), {
+                value: "patched",
+                writable: true,
+                configurable: true,
+                enumerable: true,
+            });
+            assert.equal(instance.dynamic, "patched");
+
+            unpatch(BaseClass.prototype, "patch");
+
+            instance.dynamic = "base";
+            assert.deepEqual(
+                Object.getOwnPropertyDescriptor(BaseClass.prototype, "dynamic"),
+                originalDescriptor
+            );
             assert.strictEqual(instance.dynamic, "base");
         });
 
@@ -1106,6 +1140,28 @@ QUnit.module("utils", () => {
             fn();
 
             assert.verifySteps(["patched", "original"]);
+        });
+
+        QUnit.test("patch an object with a legacy patch", async function (assert) {
+            const a = {
+                doSomething() {
+                    assert.step("a");
+                },
+            };
+            legacyUtils.patch(a, "a.patch.legacy", {
+                doSomething() {
+                    this._super();
+                    assert.step("a.patch.legacy");
+                },
+            });
+            patch(a, "a.patch", {
+                doSomething() {
+                    this._super();
+                    assert.step("a.patch");
+                },
+            });
+            a.doSomething();
+            assert.verifySteps(["a", "a.patch.legacy", "a.patch"]);
         });
 
         QUnit.module("patch 'pure' option");
