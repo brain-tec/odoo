@@ -108,7 +108,7 @@
                                             </span>
                                             <t t-set="opened">
                                                 <NotificationPopover
-                                                    notificationLocalIds="messageView.message.notifications.map(notification => notification.localId)"
+                                                    messageViewLocalId="messageView.localId"
                                                 />
                                             </t>
                                         </Popover>
@@ -132,7 +132,6 @@
                                     hasMentionSuggestionsBelowPosition="false"
                                     hasSendButton="false"
                                     isCompact="true"
-                                    textInputSendShortcuts="['enter']"
                                     t-ref="composer"
                                 />
                             </t>
