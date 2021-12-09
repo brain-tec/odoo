@@ -135,7 +135,7 @@ class TestProcurement(TestMrpCommon):
         self.env['stock.location']._parent_store_compute()
         warehouse.reception_route_id.rule_ids.filtered(
             lambda p: p.location_src_id == warehouse.wh_input_stock_loc_id and
-            p.location_id == warehouse.wh_qc_stock_loc_id).write({
+            p.location_dest_id == warehouse.wh_qc_stock_loc_id).write({
                 'procure_method': 'make_to_stock'
             })
 
@@ -543,7 +543,7 @@ class TestProcurement(TestMrpCommon):
             'name': 'Roger'
         })
         # This needs to be tried with MTO route activated
-        self.env['stock.location.route'].browse(self.ref('stock.route_warehouse0_mto')).action_unarchive()
+        self.env['stock.route'].browse(self.ref('stock.route_warehouse0_mto')).action_unarchive()
         # Define products requested for this BoM.
         product = self.env['product.product'].create({
             'name': 'product',

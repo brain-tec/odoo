@@ -58,7 +58,7 @@ class TestCreatePicking(common.TestProductCommon):
         # Validate first shipment
         self.picking = self.po.picking_ids[0]
         for ml in self.picking.move_line_ids:
-            ml.qty_done = ml.product_uom_qty
+            ml.qty_done = ml.reserved_uom_qty
         self.picking._action_done()
         self.assertEqual(self.po.order_line.mapped('qty_received'), [7.0], 'Purchase: all products should be received')
 
@@ -547,7 +547,7 @@ class TestCreatePicking(common.TestProductCommon):
             'name': 'Roger'
         })
         # This needs to be tried with MTO route activated
-        self.env['stock.location.route'].browse(self.ref('stock.route_warehouse0_mto')).action_unarchive()
+        self.env['stock.route'].browse(self.ref('stock.route_warehouse0_mto')).action_unarchive()
         product = self.env['product.product'].create({
             'name': 'product',
             'type': 'product',

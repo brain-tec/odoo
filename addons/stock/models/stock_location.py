@@ -87,7 +87,7 @@ class Location(models.Model):
     _sql_constraints = [('barcode_company_uniq', 'unique (barcode,company_id)', 'The barcode for a location must be unique per company !'),
                         ('inventory_freq_nonneg', 'check(cyclic_inventory_frequency >= 0)', 'The inventory frequency (days) for a location must be non-negative')]
 
-    @api.depends('outgoing_move_line_ids.product_qty', 'incoming_move_line_ids.product_qty',
+    @api.depends('outgoing_move_line_ids.reserved_qty', 'incoming_move_line_ids.reserved_qty',
                  'outgoing_move_line_ids.state', 'incoming_move_line_ids.state',
                  'outgoing_move_line_ids.product_id.weight', 'outgoing_move_line_ids.product_id.weight',
                  'quant_ids.quantity', 'quant_ids.product_id.weight')
@@ -101,9 +101,9 @@ class Location(models.Model):
                 location.net_weight += quant.product_id.weight * quant.quantity
             location.forecast_weight = location.net_weight
             for line in incoming_move_lines:
-                location.forecast_weight += line.product_id.weight * line.product_qty
+                location.forecast_weight += line.product_id.weight * line.reserved_qty
             for line in outgoing_move_lines:
-                location.forecast_weight -= line.product_id.weight * line.product_qty
+                location.forecast_weight -= line.product_id.weight * line.reserved_qty
 
     @api.depends('name', 'location_id.complete_name', 'usage')
     def _compute_complete_name(self):
@@ -168,7 +168,7 @@ class Location(models.Model):
                               for f in {'usage', 'scrap_location'}))
             reserved_quantities = self.env['stock.move.line'].search_count([
                 ('location_id', 'in', modified_locations.ids),
-                ('product_qty', '>', 0),
+                ('reserved_qty', '>', 0),
             ])
             if reserved_quantities:
                 raise UserError(_(
@@ -264,7 +264,7 @@ class Location(models.Model):
                         ('product_id', '=', product.id),
                         ('location_dest_id', 'in', locations.ids),
                         ('state', 'not in', ['draft', 'done', 'cancel'])
-                    ], ['location_dest_id', 'product_id', 'product_qty:array_agg', 'qty_done:array_agg', 'product_uom_id:array_agg'], ['location_dest_id'])
+                    ], ['location_dest_id', 'product_id', 'reserved_qty:array_agg', 'qty_done:array_agg', 'product_uom_id:array_agg'], ['location_dest_id'])
                     quant_data = self.env['stock.quant'].read_group([
                         ('product_id', '=', product.id),
                         ('location_id', 'in', locations.ids),
@@ -273,7 +273,7 @@ class Location(models.Model):
                     for values in move_line_data:
                         uoms = self.env['uom.uom'].browse(values['product_uom_id'])
                         qty_done = sum(max(ml_uom._compute_quantity(float(qty), product.uom_id), float(qty_reserved))
-                                    for qty_reserved, qty, ml_uom in zip(values['product_qty'], values['qty_done'], list(uoms)))
+                                    for qty_reserved, qty, ml_uom in zip(values['reserved_qty'], values['qty_done'], list(uoms)))
                         qty_by_location[values['location_dest_id'][0]] = qty_done
                     for values in quant_data:
                         qty_by_location[values['location_id'][0]] += values['quantity']
@@ -351,8 +351,8 @@ class Location(models.Model):
         return True
 
 
-class Route(models.Model):
-    _name = 'stock.location.route'
+class StockRoute(models.Model):
+    _name = 'stock.route'
     _description = "Inventory Routes"
     _order = 'sequence'
     _check_company_auto = True
@@ -374,8 +374,8 @@ class Route(models.Model):
     product_ids = fields.Many2many(
         'product.template', 'stock_route_product', 'route_id', 'product_id',
         'Products', copy=False, check_company=True)
-    categ_ids = fields.Many2many('product.category', 'stock_location_route_categ', 'route_id', 'categ_id', 'Product Categories', copy=False)
-    packaging_ids = fields.Many2many('product.packaging', 'stock_location_route_packaging', 'route_id', 'packaging_id', 'Packagings', copy=False, check_company=True)
+    categ_ids = fields.Many2many('product.category', 'stock_route_categ', 'route_id', 'categ_id', 'Product Categories', copy=False)
+    packaging_ids = fields.Many2many('product.packaging', 'stock_route_packaging', 'route_id', 'packaging_id', 'Packagings', copy=False, check_company=True)
     warehouse_domain_ids = fields.One2many('stock.warehouse', compute='_compute_warehouses')
     warehouse_ids = fields.Many2many(
         'stock.warehouse', 'stock_route_warehouse', 'route_id', 'warehouse_id',
@@ -400,4 +400,4 @@ class Route(models.Model):
     def toggle_active(self):
         for route in self:
             route.with_context(active_test=False).rule_ids.filtered(lambda ru: ru.active == route.active).toggle_active()
-        super(Route, self).toggle_active()
+        super().toggle_active()

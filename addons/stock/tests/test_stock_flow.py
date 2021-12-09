@@ -27,7 +27,7 @@ class TestStockFlow(TestStockCommon):
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_00_picking_create_and_transfer_quantity(self):
         """ Basic stock operation on incoming and outgoing shipment. """
-        LotObj = self.env['stock.production.lot']
+        LotObj = self.env['stock.lot']
         # ----------------------------------------------------------------------
         # Create incoming shipment of product A, B, C, D
         # ----------------------------------------------------------------------
@@ -333,7 +333,7 @@ class TestStockFlow(TestStockCommon):
         # Replace pack operation (Back order of Incoming shipment)
         # ----------------------------------------------------------------------
 
-        packD = self.StockPackObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_in.id)], order='product_qty')
+        packD = self.StockPackObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_in.id)], order='reserved_qty')
         self.assertEqual(len(packD), 1, 'Wrong number of pack operation.')
         packD[0].write({
             'qty_done': 8,
@@ -511,7 +511,7 @@ class TestStockFlow(TestStockCommon):
         # ----------------------------------------------------
 
         PackSdozAround = self.StockPackObj.search([('product_id', '=', self.SDozARound.id), ('picking_id', '=', picking_in_A.id)], limit=1)
-        self.assertEqual(PackSdozAround.product_qty, 11, 'Wrong quantity in pack operation (%s found instead of 11)' % (PackSdozAround.product_qty))
+        self.assertEqual(PackSdozAround.reserved_qty, 11, 'Wrong quantity in pack operation (%s found instead of 11)' % (PackSdozAround.reserved_qty))
         res_dict = picking_in_A.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         wizard.process()
@@ -610,25 +610,25 @@ class TestStockFlow(TestStockCommon):
 
         # Check pack operation quantity and unit of measure for product DozA.
         PackdozA = self.StockPackObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
-        self.assertEqual(PackdozA.product_uom_qty, 120, 'Wrong quantity in pack operation (%s found instead of 120)' % (PackdozA.product_uom_qty))
-        self.assertEqual(PackdozA.product_qty, 10, 'Wrong real quantity in pack operation (%s found instead of 10)' % (PackdozA.product_qty))
+        self.assertEqual(PackdozA.reserved_uom_qty, 120, 'Wrong quantity in pack operation (%s found instead of 120)' % (PackdozA.reserved_uom_qty))
+        self.assertEqual(PackdozA.reserved_qty, 10, 'Wrong real quantity in pack operation (%s found instead of 10)' % (PackdozA.reserved_qty))
         self.assertEqual(PackdozA.product_uom_id.id, self.uom_unit.id, 'Wrong uom in pack operation for product DozA.')
         # Check pack operation quantity and unit of measure for product SDozA.
         PackSdozA = self.StockPackObj.search([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
-        self.assertEqual(PackSdozA.product_uom_qty, 1512, 'Wrong quantity in pack operation (%s found instead of 1512)' % (PackSdozA.product_uom_qty))
+        self.assertEqual(PackSdozA.reserved_uom_qty, 1512, 'Wrong quantity in pack operation (%s found instead of 1512)' % (PackSdozA.reserved_uom_qty))
         self.assertEqual(PackSdozA.product_uom_id.id, self.uom_unit.id, 'Wrong uom in pack operation for product SDozA.')
         # Check pack operation quantity and unit of measure for product SDozARound.
         PackSdozAround = self.StockPackObj.search([('product_id', '=', self.SDozARound.id), ('picking_id', '=', picking_in_B.id)], limit=1)
-        self.assertEqual(PackSdozAround.product_uom_qty, 1584, 'Wrong quantity in pack operation (%s found instead of 1584)' % (PackSdozAround.product_uom_qty))
+        self.assertEqual(PackSdozAround.reserved_uom_qty, 1584, 'Wrong quantity in pack operation (%s found instead of 1584)' % (PackSdozAround.reserved_uom_qty))
         self.assertEqual(PackSdozAround.product_uom_id.id, self.uom_unit.id, 'Wrong uom in pack operation for product SDozARound.')
         # Check pack operation quantity and unit of measure for product gB.
         packgB = self.StockPackObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
-        self.assertEqual(packgB.product_uom_qty, 0.525, 'Wrong quantity in pack operation (%s found instead of 0.525)' % (packgB.product_uom_qty))
-        self.assertEqual(packgB.product_qty, 525, 'Wrong real quantity in pack operation (%s found instead of 525)' % (packgB.product_qty))
+        self.assertEqual(packgB.reserved_uom_qty, 0.525, 'Wrong quantity in pack operation (%s found instead of 0.525)' % (packgB.reserved_uom_qty))
+        self.assertEqual(packgB.reserved_qty, 525, 'Wrong real quantity in pack operation (%s found instead of 525)' % (packgB.reserved_qty))
         self.assertEqual(packgB.product_uom_id.id, packgB.move_id.product_uom.id, 'Wrong uom in pack operation for product kgB.')
         # Check pack operation quantity and unit of measure for product kgB.
         packkgB = self.StockPackObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
-        self.assertEqual(packkgB.product_uom_qty, 20.0, 'Wrong quantity in pack operation (%s found instead of 20)' % (packkgB.product_uom_qty))
+        self.assertEqual(packkgB.reserved_uom_qty, 20.0, 'Wrong quantity in pack operation (%s found instead of 20)' % (packkgB.reserved_uom_qty))
         self.assertEqual(packkgB.product_uom_id.id, self.uom_gm.id, 'Wrong uom in pack operation for product kgB')
 
         # ----------------------------------------------------------------------
@@ -636,14 +636,14 @@ class TestStockFlow(TestStockCommon):
         # ----------------------------------------------------------------------
 
         self.StockPackObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 0.020, 'product_uom_id': self.uom_kg.id})
+            'reserved_uom_qty': 0.020, 'product_uom_id': self.uom_kg.id})
         self.StockPackObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 526, 'product_uom_id': self.uom_gm.id})
+            'reserved_uom_qty': 526, 'product_uom_id': self.uom_gm.id})
         self.StockPackObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 4, 'product_uom_id': self.uom_dozen.id})
+            'reserved_uom_qty': 4, 'product_uom_id': self.uom_dozen.id})
         self.StockPackObj.create({
             'product_id': self.DozA.id,
-            'product_uom_qty': 48,
+            'reserved_uom_qty': 48,
             'product_uom_id': self.uom_unit.id,
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
@@ -927,8 +927,8 @@ class TestStockFlow(TestStockCommon):
             self.assertEqual(move.state, 'assigned', 'Wrong state of move line.')
         # Check pack operation quantity.
         packKG = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', picking_in.id)], limit=1)
-        self.assertEqual(packKG.product_qty, 1000, 'Wrong product real quantity in pack operation (%s found instead of 1000)' % (packKG.product_qty))
-        self.assertEqual(packKG.product_uom_qty, 1, 'Wrong product quantity in pack operation (%s found instead of 1)' % (packKG.product_uom_qty))
+        self.assertEqual(packKG.reserved_qty, 1000, 'Wrong product real quantity in pack operation (%s found instead of 1000)' % (packKG.reserved_qty))
+        self.assertEqual(packKG.reserved_uom_qty, 1, 'Wrong product quantity in pack operation (%s found instead of 1)' % (packKG.reserved_uom_qty))
         self.assertEqual(packKG.product_uom_id.id, self.uom_tone.id, 'Wrong product uom in pack operation.')
         # Transfer Incoming shipment.
         res_dict = picking_in.button_validate()
@@ -966,7 +966,7 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', picking_out.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'reserved_uom_qty': 0.5})
         res_dict = picking_out.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         res_dict_for_back_order = wizard.process()
@@ -990,7 +990,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_1.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_1.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'reserved_uom_qty': 0.5})
         res_dict = bo_out_1.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         res_dict_for_back_order = wizard.process()
@@ -1014,7 +1014,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_2.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_2.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'reserved_uom_qty': 0.5})
         res_dict = bo_out_2.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         res_dict_for_back_order = wizard.process()
@@ -1037,7 +1037,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_3.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_3.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'reserved_uom_qty': 0.5})
         res_dict = bo_out_3.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         res_dict_for_back_order = wizard.process()
@@ -1058,7 +1058,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_4.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_4.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'reserved_uom_qty': 0.5})
         res_dict = bo_out_4.button_validate()
         wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
         wizard.process()
@@ -1075,7 +1075,7 @@ class TestStockFlow(TestStockCommon):
         lotproduct = self.ProductObj.create({'name': 'Lot Product', 'uom_id': self.uom_unit.id, 'uom_po_id': self.uom_unit.id, 'type': 'product'})
         quant_obj = self.env['stock.quant'].with_context(inventory_mode=True)
         pack_obj = self.env['stock.quant.package']
-        lot_obj = self.env['stock.production.lot']
+        lot_obj = self.env['stock.lot']
         pack1 = pack_obj.create({'name': 'PACK00TEST1'})
         pack_obj.create({'name': 'PACK00TEST2'})
         lot1 = lot_obj.create({'name': 'Lot001', 'product_id': lotproduct.id, 'company_id': self.env.company.id})
@@ -1327,7 +1327,7 @@ class TestStockFlow(TestStockCommon):
         pack2 = pack_obj.create({'name': 'PACKINOUTTEST2'})
         picking_in.move_line_ids[0].result_package_id = pack1
         picking_in.move_line_ids[0].qty_done = 4
-        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'reserved_uom_qty': 0})
         packop2.qty_done = 6
         packop2.result_package_id = pack2
         picking_in._action_done()
@@ -1351,7 +1351,7 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         packout1 = picking_out.move_line_ids[0]
-        packout2 = picking_out.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packout2 = picking_out.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'reserved_uom_qty': 0})
         packout1.qty_done = 2
         packout1.package_id = pack1
         packout2.package_id = pack2
@@ -1385,7 +1385,7 @@ class TestStockFlow(TestStockCommon):
         pack2 = pack_obj.create({'name': 'PACKINOUTTEST2'})
         picking_in.move_line_ids[0].result_package_id = pack1
         picking_in.move_line_ids[0].qty_done = 120
-        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'reserved_uom_qty': 0})
         packop2.qty_done = 80
         packop2.result_package_id = pack2
         picking_in._action_done()
@@ -1705,7 +1705,7 @@ class TestStockFlow(TestStockCommon):
 
         warehouse_company_1 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
-        f = Form(self.env['stock.location.route'])
+        f = Form(self.env['stock.route'])
         f.name = 'From Company 1 to InterCompany'
         f.company_id = self.env.company
         with f.rule_ids.new() as rule:
@@ -1716,14 +1716,14 @@ class TestStockFlow(TestStockCommon):
             rule.procure_method = 'make_to_order'
         route_a = f.save()
         warehouse_company_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)], limit=1)
-        f = Form(self.env['stock.location.route'])
+        f = Form(self.env['stock.route'])
         f.name = 'From InterCompany to Company 2'
         f.company_id = company_2
         with f.rule_ids.new() as rule:
             rule.name = 'From InterCompany to Company 2'
             rule.action = 'pull'
             rule.picking_type_id = warehouse_company_2.out_type_id
-            rule.location_id = self.env.ref('stock.stock_location_inter_wh')
+            rule.location_dest_id = self.env.ref('stock.stock_location_inter_wh')
             rule.procure_method = 'make_to_stock'
         route_b = f.save()
 
@@ -1769,7 +1769,7 @@ class TestStockFlow(TestStockCommon):
 
         warehouse_company_1 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
-        f = Form(self.env['stock.location.route'])
+        f = Form(self.env['stock.route'])
         f.name = 'From Company 1 to InterCompany'
         f.company_id = self.env.company
         with f.rule_ids.new() as rule:
@@ -1781,14 +1781,14 @@ class TestStockFlow(TestStockCommon):
         route_a = f.save()
 
         warehouse_company_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)], limit=1)
-        f = Form(self.env['stock.location.route'])
+        f = Form(self.env['stock.route'])
         f.name = 'From InterCompany to Company 2'
         f.company_id = company_2
         with f.rule_ids.new() as rule:
             rule.name = 'From InterCompany to Company 2'
             rule.action = 'pull'
             rule.picking_type_id = warehouse_company_2.out_type_id
-            rule.location_id = self.env.ref('stock.stock_location_inter_wh')
+            rule.location_dest_id = self.env.ref('stock.stock_location_inter_wh')
             rule.procure_method = 'make_to_stock'
         route_b = f.save()
 
@@ -1797,14 +1797,14 @@ class TestStockFlow(TestStockCommon):
         })
 
         warehouse_company_3 = self.env['stock.warehouse'].search([('company_id', '=', company_3.id)], limit=1)
-        f = Form(self.env['stock.location.route'])
+        f = Form(self.env['stock.route'])
         f.name = 'From InterCompany to Company 3'
         f.company_id = company_3
         with f.rule_ids.new() as rule:
             rule.name = 'From InterCompany to Company 3'
             rule.action = 'pull'
             rule.picking_type_id = warehouse_company_3.out_type_id
-            rule.location_id = self.env.ref('stock.stock_location_inter_wh')
+            rule.location_dest_id = self.env.ref('stock.stock_location_inter_wh')
             rule.procure_method = 'make_to_stock'
         route_c = f.save()
 
@@ -1968,7 +1968,7 @@ class TestStockFlow(TestStockCommon):
 
         # Validates the two receipts and checks the move lines' lot.
         (receipt_1 | receipt_2).button_validate()
-        lots = self.env['stock.production.lot'].search([('product_id', '=', product_lot.id)], order='name asc')
+        lots = self.env['stock.lot'].search([('product_id', '=', product_lot.id)], order='name asc')
         self.assertEqual(len(lots), 5)
         lot1, lot2, lot3, lot4, lot5 = lots
         self.assertEqual(lot1.name, 'lot-001')
@@ -2101,3 +2101,58 @@ class TestStockFlow(TestStockCommon):
 
         bo = self.env['stock.picking'].search([('backorder_id', '=', picking_out.id)])
         self.assertEqual(bo.state, 'assigned')
+
+    def test_picking_set_clear_qty(self):
+        picking_in = self.PickingObj.create({
+            'picking_type_id': self.picking_type_in,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+        })
+        move_a = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 10,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': picking_in.id,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location})
+        move_b = self.MoveObj.create({
+            'name': self.productB.name,
+            'product_id': self.productB.id,
+            'product_uom_qty': 10,
+            'product_uom': self.productB.uom_id.id,
+            'picking_id': picking_in.id,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location})
+        picking_in.action_confirm()
+
+        # test set qty button without manual change
+        self.assertTrue(picking_in.show_set_qty_button)
+        self.assertEqual(move_a.quantity_done, 0)
+        self.assertEqual(move_b.quantity_done, 0)
+        picking_in.action_set_quantities_to_reservation()
+        self.assertEqual(move_a.quantity_done, 10)
+        self.assertEqual(move_b.quantity_done, 10)
+        self.assertFalse(picking_in.show_set_qty_button)
+
+        # test clear qty button without manual change
+        self.assertTrue(picking_in.show_clear_qty_button)
+        picking_in.action_clear_quantities_to_zero()
+        self.assertEqual(move_a.quantity_done, 0)
+        self.assertEqual(move_b.quantity_done, 0)
+        self.assertFalse(picking_in.show_clear_qty_button)
+
+        # test set qty button with manual change
+        move_a.quantity_done = 5
+        self.assertTrue(picking_in.show_set_qty_button)
+        picking_in.action_set_quantities_to_reservation()
+        self.assertEqual(move_a.quantity_done, 5)
+        self.assertEqual(move_b.quantity_done, 10)
+        self.assertFalse(picking_in.show_set_qty_button)
+
+        # test clear qty button with manual change
+        self.assertTrue(picking_in.show_clear_qty_button)
+        picking_in.action_clear_quantities_to_zero()
+        self.assertEqual(move_a.quantity_done, 5)
+        self.assertEqual(move_b.quantity_done, 0)
+        self.assertFalse(picking_in.show_clear_qty_button)

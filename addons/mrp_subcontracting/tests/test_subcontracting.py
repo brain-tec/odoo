@@ -95,7 +95,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         actually works. Also set a different subcontracting location on the partner.
         """
         # Tick "resupply subconractor on order"
-        resupply_sub_on_order_route = self.env['stock.location.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [(4, resupply_sub_on_order_route.id, None)]})
         # Create a different subcontract location
         partner_subcontract_location = self.env['stock.location'].create({
@@ -105,14 +105,14 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
             'company_id': self.env.company.id,
         })
         self.subcontractor_partner1.property_stock_subcontractor = partner_subcontract_location.id
-        resupply_rule = resupply_sub_on_order_route.rule_ids.filtered(lambda l:
-            l.location_id == self.comp1.property_stock_production and
-            l.location_src_id == self.env.company.subcontracting_location_id)
+        resupply_rule = resupply_sub_on_order_route.rule_ids.filtered(lambda r:
+            r.location_dest_id == self.comp1.property_stock_production and
+            r.location_src_id == self.env.company.subcontracting_location_id)
         resupply_rule.copy({'location_src_id': partner_subcontract_location.id})
-        resupply_warehouse_rule = self.warehouse.route_ids.rule_ids.filtered(lambda l:
-            l.location_id == self.env.company.subcontracting_location_id and
-            l.location_src_id == self.warehouse.lot_stock_id)
-        resupply_warehouse_rule.copy({'location_id': partner_subcontract_location.id})
+        resupply_warehouse_rule = self.warehouse.route_ids.rule_ids.filtered(lambda r:
+            r.location_dest_id == self.env.company.subcontracting_location_id and
+            r.location_src_id == self.warehouse.lot_stock_id)
+        resupply_warehouse_rule.copy({'location_dest_id': partner_subcontract_location.id})
         # Add a manufacturing lead time to check that the resupply delivery is correctly planned 2 days
         # before the subcontracting receipt
         self.finished.produce_delay = 2
@@ -175,13 +175,13 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         linked. Checks that an MO is created for this one.
         """
         # Tick "resupply subconractor on order"
-        resupply_sub_on_order_route = self.env['stock.location.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [(4, resupply_sub_on_order_route.id, None)]})
 
         # Tick "manufacture" and MTO on self.comp2
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        manufacture_route = self.env['stock.location.route'].search([('name', '=', 'Manufacture')])
+        manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
         self.comp2.write({'route_ids': [(4, manufacture_route.id, None)]})
         self.comp2.write({'route_ids': [(4, mto_route.id, None)]})
 
@@ -239,7 +239,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         # Tick "manufacture" and MTO on self.comp2
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        manufacture_route = self.env['stock.location.route'].search([('name', '=', 'Manufacture')])
+        manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
         self.comp2.write({'route_ids': [(4, manufacture_route.id, None)]})
         self.comp2.write({'route_ids': [(4, mto_route.id, None)]})
 
@@ -404,7 +404,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         self.assertEqual(sum(move_finished.mapped('quantity_done')), 3.0)
 
     def test_flow_8(self):
-        resupply_sub_on_order_route = self.env['stock.location.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [(4, resupply_sub_on_order_route.id, None)]})
 
         # Create a receipt picking from the subcontractor
@@ -441,7 +441,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         """Ensure that cancel the subcontract moves will also delete the
         components need for the subcontractor.
         """
-        resupply_sub_on_order_route = self.env['stock.location.route'].search([
+        resupply_sub_on_order_route = self.env['stock.route'].search([
             ('name', '=', 'Resupply Subcontractor on Order')
         ])
         (self.comp1 + self.comp2).write({
@@ -679,12 +679,12 @@ class TestSubcontractingTracking(TransactionCase):
         self.assertEqual(len(picking), 1)
         self.assertEqual(picking.picking_type_id, wh.subcontracting_resupply_type_id)
 
-        lot_id = self.env['stock.production.lot'].create({
+        lot_id = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.finished_product.id,
             'company_id': self.env.company.id,
         })
-        serial_id = self.env['stock.production.lot'].create({
+        serial_id = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.comp1_sn.id,
             'company_id': self.env.company.id,
@@ -787,7 +787,7 @@ class TestSubcontractingTracking(TransactionCase):
         self.assertEqual(mo.picking_type_id, wh.subcontracting_type_id)
         self.assertFalse(mo.picking_type_id.active)
 
-        lot_comp2 = self.env['stock.production.lot'].create({
+        lot_comp2 = self.env['stock.lot'].create({
             'name': 'lot_comp2',
             'product_id': self.comp2.id,
             'company_id': self.env.company.id,
@@ -795,12 +795,12 @@ class TestSubcontractingTracking(TransactionCase):
         serials_finished = []
         serials_comp1 = []
         for i in range(todo_nb):
-            serials_finished.append(self.env['stock.production.lot'].create({
+            serials_finished.append(self.env['stock.lot'].create({
                 'name': 'serial_fin_%s' % i,
                 'product_id': self.finished_product.id,
                 'company_id': self.env.company.id,
             }))
-            serials_comp1.append(self.env['stock.production.lot'].create({
+            serials_comp1.append(self.env['stock.lot'].create({
                 'name': 'serials_comp1_%s' % i,
                 'product_id': self.comp1_sn.id,
                 'company_id': self.env.company.id,
@@ -840,7 +840,7 @@ class TestSubcontractingTracking(TransactionCase):
     def test_flow_tracked_backorder02(self):
         """ Both component and finished product are tracked by lot. """
         todo_nb = 4
-        resupply_sub_on_order_route = self.env['stock.location.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         finished_product, component = self.env['product.product'].create([{
             'name': 'SuperProduct',
             'type': 'product',
@@ -861,7 +861,7 @@ class TestSubcontractingTracking(TransactionCase):
             bom_line.product_qty = 1
         bom = bom_form.save()
 
-        finished_lot, component_lot = self.env['stock.production.lot'].create([{
+        finished_lot, component_lot = self.env['stock.lot'].create([{
             'name': 'lot_%s' % product.name,
             'product_id': product.id,
             'company_id': self.env.company.id,

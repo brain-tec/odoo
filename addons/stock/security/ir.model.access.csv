@@ -10,7 +10,7 @@ access_stock_picking_manager,stock.picking manager,model_stock_picking,stock.gro
 access_stock_picking_type_all,stock.picking.type all users,model_stock_picking_type,base.group_user,1,0,0,0
 access_stock_picking_type_user,stock.picking.type user,model_stock_picking_type,stock.group_stock_user,1,0,0,0
 access_stock_picking_type_manager,stock.picking.type manager,model_stock_picking_type,stock.group_stock_manager,1,1,1,1
-access_stock_production_lot_user,stock.production.lot user,model_stock_production_lot,stock.group_stock_user,1,1,1,1
+access_stock_lot_user,stock.lot user,model_stock_lot,stock.group_stock_user,1,1,1,1
 access_stock_move_manager,stock.move manager,model_stock_move,stock.group_stock_manager,1,1,1,1
 access_stock_move_user,stock.move user,model_stock_move,stock.group_stock_user,1,1,1,0
 access_product_product_stock_user,product_product_stock_user,product.model_product_product,stock.group_stock_user,1,0,0,0
@@ -37,8 +37,8 @@ access_stock_package_level_stock_manager,stock.package_level stock manager,model
 access_stock_package_level_stock_user,stock.package_level stock user,model_stock_package_level,stock.group_stock_user,1,1,1,1
 access_stock_rule_user,stock_rule user,model_stock_rule,stock.group_stock_user,1,0,0,0
 access_stock_rule_stock_manager,stock_rule stock manager,model_stock_rule,stock.group_stock_manager,1,1,1,1
-access_stock_location_route_stock_manager,stock.location.route,model_stock_location_route,stock.group_stock_manager,1,1,1,1
-access_stock_location_route,stock.location.route,model_stock_location_route,base.group_user,1,0,0,0
+access_stock_location_route_stock_manager,stock.route,model_stock_route,stock.group_stock_manager,1,1,1,1
+access_stock_location_route,stock.route,model_stock_route,base.group_user,1,0,0,0
 access_stock_rule_internal,stock.rule.flow internal,model_stock_rule,base.group_user,1,0,0,0
 access_stock_move_line_manager,stock.move.line manager,model_stock_move_line,stock.group_stock_manager,1,1,1,1
 access_stock_move_line_user,stock.move.line user,model_stock_move_line,stock.group_stock_user,1,1,1,1

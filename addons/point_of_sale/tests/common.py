@@ -176,7 +176,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         cls.other_receivable_account = cls.env['account.account'].create({
             'name': 'Other Receivable',
             'code': 'RCV00' ,
-            'user_type_id': cls.env['account.account.type'].create({'name': 'RCV type', 'type': 'receivable', 'internal_group': 'asset'}).id,
+            'user_type_id': cls.env['account.account.type'].sudo().create({'name': 'RCV type', 'type': 'receivable', 'internal_group': 'asset'}).id,
             'internal_group': 'asset',
             'reconcile': True,
         })
@@ -520,7 +520,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             * currency : currency of the current pos.session
             * pricelist : the default pricelist of the session
         """
-        self.config.open_session_cb(check_coa=False)
+        self.config.open_session_cb()
         self.pos_session = self.config.current_session_id
         self.currency = self.pos_session.currency_id
         self.pricelist = self.pos_session.config_id.pricelist_id

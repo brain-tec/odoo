@@ -162,7 +162,14 @@ class MailRenderMixin(models.AbstractModel):
         _sub_relative2absolute.base_url = base_url
         html = re.sub(r"""(<img(?=\s)[^>]*\ssrc=")(/[^/][^"]+)""", _sub_relative2absolute, html)
         html = re.sub(r"""(<a(?=\s)[^>]*\shref=")(/[^/][^"]+)""", _sub_relative2absolute, html)
-        html = re.sub(r"""(<[^>]+\bstyle="[^"]+\burl\('?)(/[^/'][^'")]+)""", _sub_relative2absolute, html)
+        html = re.sub(re.compile(
+            r"""( # Group 1: element up to url in style
+                <[^>]+\bstyle=" # Element with a style attribute
+                [^"]+\burl\( # Style attribute contains "url(" style
+                (?:&\#34;|')?) # url style may start with (escaped) quote: capture it
+            ( # Group 2: url itself
+                /(?:[^'")]|(?!&\#34;))+ # stop at the first closing quote
+        )""", re.VERBOSE), _sub_relative2absolute, html)
 
         return wrapper(html)
 
@@ -269,8 +276,12 @@ class MailRenderMixin(models.AbstractModel):
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
             try:
-                render_result = self.env['ir.qweb']._render(html.fragment_fromstring(
-                    template_src, create_parent='div'), variables, raise_on_code=is_restricted)
+                render_result = self.env['ir.qweb']._render(
+                    html.fragment_fromstring(template_src, create_parent='div'),
+                    variables,
+                    raise_on_code=is_restricted,
+                    **(options or {})
+                )
                 # remove the rendered tag <div> that was added in order to wrap potentially multiples nodes into one.
                 render_result = render_result[5:-6]
             except QWebCodeFound:
@@ -322,7 +333,7 @@ class MailRenderMixin(models.AbstractModel):
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
             try:
-                render_result = view._render(variables, engine='ir.qweb', minimal_qcontext=True)
+                render_result = view._render(variables, engine='ir.qweb', minimal_qcontext=True, options=options)
             except Exception as e:
                 _logger.info("Failed to render template : %s (%d)", template_src, view.id, exc_info=True)
                 raise UserError(_("Failed to render template : %(xml_id)s (%(view_id)d)",

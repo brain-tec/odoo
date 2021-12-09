@@ -106,13 +106,13 @@ class StockPicking(models.Model):
                                 ml_vals = move._prepare_move_line_vals()
                                 ml_vals.update({'qty_done':qty})
                                 if self.picking_type_id.use_existing_lots:
-                                    existing_lot = self.env['stock.production.lot'].search([
+                                    existing_lot = self.env['stock.lot'].search([
                                         ('company_id', '=', self.company_id.id),
                                         ('product_id', '=', line.product_id.id),
                                         ('name', '=', lot.lot_name)
                                     ])
                                     if not existing_lot and self.picking_type_id.use_create_lots:
-                                        existing_lot = self.env['stock.production.lot'].create({
+                                        existing_lot = self.env['stock.lot'].create({
                                             'company_id': self.company_id.id,
                                             'product_id': line.product_id.id,
                                             'name': lot.lot_name,
@@ -141,7 +141,7 @@ class StockPicking(models.Model):
                     else:
                         move._action_assign()
                         for move_line in move.move_line_ids:
-                            move_line.qty_done = move_line.product_uom_qty
+                            move_line.qty_done = move_line.reserved_uom_qty
                         if float_compare(move.product_uom_qty, move.quantity_done, precision_rounding=move.product_uom.rounding) > 0:
                             remaining_qty = move.product_uom_qty - move.quantity_done
                             ml_vals = move._prepare_move_line_vals()
@@ -151,7 +151,7 @@ class StockPicking(models.Model):
                 else:
                     move._action_assign()
                     for move_line in move.move_line_ids:
-                        move_line.qty_done = move_line.product_uom_qty
+                        move_line.qty_done = move_line.reserved_uom_qty
                     if float_compare(move.product_uom_qty, move.quantity_done, precision_rounding=move.product_uom.rounding) > 0:
                         remaining_qty = move.product_uom_qty - move.quantity_done
                         ml_vals = move._prepare_move_line_vals()

@@ -581,7 +581,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self.company.anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'My Test Partner'})
         self.category = self.env.ref('product.product_category_1').copy({'name': 'Test category','property_valuation': 'real_time', 'property_cost_method': 'fifo'})
-        account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
+        account_type = self.env['account.account.type'].sudo().create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
         self.account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00' , 'user_type_id': account_type.id, 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00' , 'user_type_id': account_type.id, 'reconcile': True})
         account_output = self.env['account.account'].create({'name': 'Output', 'code': 'OUT00' , 'user_type_id': account_type.id, 'reconcile': True})
@@ -1364,7 +1364,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
                 line.product_uom_id = self.uom_unit
 
         # Creating 2 specific routes for each of the components of the kit
-        route_shelf1 = self.env['stock.location.route'].create({
+        route_shelf1 = self.env['stock.route'].create({
             'name': 'Shelf1 -> Customer',
             'product_selectable': True,
             'rule_ids': [(0, 0, {
@@ -1372,11 +1372,11 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
                 'action': 'pull',
                 'picking_type_id': self.company_data['default_warehouse'].in_type_id.id,
                 'location_src_id': stock_location_components.id,
-                'location_id': self.ref('stock.stock_location_customers'),
+                'location_dest_id': self.ref('stock.stock_location_customers'),
             })],
         })
 
-        route_shelf2 = self.env['stock.location.route'].create({
+        route_shelf2 = self.env['stock.route'].create({
             'name': 'Shelf2 -> Customer',
             'product_selectable': True,
             'rule_ids': [(0, 0, {
@@ -1384,7 +1384,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
                 'action': 'pull',
                 'picking_type_id': self.company_data['default_warehouse'].in_type_id.id,
                 'location_src_id': stock_location_14.id,
-                'location_id': self.ref('stock.stock_location_customers'),
+                'location_dest_id': self.ref('stock.stock_location_customers'),
             })],
         })
 
@@ -1645,7 +1645,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self.company.anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'My Test Partner'})
         self.category = self.env.ref('product.product_category_1').copy({'name': 'Test category', 'property_valuation': 'real_time', 'property_cost_method': 'fifo'})
-        account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
+        account_type = self.env['account.account.type'].sudo().create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
         self.account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'user_type_id': account_type.id, 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00', 'user_type_id': account_type.id, 'reconcile': True})
         account_output = self.env['account.account'].create({'name': 'Output', 'code': 'OUT00', 'user_type_id': account_type.id, 'reconcile': True})

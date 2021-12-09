@@ -70,7 +70,7 @@ class StockMoveLine(models.Model):
     def _reservation_is_updatable(self, quantity, reserved_quant):
         self.ensure_one()
         if self.produce_line_ids.lot_id:
-            ml_remaining_qty = self.qty_done - self.product_uom_qty
+            ml_remaining_qty = self.qty_done - self.reserved_uom_qty
             ml_remaining_qty = self.product_uom_id._compute_quantity(ml_remaining_qty, self.product_id.uom_id, rounding_method="HALF-UP")
             if float_compare(ml_remaining_qty, quantity, precision_rounding=self.product_id.uom_id.rounding) < 0:
                 return False
@@ -131,7 +131,7 @@ class StockMove(models.Model):
         'Done', compute='_compute_is_done',
         store=True,
         help='Technical Field to order moves')
-    order_finished_lot_ids = fields.Many2many('stock.production.lot', string="Finished Lot/Serial Number", compute='_compute_order_finished_lot_ids')
+    order_finished_lot_ids = fields.Many2many('stock.lot', string="Finished Lot/Serial Number", compute='_compute_order_finished_lot_ids')
     should_consume_qty = fields.Float('Quantity To Consume', compute='_compute_should_consume_qty', digits='Product Unit of Measure')
     cost_share = fields.Float(
         "Cost Share (%)", digits=(5, 2),  # decimal = 2 is important for rounding calculations!!

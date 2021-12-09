@@ -495,7 +495,7 @@ class StockMove(models.Model):
                 for move in picking.move_ids:
                     # For assigned moves
                     for move_line in move._get_move_lines():
-                        move_line.qty_done = move_line.product_uom_qty
+                        move_line.qty_done = move_line.reserved_uom_qty
                     # Create move line for remaining qty
                     missing_to_do = move.product_qty - move.quantity_done
                     missing_to_do = move.product_uom._compute_quantity(missing_to_do, move.product_uom, rounding_method='HALF-UP')
@@ -534,7 +534,7 @@ class StockMove(models.Model):
                     package_values.append(package_for_picking)
 
             _logger.info("Create lots (%d) for pickings to validate" % len(lot_values))
-            lots = self.env["stock.production.lot"].create(lot_values)
+            lots = self.env["stock.lot"].create(lot_values)
             _logger.info("Create packages (%d) for pickings to validate" % len(package_values))
             packages = self.env["stock.quant.package"].create(package_values)
 

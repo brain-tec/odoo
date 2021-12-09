@@ -166,12 +166,12 @@ class TestMultiCompany(TransactionCase):
             'tracking': 'lot',
             'name': 'product lot',
         })
-        self.env['stock.production.lot'].create({
+        self.env['stock.lot'].create({
             'name': 'lotA',
             'company_id': self.company_a.id,
             'product_id': product_lot.id,
         })
-        self.env['stock.production.lot'].create({
+        self.env['stock.lot'].create({
             'name': 'lotA',
             'company_id': self.company_b.id,
             'product_id': product_lot.id,
@@ -210,7 +210,7 @@ class TestMultiCompany(TransactionCase):
         self.assertEqual(move1.move_line_ids[0].company_id, self.company_a)
         picking.with_user(self.user_b).button_validate()
         self.assertEqual(picking.state, 'done')
-        created_serial = self.env['stock.production.lot'].search([
+        created_serial = self.env['stock.lot'].search([
             ('name', '=', 'receipt_serial')
         ])
         self.assertEqual(created_serial.company_id, self.company_a)
@@ -403,14 +403,14 @@ class TestMultiCompany(TransactionCase):
             }).id,
         })
 
-        route = self.env['stock.location.route'].create({
+        route = self.env['stock.route'].create({
             'name': 'Push',
             'company_id': False,
             'rule_ids': [(0, False, {
                 'name': 'create a move to company b',
                 'company_id': self.company_b.id,
                 'location_src_id': intercom_location.id,
-                'location_id': self.stock_location_b.id,
+                'location_dest_id': self.stock_location_b.id,
                 'action': 'push',
                 'auto': 'manual',
                 'picking_type_id': self.warehouse_b.in_type_id.id,
@@ -487,7 +487,7 @@ class TestMultiCompany(TransactionCase):
         intercom_location.write({'active': True})
         partner = self.env['res.partner'].create({'name': 'Deco Addict'})
         self.warehouse_a.resupply_wh_ids = [(6, 0, [self.warehouse_b.id])]
-        resupply_route = self.env['stock.location.route'].search([('supplier_wh_id', '=', self.warehouse_b.id),
+        resupply_route = self.env['stock.route'].search([('supplier_wh_id', '=', self.warehouse_b.id),
                                                                   ('supplied_wh_id', '=', self.warehouse_a.id)])
         self.assertTrue(resupply_route, "Resupply route not found")
 

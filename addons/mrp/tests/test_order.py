@@ -240,12 +240,12 @@ class TestMrpOrder(TestMrpCommon):
         mo, bom, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot')
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
-        lot_1 = self.env['stock.production.lot'].create({
+        lot_1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': p1.id,
             'company_id': self.env.company.id,
         })
-        lot_2 = self.env['stock.production.lot'].create({
+        lot_2 = self.env['stock.lot'].create({
             'name': 'lot2',
             'product_id': p1.id,
             'company_id': self.env.company.id,
@@ -510,12 +510,12 @@ class TestMrpOrder(TestMrpCommon):
         mo, bom, p_final, p1, p2 = self.generate_mo(tracking_base_1='serial', qty_base_1=1, qty_final=2)
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
-        lot_p1_1 = self.env['stock.production.lot'].create({
+        lot_p1_1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': p1.id,
             'company_id': self.env.company.id,
         })
-        lot_p1_2 = self.env['stock.production.lot'].create({
+        lot_p1_2 = self.env['stock.lot'].create({
             'name': 'lot2',
             'product_id': p1.id,
             'company_id': self.env.company.id,
@@ -569,18 +569,18 @@ class TestMrpOrder(TestMrpCommon):
         mo, _, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot', qty_base_1=10, qty_final=1)
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
-        first_lot_for_p1 = self.env['stock.production.lot'].create({
+        first_lot_for_p1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': p1.id,
             'company_id': self.env.company.id,
         })
-        second_lot_for_p1 = self.env['stock.production.lot'].create({
+        second_lot_for_p1 = self.env['stock.lot'].create({
             'name': 'lot2',
             'product_id': p1.id,
             'company_id': self.env.company.id,
         })
 
-        final_product_lot = self.env['stock.production.lot'].create({
+        final_product_lot = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': p_final.id,
             'company_id': self.env.company.id,
@@ -599,7 +599,7 @@ class TestMrpOrder(TestMrpCommon):
         # p2
         details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.edit(0) as line:
-            line.qty_done = line.product_uom_qty
+            line.qty_done = line.reserved_uom_qty
         with details_operation_form.move_line_ids.new() as line:
             line.qty_done = 1
         details_operation_form.save()
@@ -609,7 +609,7 @@ class TestMrpOrder(TestMrpCommon):
         for i in range(len(details_operation_form.move_line_ids)):
             # reservation in shelf1: 3 lot1, shelf2: 3 lot1, stock: 4 lot2
             with details_operation_form.move_line_ids.edit(i) as line:
-                line.qty_done = line.product_uom_qty
+                line.qty_done = line.reserved_uom_qty
         with details_operation_form.move_line_ids.new() as line:
             line.qty_done = 2
             line.lot_id = first_lot_for_p1
@@ -619,7 +619,7 @@ class TestMrpOrder(TestMrpCommon):
         details_operation_form.save()
 
         move_1 = mo.move_raw_ids.filtered(lambda m: m.product_id == p1)
-        # qty_done/product_uom_qty lot
+        # qty_done/reserved_uom_qty lot
         # 3/3 lot 1 shelf 1
         # 1/1 lot 1 shelf 2
         # 2/2 lot 1 shelf 2
@@ -666,7 +666,7 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(len(ml_p1), 2)
         self.assertEqual(sorted(ml_p1.mapped('qty_done')), [2.0, 3.0], 'Quantity done should be 1.0, 2.0 or 3.0')
         self.assertEqual(m_p1.quantity_done, 5.0, 'Total qty done should be 6.0')
-        self.assertEqual(sum(ml_p1.mapped('product_uom_qty')), 5.0, 'Total qty reserved should be 5.0')
+        self.assertEqual(sum(ml_p1.mapped('reserved_uom_qty')), 5.0, 'Total qty reserved should be 5.0')
 
         mo.button_mark_done()
         self.assertEqual(mo.state, 'done', "Production order should be in done state.")
@@ -707,7 +707,7 @@ class TestMrpOrder(TestMrpCommon):
 
         mo.button_mark_done()
         self.assertTrue(all(s == 'done' for s in mo.move_raw_ids.mapped('state')))
-        self.assertEqual(sum(mo.move_raw_ids.mapped('move_line_ids.product_uom_qty')), 0)
+        self.assertEqual(sum(mo.move_raw_ids.mapped('move_line_ids.reserved_uom_qty')), 0)
 
     def test_consumption_strict_1(self):
         """ Checks the constraints of a strict BOM without tracking when playing around
@@ -883,12 +883,12 @@ class TestMrpOrder(TestMrpCommon):
             'type': 'product',
             'tracking': 'serial'
         })
-        self.serial_1 = self.env['stock.production.lot'].create({
+        self.serial_1 = self.env['stock.lot'].create({
             'product_id': self.byproduct1.id,
             'name': 'serial 1',
             'company_id': self.env.company.id,
         })
-        self.serial_2 = self.env['stock.production.lot'].create({
+        self.serial_2 = self.env['stock.lot'].create({
             'product_id': self.byproduct1.id,
             'name': 'serial 2',
             'company_id': self.env.company.id,
@@ -899,12 +899,12 @@ class TestMrpOrder(TestMrpCommon):
             'type': 'product',
             'tracking': 'lot',
         })
-        self.lot_1 = self.env['stock.production.lot'].create({
+        self.lot_1 = self.env['stock.lot'].create({
             'product_id': self.byproduct2.id,
             'name': 'Lot 1',
             'company_id': self.env.company.id,
         })
-        self.lot_2 = self.env['stock.production.lot'].create({
+        self.lot_2 = self.env['stock.lot'].create({
             'product_id': self.byproduct2.id,
             'name': 'Lot 2',
             'company_id': self.env.company.id,
@@ -1111,7 +1111,7 @@ class TestMrpOrder(TestMrpCommon):
         """ produce a finished product with component tracked by serial number 2
         times with the same SN. Check that an error is raised the second time"""
         mo1, bom, p_final, p1, p2 = self.generate_mo(tracking_base_2='serial', qty_final=1, qty_base_1=1,)
-        sn = self.env['stock.production.lot'].create({
+        sn = self.env['stock.lot'].create({
             'name': 'sn used twice',
             'product_id': p2.id,
             'company_id': self.env.company.id,
@@ -1167,7 +1167,7 @@ class TestMrpOrder(TestMrpCommon):
         mo = mo_form.save()
         mo.action_confirm()
 
-        sn = self.env['stock.production.lot'].create({
+        sn = self.env['stock.lot'].create({
             'name': 'sn used twice',
             'product_id': byproduct.id,
             'company_id': self.env.company.id,
@@ -1205,7 +1205,7 @@ class TestMrpOrder(TestMrpCommon):
         """ Consuming the same serial number two times should not give an error if
         a repair order of the first production has been made before the second one"""
         mo1, bom, p_final, p1, p2 = self.generate_mo(tracking_base_2='serial', qty_final=1, qty_base_1=1,)
-        sn = self.env['stock.production.lot'].create({
+        sn = self.env['stock.lot'].create({
             'name': 'sn used twice',
             'product_id': p2.id,
             'company_id': self.env.company.id,
@@ -1350,7 +1350,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.product_qty = 1
         mo = mo_form.save()
 
-        final_product_lot = self.env['stock.production.lot'].create({
+        final_product_lot = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': plastic_laminate.id,
             'company_id': self.env.company.id,
@@ -1740,13 +1740,13 @@ class TestMrpOrder(TestMrpCommon):
         })
 
         # the products are tracked by lot, so we go through _generate_consumed_move_line
-        lot_final = self.env['stock.production.lot'].create({
+        self.env['stock.lot'].create({
             'name': 'Lot Final',
             'product_id': product_final.id,
             'company_id': self.env.company.id,
         })
 
-        lot_comp = self.env['stock.production.lot'].create({
+        lot_comp = self.env['stock.lot'].create({
             'name': 'Lot Component',
             'product_id': product_comp.id,
             'company_id': self.env.company.id,
@@ -1803,7 +1803,7 @@ class TestMrpOrder(TestMrpCommon):
         mo, _, p_final, _, _ = self.generate_mo(tracking_final='serial', qty_base_1=1, qty_final=1)
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
-        sn1 = self.env['stock.production.lot'].create({
+        sn1 = self.env['stock.lot'].create({
             'name': 'serial1',
             'product_id': p_final.id,
             'company_id': self.env.company.id,

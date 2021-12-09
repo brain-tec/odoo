@@ -240,7 +240,7 @@ class TestPacking(TestPackingCommon):
         picking.write({
             'move_line_ids': [(0, 0, {
                 'product_id': self.productB.id,
-                'product_uom_qty': 7.0,
+                'reserved_uom_qty': 7.0,
                 'qty_done': 7.0,
                 'product_uom_id': self.productB.uom_id.id,
                 'location_id': self.customer_location.id,
@@ -252,7 +252,7 @@ class TestPacking(TestPackingCommon):
         picking.write({
             'move_line_ids': [(0, 0, {
                 'product_id': self.productA.id,
-                'product_uom_qty': 5.0,
+                'reserved_uom_qty': 5.0,
                 'qty_done': 5.0,
                 'product_uom_id': self.productA.uom_id.id,
                 'location_id': self.customer_location.id,
@@ -635,7 +635,7 @@ class TestPacking(TestPackingCommon):
         """ Create a simple move in a delivery. Reserve the quantity but set as quantity done only a part.
         Call Put In Pack button. """
         self.productA.tracking = 'lot'
-        lot1 = self.env['stock.production.lot'].create({
+        lot1 = self.env['stock.lot'].create({
             'product_id': self.productA.id,
             'name': '00001',
             'company_id': self.warehouse.company_id.id

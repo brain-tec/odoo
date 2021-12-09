@@ -135,7 +135,7 @@ class StockWarehouse(models.Model):
                 'update_values': {
                     'active': self.buy_to_resupply,
                     'name': self._format_rulename(location_id, False, 'Buy'),
-                    'location_id': location_id.id,
+                    'location_dest_id': location_id.id,
                     'propagate_cancel': self.reception_steps != 'one_step',
                 }
             }
@@ -274,8 +274,8 @@ class Orderpoint(models.Model):
         return date
 
 
-class ProductionLot(models.Model):
-    _inherit = 'stock.production.lot'
+class StockLot(models.Model):
+    _inherit = 'stock.lot'
 
     purchase_order_ids = fields.Many2many('purchase.order', string="Purchase Orders", compute='_compute_purchase_order_ids', readonly=True, store=False)
     purchase_order_count = fields.Integer('Purchase order count', compute='_compute_purchase_order_ids')
