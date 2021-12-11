@@ -3,7 +3,9 @@
 import { registry } from '@mail/model/model_core';
 import { ModelField } from '@mail/model/model_field';
 import { FieldCommand, unlinkAll } from '@mail/model/model_field_command';
+import { RelationSet } from '@mail/model/model_field_relation_set';
 import { Listener } from '@mail/model/model_listener';
+import { followRelations } from '@mail/model/model_utils';
 import { patchClassMethods, patchInstanceMethods } from '@mail/utils/utils';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
@@ -469,6 +471,7 @@ export class ModelManager {
                             'readonly',
                             'related',
                             'required',
+                            'sum',
                         ].includes(key)
                     );
                     if (invalidKeys.length > 0) {
@@ -488,6 +491,7 @@ export class ModelManager {
                             'related',
                             'relationType',
                             'required',
+                            'sort',
                             'to',
                         ].includes(key)
                     );
@@ -502,6 +506,9 @@ export class ModelManager {
                     }
                     if (field.required && !(['one2one', 'many2one'].includes(field.relationType))) {
                         throw new Error(`Relational field "${Model}/${fieldName}" has "required" true with a relation of type "${field.relationType}" but "required" is only supported for "one2one" and "many2one".`);
+                    }
+                    if (field.sort && !(['one2many', 'many2many'].includes(field.relationType))) {
+                        throw new Error(`Relational field "${Model}/${fieldName}" has "sort" with a relation of type "${field.relationType}" but "sort" is only supported for "one2many" and "many2many".`);
                     }
                 }
                 // 3. Computed field.
@@ -739,7 +746,7 @@ export class ModelManager {
             record.__values[field.fieldName] = undefined;
             if (field.fieldType === 'relation') {
                 if (['one2many', 'many2many'].includes(field.relationType)) {
-                    record.__values[field.fieldName] = new Set();
+                    record.__values[field.fieldName] = new RelationSet(record, field);
                 }
             }
         }
@@ -928,16 +935,7 @@ export class ModelManager {
                     onChange: (info) => {
                         this.startListening(listener);
                         for (const dependency of onChange.dependencies) {
-                            let target = record;
-                            for (const field of dependency.split('.')) {
-                                if (!target.constructor.__fieldMap[field]) {
-                                    throw Error(`onChange dependency "${field}" does not exist on ${record.constructor}.`);
-                                }
-                                target = target[field];
-                                if (!target) {
-                                    break;
-                                }
-                            }
+                            followRelations(record, dependency);
                         }
                         this.stopListening(listener);
                         record[onChange.methodName]();
@@ -1210,6 +1208,22 @@ export class ModelManager {
     }
 
     /**
+     * Marks the given field of the given record as changed.
+     *
+     * @param {mail.model} record
+     * @param {ModelField} field
+     */
+    _markRecordFieldAsChanged(record, field) {
+        for (const [listener, infoList] of this._listenersObservingFieldOfLocalId.get(record.localId).get(field).entries()) {
+            this._markListenerToNotify(listener, {
+                listener,
+                reason: `_update: ${field} of ${record}`,
+                infoList,
+            });
+        }
+    }
+
+    /**
      * Notifies the listeners that have been flagged to be notified and for
      * which the `onChange` function was defined to be called after the update
      * cycle.
@@ -1269,11 +1283,25 @@ export class ModelManager {
                 Model.fields = {};
             }
             Model.inverseRelations = [];
+            const sumContributionsByFieldName = new Map();
             // Make fields aware of their field name.
             for (const [fieldName, fieldData] of Object.entries(Model.fields)) {
                 Model.fields[fieldName] = new ModelField(Object.assign({}, fieldData, {
                     fieldName,
                 }));
+                if (fieldData.sum) {
+                    const [relationFieldName, contributionFieldName] = fieldData.sum.split('.');
+                    if (!sumContributionsByFieldName.has(relationFieldName)) {
+                        sumContributionsByFieldName.set(relationFieldName, []);
+                    }
+                    sumContributionsByFieldName.get(relationFieldName).push({
+                        from: contributionFieldName,
+                        to: fieldName,
+                    });
+                }
+            }
+            for (const [fieldName, sumContributions] of sumContributionsByFieldName) {
+                Model.fields[fieldName].sumContributions = sumContributions;
             }
         }
         /**
@@ -1330,30 +1358,30 @@ export class ModelManager {
             for (const field of Model.__fieldList) {
                 Object.defineProperty(Model.prototype, field.fieldName, {
                     get: function getFieldValue() { // this is bound to record
-                        for (const listener of this.modelManager._listeners) {
-                            listener.lastObservedLocalIds.add(this.localId);
+                        if (this.modelManager._listeners.size) {
                             if (!this.modelManager._listenersObservingLocalId.has(this.localId)) {
                                 this.modelManager._listenersObservingLocalId.set(this.localId, new Map());
                             }
                             const entryLocalId = this.modelManager._listenersObservingLocalId.get(this.localId);
-                            const info = {
-                                listener,
-                                reason: `getField - ${field} of ${this}`,
-                            };
-                            if (entryLocalId.has(listener)) {
-                                entryLocalId.get(listener).push(info);
-                            } else {
-                                entryLocalId.set(listener, [info]);
-                            }
+                            const reason = `getField - ${field} of ${this}`;
                             const entryField = this.modelManager._listenersObservingFieldOfLocalId.get(this.localId).get(field);
-                            if (!listener.lastObservedFieldsByLocalId.has(this.localId)) {
-                                listener.lastObservedFieldsByLocalId.set(this.localId, new Set());
-                            }
-                            listener.lastObservedFieldsByLocalId.get(this.localId).add(field);
-                            if (entryField.has(listener)) {
-                                entryField.get(listener).push(info);
-                            } else {
-                                entryField.set(listener, [info]);
+                            for (const listener of this.modelManager._listeners) {
+                                listener.lastObservedLocalIds.add(this.localId);
+                                const info = { listener, reason };
+                                if (entryLocalId.has(listener)) {
+                                    entryLocalId.get(listener).push(info);
+                                } else {
+                                    entryLocalId.set(listener, [info]);
+                                }
+                                if (!listener.lastObservedFieldsByLocalId.has(this.localId)) {
+                                    listener.lastObservedFieldsByLocalId.set(this.localId, new Set());
+                                }
+                                listener.lastObservedFieldsByLocalId.get(this.localId).add(field);
+                                if (entryField.has(listener)) {
+                                    entryField.get(listener).push(info);
+                                } else {
+                                    entryField.set(listener, [info]);
+                                }
                             }
                         }
                         return field.get(this);
@@ -1410,13 +1438,7 @@ export class ModelManager {
                 throw new Error(`read-only ${field} on ${record} was updated`);
             }
             hasChanged = true;
-            for (const [listener, infoList] of this._listenersObservingFieldOfLocalId.get(record.localId).get(field).entries()) {
-                this._markListenerToNotify(listener, {
-                    listener,
-                    reason: `_update: ${field} of ${record}`,
-                    infoList,
-                });
-            }
+            this._markRecordFieldAsChanged(record, field);
         }
         if (hasChanged) {
             this._updatedRecordsCheckRequired.add(record);

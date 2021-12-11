@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one } from '@mail/model/model_field';
+import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, link } from '@mail/model/model_field_command';
 import { isEventHandled } from '@mail/utils/utils';
 
@@ -40,13 +40,16 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.thread}
+         * @returns {integer}
          */
-        _computeChannel() {
-            return link(this.messaging.models['mail.thread'].findFromIdentifyingData({
-                id: this.channel.id,
-                model: 'mail.channel',
-            }));
+        _computeCategoryCounterContribution() {
+            switch (this.channel.channel_type) {
+                case 'channel':
+                    return this.channel.message_needaction_counter > 0 ? 1 : 0;
+                case 'chat':
+                case 'group':
+                    return this.channel.localMessageUnreadCounter > 0 ? 1 : 0;
+            }
         }
 
         /**
@@ -241,12 +244,20 @@ function factory(dependencies) {
             compute: '_computeAvatarUrl',
         }),
         /**
-         * States the discuss sidebar category displaying this.
+         * Determines the discuss sidebar category displaying this item.
          */
         category: many2one('mail.discuss_sidebar_category', {
             inverse: 'categoryItems',
             readonly: true,
             required: true,
+        }),
+        /**
+         * Determines the contribution of this discuss sidebar category item to
+         * the counter of this category.
+         */
+        categoryCounterContribution: attr({
+            compute: '_computeCategoryCounterContribution',
+            readonly: true,
         }),
         /**
          * Amount of unread/action-needed messages
@@ -293,7 +304,7 @@ function factory(dependencies) {
         /**
          * The related channel thread.
          */
-        channel: many2one('mail.thread', {
+        channel: one2one('mail.thread', {
             inverse: 'discussSidebarCategoryItem',
             readonly: true,
             required: true,
