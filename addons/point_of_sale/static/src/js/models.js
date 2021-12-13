@@ -1719,7 +1719,7 @@ exports.Product = Backbone.Model.extend({
     // ORM. After that they are added in this order to the pricelists.
     get_price: function(pricelist, quantity, price_extra){
         var self = this;
-        var date = moment().startOf('day');
+        var date = moment();
 
         // In case of nested pricelists, it is necessary that all pricelists are made available in
         // the POS. Display a basic alert to the user in this case.
@@ -1804,6 +1804,7 @@ exports.Orderline = Backbone.Model.extend({
     initialize: function(attr,options){
         this.pos   = options.pos;
         this.order = options.order;
+        this.price_manually_set = options.price_manually_set || false;
         if (options.json) {
             try {
                 this.init_from_JSON(options.json);
@@ -1823,7 +1824,6 @@ exports.Orderline = Backbone.Model.extend({
         this.price_extra = 0;
         this.full_product_name = '';
         this.id = orderline_id++;
-        this.price_manually_set = false;
         this.customerNote = this.customerNote || '';
 
         if (options.price) {
@@ -1836,6 +1836,7 @@ exports.Orderline = Backbone.Model.extend({
         this.product = this.pos.db.get_product_by_id(json.product_id);
         this.set_product_lot(this.product);
         this.price = json.price_unit;
+        this.price_manually_set = json.price_manually_set;
         this.set_discount(json.discount);
         this.set_quantity(json.qty, 'do not recompute unit price');
         this.set_description(json.description);
@@ -2135,7 +2136,8 @@ exports.Orderline = Backbone.Model.extend({
             full_product_name: this.get_full_product_name(),
             price_extra: this.get_price_extra(),
             customer_note: this.get_customer_note(),
-            refunded_orderline_id: this.refunded_orderline_id
+            refunded_orderline_id: this.refunded_orderline_id,
+            price_manually_set: this.price_manually_set
         };
     },
     //used to create a json of the ticket, to be sent to the printer
