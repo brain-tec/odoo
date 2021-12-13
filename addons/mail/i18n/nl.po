@@ -4,8 +4,8 @@
 # 
 # Translators:
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2021
-# Martin Trigaux, 2021
 # Bert Burggraaf, 2021
+# Martin Trigaux, 2021
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2021
 # 
 msgid ""
@@ -6289,6 +6289,7 @@ msgstr ""
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/components/rtc_option_list/rtc_option_list.xml:0
+#: code:addons/mail/static/src/models/rtc_call_viewer/rtc_call_viewer.js:0
 #, python-format
 msgid "Settings"
 msgstr "Instellingen"
@@ -6759,6 +6760,13 @@ msgstr "De waarde 'Vervaldatum in' kan niet negatief zijn."
 #, python-format
 msgid "The FullScreen mode was denied by the browser"
 msgstr "De modus Volledig scherm is geweigerd door de browser"
+
+#. module: mail
+#. openerp-web
+#: code:addons/mail/static/src/models/rtc_call_viewer/rtc_call_viewer.js:0
+#, python-format
+msgid "Change Layout"
+msgstr "Opmaak wijzigen"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_res_partner__vat
@@ -7779,7 +7787,7 @@ msgstr "Je kunt alleen chatten met bestaande gebruikers."
 #, python-format
 msgid "You can only chat with partners that have a dedicated user."
 msgstr ""
-"Je kunt alleen chatten met relaties die een toegewijde gebruiker hebben."
+"Je kunt alleen chatten met relaties waaraan een gebruiker is gekoppeld."
 
 #. module: mail
 #. openerp-web

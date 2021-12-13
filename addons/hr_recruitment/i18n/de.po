@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2021
 # Ahmed Aly <ahmed.aly@datenpol.at>, 2021
+# Raymond Vetter, 2021
 # Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
@@ -1911,7 +1912,7 @@ msgstr "Nächste Aktivitäten"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr ""
+msgstr "Nächstes Aktivitätskalenderereignis"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_date_deadline
@@ -2068,6 +2069,11 @@ msgstr ""
 #, python-format
 msgid "Or talk about this applicant privately with your colleagues."
 msgstr "Oder sprechen Sie privat mit Ihren Kollegen über diesen Bewerber."
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+msgid "Other applications"
+msgstr "Andere Bewerbungen"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_user_id
@@ -2544,8 +2550,8 @@ msgid ""
 "The email will not be sent to the following applicant(s) as they don't have "
 "email address."
 msgstr ""
-"Die E-Mail wird nicht an den/die folgenden Bewerber gesendet, da keine E"
-"-Mail-Adresse vorliegt."
+"Die E-Mail wird nicht an den/die folgenden Bewerber gesendet, da keine "
+"E-Mail-Adresse vorliegt."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_model_id

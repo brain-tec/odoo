@@ -9754,7 +9754,7 @@ msgstr "Tony Fred, CEO"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
 msgid "Tooltip"
-msgstr "Tooltip"
+msgstr "ทูลทิป"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
@@ -11008,13 +11008,13 @@ msgstr "คุณไม่สามารถลบปุ่มส่งของ
 #: code:addons/website/controllers/backend.py:0
 #, python-format
 msgid "You do not have sufficient rights to perform that action."
-msgstr "คุณไม่มีสิทธิเพียงพอที่จะดำเนินการดังกล่าว"
+msgstr "คุณไม่มีสิทธิ์เพียงพอที่จะดำเนินการดังกล่าว"
 
 #. module: website
 #: code:addons/website/models/mixins.py:0
 #, python-format
 msgid "You do not have the rights to publish/unpublish"
-msgstr "คุณไม่มีสิทธิเผยแพร่/ยกเลิกการเผยแพร่"
+msgstr "คุณไม่มีสิทธิ์เผยแพร่/ยกเลิกการเผยแพร่"
 
 #. module: website
 #. openerp-web

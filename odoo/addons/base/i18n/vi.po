@@ -14402,7 +14402,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_form
 msgid "Create a Contact in your address book"
-msgstr ""
+msgstr "Tạo một liên hệ trong sổ địa chỉ"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_country_group
@@ -17993,7 +17993,7 @@ msgstr "Gibraltar"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_gift_card
 msgid "Gift Card"
-msgstr ""
+msgstr "Thẻ quà tặng"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_gift_card
@@ -21006,7 +21006,7 @@ msgstr "Thư doanh nghiệp"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mail_group
 msgid "Mail Group"
-msgstr ""
+msgstr "Nhóm gửi thư"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mail_mobile
@@ -23899,7 +23899,7 @@ msgstr "Hệ thống giúp bạn quản lý các hoạt động liên quan tới
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_form
 msgid "Odoo helps you track all activities related to your contacts."
-msgstr ""
+msgstr "Odoo giúp bạn theo dõi tất cả hoạt động liên quan tới liên hệ. "
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0

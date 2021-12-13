@@ -60,7 +60,7 @@ msgstr "財政狀況"
 msgid ""
 "If this checkbox is ticked, you will not be able to save a contact if its "
 "VAT number cannot be verified by the European VIES service."
-msgstr "如果勾選此復選框，則在歐洲 VIES 服務無法驗證合同的統一編號時，您將無法保存合同。"
+msgstr "如果勾選此復選框，則在歐洲 VIES 服務無法驗證合同的統一編號時，您將無法儲存合同。"
 
 #. module: base_vat
 #: model:ir.model.fields,help:base_vat.field_res_partner__vat
@@ -85,11 +85,9 @@ msgstr ""
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
 msgid ""
-"The VAT number [%(wrong_vat)s] for record_label does not seem to be valid. \n"
+"The VAT number [%(wrong_vat)s] for %(record_label)s does not seem to be valid. \n"
 "Note: the expected format is %(expected_format)s"
 msgstr ""
-"record_label 的統一編號 [%(wrong_vat)s] 似乎無效。\n"
-"注意：預期格式為 %(expected_format)s"
 
 #. module: base_vat
 #: code:addons/base_vat/models/account_fiscal_position.py:0
