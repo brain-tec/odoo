@@ -299,11 +299,11 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.terms
 msgid ""
-"<small class=\"text-muted float-right\">Source: https://termsfeed.com/blog"
-"/sample-terms-and-conditions-template</small>"
+"<small class=\"text-muted float-right\">Source: "
+"https://termsfeed.com/blog/sample-terms-and-conditions-template</small>"
 msgstr ""
-"<small class=\"text-muted float-right\">Quelle: https://termsfeed.com/blog"
-"/sample-terms-and-conditions-template</small>"
+"<small class=\"text-muted float-right\">Quelle: "
+"https://termsfeed.com/blog/sample-terms-and-conditions-template</small>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
@@ -1095,8 +1095,8 @@ msgstr "Kunden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "HL Express Connecto"
-msgstr ""
+msgid "DHL Express Connector"
+msgstr "DHL Express Konnektor"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__currency_id
@@ -2720,6 +2720,8 @@ msgid ""
 "Suggest alternatives to your customer (upsell strategy). Those products show"
 " up on the product page."
 msgstr ""
+"Schlagen Sie Ihrem Kunden Alternativen vor (Upselling-Strategie). Diese "
+"werden auf der Produktseite angezeigt."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.suggested_products_list
@@ -2902,7 +2904,7 @@ msgstr "Dieser Promo-Code ist nicht verfügbar."
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_website_visitor__product_count
 msgid "Total number of product viewed"
-msgstr ""
+msgstr "Gesamtzahl der angesehenen Produkte"
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_website_visitor__visitor_product_count

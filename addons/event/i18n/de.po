@@ -709,6 +709,11 @@ msgid ""
 "founded TinyERP. This was the first phase of OpenERP which would later "
 "became Odoo, the most installed open-source business software worldwide."
 msgstr ""
+"Bereits im Alter von 13 Jahren begann John DOE, erste Geschäftsanwendungen "
+"für Kunden zu entwickeln. Nachdem er das Bauingenieurwesen gemeistert hatte,"
+" gründete er TinyERP. Dies war die erste Phase von OpenERP, das später zu "
+"Odoo wurde, der weltweit am häufigsten installierten Open-Source-Business-"
+"Software."
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__message_attachment_count
@@ -2105,6 +2110,8 @@ msgid ""
 "The Great Reno Balloon Race is the world's largest free hot-air ballooning "
 "event."
 msgstr ""
+"Das Great Reno Balloon Race ist die weltweit größte kostenlose Veranstaltung"
+" für Heißluftballonfahrer."
 
 #. module: event
 #: code:addons/event/models/event.py:0
