@@ -276,20 +276,20 @@ registerModel({
     },
     fields: {
         accessToken: attr(),
-        activities: many2many('mail.activity', {
+        activities: many2many('Activity', {
             inverse: 'attachments',
         }),
         /**
          * States the attachment cards that are displaying this attachment.
          */
-        attachmentCards: one2many('mail.attachment_card', {
+        attachmentCards: one2many('AttachmentCard', {
             inverse: 'attachment',
             isCausal: true,
         }),
         /**
          * States the attachment images that are displaying this attachment.
          */
-        attachmentImages: one2many('mail.attachment_image', {
+        attachmentImages: one2many('AttachmentImage', {
             inverse: 'attachment',
             isCausal: true,
         }),
@@ -299,7 +299,7 @@ registerModel({
         attachmentLists: many2many('mail.attachment_list', {
             inverse: 'attachments',
         }),
-        attachmentViewer: many2many('mail.attachment_viewer', {
+        attachmentViewer: many2many('AttachmentViewer', {
             inverse: 'attachments',
         }),
         checksum: attr(),

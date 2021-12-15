@@ -10,11 +10,11 @@ registerModel({
         composer: one2one('mail.composer', {
             isCausal: true,
         }),
-        composerView: one2one('mail.composer_view', {
+        composerView: one2one('ComposerView', {
             inverse: 'qunitTest',
             isCausal: true,
         }),
-        messageView: one2one('mail.message_view', {
+        messageView: one2one('MessageView', {
             inverse: 'qunitTest',
             isCausal: true,
         }),

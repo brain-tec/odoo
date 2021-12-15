@@ -6,7 +6,7 @@ import { clear, insertAndReplace, link, unlink } from '@mail/model/model_field_c
 import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.chat_window',
+    name: 'ChatWindow',
     identifyingFields: ['manager', ['thread', 'managerAsNewMessage']],
     lifecycleHooks: {
         _created() {
@@ -336,7 +336,7 @@ registerModel({
          * @private
          * @param {Object} [param0={}]
          * @param {boolean} [param0.reverse=false]
-         * @returns {mail.chat_window|undefined}
+         * @returns {ChatWindow|undefined}
          */
         _getNextVisibleUnfoldedChatWindow({ reverse = false } = {}) {
             const orderedVisible = this.manager.allOrderedVisible;
@@ -375,7 +375,7 @@ registerModel({
          * Determines the channel invitation form displayed by this chat window
          * (if any). Only makes sense if hasInviteFeature is true.
          */
-        channelInvitationForm: one2one('mail.channel_invitation_form', {
+        channelInvitationForm: one2one('ChannelInvitationForm', {
             inverse: 'chatWindow',
             isCausal: true,
         }),
@@ -448,11 +448,11 @@ registerModel({
         isVisible: attr({
             compute: '_computeIsVisible',
         }),
-        manager: many2one('mail.chat_window_manager', {
+        manager: many2one('ChatWindowManager', {
             inverse: 'chatWindows',
             readonly: true,
         }),
-        managerAsNewMessage: one2one('mail.chat_window_manager', {
+        managerAsNewMessage: one2one('ChatWindowManager', {
             inverse: 'newMessageChatWindow',
             readonly: true,
         }),

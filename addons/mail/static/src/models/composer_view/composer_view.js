@@ -8,7 +8,7 @@ import { OnChange } from '@mail/model/model_onchange';
 import { addLink, escapeAndCompactTextContent, parseAndTransform } from '@mail/js/utils';
 
 registerModel({
-    name: 'mail.composer_view',
+    name: 'ComposerView',
     identifyingFields: [['threadView', 'messageViewInEditing', 'chatter']],
     lifecycleHooks: {
         _willCreate() {
@@ -71,7 +71,7 @@ registerModel({
                 return; // not supported for guests
             }
             if (
-                this.suggestionModelName === 'mail.channel_command' ||
+                this.suggestionModelName === 'ChannelCommand' ||
                 this._getCommandFromText(this.composer.textInputContent)
             ) {
                 return;
@@ -574,7 +574,7 @@ registerModel({
                 case ':':
                     return 'mail.canned_response';
                 case '/':
-                    return 'mail.channel_command';
+                    return 'ChannelCommand';
                 case '#':
                     return 'mail.thread';
                 default:
@@ -691,7 +691,7 @@ registerModel({
         /**
          * @private
          * @param {string} content html content
-         * @returns {mail.channel_command|undefined} command, if any in the content
+         * @returns {ChannelCommand|undefined} command, if any in the content
          */
         _getCommandFromText(content) {
             if (content.startsWith('/')) {
@@ -917,7 +917,7 @@ registerModel({
         /**
          * States the message view on which this composer allows editing (if any).
          */
-        messageViewInEditing: one2one('mail.message_view', {
+        messageViewInEditing: one2one('MessageView', {
             inverse: 'composerViewInEditing',
             readonly: true,
         }),

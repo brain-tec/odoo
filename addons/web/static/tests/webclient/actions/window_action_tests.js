@@ -2410,11 +2410,40 @@ QUnit.module("ActionManager", (hooks) => {
         const webClient = await createWebClient({ serverData });
         await doAction(webClient, 3); // list view
         const titleService = webClient.env.services.title;
-        assert.strictEqual(titleService.current, "{\"zopenerp\":\"Odoo\",\"action\":\"Partners\"}");
+        assert.strictEqual(titleService.current, '{"zopenerp":"Odoo","action":"Partners"}');
         await click(webClient.el.querySelector(".o_data_row"));
         await legacyExtraNextTick();
-        assert.strictEqual(titleService.current, "{\"zopenerp\":\"Odoo\",\"action\":\"First record\"}");
+        assert.strictEqual(titleService.current, '{"zopenerp":"Odoo","action":"First record"}');
         await click(webClient.el.querySelector(".o_pager_next"));
-        assert.strictEqual(titleService.current, "{\"zopenerp\":\"Odoo\",\"action\":\"Second record\"}");
+        assert.strictEqual(titleService.current, '{"zopenerp":"Odoo","action":"Second record"}');
+    });
+
+    QUnit.test("action part of title is updated when an action is mounted", async (assert) => {
+        // use a PivotView because we need a view converted to wowl
+        // those two lines can be removed once the list view is converted to wowl
+        serverData.actions[3].views.unshift([false, "pivot"]);
+        serverData.views["partner,false,pivot"] = "<pivot/>";
+        serviceRegistry.add("user", makeFakeUserService());
+
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, 3);
+        const titleService = webClient.env.services.title;
+        assert.strictEqual(titleService.current, '{"zopenerp":"Odoo","action":"Partners"}');
+    });
+
+    QUnit.test("action group_by of type string", async function (assert) {
+        assert.expect(2);
+        serverData.views["partner,false,pivot"] = `<pivot/>`;
+        registry.category("services").add("user", makeFakeUserService());
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, {
+            name: "Partner",
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[3, "pivot"]],
+            context: { group_by: "foo" },
+        });
+        assert.containsOnce(webClient, ".o_pivot_view");
+        assert.containsN(webClient, ".o_pivot_view tbody th", 6);
     });
 });

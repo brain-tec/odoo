@@ -5,7 +5,7 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.message_view',
+    name: 'MessageView',
     identifyingFields: [['threadView', 'messageActionListWithDelete'], 'message'],
     recordMethods: {
         /**
@@ -126,7 +126,7 @@ registerModel({
         /**
         * Determines the composer that is used to edit this message (if any).
         */
-        composerViewInEditing: one2one('mail.composer_view', {
+        composerViewInEditing: one2one('ComposerView', {
             inverse: 'messageViewInEditing',
             isCausal: true,
         }),

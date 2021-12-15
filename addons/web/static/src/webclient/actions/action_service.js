@@ -7,7 +7,7 @@ import { download } from "@web/core/network/download";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { useBus } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { cleanDomFromBootstrap } from "@web/legacy/utils";
 import { View } from "@web/views/view";
@@ -76,8 +76,7 @@ const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|grou
 // only register this template once for all dynamic classes ControllerComponent
 const ControllerComponentTemplate = tags.xml`<t t-component="Component" t-props="props"
     t-ref="component"
-    t-on-history-back="onHistoryBack"
-    t-on-controller-title-updated.stop="onTitleUpdated"/>`;
+    t-on-history-back="onHistoryBack"/>`;
 
 function makeActionManager(env) {
     const keepLast = new KeepLast();
@@ -242,7 +241,9 @@ function makeActionManager(env) {
             .map((controller) => {
                 return {
                     jsId: controller.jsId,
-                    name: controller.title || controller.action.name || env._t("Undefined"),
+                    get name() {
+                        return controller.displayName;
+                    },
                 };
             });
     }
@@ -310,7 +311,7 @@ function makeActionManager(env) {
     }
 
     /**
-     * @param {ClientAction | ActWindowAction} action
+     * @param {ClientAction} action
      * @param {Object} props
      * @returns {{ props: ActionProps, config: Config }}
      */
@@ -319,11 +320,10 @@ function makeActionManager(env) {
             props: Object.assign({}, props, { action, actionId: action.id }),
             config: {
                 actionId: action.id,
-                actionType: action.type,
+                actionType: "ir.actions.client",
                 actionFlags: action.flags,
-                displayName: action.display_name || action.name || "",
-                views: action.views,
             },
+            displayName: action.display_name || action.name || "",
         };
     }
 
@@ -399,11 +399,15 @@ function makeActionManager(env) {
                 return viewSwitcherEntry;
             });
         const context = action.context || {};
+        let groupBy = context.group_by || [];
+        if (typeof groupBy === "string") {
+            groupBy = [groupBy];
+        }
         const viewProps = Object.assign({}, props, {
             context,
             display: { mode: target === "new" ? "inDialog" : target },
             domain: action.domain || [],
-            groupBy: action.context.group_by || [],
+            groupBy,
             loadActionMenus: target !== "new" && target !== "inline",
             loadIrFilters: action.views.some((v) => v[1] === "search"),
             resModel: action.res_model,
@@ -449,12 +453,12 @@ function makeActionManager(env) {
             props: viewProps,
             config: {
                 actionId: action.id,
-                actionType: action.type,
+                actionType: "ir.actions.act_window",
                 actionFlags: action.flags,
-                displayName: action.display_name || action.name || "",
                 views: action.views,
                 viewSwitcherEntries,
             },
+            displayName: action.display_name || action.name || "",
         };
     }
 
@@ -527,15 +531,21 @@ function makeActionManager(env) {
             controllerArray.unshift(options.lazyController);
         }
         const nextStack = controllerStack.slice(0, index).concat(controllerArray);
-        controller.config.breadcrumbs = _getBreadcrumbs(nextStack.slice(0, -1));
-        if (controller.Component.isLegacy) {
-            controller.props.breadcrumbs = controller.config.breadcrumbs;
-        }
+        controller.config.breadcrumbs = _getBreadcrumbs(nextStack);
+        controller.config.getDisplayName = () => controller.displayName;
+        controller.config.setDisplayName = (displayName) => {
+            controller.displayName = displayName;
+            if (controller === _getCurrentController()) {
+                // if not mounted yet, will be done in "mounted"
+                env.services.title.setParts({ action: controller.displayName });
+            }
+        };
 
         class ControllerComponent extends Component {
             setup() {
                 this.Component = controller.Component;
                 this.componentRef = useRef("component");
+                this.titleService = useService("title");
                 useDebugCategory("action", { action });
                 useSubEnv({ config: controller.config });
                 if (action.target !== "new") {
@@ -552,6 +562,7 @@ function makeActionManager(env) {
                         __getLocalState__: this.__getLocalState__,
                     });
                 }
+                this.isMounted = false;
             }
             catchError(error) {
                 reject(error);
@@ -629,12 +640,13 @@ function makeActionManager(env) {
                     }
                     // END LEGACY CODE COMPATIBILITY
                     controllerStack = nextStack; // the controller is mounted, commit the new stack
-                    // wait Promise callbacks to be executed
                     pushState(controller);
+                    this.titleService.setParts({ action: controller.displayName });
                     browser.sessionStorage.setItem("current_action", action._originalAction);
                 }
                 resolve();
                 env.bus.trigger("ACTION_MANAGER:UI-UPDATED", _getActionMode(action));
+                this.isMounted = true;
             }
             willUnmount() {
                 if (action.target === "new" && dialogCloseResolve) {
@@ -648,9 +660,6 @@ function makeActionManager(env) {
                 } else {
                     _executeCloseAction();
                 }
-            }
-            onTitleUpdated(ev) {
-                controller.title = ev.detail;
             }
         }
         ControllerComponent.template = ControllerComponentTemplate;
@@ -1360,7 +1369,16 @@ function makeActionManager(env) {
 }
 
 export const actionService = {
-    dependencies: ["effect", "localization", "notification", "router", "rpc", "ui", "user"],
+    dependencies: [
+        "effect",
+        "localization",
+        "notification",
+        "router",
+        "rpc",
+        "title",
+        "ui",
+        "user",
+    ],
     start(env) {
         return makeActionManager(env);
     },

@@ -5,7 +5,7 @@ import { attr, many2many, many2one } from '@mail/model/model_field';
 import { clear, insert, unlink, unlinkAll } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.activity',
+    name: 'Activity',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -290,7 +290,7 @@ registerModel({
         thread: many2one('mail.thread', {
             inverse: 'activities',
         }),
-        type: many2one('mail.activity_type', {
+        type: many2one('ActivityType', {
             inverse: 'activities',
         }),
     },

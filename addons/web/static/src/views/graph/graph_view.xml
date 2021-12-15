@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.GraphView.Buttons" owl="1">
-        <div class="btn-group" role="toolbar" aria-label="Main actions" t-on-dropdown-item-selected="onMeasureSelected">
+        <div class="btn-group" role="toolbar" aria-label="Main actions">
             <t t-call="web.ReportViewMeasures">
                 <t t-set="measures" t-value="model.metaData.measures"/>
                 <t t-set="activeMeasures" t-value="[model.metaData.measure]"/>
@@ -58,7 +58,7 @@
                     class="o_renderer"
                     model="model"
                     t-att-class="{ o_sample_data_disabled: model.useSampleModel }"
-                    onGraphClicked="(domain) => onGraphClicked(domain)"
+                    onGraphClicked="(domain) => this.onGraphClicked(domain)"
                 />
             </t>
             <t t-else="" t-call="web.NoContentHelper">

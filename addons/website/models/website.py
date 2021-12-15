@@ -23,7 +23,7 @@ from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import UserError, AccessError
 from odoo.http import request
-from odoo.modules.module import get_resource_path
+from odoo.modules.module import get_resource_path, get_manifest
 from odoo.osv.expression import AND, OR, FALSE_DOMAIN, get_unaccent_wrapper
 from odoo.tools.translate import _
 from odoo.tools import escape_psql, pycompat
@@ -174,24 +174,26 @@ class Website(models.Model):
     def _get_menu_ids(self):
         return self.env['website.menu'].search([('website_id', '=', self.id)]).ids
 
-    @api.model
-    def create(self, vals):
-        self._handle_create_write(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._handle_create_write(vals)
 
-        if 'user_id' not in vals:
-            company = self.env['res.company'].browse(vals.get('company_id'))
-            vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
+            if 'user_id' not in vals:
+                company = self.env['res.company'].browse(vals.get('company_id'))
+                vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
 
-        res = super(Website, self).create(vals)
-        res.company_id._compute_website_id()
-        res._bootstrap_homepage()
+        websites = super().create(vals_list)
+        websites.company_id._compute_website_id()
+        for website in websites:
+            website._bootstrap_homepage()
 
         if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
             groups = self.env['res.groups'].concat(*(self.env.ref(it) for it in all_user_groups.split(',')))
             groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
 
-        return res
+        return websites
 
     def write(self, values):
         public_user_to_change_websites = self.env['website']
@@ -296,10 +298,10 @@ class Website(models.Model):
 
     @api.model
     def get_theme_snippet_lists(self, theme_name):
-        default_snippet_lists = http.addons_manifest['theme_default'].get('snippet_lists', {})
-        theme_snippet_lists = http.addons_manifest[theme_name].get('snippet_lists', {})
-        snippet_lists = {**default_snippet_lists, **theme_snippet_lists}
-        return snippet_lists
+        return {
+            **get_manifest('theme_default')['snippet_lists'],
+            **get_manifest(theme_name).get('snippet_lists', {}),
+        }
 
     def configurator_set_menu_links(self, menu_company, module_data):
         menus = self.env['website.menu'].search([('url', 'in', list(module_data.keys())), ('website_id', '=', self.id)])
@@ -339,7 +341,7 @@ class Website(models.Model):
     def configurator_recommended_themes(self, industry_id, palette):
         domain = [('name', '=like', 'theme%'), ('name', 'not in', ['theme_default', 'theme_common'])]
         client_themes = request.env['ir.module.module'].search(domain).mapped('name')
-        client_themes_img = dict([(t, http.addons_manifest[t].get('images_preview_theme', {})) for t in client_themes])
+        client_themes_img = {t: get_manifest(t).get('images_preview_theme', {}) for t in client_themes}
         themes_suggested = self._website_api_rpc(
             '/api/website/2/configurator/recommended_themes/%s' % industry_id,
             {'client_themes': client_themes_img}

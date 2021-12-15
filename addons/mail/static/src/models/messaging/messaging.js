@@ -9,7 +9,7 @@ import { makeDeferred } from '@mail/utils/deferred/deferred';
 const { EventBus } = owl.core;
 
 registerModel({
-    name: 'mail.messaging',
+    name: 'Messaging',
     identifyingFields: [],
     lifecycleHooks: {
         _created() {
@@ -27,7 +27,10 @@ registerModel({
          */
         async start() {
             this.env.services['bus_service'].on('window_focus', null, this._handleGlobalWindowFocus);
-            await this.async(() => this.initializer.start());
+            await this.initializer.start();
+            if (!this.exists()) {
+                return;
+            }
             this.notificationHandler.start();
             this.update({ isInitialized: true });
             this.initializedPromise.resolve();
@@ -230,22 +233,22 @@ registerModel({
             default: true,
         }),
         cannedResponses: one2many('mail.canned_response'),
-        chatWindowManager: one2one('mail.chat_window_manager', {
+        chatWindowManager: one2one('ChatWindowManager', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        commands: one2many('mail.channel_command'),
+        commands: one2many('ChannelCommand'),
         companyName: attr(),
-        currentGuest: one2one('mail.guest'),
+        currentGuest: one2one('Guest'),
         currentPartner: one2one('mail.partner'),
         currentUser: one2one('mail.user'),
-        device: one2one('mail.device', {
+        device: one2one('Device', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        dialogManager: one2one('mail.dialog_manager', {
+        dialogManager: one2one('DialogManager', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -278,7 +281,7 @@ registerModel({
             required: true,
             readonly: true,
         }),
-        initializer: one2one('mail.messaging_initializer', {
+        initializer: one2one('MessagingInitializer', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,

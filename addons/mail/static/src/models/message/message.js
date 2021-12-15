@@ -180,7 +180,7 @@ registerModel({
                         // on `channel` channels for performance reasons
                         continue;
                     }
-                    this.messaging.models['mail.message_seen_indicator'].insert({
+                    this.messaging.models['MessageSeenIndicator'].insert({
                         thread: replace(thread),
                         message: replace(message),
                     });
@@ -581,7 +581,7 @@ registerModel({
         failureNotifications: one2many('mail.notification', {
             compute: '_computeFailureNotifications',
         }),
-        guestAuthor: many2one('mail.guest', {
+        guestAuthor: many2one('Guest', {
             inverse: 'authoredMessages',
         }),
         /**
@@ -698,14 +698,14 @@ registerModel({
             isCausal: true,
         }),
         message_type: attr(),
-        messageSeenIndicators: one2many('mail.message_seen_indicator', {
+        messageSeenIndicators: one2many('MessageSeenIndicator', {
             inverse: 'message',
             isCausal: true,
         }),
         /**
          * States the views that are displaying this message.
          */
-        messageViews: one2many('mail.message_view', {
+        messageViews: one2many('MessageView', {
             inverse: 'message',
             isCausal: true,
         }),

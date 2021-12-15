@@ -63,7 +63,7 @@ registerModel({
             inverse: 'threadViewer',
             readonly: true,
         }),
-        chatWindow: one2one('mail.chat_window', {
+        chatWindow: one2one('ChatWindow', {
             inverse: 'threadViewer',
             readonly: true,
         }),
@@ -77,7 +77,7 @@ registerModel({
             inverse: 'threadViewer',
             readonly: true,
         }),
-        discussPublicView: one2one('mail.discuss_public_view', {
+        discussPublicView: one2one('DiscussPublicView', {
             inverse: 'threadViewer',
             readonly: true,
         }),

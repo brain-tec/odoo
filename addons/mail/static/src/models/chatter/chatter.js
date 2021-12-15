@@ -277,7 +277,7 @@ registerModel({
         },
     },
     fields: {
-        activityBoxView: one2one('mail.activity_box_view', {
+        activityBoxView: one2one('ActivityBoxView', {
             compute: '_computeActivityBoxView',
             inverse: 'chatter',
             isCausal: true,
@@ -302,7 +302,7 @@ registerModel({
         /**
          * Determines the composer view used to post in this chatter (if any).
          */
-        composerView: one2one('mail.composer_view', {
+        composerView: one2one('ComposerView', {
             inverse: 'chatter',
             isCausal: true,
         }),

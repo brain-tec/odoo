@@ -168,7 +168,7 @@ class Module(models.Model):
     @classmethod
     def get_module_info(cls, name):
         try:
-            return modules.load_information_from_description_file(name)
+            return modules.get_manifest(name)
         except Exception:
             _logger.debug('Error when trying to fetch information for module %s', name, exc_info=True)
             return {}
@@ -724,18 +724,18 @@ class Module(models.Model):
             'to_buy': False
         }
 
-    @api.model
-    def create(self, vals):
-        new = super(Module, self).create(vals)
-        module_metadata = {
-            'name': 'module_%s' % vals['name'],
+    @api.model_create_multi
+    def create(self, vals_list):
+        modules = super().create(vals_list)
+        module_metadata_list = [{
+            'name': 'module_%s' % module.name,
             'model': 'ir.module.module',
             'module': 'base',
-            'res_id': new.id,
+            'res_id': module.id,
             'noupdate': True,
-        }
-        self.env['ir.model.data'].create(module_metadata)
-        return new
+        } for module in modules]
+        self.env['ir.model.data'].create(module_metadata_list)
+        return modules
 
     # update the list of available packages
     @assert_log_admin_access

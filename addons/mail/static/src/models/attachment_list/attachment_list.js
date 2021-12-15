@@ -67,7 +67,7 @@ registerModel({
         /**
          * States the attachment cards that are displaying this nonImageAttachments.
          */
-        attachmentCards: one2many('mail.attachment_card', {
+        attachmentCards: one2many('AttachmentCard', {
             compute: '_computeAttachmentCards',
             inverse: 'attachmentList',
             isCausal: true,
@@ -75,7 +75,7 @@ registerModel({
         /**
          * States the attachment images that are displaying this imageAttachments.
          */
-        attachmentImages: one2many('mail.attachment_image', {
+        attachmentImages: one2many('AttachmentImage', {
             compute: '_computeAttachmentImages',
             inverse: 'attachmentList',
             isCausal: true,
@@ -83,7 +83,7 @@ registerModel({
         /**
          * Determines the attachment viewers displaying this attachment list (if any).
          */
-        attachmentViewer: one2many('mail.attachment_viewer', {
+        attachmentViewer: one2many('AttachmentViewer', {
             inverse: 'attachmentList',
             isCausal: true,
         }),
@@ -97,7 +97,7 @@ registerModel({
         /**
          * Link with a composer view to handle attachments.
          */
-        composerView: one2one('mail.composer_view', {
+        composerView: one2one('ComposerView', {
             inverse: 'attachmentList',
             readonly: true,
         }),
@@ -113,7 +113,7 @@ registerModel({
         /**
          * Link with a message view to handle attachments.
          */
-        messageView: one2one('mail.message_view', {
+        messageView: one2one('MessageView', {
             inverse: 'attachmentList',
             readonly: true,
         }),
