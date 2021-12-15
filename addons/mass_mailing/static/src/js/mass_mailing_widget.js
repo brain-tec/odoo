@@ -78,7 +78,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 $editable.find('img').attr(attribute, function () {
                     return $(this)[attribute]();
                 }).css(attribute, function () {
-                    return $(this).get(0).style[attribute] || attribute === 'width' ? $(this)[attribute]() + 'px' : 'auto';
+                    return $(this).get(0).style[attribute] || attribute === 'width' ? $(this)[attribute]() + 'px' : '';
                 });
             });
 
@@ -391,8 +391,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!odoo.debug) {
             $snippetsSideBar.find('.o_codeview_btn').hide();
         }
-        const $codeview = this.wysiwyg.$iframe.contents().find('textarea.o_codeview');
-        $snippetsSideBar.on('click', '.o_codeview_btn', () => this._toggleCodeView($codeview));
+        this._$codeview = this.wysiwyg.$iframe.contents().find('textarea.o_codeview');
+        $snippetsSideBar.on('click', '.o_codeview_btn', () => this._toggleCodeView(this._$codeview));
 
         if ($themes.length === 0) {
             return;

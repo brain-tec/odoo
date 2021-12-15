@@ -149,6 +149,11 @@ class ResPartner(models.Model):
 
     @api.constrains('vat', 'country_id')
     def check_vat(self):
+        # The context key 'no_vat_validation' allows you to store/set a VAT number without doing validations.
+        # This is for API pushes from external platforms where you have no control over VAT numbers.
+        if self.env.context.get('no_vat_validation'):
+            return
+
         for partner in self:
             country = partner.commercial_partner_id.country_id
             if partner.vat and self._run_vat_test(partner.vat, country, partner.is_company) is False:
@@ -227,7 +232,7 @@ class ResPartner(models.Model):
             )
 
         return '\n' + _(
-            'The VAT number [%(wrong_vat)s] for record_label does not seem to be valid. \nNote: the expected format is %(expected_format)s',
+            'The VAT number [%(wrong_vat)s] for %(record_label)s does not seem to be valid. \nNote: the expected format is %(expected_format)s',
             wrong_vat=wrong_vat,
             record_label=record_label,
             expected_format=expected_format,

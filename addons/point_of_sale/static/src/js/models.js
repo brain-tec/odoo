@@ -1719,7 +1719,7 @@ exports.Product = Backbone.Model.extend({
     // ORM. After that they are added in this order to the pricelists.
     get_price: function(pricelist, quantity, price_extra){
         var self = this;
-        var date = moment().startOf('day');
+        var date = moment();
 
         // In case of nested pricelists, it is necessary that all pricelists are made available in
         // the POS. Display a basic alert to the user in this case.
@@ -1804,6 +1804,7 @@ exports.Orderline = Backbone.Model.extend({
     initialize: function(attr,options){
         this.pos   = options.pos;
         this.order = options.order;
+        this.price_manually_set = options.price_manually_set || false;
         if (options.json) {
             try {
                 this.init_from_JSON(options.json);
@@ -1823,7 +1824,6 @@ exports.Orderline = Backbone.Model.extend({
         this.price_extra = 0;
         this.full_product_name = '';
         this.id = orderline_id++;
-        this.price_manually_set = false;
         this.customerNote = this.customerNote || '';
 
         if (options.price) {
@@ -1836,6 +1836,7 @@ exports.Orderline = Backbone.Model.extend({
         this.product = this.pos.db.get_product_by_id(json.product_id);
         this.set_product_lot(this.product);
         this.price = json.price_unit;
+        this.price_manually_set = json.price_manually_set;
         this.set_discount(json.discount);
         this.set_quantity(json.qty, 'do not recompute unit price');
         this.set_description(json.description);
@@ -2135,7 +2136,8 @@ exports.Orderline = Backbone.Model.extend({
             full_product_name: this.get_full_product_name(),
             price_extra: this.get_price_extra(),
             customer_note: this.get_customer_note(),
-            refunded_orderline_id: this.refunded_orderline_id
+            refunded_orderline_id: this.refunded_orderline_id,
+            price_manually_set: this.price_manually_set
         };
     },
     //used to create a json of the ticket, to be sent to the printer
@@ -3586,8 +3588,9 @@ exports.Order = Backbone.Model.extend({
                 if (utils.float_is_zero(rounding_applied, this.pos.currency.decimals)){
                     // https://xkcd.com/217/
                     return 0;
-                }
-                else if(this.pos.cash_rounding[0].rounding_method === "UP" && rounding_applied < 0 && remaining > 0) {
+                } else if(this.get_total_with_tax() < this.pos.cash_rounding[0].rounding) {
+                    return 0;
+                } else if(this.pos.cash_rounding[0].rounding_method === "UP" && rounding_applied < 0 && remaining > 0) {
                     rounding_applied += this.pos.cash_rounding[0].rounding;
                 }
                 else if(this.pos.cash_rounding[0].rounding_method === "UP" && rounding_applied > 0 && remaining < 0) {
@@ -3608,7 +3611,7 @@ exports.Order = Backbone.Model.extend({
         return 0;
     },
     has_not_valid_rounding: function() {
-        if(!this.pos.config.cash_rounding)
+        if(!this.pos.config.cash_rounding || this.get_total_with_tax() < this.pos.cash_rounding[0].rounding)
             return false;
 
         const only_cash = this.pos.config.only_round_cash_method;
@@ -3639,6 +3642,8 @@ exports.Order = Backbone.Model.extend({
             for(var id in this.get_paymentlines()) {
                 var line = this.get_paymentlines()[id];
                 var diff = round_pr(round_pr(line.amount, cash_rounding) - round_pr(line.amount, default_rounding), default_rounding);
+                if(this.get_total_with_tax() < this.pos.cash_rounding[0].rounding)
+                    return true;
                 if(diff && line.payment_method.is_cash_count) {
                     return false;
                 } else if(!this.pos.config.only_round_cash_method && diff) {

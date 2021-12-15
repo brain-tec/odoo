@@ -473,9 +473,9 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
             if (!$e.val() || !$e[0].checkValidity()) {
                 $e.closest('.form-group').addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
                 $e.focus();
-                return;
+                return Promise.reject();
             }
-            oldSave.bind(this.linkWidget)();
+            return oldSave.bind(this.linkWidget)();
         };
 
         this.menuType = data.menuType;
@@ -558,6 +558,9 @@ var EditMenuDialog = weWidgets.Dialog.extend({
             size: 'medium',
         }, options || {}));
         this.rootID = rootID;
+        // For the EditMenuDialog, saving the dialog should not close it,
+        // as a reload will be done to show the updated menus.
+        this.closeOnSave = false;
     },
     /**
      * @override
@@ -645,8 +648,8 @@ var EditMenuDialog = weWidgets.Dialog.extend({
                     'to_delete': this.toDelete,
                 }
             ],
-        }).then(function () {
-            return _super();
+        }).then(() => {
+            return _super(...arguments);
         });
     },
 
