@@ -5,7 +5,7 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.rtc_call_participant_card',
+    name: 'RtcCallParticipantCard',
     identifyingFields: ['relationalId'],
     lifecycleHooks: {
         _created() {
@@ -122,7 +122,7 @@ registerModel({
         /**
          * The channel of the call.
          */
-        channel: many2one('mail.thread', {
+        channel: many2one('Thread', {
             required: true,
         }),
         /**
@@ -132,7 +132,7 @@ registerModel({
         /**
          * If set, this card represents an invitation of this partner to this call.
          */
-        invitedPartner: many2one('mail.partner'),
+        invitedPartner: many2one('Partner'),
         /**
          * States whether this card is representing a person with a pending
          * invitation.
@@ -171,18 +171,18 @@ registerModel({
         /**
          * The callViewer for which this card is the spotlight.
          */
-        rtcCallViewerOfMainCard: one2one('mail.rtc_call_viewer', {
+        rtcCallViewerOfMainCard: one2one('RtcCallViewer', {
             inverse: 'mainParticipantCard',
         }),
         /**
          * The callViewer for which this card is one of the tiles.
          */
-        rtcCallViewerOfTile: many2one('mail.rtc_call_viewer', {
+        rtcCallViewerOfTile: many2one('RtcCallViewer', {
             inverse: 'tileParticipantCards',
         }),
         /**
          * If set, this card represents a rtcSession.
          */
-        rtcSession: many2one('mail.rtc_session'),
+        rtcSession: many2one('RtcSession'),
     },
 });

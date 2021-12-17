@@ -4,7 +4,7 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
 registerModel({
-    name: 'mail.rtc_option_list',
+    name: 'RtcOptionList',
     identifyingFields: ['rtcController'],
     lifecycleHooks: {
         _created() {
@@ -70,7 +70,7 @@ registerModel({
          * States the OWL component of this option list.
          */
         component: attr(),
-        rtcController: one2one('mail.rtc_controller', {
+        rtcController: one2one('RtcController', {
             inverse: 'rtcOptionList',
             readonly: true,
             required: true,

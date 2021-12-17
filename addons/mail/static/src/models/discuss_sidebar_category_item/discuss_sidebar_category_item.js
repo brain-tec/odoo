@@ -7,7 +7,7 @@ import { clear, link } from '@mail/model/model_field_command';
 import Dialog from 'web.Dialog';
 
 registerModel({
-    name: 'mail.discuss_sidebar_category_item',
+    name: 'DiscussSidebarCategoryItem',
     identifyingFields: ['category', 'channel'],
     lifecycleHooks: {
         _created() {
@@ -217,7 +217,7 @@ registerModel({
         /**
          * Determines the discuss sidebar category displaying this item.
          */
-        category: many2one('mail.discuss_sidebar_category', {
+        category: many2one('DiscussSidebarCategory', {
             inverse: 'categoryItems',
             readonly: true,
             required: true,
@@ -275,7 +275,7 @@ registerModel({
         /**
          * The related channel thread.
          */
-        channel: one2one('mail.thread', {
+        channel: one2one('Thread', {
             inverse: 'discussSidebarCategoryItem',
             readonly: true,
             required: true,

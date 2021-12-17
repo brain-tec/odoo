@@ -11,7 +11,7 @@ import { session } from '@web/session';
 import { str_to_datetime } from 'web.time';
 
 registerModel({
-    name: 'mail.message',
+    name: 'Message',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -25,7 +25,7 @@ registerModel({
                     data2.attachments = unlinkAll();
                 } else {
                     data2.attachments = insertAndReplace(data.attachment_ids.map(attachmentData =>
-                        this.messaging.models['mail.attachment'].convertData(attachmentData)
+                        this.messaging.models['Attachment'].convertData(attachmentData)
                     ));
                 }
             }
@@ -96,7 +96,7 @@ registerModel({
             }
             if ('notifications' in data) {
                 data2.notifications = insert(data.notifications.map(notificationData =>
-                    this.messaging.models['mail.notification'].convertData(notificationData)
+                    this.messaging.models['Notification'].convertData(notificationData)
                 ));
             }
             if ('parentMessage' in data) {
@@ -146,9 +146,9 @@ registerModel({
          *
          * [[dbname, 'res.partner', partnerId], { type: 'mark_as_read' }]
          *
-         * @see mail.messaging_notification_handler:_handleNotificationPartnerMarkAsRead()
+         * @see MessagingNotificationHandler:_handleNotificationPartnerMarkAsRead()
          *
-         * @param {mail.message[]} messages
+         * @param {Message[]} messages
          */
         async markAsRead(messages) {
             await this.env.services.rpc({
@@ -162,15 +162,15 @@ registerModel({
          *
          * @param {string} route
          * @param {Object} params
-         * @returns {mail.message[]}
+         * @returns {Message[]}
          */
         async performRpcMessageFetch(route, params) {
             const messagesData = await this.env.services.rpc({ route, params }, { shadow: true });
             if (!this.messaging) {
                 return;
             }
-            const messages = this.messaging.models['mail.message'].insert(messagesData.map(
-                messageData => this.messaging.models['mail.message'].convertData(messageData)
+            const messages = this.messaging.models['Message'].insert(messagesData.map(
+                messageData => this.messaging.models['Message'].convertData(messageData)
             ));
             // compute seen indicators (if applicable)
             for (const message of messages) {
@@ -287,7 +287,7 @@ registerModel({
             if (!this.messaging) {
                 return;
             }
-            this.messaging.models['mail.message'].insert(messageData);
+            this.messaging.models['Message'].insert(messageData);
         },
         /**
          * @returns {string|FieldCommand}
@@ -317,8 +317,11 @@ registerModel({
             if (this.tracking_value_ids.length > 0) {
                 return false;
             }
+            if (this.message_type !== 'comment') {
+                return false;
+            }
             if (this.originThread.model === 'mail.channel') {
-                return this.message_type === 'comment';
+                return true;
             }
             return this.is_note;
         },
@@ -512,7 +515,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread[]}
+         * @returns {Thread[]}
          */
         _computeThreads() {
             const threads = [];
@@ -535,10 +538,10 @@ registerModel({
         authorName: attr({
             compute: '_computeAuthorName',
         }),
-        attachments: many2many('mail.attachment', {
+        attachments: many2many('Attachment', {
             inverse: 'messages',
         }),
-        author: many2one('mail.partner'),
+        author: many2one('Partner'),
         /**
          * This value is meant to be returned by the server
          * (and has been sanitized before stored into db).
@@ -578,7 +581,7 @@ registerModel({
             compute: '_computeDateFromNow',
         }),
         email_from: attr(),
-        failureNotifications: one2many('mail.notification', {
+        failureNotifications: one2many('Notification', {
             compute: '_computeFailureNotifications',
         }),
         guestAuthor: many2one('Guest', {
@@ -693,7 +696,7 @@ registerModel({
          * Groups of reactions per content allowing to know the number of
          * reactions for each.
          */
-        messageReactionGroups: one2many('mail.message_reaction_group', {
+        messageReactionGroups: one2many('MessageReactionGroup', {
             inverse: 'message',
             isCausal: true,
         }),
@@ -709,14 +712,14 @@ registerModel({
             inverse: 'message',
             isCausal: true,
         }),
-        notifications: one2many('mail.notification', {
+        notifications: one2many('Notification', {
             inverse: 'message',
             isCausal: true,
         }),
         /**
          * Origin thread of this message (if any).
          */
-        originThread: many2one('mail.thread', {
+        originThread: many2one('Thread', {
             inverse: 'messagesAsOriginThread',
         }),
         /**
@@ -725,7 +728,7 @@ registerModel({
          * (parent_id in python) that should be ignored for the purpose of this
          * feature.
          */
-        parentMessage: many2one('mail.message'),
+        parentMessage: many2one('Message'),
         /**
          * This value is meant to be based on field body which is
          * returned by the server (and has been sanitized before stored into db).
@@ -742,7 +745,7 @@ registerModel({
         /**
          * All threads that this message is linked to. This field is read-only.
          */
-        threads: many2many('mail.thread', {
+        threads: many2many('Thread', {
             compute: '_computeThreads',
             inverse: 'messages',
         }),

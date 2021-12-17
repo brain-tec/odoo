@@ -22,7 +22,7 @@ const getMessageNextTemporaryId = (function () {
 })();
 
 registerModel({
-    name: 'mail.chatter',
+    name: 'Chatter',
     identifyingFields: ['id'],
     lifecycleHooks: {
         _created() {
@@ -185,7 +185,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread_viewer}
+         * @returns {ThreadViewer}
          */
         _computeThreadViewer() {
             return insertAndReplace({
@@ -224,7 +224,7 @@ registerModel({
                 }
             } else if (!this.thread || !this.thread.isTemporary) {
                 const currentPartner = this.messaging.currentPartner;
-                const message = this.messaging.models['mail.message'].create({
+                const message = this.messaging.models['Message'].create({
                     author: link(currentPartner),
                     body: this.env._t("Creating a new record..."),
                     id: getMessageNextTemporaryId(),
@@ -282,14 +282,14 @@ registerModel({
             inverse: 'chatter',
             isCausal: true,
         }),
-        attachmentBoxView: one2one('mail.attachment_box_view', {
+        attachmentBoxView: one2one('AttachmentBoxView', {
             inverse: 'chatter',
             isCausal: true,
         }),
         /**
          * Determines the attachment list that will be used to display the attachments.
          */
-        attachmentList: one2one('mail.attachment_list', {
+        attachmentList: one2one('AttachmentList', {
             compute: '_computeAttachmentList',
             inverse: 'chatter',
             isCausal: true,
@@ -372,9 +372,9 @@ registerModel({
             default: false,
         }),
         /**
-         * Determines the `mail.thread` that should be displayed by `this`.
+         * Determines the `Thread` that should be displayed by `this`.
          */
-        thread: many2one('mail.thread'),
+        thread: many2one('Thread'),
         /**
          * Determines the id of the thread that will be displayed by `this`.
          */
@@ -388,15 +388,15 @@ registerModel({
          */
         threadRef: attr(),
         /**
-         * States the `mail.thread_view` displaying `this.thread`.
+         * States the `ThreadView` displaying `this.thread`.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             related: 'threadViewer.threadView',
         }),
         /**
-         * Determines the `mail.thread_viewer` managing the display of `this.thread`.
+         * Determines the `ThreadViewer` managing the display of `this.thread`.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             compute: '_computeThreadViewer',
             inverse: 'chatter',
             isCausal: true,

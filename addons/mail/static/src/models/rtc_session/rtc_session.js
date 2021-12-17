@@ -7,7 +7,7 @@ import { attr, many2one, one2one, one2many } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.rtc_session',
+    name: 'RtcSession',
     identifyingFields: ['id'],
     lifecycleHooks: {
         _created() {
@@ -134,7 +134,7 @@ registerModel({
             this.updateAndBroadcast({
                 isDeaf: !this.isDeaf,
             });
-            for (const session of this.messaging.models['mail.rtc_session'].all()) {
+            for (const session of this.messaging.models['RtcSession'].all()) {
                 if (!session.audioElement) {
                     continue;
                 }
@@ -299,7 +299,7 @@ registerModel({
          * The mail.channel of the session, rtc sessions are part and managed by
          * mail.channel
          */
-        channel: many2one('mail.thread', {
+        channel: many2one('Thread', {
             inverse: 'rtcSessions',
         }),
         /**
@@ -324,7 +324,7 @@ registerModel({
          * this serves as an explicit inverse as it seems to confuse it with
          * other session-channel relations otherwise.
          */
-        calledChannels: one2many('mail.thread', {
+        calledChannels: one2many('Thread', {
             inverse: 'rtcInvitingSession',
         }),
         /**
@@ -389,7 +389,7 @@ registerModel({
          * has open sessions in multiple channels, but only one session per
          * channel is allowed.
          */
-        partner: many2one('mail.partner', {
+        partner: many2one('Partner', {
             inverse: 'rtcSessions',
         }),
         /**
@@ -405,7 +405,7 @@ registerModel({
          * sessions from other channels with the same partner (sessions opened from different
          * tabs or devices).
          */
-        rtc: one2one('mail.rtc', {
+        rtc: one2one('Rtc', {
             inverse: 'currentRtcSession',
         }),
         /**

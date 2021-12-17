@@ -5,7 +5,7 @@ import { attr, many2many, many2one, one2many } from '@mail/model/model_field';
 import { clear, insert, insertAndReplace, link, replace, unlink, unlinkAll } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.follower',
+    name: 'Follower',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -37,7 +37,7 @@ registerModel({
                 }
             }
             if (data.partner) {
-                data2.partner = insertAndReplace(this.models['mail.partner'].convertData(data.partner));
+                data2.partner = insertAndReplace(this.models['Partner'].convertData(data.partner));
             }
             return data2;
         },
@@ -71,7 +71,7 @@ registerModel({
             followedThread.fetchAndUpdateSuggestedRecipients();
         },
         /**
-         * @param {mail.follower_subtype} subtype
+         * @param {FollowerSubtype} subtype
          */
         selectSubtype(subtype) {
             if (!this.selectedSubtypes.includes(subtype)) {
@@ -88,8 +88,8 @@ registerModel({
             }));
             this.update({ subtypes: unlinkAll() });
             for (const data of subtypesData) {
-                const subtype = this.messaging.models['mail.follower_subtype'].insert(
-                    this.messaging.models['mail.follower_subtype'].convertData(data)
+                const subtype = this.messaging.models['FollowerSubtype'].insert(
+                    this.messaging.models['FollowerSubtype'].convertData(data)
                 );
                 this.update({ subtypes: link(subtype) });
                 if (data.followed) {
@@ -107,7 +107,7 @@ registerModel({
             });
         },
         /**
-         * @param {mail.follower_subtype} subtype
+         * @param {FollowerSubtype} subtype
          */
         unselectSubtype(subtype) {
             if (this.selectedSubtypes.includes(subtype)) {
@@ -142,7 +142,7 @@ registerModel({
         },
     },
     fields: {
-        followedThread: many2one('mail.thread', {
+        followedThread: many2one('Thread', {
             inverse: 'followers',
         }),
         id: attr({
@@ -155,14 +155,14 @@ registerModel({
         isEditable: attr({
             default: false,
         }),
-        partner: many2one('mail.partner', {
+        partner: many2one('Partner', {
             required: true,
         }),
-        selectedSubtypes: many2many('mail.follower_subtype'),
-        subtypeList: one2many('mail.follower_subtype_list', {
+        selectedSubtypes: many2many('FollowerSubtype'),
+        subtypeList: one2many('FollowerSubtypeList', {
             inverse: 'follower',
             isCausal: true,
         }),
-        subtypes: many2many('mail.follower_subtype'),
+        subtypes: many2many('FollowerSubtype'),
     },
 });

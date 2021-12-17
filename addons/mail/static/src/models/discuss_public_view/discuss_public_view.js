@@ -54,7 +54,7 @@ registerModel({
         /**
          * States the channel linked to this discuss public view.
          */
-        channel: one2one('mail.thread', {
+        channel: one2one('Thread', {
             readonly: true,
             required: true,
         }),
@@ -72,21 +72,21 @@ registerModel({
         /**
          * States the thread view linked to this discuss public view.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             readonly: true,
             related: 'threadViewer.threadView',
         }),
         /**
          * States the thread viewer linked to this discuss public view.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             inverse: 'discussPublicView',
             isCausal: true,
         }),
         /**
          * States the welcome view linked to this discuss public view.
          */
-        welcomeView: one2one('mail.welcome_view', {
+        welcomeView: one2one('WelcomeView', {
             inverse: 'discussPublicView',
             isCausal: true,
         }),

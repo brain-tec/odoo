@@ -161,7 +161,7 @@ registerModel({
         },
         /**
          * @param {Object} param0
-         * @param {mail.attachment[]} [param0.attachments=[]]
+         * @param {Attachment[]} [param0.attachments=[]]
          * @param {string|boolean} [param0.feedback=false]
          */
         async markAsDone({ attachments = [], feedback = false }) {
@@ -232,15 +232,15 @@ registerModel({
         },
     },
     fields: {
-        assignee: many2one('mail.user'),
-        attachments: many2many('mail.attachment', {
+        assignee: many2one('User'),
+        attachments: many2many('Attachment', {
             inverse: 'activities',
         }),
         canWrite: attr({
             default: false,
         }),
         category: attr(),
-        creator: many2one('mail.user'),
+        creator: many2one('User'),
         dateCreate: attr(),
         dateDeadline: attr(),
         /**
@@ -261,7 +261,7 @@ registerModel({
             compute: '_computeIsCurrentPartnerAssignee',
             default: false,
         }),
-        mailTemplates: many2many('mail.mail_template', {
+        mailTemplates: many2many('MailTemplate', {
             inverse: 'activities',
         }),
         /**
@@ -280,14 +280,14 @@ registerModel({
          * Also, be useful when the assigned user is different from the
          * "source" or "requesting" partner.
          */
-        requestingPartner: many2one('mail.partner'),
+        requestingPartner: many2one('Partner'),
         state: attr(),
         summary: attr(),
         /**
          * Determines to which "thread" (using `mail.activity.mixin` on the
          * server) `this` belongs to.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             inverse: 'activities',
         }),
         type: many2one('ActivityType', {

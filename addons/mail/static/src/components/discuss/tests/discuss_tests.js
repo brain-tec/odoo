@@ -451,7 +451,7 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
     `);
     assert.strictEqual(
         channel.dataset.threadLocalId,
-        this.messaging.models['mail.thread'].findFromIdentifyingData({
+        this.messaging.models['Thread'].findFromIdentifyingData({
             id: 20,
             model: 'mail.channel',
         }).localId,
@@ -579,7 +579,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
         document.querySelectorAll(`
             .o_DiscussSidebar_categoryChannel
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 100,
                     model: 'mail.channel',
                 }).localId
@@ -592,7 +592,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
         document.querySelectorAll(`
             .o_DiscussSidebar_categoryChannel
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 101,
                     model: 'mail.channel'
                 }).localId
@@ -604,7 +604,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     const channel1 = document.querySelector(`
         .o_DiscussSidebar_categoryChannel
         .o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 100,
                 model: 'mail.channel'
             }).localId
@@ -613,7 +613,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     const channel2 = document.querySelector(`
         .o_DiscussSidebar_categoryChannel
         .o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 101,
                 model: 'mail.channel'
             }).localId
@@ -652,7 +652,7 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     const chat = document.querySelector(`.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategory_item`);
     assert.strictEqual(
         chat.dataset.threadLocalId,
-        this.messaging.models['mail.thread'].findFromIdentifyingData({
+        this.messaging.models['Thread'].findFromIdentifyingData({
             id: 10,
             model: 'mail.channel'
         }).localId,
@@ -770,7 +770,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_categoryChat
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 11,
                     model: 'mail.channel',
                 }).localId
@@ -783,7 +783,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_categoryChat
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 12,
                     model: 'mail.channel',
                 }).localId
@@ -796,7 +796,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_categoryChat
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 13,
                     model: 'mail.channel',
                 }).localId
@@ -808,7 +808,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     const chat1 = document.querySelector(`
         .o_DiscussSidebar_categoryChat
         .o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 11,
                 model: 'mail.channel',
             }).localId
@@ -817,7 +817,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     const chat2 = document.querySelector(`
         .o_DiscussSidebar_categoryChat
         .o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 12,
                 model: 'mail.channel',
             }).localId
@@ -826,7 +826,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     const chat3 = document.querySelector(`
         .o_DiscussSidebar_categoryChat
         .o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 13,
                 model: 'mail.channel',
             }).localId
@@ -908,7 +908,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -998,7 +998,7 @@ QUnit.test('default thread rendering', async function (assert) {
     await afterNextRender(() =>
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -1008,7 +1008,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -1143,7 +1143,7 @@ QUnit.test('load single message from channel initially', async function (assert)
         document.querySelectorAll(`
             .o_Discuss_thread
             .o_MessageList_message[data-message-local-id="${
-                this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+                this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
             }"]
         `).length,
         1,
@@ -1166,7 +1166,7 @@ QUnit.test('open channel from active_id as channel id', async function (assert) 
         document.body,
         `
             .o_Discuss_thread[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({ id: 20, model: 'mail.channel' }).localId
+                this.messaging.models['Thread'].findFromIdentifyingData({ id: 20, model: 'mail.channel' }).localId
             }"]
         `,
         "should have channel with ID 20 open in Discuss when providing active_id 20"
@@ -1201,7 +1201,7 @@ QUnit.test('basic rendering of message', async function (assert) {
         .o_Discuss_thread
         .o_ThreadView_messageList
         .o_MessageList_message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
     assert.strictEqual(
@@ -1333,14 +1333,14 @@ QUnit.test('basic rendering of squashed message', async function (assert) {
         .o_Discuss_thread
         .o_ThreadView_messageList
         .o_MessageList_message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
     const message2 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadView_messageList
         .o_MessageList_message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 101 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 101 }).localId
         }"]
     `);
     assert.notOk(
@@ -1466,14 +1466,14 @@ QUnit.test('inbox messages are never squashed', async function (assert) {
         .o_Discuss_thread
         .o_ThreadView_messageList
         .o_MessageList_message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
     const message2 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadView_messageList
         .o_MessageList_message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 101 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 101 }).localId
         }"]
     `);
     assert.notOk(
@@ -1952,7 +1952,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
             document.querySelector(`
                 .o_DiscussSidebar_categoryChannel
                 .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                    this.messaging.models['mail.thread'].findFromIdentifyingData({
+                    this.messaging.models['Thread'].findFromIdentifyingData({
                         id: 12,
                         model: 'mail.channel',
                     }).localId
@@ -1985,7 +1985,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
             document.querySelector(`
                 .o_DiscussSidebar_categoryChannel
                 .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                    this.messaging.models['mail.thread'].findFromIdentifyingData({
+                    this.messaging.models['Thread'].findFromIdentifyingData({
                         id: 11,
                         model: 'mail.channel',
                     }).localId
@@ -2015,7 +2015,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
             document.querySelector(`
                 .o_DiscussSidebar_categoryChannel
                 .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                    this.messaging.models['mail.thread'].findFromIdentifyingData({
+                    this.messaging.models['Thread'].findFromIdentifyingData({
                         id: 12,
                         model: 'mail.channel',
                     }).localId
@@ -2082,7 +2082,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
         document.querySelector(`
             .o_DiscussSidebar_categoryChannel
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 1,
                     model: 'mail.channel',
                 }).localId
@@ -2094,7 +2094,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
         document.querySelector(`
             .o_DiscussSidebar_categoryChat
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -2110,7 +2110,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     const msg1 = document.querySelector(`
         .o_Discuss_thread
         .o_Message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
     assert.strictEqual(
@@ -2130,7 +2130,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
         document.querySelector(`
             .o_DiscussSidebar_categoryChannel
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 1,
                     model: 'mail.channel',
                 }).localId
@@ -2142,7 +2142,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
         document.querySelector(`
             .o_DiscussSidebar_categoryChat
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -2199,7 +2199,7 @@ QUnit.test('sidebar quick search', async function (assert) {
         document.querySelector(`
             .o_DiscussSidebar_categoryChannel .o_DiscussSidebarCategory_item
         `).dataset.threadLocalId,
-        this.messaging.models['mail.thread'].findFromIdentifyingData({
+        this.messaging.models['Thread'].findFromIdentifyingData({
             id: 12,
             model: 'mail.channel',
         }).localId,
@@ -2269,7 +2269,7 @@ QUnit.test('basic top bar rendering', async function (assert) {
     await afterNextRender(() =>
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -2340,7 +2340,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -2375,7 +2375,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -2679,7 +2679,7 @@ QUnit.test('composer state: attachments save and restore', async function (asser
     );
     assert.strictEqual(
         document.querySelector(`.o_Composer .o_AttachmentCard`).dataset.id,
-        this.messaging.models['mail.attachment'].findFromIdentifyingData({ id: 1 }).localId,
+        this.messaging.models['Attachment'].findFromIdentifyingData({ id: 1 }).localId,
         "should have correct 1st attachment in the composer"
     );
 
@@ -2693,17 +2693,17 @@ QUnit.test('composer state: attachments save and restore', async function (asser
     );
     assert.strictEqual(
         document.querySelectorAll(`.o_Composer .o_AttachmentCard`)[0].dataset.id,
-        this.messaging.models['mail.attachment'].findFromIdentifyingData({ id: 2 }).localId,
+        this.messaging.models['Attachment'].findFromIdentifyingData({ id: 2 }).localId,
         "should have attachment with id 2 as 1st attachment"
     );
     assert.strictEqual(
         document.querySelectorAll(`.o_Composer .o_AttachmentCard`)[1].dataset.id,
-        this.messaging.models['mail.attachment'].findFromIdentifyingData({ id: 3 }).localId,
+        this.messaging.models['Attachment'].findFromIdentifyingData({ id: 3 }).localId,
         "should have attachment with id 3 as 2nd attachment"
     );
     assert.strictEqual(
         document.querySelectorAll(`.o_Composer .o_AttachmentCard`)[2].dataset.id,
-        this.messaging.models['mail.attachment'].findFromIdentifyingData({ id: 4 }).localId,
+        this.messaging.models['Attachment'].findFromIdentifyingData({ id: 4 }).localId,
         "should have attachment with id 4 as 3rd attachment"
     );
 });
@@ -2799,7 +2799,7 @@ QUnit.test('post a simple message', async function (assert) {
     const message = document.querySelector(`.o_Message`);
     assert.strictEqual(
         message.dataset.messageLocalId,
-        this.messaging.models['mail.message'].findFromIdentifyingData({ id: postedMessageId }).localId,
+        this.messaging.models['Message'].findFromIdentifyingData({ id: postedMessageId }).localId,
         "new message in thread should be linked to newly created message from message post"
     );
     assert.strictEqual(
@@ -2977,7 +2977,7 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
     assert.containsOnce(
         document.body,
         `.o_DiscussSidebarCategory_item[data-thread-local-id="${
-            this.messaging.models['mail.thread'].findFromIdentifyingData({
+            this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 10,
                 model: 'mail.channel',
             }).localId
@@ -2987,7 +2987,7 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
     assert.hasClass(
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -3002,7 +3002,7 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
         func: () => {
             document.querySelector(`
                 .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                    this.messaging.models['mail.thread'].findFromIdentifyingData({
+                    this.messaging.models['Thread'].findFromIdentifyingData({
                         id: 10,
                         model: 'mail.channel',
                     }).localId
@@ -3021,7 +3021,7 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
     assert.doesNotHaveClass(
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -3106,7 +3106,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
     assert.strictEqual(
         document.querySelector(`.o_Discuss_thread .o_Message`).dataset.messageLocalId,
-        this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
+        this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId,
         "should display newly received needaction message"
     );
 
@@ -3142,7 +3142,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
         document.querySelector(`
             .o_Discuss_thread
             .o_Message[data-message-local-id="${
-                this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+                this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId
             }"]
         `),
         "should still display 1st needaction message"
@@ -3151,7 +3151,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
         document.querySelector(`
             .o_Discuss_thread
             .o_Message[data-message-local-id="${
-                this.messaging.models['mail.message'].findFromIdentifyingData({ id: 101 }).localId
+                this.messaging.models['Message'].findFromIdentifyingData({ id: 101 }).localId
             }"]
         `),
         "should display 2nd needaction message"
@@ -3227,7 +3227,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
     );
     assert.strictEqual(
         document.querySelector('.o_Message').dataset.messageLocalId,
-        this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
+        this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId,
         "should display message with ID 100"
     );
     assert.strictEqual(
@@ -3277,7 +3277,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
     );
     assert.strictEqual(
         document.querySelector('.o_Message').dataset.messageLocalId,
-        this.messaging.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
+        this.messaging.models['Message'].findFromIdentifyingData({ id: 100 }).localId,
         "should still display message with ID 100 after posting reply"
     );
     assert.notOk(
@@ -3486,7 +3486,7 @@ QUnit.test('mark a single message as read should only move this message to "Hist
     await afterNextRender(() =>
         document.querySelector(`
             .o_Message[data-message-local-id="${
-                this.messaging.models['mail.message'].findFromIdentifyingData({ id: 1 }).localId
+                this.messaging.models['Message'].findFromIdentifyingData({ id: 1 }).localId
             }"]
         `).click()
     );
@@ -3494,7 +3494,7 @@ QUnit.test('mark a single message as read should only move this message to "Hist
     await afterNextRender(() =>
         document.querySelector(`
             .o_Message[data-message-local-id="${
-                this.messaging.models['mail.message'].findFromIdentifyingData({ id: 1 }).localId
+                this.messaging.models['Message'].findFromIdentifyingData({ id: 1 }).localId
             }"] .o_MessageActionList_actionMarkRead
         `).click()
     );
@@ -3506,7 +3506,7 @@ QUnit.test('mark a single message as read should only move this message to "Hist
     assert.containsOnce(
         document.body,
         `.o_Message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 2 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 2 }).localId
         }"]`,
         "message still in inbox should be the one not marked as read"
     );
@@ -3535,7 +3535,7 @@ QUnit.test('mark a single message as read should only move this message to "Hist
     assert.containsOnce(
         document.body,
         `.o_Message[data-message-local-id="${
-            this.messaging.models['mail.message'].findFromIdentifyingData({ id: 1 }).localId
+            this.messaging.models['Message'].findFromIdentifyingData({ id: 1 }).localId
         }"]`,
         "message moved in history should be the one marked as read"
     );
@@ -3954,7 +3954,7 @@ QUnit.test('mark channel as seen if last message is visible when switching chann
         func: () => {
             document.querySelector(`
                 .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                    this.messaging.models['mail.thread'].findFromIdentifyingData({
+                    this.messaging.models['Thread'].findFromIdentifyingData({
                         id: 10,
                         model: 'mail.channel',
                     }).localId
@@ -3973,7 +3973,7 @@ QUnit.test('mark channel as seen if last message is visible when switching chann
     assert.doesNotHaveClass(
         document.querySelector(`
             .o_DiscussSidebarCategory_item[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId

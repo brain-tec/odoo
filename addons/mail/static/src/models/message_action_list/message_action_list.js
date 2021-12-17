@@ -6,7 +6,7 @@ import { clear, insertAndReplace, replace } from '@mail/model/model_field_comman
 import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.message_action_list',
+    name: 'MessageActionList',
     identifyingFields: ['messageView'],
     lifecycleHooks: {
         _created() {
@@ -176,7 +176,7 @@ registerModel({
         /**
          * States the message on which this action message list operates.
          */
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             related: 'messageView.message',
         }),
         /**

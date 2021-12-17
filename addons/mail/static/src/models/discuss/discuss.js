@@ -5,7 +5,7 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace, link, unlink } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.discuss',
+    name: 'Discuss',
     identifyingFields: ['messaging'],
     lifecycleHooks: {
         _created() {
@@ -43,14 +43,14 @@ registerModel({
             this.clearIsAddingItem();
             if (ui.item.special) {
                 const channel = await this.async(() =>
-                    this.messaging.models['mail.thread'].performRpcCreateChannel({
+                    this.messaging.models['Thread'].performRpcCreateChannel({
                         name,
                         privacy: ui.item.special,
                     })
                 );
                 channel.open();
             } else {
-                const channel = this.messaging.models['mail.thread'].insert({
+                const channel = this.messaging.models['Thread'].insert({
                     id: ui.item.id,
                     model: 'mail.channel',
                 });
@@ -68,7 +68,7 @@ registerModel({
          */
         async handleAddChannelAutocompleteSource(req, res) {
             this.update({ addingChannelValue: req.term });
-            const threads = await this.messaging.models['mail.thread'].searchChannelsToOpen({ limit: 10, searchTerm: req.term });
+            const threads = await this.messaging.models['Thread'].searchChannelsToOpen({ limit: 10, searchTerm: req.term });
             const items = threads.map((thread) => {
                 const escapedName = owl.utils.escape(thread.name);
                 return {
@@ -114,7 +114,7 @@ registerModel({
          */
         handleAddChatAutocompleteSource(req, res) {
             const value = owl.utils.escape(req.term);
-            this.messaging.models['mail.partner'].imSearch({
+            this.messaging.models['Partner'].imSearch({
                 callback: partners => {
                     const suggestions = partners.map(partner => {
                         return {
@@ -151,7 +151,7 @@ registerModel({
          * @param {MouseEvent} ev
          */
         async onClickStartAMeetingButton(ev) {
-            const meetingChannel = await this.messaging.models['mail.thread'].createGroupChat({
+            const meetingChannel = await this.messaging.models['Thread'].createGroupChat({
                 default_display_mode: 'video_full_screen',
                 partners_to: [this.messaging.currentPartner.id],
             });
@@ -171,7 +171,7 @@ registerModel({
             const [model, id] = typeof this.initActiveId === 'number'
                 ? ['mail.channel', this.initActiveId]
                 : this.initActiveId.split('_');
-            const thread = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const thread = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: model !== 'mail.box' ? Number(id) : id,
                 model,
             });
@@ -186,7 +186,7 @@ registerModel({
         /**
          * Opens the given thread in Discuss, and opens Discuss if necessary.
          *
-         * @param {mail.thread} thread
+         * @param {Thread} thread
          * @param {Object} [param1={}]
          * @param {Boolean} [param1.focus]
          */
@@ -209,7 +209,7 @@ registerModel({
             }
         },
         /**
-         * @param {mail.thread} thread
+         * @param {Thread} thread
          * @returns {string}
          */
         threadToActiveId(thread) {
@@ -289,7 +289,7 @@ registerModel({
          * Only pinned threads are allowed in discuss.
          *
          * @private
-         * @returns {mail.thread|undefined}
+         * @returns {Thread|undefined}
          */
         _computeThread() {
             if (!this.thread || !this.thread.isPinned) {
@@ -298,7 +298,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread_viewer}
+         * @returns {ThreadViewer}
          */
         _computeThreadViewer() {
             return insertAndReplace({
@@ -329,14 +329,14 @@ registerModel({
         /**
          * Discuss sidebar category for `channel` type channel threads.
          */
-        categoryChannel: one2one('mail.discuss_sidebar_category', {
+        categoryChannel: one2one('DiscussSidebarCategory', {
             inverse: 'discussAsChannel',
             isCausal: true,
         }),
         /**
          * Discuss sidebar category for `chat` type channel threads.
          */
-        categoryChat: one2one('mail.discuss_sidebar_category', {
+        categoryChat: one2one('DiscussSidebarCategory', {
             inverse: 'discussAsChat',
             isCausal: true,
         }),
@@ -400,21 +400,21 @@ registerModel({
          */
         startAMeetingButtonRef: attr(),
         /**
-         * Determines the `mail.thread` that should be displayed by `this`.
+         * Determines the `Thread` that should be displayed by `this`.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             compute: '_computeThread',
         }),
         /**
-         * States the `mail.thread_view` displaying `this.thread`.
+         * States the `ThreadView` displaying `this.thread`.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             related: 'threadViewer.threadView',
         }),
         /**
-         * Determines the `mail.thread_viewer` managing the display of `this.thread`.
+         * Determines the `ThreadViewer` managing the display of `this.thread`.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             compute: '_computeThreadViewer',
             inverse: 'discuss',
             isCausal: true,

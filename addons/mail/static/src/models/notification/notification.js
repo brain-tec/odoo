@@ -5,7 +5,7 @@ import { attr, many2one } from '@mail/model/model_field';
 import { clear, insert, insertAndReplace, unlinkAll } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.notification',
+    name: 'Notification',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -140,15 +140,15 @@ registerModel({
         isFromCurrentUser: attr({
             compute: '_computeIsFromCurrentUser',
         }),
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             inverse: 'notifications',
         }),
-        notificationGroup: many2one('mail.notification_group', {
+        notificationGroup: many2one('NotificationGroup', {
             compute: '_computeNotificationGroup',
             inverse: 'notifications',
         }),
         notification_status: attr(),
         notification_type: attr(),
-        partner: many2one('mail.partner'),
+        partner: many2one('Partner'),
     },
 });

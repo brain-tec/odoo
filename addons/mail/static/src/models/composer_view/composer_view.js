@@ -142,10 +142,10 @@ registerModel({
             // the mention will appear in the target channel, or be notified to
             // the target partner.
             switch (this.activeSuggestedRecord.constructor.name) {
-                case 'mail.thread':
+                case 'Thread':
                     Object.assign(updateData, { mentionedChannels: link(this.activeSuggestedRecord) });
                     break;
-                case 'mail.partner':
+                case 'Partner':
                     Object.assign(updateData, { mentionedPartners: link(this.activeSuggestedRecord) });
                     break;
             }
@@ -293,8 +293,8 @@ registerModel({
                 if (!this.messaging) {
                     return;
                 }
-                const message = this.messaging.models['mail.message'].insert(
-                    this.messaging.models['mail.message'].convertData(messageData)
+                const message = this.messaging.models['Message'].insert(
+                    this.messaging.models['Message'].convertData(messageData)
                 );
                 for (const threadView of message.originThread.threadViews) {
                     // Reset auto scroll to be able to see the newly posted message.
@@ -420,7 +420,7 @@ registerModel({
          * the active current record is no longer part of the suggestions.
          *
          * @private
-         * @returns {mail.model}
+         * @returns {Model}
          */
         _computeActiveSuggestedRecord() {
             if (
@@ -476,7 +476,7 @@ registerModel({
          * main list, which is a requirement for the navigation process.
          *
          * @private
-         * @returns {mail.model[]}
+         * @returns {Model[]}
          */
         _computeExtraSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
@@ -495,7 +495,7 @@ registerModel({
          * Clears the main suggested record on closing mentions.
          *
          * @private
-         * @returns {mail.model[]}
+         * @returns {Model[]}
          */
         _computeMainSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
@@ -570,13 +570,13 @@ registerModel({
         _computeSuggestionModelName() {
             switch (this.suggestionDelimiter) {
                 case '@':
-                    return 'mail.partner';
+                    return 'Partner';
                 case ':':
-                    return 'mail.canned_response';
+                    return 'CannedResponse';
                 case '/':
                     return 'ChannelCommand';
                 case '#':
-                    return 'mail.thread';
+                    return 'Thread';
                 default:
                     return clear();
             }
@@ -847,13 +847,13 @@ registerModel({
          * is highlighted in the UI and it will be the selected record if the
          * suggestion is confirmed by the user.
          */
-        activeSuggestedRecord: many2one('mail.model', {
+        activeSuggestedRecord: many2one('Model', {
             compute: '_computeActiveSuggestedRecord',
         }),
         /**
          * Determines the attachment list that will be used to display the attachments.
          */
-        attachmentList: one2one('mail.attachment_list', {
+        attachmentList: one2one('AttachmentList', {
             compute: '_computeAttachmentList',
             inverse: 'composerView',
             isCausal: true,
@@ -862,14 +862,14 @@ registerModel({
         /**
          * States the chatter which this composer allows editing (if any).
          */
-        chatter: one2one('mail.chatter', {
+        chatter: one2one('Chatter', {
             inverse: 'composerView',
             readonly: true,
         }),
         /**
          * States the composer state that is displayed by this composer view.
          */
-        composer: many2one('mail.composer', {
+        composer: many2one('Composer', {
             compute: '_computeComposer',
             inverse: 'composerViews',
             required: true,
@@ -884,7 +884,7 @@ registerModel({
          * process. 2 arbitrary lists can be provided and the second is defined
          * as "extra".
          */
-        extraSuggestedRecords: many2many('mail.model', {
+        extraSuggestedRecords: many2many('Model', {
             compute: '_computeExtraSuggestedRecords',
         }),
         hasFocus: attr({
@@ -911,7 +911,7 @@ registerModel({
          * process. 2 arbitrary lists can be provided and the first is defined
          * as "main".
          */
-        mainSuggestedRecords: many2many('mail.model', {
+        mainSuggestedRecords: many2many('Model', {
             compute: '_computeMainSuggestedRecords',
         }),
         /**
@@ -969,7 +969,7 @@ registerModel({
         /**
          * States the thread view on which this composer allows editing (if any).
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             inverse: 'composerView',
             readonly: true,
         }),

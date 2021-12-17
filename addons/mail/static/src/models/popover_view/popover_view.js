@@ -5,7 +5,7 @@ import { attr, one2one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.popover_view',
+    name: 'PopoverView',
     identifyingFields: ['threadViewTopbarOwner', 'channelInvitationForm'],
     lifecycleHooks: {
         _created() {
@@ -88,7 +88,7 @@ registerModel({
         /**
          * If set, this popover view is owned by a thread view topbar record.
          */
-        threadViewTopbarOwner: one2one('mail.thread_view_topbar', {
+        threadViewTopbarOwner: one2one('ThreadViewTopbar', {
             inverse: 'invitePopoverView',
             readonly: true,
         }),

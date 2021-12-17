@@ -10,7 +10,7 @@ import { clear, insert, insertAndReplace, link, unlink } from '@mail/model/model
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.rtc_call_viewer',
+    name: 'RtcCallViewer',
     identifyingFields: ['threadView'],
     lifecycleHooks: {
         _created() {
@@ -356,14 +356,14 @@ registerModel({
         /**
          * If set, the card to be displayed as the "main/spotlight" card.
          */
-        mainParticipantCard: one2one('mail.rtc_call_participant_card', {
+        mainParticipantCard: one2one('RtcCallParticipantCard', {
             compute: '_computeMainParticipantCard',
             inverse: 'rtcCallViewerOfMainCard',
         }),
         /**
          * The model for the controller (buttons).
          */
-        rtcController: one2one('mail.rtc_controller', {
+        rtcController: one2one('RtcController', {
             default: insertAndReplace(),
             readonly: true,
             required: true,
@@ -373,7 +373,7 @@ registerModel({
         /**
          * The model for the menu to control the layout of the viewer.
          */
-        rtcLayoutMenu: one2one('mail.rtc_layout_menu', {
+        rtcLayoutMenu: one2one('RtcLayoutMenu', {
             inverse: 'callViewer',
             isCausal: true,
         }),
@@ -392,7 +392,7 @@ registerModel({
         /**
          * ThreadView on which the call viewer is attached.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             inverse: 'rtcCallViewer',
             readonly: true,
             required: true,
@@ -400,7 +400,7 @@ registerModel({
         /**
          * List of all participant cards (can either be invitations or rtcSessions).
          */
-        tileParticipantCards: one2many('mail.rtc_call_participant_card', {
+        tileParticipantCards: one2many('RtcCallParticipantCard', {
             compute: '_computeTileParticipantCards',
             inverse: 'rtcCallViewerOfTile',
         }),

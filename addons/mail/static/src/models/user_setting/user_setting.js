@@ -7,7 +7,7 @@ import { attr, one2one, one2many } from '@mail/model/model_field';
 import { insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.user_setting',
+    name: 'UserSetting',
     identifyingFields: ['id'],
     lifecycleHooks: {
         _created() {
@@ -251,7 +251,7 @@ registerModel({
         /**
          * Model for the component with the controls for RTC related settings.
          */
-        rtcConfigurationMenu: one2one('mail.rtc_configuration_menu', {
+        rtcConfigurationMenu: one2one('RtcConfigurationMenu', {
             default: insertAndReplace(),
             inverse: 'userSetting',
             isCausal: true,
@@ -285,7 +285,7 @@ registerModel({
         /**
          * Models that represent the volume chosen by the user for each partner.
          */
-        volumeSettings: one2many('mail.volume_setting', {
+        volumeSettings: one2many('VolumeSetting', {
             inverse: 'userSetting',
             isCausal: true,
         }),

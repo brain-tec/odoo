@@ -109,7 +109,7 @@ registerModel({
          * Determines the attachment list displaying the attachments of this
          * message (if any).
          */
-        attachmentList: one2one('mail.attachment_list', {
+        attachmentList: one2one('AttachmentList', {
             compute: '_computeAttachmentList',
             inverse: 'messageView',
             isCausal: true,
@@ -119,7 +119,7 @@ registerModel({
          * States the component displaying this message view (if any).
          */
         component: attr(),
-        composerForEditing: one2one('mail.composer', {
+        composerForEditing: one2one('Composer', {
             inverse: 'messageViewInEditing',
             isCausal: true,
         }),
@@ -148,7 +148,7 @@ registerModel({
         /**
          * Determines the message action list of this message view (if any).
          */
-        messageActionList: one2one('mail.message_action_list', {
+        messageActionList: one2one('MessageActionList', {
             compute: '_computeMessageActionList',
             inverse: 'messageView',
             isCausal: true,
@@ -158,7 +158,7 @@ registerModel({
          * States the message action list that is displaying this message view
          * in its delete confirmation view.
          */
-        messageActionListWithDelete: one2one('mail.message_action_list', {
+        messageActionListWithDelete: one2one('MessageActionList', {
             inverse: 'messageViewForDelete',
             isCausal: true,
             readonly: true,
@@ -166,7 +166,7 @@ registerModel({
         /**
          * Determines the message that is displayed by this message view.
          */
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             inverse: 'messageViews',
             readonly: true,
             required: true,
@@ -175,7 +175,7 @@ registerModel({
          * States the message in reply to view that displays the message of
          * which this message is a reply to (if any).
          */
-        messageInReplyToView: one2one('mail.message_in_reply_to_view', {
+        messageInReplyToView: one2one('MessageInReplyToView', {
             compute: '_computeMessageInReplyToView',
             inverse: 'messageView',
             isCausal: true,
@@ -184,7 +184,7 @@ registerModel({
         /**
          * States the thread view that is displaying this messages (if any).
          */
-        threadView: many2one('mail.thread_view', {
+        threadView: many2one('ThreadView', {
             inverse: 'messageViews',
             readonly: true,
         }),

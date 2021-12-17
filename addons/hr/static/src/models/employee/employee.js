@@ -5,7 +5,7 @@ import { attr, one2one } from '@mail/model/model_field';
 import { insert, unlink } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'hr.employee',
+    name: 'Employee',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -56,8 +56,8 @@ registerModel({
                     fields,
                 },
             });
-            this.messaging.models['hr.employee'].insert(employeesData.map(employeeData =>
-                this.messaging.models['hr.employee'].convertData(employeeData)
+            this.messaging.models['Employee'].insert(employeesData.map(employeeData =>
+                this.messaging.models['Employee'].convertData(employeeData)
             ));
         },
         /**
@@ -78,8 +78,8 @@ registerModel({
                     fields,
                 },
             });
-            this.messaging.models['hr.employee'].insert(employeesData.map(employeeData =>
-                this.messaging.models['hr.employee'].convertData(employeeData)
+            this.messaging.models['Employee'].insert(employeesData.map(employeeData =>
+                this.messaging.models['Employee'].convertData(employeeData)
             ));
         },
     },
@@ -89,7 +89,7 @@ registerModel({
          * them if applicable.
          */
         async checkIsUser() {
-            return this.messaging.models['hr.employee'].performRpcRead({
+            return this.messaging.models['Employee'].performRpcRead({
                 ids: [this.id],
                 fields: ['user_id', 'user_partner_id'],
                 context: { active_test: false },
@@ -100,7 +100,7 @@ registerModel({
          *
          * If a chat is not appropriate, a notification is displayed instead.
          *
-         * @returns {mail.thread|undefined}
+         * @returns {Thread|undefined}
          */
         async getChat() {
             if (!this.user && !this.hasCheckedUser) {
@@ -122,8 +122,8 @@ registerModel({
          *
          * If a chat is not appropriate, a notification is displayed instead.
          *
-         * @param {Object} [options] forwarded to @see `mail.thread:open()`
-         * @returns {mail.thread|undefined}
+         * @param {Object} [options] forwarded to @see `Thread:open()`
+         * @returns {Thread|undefined}
          */
         async openChat(options) {
             const chat = await this.async(() => this.getChat());
@@ -161,14 +161,14 @@ registerModel({
         /**
          * Partner related to this employee.
          */
-        partner: one2one('mail.partner', {
+        partner: one2one('Partner', {
             inverse: 'employee',
             related: 'user.partner',
         }),
         /**
          * User related to this employee.
          */
-        user: one2one('mail.user', {
+        user: one2one('User', {
             inverse: 'employee',
         }),
     },

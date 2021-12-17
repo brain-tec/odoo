@@ -5,12 +5,12 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.thread_viewer',
+    name: 'ThreadViewer',
     identifyingFields: [['chatter', 'chatWindow', 'discuss', 'discussPublicView']],
     recordMethods: {
         /**
          * @param {integer} scrollHeight
-         * @param {mail.thread_cache} threadCache
+         * @param {ThreadCache} threadCache
          */
         saveThreadCacheScrollHeightAsInitial(scrollHeight, threadCache) {
             threadCache = threadCache || this.threadCache;
@@ -31,7 +31,7 @@ registerModel({
         },
         /**
          * @param {integer} scrollTop
-         * @param {mail.thread_cache} threadCache
+         * @param {ThreadCache} threadCache
          */
         saveThreadCacheScrollPositionsAsInitial(scrollTop, threadCache) {
             threadCache = threadCache || this.threadCache;
@@ -52,14 +52,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread_viewer|undefined}
+         * @returns {ThreadViewer|undefined}
          */
         _computeThreadView() {
             return this.hasThreadView ? insertAndReplace() : clear();
         },
     },
     fields: {
-        chatter: one2one('mail.chatter', {
+        chatter: one2one('Chatter', {
             inverse: 'threadViewer',
             readonly: true,
         }),
@@ -73,7 +73,7 @@ registerModel({
         compact: attr({
             default: false,
         }),
-        discuss: one2one('mail.discuss', {
+        discuss: one2one('Discuss', {
             inverse: 'threadViewer',
             readonly: true,
         }),
@@ -113,13 +113,13 @@ registerModel({
             default: 'asc',
         }),
         /**
-         * Determines the `mail.thread` that should be displayed by `this`.
+         * Determines the `Thread` that should be displayed by `this`.
          */
-        thread: many2one('mail.thread'),
+        thread: many2one('Thread'),
         /**
-         * States the `mail.thread_cache` that should be displayed by `this`.
+         * States the `ThreadCache` that should be displayed by `this`.
          */
-        threadCache: many2one('mail.thread_cache', {
+        threadCache: many2one('ThreadCache', {
             related: 'thread.cache',
         }),
         /**
@@ -142,9 +142,9 @@ registerModel({
             default: {},
         }),
         /**
-         * States the `mail.thread_view` currently displayed and managed by `this`.
+         * States the `ThreadView` currently displayed and managed by `this`.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             compute: '_computeThreadView',
             inverse: 'threadViewer',
             isCausal: true,

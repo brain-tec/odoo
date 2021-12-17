@@ -7,7 +7,7 @@ import { clear, insertAndReplace, link, replace, unlink, update } from '@mail/mo
 import { OnChange } from '@mail/model/model_onchange';
 
 registerModel({
-    name: 'mail.thread_view',
+    name: 'ThreadView',
     identifyingFields: ['threadViewer'],
     lifecycleHooks: {
         _created() {
@@ -37,7 +37,7 @@ registerModel({
             });
         },
         /**
-         * @param {mail.message} message
+         * @param {Message} message
          */
         handleVisibleMessage(message) {
             if (!this.lastVisibleMessage || this.lastVisibleMessage.id < message.id) {
@@ -226,8 +226,8 @@ registerModel({
             this.update({ isLoading: false, isPreparingLoading: false });
         },
         /**
-         * @param {mail.message} prevMessage
-         * @param {mail.message} message
+         * @param {Message} prevMessage
+         * @param {Message} message
          * @returns {boolean}
          */
         _shouldMessageBeSquashed(prevMessage, message) {
@@ -393,15 +393,15 @@ registerModel({
         /**
          * Last message in the context of the currently displayed thread cache.
          */
-        lastMessage: many2one('mail.message', {
+        lastMessage: many2one('Message', {
             related: 'thread.lastMessage',
         }),
         /**
          * Most recent message in this ThreadView that has been shown to the
          * current partner in the currently displayed thread cache.
          */
-        lastVisibleMessage: many2one('mail.message'),
-        messages: many2many('mail.message', {
+        lastVisibleMessage: many2one('Message'),
+        messages: many2many('Message', {
             related: 'threadCache.messages',
         }),
         /**
@@ -426,24 +426,24 @@ registerModel({
         /**
          * Determines the Rtc call viewer of this thread.
          */
-        rtcCallViewer: one2one('mail.rtc_call_viewer', {
+        rtcCallViewer: one2one('RtcCallViewer', {
             compute: '_computeRtcCallViewer',
             inverse: 'threadView',
             isCausal: true,
             readonly: true,
         }),
         /**
-         * Determines the `mail.thread` currently displayed by `this`.
+         * Determines the `Thread` currently displayed by `this`.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             inverse: 'threadViews',
             readonly: true,
             related: 'threadViewer.thread',
         }),
         /**
-         * States the `mail.thread_cache` currently displayed by `this`.
+         * States the `ThreadCache` currently displayed by `this`.
          */
-        threadCache: many2one('mail.thread_cache', {
+        threadCache: many2one('ThreadCache', {
             inverse: 'threadViews',
             readonly: true,
             related: 'threadViewer.threadCache',
@@ -469,9 +469,9 @@ registerModel({
             related: 'threadViewer.threadCacheInitialScrollPositions',
         }),
         /**
-         * Determines the `mail.thread_viewer` currently managing `this`.
+         * Determines the `ThreadViewer` currently managing `this`.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             inverse: 'threadView',
             readonly: true,
             required: true,
@@ -479,7 +479,7 @@ registerModel({
         /**
          * Determines the top bar of this thread view, if any.
          */
-        topbar: one2one('mail.thread_view_topbar', {
+        topbar: one2one('ThreadViewTopbar', {
             compute: '_computeTopbar',
             inverse: 'threadView',
             isCausal: true,

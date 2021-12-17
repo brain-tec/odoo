@@ -107,7 +107,7 @@ registerModel({
         /**
          * Determines the attachment of this attachment image..
          */
-        attachment: many2one('mail.attachment', {
+        attachment: many2one('Attachment', {
             inverse: 'attachmentImages',
             readonly: true,
             required: true,
@@ -115,7 +115,7 @@ registerModel({
         /**
          * States the attachmentList displaying this attachment image.
          */
-        attachmentList: many2one('mail.attachment_list', {
+        attachmentList: many2one('AttachmentList', {
             inverse: 'attachmentImages',
             readonly: true,
             required: true,

@@ -5,7 +5,7 @@ import { attr, many2many, many2one, one2many } from '@mail/model/model_field';
 import { clear, insert } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.attachment',
+    name: 'Attachment',
     identifyingFields: ['id'],
     lifecycleHooks: {
         _created() {
@@ -296,17 +296,17 @@ registerModel({
         /**
          * States the attachment lists that are displaying this attachment.
          */
-        attachmentLists: many2many('mail.attachment_list', {
+        attachmentLists: many2many('AttachmentList', {
             inverse: 'attachments',
         }),
-        attachmentViewer: many2many('AttachmentViewer', {
+        attachmentViewers: many2many('AttachmentViewer', {
             inverse: 'attachments',
         }),
         checksum: attr(),
         /**
          * States on which composer this attachment is currently being created.
          */
-        composer: many2one('mail.composer', {
+        composer: many2one('Composer', {
             inverse: 'attachments',
         }),
         defaultSource: attr({
@@ -391,18 +391,18 @@ registerModel({
         mediaType: attr({
             compute: '_computeMediaType',
         }),
-        messages: many2many('mail.message', {
+        messages: many2many('Message', {
             inverse: 'attachments',
         }),
         mimetype: attr({
             default: '',
         }),
         name: attr(),
-        originThread: many2one('mail.thread', {
+        originThread: many2one('Thread', {
             inverse: 'originThreadAttachments',
         }),
         size: attr(),
-        threads: many2many('mail.thread', {
+        threads: many2many('Thread', {
             inverse: 'attachments',
         }),
         type: attr(),

@@ -6,7 +6,7 @@ import { clear, insert, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
 registerModel({
-    name: 'mail.notification_group',
+    name: 'NotificationGroup',
     identifyingFields: ['res_model', 'res_id', 'notification_type'],
     recordMethods: {
         /**
@@ -39,7 +39,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread|undefined}
+         * @returns {Thread|undefined}
          */
         _computeThread() {
             const notificationsThreadIds = this.notifications
@@ -124,7 +124,7 @@ registerModel({
         notification_type: attr({
             readonly: true,
         }),
-        notifications: one2many('mail.notification', {
+        notifications: one2many('Notification', {
             inverse: 'notificationGroup',
         }),
         res_id: attr({
@@ -144,7 +144,7 @@ registerModel({
         /**
          * Related thread when the notification group concerns a single thread.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             compute: '_computeThread',
         }),
     },

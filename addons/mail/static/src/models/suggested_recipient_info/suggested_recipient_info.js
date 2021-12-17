@@ -4,7 +4,7 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, many2one } from '@mail/model/model_field';
 
 registerModel({
-    name: 'mail.suggested_recipient_info',
+    name: 'SuggestedRecipientInfo',
     identifyingFields: ['id'],
     recordMethods: {
         /**
@@ -63,18 +63,18 @@ registerModel({
             compute: '_computeName',
         }),
         /**
-         * Determines the optional `mail.partner` associated to `this`.
+         * Determines the optional `Partner` associated to `this`.
          */
-        partner: many2one('mail.partner'),
+        partner: many2one('Partner'),
         /**
          * Determines why `this` is a suggestion for `this.thread`. It serves as
          * visual clue when displaying `this`.
          */
         reason: attr(),
         /**
-         * Determines the `mail.thread` concerned by `this.`
+         * Determines the `Thread` concerned by `this.`
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             inverse: 'suggestedRecipientInfoList',
             required: true,
         }),

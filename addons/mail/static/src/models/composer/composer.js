@@ -5,12 +5,12 @@ import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_
 import { clear, replace, unlink } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.composer',
+    name: 'Composer',
     identifyingFields: [['thread', 'messageViewInEditing']],
     recordMethods: {
         /**
          * @private
-         * @returns {mail.thread}
+         * @returns {Thread}
          */
         _computeActiveThread() {
             if (this.messageViewInEditing && this.messageViewInEditing.message && this.messageViewInEditing.message.originThread) {
@@ -43,7 +43,7 @@ registerModel({
          * and removes them if not.
          *
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeMentionedPartners() {
             const unmentionedPartners = [];
@@ -68,7 +68,7 @@ registerModel({
          * and removes them if not.
          *
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeMentionedChannels() {
             const unmentionedChannels = [];
@@ -90,7 +90,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeRecipients() {
             const recipients = [...this.mentionedPartners];
@@ -120,7 +120,7 @@ registerModel({
         },
     },
     fields: {
-        activeThread: many2one('mail.thread', {
+        activeThread: many2one('Thread', {
             compute: '_computeActiveThread',
             readonly: true,
             required: true,
@@ -128,7 +128,7 @@ registerModel({
         /**
          * States which attachments are currently being created in this composer.
          */
-        attachments: one2many('mail.attachment', {
+        attachments: one2many('Attachment', {
             inverse: 'composer',
         }),
         canPostMessage: attr({
@@ -166,10 +166,10 @@ registerModel({
          * Determines whether a post_message request is currently pending.
          */
         isPostingMessage: attr(),
-        mentionedChannels: many2many('mail.thread', {
+        mentionedChannels: many2many('Thread', {
             compute: '_computeMentionedChannels',
         }),
-        mentionedPartners: many2many('mail.partner', {
+        mentionedPartners: many2many('Partner', {
             compute: '_computeMentionedPartners',
         }),
         messageViewInEditing: one2one('MessageView', {
@@ -177,11 +177,11 @@ registerModel({
             readonly: true,
         }),
         /**
-         * Determines the extra `mail.partner` (on top of existing followers)
+         * Determines the extra `Partner` (on top of existing followers)
          * that will receive the message being composed by `this`, and that will
          * also be added as follower of `this.activeThread`.
          */
-        recipients: many2many('mail.partner', {
+        recipients: many2many('Partner', {
             compute: '_computeRecipients',
         }),
         textInputContent: attr({
@@ -199,7 +199,7 @@ registerModel({
         /**
          * States the thread which this composer represents the state (if any).
          */
-        thread: one2one('mail.thread', {
+        thread: one2one('Thread', {
             inverse: 'composer',
             readonly: true,
         }),

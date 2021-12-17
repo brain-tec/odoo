@@ -6,7 +6,7 @@ import { clear, insertAndReplace, replace } from '@mail/model/model_field_comman
 import { OnChange } from '@mail/model/model_onchange';
 
 registerModel({
-    name: 'mail.discuss_sidebar_category',
+    name: 'DiscussSidebarCategory',
     identifyingFields: [['discussAsChannel', 'discussAsChat']],
     lifecycleHooks: {
         _created() {
@@ -46,7 +46,7 @@ registerModel({
          */
         async close() {
             this.update({ isPendingOpen: false });
-            await this.messaging.models['mail.discuss_sidebar_category'].performRpcSetResUsersSettings({
+            await this.messaging.models['DiscussSidebarCategory'].performRpcSetResUsersSettings({
                 [this.serverStateKey]: false,
             });
         },
@@ -55,13 +55,13 @@ registerModel({
          */
         async open() {
             this.update({ isPendingOpen: true });
-            await this.messaging.models['mail.discuss_sidebar_category'].performRpcSetResUsersSettings({
+            await this.messaging.models['DiscussSidebarCategory'].performRpcSetResUsersSettings({
                 [this.serverStateKey]: true,
             });
         },
         /**
          * @private
-         * @returns {mail.discuss_sidebar_category_item | undefined}
+         * @returns {DiscussSidebarCategoryItem|undefined}
          */
         _computeActiveItem() {
             const thread = this.messaging.discuss.thread;
@@ -203,7 +203,7 @@ registerModel({
          * The category item which is active and belongs
          * to the category.
          */
-        activeItem: one2one('mail.discuss_sidebar_category_item', {
+        activeItem: one2one('DiscussSidebarCategoryItem', {
             compute: '_computeActiveItem',
         }),
         /**
@@ -219,7 +219,7 @@ registerModel({
          * Determines the discuss sidebar category items that are displayed by
          * this discuss sidebar category.
          */
-        categoryItems: one2many('mail.discuss_sidebar_category_item', {
+        categoryItems: one2many('DiscussSidebarCategoryItem', {
             inverse: 'category',
             isCausal: true,
             sort: '_sortDefinitionCategoryItems',
@@ -233,11 +233,11 @@ registerModel({
             readonly: true,
             sum: 'categoryItems.categoryCounterContribution',
         }),
-        discussAsChannel: one2one('mail.discuss', {
+        discussAsChannel: one2one('Discuss', {
             inverse: 'categoryChannel',
             readonly: true,
         }),
-        discussAsChat: one2one('mail.discuss', {
+        discussAsChat: one2one('Discuss', {
             inverse: 'categoryChat',
             readonly: true,
         }),
@@ -245,7 +245,7 @@ registerModel({
          * Determines the filtered and sorted discuss sidebar category items
          * that are displayed by this discuss sidebar category.
          */
-        filteredCategoryItems: one2many('mail.discuss_sidebar_category_item', {
+        filteredCategoryItems: one2many('DiscussSidebarCategoryItem', {
             compute: '_computeFilteredCategoryItems',
             readonly: true,
         }),

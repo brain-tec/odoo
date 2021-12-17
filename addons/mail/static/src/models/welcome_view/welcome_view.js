@@ -10,7 +10,7 @@ const getNextGuestNameInputId = (function () {
 })();
 
 registerModel({
-    name: 'mail.welcome_view',
+    name: 'WelcomeView',
     identifyingFields: ['messaging'],
     lifecycleHooks: {
         _created() {
@@ -136,7 +136,7 @@ registerModel({
          * States the channel to redirect to once the user clicks on the
          * 'joinButton'.
          */
-        channel: one2one('mail.thread', {
+        channel: one2one('Thread', {
             readonly: true,
             required: true,
         }),

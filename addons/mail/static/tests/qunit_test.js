@@ -4,10 +4,10 @@ import { registerModel } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 
 registerModel({
-    name: 'mail.qunit_test',
+    name: 'QUnitTest',
     identifyingFields: [], // singleton acceptable (only one test at a time)
     fields: {
-        composer: one2one('mail.composer', {
+        composer: one2one('Composer', {
             isCausal: true,
         }),
         composerView: one2one('ComposerView', {
@@ -18,7 +18,7 @@ registerModel({
             inverse: 'qunitTest',
             isCausal: true,
         }),
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             inverse: 'qunitTest',
             isCausal: true,
         }),

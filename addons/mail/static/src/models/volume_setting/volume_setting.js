@@ -5,7 +5,7 @@ import { attr, one2one, many2one } from '@mail/model/model_field';
 import { OnChange } from '@mail/model/model_onchange';
 
 registerModel({
-    name: 'mail.volume_setting',
+    name: 'VolumeSetting',
     identifyingFields: ['id'],
     recordMethods: {
         /**
@@ -35,10 +35,10 @@ registerModel({
             readonly: true,
             required: true,
         }),
-        partner: one2one('mail.partner', {
+        partner: one2one('Partner', {
             inverse: 'volumeSetting',
         }),
-        userSetting: many2one('mail.user_setting', {
+        userSetting: many2one('UserSetting', {
             inverse: 'volumeSettings',
             required: true,
         }),

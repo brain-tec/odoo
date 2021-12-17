@@ -6,7 +6,7 @@ import { insertAndReplace } from '@mail/model/model_field_command';
 import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.message_reaction_group',
+    name: 'MessageReactionGroup',
     identifyingFields: ['message', 'content'],
     lifecycleHooks: {
         _created() {
@@ -88,7 +88,7 @@ registerModel({
             compute: '_computeHasUserReacted',
             default: false,
         }),
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             compute: '_computeMessage',
             inverse: 'messageReactionGroups',
             readonly: true,
@@ -101,7 +101,7 @@ registerModel({
         /**
          * States the partners that have used this reaction on this message.
          */
-        partners: many2many('mail.partner'),
+        partners: many2many('Partner'),
         summary: attr({
             compute: '_computeSummary',
         }),

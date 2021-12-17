@@ -6,7 +6,7 @@ import { insert, link, unlinkAll } from '@mail/model/model_field_command';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.partner',
+    name: 'Partner',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -76,7 +76,7 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         * @param {Thread} [options.thread] prioritize and/or restrict
          *  result in the context of given thread
          */
         async fetchSuggestions(searchTerm, { thread } = {}) {
@@ -93,8 +93,8 @@ registerModel({
                 },
                 { shadow: true },
             );
-            const partners = this.messaging.models['mail.partner'].insert(suggestedPartners.map(data =>
-                this.messaging.models['mail.partner'].convertData(data)
+            const partners = this.messaging.models['Partner'].insert(suggestedPartners.map(data =>
+                this.messaging.models['Partner'].convertData(data)
             ));
             if (isNonPublicChannel) {
                 thread.update({ members: link(partners) });
@@ -106,7 +106,7 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize result in the
+         * @param {Thread} [options.thread] prioritize result in the
          *  context of given thread
          * @returns {function}
          */
@@ -218,9 +218,9 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         * @param {Thread} [options.thread] prioritize and/or restrict
          *  result in the context of given thread
-         * @returns {[mail.partner[], mail.partner[]]}
+         * @returns {[Partner[], Partner[]]}
          */
         searchSuggestions(searchTerm, { thread } = {}) {
             let partners;
@@ -233,7 +233,7 @@ registerModel({
                 // mentioned partner.
                 partners = thread.members;
             } else {
-                partners = this.messaging.models['mail.partner'].all();
+                partners = this.messaging.models['Partner'].all();
             }
             const cleanedSearchTerm = cleanSearchTerm(searchTerm);
             const mainSuggestionList = [];
@@ -320,7 +320,7 @@ registerModel({
          *
          * If a chat is not appropriate, a notification is displayed instead.
          *
-         * @returns {mail.thread|undefined}
+         * @returns {Thread|undefined}
          */
         async getChat() {
             if (!this.user && !this.hasCheckedUser) {
@@ -350,8 +350,8 @@ registerModel({
          *
          * If a chat is not appropriate, a notification is displayed instead.
          *
-         * @param {Object} [options] forwarded to @see `mail.thread:open()`
-         * @returns {mail.thread|undefined}
+         * @param {Object} [options] forwarded to @see `Thread:open()`
+         * @returns {Thread|undefined}
          */
         async openChat(options) {
             const chat = await this.async(() => this.getChat());
@@ -409,7 +409,7 @@ registerModel({
         avatarUrl: attr({
             compute: '_computeAvatarUrl',
         }),
-        country: many2one('mail.country'),
+        country: many2one('Country'),
         display_name: attr({
             compute: '_computeDisplayName',
             default: "",
@@ -436,7 +436,7 @@ registerModel({
         isMuted: attr({
             default: false,
         }),
-        memberThreads: many2many('mail.thread', {
+        memberThreads: many2many('Thread', {
             inverse: 'members',
         }),
         model: attr({
@@ -446,17 +446,17 @@ registerModel({
         nameOrDisplayName: attr({
             compute: '_computeNameOrDisplayName',
         }),
-        partnerSeenInfos: one2many('mail.thread_partner_seen_info', {
+        partnerSeenInfos: one2many('ThreadPartnerSeenInfo', {
             inverse: 'partner',
             isCausal: true,
         }),
-        rtcSessions: one2many('mail.rtc_session', {
+        rtcSessions: one2many('RtcSession', {
             inverse: 'partner',
         }),
-        user: one2one('mail.user', {
+        user: one2one('User', {
             inverse: 'partner',
         }),
-        volumeSetting: one2one('mail.volume_setting', {
+        volumeSetting: one2one('VolumeSetting', {
             inverse: 'partner',
         }),
     },

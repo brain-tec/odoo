@@ -44,7 +44,7 @@ registerModel({
                 discuss.openInitThread();
             }
             if (this.messaging.autofetchPartnerImStatus) {
-                this.messaging.models['mail.partner'].startLoopFetchImStatus();
+                this.messaging.models['Partner'].startLoopFetchImStatus();
             }
         },
         /**
@@ -132,7 +132,7 @@ registerModel({
          */
         async _initChannels(channelsData) {
             return executeGracefully(channelsData.map(channelData => () => {
-                const convertedData = this.messaging.models['mail.thread'].convertData(channelData);
+                const convertedData = this.messaging.models['Thread'].convertData(channelData);
                 if (!convertedData.members) {
                     // channel_info does not return all members of channel for
                     // performance reasons, but code is expecting to know at
@@ -147,7 +147,7 @@ registerModel({
                         convertedData.guestMembers = link(this.messaging.currentGuest);
                     }
                 }
-                const channel = this.messaging.models['mail.thread'].insert(
+                const channel = this.messaging.models['Thread'].insert(
                     Object.assign({ model: 'mail.channel' }, convertedData)
                 );
                 // flux specific: channels received at init have to be
@@ -201,8 +201,8 @@ registerModel({
          */
         async _initMailFailures(mailFailuresData) {
             await executeGracefully(mailFailuresData.map(messageData => () => {
-                const message = this.messaging.models['mail.message'].insert(
-                    this.messaging.models['mail.message'].convertData(messageData)
+                const message = this.messaging.models['Message'].insert(
+                    this.messaging.models['Message'].convertData(messageData)
                 );
                 // implicit: failures are sent by the server at initialization
                 // only if the current partner is author of the message
@@ -285,7 +285,7 @@ registerModel({
                 this.messaging.update({ currentGuest: insert(currentGuest) });
             }
             if (current_partner) {
-                const partnerData = this.messaging.models['mail.partner'].convertData(current_partner);
+                const partnerData = this.messaging.models['Partner'].convertData(current_partner);
                 partnerData.user = insert({ id: currentUserId });
                 this.messaging.update({
                     currentPartner: insert(partnerData),
@@ -293,9 +293,9 @@ registerModel({
                 });
             }
             this.messaging.update({
-                partnerRoot: insert(this.messaging.models['mail.partner'].convertData(partner_root)),
+                partnerRoot: insert(this.messaging.models['Partner'].convertData(partner_root)),
                 publicPartners: insert(public_partners.map(
-                    publicPartner => this.messaging.models['mail.partner'].convertData(publicPartner)
+                    publicPartner => this.messaging.models['Partner'].convertData(publicPartner)
                 )),
             });
         },

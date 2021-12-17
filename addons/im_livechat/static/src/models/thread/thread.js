@@ -5,7 +5,7 @@ import { insert, link, unlink } from '@mail/model/model_field_command';
 // ensure that the model definition is loaded before the patch
 import '@mail/models/thread/thread';
 
-patchModelMethods('mail.thread', {
+patchModelMethods('Thread', {
     /**
      * @override
      */
@@ -34,16 +34,16 @@ patchModelMethods('mail.thread', {
                  * easier to handle one temporary partner per channel.
                  */
                 data2.members.push(unlink(this.messaging.publicPartners));
-                const partner = this.messaging.models['mail.partner'].create(
+                const partner = this.messaging.models['Partner'].create(
                     Object.assign(
-                        this.messaging.models['mail.partner'].convertData(data.livechat_visitor),
-                        { id: this.messaging.models['mail.partner'].getNextPublicId() }
+                        this.messaging.models['Partner'].convertData(data.livechat_visitor),
+                        { id: this.messaging.models['Partner'].getNextPublicId() }
                     )
                 );
                 data2.members.push(link(partner));
                 data2.correspondent = link(partner);
             } else {
-                const partnerData = this.messaging.models['mail.partner'].convertData(data.livechat_visitor);
+                const partnerData = this.messaging.models['Partner'].convertData(data.livechat_visitor);
                 data2.members.push(insert(partnerData));
                 data2.correspondent = insert(partnerData);
             }
@@ -52,7 +52,7 @@ patchModelMethods('mail.thread', {
     },
 });
 
-patchRecordMethods('mail.thread', {
+patchRecordMethods('Thread', {
     /**
      * @override
      */

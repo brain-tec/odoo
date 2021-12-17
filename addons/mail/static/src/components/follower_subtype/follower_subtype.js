@@ -11,17 +11,17 @@ export class FollowerSubtype extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.follower|undefined}
+     * @returns {Follower|undefined}
      */
     get follower() {
-        return this.messaging && this.messaging.models['mail.follower'].get(this.props.followerLocalId);
+        return this.messaging && this.messaging.models['Follower'].get(this.props.followerLocalId);
     }
 
     /**
-     * @returns {mail.follower_subtype}
+     * @returns {FollowerSubtype}
      */
     get followerSubtype() {
-        return this.messaging && this.messaging.models['mail.follower_subtype'].get(this.props.followerSubtypeLocalId);
+        return this.messaging && this.messaging.models['FollowerSubtype'].get(this.props.followerSubtypeLocalId);
     }
 
     //--------------------------------------------------------------------------

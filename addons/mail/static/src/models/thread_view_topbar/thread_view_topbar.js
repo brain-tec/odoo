@@ -5,7 +5,7 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.thread_view_topbar',
+    name: 'ThreadViewTopbar',
     identifyingFields: ['threadView'],
     lifecycleHooks: {
         _created() {
@@ -53,7 +53,7 @@ registerModel({
          * @param {MouseEvent} ev
          */
         onClickInboxMarkAllAsRead(ev) {
-            this.messaging.models['mail.message'].markAllAsRead();
+            this.messaging.models['Message'].markAllAsRead();
         },
         /**
          * Handles click on the "invite" button.
@@ -129,7 +129,7 @@ registerModel({
          * @param {MouseEvent} ev
          */
         onClickUnstarAll(ev) {
-            this.messaging.models['mail.message'].unstarAll();
+            this.messaging.models['Message'].unstarAll();
         },
         /**
          * Handles click on the guest name.
@@ -591,7 +591,7 @@ registerModel({
          * If set, this is the record of invite button popover that is currently
          * open in the topbar.
          */
-        invitePopoverView: one2one('mail.popover_view', {
+        invitePopoverView: one2one('PopoverView', {
             isCausal: true,
             inverse: 'threadViewTopbarOwner',
         }),
@@ -658,7 +658,7 @@ registerModel({
         /**
          * States the thread that is displayed by this top bar.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             related: 'threadView.thread',
         }),
         /**
@@ -674,7 +674,7 @@ registerModel({
         /**
          * States the thread view managing this top bar.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             inverse: 'topbar',
             readonly: true,
             required: true,

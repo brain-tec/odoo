@@ -5,7 +5,7 @@ import { attr, many2one, one2many } from '@mail/model/model_field';
 import { insert, link, unlink } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'website_livechat.visitor',
+    name: 'Visitor',
     identifyingFields: ['id'],
     modelMethods: {
         convertData(data) {
@@ -61,7 +61,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.country}
+         * @returns {Country}
          */
         _computeCountry() {
             if (this.partner && this.partner.country) {
@@ -93,7 +93,7 @@ registerModel({
         /**
          * Country of the visitor.
          */
-        country: many2one('mail.country', {
+        country: many2one('Country', {
             compute: '_computeCountry',
         }),
         /**
@@ -125,11 +125,11 @@ registerModel({
         /**
          * Partner linked to this visitor, if any.
          */
-        partner: many2one('mail.partner'),
+        partner: many2one('Partner'),
         /**
          * Threads with this visitor as member
          */
-        threads: one2many('mail.thread', {
+        threads: one2many('Thread', {
             inverse: 'visitor',
         }),
         /**

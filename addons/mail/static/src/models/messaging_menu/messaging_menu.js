@@ -4,7 +4,7 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one2many } from '@mail/model/model_field';
 
 registerModel({
-    name: 'mail.messaging_menu',
+    name: 'MessagingMenu',
     identifyingFields: ['messaging'],
     recordMethods: {
         /**
@@ -41,7 +41,7 @@ registerModel({
             }
             const inboxCounter = this.messaging.inbox ? this.messaging.inbox.counter : 0;
             const unreadChannelsCounter = this.pinnedAndUnreadChannels.length;
-            const notificationGroupsCounter = this.messaging.models['mail.notification_group'].all().reduce(
+            const notificationGroupsCounter = this.messaging.models['NotificationGroup'].all().reduce(
                 (total, group) => total + group.notifications.length,
                 0
             );
@@ -80,7 +80,7 @@ registerModel({
         /**
          * States all the pinned channels that have unread messages.
          */
-         pinnedAndUnreadChannels: one2many('mail.thread', {
+         pinnedAndUnreadChannels: one2many('Thread', {
             inverse: 'messagingMenuAsPinnedAndUnreadChannel',
             readonly: true,
         }),

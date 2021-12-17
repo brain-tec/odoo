@@ -6,7 +6,7 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
 registerModel({
-    name: 'mail.rtc_configuration_menu',
+    name: 'RtcConfigurationMenu',
     identifyingFields: ['userSetting'],
     lifecycleHooks: {
         _created() {
@@ -84,7 +84,7 @@ registerModel({
         isRegisteringKey: attr({
             default: false,
         }),
-        userSetting: one2one('mail.user_setting', {
+        userSetting: one2one('UserSetting', {
             inverse: 'rtcConfigurationMenu',
             readonly: true,
             required: true,

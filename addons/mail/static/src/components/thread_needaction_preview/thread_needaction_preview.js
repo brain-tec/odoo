@@ -56,10 +56,10 @@ export class ThreadNeedactionPreview extends Component {
     }
 
     /**
-     * @returns {mail.thread}
+     * @returns {Thread}
      */
     get thread() {
-        return this.messaging && this.messaging.models['mail.thread'].get(this.props.threadLocalId);
+        return this.messaging && this.messaging.models['Thread'].get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -87,7 +87,7 @@ export class ThreadNeedactionPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
-        this.messaging.models['mail.message'].markAllAsRead([
+        this.messaging.models['Message'].markAllAsRead([
             ['model', '=', this.thread.model],
             ['res_id', '=', this.thread.id],
         ]);

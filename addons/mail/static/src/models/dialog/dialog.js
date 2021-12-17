@@ -5,7 +5,7 @@ import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, replace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.dialog',
+    name: 'Dialog',
     identifyingFields: ['manager', ['attachmentViewer', 'followerSubtypeList']],
     recordMethods: {
         /**
@@ -40,7 +40,7 @@ registerModel({
             compute: '_computeComponentName',
             required: true,
         }),
-        followerSubtypeList: one2one('mail.follower_subtype_list', {
+        followerSubtypeList: one2one('FollowerSubtypeList', {
             isCausal: true,
             inverse: 'dialog',
             readonly: true,
@@ -54,7 +54,7 @@ registerModel({
          * a UI component, such as AttachmentViewer. These records must be
          * created from @see `DialogManager:open()`.
          */
-        record: one2one('mail.model', {
+        record: one2one('Model', {
             compute: '_computeRecord',
             isCausal: true,
             readonly: true,

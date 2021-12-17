@@ -5,7 +5,7 @@ import { one2one } from '@mail/model/model_field';
 // ensure that the model definition is loaded before the patch
 import '@mail/models/discuss/discuss';
 
-patchRecordMethods('mail.discuss', {
+patchRecordMethods('Discuss', {
     /**
      * @override
      */
@@ -17,11 +17,11 @@ patchRecordMethods('mail.discuss', {
     },
 });
 
-addFields('mail.discuss', {
+addFields('Discuss', {
     /**
      * Discuss sidebar category for `livechat` channel threads.
      */
-    categoryLivechat: one2one('mail.discuss_sidebar_category', {
+    categoryLivechat: one2one('DiscussSidebarCategory', {
         inverse: 'discussAsLivechat',
         isCausal: true,
     }),

@@ -11,7 +11,7 @@ registerModel({
          * Close the attachment viewer by closing its linked dialog.
          */
         close() {
-            const dialog = this.messaging.models['mail.dialog'].find(dialog => dialog.record === this);
+            const dialog = this.messaging.models['Dialog'].find(dialog => dialog.record === this);
             if (dialog) {
                 dialog.delete();
             }
@@ -38,20 +38,20 @@ registerModel({
         angle: attr({
             default: 0,
         }),
-        attachment: many2one('mail.attachment'),
-        attachmentList: many2one('mail.attachment_list', {
-            inverse: 'attachmentViewer',
+        attachment: many2one('Attachment'),
+        attachmentList: many2one('AttachmentList', {
+            inverse: 'attachmentViewers',
             readonly: true,
             required: true,
         }),
-        attachments: many2many('mail.attachment', {
-            inverse: 'attachmentViewer',
+        attachments: many2many('Attachment', {
+            inverse: 'attachmentViewers',
             related: 'attachmentList.viewableAttachments',
         }),
         /**
          * Determines the dialog displaying this attachment viewer.
          */
-        dialog: one2one('mail.dialog', {
+        dialog: one2one('Dialog', {
             inverse: 'attachmentViewer',
             isCausal: true,
             readonly: true,

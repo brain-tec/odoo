@@ -41,10 +41,10 @@ export class MessagingMenu extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.messaging_menu}
+     * @returns {MessagingMenu}
      */
     get messagingMenu() {
-        return this.messaging && this.messaging.models['mail.messaging_menu'].get(this.props.localId);
+        return this.messaging && this.messaging.models['MessagingMenu'].get(this.props.localId);
     }
 
     /**
@@ -155,7 +155,7 @@ export class MessagingMenu extends Component {
      */
     _onMobileNewMessageInputSource(req, res) {
         const value = _.escape(req.term);
-        this.messaging.models['mail.partner'].imSearch({
+        this.messaging.models['Partner'].imSearch({
             callback: partners => {
                 const suggestions = partners.map(partner => {
                     return {

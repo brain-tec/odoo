@@ -288,7 +288,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread_viewer}
+         * @returns {ThreadViewer}
          */
         _computeThreadViewer() {
             return insertAndReplace({
@@ -460,23 +460,23 @@ registerModel({
             compute: '_computeName',
         }),
         /**
-         * Determines the `mail.thread` that should be displayed by `this`.
-         * If no `mail.thread` is linked, `this` is considered "new message".
+         * Determines the `Thread` that should be displayed by `this`.
+         * If no `Thread` is linked, `this` is considered "new message".
          */
-        thread: one2one('mail.thread', {
+        thread: one2one('Thread', {
             inverse: 'chatWindow',
             readonly: true,
         }),
         /**
-         * States the `mail.thread_view` displaying `this.thread`.
+         * States the `ThreadView` displaying `this.thread`.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             related: 'threadViewer.threadView',
         }),
         /**
-         * Determines the `mail.thread_viewer` managing the display of `this.thread`.
+         * Determines the `ThreadViewer` managing the display of `this.thread`.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             compute: '_computeThreadViewer',
             inverse: 'chatWindow',
             isCausal: true,

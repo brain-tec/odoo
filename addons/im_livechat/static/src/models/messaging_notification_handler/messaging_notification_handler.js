@@ -4,7 +4,7 @@ import { patchRecordMethods } from '@mail/model/model_core';
 // ensure that the model definition is loaded before the patch
 import '@mail/models/messaging_notification_handler/messaging_notification_handler';
 
-patchRecordMethods('mail.messaging_notification_handler', {
+patchRecordMethods('MessagingNotificationHandler', {
     /**
      * @override
      * @param {object} settings
@@ -22,7 +22,7 @@ patchRecordMethods('mail.messaging_notification_handler', {
      * @override
      */
     _handleNotificationChannelPartnerTypingStatus({ channel_id, is_typing, partner_id, partner_name }) {
-        const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+        const channel = this.messaging.models['Thread'].findFromIdentifyingData({
             id: channel_id,
             model: 'mail.channel',
         });

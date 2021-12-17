@@ -6,7 +6,7 @@ import { insert, unlink } from '@mail/model/model_field_command';
 // ensure that the model definition is loaded before the patch
 import '@mail/models/thread/thread';
 
-patchModelMethods('mail.thread', {
+patchModelMethods('Thread', {
     /**
      * @override
      */
@@ -14,7 +14,7 @@ patchModelMethods('mail.thread', {
         const data2 = this._super(data);
         if ('visitor' in data) {
             if (data.visitor) {
-                data2.visitor = insert(this.messaging.models['website_livechat.visitor'].convertData(data.visitor));
+                data2.visitor = insert(this.messaging.models['Visitor'].convertData(data.visitor));
             } else {
                 data2.visitor = unlink();
             }
@@ -23,11 +23,11 @@ patchModelMethods('mail.thread', {
     },
 });
 
-addFields('mail.thread', {
+addFields('Thread', {
     /**
      * Visitor connected to the livechat.
      */
-    visitor: many2one('website_livechat.visitor', {
+    visitor: many2one('Visitor', {
         inverse: 'threads',
     }),
 });

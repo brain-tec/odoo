@@ -28,11 +28,11 @@ export class ComposerSuggestion extends Component {
     }
 
     get isCannedResponse() {
-        return this.props.modelName === "mail.canned_response";
+        return this.props.modelName === "CannedResponse";
     }
 
     get isChannel() {
-        return this.props.modelName === "mail.thread";
+        return this.props.modelName === "Thread";
     }
 
     get isCommand() {
@@ -40,7 +40,7 @@ export class ComposerSuggestion extends Component {
     }
 
     get isPartner() {
-        return this.props.modelName === "mail.partner";
+        return this.props.modelName === "Partner";
     }
 
     get record() {

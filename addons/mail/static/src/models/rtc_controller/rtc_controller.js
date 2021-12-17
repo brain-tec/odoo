@@ -5,7 +5,7 @@ import { attr, one2one } from '@mail/model/model_field';
 import { insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.rtc_controller',
+    name: 'RtcController',
     identifyingFields: ['callViewer'],
     lifecycleHooks: {
         _created() {
@@ -80,7 +80,7 @@ registerModel({
         },
     },
     fields: {
-        callViewer: one2one('mail.rtc_call_viewer', {
+        callViewer: one2one('RtcCallViewer', {
             inverse: 'rtcController',
             readonly: true,
             required: true,
@@ -88,7 +88,7 @@ registerModel({
         isSmall: attr({
             compute: '_computeIsSmall',
         }),
-        rtcOptionList: one2one('mail.rtc_option_list', {
+        rtcOptionList: one2one('RtcOptionList', {
             default: insertAndReplace(),
             inverse: 'rtcController',
             isCausal: true,

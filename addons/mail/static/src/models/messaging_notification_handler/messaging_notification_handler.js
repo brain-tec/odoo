@@ -10,7 +10,7 @@ import { Markup } from 'web.utils';
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
 registerModel({
-    name: 'mail.messaging_notification_handler',
+    name: 'MessagingNotificationHandler',
     identifyingFields: ['messaging'],
     lifecycleHooks: {
         _willDelete() {
@@ -98,15 +98,15 @@ registerModel({
                         case 'mail.channel/last_interest_dt_changed':
                             return this._handleNotificationChannelLastInterestDateTimeChanged(message.payload);
                         case 'mail.channel/legacy_insert':
-                            return this.messaging.models['mail.thread'].insert(this.messaging.models['mail.thread'].convertData({ model: 'mail.channel', ...message.payload }));
+                            return this.messaging.models['Thread'].insert(this.messaging.models['Thread'].convertData({ model: 'mail.channel', ...message.payload }));
                         case 'mail.channel/insert':
                             return this._handleNotificationChannelUpdate(message.payload);
                         case 'mail.guest/insert':
                             return this.messaging.models['Guest'].insert(message.payload);
                         case 'mail.message/insert':
-                            return this.messaging.models['mail.message'].insert(message.payload);
+                            return this.messaging.models['Message'].insert(message.payload);
                         case 'mail.channel.rtc.session/insert':
-                            return this.messaging.models['mail.rtc_session'].insert(message.payload);
+                            return this.messaging.models['RtcSession'].insert(message.payload);
                         case 'res.users.settings/changed':
                             return this._handleNotificationResUsersSettings(message.payload);
                         case 'mail.channel.rtc.session/peer_notification':
@@ -136,7 +136,7 @@ registerModel({
          * @param {integer} [payload.id]
          */
         _handleNotificationAttachmentDelete(payload) {
-            const attachment = this.messaging.models['mail.attachment'].findFromIdentifyingData(payload);
+            const attachment = this.messaging.models['Attachment'].findFromIdentifyingData(payload);
             if (attachment) {
                 attachment.delete();
             }
@@ -153,7 +153,7 @@ registerModel({
             last_message_id,
             partner_id,
         }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: channelId,
                 model: 'mail.channel',
             });
@@ -166,7 +166,7 @@ registerModel({
                 // disabled on `channel` channels for performance reasons
                 return;
             }
-            this.messaging.models['mail.thread_partner_seen_info'].insert({
+            this.messaging.models['ThreadPartnerSeenInfo'].insert({
                 lastFetchedMessage: insert({ id: last_message_id }),
                 partner: insertAndReplace({ id: partner_id }),
                 thread: replace(channel),
@@ -181,11 +181,11 @@ registerModel({
         /**
          * @private
          * @param {Object} payload
-         * @param {mail.thread} payload.channel
+         * @param {Thread} payload.channel
          * @param {integer} payload.invited_by_user_id
          */
         _handleNotificationChannelJoined({ channel: channelData, invited_by_user_id: invitedByUserId }) {
-            const channel = this.messaging.models['mail.thread'].insert(this.messaging.models['mail.thread'].convertData(channelData));
+            const channel = this.messaging.models['Thread'].insert(this.messaging.models['Thread'].convertData(channelData));
             if (invitedByUserId !== this.messaging.currentUser.id) {
                 // Current user was invited by someone else.
                 this.env.services['notification'].notify({
@@ -204,7 +204,7 @@ registerModel({
          * @param {string} payload.last_interest_dt
          */
         _handleNotificationChannelLastInterestDateTimeChanged({ id, last_interest_dt }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: id,
                 model: 'mail.channel',
             });
@@ -221,14 +221,14 @@ registerModel({
          * @param {Object} payload.messageData
          */
         async _handleNotificationChannelMessage({ id: channelId, message: messageData }) {
-            let channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            let channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: channelId,
                 model: 'mail.channel',
             });
             if (!channel && this.messaging.isCurrentUserGuest) {
                 return; // guests should not receive messages for channels they don't know, and they can't make the channel_info RPC
             }
-            const convertedData = this.messaging.models['mail.message'].convertData(messageData);
+            const convertedData = this.messaging.models['Message'].convertData(messageData);
 
             // Fetch missing info from channel before going further. Inserting
             // a channel with incomplete info can lead to issues. This is in
@@ -237,14 +237,14 @@ registerModel({
             // features such as chat windows.
             if (!channel) {
                 channel = (await this.async(() =>
-                    this.messaging.models['mail.thread'].performRpcChannelInfo({ ids: [channelId] })
+                    this.messaging.models['Thread'].performRpcChannelInfo({ ids: [channelId] })
                 ))[0];
             }
             if (!channel.isPinned) {
                 channel.pin();
             }
 
-            const message = this.messaging.models['mail.message'].insert(convertedData);
+            const message = this.messaging.models['Message'].insert(convertedData);
             this._notifyThreadViewsMessageReceived(message);
 
             // If the current partner is author, do nothing else.
@@ -293,7 +293,7 @@ registerModel({
             last_message_id,
             partner_id,
         }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: channelId,
                 model: 'mail.channel',
             });
@@ -302,12 +302,12 @@ registerModel({
                 // knowledge of the channel
                 return;
             }
-            const lastMessage = this.messaging.models['mail.message'].insert({ id: last_message_id });
+            const lastMessage = this.messaging.models['Message'].insert({ id: last_message_id });
             // restrict computation of seen indicator for "non-channel" channels
             // for performance reasons
             const shouldComputeSeenIndicators = channel.channel_type !== 'channel';
             if (shouldComputeSeenIndicators) {
-                this.messaging.models['mail.thread_partner_seen_info'].insert({
+                this.messaging.models['ThreadPartnerSeenInfo'].insert({
                     lastSeenMessage: link(lastMessage),
                     partner: insertAndReplace({ id: partner_id }),
                     thread: replace(channel),
@@ -325,7 +325,7 @@ registerModel({
             }
             if (shouldComputeSeenIndicators) {
                 // FIXME force the computing of thread values (cf task-2261221)
-                this.messaging.models['mail.thread'].computeLastCurrentPartnerMessageSeenByEveryone(channel);
+                this.messaging.models['Thread'].computeLastCurrentPartnerMessageSeenByEveryone(channel);
                 // FIXME force the computing of message values (cf task-2261221)
                 this.messaging.models['MessageSeenIndicator'].recomputeSeenValues(channel);
             }
@@ -339,14 +339,14 @@ registerModel({
          * @param {string} param1.partner_name
          */
         _handleNotificationChannelPartnerTypingStatus({ channel_id, is_typing, partner_id, partner_name }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id: channel_id,
                 model: 'mail.channel',
             });
             if (!channel) {
                 return;
             }
-            const partner = this.messaging.models['mail.partner'].insert({
+            const partner = this.messaging.models['Partner'].insert({
                 id: partner_id,
                 name: partner_name,
             });
@@ -374,7 +374,7 @@ registerModel({
          * @param {Object} channelData
          */
         _handleNotificationChannelUpdate(channelData) {
-            this.messaging.models['mail.thread'].insert({ model: 'mail.channel', ...channelData });
+            this.messaging.models['Thread'].insert({ model: 'mail.channel', ...channelData });
         },
         /**
          * @private
@@ -408,8 +408,8 @@ registerModel({
          * @param {Object} data
          */
         _handleNotificationNeedaction(data) {
-            const message = this.messaging.models['mail.message'].insert(
-                this.messaging.models['mail.message'].convertData(data)
+            const message = this.messaging.models['Message'].insert(
+                this.messaging.models['Message'].convertData(data)
             );
             this.messaging.inbox.update({ counter: increment() });
             const originThread = message.originThread;
@@ -477,7 +477,7 @@ registerModel({
          * @param {Object} [data.rtcSessions]
          */
         async _handleNotificationRtcSessionUpdate({ id, rtcSessions }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({ id, model: 'mail.channel' });
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({ id, model: 'mail.channel' });
             if (!channel) {
                 return;
             }
@@ -490,7 +490,7 @@ registerModel({
          */
         _handleNotificationMessageDelete({ message_ids }) {
             for (const id of message_ids) {
-                const message = this.messaging.models['mail.message'].findFromIdentifyingData({ id });
+                const message = this.messaging.models['Message'].findFromIdentifyingData({ id });
                 if (message) {
                     message.delete();
                 }
@@ -502,8 +502,8 @@ registerModel({
          */
         _handleNotificationPartnerMessageNotificationUpdate({ elements }) {
             for (const messageData of elements) {
-                const message = this.messaging.models['mail.message'].insert(
-                    this.messaging.models['mail.message'].convertData(messageData)
+                const message = this.messaging.models['Message'].insert(
+                    this.messaging.models['Message'].convertData(messageData)
                 );
                 // implicit: failures are sent by the server as notification
                 // only if the current partner is author of the message
@@ -525,7 +525,7 @@ registerModel({
                 // Furthermore, server should not send back all message_ids marked as read
                 // but something like last read message_id or something like that.
                 // (just imagine you mark 1000 messages as read ... )
-                const message = this.messaging.models['mail.message'].findFromIdentifyingData({ id: message_id });
+                const message = this.messaging.models['Message'].findFromIdentifyingData({ id: message_id });
                 if (!message) {
                     continue;
                 }
@@ -563,7 +563,7 @@ registerModel({
         _handleNotificationPartnerToggleStar({ message_ids = [], starred }) {
             const starredMailbox = this.messaging.starred;
             for (const messageId of message_ids) {
-                const message = this.messaging.models['mail.message'].findFromIdentifyingData({
+                const message = this.messaging.models['Message'].findFromIdentifyingData({
                     id: messageId,
                 });
                 if (!message) {
@@ -584,13 +584,13 @@ registerModel({
          * @param {Object} data
          */
         _handleNotificationPartnerTransientMessage(data) {
-            const convertedData = this.messaging.models['mail.message'].convertData(data);
-            const lastMessageId = this.messaging.models['mail.message'].all().reduce(
+            const convertedData = this.messaging.models['Message'].convertData(data);
+            const lastMessageId = this.messaging.models['Message'].all().reduce(
                 (lastMessageId, message) => Math.max(lastMessageId, message.id),
                 0
             );
             const partnerRoot = this.messaging.partnerRoot;
-            const message = this.messaging.models['mail.message'].create(Object.assign(convertedData, {
+            const message = this.messaging.models['Message'].create(Object.assign(convertedData, {
                 author: link(partnerRoot),
                 id: lastMessageId + 0.01,
                 isTransient: true,
@@ -603,7 +603,7 @@ registerModel({
          * @param {integer} payload.id
          */
         _handleNotificationChannelLeave({ id }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id,
                 model: 'mail.channel',
             });
@@ -625,7 +625,7 @@ registerModel({
          * @param {integer} payload.id
          */
         _handleNotificationChannelUnpin({ id }) {
-            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({
+            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
                 id,
                 model: 'mail.channel',
             });
@@ -663,8 +663,8 @@ registerModel({
         /**
          * @private
          * @param {Object} param0
-         * @param {mail.thread} param0.channel
-         * @param {mail.message} param0.message
+         * @param {Thread} param0.channel
+         * @param {Message} param0.message
          */
         _notifyNewChannelMessageWhileOutOfFocus({ channel, message }) {
             const author = message.author;
@@ -714,7 +714,7 @@ registerModel({
          * This can allow them adjust their scroll position if applicable.
          *
          * @private
-         * @param {mail.message}
+         * @param {Message}
          */
         _notifyThreadViewsMessageReceived(message) {
             for (const thread of message.threads) {

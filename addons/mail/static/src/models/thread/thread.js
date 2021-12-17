@@ -20,7 +20,7 @@ const getSuggestedRecipientInfoNextTemporaryId = (function () {
 })();
 
 registerModel({
-    name: 'mail.thread',
+    name: 'Thread',
     identifyingFields: ['model', 'id'],
     lifecycleHooks: {
         _willCreate() {
@@ -127,10 +127,10 @@ registerModel({
     },
     modelMethods: {
         /**
-         * @param {mail.thread} [thread] the concerned thread
+         * @param {Thread} [thread] the concerned thread
          */
         computeLastCurrentPartnerMessageSeenByEveryone(thread = undefined) {
-            const threads = thread ? [thread] : this.messaging.models['mail.thread'].all();
+            const threads = thread ? [thread] : this.messaging.models['Thread'].all();
             threads.map(localThread => {
                 localThread.update({
                     lastCurrentPartnerMessageSeenByEveryone: localThread._computeLastCurrentPartnerMessageSeenByEveryone(),
@@ -187,7 +187,7 @@ registerModel({
                 data2.lastInterestDateTime = str_to_datetime(data.last_interest_dt);
             }
             if ('last_message' in data && data.last_message) {
-                const messageData = this.messaging.models['mail.message'].convertData({
+                const messageData = this.messaging.models['Message'].convertData({
                     id: data.last_message.id,
                     model: data2.model,
                     res_id: data2.id,
@@ -195,7 +195,7 @@ registerModel({
                 data2.serverLastMessage = insert(messageData);
             }
             if ('last_message_id' in data && data.last_message_id) {
-                const messageData = this.messaging.models['mail.message'].convertData({
+                const messageData = this.messaging.models['Message'].convertData({
                     id: data.last_message_id,
                     model: data2.model,
                     res_id: data2.id,
@@ -231,7 +231,7 @@ registerModel({
                     data2.members = [unlinkAll()];
                 } else {
                     data2.members = [insertAndReplace(data.members.map(memberData =>
-                        this.messaging.models['mail.partner'].convertData(memberData)
+                        this.messaging.models['Partner'].convertData(memberData)
                     ))];
                 }
             }
@@ -285,7 +285,7 @@ registerModel({
          * @param {number[]} param0.partners_to Ids of the partners to add as channel
          * members.
          * @param {boolean|string} param0.default_display_mode
-         * @returns {mail.thread} The newly created group chat.
+         * @returns {Thread} The newly created group chat.
          */
         async createGroupChat({ default_display_mode, partners_to }) {
             const channelData = await this.env.services.rpc({
@@ -296,8 +296,8 @@ registerModel({
                     partners_to,
                 },
             });
-            return this.messaging.models['mail.thread'].insert(
-                this.messaging.models['mail.thread'].convertData(channelData)
+            return this.messaging.models['Thread'].insert(
+                this.messaging.models['Thread'].convertData(channelData)
             );
         },
         /**
@@ -307,7 +307,7 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         * @param {Thread} [options.thread] prioritize and/or restrict
          *  result in the context of given thread
          */
         async fetchSuggestions(searchTerm, { thread } = {}) {
@@ -319,10 +319,10 @@ registerModel({
                 },
                 { shadow: true },
             );
-            this.messaging.models['mail.thread'].insert(channelsData.map(channelData =>
+            this.messaging.models['Thread'].insert(channelsData.map(channelData =>
                 Object.assign(
                     { model: 'mail.channel' },
-                    this.messaging.models['mail.thread'].convertData(channelData),
+                    this.messaging.models['Thread'].convertData(channelData),
                 )
             ));
         },
@@ -332,7 +332,7 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize result in the
+         * @param {Thread} [options.thread] prioritize result in the
          *  context of given thread
          * @returns {function}
          */
@@ -376,7 +376,7 @@ registerModel({
          * Load the previews of the specified threads. Basically, it fetches the
          * last messages, since they are used to display inline content of them.
          *
-         * @param {mail.thread[]} threads
+         * @param {Thread[]} threads
          */
         async loadPreviews(threads) {
             const channelIds = threads.reduce((list, thread) => {
@@ -393,8 +393,8 @@ registerModel({
                 method: 'channel_fetch_preview',
                 args: [channelIds],
             }, { shadow: true });
-            this.messaging.models['mail.message'].insert(channelPreviews.filter(p => p.last_message).map(
-                channelPreview => this.messaging.models['mail.message'].convertData(channelPreview.last_message)
+            this.messaging.models['Message'].insert(channelPreviews.filter(p => p.last_message).map(
+                channelPreview => this.messaging.models['Message'].convertData(channelPreview.last_message)
             ));
         },
         /**
@@ -418,7 +418,7 @@ registerModel({
          *
          * @param {Object} param0
          * @param {integer[]} param0.ids list of id of channels
-         * @returns {mail.thread[]}
+         * @returns {Thread[]}
          */
         async performRpcChannelInfo({ ids }) {
             const channelInfos = await this.env.services.rpc({
@@ -426,8 +426,8 @@ registerModel({
                 method: 'channel_info',
                 args: [ids],
             }, { shadow: true });
-            const channels = this.messaging.models['mail.thread'].insert(
-                channelInfos.map(channelInfo => this.messaging.models['mail.thread'].convertData(channelInfo))
+            const channels = this.messaging.models['Thread'].insert(
+                channelInfos.map(channelInfo => this.messaging.models['Thread'].convertData(channelInfo))
             );
             return channels;
         },
@@ -470,7 +470,7 @@ registerModel({
          * @param {Object} param0
          * @param {string} param0.name
          * @param {string} [param0.privacy]
-         * @returns {mail.thread} the created channel
+         * @returns {Thread} the created channel
          */
         async performRpcCreateChannel({ name, privacy }) {
             const device = this.messaging.device;
@@ -486,8 +486,8 @@ registerModel({
                     }),
                 },
             });
-            return this.messaging.models['mail.thread'].insert(
-                this.messaging.models['mail.thread'].convertData(data)
+            return this.messaging.models['Thread'].insert(
+                this.messaging.models['Thread'].convertData(data)
             );
         },
         /**
@@ -499,7 +499,7 @@ registerModel({
          * @param {Object} param0
          * @param {integer[]} param0.partnerIds
          * @param {boolean} [param0.pinForCurrentPartner]
-         * @returns {mail.thread|undefined} the created or existing chat
+         * @returns {Thread|undefined} the created or existing chat
          */
         async performRpcCreateChat({ partnerIds, pinForCurrentPartner }) {
             const device = this.messaging.device;
@@ -520,8 +520,8 @@ registerModel({
             if (!data) {
                 return;
             }
-            return this.messaging.models['mail.thread'].insert(
-                this.messaging.models['mail.thread'].convertData(data)
+            return this.messaging.models['Thread'].insert(
+                this.messaging.models['Thread'].convertData(data)
             );
         },
         /**
@@ -593,7 +593,7 @@ registerModel({
          *
          * @param {string} searchTerm
          * @param {Object} [options={}]
-         * @param {mail.thread} [options.thread] prioritize and/or restrict
+         * @param {Thread} [options.thread] prioritize and/or restrict
          *  result in the context of given thread
          * @returns {[mail.threads[], mail.threads[]]}
          */
@@ -607,7 +607,7 @@ registerModel({
                 // channel.
                 threads = [thread];
             } else {
-                threads = this.messaging.models['mail.thread'].all();
+                threads = this.messaging.models['Thread'].all();
             }
             const cleanedSearchTerm = cleanSearchTerm(searchTerm);
             return [threads.filter(thread =>
@@ -655,7 +655,7 @@ registerModel({
             if (this.isTemporary) {
                 return;
             }
-            return this.messaging.models['mail.thread'].performRpcMailGetSuggestedRecipients({
+            return this.messaging.models['Thread'].performRpcMailGetSuggestedRecipients({
                 model: this.model,
                 res_ids: [this.id],
             });
@@ -840,7 +840,7 @@ registerModel({
         /**
          * Mark the specified conversation as read/seen.
          *
-         * @param {mail.message} message the message to be considered as last seen.
+         * @param {Message} message the message to be considered as last seen.
          */
         async markAsSeen(message) {
             if (this.messaging.currentGuest) {
@@ -859,7 +859,7 @@ registerModel({
                 return;
             }
             this.update({ pendingSeenMessageId: message.id });
-            return this.messaging.models['mail.thread'].performRpcChannelSeen({
+            return this.messaging.models['Thread'].performRpcChannelSeen({
                 id: this.id,
                 lastMessageId: message.id,
             });
@@ -869,7 +869,7 @@ registerModel({
          */
         async markNeedactionMessagesAsOriginThreadAsRead() {
             await this.async(() =>
-                this.messaging.models['mail.message'].markAsRead(this.needactionMessagesAsOriginThread)
+                this.messaging.models['Message'].markAsRead(this.needactionMessagesAsOriginThread)
             );
         },
         /**
@@ -886,7 +886,7 @@ registerModel({
             if (!this.uuid) {
                 return;
             }
-            return this.messaging.models['mail.thread'].performRpcChannelFold(this.uuid, state);
+            return this.messaging.models['Thread'].performRpcChannelFold(this.uuid, state);
         },
         /**
          * Notify server to leave the current channel. Useful for cross-tab
@@ -899,7 +899,7 @@ registerModel({
                 await this.leave();
                 return;
             }
-            await this.messaging.models['mail.thread'].performRpcChannelPin({
+            await this.messaging.models['Thread'].performRpcChannelPin({
                 pinned: this.isPendingPinned,
                 uuid: this.uuid,
             });
@@ -908,7 +908,7 @@ registerModel({
          * Handles click on the avatar of the given member in the member list of
          * this channel.
          *
-         * @param {mail.partner} member
+         * @param {Partner} member
          */
         onClickMemberAvatar(member) {
             member.openChat();
@@ -917,7 +917,7 @@ registerModel({
          * Handles click on the name of the given member in the member list of
          * this channel.
          *
-         * @param {mail.partner} member
+         * @param {Partner} member
          */
         onClickMemberName(member) {
             member.openProfile();
@@ -1038,7 +1038,7 @@ registerModel({
             if (followers.length > 0) {
                 this.update({
                     followers: insertAndReplace(followers.map(data =>
-                        this.messaging.models['mail.follower'].convertData(data))
+                        this.messaging.models['Follower'].convertData(data))
                     ),
                 });
             } else {
@@ -1057,7 +1057,7 @@ registerModel({
          * Called to refresh a registered other member partner that is typing
          * something.
          *
-         * @param {mail.partner} partner
+         * @param {Partner} partner
          */
         refreshOtherMemberTypingMember(partner) {
             this._otherMembersLongTypingTimers.get(partner).reset();
@@ -1087,7 +1087,7 @@ registerModel({
          * Called to register a new other member partner that is typing
          * something.
          *
-         * @param {mail.partner} partner
+         * @param {Partner} partner
          */
         registerOtherMemberTypingMember(partner) {
             const timer = new Timer(
@@ -1189,7 +1189,7 @@ registerModel({
          * Called to unregister an other member partner that is no longer typing
          * something.
          *
-         * @param {mail.partner} partner
+         * @param {Partner} partner
          */
         unregisterOtherMemberTypingMember(partner) {
             this._otherMembersLongTypingTimers.get(partner).clear();
@@ -1211,7 +1211,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.attachment[]}
+         * @returns {Attachment[]}
          */
         _computeAllAttachments() {
             const allAttachments = [...new Set(this.originThreadAttachments.concat(this.attachments))]
@@ -1240,7 +1240,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.partner}
+         * @returns {Partner}
          */
         _computeCorrespondent() {
             if (this.channel_type === 'channel') {
@@ -1405,7 +1405,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message}
+         * @returns {Message}
          */
         _computeLastCurrentPartnerMessageSeenByEveryone() {
             const otherPartnerSeenInfos =
@@ -1440,7 +1440,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message|undefined}
+         * @returns {Message|undefined}
          */
         _computeLastMessage() {
             const {
@@ -1454,7 +1454,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message|undefined}
+         * @returns {Message|undefined}
          */
         _computeLastNonTransientMessage() {
             const {
@@ -1503,7 +1503,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message|undefined}
+         * @returns {Message|undefined}
          */
         _computeLastNeedactionMessageAsOriginThread() {
             const orderedNeedactionMessagesAsOriginThread = this.needactionMessagesAsOriginThread.sort(
@@ -1577,14 +1577,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message[]}
+         * @returns {Message[]}
          */
         _computeNeedactionMessagesAsOriginThread() {
             return replace(this.messagesAsOriginThread.filter(message => message.isNeedaction));
         },
         /**
          * @private
-         * @returns {mail.message|undefined}
+         * @returns {Message|undefined}
          */
         _computeMessageAfterNewMessageSeparator() {
             if (this.model !== 'mail.channel') {
@@ -1607,35 +1607,35 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeOrderedOfflineMembers() {
             return replace(this._sortMembers(this.members.filter(member => !member.isOnline)));
         },
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeOrderedOnlineMembers() {
             return replace(this._sortMembers(this.members.filter(member => member.isOnline)));
         },
         /**
          * @private
-         * @returns {mail.message[]}
+         * @returns {Message[]}
          */
         _computeOrderedMessages() {
             return replace(this.messages.sort((m1, m2) => m1.id < m2.id ? -1 : 1));
         },
         /**
          * @private
-         * @returns {mail.message[]}
+         * @returns {Message[]}
          */
         _computeOrderedNonTransientMessages() {
             return replace(this.orderedMessages.filter(m => !m.isTransient));
         },
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeOrderedOtherTypingMembers() {
             return replace(this.orderedTypingMembers.filter(
@@ -1644,13 +1644,13 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          */
         _computeOrderedTypingMembers() {
             return [[
                 'replace',
                 this.orderedTypingMemberLocalIds
-                    .map(localId => this.messaging.models['mail.partner'].get(localId))
+                    .map(localId => this.messaging.models['Partner'].get(localId))
                     .filter(member => !!member),
             ]];
         },
@@ -1727,7 +1727,7 @@ registerModel({
          * type.
          *
          * @private
-         * @returns {mail.discuss_sidebar_category}
+         * @returns {DiscussSidebarCategory}
          */
         _getDiscussSidebarCategory() {
             switch (this.channel_type) {
@@ -1829,15 +1829,15 @@ registerModel({
                 options: {
                     on_close: async () => {
                        await this.async(() => this.refreshFollowers());
-                       this.env.bus.trigger('mail.thread:promptAddFollower-closed');
+                       this.env.bus.trigger('Thread:promptAddFollower-closed');
                     },
                 },
             });
         },
         /**
          * @private
-         * @param {mail.partner[]} members
-         * @returns {mail.partner[]}
+         * @param {Partner[]} members
+         * @returns {Partner[]}
          */
         _sortMembers(members) {
             return [...members].sort((a, b) => {
@@ -1893,7 +1893,7 @@ registerModel({
         },
         /**
          * @private
-         * @param {mail.partner} partner
+         * @param {Partner} partner
          */
         async _onOtherMemberLongTypingTimeout(partner) {
             if (!this.typingMembers.includes(partner)) {
@@ -1911,7 +1911,7 @@ registerModel({
         activities: one2many('Activity', {
             inverse: 'thread',
         }),
-        allAttachments: many2many('mail.attachment', {
+        allAttachments: many2many('Attachment', {
             compute: '_computeAllAttachments',
         }),
         areAttachmentsLoaded: attr({
@@ -1924,7 +1924,7 @@ registerModel({
         areFollowersLoaded: attr({
             default: false,
         }),
-        attachments: many2many('mail.attachment', {
+        attachments: many2many('Attachment', {
             inverse: 'threads',
         }),
         /**
@@ -1932,7 +1932,7 @@ registerModel({
          * It only makes sense for channels.
          */
         avatarCacheKey: attr(),
-        cache: one2one('mail.thread_cache', {
+        cache: one2one('ThreadCache', {
             default: insertAndReplace(),
             inverse: 'thread',
             isCausal: true,
@@ -1950,19 +1950,19 @@ registerModel({
         /**
          * Determines the composer state of this thread.
          */
-        composer: one2one('mail.composer', {
+        composer: one2one('Composer', {
             compute: '_computeComposer',
             inverse: 'thread',
             isCausal: true,
             readonly: true,
         }),
-        correspondent: many2one('mail.partner', {
+        correspondent: many2one('Partner', {
             compute: '_computeCorrespondent',
         }),
         counter: attr({
             default: 0,
         }),
-        creator: many2one('mail.user'),
+        creator: many2one('User'),
         custom_channel_name: attr(),
         /**
          * Determines the default display mode of this channel. Should contain
@@ -1978,7 +1978,7 @@ registerModel({
          * Determines the discuss sidebar category item that displays this
          * thread (if any). Only applies to channels.
          */
-        discussSidebarCategoryItem: one2one('mail.discuss_sidebar_category_item', {
+        discussSidebarCategoryItem: one2one('DiscussSidebarCategoryItem', {
             compute: '_computeDiscussSidebarCategoryItem',
             inverse: 'channel',
             isCausal: true,
@@ -1993,10 +1993,10 @@ registerModel({
         fetchMessagesUrl: attr({
             compute: '_computeFetchMessagesUrl',
         }),
-        followersPartner: many2many('mail.partner', {
+        followersPartner: many2many('Partner', {
             related: 'followers.partner',
         }),
-        followers: one2many('mail.follower', {
+        followers: one2many('Follower', {
             inverse: 'followedThread',
         }),
         /**
@@ -2060,7 +2060,7 @@ registerModel({
         /**
          * List of partners that have been invited to the RTC call of this channel.
          */
-        invitedPartners: many2many('mail.partner'),
+        invitedPartners: many2many('Partner'),
         /**
          * Determines whether this description can be changed.
          * Only makes sense for channels.
@@ -2132,25 +2132,25 @@ registerModel({
          * pinning, and new message posted. It is contained as a Date object.
          */
         lastInterestDateTime: attr(),
-        lastCurrentPartnerMessageSeenByEveryone: many2one('mail.message', {
+        lastCurrentPartnerMessageSeenByEveryone: many2one('Message', {
             compute: '_computeLastCurrentPartnerMessageSeenByEveryone',
         }),
         /**
          * Last message of the thread, could be a transient one.
          */
-        lastMessage: many2one('mail.message', {
+        lastMessage: many2one('Message', {
             compute: '_computeLastMessage',
         }),
         /**
          * States the last known needaction message having this thread as origin.
          */
-        lastNeedactionMessageAsOriginThread: many2one('mail.message', {
+        lastNeedactionMessageAsOriginThread: many2one('Message', {
             compute: '_computeLastNeedactionMessageAsOriginThread',
         }),
         /**
          * Last non-transient message.
          */
-        lastNonTransientMessage: many2one('mail.message', {
+        lastNonTransientMessage: many2one('Message', {
             compute: '_computeLastNonTransientMessage',
         }),
         /**
@@ -2177,24 +2177,24 @@ registerModel({
          * Only makes sense if this thread is a channel.
          */
         memberCount: attr(),
-        members: many2many('mail.partner', {
+        members: many2many('Partner', {
             inverse: 'memberThreads',
         }),
         /**
          * Determines the last mentioned channels of the last composer related
          * to this thread. Useful to sync the composer when re-creating it.
          */
-        mentionedChannelsBackup: many2many('mail.thread'),
+        mentionedChannelsBackup: many2many('Thread'),
         /**
          * Determines the last mentioned partners of the last composer related
          * to this thread. Useful to sync the composer when re-creating it.
          */
-        mentionedPartnersBackup: many2many('mail.partner'),
+        mentionedPartnersBackup: many2many('Partner'),
         /**
          * Determines the message before which the "new message" separator must
          * be positioned, if any.
          */
-        messageAfterNewMessageSeparator: many2one('mail.message', {
+        messageAfterNewMessageSeparator: many2one('Message', {
             compute: '_computeMessageAfterNewMessageSeparator',
         }),
         message_needaction_counter: attr({
@@ -2205,14 +2205,14 @@ registerModel({
          * Note that this field is automatically computed by inverse
          * computed field.
          */
-        messages: many2many('mail.message', {
+        messages: many2many('Message', {
             inverse: 'threads',
             readonly: true,
         }),
         /**
          * All messages that have been originally posted in this thread.
          */
-        messagesAsOriginThread: one2many('mail.message', {
+        messagesAsOriginThread: one2many('Message', {
             inverse: 'originThread',
             isCausal: true,
         }),
@@ -2228,7 +2228,7 @@ registerModel({
             inverse: 'ringingThreads',
             readonly: true,
         }),
-        messagingMenuAsPinnedAndUnreadChannel: many2one('mail.messaging_menu', {
+        messagingMenuAsPinnedAndUnreadChannel: many2one('MessagingMenu', {
             compute: '_computeMessagingMenuAsPinnedAndUnreadChannel',
             inverse: 'pinnedAndUnreadChannels',
             readonly: true,
@@ -2243,38 +2243,38 @@ registerModel({
         /**
          * States all known needaction messages having this thread as origin.
          */
-        needactionMessagesAsOriginThread: many2many('mail.message', {
+        needactionMessagesAsOriginThread: many2many('Message', {
             compute: '_computeNeedactionMessagesAsOriginThread',
         }),
         /**
          * All offline members ordered like they are displayed.
          */
-        orderedOfflineMembers: many2many('mail.partner', {
+        orderedOfflineMembers: many2many('Partner', {
             compute: '_computeOrderedOfflineMembers',
         }),
         /**
          * All online members ordered like they are displayed.
          */
-        orderedOnlineMembers: many2many('mail.partner', {
+        orderedOnlineMembers: many2many('Partner', {
             compute: '_computeOrderedOnlineMembers',
         }),
         /**
          * All messages ordered like they are displayed.
          */
-        orderedMessages: many2many('mail.message', {
+        orderedMessages: many2many('Message', {
             compute: '_computeOrderedMessages',
         }),
         /**
          * All messages ordered like they are displayed. This field does not
          * contain transient messages which are not "real" records.
          */
-        orderedNonTransientMessages: many2many('mail.message', {
+        orderedNonTransientMessages: many2many('Message', {
             compute: '_computeOrderedNonTransientMessages',
         }),
         /**
          * Ordered typing members on this thread, excluding the current partner.
          */
-        orderedOtherTypingMembers: many2many('mail.partner', {
+        orderedOtherTypingMembers: many2many('Partner', {
             compute: '_computeOrderedOtherTypingMembers',
         }),
         /**
@@ -2282,7 +2282,7 @@ registerModel({
          * is currently typing for the longest time. This list includes current
          * partner as typer.
          */
-        orderedTypingMembers: many2many('mail.partner', {
+        orderedTypingMembers: many2many('Partner', {
             compute: '_computeOrderedTypingMembers',
         }),
         /**
@@ -2291,7 +2291,7 @@ registerModel({
         orderedTypingMemberLocalIds: attr({
             default: [],
         }),
-        originThreadAttachments: one2many('mail.attachment', {
+        originThreadAttachments: one2many('Attachment', {
             inverse: 'originThread',
             isCausal: true,
         }),
@@ -2306,7 +2306,7 @@ registerModel({
          * Contains the seen information for all members of the thread.
          * FIXME This field should be readonly once task-2336946 is done.
          */
-        partnerSeenInfos: one2many('mail.thread_partner_seen_info', {
+        partnerSeenInfos: one2many('ThreadPartnerSeenInfo', {
             inverse: 'thread',
             isCausal: true,
         }),
@@ -2320,17 +2320,17 @@ registerModel({
         /**
          * If set, the current thread is the thread that hosts the current RTC call.
          */
-        rtc: one2one('mail.rtc', {
+        rtc: one2one('Rtc', {
             inverse: 'channel',
         }),
         /**
          * The session that invited the current user, it is only set when the
          * invitation is still pending.
          */
-        rtcInvitingSession: many2one('mail.rtc_session', {
+        rtcInvitingSession: many2one('RtcSession', {
             inverse: 'calledChannels',
         }),
-        rtcSessions: one2many('mail.rtc_session', {
+        rtcSessions: one2many('RtcSession', {
             inverse: 'channel',
             isCausal: true,
         }),
@@ -2353,7 +2353,7 @@ registerModel({
          *
          * @see localMessageUnreadCounter
          */
-        serverLastMessage: many2one('mail.message'),
+        serverLastMessage: many2one('Message'),
         /**
          * Message unread counter coming from server.
          *
@@ -2368,9 +2368,9 @@ registerModel({
             default: 0,
         }),
         /**
-         * Determines the `mail.suggested_recipient_info` concerning `this`.
+         * Determines the `SuggestedRecipientInfo` concerning `this`.
          */
-        suggestedRecipientInfoList: one2many('mail.suggested_recipient_info', {
+        suggestedRecipientInfoList: one2many('SuggestedRecipientInfo', {
             inverse: 'thread',
             isCausal: true,
         }),
@@ -2402,7 +2402,7 @@ registerModel({
         textInputSelectionDirectionBackup: attr({
             default: "none",
         }),
-        threadViews: one2many('mail.thread_view', {
+        threadViews: one2many('ThreadView', {
             inverse: 'thread',
         }),
         /**
@@ -2416,7 +2416,7 @@ registerModel({
          * Members that are currently typing something in the composer of this
          * thread, including current partner.
          */
-        typingMembers: many2many('mail.partner'),
+        typingMembers: many2many('Partner'),
         /**
          * Text that represents the status on this thread about typing members.
          */

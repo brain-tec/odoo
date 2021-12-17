@@ -9,7 +9,7 @@ registerModel({
     identifyingFields: ['thread', 'message'],
     modelMethods: {
         /**
-         * @param {mail.thread} [channel] the concerned thread
+         * @param {Thread} [channel] the concerned thread
          */
         recomputeFetchedValues(channel = undefined) {
             const indicatorFindFunction = channel ? localIndicator => localIndicator.thread === channel : undefined;
@@ -23,7 +23,7 @@ registerModel({
             }
         },
         /**
-         * @param {mail.thread} [channel] the concerned thread
+         * @param {Thread} [channel] the concerned thread
          */
         recomputeSeenValues(channel = undefined) {
             const indicatorFindFunction = channel ? localIndicator => localIndicator.thread === channel : undefined;
@@ -145,7 +145,7 @@ registerModel({
          * Manually called as not always called when necessary
          *
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          * @see computeFetchedValues
          * @see computeSeenValues
          */
@@ -157,7 +157,7 @@ registerModel({
                 .filter(partnerSeenInfo =>
                     /**
                      * Relation may not be set yet immediately
-                     * @see mail.thread_partner_seen_info:partnerId field
+                     * @see ThreadPartnerSeenInfo:partnerId field
                      * FIXME task-2278551
                      */
                     partnerSeenInfo.partner &&
@@ -175,7 +175,7 @@ registerModel({
          * Manually called as not always called when necessary
          *
          * @private
-         * @returns {mail.partner[]}
+         * @returns {Partner[]}
          * @see computeSeenValues
          */
         _computePartnersThatHaveSeen() {
@@ -186,7 +186,7 @@ registerModel({
                 .filter(partnerSeenInfo =>
                     /**
                      * Relation may not be set yet immediately
-                     * @see mail.thread_partner_seen_info:partnerId field
+                     * @see ThreadPartnerSeenInfo:partnerId field
                      * FIXME task-2278551
                      */
                     partnerSeenInfo.partner &&
@@ -225,21 +225,21 @@ registerModel({
         /**
          * The message concerned by this seen indicator.
          */
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             inverse: 'messageSeenIndicators',
             readonly: true,
             required: true,
         }),
-        partnersThatHaveFetched: many2many('mail.partner', {
+        partnersThatHaveFetched: many2many('Partner', {
             compute: '_computePartnersThatHaveFetched',
         }),
-        partnersThatHaveSeen: many2many('mail.partner', {
+        partnersThatHaveSeen: many2many('Partner', {
             compute: '_computePartnersThatHaveSeen',
         }),
         /**
          * The thread concerned by this seen indicator.
          */
-        thread: many2one('mail.thread', {
+        thread: many2one('Thread', {
             inverse: 'messageSeenIndicators',
             readonly: true,
             required: true,
