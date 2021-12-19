@@ -143,6 +143,7 @@ function _buildCollapseElement(title, options) {
     const children = options && options.childNodes || [];
     if (titleEl) {
         titleEl.remove();
+        titleEl.classList.add('o_we_collapse_toggler');
         children.unshift(titleEl);
     }
     let i = 0;
@@ -508,12 +509,6 @@ const UserValueWidget = Widget.extend({
      * @param {boolean} [isSimulatedEvent=false]
      */
     notifyValueChange: function (previewMode, isSimulatedEvent) {
-        // If the widget has no associated method, it should not notify user
-        // value changes
-        if (!this._methodsNames.length) {
-            console.warn('UserValueWidget with no methods notifying value change');
-        }
-
         // In the case we notify a change update, force a preview update if it
         // was not already previewed
         const isPreviewed = this.isPreviewed();
