@@ -72,26 +72,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             self._isDirty = self.wysiwyg.isDirty();
             self._doAction();
 
-            // fix outlook image rendering bug (this change will be kept in both
-            // fields)
-            _.each(['width', 'height'], function (attribute) {
-                $editable.find('img').attr(attribute, function () {
-                    return $(this)[attribute]();
-                }).css(attribute, function () {
-                    return $(this).get(0).style[attribute] || attribute === 'width' ? $(this)[attribute]() + 'px' : 'auto';
-                });
-            });
-
-            convertInline.attachmentThumbnailToLinkImg($editable);
-            convertInline.fontToImg($editable);
-            convertInline.classToStyle($editable);
-            convertInline.bootstrapToTable($editable);
-            convertInline.cardToTable($editable);
-            convertInline.listGroupToTable($editable);
-            convertInline.addTables($editable);
-            convertInline.formatTables($editable);
-            convertInline.normalizeColors($editable);
-            convertInline.normalizeRem($editable);
+            convertInline.toInline($editable, self.cssRules);
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
@@ -134,6 +115,10 @@ var MassMailingFieldHtml = FieldHtml.extend({
         this.$content.find('.o_layout').addBack().data('name', 'Mailing');
         // We don't want to drop snippets directly within the wysiwyg.
         this.$content.removeClass('o_editable');
+        // Force compute CSS rules even without the style-inline node option.
+        if (this.mode === 'edit' && !this.cssRules) {
+            this.cssRules = convertInline.getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
+        }
     },
     /**
      * Returns true if the editable area is empty.
@@ -275,7 +260,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 class: 'container o_mail_wrapper o_mail_regular oe_unremovable',
             });
             $newWrapperContent = $('<div/>', {
-                class: 'col o_mail_no_options o_mail_wrapper_td oe_structure o_editable'
+                class: 'col o_mail_no_options o_mail_wrapper_td bg-white oe_structure o_editable'
             });
             $new_wrapper.append($('<div class="row"/>').append($newWrapperContent));
         }
@@ -391,8 +376,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!odoo.debug) {
             $snippetsSideBar.find('.o_codeview_btn').hide();
         }
-        const $codeview = this.wysiwyg.$iframe.contents().find('textarea.o_codeview');
-        $snippetsSideBar.on('click', '.o_codeview_btn', () => this._toggleCodeView($codeview));
+        this._$codeview = this.wysiwyg.$iframe.contents().find('textarea.o_codeview');
+        $snippetsSideBar.on('click', '.o_codeview_btn', () => this._toggleCodeView(this._$codeview));
 
         if ($themes.length === 0) {
             return;

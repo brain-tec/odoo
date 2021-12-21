@@ -223,7 +223,7 @@ class PosOrder(models.Model):
             .mapped('picking_ids.move_ids')\
             ._filter_anglo_saxon_moves(product)\
             .sorted(lambda x: x.date)
-        price_unit = product._compute_average_price(0, quantity, moves)
+        price_unit = product.with_company(self.company_id)._compute_average_price(0, quantity, moves)
         return price_unit
 
     name = fields.Char(string='Order Ref', required=True, readonly=True, copy=False, default='/')
@@ -842,6 +842,10 @@ class PosOrder(models.Model):
             'is_tipped': order.is_tipped,
             'tip_amount': order.tip_amount,
         }
+
+    def _get_fields_for_order_line(self):
+        """This function is here to be overriden"""
+        return []
 
     def export_for_ui(self):
         """ Returns a list of dict with each item having similar signature as the return of

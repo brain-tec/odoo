@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, _
-
-import base64
 import markupsafe
+from odoo.addons.account_edi_ubl_bis3.models.account_edi_format import COUNTRY_EAS
+
+from odoo import models, _
 
 
 class AccountEdiFormat(models.Model):
@@ -139,3 +139,10 @@ class AccountEdiFormat(models.Model):
         if self.code == 'nlcius_1' and self._is_nlcius(filename, tree):
             return self._decode_bis3(tree, invoice)
         return super()._update_invoice_from_xml_tree(filename, tree, invoice)
+
+    def _is_required_for_invoice(self, invoice):
+        self.ensure_one()
+        if self.code != 'nlcius_1':
+            return super()._is_required_for_invoice(invoice)
+
+        return invoice.commercial_partner_id.country_code in COUNTRY_EAS

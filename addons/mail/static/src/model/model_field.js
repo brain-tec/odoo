@@ -24,6 +24,7 @@ export class ModelField {
         related,
         relationType,
         required = false,
+        sort,
         to,
     } = {}) {
         /**
@@ -97,6 +98,36 @@ export class ModelField {
          * null or empty string are NOT considered empty value, meaning these values meet the requirement.
         */
         this.required = required;
+        /**
+         * Determines the name of the function on record that returns the
+         * definition on how this field is sorted (only makes sense for
+         * relational x2many).
+         *
+         * It must contain a function returning the definition instead of the
+         * definition directly (to allow the definition to depend on the value
+         * of another field).
+         *
+         * The definition itself should be a list of operations, and each
+         * operation itself should be a list of 2 elements: the first is the
+         * name of a supported compare method, and the second is a dot separated
+         * relation path, starting from the current record.
+         *
+         * When determining the order of one record compared to another, each
+         * compare operation will be applied in the order provided, stopping at
+         * the first operation that is able to determine an order for the two
+         * records.
+         */
+        this.sort = sort;
+        /**
+         * Determines whether and how elements of this field should be summed
+         * into a counter field (only makes sense for relational x2many).
+         *
+         * It must contain an array of object with 2 keys: `from` giving the
+         * name of a field on the relation record that holds the contribution of
+         * that record to the sum, and `to` giving the name of a field on the
+         * current record which contains the sum.
+         */
+        this.sumContributions = [];
         /**
          * This prop only makes sense in a relational field. Determine which
          * model name this relation refers to.
@@ -372,7 +403,7 @@ export class ModelField {
                         }
                         break;
                     case 'unlink-all':
-                        if (this._setRelationUnlink(record, this.read(record), options)) {
+                        if (this._setRelationUnlink(record, this.get(record), options)) {
                             hasChanged = true;
                         }
                         break;
@@ -569,7 +600,8 @@ export class ModelField {
      * @returns {boolean} whether the value changed for the current field
      */
     _setRelationLinkX2Many(record, newValue, { hasToUpdateInverse = true } = {}) {
-        const recordsToLink = this._convertX2ManyValue(newValue);
+        const hasToVerify = record.modelManager.isDebug;
+        const recordsToLink = this._convertX2ManyValue(newValue, { hasToVerify });
         const otherRecords = this.read(record);
 
         let hasChanged = false;
@@ -607,7 +639,9 @@ export class ModelField {
      * @returns {boolean} whether the value changed for the current field
      */
     _setRelationLinkX2One(record, recordToLink, { hasToUpdateInverse = true } = {}) {
-        this._verifyRelationalValue(recordToLink);
+        if (record.modelManager.isDebug) {
+            this._verifyRelationalValue(recordToLink);
+        }
         const prevOtherRecord = this.read(record);
         // other record already linked, avoid linking twice
         if (prevOtherRecord === recordToLink) {
@@ -648,7 +682,8 @@ export class ModelField {
         let hasToReorder = false;
         const otherRecordsSet = this.read(record);
         const otherRecordsList = [...otherRecordsSet];
-        const recordsToReplaceList = [...this._convertX2ManyValue(newValue)];
+        const hasToVerify = record.modelManager.isDebug;
+        const recordsToReplaceList = [...this._convertX2ManyValue(newValue, { hasToVerify })];
         const recordsToReplaceSet = new Set(recordsToReplaceList);
 
         // records to link

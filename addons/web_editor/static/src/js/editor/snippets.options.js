@@ -508,12 +508,6 @@ const UserValueWidget = Widget.extend({
      * @param {boolean} [isSimulatedEvent=false]
      */
     notifyValueChange: function (previewMode, isSimulatedEvent) {
-        // If the widget has no associated method, it should not notify user
-        // value changes
-        if (!this._methodsNames.length) {
-            console.warn('UserValueWidget with no methods notifying value change');
-        }
-
         // In the case we notify a change update, force a preview update if it
         // was not already previewed
         const isPreviewed = this.isPreviewed();
@@ -2751,14 +2745,14 @@ const Many2manyUserValueWidget = UserValueWidget.extend({
         });
         const selectedRecordIds = record[m2oField];
         // TODO: handle no record
-        const [modelData] = await this._rpc({
-            model: 'ir.model.fields',
-            method: 'search_read',
-            args: [[['model', '=', model], ['name', '=', m2oField]], ['relation', 'field_description']],
+        const modelData = await this._rpc({
+            model: model,
+            method: 'fields_get',
+            args: [[m2oField]],
         });
         // TODO: simultaneously fly both RPCs
-        this.m2oModel = modelData.relation;
-        this.m2oName = modelData.field_description; // Use as string attr?
+        this.m2oModel = modelData[m2oField].relation;
+        this.m2oName = modelData[m2oField].field_description; // Use as string attr?
 
         const selectedRecords = await this._rpc({
             model: this.m2oModel,

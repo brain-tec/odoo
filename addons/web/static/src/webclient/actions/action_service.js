@@ -399,11 +399,15 @@ function makeActionManager(env) {
                 return viewSwitcherEntry;
             });
         const context = action.context || {};
+        let groupBy = context.group_by || [];
+        if (typeof groupBy === "string") {
+            groupBy = [groupBy];
+        }
         const viewProps = Object.assign({}, props, {
             context,
             display: { mode: target === "new" ? "inDialog" : target },
             domain: action.domain || [],
-            groupBy: action.context.group_by || [],
+            groupBy,
             loadActionMenus: target !== "new" && target !== "inline",
             loadIrFilters: action.views.some((v) => v[1] === "search"),
             resModel: action.res_model,
@@ -1050,7 +1054,7 @@ function makeActionManager(env) {
     async function _executeServerAction(action, options) {
         const runProm = env.services.rpc("/web/action/run", {
             action_id: action.id,
-            context: action.context || {},
+            context: makeContext([env.services.user.context, action.context]),
         });
         let nextAction = await keepLast.add(runProm);
         nextAction = nextAction || { type: "ir.actions.act_window_close" };

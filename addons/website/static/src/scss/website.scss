@@ -801,7 +801,7 @@ $-transition-duration: 200ms;
 }
 
 // Navbar
-.navbar .o_extra_menu_items.show > ul {
+.navbar .o_extra_menu_items.show > div {
     > li {
         + li {
             border-top: 1px solid gray('200');
@@ -894,7 +894,7 @@ header {
                     padding-top: 15vh;
                     padding-bottom: 15vh;
                 }
-                text-align: center;
+                text-align: center !important;
             }
         }
     }
@@ -931,6 +931,15 @@ header {
             max-height: 100vh;
             transition: none;
             transform: none;
+
+            @if o-website-value('header-template') == 'magazine' {
+                @include media-breakpoint-up(lg) {
+                    position: fixed;
+                }
+                #top_menu {
+                    align-items: normal !important;
+                }
+            }
 
             &, & > .o_header_collapsed_content_wrapper {
                 // TODO improve: ugly code to reset a potential wrapper
@@ -1014,7 +1023,7 @@ header {
                 }
             }
 
-            .o_connected_user:not(.editor_has_snippets) header & {
+            .o_connected_user:not(.editor_has_snippets):not(.o_fullscreen) header & {
                 // TODO this has to be reviewed
                 $-header-template: o-website-value('header-template');
                 @if not index(('Contact', 'boxed', 'magazine'), $-header-template) {
@@ -1022,11 +1031,15 @@ header {
                     padding-top: $o-navbar-height;
                 } @else if $-header-template == 'magazine' {
                     @include media-breakpoint-up(lg) {
-                        position: fixed;
+                        padding-top: $o-navbar-height;
+                    }
+                }
+            }
 
-                        #top_menu {
-                            align-items: normal !important;
-                        }
+            .editor_has_snippets:not(.o_fullscreen) header & {
+                @if (o-website-value('header-template') == 'magazine') {
+                    @include media-breakpoint-up(lg) {
+                        right: $o-we-sidebar-width;
                     }
                 }
             }
@@ -1120,7 +1133,7 @@ header {
                 }
             }
         }
-        body.o_connected_user {
+        body.o_connected_user:not(.o_fullscreen) {
             &:not(.editor_has_snippets) #wrapwrap > header {
                 top: $o-navbar-height;
             }
@@ -1188,6 +1201,7 @@ header {
         padding-right: $grid-gutter-width / 2;
     }
 }
+
 .o_mega_menu_container_size {
     $-header-template: o-website-value('header-template');
     @if not index(('sidebar', 'hamburger', 'magazine'), $-header-template) {
@@ -1205,6 +1219,26 @@ header {
         ));
     }
     @include make-container-max-widths($-mm-max-widths);
+}
+
+// The design of some of the new mega menu templates required a column with
+// an overlay that would overflow until the end of the container. For
+// technical reasons, this overlay has to be hardcoded here.
+%s_mega_menu_gray_area {
+    z-index: 1;
+
+    &:before {
+        content: '';
+        display: block;
+        width: 100vw;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: rgba(0, 0, 0, .05);
+    }
 }
 
 #wrapwrap.o_header_overlay {
