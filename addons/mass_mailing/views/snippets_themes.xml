@@ -458,7 +458,7 @@
         t-att-data-selector="so_snippet_addition_selector"
         data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(.o_mega_menu):not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
 
-    <t t-set="so_content_addition_selector" t-translation="off">.s_blockquote, .s_mail_alert, .s_rating, .s_hr, .s_text_highlight</t>
+    <t t-set="so_content_addition_selector" t-translation="off">.s_mail_blockquote, .s_mail_alert, .s_rating, .s_hr, .s_mail_text_highlight</t>
     <div id="so_content_addition"
         t-att-data-selector="so_content_addition_selector"
         t-attf-data-drop-near="p, h1, h2, h3, ul, ol, .row > div > img, #{so_content_addition_selector}"
@@ -475,9 +475,9 @@
 
     <div data-selector=".o_layout, .note-editable > div:not(.o_layout),
         .note-editable .oe_structure > div:not(:has(> .o_mail_snippet_general)),
-        .note-editable .oe_structure > div > .o_mail_snippet_general,
-        .note-editable .oe_structure > div > .o_mail_snippet_general .o_cc,
-        .note-editable .oe_structure > div > .o_mail_snippet_general .btn:not(.btn-link),
+        .note-editable .oe_structure > div.o_mail_snippet_general,
+        .note-editable .oe_structure > div.o_mail_snippet_general .o_cc,
+        .note-editable .oe_structure > div.o_mail_snippet_general .btn:not(.btn-link),
         td, td.o_mail_no_colorpicker div:first-child, th"
         data-exclude=".o_mail_no_colorpicker, .o_mail_no_options">
         <we-colorpicker string="Background Color"
