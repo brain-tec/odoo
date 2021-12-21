@@ -20,15 +20,16 @@
 # Kevin Harrings <kha@odoo.com>, 2020
 # Max-Milan Stoyanov, 2020
 # spilymp <visessa+github@gmail.com>, 2020
-# Martin Trigaux, 2021
 # Ahmed Aly <ahmed.aly@datenpol.at>, 2021
+# Raymond Vetter, 2021
+# Martin Trigaux, 2021
 # Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.4\n"
+"Project-Id-Version: Odoo Server saas~15.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"POT-Creation-Date: 2021-12-07 10:47+0000\n"
 "PO-Revision-Date: 2020-12-11 11:05+0000\n"
 "Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
@@ -47,6 +48,8 @@ msgid ""
 ")\n"
 "                    to meet them !"
 msgstr ""
+")\n"
+"                    um sie zu treffen !"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
@@ -79,6 +82,16 @@ msgid ""
 msgstr ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_aside
+msgid "<small class=\"badge badge-danger\">Unpublished</small>"
+msgstr "<small class=\"badge badge-danger\">Unveröffentlicht</small>"
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_search_tag
+msgid "<span class=\"btn border-0 py-1\">×</span>"
+msgstr "<span class=\"btn border-0 py-1\">×</span>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_aside
@@ -225,6 +238,11 @@ msgid "Create a Sponsor / Exhibitor"
 msgstr ""
 
 #. module: website_event_exhibitor
+#: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_type_action
+msgid "Create a Sponsor Level"
+msgstr ""
+
+#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__create_uid
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__create_uid
 msgid "Created by"
@@ -252,6 +270,11 @@ msgstr "Anzeigename"
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_type__exhibitor_menu
 msgid "Display exhibitors on website"
 msgstr "Aussteller auf der Website anzeigen"
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
+msgid "Display in footer"
+msgstr "Im Fußtext anzeigen"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_email
@@ -315,6 +338,11 @@ msgstr "Aussteller"
 #, python-format
 msgid "Exhibitors"
 msgstr "Aussteller"
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_type_view_form
+msgid "Exhibitors Menu Item"
+msgstr ""
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__exhibitor_menu_ids
@@ -411,7 +439,7 @@ msgstr "Ist veröffentlicht"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Jitsi Name"
-msgstr ""
+msgstr "Jitsi Name"
 
 #. module: website_event_exhibitor
 #. openerp-web
@@ -529,7 +557,7 @@ msgstr "Name"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr ""
+msgstr "Nächstes Aktivitätskalenderereignis"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_date_deadline
@@ -625,6 +653,20 @@ msgid "Phone"
 msgstr "Telefon"
 
 #. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
+msgid "Published"
+msgstr "Veröffentlicht"
+
+#. module: website_event_exhibitor
+#: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_type_action
+msgid ""
+"Rank your sponsors based on your own grading system (e.g. \"Gold, Silver, "
+"Bronze\")."
+msgstr ""
+"Ordnen Sie Ihre Sponsoren nach Ihrem eigenen Bewertungssystem (z. B. \"Gold,"
+" Silber, Bronze\")."
+
+#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
 msgid "Register"
 msgstr "Registrieren"
@@ -682,7 +724,7 @@ msgstr "Slogan"
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__event_sponsor__exhibitor_type__sponsor
 #, python-format
 msgid "Sponsor"
-msgstr ""
+msgstr "Sponsor"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__sponsor_count
@@ -797,6 +839,11 @@ msgid "Type of the exception activity on record."
 msgstr "Typ der Ausnahmeaktivität im Datensatz."
 
 #. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_thumb_details
+msgid "Unpublished"
+msgstr "Unveröffentlicht"
+
+#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_unread
 msgid "Unread Messages"
 msgstr "Ungelesene Nachrichten"
@@ -849,6 +896,11 @@ msgstr "Innerhalb der Öffnungszeiten"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
+msgid "e.g. \"Openwood specializes in home decoration...\""
+msgstr ""
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "e.g. : OpenWood Decoration"
 msgstr "z.B. : OpenWood Decoration"
 
@@ -880,7 +932,7 @@ msgstr "ist momentan nicht verfügbar."
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #, python-format
 msgid "is over."
-msgstr ""
+msgstr "ist vorbei."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -888,6 +940,8 @@ msgid ""
 "is over.\n"
 "                <br/>"
 msgstr ""
+"ist vorbei.\n"
+"<br/>"
 
 #. module: website_event_exhibitor
 #. openerp-web
@@ -915,4 +969,4 @@ msgstr "startet in"
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format
 msgid "starts on"
-msgstr ""
+msgstr "beginnt am"

@@ -15,27 +15,27 @@
 # Monika Grzelak <m.e.grzelak@gmail.com>, 2019
 # zieloo <zieloo@gmail.com>, 2019
 # Grzegorz Krukar <grzegorzgk1@gmail.com>, 2019
-# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2019
 # Mariusz, 2019
 # Jaroslaw Kaczmarski, 2019
 # Slawomir Adamus <melthalion@gmail.com>, 2019
 # Grażyna Grzelak <grazyna.grzelak@openglobe.pl>, 2019
-# Maja Stawicka <mjstwck@wp.pl>, 2019
 # Natalia Gros <nag@odoo.com>, 2020
 # Karol Rybak <karolrybak85@gmail.com>, 2020
-# Tomasz Leppich <t.leppich@gmail.com>, 2020
-# Piotr Szlązak <szlazakpiotr@gmail.com>, 2020
+# Radosław Biegalski <radoslaw.biegalski@openglobe.pl>, 2021
+# Wiktor Kaźmierczak <wik92tor@wp.pl>, 2021
+# Grzegorz Michrowski <grzegorz.michrowski@openglobe.pl>, 2021
+# Rafał Kozak <rafal.kozak@openglobe.pl>, 2021
 # Piotr Strębski <strebski@gmail.com>, 2021
 # Martin Trigaux, 2021
 # Dariusz Żbikowski <darek@krokus.com.pl>, 2021
-# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2021
-# Radosław Biegalski <radoslaw.biegalski@openglobe.pl>, 2021
-# Paweł Wodyński <pw@myodoo.pl>, 2021
-# Wiktor Kaźmierczak <wik92tor@wp.pl>, 2021
-# Maksym <ms@myodoo.pl>, 2021
-# Grzegorz Michrowski <grzegorz.michrowski@openglobe.pl>, 2021
-# Rafał Kozak <rafal.kozak@openglobe.pl>, 2021
 # Wojciech Warczakowski <w.warczakowski@gmail.com>, 2021
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2021
+# Tomasz Leppich <t.leppich@gmail.com>, 2021
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2021
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2021
+# Paweł Wodyński <pw@myodoo.pl>, 2021
+# Maja Stawicka <mjstwck@wp.pl>, 2021
+# Maksym <ms@myodoo.pl>, 2021
 # 
 msgid ""
 msgstr ""
@@ -43,7 +43,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-12 08:05+0000\n"
 "PO-Revision-Date: 2016-08-05 12:54+0000\n"
-"Last-Translator: Wojciech Warczakowski <w.warczakowski@gmail.com>, 2021\n"
+"Last-Translator: Maksym <ms@myodoo.pl>, 2021\n"
 "Language-Team: Polish (https://www.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11274,7 +11274,7 @@ msgstr "Widok kohorty"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad
 msgid "Collaborative Pads"
-msgstr "Współpracujące Pady"
+msgstr "Współpracujące pady"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_sepa_direct_debit
@@ -11787,6 +11787,7 @@ msgstr ""
 #, python-format
 msgid "Contact your administrator to request access if necessary."
 msgstr ""
+"W razie potrzeby skontaktuj się z administratorem, aby poprosić o dostęp."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__partner_ids
@@ -13487,6 +13488,8 @@ msgid ""
 "Due to security restrictions, you are not allowed to access "
 "'%(document_kind)s' (%(document_model)s) records."
 msgstr ""
+"Ze względu na ograniczenia związane z bezpieczeństwem, nie masz dostępu do "
+"rekordów '%(document_kind)s' (%(document_model)s)."
 
 #. module: base
 #: code:addons/base/models/ir_rule.py:0
@@ -15888,7 +15891,7 @@ msgstr "Akcja startowa"
 #. module: base
 #: model:ir.actions.act_url,name:base.action_open_website
 msgid "Home Menu"
-msgstr ""
+msgstr "Menu główne"
 
 #. module: base
 #: model:res.country,name:base.hn
@@ -23352,7 +23355,7 @@ msgstr "Rekordy:"
 #: code:addons/base/models/ir_rule.py:0
 #, python-format
 msgid "Records: %s"
-msgstr ""
+msgstr "Rekordy: %s"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_recruitment
@@ -26751,6 +26754,8 @@ msgid ""
 "This restriction is due to the following rules:\n"
 "%s"
 msgstr ""
+"To ograniczenie wynika z następujących zasad:\n"
+"%s"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__thousands_sep
@@ -27885,7 +27890,7 @@ msgstr "Użytkownik:"
 #: code:addons/base/models/ir_rule.py:0
 #, python-format
 msgid "User: %s"
-msgstr ""
+msgstr "Użytkownik: %s"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_user
@@ -28728,7 +28733,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_simple_form
 msgid "You are inviting a new user."
-msgstr ""
+msgstr "Zapraszasz nowego użytkownika."
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0

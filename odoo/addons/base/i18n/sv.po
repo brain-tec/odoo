@@ -14,19 +14,19 @@
 # Peter Wickenberg <peter@wickenberg.nu>, 2019
 # Daniel Osser <danielosser@gmail.com>, 2019
 # Robert Frykelius <robert.frykelius@linserv.se>, 2019
-# lasch a <bmail440@gmail.com>, 2019
 # Michael Tanzi <michael.tanzi@vertel.se>, 2020
 # Fredrik Arvas <fredrik.arvas@vertel.se>, 2020
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
 # Kristoffer Grundström <lovaren@gmail.com>, 2021
-# Martin Trigaux, 2021
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2021
 # STefan Rundgren <stefanrundgren@cellglas.com>, 2021
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
-# Kim Asplund <kim.asplund@gmail.com>, 2021
-# Simon S, 2021
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
 # Victor Ekström, 2021
+# Martin Trigaux, 2021
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# lasch a <bmail440@gmail.com>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
+# Simon S, 2021
 # 
 msgid ""
 msgstr ""
@@ -34,7 +34,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-12 08:05+0000\n"
 "PO-Revision-Date: 2016-08-05 12:54+0000\n"
-"Last-Translator: Victor Ekström, 2021\n"
+"Last-Translator: Simon S, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2366,6 +2366,17 @@ msgid ""
 "Allows to contact directly the employee in case of unjustified absence.\n"
 "    "
 msgstr ""
+"\n"
+"Kontrollera anställdas närvaro\n"
+"==========================\n"
+"\n"
+"Baserat på:\n"
+"    * IP-addressen\n"
+"    * Användarens session\n"
+"    * Skickade e-postmeddelanden\n"
+"\n"
+"Gör det möjligt att kontakta den anställde direkt vid omotiverad frånvaro..\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_helpdesk
@@ -6075,7 +6086,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "%A - Full weekday name."
-msgstr "%A - Komplett veckodagsnamn"
+msgstr "%A - Komplett veckodagsnamn."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -6110,7 +6121,7 @@ msgstr "%Y - År med århundrade\""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "%a - Abbreviated weekday name."
-msgstr "%a - Förkortat veckodagnamn."
+msgstr "%a - Förkortat veckodagsnamn."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -7145,12 +7156,12 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_private_addresses
 msgid "Access to Private Addresses"
-msgstr ""
+msgstr "Tillgång till privata adresser"
 
 #. module: base
 #: model:res.groups,name:base.group_allow_export
 msgid "Access to export feature"
-msgstr ""
+msgstr "Tillgång till exportfunktion"
 
 #. module: base
 #: code:addons/api.py:0 code:addons/api.py:0
@@ -7782,7 +7793,7 @@ msgstr ""
 #: code:addons/base/models/ir_model.py:0
 #, python-format
 msgid "Administrator access is required to uninstall a module"
-msgstr ""
+msgstr "Administratörsbehörighet krävs för att avinstallera en modul"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_country_form
@@ -10514,7 +10525,7 @@ msgstr "Kan inte skapa kontakt utan e-postadress!"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__count
 msgid "Count (Incl. Archived)"
-msgstr ""
+msgstr "Antal (Inklusive arkiverade)"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_country
@@ -10673,7 +10684,7 @@ msgstr "Skapa ett nytt bolag"
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_category_form
 msgid "Create a new contact tag"
-msgstr "Skapa ny kontakt tag"
+msgstr "Skapa ny kontaktetikett"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_customer_form
@@ -11672,6 +11683,8 @@ msgid ""
 "Disabling this option will also uninstall the following modules \n"
 "%s"
 msgstr ""
+"Om du inaktiverar det här alternativet avinstalleras även följande moduler \n"
+"%s"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_disallowed_expenses
@@ -11823,8 +11836,8 @@ msgid ""
 "partner records. You can create or delete countries to make sure the ones "
 "you are working on will be maintained."
 msgstr ""
-"Visa och hantera listan av alla länder som kan bli tilldelade dina "
-"företagsuppgifter. Du kan skapa eller ta bort länder så att du är säker på "
+"Visa och hantera listan av alla länder som kan bli tillagd i dina "
+"kontaktuppgifter. Du kan skapa eller ta bort länder så att du är säker på "
 "att de som du jobbar på kommer att underhållas."
 
 #. module: base
@@ -12321,7 +12334,7 @@ msgstr "E-postbrygga"
 #: model:ir.module.category,name:base.module_category_marketing_email_marketing
 #: model:ir.module.module,shortdesc:base.module_mass_mailing
 msgid "Email Marketing"
-msgstr ""
+msgstr "E-postmarknadsföring"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__signature
@@ -12347,7 +12360,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_presence
 msgid "Employee Presence Control"
-msgstr ""
+msgstr "Kontroll av anställdas närvaro"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_referral
@@ -15232,7 +15245,7 @@ msgstr "Installera språk"
 #. module: base
 #: model:ir.actions.server,name:base.action_server_module_immediate_install
 msgid "Install Modules"
-msgstr ""
+msgstr "Installera moduler"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__installed
@@ -15368,7 +15381,7 @@ msgstr "Intern Källa"
 #. module: base
 #: model:res.groups,name:base.group_user
 msgid "Internal User"
-msgstr ""
+msgstr "Intern användare"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_search
@@ -16312,7 +16325,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 msgid "Learn More"
-msgstr ""
+msgstr "Läs mer"
 
 #. module: base
 #: model:res.country,name:base.lb
@@ -22953,7 +22966,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_skills
 msgid "Skills Management"
-msgstr ""
+msgstr "Kompetenshantering"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_skills_slides
@@ -23755,7 +23768,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_timesheet
 msgid "Task Logs"
-msgstr ""
+msgstr "Aktivitetsloggar"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__vat
@@ -24029,7 +24042,7 @@ msgstr ""
 #: code:addons/base/models/ir_module.py:0
 #, python-format
 msgid "The `base` module cannot be uninstalled"
-msgstr ""
+msgstr "Modulen 'base' kan inte avinstalleras"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_category__active
@@ -24156,13 +24169,13 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 msgid "The following documents will be permanently lost"
-msgstr ""
+msgstr "Följande dokument kommer att gå förlorade permanent"
 
 #. module: base
 #: code:addons/base/wizard/base_module_upgrade.py:0
 #, python-format
 msgid "The following modules are not installed or unknown: %s"
-msgstr ""
+msgstr "Följande moduler är inte installerade eller okända: %s"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_country__name
@@ -24173,7 +24186,7 @@ msgstr "Landets fulla namn"
 #: model:ir.model.fields,help:base.field_res_partner__user_id
 #: model:ir.model.fields,help:base.field_res_users__user_id
 msgid "The internal user in charge of this contact."
-msgstr ""
+msgstr "Den interna användaren som ansvarar för denna kontakt."
 
 #. module: base
 #: code:addons/base/models/res_country.py:0
@@ -24422,7 +24435,7 @@ msgstr ""
 #: code:addons/base/models/res_users.py:0
 #, python-format
 msgid "The user cannot have more than one user types."
-msgstr ""
+msgstr "Användaren kan inte ha mer än en användartyp"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_filters__user_id
@@ -24756,7 +24769,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "This module will trigger the uninstallation of below modules."
-msgstr ""
+msgstr "Denna modul kommer att utlösa avinstallation av nedanstående moduler."
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -25447,7 +25460,7 @@ msgstr "Avinstallera"
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 #, python-format
 msgid "Uninstall module"
-msgstr ""
+msgstr "Avinstallera modul"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__uninstallable
@@ -25826,7 +25839,7 @@ msgstr "Användarinloggning"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 msgid "User Type"
-msgstr ""
+msgstr "Användartyp"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__log_ids
@@ -25836,7 +25849,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_user_type
 msgid "User types"
-msgstr ""
+msgstr "Användartyper"
 
 #. module: base
 #: model:ir.model,name:base.model_change_password_user

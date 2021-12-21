@@ -8,14 +8,15 @@
 # fanha99 <fanha99@hotmail.com>, 2020
 # thanhnguyen.icsc <thanhnguyen.icsc@gmail.com>, 2020
 # Trần Hà <tranthuha13590@gmail.com>, 2021
+# Vo Thanh Thuy, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.4\n"
+"Project-Id-Version: Odoo Server saas~15.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"POT-Creation-Date: 2021-12-07 10:47+0000\n"
 "PO-Revision-Date: 2016-08-05 13:12+0000\n"
-"Last-Translator: Trần Hà <tranthuha13590@gmail.com>, 2021\n"
+"Last-Translator: Vo Thanh Thuy, 2021\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,7 +36,7 @@ msgstr "Trả lời"
 #: model_terms:ir.ui.view,arch_db:website_event_questions.event_registration_answer_view_pivot
 #: model_terms:ir.ui.view,arch_db:website_event_questions.event_registration_answer_view_tree
 msgid "Answer Breakdown"
-msgstr ""
+msgstr "Phân tích câu trả lời"
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question__answer_ids
@@ -47,12 +48,12 @@ msgstr "Câu trả lời"
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question__once_per_order
 msgid "Ask only once per order"
-msgstr ""
+msgstr "Chỉ hỏi một lần cho mỗi lần đặt chỗ"
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration__registration_answer_ids
 msgid "Attendee Answers"
-msgstr ""
+msgstr "Câu trả lời của người tham dự "
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration_answer__partner_id
@@ -90,12 +91,12 @@ msgstr "Sự kiện"
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_question
 msgid "Event Question"
-msgstr ""
+msgstr "Câu hỏi sự kiện"
 
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_question_answer
 msgid "Event Question Answer"
-msgstr ""
+msgstr "Trả lời câu hỏi sự kiện"
 
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_registration
@@ -105,7 +106,7 @@ msgstr "Đăng ký Sự kiện"
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_registration_answer
 msgid "Event Registration Answer"
-msgstr ""
+msgstr "Trả lời đăng ký sự kiện "
 
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_type
@@ -136,6 +137,9 @@ msgid ""
 "propagated to every attendees.If not it will be asked for every attendee of "
 "a reservation."
 msgstr ""
+"Nếu Đúng, câu hỏi này sẽ chỉ được hỏi một lần và giá trị sẽ được nhập cho "
+"mọi người tham dự. Nếu không, câu hỏi sẽ được hỏi cho mỗi người tham dự của "
+"một nhóm đặt chỗ. "
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question____last_update
@@ -176,20 +180,16 @@ msgstr "Loại câu hỏi"
 #: code:addons/website_event_questions/models/event_question.py:0
 #, python-format
 msgid "Question cannot belong to both the event category and itself."
-msgstr ""
+msgstr "Câu hỏi không thể thuộc về cả danh mục sự kiện và chính nó."
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_event__question_ids
 #: model:ir.model.fields,field_description:website_event_questions.field_event_type__question_ids
 #: model_terms:ir.ui.view,arch_db:website_event_questions.event_event_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_questions.event_registration_view_form_inherit_question
+#: model_terms:ir.ui.view,arch_db:website_event_questions.event_type_view_form_inherit_question
 msgid "Questions"
 msgstr "Câu hỏi"
-
-#. module: website_event_questions
-#: model:ir.model.fields,field_description:website_event_questions.field_event_type__use_questions
-msgid "Questions to Attendees"
-msgstr ""
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration_answer__registration_id
@@ -197,9 +197,14 @@ msgid "Registration"
 msgstr "Đăng ký"
 
 #. module: website_event_questions
+#: model_terms:ir.ui.view,arch_db:website_event_questions.event_registration_view_tree
+msgid "Selected Answers"
+msgstr ""
+
+#. module: website_event_questions
 #: model_terms:ir.ui.view,arch_db:website_event_questions.event_registration_answer_view_tree
 msgid "Selected answer"
-msgstr ""
+msgstr "Câu trả lời được chọn"
 
 #. module: website_event_questions
 #: model:ir.model.fields.selection,name:website_event_questions.selection__event_question__question_type__simple_choice
@@ -225,7 +230,7 @@ msgstr "Câu trả lời được gợi ý"
 #. module: website_event_questions
 #: model:ir.model.fields.selection,name:website_event_questions.selection__event_question__question_type__text_box
 msgid "Text Input"
-msgstr ""
+msgstr "Nhập văn bản"
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration_answer__value_text_box
@@ -235,7 +240,7 @@ msgstr "Câu trả lời dạng chữ"
 #. module: website_event_questions
 #: model:ir.model.constraint,message:website_event_questions.constraint_event_registration_answer_value_check
 msgid "There must be a suggested value or a text value."
-msgstr ""
+msgstr "Phải có giá trị được gợi ý hoặc giá trị văn bản. "
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question__title
@@ -253,4 +258,24 @@ msgstr "Loại"
 #, python-format
 msgid ""
 "You cannot change the question type of a question that already has answers!"
+msgstr "Bạn không thể thay đổi kiểu câu hỏi của câu hỏi đã có câu trả lời!"
+
+#. module: website_event_questions
+#: code:addons/website_event_questions/models/event_question.py:0
+#, python-format
+msgid ""
+"You cannot delete a question that has already been answered by attendees."
+msgstr ""
+
+#. module: website_event_questions
+#: code:addons/website_event_questions/models/event_question.py:0
+#, python-format
+msgid ""
+"You cannot delete an answer that has already been selected by attendees."
+msgstr ""
+
+#. module: website_event_questions
+#: model_terms:ir.ui.view,arch_db:website_event_questions.event_event_view_form
+#: model_terms:ir.ui.view,arch_db:website_event_questions.event_question_view_form
+msgid "e.g. \"Do you have any diet restrictions?\""
 msgstr ""

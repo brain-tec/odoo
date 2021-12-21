@@ -4,15 +4,15 @@
 # 
 # Translators:
 # Duy BQ <duybq86@gmail.com>, 2020
-# Dung Nguyen Thi <dungnt@trobz.com>, 2020
+# Vo Thanh Thuy, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.4\n"
+"Project-Id-Version: Odoo Server saas~15.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"POT-Creation-Date: 2021-12-07 10:47+0000\n"
 "PO-Revision-Date: 2020-08-21 13:39+0000\n"
-"Last-Translator: Dung Nguyen Thi <dungnt@trobz.com>, 2020\n"
+"Last-Translator: Vo Thanh Thuy, 2021\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,6 +26,8 @@ msgid ""
 "<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/>\n"
 "                <span class=\"pl-2\">Loading Video...</span>"
 msgstr ""
+"<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/>\n"
+"                <span class=\"pl-2\">Đang tải video...</span>"
 
 #. module: website_event_track_live
 #: model_terms:ir.ui.view,arch_db:website_event_track_live.event_track_aside
@@ -35,7 +37,7 @@ msgstr "Nhắn tin"
 #. module: website_event_track_live
 #: model:ir.model.fields,help:website_event_track_live.field_event_track__is_youtube_replay
 msgid ""
-"Check this option if the video is already available on Youtube to avoid "
+"Check this option if the video is already available on YouTube to avoid "
 "showing 'Direct' options (Chat, ...)"
 msgstr ""
 
@@ -44,6 +46,8 @@ msgstr ""
 msgid ""
 "Configure this URL so that event attendees can see your Track in video!"
 msgstr ""
+"Định cấu hình URL này để người tham dự sự kiện có thể nhìn thấy bài trong "
+"video!"
 
 #. module: website_event_track_live
 #: model:ir.model,name:website_event_track_live.model_event_track
@@ -56,21 +60,23 @@ msgid ""
 "Extracted from the video URL and used to infer various links "
 "(embed/thumbnail/...)"
 msgstr ""
+"Trích xuất từ URL video và được dùng để chỉ tới các liên kết khác "
+"(nhúng/hình thu nhỏ/...)"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__is_youtube_chat_available
 msgid "Is Chat Available"
-msgstr ""
+msgstr "Chat có sẵn"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__is_youtube_replay
-msgid "Is Youtube Replay"
+msgid "Is YouTube Replay"
 msgstr ""
 
 #. module: website_event_track_live
 #: model_terms:ir.ui.view,arch_db:website_event_track_live.tracks_display_list
 msgid "Replay"
-msgstr ""
+msgstr "Phát lại"
 
 #. module: website_event_track_live
 #. openerp-web
@@ -78,21 +84,21 @@ msgstr ""
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Replay Video"
-msgstr ""
+msgstr "Phát lại video"
 
 #. module: website_event_track_live
 #. openerp-web
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Starts in"
-msgstr ""
+msgstr "Bắt đầu sau"
 
 #. module: website_event_track_live
 #. openerp-web
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Up Next:"
-msgstr ""
+msgstr "Tiếp theo: "
 
 #. module: website_event_track_live
 #. openerp-web
@@ -100,14 +106,14 @@ msgstr ""
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "You just watched:"
-msgstr ""
+msgstr "Bạn vừa xem: "
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__youtube_video_url
-msgid "Youtube Video URL"
-msgstr "Đường dẫn URL video youtube"
+msgid "YouTube Video Link"
+msgstr ""
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__youtube_video_id
-msgid "Youtube video ID"
+msgid "YouTube video ID"
 msgstr ""
