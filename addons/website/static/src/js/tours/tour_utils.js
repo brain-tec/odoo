@@ -242,6 +242,18 @@ function registerThemeHomepageTour(name, steps) {
     ));
 }
 
+function clickOnExtraMenuItem(stepOptions) {
+    return Object.assign({}, {
+        content: "Click on the extra menu dropdown toggle if it is there",
+        trigger: '#top_menu',
+        run: function () {
+            const extraMenuButton = this.$anchor[0].querySelector('.o_extra_menu_items a.nav-link');
+            if (extraMenuButton) {
+                extraMenuButton.click();
+            }
+        },
+    }, stepOptions);
+}
 
 return {
     addMedia,
@@ -263,7 +275,7 @@ return {
     selectHeader,
     selectNested,
     selectSnippetColumn,
-
     registerThemeHomepageTour,
+    clickOnExtraMenuItem,
 };
 });

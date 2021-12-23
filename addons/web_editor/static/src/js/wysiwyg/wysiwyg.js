@@ -243,7 +243,11 @@ const Wysiwyg = Widget.extend({
                 ev.preventDefault();
             }
 
-            if ($target.is(this.customizableLinksSelector) && $target.is('a') && !$target.attr('data-oe-model') && !$target.find('> [data-oe-model]').length) {
+            if ($target.is(this.customizableLinksSelector)
+                    && $target.is('a')
+                    && !$target.attr('data-oe-model')
+                    && !$target.find('> [data-oe-model]').length
+                    && !$target[0].closest('.o_extra_menu_items')) {
                 this.linkPopover = $target.data('popover-widget-initialized');
                 if (!this.linkPopover) {
                     // TODO this code is ugly maybe the mutex should be in the
@@ -1427,7 +1431,9 @@ const Wysiwyg = Widget.extend({
                 if (!this.showTooltip || $target.attr('title') !== undefined) {
                     return;
                 }
+                this.odooEditor.observerUnactive();
                 $target.tooltip({title: _t('Double-click to edit'), trigger: 'manual', container: 'body'}).tooltip('show');
+                this.odooEditor.observerActive();
                 setTimeout(() => $target.tooltip('dispose'), 800);
             }, 400);
         }
