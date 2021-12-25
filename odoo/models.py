@@ -27,6 +27,7 @@ import datetime
 import dateutil
 import fnmatch
 import functools
+import inspect
 import itertools
 import io
 import logging
@@ -34,6 +35,7 @@ import operator
 import pytz
 import re
 import uuid
+import warnings
 from collections import defaultdict, OrderedDict
 from collections.abc import MutableMapping
 from contextlib import closing
@@ -45,7 +47,6 @@ import dateutil.relativedelta
 import psycopg2, psycopg2.extensions
 from lxml import etree
 from lxml.builder import E
-from psycopg2.extensions import AsIs
 
 import odoo
 from . import SUPERUSER_ID
@@ -54,7 +55,7 @@ from . import tools
 from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, ormcache, \
-                   Collector, LastOrderedSet, OrderedSet, IterableGenerator, \
+                   LastOrderedSet, OrderedSet, IterableGenerator, \
                    groupby, discardattr, partition
 from .tools.config import config
 from .tools.func import frame_codeinfo
@@ -66,10 +67,9 @@ from .tools import unique
 from .tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
-_schema = logging.getLogger(__name__ + '.schema')
 _unlink = logging.getLogger(__name__ + '.unlink')
 
-regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
+regex_order = re.compile(r'^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
@@ -117,10 +117,6 @@ def check_method_name(name):
     """ Raise an ``AccessError`` if ``name`` is a private method name. """
     if regex_private.match(name):
         raise AccessError(_('Private methods (such as %s) cannot be called remotely.') % (name,))
-
-def same_name(f, g):
-    """ Test whether functions ``f`` and ``g`` are identical or have the same name """
-    return f == g or getattr(f, '__name__', 0) == getattr(g, '__name__', 1)
 
 def fix_import_export_id_paths(fieldname):
     """
@@ -177,6 +173,9 @@ class MetaModel(api.Meta):
 
     def __init__(self, name, bases, attrs):
         super().__init__(name, bases, attrs)
+
+        if '__init__' in attrs and len(inspect.signature(attrs['__init__']).parameters) != 4:
+            _logger.warning("The method %s.__init__ doesn't match the new signature in module %s", name, attrs.get('__module__'))
 
         if not attrs.get('_register', True):
             return
@@ -514,7 +513,6 @@ class BaseModel(metaclass=MetaModel):
     _date_name = 'date'         #: field to use for default calendar view
     _fold_name = 'fold'         #: field to determine folded groups in kanban views
 
-    _needaction = False         # whether the model supports "need actions" (Old API)
     _translate = True           # False disables translations export for this model (Old API)
     _check_company_auto = False
     """On write and create, call ``_check_company`` to ensure companies
@@ -537,13 +535,6 @@ class BaseModel(metaclass=MetaModel):
     "maximum idle lifetime (in hours), unlimited if ``0``"
 
     CONCURRENCY_CHECK_FIELD = '__last_update'
-
-    @api.model
-    def view_init(self, fields_list):
-        """ Override this method to do specific things when a form view is
-        opened. This method is invoked by :meth:`~default_get`.
-        """
-        pass
 
     def _valid_field_parameter(self, field, name):
         """ Return whether the given parameter name is valid for the field. """
@@ -667,10 +658,6 @@ class BaseModel(metaclass=MetaModel):
         # link the class to the registry, and update the registry
         ModelClass.pool = pool
         pool[name] = ModelClass
-
-        # backward compatibility: instantiate the model, and initialize it
-        model = object.__new__(ModelClass)
-        model.__init__(pool, cr)
 
         return ModelClass
 
@@ -832,15 +819,6 @@ class BaseModel(metaclass=MetaModel):
         # optimization: memoize result on cls, it will not be recomputed
         cls._onchange_methods = methods
         return methods
-
-    def __new__(cls):
-        # In the past, this method was registering the model class in the server.
-        # This job is now done entirely by the metaclass MetaModel.
-        return None
-
-    def __init__(self, pool, cr):
-        """ Deprecated method to initialize the model. """
-        pass
 
     def _is_an_ordinary_table(self):
         return self.pool.is_an_ordinary_table(self)
@@ -1038,9 +1016,6 @@ class BaseModel(metaclass=MetaModel):
             assert not xidmap, "failed to export xids for %s" % ', '.join('{}:{}' % it for it in xidmap.items())
 
         return lines
-
-    # backward compatibility
-    __export_rows = _export_rows
 
     def export_data(self, fields_to_export):
         """ Export fields for selected objects
@@ -1389,9 +1364,6 @@ class BaseModel(metaclass=MetaModel):
             Unrequested defaults won't be considered, there is no need to return a
             value for fields whose names are not in `fields_list`.
         """
-        # trigger view init hook
-        self.view_init(fields_list)
-
         defaults = {}
         parent_fields = defaultdict(list)
         ir_defaults = self.env['ir.default'].get_model_defaults(self._name)
@@ -2876,9 +2848,6 @@ class BaseModel(metaclass=MetaModel):
         if self._auto:
             self._add_sql_constraints()
 
-        if must_create_table:
-            self._execute_sql()
-
         if parent_path_compute:
             self._parent_store_compute()
 
@@ -2919,11 +2888,6 @@ class BaseModel(metaclass=MetaModel):
                 self.pool.post_init(tools.add_constraint, cr, self._table, conname, definition)
             else:
                 self.pool.post_constraint(tools.add_constraint, cr, self._table, conname, definition)
-
-    def _execute_sql(self):
-        """ Execute the SQL code from the _sql attribute (if any)."""
-        if hasattr(self, "_sql"):
-            self._cr.execute(self._sql)
 
     #
     # Update objects that use this one to update their _inherits fields
@@ -5223,19 +5187,16 @@ Fields:
     #  - the global cache is only an index to "resolve" a record 'id'.
     #
 
-    @classmethod
-    def _browse(cls, env, ids, prefetch_ids):
+    def __init__(self, env, ids, prefetch_ids):
         """ Create a recordset instance.
 
         :param env: an environment
         :param ids: a tuple of record ids
         :param prefetch_ids: a collection of record ids (for prefetching)
         """
-        records = object.__new__(cls)
-        records.env = env
-        records._ids = ids
-        records._prefetch_ids = prefetch_ids
-        return records
+        self.env = env
+        self._ids = ids
+        self._prefetch_ids = prefetch_ids
 
     def browse(self, ids=None):
         """ browse([ids]) -> records
@@ -5249,7 +5210,7 @@ Fields:
             res.partner(7, 18, 12)
 
         :param ids: id(s)
-        :type ids: int or list(int) or None
+        :type ids: int or iterable(int) or None
         :return: recordset
         """
         if not ids:
@@ -5258,7 +5219,7 @@ Fields:
             ids = (ids,)
         else:
             ids = tuple(ids)
-        return self._browse(self.env, ids, ids)
+        return self.__class__(self.env, ids, ids)
 
     #
     # Internal properties, for manipulating the instance's implementation
@@ -5303,7 +5264,7 @@ Fields:
             delays while re-fetching from the database.
             The returned recordset has the same prefetch object as ``self``.
         """
-        return self._browse(env, self._ids, self._prefetch_ids)
+        return self.__class__(env, self._ids, self._prefetch_ids)
 
     def sudo(self, flag=True):
         """ sudo([flag=True])
@@ -5429,7 +5390,7 @@ Fields:
         """
         if prefetch_ids is None:
             prefetch_ids = self._ids
-        return self._browse(self.env, self._ids, prefetch_ids)
+        return self.__class__(self.env, self._ids, prefetch_ids)
 
     def _update_cache(self, values, validate=True):
         """ Update the cache of ``self`` with ``values``.
@@ -5702,9 +5663,8 @@ Fields:
 
     def update(self, values):
         """ Update the records in ``self`` with ``values``. """
-        for record in self:
-            for name, value in values.items():
-                record[name] = value
+        for name, value in values.items():
+            self[name] = value
 
     @api.model
     def flush(self, fnames=None, records=None):
@@ -5810,7 +5770,7 @@ Fields:
         """ Return the actual records corresponding to ``self``. """
         ids = tuple(origin_ids(self._ids))
         prefetch_ids = IterableGenerator(origin_ids, self._prefetch_ids)
-        return self._browse(self.env, ids, prefetch_ids)
+        return self.__class__(self.env, ids, prefetch_ids)
 
     #
     # "Dunder" methods
@@ -5830,10 +5790,10 @@ Fields:
         if len(self._ids) > PREFETCH_MAX and self._prefetch_ids is self._ids:
             for ids in self.env.cr.split_for_in_conditions(self._ids):
                 for id_ in ids:
-                    yield self._browse(self.env, (id_,), ids)
+                    yield self.__class__(self.env, (id_,), ids)
         else:
-            for id in self._ids:
-                yield self._browse(self.env, (id,), self._prefetch_ids)
+            for id_ in self._ids:
+                yield self.__class__(self.env, (id_,), self._prefetch_ids)
 
     def __contains__(self, item):
         """ Test whether ``item`` (record or field name) is an element of ``self``.
@@ -6018,6 +5978,8 @@ Fields:
             .. deprecated:: 8.0
                 The record cache is automatically invalidated.
         """
+        warnings.warn('refresh() is deprecated method, use invalidate_cache() instead',
+                      DeprecationWarning)
         self.invalidate_cache()
 
     @api.model
@@ -6167,7 +6129,7 @@ Fields:
                     real_records = self - new_records
                     records = model.browse()
                     if real_records:
-                        records |= model.search([(key.name, 'in', real_records.ids)], order='id')
+                        records = model.search([(key.name, 'in', real_records.ids)], order='id')
                     if new_records:
                         cache_records = self.env.cache.get_records(model, key)
                         records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))

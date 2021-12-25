@@ -286,6 +286,20 @@ registerModel({
             return this.isAddingChat;
         },
         /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeMobileMessagingNavbarView() {
+            if (
+                this.messaging.device &&
+                this.messaging.device.isMobile &&
+                !(this.threadView && this.threadView.replyingToMessageView)
+            ) {
+                return insertAndReplace();
+            }
+            return clear();
+        },
+        /**
          * Only pinned threads are allowed in discuss.
          *
          * @private
@@ -388,17 +402,21 @@ registerModel({
             default: null,
         }),
         /**
+         * The navbar view on the discuss app when in mobile and when not
+         * replying to a message from inbox.
+         */
+        mobileMessagingNavbarView: one2one('MobileMessagingNavbarView', {
+            compute: '_computeMobileMessagingNavbarView',
+            inverse: 'discuss',
+            isCausal: true,
+        }),
+        /**
          * Quick search input value in the discuss sidebar (desktop). Useful
          * to filter channels and chats based on this input content.
          */
         sidebarQuickSearchValue: attr({
             default: "",
         }),
-        /**
-         * States the OWL ref of the start a meeting button in sidebar.
-         * Useful to provide anchor for the invite popover positioning.
-         */
-        startAMeetingButtonRef: attr(),
         /**
          * Determines the `Thread` that should be displayed by `this`.
          */

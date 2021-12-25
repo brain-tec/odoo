@@ -74,10 +74,6 @@ class Meta(type):
             if not key.startswith('__') and callable(value):
                 # make the method inherit from decorators
                 value = propagate(getattr(parent, key, None), value)
-
-                if (getattr(value, '_api', None) or '').startswith('cr'):
-                    _logger.warning("Deprecated method %s.%s in module %s", name, key, attrs.get('__module__'))
-
                 attrs[key] = value
 
         return type.__new__(meta, name, bases, attrs)
@@ -283,7 +279,7 @@ def depends_context(*args):
                     pricelist = self.env['product.pricelist'].browse(product.env.context['pricelist'])
                 else:
                     pricelist = self.env['product.pricelist'].get_default_pricelist()
-                product.price = pricelist.get_products_price(product).get(product.id, 0.0)
+                product.price = pricelist._get_products_price(product).get(product.id, 0.0)
 
     All dependencies must be hashable.  The following keys have special
     support:
@@ -538,7 +534,7 @@ class Environment(Mapping):
 
     def __getitem__(self, model_name):
         """ Return an empty recordset from the given model. """
-        return self.registry[model_name]._browse(self, (), ())
+        return self.registry[model_name](self, (), ())
 
     def __iter__(self):
         """ Return an iterator on model names. """
