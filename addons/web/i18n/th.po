@@ -13,6 +13,7 @@
 # gsong <gsong2014@foxmail.com>, 2020
 # Odoo Thaidev <odoothaidev@gmail.com>, 2020
 # Wichanon Jamwutthipreecha, 2021
+# Krisa C, 2021
 # 
 msgid ""
 msgstr ""
@@ -20,7 +21,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-25 10:30+0000\n"
 "PO-Revision-Date: 2020-09-07 08:19+0000\n"
-"Last-Translator: Wichanon Jamwutthipreecha, 2021\n"
+"Last-Translator: Krisa C, 2021\n"
 "Language-Team: Thai (https://www.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1307,7 +1308,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "Count"
-msgstr ""
+msgstr "จำนวน"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__country_id
@@ -2130,7 +2131,7 @@ msgstr "รูปภาพ"
 #: code:addons/web/static/src/js/fields/basic_fields.js:0
 #, python-format
 msgid "In %s days"
-msgstr ""
+msgstr "ใน %s วัน"
 
 #. module: web
 #. openerp-web
@@ -3235,7 +3236,7 @@ msgstr ""
 #: code:addons/web/static/src/js/control_panel/search_utils.js:0
 #, python-format
 msgid "Previous Year"
-msgstr ""
+msgstr "ปีที่แล้ว"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__primary_color
@@ -4172,7 +4173,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/field_utils.js:0
 #, python-format
 msgid "True"
-msgstr ""
+msgstr "จริง"
 
 #. module: web
 #. openerp-web
@@ -4417,7 +4418,7 @@ msgstr "ผู้ใช้งาน"
 #: code:addons/web/static/src/js/services/crash_manager.js:0
 #, python-format
 msgid "Validation Error"
-msgstr ""
+msgstr "ข้อผิดพลาดในการตรวจสอบความถูกต้อง"
 
 #. module: web
 #. openerp-web

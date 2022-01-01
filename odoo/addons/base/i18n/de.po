@@ -8269,6 +8269,12 @@ msgid ""
 "Other SIPS providers may be compatible, though this is\n"
 "not guaranteed."
 msgstr ""
+"\n"
+"Worldline SIPS Zahlungsanbieter für Online-Zahlungen\n"
+"\n"
+"Implementiert die Worldline SIPS API für Zahlungsanbieter.\n"
+"Andere SIPS-Anbieter können kompatibel sein, dies ist jedoch nicht\n"
+"nicht garantiert."
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm_livechat
@@ -24659,7 +24665,7 @@ msgstr "Referenz"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Reference date"
-msgstr "Referenz-datum"
+msgstr "Referenzdatum"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_referrals

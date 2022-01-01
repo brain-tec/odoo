@@ -134,6 +134,12 @@ msgid ""
 "contribute, there is a free ticket, therefore, catering and access to "
 "evening events aren't included."
 msgstr ""
+"<b>Die gesamte Veranstaltung ist für die Öffentlichkeit zugänglich!</b> "
+"<br>Wir bitten um eine Teilnahmegebühr von 49,50€ für die Kosten der 3 Tage "
+"(Kaffeepausen, Verpflegung, Getränke und ein Überraschungskonzert und "
+"Bierparty). <br>Für diejenigen, die keinen Beitrag leisten wollen, gibt es "
+"ein kostenloses Ticket, bei dem die Verpflegung und der Zugang zu den "
+"Abendveranstaltungen nicht inbegriffen sind."
 
 #. module: event
 #: model_terms:event.event,description:event.event_0
@@ -153,6 +159,8 @@ msgid ""
 "<br/>\n"
 "                                            <span class=\"text-muted\">Share a quiz to your attendees once a track is over</span>"
 msgstr ""
+"<br/>\n"
+"                                            <span class=\"text-muted\">Stellen Sie Ihren Teilnehmern ein Quiz zur Verfügung, sobald ein Track vorbei ist</span>"
 
 #. module: event
 #: model:mail.template,body_html:event.event_registration_mail_template_badge
@@ -298,6 +306,8 @@ msgid ""
 "<span class=\"text-muted\" states=\"done\">Attended</span>\n"
 "                                    <span class=\"text-muted\" states=\"cancel\">Canceled</span>"
 msgstr ""
+"<span class=\"text-muted\" states=\"erledigt\">Teilgenommen</span>\n"
+"                                    <span class=\"text-muted\" states=\"stornieren\">Storniert</span>"
 
 #. module: event
 #: model:mail.template,body_html:event.event_subscription
@@ -805,7 +815,7 @@ msgstr "Fügen Sie eine neue Veranstaltung hinzu"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_form
 msgid "Add a note..."
-msgstr ""
+msgstr "Notiz hinzufügen..."
 
 #. module: event
 #: model:res.groups,name:event.group_event_manager
@@ -845,6 +855,8 @@ msgid ""
 "And this time, we go fully ONLINE! Meet us in our live streams from the comfort of your house.<br>\n"
 "        Special discount codes will be handed out during the various streams, make sure to be there on time."
 msgstr ""
+"Und dieses Mal gehen wir komplett ONLINE! Erleben Sie uns in unseren Live-Streams bequem von zu Hause aus. <br>\n"
+"Während der verschiedenen Streams werden spezielle Rabattcodes verteilt, seien Sie also pünktlich da."
 
 #. module: event
 #: model:event.stage,name:event.event_stage_announced
@@ -1488,6 +1500,18 @@ msgid ""
 "  - or the responsible of the event,\n"
 "  - or the last writer of the template.\n"
 msgstr ""
+"Veranstaltung geplant für:\n"
+"  - Veranstaltung: %(event_name)s (%(event_id)s)\n"
+"  - Zeit: %(date)s\n"
+"  - Vorlage: %(template_name)s (%(template_id)s)\n"
+"\n"
+"Fehlgeschlagen:\n"
+"  - %(error)s\n"
+"\n"
+"Sie erhalten diese E-Mail aufgrund Ihrer Rolle als:\n"
+"  - Organisator dieses Events,\n"
+"  - Verantwortlicher dieses Events,\n"
+"  - Letzter Bearbeiter der Vorlage.\n"
 
 #. module: event
 #: model:ir.model,name:event.model_event_stage
@@ -2399,7 +2423,7 @@ msgstr ""
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_registration_search
 msgid "Ongoing Events"
-msgstr ""
+msgstr "Laufende Veranstaltungen"
 
 #. module: event
 #: model:event.tag,name:event.event_tag_category_3_tag_1
@@ -2458,6 +2482,8 @@ msgid ""
 "Override the default value displayed for the blocked state for kanban "
 "selection."
 msgstr ""
+"Überschreiben Sie den Standardwert, der für den Sperrzustand bei der "
+"Kanbanauswahl angezeigt wird."
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__legend_done
@@ -2810,7 +2836,7 @@ msgstr "Stufenbezeichnung"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_stage__description
 msgid "Stage description"
-msgstr ""
+msgstr "Beschreibung der Phase"
 
 #. module: event
 #: model:event.event.ticket,name:event.event_0_ticket_1
@@ -2899,6 +2925,8 @@ msgid ""
 "The Great Reno Balloon Race is the world's largest free hot-air ballooning "
 "event."
 msgstr ""
+"Das Great Reno Balloon Race ist die weltweit größte kostenlose Veranstaltung"
+" für Heißluftballonfahrer."
 
 #. module: event
 #: model_terms:event.event,description:event.event_5
@@ -2940,6 +2968,9 @@ msgid ""
 "The event is sold out if no more seats are available on event. If ticketing "
 "is used and all tickets are sold out, the event will be sold out."
 msgstr ""
+"Die Veranstaltung ist ausverkauft, wenn keine Plätze mehr verfügbar sind. "
+"Wenn das Ticketing genutzt wird und alle Tickets ausverkauft sind, ist die "
+"Veranstaltung ausverkauft."
 
 #. module: event
 #: model_terms:event.event,description:event.event_7
@@ -2947,6 +2978,8 @@ msgid ""
 "The finest OpenWood furnitures are coming to your house in a brand new "
 "collection"
 msgstr ""
+"Die schönsten OpenWood-Möbel kommen in einer brandneuen Kollektion zu Ihnen "
+"nach Hause"
 
 #. module: event
 #: model:event.stage,description:event.event_stage_booked
@@ -3062,6 +3095,8 @@ msgid ""
 "Ticket types allow you to distinguish your attendees. Let's <b>create</b> a "
 "new one."
 msgstr ""
+"Ticketarten ermöglichen es Ihnen, Ihre Teilnehmer zu unterscheiden. Lassen "
+"Sie uns einen <b>neuen Typ erstellen</b>."
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_type__use_ticket
@@ -3388,7 +3423,7 @@ msgstr "nächste Woche "
 #: code:addons/event/models/event_registration.py:0
 #, python-format
 msgid "on %(date)s"
-msgstr ""
+msgstr "am %(date)s"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_ticket_view_kanban_from_event

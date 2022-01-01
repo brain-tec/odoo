@@ -12,6 +12,7 @@
 # Odoo Thaidev <odoothaidev@gmail.com>, 2021
 # kittipot anuwet <pipemsn1@gmail.com>, 2021
 # Amin Cheloh <nineamin@hotmail.com>, 2021
+# Krisa C, 2021
 # Wichanon Jamwutthipreecha, 2021
 # 
 msgid ""
@@ -190,7 +191,7 @@ msgstr "เก็บถาวร"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__next_assignation_date
 msgid "Assignment Date"
-msgstr ""
+msgstr "วันที่มอบหมาย"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__log_drivers
@@ -264,7 +265,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__brand_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Brand"
-msgstr ""
+msgstr "แบรนด์"
 
 #. module: fleet
 #: model:ir.model,name:fleet.model_fleet_vehicle_model_brand
@@ -1893,7 +1894,7 @@ msgstr "ที่จะทำ"
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_to_order
 msgid "To Order"
-msgstr ""
+msgstr "จำนวนที่สั่ง"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search

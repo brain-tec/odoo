@@ -449,12 +449,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Waiting for Payment</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Waiting for Payment</span></span>"
 msgstr ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Очікування платежу</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Очікування платежу</span></span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
@@ -12810,6 +12810,16 @@ msgid "The payment's currency."
 msgstr "Валюта платежу."
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The recipient bank account link to this invoice is archived.\n"
+"So you cannot confirm the invoice."
+msgstr ""
+"Банківський рахунок одержувача, пов'язаний з цим рахунком-фактурою, заархівований.\n"
+"Тому ви не можете підтвердити цей рахунок-фактуру."
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model__match_partner_category_ids
 #: model:ir.model.fields,help:account.field_account_reconcile_model_template__match_partner_category_ids
 msgid ""
@@ -13079,6 +13089,8 @@ msgstr ""
 #, python-format
 msgid "The tags linked to a tax report line should always match its tag name."
 msgstr ""
+"Теги, пов'язані з рядком податковго звіту, повинні завжди відповідати назві "
+"тегу."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_tag__tax_report_line_ids
@@ -13092,6 +13104,8 @@ msgid ""
 "The tax set to apply this distribution on invoices. Mutually exclusive with "
 "refund_tax_id"
 msgstr ""
+"Податок, встановлений на продажу на рахунках. Взаємовиключення з "
+"refund_tax_id"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__refund_tax_id
@@ -13100,6 +13114,8 @@ msgid ""
 "The tax set to apply this distribution on refund invoices. Mutually "
 "exclusive with invoice_tax_id"
 msgstr ""
+"Цей податок буде застосовуватися до повернення рахунків-фактур. "
+"Взаємовиключення з invoice_tax_id"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_cash_rounding__rounding_method
@@ -13144,6 +13160,8 @@ msgid ""
 "There are still unreconciled bank statement lines in the period you want to "
 "lock.You should either reconcile or delete them."
 msgstr ""
+"У період, який потрібно заблокувати, все ще є неузгоджені рядки банківської "
+"виписки. Ви повинні або звірити їх, або видалити."
 
 #. module: account
 #: code:addons/account/models/account_partial_reconcile.py:0
@@ -13152,6 +13170,8 @@ msgid ""
 "There is no tax cash basis journal defined for the '%s' company.\n"
 "Configure it in Accounting/Configuration/Settings"
 msgstr ""
+"Журнал касового методу не визначено для компанії '%s'.\n"
+"Налаштуйте його в Бухобліку/Налаштуваннях/Налаштуваннях"
 
 #. module: account
 #: code:addons/account/models/company.py:0
@@ -13260,6 +13280,7 @@ msgid ""
 "This entry transfers the following amounts to "
 "<strong>%(destination)s</strong> <ul>"
 msgstr ""
+"Цей запис перераховує такі суми на <strong>%(destination)s</strong> <ul>"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model_line__journal_id
@@ -13313,6 +13334,8 @@ msgid ""
 "This matching rule is used when the user is not certain of all the "
 "information of the counterpart."
 msgstr ""
+"Це правило співставлення використовується, коли користувач не впевнений у "
+"всій інформації відповідника."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -13324,13 +13347,13 @@ msgstr "Це переміщення налаштоване, щоби автом�
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
 "This move is configured to be posted automatically at the accounting date:"
-msgstr ""
+msgstr "Це переміщення налаштовано на автоматичну проводку на дату обліку:"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "This move will be posted at the accounting date: %(date)s"
-msgstr ""
+msgstr "Цю проводку буде опубліковано на дату бухобліку: %(date)s"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_invoice_send__auto_delete
@@ -13392,7 +13415,7 @@ msgstr ""
 #: code:addons/account/models/account_reconcile_model.py:0
 #, python-format
 msgid "This reconciliation model has created no entry so far"
-msgstr ""
+msgstr "Ця модель узгодження поки що не створила жодного запису"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_validate_account_move
@@ -13426,6 +13449,7 @@ msgstr ""
 #: model_terms:digest.tip,tip_description:account.digest_tip_account_0
 msgid "Tip: No need to print, put in an envelop and post your invoices"
 msgstr ""
+"Порада: Не потрібно друкувати, класти в конверт і публікувати ваші рахунки"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__destination_account_id
@@ -13525,7 +13549,7 @@ msgstr "Всього підписано"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__total_amount
 msgid "Total amount impacted by the automatic entry."
-msgstr ""
+msgstr "Загальна сума, на яку вплинув автоматичний запис."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__credit
@@ -13618,7 +13642,7 @@ msgstr "Переміщення"
 #: code:addons/account/wizard/account_tour_upload_bill.py:0
 #, python-format
 msgid "Try a sample vendor bill"
-msgstr ""
+msgstr "Спробуйте приклад рахунку постачальника"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__user_type_id
@@ -13655,6 +13679,9 @@ msgid ""
 "printing it. If left blank, the first available and usable method will be "
 "used."
 msgstr ""
+"Тип QR-коду, який буде згенеровано для оплати цього рахунка-фактури під час "
+"його друку. Якщо залишити порожнім, буде використано перший доступний метод,"
+" що використовується."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__activity_exception_decoration
@@ -13676,6 +13703,8 @@ msgid ""
 "Unable to create an open balance for a statement line because the receivable"
 " / payable accounts are missing on the partner."
 msgstr ""
+"Неможливо створити відкритий баланс для рядка виписки, оскільки рахунки "
+"дебіторської/кредиторської заборгованості відсутні на партнері."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -13683,6 +13712,8 @@ msgstr ""
 msgid ""
 "Unable to create an open balance for a statement line without a partner set."
 msgstr ""
+"Неможна створити відкритий баланс для рядка виписки без встановленого "
+"партнера."
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -13825,7 +13856,7 @@ msgstr "Завантажити"
 #: code:addons/account/wizard/account_tour_upload_bill.py:0
 #, python-format
 msgid "Upload your own bill"
-msgstr ""
+msgstr "Завантажте ваш рахунок постачальника"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_chart_template__use_anglo_saxon
@@ -13884,6 +13915,11 @@ msgid ""
 "printed in the right country, put in an envelop and sent by snail mail. Use "
 "this feature from the list view to post hundreds of invoices in bulk."
 msgstr ""
+"Використовуйте опцію “<i>Надіслати поштою</i>”, щоб опублікувати рахунки "
+"автоматично. За вартість місцевої марки ми виконуємо всю ручну роботу: ваш "
+"рахунок-фактуру буде надруковано в потрібній країні, поміщено в конверт і "
+"відправлено поштою. Використовуйте цю функцію з перегляду списку, щоб "
+"опублікувати сотні рахунків-фактур."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__used
@@ -13921,7 +13957,7 @@ msgstr "Використовується для впорядкування жу�
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_method__sequence
 msgid "Used to order Methods in the form view"
-msgstr ""
+msgstr "Використовується для впорядкування Методів у перегляді форми."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__loss_account_id
@@ -14018,6 +14054,13 @@ msgid ""
 "You could enter\n"
 "BRT: ([\\d,]+)"
 msgstr ""
+"Значення суми рядка списання\n"
+"    * Відсоток: Відсоток балансу, між 0 та 100.\n"
+"    * Фіксована сума: Фіксована сума рядка списання. Сума буде зарахована як дебет, якщо вона негативна, як кредит, якщо вона позитивна.\n"
+"    * З мітки: роздільник регулярного виразу не потрібен, потрібен лише регулярний вираз. Наприклад, якщо ви хочете отримати суму з\n"
+"R:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\n"
+"Ви повинні ввести\n"
+"BRT: ([\\d,]+)"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__supplier
@@ -14083,7 +14126,7 @@ msgstr "Платежі постачальника"
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "Vendor Reimbursement"
-msgstr ""
+msgstr "Відшкодування постачальнику"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_product_product__supplier_taxes_id
@@ -14153,6 +14196,8 @@ msgid ""
 "We process bills automatically so that you only have to validate them. "
 "Choose how you want to test our artificial intelligence engine:"
 msgstr ""
+"Ми обробляємо рахунки автоматично, тому вам залишається лише підтвердити їх."
+" Виберіть, як ви хочете протестувати наш механізм штучного інтелекту:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__website_message_ids
@@ -14217,7 +14262,7 @@ msgstr "З валютою"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_tour_upload_bill
 msgid "With Odoo, you won't have to records bills manually"
-msgstr ""
+msgstr "З Odoo, вам не потрібно буде записувати рахунки постачальників вручну"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_search
@@ -14230,6 +14275,8 @@ msgstr "З податками"
 #, python-format
 msgid "Write a company name to <b>create one</b> or <b>see suggestions</b>."
 msgstr ""
+"Напишіть назву компанії, щоб <b>створити її</b> або <b>перегляньте "
+"запропоновані</b>."
 
 #. module: account
 #. openerp-web
@@ -14237,6 +14284,8 @@ msgstr ""
 #, python-format
 msgid "Write here <b>your own email address</b> to test the flow."
 msgstr ""
+"Напишіть тут <b>вашу власну адресу електронної пошти</b>, щоби протестити "
+"процес."
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_move_line_check_credit_debit
@@ -14278,6 +14327,12 @@ msgid ""
 "2/ then filter on 'Draft' entries\n"
 "3/ select them all and post or delete them through the action menu"
 msgstr ""
+"Ви не можете архівувати журнал, що містить чернетки записів журналу.\n"
+"\n"
+"Щоби продовжити:\n"
+"1/ натисніть у верхньому правому куті кнопку «Записи в журналі» у цій формі журналу\n"
+"2/ потім відфільтруйте записи \"Чернетки\"\n"
+"3/ виберіть їх усі та опублікуйте або видаліть їх за допомогою меню дій"
 
 #. module: account
 #: code:addons/account/models/account_payment_term.py:0
@@ -14295,6 +14350,8 @@ msgstr ""
 msgid ""
 "You can not reorder sequence by date when the journal is locked with a hash."
 msgstr ""
+"Ви не можете змінити порядок послідовності за датою, якщо журнал заблоковано"
+" хешем."
 
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
@@ -14302,43 +14359,46 @@ msgstr ""
 msgid ""
 "You can only change the period/account for items that are not yet "
 "reconciled."
-msgstr ""
+msgstr "Змінити період/рахунок можна лише для позицій, які ще не узгоджені."
 
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #, python-format
 msgid "You can only change the period/account for posted journal items."
 msgstr ""
+"Ви можете змінити лише період/рахунок для опублікованих статей журналу."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "You can only create statement line in open bank statements."
 msgstr ""
+"Ви можете створити рядок виписки лише у відкритих банківських виписках."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You can only reconcile posted entries."
-msgstr ""
+msgstr "Ви можете узгодити лише опубліковані записи."
 
 #. module: account
 #: code:addons/account/wizard/account_payment_register.py:0
 #, python-format
 msgid "You can only register payment for posted journal entries."
 msgstr ""
+"Ви можете зареєструвати платежі лише для опублікованих записів жураналу."
 
 #. module: account
 #: code:addons/account/wizard/account_resequence.py:0
 #, python-format
 msgid "You can only resequence items from the same journal"
-msgstr ""
+msgstr "Ви можете змінити послідовність лише елементів з того самого журналу"
 
 #. module: account
 #: code:addons/account/wizard/account_move_reversal.py:0
 #, python-format
 msgid "You can only reverse posted moves."
-msgstr ""
+msgstr "Ви можете відмінити лише опубліковані проведення."
 
 #. module: account
 #: code:addons/account/wizard/account_invoice_send.py:0
@@ -14414,6 +14474,8 @@ msgid ""
 "You can't create a new payment without an outstanding payments/receipts "
 "account set on the %s journal."
 msgstr ""
+"Ви не можете створити новий платіж без рахунку непогашених "
+"платежів/квитанцій, встановленого в журналі %s."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -14422,6 +14484,8 @@ msgid ""
 "You can't create a new statement line without a suspense account set on the "
 "%s journal."
 msgstr ""
+"Ви не можете створити новий рядок виписки, якщо в журналі не встановлено "
+"рахунок призупинення %s."
 
 #. module: account
 #: code:addons/account/wizard/account_payment_register.py:0
@@ -14430,6 +14494,7 @@ msgstr ""
 msgid ""
 "You can't create payments for entries belonging to different companies."
 msgstr ""
+"Ви не можете створювати платежі для записів, що належать різним компаніям."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -14438,6 +14503,8 @@ msgid ""
 "You can't manually change the state of journal entry %s, as it has been "
 "created by bank statement %s."
 msgstr ""
+"Ви не можете вручну змінити стан запису в журналі %s, оскільки він був "
+"створений за допомогою виписки з банку %s."
 
 #. module: account
 #: code:addons/account/wizard/account_payment_register.py:0
@@ -14446,6 +14513,8 @@ msgid ""
 "You can't open the register payment wizard without at least one "
 "receivable/payable line."
 msgstr ""
+"Ви не можете відкрити помічника реєстру платежів без принаймні одного "
+"дебіторського/платіжного рядка."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -14454,6 +14523,7 @@ msgid ""
 "You can't provide an amount in foreign currency without specifying a foreign"
 " currency."
 msgstr ""
+"Ви не можете вказати суму в іноземній валюті, не вказавши іноземну валюту."
 
 #. module: account
 #: code:addons/account/wizard/account_payment_register.py:0
@@ -14462,6 +14532,8 @@ msgid ""
 "You can't register a payment because there is nothing left to pay on the "
 "selected journal items."
 msgstr ""
+"Ви не можете зареєструвати платіж, оскільки за вибраними статтями журналу не"
+" залишилося нічого до оплатити."
 
 #. module: account
 #: code:addons/account/wizard/account_payment_register.py:0
@@ -14470,6 +14542,8 @@ msgid ""
 "You can't register payments for journal items being either all inbound, "
 "either all outbound."
 msgstr ""
+"Ви не можете зареєструвати платежі для статей журналу, які є або всіма "
+"вхідними, або всіма вихідними."
 
 #. module: account
 #: code:addons/account/models/account_analytic_line.py:0
@@ -14591,6 +14665,8 @@ msgid ""
 "You cannot edit the journal of an account move if it already has a sequence "
 "number assigned."
 msgstr ""
+"Ви не можете редагувати журнал проведення рахунку, якщо йому вже присвоєно "
+"порядковий номер."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14679,6 +14755,8 @@ msgid ""
 "You cannot reduce the number of decimal places of a currency which has "
 "already been used to make accounting entries."
 msgstr ""
+"Ви не можете зменшити кількість десяткових знаків у валюті, яка вже була "
+"використана для здійснення бухгалтерських проводок."
 
 #. module: account
 #: code:addons/account/models/account_journal.py:0
@@ -14694,6 +14772,8 @@ msgid ""
 "You cannot remove/deactivate the account %s which is set on a customer or "
 "vendor."
 msgstr ""
+"Ви не можете вилучити/деактивувати рахунок %s, який встановлено на клієнті "
+"чи постачальнику."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14748,6 +14828,8 @@ msgid ""
 "You cannot use this account (%s) in this journal, check the field 'Allowed "
 "Journals' on the related account."
 msgstr ""
+"Ви не можете використовувати цей рахунок (%s) у цьому журналі, перевірте "
+"поле 'Дозволені журналі' на пов'язаному рахунку."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14756,6 +14838,9 @@ msgid ""
 "You cannot use this account (%s) in this journal, check the section "
 "'Control-Access' under tab 'Advanced Settings' on the related journal."
 msgstr ""
+"Ви не можете використовувати рахунок (%s) у цьому журналі, перевірте "
+"підрозділ 'Контроль доступу' під вкладкою 'Розширені налаштування' на "
+"пов'язаному журналі."
 
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
@@ -14764,6 +14849,8 @@ msgid ""
 "You cannot use this wizard on journal entries belonging to different "
 "companies."
 msgstr ""
+"Ви не можете використовувати цього помічника для записів у журналі, що "
+"належать різним компаніям."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14818,6 +14905,9 @@ msgid ""
 "settings, to manage automatically the booking of accounting entries related "
 "to differences between exchange rates."
 msgstr ""
+"Вам слід налаштувати «Журнал курсових різниць» у налаштуваннях вашої "
+"компанії, щоб автоматично керувати резервуванням бухгалтерських проводок, "
+"пов’язаних із різницею між курсами валют."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -14827,6 +14917,9 @@ msgid ""
 "settings, to manage automatically the booking of accounting entries related "
 "to differences between exchange rates."
 msgstr ""
+"Вам слід налаштувати «Рахунок курсових різниць» у налаштуваннях вашої "
+"компанії, щоб автоматично керувати резервуванням бухгалтерських проводок, "
+"пов’язаних із різницею між курсами валют."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
