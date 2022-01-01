@@ -2,13 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, timedelta
-from functools import partial
 from itertools import groupby
 import json
 
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang
 from odoo.osv import expression
 from odoo.tools import float_is_zero, html_keep_url, is_html_empty
 
@@ -515,7 +513,8 @@ class SaleOrder(models.Model):
             price_unit = self.env['account.tax']._fix_tax_included_price_company(
                 line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
             if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
-                discount = max(0, (price_unit - product.price) * 100 / price_unit)
+                price_discount_unrounded = self.pricelist_id.get_product_price(product, line.product_uom_qty, self.partner_id, self.date_order, line.product_uom.id)
+                discount = max(0, (price_unit - price_discount_unrounded) * 100 / price_unit)
             else:
                 discount = 0
             lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
@@ -864,6 +863,9 @@ class SaleOrder(models.Model):
                 'context': {'default_order_id': self.id},
                 'target': 'new'
             }
+        return self._action_cancel()
+
+    def _action_cancel(self):
         inv = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')
         inv.button_cancel()
         return self.write({'state': 'cancel'})

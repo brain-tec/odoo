@@ -1930,7 +1930,7 @@ msgstr "กำลังดำเนินการ"
 #: model:ir.model.fields,field_description:event.field_event_mail__interval_nbr
 #: model:ir.model.fields,field_description:event.field_event_type_mail__interval_nbr
 msgid "Interval"
-msgstr ""
+msgstr "ช่วงเวลา"
 
 #. module: event
 #: model_terms:event.event,description:event.event_2
@@ -2481,7 +2481,7 @@ msgstr ""
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_registration_search
 msgid "Participant"
-msgstr ""
+msgstr "ผู้มีส่วนร่วม"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_registration_search
@@ -3041,7 +3041,7 @@ msgstr "ขั้นตอนนี้เสร็จสิ้น คลิก�
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_ticket_view_form_from_event
 msgid "Ticket"
-msgstr ""
+msgstr "ทิกเก็ต"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_type_form
@@ -3063,7 +3063,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:event.event_event_ticket_form_view
 #: model_terms:ir.ui.view,arch_db:event.view_registration_search
 msgid "Ticket Type"
-msgstr ""
+msgstr "ประเภททิกเก็ต"
 
 #. module: event
 #. openerp-web

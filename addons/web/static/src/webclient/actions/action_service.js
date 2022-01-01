@@ -399,11 +399,15 @@ function makeActionManager(env) {
                 return viewSwitcherEntry;
             });
         const context = action.context || {};
+        let groupBy = context.group_by || [];
+        if (typeof groupBy === "string") {
+            groupBy = [groupBy];
+        }
         const viewProps = Object.assign({}, props, {
             context,
             display: { mode: target === "new" ? "inDialog" : target },
             domain: action.domain || [],
-            groupBy: action.context.group_by || [],
+            groupBy,
             loadActionMenus: target !== "new" && target !== "inline",
             loadIrFilters: action.views.some((v) => v[1] === "search"),
             resModel: action.res_model,
@@ -740,8 +744,9 @@ function makeActionManager(env) {
      *
      * @private
      * @param {ActURLAction} action
+     * @param {ActionOptions} options
      */
-    function _executeActURLAction(action) {
+    function _executeActURLAction(action, options) {
         if (action.target === "self") {
             env.services.router.redirect(action.url);
         } else {
@@ -755,6 +760,9 @@ function makeActionManager(env) {
                     sticky: true,
                     type: "warning",
                 });
+            }
+            if (options.onClose) {
+                options.onClose();
             }
         }
     }
@@ -1059,7 +1067,7 @@ function makeActionManager(env) {
     async function _executeServerAction(action, options) {
         const runProm = env.services.rpc("/web/action/run", {
             action_id: action.id,
-            context: action.context || {},
+            context: makeContext([env.services.user.context, action.context]),
         });
         let nextAction = await keepLast.add(runProm);
         nextAction = nextAction || { type: "ir.actions.act_window_close" };
@@ -1097,7 +1105,7 @@ function makeActionManager(env) {
         action = _preprocessAction(action, options.additionalContext);
         switch (action.type) {
             case "ir.actions.act_url":
-                return _executeActURLAction(action);
+                return _executeActURLAction(action, options);
             case "ir.actions.act_window":
                 if (action.target !== "new") {
                     await clearUncommittedChanges(env);

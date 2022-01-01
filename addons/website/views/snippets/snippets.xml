@@ -462,8 +462,8 @@
     </div>
 
     <!-- Background -->
-    <t t-set="only_bg_color_selector" t-value="'section .row > div, .s_text_highlight'"/>
-    <t t-set="only_bg_color_exclude" t-value="'.s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .o_mega_menu .row > div, .s_image_gallery .row > div'"/>
+    <t t-set="only_bg_color_selector" t-value="'section .row > div, .s_text_highlight, .s_mega_menu_thumbnails_footer'"/>
+    <t t-set="only_bg_color_exclude" t-value="'.s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .s_image_gallery .row > div'"/>
 
     <t t-set="base_only_bg_image_selector" t-value="'.s_tabs .oe_structure > *, footer .oe_structure > *'"/>
     <t t-set="only_bg_image_selector" t-value="base_only_bg_image_selector"/>
@@ -1350,7 +1350,7 @@
             <we-input string="⌙ Large" data-customize-website-variable="" data-variable="btn-border-radius-lg" data-unit="px" data-save-unit="rem"/>
         </we-collapse>
         <we-checkbox string="Ripple Effect"
-                     data-customize-website-views="website.option_ripple_effect"
+                     data-customize-website-assets="website.ripple_effect_scss, website.ripple_effect_js"
                      data-customize-website-variable="false|true"
                      data-variable="btn-ripple"/>
         <we-select string="Link Style" data-variable="link-underline">

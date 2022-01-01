@@ -2950,7 +2950,7 @@ msgstr "Zugehöriger Kunde"
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__crm_auto_assignment_interval_number
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Repeat every"
-msgstr ""
+msgstr "Wiederholen alle"
 
 #. module: crm
 #: code:addons/crm/models/res_config_settings.py:0
@@ -3730,7 +3730,7 @@ msgstr "Wird zum Ordnen der Stufen in aufsteigender Reihenfolge genutzt."
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__user_company_ids
 msgid "User Company"
-msgstr ""
+msgstr "Nutzer Unternehmen"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__user_email

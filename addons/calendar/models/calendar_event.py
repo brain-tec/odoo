@@ -381,10 +381,14 @@ class Meeting(models.Model):
                     activity_vals['user_id'] = user_id
                 values['activity_ids'] = [(0, 0, activity_vals)]
 
+        # Add commands to create attendees from partners (if present) if no attendee command
+        # is already given (coming from Google event for example).
         # Automatically add the current partner when creating an event if there is none (happens when we quickcreate an event)
         default_partners_ids = defaults.get('partner_ids') or ([(4, self.env.user.partner_id.id)])
         vals_list = [
-            dict(vals, attendee_ids=self._attendees_values(vals.get('partner_ids', default_partners_ids))) if not vals.get('attendee_ids') else vals
+            dict(vals, attendee_ids=self._attendees_values(vals.get('partner_ids', default_partners_ids)))
+            if not vals.get('attendee_ids')
+            else vals
             for vals in vals_list
         ]
         recurrence_fields = self._get_recurrent_fields()
@@ -690,6 +694,11 @@ class Meeting(models.Model):
     # ------------------------------------------------------------
     # MAILING
     # ------------------------------------------------------------
+
+    def _get_attendee_emails(self):
+        """ Get comma-separated attendee email addresses. """
+        self.ensure_one()
+        return ",".join([e for e in self.attendee_ids.mapped("email") if e])
 
     def _sync_activities(self, fields):
         # update activities

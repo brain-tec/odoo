@@ -214,7 +214,9 @@ var SnippetEditor = Widget.extend({
                     },
                 },
             });
-            const $scrollable = (this.options.wysiwyg.snippetsMenu && this.options.wysiwyg.snippetsMenu.$scrollable)
+            const modalAncestorEl = this.$target[0].closest('.modal');
+            const $scrollable = modalAncestorEl && $(modalAncestorEl)
+                || (this.options.wysiwyg.snippetsMenu && this.options.wysiwyg.snippetsMenu.$scrollable)
                 || (this.$scrollingElement.length && this.$scrollingElement)
                 || $().getScrollingElement(this.ownerDocument);
             this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $scrollable, smoothScrollOptions);
@@ -460,9 +462,14 @@ var SnippetEditor = Widget.extend({
         // first, destroying the related editors and not calling onBlur... to
         // check if this has always been like this or not and this should be
         // unit tested.
-        const parent = this.$target[0].parentElement;
+        let parent = this.$target[0].parentElement;
         const nextSibling = this.$target[0].nextElementSibling;
         const previousSibling = this.$target[0].previousElementSibling;
+        if ($(parent).is('.o_editable:not(body)')) {
+            // If we target the editable, we want to reset the selection to the
+            // body. If the editable has options, we do not want to show them.
+            parent = $(parent).closest('body');
+        }
         this.trigger_up('activate_snippet', {
             $snippet: $(previousSibling || nextSibling || parent)
         });
@@ -900,12 +907,6 @@ var SnippetEditor = Widget.extend({
             },
         });
 
-        // If a modal is open, the scroll target must be that modal
-        const $openModal = self.$editable.find('.modal:visible');
-        if ($openModal.length) {
-            self.draggableComponent.$scrollTarget = $openModal;
-        }
-
         // Trigger a scroll on the draggable element so that jQuery updates
         // the position of the drop zones.
         self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function () {
@@ -1293,10 +1294,17 @@ var SnippetsMenu = Widget.extend({
             if (!$target.closest('we-button, we-toggler, we-select, .o_we_color_preview').length) {
                 this._closeWidgets();
             }
-            if (!$target.closest('body > *').length) {
+            if (!$target.closest('body > *').length || $target.is('#iframe_target')) {
                 return;
             }
             if ($target.closest(this._notActivableElementsSelector).length) {
+                return;
+            }
+            const $oeStructure = $target.closest('.oe_structure');
+            if ($oeStructure.length && !$oeStructure.children().length && this.$snippets) {
+                // If empty oe_structure, encourage using snippets in there by
+                // making them "wizz" in the panel.
+                this.$snippets.odooBounce();
                 return;
             }
             this._activateSnippet($target);
@@ -1468,14 +1476,25 @@ var SnippetsMenu = Widget.extend({
      * - Remove the 'contentEditable' attributes
      */
     cleanForSave: async function () {
+        // First disable the snippet selection, calling options onBlur, closing
+        // widgets, etc. Then wait for full resolution of the mutex as widgets
+        // may have triggered some final edition requests that need to be
+        // processed before actual "clean for save" and saving.
         await this._activateSnippet(false);
+        await this._mutex.getUnlockedDef();
+
+        // Next, notify that we want the DOM to be cleaned (e.g. in website this
+        // may be the moment where the public widgets need to be destroyed).
         this.trigger_up('ready_to_clean_for_save');
+
+        // Then destroy all snippet editors, making them call their own
+        // "clean for save" methods (and options ones).
         await this._destroyEditors();
 
+        // Final editor cleanup
         this.getEditableArea().find('[contentEditable]')
             .removeAttr('contentEditable')
             .removeProp('contentEditable');
-
         this.getEditableArea().find('.o_we_selected_image')
             .removeClass('o_we_selected_image');
     },
@@ -2339,7 +2358,7 @@ var SnippetsMenu = Widget.extend({
                 handle: '.oe_snippet_thumbnail:not(.o_we_already_dragging)',
                 helper: function () {
                     const dragSnip = this.cloneNode(true);
-                    dragSnip.querySelectorAll('.o_delete_btn').forEach(
+                    dragSnip.querySelectorAll('.o_delete_btn, .o_rename_btn').forEach(
                         el => el.remove()
                     );
                     return dragSnip;
@@ -2368,6 +2387,13 @@ var SnippetsMenu = Widget.extend({
                                 $selectorChildren = $selectorChildren.add(temp[k]['drop-in'].all());
                             }
                         }
+                    }
+
+                    // TODO mentioning external app snippet but done as a stable fix
+                    // that will be adapted in master: if popup snippet, do not
+                    // allow to add it in another snippet
+                    if ($baseBody[0].matches('.s_popup, .o_newsletter_popup')) {
+                        $selectorChildren = $selectorChildren.not('[data-snippet] *');
                     }
 
                     $toInsert = $baseBody.clone();
