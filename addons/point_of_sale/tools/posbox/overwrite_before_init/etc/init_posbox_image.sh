@@ -68,7 +68,6 @@ PKGS_TO_INSTALL="
     python3-dateutil \
     python3-decorator \
     python3-docutils \
-    python3-feedparser \
     python3-pil \
     python3-jinja2 \
     python3-ldap \
@@ -95,7 +94,6 @@ PKGS_TO_INSTALL="
     python3-passlib \
     python3-libsass \
     python3-qrcode \
-    python3-html2text \
     python3-unittest2 \
     python3-simplejson"
 

@@ -6,10 +6,10 @@
 # Jan Pedro Tumusok <jpt@eyenetworks.no>, 2019
 # Fredrik Ahlsen <fredrik@gdx.no>, 2020
 # Jorunn D. Newth, 2020
-# Martin Trigaux, 2020
-# Mads Søndergaard <mads@vkdata.dk>, 2021
 # Jens Nymoen <jens@nettimport.no>, 2021
+# Mads Søndergaard, 2021
 # Marius Stedjan <marius@stedjan.com>, 2021
+# Martin Trigaux, 2021
 # 
 msgid ""
 msgstr ""
@@ -17,7 +17,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-01 12:20+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Marius Stedjan <marius@stedjan.com>, 2021\n"
+"Last-Translator: Martin Trigaux, 2021\n"
 "Language-Team: Norwegian Bokmål (https://www.transifex.com/odoo/teams/41243/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -330,13 +330,15 @@ msgid ""
 "<span attrs=\"{'invisible':[('reconciled_invoices_count','&gt;',1)]}\">Invoice</span>\n"
 "                                <span attrs=\"{'invisible':[('reconciled_invoices_count','&lt;=',1)]}\">Invoices</span>"
 msgstr ""
+"<span attrs=\"{'invisible':[('reconciled_invoices_count','&gt;',1)]}\">Faktura</span>\n"
+"                                <span attrs=\"{'invisible':[('reconciled_invoices_count','&lt;=',1)]}\">Fakturaer</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Waiting for Payment</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Waiting for Payment</span></span>"
 msgstr ""
 
 #. module: account
@@ -477,6 +479,8 @@ msgid ""
 "<span groups=\"account.group_show_line_subtotals_tax_excluded\">Amount</span>\n"
 "                                    <span groups=\"account.group_show_line_subtotals_tax_included\">Total Price</span>"
 msgstr ""
+"<span groups=\"account.group_show_line_subtotals_tax_excluded\">Beløp</span>\n"
+"                                    <span groups=\"account.group_show_line_subtotals_tax_included\">Totalpris</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -616,7 +620,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span>Upload Invoices</span>"
-msgstr "Last opp fakturaer"
+msgstr "<span>Last opp fakturaer</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -4324,7 +4328,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #, python-format
 msgid "Draft Invoice"
-msgstr "Faktura-utkast"
+msgstr "Fakturakladd"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
@@ -5930,7 +5934,7 @@ msgstr "Fakturaer"
 #: model_terms:ir.ui.view,arch_db:account.portal_my_home_invoice
 #: model_terms:ir.ui.view,arch_db:account.portal_my_home_menu_invoice
 msgid "Invoices &amp; Bills"
-msgstr ""
+msgstr "Fakturaer og regninger"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_account_invoice_report_all
@@ -6665,7 +6669,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_chart_template__tax_template_ids
 msgid "List of all the taxes that have to be installed by the wizard"
-msgstr "Liste over alle skatter som må installeres av veiviseren"
+msgstr "Liste over alle avgifter som må installeres av veiviseren"
 
 #. module: account
 #. openerp-web
@@ -8181,7 +8185,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "Please use the following communication for your payment :"
-msgstr ""
+msgstr "Vennligst bruk følgende kommunikasjon for betalingen:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line_template__plus_report_line_ids
@@ -9922,7 +9926,7 @@ msgstr "Avgift"
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "Tax %.2f%%"
-msgstr "Skatt %.2f%%"
+msgstr "Avgift %.2f%%"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.tax_adjustments_form

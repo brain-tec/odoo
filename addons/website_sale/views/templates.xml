@@ -154,7 +154,7 @@
                 <a t-att-href="product_href" class="d-block h-100" itemprop="url">
                     <t t-set="image_holder" t-value="product._get_image_holder()"/>
                     <span t-field="image_holder.image_1920"
-                        t-options="{'widget': 'image', 'preview_image': 'image_1024' if product_image_big else 'image_256'}"
+                        t-options="{'widget': 'image', 'preview_image': 'image_1024' if product_image_big else 'image_256', 'itemprop': 'image'}"
                         class="d-flex h-100 justify-content-center align-items-center"/>
                 </a>
             </div>
@@ -1651,7 +1651,7 @@
                 <div t-if="(payment_tx_id.acquirer_id.qr_code == True) and (payment_tx_id.acquirer_id.provider == 'transfer') and (payment_tx_id.currency_id.name == 'EUR')">
                     <div class="card-body" t-if="payment_tx_id.acquirer_id.journal_id.bank_account_id.qr_code_valid">
                         <h3>Or scan me with your banking app.</h3>
-                        <img class="border border-dark rounded" t-att-src="payment_tx_id.acquirer_id.journal_id.bank_account_id.build_qr_code_url(order.amount_total,payment_tx_id.reference)"/>
+                        <img class="border border-dark rounded" t-att-src="payment_tx_id.acquirer_id.journal_id.bank_account_id.build_qr_code_base64(order.amount_total,payment_tx_id.reference)"/>
                     </div>
                     <div class="card-body" t-if="payment_tx_id.acquirer_id.journal_id.bank_account_id.qr_code_valid == False">
                         <h3>The SEPA QR Code informations are not set correctly.</h3>

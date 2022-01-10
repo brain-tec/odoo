@@ -91,7 +91,7 @@
             <field name="name">account.move.line.kanban</field>
             <field name="model">account.move.line</field>
             <field name="arch" type="xml">
-                <kanban class="o_kanban_mobile">
+                <kanban class="o_kanban_mobile" create="false" group_create="false">
                     <field name="date_maturity"/>
                     <field name="move_id"/>
                     <field name="name"/>
@@ -979,6 +979,7 @@
                                     <group string="Invoice"
                                            name="sale_info_group"
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund'))]}">
+                                        <field name="user_id" invisible="1" force_save="1"/>
                                         <field name="invoice_user_id"/>
                                         <field name="invoice_origin" force_save="1" string="Source Document"
                                                attrs="{'invisible': [('invoice_origin', '=', False)]}"/>

@@ -445,7 +445,7 @@ msgstr "Descripció"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__display_name
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet_register_payment_wizard__display_name
 msgid "Display Name"
-msgstr "Nom mostrat"
+msgstr "Nom a mostrar"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -1028,7 +1028,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__description
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "Notes..."
-msgstr ""
+msgstr "Notes..."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_needaction_counter
@@ -1456,7 +1456,7 @@ msgstr "Impostos"
 #. module: hr_expense
 #: model:res.groups,name:hr_expense.group_hr_expense_team_approver
 msgid "Team Approver"
-msgstr ""
+msgstr "Supervisor d'equip"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet_register_payment_wizard__hide_payment_method
@@ -1781,7 +1781,7 @@ msgstr ""
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid "e.g. Lunch"
-msgstr ""
+msgstr "Per exemple: dinar"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -1808,4 +1808,10 @@ msgstr "km"
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
 msgid "or send receipts by email to %s."
+msgstr ""
+
+#. module: hr_expense
+#: code:addons/hr_expense/models/account_move.py:0
+#, python-format
+msgid "Payment Cancelled"
 msgstr ""

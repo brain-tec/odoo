@@ -105,7 +105,7 @@ class AccountMove(models.Model):
             if not partner:
                 elements = tree.xpath('//ram:%s//ram:URIID[@schemeID=\'SMTP\']' % partner_type, namespaces=tree.nsmap)
                 partner = elements and self.env['res.partner'].search([('email', '=', elements[0].text)], limit=1)
-            return partner
+            return partner or self.env["res.partner"]
 
         amount_total_import = None
 
@@ -155,10 +155,6 @@ class AccountMove(models.Model):
             # Partner (first step to avoid warning 'Warning! You must first select a partner.').
             partner_type = invoice_form.journal_id.type == 'purchase' and 'SellerTradeParty' or 'BuyerTradeParty'
             invoice_form.partner_id = find_partner(partner_type)
-
-            # Delivery Partner
-            if 'partner_shipping_id' in self._fields:
-                invoice_form.partner_shipping_id = find_partner('ShipToTradeParty')
 
             # Reference.
             elements = tree.xpath('//rsm:ExchangedDocument/ram:ID', namespaces=tree.nsmap)

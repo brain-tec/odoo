@@ -26,6 +26,7 @@
 # Lucas Rabelo <lucas.rabelo@nextsolucoes.net.br>, 2020
 # Éder Brito <britoederr@gmail.com>, 2021
 # Marcel Savegnago <marcel.savegnago@gmail.com>, 2021
+# Marcos Rodrigues, 2021
 # 
 msgid ""
 msgstr ""
@@ -33,7 +34,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-05 12:34+0000\n"
 "PO-Revision-Date: 2019-08-26 09:14+0000\n"
-"Last-Translator: Marcel Savegnago <marcel.savegnago@gmail.com>, 2021\n"
+"Last-Translator: Marcos Rodrigues, 2021\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2316,9 +2317,9 @@ msgid ""
 "danger\">Your answers have probably not been recorded.</strong> Try "
 "refreshing."
 msgstr ""
-"Algo deu errado ao entrar em contato com servidor de pesquisa. <strong class"
-"=\"text-danger\">Suas respostas provavelmente não foram gravadas.</strong> "
-"Tente atualizar."
+"Algo deu errado ao entrar em contato com servidor de pesquisa. <strong "
+"class=\"text-danger\">Suas respostas provavelmente não foram "
+"gravadas.</strong> Tente atualizar."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.result
@@ -2807,7 +2808,7 @@ msgstr "Esta pesquisa está aberto apenas para pessoas registradas. Por Favor"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
 msgid "Time Limit"
-msgstr ""
+msgstr "Tempo limite"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__time_limit
@@ -3065,6 +3066,22 @@ msgstr ""
 msgid "You cannot send an invitation for a survey that has no questions."
 msgstr ""
 "Você não pode enviar um convite para uma pesquisa que não tem perguntas."
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey has no sections."
+msgstr ""
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey only contains empty sections."
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/models/survey_survey.py:0

@@ -8,11 +8,12 @@
 # matjaz k <matjaz@mentis.si>, 2020
 # jl2035 <jaka.luthar@gmail.com>, 2020
 # Boris Kodelja <boris@hbs.si>, 2020
-# Tadej Lupšina <tadej@hbs.si>, 2020
 # Martin Trigaux, 2020
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2020
 # Grega Vavtar <grega@hbs.si>, 2020
-# Jasmina Macur <jasmina@hbs.si>, 2020
+# Tadej Lupšina <tadej@hbs.si>, 2021
+# Nejc G <nejc@luxim.si>, 2021
+# Jasmina Macur <jasmina@hbs.si>, 2021
 # 
 msgid ""
 msgstr ""
@@ -20,7 +21,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-05 09:02+0000\n"
 "PO-Revision-Date: 2019-08-26 09:13+0000\n"
-"Last-Translator: Jasmina Macur <jasmina@hbs.si>, 2020\n"
+"Last-Translator: Jasmina Macur <jasmina@hbs.si>, 2021\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -86,6 +87,8 @@ msgid ""
 "<span class=\"o_form_label oe_inline\"> Days</span> <span "
 "class=\"oe_grey\">if 0, infinite use</span>"
 msgstr ""
+"<span class=\"o_form_label oe_inline\"> Dni</span> <span class=\"oe_grey\">0"
+" za neskončno</span>"
 
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_coupon_program_view_promo_program_form
@@ -312,7 +315,7 @@ msgstr "Uporabi na naslednjem naročilu"
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_coupon_apply_code_view_form
 msgid "Apply coupon"
-msgstr ""
+msgstr "Uporabi kupon"
 
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_coupon_program_view_promo_program_form
@@ -548,7 +551,7 @@ msgstr "Kupec"
 #: model:ir.model.fields,help:sale_coupon.field_sale_coupon_program__reward_product_uom_id
 #: model:ir.model.fields,help:sale_coupon.field_sale_coupon_reward__reward_product_uom_id
 msgid "Default unit of measure used for all stock operations."
-msgstr ""
+msgstr "Privzeta merska enota, ki se uporablja za vse operacije z zalogami."
 
 #. module: sale_coupon
 #: model:ir.model.fields,field_description:sale_coupon.field_sale_coupon_program__discount_percentage
@@ -647,7 +650,7 @@ msgstr "Fiksni znesek"
 #. module: sale_coupon
 #: model:ir.model.fields,field_description:sale_coupon.field_sale_coupon__partner_id
 msgid "For Customer"
-msgstr ""
+msgstr "Za stranko"
 
 #. module: sale_coupon
 #: code:addons/sale_coupon/models/sale_order.py:0
@@ -874,7 +877,7 @@ msgstr ""
 #. module: sale_coupon
 #: model:ir.model.fields.selection,name:sale_coupon.selection__sale_coupon_generate__generation_type__nbr_customer
 msgid "Number of Selected Customers"
-msgstr ""
+msgstr "Število izbranih strank"
 
 #. module: sale_coupon
 #: model:ir.model.fields,help:sale_coupon.field_sale_coupon_generate__nbr_coupons
@@ -1207,7 +1210,7 @@ msgstr ""
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_coupon_program_view_promo_program_form
 msgid "Select customer"
-msgstr ""
+msgstr "Izberi stranko"
 
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_coupon_program_view_form_common

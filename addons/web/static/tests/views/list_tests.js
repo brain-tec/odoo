@@ -5448,6 +5448,7 @@ QUnit.module('Views', {
                 if (route === '/web/dataset/resequence') {
                     if (moves === 0) {
                         assert.deepEqual(args, {
+                            context: {},
                             model: "foo",
                             ids: [4, 3],
                             offset: 13,
@@ -5456,6 +5457,7 @@ QUnit.module('Views', {
                     }
                     if (moves === 1) {
                         assert.deepEqual(args, {
+                            context: {},
                             model: "foo",
                             ids: [4, 2],
                             offset: 12,
@@ -5464,6 +5466,7 @@ QUnit.module('Views', {
                     }
                     if (moves === 2) {
                         assert.deepEqual(args, {
+                            context: {},
                             model: "foo",
                             ids: [2, 4],
                             offset: 12,
@@ -5472,6 +5475,7 @@ QUnit.module('Views', {
                     }
                     if (moves === 3) {
                         assert.deepEqual(args, {
+                            context: {},
                             model: "foo",
                             ids: [4, 2],
                             offset: 12,
@@ -9488,6 +9492,44 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('editable list: resize column headers with max-width', async function (assert) {
+        // This test will ensure that, on resize list header,
+        // the resized element have the correct size and other elements are not resized
+        assert.expect(2);
+        this.data.foo.records[0].foo = "a".repeat(200);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top">' +
+                    '<field name="foo"/>' +
+                    '<field name="bar"/>' +
+                    '<field name="reference" optional="hide"/>' +
+                '</tree>',
+        });
+
+        // Target handle
+        const th = list.el.getElementsByTagName('th')[1];
+        const thNext = list.el.getElementsByTagName('th')[2];
+        const resizeHandle = th.getElementsByClassName('o_resize')[0];
+        const nextResizeHandle = thNext.getElementsByClassName('o_resize')[0];
+        const thOriginalWidth = th.offsetWidth;
+        const thNextOriginalWidth = thNext.offsetWidth;
+        const thExpectedWidth = Math.floor(thOriginalWidth + thNextOriginalWidth);
+
+        await testUtils.dom.dragAndDrop(resizeHandle, nextResizeHandle, { mousemoveTarget: window, mouseupTarget: window });
+
+        const thFinalWidth = th.offsetWidth;
+        const thNextFinalWidth = thNext.offsetWidth;
+        const thWidthDiff = Math.abs(thExpectedWidth - thFinalWidth)
+
+        assert.ok(thWidthDiff <= 1, "Wrong width on resize");
+        assert.ok(thNextOriginalWidth === thNextFinalWidth, "Width must not have been changed");
+
+        list.destroy();
+    });
+
     QUnit.test('enter edition in editable list with <widget>', async function (assert) {
         assert.expect(1);
 
@@ -9554,6 +9596,40 @@ QUnit.module('Views', {
 
         list.destroy();
     });
+
+    QUnit.test('selecting a row after another one containing a table within an html field should be the correct one', async function (assert) {
+        assert.expect(1);
+
+        this.data.foo.fields.html = {string: "HTML field", type: "html"}
+        this.data.foo.records[0].html = `
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td><br></td>
+                        <td><br></td>
+                    </tr>
+                     <tr>
+                        <td><br></td>
+                        <td><br></td>
+                    </tr>
+                </tbody>
+            </table>`;
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top" multi_edit="1">' +
+                '<field name="html"/>' +
+                '</tree>',
+        });
+
+        await testUtils.dom.click(list.$('.o_data_cell:eq(1)'))
+        assert.ok($('table.o_list_table > tbody > tr:eq(1)')[0].classList.contains('o_selected_row'), "The second row should be selected")
+
+        list.destroy();
+    });
+
 });
 
 });

@@ -1036,6 +1036,60 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
+        assert.expect(4);
+
+        this.data.partner.records[0].product_ids = [37];
+        this.data.partner.records[0].trululu = false;
+        this.data.partner.onchanges = {
+            trululu(record) {
+                // when trululu changes, push another record in product_ids.
+                // only push a second record once.
+                if (record.product_ids.map(command => command[1]).includes(41)) {
+                    return;
+                }
+                // copy the list to force it as different from the original
+                record.product_ids = record.product_ids.slice();
+                record.product_ids.push([4,41,false]);
+            }
+        };
+
+        this.data.product.records[0].name = 'test';
+        // This one is necessary to have a valid, rendered widget
+        this.data.product.fields.int_field = { type:"integer", string: "intField" };
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+            <form>
+                <field name="trululu"/>
+                <field name="product_ids" attrs="{'readonly': [['trululu', '=', False]]}">
+                    <tree editable="top"><field name="int_field" widget="handle" /><field name="name"/></tree>
+                </field>
+            </form>
+            `,
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+        });
+
+        for (let value of [true, false, true, false]) {
+            if (value) {
+                await testUtils.fields.many2one.clickOpenDropdown('trululu')
+                await testUtils.fields.many2one.clickHighlightedItem('trululu')
+                assert.notOk($('.o_field_one2many[name="product_ids"]').hasClass("o_readonly_modifier"), 'lines should not be readonly')
+            } else {
+                await testUtils.fields.editAndTrigger(form.$('.o_field_many2one[name="trululu"] input'), '', ['keyup'])
+                assert.ok($('.o_field_one2many[name="product_ids"]').hasClass("o_readonly_modifier"), 'lines should be readonly')
+            }
+        }
+
+        form.destroy();
+    });
+
     QUnit.test('empty fields have o_form_empty class in readonly mode', async function (assert) {
         assert.expect(8);
 
@@ -4891,6 +4945,66 @@ QUnit.module('Views', {
             "the cell should contains the number of record: 1");
 
         await testUtils.form.clickSave(form);
+
+        form.destroy();
+    });
+
+    QUnit.test('one2manys (list editable) inside one2manys discard and edit o2m again', async function (assert) {
+        assert.expect(3);
+
+        this.data.partner.records[0].p = [2]; // one2many
+        this.data.partner.records[1].p = [4]; // one2many
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<field name="p">' +
+                            '<tree>' +
+                                '<field name="p"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</sheet>' +
+                '</form>',
+            archs: {
+                "partner,false,form": '<form>' +
+                        '<field name="p">' +
+                            '<tree editable="top">' +
+                                '<field name="display_name"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</form>'
+            },
+            res_id: 1,
+        });
+
+        await testUtils.form.clickEdit(form);
+
+        // add a o2m subrecord
+        await testUtils.dom.click(form.$('.o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.dom.click($('.modal-body .o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.fields.editInput($('.modal-body input'), 'xtv');
+        await testUtils.dom.click($('.modal-footer button:first'));
+        assert.strictEqual($('.modal').length, 0,
+            "dialog should be closed");
+
+        // Discard record and edit record again
+        await testUtils.form.clickDiscard(form);
+        await testUtils.dom.click($('.modal .modal-footer .btn-primary:first'));
+        await testUtils.form.clickEdit(form);
+
+        await testUtils.dom.click(form.$('.o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.dom.click($('.modal-body .o_field_one2many tbody tr:eq(0) td.o_data_cell:first'));
+        await testUtils.fields.editInput($('.modal-body input'), 'xtv');
+        await testUtils.dom.click($('.modal-footer button:first'));
+        assert.strictEqual($('.modal').length, 0,
+            "dialog should be closed");
+
+        var row = form.$('.o_field_one2many .o_list_view .o_data_row');
+        assert.strictEqual(row.children()[0].textContent, '1 record',
+            "the cell should contains the number of record: 1");
 
         form.destroy();
     });

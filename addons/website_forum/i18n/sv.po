@@ -5,15 +5,18 @@
 # Translators:
 # lasch a <bmail440@gmail.com>, 2019
 # Robert Frykelius <robert.frykelius@linserv.se>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # Kristoffer Grundström <lovaren@gmail.com>, 2019
 # Martin Trigaux, 2019
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2019
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
 # Frida E, 2019
-# Kim Asplund <kim.asplund@gmail.com>, 2020
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2020
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# STefan Rundgren <stefanrundgren@cellglas.com>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
+# Victor Ekström, 2021
+# Simon S, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -21,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:15+0000\n"
-"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2021\n"
+"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1212,7 +1215,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__is_correct
 msgid "Correct"
-msgstr ""
+msgstr "Korrekt"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_post__is_correct
@@ -1420,7 +1423,7 @@ msgstr ""
 #: model:gamification.challenge.line,name:website_forum.line_editor
 #: model:gamification.goal.definition,name:website_forum.definition_editor
 msgid "Editor"
-msgstr ""
+msgstr "Redigerare"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_editor
@@ -1533,7 +1536,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.question_dropdown
 msgid "Flag"
-msgstr ""
+msgstr "Flagga"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_flag
@@ -1791,7 +1794,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_error
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Om markerad så har det blivit ett leveransfel för några  meddelanden."
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__karma_dofollow
@@ -1985,7 +1988,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Huvudbilaga"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answers
@@ -2008,7 +2011,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_has_error
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Fel vid meddelandeleverans"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_ids
@@ -2094,7 +2097,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
 msgid "My profile"
-msgstr ""
+msgstr "Min profil"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
@@ -2250,7 +2253,7 @@ msgstr "Antal meddelanden som kräver en åtgärd"
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_has_error_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Antal meddelanden med leveransfel"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__count_posts_waiting_validation
@@ -2303,7 +2306,7 @@ msgstr "Order"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "Order by"
-msgstr ""
+msgstr "Order av"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
@@ -3261,12 +3264,12 @@ msgstr "Webbplatsens metatitel"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_meta_og_img
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_meta_og_img
 msgid "Website opengraph image"
-msgstr ""
+msgstr "Webbplats opengraph bild"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__welcome_message
 msgid "Welcome Message"
-msgstr ""
+msgstr "Välkomst Meddelande"
 
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help

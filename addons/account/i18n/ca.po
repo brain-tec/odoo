@@ -312,12 +312,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Waiting for Payment</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Waiting for Payment</span></span>"
 msgstr ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Pendent de pagament </span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Pendent de pagament </span></span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
@@ -2708,7 +2708,7 @@ msgstr ""
 #. module: account
 #: model:ir.model,name:account.model_cash_box_out
 msgid "Cash Box Out"
-msgstr ""
+msgstr "Sortida de caixa"
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -2845,7 +2845,7 @@ msgstr "Plantilles de pla comptable"
 #: model_terms:ir.ui.view,arch_db:account.onboarding_chart_of_account_step
 #, python-format
 msgid "Chart of Accounts"
-msgstr "Resum de comptes"
+msgstr "Pla comptable"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_chart_template_form
@@ -4103,6 +4103,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Define the smallest coinage of the currency used to pay by cash"
 msgstr ""
+"Definiu la unitat de moneda més petita de la divisa utilitzada per a pagar "
+"en efectiu"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.onboarding_fiscal_year_step
@@ -4306,7 +4308,7 @@ msgstr "Descompte (%)"
 #: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard__display_name
 #: model:ir.model.fields,field_description:account.field_validate_account_move__display_name
 msgid "Display Name"
-msgstr "Nom mostrat"
+msgstr "Nom a mostrar"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__qr_code
@@ -5602,8 +5604,8 @@ msgid ""
 "In order to delete a bank statement line, you must first cancel it to delete"
 " related journal items."
 msgstr ""
-"Per a poder esborrar una línia de l'extracte bancari, primer ha de cancel"
-"·lar-lo per esborrar els apunts comptables relacionats."
+"Per a poder esborrar una línia de l'extracte bancari, primer ha de "
+"cancel·lar-lo per esborrar els apunts comptables relacionats."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -6705,7 +6707,7 @@ msgstr "Menys pagaments"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Let your customers pay their invoices online"
-msgstr ""
+msgstr "Permetre que els clients paguin les factures online"
 
 #. module: account
 #. openerp-web
@@ -7621,7 +7623,7 @@ msgstr "Nombres unitaris d'apertura"
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "Opening balance"
-msgstr ""
+msgstr "Saldo inicial"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__opening_credit
@@ -8109,7 +8111,7 @@ msgstr ""
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term_45days
 msgid "Payment terms: 45 Days"
-msgstr ""
+msgstr "Termini de pagament: 45 dies"
 
 #. module: account
 #: model:account.payment.term,note:account.account_payment_term_end_following_month
@@ -8736,7 +8738,7 @@ msgstr "Conciliació d'extractes bancaris"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Record transactions in foreign currencies"
-msgstr ""
+msgstr "Registrar transaccions en moneda estrangera "
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -9128,12 +9130,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_sepa
 msgid "SEPA Credit Transfer (SCT)"
-msgstr ""
+msgstr "Transferències SEPA (SCT)"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "SEPA Direct Debit (SDD)"
-msgstr ""
+msgstr "Càrrecs directes SEPA (SDD)"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -9266,7 +9268,7 @@ msgstr "Guardar com a nova plantilla"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Save this page and come back here to set up the feature."
-msgstr ""
+msgstr "Guardeu aquesta pàgina i torneu per a configurar la característica."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_search
@@ -9680,7 +9682,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 msgid "Show active taxes"
-msgstr ""
+msgstr "Mostrar impostos actius"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
@@ -9692,7 +9694,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 msgid "Show inactive taxes"
-msgstr ""
+msgstr "Mostrar impostos inactius"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__show_on_dashboard
@@ -10016,7 +10018,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.cash_box_out_form
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_form
 msgid "Take Money In/Out"
-msgstr ""
+msgstr "Posar o treure diners"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_common_journal_report__target_move

@@ -108,7 +108,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
         var _super = this._super.bind(this);
         return this.wysiwyg.saveCroppedImages(this.$content).then(function () {
-            return self.wysiwyg.save().then(function (result) {
+            return self.wysiwyg.save(self.nodeOptions).then(function (result) {
                 self._isDirty = result.isDirty;
                 _super();
             });
@@ -327,6 +327,11 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                         return;
                     }
                     var cwindow = self.$iframe[0].contentWindow;
+                    try {
+                        cwindow.document;
+                    } catch (e) {
+                        return;
+                    }
                     cwindow.document
                         .open("text/html", "replace")
                         .write(

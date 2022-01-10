@@ -2273,8 +2273,8 @@ msgid ""
 "danger\">Your answers have probably not been recorded.</strong> Try "
 "refreshing."
 msgstr ""
-"Нещо се обърка в хода на свръзката със сървъра за проучвания. <strong class"
-"=\"text-danger\">Отговорите ви вероятно не са били записани.</strong> "
+"Нещо се обърка в хода на свръзката със сървъра за проучвания. <strong "
+"class=\"text-danger\">Отговорите ви вероятно не са били записани.</strong> "
 "Опитайте да опресните."
 
 #. module: survey
@@ -3021,6 +3021,22 @@ msgstr ""
 #, python-format
 msgid "You cannot send an invitation for a survey that has no questions."
 msgstr "Не можете да изпратите покана за проучване, в което няма въпроси."
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey has no sections."
+msgstr ""
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey only contains empty sections."
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/models/survey_survey.py:0

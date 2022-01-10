@@ -207,8 +207,8 @@ var SnippetEditor = Widget.extend({
                     for (var i in editor.styles) {
                         editor.styles[i].onRemove();
                     }
-                    resolve();
                 },
+                onSuccess: resolve,
             });
         });
 
@@ -253,7 +253,8 @@ var SnippetEditor = Widget.extend({
         function isEmptyAndRemovable($el, editor) {
             editor = editor || $el.data('snippet-editor');
             return $el.children().length === 0 && $el.text().trim() === ''
-                && !$el.hasClass('oe_structure') && (!editor || editor.isTargetParentEditable);
+                && !$el.hasClass('oe_structure') && !$el.parent().hasClass('carousel-item')
+                && (!editor || editor.isTargetParentEditable);
         }
     },
     /**
@@ -337,7 +338,7 @@ var SnippetEditor = Widget.extend({
         }
 
         this.$target.after($clone);
-        this.trigger_up('call_for_each_child_snippet', {
+        this.trigger_up('call_for_each_child_snippet', { // FIXME should be awaited
             $snippet: $clone,
             callback: function (editor, $snippet) {
                 for (var i in editor.styles) {
@@ -925,6 +926,15 @@ var SnippetsMenu = Widget.extend({
      */
     _activateInsertionZones: function ($selectorSiblings, $selectorChildren) {
         var self = this;
+
+        // If a dropdown is shown, the drop zones must be created only in this
+        // element.
+        const $editableArea = self.getEditableArea();
+        const $dropdown = $editableArea.find('.dropdown-menu.show').addBack('.dropdown-menu.show').parent();
+        if ($dropdown.length) {
+            $selectorSiblings = $dropdown.find($selectorSiblings);
+            $selectorChildren = $dropdown.find($selectorChildren);
+        }
 
         // Check if the drop zone should be horizontal or vertical
         function setDropZoneDirection($elem, $parent, $sibling) {
@@ -1518,6 +1528,13 @@ var SnippetsMenu = Widget.extend({
                     }
                 }
 
+                // TODO mentioning external app snippet but done as a stable fix
+                // that will be adapted in master: if popup snippet, do not
+                // allow to add it in another snippet
+                if ($baseBody[0].matches('.o_newsletter_popup')) {
+                    $selectorChildren = $selectorChildren.not('.oe_structure *, [data-oe-type=html] *');
+                }
+
                 $toInsert = $baseBody.clone();
 
                 if (!$selectorSiblings.length && !$selectorChildren.length) {
@@ -1651,7 +1668,10 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onCallForEachChildSnippet: function (ev) {
-        this._callForEachChildSnippet(ev.data.$snippet, ev.data.callback);
+        const prom = this._callForEachChildSnippet(ev.data.$snippet, ev.data.callback);
+        if (ev.data.onSuccess) {
+            prom.then(() => ev.data.onSuccess());
+        }
     },
     /**
      * Called when asked to clean the DOM for save. Should technically not be

@@ -614,14 +614,13 @@ class WebsiteSale(http.Controller):
                 if k not in ('field_required', 'partner_id', 'callback', 'submitted'): # classic case
                     _logger.debug("website_sale postprocess: %s value has been dropped (empty or not writable)" % k)
 
-        new_values['team_id'] = request.website.salesteam_id and request.website.salesteam_id.id
-        new_values['user_id'] = request.website.salesperson_id and request.website.salesperson_id.id
-
         if request.website.specific_user_account:
             new_values['website_id'] = request.website.id
 
         if mode[0] == 'new':
             new_values['company_id'] = request.website.company_id.id
+            new_values['team_id'] = request.website.salesteam_id and request.website.salesteam_id.id
+            new_values['user_id'] = request.website.salesperson_id.id
 
         lang = request.lang.code if request.lang.code in request.website.mapped('language_ids.code') else None
         if lang:
@@ -679,7 +678,7 @@ class WebsiteSale(http.Controller):
                 return request.redirect('/shop/checkout')
 
         # IF POSTED
-        if 'submitted' in kw:
+        if 'submitted' in kw and request.httprequest.method == "POST":
             pre_values = self.values_preprocess(order, mode, kw)
             errors, error_msg = self.checkout_form_validate(mode, kw, pre_values)
             post, errors, error_msg = self.values_postprocess(order, mode, pre_values, errors, error_msg)

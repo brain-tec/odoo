@@ -9,12 +9,13 @@
 # Katharina Moritz <kmo@e2f.com>, 2019
 # David Vidal <david.vidal@trespinos.es>, 2019
 # e2f <projects@e2f.com>, 2019
-# Martin Trigaux, 2019
 # Andi, 2019
 # Leon Grill <leg@odoo.com>, 2019
 # Chris Egal <sodaswed@web.de>, 2019
 # Ermin Trevisan <trevi@twanda.com>, 2020
 # Kevin Harrings <kha@odoo.com>, 2020
+# Martin Trigaux, 2021
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
@@ -22,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:15+0000\n"
-"Last-Translator: Kevin Harrings <kha@odoo.com>, 2020\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,6 +62,8 @@ msgid ""
 "<em>Write here a quote from one of your attendees. It gives confidence in "
 "your events.</em>"
 msgstr ""
+"<em>Platzieren Sie hier ein Zitat eines Ihrer Teilnehmer. Das spendet "
+"Vertrauen in Ihre Veranstaltung.</em>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
@@ -79,6 +82,8 @@ msgid ""
 "<i class=\"fa fa-facebook text-facebook\" aria-label=\"Facebook\" "
 "title=\"Facebook\"/>"
 msgstr ""
+"<i class=\"fa fa-facebook text-facebook\" aria-label=\"Facebook\" "
+"title=\"Facebook\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
@@ -98,7 +103,7 @@ msgstr "<i class=\"fa fa-fw fa-calendar\"/>Zu iCal/Outlook hinzufügen"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
 msgid "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
@@ -112,6 +117,8 @@ msgid ""
 "<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
 "title=\"Instagram\"/>"
 msgstr ""
+"<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
+"title=\"Instagram\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -119,6 +126,8 @@ msgid ""
 "<i class=\"fa fa-linkedin text-linkedin\" aria-label=\"LinkedIn\" "
 "title=\"LinkedIn\"/>"
 msgstr ""
+"<i class=\"fa fa-linkedin text-linkedin\" aria-label=\"LinkedIn\" "
+"title=\"LinkedIn\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.layout
@@ -137,6 +146,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
 msgid "<i class=\"fa fa-twitter text-twitter\" aria-label=\"Twitter\" title=\"Twitter\"/>"
 msgstr ""
+"<i class=\"fa fa-twitter text-twitter\" aria-label=\"Twitter\" "
+"title=\"Twitter\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -144,6 +155,8 @@ msgid ""
 "<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
 "title=\"Youtube\"/>"
 msgstr ""
+"<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
+"title=\"Youtube\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_speaker_bio
@@ -210,7 +223,7 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
 msgid "A past event"
-msgstr ""
+msgstr "Ein vergangenes Event"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_about_us
@@ -220,7 +233,7 @@ msgstr "Über uns"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "Add to Calendar"
-msgstr ""
+msgstr "Zu Kalender hinzufügen"
 
 #. module: website_event
 #: code:addons/website_event/controllers/main.py:0
@@ -238,7 +251,7 @@ msgstr "Alle Länder"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_location
 msgid "All countries"
-msgstr ""
+msgstr "Alle Länder"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.res_config_settings_view_form
@@ -253,6 +266,11 @@ msgid ""
 "founded TinyERP. This was the first phase of OpenERP which would later "
 "became Odoo, the most installed open-source business software worldwide."
 msgstr ""
+"Bereits im Alter von 13 Jahren begann John DOE, erste Geschäftsanwendungen "
+"für Kunden zu entwickeln. Nachdem er das Bauingenieurwesen gemeistert hatte,"
+" gründete er TinyERP. Dies war die erste Phase von OpenERP, das später zu "
+"Odoo wurde, der weltweit am häufigsten installierten Open-Source-Business-"
+"Software."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
@@ -424,12 +442,12 @@ msgstr "Termin Bezeichnung"
 #: model:ir.model.fields,field_description:website_event.field_event_event__subtitle
 #: model_terms:ir.ui.view,arch_db:website_event.event_details
 msgid "Event Subtitle"
-msgstr ""
+msgstr "Veranstaltungsuntertitel"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_details
 msgid "Event Title"
-msgstr ""
+msgstr "Veranstaltungstitel"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.404
@@ -459,11 +477,13 @@ msgid ""
 "Find out what people see and say about this event, and join the "
 "conversation."
 msgstr ""
+"Finden Sie heraus, was über diese Veranstaltung gesagt wird und beteiligen "
+"Sie sich am Gespräch."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
 msgid "Follow Us"
-msgstr ""
+msgstr "Folge uns"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -473,7 +493,7 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "Google"
-msgstr ""
+msgstr "Google"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -545,7 +565,7 @@ msgstr "Nächster Monat"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
 msgid "No events found."
-msgstr ""
+msgstr "Keine Veranstaltungen gefunden."
 
 #. module: website_event
 #. openerp-web
@@ -588,12 +608,12 @@ msgstr "Telefon"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Phone <small>(Optional)</small>"
-msgstr ""
+msgstr "Telefon <small>(Optional)</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
 msgid "Photos"
-msgstr ""
+msgstr "Fotos"
 
 #. module: website_event
 #. openerp-web
@@ -632,7 +652,7 @@ msgstr "Anmeldung"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Registration confirmed!"
-msgstr ""
+msgstr "Anmeldung bestätigt!"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.404
@@ -642,7 +662,7 @@ msgstr "Gehe zurück zur Veranstaltungsseite"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "SHARE"
-msgstr ""
+msgstr "FREIGEBEN"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
@@ -675,7 +695,7 @@ msgstr "Dieser Monat"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Ticket #"
-msgstr ""
+msgstr "Ticket #"
 
 #. module: website_event
 #: code:addons/website_event/controllers/main.py:0
@@ -697,11 +717,14 @@ msgstr "Unveröffentlicht"
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
 msgid "Use the top button '<b>+ New</b>' to create an event."
 msgstr ""
+"Nutzen Sie den Knopf '<b>+ Neu</b>' um eine neue Veranstaltung zu erstellen."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_about_us
 msgid "Use this paragrah to write a short text about your events or company."
 msgstr ""
+"Nutzen Sie diesen Abschnitt um einen kurzen Text über Ihre Veranstaltung "
+"oder Ihr Unternehmen zu schreiben."
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_published
@@ -721,7 +744,7 @@ msgstr "Website Menü"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "iCal/Outlook"
-msgstr ""
+msgstr "iCal/Outlook"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full

@@ -232,24 +232,26 @@ var BasicModel = AbstractModel.extend({
         const mainFieldInfo = dataPoint.fieldsInfo[dataPoint[viewInfo.viewType]];
         dataPoint.fieldsInfo[viewInfo.viewType] = _.defaults({}, viewInfo.fieldInfo, mainFieldInfo);
 
-        // Some fields in the new fields info might not be in the previous one,
-        // so we might have stored changes for them (e.g. coming from onchange
-        // RPCs), that we haven't been able to process earlier (because those
-        // fields were unknown at that time). So we now try to process them.
-        return this.applyRawChanges(dataPointID, viewInfo.viewType).then(() => {
+        // recursively apply the new field info on sub datapoints
+        if (dataPoint.type === 'list') {
+            // case 'list': on all datapoints in the list
             const proms = [];
-            const fieldInfo = dataPoint.fieldsInfo[viewInfo.viewType];
-            // recursively apply the new field info on sub datapoints
-            if (dataPoint.type === 'list') {
-                // case 'list': on all datapoints in the list
-                Object.values(dataPoint._cache).forEach(subDataPointID => {
-                    proms.push(this.addFieldsInfo(subDataPointID, {
-                        fields: dataPoint.fields,
-                        fieldInfo: dataPoint.fieldsInfo[viewInfo.viewType],
-                        viewType: viewInfo.viewType,
-                    }));
-                });
-            } else {
+            Object.values(dataPoint._cache).forEach(subDataPointID => {
+                proms.push(this.addFieldsInfo(subDataPointID, {
+                    fields: dataPoint.fields,
+                    fieldInfo: dataPoint.fieldsInfo[viewInfo.viewType],
+                    viewType: viewInfo.viewType,
+                }));
+            });
+            return Promise.all(proms);
+        } else {
+            // Some fields in the new fields info might not be in the previous one,
+            // so we might have stored changes for them (e.g. coming from onchange
+            // RPCs), that we haven't been able to process earlier (because those
+            // fields were unknown at that time). So we now try to process them.
+            return this.applyRawChanges(dataPointID, viewInfo.viewType).then(() => {
+                const proms = [];
+                const fieldInfo = dataPoint.fieldsInfo[viewInfo.viewType];
                 // case 'record': on datapoints of all x2many fields
                 const values = _.extend({}, dataPoint.data, dataPoint._changes);
                 Object.keys(fieldInfo).forEach(fieldName => {
@@ -267,9 +269,10 @@ var BasicModel = AbstractModel.extend({
                         }
                     }
                 });
-            }
-            return Promise.all(proms);
-        });
+                return Promise.all(proms);
+            });
+        }
+
 
     },
     /**
@@ -1014,6 +1017,7 @@ var BasicModel = AbstractModel.extend({
         var params = {
             model: modelName,
             ids: resIDs,
+            context: data.getContext(),
         };
         if (options.offset) {
             params.offset = options.offset;
@@ -1037,6 +1041,7 @@ var BasicModel = AbstractModel.extend({
                     model: modelName,
                     method: 'read',
                     args: [resIDs, [field]],
+                    context: data.getContext(),
                 }).then(function (records) {
                     if (data.data.length) {
                         var dataType = self.localData[data.data[0]].type;

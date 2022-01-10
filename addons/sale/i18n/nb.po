@@ -1463,8 +1463,8 @@ msgstr "Tilpass utseende på tilbud"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_dhl
-msgid "DHL Connector"
-msgstr "DHL-integrasjon"
+msgid "DHL Express Connector"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
@@ -4339,7 +4339,7 @@ msgstr ""
 #: code:addons/sale/static/src/js/tours/sale.js:0
 #, python-format
 msgid "Use this menu to access quotations, sales orders and customers."
-msgstr "Bruk denne menyen for å se pristilbud, salgsordre og kunder."
+msgstr "Bruk denne menyen for å se tilbud, salgsordre og kunder."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations

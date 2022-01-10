@@ -10,16 +10,18 @@
 # 03992e16f8df6e39b9d1cc0ff635887e, 2019
 # Robert Frykelius <robert.frykelius@linserv.se>, 2019
 # Frida E, 2019
-# Daniel Osser <danielosser@gmail.com>, 2019
 # Kristoffer Grundström <lovaren@gmail.com>, 2019
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2019
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # Martin Trigaux, 2020
-# Kim Asplund <kim.asplund@gmail.com>, 2020
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2020
 # Mikael Holm <mikael.holm@vertel.se>, 2020
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# STefan Rundgren <stefanrundgren@cellglas.com>, 2021
+# Simon S, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
+# Daniel Osser <danielosser@gmail.com>, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -27,7 +29,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:16+0000\n"
-"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2021\n"
+"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -570,6 +572,7 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/js/slides_course_fullscreen_player.js:0
+#: code:addons/website_slides/static/src/js/slides_share.js:0
 #, python-format
 msgid "<strong>Thank you!</strong> Mail has been sent."
 msgstr "<strong>Tack!</strong> E-post är skickad."
@@ -1020,7 +1023,7 @@ msgstr "Kanal"
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel_partner
 msgid "Channel / Partners (Members)"
-msgstr ""
+msgstr "Kanal / Partners (Medlemmar)"
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel_invite
@@ -1298,7 +1301,7 @@ msgstr "Fortsätt"
 #: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #, python-format
 msgid "Copy Link"
-msgstr ""
+msgstr "Kopiera länk"
 
 #. module: website_slides
 #: code:addons/website_slides/controllers/main.py:0
@@ -1646,7 +1649,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "Dropdown meny"
 
 #. module: website_slides
 #. openerp-web
@@ -1863,7 +1866,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid "Fullscreen"
-msgstr ""
+msgstr "Helskärm"
 
 #. module: website_slides
 #: model:slide.channel.tag,name:website_slides.slide_channel_tag_role_furniture
@@ -2064,7 +2067,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_has_error
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Om markerad så har det blivit ett leveransfel för några  meddelanden."
 
 #. module: website_slides
 #: model:slide.channel,description:website_slides.slide_channel_demo_4_furn1
@@ -2427,7 +2430,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Huvudbilaga"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_2_0
@@ -2485,7 +2488,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Fel vid meddelandeleverans"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__enroll_msg
@@ -2756,7 +2759,7 @@ msgstr "Antal meddelanden som kräver en åtgärd"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Antal meddelanden med leveransfel"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_unread_counter
@@ -3018,13 +3021,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_ids
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Rating"
-msgstr ""
+msgstr "Betyg"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_avg
 #: model_terms:ir.ui.view,arch_db:website_slides.rating_rating_view_graph_slide_channel
 msgid "Rating Average"
-msgstr ""
+msgstr "Betyg Medeltal"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_avg_stars
@@ -3034,22 +3037,22 @@ msgstr "Betygsmedel (stjärnor)"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr ""
+msgstr "Betyg Senaste Feedback"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_last_image
 msgid "Rating Last Image"
-msgstr ""
+msgstr "Betyg Senaste Bild"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_last_value
 msgid "Rating Last Value"
-msgstr ""
+msgstr "Betyg Senaste Värde"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_count
 msgid "Rating count"
-msgstr ""
+msgstr "Betyg Antal"
 
 #. module: website_slides
 #: code:addons/website_slides/models/slide_channel.py:0
@@ -3075,7 +3078,7 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__rating_last_feedback
 msgid "Reason of the rating"
-msgstr ""
+msgstr "Orsaken till betyget"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__partner_ids
@@ -3303,7 +3306,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_media
 #, python-format
 msgid "Share Link"
-msgstr ""
+msgstr "Dela Länk"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__share_template_id
@@ -3426,7 +3429,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 #, python-format
 msgid "Slide image"
-msgstr ""
+msgstr "Slide-bild"
 
 #. module: website_slides
 #: code:addons/website_slides/controllers/main.py:0
@@ -3699,7 +3702,7 @@ msgstr "Titel"
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Växla navigering"
 
 #. module: website_slides
 #: model:slide.tag,name:website_slides.slide_tag_demo_tools
@@ -3835,7 +3838,7 @@ msgstr "Avsluta prenumeration"
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #, python-format
 msgid "Upload"
-msgstr ""
+msgstr "Ladda upp"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__upload_group_ids
@@ -4080,7 +4083,7 @@ msgstr "Webbplatsens metatitel"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_meta_og_img
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_meta_og_img
 msgid "Website opengraph image"
-msgstr ""
+msgstr "Webbplats opengraph bild"
 
 #. module: website_slides
 #: model:slide.question,question:website_slides.slide_slide_demo_0_4_question_0
@@ -4327,13 +4330,13 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "e.g. https://www.odoo.com"
-msgstr ""
+msgstr "T.ex. https://www.odoo.com"
 
 #. module: website_slides
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_root
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "eLearning"
-msgstr ""
+msgstr "eLearning"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_res_partner__slide_channel_ids

@@ -233,7 +233,13 @@ class MassMailing(models.Model):
             values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
         if 'medium_id' not in values and values.get('mailing_type', 'mail') == 'mail':
             values['medium_id'] = self.env.ref('utm.utm_medium_email').id
-        return super(MassMailing, self).create(values)
+        result = super().create(values)
+
+        # fix attachment ownership
+        if result.attachment_ids:
+            result.attachment_ids.write({'res_model': self._name, 'res_id': result.id})
+
+        return result
 
     def write(self, values):
         if values.get('body_html'):
@@ -515,8 +521,11 @@ class MassMailing(models.Model):
     def action_send_mail(self, res_ids=None):
         author_id = self.env.user.partner_id.id
 
+        # If no recipient is passed, we don't want to use the recipients of the first
+        # mailing for all the others
+        initial_res_ids = res_ids
         for mailing in self:
-            if not res_ids:
+            if not initial_res_ids:
                 res_ids = mailing._get_remaining_recipients()
             if not res_ids:
                 raise UserError(_('There are no recipients selected.'))

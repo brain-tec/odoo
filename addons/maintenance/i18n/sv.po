@@ -8,12 +8,14 @@
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
 # Robert Frykelius <robert.frykelius@linserv.se>, 2019
 # lynnliuying <lynn.liu1971@gmail.com>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # Kristoffer Grundström <lovaren@gmail.com>, 2019
 # Martin Trigaux, 2019
-# Kim Asplund <kim.asplund@gmail.com>, 2020
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2020
+# STefan Rundgren <stefanrundgren@cellglas.com>, 2021
+# Simon S, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -21,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-05 12:34+0000\n"
 "PO-Revision-Date: 2019-08-26 09:11+0000\n"
-"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2021\n"
+"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -127,13 +129,13 @@ msgstr "Aktiviteter"
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_exception_decoration
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Dekoration för aktivitetsundantag"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_state
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Aktivitetsstatus"
 
 #. module: maintenance
 #: model:ir.actions.act_window,name:maintenance.mail_activity_type_action_config_maintenance
@@ -429,7 +431,7 @@ msgstr "Klar"
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_kanban
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "Dropdown meny"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__duration
@@ -439,7 +441,7 @@ msgstr "Varaktighet"
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__duration
 msgid "Duration in hours."
-msgstr ""
+msgstr "Varaktighet i timmar."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_kanban
@@ -468,7 +470,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__email_cc
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
 msgid "Email cc"
-msgstr ""
+msgstr "E-post cc"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_count
@@ -477,7 +479,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "Equipment"
-msgstr ""
+msgstr "Utrustning"
 
 #. module: maintenance
 #: model:mail.message.subtype,description:maintenance.mt_mat_assign
@@ -491,7 +493,7 @@ msgstr ""
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_cat
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 msgid "Equipment Categories"
-msgstr ""
+msgstr "Utrustningskategorier"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__category_id
@@ -605,6 +607,8 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
+"ID på överliggande post med aliaset (exempel: projekt som har alias för "
+"skapa uppgift)"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_exception_icon
@@ -616,7 +620,7 @@ msgstr "Ikon"
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__activity_exception_icon
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Ikon för att indikera en undantagsaktivitet."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_needaction
@@ -634,7 +638,7 @@ msgstr ""
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Om markerad så har det blivit ett leveransfel för några  meddelanden."
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__kanban_state__normal
@@ -646,7 +650,7 @@ msgstr "Pågående"
 #. module: maintenance
 #: model:maintenance.team,name:maintenance.equipment_team_maintenance
 msgid "Internal Maintenance"
-msgstr ""
+msgstr "Internt underhåll"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
@@ -701,7 +705,7 @@ msgstr "Försenade aktiviteter"
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__email_cc
 msgid "List of cc from incoming emails."
-msgstr ""
+msgstr "Lista på CC från inkommande e-post"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__location
@@ -723,7 +727,7 @@ msgstr "Låg"
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_main_attachment_id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Huvudbilaga"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__maintenance_ids
@@ -733,7 +737,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "Maintenance"
-msgstr ""
+msgstr "Underhåll"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_request_calendar
@@ -760,7 +764,7 @@ msgstr ""
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_equipment
 msgid "Maintenance Equipment"
-msgstr ""
+msgstr "Utrustning att underhålla"
 
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_equipment_category
@@ -815,7 +819,7 @@ msgstr ""
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_stage
 msgid "Maintenance Stage"
-msgstr ""
+msgstr "Underhållssteg"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_stage_configuration
@@ -827,19 +831,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_tree
 msgid "Maintenance Team"
-msgstr ""
+msgstr "Underhållslag"
 
 #. module: maintenance
 #: model:ir.actions.act_window,name:maintenance.maintenance_dashboard_action
 #: model:ir.model,name:maintenance.model_maintenance_team
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_teams
 msgid "Maintenance Teams"
-msgstr ""
+msgstr "Underhållslag"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__maintenance_type
 msgid "Maintenance Type"
-msgstr ""
+msgstr "Underhållstyp"
 
 #. module: maintenance
 #: model:ir.actions.server,name:maintenance.maintenance_requests_cron_ir_actions_server
@@ -853,7 +857,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Fel vid meddelandeleverans"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_ids
@@ -885,7 +889,7 @@ msgstr ""
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
 msgid "My Maintenances"
-msgstr ""
+msgstr "Mitt underhåll"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__name
@@ -983,7 +987,7 @@ msgstr "Antal meddelanden som kräver en åtgärd"
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error_counter
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Antal meddelanden med leveransfel"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_unread_counter
@@ -1264,6 +1268,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"Status baserad på aktiviteter\n"
+"Försenade: Förfallodagen har passerat\n"
+"Idag: Aktivitetsdatum är idag\n"
+"Kommande: Framtida aktiviteter."
 
 #. module: maintenance
 #: model:mail.message.subtype,description:maintenance.mt_req_status
@@ -1273,7 +1281,7 @@ msgstr "Status förändrad"
 #. module: maintenance
 #: model:maintenance.team,name:maintenance.equipment_team_subcontractor
 msgid "Subcontractor"
-msgstr ""
+msgstr "Underleverantör"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__name
@@ -1300,7 +1308,7 @@ msgstr ""
 #. module: maintenance
 #: model:ir.actions.act_window,name:maintenance.maintenance_team_action_settings
 msgid "Teams"
-msgstr ""
+msgstr "Teams"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__technician_user_id
@@ -1381,7 +1389,7 @@ msgstr ""
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__activity_exception_decoration
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Typ av undantagsaktivitet i posten"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search

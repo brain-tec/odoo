@@ -13,8 +13,10 @@
 # sejun huang <sejun.huang@gmail.com>, 2020
 # zhengwei wu <wzw15199@gmail.com>, 2020
 # Mandy Choy <mnc@odoo.com>, 2021
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
 # JustinC <dev@dottdot.com>, 2021
+# Benson <Benson.Dr@Gmail.com>, 2021
+# Shigurefox <tom.liang@omniwaresoft.com.tw>, 2021
+# 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -22,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: JustinC <dev@dottdot.com>, 2021\n"
+"Last-Translator: 敬雲 林 <chingyun@yuanchih-consult.com>, 2021\n"
 "Language-Team: Chinese (Taiwan) (https://www.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -572,6 +574,10 @@ msgid ""
 "        Contains Balance Sheet, Profit/Loss reports\n"
 "    "
 msgstr ""
+"\n"
+"立陶宛的會計報告\n"
+"\n"
+"         包含資產負債表、損益報告 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_reports
@@ -600,6 +606,9 @@ msgid ""
 "        Accounting reports for Sweden\n"
 "    "
 msgstr ""
+"\n"
+"        Accounting reports for Sweden\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ch_reports
@@ -744,6 +753,17 @@ msgid ""
 "        * Account Tags.\n"
 "    "
 msgstr ""
+"\n"
+"        Chart of Accounts (COA) Template for Lithuania's Accounting.\n"
+"\n"
+"        This module also includes:\n"
+"\n"
+"        * List of available banks in Lithuania.\n"
+"        * Tax groups.\n"
+"        * Most common Lithuanian Taxes.\n"
+"        * Fiscal positions.\n"
+"        * Account Tags.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_fsm
@@ -752,6 +772,8 @@ msgid ""
 "        Convert helpdesk tickets to field service tasks.\n"
 "    "
 msgstr ""
+"\n"
+"        將求助中心工單轉換為現場服務任務. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_product_unspsc
@@ -1310,6 +1332,23 @@ msgid ""
 "    but rather the amount of these lines will be deduced from the lines they apply to during tax computation.\n"
 "    "
 msgstr ""
+"\n"
+"在 稅務雲 計算中管理折扣.\n"
+"    請參閱 https://taxcloud.com/support/discounts 或\n"
+"    https://service.taxcloud.net/hc/en-us/articles/360015649791-How-can-discounts-be-applied-\n"
+"\n"
+"    總結: 在計算銷售稅之前，所有賣家提供的折扣都必須應用於銷售價格.\n"
+"    賣家應在折扣申請政策中向客戶披露他們的方法。\n"
+"\n"
+"   算法如下:\n"
+"    - 首先應用特定於行的折扣，在它們應該適用的行上。\n"
+"      這意味著特定產品的折扣或最便宜的產品線的折扣。\n"
+"    - 然後，全球折扣盡可能均勻地應用於付費行。\n"
+"      如果有餘數，則按行順序依次應用，\n"
+"      直到沒有折扣或沒有折扣明細行。\n"
+"\n"
+"   請注意，折扣明細(價格為負)不會對其徵稅，\n"
+"   而是這些行的數量將從它們在稅收計算過程中使用的明細行中扣除. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_coupon_taxcloud_delivery
@@ -1344,6 +1383,10 @@ msgid ""
 "    Necessary master data is also included.\n"
 "    "
 msgstr ""
+"\n"
+"挪威 SAF-T 是標准文件格式，用於使用 XML 格式導出各種類型的會計交易資料.\n"
+"    SAF-T Financial 的第一個版本僅限於總分類帳級別，包括客戶和供應商交易.\n"
+"    還包括必要的主資料. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_payumoney
@@ -1398,6 +1441,9 @@ msgid ""
 "    Under Construction\n"
 "    "
 msgstr ""
+"\n"
+"   建構中\n"
+" "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_ebay
@@ -1554,6 +1600,102 @@ msgid ""
 "    When validating a batch payment, the ABA file will be generated.  It can\n"
 "    be regenerated.  This file can then be uploaded to the bank.\n"
 msgstr ""
+"\n"
+"ABA Credit Transfer\n"
+"===================\n"
+"\n"
+"This module allows the generation of payment batches as ABA (Australian\n"
+"Bankers Association) text files.  The generated 'aba' file can be uploaded\n"
+"to many Australian banks.\n"
+"\n"
+"Setup\n"
+"-----\n"
+"\n"
+"- *Account > Configuration > invoicing > Journals*\n"
+"\n"
+"    If needed, create new journal or choose an existing journal with **Type**\n"
+"    set to *“Bank”*.\n"
+"\n"
+"    On **Advanced Settings**, ensure ABA Credit Transfer is ticked.\n"
+"\n"
+"    On the **Bank Account** tab, enter the **Account Number**.\n"
+"\n"
+"    On the same tab, ensure the ABA transfer information is set up.\n"
+"\n"
+"    **BSB** - Required, 6 digits, and will be auto formatted.\n"
+"\n"
+"    **Financial Institution Code** - Required (provided by bank or can be found\n"
+"    on Google).  It is three uppercase 3 characters.\n"
+"\n"
+"    **Supplying User Name** - Some banks allow this to be freeform, some banks\n"
+"    may reject the ABA file if the Supplying User Name is not as expected.  It\n"
+"    cannot be longer than 26 characters.\n"
+"\n"
+"    **APCA Identification Number** - User Identification number is bank\n"
+"    allocated.  It is 6 digits.\n"
+"\n"
+"    **Include Self Balancing Transaction** - Some institutions require that the\n"
+"    last be a self balancing transaction which is used as a verification.\n"
+"\n"
+"- *Accounting > Configuration > Payments > Bank Accounts*\n"
+"\n"
+"    Account will show up in list as the journal name.\n"
+"\n"
+"    Editing will show the **Account Number**.  This is important as it is used by\n"
+"    the ABA process.\n"
+"\n"
+"    **Bank** is optional.\n"
+"\n"
+"- *Contacts > Configuration > Bank Accounts > Bank Accounts*\n"
+"\n"
+"    Paying account will show up in list as the account number.\n"
+"\n"
+"    **Account Holder Name** - Can be entered here, if Required.  Generally not\n"
+"    validated by the banks on ABA file transfers, but may show up on the payee\n"
+"    bank statement against the payment.\n"
+"\n"
+"- Vendor bank accounts can be set up in the same place, however, it is\n"
+"  generally easier to set them up from the partner from for the Vendor.\n"
+"\n"
+"- *Accounting > Vendors > Vendors*\n"
+"\n"
+"    On **Accounting** tab, click on *\"View accounts detail\"* from where a\n"
+"    vendor bank account can be created or edited.\n"
+"\n"
+"    **Account Number** - Required, must be less than 9 digits.\n"
+"\n"
+"    **BSB** - Required, 6 digits, and will be auto formatted.\n"
+"\n"
+"    **Account Holder Name** - Optional.\n"
+"\n"
+"Use\n"
+"---\n"
+"\n"
+"- Create a vendor payment in the normal way.\n"
+"\n"
+"    Ensure the **Vendor** is one with a valid ABA payment account.\n"
+"\n"
+"    Choose the correct **Payment Journal** which is set for ABA payments.\n"
+"\n"
+"    Select **ABA Credit Transfer** radio button.\n"
+"\n"
+"    If the vendor has multiple bank account, you may need to select the\n"
+"    correct **Recipient Bank Account**.  Or if paying a vendor bill, it may\n"
+"    need the correct bank account associated with it.\n"
+"\n"
+"    Enter payment amount, etc.\n"
+"\n"
+"- *Vendors > Payments*\n"
+"\n"
+"    After payment(s) are confirmed, they will show up in the payments list.\n"
+"\n"
+"    Using filters, or sorting, select the payments to be included.  Under\n"
+"    *Actions* choose *Create batch payment*.\n"
+"\n"
+"- *Vendors > Batch Payments*\n"
+"\n"
+"    When validating a batch payment, the ABA file will be generated.  It can\n"
+"    be regenerated.  This file can then be uploaded to the bank.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_auto_transfer
@@ -1654,6 +1796,10 @@ msgid ""
 "=================================\n"
 "    "
 msgstr ""
+"\n"
+"Accounting reports for Denmark\n"
+"=================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fi_reports
@@ -1664,6 +1810,11 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"Accounting reports for Finland\n"
+"================================\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_reports
@@ -2360,6 +2511,10 @@ msgid ""
 "This is meant to be used with localization specific modules.\n"
 "    "
 msgstr ""
+"\n"
+"SAF-T 報表的基本模組\n"
+"================================\n"
+"這表示在與本地化特定模組一起使用. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_br
@@ -2514,6 +2669,25 @@ msgid ""
 "No modified version is certified and supported by Odoo SA.\n"
 "    "
 msgstr ""
+"\n"
+"Belgian Registered Cash Register\n"
+"================================\n"
+"\n"
+"This module turns the Point Of Sale module into a certified Belgian cash register.\n"
+"\n"
+"More info:\n"
+"  * http://www.systemedecaisseenregistreuse.be/\n"
+"  * http://www.geregistreerdkassasysteem.be/\n"
+"\n"
+"Legal\n"
+"-----\n"
+"**The use of pos_blackbox_be sources is only certified on odoo.com SaaS platform\n"
+"for version 13.0.** Contact Odoo SA before installing pos_blackbox_be module.\n"
+"\n"
+"An obfuscated and certified version of the pos_blackbox_be may be provided on\n"
+"requests for on-premise installations.\n"
+"No modified version is certified and supported by Odoo SA.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_bo
@@ -2570,6 +2744,8 @@ msgid ""
 "Bridge module for project and enterprise\n"
 "    "
 msgstr ""
+"\n"
+"專案和企業的橋接模組 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_rating
@@ -3522,6 +3698,66 @@ msgid ""
 "For Development information go to http://www.afip.gob.ar/fe/documentos/WSBFEv1%20-%20Manual%20para%20el%20desarrollador.pdf\n"
 "\n"
 msgstr ""
+"\n"
+"功能性\n"
+"----------\n"
+"\n"
+"能夠在 Odoo 中建立日誌以建立電子客戶應收憑單並報告給 AFIP (通過網路服務).\n"
+"可用的選項有:\n"
+"\n"
+"    * 電子票據 - 網路服務\n"
+"    * 出口憑證 - 網路服務\n"
+"    * 電子財政債券 - 網路服務\n"
+"\n"
+"在電子日記帳中，如果您驗證票據，此票據將同時在 Odoo 和 AFIP 中驗證. 此驗證是即時進行的，我們收到來自 AFIP 的 \"已批准/已批准/已觀察/拒絕\" 狀態. 如果票據已被 AFIP 拒絕，則不會在系統中過帳，並且將顯示一條彈出訊息，其中包含我們收到的錯誤詳細訊息 (拒絕原因) 和有關問題可能是什麼的提示.\n"
+"\n"
+"出於審計和故障排除目的，我們還增加了一個功能表\"在 AFIP 中諮詢票據\"，讓我們可以查閱先前發送到 AFIP 的票據和用作支援 Odoo 和 AFIP 之間序列同步的任何可能問題的最後一個號碼.\n"
+"\n"
+"    注意：從日誌的表單視圖中，我們可以強制同步\n"
+" 在每個文檔類型的 odoo 序列之間使用 AFIP 中登記的最後一個數字.\n"
+"\n"
+"從供應商賬單中，我們增加了一個功能，可以\n"
+" 在會計設定中設定能夠驗證 AFIP 中的供應商賬單以檢查供應商賬單是否真實 (更多訊息請查看設定說明).\n"
+"\n"
+"設定:\n"
+"\n"
+"1. 轉到會計設定 > 阿根廷本地化部分\n"
+"\n"
+"    1.1.設定 AFIP Web 服務模式：\n"
+"\n"
+"    * 測試環境，以便使用演示證書來測試實例，並向 AFIP 開具非真實發票。只是為了測試。對於已經預先定義的演示實例，您無需對其進行設定（在 AFIP 中通常稱為 Homologation 環境）。\n"
+"    * 為AFIP產生真實證書和合法發票的生產環境，\n"
+"\n"
+"    1.2.設定您的 AFIP 證書：如果您在演示實例中，則預設情況下已設定該證書。如果您在生產實例中，只需上傳您的 AFIP 證書\n"
+"\n"
+"    1.3.您可以選擇定義是否可以驗證供應商 AFIP 中的賬單.\n"
+"\n"
+"2. 建立銷售日誌，代表您想在 Odoo 中使用的每個 AFIP POS (在 AFIP 門戶中可用).\n"
+"\n"
+"    2.1.預設情況下設定使用文件欄位請不要更改\n"
+"    2.2.為其中一個電子系統設定 AFIP POS 系統.\n"
+"\n"
+"        * 電子發票 - 網路服務'\n"
+"        * 電子財政債券 - 網路服務'\n"
+"        * 出口憑證 - 網路服務'\n"
+"\n"
+"    2.3.考慮到您在 AFIP 門戶中設定的內容，設定 AFIP POS 號碼和 AFIP POS 地址.\n"
+"\n"
+"    注意: 您可以使用日記帳表單中的\"檢查可用的 AFIP POS\"按鈕來確認用於建立日記帳的.\n"
+"\n"
+"有關阿根廷電子發票的更多信息，請存取 http://www.afip.gob.ar/fe/ayuda.asp\n"
+"\n"
+"技術的\n"
+"---------\n"
+"\n"
+"實現的 Web 服務是最常見的:\n"
+"\n"
+"* wsfev1 - “Factura Electrónica”（電子發票）\n"
+"* wsbfev1 - “Bono Fiscal Electrónico”（電子財政債券）\n"
+"* wsfexv1 - “Factura de Exportación Electrónica”（電子出口發票 - 與出口憑證相同）\n"
+"* wscdc - “Constatación de Comprobantes”（發票驗證）\n"
+"\n"
+"有關開發信息，請存取 http://www.afip.gob.ar/fe/documentos/WSBFEv1%20-%20Manual%20para%20el%20desarrollador.pdf\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_latam_invoice_document
@@ -3746,6 +3982,8 @@ msgid ""
 "Generate Electronic Invoice with custom numbers\n"
 "    "
 msgstr ""
+"\n"
+"使用自定義編號產生電子票據 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm
@@ -3933,6 +4171,8 @@ msgid ""
 "Hides the attendance presence button when an employee is on leave.\n"
 "    "
 msgstr ""
+"\n"
+"員工休假時隱藏考勤按鈕. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_import_module
@@ -3989,6 +4229,11 @@ msgid ""
 "The wizard used is similar as the one for the credit note.\n"
 "    "
 msgstr ""
+"\n"
+"在許多國家/地區，借記單用作現有發票金額的增加\n"
+"或在某些特定情況下取消信用票據。\n"
+"它就像一張普通發票，但我們需要追踪與原始發票的連結.\n"
+"使用的引導與貸記單的引導相似. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cn
@@ -4420,6 +4665,8 @@ msgid ""
 "Manage Product returns from helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"管理來自求助中心工單的產品退貨 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_dropshipping
@@ -4587,6 +4834,8 @@ msgid ""
 "Manage the after sale of the products from helpdesk tickets.\n"
 "    "
 msgstr ""
+"\n"
+"從求助中心單據管理產品的售後. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_stock
@@ -5438,6 +5687,8 @@ msgid ""
 "Please refer to Sale Matrix or Purchase Matrix for the use of this module.\n"
 "    "
 msgstr ""
+"\n"
+"本模組的使用請參考銷售矩陣或採購矩陣. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_plm
@@ -5607,6 +5858,8 @@ msgid ""
 "Repair Products from helpdesk tickets\n"
 "    "
 msgstr ""
+"\n"
+"從求助中心單據維修產品 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_fetchmail
@@ -5828,6 +6081,8 @@ msgid ""
 "\n"
 "Shorten URLs and use them to track clicks and UTMs\n"
 msgstr ""
+"\n"
+"縮短 URL 並使用它們來追踪點擊次數和整合式威脅管理 \n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_google_map
@@ -6049,6 +6304,11 @@ msgid ""
 "It also enables the \"optional products\" feature.\n"
 "    "
 msgstr ""
+"\n"
+"使用者檢查“module_sale_product_configurator”設定時安裝的技術模組.\n"
+"主要目的是覆蓋 sale_order 視圖以允許在 SO 表單中設定產品.\n"
+"\n"
+"它還啟用\"可選產品\"功能. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_repair
@@ -6268,6 +6528,17 @@ msgid ""
 "Set the payment reference type from the Sales Journal.\n"
 "    "
 msgstr ""
+"\n"
+"This is the Odoo module to manage the accounting in Finland.\n"
+"============================================================\n"
+"\n"
+"After installing this module, you'll have access to :\n"
+"    * Finnish chart of account\n"
+"    * Fiscal positions\n"
+"    * Invoice Payment Reference Types (Finnish Standard Reference & Finnish Creditor Reference (RF))\n"
+"\n"
+"Set the payment reference type from the Sales Journal.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_uom
@@ -6536,6 +6807,11 @@ msgid ""
 "    - generic Indonesian chart of accounts\n"
 "    - tax structure"
 msgstr ""
+"\n"
+"這是為中小企業執行 Odoo 會計所需的最新印度尼西亞 Odoo 本地化：\n"
+"================================================== ================================================\n"
+"     - 通用印尼會計科目表\n"
+"     - 稅收結構"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_uk
@@ -6694,6 +6970,10 @@ msgid ""
 "======================================================================\n"
 "This module applies to companies based in Algeria.\n"
 msgstr ""
+"\n"
+"This is the module to manage the accounting chart for Algeria in Odoo.\n"
+"======================================================================\n"
+"This module applies to companies based in Algeria.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr
@@ -6973,6 +7253,8 @@ msgid ""
 "This module allows Employees (and not users) to log in to the Point of Sale application using the fiscal data module\n"
 "    "
 msgstr ""
+"\n"
+"該模組允許員工 (而非使用者) 使用財務資料模組登錄銷售點應用程式 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_rating
@@ -7009,6 +7291,8 @@ msgid ""
 "This module allows to configure commissions for resellers.\n"
 "    "
 msgstr ""
+"\n"
+"此模組允許為經銷商設定佣金. "
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_automation
@@ -8019,7 +8303,7 @@ msgstr "- %r in %s=%r"
 #: model:ir.module.module,description:base.module_website_crm_livechat
 msgid ""
 " Adds a stat button on lead form view to access their livechat sessions."
-msgstr ""
+msgstr " 在潛在客戶表單視圖上增加一個統計按鈕以存取他們的即時聊天對話."
 
 #. module: base
 #: model:ir.module.module,description:base.module_inter_company_rules
@@ -8045,7 +8329,7 @@ msgstr "這是管理香港會計和在地化圖表的基礎模組"
 msgid ""
 " another model requires the record being deleted. If possible, archive it "
 "instead."
-msgstr ""
+msgstr " 另一種模型需要刪除記錄. 如果可能，請改為封存."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__accesses_count
@@ -8208,7 +8492,7 @@ msgstr ""
 #: code:addons/fields.py:0
 #, python-format
 msgid "(Record: %s, User: %s)"
-msgstr ""
+msgstr "(記錄: %s, 使用者: %s)"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -8242,6 +8526,7 @@ msgid ""
 "- %(record)r belongs to company %(company)r and %(field)r (%(fname)s: "
 "%(values)s) belongs to another company."
 msgstr ""
+"- %(record)r 屬於公司 %(company)r 及 %(field)r (%(fname)s: %(values)s) 屬於另一家公司."
 
 #. module: base
 #: code:addons/model.py:0
@@ -8250,6 +8535,8 @@ msgid ""
 "- Create/update: a mandatory field is not set.\n"
 "- Delete: another model requires the record being deleted. If possible, archive it instead."
 msgstr ""
+"- 建立/更新: 未設定必填欄位.\n"
+"- 刪除: 另一個模型需要刪除記錄. 如果可能，請改為封存."
 
 #. module: base
 #: code:addons/models.py:0
@@ -8257,7 +8544,7 @@ msgstr ""
 msgid ""
 "- Record is company %(company)r and %(field)r (%(fname)s: %(values)s) "
 "belongs to another company."
-msgstr ""
+msgstr "- 記錄是公司 %(company)r 及 %(field)r (%(fname)s: %(values)s) 屬於另一家公司."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -8617,11 +8904,13 @@ msgid ""
 "<span class=\"searchIcon\"><i class=\"fa fa-search\" role=\"img\" aria-"
 "label=\"Search\" title=\"Search\"/></span>"
 msgstr ""
+"<span class=\"searchIcon\"><i class=\"fa fa-search\" role=\"img\" aria-"
+"label=\"搜尋\" title=\"搜尋\"/></span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.demo_force_install_form
 msgid "<span class=\"text-white text-uppercase\">Danger Zone</span>"
-msgstr ""
+msgstr "<span class=\"text-white text-uppercase\">危險區域</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -9022,7 +9311,7 @@ msgstr "A 農業、林業和漁業"
 msgid ""
 "A Slide channel can be linked to forum. Also, profiles from slide and forum "
 "are regrouped together"
-msgstr ""
+msgstr "滾動頻道可以連結到論壇. 此外，幻燈片和論壇中的設定文件重新組合在一起"
 
 #. module: base
 #: code:addons/models.py:0
@@ -9061,7 +9350,7 @@ msgstr "生成異常的模組"
 #. module: base
 #: model:ir.module.module,description:base.module_test_lint
 msgid "A module to test Odoo code with various linters."
-msgstr ""
+msgstr "使用各種 linter 測試 Odoo 程式碼的模組."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_impex
@@ -9076,7 +9365,7 @@ msgstr "測試 API 的模組"
 #. module: base
 #: model:ir.module.module,description:base.module_test_rpc
 msgid "A module to test the RPC requests."
-msgstr ""
+msgstr "用於測試 RPC 請求的模組."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_uninstall
@@ -9091,7 +9380,7 @@ msgstr "測試翻譯導入的模組。"
 #. module: base
 #: model:ir.module.module,description:base.module_test_xlsx_export
 msgid "A module to test xlsx export."
-msgstr ""
+msgstr "一個用於測試 xlsx 導出的模組."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_assetsbundle
@@ -9102,7 +9391,7 @@ msgstr "驗證資產打包機制的模組"
 #: model:ir.module.module,description:base.module_test_inherits_depends
 msgid ""
 "A module to verify the inheritance using _inherits in non-original modules."
-msgstr ""
+msgstr "在非原始模組中使用 _inherits 驗證繼承的模組."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_inherits
@@ -9124,7 +9413,7 @@ msgstr "具有仿真方法的模組"
 msgid ""
 "A partner with the same <span><span class=\"o_vat_label\">Tax "
 "ID</span></span> already exists ("
-msgstr ""
+msgstr "已存在具有相同 <span><span class=\"o_vat_label\">稅號</span></span> 的合作夥伴 ("
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_10
@@ -9258,12 +9547,12 @@ msgstr "訪問指示物"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr
 msgid "Access documents from the employee profile"
-msgstr ""
+msgstr "從員工檔案輕鬆存取您的文件"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_profile
 msgid "Access the website profile of the users"
-msgstr ""
+msgstr "存取使用者的網站資料"
 
 #. module: base
 #: model:res.groups,name:base.group_private_addresses
@@ -9274,7 +9563,7 @@ msgstr "訪問私人地址"
 #: code:addons/api.py:0 code:addons/api.py:0
 #, python-format
 msgid "Access to unauthorized or invalid companies."
-msgstr ""
+msgstr "存取未經授權或無效的公司."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_analytic_default
@@ -9294,12 +9583,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_auto_transfer
 msgid "Account Automatic Transfers"
-msgstr ""
+msgstr "科目自動轉賬"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_generic_auto_transfer_demo
 msgid "Account Automatic Transfers Demo Data"
-msgstr ""
+msgstr "會計科目自動轉帳示範資料"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import
@@ -9314,12 +9603,12 @@ msgstr "科目表"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_us_consolidation_demo
 msgid "Account Consolidation Demo Data"
-msgstr ""
+msgstr "會計科目合併示範資料"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_be_us_consolidation_demo
 msgid "Account Consolidation Demo Data using a Belgium and a US company"
-msgstr ""
+msgstr "Account Consolidation Demo Data using a Belgium and a US company"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__partner_id
@@ -9339,7 +9628,7 @@ msgstr "帳戶憑單導出"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_invoice_extract_purchase
 msgid "Account Invoice Extract Purchase"
-msgstr ""
+msgstr "會計科目應收憑單提取採購"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__account_no
@@ -9374,17 +9663,17 @@ msgstr "科目 TaxCloud - 銷售"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_coupon_taxcloud
 msgid "Account Taxcloud - Sale (coupon)"
-msgstr ""
+msgstr "會計科目稅務雲 - 銷售(優惠券)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_coupon_taxcloud_delivery
 msgid "Account Taxcloud - Sale (coupon) - Delivery"
-msgstr ""
+msgstr "會計科目稅務雲 - 銷售(優惠券) - 交貨"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_winbooks_import
 msgid "Account Winbooks Import"
-msgstr ""
+msgstr "會計科目 Winbook 導入"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_payment
@@ -9569,12 +9858,12 @@ msgstr "動作"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_tree
 msgid "Activate Language and Update Translations"
-msgstr ""
+msgstr "啟用語言並更新翻譯"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "Activate and Translate"
-msgstr ""
+msgstr "啟用及翻譯"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__active
@@ -9602,7 +9891,7 @@ msgstr "啟用"
 #: model:ir.model.fields,field_description:base.field_res_partner__active_lang_count
 #: model:ir.model.fields,field_description:base.field_res_users__active_lang_count
 msgid "Active Lang Count"
-msgstr ""
+msgstr "啟用語言計數"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__number_next_actual
@@ -9618,7 +9907,7 @@ msgstr "在討論中加入OdooBot"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription_sepa_direct_debit
 msgid "Add SEPA Direct Debit as payment method to subscriptions"
-msgstr ""
+msgstr "將 SEPA 直接借記增加為訂閱的付款方式"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_sms
@@ -9653,27 +9942,27 @@ msgstr "將條碼掃瞄功能添加到活動管理中。"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_reports_cash_basis
 msgid "Add cash basis functionality for reports"
-msgstr ""
+msgstr "為報表增加現金支付功能"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_survey
 msgid "Add certification capabilities to your courses"
-msgstr ""
+msgstr "為您的課程增加認證功能"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_survey
 msgid "Add certification to resumé of your employees"
-msgstr ""
+msgstr "為您的員工履歷增加認證"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_slides
 msgid "Add completed courses to resumé of your employees"
-msgstr ""
+msgstr "將已完成的課程增加到您的員工履歷中"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_crm
 msgid "Add crm UTM info on social"
-msgstr ""
+msgstr "在社交上增加 crm UTM 訊息"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
@@ -9703,7 +9992,7 @@ msgstr "添加OdooBot及時聊天支援"
 #. module: base
 #: model:ir.module.module,summary:base.module_social_sale
 msgid "Add sale UTM info on social"
-msgstr ""
+msgstr "在社交上增加銷售 UTM 訊息"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_sale
@@ -9728,7 +10017,7 @@ msgstr "地址"
 #. module: base
 #: model:ir.model,name:base.model_format_address_mixin
 msgid "Address Format"
-msgstr ""
+msgstr "地址格式"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__type
@@ -9822,6 +10111,72 @@ msgid ""
 "         user with the same login (and a blank password), then rename this new\n"
 "         user to a username that does not exist in LDAP, and setup its groups\n"
 msgstr ""
+"Adds support for authentication by LDAP server.\n"
+"===============================================\n"
+"This module allows users to login with their LDAP username and password, and\n"
+"will automatically create Odoo users for them on the fly.\n"
+"\n"
+"**Note:** This module only work on servers that have Python's ``python-ldap`` module installed.\n"
+"\n"
+"Configuration:\n"
+"--------------\n"
+"After installing this module, you need to configure the LDAP parameters in the\n"
+"General Settings menu. Different companies may have different\n"
+"LDAP servers, as long as they have unique usernames (usernames need to be unique\n"
+"in Odoo, even across multiple companies).\n"
+"\n"
+"Anonymous LDAP binding is also supported (for LDAP servers that allow it), by\n"
+"simply keeping the LDAP user and password empty in the LDAP configuration.\n"
+"This does not allow anonymous authentication for users, it is only for the master\n"
+"LDAP account that is used to verify if a user exists before attempting to\n"
+"authenticate it.\n"
+"\n"
+"Securing the connection with STARTTLS is available for LDAP servers supporting\n"
+"it, by enabling the TLS option in the LDAP configuration.\n"
+"\n"
+"For further options configuring the LDAP settings, refer to the ldap.conf\n"
+"manpage: manpage:`ldap.conf(5)`.\n"
+"\n"
+"Security Considerations:\n"
+"------------------------\n"
+"Users' LDAP passwords are never stored in the Odoo database, the LDAP server\n"
+"is queried whenever a user needs to be authenticated. No duplication of the\n"
+"password occurs, and passwords are managed in one place only.\n"
+"\n"
+"Odoo does not manage password changes in the LDAP, so any change of password\n"
+"should be conducted by other means in the LDAP directory directly (for LDAP users).\n"
+"\n"
+"It is also possible to have local Odoo users in the database along with\n"
+"LDAP-authenticated users (the Administrator account is one obvious example).\n"
+"\n"
+"Here is how it works:\n"
+"---------------------\n"
+"    * The system first attempts to authenticate users against the local Odoo\n"
+"      database;\n"
+"    * if this authentication fails (for example because the user has no local\n"
+"      password), the system then attempts to authenticate against LDAP;\n"
+"\n"
+"As LDAP users have blank passwords by default in the local Odoo database\n"
+"(which means no access), the first step always fails and the LDAP server is\n"
+"queried to do the authentication.\n"
+"\n"
+"Enabling STARTTLS ensures that the authentication query to the LDAP server is\n"
+"encrypted.\n"
+"\n"
+"User Template:\n"
+"--------------\n"
+"In the LDAP configuration on the General Settings, it is possible to select a *User\n"
+"Template*. If set, this user will be used as template to create the local users\n"
+"whenever someone authenticates for the first time via LDAP authentication. This\n"
+"allows pre-setting the default groups and menus of the first-time users.\n"
+"\n"
+"**Warning:** if you set a password for the user template, this password will be\n"
+"         assigned as local password for each new LDAP user, effectively setting\n"
+"         a *master password* for these users (until manually changed). You\n"
+"         usually do not want this. One easy way to setup a template user is to\n"
+"         login once with a valid LDAP user, let Odoo create a blank local\n"
+"         user with the same login (and a blank password), then rename this new\n"
+"         user to a username that does not exist in LDAP, and setup its groups\n"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_administration
@@ -9866,7 +10221,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase_enterprise
 msgid "Advanced Features for Purchase Management"
-msgstr ""
+msgstr "採購管理的進階功能"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_enterprise
@@ -9888,12 +10243,12 @@ msgstr "客戶關係管理的高級特徵"
 #. module: base
 #: model:ir.module.module,summary:base.module_im_livechat_enterprise
 msgid "Advanced features for Live Chat"
-msgstr ""
+msgstr "線上客服的進階功能"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_enterprise
 msgid "Advanced features for PoS"
-msgstr ""
+msgstr "PoS 的進階功能"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_enterprise
@@ -9954,13 +10309,13 @@ msgstr "阿爾及利亞"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dz
 msgid "Algeria - Accounting"
-msgstr ""
+msgstr "Algeria - Accounting"
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_alipay
 #: model:ir.module.module,shortdesc:base.module_payment_alipay
 msgid "Alipay Payment Acquirer"
-msgstr ""
+msgstr "Alipay Payment Acquirer"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_search
@@ -9992,7 +10347,7 @@ msgstr "發送到該聯繫人的所有電子信件和文件將以這種語言翻
 #: model:ir.module.module,description:base.module_account_consolidation
 #: model:ir.module.module,summary:base.module_account_consolidation
 msgid "All you need to make financial consolidation"
-msgstr ""
+msgstr "進行財務整合所需的一切"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays
@@ -10007,7 +10362,7 @@ msgstr "允許收銀櫃檯再次列印收據"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_fsm
 msgid "Allow generating fsm tasks from ticket"
-msgstr ""
+msgstr "允許從票證生成 fsm 任務"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_ocn_client
@@ -10052,24 +10407,24 @@ msgstr "允許的公司"
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode_quality_control
 msgid "Allows the usage of quality checks within the barcode views"
-msgstr ""
+msgstr "允許在條碼視圖中使用品檢"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_map
 msgid "Allows the viewing of records on a map"
-msgstr ""
+msgstr "允許查看地圖上的記錄"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_profile
 msgid ""
 "Allows to access the website profile of the users and see their statistics "
 "(karma, badges, etc..)"
-msgstr ""
+msgstr "允許訪問用戶的網站個人資料並查看他們的統計數據（活躍度、成就等。）"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_forum
 msgid "Allows to link forum on a course"
-msgstr ""
+msgstr "允許連結課程論壇"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_delivery
@@ -10080,34 +10435,34 @@ msgstr "可在優惠券獎勵中提供免費運送服務"
 #: model:ir.module.module,description:base.module_website_sale_coupon_delivery
 #: model:ir.module.module,summary:base.module_website_sale_coupon_delivery
 msgid "Allows to offer free shippings in coupon reward on eCommerce"
-msgstr ""
+msgstr "允許在電子商務的優惠券獎勵中提供免費送貨"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sms
 msgid "Allows to send sms to website visitor"
-msgstr ""
+msgstr "允許向網站訪客傳送SMS"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_crm_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a lead."
-msgstr ""
+msgstr "如果訪問者連結到潛在客戶，則允許向網站訪問者發送短信。"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sms
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a partner."
-msgstr ""
+msgstr "如果訪問者連接到合作夥伴，則允許向網站訪問者發送簡訊。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_sms
 msgid "Allows to send sms to website visitor that have lead"
-msgstr ""
+msgstr "允許向有線索的網站訪問者發送簡訊"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon
 msgid "Amazon Connector"
-msgstr ""
+msgstr "Amazon Connector"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_delivery
@@ -10117,7 +10472,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_amazon_taxcloud
 msgid "Amazon/TaxCloud Bridge"
-msgstr ""
+msgstr "Amazon/TaxCloud Bridge"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -10321,7 +10676,7 @@ msgstr "結構"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__arch_diff
 msgid "Architecture Diff"
-msgstr ""
+msgstr "架構差異"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access_search
@@ -10416,7 +10771,7 @@ msgstr "至少要啟動一種語言."
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_attachment
 msgid "Attach a new document"
-msgstr ""
+msgstr "附加新的文件"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_form
@@ -10477,17 +10832,17 @@ msgstr "奧地利 - 會計"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_at_reports
 msgid "Austria - Accounting Reports"
-msgstr ""
+msgstr "Austria - Accounting Reports"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_at_reports
 msgid "Austrian Financial Reports"
-msgstr ""
+msgstr "Austrian Financial Reports"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_at
 msgid "Austrian Standardized Charts & Tax"
-msgstr ""
+msgstr "Austrian Standardized Charts & Tax"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_ldap
@@ -10514,12 +10869,12 @@ msgstr "Authorize.Net付款"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_dependency__auto_install_required
 msgid "Auto Install Required"
-msgstr ""
+msgstr "需要自動安裝"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_partner_autocomplete
 msgid "Auto-complete partner companies' data"
-msgstr ""
+msgstr "自動完成聯繫人公司的資料"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_partner_autocomplete_address_extended
@@ -10567,7 +10922,7 @@ msgstr "自動安裝下載的APP，目前不可用"
 msgid ""
 "Automatically finds the purchase order linked to a vendor bill when using "
 "invoice extraction"
-msgstr ""
+msgstr "使用發票提取時自動查找鏈接到供應商帳單的採購訂單"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_translation__state
@@ -10781,7 +11136,7 @@ msgstr "條碼"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_quality_control
 msgid "Barcode Quality bridge module"
-msgstr ""
+msgstr "條碼品檢橋接模塊"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_barcodes_mobile
@@ -10797,7 +11152,7 @@ msgstr "移動應用中的條碼掃瞄"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Barcode symbology"
-msgstr ""
+msgstr "條碼符號"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
@@ -10827,7 +11182,7 @@ msgstr "無法刪除基礎語言 \"en_US\"。"
 #. module: base
 #: model:ir.module.module,summary:base.module_payment
 msgid "Base Module for Payment Acquirers"
-msgstr ""
+msgstr "支付收單方的基本模塊"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model__state__base
@@ -10932,7 +11287,7 @@ msgstr "比利時註冊的收銀機"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_hr_l10n_be
 msgid "Belgian Registered Cash Register Employee module"
-msgstr ""
+msgstr "Belgian Registered Cash Register Employee module"
 
 #. module: base
 #: model:res.country,name:base.be
@@ -10952,7 +11307,7 @@ msgstr "比利時 - 會計報告"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_edi
 msgid "Belgium - E-Invoicing (UBL 2.0, e-fff)"
-msgstr ""
+msgstr "Belgium - E-Invoicing (UBL 2.0, e-fff)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_coda
@@ -11136,7 +11491,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_amazon_taxcloud
 msgid "Bridge module between Amazon Connector and TaxCloud"
-msgstr ""
+msgstr "Amazon Connector 和 TaxCloud 之間的橋接模塊"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_timesheet_purchase
@@ -11152,7 +11507,7 @@ msgstr "用於使用網站的幫助台模組的連接模組。"
 #. module: base
 #: model:ir.module.module,summary:base.module_project_enterprise
 msgid "Bridge module for project and enterprise"
-msgstr ""
+msgstr "專案和企業的橋樑模塊"
 
 #. module: base
 #: model:res.country,name:base.io
@@ -11255,7 +11610,7 @@ msgstr "CRM 企業"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_crm
 msgid "CRM statistics on social"
-msgstr ""
+msgstr "社交媒體CRM統計"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_language_export__format__csv
@@ -11272,7 +11627,7 @@ msgstr "CSV 格式: 您可以用您的電子試算表軟體直接修改。最右
 #. module: base
 #: model:res.country,vat_label:base.ar
 msgid "CUIT"
-msgstr ""
+msgstr "CUIT"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__calendar
@@ -11379,7 +11734,7 @@ msgstr "無法聚合字段 %r."
 msgid ""
 "Cannot create new '%s' records from their name alone. Please create those "
 "records manually and try importing again."
-msgstr ""
+msgstr "無法僅從名稱創建新的 '%s' 紀錄。請手動創建這些紀錄並再次嘗試匯入。"
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -11418,7 +11773,7 @@ msgstr "級聯"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_reports_cash_basis
 msgid "Cash Basis Accounting Reports"
-msgstr ""
+msgstr "收付實現制會計報告"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__category_id
@@ -11761,7 +12116,7 @@ msgstr "哥倫比亞 - 會計報告"
 #: model:ir.module.module,description:base.module_l10n_co_pos
 #: model:ir.module.module,shortdesc:base.module_l10n_co_pos
 msgid "Colombian - Point of Sale"
-msgstr ""
+msgstr "Colombian - Point of Sale"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_co
@@ -11897,7 +12252,7 @@ msgstr "公司文件佈局"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__favicon
 msgid "Company Favicon"
-msgstr ""
+msgstr "公司圖標"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo
@@ -11962,7 +12317,7 @@ msgstr "比較專案的時間表和預測"
 #. module: base
 #: model:ir.module.module,summary:base.module_project_timesheet_forecast
 msgid "Compare timesheets and plannings"
-msgstr ""
+msgstr "Compare timesheets and plannings"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__contact_address
@@ -11993,7 +12348,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription_taxcloud
 msgid "Compute taxes with TaxCloud after automatic invoice creation."
-msgstr ""
+msgstr "Compute taxes with TaxCloud after automatic invoice creation."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_taxcloud_delivery
@@ -12070,7 +12425,7 @@ msgstr "配置嚮導"
 #. module: base
 #: model:ir.module.module,summary:base.module_partner_commission
 msgid "Configure resellers commissions on subscription sale"
-msgstr ""
+msgstr "配置訂閱銷售的經銷商佣金"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_timesheet_enterprise
@@ -12085,7 +12440,7 @@ msgstr "配置您的文件佈局"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_product_configurator
 msgid "Configure your products"
-msgstr ""
+msgstr "配置您的產品"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
@@ -12128,12 +12483,12 @@ msgstr ""
 #: code:addons/base/models/ir_mail_server.py:0
 #, python-format
 msgid "Connection Test Succeeded!"
-msgstr ""
+msgstr "連接測試成功！"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_consolidation
 msgid "Consolidation"
-msgstr ""
+msgstr "Consolidation"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__name
@@ -12227,12 +12582,12 @@ msgstr "聯繫人 & 地址"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_contacts_enterprise
 msgid "Contacts Enterprise"
-msgstr ""
+msgstr "聯繫人-企業版"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_partner_check_name
 msgid "Contacts require a name"
-msgstr ""
+msgstr "聯繫人需要姓名"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_filters__context
@@ -12255,7 +12610,7 @@ msgstr "上下文字典作為 Python表達式, 預設為空白 (預設：: {})"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract_sign
 msgid "Contract - Signature"
-msgstr ""
+msgstr "合約 - 簽名"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_contracts
@@ -12275,7 +12630,7 @@ msgstr "控制產品品質"
 #. module: base
 #: model:ir.module.module,summary:base.module_quality_control_iot
 msgid "Control the quality of your products with IoT devices"
-msgstr ""
+msgstr "使用物聯網設備控制產品質量"
 
 #. module: base
 #: model:res.country,name:base.ck
@@ -12306,7 +12661,7 @@ msgstr "不能建立沒有電子信件地址的聯絡人！"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__count
 msgid "Count (Incl. Archived)"
-msgstr ""
+msgstr "計數（包括歸檔）"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_country
@@ -12374,7 +12729,7 @@ msgstr "電子優惠券和促銷"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_survey
 msgid "Course Certifications"
-msgstr ""
+msgstr "課程認證"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_create
@@ -12422,7 +12777,7 @@ msgstr "創建選單嚮導"
 #. module: base
 #: model:ir.module.module,summary:base.module_industry_fsm_report
 msgid "Create Reports for Field service workers"
-msgstr ""
+msgstr "為現場服務工作人員創建報告"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_helpdesk
@@ -12509,7 +12864,7 @@ msgstr "為系統創建和管理使用者。在一段時間內用該系統的使
 #. module: base
 #: model:ir.module.module,summary:base.module_approvals
 msgid "Create and validate approvals requests"
-msgstr ""
+msgstr "創建和驗證批准請求"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_livechat
@@ -12714,7 +13069,7 @@ msgstr "創建日期"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_logging_form_view
 msgid "Creation details"
-msgstr ""
+msgstr "創建詳情"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__credit_limit
@@ -13047,7 +13402,7 @@ msgstr "日期單位用於比較和格式化"
 msgid ""
 "Date unit used for the rounding. The value must be smaller than 'hour' if "
 "you use the digital formatting."
-msgstr ""
+msgstr "用於四捨五入的日期單位。如果您使用數字格式，該值必須小於“小時”。"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:0
@@ -13071,7 +13426,7 @@ msgstr "天數"
 #: model:ir.module.module,shortdesc:base.module_account_debit_note
 #: model:ir.module.module,summary:base.module_account_debit_note
 msgid "Debit Notes"
-msgstr ""
+msgstr "借方備註"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_debug
@@ -13164,7 +13519,7 @@ msgstr "定義的報告"
 #. module: base
 #: model:ir.module.module,summary:base.module_web_map
 msgid "Defines the map view for odoo enterprise"
-msgstr ""
+msgstr "定義 odoo 企業板的地圖視圖"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__definition
@@ -13228,6 +13583,8 @@ msgid ""
 "Demo data should only be used on test databases!\n"
 "                             Once they are loaded, they cannot be removed!"
 msgstr ""
+"演示數據只能用於測試數據庫！\n"
+"                             一旦加載，就無法移除！"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_demo_failure
@@ -13247,12 +13604,12 @@ msgstr "丹麥"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk
 msgid "Denmark - Accounting"
-msgstr ""
+msgstr "Denmark - Accounting"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk_reports
 msgid "Denmark - Accounting Reports"
-msgstr ""
+msgstr "Denmark - Accounting Reports"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__depends
@@ -13307,7 +13664,7 @@ msgstr "使用構建塊設計出色的報價模板，以顯著提高您的成功
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_sms
 msgid "Design, send and track SMS"
-msgstr ""
+msgstr "設計、發送和跟踪簡訊"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing
@@ -13363,7 +13720,7 @@ msgstr "數位產品"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Digital formatting"
-msgstr ""
+msgstr "數字格式"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_decimal_precision__digits
@@ -13779,7 +14136,7 @@ msgstr "下拉選單"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_dropshipping
 msgid "Dropship and Subcontracting Management"
-msgstr ""
+msgstr "直運和外包管理"
 
 #. module: base
 #: code:addons/base/models/res_company.py:0
@@ -13796,7 +14153,7 @@ msgstr "E 給水；排水；廢物管理和整治行動"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_be_edi
 msgid "E-Invoicing, Universal Business Language (UBL 2.0), e-fff protocol"
-msgstr ""
+msgstr "E-Invoicing, Universal Business Language (UBL 2.0), e-fff protocol"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_edi
@@ -13998,7 +14355,7 @@ msgstr "電郵市場行銷"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__signature
 msgid "Email Signature"
-msgstr ""
+msgstr "電子郵件簽名"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__employee
@@ -14014,17 +14371,17 @@ msgstr "員工合同"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract_reports
 msgid "Employee Contracts Reporting"
-msgstr ""
+msgstr "員工契約報告"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_presence
 msgid "Employee Presence Control"
-msgstr ""
+msgstr "員工出勤控制"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_referral
 msgid "Employee Referral"
-msgstr ""
+msgstr "員工推薦"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_employee_form
@@ -14058,7 +14415,7 @@ msgstr "能源供應"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_iap_lead_enrich
 msgid "Enrich Leads/Opportunities using email address domain"
-msgstr ""
+msgstr "使用電子郵件地址域豐富潛在客戶/機會"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -14099,12 +14456,12 @@ msgstr "娛樂"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_epson_printer_restaurant
 msgid "Epson Printers as Order Printers"
-msgstr ""
+msgstr "Epson印表機作為訂單印表機"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_epson_printer
 msgid "Epson ePOS Printers in PoS"
-msgstr ""
+msgstr "PoS 中的 Epson ePOS 印表機"
 
 #. module: base
 #: model:res.country,name:base.gq
@@ -14181,7 +14538,7 @@ msgstr "估算類型"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_event_sms
 msgid "Event Attendees SMS Marketing"
-msgstr ""
+msgstr "活動參加者簡訊行銷"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_barcode
@@ -14306,7 +14663,7 @@ msgstr "費用"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_payroll_expense
 msgid "Expenses in Payslips"
-msgstr ""
+msgstr "工資單中的費用"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_10
@@ -14532,7 +14889,7 @@ msgstr "聯邦航運"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_fr_fec
 msgid "Fichier d'Échange Informatisé (FEC) for France"
-msgstr ""
+msgstr "Fichier d'Échange Informatisé (FEC) for France"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_fec
@@ -14678,17 +15035,17 @@ msgstr "字段名稱"
 #: model:ir.module.category,name:base.module_category_operations_field_service
 #: model:ir.module.module,shortdesc:base.module_industry_fsm
 msgid "Field Service"
-msgstr ""
+msgstr "現場服務"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_industry_fsm_report
 msgid "Field Service Reports"
-msgstr ""
+msgstr "現場服務報告"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_industry_fsm_stock
 msgid "Field Service Stock"
-msgstr ""
+msgstr "現場服務庫存"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__ttype
@@ -14749,7 +15106,7 @@ msgstr "字段說明"
 #: model:ir.model,name:base.model_ir_model_fields_selection
 #: model:ir.ui.menu,name:base.ir_model_model_fields_selection
 msgid "Fields Selection"
-msgstr ""
+msgstr "字段選擇"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -14780,6 +15137,12 @@ msgid ""
 "Technical Details:\n"
 "%s"
 msgstr ""
+"由於文件格式錯誤，文件 %r 未導入。\n"
+"\n"
+"此問題可能是由引用同一字段的重複條目引起的。請檢查您嘗試導入的文件的內容。\n"
+"\n"
+"技術細節：\n"
+"%s"
 
 #. module: base
 #: code:addons/base/wizard/base_import_language.py:0
@@ -14790,6 +15153,10 @@ msgid ""
 "Technical Details:\n"
 "%s"
 msgstr ""
+"由於格式不匹配或格式錯誤的文件，文件 %r 未導入。 （有效格式為 .csv、.po、.pot）\n"
+"\n"
+"技術細節：\n"
+"%s"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -14895,12 +15262,12 @@ msgstr "芬蘭"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fi_reports
 msgid "Finland - Accounting Reports"
-msgstr ""
+msgstr "Finland - Accounting Reports"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fi
 msgid "Finnish Localization"
-msgstr ""
+msgstr "Finnish Localization"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__week_start
@@ -14957,12 +15324,12 @@ msgstr "車隊"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_fleet
 msgid "Fleet History"
-msgstr ""
+msgstr "車隊歷程"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_fleet
 msgid "Fleet from documents"
-msgstr ""
+msgstr "從文件車隊"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__float
@@ -15071,7 +15438,7 @@ msgstr "論壇"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_forum
 msgid "Forum on Courses"
-msgstr ""
+msgstr "課程論壇"
 
 #. module: base
 #: code:addons/models.py:0
@@ -15079,7 +15446,7 @@ msgstr ""
 msgid ""
 "Found more than 10 errors and more than one error per 10 records, "
 "interrupted to avoid showing too many errors."
-msgstr ""
+msgstr "發現超過10個錯誤，每10條記錄超過1個錯誤，中斷避免顯示太多錯誤。"
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -15116,7 +15483,7 @@ msgstr "法國 -POS的增值稅反欺詐認證（CGI 286 I-3 bis）"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_coupon_delivery
 msgid "Free Delivery with Coupon on eCommerce"
-msgstr ""
+msgstr "在電子商務上使用優惠券免運費"
 
 #. module: base
 #: model:res.country,name:base.gf
@@ -15223,7 +15590,7 @@ msgstr "消費稅號:"
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_pos
 msgid "GST Point of Sale"
-msgstr ""
+msgstr "GST 營業點"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_purchase
@@ -15275,7 +15642,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays_gantt
 msgid "Gantt view for Time Off Dashboard"
-msgstr ""
+msgstr "休假儀表板的甘特圖視圖"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_kanban_gauge
@@ -15400,7 +15767,7 @@ msgstr "在網站應用程序中獲取新的儀表板視圖"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_fleet
 msgid "Get history of driven cars by employees"
-msgstr ""
+msgstr "獲取員工駕駛汽車的歷史記錄"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_enterprise
@@ -15856,32 +16223,32 @@ msgstr "服務台"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_account
 msgid "Helpdesk Account"
-msgstr ""
+msgstr "Helpdesk Account"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale
 msgid "Helpdesk After Sales"
-msgstr ""
+msgstr "Helpdesk After Sales"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_fsm
 msgid "Helpdesk FSM"
-msgstr ""
+msgstr "Helpdesk FSM"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_repair
 msgid "Helpdesk Repair"
-msgstr ""
+msgstr "Helpdesk Repair"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale_coupon
 msgid "Helpdesk Sale Coupon"
-msgstr ""
+msgstr "Helpdesk Sale Coupon"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_stock
 msgid "Helpdesk Stock"
-msgstr ""
+msgstr "Helpdesk Stock"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_timesheet
@@ -15936,7 +16303,7 @@ msgstr "幫您管理您的評價。"
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_approvals
 msgid "Helps you manage your approvals."
-msgstr ""
+msgstr "幫助您管理您的審批。"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_contracts
@@ -15973,6 +16340,8 @@ msgid ""
 "Helps you manage your mass mailing to design\n"
 "professional emails and reuse templates."
 msgstr ""
+"幫助您管理群發郵件以進行設計\n"
+"專業電子郵件和重複使用模板。"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_payroll
@@ -15996,7 +16365,7 @@ msgstr "幫助您管理與採購相關的流程，如報價請求，供應商帳
 #. module: base
 #: model:ir.module.category,description:base.module_category_manufacturing_quality
 msgid "Helps you manage your quality alerts and quality checks."
-msgstr ""
+msgstr "幫助您管理質量警報和質量檢查。"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_recruitment
@@ -16006,7 +16375,7 @@ msgstr "幫您管理您的招聘。"
 #. module: base
 #: model:ir.module.category,description:base.module_category_human_resources_time_off
 msgid "Helps you manage your time off."
-msgstr ""
+msgstr "幫助您管理您的休假"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_sign
@@ -16479,7 +16848,7 @@ msgstr "畫素 512"
 #. module: base
 #: model:ir.model,name:base.model_image_mixin
 msgid "Image Mixin"
-msgstr ""
+msgstr "圖像混合"
 
 #. module: base
 #: code:addons/image.py:0
@@ -16487,7 +16856,7 @@ msgstr ""
 msgid ""
 "Image size excessive, uploaded images must be smaller than %s million "
 "pixels."
-msgstr ""
+msgstr "圖片尺寸過大，上傳的圖片必須小於 %s 百萬像素。"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
@@ -16567,7 +16936,7 @@ msgstr "導入CSV銀行對帳單"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_winbooks_import
 msgid "Import Data From Winbooks"
-msgstr ""
+msgstr "從 Winbooks 導入數據"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import_ofx
@@ -16638,12 +17007,12 @@ msgstr "印度"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_purchase_stock
 msgid "India Purchase and Warehouse Management"
-msgstr ""
+msgstr "India Purchase and Warehouse Management"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_sale_stock
 msgid "India Sales and Warehouse Management"
-msgstr ""
+msgstr "India Sales and Warehouse Management"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in
@@ -16698,12 +17067,12 @@ msgstr "印度尼西亞"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
 msgid "Indonesia E-faktur"
-msgstr ""
+msgstr "Indonesia E-faktur"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
 msgid "Indonesian - Accounting"
-msgstr ""
+msgstr "Indonesian - Accounting"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
@@ -16846,7 +17215,7 @@ msgstr "整數"
 #. module: base
 #: model:ir.module.module,summary:base.module_marketing_automation_sms
 msgid "Integrate SMS Marketing in marketing campaigns"
-msgstr ""
+msgstr "將簡訊營銷整合到營銷活動中"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_coupon
@@ -16861,12 +17230,12 @@ msgstr "將優惠券機制與運輸成本整合。"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_six
 msgid "Integrate your POS with a Six payment terminal"
-msgstr ""
+msgstr "Integrate your POS with a Six payment terminal"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_adyen
 msgid "Integrate your POS with an Adyen payment terminal"
-msgstr ""
+msgstr "Integrate your POS with an Adyen payment terminal"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_inter_company_rules
@@ -17008,6 +17377,12 @@ msgstr "無效密鑰: QWeb 視圖應該有一個密鑰"
 #, python-format
 msgid "Invalid model name %r in action definition."
 msgstr "動作定義中使用了無效的模型名稱 %r。"
+
+#. module: base
+#: code:addons/base/models/ir_actions.py:611
+#, python-format
+msgid "many2many fields cannot be evaluated by reference"
+msgstr ""
 
 #. module: base
 #: code:addons/template_inheritance.py:0
@@ -17189,7 +17564,7 @@ msgstr "以色列"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_il
 msgid "Israel - Accounting"
-msgstr ""
+msgstr "Israel - Accounting"
 
 #. module: base
 #: model:res.country,name:base.it
@@ -17340,22 +17715,22 @@ msgstr "L 房地產業活動"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_latam_invoice_document
 msgid "LATAM Document"
-msgstr ""
+msgstr "LATAM Document"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_latam_invoice_document
 msgid "LATAM Document Types"
-msgstr ""
+msgstr "LATAM Document Types"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_latam_base
 msgid "LATAM Identification Types"
-msgstr ""
+msgstr "LATAM Identification Types"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_latam_base
 msgid "LATAM Localization Base"
-msgstr ""
+msgstr "LATAM Localization Base"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__license__lgpl-3
@@ -17365,7 +17740,7 @@ msgstr "LGPL 第3版"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
 msgid "LT - Accounting Reports"
-msgstr ""
+msgstr "LT - Accounting Reports"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_landed_costs
@@ -17714,12 +18089,12 @@ msgstr "最新版本"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__login_date
 msgid "Latest authentication"
-msgstr ""
+msgstr "最近登入"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__lato
 msgid "Lato"
-msgstr ""
+msgstr "Lato"
 
 #. module: base
 #: model:res.country,name:base.lv
@@ -17761,12 +18136,12 @@ msgstr "線索生成"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead_website
 msgid "Lead Generation From Website Visits"
-msgstr ""
+msgstr "從網站訪問中產生潛在客戶"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_livechat
 msgid "Lead Livechat Sessions"
-msgstr ""
+msgstr "線索線上客服會話"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_score
@@ -17834,7 +18209,7 @@ msgstr "讓系統嘗試為您的供應商帳單選擇正確的帳戶和/或產�
 #: model:ir.module.module,description:base.module_hr_referral
 #: model:ir.module.module,summary:base.module_hr_referral
 msgid "Let your employees share job positions and refer their friends"
-msgstr ""
+msgstr "讓您的員工分享工作職位並推薦他們的朋友"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_step
@@ -17918,12 +18293,12 @@ msgstr "連結追蹤"
 #. module: base
 #: model:ir.module.module,summary:base.module_voip_crm
 msgid "Link between voip and crm"
-msgstr ""
+msgstr "voip 和 crm 之間的鏈接"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_hr
 msgid "Link module between Point of Sale and HR"
-msgstr ""
+msgstr "銷售點和人力資源之間的鏈接模塊"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_sale
@@ -17933,7 +18308,7 @@ msgstr "銷售點和銷售之間的鏈接模組"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_hr_l10n_be
 msgid "Link module between Pos Blackbox Be and Pos HR"
-msgstr ""
+msgstr "Pos Blackbox Be 和 Pos HR 之間的鏈接模塊"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__link_field_id
@@ -17980,7 +18355,7 @@ msgstr "立陶宛"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt
 msgid "Lithuania - Accounting"
-msgstr ""
+msgstr "立陶宛 - 會計"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_website_live_chat
@@ -17996,7 +18371,7 @@ msgstr "及時匯率"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_livechat_enterprise
 msgid "Live chat enterprise"
-msgstr ""
+msgstr "線上客服-企業版"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_support
@@ -18045,7 +18420,7 @@ msgstr "記錄"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_logging_form_view
 msgid "Logging details"
-msgstr ""
+msgstr "記錄詳情"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__login
@@ -18061,12 +18436,12 @@ msgstr "徽標"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_primary_color
 msgid "Logo Primary Color"
-msgstr ""
+msgstr "logo原色"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_secondary_color
 msgid "Logo Secondary Color"
-msgstr ""
+msgstr "logo二級原色"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__logo_web
@@ -18139,7 +18514,7 @@ msgstr "品質管理的MRP功能"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_mrp_workorder_iot
 msgid "MRP features for Quality Control with IoT"
-msgstr ""
+msgstr "物聯網質量控制的 MRP 功能"
 
 #. module: base
 #: model:res.country,name:base.mo
@@ -18185,12 +18560,12 @@ msgstr "信件測試"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_mail_enterprise
 msgid "Mail Tests (Enterprise)"
-msgstr ""
+msgstr "郵件測試（企業）"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_mail_full
 msgid "Mail Tests (Full)"
-msgstr ""
+msgstr "郵件測試（完整）"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_mail
@@ -18202,7 +18577,7 @@ msgstr "信件測試：特別用於信件的展示和測試"
 #: model:ir.module.module,summary:base.module_test_mail_full
 msgid ""
 "Mail Tests: performances and tests specific to mail with all sub-modules"
-msgstr ""
+msgstr "郵件測試：特定於郵件的所有子模塊的性能和測試"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -18217,7 +18592,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.menu,name:base.menu_module_tree
 msgid "Main Apps"
-msgstr ""
+msgstr "主要模組"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range__sequence_id
@@ -18377,7 +18752,7 @@ msgstr "管理和自定義使用者的選單項。您可以用勾選一些選單
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides
 msgid "Manage and publish an eLearning platform"
-msgstr ""
+msgstr "管理和發布電子學習平台"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_res_bank_form
@@ -18394,12 +18769,12 @@ msgstr "管理聯繫標籤，以更好地分類他們的追蹤和分析的目的
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_taxcloud_delivery
 msgid "Manage discounts in taxclouds computations with delivery."
-msgstr ""
+msgstr "通過交付管理 taxclouds 計算中的折扣。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_taxcloud
 msgid "Manage discounts in taxclouds computations."
-msgstr ""
+msgstr "在 taxclouds 計算中管理折扣。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_plm
@@ -18420,7 +18795,7 @@ msgstr "管理產品庫存和可用性"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_renting
 msgid "Manage rental contracts, deliveries and returns"
-msgstr ""
+msgstr "管理租賃合同、交付和退貨"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.res_partner_industry_action
@@ -18432,7 +18807,7 @@ msgstr "管理合作夥伴行業/產業，更好地對合作夥伴進行分類�
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills
 msgid "Manage skills, knowledge and resumé of your employees"
-msgstr ""
+msgstr "管理員工的技能、知識和簡歷"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_title_contact
@@ -18445,30 +18820,30 @@ msgstr "管理您系統中可用的聯絡人稱謂，這樣您可以在信函或
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_work_entry
 msgid "Manage work entries"
-msgstr ""
+msgstr "管理工時記錄"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_facebook
 #: model:ir.module.module,summary:base.module_social_facebook
 msgid "Manage your Facebook pages and schedule posts"
-msgstr ""
+msgstr "管理您的 Facebook 頁面並安排發佈時間"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_linkedin
 #: model:ir.module.module,summary:base.module_social_linkedin
 msgid "Manage your LinkedIn accounts and schedule posts"
-msgstr ""
+msgstr "管理您的 LinkedIn 帳戶並安排帖子"
 
 #. module: base
 #: model:ir.module.module,description:base.module_social_twitter
 #: model:ir.module.module,summary:base.module_social_twitter
 msgid "Manage your Twitter accounts and schedule tweets"
-msgstr ""
+msgstr "管理您的 Twitter 帳戶並安排推文"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_contract_sign
 msgid "Manage your documents to sign in contracts"
-msgstr ""
+msgstr "管理您的文件以簽署合同"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_payroll
@@ -18478,7 +18853,7 @@ msgstr "管理您的員工薪資表記錄"
 #. module: base
 #: model:ir.module.module,summary:base.module_planning
 msgid "Manage your employees' schedule"
-msgstr ""
+msgstr "管理員工的日程安排"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_fleet
@@ -18983,7 +19358,7 @@ msgstr "缺失單據"
 #: code:addons/models.py:0
 #, python-format
 msgid "Missing required value for the field '%s'"
-msgstr ""
+msgstr "找不到欄位 '%s' 所需的值"
 
 #. module: base
 #: code:addons/models.py:0
@@ -19132,7 +19507,7 @@ msgstr "伺服器動作運行的模型."
 #: code:addons/model.py:0 code:addons/model.py:0
 #, python-format
 msgid "Model:"
-msgstr ""
+msgstr "模型："
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_model_model
@@ -19146,7 +19521,7 @@ msgstr "模型"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_updated
 msgid "Modified Architecture"
-msgstr ""
+msgstr "Modified Architecture"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_module_module
@@ -19265,12 +19640,12 @@ msgstr "蒙古"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn
 msgid "Mongolia - Accounting"
-msgstr ""
+msgstr "Mongolia - Accounting"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn_reports
 msgid "Mongolia - Accounting Reports"
-msgstr ""
+msgstr "Mongolia - Accounting Reports"
 
 #. module: base
 #: model:res.country,name:base.me
@@ -19359,7 +19734,7 @@ msgstr "NIT"
 #. module: base
 #: model:res.country,vat_label:base.id
 msgid "NPWP"
-msgstr ""
+msgstr "NPWP"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__group_by_name
@@ -19587,7 +19962,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.open_module_tree
 msgid "No module found!"
-msgstr ""
+msgstr "找不到模組！"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__view_ids
@@ -19665,7 +20040,7 @@ msgstr "挪威 - 會計"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_no_saft
 msgid "Norwegian Standard Audit File for Tax"
-msgstr ""
+msgstr "Norwegian Standard Audit File for Tax"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__uninstalled
@@ -19690,7 +20065,7 @@ msgstr "外部ID訪問權限不足："
 #: code:addons/base/models/ir_rule.py:0
 #, python-format
 msgid "Note: this might be a multi-company issue."
-msgstr ""
+msgstr "注意：這可能是一個多公司問題。"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__comment
@@ -19719,12 +20094,12 @@ msgstr "公司數量"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__accesses_count
 msgid "Number of access rights that apply to the current user"
-msgstr ""
+msgstr "適用於當前用戶的訪問權限數"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__groups_count
 msgid "Number of groups that apply to the current user"
-msgstr ""
+msgstr "適用於當前用戶的組數"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_module_update__added
@@ -19739,7 +20114,7 @@ msgstr "已更新的模組數量"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__rules_count
 msgid "Number of record rules that apply to the current user"
-msgstr ""
+msgstr "適用於當前用戶的記錄規則數"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_O
@@ -20821,7 +21196,7 @@ msgstr "Odoo 墨西哥語在地化報告"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_reports_closing
 msgid "Odoo Mexican Localization Reports for Closing"
-msgstr ""
+msgstr "Odoo Mexican Localization Reports for Closing"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_edi_landing
@@ -21875,6 +22250,10 @@ msgid ""
 "\n"
 "Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
 msgstr ""
+"Odoo 無法合併附加到以下記錄的 PDF：\n"
+"%s\n"
+"\n"
+"請從選擇中排除它們以繼續。通過單獨選擇每個受影響的記錄，仍然可以檢索這些 PDF，這將避免合併。"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
@@ -21962,7 +22341,7 @@ msgstr "您正嘗試修改的記錄已經被刪除(單據類型：%s)."
 msgid ""
 "One or more of the selected modules have already been uninstalled, if you "
 "believe this to be an error, you may try again later or contact support."
-msgstr ""
+msgstr "一個或多個選定的模塊已被卸載，如果您認為這是一個錯誤，您可以稍後重試或聯繫客服人員。"
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0
@@ -22095,7 +22474,7 @@ msgstr "打開一個窗口"
 #: code:addons/base/models/ir_model.py:0 code:addons/models.py:0
 #, python-format
 msgid "Operation:"
-msgstr ""
+msgstr "作業:"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_operations
@@ -22510,7 +22889,7 @@ msgstr "其他"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__type__other
 msgid "Other Address"
-msgstr ""
+msgstr "其他地址"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_extra
@@ -22520,7 +22899,7 @@ msgstr "其它額外權利"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__license__other_osi_approved_licence
 msgid "Other OSI Approved License"
-msgstr ""
+msgstr "其他 OSI 批准的許可證"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_other_form
@@ -22599,7 +22978,7 @@ msgstr "P 教育"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_pe
 msgid "PCGE Simplified"
-msgstr ""
+msgstr "PCGE 簡化版"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_report__report_type__qweb-pdf
@@ -22629,12 +23008,12 @@ msgstr "POEdit"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_adyen
 msgid "POS Adyen"
-msgstr ""
+msgstr "POS Adyen"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_six
 msgid "POS Six"
-msgstr ""
+msgstr "POS Six"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad_project
@@ -22801,7 +23180,7 @@ msgstr "業務夥伴稱謂"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__active_partner
 msgid "Partner is Active"
-msgstr ""
+msgstr "合作夥伴啟用"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_partner
@@ -22812,7 +23191,7 @@ msgstr "網站的業務夥伴模組"
 #: model:ir.model.fields,field_description:base.field_res_partner__same_vat_partner_id
 #: model:ir.model.fields,field_description:base.field_res_users__same_vat_partner_id
 msgid "Partner with same Tax ID"
-msgstr ""
+msgstr "具有相同統編的合作夥伴"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__partner_id
@@ -22847,7 +23226,7 @@ msgstr "密碼"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy
 msgid "Password Policy"
-msgstr ""
+msgstr "密碼政策"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy_signup
@@ -22868,7 +23247,7 @@ msgstr "格式模式"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_payroll_account_sepa
 msgid "Pay your employees with SEPA payment."
-msgstr ""
+msgstr "使用 SEPA 付款向您的員工付款。"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_accounting_payment
@@ -22898,7 +23277,7 @@ msgstr "收單：Adyen實現"
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_alipay
 msgid "Payment Acquirer: Alipay Implementation"
-msgstr ""
+msgstr "Payment Acquirer: Alipay Implementation"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_authorize
@@ -22923,7 +23302,7 @@ msgstr "收單：Paypal實現"
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_payulatam
 msgid "Payment Acquirer: PayuLatam Implementation"
-msgstr ""
+msgstr "Payment Acquirer: PayuLatam Implementation"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_payumoney
@@ -22933,7 +23312,7 @@ msgstr "收單：PayuMoney 實現"
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_sepa_direct_debit
 msgid "Payment Acquirer: Sepa Direct Debit"
-msgstr ""
+msgstr "Payment Acquirer: Sepa Direct Debit"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_stripe
@@ -22980,12 +23359,12 @@ msgstr "薪資表會計"
 #. module: base
 #: model:ir.module.category,name:base.module_category_payroll_localization
 msgid "Payroll Localization"
-msgstr ""
+msgstr "薪資本地化"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_payulatam
 msgid "PayuLatam Payment Acquirer"
-msgstr ""
+msgstr "PayuLatam Payment Acquirer"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_payumoney
@@ -22995,7 +23374,7 @@ msgstr "PayuMoney 收單"
 #. module: base
 #: model:ir.module.module,description:base.module_payment_payulatam
 msgid "Payulatam payment acquirer"
-msgstr ""
+msgstr "Payulatam payment acquirer"
 
 #. module: base
 #: model:res.country,name:base.pe
@@ -23356,7 +23735,7 @@ msgstr "產品生命週期管理 (PLM)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_product_matrix
 msgid "Product Matrix"
-msgstr ""
+msgstr "產品矩陣"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity
@@ -23407,7 +23786,7 @@ msgstr "專案"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_enterprise
 msgid "Project Enterprise"
-msgstr ""
+msgstr "企業版專案"
 
 #. module: base
 #: model:ir.module.module,description:base.module_project
@@ -23563,27 +23942,27 @@ msgstr "專案、幫助台、工時表和銷售訂單"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_account
 msgid "Project, Tasks, Account"
-msgstr ""
+msgstr "專案、任務、會計"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale
 msgid "Project, Tasks, After Sales"
-msgstr ""
+msgstr "專案、任務、售後"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_repair
 msgid "Project, Tasks, Repair"
-msgstr ""
+msgstr "專案、任務、維修"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale_coupon
 msgid "Project, Tasks, Sale Coupon"
-msgstr ""
+msgstr "專案、任務、銷售優惠券"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_stock
 msgid "Project, Tasks, Stock"
-msgstr ""
+msgstr "專案、任務、庫存"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_timesheet
@@ -23685,7 +24064,7 @@ msgstr "購買協議"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_product_matrix
 msgid "Purchase Matrix"
-msgstr ""
+msgstr "採購矩陣"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase_stock
@@ -23695,7 +24074,7 @@ msgstr "採購訂單, 入庫單, 庫存Vendor 憑單"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_requisition_stock
 msgid "Purchase Requisition Stock"
-msgstr ""
+msgstr "採購申請庫存"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_stock
@@ -23710,7 +24089,7 @@ msgstr "銷售與 MRP 管理"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_enterprise
 msgid "Purchase enterprise"
-msgstr ""
+msgstr "Purchase enterprise"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase
@@ -23775,7 +24154,7 @@ msgstr "MRP的品質管理"
 #. module: base
 #: model:ir.module.module,summary:base.module_quality_mrp_workorder_iot
 msgid "Quality Management with MRP and IoT"
-msgstr ""
+msgstr "使用 MRP 和 IoT 進行品管"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_iot
@@ -24036,13 +24415,13 @@ msgstr "招聘"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_recruitment
 msgid "Recruitment resumés and letters from documents"
-msgstr ""
+msgstr "招募簡歷和文件"
 
 #. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Recursion Detected."
-msgstr ""
+msgstr "檢測到遞歸"
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0
@@ -24182,7 +24561,7 @@ msgstr "租賃"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_stock_renting
 msgid "Rental Stock Management"
-msgstr ""
+msgstr "租賃庫存管理"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_renting_sign
@@ -24298,17 +24677,17 @@ msgstr "經銷商"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_partner_commission
 msgid "Resellers Commissions For Subscription"
-msgstr ""
+msgstr "經銷商訂閱佣金"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__reset_mode
 msgid "Reset Mode"
-msgstr ""
+msgstr "重置模式"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.reset_view_arch_wizard_view
 msgid "Reset View"
-msgstr ""
+msgstr "重置視圖"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.reset_view_arch_wizard_action
@@ -24324,12 +24703,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__hard
 msgid "Reset to file version (hard reset)."
-msgstr ""
+msgstr "重置為文件版本 (hard reset)."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Reset to logo colors"
-msgstr ""
+msgstr "重置為logo顏色"
 
 #. module: base
 #: code:addons/models.py:0
@@ -24407,7 +24786,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__roboto
 msgid "Roboto"
-msgstr ""
+msgstr "機器人"
 
 #. module: base
 #: model:res.country,name:base.ro
@@ -24636,7 +25015,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_product_matrix
 msgid "Sale Matrix"
-msgstr ""
+msgstr "銷售矩陣"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_product_configurator
@@ -24995,7 +25374,7 @@ msgstr "自己"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_slides
 msgid "Sell Courses"
-msgstr ""
+msgstr "銷售課程"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale_timesheet
@@ -25035,7 +25414,7 @@ msgstr "線上銷售您的產品"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sms
 msgid "Send SMS to Visitor"
-msgstr ""
+msgstr "給訪客發送簡訊"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_sms
@@ -25451,7 +25830,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_twitter
 msgid "Social Twitter"
-msgstr ""
+msgstr "社交推特"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_media
@@ -25492,7 +25871,7 @@ msgstr "很抱歉，您無法查看文件類型 '%(document_kind)s' (%(document_
 #: code:addons/base/models/ir_attachment.py:0
 #, python-format
 msgid "Sorry, you are not allowed to access these fields on attachments."
-msgstr ""
+msgstr "對不起，您沒有存取附件中這些欄位的權限。"
 
 #. module: base
 #: code:addons/base/models/ir_attachment.py:0
@@ -25529,7 +25908,7 @@ msgstr "很抱歉，您無法修改文件類型 '%(document_kind)s' (%(document_
 #: code:addons/base/models/ir_attachment.py:0
 #, python-format
 msgid "Sorry, you must provide fields to read on attachments"
-msgstr ""
+msgstr "對不起，您必須提供欲在附件中讀取的欄位。"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_filters__sort
@@ -25714,7 +26093,7 @@ msgstr "即時貼，協同"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_sms
 msgid "Stock - SMS"
-msgstr ""
+msgstr "庫存 - 簡訊"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_mobile
@@ -25822,12 +26201,12 @@ msgstr "Studio"
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_subcontracting
 msgid "Subcontract Productions"
-msgstr ""
+msgstr "外包製作"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_account
 msgid "Subcontracting Management with Stock Valuation"
-msgstr ""
+msgstr "庫存評估的外包管理"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access
@@ -25934,7 +26313,7 @@ msgstr "瑞典"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_reports
 msgid "Sweden - Accounting Reports"
-msgstr ""
+msgstr "Sweden - Accounting Reports"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_ocr
@@ -25944,7 +26323,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se
 msgid "Swedish - Accounting"
-msgstr ""
+msgstr "Swedish - Accounting"
 
 #. module: base
 #: model:res.country,name:base.ch
@@ -26007,7 +26386,7 @@ msgstr "系統更新"
 #. module: base
 #: model:res.country,name:base.st
 msgid "São Tomé and Príncipe"
-msgstr ""
+msgstr "聖多美和普林西比"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_T
@@ -26104,7 +26483,7 @@ msgstr "交付和TaxCloud - 電子商務"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_taxcloud
 msgid "TaxCloud and Subscriptions"
-msgstr ""
+msgstr "TaxCloud and Subscriptions"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_taxcloud
@@ -26162,13 +26541,13 @@ msgstr "測試 API"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_action_bindings
 msgid "Test Action Bindings"
-msgstr ""
+msgstr "Test Action Bindings"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_l10n_be_hr_payroll_account
 #: model:ir.module.module,summary:base.module_test_l10n_be_hr_payroll_account
 msgid "Test Belgian Payroll"
-msgstr ""
+msgstr "Test Belgian Payroll"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_mail_server_form
@@ -26178,7 +26557,7 @@ msgstr "測試連接"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_website_slides_full
 msgid "Test Full eLearning Flow"
-msgstr ""
+msgstr "Test Full eLearning Flow"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_main_flows
@@ -26188,7 +26567,7 @@ msgstr "測試主流程"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment_test
 msgid "Test Payment Acquirer"
-msgstr ""
+msgstr "Test Payment Acquirer"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_performance
@@ -26198,7 +26577,7 @@ msgstr "測試性能"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_rpc
 msgid "Test RPC"
-msgstr ""
+msgstr "Test RPC"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_marketing_automation
@@ -26284,7 +26663,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__url_code
 msgid "The Lang Code displayed in the URL"
-msgstr ""
+msgstr "URL中顯示的Lang代碼"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__grouping
@@ -26499,7 +26878,7 @@ msgstr "負責此聯繫人的內部使用者。"
 #: code:addons/base/models/res_country.py:106
 #, python-format
 msgid "The layout contains an invalid format key"
-msgstr ""
+msgstr "格式中包含無效的格式鍵"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
@@ -26512,7 +26891,7 @@ msgstr "擴展目前模型的模型清單。"
 msgid ""
 "The m2o field %s is required but declares its ondelete policy as being 'set "
 "null'. Only 'restrict' and 'cascade' make sense."
-msgstr ""
+msgstr "m2o 字段 %s 是必需的，但將其 ondelete 策略聲明為“set null”。只有“限制”和“級聯”才有意義。"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_filters__action_id
@@ -26594,7 +26973,7 @@ msgstr "唯一預設的變量是"
 #: code:addons/model.py:0
 #, python-format
 msgid "The operation cannot be completed:"
-msgstr ""
+msgstr "操作無法完成："
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__domain
@@ -26690,7 +27069,7 @@ msgstr "捨入因子必須大於0！"
 msgid ""
 "The server is busy right now, module operations are not possible at this "
 "time, please try again later."
-msgstr ""
+msgstr "伺服器忙碌中，目前無法進行模組操作，請稍後再試。"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -26784,7 +27163,7 @@ msgstr "佈景主題"
 #: model:ir.ui.menu,name:base.menu_theme_store
 #: model:ir.ui.menu,name:base.theme_store
 msgid "Theme Store"
-msgstr ""
+msgstr "主題商店"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
@@ -26803,7 +27182,7 @@ msgstr "這是一個%(model)s的共享篩選，請在上處或者修改前設定
 #: model:ir.actions.act_url,name:base.action_third_party
 #: model:ir.ui.menu,name:base.menu_third_party
 msgid "Third-Party Apps"
-msgstr ""
+msgstr "第三方應用"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__iso_code
@@ -26998,7 +27377,7 @@ msgstr "此模組可確保線上計算交貨價格，並使用TaxCloud計算稅�
 msgid ""
 "This module lets you use the full power of certifications within your "
 "courses."
-msgstr ""
+msgstr "該模塊可讓您在課程中使用認證的全部功能。"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
@@ -27510,7 +27889,7 @@ msgstr "英國 - 會計報告"
 #: model:ir.module.module,shortdesc:base.module_product_unspsc
 #: model:ir.module.module,summary:base.module_product_unspsc
 msgid "UNSPSC product codes"
-msgstr ""
+msgstr "UNSPSC product codes"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
@@ -27592,7 +27971,7 @@ msgstr "烏克蘭"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ua
 msgid "Ukraine - Accounting"
-msgstr ""
+msgstr "Ukraine - Accounting"
 
 #. module: base
 #: code:addons/models.py:0
@@ -27756,7 +28135,7 @@ msgstr "無法識別的擴展名後綴名: 規定為 .csv, 或.po, 或 .tgz格�
 #: code:addons/base/static/src/js/res_config_settings.js:0
 #, python-format
 msgid "Unsaved changes"
-msgstr ""
+msgstr "未儲存的變更"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_unsplash
@@ -27880,12 +28259,12 @@ msgstr "在您的網店中使用優惠券和促銷計劃"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon
 msgid "Use discount coupons in sales orders"
-msgstr ""
+msgstr "在銷售訂單中使用折扣券"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_tax_python
 msgid "Use python code to define taxes"
-msgstr ""
+msgstr "使用python程式碼定義税"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__use_date_range
@@ -28354,7 +28733,7 @@ msgstr "瓦利斯群島和富圖納群島"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_picking_batch
 msgid "Warehouse Management: Batch Transfer"
-msgstr ""
+msgstr "倉庫管理: 批量轉移"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -28442,7 +28821,7 @@ msgstr "Web 路由"
 #. module: base
 #: model:ir.module.module,summary:base.module_test_web_cohort
 msgid "Web cohort Test"
-msgstr ""
+msgstr "網絡群體測試"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_translation_search
@@ -28473,7 +28852,7 @@ msgstr "網站企業版"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_form
 msgid "Website Form"
-msgstr ""
+msgstr "網站表格"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk
@@ -28530,12 +28909,12 @@ msgstr "網站評分"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_product_configurator
 msgid "Website Sale Product Configurator"
-msgstr ""
+msgstr "網站銷售產品組態設定"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_stock_product_configurator
 msgid "Website Sale Stock Product Configurator"
-msgstr ""
+msgstr "網站銷售庫存產品組態設定"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_dashboard
@@ -28555,7 +28934,7 @@ msgstr "網站工作室"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_website
 msgid "Website Test"
-msgstr ""
+msgstr "網站測試"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_website
@@ -28570,7 +28949,7 @@ msgstr "網站主題安裝"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_profile
 msgid "Website profile"
-msgstr ""
+msgstr "網站簡介"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__3
@@ -28610,6 +28989,9 @@ msgid ""
 "If the timezone is not set, UTC (Coordinated Universal Time) is used.\n"
 "Anywhere else, time values are computed according to the time offset of your web client."
 msgstr ""
+"列印文件和導出/導入資料時，將根據此時區計算時間值.\n"
+"如果未設定時區，則使用 UTC (標準世界時間).\n"
+"在其他任何地方，時間值都是根據您的 Web 客戶端的時間偏移量計算."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -28633,7 +29015,7 @@ msgstr "值是否存儲在資料庫。"
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_module_module_dependency__auto_install_required
 msgid "Whether this dependency blocks automatic installation of the dependent"
-msgstr ""
+msgstr "此依賴項是否阻止依賴項的自動安裝"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__translate
@@ -28790,7 +29172,7 @@ msgstr "您可以從您的電腦上傳一個文件或者複製/粘貼一個網�
 msgid ""
 "You can manage the different federal states you are working on from here. "
 "Each state is attached to one country."
-msgstr ""
+msgstr "您可以從這裡管理您所工作的不同州/省. 每個州/省都只附屬於一個國家."
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0
@@ -28829,7 +29211,7 @@ msgstr "您不能啟動超級使用者。"
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "You cannot archive a contact linked to a portal or internal user."
-msgstr ""
+msgstr "您無法封存連結到門戶或內部使用者的聯繫人."
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0
@@ -28885,12 +29267,15 @@ msgid ""
 "\n"
 "(Operation: %(operation)s)"
 msgstr ""
+"您沒有足夠的權限存取 %(document_kind)s (%(document_model)s) 上的欄位 \"%(fields)s\". 請與您的系統管理員聯繫。\n"
+"\n"
+"(操作: %(operation)s)"
 
 #. module: base
 #: code:addons/base/models/ir_actions.py:0
 #, python-format
 msgid "You don't have enough access rights to run this action."
-msgstr ""
+msgstr "您沒有足夠的存取權限來執行此操作."
 
 #. module: base
 #: code:addons/base/wizard/base_partner_merge.py:0
@@ -29202,7 +29587,7 @@ msgstr ""
 #: code:addons/models.py:0
 #, python-format
 msgid "forbidden for groups %s"
-msgstr ""
+msgstr "禁止群組 %s"
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0

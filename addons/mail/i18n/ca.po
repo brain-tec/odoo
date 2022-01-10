@@ -15,6 +15,7 @@
 # Arnau Ros, 2020
 # Susanna Pujol, 2020
 # Carles Antoli <carlesantoli@hotmail.com>, 2021
+# Pere Martínez, 2021
 # jabelchi, 2021
 # 
 msgid ""
@@ -49,7 +50,7 @@ msgstr ""
 #: code:addons/mail/wizard/invite.py:0
 #, python-format
 msgid "%(user_name)s invited you to follow a new document."
-msgstr ""
+msgstr "%(user_name)s us ha convidat a seguir un nou document."
 
 #. module: mail
 #. openerp-web
@@ -85,7 +86,7 @@ msgstr "%s (còpia)"
 #: code:addons/mail/static/src/js/models/threads/mixins/thread_typing_mixin.js:0
 #, python-format
 msgid "%s and %s are typing..."
-msgstr ""
+msgstr "%s i %s estan escrivint..."
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:0
@@ -128,7 +129,7 @@ msgstr "&nbsp;("
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_activity_done
 msgid "(originally assigned to"
-msgstr ""
+msgstr "(assignat originalment a"
 
 #. module: mail
 #. openerp-web
@@ -292,7 +293,7 @@ msgstr "<p>Crear un canal aquí.</p>"
 #: code:addons/mail/static/src/js/tours/mail.js:0
 #, python-format
 msgid "<p>Create a public or private channel.</p>"
-msgstr ""
+msgstr "<p>Crear un canal públic o privat.</p>"
 
 #. module: mail
 #. openerp-web
@@ -397,7 +398,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_activity_done
 msgid "<strong>Original note:</strong>"
-msgstr ""
+msgstr "<strong>Nota original:</strong>"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
@@ -420,6 +421,7 @@ msgstr ""
 #, python-format
 msgid "A next activity can only be planned on models that use the chatter"
 msgstr ""
+"Una següent activitat només es pot planificar en models que usen el chatter"
 
 #. module: mail
 #: model_terms:ir.actions.act_window,help:mail.mail_shortcode_action
@@ -497,6 +499,8 @@ msgid ""
 "Actions may trigger specific behavior like opening calendar view or "
 "automatically mark as done when a document is uploaded"
 msgstr ""
+"Les accions poden disparar comportaments específics com ara obrir una vista "
+"de calendari o marcar automàticament com a fet quan es puja un document"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_message_subtype__default
@@ -587,7 +591,7 @@ msgstr "Tipus d'activitats"
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_user_type
 #: model:ir.model.fields,field_description:mail.field_ir_cron__activity_user_type
 msgid "Activity User Type"
-msgstr ""
+msgstr "Tipus d'activitat d'usuari"
 
 #. module: mail
 #. openerp-web
@@ -639,7 +643,7 @@ msgstr "Afegir seguidors "
 #: code:addons/mail/models/ir_actions.py:0
 #, python-format
 msgid "Add Followers can only be done on a mail thread model"
-msgstr ""
+msgstr "Afegir seguidors només pot fer-se en un model amb fil de correu"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__add_sign
@@ -666,7 +670,7 @@ msgstr "Afegeix un canal"
 #: code:addons/mail/models/mail_thread.py:0
 #, python-format
 msgid "Add a new %(document)s or send an email to %(email_link)s"
-msgstr ""
+msgstr "Afegir un %(document)s nou o enviar un correu a %(email_link)s"
 
 #. module: mail
 #: model_terms:ir.actions.act_window,help:mail.mail_blacklist_action
@@ -696,7 +700,7 @@ msgstr "Afegir contactes a notificar..."
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Add this email address to white list of people"
-msgstr ""
+msgstr "Afegir aquesta adreça de correu a una llista blanca de persones"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_ids
@@ -1076,7 +1080,7 @@ msgstr "Rebotat"
 #: code:addons/mail/models/mail_cc_mixin.py:0
 #, python-format
 msgid "CC Email"
-msgstr ""
+msgstr "Adreça CC"
 
 #. module: mail
 #: model:mail.activity.type,name:mail.mail_activity_data_call
@@ -1150,7 +1154,7 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_company__catchall
 msgid "Catchall Email"
-msgstr ""
+msgstr "Adreça mail \"catch-all\""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__email_cc
@@ -1347,7 +1351,7 @@ msgstr "Empreses"
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #, python-format
 msgid "Compose Email"
-msgstr "Compondre correu electrònic"
+msgstr "Redactar correu electrònic"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__composition_mode
@@ -1813,7 +1817,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__display_name
 #: model:ir.model.fields,field_description:mail.field_publisher_warranty_contract__display_name
 msgid "Display Name"
-msgstr "Nom mostrat"
+msgstr "Nom a mostrar"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -2562,13 +2566,13 @@ msgstr "Capçaleres"
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_notify_moderation
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_send_guidelines
 msgid "Hello"
-msgstr ""
+msgstr "Hola"
 
 #. module: mail
 #: code:addons/mail/wizard/invite.py:0
 #, python-format
 msgid "Hello,"
-msgstr ""
+msgstr "Hola,"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_cancel__help_message
@@ -2960,7 +2964,7 @@ msgstr "És una notificació"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_notification__is_read
 msgid "Is Read"
-msgstr "És llegit"
+msgstr "Està llegit"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__is_subscribed
@@ -3604,7 +3608,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Messages marked as read will appear in the history."
-msgstr ""
+msgstr "Els missatges marcats com a llegits apareixeran a l'històric"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_message_subtype__internal
@@ -3974,7 +3978,7 @@ msgstr "Cap seguidor"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "No history messages"
-msgstr ""
+msgstr "No hi ha missatges a l'històric"
 
 #. module: mail
 #. openerp-web
@@ -4568,7 +4572,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "Please contact us instead using"
-msgstr ""
+msgstr "Si us plau, contacteu amb nosaltres utilitzant"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_send_guidelines
@@ -5574,7 +5578,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "The email sent to"
-msgstr ""
+msgstr "El missatge enviat a"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_shortcode__substitution
@@ -5655,7 +5659,7 @@ msgstr "La drecera que ha de ser reemplaçada als missatges de xat"
 #: model:ir.model.fields,help:mail.field_email_template_preview__model_id
 #: model:ir.model.fields,help:mail.field_mail_template__model_id
 msgid "The type of document this template can be used with"
-msgstr "El tipus de plantilla de document pot ser utilitzat amb"
+msgstr "El tipus de document amb el que pot usar-se aquesta plantilla"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_origin_link
@@ -6012,7 +6016,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Uploaded"
-msgstr ""
+msgstr "Pujat"
 
 #. module: mail
 #. openerp-web
@@ -6554,6 +6558,8 @@ msgid ""
 "cannot be processed. This address\n"
 "    is used to collect replies and should not be used to directly contact"
 msgstr ""
+"no pot processar-se. Aquesta adreça serveix per a recollir respostes i no "
+"hauria d'utilitzar-se per a contactar directament amb"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_send_guidelines

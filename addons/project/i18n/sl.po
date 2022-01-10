@@ -11,6 +11,7 @@
 # Grega Vavtar <grega@hbs.si>, 2020
 # Tadej Lupšina <tadej@hbs.si>, 2020
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2020
+# Nejc G <nejc@luxim.si>, 2021
 # Jasmina Macur <jasmina@hbs.si>, 2021
 # 
 msgid ""
@@ -896,7 +897,7 @@ msgstr "E-pošta kupca"
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:0
 #, python-format
 msgid "Customer Feedback"
-msgstr ""
+msgstr "Odzivi strank"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__access_url
@@ -926,7 +927,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_status
 msgid "Customer(s) Ratings"
-msgstr ""
+msgstr "Ocene strank"
 
 #. module: project
 #. openerp-web
@@ -1400,6 +1401,8 @@ msgid ""
 "If set an email will be sent to the customer when the task or issue reaches "
 "this step."
 msgstr ""
+"Če je nastavljeno, bo stranki poslana e-pošta, ko bo opravilo ali težava "
+"dosegla ta korak."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task_type__rating_template_id
@@ -1933,7 +1936,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_digest_digest__kpi_project_task_opened
 msgid "Open Tasks"
-msgstr ""
+msgstr "Odprta opravila"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__alias_force_thread_id
@@ -2230,7 +2233,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Rated tasks"
-msgstr ""
+msgstr "Ocenjena opravila"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.rating_rating_action_view_project_rating

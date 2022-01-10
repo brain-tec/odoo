@@ -526,9 +526,9 @@ msgid ""
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"Un producte emmagatzemable és un producte pel qual gestiones estoc. L'aplicació d'inventari s'ha d'instal·lar.\n"
-"Un consumible és un producte pel qual l'estoc no és gestionat.\n"
-"Un servei és un producte no material que proveeixes. "
+"Un producte emmagatzemable és un producte pel qual gestioneu estoc. Cal instal·lar l'aplicació Inventari.\n"
+"Un consumible és un producte pel qual no es gestiona estoc.\n"
+"Un servei és un producte no material que subministreu. "
 
 #. module: stock
 #: model:res.groups,name:stock.group_warning_stock
@@ -1584,8 +1584,8 @@ msgstr "Ubicacions del client"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
-msgid "DHL Connector"
-msgstr "Connector DHL"
+msgid "DHL Express Connector"
+msgstr "Connector DHL Express"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_report_stock_quantity__date
@@ -2005,7 +2005,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_warn_insufficient_qty__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_warn_insufficient_qty_scrap__display_name
 msgid "Display Name"
-msgstr "Nom mostrat"
+msgstr "Nom a mostrar"
 
 #. module: stock
 #: model:res.groups,name:stock.group_lot_on_delivery_slip
@@ -2959,16 +2959,24 @@ msgstr "Es pot editar la quantitat"
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"It is not possible to reserve more products of %s than you have in stock."
-msgstr "No és possible reservar més productes de %s dels que tens en estoc."
+"It is not possible to unreserve more products of %s than you have in "
+"stock.The correction could unreserve some operations with problematics "
+"products."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"It is not possible to unreserve more products of %s than you have in stock."
+"It is not possible to unreserve more products of %s than you have in stock. "
+"Contact an administrator."
 msgstr ""
-"No és possible deixar de reservar més productes de %s dels que tens en estoc"
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "Try our automated action to fix it"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__move_type
@@ -6766,6 +6774,13 @@ msgid "Unreserve"
 msgstr "Anul·lar la reserva"
 
 #. module: stock
+#: code:addons/stock/models/stock_inventory.py:0
+#: code:addons/stock/models/stock_inventory.py:0
+#, python-format
+msgid "Unsupported search on %s outside of an Inventory Adjustment"
+msgstr ""
+
+#. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_uom_form_action
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_line_tree2
 msgid "UoM"
@@ -7435,6 +7450,8 @@ msgid ""
 "You have not recorded <i>done</i> quantities yet, by clicking on <i>apply</i>\n"
 "                        Odoo will process all the quantities."
 msgstr ""
+"Encara no heu enregistrat quantitats <i>fetes</i>, fent clic a <i>aplicar</i>\n"
+"                        Odoo processarà totes les quantitats."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation

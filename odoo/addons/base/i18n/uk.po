@@ -18198,6 +18198,12 @@ msgid "Invalid model name %r in action definition."
 msgstr "Недійсна назва моделі %r у визначенні дії."
 
 #. module: base
+#: code:addons/base/models/ir_actions.py:611
+#, python-format
+msgid "many2many fields cannot be evaluated by reference"
+msgstr ""
+
+#. module: base
 #: code:addons/template_inheritance.py:0
 #, python-format
 msgid "Invalid position attribute: '%s'"
@@ -18425,7 +18431,7 @@ msgstr "Джерсі "
 #: model:ir.model.fields,field_description:base.field_res_partner__function
 #: model:ir.model.fields,field_description:base.field_res_users__function
 msgid "Job Position"
-msgstr "Вакансія"
+msgstr "Посада"
 
 #. module: base
 #: model:res.country,name:base.jo
@@ -23126,6 +23132,10 @@ msgid ""
 "\n"
 "Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
 msgstr ""
+"Odoo не може об’єднати PDF-файли, додані до наступних записів:\n"
+"%s\n"
+"\n"
+"Щоб продовжити, виключіть їх із вибору. Можна все одно отримати ці PDF-файли, вибравши кожен із порушених записів окремо, що дозволить уникнути злиття."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
@@ -27852,7 +27862,7 @@ msgstr "Внутрішній користувач, який відповідає
 #: code:addons/base/models/res_country.py:106
 #, python-format
 msgid "The layout contains an invalid format key"
-msgstr ""
+msgstr "Макет містить недійсний ключ формату"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
@@ -30331,6 +30341,8 @@ msgstr "Не можна активувати суперкористувача."
 #, python-format
 msgid "You cannot archive a contact linked to a portal or internal user."
 msgstr ""
+"Ви не можете архівувати контакт, який пов'язаний з публічним або внутрішнім "
+"користувачем."
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0

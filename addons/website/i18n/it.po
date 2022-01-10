@@ -19,6 +19,8 @@
 # Paolo Valier, 2019
 # Léonie Bouchat <lbo@odoo.com>, 2019
 # Sergio Zanchetta <primes2h@gmail.com>, 2021
+# BigBlu <paolo.moroni@air-srl.com>, 2021
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
@@ -26,7 +28,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:15+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2021\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2874,6 +2876,9 @@ msgid ""
 "* if False, the view currently does not extend its parent but can be enabled\n"
 "         "
 msgstr ""
+"Se questa è una vista ereditata,\n"
+"* se True, la vista estende sempre la vista genitore\n"
+"* se False, la vista attualmente non estende la vista genitore ma si può abilitare"
 
 #. module: website
 #. openerp-web
@@ -2904,6 +2909,8 @@ msgid ""
 "In this mode, you can only translate texts. To change the structure of the page, you must edit the master page.\n"
 "        Each modification on the master page is automatically applied to all translated versions."
 msgstr ""
+"In questa modalità, puoi tradurre solo i testi. Per cambiare la struttura della pagina, devi modificare la pagina principale.\n"
+"Ogni modifica sulla pagina master viene automaticamente applicata a tutte le versioni tradotte."
 
 #. module: website
 #: code:addons/website/controllers/backend.py:0
@@ -4475,7 +4482,7 @@ msgstr "Seleziona un menù"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Select a website to load its settings."
-msgstr ""
+msgstr "Seleziona un sito web per caricare le sue impostazioni."
 
 #. module: website
 #. openerp-web
@@ -4968,6 +4975,8 @@ msgid ""
 "This field should be used when accessing view arch. It will use translation.\n"
 "                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 msgstr ""
+"Questo campo dovrebbe essere usato quando si accede all'architettura della vista (view arch). Utilizzerà la traduzione.\n"
+"Notare che leggerà `arch_db` oppure `arch_fs` se in modalità dev-xml."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_page__arch_db
@@ -5043,7 +5052,7 @@ msgstr "Fuso orario"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Tiny"
-msgstr ""
+msgstr "Winzig"
 
 #. module: website
 #. openerp-web
@@ -5562,6 +5571,8 @@ msgstr "Visite"
 msgid ""
 "Wait for visitors to come to your website to see the pages they viewed."
 msgstr ""
+"Aspetta che i visitatori vengano sul tuo sito per vedere le pagine che hanno"
+" visto."
 
 #. module: website
 #: model_terms:ir.actions.act_window,help:website.website_visitors_action
@@ -5748,7 +5759,7 @@ msgstr "Visitatore sito web n. %s"
 #: model:ir.cron,cron_name:website.website_visitor_cron
 #: model:ir.cron,name:website.website_visitor_cron
 msgid "Website Visitor : Archive old visitors"
-msgstr ""
+msgstr "Visitatore sito web: archiviazione vecchi visitatori"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_collapse
@@ -5933,7 +5944,7 @@ msgstr "Diritti non sufficienti per eseguire questa azione."
 #: code:addons/website/models/mixins.py:0
 #, python-format
 msgid "You do not have the rights to publish/unpublish"
-msgstr ""
+msgstr "Non hai i diritti di pubblicare/rimuovere la pubblicazione"
 
 #. module: website
 #. openerp-web

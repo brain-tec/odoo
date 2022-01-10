@@ -18,6 +18,7 @@
 # Denis Baranov <baranov@itlibertas.com>, 2020
 # Ekaterina <nawsikaya@bk.ru>, 2020
 # Ivan Yelizariev // IEL <yelizariev@itpp.dev>, 2020
+# ILMIR <karamov@it-projects.info>, 2021
 # Сергей Шебанин <sergey@shebanin.ru>, 2021
 # 
 msgid ""
@@ -298,7 +299,7 @@ msgstr "<p> Создайте канал здесь. </p>"
 #: code:addons/mail/static/src/js/tours/mail.js:0
 #, python-format
 msgid "<p>Create a public or private channel.</p>"
-msgstr ""
+msgstr "<p>Создать публичный или закрытый канал.</p>"
 
 #. module: mail
 #. openerp-web
@@ -572,7 +573,7 @@ msgstr "Мероприятие"
 #: model:ir.model.fields,field_description:mail.field_res_partner__activity_exception_decoration
 #: model:ir.model.fields,field_description:mail.field_res_users__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Оформление исключения активности"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_mixin
@@ -1935,7 +1936,7 @@ msgstr "Скачать"
 #: code:addons/mail/static/src/xml/composer.xml:0
 #, python-format
 msgid "Drag Files Here"
-msgstr ""
+msgstr "Перетащите файлы сюда"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_document_file_kanban
@@ -2675,7 +2676,7 @@ msgstr "Иконка"
 #: model:ir.model.fields,help:mail.field_res_partner__activity_exception_icon
 #: model:ir.model.fields,help:mail.field_res_users__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Значок, обозначающий действие исключения."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_followers__res_id
@@ -4002,7 +4003,7 @@ msgstr "Нет подписчика"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "No history messages"
-msgstr ""
+msgstr "Нет записей в истории"
 
 #. module: mail
 #. openerp-web
@@ -4044,7 +4045,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "No starred messages"
-msgstr ""
+msgstr "Нет отмеченных сообщений"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__no_auto_thread
@@ -4264,13 +4265,13 @@ msgstr "Онлайн"
 #: code:addons/mail/models/mail_message.py:0
 #, python-format
 msgid "Only administrators are allowed to export mail message"
-msgstr ""
+msgstr "Экспортировать сообщения может только администратор."
 
 #. module: mail
 #: code:addons/mail/models/mail_message.py:0
 #, python-format
 msgid "Only administrators are allowed to use grouped read on message model"
-msgstr ""
+msgstr "Только администратор может просматривать сообщения с группировкой"
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:0
@@ -4622,7 +4623,7 @@ msgstr "Пожалуйста, подождите"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Please wait..."
-msgstr ""
+msgstr "Подождите..."
 
 #. module: mail
 #. openerp-web
@@ -4760,7 +4761,7 @@ msgstr "Издатель: оповещение об обновлении"
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "Quick search..."
-msgstr ""
+msgstr "Быстрый поиск..."
 
 #. module: mail
 #: code:addons/mail/wizard/mail_compose_message.py:0
@@ -4811,7 +4812,7 @@ msgstr "Получено"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Received by Everyone"
-msgstr ""
+msgstr "Получено всеми"
 
 #. module: mail
 #. openerp-web
@@ -5178,14 +5179,14 @@ msgstr "Искать список модерации"
 #: code:addons/mail/static/src/js/views/activity/activity_controller.js:0
 #, python-format
 msgid "Search: %s"
-msgstr ""
+msgstr "Поиск: %s"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Seen by Everyone"
-msgstr ""
+msgstr "Просмотрено всеми"
 
 #. module: mail
 #. openerp-web
@@ -5286,7 +5287,7 @@ msgstr ""
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_partner_mass_mail
 msgid "Send email"
-msgstr ""
+msgstr "Отправить email"
 
 #. module: mail
 #. openerp-web
@@ -5887,7 +5888,7 @@ msgstr ""
 #: model:ir.model.fields,help:mail.field_res_partner__activity_exception_decoration
 #: model:ir.model.fields,help:mail.field_res_users__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Тип активности исключения в записи."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__uuid
@@ -6053,7 +6054,7 @@ msgstr "Загрузить документ"
 #: code:addons/mail/static/src/xml/web_kanban_activity.xml:0
 #, python-format
 msgid "Upload file"
-msgstr ""
+msgstr "Загрузить файл"
 
 #. module: mail
 #. openerp-web
@@ -6134,21 +6135,21 @@ msgstr "Название поля пользователя"
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "User is idle"
-msgstr ""
+msgstr "Пользователь Отошел"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "User is offline"
-msgstr ""
+msgstr "Пользователь Не в сети"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "User is online"
-msgstr ""
+msgstr "Пользователь В сети"
 
 #. module: mail
 #. openerp-web
@@ -6476,7 +6477,7 @@ msgstr "Вы были назначены для"
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:0
 #, python-format
 msgid "You have been invited to: %s"
-msgstr ""
+msgstr "Вы были приглашены в: #%s"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_notify_moderation
@@ -6564,6 +6565,9 @@ msgid ""
 " users it is important to change it immediately for security reasons. I will"
 " keep nagging you about it!"
 msgstr ""
+"Вы используете пароль по умолчанию (admin)! Если ваша система доступна для "
+"недоверенных пользователей, то незамедлительно смените пароль! Я не отстану "
+"с этим!"
 
 #. module: mail
 #. openerp-web

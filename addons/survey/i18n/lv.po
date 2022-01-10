@@ -2272,8 +2272,8 @@ msgid ""
 "danger\">Your answers have probably not been recorded.</strong> Try "
 "refreshing."
 msgstr ""
-"Kaut kas nogāja greizi, sazinoties ar aptaujas serveri. <strong class"
-"=\"text-danger\">Jūsu atbildes visticamāk netika reģistrētas.</strong> "
+"Kaut kas nogāja greizi, sazinoties ar aptaujas serveri. <strong "
+"class=\"text-danger\">Jūsu atbildes visticamāk netika reģistrētas.</strong> "
 "Mēģiniet atjaunot lapu."
 
 #. module: survey
@@ -3019,6 +3019,22 @@ msgstr ""
 msgid "You cannot send an invitation for a survey that has no questions."
 msgstr ""
 "Jūs nevarat nosūtīt uzaicinājumu uz aptauju, kurai nav neviena jautājuma."
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey has no sections."
+msgstr ""
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey only contains empty sections."
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/models/survey_survey.py:0

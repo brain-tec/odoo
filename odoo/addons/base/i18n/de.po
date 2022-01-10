@@ -28,6 +28,7 @@
 # Jan Meyer, 2019
 # e2f <projects@e2f.com>, 2019
 # Ralf Hilgenstock <rh@dialoge.info>, 2019
+# Wolfgang Taferner, 2019
 # Gab_Odoo <gab@odoo.com>, 2019
 # Anja Funk <anja.funk@afimage.de>, 2019
 # Rudolf Schnapka <rs@techno-flex.de>, 2019
@@ -44,9 +45,10 @@
 # Martin Trigaux, 2020
 # f91684c3ff9ec3e650d5c8461e534581_686eae3 <449b96d9f63071f94d89e129677b83de_366193>, 2020
 # Florian Pose <fp@igh.de>, 2020
-# EugenBrodskiSAMSAIT <eugen.brodski@samsa-it.de>, 2021
-# Wolfgang Taferner, 2021
 # Chris Egal <sodaswed@web.de>, 2021
+# EugenBrodskiSAMSAIT <eugen.brodski@samsa-it.de>, 2021
+# spilymp <visessa+github@gmail.com>, 2021
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
@@ -54,7 +56,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Chris Egal <sodaswed@web.de>, 2021\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6779,6 +6781,11 @@ msgid ""
 "    - generic Indonesian chart of accounts\n"
 "    - tax structure"
 msgstr ""
+"\n"
+"Dies ist die neueste indonesische Odoo-Lokalisierung, die notwendig ist, um Odoo Buchhaltung für KMUs zu betreiben:\n"
+"=================================================================================================\n"
+"- allgemeiner indonesischer Kontenplan\n"
+"- Steuerstruktur"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_uk
@@ -7221,6 +7228,8 @@ msgid ""
 "This module allows Employees (and not users) to log in to the Point of Sale application using the fiscal data module\n"
 "    "
 msgstr ""
+"\n"
+"Mit diesem Modul können sich die Mitarbeiter (nicht Benutzer) über das Modul für steuerliche Daten bei der Kassensystemanwendung anmelden."
 
 #. module: base
 #: model:ir.module.module,description:base.module_rating
@@ -7259,6 +7268,8 @@ msgid ""
 "This module allows to configure commissions for resellers.\n"
 "    "
 msgstr ""
+"\n"
+"Dieses Modul ermöglicht die Konfiguration von Provisionen für Händler."
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_automation
@@ -9944,7 +9955,7 @@ msgstr "Fügen Sie die Funktion zum Barcode-Scannen zur Eventverwaltung hinzu."
 #. module: base
 #: model:ir.module.module,summary:base.module_account_reports_cash_basis
 msgid "Add cash basis functionality for reports"
-msgstr ""
+msgstr "Hinzufügen von Cash-Basis-Funktionalität für Berichte"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_slides_survey
@@ -10020,7 +10031,7 @@ msgstr "Adresse"
 #. module: base
 #: model:ir.model,name:base.model_format_address_mixin
 msgid "Address Format"
-msgstr ""
+msgstr "Adressformat "
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__type
@@ -10248,7 +10259,7 @@ msgstr "Algerien"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dz
 msgid "Algeria - Accounting"
-msgstr ""
+msgstr "Algerien -Buchhaltung"
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_alipay
@@ -11722,6 +11733,8 @@ msgstr ""
 #, python-format
 msgid "Cannot deactivate a language that is currently used by contacts."
 msgstr ""
+"Eine Sprache, die derzeit von Kontakten verwendet wird, kann nicht "
+"deaktiviert werden."
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -12114,7 +12127,7 @@ msgstr "Kolumbien - Buchhaltungsauswertungen"
 #: model:ir.module.module,description:base.module_l10n_co_pos
 #: model:ir.module.module,shortdesc:base.module_l10n_co_pos
 msgid "Colombian - Point of Sale"
-msgstr ""
+msgstr "Kolumbien - Kassensystem"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_co
@@ -13450,7 +13463,7 @@ msgstr "Tage"
 #: model:ir.module.module,shortdesc:base.module_account_debit_note
 #: model:ir.module.module,summary:base.module_account_debit_note
 msgid "Debit Notes"
-msgstr ""
+msgstr "Lastschriften"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_debug
@@ -13628,12 +13641,12 @@ msgstr "Dänemark"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk
 msgid "Denmark - Accounting"
-msgstr ""
+msgstr "Dänemark - Buchhaltung"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk_reports
 msgid "Denmark - Accounting Reports"
-msgstr ""
+msgstr "Dänemark - Buchführung"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__depends
@@ -15325,7 +15338,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fi
 msgid "Finnish Localization"
-msgstr ""
+msgstr "Finnische Lokalisierung"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__week_start
@@ -15515,6 +15528,8 @@ msgid ""
 "Found more than 10 errors and more than one error per 10 records, "
 "interrupted to avoid showing too many errors."
 msgstr ""
+"Mehr als 10 Fehler und mehr als ein Fehler pro 10 Datensätze gefunden, "
+"unterbrochen, um nicht zu viele Fehler anzuzeigen."
 
 #. module: base
 #: code:addons/base/models/ir_fields.py:0
@@ -17197,12 +17212,12 @@ msgstr "Indonesien"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
 msgid "Indonesia E-faktur"
-msgstr ""
+msgstr "Indonesien E-Faktur"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
 msgid "Indonesian - Accounting"
-msgstr ""
+msgstr "Indonesian - Buchhaltung"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
@@ -17521,6 +17536,12 @@ msgid "Invalid model name %r in action definition."
 msgstr "Ungültiger Modulname %r in der Aktionsdefinition."
 
 #. module: base
+#: code:addons/base/models/ir_actions.py:611
+#, python-format
+msgid "many2many fields cannot be evaluated by reference"
+msgstr ""
+
+#. module: base
 #: code:addons/template_inheritance.py:0
 #, python-format
 msgid "Invalid position attribute: '%s'"
@@ -17702,7 +17723,7 @@ msgstr "Israel"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_il
 msgid "Israel - Accounting"
-msgstr ""
+msgstr "Israel - Buchhaltung"
 
 #. module: base
 #: model:res.country,name:base.it
@@ -18296,7 +18317,7 @@ msgstr "Zu Tickets führen"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
 msgid "Learn More"
-msgstr "Lernen Sie mehr"
+msgstr "Mehr erfahren"
 
 #. module: base
 #: model:res.country,name:base.lb
@@ -18498,7 +18519,7 @@ msgstr "Litauen"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt
 msgid "Lithuania - Accounting"
-msgstr ""
+msgstr "Litauen - Buchhaltung"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_website_live_chat
@@ -18907,12 +18928,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_taxcloud_delivery
 msgid "Manage discounts in taxclouds computations with delivery."
-msgstr ""
+msgstr "Verwalten Sie Rabatte in Taxclouds-Berechnungen mit Lieferung."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_coupon_taxcloud
 msgid "Manage discounts in taxclouds computations."
-msgstr ""
+msgstr "Verwalten Sie Rabatte in Taxclouds-Berechnungen."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_plm
@@ -22363,7 +22384,7 @@ msgstr ""
 #: code:addons/base/models/ir_actions_report.py:0
 #, python-format
 msgid "One of the documents, you try to merge is encrypted"
-msgstr ""
+msgstr "Eines der Dokumente, die Sie zusammenführen wollen, ist verschlüsselt"
 
 #. module: base
 #: code:addons/models.py:0
@@ -28093,7 +28114,7 @@ msgstr "Vereinigtes Königreich Buchhaltungsauswertungen"
 #: model:ir.module.module,shortdesc:base.module_product_unspsc
 #: model:ir.module.module,summary:base.module_product_unspsc
 msgid "UNSPSC product codes"
-msgstr ""
+msgstr "UNSPSC product codes"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
@@ -28254,7 +28275,7 @@ msgstr "Nicht installierbar"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "Unit Price"
-msgstr "Einzelpreis"
+msgstr "Stückpreis"
 
 #. module: base
 #: model:res.country,name:base.ae
@@ -28377,7 +28398,7 @@ msgstr "Aktualisieren"
 #. module: base
 #: model:ir.ui.menu,name:base.menu_view_base_module_update
 msgid "Update Apps List"
-msgstr "Update der Apps"
+msgstr "App-Liste aktualisieren"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_data__date_update
@@ -29001,6 +29022,10 @@ msgid ""
 "enhancing solutions through the use of advanced software for our clients "
 "worldwide. At Lumber Inc we bring operational experience combined..."
 msgstr ""
+"Wir sind ein Technologie- und Strategieberatungsunternehmen, das durch den "
+"Einsatz fortschrittlicher Software wertsteigernde Lösungen für unsere Kunden"
+" weltweit schafft. Bei Lumber Inc bringen wir operative Erfahrung "
+"kombiniert..."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_18
@@ -29009,6 +29034,9 @@ msgid ""
 " <br> <br>\n"
 "At Lumber Inc we bring operational experience combined with technological acumen. We understand that any software that supports business operations needs to be designed in such a way that facilitates the execution of critical operational processes, and serves as a tool to the users rather than a barrier. Our approach is focused on the process first, ensuring that it contributes to the goals of the company, we then optimize it, and design the software solutions to best support it."
 msgstr ""
+"Wir sind eine Technologie- und Strategieberatungsfirma, die durch den Einsatz fortschrittlicher Software wertsteigernde Lösungen für unsere Kunden weltweit schafft.\n"
+"<br><br>\n"
+"Bei Lumber Inc bringen wir betriebliche Erfahrung in Kombination mit technologischem Scharfsinn ein. Wir wissen, dass jede Software, die Geschäftsabläufe unterstützt, so konzipiert sein muss, dass sie die Ausführung kritischer betrieblicher Prozesse erleichtert und den Benutzern als Werkzeug dient, statt Hindernis zu sein. Unser Ansatz konzentriert sich zunächst auf den Prozess und stellt sicher, dass er zur Erreichung der Unternehmensziele beiträgt. Wir optimieren ihn und entwickeln die entsprechende Softwarelösung."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web
@@ -30044,7 +30072,7 @@ msgstr "test read_group"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_xlsx_export
 msgid "test xlsx export"
-msgstr ""
+msgstr "test xlsx export"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_assetsbundle

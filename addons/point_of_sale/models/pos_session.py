@@ -252,6 +252,7 @@ class PosSession(models.Model):
             session.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
             if not session.config_id.cash_control:
                 session.action_pos_session_close()
+        return True
 
     def _check_pos_session_balance(self):
         for session in self:
@@ -1004,7 +1005,7 @@ class PosSession(models.Model):
     def _alert_old_session(self):
         # If the session is open for more then one week,
         # log a next activity to close the session.
-        sessions = self.search([('start_at', '<=', (fields.datetime.now() - timedelta(days=7))), ('state', '!=', 'closed')])
+        sessions = self.sudo().search([('start_at', '<=', (fields.datetime.now() - timedelta(days=7))), ('state', '!=', 'closed')])
         for session in sessions:
             if self.env['mail.activity'].search_count([('res_id', '=', session.id), ('res_model', '=', 'pos.session')]) == 0:
                 session.activity_schedule('point_of_sale.mail_activity_old_session',

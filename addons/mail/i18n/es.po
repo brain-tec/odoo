@@ -25,14 +25,17 @@
 # Efrem Jimenez <efj@odoo.com>, 2019
 # Martin Trigaux, 2019
 # Jesse Garza <jga@odoo.com>, 2019
-# John Guardado <jgu@odoo.com>, 2019
+# 2ce5c0f90a7530708d68bb8c6ad9a772_9dbda0e <234f5478d2e8ef72de316673811c6a08_768192>, 2019
 # RGB Consulting <odoo@rgbconsulting.com>, 2019
 # Jon Perez <jop@odoo.com>, 2020
 # VivianMontana23 <vivianpvm@gmail.com>, 2020
-# Osiris Román <osiris.roman@yachaytech.edu.ec>, 2020
+# Osiris Anael Roman Eras <osiris.roman@yachaytech.edu.ec>, 2020
 # Jesús Alan Ramos Rodríguez <alan.ramos@jarsa.com.mx>, 2020
-# Pedro M. Baeza <pedro.baeza@gmail.com>, 2021
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2021
 # Lucia Pacheco <lpo@odoo.com>, 2021
+# Jairo Llopis <yajo.sk8@gmail.com>, 2021
+# jabelchi, 2021
+# Pere Martínez, 2021
 # 
 msgid ""
 msgstr ""
@@ -40,7 +43,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:11+0000\n"
-"Last-Translator: Lucia Pacheco <lpo@odoo.com>, 2021\n"
+"Last-Translator: Pere Martínez, 2021\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -102,7 +105,7 @@ msgstr "%s (copia)"
 #: code:addons/mail/static/src/js/models/threads/mixins/thread_typing_mixin.js:0
 #, python-format
 msgid "%s and %s are typing..."
-msgstr "%s y %s están escribiendo.."
+msgstr "%s y %s están escribiendo..."
 
 #. module: mail
 #: code:addons/mail/models/mail_thread.py:0
@@ -115,14 +118,14 @@ msgstr "%s creado"
 #: code:addons/mail/static/src/js/models/threads/mixins/thread_typing_mixin.js:0
 #, python-format
 msgid "%s is typing..."
-msgstr "%s esta escribiendo.."
+msgstr "%s esta escribiendo..."
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/js/models/threads/mixins/thread_typing_mixin.js:0
 #, python-format
 msgid "%s, %s and more are typing..."
-msgstr "%s, %s y más están escribiendo.."
+msgstr "%s, %s y más están escribiendo..."
 
 #. module: mail
 #: code:addons/mail/models/mail_activity.py:0
@@ -1636,7 +1639,7 @@ msgstr "Fecha límite"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_user_assigned
 msgid "Dear"
-msgstr "Querido"
+msgstr "Estimado/a"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__activity_decoration
@@ -1986,7 +1989,7 @@ msgstr "Fecha de vencimiento en"
 #: code:addons/mail/static/src/js/activity.js:0
 #, python-format
 msgid "Due in %d days"
-msgstr "Vencido en %d días"
+msgstr "Vence en %d días"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_date_deadline_range_type
@@ -3022,7 +3025,7 @@ msgstr "Es una notificación"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_notification__is_read
 msgid "Is Read"
-msgstr "Es leído"
+msgstr "Está leído"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__is_subscribed
@@ -3423,14 +3426,14 @@ msgstr "Marcar como hecho"
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "Mark all as read"
-msgstr "Marcar todo como leido"
+msgstr "Marcar todo como leído"
 
 #. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "Mark all read"
-msgstr "Marcar todo como leido"
+msgstr "Marcar todo como leído"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
@@ -3443,7 +3446,7 @@ msgstr "Marcar como Hecho"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Mark as Read"
-msgstr "Marcar como leido"
+msgstr "Marcar como leído"
 
 #. module: mail
 #. openerp-web
@@ -4644,7 +4647,7 @@ msgstr "Por favor, complete la información del cliente"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "Please contact us instead using"
-msgstr "Por favor contáctenos en vez de usar"
+msgstr "Por favor, en su lugar contáctenos usando"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_send_guidelines

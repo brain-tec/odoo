@@ -2303,8 +2303,8 @@ msgid ""
 "danger\">Your answers have probably not been recorded.</strong> Try "
 "refreshing."
 msgstr ""
-"Ceva nu a mers în timp ce contactați serverul de sondaj <strong class"
-"=\"text-danger\">Răspunsurile dvs. probabil nu au fost "
+"Ceva nu a mers în timp ce contactați serverul de sondaj <strong "
+"class=\"text-danger\">Răspunsurile dvs. probabil nu au fost "
 "înregistrate.</strong> Încercați să reîmprospătați pagina."
 
 #. module: survey
@@ -3075,6 +3075,22 @@ msgstr ""
 #, python-format
 msgid "You cannot send an invitation for a survey that has no questions."
 msgstr "Nu puteți trimite o invitație pentru un sondaj care nu are întrebări."
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey has no sections."
+msgstr ""
+
+#. module: survey
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"You cannot send an invitation for a \"One page per section\" survey if the "
+"survey only contains empty sections."
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/models/survey_survey.py:0

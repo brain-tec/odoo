@@ -412,6 +412,7 @@ class HrExpense(models.Model):
                 if tax['tax_repartition_line_id']:
                     rep_ln = self.env['account.tax.repartition.line'].browse(tax['tax_repartition_line_id'])
                     base_amount = self.env['account.move']._get_base_amount_to_display(tax['base'], rep_ln)
+                    base_amount = expense.currency_id._convert(base_amount, company_currency, expense.company_id, account_date) if different_currency else base_amount
                 else:
                     base_amount = None
 
@@ -564,7 +565,7 @@ class HrExpense(models.Model):
             'unit_amount': price,
             'product_id': product.id if product else None,
             'product_uom_id': product.uom_id.id,
-            'tax_ids': [(4, tax.id, False) for tax in product.supplier_taxes_id],
+            'tax_ids': [(4, tax.id, False) for tax in product.supplier_taxes_id.filtered(lambda r: r.company_id == company)],
             'quantity': 1,
             'company_id': company.id,
             'currency_id': currency_id.id

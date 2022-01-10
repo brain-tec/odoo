@@ -46,7 +46,7 @@ class SaleOrder(models.Model):
         for order in self:
             pickings = order.picking_ids.filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
             dates_list = [date for date in pickings.mapped('date_done') if date]
-            order.effective_date = min(dates_list).date() if dates_list else False
+            order.effective_date = fields.Date.context_today(order, min(dates_list)) if dates_list else False
 
     @api.depends('picking_policy')
     def _compute_expected_date(self):
@@ -411,6 +411,8 @@ class SaleOrderLine(models.Model):
                 'message' : _('You are decreasing the ordered quantity! Do not forget to manually update the delivery order if needed.'),
             }
             return {'warning': warning_mess}
+        if self.product_packaging:
+            return self._check_package()
         return {}
 
     def _prepare_procurement_values(self, group_id=False):

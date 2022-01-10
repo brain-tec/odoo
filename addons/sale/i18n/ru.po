@@ -18,12 +18,14 @@
 # Martin Trigaux, 2019
 # Sergey Vilizhanin, 2019
 # Anton Ilchenko <anton.wmt@gmail.com>, 2019
-# Ivan Yelizariev // IEL <yelizariev@itpp.dev>, 2020
+# Ivan Yelizariev // IEL (ellui) <yelizariev@itpp.dev>, 2020
 # Denis Knotko <denis_knotko@yahoo.com>, 2020
 # Denis Baranov <baranov@itlibertas.com>, 2020
 # Ekaterina <nawsikaya@bk.ru>, 2020
 # Ye Ye <vrio.ua@gmail.com>, 2020
 # Сергей Шебанин <sergey@shebanin.ru>, 2021
+# ILMIR <karamov@it-projects.info>, 2021
+# Диляра Дельтаева <dilya.kz93@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -31,7 +33,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-27 09:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:13+0000\n"
-"Last-Translator: Сергей Шебанин <sergey@shebanin.ru>, 2021\n"
+"Last-Translator: Диляра Дельтаева <dilya.kz93@gmail.com>, 2021\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -724,7 +726,7 @@ msgstr "Деятельность"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Оформление исключения активности"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__activity_state
@@ -1289,8 +1291,8 @@ msgstr "Настройте вид своих коммерческих предл
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_dhl
-msgid "DHL Connector"
-msgstr "Коннектор DHL"
+msgid "DHL Express Connector"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
@@ -1756,7 +1758,7 @@ msgstr "Иконка"
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Значок, обозначающий действие исключения."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_needaction
@@ -2675,7 +2677,7 @@ msgstr "Операция Оплаты"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_onboarding_order_confirmation_step
 msgid "Payment method"
-msgstr ""
+msgstr "Метод оплаты"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -3086,7 +3088,7 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Ошибка доставки SMS"
 
 #. module: sale
 #. openerp-web
@@ -4041,7 +4043,7 @@ msgstr "Название типа"
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Тип активности исключения в записи."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_ups
@@ -4096,7 +4098,7 @@ msgstr "Единицы измерения"
 #. module: sale
 #: model:ir.ui.menu,name:sale.menu_product_uom_categ_form_action
 msgid "Units of Measure Categories"
-msgstr ""
+msgstr "Категории единиц измерения"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_auto_done_setting
@@ -4190,7 +4192,7 @@ msgstr "Подтвердить Заказа"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Variant Grid Entry"
-msgstr ""
+msgstr "Вариант записи графика платежей"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.mail_notification_paynow_online
@@ -4354,6 +4356,8 @@ msgid ""
 "Your quotation contains products from company %s whereas your quotation belongs to company %s. \n"
 " Please change the company of your quotation or remove the products from other companies (%s)."
 msgstr ""
+"Ваше предложение содержит продукты компании %s , тогда как ваше предложение принадлежит компании %s. \n"
+" Пожалуйста, измените компанию вашего предложения или удалите продукты от других компаний (%s)."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_bpost

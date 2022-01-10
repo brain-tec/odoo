@@ -345,7 +345,7 @@
                                     <field name="product_uom_qty" string="Demand" attrs="{'column_invisible': [('parent.immediate_transfer', '=', True)], 'readonly': ['|', ('is_initial_demand_editable', '=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False)]}"/>
                                     <field name="reserved_availability" string="Reserved" attrs="{'column_invisible': (['|','|', ('parent.state','=', 'done'), ('parent.picking_type_code', '=', 'incoming'), ('parent.immediate_transfer', '=', True)])}"/>
                                     <field name="quantity_done" string="Done" attrs="{'readonly': [('is_quantity_done_editable', '=', False)]}"/>
-                                    <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('additional', '=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
+                                    <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('id', '!=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                                     <button name="action_show_details" string="Register lots, packs, location" type="object" icon="fa-list" width="0.1"
                                             attrs="{'invisible': [('show_details_visible', '=', False)]}" options='{"warn": true}'/>
                                     <button name="action_assign_serial" type="object"
@@ -369,7 +369,7 @@
                                         <field name="product_uom_qty" string="Initial Demand" attrs="{'invisible': [('parent.immediate_transfer', '=', True)], 'readonly': [('is_initial_demand_editable', '=', False)]}"/>
                                         <field name="reserved_availability" string="Reserved" attrs="{'invisible': (['|','|', ('parent.state','=', 'done'), ('parent.picking_type_code', '=', 'incoming'), ('parent.immediate_transfer', '=', True)])}"/>
                                         <field name="quantity_done" string="Done" attrs="{'readonly': [('is_quantity_done_editable', '=', False)]}"/>
-                                        <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('additional', '=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
+                                        <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('id', '!=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                                         <field name="description_picking" string="Description"/>
                                     </group>
                                 </form>
@@ -412,7 +412,7 @@
                     <field name="name" string="Transfer" filter_domain="['|', ('name', 'ilike', self), ('origin', 'ilike', self)]"/>
                     <field name="partner_id" filter_domain="[('partner_id', 'child_of', self)]"/>
                     <field name="origin"/>
-                    <field name="product_id"/>
+                    <field name="product_id" filter_domain="['|', '|', ('product_id.default_code', 'ilike', self), ('product_id.name', 'ilike', self), ('product_id.barcode', 'ilike', self)]"/>
                     <field name="picking_type_id"/>
                     <filter name="my_transfers" string="My Transfers" domain="[('user_id', '=', uid)]"/>
                     <separator/>
