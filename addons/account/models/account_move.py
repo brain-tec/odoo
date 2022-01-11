@@ -1961,9 +1961,9 @@ class AccountMove(models.Model):
             raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
                                     'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
 
-    @api.constrains('ref', 'move_type', 'partner_id', 'journal_id', 'invoice_date')
+    @api.constrains('ref', 'move_type', 'partner_id', 'journal_id', 'invoice_date', 'state')
     def _check_duplicate_supplier_reference(self):
-        moves = self.filtered(lambda move: move.is_purchase_document() and move.ref)
+        moves = self.filtered(lambda move: move.state == 'posted' and move.is_purchase_document() and move.ref)
         if not moves:
             return
 
@@ -2669,15 +2669,18 @@ class AccountMove(models.Model):
                 refund_repartition_line = tax_repartition_lines_mapping[invoice_repartition_line]
 
                 # Find the right account.
-                account_id = self.env['account.move.line']._get_default_tax_account(refund_repartition_line).id
-                if not account_id:
-                    if not invoice_repartition_line.account_id:
-                        # Keep the current account as the current one comes from the base line.
-                        account_id = line_vals['account_id']
-                    else:
-                        tax = invoice_repartition_line.invoice_tax_id
-                        base_line = self.line_ids.filtered(lambda line: tax in line.tax_ids.flatten_taxes_hierarchy())[0]
-                        account_id = base_line.account_id.id
+                if cancel:
+                    account_id = line_vals['account_id']
+                else:
+                    account_id = self.env['account.move.line']._get_default_tax_account(refund_repartition_line).id
+                    if not account_id:
+                        if not invoice_repartition_line.account_id:
+                            # Keep the current account as the current one comes from the base line.
+                            account_id = line_vals['account_id']
+                        else:
+                            tax = invoice_repartition_line.invoice_tax_id
+                            base_line = self.line_ids.filtered(lambda line: tax in line.tax_ids.flatten_taxes_hierarchy())[0]
+                            account_id = base_line.account_id.id
 
                 tags = refund_repartition_line.tag_ids
                 if line_vals.get('tax_ids'):
@@ -2910,6 +2913,8 @@ class AccountMove(models.Model):
         if not self.env.su and not self.env.user.has_group('account.group_account_invoice'):
             raise AccessError(_("You don't have the access rights to post an invoice."))
         for move in to_post:
+            if move.partner_bank_id and not move.partner_bank_id.active:
+                raise UserError(_("The recipient bank account link to this invoice is archived.\nSo you cannot confirm the invoice."))
             if move.state == 'posted':
                 raise UserError(_('The entry %s (id %s) is already posted.') % (move.name, move.id))
             if not move.line_ids.filtered(lambda line: not line.display_type):

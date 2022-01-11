@@ -428,6 +428,12 @@ options.Class.include({
     customizeWebsiteColor: async function (previewMode, widgetValue, params) {
         await this._customizeWebsite(previewMode, widgetValue, params, 'color');
     },
+    /**
+     * @see this.selectClass for parameters
+     */
+    async customizeWebsiteAssets(previewMode, widgetValue, params) {
+        await this._customizeWebsite(previewMode, widgetValue, params, 'assets');
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -474,30 +480,16 @@ options.Class.include({
     _computeWidgetState: async function (methodName, params) {
         switch (methodName) {
             case 'customizeWebsiteViews': {
-                const allXmlIDs = this._getXMLIDsFromPossibleValues(params.possibleValues);
-                const enabledXmlIDs = await this._rpc({
-                    route: '/website/theme_customize_get',
-                    params: {
-                        'xml_ids': allXmlIDs,
-                    },
-                });
-                let mostXmlIDsStr = '';
-                let mostXmlIDsNb = 0;
-                for (const xmlIDsStr of params.possibleValues) {
-                    const enableXmlIDs = xmlIDsStr.split(/\s*,\s*/);
-                    if (enableXmlIDs.length > mostXmlIDsNb
-                            && enableXmlIDs.every(xmlID => enabledXmlIDs.includes(xmlID))) {
-                        mostXmlIDsStr = xmlIDsStr;
-                        mostXmlIDsNb = enableXmlIDs.length;
-                    }
-                }
-                return mostXmlIDsStr; // Need to return the exact same string as in possibleValues
+                return this._getEnabledCustomizeValues(params.possibleValues, true);
             }
             case 'customizeWebsiteVariable': {
                 return weUtils.getCSSVariableValue(params.variable);
             }
             case 'customizeWebsiteColor': {
                 return weUtils.getCSSVariableValue(params.color);
+            }
+            case 'customizeWebsiteAssets': {
+                return this._getEnabledCustomizeValues(params.possibleValues, false);
             }
         }
         return this._super(...arguments);
@@ -513,13 +505,16 @@ options.Class.include({
 
         switch (type) {
             case 'views':
-                await this._customizeWebsiteViews(widgetValue, params);
+                await this._customizeWebsiteData(widgetValue, params, true);
                 break;
             case 'variable':
                 await this._customizeWebsiteVariable(widgetValue, params);
                 break;
             case 'color':
                 await this._customizeWebsiteColor(widgetValue, params);
+                break;
+            case 'assets':
+                await this._customizeWebsiteData(widgetValue, params, false);
                 break;
             default:
                 if (params.customCustomization) {
@@ -583,32 +578,78 @@ options.Class.include({
         }, params.nullValue);
     },
     /**
+     * TODO Remove this function in master because it only stays here for
+     * compatibility.
+     *
      * @private
      */
     _customizeWebsiteViews: async function (xmlID, params) {
-        const allXmlIDs = this._getXMLIDsFromPossibleValues(params.possibleValues);
-        const enableXmlIDs = xmlID.split(/\s*,\s*/);
-        const disableXmlIDs = allXmlIDs.filter(xmlID => !enableXmlIDs.includes(xmlID));
+        this._customizeWebsiteData(xmlID, params, true);
+    },
+    /**
+     * @private
+     */
+    async _customizeWebsiteData(value, params, isViewData) {
+        const allDataKeys = this._getDataKeysFromPossibleValues(params.possibleValues);
+        const enableDataKeys = value.split(/\s*,\s*/);
+        const disableDataKeys = allDataKeys.filter(value => !enableDataKeys.includes(value));
         const resetViewArch = !!params.resetViewArch;
 
         return this._rpc({
-            route: '/website/theme_customize',
+            route: '/website/theme_customize_data',
             params: {
-                'enable': enableXmlIDs,
-                'disable': disableXmlIDs,
+                'is_view_data': isViewData,
+                'enable': enableDataKeys,
+                'disable': disableDataKeys,
                 'reset_view_arch': resetViewArch,
             },
         });
     },
     /**
+     * TODO Remove this function in master because it only stays here for
+     * compatibility.
+     *
      * @private
      */
     _getXMLIDsFromPossibleValues: function (possibleValues) {
-        const allXmlIDs = [];
-        for (const xmlIDsStr of possibleValues) {
-            allXmlIDs.push(...xmlIDsStr.split(/\s*,\s*/));
+        this._getDataKeysFromPossibleValues(possibleValues);
+    },
+    /**
+     * @private
+     */
+    _getDataKeysFromPossibleValues(possibleValues) {
+        const allDataKeys = [];
+        for (const dataKeysStr of possibleValues) {
+            allDataKeys.push(...dataKeysStr.split(/\s*,\s*/));
         }
-        return allXmlIDs.filter((v, i, arr) => arr.indexOf(v) === i);
+        return allDataKeys.filter((v, i, arr) => arr.indexOf(v) === i);
+    },
+    /**
+     * @private
+     * @param {Array} possibleValues
+     * @param {Boolean} isViewData true = "ir.ui.view", false = "ir.asset"
+     * @returns {String}
+     */
+    async _getEnabledCustomizeValues(possibleValues, isViewData) {
+        const allDataKeys = this._getDataKeysFromPossibleValues(possibleValues);
+        const enabledValues = await this._rpc({
+            route: '/website/theme_customize_data_get',
+            params: {
+                'keys': allDataKeys,
+                'is_view_data': isViewData,
+            },
+        });
+        let mostValuesStr = '';
+        let mostValuesNb = 0;
+        for (const valuesStr of possibleValues) {
+            const enableValues = valuesStr.split(/\s*,\s*/);
+            if (enableValues.length > mostValuesNb
+                    && enableValues.every(value => enabledValues.includes(value))) {
+                mostValuesStr = valuesStr;
+                mostValuesNb = enableValues.length;
+            }
+        }
+        return mostValuesStr; // Need to return the exact same string as in possibleValues
     },
     /**
      * @private
@@ -2466,6 +2507,10 @@ options.registry.CoverProperties = options.Class.extend({
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
         }
+
+        if (!previewMode) {
+            this._updateSavingDataset();
+        }
     },
     /**
      * @see this.selectClass for parameters
@@ -2473,47 +2518,30 @@ options.registry.CoverProperties = options.Class.extend({
     filterValue: function (previewMode, widgetValue, params) {
         this.$filter.css('opacity', widgetValue || 0);
         this.$filter.toggleClass('oe_black', parseFloat(widgetValue) !== 0);
+
+        if (!previewMode) {
+            this._updateSavingDataset();
+        }
     },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
-     * @private
+     * @override
      */
-    updateUI: async function () {
+    selectStyle: async function (previewMode, widgetValue, params) {
         await this._super(...arguments);
 
-        // TODO: `o_record_has_cover` should be handled using model field, not
-        // resize_class to avoid all of this.
-        let coverClass = this.$el.find('[data-cover-opt-name="size"] we-button.active').data('selectClass') || '';
-        const bg = this.$image.css('background-image');
-        if (bg && bg !== 'none') {
-            coverClass += " o_record_has_cover";
+        if (!previewMode) {
+            this._updateSavingDataset(widgetValue);
         }
-        // Update saving dataset
-        this.$target[0].dataset.coverClass = coverClass;
-        this.$target[0].dataset.textAlignClass = this.$el.find('[data-cover-opt-name="text_align"] we-button.active').data('selectClass') || '';
-        this.$target[0].dataset.filterValue = this.$filterValueOpts.filter('.active').data('filterValue') || 0.0;
-        const colorPickerWidget = this._requestUserValueWidgets('bg_color_opt')[0];
-        // TODO there is probably a better way and this should be refactored to
-        // use more standard colorpicker+imagepicker structure
-        const ccValue = colorPickerWidget._ccValue;
-        const colorOrGradient = colorPickerWidget._value;
-        const isGradient = weUtils.isColorGradient(colorOrGradient);
-        const isCSSColor = !isGradient && ColorpickerWidget.isCSSColor(colorOrGradient);
-        const colorNames = [];
-        if (ccValue) {
-            colorNames.push(ccValue);
+    },
+    /**
+     * @override
+     */
+    selectClass: async function (previewMode, widgetValue, params) {
+        await this._super(...arguments);
+
+        if (!previewMode) {
+            this._updateSavingDataset();
         }
-        if (!isGradient && !isCSSColor) {
-            colorNames.push(colorOrGradient);
-        }
-        this.$target[0].dataset.bgColorClass = weUtils.computeColorClasses(colorNames).join(' ');
-        this.$target[0].dataset.bgColorStyle =
-            isCSSColor ? `background-color: ${colorOrGradient};` :
-            isGradient ? `background-color: rgba(0, 0, 0, 0); background-image: ${colorOrGradient};` : '';
     },
 
     //--------------------------------------------------------------------------
@@ -2546,6 +2574,81 @@ options.registry.CoverProperties = options.Class.extend({
             return this.$target.data(`use_${params.coverOptName}`) === 'True';
         }
         return this._super(...arguments);
+    },
+    /**
+     * TODO: update in master to set data-name values in XML.
+     *
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        uiFragment.querySelectorAll('[data-cover-opt-name]').forEach(el => {
+            el.dataset.name = `${el.dataset.coverOptName}_opt`;
+        });
+    },
+    /**
+     * @private
+     */
+    _updateColorDataset(bgColorStyle = '', bgColorClass = '') {
+        this.$target[0].dataset.bgColorStyle = bgColorStyle;
+        if (bgColorClass) {
+            this.$target[0].dataset.bgColorClass = bgColorClass;
+        }
+    },
+    /**
+     * Updates the cover properties dataset used for saving.
+     *
+     * @private
+     */
+    _updateSavingDataset(colorValue) {
+        const [colorPickerWidget, sizeWidget, textAlignWidget] = this._requestUserValueWidgets('bg_color_opt', 'size_opt', 'text_align_opt');
+        if (!colorPickerWidget) {
+            // Saving without closing the color palette, but the last picked
+            // color was already taken into account (we still need to update the
+            // dataset when a custom color is selected).
+            if (colorValue) {
+                this._updateColorDataset(`background-color: ${colorValue};`);
+            }
+            return;
+        }
+        // TODO: `o_record_has_cover` should be handled using model field, not
+        // resize_class to avoid all of this.
+        // Get values from DOM (selected values in options are only available
+        // after updateUI)
+        const sizeOptValues = sizeWidget.getMethodsParams('selectClass').possibleValues;
+        let coverClass = [...this.$target[0].classList].filter(
+            value => sizeOptValues.includes(value)
+        ).join(' ');
+        const bg = this.$image.css('background-image');
+        if (bg && bg !== 'none') {
+            coverClass += " o_record_has_cover";
+        }
+        const textAlignOptValues = textAlignWidget.getMethodsParams('selectClass').possibleValues;
+        const textAlignClass = [...this.$target[0].classList].filter(
+            value => textAlignOptValues.includes(value)
+        ).join(' ');
+        const filterEl = this.$target[0].querySelector('.o_record_cover_filter');
+        const filterValue = filterEl && filterEl.style.opacity;
+        // Update saving dataset
+        this.$target[0].dataset.coverClass = coverClass;
+        this.$target[0].dataset.textAlignClass = textAlignClass;
+        this.$target[0].dataset.filterValue = filterValue || 0.0;
+        // TODO there is probably a better way and this should be refactored to
+        // use more standard colorpicker+imagepicker structure
+        const ccValue = colorPickerWidget._ccValue;
+        const colorOrGradient = colorPickerWidget._value;
+        const isGradient = weUtils.isColorGradient(colorOrGradient);
+        const isCSSColor = !isGradient && ColorpickerWidget.isCSSColor(colorOrGradient);
+        const colorNames = [];
+        if (ccValue) {
+            colorNames.push(ccValue);
+        }
+        if (!isGradient && !isCSSColor) {
+            colorNames.push(colorOrGradient);
+        }
+        const bgColorClass = weUtils.computeColorClasses(colorNames).join(' ');
+        const bgColorStyle = isCSSColor ? `background-color: ${colorOrGradient};` :
+            isGradient ? `background-color: rgba(0, 0, 0, 0); background-image: ${colorOrGradient};` : '';
+        this._updateColorDataset(bgColorStyle, bgColorClass);
     },
 });
 

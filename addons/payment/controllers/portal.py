@@ -258,8 +258,8 @@ class PaymentPortal(portal.CustomerPortal):
                 and tokenization_required_or_requested
             )
         elif flow == 'token':  # Payment by token
-            token_sudo = request.env['payment.token'].sudo().browse(payment_option_id)
-            acquirer_sudo = token_sudo.acquirer_id
+            token = request.env['payment.token'].browse(payment_option_id)
+            acquirer_sudo = token.acquirer_id.sudo()
             token_id = payment_option_id
             tokenize = False
         else:
@@ -375,6 +375,22 @@ class PaymentPortal(portal.CustomerPortal):
         else:
             # Display the portal homepage to the user
             return request.redirect('/my/home')
+
+    @http.route('/payment/archive_token', type='json', auth='user')
+    def archive_token(self, token_id):
+        """ Check that a user has write access on a token and archive the token if so.
+
+        :param int token_id: The token to archive, as a `payment.token` id
+        :return: None
+        """
+        partner_sudo = request.env.user.partner_id
+        token_sudo = request.env['payment.token'].sudo().search([
+            ('id', '=', token_id),
+            # Check that the user owns the token before letting them archive anything
+            ('partner_id', 'in', [partner_sudo.id, partner_sudo.commercial_partner_id.id])
+        ])
+        if token_sudo:
+            token_sudo.active = False
 
     @staticmethod
     def cast_as_int(str_value):

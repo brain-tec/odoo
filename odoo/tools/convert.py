@@ -578,7 +578,7 @@ form: module.record_id""" % (xml_id,)
                         f_val = float(f_val)
                     elif field_type == 'boolean' and isinstance(f_val, str):
                         f_val = str2bool(f_val)
-                    elif field_type in 'one2many':
+                    elif field_type == 'one2many':
                         if isinstance(f_val, str):
                             f_val = None
                         for child in field.findall('./record'):
@@ -759,7 +759,7 @@ def convert_file(cr, module, filename, idref, mode='update', noupdate=False, kin
             raise ValueError("Can't load unknown file type %s.", filename)
 
 def convert_sql_import(cr, fp):
-    cr.execute(fp.read())
+    cr.execute(fp.read()) # pylint: disable=sql-injection
 
 def convert_csv_import(cr, module, fname, csvcontent, idref=None, mode='init',
         noupdate=False):

@@ -3,11 +3,15 @@
 
 from unittest.mock import patch
 
+from odoo import tools
+from odoo.addons.base.tests import test_mail_examples
 from odoo.addons.base.tests.common import MockSmtplibCase
+from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 
 
+@tagged('mail_server')
 class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
     def setUp(self):
@@ -48,6 +52,41 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         ]
         for email, from_filter in tests:
             self.assertFalse(match_from_filter(email, from_filter))
+
+    def test_mail_body(self):
+        bodies = [
+            'content',
+            '<p>content</p>',
+            '<head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"></head><body><p>content</p></body>',
+            test_mail_examples.MISC_HTML_SOURCE,
+            test_mail_examples.QUOTE_THUNDERBIRD_HTML,
+        ]
+        expected_list = [
+            'content',
+            'content',
+            'content',
+            "test1\n*test2*\ntest3\ntest4\ntest5\ntest6   test7\ntest8    test9\ntest10\ntest11\ntest12\ngoogle [1]\ntest link [2]\n\n\n[1] http://google.com\n[2] javascript:alert('malicious code')",
+            'On 01/05/2016 10:24 AM, Raoul\nPoilvache wrote:\n\n* Test reply. The suite. *\n\n--\nRaoul Poilvache\n\nTop cool !!!\n\n--\nRaoul Poilvache',
+        ]
+        for body, expected in zip(bodies, expected_list):
+            message = self.env['ir.mail_server'].build_email(
+                'john.doe@from.example.com',
+                'destinataire@to.example.com',
+                body=body,
+                subject='Subject',
+                subtype='html',
+            )
+            body_alternative = False
+            for part in message.walk():
+                if part.get_content_maintype() == 'multipart':
+                    continue  # skip container
+                if part.get_content_type() == 'text/plain':
+                    if not part.get_payload():
+                        continue
+                    body_alternative = tools.ustr(part.get_content())
+                    # remove ending new lines as it just adds noise
+                    body_alternative = body_alternative.strip('\n')
+            self.assertEqual(body_alternative, expected)
 
     @mute_logger('odoo.models.unlink')
     def test_mail_server_priorities(self):
@@ -132,7 +171,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
         self.assert_email_sent_smtp(
             smtp_from='notifications@test.com',
-            message_from='"Name (test@unknown_domain.com)" <notifications@test.com>',
+            message_from='"Name" <notifications@test.com>',
             from_filter='notifications@test.com',
         )
 
@@ -145,7 +184,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
         self.assert_email_sent_smtp(
             smtp_from='notifications@test.com',
-            message_from='"test@unknown_domain.com" <notifications@test.com>',
+            message_from='"test" <notifications@test.com>',
             from_filter='notifications@test.com',
         )
 
@@ -179,7 +218,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
         self.assert_email_sent_smtp(
             smtp_from=default_bounce_adress,
-            message_from='"Name (test@unknown_domain.com)" <notifications@test.com>',
+            message_from='"Name" <notifications@test.com>',
             from_filter='test.com',
         )
 
@@ -230,7 +269,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         self.connect_mocked.assert_called_once()
         self.assert_email_sent_smtp(
             smtp_from='notifications@test.com',
-            message_from='"Name (test@unknown_domain.com)" <notifications@test.com>',
+            message_from='"Name" <notifications@test.com>',
             from_filter='notifications@test.com',
         )
 
@@ -262,7 +301,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         self.connect_mocked.assert_called_once()
         self.assert_email_sent_smtp(
             smtp_from=default_bounce_adress,
-            message_from='"Name (test@unknown_domain.com)" <notifications@test.com>',
+            message_from='"Name" <notifications@test.com>',
             from_filter='test.com',
         )
 
@@ -314,7 +353,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         self.connect_mocked.assert_called_once()
         self.assert_email_sent_smtp(
             smtp_from=default_bounce_adress,
-            message_from='"test@unknown_domain.com" <notifications@test.com>',
+            message_from='"test" <notifications@test.com>',
             from_filter='test.com',
         )
 
@@ -357,7 +396,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         self.connect_mocked.assert_called_once()
         self.assert_email_sent_smtp(
             smtp_from=default_bounce_adress,
-            message_from='"test@unknown_domain.com" <notifications@test.com>',
+            message_from='"test" <notifications@test.com>',
             from_filter='test.com',
         )
 

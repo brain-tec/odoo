@@ -2042,6 +2042,7 @@
 
 <!-- Effect options -->
 <record id="website.ripple_effect_scss" model="ir.asset">
+    <field name="key">website.ripple_effect_scss</field>
     <field name="name">Ripple effect SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="path">/website/static/src/scss/options/ripple_effect.scss</field>
@@ -2049,6 +2050,7 @@
 </record>
 
 <record id="website.ripple_effect_js" model="ir.asset">
+    <field name="key">website.ripple_effect_js</field>
     <field name="name">Ripple effect JS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="path">/website/static/src/js/content/ripple_effect.js</field>
@@ -2133,7 +2135,7 @@
     </script>
 </template>
 <template id="default_xml">
-    &lt;?xml version="1.0" encoding="utf-8"?&gt;
+    <t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</t>
 </template>
 <template id="default_css">
     <style type="text/css">
@@ -2157,7 +2159,7 @@
     </style>
 </template>
 <template id="default_csv">
-    1,2,3
+    <t t-translation="off">1,2,3</t>
 </template>
 
 <!-- PAGE 404 -->
@@ -2334,18 +2336,19 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
     </url>
 </template>
 
-<template id="sitemap_xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<template id="sitemap_xml"><t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</t>
 <urlset t-attf-xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <t t-out="content"/>
 </urlset>
 </template>
 
-<template id="sitemap_index_xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<template id="sitemap_index_xml"><t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 <sitemapindex t-attf-xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap t-translation="off" t-foreach="pages" t-as="page">
     <loc><t t-esc="url_root"/>sitemap-<t t-esc="page"/>.xml</loc>
   </sitemap>
 </sitemapindex>
+</t>
 </template>
 
 <template id="website_search_box" name="Website Searchbox">
