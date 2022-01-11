@@ -8,13 +8,6 @@ import { cleanSearchTerm } from '@mail/utils/utils';
 registerModel({
     name: 'ChannelInvitationForm',
     identifyingFields: [['chatWindow', 'popoverViewOwner']],
-    lifecycleHooks: {
-        _created() {
-            // Bind necessary until OWL supports arrow function in handlers: https://github.com/odoo/owl/issues/876
-            this.onClickInvite = this.onClickInvite.bind(this);
-            this.onInputSearch = this.onInputSearch.bind(this);
-        },
-    },
     recordMethods: {
         /**
          * Handles click on the "invite" button.
@@ -219,6 +212,7 @@ registerModel({
          */
         popoverViewOwner: one2one('PopoverView', {
             inverse: 'channelInvitationForm',
+            isCausal: true,
             readonly: true,
         }),
         /**

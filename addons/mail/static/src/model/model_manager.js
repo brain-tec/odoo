@@ -636,9 +636,6 @@ export class ModelManager {
                 ) {
                     throw new Error(`Mismatched relation types: ${field} on ${Model} (${field.relationType}) and ${inverseField} on ${RelatedModel} (${inverseField.relationType}).`);
                 }
-                if (field.required && !inverseField.isCausal) {
-                    throw new Error(`${field} on ${Model} is required but its inverse ${inverseField} on ${RelatedModel} is not causal.`);
-                }
             }
             for (const identifyingField of Model.__identifyingFieldsFlattened) {
                 const field = Model.__fieldMap[identifyingField];
@@ -713,11 +710,21 @@ export class ModelManager {
             this._listenersObservingFieldOfLocalId.get(localId).set(field, new Map());
         }
         /**
-         * Register record and invoke the life-cycle hook `_willCreate.`
+         * Register record.
+         */
+        Model.__records[record.localId] = record;
+        /**
+         * Auto-bind record methods so that `this` always refer to the record.
+         */
+        const recordMethods = registry.get(Model.name).get('recordMethods');
+        for (const methodName of recordMethods.keys()) {
+            record[methodName] = record[methodName].bind(record);
+        }
+        /**
+         * Invoke the life-cycle hook `_willCreate.`
          * After this step the record is in a functioning state and it is
          * considered existing.
          */
-        Model.__records[record.localId] = record;
         const lifecycleHooks = registry.get(Model.name).get('lifecycleHooks');
         if (lifecycleHooks.has('_willCreate')) {
             lifecycleHooks.get('_willCreate').call(record);
@@ -1069,9 +1076,9 @@ export class ModelManager {
             relFunc(Model.name, { inverse: field.fieldName }),
             {
                 fieldName: `_inverse_${Model}/${field.fieldName}`,
-                // Note that an identifying field is not necessarily defined as
-                // `required` (example: identifyingFields with an OR). 
-                isCausal: field.required || Model.__identifyingFieldsFlattened.has(field.fieldName),
+                // Allows the inverse of an identifying field to be
+                // automatically generated.
+                isCausal: Model.__identifyingFieldsFlattened.has(field.fieldName),
             },
         ));
         return inverseField;
