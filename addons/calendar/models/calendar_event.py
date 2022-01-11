@@ -711,7 +711,7 @@ class Meeting(models.Model):
         # is already given (coming from Google event for example).
         vals_list = [
             dict(vals, attendee_ids=self._attendees_values(vals['partner_ids']))
-            if 'partner_ids' in vals and 'attendee_ids' not in vals
+            if 'partner_ids' in vals and not vals.get('attendee_ids')
             else vals
             for vals in vals_list
         ]
@@ -788,6 +788,21 @@ class Meeting(models.Model):
 
         return public_events + my_private_events + obfuscated(others_private_events)
 
+    def name_get(self):
+        """ Hide private events' name for events which don't belong to the current user
+        """
+        hidden = self.filtered(
+            lambda evt:
+                evt.privacy == 'private' and
+                evt.user_id.id != self.env.uid and
+                self.env.user.partner_id not in evt.partner_ids
+        )
+
+        shown = self - hidden
+        shown_names = super(Meeting, shown).name_get()
+        obfuscated_names = [(eid, _('Busy')) for eid in hidden.ids]
+        return shown_names + obfuscated_names
+    
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         groupby = [groupby] if isinstance(groupby, str) else groupby
