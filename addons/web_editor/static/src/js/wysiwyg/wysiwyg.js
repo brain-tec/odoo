@@ -116,8 +116,12 @@ const Wysiwyg = Widget.extend({
                 }
             },
             isHintBlacklisted: node => {
-                return node.hasAttribute &&
-                    (node.hasAttribute('data-target') || node.hasAttribute('data-oe-model'));
+                return (node.classList && node.classList.contains('nav-item')) || (
+                    node.hasAttribute && (
+                        node.hasAttribute('data-target') ||
+                        node.hasAttribute('data-oe-model')
+                    )
+                );
             },
             filterMutationRecords: (records) => {
                 return records.filter((record) => {
@@ -901,7 +905,8 @@ const Wysiwyg = Widget.extend({
             if (options.forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
                 if (!this.linkTools || ![options.link, ...wysiwygUtils.ancestors(options.link)].includes(this.linkTools.$link[0])) {
-                    this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
+                    const linkToolsData = Object.assign({}, this.options.defaultDataForLinkTools);
+                    this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, linkToolsData, $btn, options.link || this.lastMediaClicked);
                 }
                 this.linkTools.noFocusUrl = options.noFocusUrl;
                 const _onMousedown = ev => {
@@ -1641,10 +1646,13 @@ const Wysiwyg = Widget.extend({
     _getSnippetsCommands: function () {
         const snippetCommandCallback = (selector) => {
             const $separatorBody = $(selector);
-            const $clonedBody = $separatorBody.clone();
+            const $clonedBody = $separatorBody.clone().removeClass('oe_snippet_body');
             const range = getDeepRange(this.odooEditor.editable);
             const block = closestElement(range.endContainer, 'p, div, ol, ul, cl, h1, h2, h3, h4, h5, h6');
-            block && block.after($clonedBody[0]);
+            if (block) {
+                block.after($clonedBody[0]);
+                this.snippetsMenu.callPostSnippetDrop($clonedBody);
+            }
         };
         return [
             {
