@@ -16,8 +16,8 @@ export class Composer extends Component {
     setup() {
         super.setup();
         this.isDropZoneVisible = useDragVisibleDropZone();
-        useComponentToModel({ fieldName: 'component', modelName: 'ComposerView', propNameAsRecordLocalId: 'composerViewLocalId' });
-        useRefToModel({ fieldName: 'buttonEmojisRef', modelName: 'ComposerView', propNameAsRecordLocalId: 'composerViewLocalId', refName: 'buttonEmojis' });
+        useComponentToModel({ fieldName: 'component', modelName: 'ComposerView' });
+        useRefToModel({ fieldName: 'buttonEmojisRef', modelName: 'ComposerView', refName: 'buttonEmojis' });
         this._onDropZoneFilesDropped = this._onDropZoneFilesDropped.bind(this);
         this._onComposerTextInputSendShortcut = this._onComposerTextInputSendShortcut.bind(this);
         this._onPasteTextInput = this._onPasteTextInput.bind(this);
@@ -31,7 +31,7 @@ export class Composer extends Component {
      * @returns {ComposerView}
      */
     get composerView() {
-        return this.messaging && this.messaging.models['ComposerView'].get(this.props.composerViewLocalId);
+        return this.messaging && this.messaging.models['ComposerView'].get(this.props.localId);
     }
 
     /**
@@ -122,7 +122,7 @@ export class Composer extends Component {
      * @private
      */
     _onClickAddAttachment() {
-        this.composerView.fileUploaderView.openBrowserFileUploader();
+        this.composerView.fileUploader.openBrowserFileUploader();
         if (!this.messaging.device.isMobileDevice) {
             this.composerView.update({ doFocus: true });
         }
@@ -172,7 +172,7 @@ export class Composer extends Component {
      * @param {FileList} detail.files
      */
     async _onDropZoneFilesDropped(detail) {
-        await this.composerView.fileUploaderView.uploadFiles(detail.files);
+        await this.composerView.fileUploader.uploadFiles(detail.files);
         this.isDropZoneVisible.value = false;
     }
 
@@ -201,7 +201,7 @@ export class Composer extends Component {
         if (!ev.clipboardData || !ev.clipboardData.files) {
             return;
         }
-        await this.composerView.fileUploaderView.uploadFiles(ev.clipboardData.files);
+        await this.composerView.fileUploader.uploadFiles(ev.clipboardData.files);
     }
 
 }
@@ -218,7 +218,7 @@ Object.assign(Composer, {
         isExpandable: false,
     },
     props: {
-        composerViewLocalId: String,
+        localId: String,
         hasCurrentPartnerAvatar: Boolean,
         hasDiscardButton: Boolean,
         hasFollowers: Boolean,
