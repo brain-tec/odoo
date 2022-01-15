@@ -133,6 +133,12 @@ class Sanitize {
             }
         }
 
+        // Ensure unique ids on checklists and stars.
+        if (node.nodeName == 'LI' && node.parentElement && node.parentElement.classList.contains('o_checklist') ||
+            node.classList && node.classList.contains('o_stars')) {
+            node.setAttribute('id', Math.floor(new Date() * Math.random()));
+        }
+
         // FIXME not parse out of editable zone...
         this._parse(node.firstChild);
         this._parse(node.nextSibling);

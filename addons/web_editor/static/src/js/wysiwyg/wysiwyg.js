@@ -133,6 +133,11 @@ const Wysiwyg = Widget.extend({
             plugins: options.editorPlugins,
         }, editorCollaborationOptions));
 
+        this.odooEditor.addEventListener('contentChanged', function () {
+            self.$editable.trigger('content_changed');
+            self.trigger_up('wysiwyg_change');
+        });
+
         const $wrapwrap = $('#wrapwrap');
         if ($wrapwrap.length) {
             $wrapwrap[0].addEventListener('scroll', this.odooEditor.multiselectionRefresh, { passive: true });
@@ -205,7 +210,9 @@ const Wysiwyg = Widget.extend({
                 }).join(' ');
             }
 
-            self.openMediaDialog(params);
+            if (!$el.parent().hasClass('o_stars')) {
+                self.openMediaDialog(params);
+            }
         });
 
         if (options.snippets) {
@@ -905,7 +912,8 @@ const Wysiwyg = Widget.extend({
             if (options.forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
                 if (!this.linkTools || ![options.link, ...wysiwygUtils.ancestors(options.link)].includes(this.linkTools.$link[0])) {
-                    this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, {}, $btn, options.link || this.lastMediaClicked);
+                    const linkToolsData = Object.assign({}, this.options.defaultDataForLinkTools);
+                    this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, linkToolsData, $btn, options.link || this.lastMediaClicked);
                 }
                 this.linkTools.noFocusUrl = options.noFocusUrl;
                 const _onMousedown = ev => {
@@ -1363,7 +1371,7 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
         // Only show the media tools in the toolbar if the current selected
         // snippet is a media.
-        const isInMedia = $target.is(mediaSelector);
+        const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars');
         this.toolbar.$el.find([
             '#image-shape',
             '#image-width',
@@ -1514,22 +1522,7 @@ const Wysiwyg = Widget.extend({
         }
     },
     _editorOptions: function () {
-        var self = this;
-        var options = Object.assign({}, this.defaultOptions, this.options);
-        options.onChange = function (html, $editable) {
-            $editable.trigger('content_changed');
-            self.trigger_up('wysiwyg_change');
-        };
-        options.onUpload = function (attachments) {
-            self.trigger_up('wysiwyg_attachment', attachments);
-        };
-        options.onFocus = function () {
-            self.trigger_up('wysiwyg_focus');
-        };
-        options.onBlur = function () {
-            self.trigger_up('wysiwyg_blur');
-        };
-        return options;
+        return Object.assign({}, this.defaultOptions, this.options);
     },
     _insertSnippetMenu: function () {
         return this.snippetsMenu.insertBefore(this.$el);

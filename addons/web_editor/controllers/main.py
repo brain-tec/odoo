@@ -118,9 +118,19 @@ class Web_Editor(http.Controller):
         htmlelem = etree.fromstring("<div>%s</div>" % value, etree.HTMLParser())
         checked = bool(checked)
 
-        li = htmlelem.find(".//li[@id='checklist-id-" + str(checklistId) + "']")
+        li = htmlelem.find(".//li[@id='%s']" % checklistId)
 
-        if not li or not self._update_checklist_recursive(li, checked, children=True, ancestors=True):
+        if li is None:
+            return value
+
+        classname = li.get('class', '')
+        if ('o_checked' in classname) != checked:
+            if checked:
+                classname = '%s o_checked' % classname
+            else:
+                classname = re.sub(r"\s?o_checked\s?", '', classname)
+            li.set('class', classname)
+        else:
             return value
 
         value = etree.tostring(htmlelem[0][0], encoding='utf-8', method='html')[5:-6]
@@ -128,54 +138,42 @@ class Web_Editor(http.Controller):
 
         return value
 
-    def _update_checklist_recursive (self, li, checked, children=False, ancestors=False):
-        if 'checklist-id-' not in li.get('id', ''):
-            return False
+    #------------------------------------------------------
+    # Update a stars rating in the editor on check/uncheck
+    #------------------------------------------------------
+    @http.route('/web_editor/stars', type='json', auth='user')
+    def update_stars(self, res_model, res_id, filename, starsId, rating):
+        record = request.env[res_model].browse(res_id)
+        value = getattr(record, filename, False)
+        htmlelem = etree.fromstring("<div>%s</div>" % value, etree.HTMLParser())
 
-        classname = li.get('class', '')
-        if ('o_checked' in classname) == checked:
-            return False
+        stars_widget = htmlelem.find(".//span[@id='%s']" % starsId)
 
-        # check / uncheck
-        if checked:
-            classname = '%s o_checked' % classname
-        else:
-            classname = re.sub(r"\s?o_checked\s?", '', classname)
-        li.set('class', classname)
+        if stars_widget is None:
+            return value
 
-        # propagate to children
-        if children:
-            node = li.getnext()
-            ul = None
-            if node is not None:
-                if node.tag == 'ul':
-                    ul = node
-                if node.tag == 'li' and len(node.getchildren()) == 1 and node.getchildren()[0].tag == 'ul':
-                    ul = node.getchildren()[0]
+        # Check the `rating` first stars and uncheck the others if any.
+        stars = []
+        for star in stars_widget.getchildren():
+            if 'fa-star' in star.get('class', ''):
+                stars.append(star)
+        star_index = 0
+        for star in stars:
+            classname = star.get('class', '')
+            if star_index < rating and (not 'fa-star' in classname or 'fa-star-o' in classname):
+                classname = re.sub(r"\s?fa-star-o\s?", '', classname)
+                classname = '%s fa-star' % classname
+                star.set('class', classname)
+            elif star_index >= rating and not 'fa-star-o' in classname:
+                classname = re.sub(r"\s?fa-star\s?", '', classname)
+                classname = '%s fa-star-o' % classname
+                star.set('class', classname)
+            star_index += 1
 
-            if ul is not None:
-                for child in ul.getchildren():
-                    if child.tag == 'li':
-                        self._update_checklist_recursive(child, checked, children=True)
+        value = etree.tostring(htmlelem[0][0], encoding='utf-8', method='html')[5:-6]
+        record.write({filename: value})
 
-        # propagate to ancestors
-        if ancestors:
-            allSelected = True
-            ul = li.getparent()
-            if ul.tag == 'li':
-                ul = ul.getparent()
-
-            for child in ul.getchildren():
-                if child.tag == 'li' and 'checklist-id' in child.get('id', '') and 'o_checked' not in child.get('class', ''):
-                    allSelected = False
-
-            node = ul.getprevious()
-            if node is None:
-                node = ul.getparent().getprevious()
-            if node is not None and node.tag == 'li':
-                self._update_checklist_recursive(node, allSelected, ancestors=True)
-
-        return True
+        return value
 
     @http.route('/web_editor/video_url/data', type='json', auth='user', website=True)
     def video_url_data(self, video_url, autoplay=False, loop=False,

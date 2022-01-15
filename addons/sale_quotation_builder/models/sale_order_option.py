@@ -9,10 +9,12 @@ class SaleOrderOption(models.Model):
     _inherit = "sale.order.option"
 
     website_description = fields.Html(
-        'Website Description', sanitize_attributes=False, translate=html_translate,
-        compute='_compute_website_description', store=True, readonly=False, precompute=True)
+        string="Website Description",
+        compute='_compute_website_description',
+        store=True, readonly=False, precompute=True,
+        sanitize_attributes=False, translate=html_translate)
 
-    @api.depends('product_id', 'uom_id')
+    @api.depends('product_id')
     def _compute_website_description(self):
         for option in self:
             if not option.product_id:
@@ -21,6 +23,6 @@ class SaleOrderOption(models.Model):
             option.website_description = product.quotation_description
 
     def _get_values_to_add_to_order(self):
-        values = super(SaleOrderOption, self)._get_values_to_add_to_order()
+        values = super()._get_values_to_add_to_order()
         values.update(website_description=self.website_description)
         return values

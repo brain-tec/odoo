@@ -1,14 +1,15 @@
-odoo.define('web_editor.field.html', function (require) {
+/** @odoo-module alias=web_editor.field.html */
 'use strict';
 
-var ajax = require('web.ajax');
-var basic_fields = require('web.basic_fields');
-var core = require('web.core');
-var wysiwygLoader = require('web_editor.loader');
-var field_registry = require('web.field_registry');
-const {QWebPlugin} = require('@web_editor/js/backend/QWebPlugin');
+import ajax from 'web.ajax';
+import basic_fields from 'web.basic_fields';
+import core from 'web.core';
+import wysiwygLoader from 'web_editor.loader';
+import field_registry from 'web.field_registry';
+import {QWebPlugin} from '@web_editor/js/backend/QWebPlugin';
+import {getAdjacentPreviousSiblings, getAdjacentNextSiblings} from '../../../lib/odoo-editor/src/utils/utils';
 // must wait for web/ to add the default html widget, otherwise it would override the web_editor one
-require('web._field_registry');
+import 'web._field_registry';
 
 var _lt = core._lt;
 var TranslatableFieldMixin = basic_fields.TranslatableFieldMixin;
@@ -386,6 +387,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
 
         def.then(function () {
             self.$content.on('click', 'ul.o_checklist > li', self._onReadonlyClickChecklist.bind(self));
+            self.$content.on('click', '.o_stars .fa-star, .o_stars .fa-star-o', self._onReadonlyClickStar.bind(self));
             if (self.$iframe) {
                 // Iframe is hidden until fully loaded to avoid glitches.
                 self.$iframe.removeClass('d-none');
@@ -454,27 +456,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      */
     _onChange: function (ev) {
         this._doDebouncedAction.apply(this, arguments);
-
-        var $lis = this.$content.find('.note-editable ul.o_checklist > li:not(:has(> ul.o_checklist))');
-        if (!$lis.length) {
-            return;
-        }
-        var max = 0;
-        var ids = [];
-        $lis.map(function () {
-            var checklistId = parseInt(($(this).attr('id') || '0').replace(/^checklist-id-/, ''));
-            if (ids.indexOf(checklistId) === -1) {
-                if (checklistId > max) {
-                    max = checklistId;
-                }
-                ids.push(checklistId);
-            } else {
-                $(this).removeAttr('id');
-            }
-        });
-        $lis.not('[id]').each(function () {
-            $(this).attr('id', 'checklist-id-' + (++max));
-        });
     },
     /**
      * Allows Enter keypress in a textarea (source mode)
@@ -503,7 +484,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         ev.stopPropagation();
         ev.preventDefault();
         var checked = $(ev.target).hasClass('o_checked');
-        var checklistId = parseInt(($(ev.target).attr('id') || '0').replace(/^checklist-id-/, ''));
+        var checklistId = parseInt($(ev.target).attr('id') || '0');
 
         this._rpc({
             route: '/web_editor/checklist',
@@ -517,6 +498,38 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }).then(function (value) {
             self._setValue(value);
         });
+    },
+    /**
+     * Check stars on click event in readonly.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onReadonlyClickStar: function (ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+
+        const node = ev.target;
+        const previousStars = getAdjacentPreviousSiblings(node, sib => (
+            sib.nodeType === Node.ELEMENT_NODE && sib.className.includes('fa-star')
+        ));
+        const nextStars = getAdjacentNextSiblings(node, sib => (
+            sib.nodeType === Node.ELEMENT_NODE && sib.classList.contains('fa-star')
+        ));
+        const shouldToggleOff = node.classList.contains('fa-star') && !nextStars.length;
+        const rating = shouldToggleOff ? 0 : previousStars.length + 1
+
+        const starsId = parseInt($(node).parent().attr('id') || '0');
+        this._rpc({
+            route: '/web_editor/stars',
+            params: {
+                res_model: this.model,
+                res_id: this.res_id,
+                filename: this.name,
+                starsId,
+                rating,
+            },
+        }).then(value => this._setValue(value));
     },
     /**
      * Method called when the wysiwyg instance is loaded.
@@ -573,5 +586,4 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
 field_registry.add('html', FieldHtml);
 
 
-return FieldHtml;
-});
+export default FieldHtml;
