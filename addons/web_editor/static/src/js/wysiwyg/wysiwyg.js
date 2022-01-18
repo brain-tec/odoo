@@ -128,7 +128,6 @@ const Wysiwyg = Widget.extend({
                     return !(record.target.classList && record.target.classList.contains('o_header_standard'));
                 });
             },
-            noScrollSelector: 'body, .note-editable, .o_content, #wrapwrap',
             commands: commands,
             plugins: options.editorPlugins,
         }, editorCollaborationOptions));
@@ -1145,6 +1144,7 @@ const Wysiwyg = Widget.extend({
             }
             $(this.lastMediaClicked).remove();
             this.lastMediaClicked = undefined;
+            this.odooEditor.toolbarHide();
         });
         $toolbar.find('#fa-resize div').click(e => {
             if (!this.lastMediaClicked) {
