@@ -688,7 +688,11 @@ class StockQuant(models.Model):
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
 
-        incoming_dates = [d for d in quants.mapped('in_date') if d]
+        if location_id.should_bypass_reservation():
+            incoming_dates = []
+        else:
+            incoming_dates = [quant.in_date for quant in quants if quant.in_date and
+                              float_compare(quant.quantity, 0, precision_rounding=quant.product_uom_id.rounding) > 0]
         if in_date:
             incoming_dates += [in_date]
         # If multiple incoming dates are available for a given lot_id/package_id/owner_id, we
@@ -1036,7 +1040,7 @@ class QuantPackage(models.Model):
     _order = 'name'
 
     name = fields.Char(
-        'Package Reference', copy=False, index=True,
+        'Package Reference', copy=False, index='gin',
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.quant.package') or _('Unknown Pack'))
     quant_ids = fields.One2many('stock.quant', 'package_id', 'Bulk Content', readonly=True,
         domain=['|', ('quantity', '!=', 0), ('reserved_quantity', '!=', 0)])
@@ -1050,7 +1054,7 @@ class QuantPackage(models.Model):
         index=True, readonly=True, store=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner', compute='_compute_package_info', search='_search_owner',
-        index=True, readonly=True, compute_sudo=True)
+        index='not null', readonly=True, compute_sudo=True)
     package_use = fields.Selection([
         ('disposable', 'Disposable Box'),
         ('reusable', 'Reusable Box'),
