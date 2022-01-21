@@ -382,7 +382,7 @@ class AccountMove(models.Model):
     def _auto_init(self):
         super(AccountMove, self)._auto_init()
         if sql.has_pg_trgm(self._cr):
-            sql.create_index(self._cr, 'account_move_name_gin_index', self._table, 'name gin_trgm_ops', 'gin')
+            sql.create_index(self._cr, 'account_move_name_gin_index', self._table, ['name gin_trgm_ops'], 'gin')
 
     @api.model
     def _field_will_change(self, record, vals, field_name):
@@ -918,6 +918,7 @@ class AccountMove(models.Model):
                     'name': _('%s (rounding)', biggest_tax_line.name),
                     'account_id': biggest_tax_line.account_id.id,
                     'tax_repartition_line_id': biggest_tax_line.tax_repartition_line_id.id,
+                    'tax_tag_ids': [(6, 0, biggest_tax_line.tax_tag_ids.ids)],
                     'exclude_from_invoice_tab': True,
                 })
 
