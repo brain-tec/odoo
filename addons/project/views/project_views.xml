@@ -282,7 +282,7 @@
             <field name="name">project.project.form</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <form string="Project" class="o_form_project_project" delete="0">
+                <form string="Project" class="o_form_project_project" delete="0" js_class="form_description_expander">
                     <header>
                         <button name="%(project.project_share_wizard_action)d" string="Share Readonly" type="action" class="oe_highlight" groups="project.group_project_manager"
                         attrs="{'invisible': [('privacy_visibility', '!=', 'portal')]}" context="{'default_access_mode': 'read'}"/>
@@ -403,7 +403,7 @@
                     </group>
                     <notebook>
                         <page name="description" string="Description">
-                            <field name="description"/>
+                            <field name="description" options="{'resizable': false}"/>
                         </page>
                         <page name="settings" string="Settings">
                             <group>
@@ -415,7 +415,8 @@
                                     <div name="alias_def" colspan="2" attrs="{'invisible': [('alias_domain', '=', False)]}">
                                         <!-- Always display the whole alias in edit mode. It depends in read only -->
                                         <field name="alias_enabled" invisible="1"/>
-                                        <span class="font-weight-bold oe_read_only" attrs="{'invisible':  [('alias_name', '=', False)]}">Create tasks by sending an email to </span>
+                                        <span class="oe_read_only" attrs="{'invisible': [('alias_name', '!=', False)]}">Create tasks by sending an email to </span>
+                                        <span class="font-weight-bold oe_read_only" attrs="{'invisible': [('alias_name', '=', False)]}">Create tasks by sending an email to </span>
                                         <span class="font-weight-bold oe_edit_only">Create tasks by sending an email to </span>
                                             <field name="alias_value" class="oe_read_only d-inline" readonly="1" widget="email" attrs="{'invisible':  [('alias_name', '=', False)]}" />
                                             <span class="oe_edit_only">
@@ -937,7 +938,7 @@
                     </group>
                     <notebook>
                         <page name="description_page" string="Description">
-                            <field name="description" type="html" options="{'collaborative': true}"/>
+                            <field name="description" type="html" options="{'collaborative': true, 'resizable': false}"/>
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
                             <field name="child_ids" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id, 'default_partner_id': partner_id}" widget="subtasks_one2many">
@@ -1021,7 +1022,7 @@
                             <group>
                                 <group>
                                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting" context="{'default_partner_id': partner_id}"/>
-                                    <field name="parent_id" domain="[('parent_id', '=', False)]" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
+                                    <field name="parent_id" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
                                     <field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags"/>
                                     <field name="sequence" groups="base.group_no_one"/>
                                     <field name="email_from" invisible="1"/>

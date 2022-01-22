@@ -334,8 +334,11 @@ function classToStyle($editable, cssRules) {
  *                                   specificity: number;}>
  */
 function toInline($editable, cssRules) {
+    const doc = $editable[0].ownerDocument;
+    cssRules = cssRules || doc._rulesCache;
     if (!cssRules) {
-        cssRules = getCSSRules($editable[0].ownerDocument);
+        cssRules = getCSSRules(doc);
+        doc._rulesCache = cssRules;
     }
 
     // Fix outlook image rendering bug (this change will be kept in both
@@ -952,14 +955,6 @@ FieldHtml.include({
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
-    _createWysiwygIntance: function () {
-        return this._super(...arguments).then(() => {
-            if (this.nodeOptions['style-inline'] && this.mode === "edit") {
-                this.cssRules = getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
-            }
-        });
-    },
 
     /**
      * @override
