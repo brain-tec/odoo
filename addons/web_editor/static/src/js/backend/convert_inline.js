@@ -11,6 +11,7 @@ import { isBlock, rgbToHex } from '../../../lib/odoo-editor/src/utils/utils';
 const RE_COL_MATCH = /(^| )col(-[\w\d]+)*( |$)/;
 const RE_OFFSET_MATCH = /(^| )offset(-[\w\d]+)*( |$)/;
 const RE_PADDING = /([\d.]+)/;
+const RE_WHITESPACE = /[\s\u200b]*/;
 const SELECTORS_IGNORE = /(^\*$|:hover|:before|:after|:active|:link|::|'|\([^(),]+[,(])/;
 // Attributes all tables should have in a mailing.
 const TABLE_ATTRIBUTES = {
@@ -248,25 +249,33 @@ function cardToTable($editable) {
         const $card = $(card);
         const $table = _createTable(card.attributes);
         for (const child of [...card.childNodes]) {
-            if (child.nodeType === Node.TEXT_NODE) {
-                $table.append(child);
-            } else {
-                const $row = $('<tr/>');
-                const $col = $('<td/>');
-                if (child.nodeName === 'IMG') {
+            const $row = $('<tr/>');
+            const $col = $('<td/>');
+            if (child.nodeName === 'IMG') {
+                $col.append(child);
+            } else if (child.nodeType === Node.TEXT_NODE) {
+                if (child.textContent.replace(RE_WHITESPACE, '').length) {
                     $col.append(child);
                 } else {
-                    for (const attr of child.attributes) {
-                        $col.attr(attr.name, attr.value);
-                    }
-                    for (const descendant of [...child.childNodes]) {
-                        $col.append(descendant);
-                    }
-                    $(child).remove();
+                    continue;
                 }
-                $row.append($col);
-                $table.append($row);
+            } else {
+                for (const attr of child.attributes) {
+                    $col.attr(attr.name, attr.value);
+                }
+                for (const descendant of [...child.childNodes]) {
+                    $col.append(descendant);
+                }
+                $(child).remove();
             }
+            const $subTable = _createTable();
+            const $superRow = $('<tr/>');
+            const $superCol = $('<td/>');
+            $row.append($col);
+            $subTable.append($row);
+            $superCol.append($subTable);
+            $superRow.append($superCol);
+            $table.append($superRow);
         }
         $card.before($table);
         $card.remove();
@@ -288,6 +297,10 @@ function classToStyle($editable, cssRules) {
             if (styleName.includes('flex') || `${node.style[styleName]}`.includes('flex')) {
                 node.style[styleName] = '';
             }
+        }
+        // Ignore font-family (mail-safe font declared in <head>)
+        if ('font-family' in css) {
+            delete css['font-family'];
         }
 
         // Do not apply css that would override inline styles (which are prioritary).
@@ -334,8 +347,9 @@ function classToStyle($editable, cssRules) {
  * @param {Object[]} [cssRules] Array<{selector: string;
  *                                   style: {[styleName]: string};
  *                                   specificity: number;}>
+ * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
-function toInline($editable, cssRules) {
+function toInline($editable, cssRules, $iframe) {
     const doc = $editable[0].ownerDocument;
     cssRules = cssRules || doc._rulesCache;
     if (!cssRules) {
@@ -343,13 +357,31 @@ function toInline($editable, cssRules) {
         doc._rulesCache = cssRules;
     }
 
+    // If the editable is not visible, we need to make it visible in order to
+    // retrieve image/icon dimensions. This iterates over ancestors to make them
+    // visible again. We then restore it at the end of this function.
+    const displaysToRestore = [];
+    if (!$editable.is(':visible')) {
+        let $ancestor = $editable;
+        while ($ancestor[0] && !$ancestor.is('html') && !$ancestor.is(':visible')) {
+            if ($ancestor.css('display') === 'none') {
+                displaysToRestore.push([$ancestor, $ancestor[0].style.display]);
+                $ancestor.css('display', 'block');
+            }
+            $ancestor = $ancestor.parent();
+            if ((!$ancestor[0] || $ancestor.is('html')) && $iframe && $iframe[0]) {
+                $ancestor = $iframe;
+            }
+        }
+    }
+
     // Fix outlook image rendering bug (this change will be kept in both
     // fields).
     _.each(['width', 'height'], function (attribute) {
         $editable.find('img').attr(attribute, function () {
-            return $(this)[attribute]();
+            return ($(this).attr(attribute)) || (attribute === 'height' && this.offsetHeight) || $(this)[attribute]();
         }).css(attribute, function () {
-            return $(this).get(0).style[attribute] || attribute === 'width' ? $(this)[attribute]() + 'px' : '';
+            return $(this).attr(attribute);
         });
     });
 
@@ -363,6 +395,10 @@ function toInline($editable, cssRules) {
     formatTables($editable);
     normalizeColors($editable);
     normalizeRem($editable);
+
+    for (const displayToRestore of displaysToRestore) {
+        $(displayToRestore[0]).css('display', displayToRestore[1]);
+    }
 }
 /**
  * Convert font icons to images.
@@ -371,11 +407,11 @@ function toInline($editable, cssRules) {
  *                           converted to images
  */
 function fontToImg($editable) {
-    var fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
+    const fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
 
     $editable.find('.fa').each(function () {
-        var $font = $(this);
-        var icon, content;
+        const $font = $(this);
+        let icon, content;
         _.find(fonts.fontIcons, function (font) {
             return _.find(fonts.getCssSelectors(font.parser), function (data) {
                 if ($font.is(data.selector.replace(/::?before/g, ''))) {
@@ -386,7 +422,7 @@ function fontToImg($editable) {
             });
         });
         if (content) {
-            var color = $font.css('color').replace(/\s/g, '');
+            const color = $font.css('color').replace(/\s/g, '');
             let $backgroundColoredElement = $font;
             let bg, isTransparent;
             do {
@@ -406,8 +442,10 @@ function fontToImg($editable) {
             // Compute the padding.
             // First get the dimensions of the icon itself (::before)
             $font.css({height: 'fit-content', width: 'fit-content', 'line-height': 'normal'});
-            const hPadding = width && (width - $font.width()) / 2;
-            const vPadding = height && (height - $font.height()) / 2;
+            const intrinsicWidth = $font.width();
+            const intrinsicHeight = $font.height();
+            const hPadding = width && (width - intrinsicWidth) / 2;
+            const vPadding = height && (height - intrinsicHeight) / 2;
             let padding = '';
             if (hPadding || vPadding) {
                 padding = vPadding ? vPadding + 'px ' : '0 ';
@@ -415,17 +453,29 @@ function fontToImg($editable) {
             }
             const $img = $('<img/>').attr({
                 width, height,
-                src: `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, $font.height())}`,
+                src: `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, Math.round(intrinsicWidth))}x${Math.max(1, Math.round(intrinsicHeight))}`,
                 'data-class': $font.attr('class'),
                 'data-style': style,
-                class: $font.attr('class').replace(new RegExp('(^|\\s+)' + icon + '(-[^\\s]+)?', 'gi'), ''), // remove inline font-awsome style
                 style,
             }).css({
                 'box-sizing': 'border-box', // keep the fontawesome's dimensions
                 'line-height': lineHeight,
-                padding, width: width + 'px', height: height + 'px',
+                width: intrinsicWidth, height: intrinsicHeight,
             });
-            $font.replaceWith($img);
+            if (!padding) {
+                $img.css('margin', $font.css('margin'));
+            }
+            // For rounded images, apply the rounded border to a wrapper, make
+            // sure it doesn't get applied to the image itself so the image
+            // doesn't get cropped in the process.
+            const $wrapper = $('<span style="display: inline-block;"/>');
+            $wrapper.append($img);
+            $font.replaceWith($wrapper);
+            $wrapper.css({
+                padding, width: width + 'px', height: height + 'px',
+                'vertical-align': 'middle',
+                'background-color': $img[0].style.backgroundColor,
+            }).attr('class', $font.attr('class').replace(new RegExp('(^|\\s+)' + icon + '(-[^\\s]+)?', 'gi'), '')) // remove inline font-awsome style);
         } else {
             $font.remove();
         }
@@ -449,7 +499,7 @@ function formatTables($editable) {
         const $columns = $table.find('td').filter((i, td) => $(td).closest('table').is($table));
         for (const column of $columns) {
             const $column = $(column);
-            const $columnsInRow = $column.closest('tr').find('td');
+            const $columnsInRow = $column.closest('tr').find('td').filter((i, td) => $(td).closest('table').is($table));
             const columnIndex = $columnsInRow.toArray().findIndex(col => $(col).is($column));
             const rowIndex = $rows.toArray().findIndex(row => $(row).is($column.closest('tr')));
             if (!rowIndex) {
@@ -477,7 +527,9 @@ function formatTables($editable) {
     }
     // Ensure a tbody in every table and cancel its default style.
     for (const table of $editable.find('table:not(:has(tbody))')) {
-        $(table).contents().wrap('<tbody style="vertical-align: top;"/>');
+        const $contents = $(table).contents();
+        $(table).prepend('<tbody style="vertical-align: top;"/>');
+        $(table.firstChild).append($contents);
     }
     // Children will only take 100% height if the parent has a height property.
     for (const node of $editable.find('*').filter((i, n) => (
@@ -493,6 +545,29 @@ function formatTables($editable) {
         }
         if (parent) {
             parent.style.setProperty('height', '0');
+        }
+    }
+    // Align self and justify content don't work on table cells.
+    for (const cell of $editable.find('td')) {
+        const alignSelf = cell.style.alignSelf;
+        const justifyContent = cell.style.justifyContent;
+        if (alignSelf === 'start' || justifyContent === 'start' || justifyContent === 'flex-start') {
+            cell.style.verticalAlign = 'top';
+        } else if (alignSelf === 'center' || justifyContent === 'center') {
+            cell.style.verticalAlign = 'middle';
+        } else if (alignSelf === 'end' || justifyContent === 'end' || justifyContent === 'flex-end') {
+            cell.style.verticalAlign = 'bottom';
+        }
+    }
+    // Align items doesn't work on table rows.
+    for (const cell of $editable.find('tr')) {
+        const alignItems = cell.style.alignItems;
+        if (alignItems === 'flex-start') {
+            cell.style.verticalAlign = 'top';
+        } else if (alignItems === 'center') {
+            cell.style.verticalAlign = 'middle';
+        } else if (alignItems === 'flex-end' || alignItems === 'baseline') {
+            cell.style.verticalAlign = 'bottom';
         }
     }
 }
@@ -686,7 +761,7 @@ function normalizeRem($editable) {
         const remMatch = node.getAttribute('style').match(/[\d\.]+\s*rem/g);
         for (const rem of remMatch || []) {
             const remValue = parseFloat(rem.replace(/[^\d\.]/g, ''));
-            const pxValue = Math.round(remValue * rootFontSize * 10) / 10;
+            const pxValue = Math.round(remValue * rootFontSize * 100) / 100;
             node.setAttribute('style', node.getAttribute('style').replace(rem, pxValue + 'px'));
         }
     }
@@ -705,7 +780,8 @@ function normalizeRem($editable) {
  */
 function _applyColspan($element, colspan) {
     $element.attr('colspan', colspan);
-    const width = Math.round(+$element.attr('colspan') * 100 / 12) + '%';
+    // Round to 2 decimal places.
+    const width = (Math.round(+$element.attr('colspan') * 10000 / 12) / 100) + '%';
     $element.attr('width', width);
     $element.css('width', width);
 }
@@ -988,7 +1064,7 @@ FieldHtml.include({
         $odooEditor.removeClass('odoo-editor');
         $editable.html(html);
 
-        toInline($editable, this.cssRules);
+        toInline($editable, this.cssRules, this.wysiwyg.$iframe);
         $odooEditor.addClass('odoo-editor');
 
         this.wysiwyg.setValue($editable.html(), {
