@@ -72,7 +72,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             self._isDirty = self.wysiwyg.isDirty();
             self._doAction();
 
-            convertInline.toInline($editable, self.cssRules);
+            convertInline.toInline($editable, self.cssRules, self.wysiwyg.$iframe);
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
@@ -115,10 +115,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
         this.$content.find('.o_layout').addBack().data('name', 'Mailing');
         // We don't want to drop snippets directly within the wysiwyg.
         this.$content.removeClass('o_editable');
-        // Force compute CSS rules even without the style-inline node option.
-        if (this.mode === 'edit' && !this.cssRules) {
-            this.cssRules = convertInline.getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
-        }
     },
     /**
      * Returns true if the editable area is empty.
