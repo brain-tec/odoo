@@ -1469,7 +1469,6 @@ export class OdooEditor extends EventTarget {
         const result = this._protect(() => this._applyRawCommand(...args));
         this.sanitize();
         this.historyStep();
-        this._handleCommandHint();
         return result;
     }
     /**
@@ -1625,7 +1624,6 @@ export class OdooEditor extends EventTarget {
     // ===========
 
     _createCommandBar() {
-        this.options.noScrollSelector = this.options.noScrollSelector || 'body';
         this.commandbarTablePicker = new TablePicker({
             document: this.document,
             floating: true,
@@ -1734,16 +1732,6 @@ export class OdooEditor extends EventTarget {
             shouldActivate: () => !!this.options.getPowerboxElement(),
             onActivate: () => {
                 this._beforeCommandbarStepIndex = this._historySteps.length - 1;
-                this.observerUnactive();
-                for (const element of document.querySelectorAll(this.options.noScrollSelector)) {
-                    element.classList.add('oe-noscroll');
-                }
-                for (const element of this.document.querySelectorAll(
-                    this.options.noScrollSelector,
-                )) {
-                    element.classList.add('oe-noscroll');
-                }
-                this.observerActive();
             },
             preValidate: () => {
                 this._historyRevertUntil(this._beforeCommandbarStepIndex);
@@ -1755,16 +1743,6 @@ export class OdooEditor extends EventTarget {
             },
             postValidate: () => {
                 this.historyStep(true);
-            },
-            onStop: () => {
-                this.observerUnactive();
-                for (const element of document.querySelectorAll('.oe-noscroll')) {
-                    element.classList.remove('oe-noscroll');
-                }
-                for (const element of this.document.querySelectorAll('.oe-noscroll')) {
-                    element.classList.remove('oe-noscroll');
-                }
-                this.observerActive();
             },
             commands: [...mainCommands, ...(this.options.commands || [])],
         });
@@ -1788,6 +1766,12 @@ export class OdooEditor extends EventTarget {
     // TOOLBAR
     // =======
 
+    toolbarHide() {
+        this._updateToolbar(false);
+    }
+    toolbarShow() {
+        this._updateToolbar(true);
+    }
     /**
      * @private
      * @param {boolean} [show]
