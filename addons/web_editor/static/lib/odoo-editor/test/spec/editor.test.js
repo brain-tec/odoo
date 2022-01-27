@@ -2805,6 +2805,13 @@ X[]
                     contentAfter: '<div><h1>[ab]</h1></div>',
                 });
             });
+            it('should remove the background image while turning a p>font into a heading 1>span', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div><p><font class="text-gradient" style="background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%);">[ab]</font></p></div>',
+                    stepFunction: editor => editor.execCommand('setTag', 'h1'),
+                    contentAfter: '<div><h1><span style="">[ab]</span></h1></div>',
+                });
+            });
         });
         describe('to heading 2', () => {
             it('should turn a heading 1 into a heading 2', async () => {
@@ -3114,6 +3121,18 @@ X[]
                     },
                     contentAfter: '<p>ad[]</p>',
                 });
+            });
+        });
+    });
+
+    describe('applyColor', () => {
+        it('should apply a color to a slice of text in a span in a font', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>a<font>b<span>c[def]g</span>h</font>i</p>',
+                stepFunction: editor => editor.execCommand('applyColor', 'rgb(255, 0, 0)', 'color'),
+                contentAfter: '<p>a<font>b<span>c</span></font>' +
+                    '<font style="color: rgb(255, 0, 0);"><span>[def]</span></font>' +
+                    '<font><span>g</span>h</font>i</p>',
             });
         });
     });

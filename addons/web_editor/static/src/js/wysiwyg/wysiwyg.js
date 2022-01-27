@@ -239,10 +239,10 @@ const Wysiwyg = Widget.extend({
         this._updateEditorUI();
 
         this.$root.on('click', (ev) => {
-            const $target = $(ev.target);
+            const $target = $(ev.target).closest('a');
 
             // Keep popover open if clicked inside it, but not on a button
-            if ($target.parents('.o_edit_menu_popover').length && !$target.parent('a').addBack('a').length) {
+            if ($(ev.target).parents('.o_edit_menu_popover').length && !$target.length) {
                 ev.preventDefault();
             }
 
@@ -263,7 +263,7 @@ const Wysiwyg = Widget.extend({
                             // here relies on clicking in that editor panel...
                             await this.snippetsMenu._mutex.exec(() => null);
                         }
-                        this.linkPopover = await weWidgets.LinkPopoverWidget.createFor(this, ev.target, { wysiwyg: this });
+                        this.linkPopover = await weWidgets.LinkPopoverWidget.createFor(this, $target[0], { wysiwyg: this });
                         $target.data('popover-widget-initialized', this.linkPopover);
                     })();
                 }
@@ -1312,7 +1312,7 @@ const Wysiwyg = Widget.extend({
         // Open the link tool when CTRL+K is pressed.
         if (e && e.key === 'k' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
-            const targetEl = this.odooEditor.document.getSelection().baseNode; // FIXME this is undefined on Firefox after clicking on an image and hitting CTRL-K
+            const targetEl = this.odooEditor.document.getSelection().getRangeAt(0).startContainer;
             // Link tool is different if the selection is an image or a text.
             if (targetEl instanceof HTMLElement
                     && (targetEl.tagName === 'IMG' || targetEl.querySelectorAll('img').length === 1)) {
