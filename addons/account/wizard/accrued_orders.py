@@ -38,6 +38,8 @@ class AccruedExpenseRevenue(models.TransientModel):
         compute="_compute_reversal_date",
         required=True,
         readonly=False,
+        store=True,
+        precompute=True,
     )
     amount = fields.Monetary(string='Amount', help="Specify an arbitrary value that will be accrued on a \
         default account for the entire order, regardless of the products on the different lines.")
@@ -157,7 +159,8 @@ class AccruedExpenseRevenue(models.TransientModel):
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_untaxed_amount_invoiced()
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_to_invoice()
                 lines = o.order_line.filtered(
-                    lambda l: fields.Float.compare(
+                    lambda l: l.display_type not in ['line_section', 'line_note'] and
+                    fields.Float.compare(
                         l.qty_to_invoice,
                         0,
                         precision_rounding=l.product_uom.rounding,
