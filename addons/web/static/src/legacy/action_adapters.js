@@ -31,6 +31,9 @@ class ActionAdapter extends ComponentAdapter {
         let originalUpdateControlPanel;
         useEffect(
             () => {
+                if (this.wowlEnv.setLegacyControllerWidget) {
+                    this.wowlEnv.setLegacyControllerWidget(this.widget);
+                }
                 const query = this.widget.getState();
                 Object.assign(query, this.tempQuery);
                 this.tempQuery = null;
@@ -120,6 +123,8 @@ class ActionAdapter extends ComponentAdapter {
                     type: "warning",
                 });
             }
+        } else if (ev.name === "history_back") {
+            this.wowlEnv.config.historyBack();
         } else {
             super._trigger_up(ev);
         }
