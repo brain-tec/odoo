@@ -142,6 +142,7 @@ class IrAttachment(models.Model):
 
     def _mark_for_gc(self, fname):
         """ Add ``fname`` in a checklist for the filestore garbage collection. """
+        fname = re.sub('[.]', '', fname).strip('/\\')
         # we use a spooldir: add an empty file in the subdirectory 'checklist'
         full_path = os.path.join(self._full_path('checklist'), fname)
         if not os.path.exists(full_path):
@@ -384,7 +385,7 @@ class IrAttachment(models.Model):
     type = fields.Selection([('url', 'URL'), ('binary', 'File')],
                             string='Type', required=True, default='binary', change_default=True,
                             help="You can either upload a file from your computer or copy/paste an internet link to your file.")
-    url = fields.Char('Url', index="not null", size=1024)
+    url = fields.Char('Url', index='btree_not_null', size=1024)
     public = fields.Boolean('Is public document')
 
     # for external access

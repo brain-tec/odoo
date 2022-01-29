@@ -217,14 +217,14 @@ def fix_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
     if not found:
         return add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete)
 
-def has_pg_trgm(cr):
-    cr.execute("select installed_version from pg_available_extensions where name='pg_trgm'")
+def install_pg_trgm(cr):
+    cr.execute("SELECT installed_version FROM pg_available_extensions WHERE name='pg_trgm'")
     version = cr.fetchone()
     if version is None:
         return False
     if version[0]:
         return True
-    cr.execute('select usesuper from pg_user where usename = CURRENT_USER')
+    cr.execute('SELECT usesuper FROM pg_user WHERE usename = CURRENT_USER')
     if not cr.fetchone()[0]:
         return False
     try:
@@ -247,7 +247,9 @@ def create_index(cr, indexname, tablename, expressions, method='btree', where=''
     if index_exists(cr, indexname):
         return
     args = ', '.join(expressions)
-    cr.execute('CREATE INDEX "{}" ON "{}" USING {} ({}) {}'.format(indexname, tablename, method, args, where))
+    if where:
+        where = f' WHERE {where}'
+    cr.execute(f'CREATE INDEX "{indexname}" ON "{tablename}" USING {method} ({args}){where}')
     _schema.debug("Table %r: created index %r (%s)", tablename, indexname, args)
 
 def create_unique_index(cr, indexname, tablename, expressions):
