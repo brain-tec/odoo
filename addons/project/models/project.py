@@ -151,6 +151,12 @@ class Project(models.Model):
     _rating_satisfaction_days = 30  # takes 30 days by default
     _check_company_auto = True
 
+    def _default_rating_status(self):
+        return self.env['ir.config_parameter'].sudo().get_param('project.rating_status') or 'stage'
+
+    def _default_rating_status_period(self):
+        return self.env['ir.config_parameter'].sudo().get_param('project.rating_status_period') or 'monthly'
+
     def _compute_attached_docs_count(self):
         Attachment = self.env['ir.attachment']
         for project in self:
@@ -282,7 +288,7 @@ class Project(models.Model):
     rating_status = fields.Selection(
         [('stage', 'Rating when changing stage'),
          ('periodic', 'Periodic rating')
-        ], 'Customer Ratings Status', default="stage", required=True,
+        ], 'Customer Ratings Status', default=_default_rating_status, required=True,
         help="How to get customer feedback?\n"
              "- Rating when changing stage: an email will be sent when a task is pulled to another stage.\n"
              "- Periodic rating: an email will be sent periodically.\n\n"
@@ -293,7 +299,7 @@ class Project(models.Model):
         ('bimonthly', 'Twice a Month'),
         ('monthly', 'Once a Month'),
         ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly')], 'Rating Frequency', required=True, default='monthly')
+        ('yearly', 'Yearly')], 'Rating Frequency', required=True, default=_default_rating_status_period)
 
     # Not `required` since this is an option to enable in project settings.
     stage_id = fields.Many2one('project.project.stage', string='Stage', ondelete='restrict', groups="project.group_project_stages",
@@ -660,7 +666,7 @@ class Project(models.Model):
         if self.rating_count == 1:
             action.update({
                 'view_mode': 'form',
-                'views': [(False, 'form')],
+                'views': [(view_id, view_type) for view_id, view_type in action['views'] if view_type == 'form'],
                 'res_id': self.rating_ids[0].id, # [0] since rating_ids might be > then rating_count
             })
         return dict(action, context=action_context)
@@ -936,7 +942,8 @@ class Task(models.Model):
     write_date = fields.Datetime("Last Updated On", readonly=True)
     date_end = fields.Datetime(string='Ending Date', index=True, copy=False)
     date_assign = fields.Datetime(string='Assigning Date', copy=False, readonly=True)
-    date_deadline = fields.Date(string='Deadline', index=True, copy=False, tracking=True, task_dependency_tracking=True)
+    date_deadline = fields.Date(string='Deadline', index=True, copy=False, tracking=True, task_dependency_tracking=True, help="The deadline for the task, which appears in the calendar view.")
+
     date_last_stage_update = fields.Datetime(string='Last Stage Update',
         index=True,
         copy=False,
@@ -1951,12 +1958,12 @@ class Task(models.Model):
                 res -= dependency_subtype
         return res
 
-    def _notify_get_groups(self, msg_vals=None):
+    def _notify_get_recipients_groups(self, msg_vals=None):
         """ Handle project users and managers recipients that can assign
         tasks and create new one directly from notification emails. Also give
         access button to portal users and portal customers. If they are notified
         they should probably have access to the document. """
-        groups = super(Task, self)._notify_get_groups(msg_vals=msg_vals)
+        groups = super(Task, self)._notify_get_recipients_groups(msg_vals=msg_vals)
         local_msg_vals = dict(msg_vals or {})
         self.ensure_one()
 
@@ -1983,13 +1990,13 @@ class Task(models.Model):
 
         return groups
 
-    def _notify_get_reply_to(self, default=None, records=None, company=None, doc_names=None):
+    def _notify_get_reply_to(self, default=None):
         """ Override to set alias of tasks to their project if any. """
-        aliases = self.sudo().mapped('project_id')._notify_get_reply_to(default=default, records=None, company=company, doc_names=None)
+        aliases = self.sudo().mapped('project_id')._notify_get_reply_to(default=default)
         res = {task.id: aliases.get(task.project_id.id) for task in self}
         leftover = self.filtered(lambda rec: not rec.project_id)
         if leftover:
-            res.update(super(Task, leftover)._notify_get_reply_to(default=default, records=None, company=company, doc_names=doc_names))
+            res.update(super(Task, leftover)._notify_get_reply_to(default=default))
         return res
 
     def email_split(self, msg):
@@ -2044,8 +2051,8 @@ class Task(models.Model):
                 task._message_add_suggested_recipient(recipients, email=task.email_from, reason=_('Customer Email'))
         return recipients
 
-    def _notify_email_header_dict(self):
-        headers = super(Task, self)._notify_email_header_dict()
+    def _notify_by_email_get_headers(self):
+        headers = super(Task, self)._notify_by_email_get_headers()
         if self.project_id:
             current_objects = [h for h in headers.get('X-Odoo-Objects', '').split(',') if h]
             current_objects.insert(0, 'project.project-%s, ' % self.project_id.id)

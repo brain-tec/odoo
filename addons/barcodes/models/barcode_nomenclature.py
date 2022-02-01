@@ -63,7 +63,9 @@ class BarcodeNomenclature(models.Model):
         barcode_sizes = {
             'ean8': 8,
             'ean13': 13,
+            'gtin14': 14,
             'upca': 12,
+            'sscc': 18,
         }
         barcode_size = barcode_sizes[encoding]
         return len(barcode) == barcode_size and re.match(r"^\d+$", barcode) and self.get_barcode_check_digit(barcode) == int(barcode[-1])
