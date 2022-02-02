@@ -174,7 +174,7 @@ class AccountMove(models.Model):
                 rec.l10n_ar_currency_rate = 1.0
             elif not rec.l10n_ar_currency_rate:
                 rec.l10n_ar_currency_rate = rec.currency_id._convert(
-                    1.0, rec.company_id.currency_id, rec.company_id, rec.invoice_date or fields.Date.today(), round=False)
+                    1.0, rec.company_id.currency_id, rec.company_id, rec.date, round=False)
 
         # We make validations here and not with a constraint because we want validation before sending electronic
         # data on l10n_ar_edi
@@ -247,7 +247,7 @@ class AccountMove(models.Model):
         sign = -1 if (company_currency and self.is_inbound()) else 1
 
         # if we are on a document that works invoice and refund and it's a refund, we need to export it as negative
-        sign = -sign if self.type in ('out_refund', 'in_refund') and\
+        sign = -sign if self.move_type in ('out_refund', 'in_refund') and\
             self.l10n_latam_document_type_id.code in self._get_l10n_ar_codes_used_for_inv_and_ref() else sign
 
         tax_lines = self.line_ids.filtered('tax_line_id')
@@ -283,7 +283,7 @@ class AccountMove(models.Model):
         sign = -1 if (company_currency and self.is_inbound()) else 1
 
         # if we are on a document that works invoice and refund and it's a refund, we need to export it as negative
-        sign = -sign if self.type in ('out_refund', 'in_refund') and\
+        sign = -sign if self.move_type in ('out_refund', 'in_refund') and\
             self.l10n_latam_document_type_id.code in self._get_l10n_ar_codes_used_for_inv_and_ref() else sign
 
         res = []
