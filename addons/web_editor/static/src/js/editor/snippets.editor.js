@@ -463,8 +463,14 @@ var SnippetEditor = Widget.extend({
         // check if this has always been like this or not and this should be
         // unit tested.
         let parent = this.$target[0].parentElement;
-        const nextSibling = this.$target[0].nextElementSibling;
-        const previousSibling = this.$target[0].previousElementSibling;
+        let nextSibling = this.$target[0].nextElementSibling;
+        while (nextSibling && nextSibling.matches('.o_snippet_invisible')) {
+            nextSibling = nextSibling.nextElementSibling;
+        }
+        let previousSibling = this.$target[0].previousElementSibling;
+        while (previousSibling && previousSibling.matches('.o_snippet_invisible')) {
+            previousSibling = previousSibling.previousElementSibling;
+        }
         if ($(parent).is('.o_editable:not(body)')) {
             // If we target the editable, we want to reset the selection to the
             // body. If the editable has options, we do not want to show them.
@@ -2635,6 +2641,11 @@ var SnippetsMenu = Widget.extend({
      * @return {Promise}
      */
     async _scrollToSnippet($el, $scrollable) {
+        // Don't scroll if $el is added to a visible popup that does not fill
+        // the page (otherwise the page would scroll to a random location).
+        if ($el.closest('div.modal:not(.s_popup_overflow_page)').length) {
+            return;
+        }
         return dom.scrollTo($el[0], {extraOffset: 50, $scrollable: $scrollable});
     },
     /**
