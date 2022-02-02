@@ -219,12 +219,18 @@ class MailThread(models.AbstractModel):
     def _compute_message_has_error(self):
         res = {}
         if self.ids:
-            self._cr.execute(""" SELECT msg.res_id, COUNT(msg.res_id) FROM mail_message msg
-                                 RIGHT JOIN mail_notification rel
-                                 ON rel.mail_message_id = msg.id AND rel.notification_status in ('exception','bounce')
-                                 WHERE msg.author_id = %s AND msg.model = %s AND msg.res_id in %s AND msg.message_type != 'user_notification'
-                                 GROUP BY msg.res_id""",
-                             (self.env.user.partner_id.id, self._name, tuple(self.ids),))
+            self.env.cr.execute("""
+                    SELECT msg.res_id, COUNT(msg.res_id)
+                      FROM mail_message msg
+                INNER JOIN mail_notification notif
+                        ON notif.mail_message_id = msg.id
+                     WHERE notif.notification_status in ('exception', 'bounce')
+                       AND notif.author_id = %(author_id)s
+                       AND msg.model = %(model_name)s
+                       AND msg.res_id in %(res_ids)s
+                       AND msg.message_type != 'user_notification'
+                  GROUP BY msg.res_id
+            """, {'author_id': self.env.user.partner_id.id, 'model_name': self._name, 'res_ids': tuple(self.ids)})
             res.update(self._cr.fetchall())
 
         for record in self:
@@ -2187,6 +2193,7 @@ class MailThread(models.AbstractModel):
         inbox_pids = [r['id'] for r in recipients_data if r['notif'] == 'inbox']
         if inbox_pids:
             notif_create_values = [{
+                'author_id': message.author_id.id,
                 'mail_message_id': message.id,
                 'res_partner_id': pid,
                 'notification_type': 'inbox',
@@ -2313,6 +2320,7 @@ class MailThread(models.AbstractModel):
                                 'mail_mail_id': new_email.id,
                             })
                     notif_create_values += [{
+                        'author_id': message.author_id.id,
                         'mail_message_id': message.id,
                         'res_partner_id': recipient_id,
                         'notification_type': 'email',
@@ -2558,11 +2566,12 @@ class MailThread(models.AbstractModel):
         Groups has a default value that you can find in mail_thread
         ``_notify_get_recipients_classify`` method.
         """
+        is_thread_notification = self._notify_get_recipients_thread_info(msg_vals=msg_vals)['is_thread_notification']
         return [
             [
                 'user',
                 lambda pdata: pdata['type'] == 'user',
-                {'has_button_access': True}
+                {'has_button_access': is_thread_notification}
             ], [
                 'portal',
                 lambda pdata: pdata['type'] == 'portal',
@@ -2624,9 +2633,10 @@ class MailThread(models.AbstractModel):
 
         # fill group_data with default_values if they are not complete
         for group_name, group_func, group_data in groups:
+            is_thread_notification = self._notify_get_recipients_thread_info(msg_vals=msg_vals)['is_thread_notification']
             group_data.setdefault('active', True)
             group_data.setdefault('actions', list())
-            group_data.setdefault('has_button_access', True)
+            group_data.setdefault('has_button_access', is_thread_notification)
             group_data.setdefault('notification_is_customer', False)
             group_data.setdefault('notification_group_name', group_name)
             group_data.setdefault('recipients', list())
@@ -2644,6 +2654,15 @@ class MailThread(models.AbstractModel):
         # filter out groups without recipients
         return [group_data for _group_name, _group_func, group_data in groups
                 if group_data['recipients']]
+
+    def _notify_get_recipients_thread_info(self, msg_vals=None):
+        """ Tool method to compute thread info used in ``_notify_classify_recipients``
+        and its sub-methods. """
+        res_model = msg_vals['model'] if msg_vals and 'model' in msg_vals else self._name
+        res_id = msg_vals['res_id'] if msg_vals and 'res_id' in msg_vals else self.ids[0] if self.ids else False
+        return {
+            'is_thread_notification': res_model and (res_model != 'mail.thread') and res_id
+        }
 
     @api.model
     def _notify_encode_link(self, base_link, params):

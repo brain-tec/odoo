@@ -233,12 +233,12 @@ class IrMailServer(models.Model):
         if mail_server:
             smtp_server = mail_server.smtp_host
             smtp_port = mail_server.smtp_port
-            if mail_server.smtp_authentication == "login":
-                smtp_user = mail_server.smtp_user
-                smtp_password = mail_server.smtp_pass
-            else:
+            if mail_server.smtp_authentication == "certificate":
                 smtp_user = None
                 smtp_password = None
+            else:
+                smtp_user = mail_server.smtp_user
+                smtp_password = mail_server.smtp_pass
             smtp_encryption = mail_server.smtp_encryption
             smtp_debug = smtp_debug or mail_server.smtp_debug
             from_filter = mail_server.from_filter
@@ -712,3 +712,9 @@ class IrMailServer(models.Model):
         outgoing mail server.
         """
         return getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode()
+
+    def _neutralize(self):
+        super()._neutralize()
+        self.flush()
+        self.invalidate_cache()
+        self.env.cr.execute("UPDATE ir_mail_server SET active = false")

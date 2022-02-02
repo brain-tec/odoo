@@ -59,7 +59,7 @@ from .tools import frozendict, lazy_classproperty, ormcache, \
                    groupby, discardattr, partition
 from .tools.config import config
 from .tools.func import frame_codeinfo
-from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang
+from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang, split_every
 from .tools.translate import _
 from .tools import date_utils
 from .tools import populate
@@ -75,6 +75,9 @@ regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
+
+INSERT_BATCH_SIZE = 100
+SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 
 def check_object_name(name):
     """ Check if the given name is a valid model name.
@@ -506,7 +509,6 @@ class BaseModel(metaclass=MetaModel):
     """
     _table = None               #: SQL table name used by model if :attr:`_auto`
     _table_query = None         #: SQL expression of the table's content (optional)
-    _sequence = None            #: SQL sequence to use for ID field
     _sql_constraints = []       #: SQL constraints [(name, sql_def, message)]
 
     _rec_name = None            #: field to use for labeling records, default: ``name``
@@ -703,7 +705,6 @@ class BaseModel(metaclass=MetaModel):
         """ Initialize base model attributes. """
         cls._description = cls._name
         cls._table = cls._name.replace('.', '_')
-        cls._sequence = None
         cls._log_access = cls._auto
         inherits = {}
         depends = {}
@@ -716,7 +717,6 @@ class BaseModel(metaclass=MetaModel):
                     _logger.warning("The model %s has no _description", cls._name)
                 cls._description = base._description or cls._description
                 cls._table = base._table or cls._table
-                cls._sequence = base._sequence or cls._sequence
                 cls._log_access = getattr(base, '_log_access', cls._log_access)
 
             inherits.update(base._inherits)
@@ -727,7 +727,6 @@ class BaseModel(metaclass=MetaModel):
             for cons in base._sql_constraints:
                 cls._sql_constraints[cons[0]] = cons
 
-        cls._sequence = cls._sequence or (cls._table + '_id_seq')
         cls._sql_constraints = list(cls._sql_constraints.values())
 
         # avoid assigning an empty dict to save memory
@@ -2778,8 +2777,7 @@ class BaseModel(metaclass=MetaModel):
         if necessary:
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
-            query = 'UPDATE "%s" SET "%s"=%s WHERE "%s" IS NULL' % (
-                self._table, column_name, field.column_format, column_name)
+            query = f'UPDATE "{self._table}" SET "{column_name}" = %s WHERE "{column_name}" IS NULL'
             self._cr.execute(query, (value,))
 
     @ormcache()
@@ -3387,8 +3385,6 @@ Fields:
                 field = self._fields[name]
                 if not field.column_type:
                     field.read(fetched)
-                if field.deprecated:
-                    _logger.warning('Field %s is deprecated: %s', field, field.deprecated)
 
         # possibly raise exception for the records that could not be read
         missing = self - fetched
@@ -3927,9 +3923,13 @@ Fields:
         return True
 
     def _write(self, vals):
-        # low-level implementation of write()
+        """ Low-level implementation of write()
+
+        The ids of self should be a database id and unique.
+        Ignore non-existent record.
+        """
         if not self:
-            return True
+            return
 
         self._check_concurrency()
         cr = self._cr
@@ -3944,39 +3944,27 @@ Fields:
             vals.setdefault('write_date', self.env.cr.now())
 
         # determine SQL values
-        columns = []                    # list of (column_name, format, value)
+        columns = {}                    # {column_name: value}
 
         for name, val in sorted(vals.items()):
             if self._log_access and name in LOG_ACCESS_COLUMNS and not val:
                 continue
             field = self._fields[name]
             assert field.store
-
-            if field.deprecated:
-                _logger.warning('Field %s is deprecated: %s', field, field.deprecated)
-
             assert field.column_type
-            columns.append((name, field.column_format, val))
+            columns[name] = val
 
         # update columns
         if columns:
-            query = 'UPDATE "%s" SET %s WHERE id IN %%s' % (
-                self._table, ','.join('"%s"=%s' % (column[0], column[1]) for column in columns),
-            )
-            params = [column[2] for column in columns]
-            for sub_ids in cr.split_for_in_conditions(set(self.ids)):
+            template = ', '.join(f'"{name}" = %s' for name in columns)
+            query = f'UPDATE "{self._table}" SET {template} WHERE id IN %s'
+            params = list(columns.values())
+            for sub_ids in cr.split_for_in_conditions(self._ids):
                 cr.execute(query, params + [sub_ids])
-                if cr.rowcount != len(sub_ids):
-                    raise MissingError(
-                        _('One of the records you are trying to modify has already been deleted (Document type: %s).', self._description)
-                        + '\n\n({} {}, {} {})'.format(_('Records:'), sub_ids[:6], _('User:'), self._uid)
-                    )
 
         # update parent_path
         if parent_records:
             parent_records._parent_store_update()
-
-        return True
 
     @api.model_create_multi
     @api.returns('self', lambda value: value.id)
@@ -4201,58 +4189,45 @@ Fields:
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
         cr = self.env.cr
-        quote = '"{}"'.format
 
-        # insert rows
+        # insert rows in batches of maximum INSERT_BATCH_SIZE
         ids = []                                # ids of created records
         other_fields = OrderedSet()             # non-column fields
         translated_fields = OrderedSet()        # translated fields
 
-        for data in data_list:
-            # determine column values
-            stored = data['stored']
-            columns = [('id', "nextval(%s)", self._sequence)]
-            for name, val in sorted(stored.items()):
-                field = self._fields[name]
-                assert field.store
+        for data_sublist in split_every(INSERT_BATCH_SIZE, data_list):
+            stored_list = [data['stored'] for data in data_sublist]
+            fnames = sorted({name for stored in stored_list for name in stored})
 
+            columns = []
+            rows = [[] for _ in stored_list]
+            for fname in fnames:
+                field = self._fields[fname]
                 if field.column_type:
-                    col_val = field.convert_to_column(val, self, stored)
-                    columns.append((name, field.column_format, col_val))
                     if field.translate is True:
                         translated_fields.add(field)
+                    columns.append(fname)
+                    for stored, row in zip(stored_list, rows):
+                        if fname in stored:
+                            row.append(field.convert_to_column(stored[fname], self, stored))
+                        else:
+                            row.append(SQL_DEFAULT)
                 else:
                     other_fields.add(field)
 
-            # Insert rows one by one
-            # - as records don't all specify the same columns, code building batch-insert query
-            #   was very complex
-            # - and the gains were low, so not worth spending so much complexity
-            #
-            # It also seems that we have to be careful with INSERTs in batch, because they have the
-            # same problem as SELECTs:
-            # If we inject a lot of data in a single query, we fall into pathological perfs in
-            # terms of SQL parser and the execution of the query itself.
-            # In SELECT queries, we inject max 1000 ids (integers) when we can, because we know
-            # that this limit is well managed by PostgreSQL.
-            # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
-            # example).
-            #
-            # The problem then becomes: how to "estimate" the right size of the batch to have
-            # good performance?
-            #
-            # This requires extensive testing, and it was preferred not to introduce INSERTs in
-            # batch, to avoid regressions as much as possible.
-            #
-            # That said, we haven't closed the door completely.
-            query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
-                quote(self._table),
-                ", ".join(quote(name) for name, fmt, val in columns),
-                ", ".join(fmt for name, fmt, val in columns),
+            if not columns:
+                # manage the case where we create empty records
+                columns = ['id']
+                for row in rows:
+                    row.append(SQL_DEFAULT)
+
+            header = ", ".join(f'"{column}"' for column in columns)
+            template = ", ".join("%s" for _ in rows)
+            cr.execute(
+                f'INSERT INTO "{self._table}" ({header}) VALUES {template} RETURNING "id"',
+                [tuple(row) for row in rows],
             )
-            params = [val for name, fmt, val in columns]
-            cr.execute(query, params)
-            ids.append(cr.fetchone()[0])
+            ids.extend(id_ for id_, in cr.fetchall())
 
         # put the new records in cache, and update inverse fields, for many2one
         #
@@ -4260,11 +4235,12 @@ Fields:
         cachetoclear = []
         records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
+        common_set_vals = set(LOG_ACCESS_COLUMNS + [self.CONCURRENCY_CHECK_FIELD, 'id', 'parent_path'])
         for data, record in zip(data_list, records):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
             vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
-            set_vals = list(vals) + LOG_ACCESS_COLUMNS + [self.CONCURRENCY_CHECK_FIELD, 'id', 'parent_path']
+            set_vals = common_set_vals.union(vals)
             for field in self._fields.values():
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
@@ -4830,10 +4806,6 @@ Fields:
                     blacklist.update(set(self.env[parent_model]._fields) - whitelist)
                 else:
                     blacklist_given_fields(self.env[parent_model])
-            # blacklist deprecated fields
-            for name, field in model._fields.items():
-                if field.deprecated:
-                    blacklist.add(name)
 
         blacklist_given_fields(self)
 
@@ -5707,11 +5679,7 @@ Fields:
                 updates[frozendict(vals)].append(rid)
 
             for vals, ids in updates.items():
-                recs = model.browse(ids)
-                try:
-                    recs._write(vals)
-                except MissingError:
-                    recs.exists()._write(vals)
+                model.browse(ids)._write(vals)
 
         if fnames is None:
             # flush everything
@@ -6687,6 +6655,12 @@ Fields:
         if create_values:
             records_batches.append(self.create(create_values))
         return self.concat(*records_batches)
+
+    def _neutralize(self):
+        """ Neutralize this model's records.
+        This should prevent the database from connecting to external services.
+        """
+        return
 
 
 collections.Set.register(BaseModel)

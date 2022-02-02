@@ -408,7 +408,10 @@ class AccountPaymentRegister(models.TransientModel):
         """ Computes if the destination bank account must be displayed in the payment form view. By default, it
         won't be displayed but some modules might change that, depending on the payment type."""
         for wizard in self:
-            wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
+            if wizard.journal_id.type == 'cash':
+                wizard.show_partner_bank_account = False
+            else:
+                wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
             wizard.require_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
@@ -460,6 +463,11 @@ class AccountPaymentRegister(models.TransientModel):
                 raise UserError(_(
                     "The register payment wizard should only be called on account.move or account.move.line records."
                 ))
+
+            if 'journal_id' in res and not self.env['account.journal'].browse(res['journal_id'])\
+                    .filtered_domain([('company_id', '=', lines.company_id.id), ('type', 'in', ('bank', 'cash'))]):
+                # default can be inherited from the list view, should be computed instead
+                del res['journal_id']
 
             # Keep lines having a residual amount to pay.
             available_lines = self.env['account.move.line']
