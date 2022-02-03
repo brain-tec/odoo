@@ -43,7 +43,7 @@ from openerp.loglevels import ustr
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('openerp.tests')
-
+SMTP_TIMEOUT = 60
 
 class MailDeliveryException(osv.except_osv):
     """Specific exception subclass for mail delivery errors"""
@@ -233,9 +233,9 @@ class ir_mail_server(osv.osv):
                              _("SMTP-over-SSL mode unavailable"),
                              _("Your OpenERP Server does not support SMTP-over-SSL. You could use STARTTLS instead."
                                "If SSL is needed, an upgrade to Python 2.6 on the server-side should do the trick."))
-            connection = smtplib.SMTP_SSL(host, port)
+            connection = smtplib.SMTP_SSL(host, port, timeout=SMTP_TIMEOUT)
         else:
-            connection = smtplib.SMTP(host, port)
+            connection = smtplib.SMTP(host, port, timeout=SMTP_TIMEOUT)
         connection.set_debuglevel(smtp_debug)
         if encryption == 'starttls':
             # starttls() will perform ehlo() if needed first
