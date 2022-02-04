@@ -173,8 +173,8 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
         "should have activity delay"
     );
     assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-planned'),
-        "activity delay should have the right color modifier class (planned)"
+        document.querySelector('.o_Activity_dueDateText').classList.contains('text-success'),
+        "activity delay should have the right color modifier class (text-success)"
     );
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
@@ -216,8 +216,8 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
         "should have activity delay"
     );
     assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-planned'),
-        "activity delay should have the right color modifier class (planned)"
+        document.querySelector('.o_Activity_dueDateText').classList.contains('text-success'),
+        "activity delay should have the right color modifier class (text-success)"
     );
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
@@ -256,8 +256,8 @@ QUnit.test('activity info layout when planned today', async function (assert) {
         "should have activity delay"
     );
     assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-today'),
-        "activity delay should have the right color modifier class (today)"
+        document.querySelector('.o_Activity_dueDateText').classList.contains('text-warning'),
+        "activity delay should have the right color modifier class (text-warning)"
     );
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
@@ -299,8 +299,8 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
         "should have activity delay"
     );
     assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-overdue'),
-        "activity delay should have the right color modifier class (overdue)"
+        document.querySelector('.o_Activity_dueDateText').classList.contains('text-danger'),
+        "activity delay should have the right color modifier class (text-danger)"
     );
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
@@ -342,8 +342,8 @@ QUnit.test('activity info layout when planned before yesterday', async function 
         "should have activity delay"
     );
     assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-overdue'),
-        "activity delay should have the right color modifier class (overdue)"
+        document.querySelector('.o_Activity_dueDateText').classList.contains('text-danger'),
+        "activity delay should have the right color modifier class (text-danger)"
     );
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
@@ -788,7 +788,7 @@ QUnit.test('activity upload document is available', async function (assert) {
     });
     this.data['mail.activity'].records.push({
         activity_category: 'upload_file',
-        activity_type_id: 1,
+        activity_type_id: 28,
         can_write: true,
         id: 12,
         res_id: 100,
@@ -1272,6 +1272,54 @@ QUnit.test('data-oe-id & data-oe-model link redirection on click', async functio
     assert.verifySteps(
         ['do-action:openFormView_some.model_250'],
         "should have open form view on related record after click on link"
+    );
+});
+
+QUnit.test('button related to file uploading is replaced when updating activity type from "Upload Document" to "Email"', async function (assert) {
+    assert.expect(2);
+
+    const activityId = 513;
+    this.data['res.partner'].records.push({
+        activity_ids: [activityId],
+        id: 100,
+    });
+    this.data['mail.activity'].records.push({
+        activity_category: 'upload_file',
+        activity_type_id: 28,
+        can_write: true,
+        id: activityId,
+        res_id: 100,
+        res_model: 'res.partner',
+    });
+    const { createChatterContainerComponent } = await this.start();
+    await createChatterContainerComponent({
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+
+    // Update the record server side then fetch updated data in order to
+    // emulate what happens when using the form view.
+    await this.env.services.rpc({
+        model: 'mail.activity',
+        method: 'write',
+        args: [[activityId], {
+            activity_category: 'default',
+            activity_type_id: 1,
+        }],
+    });
+    await afterNextRender(async () => {
+        const activity = this.messaging.models['Activity'].findFromIdentifyingData({ id: activityId });
+        await activity.fetchAndUpdate();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_Activity_markDoneButton',
+        "should have a mark done button when changing activity type from 'Upload Document' to 'Email'"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_Activity_uploadButton',
+        "should not have an upload button after changing the activity type from 'Upload Document' to 'Email'"
     );
 });
 

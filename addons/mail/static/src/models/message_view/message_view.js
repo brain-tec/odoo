@@ -13,10 +13,13 @@ registerModel({
          * Briefly highlights the message.
          */
         highlight() {
-            this.env.browser.clearTimeout(this.highlightTimeout);
+            this.messaging.browser.clearTimeout(this.highlightTimeout);
             this.update({
                 isHighlighted: true,
-                highlightTimeout: this.env.browser.setTimeout(() => {
+                highlightTimeout: this.messaging.browser.setTimeout(() => {
+                    if (!this.exists()) {
+                        return;
+                    }
                     this.update({ isHighlighted: false });
                 }, 2000),
             });
@@ -140,7 +143,7 @@ registerModel({
          */
         attachmentList: one('AttachmentList', {
             compute: '_computeAttachmentList',
-            inverse: 'messageView',
+            inverse: 'messageViewOwner',
             isCausal: true,
             readonly: true,
         }),

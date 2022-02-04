@@ -19,7 +19,7 @@ import odoo
 from odoo import api, models, registry, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
-from odoo.addons.base.models.qweb import QWebException
+from odoo.addons.base.models.ir_qweb import QWebException
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import config, ustr, pycompat
@@ -569,7 +569,7 @@ class IrHttp(models.AbstractModel):
         elif isinstance(exception, QWebException):
             values.update(qweb_exception=exception)
 
-            if type(exception.error) == exceptions.AccessError:
+            if isinstance(exception.__cause__, exceptions.AccessError):
                 code = 403
 
         elif isinstance(exception, werkzeug.exceptions.HTTPException):

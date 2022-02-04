@@ -197,7 +197,7 @@ registerModel({
                 return;
             }
             // Let event be handled by bubbling handlers first
-            await new Promise(this.env.browser.setTimeout);
+            await new Promise(this.messaging.browser.setTimeout);
             if (isEventHandled(ev, 'MessageActionList.replyTo')) {
                 return;
             }
@@ -205,7 +205,7 @@ registerModel({
         },
         /**
          * @private
-         * @param {MouseEvent} ev 
+         * @param {MouseEvent} ev
          */
         onClickEmoji(ev) {
             if (this.textInputComponent) {
@@ -924,7 +924,7 @@ registerModel({
          */
         attachmentList: one('AttachmentList', {
             compute: '_computeAttachmentList',
-            inverse: 'composerView',
+            inverse: 'composerViewOwner',
             isCausal: true,
             readonly: true,
         }),
