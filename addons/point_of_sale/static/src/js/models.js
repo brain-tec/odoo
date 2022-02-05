@@ -800,7 +800,7 @@ exports.PosModel = Backbone.Model.extend({
                 if (self.db.add_partners(partners)) {   // check if the partners we got were real updates
                     resolve();
                 } else {
-                    reject('Failed in updating partners.');
+                    reject(new Error('Failed in updating partners.'));
                 }
             }, function (type, err) { reject(); });
         });
@@ -1823,7 +1823,7 @@ exports.Orderline = Backbone.Model.extend({
         this.selected = false;
         this.description = '';
         this.price_extra = 0;
-        this.full_product_name = '';
+        this.full_product_name = options.description || '';
         this.id = orderline_id++;
         this.customerNote = this.customerNote || '';
 
