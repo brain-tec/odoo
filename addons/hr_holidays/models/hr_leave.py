@@ -80,7 +80,7 @@ class HolidaysRequest(models.Model):
 
         if 'state' in fields_list and not defaults.get('state'):
             lt = self.env['hr.leave.type'].browse(defaults.get('holiday_status_id'))
-            defaults['state'] = 'confirm' if lt and lt.leave_validation_type != 'no_validation' else 'draft'
+            defaults['state'] = 'confirm'
 
         return defaults
 
@@ -1046,7 +1046,7 @@ class HolidaysRequest(models.Model):
     def _validate_leave_request(self):
         """ Validate time off requests (holiday_type='employee')
         by creating a calendar event and a resource time off. """
-        holidays = self.filtered(lambda request: request.holiday_type == 'employee')
+        holidays = self.filtered(lambda request: request.holiday_type == 'employee' and request.employee_id)
         holidays._create_resource_leave()
         meeting_holidays = holidays.filtered(lambda l: l.holiday_status_id.create_calendar_meeting)
         if meeting_holidays:

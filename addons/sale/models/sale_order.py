@@ -367,17 +367,19 @@ class SaleOrder(models.Model):
         for order in self:
             order.is_expired = order.state == 'sent' and order.validity_date and order.validity_date < today
 
-    @api.depends('order_line.customer_lead', 'date_order', 'order_line.state')
+    @api.depends('order_line.customer_lead', 'date_order', 'state')
     def _compute_expected_date(self):
         """ For service and consumable, we only take the min dates. This method is extended in sale_stock to
             take the picking_policy of SO into account.
         """
         self.mapped("order_line")  # Prefetch indication
         for order in self:
-            dates_list = []
-            for line in order.order_line.filtered(lambda x: x.state != 'cancel' and not x._is_delivery() and not x.display_type):
-                dt = line._expected_date()
-                dates_list.append(dt)
+            if order.state == 'cancel':
+                order.expected_date = False
+                continue
+            dates_list = order.order_line.filtered(
+                lambda line: not line.display_type and not line._is_delivery()
+            ).mapped(lambda line: line and line._expected_date())
             if dates_list:
                 order.expected_date = min(dates_list)
             else:
@@ -395,13 +397,6 @@ class SaleOrder(models.Model):
             tax_lines_data = account_move._prepare_tax_lines_data_for_totals_from_object(order.order_line, compute_taxes)
             tax_totals = account_move._get_tax_totals(order.partner_id, tax_lines_data, order.amount_total, order.amount_untaxed, order.currency_id)
             order.tax_totals_json = json.dumps(tax_totals)
-
-    # YTI TODO: Convert into compute method, however this introduces
-    # a behavior change that breaks the test test_reservation_method_w_sale
-    # Note: This should be the case
-    @api.onchange('expected_date')
-    def _onchange_expected_date(self):
-        self.commitment_date = self.expected_date
 
     @api.depends('transaction_ids')
     def _compute_authorized_transaction_ids(self):
@@ -544,7 +539,7 @@ class SaleOrder(models.Model):
                 }
             }
 
-    @api.onchange('commitment_date')
+    @api.onchange('commitment_date', 'expected_date')
     def _onchange_commitment_date(self):
         """ Warn if the commitment dates is sooner than the expected date """
         if (self.commitment_date and self.expected_date and self.commitment_date < self.expected_date):
@@ -556,7 +551,7 @@ class SaleOrder(models.Model):
                 }
             }
 
-    @api.depends('pricelist_id', 'order_line')
+    @api.depends('pricelist_id')
     def _compute_show_update_pricelist(self):
         for order in self:
             order.show_update_pricelist = order.order_line and order.pricelist_id and order._origin.pricelist_id != self.pricelist_id
@@ -1001,7 +996,7 @@ class SaleOrder(models.Model):
         self.write({'state': 'sale'})
 
     def _action_confirm(self):
-        """ Implementation of additionnal mecanism of Sales Order confirmation.
+        """ Implementation of additional mechanism of Sales Order confirmation.
             This method should be extended when the confirmation should generated
             other documents. In this method, the SO are in 'sale' state (not yet 'done').
         """
