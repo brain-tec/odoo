@@ -4,3 +4,4 @@
 from . import account_payment
 from . import payment_acquirer
 from . import payment_transaction
+from . import res_config_settings

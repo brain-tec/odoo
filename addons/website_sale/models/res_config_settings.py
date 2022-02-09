@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
 
 
 class ResConfigSettings(models.TransientModel):
@@ -19,6 +19,10 @@ class ResConfigSettings(models.TransientModel):
 
     group_delivery_invoice_address = fields.Boolean(string="Shipping Address", implied_group='account.group_delivery_invoice_address', group='base.group_portal,base.group_user,base.group_public')
     group_show_uom_price = fields.Boolean(default=False, string="Base Unit Price", implied_group="website_sale.group_show_uom_price", group='base.group_portal,base.group_user,base.group_public')
+    group_product_price_comparison = fields.Boolean(
+        string="Comparison Price",
+        implied_group="website_sale.group_product_price_comparison",
+        group='base.group_portal,base.group_user,base.group_public')
 
     module_website_sale_digital = fields.Boolean("Digital Content")
     module_website_sale_wishlist = fields.Boolean("Wishlists")
@@ -30,7 +34,7 @@ class ResConfigSettings(models.TransientModel):
                                                   related='website_id.cart_recovery_mail_template_id', readonly=False)
     cart_abandoned_delay = fields.Float("Abandoned Delay", help="Number of hours after which the cart is considered abandoned.",
                                         related='website_id.cart_abandoned_delay', readonly=False)
-    cart_add_on_page = fields.Boolean("Stay on page after adding to cart", related='website_id.cart_add_on_page', readonly=False)
+    add_to_cart_action = fields.Selection(related='website_id.add_to_cart_action', readonly=False)
     terms_url = fields.Char(compute='_compute_terms_url', string="URL", help="A preview will be available at this URL.")
 
     module_delivery = fields.Boolean(
@@ -39,6 +43,17 @@ class ResConfigSettings(models.TransientModel):
         compute='_compute_module_delivery', store=True, readonly=False)
     group_product_pricelist = fields.Boolean(
         compute='_compute_group_product_pricelist', store=True, readonly=False)
+
+    enabled_extra_checkout_step = fields.Boolean(string="Extra Step During Checkout")
+    enabled_buy_now_button = fields.Boolean(string="Buy Now")
+
+    account_on_checkout = fields.Selection(related='website_id.account_on_checkout', readonly=False)
+
+    @api.onchange('account_on_checkout')
+    def _onchange_auth_signup_uninvited(self):
+        for config in self:
+            if config.account_on_checkout == 'mandatory':
+                config.auth_signup_uninvited = 'b2c'
 
     @api.depends('website_id')
     def _compute_terms_url(self):
@@ -57,8 +72,19 @@ class ResConfigSettings(models.TransientModel):
 
         res.update(
             sale_delivery_settings=sale_delivery_settings,
+            enabled_extra_checkout_step=self.env.ref('website_sale.extra_info_option').active,
+            enabled_buy_now_button=self.env.ref('website_sale.product_buy_now').active,
         )
         return res
+
+    def set_values(self):
+        super().set_values()
+        extra_step_view = self.env.ref('website_sale.extra_info_option')
+        if extra_step_view.active != self.enabled_extra_checkout_step:
+            extra_step_view.active = self.enabled_extra_checkout_step
+        buy_now_view = self.env.ref('website_sale.product_buy_now')
+        if buy_now_view.active != self.enabled_buy_now_button:
+            buy_now_view.active = self.enabled_buy_now_button
 
     @api.depends('sale_delivery_settings')
     def _compute_module_delivery(self):
@@ -78,4 +104,22 @@ class ResConfigSettings(models.TransientModel):
             'type': 'ir.actions.act_url',
             'url': '/terms?enable_editor=1',
             'target': 'self',
+        }
+
+    def action_open_extra_info(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/shop/extra_info?enable_editor=1',
+            'target': 'self',
+        }
+
+    def action_open_sale_mail_templates(self):
+        return {
+            'name': _('Customize Email Templates'),
+            'type': 'ir.actions.act_window',
+            'domain': [('model', '=', 'sale.order')],
+            'res_model': 'mail.template',
+            'view_id': False,
+            'view_mode': 'tree,form',
         }
