@@ -99,6 +99,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/search/**/*',
             'web/static/src/views/**/*',
             'web/static/src/webclient/**/*',
+            ('remove', 'web/static/src/webclient/navbar/navbar.scss'), # already in _assets_common_styles
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
             'web/static/src/env.js',
 
@@ -223,7 +224,6 @@ This module provides the core of the Odoo Web Client.
 
             'web/static/src/legacy/scss/base_frontend.scss',
             'web/static/src/legacy/scss/lazyloader.scss',
-            'web/static/src/legacy/scss/navbar_mobile.scss',
 
             ('include', 'web.assets_frontend_minimal'),
 
@@ -301,6 +301,7 @@ This module provides the core of the Odoo Web Client.
 
         'web._assets_primary_variables': [
             'web/static/src/legacy/scss/primary_variables.scss',
+            'web/static/src/**/**/*.variables.scss',
         ],
         'web._assets_secondary_variables': [
             'web/static/src/legacy/scss/secondary_variables.scss',
@@ -335,9 +336,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/select2-bootstrap-css/select2-bootstrap.css',
             'web/static/lib/daterangepicker/daterangepicker.css',
             'web/static/fonts/fonts.scss',
+            'web/static/src/webclient/navbar/navbar.scss',
             'web/static/src/legacy/scss/ui.scss',
             'web/static/src/legacy/scss/ui_extra.scss',
-            'web/static/src/legacy/scss/navbar.scss',
             'web/static/src/legacy/scss/mimetypes.scss',
             'web/static/src/legacy/scss/modal.scss',
             'web/static/src/legacy/scss/animation.scss',

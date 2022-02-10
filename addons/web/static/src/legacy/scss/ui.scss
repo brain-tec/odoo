@@ -1,5 +1,15 @@
-.o_hidden {
+:root .o_hidden {
+    // Add `:root` as parent selector to increase '.o_hidden' hierarchy.
+    // The aim is to ensure that it overrides any bootstrap default layout
+    // class (eg. d-flex).
+    // TODO: After migrating to BTS5 review how layout/visibility classes
+    // interfere with each other.
     display: none!important;
+}
+
+.o_disabled {
+    pointer-events: none;
+    opacity: $o-opacity-disabled;
 }
 
 .o_text_overflow {
