@@ -1,0 +1,39 @@
+{
+    "env": {
+        "browser": true,
+        "es2017": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 2019,
+        "sourceType": "module"
+    },
+    "root": true,
+    "rules": {
+        "no-undef": "error",
+        "no-restricted-globals": ["error", "event", "self"],
+        "no-const-assign": ["error"],
+        "no-debugger": ["error"],
+        "no-dupe-class-members": ["error"],
+        "no-unsafe-negation": ["error"],
+        "no-duplicate-imports": ["error"],
+        "valid-typeof": ["error"]
+    },
+    "globals": {
+        "owl": "readonly",
+        "odoo": "readonly",
+        "$": "readonly",
+        "jQuery": "readonly",
+        "_": "readonly",
+        "Chart": "readonly",
+        "fuzzy": "readonly",
+        "QWeb2": "readonly",
+        "Popover": "readonly",
+        "StackTrace": "readonly",
+        "QUnit": "readonly",
+        "luxon": "readonly",
+        "moment": "readonly",
+        "py": "readonly",
+        "ClipboardJS": "readonly",
+        "globalThis": "readonly"
+    }
+}
