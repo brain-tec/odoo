@@ -317,7 +317,7 @@ class Website(models.Model):
     def configurator_init(self):
         r = dict()
         company = self.get_current_website().company_id
-        configurator_features = self.env['website.configurator.feature'].search([])
+        configurator_features = self.env['website.configurator.feature'].with_context(lang=self.get_current_website().default_lang_id.code).search([])
         r['features'] = [{
             'id': feature.id,
             'name': feature.name,
@@ -331,7 +331,7 @@ class Website(models.Model):
         if company.logo and company.logo != company._get_logo():
             r['logo'] = company.logo.decode('utf-8')
         try:
-            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.user.lang})
+            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.get_current_website().default_lang_id.code})
             r['industries'] = result['industries']
         except AccessError as e:
             logger.warning(e.args[0])
@@ -426,7 +426,7 @@ class Website(models.Model):
             nb_snippets = len(snippet_list)
             for i, snippet in enumerate(snippet_list, start=1):
                 try:
-                    view_id = self.env['website'].with_context(website_id=website.id).viewref('website.' + snippet)
+                    view_id = self.env['website'].with_context(website_id=website.id, lang=website.default_lang_id.code).viewref('website.' + snippet)
                     if view_id:
                         el = html.fromstring(view_id._render(values=cta_data))
 
@@ -1587,7 +1587,8 @@ class Website(models.Model):
 
         :return: term on which a search can be performed instead of the initial search
         """
-        if len(search) < 4 or ' ' in search:
+        # No fuzzy search for less that 4 characters, multi-words nor 80%+ numbers.
+        if len(search) < 4 or ' ' in search or len(re.findall(r'\d', search)) / len(search) >= 0.8:
             return search
         search = search.lower()
         words = set()
