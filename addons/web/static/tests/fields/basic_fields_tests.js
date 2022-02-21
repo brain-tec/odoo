@@ -1874,7 +1874,7 @@ QUnit.module('basic_fields', {
     });
 
     QUnit.test('binary fields that are readonly in create mode do not download', function (assert) {
-        assert.expect(2);
+        assert.expect(4);
 
         // save the session function
         var oldGetFile = session.get_file;
@@ -1908,8 +1908,10 @@ QUnit.module('basic_fields', {
         form.$('.o_field_many2one input').click();
         $dropdown.find('li:not(.o_m2o_dropdown_option):contains(xphone)').click();
 
-        assert.strictEqual(form.$('a.o_field_widget[name="document"] > .fa-download').length, 1,
+        assert.strictEqual(form.$('a.o_field_widget[name="document"]').length, 1,
             'The link to download the binary should be present');
+        assert.containsNone(form, 'a.o_field_widget[name="document"] > .fa-download',
+            'The download icon should not be present');
 
         form.$('a.o_field_widget[name="document"]').click();
 
