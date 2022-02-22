@@ -990,7 +990,7 @@ class Users(models.Model):
                     "and *might* be a proxy. If your Odoo is behind a proxy, "
                     "it may be mis-configured. Check that you are running "
                     "Odoo in Proxy Mode and that the proxy is properly configured, see "
-                    "https://www.odoo.com/documentation/15.0/administration/install/deploy.html#https for details.",
+                    "https://www.odoo.com/documentation/master/administration/install/deploy.html#https for details.",
                     source
                 )
             raise AccessDenied(_("Too many login failures, please wait a bit before trying again."))
@@ -1400,7 +1400,9 @@ class UsersView(models.Model):
         return res
 
     @api.model
-    def new(self, values={}, origin=None, ref=None):
+    def new(self, values=None, origin=None, ref=None):
+        if values is None:
+            values = {}
         values = self._remove_reified_groups(values)
         user = super().new(values=values, origin=origin, ref=ref)
         group_multi_company = self.env.ref('base.group_multi_company', False)

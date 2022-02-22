@@ -2,23 +2,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
-import werkzeug
 
-from odoo import http
-from odoo.http import request
+from odoo.http import request, route
 from odoo.addons.website_event.controllers.main import WebsiteEventController
 
 
 class WebsiteEventBoothController(WebsiteEventController):
 
-    @http.route()
+    @route()
     def event_booth_main(self, event):
-        pricelist = request.website.get_current_pricelist()
+        pricelist = request.website.pricelist_id
         if pricelist:
             event = event.with_context(pricelist=pricelist.id)
         return super(WebsiteEventBoothController, self).event_booth_main(event)
 
-    @http.route()
+    @route()
     def event_booth_registration_confirm(self, event, booth_category_id, event_booth_ids, **kwargs):
         """Override: Doesn't call the parent method because we go through the checkout
         process which will confirm the booths when receiving the payment."""
@@ -31,17 +29,17 @@ class WebsiteEventBoothController(WebsiteEventController):
             return json.dumps({'error': 'boothCategoryError'})
 
         booth_values = self._prepare_booth_registration_values(event, kwargs)
-        order = request.website.sale_get_order(force_create=1)
-        order._cart_update(
+        order_sudo = request.website.sale_get_order(force_create=True)
+        order_sudo._cart_update(
             product_id=booth_category.product_id.id,
             set_qty=1,
             event_booth_pending_ids=booths.ids,
             registration_values=booth_values,
         )
-        if order.amount_total:
+        if order_sudo.amount_total:
             return json.dumps({'redirect': '/shop/checkout'})
-        elif order:
-            order.action_confirm()
+        elif order_sudo:
+            order_sudo.action_confirm()
             request.website.sale_reset()
 
             return self._prepare_booth_registration_success_values(event.name, booth_values)

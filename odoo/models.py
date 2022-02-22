@@ -56,14 +56,13 @@ from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, ormcache, \
                    LastOrderedSet, OrderedSet, ReversedIterable, \
-                   groupby, discardattr, partition
+                   unique, discardattr, partition
 from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang, split_every
 from .tools.translate import _
 from .tools import date_utils
 from .tools import populate
-from .tools import unique
 from .tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
@@ -287,7 +286,7 @@ def expand_ids(id0, ids):
             seen.add(id_)
 
 
-IdType = (int, str, NewId)
+IdType = (int, NewId)
 
 
 # maximum number of prefetched records
@@ -1427,6 +1426,10 @@ class BaseModel(metaclass=MetaModel):
 
     @api.model
     def fields_get_keys(self):
+        warnings.warn(
+            'fields_get_keys() method is deprecated, use `_fields` or `fields_view_get` instead',
+            DeprecationWarning
+        )
         return list(self._fields)
 
     @api.model
@@ -1781,26 +1784,26 @@ class BaseModel(metaclass=MetaModel):
         return self.get_formview_action(access_uid=access_uid)
 
     @api.model
-    def search_count(self, args):
-        """ search_count(args) -> int
+    def search_count(self, domain):
+        """ search_count(domain) -> int
 
         Returns the number of records in the current model matching :ref:`the
         provided domain <reference/orm/domains>`.
         """
-        res = self.search(args, count=True)
+        res = self.search(domain, count=True)
         return res if isinstance(res, int) else len(res)
 
     @api.model
     @api.returns('self',
-        upgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: value if count else self.browse(value),
-        downgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: value if count else value.ids)
-    def search(self, args, offset=0, limit=None, order=None, count=False):
-        """ search(args[, offset=0][, limit=None][, order=None][, count=False])
+        upgrade=lambda self, value, domain, offset=0, limit=None, order=None, count=False: value if count else self.browse(value),
+        downgrade=lambda self, value, domain, offset=0, limit=None, order=None, count=False: value if count else value.ids)
+    def search(self, domain, offset=0, limit=None, order=None, count=False):
+        """ search(domain[, offset=0][, limit=None][, order=None][, count=False])
 
-        Searches for records based on the ``args``
+        Searches for records based on the ``domain``
         :ref:`search domain <reference/orm/domains>`.
 
-        :param args: :ref:`A search domain <reference/orm/domains>`. Use an empty
+        :param domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
                      list to match all records.
         :param int offset: number of results to ignore (default: none)
         :param int limit: maximum number of records to return (default: all)
@@ -1809,7 +1812,7 @@ class BaseModel(metaclass=MetaModel):
         :returns: at most ``limit`` records matching the search criteria
         :raise AccessError: * if user tries to bypass access rules for read on the requested object.
         """
-        res = self._search(args, offset=offset, limit=limit, order=order, count=count)
+        res = self._search(domain, offset=offset, limit=limit, order=order, count=count)
         return res if count else self.browse(res)
 
     #
@@ -2871,7 +2874,6 @@ class BaseModel(metaclass=MetaModel):
         """ This method is called after :meth:`~._auto_init`, and may be
             overridden to create or modify a model's database schema.
         """
-        pass
 
     def _check_parent_path(self):
         field = self._fields.get('parent_path')
@@ -3624,7 +3626,7 @@ Fields:
     def unlink(self):
         """ unlink()
 
-        Deletes the records of the current set
+        Deletes the records in ``self``.
 
         :raise AccessError: * if user has no unlink rights on the requested object
                             * if user tries to bypass access rules for unlink on the requested object
@@ -3722,7 +3724,7 @@ Fields:
     def write(self, vals):
         """ write(vals)
 
-        Updates all records in the current set with the provided values.
+        Updates all records in ``self`` with the provided values.
 
         :param dict vals: fields to update and the value to set on them e.g::
 
@@ -4737,7 +4739,7 @@ Fields:
             self.env[model_name].flush(field_names)
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+    def _search(self, domain, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         """
         Private implementation of search() method, allowing specifying the uid to use for the access right check.
         This is useful for example when filling in the selection list for a drop-down and avoiding access rights errors,
@@ -4751,14 +4753,14 @@ Fields:
         model = self.with_user(access_rights_uid) if access_rights_uid else self
         model.check_access_rights('read')
 
-        if expression.is_false(self, args):
+        if expression.is_false(self, domain):
             # optimization: no need to query, as no record satisfies the domain
             return 0 if count else []
 
         # the flush must be done before the _where_calc(), as the latter can do some selects
-        self._flush_search(args, order=order)
+        self._flush_search(domain, order=order)
 
-        query = self._where_calc(args)
+        query = self._where_calc(domain)
         self._apply_ir_rules(query, 'read')
 
         if count:
@@ -4928,8 +4930,8 @@ Fields:
     def exists(self):
         """  exists() -> records
 
-        Returns the subset of records in ``self`` that exist, and marks deleted
-        records as such in cache. It can be used as a test on records::
+        Returns the subset of records in ``self`` that exist.
+        It can be used as a test on records::
 
             if record.exists():
                 ...
@@ -5051,9 +5053,9 @@ Fields:
         return {key: val[0] if val else ''
                 for key, val in results.items()}
 
-    # backwards compatibility
-    get_xml_id = get_external_id
-    _get_xml_ids = _get_external_ids
+    def get_xml_id(self):
+        warnings.warn('get_xml_id() is deprecated method, use get_external_id() instead', DeprecationWarning)
+        return self.get_external_id()
 
     # Transience
     @classmethod
@@ -5130,11 +5132,9 @@ Fields:
 
     def _register_hook(self):
         """ stuff to do right after the registry is built """
-        pass
 
     def _unregister_hook(self):
         """ Clean up what `~._register_hook` has done. """
-        pass
 
     @classmethod
     def _patch_method(cls, name, method):
@@ -5216,7 +5216,7 @@ Fields:
         """
         if not ids:
             ids = ()
-        elif ids.__class__ in IdType:
+        elif ids.__class__ is int:
             ids = (ids,)
         else:
             ids = tuple(ids)
@@ -5241,7 +5241,7 @@ Fields:
     #
 
     def ensure_one(self):
-        """Verify that the current recorset holds a single record.
+        """Verify that the current recordset holds a single record.
 
         :raise odoo.exceptions.ValueError: ``len(self) != 1``
         """
@@ -5259,10 +5259,7 @@ Fields:
         :param env:
         :type env: :class:`~odoo.api.Environment`
 
-        .. warning::
-            The new environment will not benefit from the current
-            environment's data cache, so later data access may incur extra
-            delays while re-fetching from the database.
+        .. note::
             The returned recordset has the same prefetch object as ``self``.
         """
         return self.__class__(env, self._ids, self._prefetch_ids)
@@ -5287,16 +5284,10 @@ Fields:
 
         .. note::
 
-            Because the record rules and access control will have to be
-            re-evaluated, the new recordset will not benefit from the current
-            environment's data cache, so later data access may incur extra
-            delays while re-fetching from the database.
             The returned recordset has the same prefetch object as ``self``.
 
         """
-        if not isinstance(flag, bool):
-            _logger.warning("deprecated use of sudo(user), use with_user(user) instead", stack_info=True)
-            return self.with_user(flag)
+        assert isinstance(flag, bool)
         return self.with_env(self.env(su=flag))
 
     def with_user(self, user):
@@ -5504,20 +5495,6 @@ Fields:
         else:
             return self._mapped_func(func)
 
-    def _mapped_cache(self, name_seq):
-        """ Same as `~.mapped`, but ``name_seq`` is a dot-separated sequence of
-            field names, and only cached values are used.
-        """
-        recs = self
-        for name in name_seq.split('.'):
-            field = recs._fields[name]
-            null = field.convert_to_cache(False, self, validate=False)
-            if recs:
-                recs = recs.mapped(lambda rec: field.convert_to_record(rec._cache.get(name, null), rec))
-            else:
-                recs = field.convert_to_record(null, recs)
-        return recs
-
     def filtered(self, func):
         """Return the records in ``self`` satisfying ``func``.
 
@@ -5541,28 +5518,36 @@ Fields:
         return self.browse([rec.id for rec in self if func(rec)])
 
     def filtered_domain(self, domain):
-        if not domain: return self
-        result = []
-        for d in reversed(domain):
-            if d == '|':
-                result.append(result.pop() | result.pop())
-            elif d == '!':
-                result.append(self - result.pop())
-            elif d == '&':
-                result.append(result.pop() & result.pop())
-            elif d == expression.TRUE_LEAF:
-                result.append(self)
-            elif d == expression.FALSE_LEAF:
-                result.append(self.browse())
+        """Return the records in ``self`` satisfying the domain and keeping the same order.
+
+        :param domain: :ref:`A search domain <reference/orm/domains>`.
+        """
+        if not domain or not self:
+            return self
+
+        stack = []
+        for leaf in reversed(domain):
+            if leaf == '|':
+                stack.append(stack.pop() | stack.pop())
+            elif leaf == '!':
+                stack.append(set(self._ids) - stack.pop())
+            elif leaf == '&':
+                stack.append(stack.pop() & stack.pop())
+            elif leaf == expression.TRUE_LEAF:
+                stack.append(set(self._ids))
+            elif leaf == expression.FALSE_LEAF:
+                stack.append(set())
             else:
-                (key, comparator, value) = d
+                (key, comparator, value) = leaf
                 if comparator in ('child_of', 'parent_of'):
-                    result.append(self.search([('id', 'in', self.ids), d]))
+                    stack.append(set(self.search([('id', 'in', self.ids), leaf], order='id')._ids))
                     continue
+
                 if key.endswith('.id'):
                     key = key[:-3]
                 if key == 'id':
                     key = ''
+
                 # determine the field with the final type for values
                 field = None
                 if key:
@@ -5570,76 +5555,81 @@ Fields:
                     for fname in key.split('.'):
                         field = model._fields[fname]
                         model = model[fname]
+
                 if comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
                     value_esc = value.replace('_', '?').replace('%', '*').replace('[', '?')
-                records_ids = OrderedSet()
-                for rec in self:
-                    data = rec.mapped(key)
+                if comparator in ('in', 'not in'):
+                    if isinstance(value, (list, tuple)):
+                        value = set(value)
+                    else:
+                        value = (value,)
+                    if field and field.type in ('date', 'datetime'):
+                        value = {Datetime.to_datetime(v) for v in value}
+                elif field and field.type in ('date', 'datetime'):
+                    value = Datetime.to_datetime(value)
+
+                matching_ids = set()
+                for record in self:
+                    data = record.mapped(key)
                     if isinstance(data, BaseModel):
                         v = value
-                        if (isinstance(value, list) or isinstance(value, tuple)) and len(value):
-                            v = value[0]
+                        if isinstance(value, (list, tuple, set)) and value:
+                            v = next(iter(value))
                         if isinstance(v, str):
                             data = data.mapped('display_name')
                         else:
                             data = data and data.ids or [False]
                     elif field and field.type in ('date', 'datetime'):
-                        # convert all date and datetime values to datetime
-                        normalize = Datetime.to_datetime
-                        if isinstance(value, (list, tuple)):
-                            value = [normalize(v) for v in value]
-                        else:
-                            value = normalize(value)
-                        data = [normalize(d) for d in data]
-                    if comparator in ('in', 'not in'):
-                        if not (isinstance(value, list) or isinstance(value, tuple)):
-                            value = [value]
+                        data = [Datetime.to_datetime(d) for d in data]
 
                     if comparator == '=':
                         ok = value in data
-                    elif comparator == 'in':
-                        ok = any(map(lambda x: x in data, value))
-                    elif comparator == '<':
-                        ok = any(map(lambda x: x is not None and x < value, data))
-                    elif comparator == '>':
-                        ok = any(map(lambda x: x is not None and x > value, data))
-                    elif comparator == '<=':
-                        ok = any(map(lambda x: x is not None and x <= value, data))
-                    elif comparator == '>=':
-                        ok = any(map(lambda x: x is not None and x >= value, data))
                     elif comparator in ('!=', '<>'):
                         ok = value not in data
+                    elif comparator == '=?':
+                        ok = not value or (value in data)
+                    elif comparator == 'in':
+                        ok = value and any(x in value for x in data)
                     elif comparator == 'not in':
-                        ok = all(map(lambda x: x not in data, value))
-                    elif comparator == 'not ilike':
-                        data = [(x or "") for x in data]
-                        ok = all(map(lambda x: value.lower() not in x.lower(), data))
+                        ok = not (value and any(x in value for x in data))
+                    elif comparator == '<':
+                        ok = any(x is not None and x < value for x in data)
+                    elif comparator == '>':
+                        ok = any(x is not None and x > value for x in data)
+                    elif comparator == '<=':
+                        ok = any(x is not None and x <= value for x in data)
+                    elif comparator == '>=':
+                        ok = any(x is not None and x >= value for x in data)
                     elif comparator == 'ilike':
                         data = [(x or "").lower() for x in data]
-                        ok = bool(fnmatch.filter(data, '*'+(value_esc or '').lower()+'*'))
-                    elif comparator == 'not like':
-                        data = [(x or "") for x in data]
-                        ok = all(map(lambda x: value not in x, data))
+                        ok = fnmatch.filter(data, '*' + (value_esc or '').lower() + '*')
+                    elif comparator == 'not ilike':
+                        value = value.lower()
+                        ok = not any(value in (x or "").lower() for x in data)
                     elif comparator == 'like':
                         data = [(x or "") for x in data]
-                        ok = bool(fnmatch.filter(data, value and '*'+value_esc+'*'))
-                    elif comparator == '=?':
-                        ok = (value in data) or not value
-                    elif comparator in ('=like'):
+                        ok = fnmatch.filter(data, value and '*' + value_esc + '*')
+                    elif comparator == 'not like':
+                        ok = not any(value in (x or "") for x in data)
+                    elif comparator == '=like':
                         data = [(x or "") for x in data]
-                        ok = bool(fnmatch.filter(data, value_esc))
-                    elif comparator in ('=ilike'):
+                        ok = fnmatch.filter(data, value_esc)
+                    elif comparator == '=ilike':
                         data = [(x or "").lower() for x in data]
-                        ok = bool(fnmatch.filter(data, value and value_esc.lower()))
+                        ok = fnmatch.filter(data, value and value_esc.lower())
                     else:
-                        raise ValueError
-                    if ok:
-                       records_ids.add(rec.id)
-                result.append(self.browse(records_ids))
-        while len(result)>1:
-            result.append(result.pop() & result.pop())
-        return result[0]
+                        raise ValueError(f"Invalid term domain '{leaf}', operator '{comparator}' doesn't exist.")
 
+                    if ok:
+                        matching_ids.add(record.id)
+
+                stack.append(matching_ids)
+
+        while len(stack) > 1:
+            stack.append(stack.pop() & stack.pop())
+
+        [result_ids] = stack
+        return self.browse(id_ for id_ in self._ids if id_ in result_ids)
 
     def sorted(self, key=None, reverse=False):
         """Return the recordset ``self`` ordered by ``key``.
@@ -5741,7 +5731,7 @@ Fields:
     #
 
     @api.model
-    def new(self, values={}, origin=None, ref=None):
+    def new(self, values=None, origin=None, ref=None):
         """ new([values], [origin], [ref]) -> record
 
         Return a new record instance attached to the current environment and
@@ -5755,9 +5745,11 @@ Fields:
         One can also pass a ``ref`` value to identify the record among other new
         records. The reference is encapsulated in the ``id`` of the record.
         """
+        if values is None:
+            values = {}
         if origin is not None:
             origin = origin.id
-        record = self.browse([NewId(origin, ref)])
+        record = self.browse((NewId(origin, ref),))
         record._update_cache(values, validate=False)
 
         return record
@@ -5775,7 +5767,8 @@ Fields:
 
     def __bool__(self):
         """ Test whether ``self`` is nonempty. """
-        return bool(getattr(self, '_ids', True))
+        return True if self._ids else False  # fast version of bool(self._ids)
+
     __nonzero__ = __bool__
 
     def __len__(self):
@@ -5921,13 +5914,10 @@ Fields:
         return self.id or 0
 
     def __repr__(self):
-        return "%s%s" % (self._name, getattr(self, '_ids', ""))
+        return f"{self._name}{self._ids}"
 
     def __hash__(self):
-        if hasattr(self, '_ids'):
-            return hash((self._name, frozenset(self._ids)))
-        else:
-            return hash(self._name)
+        return hash((self._name, frozenset(self._ids)))
 
     def __getitem__(self, key):
         """ If ``key`` is an integer or a slice, return the corresponding record
