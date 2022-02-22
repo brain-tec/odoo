@@ -520,8 +520,7 @@ class LazyCursor(object):
             self._cursor.__exit__(exc_type, exc_value, traceback)
 
 class PsycoConnection(psycopg2.extensions.connection):
-    def lobject(*args, **kwargs):
-        pass
+    pass
 
 class ConnectionPool(object):
     """ The pool of connections to database(s)
