@@ -5,10 +5,10 @@
 # Translators:
 # Divya Pandya <dia@odoo.com>, 2018
 # Ranjit Pillai <rpi@odoo.com>, 2018
-# Dharmraj Jhala <dja@openerp.com>, 2018
+# D J <dja@openerp.com>, 2018
 # Turkesh Patel <turkesh4friends@gmail.com>, 2018
 # Martin Trigaux, 2018
-# Spellbound Soft Solutions <jeel.spellbound@gmail.com>, 2018
+# Spellbound Soft Solutions <jeel.spellbound@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -16,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:20+0000\n"
-"Last-Translator: Spellbound Soft Solutions <jeel.spellbound@gmail.com>, 2018\n"
+"Last-Translator: Spellbound Soft Solutions <jeel.spellbound@gmail.com>, 2020\n"
 "Language-Team: Gujarati (https://www.transifex.com/odoo/teams/41243/gu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -393,7 +393,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_needaction
 #: model:ir.model.fields,field_description:mail.field_res_users__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "ક્રિયા આવશ્યક છે"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__state
@@ -2703,6 +2703,12 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_notification__is_read
 msgid "Is Read"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_notification.py:0
+#, python-format
+msgid "Can not update the message or recipient of a notification."
 msgstr ""
 
 #. module: mail
@@ -5140,6 +5146,12 @@ msgid ""
 msgstr ""
 
 #. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "The partner can not join this channel"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_activity.py:243
 #: code:addons/mail/models/mail_message.py:704
 #: code:addons/mail/models/mail_message.py:874
@@ -5802,6 +5814,24 @@ msgid ""
 msgstr ""
 
 #. module: mail
+#: cod:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not remove this partner from this channel"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on the record of other users"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on this field"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/res_users.py:87
 #, python-format
 msgid ""
@@ -5815,6 +5845,14 @@ msgstr ""
 msgid ""
 "You cannot delete those groups, as the Whole Company group is required by "
 "other modules."
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_alias.py:89
+#, python-format
+msgid ""
+"You cannot use anything else than unaccented latin characters in the alias "
+"address."
 msgstr ""
 
 #. module: mail
@@ -5840,7 +5878,7 @@ msgstr ""
 #. openerp-web
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:198
 #, python-format
-msgid "You have been invited to: "
+msgid "You have been invited to: %s"
 msgstr ""
 
 #. module: mail

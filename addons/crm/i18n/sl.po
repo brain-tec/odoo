@@ -10,8 +10,8 @@
 # matjaz k <matjaz@mentis.si>, 2019
 # Boris Kodelja <boris@hbs.si>, 2019
 # Tadej Lupšina <tadej@hbs.si>, 2019
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
 # Jasmina Macur <jasmina@hbs.si>, 2019
+# Matjaz Mozetic <m.mozetic@matmoz.si>, 2020
 # 
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-09 10:31+0000\n"
 "PO-Revision-Date: 2018-08-24 09:17+0000\n"
-"Last-Translator: Jasmina Macur <jasmina@hbs.si>, 2019\n"
+"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2020\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -54,6 +54,8 @@ msgid ""
 "<b>Choose a name</b> for your opportunity, example: <i>'Need a new "
 "website'</i>"
 msgstr ""
+"<b>Izberi ime</b> za novo priložnost, na primer: <i>'Potrebujete novo "
+"spletno stran'</i>"
 
 #. module: crm
 #. openerp-web
@@ -82,10 +84,10 @@ msgid ""
 "attrs=\"{'invisible': ['|', ('is_blacklisted', '=', False), "
 "('partner_address_email', '!=', False)]}\" groups=\"base.group_user\"/>"
 msgstr ""
-"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"This email"
-" is blacklisted for mass mailing\" aria-label=\"Blacklisted\" "
-"attrs=\"{'invisible': ['|', ('is_blacklisted', '=', False), "
-"('partner_address_email', '!=', False)]}\" groups=\"base.group_user\"/>"
+"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"Ta e-pošta"
+" je na črnem seznamu.\" aria-label=\"Blacklisted\" attrs=\"{'invisible': "
+"['|', ('is_blacklisted', '=', False), ('partner_address_email', '!=', "
+"False)]}\" groups=\"base.group_user\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor
@@ -95,10 +97,10 @@ msgid ""
 "attrs=\"{'invisible': ['|', ('partner_is_blacklisted', '=', False), "
 "('partner_address_email', '=', False)]}\" groups=\"base.group_user\"/>"
 msgstr ""
-"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"This email"
-" is blacklisted for mass mailing\" aria-label=\"Blacklisted\" "
-"attrs=\"{'invisible': ['|', ('partner_is_blacklisted', '=', False), "
-"('partner_address_email', '=', False)]}\" groups=\"base.group_user\"/>"
+"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"Ta e-pošta"
+" je na črnem seznamu.\" aria-label=\"Blacklisted\" attrs=\"{'invisible': "
+"['|', ('partner_is_blacklisted', '=', False), ('partner_address_email', '=',"
+" False)]}\" groups=\"base.group_user\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_leads
@@ -108,10 +110,9 @@ msgid ""
 "attrs=\"{'invisible': [('is_blacklisted', '=', False)]}\" "
 "groups=\"base.group_user\"/>"
 msgstr ""
-"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"This email"
-" is blacklisted for mass mailing\" aria-label=\"Blacklisted\" "
-"attrs=\"{'invisible': [('is_blacklisted', '=', False)]}\" "
-"groups=\"base.group_user\"/>"
+"<i class=\"fa fa-ban\" style=\"color: red;\" role=\"img\" title=\"Ta e-pošta"
+" je na črnem seznamu.\" aria-label=\"Blacklisted\" attrs=\"{'invisible': "
+"[('is_blacklisted', '=', False)]}\" groups=\"base.group_user\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead_kanban
@@ -232,7 +233,7 @@ msgstr "Cilj opravljenih aktivnosti"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Activities Todo"
-msgstr "Opravki"
+msgstr "Aktivnosti za obdelavo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_state
@@ -321,7 +322,7 @@ msgstr "Črni seznam"
 #: code:addons/crm/models/crm_lead.py:400
 #, python-format
 msgid "Boom! Team record for the past 30 days."
-msgstr ""
+msgstr "Bum! Ekipni rekord v zadnjih 30 dneh."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_bounce
@@ -426,15 +427,15 @@ msgid ""
 "Click here to <b>create your first opportunity</b> and add it to your "
 "pipeline."
 msgstr ""
-"Klinki tukaj za <b>kreiranje prve priložnosti</b> in jo dodaj v svoj delovni"
-" tok."
+"Kliknite, da <b>ustvarite svojo prvo priložnost</b> in si jo dodate v svoj "
+"prodajni tok."
 
 #. module: crm
 #. openerp-web
 #: code:addons/crm/static/src/js/tour.js:60
 #, python-format
 msgid "Click on the opportunity to zoom in."
-msgstr ""
+msgstr "Kliknite na priložnost za povečavo."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__date_closed
@@ -624,7 +625,7 @@ msgstr "Nova priložnost"
 #: selection:crm.lead2opportunity.partner,action:0
 #: selection:crm.partner.binding,action:0
 msgid "Create a new customer"
-msgstr "Ustvari novega kupca"
+msgstr "Ustvari novo stranko"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_lead
@@ -660,6 +661,9 @@ msgid ""
 "Create tags that fit your business (product structure, sales type, etc.) to "
 "better manage and tack your opportunities."
 msgstr ""
+"Ustvarite oznake, ki ustrezajo vašemu podjetju (struktura izdelka, vrsta "
+"prodaje itd.), da boste bolje upravljali in se spoprijeli s svojimi "
+"priložnostmi."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__author_id
@@ -723,25 +727,25 @@ msgstr "Valuta"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 #, python-format
 msgid "Customer"
-msgstr "Kupec"
+msgstr "Stranka"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:1170
 #, python-format
 msgid "Customer Email"
-msgstr "E-pošta kupca"
+msgstr "E-pošta stranke"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__partner_name
 msgid "Customer Name"
-msgstr "Naziv kupca"
+msgstr "Naziv stranke"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.res_partner_menu_customer
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Customers"
-msgstr "Kupci"
+msgstr "Stranke"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date
@@ -792,7 +796,7 @@ msgstr "Načrtovanje"
 #. module: crm
 #: model:ir.model,name:crm.model_digest_digest
 msgid "Digest"
-msgstr "Prenesena"
+msgstr "Povzemanje"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_create_opportunity_simplified
@@ -811,21 +815,21 @@ msgstr "Opusti"
 #: model:ir.model.fields,field_description:crm.field_crm_partner_binding__display_name
 #: model:ir.model.fields,field_description:crm.field_crm_stage__display_name
 msgid "Display Name"
-msgstr "Prikazni naziv"
+msgstr "Prikazani naziv"
 
 #. module: crm
 #: code:addons/crm/models/digest.py:18 code:addons/crm/models/digest.py:29
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
 msgstr ""
-"Nimate dostopa, preskočite te podatke zaradi uporabnikove prenesene e-pošte"
+"Nimate dostopa, preskočite te podatke v uporabnikovem e-poštnem povzetku."
 
 #. module: crm
 #: selection:crm.lead2opportunity.partner,action:0
 #: selection:crm.lead2opportunity.partner.mass,action:0
 #: selection:crm.partner.binding,action:0
 msgid "Do not link to a customer"
-msgstr "Ne poveži s kupcem"
+msgstr "Ne poveži s stranko"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
@@ -1347,7 +1351,7 @@ msgstr "Načrtujmo aktivnost."
 #: selection:crm.lead2opportunity.partner,action:0
 #: selection:crm.partner.binding,action:0
 msgid "Link to an existing customer"
-msgstr "Povezava na obstoječega kupca"
+msgstr "Povezava na obstoječo stranko"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__partner_id
@@ -1569,6 +1573,7 @@ msgstr "Moj prodajni tok"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_tag__name
 #: model:ir.model.fields,field_description:crm.field_crm_lost_reason__name
+#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
 msgid "Name"
 msgstr "Naziv"
 
@@ -1738,7 +1743,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__opportunities_amount
 msgid "Opportunities Revenues"
-msgstr ""
+msgstr "Prihodki od priložnosti"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_digest_digest__kpi_crm_opportunities_won
@@ -1856,7 +1861,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__partner_id
 msgid "Partner/Customer"
-msgstr "Partner/kupec"
+msgstr "Partner/stranka"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__phone
@@ -1992,7 +1997,7 @@ msgstr "Navedel"
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner_mass__action
 #: model:ir.model.fields,field_description:crm.field_crm_partner_binding__action
 msgid "Related Customer"
-msgstr "Povezani kupec"
+msgstr "Povezana stranka"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_menu_report
@@ -2400,7 +2405,7 @@ msgstr ""
 #: code:addons/crm/models/crm_lead.py:1088
 #, python-format
 msgid "This target does not exist."
-msgstr ""
+msgstr "Ta cilj ne obstaja."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__title
@@ -2568,7 +2573,7 @@ msgstr "Zelo visoka"
 #. module: crm
 #: model:crm.lost.reason,name:crm.lost_reason_2
 msgid "We don't have people/skills"
-msgstr ""
+msgstr "Nimamo ljudi/veščin"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__website
@@ -2691,7 +2696,7 @@ msgstr "Poštna št."
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_create_opportunity_simplified
 msgid "e.g. Customer Deal"
-msgstr "npr. Pogodba za stranke"
+msgstr "npr. posel s stranko"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_form_view_oppor

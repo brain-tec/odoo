@@ -20,12 +20,10 @@ class MailThread(models.AbstractModel):
     def message_route(self, message, message_dict, model=None, thread_id=None, custom_values=None):
         """ Override to udpate mass mailing statistics based on bounce emails """
         bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
-        alias_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
         email_to = decode_message_header(message, 'To')
         email_to_localparts = [
             e.split('@', 1)[0].lower()
             for e in (tools.email_split(email_to) or [''])
-            if not alias_domain or e.endswith('@%s' % alias_domain)
         ]
 
         if bounce_alias and any(email.startswith(bounce_alias) for email in email_to_localparts):
@@ -42,10 +40,17 @@ class MailThread(models.AbstractModel):
         """ Override to update the parent mail statistics. The parent is found
         by using the References header of the incoming message and looking for
         matching message_id in mail.mail.statistics. """
-        if message.get('References') and routes:
-            message_ids = [x.strip() for x in decode_smtp_header(message['References']).split()]
-            self.env['mail.mail.statistics'].set_opened(mail_message_ids=message_ids)
-            self.env['mail.mail.statistics'].set_replied(mail_message_ids=message_ids)
+        if routes:
+            references = tools.decode_message_header(message, 'References')
+            in_reply_to = tools.decode_message_header(message, 'In-Reply-To').strip()
+            thread_references = references or in_reply_to
+            # even if 'reply_to' in ref (cfr mail/mail_thread) that indicates a new thread redirection
+            # (aka bypass alias configuration in gateway) consider it as a reply for statistics purpose
+            references_msg_id_list = tools.mail_header_msgid_re.findall(thread_references)
+
+            if references_msg_id_list:
+                self.env['mail.mail.statistics'].set_opened(mail_message_ids=references_msg_id_list)
+                self.env['mail.mail.statistics'].set_replied(mail_message_ids=references_msg_id_list)
         return super(MailThread, self).message_route_process(message, message_dict, routes)
 
     @api.multi

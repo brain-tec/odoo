@@ -91,6 +91,16 @@ class BaseAutomation(models.Model):
                 }
             }}
 
+        MAIL_STATES = ('email', 'followers', 'next_activity')
+        if self.trigger == 'on_unlink' and self.state in MAIL_STATES:
+            return {'warning': {
+                'title': _("Warning"),
+                'message': _(
+                    "You cannot send an email, add followers or create an activity "
+                    "for a deleted record.  It simply does not work."
+                ),
+            }}
+
     @api.model
     def create(self, vals):
         vals['usage'] = 'base_automation'
@@ -331,6 +341,16 @@ class BaseAutomation(models.Model):
                 method = make_onchange(action_rule.id)
                 for field_name in action_rule.on_change_fields.split(","):
                     Model._onchange_methods[field_name.strip()].append(method)
+
+    def _unregister_hook(self):
+        """ Remove the patches installed by _register_hook() """
+        NAMES = ['create', '_write', 'unlink', '_onchange_methods']
+        for Model in self.env.registry.values():
+            for name in NAMES:
+                try:
+                    delattr(Model, name)
+                except AttributeError:
+                    pass
 
     @api.model
     def _check_delay(self, action, record, record_dt):

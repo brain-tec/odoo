@@ -6,17 +6,20 @@
 # Ladislav Tomm <tomm@helemik.cz>, 2018
 # Jan Horzinka <jan.horzinka@centrum.cz>, 2018
 # nle_odoo, 2018
-# Martin Trigaux, 2019
 # Michal Veselý <michal@veselyberanek.net>, 2019
-# trendspotter <j.podhorecky@volny.cz>, 2019
+# Martin Trigaux, 2019
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
+# trendspotter, 2020
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2020
+# Damian Brencic <brencicdamian12313@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-14 08:02+0000\n"
+"POT-Creation-Date: 2019-12-10 14:44+0000\n"
 "PO-Revision-Date: 2018-08-24 09:14+0000\n"
-"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
+"Last-Translator: Damian Brencic <brencicdamian12313@gmail.com>, 2020\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -118,6 +121,93 @@ msgstr ""
 "- Obecná maďarská účetní osnova\n"
 "- Maďarské daně\n"
 "- Informace o maďarské bance"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dk
+msgid ""
+"\n"
+"\n"
+"Localization Module for Denmark\n"
+"===============================\n"
+"\n"
+"This is the module to manage the **accounting chart for Denmark**. Cover both one-man business as well as I/S, IVS, ApS and A/S\n"
+"\n"
+"**Modulet opsætter:**\n"
+"\n"
+"- **Dansk kontoplan**\n"
+"\n"
+"- Dansk moms\n"
+"        - 25% moms\n"
+"        - Resturationsmoms 6,25%\n"
+"        - Omvendt betalingspligt\n"
+"        \n"
+"- Konteringsgrupper\n"
+"        - EU (Virksomhed)\n"
+"        - EU (Privat)\n"
+"        - 3.lande\n"
+"\n"
+"- Finans raporter\n"
+"        - Resulttopgørelse\n"
+"        - Balance\n"
+"        - Momsafregning\n"
+"            - Afregning\n"
+"            - Rubrik A, B og C\n"
+"\n"
+"- **Anglo-Saxon regnskabsmetode**\n"
+"\n"
+".\n"
+"\n"
+"Produkt setup:\n"
+"==============\n"
+"\n"
+"**Vare**\n"
+"\n"
+"**Salgsmoms:**      Salgmoms 25%\n"
+"\n"
+"**Salgskonto:**     1010 Salg af vare, m/moms\n"
+"\n"
+"**Købsmoms:**       Købsmoms 25%\n"
+"\n"
+"**Købskonto:**      2010 Direkte omkostninger vare, m/moms\n"
+"\n"
+".\n"
+"\n"
+"**Ydelse**\n"
+"\n"
+"**Salgsmoms:**      Salgmoms 25%, ydelser\n"
+"\n"
+"**Salgskonto:**     1011 Salg af ydelser, m/moms\n"
+"\n"
+"**Købsmoms:**       Købsmoms 25%, ydelser\n"
+"\n"
+"**Købskonto:**      2011 Direkte omkostninger ydelser, m/moms\n"
+"\n"
+".\n"
+"\n"
+"**Vare med omvendt betalingspligt**\n"
+"\n"
+"**Salgsmoms:**      Salg omvendt betalingspligt\n"
+"\n"
+"**Salgskonto:**     1012 Salg af vare, u/moms\n"
+"\n"
+"**Købsmoms:**       Køb omvendt betalingspligt\n"
+"\n"
+"**Købskonto:**      2012 Direkte omkostninger vare, u/moms\n"
+"\n"
+"\n"
+".\n"
+"\n"
+"**Restauration**\n"
+"\n"
+"**Købsmoms:**       Restaurationsmoms 6,25%, købsmoms\n"
+"\n"
+"**Købskonto:**      4010 Restaurationsbesøg\n"
+"\n"
+".\n"
+"\n"
+"Copyright 2018 Odoo House ApS\n"
+"    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_do
@@ -692,6 +782,15 @@ msgid ""
 msgstr ""
 "\n"
 "Správné formátování adresy, když jsou nainstalovány oba moduly"
+
+#. module: base
+#: model:ir.module.module,description:base.module_product_unspsc
+msgid ""
+"\n"
+"        Countries like Colombia, Peru and Mexico need to be able to use the \n"
+"        UNSPSC code for their products and uoms.  \n"
+"    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_mx_reports
@@ -1509,6 +1608,15 @@ msgstr ""
 "\n"
 "Účetní výkazy pro Chorvatsko\n"
 "================================"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dk_reports
+msgid ""
+"\n"
+"Accounting reports for Denmark\n"
+"=================================\n"
+"    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_et_reports
@@ -5842,6 +5950,16 @@ msgstr ""
 "Nainstalujte si obecné schéma účtů."
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_id
+msgid ""
+"\n"
+"This is the latest Indonesian Odoo localisation necessary to run Odoo accounting for SMEs with:\n"
+"=================================================================================================\n"
+"    - generic Indonesian chart of accounts\n"
+"    - tax structure"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_uk
 msgid ""
 "\n"
@@ -5869,6 +5987,11 @@ msgid ""
 "    - a generic chart of accounts\n"
 "    - SARS VAT Ready Structure"
 msgstr ""
+"\n"
+"Toto je poslední základní jihoafrická lokalizace nezbytná pro spuštění Odoo v JAR:\n"
+"================================================== ===============================\n"
+"- obecná účtová osnova\n"
+"- SARS Struktura připravená k DPH"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ro
@@ -6800,6 +6923,8 @@ msgid ""
 "\n"
 "This widget allows to display gauges using d3 library.\n"
 msgstr ""
+"\n"
+"Tento widget umožňuje zobrazit měřidla pomocí knihovny d3.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_product_expiry
@@ -6817,6 +6942,18 @@ msgid ""
 "\n"
 "Also implements the removal strategy First Expiry First Out (FEFO) widely used, for example, in food industries.\n"
 msgstr ""
+"\n"
+"Sledujte různá data produktů a výrobních šarží.\n"
+"======================================================\n"
+"\n"
+"Lze sledovat následující data:\n"
+"-------------------------------\n"
+"- konec trvanlivosti\n"
+"- datum minimální trvanlivosti\n"
+"- datum vyřazení\n"
+"- datum výstrahy\n"
+"\n"
+"Také implementuje strategii odstraňování First Expiry First Out (FEFO) široce používanou například v potravinářském průmyslu.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_transifex
@@ -6872,6 +7009,9 @@ msgid ""
 "============================\n"
 "    "
 msgstr ""
+"\n"
+"Ukrajina - účtová osnova.\n"
+"============================="
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ae
@@ -7138,6 +7278,11 @@ msgid ""
 "Works with Worldline keys version 2.0, contains implementation of\n"
 "payments acquirer using Worldline SIPS."
 msgstr ""
+"\n"
+"Worldline SIPS Payment Acquirer pro online platby\n"
+"\n"
+"Pracuje s klíči Worldline verze 2.0, obsahuje implementaci\n"
+"příjemce plateb pomocí Worldline SIPS."
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:1091
@@ -7172,6 +7317,8 @@ msgid ""
 " another model requires the record being deleted. If possible, archive it "
 "instead."
 msgstr ""
+"jiný model vyžaduje vymazání záznamu. Pokud je to možné, místo toho jej "
+"archivujte."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -7514,21 +7661,23 @@ msgid ""
 "<i class=\"fa fa-building\" role=\"img\" aria-label=\"Enterprise\" "
 "title=\"Enterprise\"/>"
 msgstr ""
+"<i class=\"fa fa-building\" role=\"img\" aria-label=\"Enterprise\" "
+"title=\"Enterprise\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Invalid\" title=\"Invalid\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Invalid\" title=\"Invalid\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Ok\" title=\"Ok\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Ok\" title=\"Ok\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Login\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Login\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
@@ -7536,11 +7685,13 @@ msgid ""
 "<i class=\"fa fa-info fa-3x text-info float-left\" role=\"img\" aria-"
 "label=\"Info\" title=\"Info\"/>"
 msgstr ""
+"<i class=\"fa fa-info fa-3x text-info float-left\" role=\"img\" aria-"
+"label=\"Info\" title=\"Info\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
 msgid "<i class=\"fa fa-times\" title=\"Close the onboarding panel\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-times\" title=\"Close the onboarding panel\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.onboarding_container
@@ -7599,6 +7750,8 @@ msgid ""
 "<span class=\"searchIcon\"><i class=\"fa fa-search\" role=\"img\" aria-"
 "label=\"Search\" title=\"Search\"/></span>"
 msgstr ""
+"<span class=\"searchIcon\"><i class=\"fa fa-search\" role=\"img\" aria-"
+"label=\"Search\" title=\"Search\"/></span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.demo_force_install_form
@@ -7621,6 +7774,9 @@ msgid ""
 "                                <span colspan=\"2\">Week of the Year: %(woy)s</span>\n"
 "                                <span colspan=\"2\">Day of the Week (0:Monday): %(weekday)s</span>"
 msgstr ""
+"<span colspan=\"2\">Den v roce: %(doy)s</span>\n"
+"                                <span colspan=\"2\">Týden roku: %(woy)s</span>\n"
+"                                <span colspan=\"2\">Den v týdnu (0: pondělí): %(weekday)s</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -8198,7 +8354,7 @@ msgstr "Modul pro generování výjimek."
 #. module: base
 #: model:ir.module.module,description:base.module_test_lint
 msgid "A module to test Odoo code with various linters."
-msgstr ""
+msgstr "Modul pro testování kódu Odoo s různými lintery."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_impex
@@ -8213,7 +8369,7 @@ msgstr "Modul pro testování API."
 #. module: base
 #: model:ir.module.module,description:base.module_test_rpc
 msgid "A module to test the RPC requests."
-msgstr ""
+msgstr "Modul pro testování požadavků RPC."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_uninstall
@@ -8309,7 +8465,7 @@ msgstr "A9 13 37 x 52 mm"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_au_aba
 msgid "ABA Credit Transfer"
-msgstr ""
+msgstr "Převod kreditu ABA Credit"
 
 #. module: base
 #: code:addons/fields.py:1770
@@ -8404,7 +8560,7 @@ msgstr "Jméno Majitele Účtu"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_invoice_extract
 msgid "Account Invoice Extract"
-msgstr ""
+msgstr "Výpis faktury z účtu"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__account_no
@@ -8582,12 +8738,12 @@ msgstr "Použití akce"
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window
 msgid "Action Window"
-msgstr ""
+msgstr "Okno akce"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window_close
 msgid "Action Window Close"
-msgstr ""
+msgstr "Zavřít okno akce"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_act_window_view
@@ -8701,7 +8857,7 @@ msgstr "Přidat podporu livechat pro OdooBot"
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_sale
 msgid "Add sale order UTM info on mass mailing"
-msgstr ""
+msgstr "Přidat informace o objednávce UTM do hromadné pošty"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.contact
@@ -8896,7 +9052,7 @@ msgstr "Pokročilé funkce pro CRM"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_enterprise
 msgid "Advanced features for PoS"
-msgstr ""
+msgstr "Pokročilé funkce pro Místo prodeje"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_enterprise
@@ -9096,7 +9252,7 @@ msgstr "Analytické účetnictví"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_analytic_enterprise
 msgid "Analytic Accounting Enterprise"
-msgstr ""
+msgstr "Analytické účetní podnikání "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_account
@@ -9241,12 +9397,12 @@ msgstr "Aplikace:"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_db
 msgid "Arch Blob"
-msgstr ""
+msgstr "Arch Blob"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_fs
 msgid "Arch Filename"
-msgstr ""
+msgstr "Arch Filename"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_view_form
@@ -9682,7 +9838,7 @@ msgstr "Snímání čárového kódu v mobilu"
 #: code:addons/base/models/ir_qweb_fields.py:607
 #, python-format
 msgid "Barcode symbology"
-msgstr ""
+msgstr "Symbolika čárových kódů"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:607
@@ -10039,7 +10195,7 @@ msgstr "Vytvořte vlastní webové formuláře"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_quotation_builder
 msgid "Build great quotation templates"
-msgstr ""
+msgstr "Vytvářejte skvělé šablony nabídek"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_board
@@ -10171,7 +10327,7 @@ msgstr "Kanada - účetnictví"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ca_check_printing
 msgid "Canadian Checks Layout"
-msgstr ""
+msgstr "Rozvrh kanadských šeků"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_onboarding_company_form
@@ -10478,7 +10634,7 @@ msgstr "Čína - účetnictví"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_cn_city
 msgid "China - City Data"
-msgstr ""
+msgstr "Čína - městská data"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_cn_small_business
@@ -10640,6 +10796,11 @@ msgstr "Kolumbijská účetnictví a daňová předkonfigurace"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_co_edi
 msgid "Colombian Localization for EDI documents"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_co_edi_ubl_2_1
+msgid "Colombian Localization for EDI documents UBL 2.1"
 msgstr ""
 
 #. module: base
@@ -10841,7 +11002,7 @@ msgstr "Vypočítat"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription_taxcloud
 msgid "Compute taxes with TaxCloud after automatic invoice creation."
-msgstr ""
+msgstr "Vypočítá daně pomocí TaxCloud po automatickém vytvoření faktury."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_taxcloud_delivery
@@ -12063,6 +12224,16 @@ msgid "Denmark"
 msgstr "Dánsko"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_dk
+msgid "Denmark - Accounting"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_dk_reports
+msgid "Denmark - Accounting Reports"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__depends
 #: model:ir.model.fields,field_description:base.field_ir_module_module__dependencies_id
 #: model_terms:ir.ui.view,arch_db:base.module_form
@@ -12467,7 +12638,7 @@ msgstr "Model dokumentu"
 #: code:addons/models.py:3074
 #, python-format
 msgid "Document type:"
-msgstr ""
+msgstr "Typ dokumentu:"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_documentation_examples
@@ -12548,7 +12719,7 @@ msgstr "Dr."
 #: model:ir.module.module,shortdesc:base.module_stock_dropshipping
 #: model:ir.module.module,summary:base.module_stock_dropshipping
 msgid "Drop Shipping"
-msgstr ""
+msgstr "Přepravní služba"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
@@ -12897,8 +13068,13 @@ msgid "Electronic invoicing for Colombia with Carvajal"
 msgstr "Elektronická fakturace pro Kolumbii s Carvajalem"
 
 #. module: base
-#: code:addons/base/models/ir_ui_view.py:619
-#: code:addons/base/models/ir_ui_view.py:700
+#: model:ir.module.module,shortdesc:base.module_l10n_co_edi_ubl_2_1
+msgid "Electronic invoicing for Colombia with Carvajal UBL 2.1"
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/ir_ui_view.py:629
+#: code:addons/base/models/ir_ui_view.py:720
 #, python-format
 msgid "Element '%s' cannot be located in parent view"
 msgstr ""
@@ -12996,7 +13172,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_website
 msgid "Enterprise website builder"
-msgstr ""
+msgstr "Tvůrce webových stránek pro podniky"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_R
@@ -13770,7 +13946,19 @@ msgid "File Size"
 msgstr "Velikost souboru"
 
 #. module: base
-#: code:addons/base/wizard/base_import_language.py:44
+#: code:addons/base/wizard/base_import_language.py:45
+#, python-format
+msgid ""
+"File not imported due to a malformed file.\n"
+"\n"
+"This issue can be caused by duplicates entries who are referring to the same field. Please check the content of the file you are trying to import.\n"
+"\n"
+"Technical Details:\n"
+"%s"
+msgstr ""
+
+#. module: base
+#: code:addons/base/wizard/base_import_language.py:51
 #, python-format
 msgid ""
 "File not imported due to format mismatch or a malformed file. (Valid formats are .csv, .po, .pot)\n"
@@ -15577,6 +15765,11 @@ msgid "Indonesia"
 msgstr "Indonesie"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_id
+msgid "Indonesian - Accounting"
+msgstr ""
+
+#. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
 #: model:ir.model,name:base.model_res_partner_industry
 #: model:ir.model.fields,field_description:base.field_res_partner__industry_id
@@ -16559,7 +16752,7 @@ msgstr "Spustit Průvodce konfigurací"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__address_format
 msgid "Layout in Reports"
-msgstr ""
+msgstr "Rozvrh v Reportech"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_lead_automation
@@ -16569,7 +16762,7 @@ msgstr "Automatizace případů"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_reveal
 msgid "Lead Generation"
-msgstr ""
+msgstr "Vytváření potenciálního zákazníka"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_score
@@ -16738,7 +16931,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_restaurant_iot
 msgid "Link your PoS configuration with an IoT Box for the restaurant"
-msgstr ""
+msgstr "Propojení vaší konfigurace Místa prodeje s IoT Boxem pro restauraci"
 
 #. module: base
 #: code:addons/base/models/ir_qweb_fields.py:629
@@ -17181,7 +17374,7 @@ msgstr "Spravujte svůj vozový park a sledujte náklady na vozidlo"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_hr_recruitment
 msgid "Manage your online hiring process"
-msgstr ""
+msgstr "Spravovat váš online proces náboru"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock
@@ -17267,12 +17460,12 @@ msgstr "Martinik"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_mass_mailing
 msgid "Mass Mail Tests"
-msgstr ""
+msgstr "Zkoušky hromadné pošty"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_mass_mailing
 msgid "Mass Mail Tests: feature and performance tests for mass mailing"
-msgstr ""
+msgstr "Testy hromadné pošty: testy funkcí a výkonu hromadné pošty"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_themes
@@ -18829,6 +19022,52 @@ msgid ""
 "manufacturing operations.\n"
 "\n"
 msgstr ""
+"Plánování výrobních zdrojů Odoo\n"
+"------------------------------------\n"
+"\n"
+"Správa kusovníku, plánování výrobních objednávek, sledování pracovních objednávek pomocí Odoo <a href=\"https://www.odoo.com/page/manufacturing\">Open Source MRP</a> aplikace.\n"
+"\n"
+"Získejte všechny vaše montážní nebo výrobní operace řízené společností Odoo. Plán výrobní zakázky a pracovní objednávky automaticky. Zkontrolujte navrhované plánování s inteligentním výhledem na kanban a Ganttův diagram. Použijte pokročilou analytiku funkce pro detekci úzkých míst v kapacitách zdrojů a umístění zásob.\n"
+"\n"
+"Efektivně naplánujte výrobní zakázky\n"
+"---------------------------------------------\n"
+"\n"
+"Získejte výrobní zakázky a pracovní objednávky naplánované automaticky na základě vaší objednávky pravidla pro zadávání zakázek, předpokládaná množství a závislá poptávka (poptávka po této části na základě jiné části, která ji konzumuje).\n"
+"\n"
+"Definujte flexibilní kmenová data\n"
+"---------------------------\n"
+"\n"
+"Získejte flexibilitu při vytváření víceúrovňového kusovníku, volitelného směrování, změny verze a fantomový kusovník. BoM můžete použít pro sady nebo pro výrobní zakázky.\n"
+"\n"
+"Získejte flexibilitu ve všech operacích\n"
+"---------------------------------\n"
+"\n"
+"Ručně upravte všechny navrhované operace na jakékoli úrovni postupu. S Odoo vás rigidní systém nebude frustrovat.\n"
+"\n"
+"Naplánujte pracovní příkazy\n"
+"--------------------\n"
+"\n"
+"Zkontrolujte kapacity zdrojů a opravte úzká místa. Definujte rutiny a naplánujte pracovní dobu a kapacitu vašich zdrojů. Rychle identifikujte zdroj\n"
+"požadavků a úzká místa, aby se zajistilo, že vaše výroba splní vaše dodávky\n"
+"naplánovuje termíny.\n"
+"\n"
+"\n"
+"Produktivní uživatelské rozhraní\n"
+"---------------------------\n"
+"\n"
+"Uspořádejte výrobní zakázky a pracovní objednávky tak, jak se vám líbí. Další postup objednávky ze seznamu, ovládejte zobrazení kalendáře a upravujte navrhované plány v Ganttově zobrazení.\n"
+"\n"
+"\n"
+"Analýza zásob a výroby\n"
+"-----------------------------------\n"
+"\n"
+"Sledujte vývoj hodnoty zásob podle úrovně výroby\n"
+"činnosti v průběhu transformačního procesu.\n"
+"\n"
+"Plně integrovaný s operacemi\n"
+"--------------------------------\n"
+"\n"
+"Zajistěte přesné plánování výrobních zdrojů díky plné integraci s prodejem a nákupem aplikací. Integrace účetnictví umožňuje reálný čas účetní ocenění a hlubší zprávy o nákladech a výnosech výrobní operace.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing
@@ -19818,7 +20057,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.demo_force_install_form
 msgid "Oops, no!"
-msgstr ""
+msgstr "Uff, ne!"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
@@ -20106,6 +20345,121 @@ msgid ""
 "\n"
 "Create a great \"About us\" page by presenting your team efficiently.\n"
 msgstr ""
+"Pořádejte akce, školení a webináře\n"
+"-----------------------------------------\n"
+"\n"
+"### Plán, propagace, prodej, organizace\n"
+"\n"
+"Organizujte, propagujte a prodávejte události online. Ať už organizujete schůzky, konference, školení nebo webináře, Odoo vám poskytuje všechny funkce, které potřebujete pro správu vašich akcí.\n"
+"\n"
+"Vytvořte úžasné stránky událostí\n"
+"--------------------------\n"
+"\n"
+"### Zbavte se starých editorů WYSIWYG\n"
+"\n"
+"Vytvářejte krásné stránky událostí přetažením dobře navržených * 'Building Blocks' *. Publikovat fotografie událostí, reproduktory, plán atd.\n"
+"\n"
+"Jedinečný přístup společnosti Odoo * „editovat inline“ * umožňuje překvapivě snadnou tvorbu webových stránek. „Chcete představit řečníka? Změnit cenu lístku? Aktualizovat banner? Podporovat sponzory?“ stačí kliknout a změnit.\n"
+"\n"
+"Prodávejte vstupenky online\n"
+"-------------------\n"
+"\n"
+"### Automatizujte proces registrace a platby\n"
+"\n"
+"Prodávejte registrace na svou akci pomocí funkce hromadných lístků. Akce mohou být zdarma nebo za poplatek. Účastníci mohou platit online kreditní kartou nebo na faktuře na základě vaší konfigurace.\n"
+"\n"
+"Zvyšte svůj prodej cenami pro ty co si pospíší, zvláštními podmínkami pro členy nebo dalšími službami s více lístky.\n"
+"\n"
+"Čistá integrace Google Analytics\n"
+"------------------------------------\n"
+"\n"
+"### Ovládejte své prodejní cesty pomocí Google Analytics\n"
+"\n"
+"Získejte jasnou viditelnost své prodejní cesty. Sledovače Google Analytics odoo ve výchozím nastavení jsou nakonfigurovány tak, aby sledovaly všechny druhy událostí souvisejících s nákupními vozíky, výzvami k akci atd.\n"
+"\n"
+"Vzhledem k tomu, že marketingové nástroje Odoo (hromadné rozesílání, kampaně atd.) Jsou také propojeny s Google Analytics, získáte úplný přehled o své firmě.\n"
+"\n"
+"Efektivní propagace událostí\n"
+"--------------------------\n"
+"\n"
+"### Hromadná pošta a sociální média\n"
+"\n"
+"Pomocí funkcí segmentace, integrace v sociálních sítích a hromadného zasílání zpráv propagujte své akce správnému publiku. Nastavit automatické e-maily účastníkům, aby jim poslali podrobnosti na poslední chvíli.\n"
+"\n"
+"Témata přátelská k návrhářům\n"
+"------------------------\n"
+"\n"
+"### Designéři rádi pracují na Odoo\n"
+"\n"
+"Motivy jsou úžasné a snadno se navrhují. Nemusíte je vyvíjet, abyste mohli vytvářet nové stránky, motivy nebo stavební bloky. Používáme čistou strukturu HTML, [bootstrap](http://getbootstrap.com/) CSS a naše modularita umožňuje snadno distribuovat vaše témata.\n"
+"\n"
+"Přístup založený na stavebních blocích umožňuje, aby web zůstal čistý poté, co koncoví uživatelé začnou vytvářet nový obsah.\n"
+"\n"
+"Zviditelněte svou událost\n"
+"----------------------------\n"
+"\n"
+"### SEO nástroje na dosah ruky\n"
+"\n"
+"Nástroje SEO jsou připraveny k použití bez nutnosti konfigurace. Odoo navrhuje klíčová slova podle nejvyhledávanějších výrazů Google, Google Analytics sleduje události v nákupním košíku a mapa stránek se vytváří automaticky.\n"
+"\n"
+"Strukturovaný obsah dokonce děláme automaticky, abychom efektivně propagovali vaše události a produkty na Googlu.\n"
+"\n"
+"Využijte sociální média\n"
+"---------------------\n"
+"\n"
+"### Optimizace: od reklamy ke konverzi\n"
+"\n"
+"Pomocí funkce Odoo inline edition můžete snadno vytvářet nové vstupní stránky. Zašlete návštěvníkům různých marketingových kampaní na vstupní stránky událostí, abyste optimalizovali konverze.\n"
+"\n"
+"A mnohem víc...\n"
+"----------------\n"
+"\n"
+"### Plán\n"
+"\n"
+"- Kalendář událostí\n"
+"- Publikování souvisejících dokumentů\n"
+"- Přidělení zdrojů\n"
+"- Automatizace nákupů (catering ...)\n"
+"- Více míst a organizátorů\n"
+"- Mobilní rozhraní\n"
+"\n"
+"### Prodeje\n"
+"\n"
+"- Online nebo offline prodej\n"
+"- Automatizovaná fakturace\n"
+"- Storno podmínky\n"
+"- Konkrétní ceny pro členy\n"
+"- Řídicí panely a podávání zpráv\n"
+"\n"
+"### Uspořádat\n"
+"\n"
+"- Pokročilé plánování\n"
+"- Tisk odznaků\n"
+"- Automatizujte následné e-maily\n"
+"- Min./max. kapacity\n"
+"- Správa tříd a zdrojů\n"
+"- Tvorba skupin účastníků\n"
+"- Automatizace průzkumů spokojenosti\n"
+"\n"
+"Plně integrovaný s ostatními aplikacemi\n"
+"---------------------------------\n"
+"\n"
+"### Získejte stovky aplikací s otevřeným zdrojovým kódem zdarma\n"
+"\n"
+"\n"
+"### eCommerce\n"
+"\n"
+"Propagujte produkty, prodávejte online, optimalizujte nákupní zážitky návštěvníků.\n"
+"\n"
+"\n"
+"### Blogy\n"
+"\n"
+"Napište zprávy, přilákejte nové návštěvníky, budujte loajalitu zákazníků.\n"
+"\n"
+"\n"
+"### Náš tým\n"
+"\n"
+"Vytvořte skvělou stránku „O nás“ tím, že efektivně představíte svůj tým.\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project
@@ -20455,7 +20809,7 @@ msgstr "Zásady hesla"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy_signup
 msgid "Password Policy support for Signup"
-msgstr ""
+msgstr "Podpora zásad hesla pro registraci"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_logging__path
@@ -20776,7 +21130,7 @@ msgstr "Prezentujte své údaje o zaměstnancích online"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_twitter_wall
 msgid "Pretty Way to Display Tweets for Event"
-msgstr ""
+msgstr "Pěkný způsob, jak zobrazit tweety pro událost"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_form
@@ -20975,6 +21329,56 @@ msgid ""
 "accurate reports on your team's performance.\n"
 "\n"
 msgstr ""
+"Projektový management\n"
+"------------------\n"
+"\n"
+"### Nekonečně flexibilní. Neuvěřitelně snadné použití.\n"
+"\n"
+"\n"
+"Společné řízení projektů Odoo v reálném čase a v <a href=\"https://www.odoo.com/page/project-management\">open source</a> pomáhá vašemu týmu pracovat. Mějte přehled o všem, z odstupu i po minutách, od zákaznické smlouvy po fakturaci.\n"
+"\n"
+"Navrženo tak, aby vyhovovalo vašemu vlastnímu procesu\n"
+"--------------------------------\n"
+"\n"
+"Uspořádejte projekty podle svých vlastních procesů. Práce s úkoly a problémy pomocí zobrazení kanban, plánování úkolů pomocí Ganttova diagramu a kontrola termínů v zobrazení kalendáře. Každý projekt může mít své vlastní etapy, které týmům umožňují optimalizovat jejich práci.\n"
+"\n"
+"Snadné použití\n"
+"-----------\n"
+"\n"
+"Organizujte se tak rychle, jak si jen myslíte. Snadno použitelné rozhraní nevyžaduje učení a každá akce je okamžitá, takže mezi vámi a vaším plynulým produktivním tokem nic nestojí.\n"
+"\n"
+"Spolupracujte\n"
+"-------------\n"
+"\n"
+"### Chaty v reálném čase, sdílení dokumentů, integrace e-mailů\n"
+"\n"
+"Pomocí otevřeného chatování komunikujte se svým týmem nebo zákazníky a sdílejte komentáře a dokumenty o úkolech a problémech. Rychle integrujte diskusi s integrací e-mailu.\n"
+"\n"
+"Promluvte si s ostatními uživateli nebo zákazníky pomocí funkce živého chatu na webu.\n"
+"\n"
+"Kolaborativní psaní\n"
+"---------------------\n"
+"\n"
+"### Síla etherpadu ve vašich úkolech\n"
+"\n"
+"Společně upravujte stejné specifikace nebo zápisy ze schůzky přímo uvnitř aplikace. Integrovaná funkce etherpad umožňuje několika lidem pracovat na stejných úkolech současně.\n"
+"\n"
+"To je velmi efektivní pro skrumážové schůzky, zápisy ze schůzky nebo specifikace komplexu. Každý uživatel má svou vlastní barvu a můžete si projít  celou tvorbu obsahu.\n"
+"\n"
+"Získejte práci\n"
+"-------------\n"
+"\n"
+"Dostávejte upozornění na sledované události a mějte aktuální informace o tom, co vás zajímá. Pomocí okamžitých zelených / červených vizuálních indikátorů můžete procházet, co se stalo a co vyžaduje vaši pozornost.\n"
+"\n"
+"Harmonogramy, smlouvy a fakturace\n"
+"---------------------------------\n"
+"\n"
+"Projekty jsou automaticky integrovány do smluv se zákazníky, což vám umožňuje snadno fakturovat na základě času a materiálů a zaznamenávat časové rozvrhy.\n"
+"\n"
+"Sledujte problémy\n"
+"------------\n"
+"\n"
+"Vyjmenujte problémy, které vznikají v projektu, abyste se mohli lépe zaměřit na jejich řešení. Integrujte interakci se zákazníky u každého problému a získejte přesné zprávy o výkonu vašeho týmu.\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_project
@@ -21159,7 +21563,7 @@ msgstr "Katar"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_form
 msgid "Qualify helpdesk queries with a website form"
-msgstr ""
+msgstr "Kvalifikujte dotazy helpdesku pomocí webového formuláře"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_control
@@ -21232,7 +21636,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr ""
+msgstr "Qweb Field Contact"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_date
@@ -21903,7 +22307,7 @@ msgstr "Svatý Vincent a Grenadiny"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_contract_salary
 msgid "Salary Package Configurator"
-msgstr ""
+msgstr "Konfigurátor balíkov platov"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_voucher
@@ -21918,7 +22322,7 @@ msgstr "Prodejní kupón"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_coupon_delivery
 msgid "Sale Coupon Delivery"
-msgstr ""
+msgstr "Doručení prodejního kuponu"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_intrastat
@@ -22886,6 +23290,11 @@ msgid "Sticky memos, Collaborative"
 msgstr "Nalepovací poznámky, spolupráce"
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_stock
+msgid "Stock"
+msgstr "Sklad"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_mobile
 msgid "Stock Barcode in Mobile"
 msgstr "Skladový čárový kód v mobilu"
@@ -22978,6 +23387,11 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_web_studio
 msgid "Studio"
 msgstr "Studio"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_studio_customization
+msgid "Studio customizations"
+msgstr ""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access
@@ -23792,7 +24206,7 @@ msgstr "ID daně"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_taxcloud_delivery
 msgid "TaxCloud and Delivery - Ecommerce"
-msgstr ""
+msgstr "TaxCloud a Delivery - Elektronický obchod"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_taxcloud
@@ -23881,7 +24295,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_test_marketing_automation
 msgid "Test Suits for Automated Marketing Campaigns"
-msgstr ""
+msgstr "Testovací obleky pro automatizované marketingové kampaně"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_testing_utilities
@@ -24106,6 +24520,9 @@ msgid ""
 "                                    the field must be assigned to each record with a dictionary-like\n"
 "                                    assignment."
 msgstr ""
+"Pole <strong>Vypočítat</strong> je kód Pythonu\n"
+"k výpočtu hodnoty pole na sadě záznamů. Hodnota\n"
+"pole musí být každému záznamu přiřazeno jako položka ve slovníku."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_form
@@ -24158,6 +24575,14 @@ msgstr "Interní uživatel odpovědný za tento kontakt."
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids
 msgid "The list of models that extends the current model."
 msgstr "Seznam modelů, které rozšiřují aktuální model."
+
+#. module: base
+#: code:addons/base/models/ir_model.py:522
+#, python-format
+msgid ""
+"The m2o field %s is required but declares its ondelete policy as being 'set "
+"null'. Only 'restrict' and 'cascade' make sense."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_filters__action_id
@@ -24301,6 +24726,9 @@ msgid ""
 "\n"
 "Can not separate file to save as attachment because the report's template does not contains the attributes 'data-oe-model' and 'data-oe-id' on the div with 'article' classname."
 msgstr ""
+"Šablona přehledu '%s'  je chybná, kontaktujte prosím svého správce.\n"
+"\n"
+"Nelze oddělit soubor, který chcete uložit jako přílohu, protože šablona sestavy neobsahuje atributy „data-oe-model“ a „data-oe-id“ v div s názvem „article“ názvu třídy."
 
 #. module: base
 #: code:addons/models.py:2923
@@ -24598,6 +25026,13 @@ msgstr ""
 "objednávce, tak při dodání."
 
 #. module: base
+#: model:ir.module.module,description:base.module_studio_customization
+msgid ""
+"This module has been generated by Odoo Studio.\n"
+"It contains the apps created with Studio and the customizations of existing apps."
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "This module will trigger the uninstallation of below modules."
 msgstr "Tento modul spustí odinstalování níže uvedených modulů."
@@ -24620,7 +25055,7 @@ msgstr "Čtvrtek"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_livechat
 msgid "Ticketing, Support, Livechat"
-msgstr ""
+msgstr "Prodej lístků, podpora, živý chat"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_slides
@@ -25086,6 +25521,12 @@ msgid "UK - Accounting Reports to HMRC"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_product_unspsc
+#: model:ir.module.module,summary:base.module_product_unspsc
+msgid "UNSPSC product codes"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
 msgid "UPS Shipping"
 msgstr "Odeslání UPS"
@@ -25093,7 +25534,7 @@ msgstr "Odeslání UPS"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_delivery_ups
 msgid "UPS: Bill My Account"
-msgstr ""
+msgstr "UPS: Vyúčtování mého účtu"
 
 #. module: base
 #: selection:ir.attachment,type:0
@@ -25131,7 +25572,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing_sale
 msgid "UTM and mass mailing on sale orders"
-msgstr ""
+msgstr "UTM a hromadné rozesílání na prodejní objednávky"
 
 #. module: base
 #: model:res.country,name:base.ug
@@ -25244,14 +25685,22 @@ msgid "Units of measure"
 msgstr "Měrné jednotky"
 
 #. module: base
+#: code:addons/model.py:143 code:addons/model.py:152 code:addons/model.py:153
 #: model:ir.model,name:base.model__unknown
 #: selection:ir.module.module.dependency,state:0
 #: selection:ir.module.module.exclusion,state:0
+#, python-format
 msgid "Unknown"
 msgstr "Neznámý"
 
 #. module: base
-#: code:addons/models.py:1058
+#: code:addons/models.py:873
+#, python-format
+msgid "Unknown database error: '%s'"
+msgstr ""
+
+#. module: base
+#: code:addons/models.py:1067
 #, python-format
 msgid "Unknown database identifier '%s'"
 msgstr "Neznámý identifikátor databáze '%s'"
@@ -25383,7 +25832,7 @@ msgstr "Upgrade"
 #. module: base
 #: model:ir.model,name:base.model_base_module_upgrade
 msgid "Upgrade Module"
-msgstr ""
+msgstr "Upgradovat modul"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__url
@@ -25522,7 +25971,7 @@ msgstr "Použito k přihlášení do systému"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_company__sequence
 msgid "Used to order Companies in the company switcher"
-msgstr ""
+msgstr "Používá se k objednávání společností ve firemním přepínači"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_change_password_user__user_id
@@ -25718,7 +26167,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_property__value_float
 msgid "Value Float"
-msgstr ""
+msgstr "plovoucí hodnota"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_property__value_integer
@@ -25729,7 +26178,7 @@ msgstr "Celočíselná hodnota"
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__fields_lines
 #: model:ir.model.fields,field_description:base.field_ir_cron__fields_lines
 msgid "Value Mapping"
-msgstr ""
+msgstr "Mapování hodnot"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_property__value_reference
@@ -26027,12 +26476,12 @@ msgstr "Web - řízení prodeje"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_enterprise
 msgid "Website Enterprise"
-msgstr ""
+msgstr "Webové stránky pro podnikání"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk
 msgid "Website Helpdesk"
-msgstr ""
+msgstr "webové centrum nápovědy"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_livechat
@@ -26052,7 +26501,7 @@ msgstr "Website e-mail"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_mail_channel
 msgid "Website Mail Channels"
-msgstr ""
+msgstr "E-mailové kanály webových stránek"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_mail
@@ -26097,12 +26546,13 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_website
 msgid "Website Test"
-msgstr ""
+msgstr "Webstránka test"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_website
 msgid "Website Test, mainly for module install/uninstall tests"
 msgstr ""
+"Test webových stránek, hlavně pro testy instalace / odinstalace modulů"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_theme_install
@@ -26823,6 +27273,11 @@ msgid "selection"
 msgstr "výběr"
 
 #. module: base
+#: selection:ir.model.fields,ttype:0
+msgid "serialized"
+msgstr "serializováno"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_snailmail_account
 msgid "snailmail_account"
 msgstr "snailmail_account"
@@ -26831,11 +27286,6 @@ msgstr "snailmail_account"
 #: model:ir.module.module,shortdesc:base.module_social_media
 msgid "social_media"
 msgstr "social_media"
-
-#. module: base
-#: model:ir.module.category,name:base.module_category_stock
-msgid "stock"
-msgstr "sklad"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_zebra
@@ -26893,9 +27343,19 @@ msgid "test-inherits"
 msgstr "test-inherits"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_test_inherits_depends
+msgid "test-inherits-depends"
+msgstr "test-inherits-depends"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_test_limits
 msgid "test-limits"
 msgstr "test-limits"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_test_lint
+msgid "test-lint"
+msgstr "test-lint"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_translation_import

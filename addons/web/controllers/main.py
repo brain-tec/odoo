@@ -78,6 +78,7 @@ SIGN_UP_REQUEST_PARAMS = {'db', 'login', 'debug', 'token', 'message', 'error', '
                           'redirect', 'redirect_hostname', 'email', 'name', 'partner_id',
                           'password', 'confirm_password', 'city', 'country_id', 'lang'}
 
+def clean(name): return name.replace('\x3c', '')
 def serialize_exception(f):
     @functools.wraps(f)
     def wrap(*args, **kwargs):
@@ -1140,10 +1141,10 @@ class Binary(http.Controller):
         try:
             data = ufile.read()
             args = [len(data), ufile.filename,
-                    ufile.content_type, base64.b64encode(data)]
+                    ufile.content_type, pycompat.to_text(base64.b64encode(data))]
         except Exception as e:
             args = [False, str(e)]
-        return out % (json.dumps(callback), json.dumps(args))
+        return out % (json.dumps(clean(callback)), json.dumps(args))
 
     @http.route('/web/binary/upload_attachment', type='http', auth="user")
     @serialize_exception
@@ -1177,11 +1178,11 @@ class Binary(http.Controller):
                 _logger.exception("Fail to upload attachment %s" % ufile.filename)
             else:
                 args.append({
-                    'filename': filename,
+                    'filename': clean(filename),
                     'mimetype': ufile.content_type,
                     'id': attachment.id
                 })
-        return out % (json.dumps(callback), json.dumps(args))
+        return out % (json.dumps(clean(callback)), json.dumps(args))
 
     @http.route([
         '/web/binary/company_logo',
@@ -1342,6 +1343,8 @@ class Export(http.Controller):
 
             if len(id.split('/')) < 3 and 'relation' in field:
                 ref = field.pop('relation')
+                if import_compat and field.get('type') in ['many2one', 'many2many']:
+                    record['id'] += '/id'
                 record['value'] += '/id'
                 record['params'] = {'model': ref, 'prefix': id, 'name': name, 'parent_field': field}
                 record['children'] = True
@@ -1419,6 +1422,7 @@ class Export(http.Controller):
 
 class ExportFormat(object):
     raw_data = False
+    max_rows = None
 
     @property
     def content_type(self):
@@ -1449,6 +1453,8 @@ class ExportFormat(object):
 
         Model = request.env[model].with_context(import_compat=import_compat, **params.get('context', {}))
         records = Model.browse(ids) or Model.search(domain, offset=0, limit=False, order=False)
+        if self.max_rows and len(records) > self.max_rows:
+            raise UserError(_('There are too many records (%s records, limit: %s) to export as this format. Consider splitting the export.') % (len(records), self.max_rows))
 
         if not Model._is_an_ordinary_table():
             fields = [field for field in fields if field['name'] != 'id']
@@ -1502,6 +1508,7 @@ class CSVExport(ExportFormat, http.Controller):
 class ExcelExport(ExportFormat, http.Controller):
     # Excel needs raw data to correctly handle numbers and date values
     raw_data = True
+    max_rows = 65535
 
     @http.route('/web/export/xls', type='http', auth="user")
     @serialize_exception
@@ -1516,7 +1523,7 @@ class ExcelExport(ExportFormat, http.Controller):
         return base + '.xls'
 
     def from_data(self, fields, rows):
-        if len(rows) > 65535:
+        if len(rows) > self.max_rows:
             raise UserError(_('There are too many rows (%s rows, limit: 65535) to export as Excel 97-2003 (.xls) format. Consider splitting the export.') % len(rows))
 
         workbook = xlwt.Workbook()
@@ -1552,6 +1559,8 @@ class ExcelExport(ExportFormat, http.Controller):
                     cell_style = datetime_style
                 elif isinstance(cell_value, datetime.date):
                     cell_style = date_style
+                elif isinstance(cell_value, (list, tuple)):
+                    cell_value = pycompat.to_text(cell_value)
                 worksheet.write(row_index + 1, cell_index, cell_value, cell_style)
 
         fp = io.BytesIO()
@@ -1635,7 +1644,7 @@ class ReportController(http.Controller):
                 ('QR', o.name, 200, 200)"/>
 
         :param type: Accepted types: 'Codabar', 'Code11', 'Code128', 'EAN13', 'EAN8', 'Extended39',
-        'Extended93', 'FIM', 'I2of5', 'MSI', 'POSTNET', 'QR', 'Standard39', 'Standard93',
+        'Extended93', 'FIM', 'I2of5', 'MSI', 'POSTNET', 'QR', 'QR_quiet', 'Standard39', 'Standard93',
         'UPCA', 'USPS_4State'
         :param humanreadable: Accepted values: 0 (default) or 1. 1 will insert the readable value
         at the bottom of the output image

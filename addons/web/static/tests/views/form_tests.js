@@ -1260,6 +1260,64 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('button in form view and long willStart', async function (assert) {
+        assert.expect(6);
+
+        var rpcCount = 0;
+
+        var FieldChar = fieldRegistry.get('char');
+        fieldRegistry.add('asyncwidget', FieldChar.extend({
+            willStart: function () {
+                assert.step('load '+rpcCount);
+                if (rpcCount === 2) {
+                    return $.Deferred();
+                }
+                return $.Deferred().resolve();
+            },
+        }));
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="state" invisible="1"/>' +
+                    '<header>' +
+                        '<button name="post" class="p" string="Confirm" type="object"/>' +
+                    '</header>' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="foo" widget="asyncwidget"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function () {
+                rpcCount++;
+                return this._super.apply(this, arguments);
+            },
+        });
+        assert.verifySteps(['load 1']);
+
+        testUtils.intercept(form, 'execute_action', function (ev) {
+            ev.data.on_success();
+            ev.data.on_closed();
+        });
+
+        form.$('.o_form_statusbar button.p').click();
+        assert.verifySteps(['load 1', 'load 2']);
+
+        testUtils.intercept(form, 'execute_action', function (ev) {
+            ev.data.on_success();
+            ev.data.on_closed();
+        });
+
+        form.$('.o_form_statusbar button.p').click();
+        assert.verifySteps(['load 1', 'load 2', 'load 3']);
+
+        form.destroy();
+    });
+
     QUnit.test('buttons in form view, new record', function (assert) {
         // this simulates a situation similar to the settings forms.
         assert.expect(7);
@@ -4707,6 +4765,45 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('open new record even with warning message', async function (assert) {
+        assert.expect(3);
+
+        this.data.partner.onchanges = { foo: true };
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<group><field name="foo"/></group>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function (route, args) {
+                if (args.method === 'onchange') {
+                    return $.when({
+                        warning: {
+                            title: "Warning",
+                            message: "Any warning."
+                        }
+                    });
+                }
+                return this._super.apply(this, arguments);
+            },
+
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+        assert.strictEqual(form.$('input').val(), 'blip', 'input should contain record value');
+        form.$('input').first().val("tralala").trigger('input');
+        assert.strictEqual(form.$('input').val(), 'tralala', 'input should contain new value');
+
+        form.reload({ currentId: false });
+        assert.strictEqual(form.$('input').val(), 'My little Foo Value',
+            'input should contain default value after reload');
+
+        form.destroy();
+    });
+
     QUnit.test('render stat button with string inline', function (assert) {
         assert.expect(1);
 
@@ -5819,13 +5916,13 @@ QUnit.module('Views', {
         form.$buttons.find('.o_form_button_edit').click();
         form.$('input[name="foo"]').val("test").trigger("input");
         form.$buttons.find('.o_form_button_save').click();
-        assert.strictEqual(form.$('.o_form_view > .alert > div .oe_field_translate').length, 1,
+        assert.strictEqual(form.$('.o_form_view .alert .oe_field_translate').length, 1,
             "should have single translation alert");
 
         form.$buttons.find('.o_form_button_edit').click();
         form.$('input[name="display_name"]').val("test2").trigger("input");
         form.$buttons.find('.o_form_button_save').click();
-        assert.strictEqual(form.$('.o_form_view > .alert > div .oe_field_translate').length, 2,
+        assert.strictEqual(form.$('.o_form_view .alert .oe_field_translate').length, 2,
             "should have two translate fields in translation alert");
 
         form.destroy();
@@ -5861,25 +5958,25 @@ QUnit.module('Views', {
         form.$('input[name="foo"]').val("test").trigger("input");
         form.$buttons.find('.o_form_button_save').click();
 
-        assert.strictEqual(form.$('.o_form_view > .alert > div').length, 1,
+        assert.strictEqual(form.$('.o_form_view .alert > div').length, 1,
             "should have a translation alert");
 
         // click on the pager to switch to the next record
         form.pager.$('.o_pager_next').click();
-        assert.strictEqual(form.$('.o_form_view > .alert > div').length, 0,
+        assert.strictEqual(form.$('.o_form_view .alert > div').length, 0,
             "should not have a translation alert");
 
         // click on the pager to switch back to the previous record
         form.pager.$('.o_pager_previous').click();
-        assert.strictEqual(form.$('.o_form_view > .alert > div').length, 1,
+        assert.strictEqual(form.$('.o_form_view .alert > div').length, 1,
             "should have a translation alert");
 
         // remove translation alert by click X and check alert even after form reload
-        form.$('.o_form_view > .alert > .close').click();
-        assert.strictEqual(form.$('.o_form_view > .alert > div').length, 0,
+        form.$('.o_form_view .alert > .close').click();
+        assert.strictEqual(form.$('.o_form_view .alert > div').length, 0,
             "should not have a translation alert");
         form.reload();
-        assert.strictEqual(form.$('.o_form_view > .alert > div').length, 0,
+        assert.strictEqual(form.$('.o_form_view .alert > div').length, 0,
             "should not have a translation alert after reload");
 
         form.destroy();
@@ -5946,7 +6043,7 @@ QUnit.module('Views', {
         actionManager.$('input[name="foo"]').val("test").trigger("input");
         actionManager.controlPanel.$el.find('.o_form_button_save').click();
 
-        assert.strictEqual(actionManager.$('.o_form_view > .alert > div').length, 1,
+        assert.strictEqual(actionManager.$('.o_form_view .alert > div').length, 1,
             "should have a translation alert");
 
         var currentController = actionManager.getCurrentController().widget;
@@ -5960,7 +6057,7 @@ QUnit.module('Views', {
         });
 
         $('.o_control_panel .breadcrumb a:first').click();
-        assert.strictEqual(actionManager.$('.o_form_view > .alert > div').length, 1,
+        assert.strictEqual(actionManager.$('.o_form_view .alert > div').length, 1,
             "should have a translation alert");
 
         actionManager.destroy();

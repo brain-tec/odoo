@@ -12,7 +12,10 @@
 # Martin Aavastik <martin@avalah.ee>, 2018
 # Helen Sulaoja <helen@avalah.ee>, 2018
 # Rivo Zängov <eraser@eraser.ee>, 2019
-# Eneli Õigus <enelioigus@gmail.com>, 2019
+# Eneli Õigus <enelioigus@gmail.com>, 2020
+# Algo Kärp <algokarp@gmail.com>, 2020
+# Piia Paurson <piia@avalah.ee>, 2020
+# Triine Aavik <triine@avalah.ee>, 2020
 # 
 msgid ""
 msgstr ""
@@ -20,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
-"Last-Translator: Eneli Õigus <enelioigus@gmail.com>, 2019\n"
+"Last-Translator: Triine Aavik <triine@avalah.ee>, 2020\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,7 +49,7 @@ msgstr "3D Secure HTML"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
 msgid "<b>Amount:</b>"
-msgstr ""
+msgstr "<b>Summa:</b>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_confirmation_status
@@ -259,13 +262,13 @@ msgstr ""
 #: code:addons/payment/models/account_invoice.py:72
 #, python-format
 msgid "A journal must be specified of the acquirer %s."
-msgstr ""
+msgstr "Andmik peab olema määratud nõudjal %s."
 
 #. module: payment
 #: code:addons/payment/models/account_invoice.py:65
 #, python-format
 msgid "A payment acquirer is required to create a transaction."
-msgstr ""
+msgstr "Makse nõudja on kohustuslik, et lõpetada tehing."
 
 #. module: payment
 #: code:addons/payment/models/account_payment.py:55
@@ -312,7 +315,7 @@ msgstr "Konto"
 #. module: payment
 #: model:ir.model,name:payment.model_account_chart_template
 msgid "Account Chart Template"
-msgstr ""
+msgstr "Konto tabeli mall"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__acc_number
@@ -535,7 +538,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:payment.action_open_payment_onboarding_payment_acquirer_wizard
 #: model_terms:ir.ui.view,arch_db:payment.payment_acquirer_onboarding_wizard_form
 msgid "Choose a payment method"
-msgstr ""
+msgstr "Valige maksemeetod"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_city
@@ -676,7 +679,7 @@ msgstr "Kohandatud"
 #. module: payment
 #: selection:payment.acquirer.onboarding.wizard,payment_method:0
 msgid "Custom payment instructions"
-msgstr ""
+msgstr "Kohandatud makse juhised"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_id
@@ -794,7 +797,7 @@ msgstr "Rahvusvahelised tasud"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer__inbound_payment_method_ids
 msgid "For Incoming Payments"
-msgstr ""
+msgstr "Laekuvate maksete jaoks"
 
 #. module: payment
 #: selection:payment.transaction,type:0
@@ -1237,7 +1240,7 @@ msgstr "Partneri nimi"
 #. module: payment
 #: selection:payment.acquirer.onboarding.wizard,payment_method:0
 msgid "Pay with PayPal"
-msgstr ""
+msgstr "Maksa Paypal´iga"
 
 #. module: payment
 #: selection:payment.acquirer.onboarding.wizard,payment_method:0
@@ -1247,17 +1250,17 @@ msgstr ""
 #. module: payment
 #: selection:payment.acquirer.onboarding.wizard,payment_method:0
 msgid "Pay with credit card (via Stripe)"
-msgstr ""
+msgstr "Maksa krediitkaardiga (Stripe)"
 
 #. module: payment
 #: selection:res.company,payment_onboarding_payment_method:0
 msgid "PayPal"
-msgstr ""
+msgstr "Paypal"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_email_account
 msgid "PayPal Email ID"
-msgstr ""
+msgstr "Paypal e-posti ID"
 
 #. module: payment
 #: model:payment.acquirer,name:payment.payment_acquirer_payu
@@ -1367,7 +1370,7 @@ msgstr "Payment from Odoo"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Payment method set!"
-msgstr ""
+msgstr "Makseviis valitud"
 
 #. module: payment
 #: model:ir.model,name:payment.model_account_payment
@@ -1418,7 +1421,7 @@ msgstr "Paypal"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_seller_account
 msgid "Paypal Merchant ID"
-msgstr ""
+msgstr "Paypali kaupmehe ID"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer_onboarding_wizard__paypal_pdt_token
@@ -1638,7 +1641,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Set payments"
-msgstr ""
+msgstr "Seadke maksed"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_token__short_name

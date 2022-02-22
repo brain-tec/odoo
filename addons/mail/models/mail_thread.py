@@ -20,13 +20,12 @@ except ImportError:
 
 from collections import namedtuple
 from email.message import Message
-from email.utils import formataddr
 from lxml import etree
 from werkzeug import url_encode
 from werkzeug import urls
 
 from odoo import _, api, exceptions, fields, models, tools
-from odoo.tools import pycompat, ustr
+from odoo.tools import pycompat, ustr, formataddr
 from odoo.tools.misc import clean_context
 from odoo.tools.safe_eval import safe_eval
 
@@ -576,6 +575,14 @@ class MailThread(models.AbstractModel):
     def _message_track_post_template(self, tracking):
         if not any(change for rec_id, (change, tracking_value_ids) in tracking.items()):
             return True
+        # Clean the context to get rid of residual default_* keys
+        # that could cause issues afterward during the mail.message
+        # generation. Example: 'default_parent_id' would refer to
+        # the parent_id of the current record that was used during
+        # its creation, but could refer to wrong parent message id,
+        # leading to a traceback in case the related message_id
+        # doesn't exist
+        self = self.with_context(clean_context(self._context))
         templates = self._track_template(tracking)
         for field_name, (template, post_kwargs) in templates.items():
             if not template:
@@ -1132,11 +1139,9 @@ class MailThread(models.AbstractModel):
         Alias, dest_aliases = self.env['mail.alias'], self.env['mail.alias']
         catchall_alias = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.alias")
         bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
-        alias_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
         fallback_model = model
 
         # get email.message.Message variables for future processing
-        local_hostname = socket.gethostname()
         message_id = message.get('Message-Id')
 
         # compute references to find if message is a reply to an existing thread
@@ -1152,7 +1157,6 @@ class MailThread(models.AbstractModel):
         email_to_localparts = [
             e.split('@', 1)[0].lower()
             for e in (tools.email_split(email_to) or [''])
-            if not alias_domain or e.endswith('@%s' % alias_domain)
         ]
 
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
@@ -1166,7 +1170,6 @@ class MailThread(models.AbstractModel):
         rcpt_tos_localparts = [
             e.split('@')[0].lower()
             for e in tools.email_split(rcpt_tos)
-            if not alias_domain or e.endswith('@%s' % alias_domain)
         ]
 
         # 0. Verify whether this is a bounced email and use it to collect bounce data and update notifications for customers
@@ -1333,7 +1336,7 @@ class MailThread(models.AbstractModel):
 
                 # disabled subscriptions during message_new/update to avoid having the system user running the
                 # email gateway become a follower of all inbound messages
-                MessageModel = Model.sudo(user_id).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
+                MessageModel = Model.sudo(self.env.uid == 1 and user_id or None).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
                 if thread_id and hasattr(MessageModel, 'message_update'):
                     thread = MessageModel.browse(thread_id)
                     thread.message_update(message_dict)
@@ -1584,7 +1587,7 @@ class MailThread(models.AbstractModel):
 
                 # 0) Inline Attachments -> attachments, with a third part in the tuple to match cid / attachment
                 if filename and part.get('content-id'):
-                    inner_cid = part.get('content-id').strip('><')
+                    inner_cid = str(part.get('content-id')).strip('><')
                     attachments.append(self._Attachment(filename, part.get_payload(decode=True), {'cid': inner_cid}))
                     continue
                 # 1) Explicit Attachments -> attachments
@@ -1659,10 +1662,10 @@ class MailThread(models.AbstractModel):
             msg_dict['subject'] = tools.decode_smtp_header(message.get('Subject'))
 
         # Envelope fields not stored in mail.message but made available for message_new()
-        msg_dict['from'] = tools.decode_smtp_header(message.get('from'))
-        msg_dict['to'] = tools.decode_smtp_header(message.get('to'))
-        msg_dict['cc'] = tools.decode_smtp_header(message.get('cc'))
-        msg_dict['email_from'] = tools.decode_smtp_header(message.get('from'))
+        msg_dict['from'] = tools.decode_smtp_header(message.get('from'), quoted=True)
+        msg_dict['to'] = tools.decode_smtp_header(message.get('to'), quoted=True)
+        msg_dict['cc'] = tools.decode_smtp_header(message.get('cc'), quoted=True)
+        msg_dict['email_from'] = tools.decode_smtp_header(message.get('from'), quoted=True)
         partner_ids = self._message_find_partners(message, ['To', 'Cc'])
         msg_dict['partner_ids'] = [(4, partner_id) for partner_id in partner_ids]
 

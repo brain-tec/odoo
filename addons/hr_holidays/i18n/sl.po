@@ -9,8 +9,9 @@
 # matjaz k <matjaz@mentis.si>, 2019
 # Martin Trigaux, 2019
 # Boris Kodelja <boris@hbs.si>, 2019
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
 # Jasmina Macur <jasmina@hbs.si>, 2019
+# Tadej Lupšina <tadej@hbs.si>, 2019
+# Matjaz Mozetic <m.mozetic@matmoz.si>, 2020
 # 
 msgid ""
 msgstr ""
@@ -18,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-09 10:31+0000\n"
 "PO-Revision-Date: 2018-08-24 09:19+0000\n"
-"Last-Translator: Jasmina Macur <jasmina@hbs.si>, 2019\n"
+"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2020\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,7 +40,7 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave_type.py:265
 #, python-format
 msgid " days"
-msgstr ""
+msgstr " dni"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave_type.py:265
@@ -82,7 +83,7 @@ msgstr "%g preostalih od %g"
 #: code:addons/hr_holidays/models/hr_leave.py:428
 #, python-format
 msgid "%s : %.2f day(s)"
-msgstr ""
+msgstr "%s : %.2f dan(dni)"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:466
@@ -94,7 +95,7 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave.py:440
 #, python-format
 msgid "%s on %s : %.2f day(s)"
-msgstr ""
+msgstr "%s na %s : %.2f dan(dni)"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:481
@@ -411,7 +412,7 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
 msgid "<span class=\"o_stat_text\">Group Leaves</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Skupina dopusta</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
@@ -427,12 +428,12 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 msgid "<span class=\"text-muted\">from</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">od</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 msgid "<span class=\"text-muted\">to</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">do</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
@@ -1005,7 +1006,7 @@ msgstr "Opis"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_report_hr_holidays_report_holidayssummary__display_name
 msgid "Display Name"
-msgstr "Prikazni naziv"
+msgstr "Prikazani naziv"
 
 #. module: hr_holidays
 #: selection:hr.leave.type,validation_type:0
@@ -1209,7 +1210,7 @@ msgstr "Združi po"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__group_days_leave
 msgid "Group Leaves"
-msgstr ""
+msgstr "Skupina dopusta"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__report_note
@@ -1339,7 +1340,7 @@ msgstr "Slonokoščena"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__time_type
 msgid "Kind of Leave"
-msgstr ""
+msgstr "Vrsta dopusta"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_dept____last_update
@@ -1574,7 +1575,7 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "Leaves."
-msgstr ""
+msgstr "Odsotnosti."
 
 #. module: hr_holidays
 #: model:hr.leave.type,name:hr_holidays.holiday_status_cl
@@ -2189,7 +2190,7 @@ msgstr "Povzetek"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__type_request_unit
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__request_unit
 msgid "Take Leaves in"
-msgstr ""
+msgstr "Uporabi dopust v "
 
 #. module: hr_holidays
 #: sql_constraint:hr.leave:0 sql_constraint:hr.leave.allocation:0
@@ -2406,7 +2407,7 @@ msgstr "Uporabnik"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__valid
 msgid "Valid"
-msgstr ""
+msgstr "Velja"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
@@ -2555,7 +2556,7 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave.py:392
 #, python-format
 msgid "day(s)"
-msgstr ""
+msgstr "dan(dni)"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:222

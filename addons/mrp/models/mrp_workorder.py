@@ -95,7 +95,7 @@ class MrpWorkorder(models.Model):
         readonly=True, store=True)
     duration_unit = fields.Float(
         'Duration Per Unit', compute='_compute_duration',
-        readonly=True, store=True)
+        group_operator="avg", readonly=True, store=True)
     duration_percent = fields.Integer(
         'Duration Deviation (%)', compute='_compute_duration',
         group_operator="avg", readonly=True, store=True)
@@ -135,7 +135,7 @@ class MrpWorkorder(models.Model):
 
     @api.multi
     def name_get(self):
-        return [(wo.id, "%s - %s - %s" % (wo.production_id.name, wo.product_id.name, wo.name)) for wo in self]
+        return [(wo.id, "%s - %s - %s" % (wo.production_id.sudo().name, wo.product_id.sudo().name, wo.name)) for wo in self]
 
     @api.one
     @api.depends('production_id.product_qty', 'qty_produced')

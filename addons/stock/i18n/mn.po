@@ -14,7 +14,9 @@
 # Suren Ch <oyunsuren.ch@gmail.com>, 2019
 # nurbakhit nurka <nurbakhit@bumanit.mn>, 2019
 # Minj P <pminj322@gmail.com>, 2019
-# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2019
+# Bayarkhuu Bataa, 2019
+# Batmunkh Ganbat <batmunkh.g@bumanit.mn>, 2019
+# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -22,7 +24,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-14 07:33+0000\n"
 "PO-Revision-Date: 2018-08-24 09:25+0000\n"
-"Last-Translator: Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2019\n"
+"Last-Translator: Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2020\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -174,7 +176,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_move_view_kanban
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_inventory_kanban
 msgid "<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
-msgstr "<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Огноо\" title=\"Огноо\"/>"
+msgstr "<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_scrap_view_kanban
@@ -246,7 +248,7 @@ msgstr "<span class=\"o_stat_text\">Гарт байгаа</span>"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "<span class=\"o_stat_text\">Operations</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Үйл ажиллагаа</span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_mrp_line
@@ -359,7 +361,7 @@ msgstr "<strong>Баглаа</strong>"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_track_confirmation
 msgid "<strong>Product(s) tracked: </strong>"
-msgstr "<strong>Барааг мөшгих: </strong>"
+msgstr "<strong>Бараа(нууд) мөшгих: </strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
@@ -449,7 +451,8 @@ msgstr ""
 #. module: stock
 #: model:res.groups,name:stock.group_warning_stock
 msgid "A warning can be set on a partner (Stock)"
-msgstr "Агуулахын анхааруулах мэдээллийг харилцагч дээр тохируулах боломжтой"
+msgstr ""
+"Агуулахын анхааруулах мэдээллийг харилцагч(Бараа) дээр тохируулах боломжтой"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__action
@@ -724,6 +727,12 @@ msgstr "Бэлэн"
 #: model_terms:ir.ui.view,arch_db:stock.stock_product_search_form_view
 msgid "Available Products"
 msgstr "Боломжит бараанууд"
+
+#. module: stock
+#: code:addons/stock/models/product.py:581
+#, python-format
+msgid "Available quantity should be set to zero before changing type"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__backorder_id
@@ -3008,7 +3017,7 @@ msgstr "Мөрийн жагсаалт харагдац"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "List view of operations"
-msgstr ""
+msgstr "Баримтын жагсаалт харагдац"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_location_form
@@ -4159,6 +4168,12 @@ msgstr "Товлосон шилжүүлгүүд"
 #, python-format
 msgid "Please add some items to move."
 msgstr "Хөдөлгөөн хийх зүйлээ нэмнэ үү."
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:92
+#, python-format
+msgid "Please check the following serial number (name, id): "
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:132
@@ -6044,7 +6059,7 @@ msgstr "Онолын Тоо Хэмжээ"
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.stock_move_line_action
 msgid "There's no product move yet"
-msgstr ""
+msgstr "Барааны ямар нэг хөдөлгөөн одоогоор алга"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.quantsact
@@ -6235,7 +6250,7 @@ msgstr "Хийх"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
 msgid "To Process"
-msgstr ""
+msgstr "Боловсруулах"
 
 #. module: stock
 #: selection:stock.picking,activity_state:0
@@ -6454,7 +6469,7 @@ msgstr "Хэмжих нэгж"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Units Of Measure"
-msgstr ""
+msgstr "Хэмжих нэгж"
 
 #. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_unit_measure_stock
@@ -6475,7 +6490,7 @@ msgstr "Хэмжих нэгж"
 #: code:addons/stock/models/stock_picking.py:885
 #, python-format
 msgid "Unknow stream."
-msgstr ""
+msgstr "Тодорхойгүй урсгал"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:348
@@ -6526,12 +6541,12 @@ msgstr "Хэмжих нэгж"
 #. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_uom_categ_form_action
 msgid "UoM Categories"
-msgstr ""
+msgstr "Хэмжих нэгжийн ангилал"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_line__product_uom_category_id
 msgid "Uom category"
-msgstr ""
+msgstr "Хэмжих нэгжийн ангилал"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_change_product_quantity
@@ -6549,7 +6564,7 @@ msgstr "Гарт байгаа тоо хэмжээг шинэчлэх"
 #: code:addons/stock/models/product.py:563
 #, python-format
 msgid "Update quantity on hand"
-msgstr ""
+msgstr "Гарт буй тоо хэмжээг шинэчлэх"
 
 #. module: stock
 #: selection:stock.move,priority:0 selection:stock.picking,priority:0
@@ -6793,38 +6808,25 @@ msgstr "Жигнэсэн бараа"
 #: model:ir.model.fields,help:stock.field_stock_location_route__warehouse_selectable
 msgid ""
 "When a warehouse is selected for this route, this route should be seen as "
-"the default route when products pass through this warehouse.  This behaviour"
-" can be overridden by the routes on the Product/Product Categories or by the"
-" Preferred Routes on the Procurement"
+"the default route when products pass through this warehouse."
 msgstr ""
-"Энэ дамжлагад дээр сонгогдсон агуулахын хувьд бараа тус агуулахаар дамжин "
-"өнгөрөх үед  энэхүү дамжлага эхний сонголтоор хэрэглэгдэнэ. Энэ шинж чанар "
-"нь бараа/барааны ангилал дээр тохируулсан дамжлагаар солигдоно."
 
 #. module: stock
 #: selection:stock.picking,move_type:0
 msgid "When all products are ready"
-msgstr ""
+msgstr "Бүх бараа бэлэн үед"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location_route__product_selectable
 msgid ""
 "When checked, the route will be selectable in the Inventory tab of the "
-"Product form.  It will take priority over the Warehouse route. "
+"Product form."
 msgstr ""
-"Үүнийг сонговол, уг дамжлагыг барааны дэлгэрэнгүй мэдээлэл дээрх Агуулах ТАБ"
-" дотор сонгож ашиглах боломжтой болно. Улмаар агуулах дээр тохируулсан "
-"дамжлагаас илүү өндөр урьтамжаар ашиглагдана."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location_route__product_categ_selectable
-msgid ""
-"When checked, the route will be selectable on the Product Category.  It will"
-" take priority over the Warehouse route. "
+msgid "When checked, the route will be selectable on the Product Category."
 msgstr ""
-"Үүнийг сонговол, уг дамжлагыг барааны ангилалын мэдээлэл дээр сонгож ашиглах"
-" боломжтой болно. Улмаар агуулах дээр тохируулсан дамжлагаас илүү өндөр "
-"урьтамжаар ашиглагдана."
 
 #. module: stock
 #: code:addons/stock/models/stock_rule.py:113
@@ -6833,6 +6835,8 @@ msgid ""
 "When products are needed in <b>%s</b>, <br/> <b>%s</b> are created from "
 "<b>%s</b> to fulfill the need."
 msgstr ""
+"<b>%s</b> дээр барааны хэрэгцээ үүсэхэд, <br/> <b>%s</b> баримт</b> "
+"байрлалаас татан авахаар үүснэ."
 
 #. module: stock
 #: code:addons/stock/models/stock_rule.py:114
@@ -7081,6 +7085,8 @@ msgid ""
 "You cannot take products from or deliver products to a location of type "
 "\"view\"."
 msgstr ""
+"Та \"толгой\" төрөлтэй байрлалаас бараа авах эсвэл ийм байрлалд барааг "
+"байршуулах боломжгүй."
 
 #. module: stock
 #: code:addons/stock/models/stock_move.py:501
@@ -7104,6 +7110,10 @@ msgid ""
 "You cannot validate a transfer if no quantites are reserved nor done. To "
 "force the transfer, switch in edit more and encode the done quantities."
 msgstr ""
+"Та бараа шилжүүлгийн баримтын ажиллагааны дэлгэрэнгүй дээр нь ямар нэг "
+"бэлтгэсэн тоо хэмжээ оруулаагүй нөхцөлд энэхүү баримтыг батлах боломжгүй. "
+"Баримтыг батлахын тулд засварлах горимд шилжээд бэлтгэсэн буюу дуусгасан тоо"
+" хэмжээг бөглөж тохируулна уу."
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:112
@@ -7118,7 +7128,7 @@ msgid ""
 "You have not recorded <i>done</i> quantities yet, by clicking on <i>apply</i>\n"
 "                        Odoo will process all the <i>reserved</i> quantities."
 msgstr ""
-"Та зарим барааны ажилбар дээр<i>дууссан</i> тоо хэмжээг хараахан тодорхойлоогүй байна, <i>хэрэгжүүлэх</i>товч дээр\n"
+"Та зарим барааны ажилбар дээр<i> дууссан </i> тоо хэмжээг хараахан тодорхойлоогүй байна, <i> хэрэгжүүлэх</i> товч дээр\n"
 "                        дарснаар Odoo систем <i>нөөцлөгдсөн</i> тоо хэмжээний дагуу дууссан тоог тодорхойлж боловсруулах болно."
 
 #. module: stock
@@ -7164,13 +7174,13 @@ msgstr ""
 #: code:addons/stock/models/stock_location.py:109
 #, python-format
 msgid "You have to set a name for this location."
-msgstr ""
+msgstr "Байрлал дээр нэр тодорхойлно уу."
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:47
 #, python-format
 msgid "You may only return Done pickings."
-msgstr ""
+msgstr "Хийгдсэн бэлтгэх баримтыг буцаах боломжтой."
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:38
@@ -7236,7 +7246,7 @@ msgstr "өдөр"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "days to be propagated"
-msgstr ""
+msgstr "Түгээх өдрүүд"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_inventory_form
@@ -7285,9 +7295,15 @@ msgstr "ын"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.exception_on_picking
 msgid "processed instead of"
-msgstr ""
+msgstr "оронд нь боловсруулсан"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_inventory_form
 msgid "⇒ Set quantities to 0"
 msgstr "⇒ Тоо хэмжээг 0 болгох"
+
+#. module: stock
+#: code:addons/stock/models/stock_move_line.py:223
+#, python-format
+msgid "Changing the product is only allowed in 'Draft' state."
+msgstr ""

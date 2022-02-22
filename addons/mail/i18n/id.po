@@ -10,7 +10,6 @@
 # William Surya Permana <zarambie_game@yahoo.com>, 2019
 # Dedi Santoso <dedisantoso@yahoo.com>, 2019
 # Febrasari Almania <febrasari.almania@gmail.com>, 2019
-# Muhammad Syarif <mhdsyarif.ms@gmail.com>, 2019
 # Gusti Rini <gustirini@gmail.com>, 2019
 # Martin Trigaux, 2019
 # oon arfiandwi <oon.arfiandwi@gmail.com>, 2019
@@ -18,6 +17,9 @@
 # Muhammad Herdiansyah <herdiansyah@openmailbox.org>, 2019
 # Ryanto The <ry.the77@gmail.com>, 2019
 # Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2019
+# PAS IRVANUS <ipankbiz@gmail.com>, 2019
+# Muhammad Syarif <mhdsyarif.ms@gmail.com>, 2020
+# whenweresober <gulmugurzu@yevme.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -25,7 +27,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-14 07:34+0000\n"
 "PO-Revision-Date: 2018-08-24 09:20+0000\n"
-"Last-Translator: Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2019\n"
+"Last-Translator: whenweresober <gulmugurzu@yevme.com>, 2020\n"
 "Language-Team: Indonesian (https://www.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -589,7 +591,7 @@ msgstr "Tambah Pengikut hanya dapat dilakukan pada model pesan thread"
 #: model:ir.model.fields,field_description:mail.field_mail_mail__add_sign
 #: model:ir.model.fields,field_description:mail.field_mail_message__add_sign
 msgid "Add Sign"
-msgstr ""
+msgstr "Add Sign"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_email_template_preview__user_signature
@@ -853,7 +855,7 @@ msgstr "Lampiran"
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_attachment_count
 #: model:ir.model.fields,field_description:mail.field_res_users__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Attachment Count"
 
 #. module: mail
 #. openerp-web
@@ -974,7 +976,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/followers.xml:44
 #, python-format
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #. module: mail
 #. openerp-web
@@ -1332,7 +1334,7 @@ msgstr "Mode Komposisi"
 #. module: mail
 #: model:ir.model,name:mail.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Config Settings"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -1545,7 +1547,7 @@ msgstr "Kepada"
 #: model:ir.model.fields,field_description:mail.field_mail_activity__activity_decoration
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__decoration_type
 msgid "Decoration Type"
-msgstr ""
+msgstr "Tipe Dekorasi"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_message_subtype__default
@@ -1705,7 +1707,7 @@ msgstr "Diskusi"
 #. module: mail
 #: model:ir.model,name:mail.model_mail_channel
 msgid "Discussion Channel"
-msgstr ""
+msgstr "Saluran Diskusi"
 
 #. module: mail
 #: model:mail.message.subtype,name:mail.mt_comment
@@ -2110,7 +2112,7 @@ msgstr ""
 #. module: mail
 #: selection:ir.actions.server,state:0
 msgid "Execute several actions"
-msgstr ""
+msgstr "Laksanakan beberapa tindakan"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
@@ -2423,7 +2425,7 @@ msgstr "Memiliki lampiran"
 #: model:ir.model.fields,help:mail.field_mail_mail__has_error
 #: model:ir.model.fields,help:mail.field_mail_message__has_error
 msgid "Has error"
-msgstr ""
+msgstr "Ada kesalahan"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__headers
@@ -2546,7 +2548,7 @@ msgstr "Jika dicentang pesan-pesan baru membutuhkan penanganan lebih lanjut."
 #: model:ir.model.fields,help:mail.field_res_partner__message_has_error
 #: model:ir.model.fields,help:mail.field_res_users__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "If checked, some messages have a delivery error."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_wizard_invite__send_mail
@@ -2806,6 +2808,12 @@ msgid "Is Read"
 msgstr "Dibaca"
 
 #. module: mail
+#: code:addons/mail/models/mail_notification.py:0
+#, python-format
+msgid "Can not update the message or recipient of a notification."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel__is_subscribed
 msgid "Is Subscribed"
 msgstr "Disubskripsi"
@@ -2954,7 +2962,7 @@ msgstr "Aktivitas Terlambat"
 #: model:ir.model.fields,field_description:mail.field_mail_mail__layout
 #: model:ir.model.fields,field_description:mail.field_mail_message__layout
 msgid "Layout"
-msgstr ""
+msgstr "Layout"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_kanban
@@ -3169,7 +3177,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_main_attachment_id
 #: model:ir.model.fields,field_description:mail.field_res_users__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Main Attachment"
 
 #. module: mail
 #. openerp-web
@@ -3298,7 +3306,7 @@ msgstr "Pesan"
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_has_error
 #: model:ir.model.fields,field_description:mail.field_res_users__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Message Delivery error"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__mail_message_id
@@ -3925,7 +3933,7 @@ msgstr "Jumlah pesan yang butuh tindakan"
 #: model:ir.model.fields,help:mail.field_res_partner__message_has_error_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Number of messages with delivery error"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_unread_counter
@@ -4850,7 +4858,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:183
 #, python-format
 msgid "Select All"
-msgstr ""
+msgstr "Pilih Semua"
 
 #. module: mail
 #. openerp-web
@@ -5318,6 +5326,12 @@ msgstr ""
 "yang tepat berdasarkan pengirim (dari) alamat, atau akan menggunakan akun "
 "Administrator jika tidak ada pengguna sistem yang ditemukan untuk alamat "
 "tersebut."
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "The partner can not join this channel"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/models/mail_activity.py:243
@@ -6003,6 +6017,24 @@ msgid ""
 msgstr ""
 
 #. module: mail
+#: cod:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not remove this partner from this channel"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on the record of other users"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on this field"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/res_users.py:87
 #, python-format
 msgid ""
@@ -6021,6 +6053,14 @@ msgid ""
 msgstr ""
 "Anda tidak dapat menghapus kelompok tersebut, karena kelompok Seluruh "
 "Perusahaan diperlukan oleh modul lainnya."
+
+#. module: mail
+#: code:addons/mail/models/mail_alias.py:89
+#, python-format
+msgid ""
+"You cannot use anything else than unaccented latin characters in the alias "
+"address."
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/models/mail_channel.py:257
@@ -6045,8 +6085,8 @@ msgstr "Anda telah ditugaskan ke"
 #. openerp-web
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:198
 #, python-format
-msgid "You have been invited to: "
-msgstr "Anda telah diundang ke:"
+msgid "You have been invited to: %s"
+msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_notify_moderation

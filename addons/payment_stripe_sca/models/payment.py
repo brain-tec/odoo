@@ -4,6 +4,7 @@ import logging
 import requests
 import pprint
 from werkzeug import urls
+from requests.exceptions import HTTPError
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
@@ -52,11 +53,23 @@ class PaymentAcquirerStripeSCA(models.Model):
             "Stripe-Version": "2019-05-16",  # SetupIntent need a specific version
         }
         resp = requests.request(method, url, data=data, headers=headers)
-        try:
-            resp.raise_for_status()
-        except:
-            _logger.error(resp.text)
-            raise
+        # Stripe can send 4XX errors for payment failure (not badly-formed requests)
+        # check if error `code` is present in 4XX response and raise only if not
+        # cfr https://stripe.com/docs/error-codes
+        # these can be made customer-facing, as they usually indicate a problem with the payment
+        # (e.g. insufficient funds, expired card, etc.)
+        # if the context key `stripe_manual_payment` is set then these errors will be raised as ValidationError,
+        # otherwise, they will be silenced, and the will be returned no matter the status.
+        # This key should typically be set for payments in the present and unset for automated payments
+        # (e.g. through crons)
+        if not resp.ok and self._context.get('stripe_manual_payment') and (400 <= resp.status_code < 500 and resp.json().get('error', {}).get('code')):
+            try:
+                resp.raise_for_status()
+            except HTTPError:
+                _logger.error(resp.text)
+                stripe_error = resp.json().get('error', {}).get('message', '')
+                error_msg = " " + (_("Stripe gave us the following info about the problem: '%s'") % stripe_error)
+                raise ValidationError(error_msg)
         return resp.json()
 
     def _create_stripe_session(self, kwargs):
@@ -306,12 +319,13 @@ class PaymentTransactionStripeSCA(models.Model):
             self.write(vals)
             self._set_transaction_pending()
             return True
-        else:
-            error = tree.get("failure_message") or tree['error']['message']
-            _logger.warning(error)
-            vals.update({"state_message": error})
-            self.write(vals)
+        if status == 'requires_payment_method':
             self._set_transaction_cancel()
+            self.acquirer_id._stripe_request('payment_intents/%s/cancel' % self.stripe_payment_intent)
+            return False
+        else:
+            error = tree.get("failure_message") or tree.get('error', {}).get('message')
+            self._set_transaction_error(error)
             return False
 
     def _stripe_form_get_invalid_parameters(self, data):
