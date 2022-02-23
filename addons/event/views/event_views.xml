@@ -198,8 +198,7 @@
                         <div class="oe_button_box" name="button_box" groups="base.group_user">
                             <button name="%(event.act_event_registration_from_event)d"
                                     type="action"
-                                    context="{'search_default_expected': True,
-                                     'search_default_group_by_create_date_week': True}"
+                                    context="{'search_default_expected': True}"
                                     class="oe_stat_button"
                                     icon="fa-users"
                                     help="Total Registrations for this Event">
@@ -308,6 +307,7 @@
                     <field name="date_begin" readonly="1" widget="date"/>
                     <field name="date_end" readonly="1" widget="date"/>
                     <field name="stage_id" readonly="1"/>
+                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                     <field name="seats_expected" string="Expected Attendees" sum="Total" readonly="1"/>
                     <field name="seats_used" sum="Total" readonly="1"/>
                     <field name="seats_max" string="Maximum Seats" sum="Total" readonly="1" optional="hide"/>
@@ -385,8 +385,7 @@
                                         <h5 class="o_event_fontsize_11 p-0">
                                             <a name="%(act_event_registration_from_event)d"
                                                type="action"
-                                               context="{'search_default_expected': True,
-                                                'search_default_group_by_create_date_week': True}">
+                                               context="{'search_default_expected': True}">
                                                 <t t-esc="record.seats_expected.raw_value"/> Expected attendees
                                             </a>
                                             <t t-set="total_seats" t-value="record.seats_reserved.raw_value + record.seats_used.raw_value"/>
