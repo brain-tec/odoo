@@ -711,8 +711,6 @@ class MrpProduction(models.Model):
     @api.constrains('move_byproduct_ids')
     def _check_byproducts(self):
         for order in self:
-            if any(float_compare(move.product_qty, 0.0, precision_rounding=move.product_uom.rounding or move.product_id.uom_id.rounding) <= 0 for move in order.move_byproduct_ids):
-                raise ValidationError(_("The quantity produced of by-products must be positive."))
             if any(move.cost_share < 0 for move in order.move_byproduct_ids):
                 raise ValidationError(_("By-products cost shares must be positive."))
             if sum(order.move_byproduct_ids.mapped('cost_share')) > 100:
@@ -1520,7 +1518,6 @@ class MrpProduction(models.Model):
             self.move_raw_ids.filtered(lambda m: not m.additional)._do_unreserve()
             self.move_raw_ids.filtered(lambda m: not m.additional)._action_assign()
         backorders.action_confirm()
-        backorders.action_assign()
 
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
