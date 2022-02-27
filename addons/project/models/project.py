@@ -41,13 +41,13 @@ PROJECT_TASK_READABLE_FIELDS = {
     'legend_normal',
     'legend_blocked',
     'legend_done',
+    'user_ids',
 }
 
 PROJECT_TASK_WRITABLE_FIELDS = {
     'name',
     'partner_id',
     'partner_email',
-    'user_ids',
     'date_deadline',
     'tag_ids',
     'sequence',
@@ -153,13 +153,24 @@ class Project(models.Model):
     def _compute_attached_docs_count(self):
         self.env.cr.execute(
             """
-            SELECT coalesce(task.project_id, project.id), count(*)
-              FROM ir_attachment attachment
-              LEFT JOIN project_task task ON attachment.res_model = 'project.task' AND task.id = attachment.res_id
-              LEFT JOIN project_project project ON attachment.res_model = 'project.project' AND project.id = attachment.res_id
-             WHERE project.id IN %(project_ids)s
-                OR task.project_id IN %(project_ids)s
-             GROUP BY coalesce(task.project_id, project.id)
+            WITH docs AS (
+                 SELECT res_id as id, count(*) as count
+                   FROM ir_attachment
+                  WHERE res_model = 'project.project'
+                    AND res_id IN %(project_ids)s
+               GROUP BY res_id
+
+              UNION ALL
+
+                 SELECT t.project_id as id, count(*) as count
+                   FROM ir_attachment a
+                   JOIN project_task t ON a.res_model = 'project.task' AND a.res_id = t.id
+                  WHERE t.project_id IN %(project_ids)s
+               GROUP BY t.project_id
+            )
+            SELECT id, sum(count)
+              FROM docs
+          GROUP BY id
             """,
             {"project_ids": tuple(self.ids)}
         )
@@ -927,7 +938,7 @@ class Task(models.Model):
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
     # Tracking of this field is done in the write function
     user_ids = fields.Many2many('res.users', relation='project_task_user_rel', column1='task_id', column2='user_id',
-        string='Assignees', default=lambda self: self.env.user, context={'active_test': False}, tracking=True)
+        string='Assignees', default=lambda self: not self.env.user.share and self.env.user, context={'active_test': False}, tracking=True)
     # User names displayed in project sharing views
     portal_user_names = fields.Char(compute='_compute_portal_user_names', compute_sudo=True, search='_search_portal_user_names')
     # Second Many2many containing the actual personal stage for the current user
@@ -1402,8 +1413,9 @@ class Task(models.Model):
             (In other words, this compute is only used in project sharing views to see all assignees for each task)
         """
         if self.ids:
-            # fetch 'user_ids' in superuser mode (and override value in cache)
-            self._read(['user_ids'])
+            # fetch 'user_ids' in superuser mode (and override value in cache
+            # browse is useful to avoid miscache because of the newIds contained in self
+            self.browse(self.ids)._read(['user_ids'])
         for task in self.with_context(prefetch_fields=False):
             task.portal_user_names = ', '.join(task.user_ids.mapped('name'))
 
@@ -1682,6 +1694,8 @@ class Task(models.Model):
         if 'active' in vals and not vals.get('active') and any(self.mapped('recurrence_id')):
             # TODO: show a dialog to stop the recurrence
             raise UserError(_('You cannot archive recurring tasks. Please disable the recurrence first.'))
+        if 'recurrence_id' in vals and vals.get('recurrence_id') and any(not task.active for task in self):
+            raise UserError(_('Archived tasks cannot be recurring. Please unarchive the task first.'))
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
             vals.update(self.update_date_end(vals['stage_id']))
