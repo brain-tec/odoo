@@ -1623,7 +1623,6 @@ class AccountMove(models.Model):
                 move.amount_by_group = []
                 continue
 
-            lang_env = move.with_context(lang=move.partner_id.lang).env
             balance_multiplicator = -1 if move.is_inbound() else 1
 
             tax_lines = move.line_ids.filtered('tax_line_id')
@@ -1663,8 +1662,8 @@ class AccountMove(models.Model):
                     tax_group.name,
                     tax_group_vals['tax_amount'],
                     tax_group_vals['base_amount'],
-                    formatLang(lang_env, tax_group_vals['tax_amount'], currency_obj=move.currency_id),
-                    formatLang(lang_env, tax_group_vals['base_amount'], currency_obj=move.currency_id),
+                    formatLang(self.env, tax_group_vals['tax_amount'], currency_obj=move.currency_id),
+                    formatLang(self.env, tax_group_vals['base_amount'], currency_obj=move.currency_id),
                     len(tax_group_mapping),
                     tax_group.id
                 ))
@@ -2400,7 +2399,11 @@ class AccountMove(models.Model):
                 'credit': balance < 0.0 and -balance or 0.0,
             })
 
-            if not is_refund:
+            if not is_refund or self.tax_cash_basis_move_id:
+                # We don't map tax repartition for non-refund operations, nor for cash basis entries.
+                # Indeed, cancelling a cash basis entry usually happens when unreconciling and invoice,
+                # in which case we always want the reverse entry to totally cancel the original one, keeping the same accounts,
+                # tags and repartition lines
                 continue
 
             # ==== Map tax repartition lines ====
@@ -2412,18 +2415,15 @@ class AccountMove(models.Model):
                 refund_repartition_line = tax_repartition_lines_mapping[invoice_repartition_line]
 
                 # Find the right account.
-                if cancel:
-                    account_id = line_vals['account_id']
-                else:
-                    account_id = self.env['account.move.line']._get_default_tax_account(refund_repartition_line).id
-                    if not account_id:
-                        if not invoice_repartition_line.account_id:
-                            # Keep the current account as the current one comes from the base line.
-                            account_id = line_vals['account_id']
-                        else:
-                            tax = invoice_repartition_line.invoice_tax_id
-                            base_line = self.line_ids.filtered(lambda line: tax in line.tax_ids.flatten_taxes_hierarchy())[0]
-                            account_id = base_line.account_id.id
+                account_id = self.env['account.move.line']._get_default_tax_account(refund_repartition_line).id
+                if not account_id:
+                    if not invoice_repartition_line.account_id:
+                        # Keep the current account as the current one comes from the base line.
+                        account_id = line_vals['account_id']
+                    else:
+                        tax = invoice_repartition_line.invoice_tax_id
+                        base_line = self.line_ids.filtered(lambda line: tax in line.tax_ids.flatten_taxes_hierarchy())[0]
+                        account_id = base_line.account_id.id
 
                 tags = refund_repartition_line.tag_ids
                 if line_vals.get('tax_ids'):
