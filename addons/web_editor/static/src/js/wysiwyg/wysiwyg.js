@@ -90,9 +90,9 @@ const Wysiwyg = Widget.extend({
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
         }
 
-        const getYoutubeVideoElement = (url) => {
+        const getYoutubeVideoElement = async (url) => {
             const videoWidget = new weWidgets.VideoWidget(this, undefined, {});
-            const src = videoWidget._createVideoNode(url).$video.attr('src');
+            const src = (await videoWidget.createVideoNode(url)).$video.attr('src');
             return videoWidget.getWrappedIframe(src)[0];
         };
 
@@ -109,7 +109,7 @@ const Wysiwyg = Widget.extend({
             getYoutubeVideoElement: getYoutubeVideoElement,
             getContextFromParentRect: options.getContextFromParentRect,
             getPowerboxElement: () => {
-                const selection = document.getSelection();
+                const selection = (this.options.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
                     const node = closestElement(selection.anchorNode, 'P, DIV');
                     return !(node && node.hasAttribute && node.hasAttribute('data-oe-model')) && node;
@@ -209,10 +209,7 @@ const Wysiwyg = Widget.extend({
 
         if (options.snippets) {
             $(this.odooEditor.document.body).addClass('editor_enable');
-            this.snippetsMenu = new snippetsEditor.SnippetsMenu(this, Object.assign({
-                wysiwyg: this,
-                selectorEditableArea: '.o_editable',
-            }, options));
+            this.snippetsMenu = this._createSnippetsMenuInstance(options);
             await this._insertSnippetMenu();
 
             this._onBeforeUnload = (event) => {
@@ -941,7 +938,9 @@ const Wysiwyg = Widget.extend({
             const linkDialog = new weWidgets.LinkDialog(this, {
                 forceNewWindow: this.options.linkForceNewWindow,
                 wysiwyg: this,
-            }, this.$editable[0], {}, undefined, options.link);
+            }, this.$editable[0], {
+                needLabel: true,
+            }, undefined, options.link);
             const restoreSelection = preserveCursor(this.odooEditor.document);
             linkDialog.open();
             linkDialog.on('save', this, data => {
@@ -1002,7 +1001,9 @@ const Wysiwyg = Widget.extend({
         const restoreSelection = preserveCursor(this.odooEditor.document);
 
         const $node = $(params.node);
-        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable'));
+        // We need to keep track of FA icon because media.js will _clear those classes
+        const wasFontAwesome = $node.hasClass('fa');
+        const $editable = $(this.odooEditor.editable);
         const model = $editable.data('oe-model');
         const field = $editable.data('oe-field');
         const type = $editable.data('oe-type');
@@ -1025,7 +1026,7 @@ const Wysiwyg = Widget.extend({
                 element.className += " " + params.htmlClass;
             }
             restoreSelection();
-            if (wysiwygUtils.isImg($node[0])) {
+            if (wysiwygUtils.isImg($node[0]) || wasFontAwesome) {
                 $node.replaceWith(element);
                 this.odooEditor.unbreakableStepUnactive();
                 this.odooEditor.historyStep();
@@ -1046,8 +1047,21 @@ const Wysiwyg = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Returns an instance of the snippets menu.
+     *
+     * @param {Object} [options]
+     * @returns {widget}
+     */
+    _createSnippetsMenuInstance: function (options={}) {
+        return new snippetsEditor.SnippetsMenu(this, Object.assign({
+            wysiwyg: this,
+            selectorEditableArea: '.o_editable',
+        }, options));
+    },
     _configureToolbar: function (options) {
         const $toolbar = this.toolbar.$el;
+        $toolbar.find('.btn-group').on('mousedown', e => e.preventDefault());
         const openTools = e => {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -1213,6 +1227,10 @@ const Wysiwyg = Widget.extend({
             const eventName = elem.dataset.eventName;
             let colorpicker = null;
             const mutex = new concurrency.MutexedDropPrevious();
+            if (!elem.ownerDocument.defaultView) {
+                // In case the element is not in the DOM, don't do anything with it.
+                continue;
+            }
             // If the element is within an iframe, access the jquery loaded in
             // the iframe because it is the one who will trigger the dropdown
             // events (i.e hide.bs.dropdown and show.bs.dropdown).
@@ -1249,7 +1267,7 @@ const Wysiwyg = Widget.extend({
                         this._processAndApplyColor(eventName, ev.data.color);
                         this._updateEditorUI();
                     });
-                    colorpicker.on('color_hover color_leave', null, ev => {
+                    colorpicker.on('color_hover', null, ev => {
                         if (hadNonCollapsedSelection) {
                             this.odooEditor.historyResetLatestComputedSelection(true);
                         }
@@ -1259,6 +1277,9 @@ const Wysiwyg = Widget.extend({
                         } finally {
                             this.odooEditor.historyUnpauseSteps();
                         }
+                    });
+                    colorpicker.on('color_leave', null, ev => {
+                        this.odooEditor.historyRevertCurrentStep();
                     });
                     colorpicker.on('enter_key_color_colorpicker', null, () => {
                         $dropdown.children('.dropdown-toggle').dropdown('hide');
@@ -1892,7 +1913,6 @@ const Wysiwyg = Widget.extend({
         // remove ZeroWidthSpace from odoo field value
         // ZeroWidthSpace may be present from OdooEditor edition process
         let escapedHtml = this._getEscapedElement($el).prop('outerHTML');
-        escapedHtml = escapedHtml.replace(/[\u200B-\u200D\uFEFF]/g, '');
 
         return this._rpc({
             model: 'ir.ui.view',

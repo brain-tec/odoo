@@ -283,8 +283,7 @@ class AccountEdiFormat(models.Model):
 
             # Setup the context for the Invoice Form
             invoice_ctx = invoice.with_company(company) \
-                                 .with_context(default_move_type=move_type,
-                                               account_predictive_bills_disable_prediction=True)
+                                 .with_context(default_move_type=move_type)
 
             # move could be a single record (editing) or be empty (new).
             with Form(invoice_ctx) as invoice_form:
@@ -478,7 +477,7 @@ class AccountEdiFormat(models.Model):
                                 if not invoice_line_form.product_id:
                                     for element_code in elements_code:
                                         code = element_code.xpath('.//CodiceValore')[0]
-                                        product = self.env['product.product'].search([('default_code', '=', code.text)])
+                                        product = self.env['product.product'].search([('default_code', '=', code.text)], limit=1)
                                         if product:
                                             invoice_line_form.product_id = product
                                             break
