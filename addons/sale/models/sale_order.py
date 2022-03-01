@@ -187,7 +187,9 @@ class SaleOrder(models.Model):
     user_id = fields.Many2one(
         'res.users', string='Salesperson', index=True, tracking=2,
         compute='_compute_user_id', store=True, readonly=False, precompute=True,
-        domain=lambda self: [('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)])
+        domain=lambda self: "[('groups_id', '=', {}), ('share', '=', False), ('company_ids', '=', company_id)]".format(
+            self.env.ref("sales_team.group_sale_salesman").id
+        ),)
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=False,
         states=READONLY_FIELD_STATES,
@@ -287,7 +289,6 @@ class SaleOrder(models.Model):
                                                   string='Authorized Transactions', copy=False)
     show_update_pricelist = fields.Boolean(
         string='Has Pricelist Changed',
-        compute='_compute_show_update_pricelist', store=True, readonly=True, precompute=True,
         help="Technical Field, True if the pricelist was changed;\n"
              " this will then display a recomputation button")
     tag_ids = fields.Many2many('crm.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags')
@@ -553,10 +554,10 @@ class SaleOrder(models.Model):
                 }
             }
 
-    @api.depends('pricelist_id')
-    def _compute_show_update_pricelist(self):
-        for order in self:
-            order.show_update_pricelist = order.order_line and order.pricelist_id and order._origin.pricelist_id != self.pricelist_id
+    @api.onchange('pricelist_id')
+    def _onchange_pricelist_id_show_update_prices(self):
+        if self.order_line and self.pricelist_id and self._origin.pricelist_id != self.pricelist_id:
+            self.show_update_pricelist = True
 
     def update_prices(self):
         self.ensure_one()
@@ -1160,10 +1161,6 @@ class SaleOrder(models.Model):
         """ Return the action used to display orders when returning from customer portal. """
         self.ensure_one()
         return self.env.ref('sale.action_quotations_with_onboarding')
-
-    def _get_additional_order_page_values(self):
-        """ Return a dict of additional order page values for a sale.order."""
-        return {}
 
     @api.model
     def _prepare_down_payment_section_line(self, **optional_values):

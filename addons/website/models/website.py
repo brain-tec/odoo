@@ -20,7 +20,7 @@ from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website.tools import similarity_score, text_from_html
 from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
-from odoo.exceptions import UserError, AccessError
+from odoo.exceptions import UserError, AccessError, MissingError
 from odoo.http import request
 from odoo.modules.module import get_resource_path, get_manifest
 from odoo.osv.expression import AND, OR, FALSE_DOMAIN, get_unaccent_wrapper
@@ -172,6 +172,11 @@ class Website(models.Model):
     @tools.ormcache('self.env.uid', 'self.id')
     def _get_menu_ids(self):
         return self.env['website.menu'].search([('website_id', '=', self.id)]).ids
+
+    # self.env.uid for ir.rule groups on menu
+    @tools.ormcache('self.env.uid', 'self.id')
+    def _get_menu_page_ids(self):
+        return self.env['website.menu'].search([('website_id', '=', self.id)]).page_id.ids
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1310,7 +1315,7 @@ class Website(models.Model):
 
             router = http.root.get_db_router(request.db).bind('')
             path = router.build(rule.endpoint, args)
-        except (NotFound, AccessError):
+        except (NotFound, AccessError, MissingError):
             # The build method returns a quoted URL so convert in this case for consistency.
             path = urls.url_quote_plus(request.httprequest.path, safe='/')
         lang_path = f'/{lang.url_code}' if lang != self.default_lang_id else ''
@@ -1350,6 +1355,7 @@ class Website(models.Model):
             'user_id': self.user_id.id,
             'company_id': self.company_id.id,
             'default_lang_id': self.default_lang_id.id,
+            'homepage_id': self.homepage_id.id,
         }
 
     def _get_cached(self, field):

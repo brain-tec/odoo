@@ -73,7 +73,8 @@ class Website(Home):
         # prefetch all menus (it will prefetch website.page too)
         top_menu = request.website.menu_id
 
-        homepage = request.website.homepage_id
+        homepage_id = request.website._get_cached('homepage_id')
+        homepage = homepage_id and request.env['website.page'].browse(homepage_id)
         if homepage and (homepage.sudo().is_visible or request.env.user.has_group('base.group_user')) and homepage.url != '/':
             return request.env['ir.http'].reroute(homepage.url)
 
@@ -732,25 +733,6 @@ class Website(Home):
             'web.assets_frontend': request.env['ir.qweb']._get_asset_link_urls('web.assets_frontend'),
             'website.assets_editor': request.env['ir.qweb']._get_asset_link_urls('website.assets_editor'),
         }
-
-    @http.route(['/website/make_scss_custo'], type='json', auth='user', website=True)
-    def make_scss_custo(self, url, values):
-        """
-        Params:
-            url (str):
-                the URL of the scss file to customize (supposed to be a variable
-                file which will appear in the assets_common bundle)
-
-            values (dict):
-                key,value mapping to integrate in the file's map (containing the
-                word hook). If a key is already in the file's map, its value is
-                overridden.
-
-        Returns:
-            boolean
-        """
-        request.env['web_editor.assets'].make_scss_customization(url, values)
-        return True
 
     # ------------------------------------------------------
     # Server actions

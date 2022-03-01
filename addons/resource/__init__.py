@@ -3,4 +3,3 @@
 
 from . import models
 from . import populate
-from .tests import test_resource_model

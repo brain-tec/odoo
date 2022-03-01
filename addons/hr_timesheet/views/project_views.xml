@@ -71,7 +71,7 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
-                <xpath expr="//button[@name='%(project.project_milestone_all)d']" position="after">
+                <xpath expr="//button[@name='action_get_list_view']" position="after">
                     <button class="oe_stat_button" name="action_show_timesheets_by_employee_invoice_type" type="object" icon="fa-clock-o" attrs="{'invisible': [('allow_timesheets', '=', False)]}" groups="hr_timesheet.group_hr_timesheet_user">
                         <div class="o_field_widget o_stat_info">
                             <div class="oe_inline">
@@ -195,7 +195,7 @@
                                     <field name="date"/>
                                     <field name="user_id" invisible="1"/>
                                     <field name="employee_id" required="1" widget="many2one_avatar_employee"/>
-                                    <field name="name"/>
+                                    <field name="name" required="0"/>
                                     <field name="unit_amount" string="Duration" widget="float_time" decoration-danger="unit_amount &gt; 24"/>
                                     <field name="project_id" invisible="1"/>
                                     <field name="task_id" invisible="1"/>
@@ -401,10 +401,6 @@
         </record>
 
         <record id="project.open_view_project_all" model="ir.actions.act_window">
-            <field name="domain">[('is_internal_project', '=', False)]</field>
-        </record>
-
-        <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
             <field name="domain">[('is_internal_project', '=', False)]</field>
         </record>
 

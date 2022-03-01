@@ -263,6 +263,8 @@ class Http(models.AbstractModel):
 
         if page:
             # prefetch all menus (it will prefetch website.page too)
+            menu_pages_ids = request.website._get_menu_page_ids()
+            page.browse([page.id] + menu_pages_ids).mapped('view_id.name')
             request.website.menu_id
 
         if page and (request.website.is_publisher() or page.is_visible):
@@ -326,12 +328,14 @@ class Http(models.AbstractModel):
         if not request.uid:
             cls._auth_method_public()
         cls._frontend_pre_dispatch()
+        cls._handle_debug()
         request.params = request.get_http_params()
 
         website_page = cls._serve_page()
         if website_page:
             website_page.flatten()
             cls._register_website_track(website_page)
+            cls._post_dispatch(website_page)
             return website_page
 
         redirect = cls._serve_redirect()

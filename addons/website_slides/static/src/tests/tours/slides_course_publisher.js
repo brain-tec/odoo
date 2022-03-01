@@ -15,7 +15,7 @@ tour.register('course_publisher', {
     test: true
 }, [{
     content: 'eLearning: click on New (top-menu)',
-    trigger: 'li.o_new_content_menu a'
+    trigger: 'div.o_new_content_menu a'
 }, {
     content: 'eLearning: click on New Course',
     trigger: 'a:contains("Course")'
@@ -32,7 +32,7 @@ tour.register('course_publisher', {
     in_modal: false,
 }, {
     content: 'eLearning: set description',
-    trigger: 'input[name="description"]',
+    trigger: 'textarea[name="description"]',
     run: 'text Déboulonnate is very common at Fleurus',
 }, {
     content: 'eLearning: we want reviews',
@@ -42,24 +42,31 @@ tour.register('course_publisher', {
     trigger: 'button:contains("Create")',
 }, {
     content: 'eLearning: launch course edition',
-    trigger: 'li[id="edit-page-menu"] a',
+    trigger: 'div[id="edit-page-menu"] a',
 }, {
     content: 'eLearning: double click image to edit it',
     trigger: 'img.o_wslides_course_pict',
     run: 'dblclick',
 }, {
-    content: 'eLearning: click pâtissière',
-    trigger: 'img[title="s_company_team_image_4.png"]',
+    content: 'eLearning: click "Add URL" to trigger URL box',
+    trigger: '.o_upload_media_url_button',
 }, {
-    content: 'eLearning: is the pâtissière set ?',
+    content: 'eLearning: add a bioutifoul URL',
+    trigger: 'input.o_we_url_input',
+    run: 'text https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ThreeTimeAKCGoldWinnerPembrookeWelshCorgi.jpg/800px-ThreeTimeAKCGoldWinnerPembrookeWelshCorgi.jpg'
+}, {
+    content: 'eLearning: click "Add URL" really adding image',
+    trigger: '.o_upload_media_url_button',
+}, {
+    content: 'eLearning: is the Corgi set ?',
     trigger: 'img.o_wslides_course_pict',
     run: function () {
-        if ($('img.o_wslides_course_pict').attr('src').endsWith('s_team_member_4.png')) {
+        if ($('img.o_wslides_course_pict').attr('src').endsWith('GoldWinnerPembrookeWelshCorgi.jpg')) {
             $('img.o_wslides_course_pict').addClass('o_wslides_tour_success');
         }
     },
 }, {
-    content: 'eLearning: the pâtissière is set !',
+    content: 'eLearning: the Corgi is set !',
     trigger: 'img.o_wslides_course_pict.o_wslides_tour_success',
 }, {
     content: 'eLearning: save course edition',
@@ -77,7 +84,7 @@ tour.register('course_publisher', {
     slidesTourTools.addVideoToSection('Introduction'),
     [{
     content: 'eLearning: publish newly added course',
-    trigger: 'span:contains("Dschinghis Khan - Moskau 1979")',  // wait for slide to appear
+    trigger: 'span:contains("Dschinghis Khan - Dschinghis Khan (1979)")',  // wait for slide to appear
     // trigger: 'span.o_wslides_js_slide_toggle_is_preview:first',
     run: function () {
         $('span.o_wslides_js_slide_toggle_is_preview:first').click();
