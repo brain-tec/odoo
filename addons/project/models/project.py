@@ -1219,7 +1219,7 @@ class Task(models.Model):
     @api.constrains('depend_on_ids')
     def _check_no_cyclic_dependencies(self):
         if not self._check_m2m_recursion('depend_on_ids'):
-            raise ValidationError(_("You cannot create cyclic dependency."))
+            raise ValidationError(_("Two tasks cannot depend on each other."))
 
     @api.model
     def _get_recurrence_fields(self):
@@ -1747,6 +1747,8 @@ class Task(models.Model):
         if 'active' in vals and not vals.get('active') and any(self.mapped('recurrence_id')):
             # TODO: show a dialog to stop the recurrence
             raise UserError(_('You cannot archive recurring tasks. Please disable the recurrence first.'))
+        if 'recurrence_id' in vals and vals.get('recurrence_id') and any(not task.active for task in self):
+            raise UserError(_('Archived tasks cannot be recurring. Please unarchive the task first.'))
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
             vals.update(self.update_date_end(vals['stage_id']))
