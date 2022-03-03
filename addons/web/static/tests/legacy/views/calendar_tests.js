@@ -2,7 +2,6 @@ odoo.define('web.calendar_tests', function (require) {
 "use strict";
 
 const AbstractField = require('web.AbstractField');
-var AbstractStorageService = require('web.AbstractStorageService');
 const BasicModel = require('web.BasicModel');
 var CalendarView = require('web.CalendarView');
 var CalendarRenderer = require('web.CalendarRenderer');
@@ -503,7 +502,6 @@ QUnit.module('Views', {
     QUnit.test('quickcreate with custom create_name_field', async function (assert) {
         assert.expect(3);
 
-        var event = $.Event();
         this.data.custom_event = {
             fields: {
                 id: {string: "ID", type: "integer"},
@@ -648,7 +646,6 @@ QUnit.module('Views', {
             },
         });
 
-        var event = $.Event();
         var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
@@ -734,7 +731,7 @@ QUnit.module('Views', {
 
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1110,7 +1107,7 @@ QUnit.module('Views', {
 
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1245,7 +1242,7 @@ QUnit.module('Views', {
 
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1394,7 +1391,7 @@ QUnit.module('Views', {
 
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1536,7 +1533,7 @@ QUnit.module('Views', {
         var pos = calendar.$('.fc-bg td:eq(4)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1614,7 +1611,7 @@ QUnit.module('Views', {
         var pos = calendar.$('.fc-bg td:eq(4)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left + 15, pos.top + 15, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1666,7 +1663,7 @@ QUnit.module('Views', {
         var pos = calendar.$('.fc-bg td:eq(4)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -1719,7 +1716,7 @@ QUnit.module('Views', {
         var pos = calendar.$('.fc-bg td:eq(17)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -2330,7 +2327,7 @@ QUnit.module('Views', {
         var top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -2430,7 +2427,7 @@ QUnit.module('Views', {
         var top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
@@ -2660,7 +2657,7 @@ QUnit.module('Views', {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
             await testUtils.nextTick();
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test failed to simulate a click on the screen.' +
                 'Your screen is probably too small or your dev tools are open.');
@@ -3781,7 +3778,7 @@ QUnit.module('Views', {
 
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        } catch (e) {
+        } catch (_e) {
             calendar.destroy();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }

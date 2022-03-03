@@ -4,7 +4,7 @@
 import json
 from collections import defaultdict
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, _lt
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools import format_amount, float_is_zero, formatLang
@@ -112,7 +112,7 @@ class Project(models.Model):
 
     @api.depends('analytic_account_id', 'timesheet_ids')
     def _compute_billable_percentage(self):
-        timesheets_read_group = self.env['account.analytic.line'].read_group([('project_id', 'in', self.ids)], ['project_id', 'so_line', 'unit_amount'], ['project_id', 'so_line'], lazy=False)
+        timesheets_read_group = self.env['account.analytic.line']._read_group([('project_id', 'in', self.ids)], ['project_id', 'so_line', 'unit_amount'], ['project_id', 'so_line'], lazy=False)
         timesheets_by_project = defaultdict(list)
         for res in timesheets_read_group:
             timesheets_by_project[res['project_id'][0]].append((res['unit_amount'], bool(res['so_line'])))
@@ -142,7 +142,7 @@ class Project(models.Model):
     @api.depends('pricing_type', 'allow_timesheets', 'allow_billable', 'sale_line_employee_ids', 'sale_line_employee_ids.employee_id')
     def _compute_warning_employee_rate(self):
         projects = self.filtered(lambda p: p.allow_billable and p.allow_timesheets and p.pricing_type == 'employee_rate')
-        employees = self.env['account.analytic.line'].read_group([('task_id', 'in', projects.task_ids.ids)], ['employee_id', 'project_id'], ['employee_id', 'project_id'], ['employee_id', 'project_id'], lazy=False)
+        employees = self.env['account.analytic.line']._read_group([('task_id', 'in', projects.task_ids.ids)], ['employee_id', 'project_id'], ['employee_id', 'project_id'], ['employee_id', 'project_id'], lazy=False)
         dict_project_employee = defaultdict(list)
         for line in employees:
             dict_project_employee[line['project_id'][0]] += [line['employee_id'][0]] if line['employee_id'] else []
@@ -173,11 +173,6 @@ class Project(models.Model):
                 ('remaining_hours', '>', 0)
             ], limit=1)
             project.sale_line_id = sol or project.sale_line_employee_ids.sale_line_id[:1]  # get the first SOL containing in the employee mappings if no sol found in the search
-
-    def _get_all_sales_orders(self):
-        if self.allow_billable:
-            return super()._get_all_sales_orders() | self.sale_line_employee_ids.sale_line_id.order_id
-        return self.env['sale.order']
 
     @api.depends('sale_line_employee_ids.sale_line_id', 'allow_billable')
     def _compute_sale_order_count(self):
@@ -306,7 +301,7 @@ class Project(models.Model):
         }
 
     def _get_sale_order_lines(self):
-        sale_orders = self.sale_order_id | self.tasks.sale_order_id
+        sale_orders = self._get_sale_orders()
         return self.env['sale.order.line'].search([('order_id', 'in', sale_orders.ids), ('is_service', '=', True), ('is_downpayment', '=', False)], order='id asc')
 
     def _get_sold_items(self):
@@ -342,6 +337,30 @@ class Project(models.Model):
         }
         return sold_items
 
+    def _get_sale_order_items_query(self, domain_per_model=None):
+        if domain_per_model is None:
+            domain_per_model = {}
+        query = super()._get_sale_order_items_query(domain_per_model)
+        EmployeeMapping = self.env['project.sale.line.employee.map']
+        employee_mapping_domain = [('project_id', 'in', self.ids), ('project_id.allow_billable', '=', True), ('sale_line_id', '!=', False)]
+        if EmployeeMapping._name in domain_per_model:
+            employee_mapping_domain = expression.AND([
+                domain_per_model[EmployeeMapping._name],
+                employee_mapping_domain,
+            ])
+        employee_mapping_query = EmployeeMapping._where_calc(employee_mapping_domain)
+        EmployeeMapping._apply_ir_rules(employee_mapping_query, 'read')
+        employee_mapping_query_str, employee_mapping_params = employee_mapping_query.select(
+            f'{EmployeeMapping._table}.project_id AS id',
+            f'{EmployeeMapping._table}.sale_line_id',
+        )
+        query._tables['project_sale_order_item'] = ' UNION '.join([
+            query._tables['project_sale_order_item'],
+            employee_mapping_query_str,
+        ])
+        query._where_params += employee_mapping_params
+        return query
+
     def _get_profitability_items(self):
         if not self.user_has_groups('project.group_project_manager'):
             return {'data': []}
@@ -376,7 +395,7 @@ class Project(models.Model):
             'revenues': 0.0
         }
 
-        profitability = self.env['project.profitability.report'].read_group(
+        profitability = self.env['project.profitability.report']._read_group(
             [('project_id', '=', self.id)],
             ['project_id',
                 'amount_untaxed_to_invoice',
@@ -404,7 +423,7 @@ class Project(models.Model):
         if self.user_has_groups('hr_timesheet.group_hr_timesheet_approver'):
             buttons.append({
                 'icon': 'clock-o',
-                'text': _('Billable Time'),
+                'text': _lt('Billable Time'),
                 'number': '%s %%' % (self.billable_percentage),
                 'action_type': 'object',
                 'action': 'action_billable_time_button',

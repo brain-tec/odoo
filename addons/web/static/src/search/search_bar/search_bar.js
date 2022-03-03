@@ -8,7 +8,7 @@ import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
 import { LegacyComponent } from "@web/legacy/legacy_component";
 
-const { Component, useExternalListener, useState } = owl;
+const { useExternalListener, useState } = owl;
 const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text"];
@@ -144,7 +144,7 @@ export class SearchBar extends LegacyComponent {
                         value = parser(trimmedQuery);
                     }
                 }
-            } catch (e) {
+            } catch (_e) {
                 continue;
             }
 
@@ -183,7 +183,7 @@ export class SearchBar extends LegacyComponent {
         if (searchItem.domain) {
             try {
                 domain = new Domain(searchItem.domain).toList();
-            } catch (e) {
+            } catch (_e) {
                 // Pass
             }
         }

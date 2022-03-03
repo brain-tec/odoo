@@ -4,7 +4,7 @@ odoo.define('web.Pager', function (require) {
     const { useAutofocus } = require("@web/core/utils/hooks");
     const { LegacyComponent } = require("@web/legacy/legacy_component");
 
-    const { Component, onWillUpdateProps, useState } = owl;
+    const { onWillUpdateProps, useState } = owl;
 
     /**
      * Pager
@@ -84,7 +84,7 @@ odoo.define('web.Pager', function (require) {
         async _changeSelection(direction) {
             try {
                 await this.props.validate();
-            } catch (err) {
+            } catch (_err) {
                 return;
             }
             const { limit, size } = this.props;
@@ -115,7 +115,7 @@ odoo.define('web.Pager', function (require) {
         async _saveValue(value) {
             try {
                 await this.props.validate();
-            } catch (err) {
+            } catch (_err) {
                 return;
             }
             const [min, max] = value.trim().split(/\s*[\-\s,;]\s*/);

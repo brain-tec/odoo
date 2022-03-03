@@ -7,7 +7,7 @@ import fieldUtils from 'web.field_utils';
 import field_registry from 'web.field_registry_owl';
 import { LegacyComponent } from "@web/legacy/legacy_component";
 
-const { Component, onPatched, onWillUpdateProps, useRef, useState } = owl;
+const { onPatched, onWillUpdateProps, useRef, useState } = owl;
 
 /**
     A line of some TaxTotalsComponent, giving the values of a tax group.
@@ -78,7 +78,7 @@ class TaxGroupComponent extends LegacyComponent {
             newValue = fieldUtils.parse.float(newValue); // Need a float for format the value
             newValue = fieldUtils.format.float(newValue, null, {digits: currency.digits}); // Return a string rounded to currency precision
             newValue = fieldUtils.parse.float(newValue); // Convert back to Float to compare with oldValue to know if value has changed
-        } catch (err) {
+        } catch (_err) {
             $(this.inputTax.el).addClass('o_field_invalid');
             this.setState('edit');
             return;

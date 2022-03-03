@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, _lt
 
 
 class Project(models.Model):
@@ -11,7 +11,7 @@ class Project(models.Model):
 
     @api.depends('analytic_account_id')
     def _compute_purchase_orders_count(self):
-        purchase_orders_data = self.env['purchase.order.line'].read_group([
+        purchase_orders_data = self.env['purchase.order.line']._read_group([
             ('account_analytic_id', '!=', False),
             ('account_analytic_id', 'in', self.analytic_account_id.ids)
         ], ['account_analytic_id', 'order_id:count_distinct'], ['account_analytic_id'])
@@ -52,7 +52,7 @@ class Project(models.Model):
         if self.user_has_groups('purchase.group_purchase_user'):
             buttons.append({
                 'icon': 'credit-card',
-                'text': _('Purchase Orders'),
+                'text': _lt('Purchase Orders'),
                 'number': self.purchase_orders_count,
                 'action_type': 'object',
                 'action': 'action_open_project_purchase_orders',

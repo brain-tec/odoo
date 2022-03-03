@@ -5,7 +5,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
     const { useListener } = require("@web/core/utils/hooks");
     const { LegacyComponent } = require("@web/legacy/legacy_component");
 
-    const { Component, onWillUpdateProps, useEffect } = owl;
+    const { onWillUpdateProps, useEffect } = owl;
 
     /**
      * This file defines the Owl version of the AbstractField. Specific fields
@@ -537,7 +537,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
             try {
                 value = this._parseValue(value);
                 this._isValid = true;
-            } catch (e) {
+            } catch (_e) {
                 this._isValid = false;
                 this.trigger('set-dirty', {dataPointID: this.dataPointId});
                 return Promise.reject({message: "Value set is not valid"});

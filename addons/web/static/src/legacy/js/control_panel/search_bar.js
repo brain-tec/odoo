@@ -8,7 +8,7 @@ odoo.define('web.SearchBar', function (require) {
     const { fuzzyTest } = require('@web/core/utils/search');
     const { LegacyComponent } = require("@web/legacy/legacy_component");
 
-    const { Component, onMounted, onWillUnmount, toRaw, useExternalListener, useState } = owl;
+    const { onMounted, onWillUnmount, toRaw, useExternalListener, useState } = owl;
     const CHAR_FIELDS = ['char', 'html', 'many2many', 'many2one', 'one2many', 'text'];
 
     let sourceId = 0;
@@ -163,7 +163,7 @@ odoo.define('web.SearchBar', function (require) {
                 if (typeof args === 'string') {
                     try {
                         args = Domain.prototype.stringToArray(args);
-                    } catch (err) {
+                    } catch (_err) {
                         args = [];
                     }
                 }
@@ -295,7 +295,7 @@ odoo.define('web.SearchBar', function (require) {
         _validateSource(query, source) {
             try {
                 this._parseWithSource(query, source);
-            } catch (err) {
+            } catch (_err) {
                 return false;
             }
             return true;

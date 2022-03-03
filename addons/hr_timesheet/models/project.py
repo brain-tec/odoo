@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, _lt
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
 
 
@@ -83,7 +83,7 @@ class Project(models.Model):
 
     @api.depends('allow_timesheets', 'task_ids.planned_hours', 'task_ids.remaining_hours')
     def _compute_remaining_hours(self):
-        group_read = self.env['project.task'].read_group(
+        group_read = self.env['project.task']._read_group(
             domain=[('planned_hours', '!=', False), ('project_id', 'in', self.filtered('allow_timesheets').ids),
                      '|', ('stage_id.fold', '=', False), ('stage_id', '=', False)],
             fields=['planned_hours:sum', 'remaining_hours:sum'], groupby='project_id')
@@ -152,7 +152,7 @@ class Project(models.Model):
 
     @api.depends('timesheet_ids')
     def _compute_timesheet_count(self):
-        timesheet_read_group = self.env['account.analytic.line'].read_group(
+        timesheet_read_group = self.env['account.analytic.line']._read_group(
             [('project_id', 'in', self.ids)],
             ['project_id'],
             ['project_id']
@@ -248,7 +248,7 @@ class Project(models.Model):
         if self.user_has_groups('hr_timesheet.group_hr_timesheet_user'):
             buttons.append({
                 'icon': 'clock-o',
-                'text': _('Recorded'),
+                'text': _lt('Recorded'),
                 'number': '%s %s' % (self.total_timesheet_time, self.env.company.timesheet_encode_uom_id.name),
                 'action_type': 'object',
                 'action': 'action_show_timesheets_by_employee_invoice_type',
