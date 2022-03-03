@@ -651,7 +651,7 @@
                         <page string="Other Info" name="other_information">
                             <group>
                                 <group name="sales_person" string="Sales">
-                                    <field name="user_id" domain="[('share', '=', False)]" widget="many2one_avatar_user"/>
+                                    <field name="user_id" widget="many2one_avatar_user"/>
                                     <field name="team_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s" options="{'no_create': True}"/>
                                     <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                     <field name="require_signature"/>
@@ -725,7 +725,7 @@
             <field name="arch" type="xml">
                 <search string="Search Sales Order">
                     <field name="name" string="Order" filter_domain="['|', '|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self), ('partner_id', 'child_of', self)]"/>
-                    <field name="partner_id" operator="child_of" context="{'active_test': False}"/>
+                    <field name="partner_id" operator="child_of"/>
                     <field name="user_id"/>
                     <field name="team_id" string="Sales Team"/>
                     <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
