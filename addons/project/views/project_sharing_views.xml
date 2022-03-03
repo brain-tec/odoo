@@ -98,8 +98,11 @@
                                 <div class="oe_kanban_bottom_right" t-if="!selection_mode">
                                     <span t-if="record.portal_user_names.raw_value.length > 0" class="pr-2" t-att-title="record.portal_user_names.raw_value">
                                         <t t-set="user_count" t-value="record.portal_user_names.raw_value.split(',').length"/>
-                                        <t t-set="display_nb_assignees" t-value="user_count + ' assignee' + (user_count > 1 ? 's' : '')"/>
-                                        <t t-out="display_nb_assignees"/>
+                                        <t t-out="user_count"/>
+                                        <t t-if="user_count > 1"> assignees</t>
+                                        <t t-else=""> assignee</t>
+                                        <t t-if="1 == 0" t-set="display_nb_assignees" t-value="user_count + ' assignee' + (user_count > 1 ? 's' : '')"/>
+                                        <t t-if="1 == 0" t-out="display_nb_assignees"/>
                                     </span>
                                     <field name="kanban_state" widget="state_selection"/>
                                     <!-- TODO: [XBO] remove me in master -->
@@ -197,7 +200,7 @@
                             <field name="description" type="html" options="{'collaborative': true}"/>
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
-                            <field name="child_ids" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': [(6, 0, [uid])], 'default_parent_id': id, 'default_partner_id': partner_id, 'form_view_ref' : 'project.project_sharing_project_task_view_form'}">
+                            <field name="child_ids" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_parent_id': id, 'default_partner_id': partner_id, 'form_view_ref' : 'project.project_sharing_project_task_view_form'}">
                                 <tree editable="bottom">
                                     <field name="project_id" invisible="1"/>
                                     <field name="is_closed" invisible="1"/>

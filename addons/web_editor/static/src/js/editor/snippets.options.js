@@ -2161,7 +2161,7 @@ const ListUserValueWidget = UserValueWidget.extend({
     _onAddCustomItemClick() {
         let id;
         if (this.el.dataset.generateIdForNewItems) {
-            id = generateHTMLId(30);
+            id = generateHTMLId();
         }
         if (this.el.dataset.newElementsToggled) {
             this.selected.push(id);
@@ -4540,17 +4540,21 @@ registry.Box = SnippetOptionWidget.extend({
         if (type) {
             el.classList.add(shadowClass);
         }
+
+        let shadow = 'none';
         document.body.appendChild(el);
         switch (type) {
             case 'outset': {
-                return $(el).css('box-shadow');
+                shadow = $(el).css('box-shadow');
+                break;
             }
             case 'inset': {
-                return $(el).css('box-shadow') + ' inset';
+                shadow = $(el).css('box-shadow') + ' inset';
+                break;
             }
         }
         el.remove();
-        return 'none';
+        return shadow;
     }
 });
 

@@ -912,17 +912,25 @@ class ChromeBrowser:
                     return bin_
 
         elif system == 'Windows':
-            # TODO: handle windows platform: https://stackoverflow.com/a/40674915
-            pass
+            bins = [
+                '%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe',
+                '%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe',
+                '%LocalAppData%\\Google\\Chrome\\Application\\chrome.exe',
+            ]
+            for bin_ in bins:
+                bin_ = os.path.expandvars(bin_)
+                if os.path.exists(bin_):
+                    return bin_
 
         self._logger.warning("Chrome executable not found")
         raise unittest.SkipTest("Chrome executable not found")
 
     def _spawn_chrome(self, cmd):
-        if os.name != 'posix':
-            return
-
-        pid = os.fork()
+        if os.name == 'nt':
+            proc = subprocess.Popen(cmd, stderr=subprocess.DEVNULL)
+            pid = proc.pid
+        else:
+            pid = os.fork()
         if pid != 0:
             port_file = pathlib.Path(self.user_data_dir, 'DevToolsActivePort')
             for _ in range(100):
@@ -1017,7 +1025,7 @@ class ChromeBrowser:
         ``protocol``
             get the full protocol
         """
-        command = os.path.join('json', command).strip('/')
+        command = '/'.join(['json', command]).strip('/')
         url = werkzeug.urls.url_join('http://%s:%s/' % (HOST, self.devtools_port), command)
         self._logger.info("Issuing json command %s", url)
         delay = 0.1
@@ -1362,6 +1370,8 @@ class ChromeBrowser:
                 registrations => Promise.all(registrations.map(r => r.unregister()))
             )
         """, 'awaitPromise': True})
+        # wait for the screenshot or whatever
+        wait(self._responses.values())
         self._logger.info('Deleting cookies and clearing local storage')
         self._websocket_request('Network.clearBrowserCache')
         self._websocket_request('Network.clearBrowserCookies')
@@ -1369,7 +1379,7 @@ class ChromeBrowser:
         self.navigate_to('about:blank', wait_stop=True)
         # hopefully after navigating to about:blank there's no event left
         self._frames.clear()
-        # wait for the screenshot or whatever
+        # wait for the clearing requests to finish in case the browser is re-used
         wait(self._responses.values())
         self._responses.clear()
         self._result.cancel()

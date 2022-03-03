@@ -80,7 +80,7 @@ class HolidaysRequest(models.Model):
 
         if 'state' in fields_list and not defaults.get('state'):
             lt = self.env['hr.leave.type'].browse(defaults.get('holiday_status_id'))
-            defaults['state'] = 'confirm' if lt and lt.leave_validation_type != 'no_validation' else 'draft'
+            defaults['state'] = 'confirm'
 
         return defaults
 
@@ -201,8 +201,8 @@ class HolidaysRequest(models.Model):
     # To display in form view
     supported_attachment_ids = fields.Many2many(
         'ir.attachment', string="Attach File", compute='_compute_supported_attachment_ids',
-        inverse='_inverse_supported_attachment_ids', compute_sudo=True)
-    supported_attachment_ids_count = fields.Integer(compute='_compute_supported_attachment_ids', compute_sudo=True)
+        inverse='_inverse_supported_attachment_ids')
+    supported_attachment_ids_count = fields.Integer(compute='_compute_supported_attachment_ids')
     # UX fields
     all_employee_ids = fields.Many2many('hr.employee', compute='_compute_all_employees')
     leave_type_request_unit = fields.Selection(related='holiday_status_id.request_unit', readonly=True)
@@ -641,7 +641,9 @@ class HolidaysRequest(models.Model):
 
     def _inverse_supported_attachment_ids(self):
         for holiday in self:
-            holiday.sudo().attachment_ids = holiday.supported_attachment_ids
+            holiday.supported_attachment_ids.write({
+                'res_id': holiday.id,
+            })
 
     @api.constrains('date_from', 'date_to', 'employee_id')
     def _check_date(self):
@@ -958,9 +960,14 @@ class HolidaysRequest(models.Model):
             raise UserError(_("You can't manually archive a time off."))
 
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
-        if not is_officer:
+        if not is_officer and values.keys() - {'supported_attachment_ids', 'message_main_attachment_id'}:
             if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user for hol in self):
                 raise UserError(_('You must have manager rights to modify/validate a time off that already begun'))
+
+        # Unlink existing resource.calendar.leaves for validated time off
+        if 'state' in values and values['state'] != 'validate':
+            validated_leaves = self.filtered(lambda l: l.state == 'validate')
+            validated_leaves._remove_resource_leave()
 
         employee_id = values.get('employee_id', False)
         if not self.env.context.get('leave_fast_create'):
@@ -981,6 +988,7 @@ class HolidaysRequest(models.Model):
             for holiday in self:
                 if employee_id:
                     holiday.add_follower(employee_id)
+
         return result
 
     @api.ondelete(at_uninstall=False)
@@ -1046,7 +1054,7 @@ class HolidaysRequest(models.Model):
     def _validate_leave_request(self):
         """ Validate time off requests (holiday_type='employee')
         by creating a calendar event and a resource time off. """
-        holidays = self.filtered(lambda request: request.holiday_type == 'employee')
+        holidays = self.filtered(lambda request: request.holiday_type == 'employee' and request.employee_id)
         holidays._create_resource_leave()
         meeting_holidays = holidays.filtered(lambda l: l.holiday_status_id.create_calendar_meeting)
         if meeting_holidays:
@@ -1317,7 +1325,6 @@ class HolidaysRequest(models.Model):
                     body=_('Your %(leave_type)s planned on %(date)s has been refused', leave_type=holiday.holiday_status_id.display_name, date=holiday.date_from),
                     partner_ids=holiday.employee_id.user_id.partner_id.ids)
 
-        self._remove_resource_leave()
         self.activity_update()
         return True
 
@@ -1366,6 +1373,9 @@ class HolidaysRequest(models.Model):
                     if (state == 'validate1' and val_type == 'both') or (state == 'validate' and val_type == 'manager') and holiday.holiday_type == 'employee':
                         if not is_officer and self.env.user != holiday.employee_id.leave_manager_id:
                             raise UserError(_('You must be either %s\'s manager or Time off Manager to approve this leave') % (holiday.employee_id.name))
+
+                    if not is_officer and (state == 'validate' and val_type == 'hr') and holiday.holiday_type == 'employee':
+                        raise UserError(_('You must either be a Time off Officer or Time off Manager to approve this leave'))
 
     # ------------------------------------------------------------
     # Activity methods
