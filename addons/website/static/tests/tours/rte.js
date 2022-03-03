@@ -38,8 +38,9 @@ tour.register('rte_translator', {
     extra_trigger: 'html[lang*="pa-GB"]',
 }, {
     content: "Open new page menu",
-    trigger: '#new-content-menu > a',
+    trigger: "body:has(#o_new_content_menu_choices.o_hidden) #new-content-menu > a",
     extra_trigger: 'a[data-action="edit"]',
+    consumeVisibleOnly: true,
 }, {
     content: "click on new page",
     trigger: 'a[data-action="new_page"]',
@@ -172,7 +173,7 @@ tour.register('rte_translator', {
 }, {
     content: "save new change",
     trigger: 'button[data-action=save]',
-    extra_trigger: '#wrap.o_dirty p u',
+    extra_trigger: '#wrap.o_dirty p span[style="text-decoration: underline;"]',
 
     }, {
     content: "click language dropdown (4)",

@@ -162,8 +162,9 @@
                                     <field name="categ_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                                 </group>
                             </group>
-                            <label for="description"/>
-                            <field name="description"/>
+                            <group>
+                                <field name="description"/>
+                            </group>
                         </page>
                         <page name="page_options" string="Options">
                             <group>
@@ -419,6 +420,7 @@
         groups="base.group_no_one"/>
 
     <!-- called in js from '/js/base_calendar.js' -->
+    <!-- TODO: remove in master -->
     <record id="action_calendar_event_notify" model="ir.actions.act_window">
         <field name="name">Meetings</field>
         <field name="res_model">calendar.event</field>

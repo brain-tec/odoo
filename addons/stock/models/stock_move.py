@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import timedelta
 from operator import itemgetter
 
-from odoo import _, api, fields, models
+from odoo import _, api, Command, fields, models
 from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
@@ -877,6 +877,10 @@ class StockMove(models.Model):
                 # If quantity can be fully absorbed by a single move, update its quantity and remove the negative move
                 if float_compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty), precision_rounding=pos_move.product_uom.rounding) >= 0:
                     pos_move.product_uom_qty += neg_move.product_uom_qty
+                    pos_move.write({
+                        'move_dest_ids': [Command.link(m.id) for m in self.mapped('move_dest_ids')],
+                        'move_orig_ids': [Command.link(m.id) for m in self.mapped('move_orig_ids')],
+                    })
                     merged_moves |= pos_move
                     moves_to_unlink |= neg_move
                     break
@@ -1418,7 +1422,7 @@ class StockMove(models.Model):
             move_lines_out_reserved = (reserved_moves_out_siblings | moves_out_siblings_to_consider).mapped('move_line_ids')
 
             def _keys_out_groupby(ml):
-                return (ml.location_id.id, ml.lot_id.id, ml.package_id.id, ml.owner_id.id)
+                return (ml.location_id, ml.lot_id, ml.package_id, ml.owner_id)
 
             grouped_move_lines_out = {}
             for k, g in groupby(move_lines_out_done, key=_keys_out_groupby):
@@ -1430,7 +1434,8 @@ class StockMove(models.Model):
                 grouped_move_lines_out[k] = sum(self.env['stock.move.line'].concat(*g).mapped('product_qty'))
             available_move_lines = {key: grouped_move_lines_in[key] - grouped_move_lines_out.get(key, 0) for key in grouped_move_lines_in}
             # pop key if the quantity available amount to 0
-            return dict((k, v) for k, v in available_move_lines.items() if v)
+            rounding = move.product_id.uom_id.rounding
+            return dict((k, v) for k, v in available_move_lines.items() if float_compare(v, 0, precision_rounding=rounding) > 0)
 
         StockMove = self.env['stock.move']
         assigned_moves_ids = OrderedSet()

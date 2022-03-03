@@ -35,11 +35,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!this.nodeOptions.snippets) {
             this.nodeOptions.snippets = 'mass_mailing.email_designer_snippets';
         }
-
-        // All the code related to this __extraAssetsForIframe variable is an
-        // ugly hack to restore mass mailing options in stable versions. The
-        // whole logic has to be refactored as soon as possible...
-        this.__extraAssetsForIframe = [{jsLibs: []}];
     },
 
     //--------------------------------------------------------------------------
@@ -72,7 +67,10 @@ var MassMailingFieldHtml = FieldHtml.extend({
             self._isDirty = self.wysiwyg.isDirty();
             self._doAction();
 
+            const $editorEnable = $editable.closest('.editor_enable');
+            $editorEnable.removeClass('editor_enable');
             convertInline.toInline($editable, self.cssRules, self.wysiwyg.$iframe);
+            $editorEnable.addClass('editor_enable');
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
@@ -105,6 +103,18 @@ var MassMailingFieldHtml = FieldHtml.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Adds automatic editor messages on drag&drop zone elements.
+     *
+     * @private
+     */
+     _addEditorMessages: function () {
+        const $editable = this.wysiwyg.getEditable().find('.o_editable');
+        this.$editorMessageElements = $editable
+            .not('[data-editor-message]')
+            .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+        $editable.filter(':empty').attr('contenteditable', false);
+    },
     /**
      * @override
      */
@@ -304,7 +314,9 @@ var MassMailingFieldHtml = FieldHtml.extend({
         const options = this._super.apply(this, arguments);
         options.resizable = false;
         options.defaultDataForLinkTools = { isNewWindow: true };
-        if (!this._wysiwygSnippetsActive) {
+        if (this._wysiwygSnippetsActive) {
+            options.wysiwygAlias = 'mass_mailing.wysiwyg';
+        } else {
             delete options.snippets;
         }
         return options;
@@ -508,6 +520,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             }
 
             selectTheme(e);
+            this._addEditorMessages();
             // Wait the next tick because some mutation have to be processed by
             // the Odoo editor before resetting the history.
             setTimeout(() => {

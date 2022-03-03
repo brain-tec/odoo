@@ -259,7 +259,7 @@ def translate_xml_node(node, callback, parse, serialize):
 
         # translate the attributes of the node
         for key, val in node.attrib.items():
-            if val and key in TRANSLATED_ATTRS and TRANSLATED_ATTRS[key](node):
+            if nonspace(val) and key in TRANSLATED_ATTRS and TRANSLATED_ATTRS[key](node):
                 node.set(key, callback(val.strip()) or val)
 
     process(node)
@@ -317,6 +317,14 @@ def html_translate(callback, value):
         _logger.exception("Cannot translate malformed HTML, using source value instead")
 
     return value
+
+
+def get_text_content(term):
+    """ Return the textual content of the given term. """
+    return html.fromstring(term).text_content()
+
+xml_translate.get_text_content = get_text_content
+html_translate.get_text_content = get_text_content
 
 
 #

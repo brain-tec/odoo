@@ -1607,6 +1607,11 @@ class _String(Field):
         self.translate(terms.append, value)
         return terms
 
+    def get_text_content(self, term):
+        """ Return the textual content for the given term. """
+        func = getattr(self.translate, 'get_text_content', lambda term: term)
+        return func(term)
+
     def get_trans_func(self, records):
         """ Return a translation function `translate` for `self` on the given
         records; the function call `translate(record_id, value)` translates the
@@ -2592,7 +2597,7 @@ class Reference(Selection):
     """ Pseudo-relational field (no FK in database).
 
     The field value is stored as a :class:`string <str>` following the pattern
-    ``"res_model.res_id"`` in database.
+    ``"res_model,res_id"`` in database.
     """
     type = 'reference'
 
@@ -3837,13 +3842,14 @@ class Many2many(_RelationalMulti):
         if not records_commands_list:
             return
 
-        comodel = records_commands_list[0][0].env[self.comodel_name].with_context(**self.context)
-        cr = records_commands_list[0][0].env.cr
+        model = records_commands_list[0][0].browse()
+        comodel = model.env[self.comodel_name].with_context(**self.context)
+        cr = model.env.cr
 
         # determine old and new relation {x: ys}
         set = OrderedSet
         ids = {rid for recs, cs in records_commands_list for rid in recs.ids}
-        records = records_commands_list[0][0].browse(ids)
+        records = model.browse(ids)
 
         if self.store:
             # Using `record[self.name]` generates 2 SQL queries when the value
@@ -3854,13 +3860,9 @@ class Many2many(_RelationalMulti):
             if missing_ids:
                 self.read(records.browse(missing_ids))
 
+        # determine new relation {x: ys}
         old_relation = {record.id: set(record[self.name]._ids) for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
-
-        # determine new relation {x: ys}
-        new_relation = defaultdict(set)
-        for x, ys in old_relation.items():
-            new_relation[x] = set(ys)
 
         # operations on new relation
         def relation_add(xs, y):
