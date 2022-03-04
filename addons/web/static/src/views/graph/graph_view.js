@@ -5,19 +5,19 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { Layout } from "@web/search/layout";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
-import { Layout } from "@web/views/layout";
 import { useModel } from "../helpers/model";
 import { GraphArchParser } from "./graph_arch_parser";
 import { GraphModel } from "./graph_model";
 import { GraphRenderer } from "./graph_renderer";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const viewRegistry = registry.category("views");
+const { Component } = owl;
 
-export class GraphView extends LegacyComponent {
+export class GraphView extends Component {
     setup() {
         this.actionService = useService("action");
 
@@ -155,7 +155,7 @@ GraphView.props = {
 GraphView.type = "graph";
 
 GraphView.display_name = _lt("Graph");
-GraphView.icon = "oi oi-chart--line-smooth";
+GraphView.icon = "fa fa-area-chart";
 GraphView.multiRecord = true;
 
 GraphView.Model = GraphModel;

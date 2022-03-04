@@ -6,18 +6,18 @@ import { _lt } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { Layout } from "@web/search/layout";
 import { useModel } from "@web/views/helpers/model";
 import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
-import { Layout } from "@web/views/layout";
 import { PivotArchParser } from "@web/views/pivot/pivot_arch_parser";
 import { PivotModel } from "@web/views/pivot/pivot_model";
 import { PivotRenderer } from "@web/views/pivot/pivot_renderer";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const viewRegistry = registry.category("views");
+const { Component } = owl;
 
-export class PivotView extends LegacyComponent {
+export class PivotView extends Component {
     setup() {
         this.actionService = useService("action");
 
@@ -175,7 +175,7 @@ PivotView.ArchParser = PivotArchParser;
 
 PivotView.type = "pivot";
 PivotView.display_name = _lt("Pivot");
-PivotView.icon = "oi-cross-tab";
+PivotView.icon = "oi oi-view-pivot";
 PivotView.multiRecord = true;
 PivotView.searchMenuTypes = ["filter", "groupBy", "comparison", "favorite"];
 
