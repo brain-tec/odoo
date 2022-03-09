@@ -82,7 +82,7 @@ export class CommandPalette extends Component {
         this.DefaultCommandItem = DefaultCommandItem;
         this.activeElement = useService("ui").activeElement;
         this.defaultDebounceSearch = debounce.apply(this, [this.search, 0]);
-        useAutofocus();
+        this.inputRef = useAutofocus();
 
         useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
         useHotkey("ArrowUp", () => this.selectCommandAndScrollTo("PREV"), {
@@ -267,24 +267,25 @@ export class CommandPalette extends Component {
             searchValue,
             activeElement: this.activeElement,
         });
+        if (this.inputRef.el) {
+            this.inputRef.el.focus();
+        }
     }
 
     debounceSearch(value) {
         const { namespace } = this.processSearchValue(value);
-        if (!this.debounceSearchByNamespace[namespace]) {
-            const namespaceConfig = this.configByNamespace[namespace] || {};
-            if (namespaceConfig.debounceDelay) {
-                this.debounceSearchByNamespace[namespace] = debounce.apply(this, [
-                    this.search,
-                    namespaceConfig.debounceDelay,
-                ]);
-            } else {
-                this.debounceSearchByNamespace[namespace] = this.defaultDebounceSearch;
+        const namespaceConfig = this.configByNamespace[namespace] || {};
+        if (this.namespace !== namespace) {
+            if (this.lastDebounceSearch) {
+                this.lastDebounceSearch.cancel();
             }
+            this.lastDebounceSearch = debounce(
+                (value) => this.search(value),
+                namespaceConfig.debounceDelay || 0
+            );
+            this.namespace = namespace;
         }
-        const debounceSearch =
-            this.debounceSearchByNamespace[namespace] || this.defaultDebounceSearch;
-        this.searchValuePromise = debounceSearch.apply(this, [value]).catch(() => {
+        this.searchValuePromise = this.lastDebounceSearch(value).catch(() => {
             this.searchValuePromise = null;
         });
     }
@@ -300,6 +301,12 @@ export class CommandPalette extends Component {
             searchValue = searchValue.slice(1);
         }
         return { namespace, searchValue };
+    }
+
+    switchNamespace(namespace) {
+        const searchValue = `${namespace}${this.clearSearchValue}`;
+        this.state.searchValue = searchValue;
+        this.debounceSearch(searchValue);
     }
 }
 CommandPalette.template = "web.CommandPalette";
