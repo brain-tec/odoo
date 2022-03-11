@@ -579,7 +579,8 @@ class Channel(models.Model):
     def _message_compute_parent_id(self, parent_id):
         # super() unravels the chain of parents to set parent_id as the first
         # ancestor. We don't want that in channel.
-        return parent_id
+        parent_message = self.env['mail.message'].search([('id', '=', parent_id), ('model', '=', 'mail.channel'), ('res_id', '=', self.id)])
+        return parent_message.id
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *, message_type='notification', **kwargs):
@@ -793,6 +794,10 @@ class Channel(models.Model):
                     'fetched_message_id': cp.fetched_message_id.id,
                     'seen_message_id': cp.seen_message_id.id,
                 } for cp in members_by_channel[channel] if cp.partner_id], key=lambda p: p['partner_id'])
+                info['guestMembers'] = [('insert', sorted([{
+                    'id': member.guest_id.id,
+                    'name': member.guest_id.name,
+                } for member in members_by_channel[channel] if member.guest_id], key=lambda g: g['id']))]
 
             # add RTC sessions info
             info.update({
@@ -1064,7 +1069,7 @@ class Channel(models.Model):
         self.add_members(self.env.user.partner_id.ids)
 
     @api.model
-    def channel_create(self, name, privacy='public'):
+    def channel_create(self, name, privacy='groups'):
         """ Create a channel and add the current partner, broadcast it (to make the user directly
             listen to it when polling)
             :param name : the name of the channel to create
