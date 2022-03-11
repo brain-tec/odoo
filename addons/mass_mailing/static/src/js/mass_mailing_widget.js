@@ -247,10 +247,11 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         this.switchThemeLast = themeParams;
 
+        this.$lastContent = this.$content.find('.o_mail_wrapper_td').contents();
+
         this.$content.closest('body').removeClass(this._allClasses).addClass(themeParams.className);
 
         const old_layout = this.$content.find('.o_layout')[0];
-        const $old_layout = $(old_layout);
 
         var $new_wrapper;
         var $newWrapperContent;
@@ -292,6 +293,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         this.wysiwyg.trigger('reload_snippet_dropzones');
         this.trigger_up('iframe_updated', { $iframe: this.wysiwyg.$iframe });
+        this.wysiwyg.odooEditor.historyStep(true);
     },
 
     /**
@@ -476,7 +478,11 @@ var MassMailingFieldHtml = FieldHtml.extend({
             self._switchThemes(themeParams);
         });
         $themeSelector.on("mouseleave", ".dropdown-item", function (e) {
-            self._switchThemes(selectedTheme);
+            if (self.$lastContent) {
+                self._switchThemes(Object.assign({}, selectedTheme, {template: self.$lastContent}));
+            } else {
+                self._switchThemes(selectedTheme);
+            }
         });
         $themeSelector.on("click", '[data-toggle="dropdown"]', function (e) {
             var $menu = $themeSelector.find('.dropdown-menu');
@@ -499,6 +505,9 @@ var MassMailingFieldHtml = FieldHtml.extend({
             // Notify form view
             $themeSelector.find('.dropdown-item.selected').removeClass('selected');
             $themeSelector.find('.dropdown-item:eq(' + themesParams.indexOf(selectedTheme) + ')').addClass('selected');
+
+            // Invalidate previous content.
+            self.$lastContent = undefined;
         };
 
         $themeSelector.on("click", ".dropdown-item", selectTheme);
