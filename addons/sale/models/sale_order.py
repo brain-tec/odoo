@@ -348,10 +348,6 @@ class SaleOrder(models.Model):
             tax_totals = account_move._get_tax_totals(order.partner_id, tax_lines_data, order.amount_total, order.amount_untaxed, order.currency_id)
             order.tax_totals_json = json.dumps(tax_totals)
 
-    @api.onchange('expected_date')
-    def _onchange_expected_date(self):
-        self.commitment_date = self.expected_date
-
     @api.depends('transaction_ids')
     def _compute_authorized_transaction_ids(self):
         for trans in self:
@@ -482,7 +478,7 @@ class SaleOrder(models.Model):
                 }
             }
 
-    @api.onchange('commitment_date')
+    @api.onchange('commitment_date', 'expected_date')
     def _onchange_commitment_date(self):
         """ Warn if the commitment dates is sooner than the expected date """
         if (self.commitment_date and self.expected_date and self.commitment_date < self.expected_date):
@@ -512,8 +508,15 @@ class SaleOrder(models.Model):
                 pricelist=self.pricelist_id.id,
                 uom=line.product_uom.id
             )
-            price_unit = self.env['account.tax']._fix_tax_included_price_company(
-                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
+            price_unit = product._get_tax_included_unit_price(
+                line.company_id,
+                line.order_id.currency_id,
+                line.order_id.date_order,
+                'sale',
+                fiscal_position=line.order_id.fiscal_position_id,
+                product_price_unit=line._get_display_price(product),
+                product_currency=line.currency_id
+            )
             if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
                 price_discount_unrounded = self.pricelist_id.get_product_price(product, line.product_uom_qty, self.partner_id, self.date_order, line.product_uom.id)
                 discount = max(0, (price_unit - price_discount_unrounded) * 100 / price_unit)
