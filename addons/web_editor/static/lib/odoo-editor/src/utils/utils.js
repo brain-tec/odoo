@@ -867,6 +867,71 @@ export function isBold(node) {
     const fontWeight = +getComputedStyle(closestElement(node)).fontWeight;
     return fontWeight > 500 || fontWeight > +getComputedStyle(closestBlock(node)).fontWeight;
 }
+/**
+ * Return true if the given node appears italic.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isItalic(node) {
+    return getComputedStyle(closestElement(node)).fontStyle === 'italic';
+}
+/**
+ * Return true if the given node appears underlined.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isUnderline(node) {
+    let parent = closestElement(node);
+    while (parent) {
+        if (getComputedStyle(parent).textDecorationLine === 'underline') {
+            return true;
+        }
+        parent = parent.parentElement;
+    }
+    return false;
+}
+/**
+ * Return true if the given node appears struck through.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isStrikeThrough(node) {
+    let parent = closestElement(node);
+    while (parent) {
+        if (getComputedStyle(parent).textDecorationLine === 'line-through') {
+            return true;
+        }
+        parent = parent.parentElement;
+    }
+    return false;
+}
+export const isFormat = {
+    bold: isBold,
+    italic: isItalic,
+    underline: isUnderline,
+    strikeThrough: isStrikeThrough,
+};
+/**
+ * Return true if the current selection on the editable appears as the given
+ * format. The selection is considered to appear as that format if every text
+ * node in it appears as that format.
+ *
+ * @param {Element} editable
+ * @param {String} format 'bold'|'italic'|'underline'|'strikeThrought'
+ * @returns {boolean}
+ */
+export function isSelectionFormat(editable, format) {
+    const selectedText = getSelectedNodes(editable)
+        .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
+    if (selectedText.length) {
+        return selectedText.every(n => isFormat[format](n.parentElement));
+    } else {
+        return isFormat[format](closestElement(editable.ownerDocument.getSelection().anchorNode));
+    }
+}
 
 export function isUnbreakable(node) {
     if (!node || node.nodeType === Node.TEXT_NODE) {
@@ -1388,6 +1453,7 @@ export function insertText(sel, content) {
     sel.getRangeAt(0).insertNode(txt);
     restore();
     setSelection(...boundariesOut(txt), false);
+    return txt;
 }
 
 /**
@@ -1441,6 +1507,20 @@ export function fillEmpty(el) {
         setSelection(zws, 0, zws, 0);
     }
     return fillers;
+}
+/**
+ * Takes a selection (assumed to be collapsed) and insert a zero-width space at
+ * its anchor point. Then, select that zero-width space.
+ *
+ * @param {Selection} selection
+ * @returns {Node} the inserted zero-width space
+ */
+export function insertAndSelectZws(selection) {
+    const offset = selection.anchorOffset;
+    const zws = insertText(selection, '\u200B');
+    splitTextNode(zws, offset);
+    selection.getRangeAt(0).selectNode(zws);
+    return zws;
 }
 /**
  * Removes the given node if invisible and all its invisible ancestors.
