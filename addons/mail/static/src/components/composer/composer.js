@@ -35,22 +35,6 @@ export class Composer extends Component {
     }
 
     /**
-     * Get the current partner image URL.
-     *
-     * @returns {string}
-     */
-    get currentPartnerAvatar() {
-        const avatar = this.messaging.currentUser
-            ? this.env.session.url('/web/image', {
-                    field: 'avatar_128',
-                    id: this.messaging.currentUser.id,
-                    model: 'res.users',
-                })
-            : '/web/static/img/user_menu_avatar.png';
-        return avatar;
-    }
-
-    /**
      * Determine whether composer should display a footer.
      *
      * @returns {boolean}
@@ -63,7 +47,7 @@ export class Composer extends Component {
             this.props.hasThreadTyping ||
             this.composerView.composer.attachments.length > 0 ||
             this.composerView.messageViewInEditing ||
-            !this.props.isCompact
+            !this.composerView.isCompact
         );
     }
 
@@ -78,7 +62,7 @@ export class Composer extends Component {
         }
         return (
             (this.props.hasThreadName && this.composerView.composer.thread) ||
-            (this.props.hasFollowers && !this.composerView.composer.isLog) ||
+            (this.composerView.hasFollowers && !this.composerView.composer.isLog) ||
             this.composerView.threadView && this.composerView.threadView.replyingToMessageView
         );
     }
@@ -210,11 +194,9 @@ Object.assign(Composer, {
     defaultProps: {
         hasCurrentPartnerAvatar: true,
         hasDiscardButton: false,
-        hasFollowers: false,
         hasSendButton: true,
         hasThreadName: false,
         hasThreadTyping: false,
-        isCompact: true,
         isExpandable: false,
     },
     props: {
@@ -224,10 +206,6 @@ Object.assign(Composer, {
             optional: true,
         },
         hasDiscardButton: {
-            type: Boolean,
-            optional: true,
-        },
-        hasFollowers: {
             type: Boolean,
             optional: true,
         },
@@ -252,10 +230,6 @@ Object.assign(Composer, {
             optional: true,
         },
         showAttachmentsFilenames: {
-            type: Boolean,
-            optional: true,
-        },
-        isCompact: {
             type: Boolean,
             optional: true,
         },

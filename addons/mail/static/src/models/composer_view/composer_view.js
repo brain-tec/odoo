@@ -540,6 +540,20 @@ registerModel({
             return clear();
         },
         /**
+         * @private
+         * @returns {string}
+         */
+        _computeCurrentPartnerAvatar() {
+            if (this.messaging.currentUser) {
+                return this.env.session.url('/web/image', {
+                    field: 'avatar_128',
+                    id: this.messaging.currentUser.id,
+                    model: 'res.users',
+                });
+            }
+            return '/web/static/img/user_menu_avatar.png';
+        },
+        /**
          * Clears the extra suggested record on closing mentions, and ensures
          * the extra list does not contain any element already present in the
          * main list, which is a requirement for the navigation process.
@@ -555,10 +569,33 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeHasFollowers() {
+            if (this.chatter) {
+                return true;
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @return {boolean}
          */
         _computeHasSuggestions() {
             return this.mainSuggestedRecords.length > 0 || this.extraSuggestedRecords.length > 0;
+        },
+        /**
+         * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeIsCompact() {
+            if (this.chatter) {
+                return false;
+            }
+            if (this.messageViewInEditing) {
+                return true;
+            }
+            return clear();
         },
         /**
          * Clears the main suggested record on closing mentions.
@@ -952,6 +989,12 @@ registerModel({
             required: true,
         }),
         /**
+         * Current partner image URL.
+         */
+        currentPartnerAvatar: attr({
+            compute: '_computeCurrentPartnerAvatar',
+        }),
+        /**
          * Determines whether this composer should be focused at next render.
          */
         doFocus: attr(),
@@ -978,6 +1021,10 @@ registerModel({
             readonly: true,
             required: true,
         }),
+        hasFollowers: attr({
+            compute: '_computeHasFollowers',
+            default: false,
+        }),
         /**
          * States whether there is any result currently found for the current
          * suggestion delimiter and search term, if applicable.
@@ -992,6 +1039,10 @@ registerModel({
          */
         hasToScrollToActiveSuggestion: attr({
             default: false,
+        }),
+        isCompact: attr({
+            compute: '_computeIsCompact',
+            default: true,
         }),
         isFocused: attr({
             default: false,

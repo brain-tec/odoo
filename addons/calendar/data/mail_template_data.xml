@@ -360,7 +360,7 @@
             <field name="model_id" ref="calendar.model_calendar_event"/>
             <field name="subject">{{object.name}}: Event update</field>
             <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted or '') }}</field>
-            <field name="email_to"></field>
+            <field name="email_to">{{ object._get_attendee_emails() }}</field>
             <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="body_html" type="html">
 <div>
@@ -369,7 +369,7 @@
     <t t-set="target_responsible" t-value="object.partner_id == object.partner_id" />
     <t t-set="target_customer" t-value="object.partner_id == customer" />
     <t t-set="recurrent" t-value="object.recurrence_id and not ctx.get('calendar_template_ignore_recurrence')" />
-    <t t-set="mail_tz" t-value="ctx.get('mail_tz')" />
+    <t t-set="mail_tz" t-value="object._get_mail_tz() or ctx.get('mail_tz')" />
     <div>
         <table border="0" cellpadding="0" cellspacing="0">
             <tr>
