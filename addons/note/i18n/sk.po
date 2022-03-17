@@ -114,7 +114,7 @@ msgstr ""
 #. module: note
 #: model_terms:ir.ui.view,arch_db:note.view_note_note_filter
 msgid "Archive"
-msgstr "Archív"
+msgstr "Archivovať"
 
 #. module: note
 #: model:ir.model.fields,field_description:note.field_note_note__message_attachment_count
@@ -124,7 +124,7 @@ msgstr "Počet príloh"
 #. module: note
 #: model_terms:ir.ui.view,arch_db:note.view_note_note_filter
 msgid "By sticky note Category"
-msgstr "Podľa Sticky Note kategórie"
+msgstr "Podľa kategórie poznámok"
 
 #. module: note
 #. openerp-web
@@ -198,12 +198,12 @@ msgstr "Odberatelia"
 #. module: note
 #: model:ir.model.fields,field_description:note.field_note_note__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "Odberatelia (Kanály)"
+msgstr "Odberatelia (kanály)"
 
 #. module: note
 #: model:ir.model.fields,field_description:note.field_note_note__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Odberatelia (Partneri)"
+msgstr "Odberatelia (partneri)"
 
 #. module: note
 #: model_terms:ir.ui.view,arch_db:note.view_note_note_filter

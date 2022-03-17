@@ -41,6 +41,7 @@
                                     <group string="Taxes" attrs="{'invisible': [('tax_line_id','=',False), ('tax_ids','=',[])]}">
                                         <field name="tax_line_id" readonly="1" attrs="{'invisible': [('tax_line_id','=',False)]}"/>
                                         <field name="tax_ids" widget="many2many_tags" readonly="1" attrs="{'invisible': [('tax_ids','=',[])]}"/>
+                                        <field name="tax_exigible" attrs="{'readonly':[('parent_state','=','posted')]}"/>
                                         <field name="tax_audit"/>
                                     </group>
                                     <group string="Matching" attrs="{'invisible':[('matched_debit_ids', '=', []),('matched_credit_ids', '=', [])]}">
@@ -425,6 +426,7 @@
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
                     <field name="journal_id"/>
+                    <field name="partner_id"/>
                     <field name="ref"/>
                     <field name="date"/>
                     <field name="state"/>
@@ -433,7 +435,12 @@
                             <div t-attf-class="oe_kanban_global_click">
                                 <div class="row mb4">
                                     <div class="col-6 o_kanban_record_headings">
-                                        <strong><span><field name="journal_id"/></span></strong>
+                                        <strong>
+                                            <span>
+                                                <field name="partner_id" attrs="{'invisible': [('partner_id', '=', False)]}" />
+                                                <field name="journal_id" attrs="{'invisible': [('partner_id', '!=', False)]}" />
+                                            </span>
+                                        </strong>
                                     </div>
                                     <div class="col-6 text-right">
                                         <strong><i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/> <t t-esc="record.date.value"/></strong>
@@ -673,7 +680,13 @@
                                         <!-- Displayed fields -->
                                         <field name="sequence" widget="handle"/>
                                         <field name="move_name" invisible="1"/>
-                                        <field name="product_id" optional="show" domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                                        <field name="product_id"
+                                               optional="show"
+                                               domain="
+                                                    context.get('default_type') in ('out_invoice', 'out_refund', 'out_receipt')
+                                                    and [('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]
+                                                    or [('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]
+                                               "/>
                                         <field name="name" widget="section_and_note_text" attrs="{'required': [('parent.type', 'not in', ('in_invoice', 'in_refund','in_receipt'))]}"/>
                                         <field name="account_id"
                                                groups="account.group_account_user"
@@ -816,7 +829,7 @@
                                                 <field name="quantity"/>
                                                 <field name="product_uom_id" groups="uom.group_uom"/>
                                                 <field name="price_unit"/>
-                                                <field name="discount" groups="base.group_no_one"/>
+                                                <field name="discount" groups="product.group_discount_per_so_line"/>
                                                 <field name="currency_id" invisible="1"/>
                                             </group>
                                             <group>
@@ -861,7 +874,7 @@
                                                     'required': [('display_type', 'not in', ('line_section', 'line_note'))],
                                                     'invisible': [('display_type', 'in', ('line_section', 'line_note'))],
                                                }"
-                                               domain="[('company_id', '=', parent.company_id)]" />
+                                               domain="[('deprecated', '=', False), ('company_id', '=', parent.company_id)]" />
                                         <field name="partner_id"
                                                domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
                                                attrs="{'column_invisible': [('parent.type', '!=', 'entry')]}"/>

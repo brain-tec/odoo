@@ -82,7 +82,7 @@ class PickingType(models.Model):
         if 'sequence_id' not in vals or not vals['sequence_id']:
             if vals['warehouse_id']:
                 wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
-                vals['sequence_id'] = self.env['ir.sequence'].create({
+                vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
                     'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
                     'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
                     'company_id': wh.company_id.id,
@@ -355,7 +355,7 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         check_company=True,
         help="When validating the transfer, the products will be assigned to this owner.")
-    printed = fields.Boolean('Printed')
+    printed = fields.Boolean('Printed', copy=False)
     is_locked = fields.Boolean(default=True, help='When the picking is not done this allows changing the '
                                'initial demand. When the picking is done this allows '
                                'changing the done quantities.')
@@ -395,7 +395,7 @@ class Picking(models.Model):
     def _compute_show_lots_text(self):
         group_production_lot_enabled = self.user_has_groups('stock.group_production_lot')
         for picking in self:
-            if not picking.move_line_ids:
+            if not picking.move_line_ids and not picking.picking_type_id.use_create_lots:
                 picking.show_lots_text = False
             elif group_production_lot_enabled and picking.picking_type_id.use_create_lots \
                     and not picking.picking_type_id.use_existing_lots and picking.state != 'done':
@@ -795,7 +795,7 @@ class Picking(models.Model):
             for pack in origin_packages:
                 if picking._check_move_lines_map_quant_package(pack):
                     package_level_ids = picking.package_level_ids.filtered(lambda pl: pl.package_id == pack)
-                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack)
+                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack and not ml.result_package_id)
                     if not package_level_ids:
                         self.env['stock.package_level'].create({
                             'picking_id': picking.id,

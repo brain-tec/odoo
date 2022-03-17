@@ -1644,7 +1644,7 @@ msgstr "Novoprijatý"
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_employee_action_from_department
 msgid "Newly Hired Employees"
-msgstr "Nový prijatí zamestnanci"
+msgstr "Noví prijatí zamestnanci"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_employee__newly_hired_employee
@@ -1965,7 +1965,7 @@ msgstr "Naplánujte pohovor s týmto kandidátom"
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Search Applicants"
-msgstr "Hľadajte kandidátov "
+msgstr "Hľadať kandidátov "
 
 #. module: hr_recruitment
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job3

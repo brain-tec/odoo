@@ -486,6 +486,11 @@ var FileWidget = SearchableMediaWidget.extend({
                 self.$media.css(style);
             }
 
+            if (self.options.onUpload) {
+                // We consider that when selecting an image it is as if we upload it in the html content.
+                self.options.onUpload(img);
+            }
+
             // Remove crop related attributes
             if (self.$media.attr('data-aspect-ratio')) {
                 var attrs = ['aspect-ratio', 'x', 'y', 'width', 'height', 'rotate', 'scale-x', 'scale-y'];
@@ -881,7 +886,7 @@ var IconWidget = SearchableMediaWidget.extend({
         var style = this.$media.attr('style') || '';
         var iconFont = this._getFont(this.selectedIcon) || {base: 'fa', font: ''};
         var finalClasses = _.uniq(this.nonIconClasses.concat([iconFont.base, iconFont.font]));
-        if (!this.$media.is('span')) {
+        if (!this.$media.is('span, i')) {
             var $span = $('<span/>');
             $span.data(this.$media.data());
             this.$media = $span;

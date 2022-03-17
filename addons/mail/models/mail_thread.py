@@ -274,7 +274,7 @@ class MailThread(models.AbstractModel):
             for key, val in self._context.items():
                 if key.startswith('default_') and key[8:] not in create_values:
                     create_values[key[8:]] = val
-            thread._message_auto_subscribe(create_values)
+            thread._message_auto_subscribe(create_values, followers_existing_policy='update')
             create_values_list[thread.id] = create_values
 
         # automatic logging unless asked not to (mainly for various testing purpose)
@@ -911,10 +911,17 @@ class MailThread(models.AbstractModel):
         email_from = message_dict['email_from']
         email_from_localpart = (tools.email_split(email_from) or [''])[0].split('@', 1)[0].lower()
         email_to = message_dict['to']
-        email_to_localpart = (tools.email_split(email_to) or [''])[0].split('@', 1)[0].lower()
+        email_to_localparts = [
+            e.split('@', 1)[0].lower()
+            for e in (tools.email_split(email_to) or [''])
+        ]
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
         # for all the odd MTAs out there, as there is no standard header for the envelope's `rcpt_to` value.
-        rcpt_tos_localparts = [e.split('@')[0].lower() for e in tools.email_split(message_dict['recipients'])]
+        rcpt_tos_localparts = [
+            e.split('@')[0].lower()
+            for e in tools.email_split(message_dict['recipients'])
+        ]
+        rcpt_tos_valid_localparts = [to for to in rcpt_tos_localparts]
 
         # 0. Handle bounce: verify whether this is a bounced email and use it to collect bounce data and update notifications for customers
         #    Bounce regex: typical form of bounce is bounce_alias+128-crm.lead-34@domain
@@ -924,7 +931,7 @@ class MailThread(models.AbstractModel):
         #        As all MTA does not respect this RFC (googlemail is one of them),
         #       we also need to verify if the message come from "mailer-daemon"
         #    If not a bounce: reset bounce information
-        if bounce_alias and bounce_alias in email_to_localpart:
+        if bounce_alias and any(email.startswith(bounce_alias) for email in email_to_localparts):
             bounce_re = re.compile("%s\+(\d+)-?([\w.]+)?-?(\d+)?" % re.escape(bounce_alias), re.UNICODE)
             bounce_match = bounce_re.search(email_to)
             if bounce_match:
@@ -939,15 +946,21 @@ class MailThread(models.AbstractModel):
         #    if destination = alias with different model -> consider it is a forward and not a reply
         #    if destination = alias with same model -> check contact settings as they still apply
         if reply_model and reply_thread_id:
-            other_alias = self.env['mail.alias'].search([
-                '&',
+            other_model_aliases = self.env['mail.alias'].search([
+                '&', '&',
                 ('alias_name', '!=', False),
-                ('alias_name', '=', email_to_localpart)
+                ('alias_name', 'in', email_to_localparts),
+                ('alias_model_id.model', '!=', reply_model),
             ])
-            if other_alias and other_alias.alias_model_id.model != reply_model:
+            if other_model_aliases:
                 is_a_reply = False
+                rcpt_tos_valid_localparts = [to for to in rcpt_tos_valid_localparts if to in other_model_aliases.mapped('alias_name')]
+
         if is_a_reply:
-            dest_aliases = self.env['mail.alias'].search([('alias_name', 'in', rcpt_tos_localparts)], limit=1)
+            dest_aliases = self.env['mail.alias'].search([
+                ('alias_name', 'in', rcpt_tos_localparts),
+                ('alias_model_id.model', '=', reply_model)
+            ], limit=1)
 
             user_id = self._mail_find_user_for_gateway(email_from, alias=dest_aliases).id or self._uid
             route = self._routing_check_route(
@@ -968,7 +981,7 @@ class MailThread(models.AbstractModel):
             message_dict.pop('parent_id', None)
 
             # check it does not directly contact catchall
-            if catchall_alias and catchall_alias in email_to_localpart:
+            if catchall_alias and all(email_localpart == catchall_alias for email_localpart in email_to_localparts):
                 _logger.info('Routing mail from %s to %s with Message-Id %s: direct write to catchall, bounce', email_from, email_to, message_id)
                 body = self.env.ref('mail.mail_bounce_catchall').render({
                     'message': message,
@@ -976,7 +989,7 @@ class MailThread(models.AbstractModel):
                 self._routing_create_bounce_email(email_from, body, message, reply_to=self.env.company.email)
                 return []
 
-            dest_aliases = self.env['mail.alias'].search([('alias_name', 'in', rcpt_tos_localparts)])
+            dest_aliases = self.env['mail.alias'].search([('alias_name', 'in', rcpt_tos_valid_localparts)])
             if dest_aliases:
                 routes = []
                 for alias in dest_aliases:
@@ -1278,7 +1291,7 @@ class MailThread(models.AbstractModel):
 
                 # 0) Inline Attachments -> attachments, with a third part in the tuple to match cid / attachment
                 if filename and part.get('content-id'):
-                    inner_cid = part.get('content-id').strip('><')
+                    inner_cid = str(part.get('content-id')).strip('><')
                     attachments.append(self._Attachment(filename, part.get_payload(decode=True), {'cid': inner_cid}))
                     continue
                 # 1) Explicit Attachments -> attachments
@@ -1389,8 +1402,8 @@ class MailThread(models.AbstractModel):
         if message.get('Subject'):
             msg_dict['subject'] = tools.decode_message_header(message, 'Subject')
 
-        email_from = tools.decode_message_header(message, 'From')
-        email_cc = tools.decode_message_header(message, 'cc')
+        email_from = tools.decode_message_header(message, 'From', quoted=True)
+        email_cc = tools.decode_message_header(message, 'cc', quoted=True)
         email_from_list = tools.email_split_and_format(email_from)
         email_cc_list = tools.email_split_and_format(email_cc)
         msg_dict['email_from'] = email_from_list[0] if email_from_list else email_from
@@ -1400,18 +1413,18 @@ class MailThread(models.AbstractModel):
         # for all the odd MTAs out there, as there is no standard header for the envelope's `rcpt_to` value.
         msg_dict['recipients'] = ','.join(set(formatted_email
             for address in [
-                tools.decode_message_header(message, 'Delivered-To'),
-                tools.decode_message_header(message, 'To'),
-                tools.decode_message_header(message, 'Cc'),
-                tools.decode_message_header(message, 'Resent-To'),
-                tools.decode_message_header(message, 'Resent-Cc')
+                tools.decode_message_header(message, 'Delivered-To', quoted=True),
+                tools.decode_message_header(message, 'To', quoted=True),
+                tools.decode_message_header(message, 'Cc', quoted=True),
+                tools.decode_message_header(message, 'Resent-To', quoted=True),
+                tools.decode_message_header(message, 'Resent-Cc', quoted=True)
             ] if address
             for formatted_email in tools.email_split_and_format(address))
         )
         msg_dict['to'] = ','.join(set(formatted_email
             for address in [
-                tools.decode_message_header(message, 'Delivered-To'),
-                tools.decode_message_header(message, 'To')
+                tools.decode_message_header(message, 'Delivered-To', quoted=True),
+                tools.decode_message_header(message, 'To', quoted=True)
             ] if address
             for formatted_email in tools.email_split_and_format(address))
         )
@@ -2235,7 +2248,14 @@ class MailThread(models.AbstractModel):
         }
         base_mail_values = self._notify_by_email_add_values(base_mail_values)
 
-        Mail = self.env['mail.mail'].sudo()
+        # Clean the context to get rid of residual default_* keys that could cause issues during
+        # the mail.mail creation.
+        # Example: 'default_state' would refer to the default state of a previously created record
+        # from another model that in turns triggers an assignation notification that ends up here.
+        # This will lead to a traceback when trying to create a mail.mail with this state value that
+        # doesn't exist.
+        SafeMail = self.env['mail.mail'].sudo().with_context(clean_context(self._context))
+        SafeNotification = self.env['mail.notification'].sudo().with_context(clean_context(self._context))
         emails = self.env['mail.mail'].sudo()
 
         # loop on groups (customer, portal, user,  ... + model specific like group_sale_salesman)
@@ -2268,7 +2288,7 @@ class MailThread(models.AbstractModel):
                 if email_to:
                     create_values['email_to'] = email_to
                 create_values.update(base_mail_values)  # mail_message_id, mail_server_id, auto_delete, references, headers
-                email = Mail.create(create_values)
+                email = SafeMail.create(create_values)
 
                 if email and recipient_ids:
                     tocreate_recipient_ids = list(recipient_ids)
@@ -2295,7 +2315,7 @@ class MailThread(models.AbstractModel):
                 emails |= email
 
         if notif_create_values:
-            self.env['mail.notification'].sudo().create(notif_create_values)
+            SafeNotification.create(notif_create_values)
 
         # NOTE:
         #   1. for more than 50 followers, use the queue system
@@ -2845,7 +2865,7 @@ class MailThread(models.AbstractModel):
                 model_description=model_description,
             )
 
-    def _message_auto_subscribe(self, updated_values):
+    def _message_auto_subscribe(self, updated_values, followers_existing_policy='skip'):
         """ Handle auto subscription. Auto subscription is done based on two
         main mechanisms
 
@@ -2868,9 +2888,10 @@ class MailThread(models.AbstractModel):
 
         new_partners, new_channels = dict(), dict()
 
-        # fetch auto subscription subtypes data
+        # return data related to auto subscription based on subtype matching (aka: 
+        # default task subtypes or subtypes from project triggering task subtypes)
         updated_relation = dict()
-        all_ids, def_ids, int_ids, parent, relation = self.env['mail.message.subtype']._get_auto_subscription_subtypes(self._name)
+        child_ids, def_ids, all_int_ids, parent, relation = self.env['mail.message.subtype']._get_auto_subscription_subtypes(self._name)
 
         # check effectively modified relation field
         for res_model, fnames in relation.items():
@@ -2879,15 +2900,21 @@ class MailThread(models.AbstractModel):
         udpated_fields = [fname for fnames in updated_relation.values() for fname in fnames if updated_values.get(fname)]
 
         if udpated_fields:
+            # fetch "parent" subscription data (aka: subtypes on project to propagate on task)
             doc_data = [(model, [updated_values[fname] for fname in fnames]) for model, fnames in updated_relation.items()]
             res = self.env['mail.followers']._get_subscription_data(doc_data, None, None, include_pshare=True)
             for fid, rid, pid, cid, subtype_ids, pshare in res:
+                # use project.task_new -> task.new link
                 sids = [parent[sid] for sid in subtype_ids if parent.get(sid)]
-                sids += [sid for sid in subtype_ids if sid not in parent and sid in def_ids]
+                # add checked subtypes matching model_name
+                sids += [sid for sid in subtype_ids if sid not in parent and sid in child_ids]
                 if pid:
-                    new_partners[pid] = (set(sids) & set(all_ids)) - set(int_ids) if pshare else set(sids) & set(all_ids)
-                if cid:
-                    new_channels[cid] = (set(sids) & set(all_ids)) - set(int_ids)
+                    if pshare:  # remove internal subtypes for customers
+                        new_partners[pid] = set(sids) - set(all_int_ids)
+                    else:
+                        new_partners[pid] = set(sids)
+                if cid:  # never subscribe channels to internal subtypes
+                    new_channels[cid] = set(sids) - set(all_int_ids)
 
         notify_data = dict()
         res = self._message_auto_subscribe_followers(updated_values, def_ids)
@@ -2902,7 +2929,7 @@ class MailThread(models.AbstractModel):
             self._name, self.ids,
             list(new_partners), new_partners,
             list(new_channels), new_channels,
-            check_existing=True, existing_policy='skip')
+            check_existing=True, existing_policy=followers_existing_policy)
 
         # notify people from auto subscription, for example like assignation
         for (template, lang), pids in notify_data.items():

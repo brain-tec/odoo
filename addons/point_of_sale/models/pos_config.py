@@ -115,7 +115,8 @@ class PosConfig(models.Model):
         'account.journal', string='Sales Journal',
         domain=[('type', '=', 'sale')],
         help="Accounting journal used to post sales entries.",
-        default=_default_sale_journal)
+        default=_default_sale_journal,
+        ondelete='restrict')
     invoice_journal_id = fields.Many2one(
         'account.journal', string='Invoice Journal',
         domain=[('type', '=', 'sale')],
@@ -371,6 +372,8 @@ class PosConfig(models.Model):
     @api.onchange('iface_print_via_proxy')
     def _onchange_iface_print_via_proxy(self):
         self.iface_print_auto = self.iface_print_via_proxy
+        if not self.iface_print_via_proxy:
+            self.iface_cashdrawer = False
 
     @api.onchange('module_account')
     def _onchange_module_account(self):

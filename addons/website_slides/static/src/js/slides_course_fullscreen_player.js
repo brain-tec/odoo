@@ -510,8 +510,14 @@ odoo.define('website_slides.fullscreen', function (require) {
                 slideData.hasNext = index < slidesDataList.length-1;
                 // compute embed url
                 if (slideData.type === 'video') {
-                    slideData.embedCode = $(slideData.embedCode).attr('src');  // embedCode containts an iframe tag, where src attribute is the url (youtube or embed document from odoo)
-                    slideData.embedUrl =  "https://" + slideData.embedCode + "&rel=0&autoplay=1&enablejsapi=1&origin=" + window.location.origin;
+                    slideData.embedCode = $(slideData.embedCode).attr('src') || ""; // embedCode contains an iframe tag, where src attribute is the url (youtube or embed document from odoo)
+                    var separator = slideData.embedCode.indexOf("?") !== -1 ? "&" : "?";
+                    var scheme = slideData.embedCode.indexOf('//') === 0 ? 'https:' : '';
+                    var params = { rel: 0, enablejsapi: 1, origin: window.location.origin };
+                    if (slideData.embedCode.indexOf("//drive.google.com") === -1) {
+                        params.autoplay = 1;
+                    }
+                    slideData.embedUrl = slideData.embedCode ? scheme + slideData.embedCode + separator + $.param(params) : "";
                 } else if (slideData.type === 'infographic') {
                     slideData.embedUrl = _.str.sprintf('/web/image/slide.slide/%s/image_1024', slideData.id);
                 } else if (_.contains(['document', 'presentation'], slideData.type)) {
@@ -624,7 +630,12 @@ odoo.define('website_slides.fullscreen', function (require) {
                 return self._renderSlide();
             }).then(function() {
                 if (slide._autoSetDone && !session.is_website_user) {  // no useless RPC call
-                    return self._setCompleted(slide.id);
+                    if (['document', 'presentation'].includes(slide.type)) {
+                        // only set the slide as completed after iFrame is loaded to avoid concurrent execution with 'embedUrl' controller
+                        self.el.querySelector('iframe.o_wslides_iframe_viewer').addEventListener('load', () => self._setCompleted(slide.id));
+                    } else {
+                           return self._setCompleted(slide.id);
+                    }
                 }
             });
         },

@@ -6,7 +6,6 @@
 # Diego Bittencourt <diegomb86@gmail.com>, 2019
 # guisantos23 <guisantos23@yahoo.com.br>, 2019
 # Pablo Valentini <pablondrina@gmail.com>, 2019
-# nle_odoo, 2019
 # Thiago Macêdo <thiago95macedo@gmail.com>, 2019
 # Caio Leonardo Mendes de Sousa <caleozao@gmail.com>, 2019
 # André Augusto Firmino Cordeiro <a.cordeito@gmail.com>, 2019
@@ -25,7 +24,7 @@
 # Luiz Carlos de Lima <luiz.carlos@akretion.com.br>, 2019
 # Cécile Collart <cco@odoo.com>, 2019
 # Ramiro Pereira de Magalhães <ramiro.p.magalhaes@gmail.com>, 2019
-# Rodrigo de Almeida Sottomaior Macedo <rmsolucoeseminformatic4@gmail.com>, 2019
+# Rodrigo de Almeida Sottomaior Macedo <rmsolucoeseminformatica@protonmail.com>, 2019
 # Keli Brugalli <kbr@odoo.com>, 2019
 # Fernanda Marques <fem@odoo.com>, 2020
 # Marcel Savegnago <marcel.savegnago@gmail.com>, 2020
@@ -33,22 +32,25 @@
 # Luiz Fernando <lfpsgs@outlook.com>, 2020
 # Guilherme Libardi <guilherme.libardig@gmail.com>, 2020
 # Maurício Liell <mauricio@liell.com.br>, 2020
-# danimaribeiro <danimaribeiro@gmail.com>, 2020
 # Martin Trigaux, 2020
-# Mateus Lopes <mateus1@gmail.com>, 2020
 # grazziano <gra.negocia@gmail.com>, 2020
 # Silmar <pinheirosilmar@gmail.com>, 2020
 # Fernando Colus <fcolus1@gmail.com>, 2020
 # PopSolutions Cooperativa Digital <popsolutions.co@gmail.com>, 2020
 # Lucas Rabelo <lucas.rabelo@nextsolucoes.net.br>, 2020
+# nle_odoo, 2020
+# Mateus Lopes <mateus1@gmail.com>, 2020
+# Alvaro Rios <ninobaldo@gmail.com>, 2020
+# danimaribeiro <danimaribeiro@gmail.com>, 2020
+# Éder Brito <britoederr@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-25 09:16+0000\n"
+"POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Lucas Rabelo <lucas.rabelo@nextsolucoes.net.br>, 2020\n"
+"Last-Translator: Éder Brito <britoederr@gmail.com>, 2020\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1524,7 +1526,7 @@ msgid ""
 "Setup\n"
 "-----\n"
 "\n"
-"- *Configuration > Journals*\n"
+"- *Account > Configuration > invoicing > Journals*\n"
 "\n"
 "    If needed, create new journal or choose an existing journal with **Type**\n"
 "    set to *“Bank”*.\n"
@@ -1533,28 +1535,9 @@ msgid ""
 "\n"
 "    On the **Bank Account** tab, enter the **Account Number**.\n"
 "\n"
-"- *Configuration > Bank Accounts*\n"
-"\n"
-"    Account will show up in list as the journal name.\n"
-"\n"
-"    Editing will show the **Account Number**.  This is important as it is used by\n"
-"    the ABA process.\n"
-"\n"
-"    **Bank** is optional.\n"
-"\n"
-"- *Sales > Configuration > Bank Accounts > Bank Accounts*\n"
-"\n"
-"    Account will show up in list as the account number.\n"
-"\n"
-"    **ABA Payments** - Set to *“Account for Making ABA Payments”*.\n"
+"    On the same tab, ensure the ABA transfer information is set up.\n"
 "\n"
 "    **BSB** - Required, 6 digits, and will be auto formatted.\n"
-"\n"
-"    **Account Holder** - Optional.\n"
-"\n"
-"    **Account / Payee Name** - Required.  Generally not validated by the banks\n"
-"    on ABA file transfers, and may show up on the payee bank statement against\n"
-"    the payment.\n"
 "\n"
 "    **Financial Institution Code** - Required (provided by bank or can be found\n"
 "    on Google).  It is three uppercase 3 characters.\n"
@@ -1563,30 +1546,42 @@ msgid ""
 "    may reject the ABA file if the Supplying User Name is not as expected.  It\n"
 "    cannot be longer than 26 characters.\n"
 "\n"
-"    **Identification Number (APCA)** - User Identification number is bank\n"
+"    **APCA Identification Number** - User Identification number is bank\n"
 "    allocated.  It is 6 digits.\n"
 "\n"
 "    **Include Self Balancing Transaction** - Some institutions require that the\n"
 "    last be a self balancing transaction which is used as a verification.\n"
 "\n"
+"- *Accounting > Configuration > Payments > Bank Accounts*\n"
+"\n"
+"    Account will show up in list as the journal name.\n"
+"\n"
+"    Editing will show the **Account Number**.  This is important as it is used by\n"
+"    the ABA process.\n"
+"\n"
+"    **Bank** is optional.\n"
+"\n"
+"- *Contacts > Configuration > Bank Accounts > Bank Accounts*\n"
+"\n"
+"    Paying account will show up in list as the account number.\n"
+"\n"
+"    **Account Holder Name** - Can be entered here, if Required.  Generally not\n"
+"    validated by the banks on ABA file transfers, but may show up on the payee\n"
+"    bank statement against the payment.\n"
+"\n"
 "- Vendor bank accounts can be set up in the same place, however, it is\n"
 "  generally easier to set them up from the partner from for the Vendor.\n"
 "\n"
-"- *Accounting > Purchases > Vendors*\n"
+"- *Accounting > Vendors > Vendors*\n"
 "\n"
-"    On **Sales & Purchases** tab, click on *\"Bank account(s)\"* from where a\n"
+"    On **Accounting** tab, click on *\"View accounts detail\"* from where a\n"
 "    vendor bank account can be created or edited.\n"
 "\n"
-"    **Account Number** - Required.\n"
-"\n"
-"    **ABA Payments** - Set to *“Allow ABA Payments to this Account”*.\n"
+"    **Account Number** - Required, must be less than 9 digits.\n"
 "\n"
 "    **BSB** - Required, 6 digits, and will be auto formatted.\n"
 "\n"
-"    **Account Holder** - Optional.\n"
-"\n"
-"    **Account / Payee Name** - Required.  Generally not validated by the\n"
-"    banks.\n"
+"    **Account Holder Name** - Optional.\n"
 "\n"
 "Use\n"
 "---\n"
@@ -1600,118 +1595,23 @@ msgid ""
 "    Select **ABA Credit Transfer** radio button.\n"
 "\n"
 "    If the vendor has multiple bank account, you may need to select the\n"
-"    correct **Recipient Bank Account**.\n"
+"    correct **Recipient Bank Account**.  Or if paying a vendor bill, it may\n"
+"    need the correct bank account associated with it.\n"
 "\n"
 "    Enter payment amount, etc.\n"
 "\n"
-"- *Purchases > Payments*\n"
+"- *Vendors > Payments*\n"
 "\n"
 "    After payment(s) are confirmed, they will show up in the payments list.\n"
 "\n"
 "    Using filters, or sorting, select the payments to be included.  Under\n"
-"    *Actions* choose *Download ABA Payment*.  A pop up appears with the ABA\n"
-"    file from which you can click on the file to download locally.  This\n"
-"    file can then be uploaded to the bank.\n"
+"    *Actions* choose *Create batch payment*.\n"
+"\n"
+"- *Vendors > Batch Payments*\n"
+"\n"
+"    When validating a batch payment, the ABA file will be generated.  It can\n"
+"    be regenerated.  This file can then be uploaded to the bank.\n"
 msgstr ""
-"\n"
-"Transferência de crédito ABA\n"
-"===================\n"
-"\n"
-"Este módulo permite a geração de lotes de pagamento como ABA (Australian\n"
-"Bankers Association) arquivos de texto. O arquivo 'aba' gerado pode ser enviado\n"
-"para muitos bancos australianos.\n"
-"\n"
-"Configuração\n"
-"-----\n"
-"\n"
-"- * Configuração> Revistas *\n"
-"\n"
-"    Se necessário, crie um novo diário ou escolha um diário existente com ** Tipo **\n"
-"    definido para * \"Banco\" *.\n"
-"\n"
-"    Em ** Configurações avançadas **, verifique se Transferência de crédito ABA está marcada.\n"
-"\n"
-"    Na aba ** Conta Bancária **, insira o ** Número da Conta **.\n"
-"\n"
-"- * Configuração> Contas bancárias *\n"
-"\n"
-"    Conta será exibida na lista como o nome do diário.\n"
-"\n"
-"    A edição mostrará o ** Número da conta **. Isso é importante, pois é usado por\n"
-"    o processo ABA.\n"
-"\n"
-"    ** Banco ** é opcional.\n"
-"\n"
-"- * Vendas> Configuração> Contas bancárias> Contas bancárias *\n"
-"\n"
-"    A conta aparecerá na lista como o número da conta.\n"
-"\n"
-"    ** ABA Payments ** - Defina como * “Conta para fazer pagamentos ABA” *.\n"
-"\n"
-"    ** BSB ** - Necessário, 6 dígitos e será formatado automaticamente.\n"
-"\n"
-"    ** Titular da conta ** - Opcional.\n"
-"\n"
-"    ** Nome da conta / beneficiário ** - Obrigatório. Geralmente não validado pelos bancos\n"
-"    transferência de arquivos ABA, e pode aparecer no extrato bancário do beneficiário\n"
-"    o pagamento.\n"
-"\n"
-"    ** Código da Instituição Financeira ** - Obrigatório (fornecido pelo banco ou pode ser encontrado\n"
-"    no Google). São três caracteres maiúsculos.\n"
-"\n"
-"    ** Nome de Usuário Fornecedora ** - Alguns bancos permitem que isso seja de forma livre, alguns bancos\n"
-"    pode rejeitar o arquivo ABA se o Nome do Usuário de Fornecimento não for o esperado. isto\n"
-"    não pode ter mais de 26 caracteres.\n"
-"\n"
-"    ** Número de identificação (APCA) ** - O número de identificação do usuário é um banco\n"
-"    alocado. São 6 dígitos.\n"
-"\n"
-"    ** Incluir Transação de Balanceamento Automático ** - Algumas instituições exigem que o\n"
-"    A última é uma transação de auto balanceamento que é usada como uma verificação.\n"
-"\n"
-"- As contas bancárias do fornecedor podem ser configuradas no mesmo local, no entanto, é\n"
-"  geralmente mais fácil de configurá-los a partir do parceiro para o fornecedor.\n"
-"\n"
-"- * Contabilidade> Compras> Fornecedores *\n"
-"\n"
-"    Na aba ** Vendas e compras **, clique em * \"Conta (s) bancária (s)\" * de onde\n"
-"    A conta bancária do fornecedor pode ser criada ou editada.\n"
-"\n"
-"    ** Número da conta ** - Obrigatório.\n"
-"\n"
-"    ** ABA Payments ** - Defina como * \"Permitir pagamentos ABA para esta conta\" *.\n"
-"\n"
-"    ** BSB ** - Necessário, 6 dígitos e será formatado automaticamente.\n"
-"\n"
-"    ** Titular da conta ** - Opcional.\n"
-"\n"
-"    ** Nome da conta / beneficiário ** - Obrigatório. Geralmente não validado pelo\n"
-"    bancos.\n"
-"\n"
-"Usar\n"
-"---\n"
-"\n"
-"- Crie um pagamento de fornecedor da maneira normal.\n"
-"\n"
-"    Assegure-se de que o ** Fornecedor ** seja um com uma conta de pagamento ABA válida.\n"
-"\n"
-"    Escolha o correto ** Diário de pagamento **, que é definido para pagamentos ABA.\n"
-"\n"
-"    Selecione o botão de opção ** ABA Credit Transfer **.\n"
-"\n"
-"    Se o fornecedor tiver várias contas bancárias, talvez seja necessário selecionar\n"
-"    correto ** Conta bancária do destinatário **.\n"
-"\n"
-"    Insira o valor do pagamento, etc.\n"
-"\n"
-"- * Compras> Pagamentos *\n"
-"\n"
-"    Depois que os pagamentos forem confirmados, eles aparecerão na lista de pagamentos.\n"
-"\n"
-"    Usando filtros ou classificação, selecione os pagamentos a serem incluídos. Debaixo\n"
-"    * Ações * escolha * Faça o download do pagamento ABA *. Um pop-up aparece com o ABA\n"
-"    arquivo a partir do qual você pode clicar no arquivo para baixar localmente. este\n"
-"    O arquivo pode ser enviado para o banco.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_auto_transfer
@@ -8028,7 +7928,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
 msgid "+1 (650) 691-3277"
-msgstr ""
+msgstr "+55 (61) 3333-2222"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -8046,6 +7946,14 @@ msgid ", required"
 msgstr ", required"
 
 #. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid ""
+"- %(record)r belongs to company %(company)r and %(field)r (%(fname)s: "
+"%(values)s) belongs to another company."
+msgstr ""
+
+#. module: base
 #: code:addons/model.py:0
 #, python-format
 msgid ""
@@ -8054,6 +7962,14 @@ msgid ""
 msgstr ""
 "- Criar/atualizar: um campo obrigatório não está definido.\n"
 "- Excluir: outro modelo requer que o registro seja excluído. Se possível, arquive-o em vez disso."
+
+#. module: base
+#: code:addons/models.py:0
+#, python-format
+msgid ""
+"- Record is company %(company)r and %(field)r (%(fname)s: %(values)s) "
+"belongs to another company."
+msgstr ""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -8437,10 +8353,10 @@ msgid ""
 "                                <span colspan=\"2\">Month: %(month)s</span>\n"
 "                                <span colspan=\"2\">Day: %(day)s</span>"
 msgstr ""
-"<span colspan=\"2\">Ano atual com século: %(ano)s</span>\n"
+"<span colspan=\"2\">Ano atual com século: %(year)s</span>\n"
 "                                <span colspan=\"2\">Ano Atual sem Século: %(y)s</span>\n"
-"                                <span colspan=\"2\">Mês: %(mês)s</span>\n"
-"                                <span colspan=\"2\">Dia: %(dia)s</span>"
+"                                <span colspan=\"2\">Mês: %(month)s</span>\n"
+"                                <span colspan=\"2\">Dia: %(day)s</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -8449,9 +8365,9 @@ msgid ""
 "                                <span colspan=\"2\">Week of the Year: %(woy)s</span>\n"
 "                                <span colspan=\"2\">Day of the Week (0:Monday): %(weekday)s</span>"
 msgstr ""
-"<span colspan=\"2\">Dia do Ano: %(doy)s</span><span colspan=\"2\">Semana do "
-"Ano: %(woy)s</span>Dia da Semana<span colspan=\"2\">(0:Segunda-feira): %(dia"
-" da semana)s</span>"
+"<span colspan=\"2\">Dia do ano: %(doy)s</span>\n"
+"                                <span colspan=\"2\">Semana do ano: %(woy)s</span>\n"
+"                                <span colspan=\"2\">Dia da semana (0:Segunda-feira): %(weekday)s</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -10546,7 +10462,7 @@ msgstr "Contas Bancárias"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
 msgid "Bank Address"
-msgstr ""
+msgstr "Endereço do Banco"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_bank__bic
@@ -11207,6 +11123,12 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr "Cannot deactivate a language that is currently used by users."
 
@@ -11720,7 +11642,7 @@ msgstr "Dados da Companhia"
 #. module: base
 #: model:ir.model,name:base.model_base_document_layout
 msgid "Company Document Layout"
-msgstr ""
+msgstr "Layout do Documento da Empresa"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__favicon
@@ -12679,7 +12601,7 @@ msgstr "Personalizado"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__custom_colors
 msgid "Custom Colors"
-msgstr ""
+msgstr "Cores Personalizadas"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__state__manual
@@ -14707,6 +14629,8 @@ msgid ""
 "File from where the view originates.\n"
 "                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
+"Arquivo de onde a visualização se origina.\n"
+"                                                          Útil para redefinir visões quebradas (difícil) ou para ler o arco do arquivo no modo dev-xml."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__filter
@@ -16371,7 +16295,7 @@ msgstr "Imagem"
 #: model:ir.model.fields,field_description:base.field_res_partner__image_1024
 #: model:ir.model.fields,field_description:base.field_res_users__image_1024
 msgid "Image 1024"
-msgstr ""
+msgstr "Imagem 1024"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_image_mixin__image_128
@@ -16385,14 +16309,14 @@ msgstr "Image 128"
 #: model:ir.model.fields,field_description:base.field_res_partner__image_256
 #: model:ir.model.fields,field_description:base.field_res_users__image_256
 msgid "Image 256"
-msgstr ""
+msgstr "Imagem 256"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_image_mixin__image_512
 #: model:ir.model.fields,field_description:base.field_res_partner__image_512
 #: model:ir.model.fields,field_description:base.field_res_users__image_512
 msgid "Image 512"
-msgstr ""
+msgstr "Imagem 512"
 
 #. module: base
 #: model:ir.model,name:base.model_image_mixin
@@ -17684,7 +17608,7 @@ msgstr "Leiaute em Relatórios"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead_enrich
 msgid "Lead Enrichment"
-msgstr ""
+msgstr "Enriquecimento de Lead"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead
@@ -17996,12 +17920,12 @@ msgstr "Logotipo"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_primary_color
 msgid "Logo Primary Color"
-msgstr ""
+msgstr "Cor Primária da Logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_secondary_color
 msgid "Logo Secondary Color"
-msgstr ""
+msgstr "Cor Secundária da Logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__logo_web
@@ -19021,7 +18945,7 @@ msgstr "Modelos"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_updated
 msgid "Modified Architecture"
-msgstr ""
+msgstr "Arquitetura Modificada"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_module_module
@@ -22564,7 +22488,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__preview_logo
 msgid "Preview logo"
-msgstr ""
+msgstr "Visualizar logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_layout__pdf
@@ -22580,7 +22504,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_prev
 msgid "Previous View Architecture"
-msgstr ""
+msgstr "Arquitetura de Visualização Anterior"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_cron__lastcall
@@ -22598,7 +22522,7 @@ msgstr "Precisão do Preço"
 #: model:ir.model.fields,field_description:base.field_base_document_layout__primary_color
 #: model:ir.model.fields,field_description:base.field_res_company__primary_color
 msgid "Primary Color"
-msgstr ""
+msgstr "Cor Primária"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ca_check_printing
@@ -23582,7 +23506,7 @@ msgstr "Rodapé do Relatório"
 #: model:ir.model,name:base.model_report_layout
 #: model:ir.model.fields,field_description:base.field_base_document_layout__report_layout_id
 msgid "Report Layout"
-msgstr ""
+msgstr "Layout de Relatório"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.act_report_xml_search_view
@@ -23669,7 +23593,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Reset to logo colors"
-msgstr ""
+msgstr "Redefinir para as cores da logo"
 
 #. module: base
 #: code:addons/models.py:0
@@ -23722,7 +23646,7 @@ msgstr "Extensões de restauração para o Ponto de Venda"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__reset_view_arch_wizard__reset_mode__soft
 msgid "Restore previous version (soft reset)."
-msgstr ""
+msgstr "Restaurar versões anteriores (reinicialização suave)"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__on_delete__restrict
@@ -23861,7 +23785,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_sms
 msgid "SMS Marketing"
-msgstr ""
+msgstr "Marketing SMS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_marketing_automation_sms
@@ -24022,7 +23946,7 @@ msgstr "Vendas"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Sales & Purchase"
-msgstr ""
+msgstr "Vendas e Compra"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_expense
@@ -24235,7 +24159,7 @@ msgstr "Pesquisar..."
 #: model:ir.model.fields,field_description:base.field_base_document_layout__secondary_color
 #: model:ir.model.fields,field_description:base.field_res_company__secondary_color
 msgid "Secondary Color"
-msgstr ""
+msgstr "Cor secundária"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_security
@@ -24810,17 +24734,6 @@ msgstr "Ilhas Salomão"
 #: model:res.country,name:base.so
 msgid "Somalia"
 msgstr "Somália"
-
-#. module: base
-#: code:addons/models.py:0
-#, python-format
-msgid ""
-"Some records are incompatible with the company of the %(document_descr)s.\n"
-"\n"
-"Incompatibilities:\n"
-"Fields: %(fields)s\n"
-"Record ids: %(records)s\n"
-msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_bank__bic
@@ -26231,7 +26144,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_base
 msgid "This field is the same as `arch` field without translations"
-msgstr ""
+msgstr "Este campo é o mesmo que o campo 'arch' sem traduções"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__code
@@ -26245,11 +26158,13 @@ msgid ""
 "This field should be used when accessing view arch. It will use translation.\n"
 "                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 msgstr ""
+"Este campo deve ser usado ao acessar a arquitetura da visualização. Vai usar tradução.\n"
+"                               Observe que ele irá ler `arch_db` ou `arch_fs` se estiver no modo dev-xml."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_db
 msgid "This field stores the view arch."
-msgstr ""
+msgstr "Este campo armazena a arquitetura da visualização."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_ui_view__arch_prev
@@ -26257,6 +26172,8 @@ msgid ""
 "This field will save the current `arch_db` before writing on it.\n"
 "                                                                         Useful to (soft) reset a broken view."
 msgstr ""
+"Este campo salvará o ʻarch_db` atual antes de escrever nele.\n"
+"                                                                         Útil para redefinir (suavemente) uma vista interrompida.."
 
 #. module: base
 #: code:addons/image.py:0
@@ -27491,7 +27408,7 @@ msgstr "Usuários"
 #. module: base
 #: model:ir.ui.menu,name:base.menu_users
 msgid "Users & Companies"
-msgstr "Users & Companies"
+msgstr "Usuários & Empresas"
 
 #. module: base
 #: model:ir.model,name:base.model_res_users_log

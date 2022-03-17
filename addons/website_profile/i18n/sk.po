@@ -8,6 +8,7 @@
 # gebri <gebri@inmail.sk>, 2019
 # Jan Prokop, 2019
 # Alexandra Brencicova <alexandra.brencicova@gmail.com>, 2020
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2020
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # 
 msgid ""
@@ -273,7 +274,7 @@ msgstr "o"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
 msgid "All Users"
-msgstr ""
+msgstr "Všetci používatelia"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -322,7 +323,7 @@ msgstr "Upraviť profil"
 #. module: website_profile
 #: model:ir.model,name:website_profile.model_gamification_badge
 msgid "Gamification Badge"
-msgstr ""
+msgstr "Ocenenie gemifikácie"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
