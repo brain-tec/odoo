@@ -3,7 +3,7 @@
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model/use_component_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-import { usePosition } from '@web/core/position/position_hook';
+import { usePosition } from '@web/core/position_hook';
 
 const { Component } = owl;
 
@@ -17,8 +17,8 @@ export class PopoverView extends Component {
         useComponentToModel({ fieldName: 'component', modelName: 'PopoverView' });
         usePosition(
             () => this.popoverView && this.popoverView.anchorRef && this.popoverView.anchorRef.el,
-            'root',
             {
+                popper: "root",
                 margin: 16,
                 position: this.popoverView.position,
             }
