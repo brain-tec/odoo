@@ -331,7 +331,7 @@ class SaleOrder(models.Model):
         for order in self:
             total = 0.0
             for line in order.order_line:
-                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
+                total += (line.price_subtotal * 100)/(100-line.discount) if line.discount != 100 else (line.price_unit * line.product_uom_qty)
             order.amount_undiscounted = total
 
     @api.depends('state')
@@ -1608,7 +1608,7 @@ class SaleOrderLine(models.Model):
                 'sale',
                 fiscal_position=self.order_id.fiscal_position_id,
                 product_price_unit=self._get_display_price(product),
-                product_currency=self.currency_id
+                product_currency=self.order_id.currency_id
             )
         self.update(vals)
 
@@ -1649,7 +1649,7 @@ class SaleOrderLine(models.Model):
                 'sale',
                 fiscal_position=self.order_id.fiscal_position_id,
                 product_price_unit=self._get_display_price(product),
-                product_currency=self.currency_id
+                product_currency=self.order_id.currency_id
             )
 
     def name_get(self):
