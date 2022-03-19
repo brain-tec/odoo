@@ -471,10 +471,14 @@ class SaleOrder(models.Model):
         else:
             self.show_update_pricelist = False
 
+    def _get_update_prices_lines(self):
+        """ Hook to exclude specific lines which should not be updated based on price list recomputation """
+        return self.order_line.filtered(lambda line: not line.display_type)
+
     def update_prices(self):
         self.ensure_one()
         lines_to_update = []
-        for line in self.order_line.filtered(lambda line: not line.display_type):
+        for line in self._get_update_prices_lines():
             product = line.product_id.with_context(
                 partner=self.partner_id,
                 quantity=line.product_uom_qty,
@@ -1723,7 +1727,7 @@ class SaleOrderLine(models.Model):
                 'sale',
                 fiscal_position=self.order_id.fiscal_position_id,
                 product_price_unit=self._get_display_price(product),
-                product_currency=self.currency_id
+                product_currency=self.order_id.currency_id
             )
         self.update(vals)
 
@@ -1764,7 +1768,7 @@ class SaleOrderLine(models.Model):
                 'sale',
                 fiscal_position=self.order_id.fiscal_position_id,
                 product_price_unit=self._get_display_price(product),
-                product_currency=self.currency_id
+                product_currency=self.order_id.currency_id
             )
 
     def name_get(self):
