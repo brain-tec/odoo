@@ -2,24 +2,24 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Message" owl="1">
-        <div class="o_Message position-relative pt-1"
-            t-att-class="{
-                'o_Message_active': isActive,
-                'o-clicked': state.isClicked,
-                'o-discussion': messageView and (messageView.message.is_discussion or messageView.message.is_notification),
-                'o-has-message-selection': messageView and messageView.threadView and messageView.threadView.replyingToMessageView,
-                'o-highlighted': messageView and (messageView.message.isHighlighted or messageView.isHighlighted),
-                'o-mobile': messaging and messaging.device.isMobile,
-                'o-not-discussion': messageView and !(messageView.message.is_discussion or messageView.message.is_notification),
-                'o-notification': messageView and messageView.message.message_type === 'notification',
-                'o-selected': isSelected,
-                'o-squashed': messageView and messageView.isSquashed,
-                'o-starred': messageView and messageView.message.isStarred,
-                'mt-3': messageView and !messageView.isSquashed and messageView.threadView,
-            }" t-attf-class="{{ messageView and messageView.extraClass }} {{ className }}" t-on-click="_onClick" t-on-mouseenter="() => state.isHovered = true" t-on-mouseleave="() => state.isHovered = false" t-att-data-message-local-id="messageView and messageView.message.localId"
-            t-ref="root"
-        >
-            <t t-if="messageView" name="rootCondition">
+        <t t-if="messageView">
+            <div class="o_Message position-relative pt-1"
+                t-att-class="{
+                    'o_Message_active': isActive,
+                    'o-clicked': state.isClicked,
+                    'o-discussion': messageView.message.is_discussion or messageView.message.is_notification,
+                    'o-has-message-selection': messageView.threadView and messageView.threadView.replyingToMessageView,
+                    'o-highlighted': messageView.message.isHighlighted or messageView.isHighlighted,
+                    'o-mobile': messaging.device.isMobile,
+                    'o-not-discussion': !(messageView.message.is_discussion or messageView.message.is_notification),
+                    'o-notification': messageView.message.message_type === 'notification',
+                    'o-selected': isSelected,
+                    'o-squashed': messageView.isSquashed,
+                    'o-starred': messageView.message.isStarred,
+                    'mt-3': !messageView.isSquashed and messageView.threadView,
+                }" t-attf-class="{{ messageView.extraClass }} {{ className }}" t-on-click="_onClick" t-on-mouseenter="() => state.isHovered = true" t-on-mouseleave="() => state.isHovered = false" t-att-data-message-local-id="messageView.message.localId"
+                t-ref="root"
+            >
                 <MessageInReplyToView t-if="messageView.messageInReplyToView" messageInReplyToViewLocalId="messageView.messageInReplyToView.localId"/>
                 <div t-if="isActive and messageView.messageActionList" class="o_Message_actionListContainer pl-5 pr-3" t-att-class="{ 'o-squashed': messageView.isSquashed }">
                     <MessageActionList localId="messageView.messageActionList.localId"/>
@@ -29,7 +29,7 @@
                     <div class="o_Message_sidebar" t-att-class="{ 'o-message-squashed align-items-start': messageView.isSquashed }">
                         <t t-if="!messageView.isSquashed">
                             <div class="o_Message_authorAvatarContainer o_Message_sidebarItem">
-                                <img class="o_Message_authorAvatar rounded-circle" t-att-class="{ o_Message_authorRedirect: hasAuthorOpenChat, o_redirect: hasAuthorOpenChat }" t-att-src="avatar" t-on-click="_onClickAuthorAvatar" t-att-title="hasAuthorOpenChat ? OPEN_CHAT : ''" alt="Avatar"/>
+                                <img class="o_Message_authorAvatar rounded-circle" t-att-class="{ o_Message_authorRedirect: messageView.hasAuthorOpenChat, o_redirect: messageView.hasAuthorOpenChat }" t-att-src="messageView.message.avatarUrl" t-on-click="_onClickAuthorAvatar" t-att-title="messageView.hasAuthorOpenChat ? OPEN_CHAT : ''" alt="Avatar"/>
                                 <t t-if="messageView.message.author and messageView.message.author.im_status">
                                     <PartnerImStatusIcon
                                         className="'o_Message_partnerImStatusIcon'"
@@ -37,7 +37,7 @@
                                             'o-message-selected': isSelected,
                                             'o_Message_partnerImStatusIcon-mobile': messaging.device.isMobile,
                                         }"
-                                        hasOpenChat="hasAuthorOpenChat"
+                                        hasOpenChat="messageView.hasAuthorOpenChat"
                                         partnerLocalId="messageView.message.author.localId"
                                     />
                                 </t>
@@ -46,7 +46,7 @@
                         <t t-else="">
                             <t t-if="isActive and messageView.message.date">
                                 <div class="o_Message_date o_Message_sidebarItem mt-1" t-att-class="{ 'o-message-selected': isSelected }">
-                                    <t t-esc="shortTime"/>
+                                    <t t-esc="messageView.message.shortTime"/>
                                 </div>
                             </t>
                             <t t-if="!isActive and messageView.message.isCurrentUserOrGuestAuthor and messageView.threadView and messageView.threadView.thread and messageView.threadView.thread.hasSeenIndicators">
@@ -141,9 +141,9 @@
                             <t t-if="messageView.message.subtype_description and !messageView.message.isBodyEqualSubtypeDescription">
                                 <p t-esc="messageView.message.subtype_description"/>
                             </t>
-                            <t t-if="trackingValues.length > 0">
+                            <t t-if="messageView.message.trackingValues.length > 0">
                                 <ul class="o_Message_trackingValues">
-                                    <t t-foreach="trackingValues" t-as="value" t-key="value.id">
+                                    <t t-foreach="messageView.message.trackingValues" t-as="value" t-key="value.id">
                                         <li>
                                             <div class="o_Message_trackingValue">
                                                 <div class="o_Message_trackingValueFieldName o_Message_trackingValueItem" t-esc="value.changed_field"/>
@@ -170,8 +170,8 @@
                         </div>
                     </div>
                 </div>
-            </t>
-        </div>
+            </div>
+        </t>
     </t>
 
 </templates>

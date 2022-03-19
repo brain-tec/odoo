@@ -8,6 +8,7 @@ import { addLink, htmlToTextContentInline, parseAndTransform, timeFromNow } from
 
 import { session } from '@web/session';
 
+import { format } from 'web.field_utils';
 import { str_to_datetime } from 'web.time';
 
 registerModel({
@@ -305,6 +306,27 @@ registerModel({
             return this.env._t("Anonymous");
         },
         /**
+         * @private
+         * @returns {string}
+         */
+        _computeAvatarUrl() {
+            if (this.author && (!this.originThread || this.originThread.model !== 'mail.channel')) {
+                // TODO FIXME for public user this might not be accessible. task-2223236
+                // we should probably use the correspondig attachment id + access token
+                // or create a dedicated route to get message image, checking the access right of the message
+                return this.author.avatarUrl;
+            } else if (this.author && this.originThread && this.originThread.model === 'mail.channel') {
+                return `/mail/channel/${this.originThread.id}/partner/${this.author.id}/avatar_128`;
+            } else if (this.guestAuthor && (!this.originThread || this.originThread.model !== 'mail.channel')) {
+                return this.guestAuthor.avatarUrl;
+            } else if (this.guestAuthor && this.originThread && this.originThread.model === 'mail.channel') {
+                return `/mail/channel/${this.originThread.id}/guest/${this.guestAuthor.id}/avatar_128?unique=${this.guestAuthor.name}`;
+            } else if (this.message_type === 'email') {
+                return '/mail/static/src/img/email_icon.png';
+            }
+            return '/mail/static/src/img/smiley/avatar.jpg';
+        },
+        /**
          * @returns {boolean}
          */
         _computeCanBeDeleted() {
@@ -535,6 +557,16 @@ registerModel({
         },
         /**
          * @private
+         * @returns {string|FieldCommand}
+         */
+        _computeShortTime() {
+            if (!this.date) {
+                return clear();
+            }
+            return this.date.format('hh:mm');
+        },
+        /**
+         * @private
          * @returns {Thread[]}
          */
         _computeThreads() {
@@ -553,6 +585,88 @@ registerModel({
             }
             return replace(threads);
         },
+        /**
+         * @private
+         * @returns {Object[]}
+         */
+        _computeTrackingValues() {
+            return this.tracking_value_ids.map(trackingValue => {
+                const value = Object.assign({}, trackingValue);
+                value.changed_field = _.str.sprintf(this.env._t("%s:"), value.changed_field);
+                /**
+                 * Maps tracked field type to a JS formatter. Tracking values are
+                 * not always stored in the same field type as their origin type.
+                 * Field types that are not listed here are not supported by
+                 * tracking in Python. Also see `create_tracking_values` in Python.
+                 */
+                switch (value.field_type) {
+                    case 'boolean':
+                        value.old_value = value.old_value ? this.env._t('Yes') : this.env._t('No');
+                        value.new_value = value.new_value ? this.env._t('Yes') : this.env._t('No');
+                        break;
+                    /**
+                     * many2one formatter exists but is expecting id/name_get or data
+                     * object but only the target record name is known in this context.
+                     *
+                     * Selection formatter exists but requires knowing all
+                     * possibilities and they are not given in this context.
+                     */
+                    case 'char':
+                    case 'many2one':
+                    case 'selection':
+                        value.old_value = format.char(value.old_value);
+                        value.new_value = format.char(value.new_value);
+                        break;
+                    case 'date':
+                        if (value.old_value) {
+                            value.old_value = moment.utc(value.old_value);
+                        }
+                        if (value.new_value) {
+                            value.new_value = moment.utc(value.new_value);
+                        }
+                        value.old_value = format.date(value.old_value);
+                        value.new_value = format.date(value.new_value);
+                        break;
+                    case 'datetime':
+                        if (value.old_value) {
+                            value.old_value = moment.utc(value.old_value);
+                        }
+                        if (value.new_value) {
+                            value.new_value = moment.utc(value.new_value);
+                        }
+                        value.old_value = format.datetime(value.old_value);
+                        value.new_value = format.datetime(value.new_value);
+                        break;
+                    case 'float':
+                        value.old_value = format.float(value.old_value);
+                        value.new_value = format.float(value.new_value);
+                        break;
+                    case 'integer':
+                        value.old_value = format.integer(value.old_value);
+                        value.new_value = format.integer(value.new_value);
+                        break;
+                    case 'monetary':
+                        value.old_value = format.monetary(value.old_value, undefined, {
+                            currency: value.currency_id
+                                ? this.env.session.currencies[value.currency_id]
+                                : undefined,
+                            forceString: true,
+                        });
+                        value.new_value = format.monetary(value.new_value, undefined, {
+                            currency: value.currency_id
+                                ? this.env.session.currencies[value.currency_id]
+                                : undefined,
+                            forceString: true,
+                        });
+                        break;
+                    case 'text':
+                        value.old_value = format.text(value.old_value);
+                        value.new_value = format.text(value.new_value);
+                        break;
+                }
+                return value;
+            });
+        },
     },
     fields: {
         authorName: attr({
@@ -562,6 +676,9 @@ registerModel({
             inverse: 'messages',
         }),
         author: one('Partner'),
+        avatarUrl: attr({
+            compute: '_computeAvatarUrl'
+        }),
         /**
          * This value is meant to be returned by the server
          * (and has been sanitized before stored into db).
@@ -771,6 +888,9 @@ registerModel({
             default: "",
         }),
         recipients: many('Partner'),
+        shortTime: attr({
+            compute: '_computeShortTime',
+        }),
         subject: attr(),
         subtype_description: attr(),
         subtype_id: attr(),
@@ -780,6 +900,9 @@ registerModel({
         threads: many('Thread', {
             compute: '_computeThreads',
             inverse: 'messages',
+        }),
+        trackingValues: attr({
+            compute: '_computeTrackingValues',
         }),
         tracking_value_ids: attr({
             default: [],

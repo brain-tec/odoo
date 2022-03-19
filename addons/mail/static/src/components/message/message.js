@@ -7,7 +7,6 @@ import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { _lt } from 'web.core';
-import { format } from 'web.field_utils';
 import Popover from "web.Popover";
 import { getLangDatetimeFormat } from 'web.time';
 
@@ -88,55 +87,12 @@ export class Message extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {string}
-     */
-    get avatar() {
-        if (this.messageView.message.author && (!this.messageView.message.originThread || this.messageView.message.originThread.model !== 'mail.channel')) {
-            // TODO FIXME for public user this might not be accessible. task-2223236
-            // we should probably use the correspondig attachment id + access token
-            // or create a dedicated route to get message image, checking the access right of the message
-            return this.messageView.message.author.avatarUrl;
-        } else if (this.messageView.message.author && this.messageView.message.originThread && this.messageView.message.originThread.model === 'mail.channel') {
-            return `/mail/channel/${this.messageView.message.originThread.id}/partner/${this.messageView.message.author.id}/avatar_128`;
-        } else if (this.messageView.message.guestAuthor && (!this.messageView.message.originThread || this.messageView.message.originThread.model !== 'mail.channel')) {
-            return this.messageView.message.guestAuthor.avatarUrl;
-        } else if (this.messageView.message.guestAuthor && this.messageView.message.originThread && this.messageView.message.originThread.model === 'mail.channel') {
-            return `/mail/channel/${this.messageView.message.originThread.id}/guest/${this.messageView.message.guestAuthor.id}/avatar_128?unique=${this.messageView.message.guestAuthor.name}`;
-        } else if (this.messageView.message.message_type === 'email') {
-            return '/mail/static/src/img/email_icon.png';
-        }
-        return '/mail/static/src/img/smiley/avatar.jpg';
-    }
-
-    /**
      * Get the date time of the message at current user locale time.
      *
      * @returns {string}
      */
     get datetime() {
         return this.messageView.message.date.format(getLangDatetimeFormat());
-    }
-
-    /**
-     * Determines whether author open chat feature is enabled on message.
-     *
-     * @returns {boolean}
-     */
-    get hasAuthorOpenChat() {
-        if (this.messaging.currentGuest) {
-            return false;
-        }
-        if (!this.messageView.message.author) {
-            return false;
-        }
-        if (
-            this.messageView.threadView &&
-            this.messageView.threadView.thread &&
-            this.messageView.threadView.thread.correspondent === this.messageView.message.author
-        ) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -250,97 +206,6 @@ export class Message extends Component {
         } else {
             return Promise.resolve();
         }
-    }
-
-    /**
-     * Get the shorttime format of the message date.
-     *
-     * @returns {string}
-     */
-    get shortTime() {
-        return this.messageView.message.date.format('hh:mm');
-    }
-
-    /**
-     * @returns {Object}
-     */
-    get trackingValues() {
-        return this.messageView.message.tracking_value_ids.map(trackingValue => {
-            const value = Object.assign({}, trackingValue);
-            value.changed_field = _.str.sprintf(this.env._t("%s:"), value.changed_field);
-            /**
-             * Maps tracked field type to a JS formatter. Tracking values are
-             * not always stored in the same field type as their origin type.
-             * Field types that are not listed here are not supported by
-             * tracking in Python. Also see `create_tracking_values` in Python.
-             */
-            switch (value.field_type) {
-                case 'boolean':
-                    value.old_value = value.old_value ? _lt('Yes') : _lt('No');
-                    value.new_value = value.new_value ? _lt('Yes') : _lt('No');
-                    break;
-                /**
-                 * many2one formatter exists but is expecting id/name_get or data
-                 * object but only the target record name is known in this context.
-                 *
-                 * Selection formatter exists but requires knowing all
-                 * possibilities and they are not given in this context.
-                 */
-                case 'char':
-                case 'many2one':
-                case 'selection':
-                    value.old_value = format.char(value.old_value);
-                    value.new_value = format.char(value.new_value);
-                    break;
-                case 'date':
-                    if (value.old_value) {
-                        value.old_value = moment.utc(value.old_value);
-                    }
-                    if (value.new_value) {
-                        value.new_value = moment.utc(value.new_value);
-                    }
-                    value.old_value = format.date(value.old_value);
-                    value.new_value = format.date(value.new_value);
-                    break;
-                case 'datetime':
-                    if (value.old_value) {
-                        value.old_value = moment.utc(value.old_value);
-                    }
-                    if (value.new_value) {
-                        value.new_value = moment.utc(value.new_value);
-                    }
-                    value.old_value = format.datetime(value.old_value);
-                    value.new_value = format.datetime(value.new_value);
-                    break;
-                case 'float':
-                    value.old_value = format.float(value.old_value);
-                    value.new_value = format.float(value.new_value);
-                    break;
-                case 'integer':
-                    value.old_value = format.integer(value.old_value);
-                    value.new_value = format.integer(value.new_value);
-                    break;
-                case 'monetary':
-                    value.old_value = format.monetary(value.old_value, undefined, {
-                        currency: value.currency_id
-                            ? this.env.session.currencies[value.currency_id]
-                            : undefined,
-                        forceString: true,
-                    });
-                    value.new_value = format.monetary(value.new_value, undefined, {
-                        currency: value.currency_id
-                            ? this.env.session.currencies[value.currency_id]
-                            : undefined,
-                        forceString: true,
-                    });
-                    break;
-                case 'text':
-                    value.old_value = format.text(value.old_value);
-                    value.new_value = format.text(value.new_value);
-                    break;
-            }
-            return value;
-        });
     }
 
     //--------------------------------------------------------------------------
@@ -519,7 +384,7 @@ export class Message extends Component {
      */
     _onClickAuthorAvatar(ev) {
         markEventHandled(ev, 'Message.ClickAuthorAvatar');
-        if (!this.hasAuthorOpenChat) {
+        if (!this.messageView.hasAuthorOpenChat) {
             return;
         }
         this.messageView.message.author.openChat();
