@@ -9,7 +9,7 @@
 # Oliver Roch <oliver.roch@d9t.de>, 2020
 # Jérôme JEK <jek@odoo.com>, 2020
 # Kevin Harrings <kha@odoo.com>, 2020
-# Martin Trigaux, 2021
+# Martin Trigaux, 2022
 # Friederike Fasterling-Nesselbosch, 2022
 # 
 msgid ""
@@ -196,7 +196,7 @@ msgstr "Zertifizierung starten"
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.course_main
 msgid "Begin your <b>certification</b> today!"
-msgstr "Beginne deine <b>Zertifizierung</b> noch heute!"
+msgstr "Beginnen Sie Ihre <b>Zertifizierung</b> noch heute!"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__slide_category
@@ -293,7 +293,7 @@ msgstr "Kurse"
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_survey_survey__slide_channel_count
 msgid "Courses Count"
-msgstr ""
+msgstr "Anzahl Kurse"
 
 #. module: website_slides_survey
 #: model_terms:ir.actions.act_window,help:website_slides_survey.survey_survey_action_slides
@@ -388,7 +388,7 @@ msgstr "Folien"
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_survey_user_input__slide_partner_id
 msgid "Subscriber information"
-msgstr "Abonnenten-Information "
+msgstr "Abonnenten-Information"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_slide_slide__slide_type
@@ -489,8 +489,8 @@ msgid ""
 "You can gain badges by passing certifications. Here is a list of all available certification badges.\n"
 "                            <br/>Follow the links to reach new heights and skill up!"
 msgstr ""
-"Durch erfolgreiche Zertifizierungen können Auszeichnungen erlangt werden. Hier ist eine Liste mit allen verfügbaren Auszeichnungen.\n"
-"<br/>Über die Links können neue Erfolge erzielt und Fähigkeiten verbessert werden!"
+"Sie können Abzeichen erwerben, indem Sie Zertifizierungen bestehen. Hier ist eine Liste mit allen verfügbaren Zertifizierungsabzeichen.\n"
+"<br/>Folgen Sie den Links, um Ihre Fähigkeiten zu verbessern und neue Levels zu erreichen!"
 
 #. module: website_slides_survey
 #: model:mail.template,subject:website_slides_survey.mail_template_user_input_certification_failed
