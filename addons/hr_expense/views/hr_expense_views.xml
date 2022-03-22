@@ -144,6 +144,7 @@
                             <field name="sheet_is_editable" invisible="1"/>
                             <field name="product_id" required="1" attrs="{'readonly': [('sheet_is_editable', '=', False)]}" context="{'default_can_be_expensed': 1, 'tree_view_ref': 'hr_expense.product_product_expense_tree_view', 'form_view_ref': 'hr_expense.product_product_expense_form_view'}"/>
                             <field name="unit_amount" required="1" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}" attrs="{'invisible': [('product_has_cost', '=', False)], 'readonly': [('sheet_is_editable', '=', False)]}"/>
+                            <field name="untaxed_amount" invisible="1" force_save="1"/>
                             <field name="product_uom_category_id" invisible="1"/>
                             <label for="quantity" attrs="{'invisible': [('product_has_cost', '=', False)]}"/>
                             <div class="o_row" attrs="{'invisible': [('product_has_cost', '=', False)]}">
@@ -166,7 +167,9 @@
                                 <field name="total_amount_company" style="vertical-align: top;" widget='monetary' options="{'currency_field': 'company_currency_id'}"/>
                                 <field name="label_convert_rate"/>
                             </div>
-                            <field name="tax_ids" widget="many2many_tags" groups="account.group_account_readonly" attrs="{'readonly': [('is_editable', '=', False)], 'invisible': [('product_has_cost', '=', True)]}"  context="{'default_company_id': company_id}" placeholder="Included in price taxes" />
+                            <field name="tax_ids" widget="many2many_tags" groups="account.group_account_readonly"
+                                attrs="{'readonly': [('is_editable', '=', False)], 'invisible': [('product_has_cost', '=', True)]}"
+                                context="{'default_company_id': company_id, 'default_type_tax_use': 'purchase', 'default_price_include': 1}" placeholder="Included in price taxes" />
                         </group><group>
                             <field name="reference" groups="account.group_account_readonly" attrs="{'readonly': [('is_ref_editable', '=', False)], 'invisible': [('product_has_cost', '=', True)]}"/>
                             <field name="date" attrs="{'readonly': [('sheet_is_editable', '=', False)]}"/>
