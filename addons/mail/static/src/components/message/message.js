@@ -8,7 +8,6 @@ import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { _lt } from 'web.core';
 import Popover from "web.Popover";
-import { getLangDatetimeFormat } from 'web.time';
 
 const { Component, onWillUnmount, useRef, useState } = owl;
 
@@ -85,15 +84,6 @@ export class Message extends Component {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
-    /**
-     * Get the date time of the message at current user locale time.
-     *
-     * @returns {string}
-     */
-    get datetime() {
-        return this.messageView.message.date.format(getLangDatetimeFormat());
-    }
 
     /**
      * Whether the message is "active", ie: hovered or clicked, and should
@@ -178,12 +168,6 @@ export class Message extends Component {
      */
     get messageView() {
         return this.messaging && this.messaging.models['MessageView'].get(this.props.localId);
-    }
-    /**
-     * @returns {string}
-     */
-    get OPEN_CHAT() {
-        return this.env._t("Open chat");
     }
 
     /**

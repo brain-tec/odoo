@@ -9,7 +9,9 @@ import { addLink, htmlToTextContentInline, parseAndTransform, timeFromNow } from
 import { session } from '@web/session';
 
 import { format } from 'web.field_utils';
-import { str_to_datetime } from 'web.time';
+import { getLangDatetimeFormat, str_to_datetime } from 'web.time';
+
+const { markup } = owl;
 
 registerModel({
     name: 'Message',
@@ -384,6 +386,16 @@ registerModel({
             return timeFromNow(this.date);
         },
         /**
+         * @private
+         * @returns {string|FieldCommand}
+         */
+        _computeDatetime() {
+            if (!this.date) {
+                return clear();
+            }
+            return this.date.format(getLangDatetimeFormat());
+        },
+        /**
          * @returns {boolean}
          */
         _computeFailureNotifications() {
@@ -566,6 +578,12 @@ registerModel({
             return this.date.format('hh:mm');
         },
         /**
+         * @returns {Markup}
+         */
+        _computePrettyBodyAsMarkup() {
+            return markup(this.prettyBody);
+        },
+        /**
          * @private
          * @returns {Thread[]}
          */
@@ -716,6 +734,12 @@ registerModel({
          */
         dateFromNow: attr({
             compute: '_computeDateFromNow',
+        }),
+        /**
+         * The date time of the message at current user locale time.
+         */
+        datetime: attr({
+            compute: '_computeDatetime',
         }),
         email_from: attr(),
         failureNotifications: many('Notification', {
@@ -886,6 +910,9 @@ registerModel({
         prettyBody: attr({
             compute: '_computePrettyBody',
             default: "",
+        }),
+        prettyBodyAsMarkup: attr({
+            compute: '_computePrettyBodyAsMarkup',
         }),
         recipients: many('Partner'),
         shortTime: attr({

@@ -3,10 +3,19 @@
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 
+import { sprintf } from '@web/core/utils/strings';
+
 registerModel({
     name: 'SuggestedRecipientInfo',
     identifyingFields: ['id'],
     recordMethods: {
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeDialogText() {
+            return this.env._t("Please complete customer's information");
+        },
         /**
          * Prevents selecting a recipient that does not have a partner.
          *
@@ -23,8 +32,21 @@ registerModel({
         _computeName() {
             return this.partner && this.partner.nameOrDisplayName || this.name;
         },
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeTitleText() {
+            return sprintf(
+                this.env._t("Add as recipient and follower (reason: %s)"),
+                this.reason
+            );
+        },
     },
     fields: {
+        dialogText: attr({
+            compute: '_computeDialogText',
+        }),
         /**
          * Determines the email of `this`. It serves as visual clue when
          * displaying `this`, and also serves as default partner email when
@@ -77,6 +99,9 @@ registerModel({
         thread: one('Thread', {
             inverse: 'suggestedRecipientInfoList',
             required: true,
+        }),
+        titleText: attr({
+            compute: '_computeTitleText',
         }),
     },
 });

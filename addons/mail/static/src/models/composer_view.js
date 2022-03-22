@@ -579,10 +579,32 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeHasFooter() {
+            return Boolean(
+                this.hasThreadTyping ||
+                this.composer.attachments.length > 0 ||
+                this.messageViewInEditing ||
+                !this.isCompact
+            );
+        },
+        /**
+         * @private
          * @return {boolean}
          */
         _computeHasSuggestions() {
             return this.mainSuggestedRecords.length > 0 || this.extraSuggestedRecords.length > 0;
+        },
+        /**
+         * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeHasThreadTyping() {
+            if (this.threadView && this.threadView.hasComposerThreadTyping !== undefined) {
+                return this.threadView.hasComposerThreadTyping;
+            }
+            return clear();
         },
         /**
          * @private
@@ -1026,11 +1048,21 @@ registerModel({
             default: false,
         }),
         /**
+         * Determines whether composer should display a footer.
+         */
+        hasFooter: attr({
+            compute: '_computeHasFooter',
+        }),
+        /**
          * States whether there is any result currently found for the current
          * suggestion delimiter and search term, if applicable.
          */
         hasSuggestions: attr({
             compute: '_computeHasSuggestions',
+            default: false,
+        }),
+        hasThreadTyping: attr({
+            compute: '_computeHasThreadTyping',
             default: false,
         }),
         /**
