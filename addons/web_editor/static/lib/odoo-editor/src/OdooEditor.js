@@ -36,13 +36,14 @@ import {
     getDeepRange,
     ancestors,
     firstLeaf,
+    previousLeaf,
     nextLeaf,
     isUnremovable,
     fillEmpty,
     isEmptyBlock,
     getUrlsInfosInString,
     URL_REGEX,
-    isBold,
+    isSelectionFormat,
     YOUTUBE_URL_GET_VIDEO_ID,
     unwrapContents,
     peek,
@@ -70,7 +71,11 @@ const KEYBOARD_TYPES = { VIRTUAL: 'VIRTUAL', PHYSICAL: 'PHYSICAL', UNKNOWN: 'UKN
 const IS_KEYBOARD_EVENT_UNDO = ev => ev.key === 'z' && (ev.ctrlKey || ev.metaKey);
 const IS_KEYBOARD_EVENT_REDO = ev => ev.key === 'y' && (ev.ctrlKey || ev.metaKey);
 const IS_KEYBOARD_EVENT_BOLD = ev => ev.key === 'b' && (ev.ctrlKey || ev.metaKey);
+const IS_KEYBOARD_EVENT_ITALIC = ev => ev.key === 'i' && (ev.ctrlKey || ev.metaKey);
+const IS_KEYBOARD_EVENT_UNDERLINE = ev => ev.key === 'u' && (ev.ctrlKey || ev.metaKey);
 const IS_KEYBOARD_EVENT_STRIKETHROUGH = ev => ev.key === '5' && (ev.ctrlKey || ev.metaKey);
+const IS_KEYBOARD_EVENT_LEFT_ARROW = ev => ev.key === 'ArrowLeft' && !(ev.ctrlKey || ev.metaKey);
+const IS_KEYBOARD_EVENT_RIGHT_ARROW = ev => ev.key === 'ArrowRight' && !(ev.ctrlKey || ev.metaKey);
 
 const CLIPBOARD_BLACKLISTS = {
     unwrap: ['.Apple-interchange-newline', 'DIV'], // These elements' children will be unwrapped.
@@ -1437,7 +1442,14 @@ export class OdooEditor extends EventTarget {
                 if (hasGradient && !hasTextGradientClass) {
                     hiliteColor = backgroundImage;
                 } else {
-                    hiliteColor = computedStyle.backgroundColor;
+                    let ancestor = endContainer;
+                    while (ancestor && !hiliteColor) {
+                        hiliteColor = ancestor.style.backgroundColor;
+                        ancestor = ancestor.parentElement;
+                    }
+                    if (!hiliteColor) {
+                        hiliteColor = computedStyle.backgroundColor;
+                    }
                 }
             }
         }
@@ -1899,9 +1911,6 @@ export class OdooEditor extends EventTarget {
         }
         const paragraphDropdownButton = this.toolbar.querySelector('#paragraphDropdownButton');
         for (const commandState of [
-            'italic',
-            'underline',
-            'strikeThrough',
             'justifyLeft',
             'justifyRight',
             'justifyCenter',
@@ -1924,9 +1933,13 @@ export class OdooEditor extends EventTarget {
             const closestStartContainer = closestElement(sel.getRangeAt(0).startContainer, '*');
             const selectionStartStyle = getComputedStyle(closestStartContainer);
 
-            // queryCommandState('bold') does not take stylesheets into account
-            const button = this.toolbar.querySelector('#bold');
-            button.classList.toggle('active', isBold(closestStartContainer));
+            // queryCommandState does not take stylesheets into account
+            for (const format of ['bold', 'italic', 'underline', 'strikeThrough']) {
+                const formatButton = this.toolbar.querySelector(`#${format.toLowerCase()}`);
+                if (formatButton) {
+                    formatButton.classList.toggle('active', isSelectionFormat(this.editable, format));
+                }
+            }
 
             const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
             if (fontSizeValue) {
@@ -1998,7 +2011,7 @@ export class OdooEditor extends EventTarget {
 
         const linkNode = getInSelection(this.document, 'a');
         const linkButton = this.toolbar.querySelector('#createLink');
-        linkButton && linkButton.classList.toggle('active', linkNode);
+        linkButton && linkButton.classList.toggle('active', !!linkNode);
         const unlinkButton = this.toolbar.querySelector('#unlink');
         unlinkButton && unlinkButton.classList.toggle('d-none', !linkNode);
         const undoButton = this.toolbar.querySelector('#undo');
@@ -2094,6 +2107,11 @@ export class OdooEditor extends EventTarget {
     _prepareClipboardData(clipboardData) {
         const container = document.createElement('fake-container');
         container.innerHTML = clipboardData;
+
+        for (const tableElement of container.querySelectorAll('table')) {
+            tableElement.classList.add('table', 'table-bordered');
+        };
+
         for (const child of [...container.childNodes]) {
             this._cleanForPaste(child);
         }
@@ -2357,11 +2375,65 @@ export class OdooEditor extends EventTarget {
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('bold');
+        } else if (IS_KEYBOARD_EVENT_ITALIC(ev)) {
+            // Ctrl-I
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.execCommand('italic');
+        } else if (IS_KEYBOARD_EVENT_UNDERLINE(ev)) {
+            // Ctrl-U
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.execCommand('underline');
         } else if (IS_KEYBOARD_EVENT_STRIKETHROUGH(ev)) {
             // Ctrl-5 / Ctrl-shift-(
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('strikeThrough');
+        } else if (IS_KEYBOARD_EVENT_LEFT_ARROW(ev)) {
+            getDeepRange(this.editable);
+            const selection = this.document.getSelection();
+            // Find previous character.
+            let { focusNode, focusOffset } = selection;
+            let previousCharacter = focusOffset > 0 && focusNode.textContent[focusOffset - 1];
+            if (!previousCharacter) {
+                focusNode = previousLeaf(focusNode);
+                focusOffset = nodeSize(focusNode);
+                previousCharacter = focusNode.textContent[focusOffset - 1];
+            }
+            // Move selection if previous character is zero-width space
+            if (previousCharacter === '\u200B') {
+                focusOffset -= 1;
+                while (focusNode && (focusOffset < 0 || !focusNode.textContent[focusOffset])) {
+                    focusNode = nextLeaf(focusNode);
+                    focusOffset = focusNode && nodeSize(focusNode);
+                }
+                const startContainer = ev.shiftKey ? selection.anchorNode : focusNode;
+                const startOffset = ev.shiftKey ? selection.anchorOffset : focusOffset;
+                setSelection(startContainer, startOffset, focusNode, focusOffset);
+            }
+        } else if (IS_KEYBOARD_EVENT_RIGHT_ARROW(ev)) {
+            getDeepRange(this.editable);
+            const selection = this.document.getSelection();
+            // Find next character.
+            let { focusNode, focusOffset } = selection;
+            let nextCharacter = focusNode.textContent[focusOffset];
+            if (!nextCharacter) {
+                focusNode = nextLeaf(focusNode);
+                focusOffset = 0;
+                nextCharacter = focusNode.textContent[focusOffset];
+            }
+            // Move selection if next character is zero-width space
+            if (nextCharacter === '\u200B') {
+                focusOffset += 1;
+                while (focusNode && !focusNode.textContent[focusOffset]) {
+                    focusNode = nextLeaf(focusNode);
+                    focusOffset = 0;
+                }
+                const startContainer = ev.shiftKey ? selection.anchorNode : focusNode;
+                const startOffset = ev.shiftKey ? selection.anchorOffset : focusOffset;
+                setSelection(startContainer, startOffset, focusNode, focusOffset);
+            }
         }
     }
     /**
