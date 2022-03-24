@@ -369,13 +369,15 @@ registerModel({
                 for (const threadView of message.originThread.threadViews) {
                     // Reset auto scroll to be able to see the newly posted message.
                     threadView.update({ hasAutoScrollOnMessageReceived: true });
+                    threadView.addComponentHint('message-posted', { message });
                 }
                 if (chatterThread) {
                     if (this.exists()) {
                         this.delete();
                     }
                     if (chatterThread.exists()) {
-                        chatterThread.fetchData(['followers', 'suggestedRecipients']);
+                        // Load new messages to fetch potential new messages from other users (useful due to lack of auto-sync in chatter).
+                        chatterThread.fetchData(['followers', 'messages', 'suggestedRecipients']);
                     }
                 }
                 if (threadViewThread) {
@@ -591,6 +593,17 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeHasHeader() {
+            return Boolean(
+                (this.hasThreadName && this.composer.thread) ||
+                (this.hasFollowers && !this.composer.isLog) ||
+                this.threadView && this.threadView.replyingToMessageView
+            );
+        },
+        /**
+         * @private
          * @return {boolean}
          */
         _computeHasSuggestions() {
@@ -601,7 +614,7 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeHasThreadTyping() {
-            if (this.threadView && this.threadView.hasComposerThreadTyping !== undefined) {
+            if (this.threadView) {
                 return this.threadView.hasComposerThreadTyping;
             }
             return clear();
@@ -616,6 +629,16 @@ registerModel({
             }
             if (this.messageViewInEditing) {
                 return true;
+            }
+            return clear();
+        },
+        /**
+         * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeHasThreadName() {
+            if (this.threadView) {
+                return this.threadView.hasComposerThreadName;
             }
             return clear();
         },
@@ -1054,11 +1077,21 @@ registerModel({
             compute: '_computeHasFooter',
         }),
         /**
+         * Determine whether the composer should display a header.
+         */
+        hasHeader: attr({
+            compute: '_computeHasHeader',
+        }),
+        /**
          * States whether there is any result currently found for the current
          * suggestion delimiter and search term, if applicable.
          */
         hasSuggestions: attr({
             compute: '_computeHasSuggestions',
+            default: false,
+        }),
+        hasThreadName: attr({
+            compute: '_computeHasThreadName',
             default: false,
         }),
         hasThreadTyping: attr({

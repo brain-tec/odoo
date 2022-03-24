@@ -34,22 +34,6 @@ export class Composer extends Component {
         return this.messaging && this.messaging.models['ComposerView'].get(this.props.localId);
     }
 
-    /**
-     * Determine whether the composer should display a header.
-     *
-     * @returns {boolean}
-     */
-    get hasHeader() {
-        if (!this.composerView) {
-            return false;
-        }
-        return (
-            (this.props.hasThreadName && this.composerView.composer.thread) ||
-            (this.composerView.hasFollowers && !this.composerView.composer.isLog) ||
-            this.composerView.threadView && this.composerView.threadView.replyingToMessageView
-        );
-    }
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -178,7 +162,6 @@ Object.assign(Composer, {
         hasCurrentPartnerAvatar: true,
         hasDiscardButton: false,
         hasSendButton: true,
-        hasThreadName: false,
         isExpandable: false,
     },
     props: {
@@ -196,10 +179,6 @@ Object.assign(Composer, {
             optional: true,
         },
         hasSendButton: {
-            type: Boolean,
-            optional: true,
-        },
-        hasThreadName: {
             type: Boolean,
             optional: true,
         },
