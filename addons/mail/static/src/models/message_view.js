@@ -44,6 +44,12 @@ registerModel({
                 this.threadView.handleVisibleMessage(this.message);
             }
         },
+        onMouseenter() {
+            this.update({ isHovered: true });
+        },
+        onMouseleave() {
+            this.update({ isHovered: false });
+        },
         /**
          * Action to initiate reply to current messageView.
          */
@@ -146,6 +152,16 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeIsSelected() {
+            return Boolean(
+                this.threadView &&
+                this.threadView.replyingToMessageView === this
+            );
+        },
+        /**
+         * @private
          * @returns {FieldCommand}
          */
         _computeMessageActionList() {
@@ -224,10 +240,31 @@ registerModel({
          */
         highlightTimeout: attr(),
         /**
+         * Determines whether the message is clicked. When message is in
+         * clicked state, it keeps displaying actions even if not hovered.
+         */
+        isClicked: attr({
+            default: false
+        }),
+        /**
          * Whether the message should be forced to be isHighlighted. Should only
          * be set through @see highlight()
          */
         isHighlighted: attr(),
+        /**
+         * Determine whether the message is hovered. When message is hovered
+         * it displays message actions.
+         */
+        isHovered: attr({
+            default: false,
+        }),
+        /**
+         * Tells whether the message is selected in the current thread viewer.
+         */
+        isSelected: attr({
+            compute: '_computeIsSelected',
+            default: false,
+        }),
         /**
          * Determines whether this message view should be squashed visually.
          */

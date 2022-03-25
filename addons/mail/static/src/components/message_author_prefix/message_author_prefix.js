@@ -7,10 +7,10 @@ const { Component } = owl;
 export class MessageAuthorPrefix extends Component {
 
     /**
-     * @returns {Message}
+     * @returns {messageAuthorPrefixView}
      */
-    get message() {
-        return this.messaging && this.messaging.models['Message'].get(this.props.messageLocalId);
+    get messageAuthorPrefixView() {
+        return this.messaging && this.messaging.models['MessageAuthorPrefixView'].get(this.props.localId);
     }
 
     /**
@@ -24,7 +24,7 @@ export class MessageAuthorPrefix extends Component {
 
 Object.assign(MessageAuthorPrefix, {
     props: {
-        messageLocalId: String,
+        localId: String,
         threadLocalId: {
             type: String,
             optional: true,

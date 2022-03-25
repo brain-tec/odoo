@@ -9,7 +9,7 @@ import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 import { _lt } from 'web.core';
 import Popover from "web.Popover";
 
-const { Component, onWillUnmount, useRef, useState } = owl;
+const { Component, onWillUnmount, useRef } = owl;
 
 const READ_MORE = _lt("Read More");
 const READ_LESS = _lt("Read Less");
@@ -23,18 +23,6 @@ export class Message extends Component {
         super.setup();
         useComponentToModel({ fieldName: 'component', modelName: 'MessageView' });
         useUpdateToModel({ methodName: 'onComponentUpdate', modelName: 'MessageView' });
-        this.state = useState({
-            /**
-             * Determine whether the message is hovered. When message is hovered
-             * it displays message actions.
-             */
-             isHovered: false,
-            /**
-             * Determine whether the message is clicked. When message is in
-             * clicked state, it keeps displaying actions even if not hovered.
-             */
-            isClicked: false,
-        });
         useUpdate({ func: () => this._update() });
         /**
          * Value of the last rendered prettyBody. Useful to compare to new value
@@ -93,14 +81,16 @@ export class Message extends Component {
      */
     get isActive() {
         return Boolean(
-            this.state.isHovered ||
-            this.state.isClicked ||
+            this.messageView &&
             (
-                this.messageView &&
-                this.messageView.messageActionList &&
+                this.messageView.isHovered ||
+                this.messageView.isClicked ||
                 (
-                    this.messageView.messageActionList.reactionPopoverView ||
-                    this.messageView.messageActionList.deleteConfirmDialog
+                    this.messageView.messageActionList &&
+                    (
+                        this.messageView.messageActionList.reactionPopoverView ||
+                        this.messageView.messageActionList.deleteConfirmDialog
+                    )
                 )
             )
         );
@@ -147,19 +137,6 @@ export class Message extends Component {
         return (
             elRect.top < parentRect.bottom + 5 &&
             parentRect.top < elRect.bottom + 5
-        );
-    }
-
-    /**
-     * Tell whether the message is selected in the current thread viewer.
-     *
-     * @returns {boolean}
-     */
-    get isSelected() {
-        return Boolean(
-            this.messageView &&
-            this.messageView.threadView &&
-            this.messageView.threadView.replyingToMessageView === this.messageView
         );
     }
 
@@ -358,7 +335,7 @@ export class Message extends Component {
             !isEventHandled(ev, 'MessageReactionGroup.Click') &&
             !isEventHandled(ev, 'MessageInReplyToView.ClickMessageInReplyTo')
         ) {
-            this.state.isClicked = !this.state.isClicked;
+            this.messageView.update({ isClicked: !this.messageView.isClicked });
         }
     }
 
