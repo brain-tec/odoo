@@ -20,7 +20,11 @@ class AccountMove(models.Model):
                 self.journal_id.l10n_latam_use_documents:
             return super()._get_l10n_latam_documents_domain()
         if self.journal_id.type == 'sale':
-            domain = [('country_id.code', '=', "CL"), ('internal_type', '!=', 'invoice_in')]
+            if self.move_type == 'out_refund':
+                internal_types_domain = ('internal_type', '=', 'credit_note')
+            else:
+                internal_types_domain = ('internal_type', 'not in', ['invoice_in', 'credit_note'])
+            domain = [('country_id.code', '=', 'CL'), internal_types_domain]
             if self.company_id.partner_id.l10n_cl_sii_taxpayer_type == '1':
                 domain += [('code', '!=', '71')]  # Companies with VAT Affected doesn't have "Boleta de honorarios Electrónica"
             return domain
@@ -99,7 +103,7 @@ class AccountMove(models.Model):
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 6 padding number """
-        if self.journal_id.l10n_latam_use_documents and self.env.company.account_fiscal_country_id.code == "CL":
+        if self.journal_id.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL":
             if self.l10n_latam_document_type_id:
                 return self._l10n_cl_get_formatted_sequence()
         return super()._get_starting_sequence()

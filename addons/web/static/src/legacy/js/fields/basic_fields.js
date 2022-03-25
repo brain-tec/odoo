@@ -1683,7 +1683,7 @@ var FieldEmail = InputField.extend({
     description: _lt("Email"),
     className: 'o_field_email',
     events: _.extend({}, InputField.prototype.events, {
-        'click': '_onClick',
+        'click': '_onClickLink',
     }),
     prefix: 'mailto',
     supportedFieldTypes: ['char'],
@@ -1758,8 +1758,10 @@ var FieldEmail = InputField.extend({
      * @private
      * @param {MouseEvent} ev
      */
-    _onClick: function (ev) {
-        ev.stopPropagation();
+    _onClickLink: function (ev) {
+        if (ev.target.matches("a")) {
+            ev.stopImmediatePropagation();
+        }
     },
 });
 
@@ -2134,10 +2136,18 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
         if (width) {
             $img.attr('width', width);
             $img.css('max-width', width + 'px');
+            if (!height) {
+                $img.css('height', 'auto');
+                $img.css('max-height', '100%');
+            }
         }
         if (height) {
             $img.attr('height', height);
             $img.css('max-height', height + 'px');
+            if (!width) {
+                $img.css('width', 'auto');
+                $img.css('max-width', '100%');
+            }
         }
         this.$('> img').remove();
         this.$el.prepend($img);
@@ -2235,10 +2245,18 @@ var CharImageUrl = AbstractField.extend({
             if (width) {
                 $img.attr('width', width);
                 $img.css('max-width', width + 'px');
+                if (!height) {
+                    $img.css('height', 'auto');
+                    $img.css('max-height', '100%');
+                }
             }
             if (height) {
                 $img.attr('height', height);
                 $img.css('max-height', height + 'px');
+                if (!width) {
+                    $img.css('width', 'auto');
+                    $img.css('max-width', '100%');
+                }
             }
             this.$('> img').remove();
             this.$el.prepend($img);
