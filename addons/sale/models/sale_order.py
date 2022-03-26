@@ -505,10 +505,14 @@ class SaleOrder(models.Model):
         else:
             self.show_update_pricelist = False
 
+    def _get_update_prices_lines(self):
+        """ Hook to exclude specific lines which should not be updated based on price list recomputation """
+        return self.order_line.filtered(lambda line: not line.display_type)
+
     def update_prices(self):
         self.ensure_one()
         lines_to_update = []
-        for line in self.order_line.filtered(lambda line: not line.display_type):
+        for line in self._get_update_prices_lines():
             product = line.product_id.with_context(
                 partner=self.partner_id,
                 quantity=line.product_uom_qty,
@@ -516,8 +520,15 @@ class SaleOrder(models.Model):
                 pricelist=self.pricelist_id.id,
                 uom=line.product_uom.id
             )
-            price_unit = self.env['account.tax']._fix_tax_included_price_company(
-                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
+            price_unit = product._get_tax_included_unit_price(
+                line.company_id,
+                line.order_id.currency_id,
+                line.order_id.date_order,
+                'sale',
+                fiscal_position=line.order_id.fiscal_position_id,
+                product_price_unit=line._get_display_price(product),
+                product_currency=line.currency_id
+            )
             if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
                 price_discount_unrounded = self.pricelist_id.get_product_price(product, line.product_uom_qty, self.partner_id, self.date_order, line.product_uom.id)
                 discount = max(0, (price_unit - price_discount_unrounded) * 100 / price_unit)
