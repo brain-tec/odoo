@@ -981,7 +981,7 @@ class Task(models.Model):
     # Second Many2many containing the actual personal stage for the current user
     # See project_task_stage_personal.py for the model defininition
     personal_stage_type_ids = fields.Many2many('project.task.type', 'project_task_user_rel', column1='task_id', column2='stage_id',
-        ondelete='restrict', group_expand='_read_group_personal_stage_type_ids',
+        ondelete='restrict', group_expand='_read_group_personal_stage_type_ids', copy=False,
         domain="[('user_id', '=', user.id)]", depends=['user_ids'], string='Personal Stage')
     # Personal Stage computed from the user
     personal_stage_id = fields.Many2one('project.task.stage.personal', string='Personal Stage State', compute_sudo=False,
@@ -1653,6 +1653,8 @@ class Task(models.Model):
 
     def copy_data(self, default=None):
         defaults = super().copy_data(default=default)
+        if self.env.user.has_group('project.group_project_user'):
+            return defaults
         return [{k: v for k, v in default.items() if k in self.SELF_READABLE_FIELDS} for default in defaults]
 
     @api.model
@@ -1660,6 +1662,18 @@ class Task(models.Model):
         for field in fields:
             if field not in self.SELF_WRITABLE_FIELDS:
                 raise AccessError(_('You have not write access of %s field.') % field)
+
+    def _load_records_create(self, vals_list):
+        projects_with_recurrence = self.env['project.project'].search([('allow_recurring_tasks', '=', True)])
+        for vals in vals_list:
+            if vals.get('recurring_task'):
+                if vals.get('project_id') in projects_with_recurrence.ids and not vals.get('recurrence_id'):
+                    default_val = self.default_get(self._get_recurrence_fields())
+                    vals.update(**default_val)
+                else:
+                    for field_name in self._get_recurrence_fields() + ['recurring_task']:
+                        vals.pop(field_name, None)
+        return super()._load_records_create(vals_list)
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -1497,6 +1497,13 @@ class UsersView(models.Model):
                     values.pop('groups_id', None)
         return res
 
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        if fields:
+            # ignore reified fields
+            fields = [fname for fname in fields if not is_reified_group(fname)]
+        return super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
     def _add_reified_groups(self, fields, values):
         """ add the given reified group fields into `values` """
         gids = set(parse_m2m(values.get('groups_id') or []))
@@ -1781,8 +1788,7 @@ class APIKeyDescription(models.TransientModel):
     @check_identity
     def make_key(self):
         # only create keys for users who can delete their keys
-        if not self.user_has_groups('base.group_user'):
-            raise AccessError(_("Only internal users can create API keys"))
+        self.check_access_make_key()
 
         description = self.sudo()
         k = self.env['res.users.apikeys']._generate(None, self.sudo().name)
@@ -1798,6 +1804,10 @@ class APIKeyDescription(models.TransientModel):
                 'default_key': k,
             }
         }
+
+    def check_access_make_key(self):
+        if not self.user_has_groups('base.group_user'):
+            raise AccessError(_("Only internal users can create API keys"))
 
 class APIKeyShow(models.AbstractModel):
     _name = _description = 'res.users.apikeys.show'

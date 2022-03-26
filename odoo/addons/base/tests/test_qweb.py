@@ -17,6 +17,7 @@ from odoo.tests.common import TransactionCase
 from odoo.addons.base.models.ir_qweb import QWebException, render
 from odoo.tools import misc, mute_logger
 from odoo.tools.json import scriptsafe as json_scriptsafe
+from odoo.exceptions import MissingError
 
 unsafe_eval = eval
 
@@ -1240,6 +1241,51 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('Can not compile expression', error)
             self.assertIn('<div t-esc="abc + def + ("/>', error)
 
+    def test_error_message_3(self):
+        # The format error tells the developer what to do.
+        template = '''<section>
+                    <div t-esc="1+2">
+                        <span>content</span>
+                    </div>
+                </section>'''
+        with self.assertRaises(ValueError):
+            self.env['ir.qweb']._render(template)
+        try:
+            self.env['ir.qweb']._render(template)
+        except ValueError as e:
+            self.assertIn('Inline templates must be passed as `etree` documents', str(e))
+
+        template = '''toto <t t-esc="content"/>'''
+        with self.assertRaises(ValueError):
+            self.env['ir.qweb']._render(template)
+        try:
+            self.env['ir.qweb']._render(template)
+        except ValueError as e:
+            self.assertIn('Inline templates must be passed as `etree` documents', str(e))
+
+    def test_error_message_4(self):
+        # Template record view not found.
+        with self.assertRaises(MissingError):
+            self.env['ir.qweb']._render(-999)
+        try:
+            self.env['ir.qweb']._render(-999)
+        except MissingError as e:
+            self.assertIn('Record does not exist or has been deleted.', str(e))
+
+        with self.assertRaises(ValueError):
+            self.env['ir.qweb']._render('not.wrong_template_xmlid')
+        try:
+            self.env['ir.qweb']._render('not.wrong_template_xmlid')
+        except ValueError as e:
+            self.assertIn('External ID not found in the system', str(e))
+
+        with self.assertRaises(AssertionError):
+            self.env['ir.qweb']._render(False)
+        try:
+            self.env['ir.qweb']._render(False)
+        except AssertionError as e:
+            self.assertIn('template is required', str(e))
+
     def test_call_set(self):
         view0 = self.env['ir.ui.view'].create({
             'name': "dummy",
@@ -1492,7 +1538,32 @@ class TestQWebBasic(TransactionCase):
 
         self.assertEqual(str(rendered).strip(), result.strip())
 
-    def test_space_remove_technical_space(self):
+    def test_space_remove_technical_space_t_foreach(self):
+        view = self.env['ir.ui.view'].create({
+            'name': 'master',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='master'>
+                    <section>
+                        <article t-foreach="[0, 1, 2]" t-as="value" t-esc="value"/>
+                        <t t-foreach="[0, 1, 2]" t-as="value">
+                            <article t-esc="value"/>
+                        </t>
+                    </section>
+                </t>'''})
+
+        result = '''
+                    <section>
+                        <article>0</article><article>1</article><article>2</article>
+                            <article>0</article>
+                            <article>1</article>
+                            <article>2</article>
+                    </section>'''
+
+        rendered = self.env['ir.qweb']._render(view.id)
+
+        self.assertEqual(str(rendered), result)
+
+    def test_space_remove_technical_all(self):
         test = self.env['ir.ui.view'].create({
             'name': 'test',
             'type': 'qweb',
@@ -1576,8 +1647,7 @@ class TestQWebBasic(TransactionCase):
                         <article>
                             <div>
                 <span>0</span>
-                            </div>
-                            <div>
+                            </div><div>
                 <span>1</span>
                             </div>
 
@@ -1592,7 +1662,6 @@ class TestQWebBasic(TransactionCase):
                     </section>'''
 
         rendered = self.env['ir.qweb']._render(view.id)
-
         self.assertEqual(str(rendered), result)
 
 class FileSystemLoader(object):

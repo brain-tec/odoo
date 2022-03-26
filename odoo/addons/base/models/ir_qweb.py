@@ -636,22 +636,21 @@ class IrQWeb(models.AbstractModel):
         string document that contains ``element``, and ``ref`` if the uniq
         reference of the template (id, t-name or template).
 
-        :param template: template identifier, name or etree
+        :param template: template identifier or etree
         :param options: used to compile the template (the dict available for
             the rendering is frozen)
             ``load`` (function) overrides the load method
         """
+        assert template not in (False, None, ""), "template is required"
+
         # template is an xml etree already
         if isinstance(template, etree._Element):
             element = template
             document = etree.tostring(template, encoding='unicode')
             ref = None
-
         # template is xml as string
-        elif isinstance(template, str) and template.startswith('<'):
-            element = etree.fromstring(template)
-            document = template
-            ref = None
+        elif isinstance(template, str) and '<' in template:
+            raise ValueError('Inline templates must be passed as `etree` documents')
 
         # template is (id or ref) to a database stored template
         else:
@@ -1656,14 +1655,12 @@ class IrQWeb(models.AbstractModel):
         if not VARNAME_REGEXP.match(expr_as):
             raise ValueError(f'The varname {expr_as!r} can only contain alphanumeric characters and underscores.')
 
+        if el.tag.lower() == 't':
+            self._rstrip_text(options)
 
-        strip = self._rstrip_text(options)
         code = self._flush_text(options, level)
 
-        content_foreach = []
-        if strip and el.tag.lower() != 't':
-            self._append_text(strip, options)
-        content_foreach.extend(
+        content_foreach = (
             self._compile_directives(el, options, level + 1) +
             self._flush_text(options, level + 1, rstrip=True))
 

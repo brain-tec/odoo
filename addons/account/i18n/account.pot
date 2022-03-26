@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~15.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-11 14:33+0000\n"
-"PO-Revision-Date: 2022-02-11 14:33+0000\n"
+"POT-Creation-Date: 2022-03-15 12:05+0000\n"
+"PO-Revision-Date: 2022-03-15 12:05+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -94,7 +94,7 @@ msgstr ""
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
-msgid "%(amount)s due %(date)s"
+msgid "%(amount)s due %(date)s"
 msgstr ""
 
 #. module: account
@@ -264,7 +264,7 @@ msgid ""
 "        <br/><br/>\n"
 "        Here is your\n"
 "        <t t-if=\"object.name\">\n"
-"            credit note <strong t-out=\"object.name or ''\">RINV/2021/05/0001</strong>\n"
+"            credit note <span style=\"font-weight:bold;\" t-out=\"object.name or ''\">RINV/2021/05/0001</span>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
 "            credit note\n"
@@ -272,12 +272,12 @@ msgid ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (with reference: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        amounting in <strong t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 143,750.00</strong>\n"
+"        amounting in <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
 "        from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.invoice_user_id.signature)\">\n"
-"            <br/>\n"
+"            <br/><br/>\n"
 "            <t t-out=\"object.invoice_user_id.signature or ''\">--<br/>Mitchell Admin</t>\n"
 "        </t>\n"
 "    </p>\n"
@@ -300,7 +300,7 @@ msgid ""
 "        <br/><br/>\n"
 "        Here is your\n"
 "        <t t-if=\"object.name\">\n"
-"            invoice <strong t-out=\"object.name or ''\">INV/2021/05/0005</strong>\n"
+"            invoice <span style=\"font-weight:bold;\" t-out=\"object.name or ''\">INV/2021/05/0005</span>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
 "            invoice\n"
@@ -308,7 +308,7 @@ msgid ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (with reference: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        amounting in <strong t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 143,750.00</strong>\n"
+"        amounting in <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
 "        from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
 "            This invoice is already paid.\n"
@@ -317,13 +317,13 @@ msgid ""
 "            Please remit payment at your earliest convenience.\n"
 "            <t t-if=\"object.payment_reference\">\n"
 "                <br/><br/>\n"
-"                Please use the following communication for your payment: <strong t-out=\"object.payment_reference or ''\">INV/2021/05/0005</strong>.\n"
+"                Please use the following communication for your payment: <span style=\"font-weight:bold;\" t-out=\"object.payment_reference or ''\">INV/2021/05/0005</span>.\n"
 "            </t>\n"
 "        </t>\n"
 "        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.invoice_user_id.signature)\">\n"
-"            <br/>\n"
+"            <br/><br/>\n"
 "            <t t-out=\"object.invoice_user_id.signature or ''\">--<br/>Mitchell Admin</t>\n"
 "        </t>\n"
 "    </p>\n"
@@ -338,14 +338,14 @@ msgid ""
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Dear <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/><br/>\n"
 "        Thank you for your payment.\n"
-"        Here is your payment receipt <strong t-out=\"(object.name or '').replace('/','-') or ''\">BNK1-2021-05-0002</strong> amounting\n"
-"        to <strong t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</strong> from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"        Here is your payment receipt <span style=\"font-weight:bold;\" t-out=\"(object.name or '').replace('/','-') or ''\">BNK1-2021-05-0002</span> amounting\n"
+"        to <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</span> from <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <br/><br/>\n"
 "        Best regards,\n"
 "        <t t-if=\"not is_html_empty(user.signature)\">\n"
-"            <br/>\n"
+"            <br/><br/>\n"
 "            <t t-out=\"user.signature or ''\">--<br/>Mitchell Admin</t>\n"
 "        </t>\n"
 "    </p>\n"
@@ -893,11 +893,6 @@ msgid "<strong>Amount Due</strong>"
 msgstr ""
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_journal
-msgid "<strong>Company:</strong>"
-msgstr ""
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Customer Code:</strong>"
 msgstr ""
@@ -919,11 +914,6 @@ msgid "<strong>Ending Balance</strong>"
 msgstr ""
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_journal
-msgid "<strong>Entries Sorted By:</strong>"
-msgstr ""
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Incoterm: </strong>"
 msgstr ""
@@ -932,11 +922,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Invoice Date:</strong>"
-msgstr ""
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_journal
-msgid "<strong>Journal:</strong>"
 msgstr ""
 
 #. module: account
@@ -967,11 +952,6 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
 msgid "<strong>Subtotal</strong>"
-msgstr ""
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_journal
-msgid "<strong>Target Moves:</strong>"
 msgstr ""
 
 #. module: account
@@ -1954,7 +1934,6 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account.selection__account_common_journal_report__target_move__all
 #: model:ir.model.fields.selection,name:account.selection__account_common_report__target_move__all
 #: model:ir.model.fields.selection,name:account.selection__account_print_journal__target_move__all
-#: model_terms:ir.ui.view,arch_db:account.report_journal
 msgid "All Entries"
 msgstr ""
 
@@ -1967,7 +1946,6 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account.selection__account_common_journal_report__target_move__posted
 #: model:ir.model.fields.selection,name:account.selection__account_common_report__target_move__posted
 #: model:ir.model.fields.selection,name:account.selection__account_print_journal__target_move__posted
-#: model_terms:ir.ui.view,arch_db:account.report_journal
 msgid "All Posted Entries"
 msgstr ""
 
@@ -7036,14 +7014,6 @@ msgstr ""
 #: code:addons/account/models/account_tax.py:0
 #, python-format
 msgid ""
-"Invoice and credit note repartition should have at least one tax repartition"
-" line."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account_tax.py:0
-#, python-format
-msgid ""
 "Invoice and credit note distribution should have the same number of lines."
 msgstr ""
 
@@ -7053,6 +7023,14 @@ msgstr ""
 msgid ""
 "Invoice and credit note distribution should match (same percentages, in the "
 "same order)."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid ""
+"Invoice and credit note repartition should have at least one tax repartition"
+" line."
 msgstr ""
 
 #. module: account
@@ -7443,7 +7421,6 @@ msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_print_journal__sort_selection__move_name
-#: model_terms:ir.ui.view,arch_db:account.report_journal
 msgid "Journal Entry Number"
 msgstr ""
 
@@ -12114,11 +12091,6 @@ msgid "Tax Country Code"
 msgstr ""
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_journal
-msgid "Tax Declaration"
-msgstr ""
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_template__tax_exigibility
 msgid "Tax Due"
 msgstr ""
@@ -12924,14 +12896,6 @@ msgstr ""
 msgid ""
 "The accounting date being set prior to the %(lock_type)s lock date "
 "%(lock_date)s, it will be changed to %(accounting_date)s upon posting."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account_move.py:0
-#, python-format
-msgid ""
-"The accounting date is set prior to the tax lock date which is set on %s. "
-"Hence, the accounting date will be changed to %s."
 msgstr ""
 
 #. module: account

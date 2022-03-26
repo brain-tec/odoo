@@ -199,10 +199,11 @@ class Web_Editor(http.Controller):
 
     @http.route('/web_editor/attachment/add_data', type='json', auth='user', methods=['POST'], website=True)
     def add_data(self, name, data, is_image, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
+        data = b64decode(data)
         if is_image:
             format_error_msg = _("Uploaded image's format is not supported. Try with: %s", ', '.join(SUPPORTED_IMAGE_EXTENSIONS))
             try:
-                data = tools.image_process(b64decode(data), size=(width, height), quality=quality, verify_resolution=True)
+                data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
                 mimetype = guess_mimetype(data)
                 if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
                     return {'error': format_error_msg}
@@ -621,7 +622,15 @@ class Web_Editor(http.Controller):
                     or attachment.type != 'binary'
                     or not attachment.public
                     or not attachment.url.startswith(request.httprequest.path)):
-                raise werkzeug.exceptions.NotFound()
+                # Fallback to URL lookup to allow using shapes that were
+                # imported from data files.
+                attachment = request.env['ir.attachment'].sudo().search([
+                    ('type', '=', 'binary'),
+                    ('public', '=', True),
+                    ('url', '=', request.httprequest.path),
+                ], limit=1)
+                if not attachment:
+                    raise werkzeug.exceptions.NotFound()
             svg = attachment.raw.decode('utf-8')
         else:
             svg = self._get_shape_svg(module, 'shapes', filename)

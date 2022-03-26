@@ -25,7 +25,11 @@ const commandProviderRegistry = registry.category("command_provider");
 export async function editSearchBar(searchValue) {
     const searchBar = document.querySelector(".o_command_palette_search input");
     await testUtils.fields.editInput(searchBar, searchValue);
-    searchBar.dispatchEvent(new Event("keydown"));
+}
+
+export async function backspaceSearchBar() {
+    const searchBar = document.querySelector(".o_command_palette_search input");
+    searchBar.dispatchEvent(new KeyboardEvent("keydown", { key: "backspace" }));
     await nextTick();
 }
 
@@ -584,8 +588,8 @@ QUnit.test("can switch between command providers", async (assert) => {
         "all other commands are present"
     );
 
-    // Clear search input to recover the default provider
-    await editSearchBar("");
+    // Press backspace to recover the default provider
+    await backspaceSearchBar();
 
     assert.deepEqual(
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
@@ -936,4 +940,19 @@ QUnit.test("display shortcuts correctly for MacOS with a new overlayModifier", a
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
         ["ClickCONTROL + COMMAND + A"]
     );
+});
+
+QUnit.test("openMainPalette with onClose", async (assert) => {
+    const command = env.services.command;
+    command.openMainPalette({}, () => {
+        assert.step("onClose");
+    });
+    await mount(TestComponent, { env, target });
+
+    await nextTick();
+    assert.containsOnce(target, ".o_command_palette");
+
+    triggerHotkey("escape");
+    await nextTick();
+    assert.verifySteps(["onClose"]);
 });

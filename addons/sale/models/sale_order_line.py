@@ -158,6 +158,10 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('display_type') or self.default_get(['display_type']).get('display_type'):
+                vals['product_uom_qty'] = 0.0
+
         lines = super().create(vals_list)
         for line in lines:
             if line.product_id and line.state == 'sale':
@@ -267,7 +271,7 @@ class SaleOrderLine(models.Model):
         related="product_id.product_tmpl_id", domain=[('sale_ok', '=', True)])
     product_updatable = fields.Boolean(compute='_compute_product_updatable', string='Can Edit Product')
     product_uom_qty = fields.Float(
-        string='Quantity', digits='Product Unit of Measure', required=True,
+        string='Quantity', digits='Product Unit of Measure', required=True, default=1.0,
         compute='_compute_product_uom_qty', store=True, readonly=False, precompute=True)
     product_uom = fields.Many2one(
         'uom.uom', string='Unit of Measure',
@@ -489,8 +493,6 @@ class SaleOrderLine(models.Model):
                 line.product_uom_qty = 0.0
                 continue
 
-            # Default value = 1.0
-            line.product_uom_qty = line.product_uom_qty or 1.0
             if not line.product_packaging_id:
                 continue
             packaging_uom = line.product_packaging_id.product_uom_id
@@ -705,8 +707,16 @@ class SaleOrderLine(models.Model):
                 line.price_unit = 0.0
             else:
                 price = line._get_display_price()
-                line.price_unit = self.env['account.tax']._fix_tax_included_price_company(
-                    price, line.product_id.taxes_id, line.tax_id, line.company_id)
+                line.price_unit = line.product_id._get_tax_included_unit_price(
+                    line.company_id,
+                    line.order_id.currency_id,
+                    line.order_id.date_order,
+                    'sale',
+                    fiscal_position=line.order_id.fiscal_position_id,
+                    product_price_unit=price,
+                    product_currency=line.currency_id
+                )
+
 
     def _get_display_price(self):
         self.ensure_one()

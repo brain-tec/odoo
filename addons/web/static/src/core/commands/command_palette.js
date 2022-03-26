@@ -35,8 +35,15 @@ const FUZZY_NAMESPACES = ["default"];
 
 /**
  * @typedef {{
- *  categoriesByNamespace?: {[namespace]: string[]};
- *  emptyMessageByNamespace?: {[namespace]: string};
+ *  categories: string[];
+ *  debounceDelay: number;
+ *  emptyMessage: string;
+ * }} NamespaceConfig
+ */
+
+/**
+ * @typedef {{
+ *  configByNamespace?: {[namespace]: NamespaceConfig};
  *  FooterComponent?: Component;
  *  placeholder?: string;
  *  providers: Provider[];
@@ -74,12 +81,6 @@ export class CommandPalette extends Component {
         this.keepLast = new KeepLast();
         this.DefaultCommandItem = DefaultCommandItem;
         this.activeElement = useService("ui").activeElement;
-        const applyDebounceSearchValue = debounce.apply(this, [this.applySearchValue, 200]);
-        this.applyDebounceSearchValue = (...args) => {
-            this.searchValuePromise = applyDebounceSearchValue.apply(this, args).catch(() => {
-                this.searchValuePromise = null;
-            });
-        };
         useAutofocus();
 
         useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
@@ -96,13 +97,12 @@ export class CommandPalette extends Component {
          * @type {{ commands: CommandItem[],
          *          emptyMessage: string,
          *          FooterComponent: Component,
+         *          namespace: string,
          *          placeholder: string,
          *          searchValue: string,
          *          selectedCommand: CommandItem }}
          */
-        this.state = useState({
-            commands: [],
-        });
+        this.state = useState({});
 
         this.listboxRef = useRef("listbox");
 
@@ -130,25 +130,23 @@ export class CommandPalette extends Component {
      * @param {CommandPaletteConfig} config
      */
     async setCommandPaletteConfig(config) {
-        const result = { default: [] };
-        for (const provider of config.providers) {
-            const namespace = provider.namespace || "default";
-            if (namespace in result) {
-                result[namespace].push(provider);
-            } else {
-                result[namespace] = [provider];
-            }
-        }
-        this.categoriesByNamespace = config.categoriesByNamespace;
-        this.emptyMessageByNamespace = config.emptyMessageByNamespace || {};
-        this.providersByNamespace = result;
-
+        this.configByNamespace = config.configByNamespace || {};
         this.state.FooterComponent = config.FooterComponent;
-
         this.state.placeholder = config.placeholder || DEFAULT_PLACEHOLDER.toString();
 
-        const searchValue = config.searchValue || "";
-        await this.applySearchValue(searchValue);
+        this.providersByNamespace = { default: [] };
+        for (const provider of config.providers) {
+            const namespace = provider.namespace || "default";
+            if (namespace in this.providersByNamespace) {
+                this.providersByNamespace[namespace].push(provider);
+            } else {
+                this.providersByNamespace[namespace] = [provider];
+            }
+        }
+
+        const { namespace, searchValue } = this.processSearchValue(config.searchValue || "");
+        this.switchNamespace(namespace);
+        await this.search(searchValue);
     }
 
     /**
@@ -165,13 +163,14 @@ export class CommandPalette extends Component {
             return result;
         });
         let commands = (await this.keepLast.add(Promise.all(proms))).flat();
+        const namespaceConfig = this.configByNamespace[namespace] || {};
         if (options.searchValue && FUZZY_NAMESPACES.includes(namespace)) {
             commands = fuzzyLookup(options.searchValue, commands, (c) => c.name);
         } else {
             // we have to sort the commands by category to avoid navigation issues with the arrows
-            if (this.categoriesByNamespace && this.categoriesByNamespace[namespace]) {
+            if (namespaceConfig.categories) {
                 let commandsSorted = [];
-                this.categoryKeys = this.categoriesByNamespace[namespace];
+                this.categoryKeys = namespaceConfig.categories;
                 if (!this.categoryKeys.includes("default")) {
                     this.categoryKeys.push("default");
                 }
@@ -184,15 +183,16 @@ export class CommandPalette extends Component {
             }
         }
 
-        this.state.commands = commands.map((command) => ({
+        this.state.commands = commands.slice(0, 100).map((command) => ({
             ...command,
             keyId: this.keyId++,
             splitName: splitCommandName(command.name, options.searchValue),
         }));
         this.selectCommand(this.state.commands.length ? 0 : -1);
         this.mouseSelectionActive = false;
-        this.state.emptyMessage =
-            this.emptyMessageByNamespace[namespace] || DEFAULT_EMPTY_MESSAGE.toString();
+        this.state.emptyMessage = (
+            namespaceConfig.emptyMessage || DEFAULT_EMPTY_MESSAGE
+        ).toString();
         this.clearSearchValue = options.searchValue;
     }
 
@@ -259,21 +259,57 @@ export class CommandPalette extends Component {
         }
     }
 
-    async applySearchValue(searchValue) {
+    async search(searchValue) {
         this.state.searchValue = searchValue;
-        let namespace = "default";
-        if (searchValue.length && searchValue[0] in this.providersByNamespace) {
-            namespace = searchValue[0];
-            searchValue = searchValue.slice(1);
-        }
-        await this.setCommands(namespace, {
+        await this.setCommands(this.state.namespace, {
             searchValue,
             activeElement: this.activeElement,
         });
     }
 
+    debounceSearch(value) {
+        const { namespace, searchValue } = this.processSearchValue(value);
+        if (namespace !== "default" && this.state.namespace !== namespace) {
+            this.switchNamespace(namespace);
+        }
+        this.searchValuePromise = this.lastDebounceSearch(searchValue).catch(() => {
+            this.searchValuePromise = null;
+        });
+        return searchValue;
+    }
+
     onSearchInput(ev) {
-        this.applyDebounceSearchValue(ev.target.value);
+        ev.target.value = this.debounceSearch(ev.target.value);
+    }
+
+    onKeyDown(ev) {
+        if (ev.key.toLowerCase() === "backspace" && !ev.target.value.length && !ev.repeat) {
+            this.switchNamespace("default");
+            this.searchValuePromise = this.lastDebounceSearch("").catch(() => {
+                this.searchValuePromise = null;
+            });
+        }
+    }
+
+    switchNamespace(namespace) {
+        if (this.lastDebounceSearch) {
+            this.lastDebounceSearch.cancel();
+        }
+        const namespaceConfig = this.configByNamespace[namespace] || {};
+        this.lastDebounceSearch = debounce(
+            (value) => this.search(value),
+            namespaceConfig.debounceDelay || 0
+        );
+        this.state.namespace = namespace;
+    }
+
+    processSearchValue(searchValue) {
+        let namespace = "default";
+        if (searchValue.length && this.providersByNamespace[searchValue[0]]) {
+            namespace = searchValue[0];
+            searchValue = searchValue.slice(1);
+        }
+        return { namespace, searchValue };
     }
 }
 CommandPalette.template = "web.CommandPalette";

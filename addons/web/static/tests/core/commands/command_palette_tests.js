@@ -16,7 +16,7 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../../helpers/utils";
-import { editSearchBar } from "./command_service_tests";
+import { backspaceSearchBar, editSearchBar } from "./command_service_tests";
 
 const { Component, mount, xml } = owl;
 
@@ -49,7 +49,7 @@ QUnit.module("Command Palette Dialog", {
 
         patchWithCleanup(browser, {
             clearTimeout: () => {},
-            setTimeout: (later, wait) => {
+            setTimeout: (later) => {
                 later();
             },
         });
@@ -89,10 +89,16 @@ QUnit.test("empty providers", async (assert) => {
 
 QUnit.test("custom empty message", async (assert) => {
     testComponent = await mount(TestComponent, { env, target });
-    const emptyMessageByNamespace = {
-        default: "Empty Default",
-        "@": "Empty @",
-        "#": "Empty #",
+    const configByNamespace = {
+        default: {
+            emptyMessage: "Empty Default",
+        },
+        "@": {
+            emptyMessage: "Empty @",
+        },
+        "#": {
+            emptyMessage: "Empty #",
+        },
     };
     const provide = () => [];
     const providers = [
@@ -100,7 +106,7 @@ QUnit.test("custom empty message", async (assert) => {
         { namespace: "#", provide },
     ];
     const config = {
-        emptyMessageByNamespace,
+        configByNamespace,
         providers,
     };
     env.services.dialog.add(CommandPaletteDialog, {
@@ -112,21 +118,150 @@ QUnit.test("custom empty message", async (assert) => {
     assert.containsOnce(target, ".o_command_palette_listbox_empty");
     assert.strictEqual(
         target.querySelector(".o_command_palette_listbox_empty").textContent,
-        emptyMessageByNamespace["default"]
+        configByNamespace["default"].emptyMessage
     );
 
     await editSearchBar("@");
     assert.containsOnce(target, ".o_command_palette_listbox_empty");
     assert.strictEqual(
         target.querySelector(".o_command_palette_listbox_empty").textContent,
-        emptyMessageByNamespace["@"]
+        configByNamespace["@"].emptyMessage
     );
 
     await editSearchBar("#");
     assert.containsOnce(target, ".o_command_palette_listbox_empty");
     assert.strictEqual(
         target.querySelector(".o_command_palette_listbox_empty").textContent,
-        emptyMessageByNamespace["#"]
+        configByNamespace["#"].emptyMessage
+    );
+});
+
+QUnit.test("custom debounce delay", async (assert) => {
+    patchWithCleanup(browser, {
+        clearTimeout: () => {},
+        setTimeout: (later, delay) => {
+            assert.step(delay.toString());
+            later();
+        },
+    });
+
+    testComponent = await mount(TestComponent, { env, target });
+    const configByNamespace = {
+        "@": {
+            debounceDelay: 200,
+        },
+        "#": {
+            debounceDelay: 100,
+        },
+    };
+    const action = () => {};
+    const provide = () => [
+        {
+            name: "Command1",
+            action,
+        },
+        {
+            name: "Command2",
+            action,
+        },
+    ];
+    const providers = [
+        { namespace: "@", provide },
+        { namespace: "#", provide },
+    ];
+    const config = {
+        configByNamespace,
+        providers,
+    };
+    env.services.dialog.add(CommandPaletteDialog, {
+        config,
+    });
+    await nextTick();
+    assert.containsOnce(target, ".o_command_palette");
+    assert.containsNone(target, ".o_command");
+    await editSearchBar("com");
+    await editSearchBar("@");
+    await editSearchBar("#");
+    await backspaceSearchBar();
+    assert.verifySteps(["0", "200", "100", "0"]);
+});
+
+QUnit.test("concurrency with custom debounce delay", async (assert) => {
+    const def = makeDeferred();
+    patchWithCleanup(browser, {
+        clearTimeout: () => {},
+        setTimeout: async (later, delay) => {
+            if (delay === 200) {
+                await def;
+            }
+            later();
+        },
+    });
+
+    await mount(TestComponent, { env, target });
+    const configByNamespace = {
+        "@": {
+            debounceDelay: 200,
+        },
+        "#": {
+            debounceDelay: 100,
+        },
+    };
+    const action = () => {};
+    const providers = [
+        {
+            namespace: "@",
+            provide: () => [
+                {
+                    name: "Command@",
+                    action,
+                },
+            ],
+        },
+        {
+            namespace: "#",
+            provide: () => [
+                {
+                    name: "Command#",
+                    action,
+                },
+            ],
+        },
+    ];
+    const config = {
+        configByNamespace,
+        providers,
+    };
+    env.services.dialog.add(CommandPaletteDialog, {
+        config,
+    });
+    await nextTick();
+    assert.containsOnce(target, ".o_command_palette");
+    assert.containsNone(target, ".o_command");
+    assert.containsNone(target, ".o_command_palette .o_namespace");
+
+    await editSearchBar("@");
+    await nextTick();
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        []
+    );
+
+    await editSearchBar("#");
+    await nextTick();
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "#");
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        ["Command#"]
+    );
+
+    def.resolve();
+    await nextTick();
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "#");
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        ["Command#"]
     );
 });
 
@@ -251,6 +386,7 @@ QUnit.test("multi namespace with provider", async (assert) => {
     });
     await nextTick();
     assert.containsOnce(target, ".o_command_palette");
+    assert.containsNone(target, ".o_command_palette .o_namespace");
     assert.containsN(target, ".o_command", 2);
     assert.deepEqual(
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
@@ -258,6 +394,7 @@ QUnit.test("multi namespace with provider", async (assert) => {
     );
 
     await editSearchBar("@");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
     assert.containsN(target, ".o_command", 2);
     assert.deepEqual(
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
@@ -505,7 +642,7 @@ QUnit.test("open the command palette with a namespace already in the searchbar",
     });
     await nextTick();
     assert.containsOnce(target, ".o_command_palette");
-    assert.strictEqual(target.querySelector(".o_command_palette_search input").value, "@");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
     assert.containsN(target, ".o_command", 2);
     assert.deepEqual(
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
@@ -513,12 +650,103 @@ QUnit.test("open the command palette with a namespace already in the searchbar",
     );
 });
 
+QUnit.test("open the command palette with a searchValue with a namespace", async (assert) => {
+    testComponent = await mount(TestComponent, { env, target });
+    const action = () => {};
+    const providers = [
+        {
+            provide: () => [
+                {
+                    name: "Command1",
+                    action,
+                },
+                {
+                    name: "Command2",
+                    action,
+                },
+            ],
+        },
+        {
+            namespace: "@",
+            provide: () => [
+                {
+                    name: "Command3",
+                    action,
+                },
+                {
+                    name: "Command4",
+                    action,
+                },
+            ],
+        },
+    ];
+    const config = {
+        searchValue: "@Test",
+        providers,
+    };
+    env.services.dialog.add(CommandPaletteDialog, {
+        config,
+    });
+    await nextTick();
+    assert.containsOnce(target, ".o_command_palette");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+    assert.strictEqual(target.querySelector(".o_command_palette_search input").value, "Test");
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        ["Command3", "Command4"]
+    );
+});
+
+QUnit.test("open the command palette with a searchValue without namespace", async (assert) => {
+    testComponent = await mount(TestComponent, { env, target });
+    const action = () => {};
+    const providers = [
+        {
+            provide: () => [
+                {
+                    name: "Command1",
+                    action,
+                },
+                {
+                    name: "Command2",
+                    action,
+                },
+            ],
+        },
+        {
+            namespace: "@",
+            provide: () => [
+                {
+                    name: "Command3",
+                    action,
+                },
+                {
+                    name: "Command4",
+                    action,
+                },
+            ],
+        },
+    ];
+    const config = {
+        searchValue: "Command1",
+        providers,
+    };
+    env.services.dialog.add(CommandPaletteDialog, {
+        config,
+    });
+    await nextTick();
+    assert.containsOnce(target, ".o_command_palette");
+    assert.containsNone(target, ".o_command_palette .o_namespace");
+    assert.strictEqual(target.querySelector(".o_command_palette_search input").value, "Command1");
+    assert.containsN(target, ".o_command", 1);
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        ["Command1"]
+    );
+});
+
 QUnit.test("multi provider with categories", async (assert) => {
     testComponent = await mount(TestComponent, { env, target });
-    const categoriesByNamespace = {
-        default: ["cat1", "cat2"],
-        "@": ["@cat1", "@cat2"],
-    };
     const action = () => {};
     const providers = [
         {
@@ -564,8 +792,16 @@ QUnit.test("multi provider with categories", async (assert) => {
             ],
         },
     ];
+    const configByNamespace = {
+        default: {
+            categories: ["cat1", "cat2"],
+        },
+        "@": {
+            categories: ["@cat1", "@cat2"],
+        },
+    };
     const config = {
-        categoriesByNamespace,
+        configByNamespace,
         providers,
     };
     env.services.dialog.add(CommandPaletteDialog, {
@@ -640,9 +876,6 @@ QUnit.test("multi provider with categories", async (assert) => {
 
 QUnit.test("don't display by categories if there is a search value", async (assert) => {
     testComponent = await mount(TestComponent, { env, target });
-    const categoriesByNamespace = {
-        default: ["cat1", "cat2"],
-    };
     const action = () => {};
     const providers = [
         {
@@ -664,8 +897,13 @@ QUnit.test("don't display by categories if there is a search value", async (asse
             ],
         },
     ];
+    const configByNamespace = {
+        default: {
+            categories: ["cat1", "cat2"],
+        },
+    };
     const config = {
-        categoriesByNamespace,
+        configByNamespace,
         providers,
     };
     env.services.dialog.add(CommandPaletteDialog, {
@@ -714,6 +952,7 @@ QUnit.test("click on command", async (assert) => {
             },
         },
     ];
+
     const providers = [
         {
             provide: () => commands,
@@ -942,8 +1181,10 @@ QUnit.test("keyboard navigation scroll", async (assert) => {
 
 QUnit.test("multi level command", async (assert) => {
     testComponent = await mount(TestComponent, { env, target });
-    const emptyMessageByNamespace = {
-        default: "Empty Default",
+    const configByNamespace = {
+        default: {
+            emptyMessage: "Empty Default",
+        },
     };
     const commands = [
         {
@@ -961,7 +1202,7 @@ QUnit.test("multi level command", async (assert) => {
         },
     ];
     const config = {
-        emptyMessageByNamespace,
+        configByNamespace,
         FooterComponent,
         placeholder: "placeholder test",
         providers,
@@ -1207,4 +1448,50 @@ QUnit.test("bold the searchValue on the commands with special char", async (asse
         [...target.querySelectorAll(".o_command b")].map((el) => el.textContent),
         ["&"]
     );
+});
+
+QUnit.test("remove namespace with backspace", async (assert) => {
+    testComponent = await mount(TestComponent, { env, target });
+    const provide = () => [];
+    const providers = [
+        {
+            provide,
+        },
+        {
+            namespace: "@",
+            provide,
+        },
+    ];
+    const config = {
+        providers,
+    };
+    env.services.dialog.add(CommandPaletteDialog, {
+        config,
+    });
+    await nextTick();
+    await editSearchBar("@");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+
+    // remove namespace "@" because the input is empty
+    await backspaceSearchBar();
+    assert.containsNone(target, ".o_command_palette .o_namespace");
+    assert.strictEqual(target.querySelector(".o_command_palette_search input").value, "");
+
+    await editSearchBar("@NotEmpty");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+    assert.strictEqual(target.querySelector(".o_command_palette_search input").value, "NotEmpty");
+
+    // Do not remove the namespace "@" because the input is not empty
+    await backspaceSearchBar();
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+
+    await editSearchBar("@");
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
+
+    // Does not remove the namespace if the backspace is repeatedly applied.
+    // You don't want to remove the namespace by pressing the "backspace" key
+    const searchBar = document.querySelector(".o_command_palette_search input");
+    searchBar.dispatchEvent(new KeyboardEvent("keydown", { key: "backspace", repeat: true }));
+    await nextTick();
+    assert.strictEqual(target.querySelector(".o_command_palette .o_namespace").innerText, "@");
 });
