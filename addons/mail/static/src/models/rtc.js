@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, insert, unlink } from '@mail/model/model_field_command';
+import { clear, insert, replace, unlink } from '@mail/model/model_field_command';
 import { monitorAudio } from '@mail/utils/media_monitoring';
 
 /**
@@ -26,14 +26,6 @@ registerModel({
     identifyingFields: ['messaging'],
     lifecycleHooks: {
         _created() {
-            // technical fields that are not exposed
-            // Especially important for _peerConnections, as garbage collection of peerConnections is important for
-            // peerConnection.close().
-            /**
-             * Object { token: dataChannel<RTCDataChannel> }
-             * Contains the RTCDataChannels with the other rtc sessions.
-             */
-            this._dataChannels = {};
             /**
              /**
              * Object { token: peerConnection<RTCPeerConnection> }
@@ -51,30 +43,12 @@ registerModel({
             browser.addEventListener('keyup', this._onKeyUp);
             // Disconnects the RTC session if the page is closed or reloaded.
             browser.addEventListener('beforeunload', this._onBeforeUnload);
-            /**
-             * Call all sessions for which no peerConnection is established at
-             * a regular interval to try to recover any connection that failed
-             * to start.
-             *
-             * This is distinct from this._recoverConnection which tries to restores
-             * connection that were established but failed or timed out.
-             */
-            this._intervalId = browser.setInterval(async () => {
-                if (!this.currentRtcSession || !this.channel) {
-                    return;
-                }
-                await this._pingServer();
-                if (!this.currentRtcSession || !this.channel) {
-                    return;
-                }
-                this._callSessions();
-            }, 30000); // 30 seconds
         },
         async _willDelete() {
             browser.removeEventListener('beforeunload', this._onBeforeUnload);
             browser.removeEventListener('keydown', this._onKeyDown);
             browser.removeEventListener('keyup', this._onKeyUp);
-            browser.clearInterval(this._intervalId);
+            this.messaging.browser.clearInterval(this.pingInterval);
         },
     },
     recordMethods: {
@@ -206,14 +180,14 @@ registerModel({
             this.audioTrack && this.audioTrack.stop();
             this.videoTrack && this.videoTrack.stop();
 
-            this._dataChannels = {};
             this._peerConnections = {};
 
             for (const rtcSession of this.messaging.models['RtcSession'].all()) {
                 this.messaging.browser.clearTimeout(rtcSession.connectionRecoveryTimeout);
                 rtcSession.update({
                     connectionRecoveryTimeout: clear(),
-                    isConnected: clear(),
+                    isCurrentUserInitiatorOfConnectionOffer: clear(),
+                    rtcDataChannel: clear(),
                 });
             }
             this.update({
@@ -399,7 +373,7 @@ registerModel({
             for (const trackKind of TRANSCEIVER_ORDER) {
                 await this._updateRemoteTrack(peerConnection, trackKind, { initTransceiver: true, sessionId: rtcSession.id });
             }
-            rtcSession.update({ isConnected: true });
+            rtcSession.update({ isCurrentUserInitiatorOfConnectionOffer: true });
         },
         /**
          * Call all the sessions that do not have an already initialized peerConnection.
@@ -430,6 +404,13 @@ registerModel({
          */
         _computeIsClientRtcCompatible() {
             return window.RTCPeerConnection && window.MediaStream;
+        },
+        /**
+         * @private
+         * @returns {integer}
+         */
+        _computePingInterval() {
+            return this.messaging.browser.setInterval(this._onPingInterval, 30000); // 30 seconds
         },
         /**
          * Creates and setup a RTCPeerConnection.
@@ -507,7 +488,10 @@ registerModel({
                 }
             };
             this._peerConnections[rtcSession.id] = peerConnection;
-            this._dataChannels[rtcSession.id] = dataChannel;
+            this.messaging.models['RtcDataChannel'].insert({
+                dataChannel,
+                rtcSession: replace(rtcSession),
+            });
             return peerConnection;
         },
         /**
@@ -667,11 +651,15 @@ registerModel({
             }
             if (type === 'peerToPeer') {
                 for (const token of targetTokens) {
-                    const dataChannel = this._dataChannels[token];
-                    if (!dataChannel || dataChannel.readyState !== 'open') {
+                    const rtcSession = this.messaging.models['RtcSession'].findFromIdentifyingData({ id: token });
+                    if (!rtcSession) {
                         continue;
                     }
-                    dataChannel.send(JSON.stringify({
+                    const rtcDataChannel = rtcSession.rtcDataChannel;
+                    if (!rtcDataChannel || rtcDataChannel.dataChannel.readyState !== 'open') {
+                        continue;
+                    }
+                    rtcDataChannel.dataChannel.send(JSON.stringify({
                         event,
                         channelId: this.channel.id,
                         payload,
@@ -689,7 +677,7 @@ registerModel({
             if (!peerConnection || !this.channel) {
                 return;
             }
-            if (rtcSession.isConnected) {
+            if (rtcSession.isCurrentUserInitiatorOfConnectionOffer) {
                 return;
             }
             if (peerConnection.iceConnectionState === 'connected') {
@@ -750,12 +738,11 @@ registerModel({
             const rtcSession = this.messaging.models['RtcSession'].findFromIdentifyingData({ id: sessionId });
             if (rtcSession) {
                 rtcSession.reset();
+                const rtcDataChannel = rtcSession.rtcDataChannel;
+                if (rtcDataChannel) {
+                    rtcDataChannel.delete();
+                }
             }
-            const dataChannel = this._dataChannels[sessionId];
-            if (dataChannel) {
-                dataChannel.close();
-            }
-            delete this._dataChannels[sessionId];
             const peerConnection = this._peerConnections[sessionId];
             if (peerConnection) {
                 this._removeRemoteTracks(peerConnection);
@@ -764,7 +751,7 @@ registerModel({
             delete this._peerConnections[sessionId];
             this.messaging.models['RtcSession'].insert({
                 id: sessionId,
-                isConnected: false,
+                isCurrentUserInitiatorOfConnectionOffer: clear(),
             });
             this._addLogEntry(sessionId, 'peer removed', { step: 'peer removed' });
         },
@@ -1199,6 +1186,19 @@ registerModel({
         },
         /**
          * @private
+         */
+        async _onPingInterval() {
+            if (!this.currentRtcSession || !this.channel) {
+                return;
+            }
+            await this._pingServer();
+            if (!this.currentRtcSession || !this.channel) {
+                return;
+            }
+            this._callSessions();
+        },
+        /**
+         * @private
          * @param {boolean} isAboveThreshold 
          */
         _onThresholdAudioMonitor(isAboveThreshold) {
@@ -1279,6 +1279,19 @@ registerModel({
          */
         peerNotificationWaitDelay: attr({
             default: 50,
+        }),
+        /**
+         * Interval to regularly ping and connect to RTC sessions.
+         *
+         * - Ping is to update rtc sessions of the channel, i.e. add or remove rtc sessions.
+         *   This also deals with possible race conditions that could make us unaware of some sessions.
+         * - Connect to RTC sessions for which no peerConnection is established, to try to recover any
+         *   connection that failed to start.
+         *   This is distinct from this._recoverConnection which tries to restores connection that were
+         *   established but failed or timed out.
+         */
+        pingInterval: attr({
+            compute: '_computePingInterval',
         }),
         /**
          * How long to wait before considering a connection as needing recovery in ms.
