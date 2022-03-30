@@ -345,7 +345,7 @@ class IrActionsReport(models.Model):
 
         return command_args
 
-    def _prepare_html(self, html):
+    def _prepare_html(self, html, report_model=False):
         '''Divide and recreate the header/footer html by merging all found in html.
         The bodies are extracted and added to a list. Then, extract the specific_paperformat_args.
         The idea is to put all headers/footers together. Then, we will use a javascript trick
@@ -362,10 +362,9 @@ class IrActionsReport(models.Model):
         IrConfig = self.env['ir.config_parameter'].sudo()
 
         # Return empty dictionary if 'web.minimal_layout' not found.
-        layout = self.env.ref('web.minimal_layout', False)
+        layout = self.env.ref('web.minimal_layout', raise_if_not_found=False)
         if not layout:
             return {}
-        layout = self.env['ir.ui.view'].browse(self.env['ir.ui.view'].get_view_id('web.minimal_layout'))
         base_url = IrConfig.get_param('report.url') or layout.get_base_url()
 
         root = lxml.html.fromstring(html)
@@ -391,17 +390,17 @@ class IrActionsReport(models.Model):
 
         # Retrieve bodies
         for node in root.xpath(match_klass.format('article')):
-            layout_with_lang = layout
             # set context language to body language
+            IrQweb = self.env['ir.qweb']
             if node.get('data-oe-lang'):
-                layout_with_lang = layout_with_lang.with_context(lang=node.get('data-oe-lang'))
-            body = layout_with_lang._render({
-                'subst': False,
-                'body': Markup(lxml.html.tostring(node, encoding='unicode')),
-                'base_url': base_url
-            })
+                IrQweb = IrQweb.with_context(lang=node.get('data-oe-lang'))
+            body = IrQweb._render(layout.id, {
+                    'subst': False,
+                    'body': Markup(lxml.html.tostring(node, encoding='unicode')),
+                    'base_url': base_url
+                }, raise_if_not_found=False)
             bodies.append(body)
-            if node.get('data-oe-model') == self.model:
+            if node.get('data-oe-model') == report_model:
                 res_ids.append(int(node.get('data-oe-id', 0)))
             else:
                 res_ids.append(None)
@@ -417,12 +416,12 @@ class IrActionsReport(models.Model):
             if attribute[0].startswith('data-report-'):
                 specific_paperformat_args[attribute[0]] = attribute[1]
 
-        header = layout._render({
+        header = self.env['ir.qweb']._render(layout.id, {
             'subst': True,
             'body': Markup(lxml.html.tostring(header_node, encoding='unicode')),
             'base_url': base_url
         })
-        footer = layout._render({
+        footer = self.env['ir.qweb']._render(layout.id, {
             'subst': True,
             'body': Markup(lxml.html.tostring(footer_node, encoding='unicode')),
             'base_url': base_url
@@ -530,6 +529,27 @@ class IrActionsReport(models.Model):
         return report_obj.with_context(context).sudo().search(conditions, limit=1)
 
     @api.model
+    def _get_report(self, report_ref):
+        """Get the report (with sudo) from an id or xmlid
+        report_ref: can be one of
+            - ir.actions.report id
+            - ir.actions.report report_name
+            - ir.model.data reference
+        """
+        ReportSudo = self.env['ir.actions.report'].sudo()
+        if isinstance(report_ref, int):
+            return ReportSudo.browse(report_ref)
+        report = ReportSudo.search([('report_name', '=', report_ref)], limit=1)
+        if report:
+            return report
+        report = self.env.ref(report_ref)
+        if report:
+            if report._name != "ir.actions.report":
+                raise ValueError("Fetching report %r: type %s, expected ir.actions.report" % (report_ref, report._name))
+            return report.sudo()
+        raise ValueError("Fetching report %r: report not found" % report_ref)
+
+    @api.model
     def barcode(self, barcode_type, value, **kwargs):
         defaults = {
             'width': (600, int),
@@ -608,23 +628,14 @@ class IrActionsReport(models.Model):
         if values is None:
             values = {}
 
-        context = dict(self.env.context, inherit_branding=False)
-
         # Browse the user instead of using the sudo self.env.user
         user = self.env['res.users'].browse(self.env.uid)
-        website = None
-        if request and hasattr(request, 'website'):
-            if request.website is not None:
-                website = request.website
-                context = dict(context, translatable=context.get('lang') != request.env['ir.http']._get_default_lang().code)
-
-        view_obj = self.env['ir.ui.view'].sudo().with_context(context)
+        view_obj = self.env['ir.ui.view'].with_context(inherit_branding=False)
         values.update(
             time=time,
             context_timestamp=lambda t: fields.Datetime.context_timestamp(self.with_context(tz=user.tz), t),
             user=user,
             res_company=user.company_id,
-            website=website,
             web_base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
         )
         return view_obj._render_template(template, values).encode()
@@ -848,7 +859,7 @@ class IrActionsReport(models.Model):
 
         html = self_sudo.with_context(context)._render_qweb_html(res_ids, data=data)[0]
 
-        bodies, html_ids, header, footer, specific_paperformat_args = self_sudo.with_context(context)._prepare_html(html)
+        bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(context)._prepare_html(html, report_model=self_sudo.model)
 
         if self_sudo.attachment and set(res_ids) != set(html_ids):
             raise UserError(_("The report's template '%s' is wrong, please contact your administrator. \n\n"

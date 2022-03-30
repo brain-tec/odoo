@@ -28,7 +28,8 @@ from werkzeug import urls
 
 import odoo.modules
 
-from odoo import api, models, fields
+from odoo import _, api, models, fields
+from odoo.exceptions import ValidationError
 from odoo.tools import ustr, posix_to_ldml, pycompat
 from odoo.tools import html_escape as escape
 from odoo.tools.misc import get_lang, babel_locale_parse
@@ -44,10 +45,10 @@ class IrQWeb(models.AbstractModel):
     """
     _inherit = 'ir.qweb'
 
-    def _compile_node(self, el, options, indent):
-        snippet_key = options.get('snippet-key')
-        if snippet_key == options['template'] \
-                or options.get('snippet-sub-call-key') == options['template']:
+    def _compile_node(self, el, compile_context, indent):
+        snippet_key = compile_context.get('snippet-key')
+        if snippet_key == compile_context['template'] \
+                or compile_context.get('snippet-sub-call-key') == compile_context['template']:
             # Get the path of element to only consider the first node of the
             # snippet template content (ignoring all ancestors t elements which
             # are not t-call ones)
@@ -67,36 +68,35 @@ class IrQWeb(models.AbstractModel):
                 elif 'data-snippet' not in el.attrib:
                     el.attrib['data-snippet'] = snippet_key.split('.', 1)[-1]
 
-        return super()._compile_node(el, options, indent)
+        return super()._compile_node(el, compile_context, indent)
 
     # compile directives
 
-    def _compile_directive_snippet(self, el, options, indent):
+    def _compile_directive_snippet(self, el, compile_context, indent):
         key = el.attrib.pop('t-snippet')
         el.set('t-call', key)
         el.set('t-options', f"{{'snippet-key': {key!r}}}")
-        View = self.env['ir.ui.view'].sudo()
-        view_id = View.get_view_id(key)
-        name = View.browse(view_id).name
+        view = self.env['ir.ui.view']._get_view(key).sudo()
+        name = view.name
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
         div = '<div name="%s" data-oe-type="snippet" data-oe-thumbnail="%s" data-oe-snippet-id="%s" data-oe-keywords="%s">' % (
             escape(pycompat.to_text(name)),
             escape(pycompat.to_text(thumbnail)),
-            escape(pycompat.to_text(view_id)),
+            escape(pycompat.to_text(view.id)),
             escape(pycompat.to_text(el.findtext('keywords')))
         )
-        self._append_text(div, options)
-        code = self._compile_node(el, options, indent)
-        self._append_text('</div>', options)
+        self._append_text(div, compile_context)
+        code = self._compile_node(el, compile_context, indent)
+        self._append_text('</div>', compile_context)
         return code
 
-    def _compile_directive_snippet_call(self, el, options, indent):
+    def _compile_directive_snippet_call(self, el, compile_context, indent):
         key = el.attrib.pop('t-snippet-call')
         el.set('t-call', key)
         el.set('t-options', f"{{'snippet-key': {key!r}}}")
-        return self._compile_node(el, options, indent)
+        return self._compile_node(el, compile_context, indent)
 
-    def _compile_directive_install(self, el, options, indent):
+    def _compile_directive_install(self, el, compile_context, indent):
         key = el.attrib.pop('t-install')
         thumbnail = el.attrib.pop('t-thumbnail', 'oe-thumbnail')
         if self.user_has_groups('base.group_system'):
@@ -109,10 +109,10 @@ class IrQWeb(models.AbstractModel):
                 module.id,
                 escape(pycompat.to_text(thumbnail))
             )
-            self._append_text(div, options)
+            self._append_text(div, compile_context)
         return []
 
-    def _compile_directive_placeholder(self, el, options, indent):
+    def _compile_directive_placeholder(self, el, compile_context, indent):
         el.set('t-att-placeholder', el.attrib.pop('t-placeholder'))
         return []
 
@@ -182,8 +182,11 @@ class Float(models.AbstractModel):
     def from_html(self, model, field, element):
         lang = self.user_lang()
         value = element.text_content().strip()
-        return float(value.replace(lang.thousands_sep, '')
-                          .replace(lang.decimal_point, '.'))
+        try:
+            return float(value.replace(lang.thousands_sep, '')
+                              .replace(lang.decimal_point, '.'))
+        except:
+            raise ValidationError(_('You entered an invalid value, please try again.'))
 
 
 class ManyToOne(models.AbstractModel):
@@ -226,7 +229,6 @@ class Contact(models.AbstractModel):
     def attributes(self, record, field_name, options, values):
         attrs = super(Contact, self).attributes(record, field_name, options, values)
         if options.get('inherit_branding'):
-            options.pop('template_options') # remove options not specific to this widget
             attrs['data-oe-contact-options'] = json.dumps(options)
         return attrs
 
@@ -480,8 +482,11 @@ class Monetary(models.AbstractModel):
 
         value = element.find('span').text.strip()
 
-        return float(value.replace(lang.thousands_sep, '')
-                          .replace(lang.decimal_point, '.'))
+        try:
+            return float(value.replace(lang.thousands_sep, '')
+                              .replace(lang.decimal_point, '.'))
+        except:
+            raise ValidationError(_('You entered an invalid value, please try again.'))
 
 
 class Duration(models.AbstractModel):

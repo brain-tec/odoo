@@ -211,7 +211,7 @@ class TestViewSaving(TestViewSavingCommon):
         )
         self.assertIn(
             replacement,
-            view._render(),
+            self.env['ir.qweb']._render(view.id),
             'inline script should not be escaped when rendering'
         )
         # common text nodes should be be escaped client side
@@ -220,7 +220,7 @@ class TestViewSaving(TestViewSavingCommon):
         self.assertIn(replacement, view.arch, 'common text node should not be escaped server side')
         self.assertIn(
             replacement,
-            str(view._render()).replace(u'&', u'&amp;'),
+            str(self.env['ir.qweb']._render(view.id)).replace(u'&', u'&amp;'),
             'text node characters wrongly unescaped when rendering'
         )
 
@@ -582,8 +582,8 @@ class TestCowViewSaving(TestViewSavingCommon):
         main_view.with_context(website_id=1).write({'arch': '<body>SPECIFIC<div>Z</div></body>'})
         self.assertEqual(total_views + 3 + 3, View.search_count([]), "It should have duplicated the Main View tree as a specific tree and then removed the specific view from the generic tree as no more needed")
 
-        generic_view = View.with_context(website_id=None).get_view_id('website.main_view')
-        specific_view = View.with_context(website_id=1).get_view_id('website.main_view')
+        generic_view = View.with_context(website_id=None)._get_view_id('website.main_view')
+        specific_view = View.with_context(website_id=1)._get_view_id('website.main_view')
         generic_view_arch = View.browse(generic_view).with_context(load_all_views=True).get_combined_arch()
         specific_view_arch = View.browse(specific_view).with_context(load_all_views=True, website_id=1).get_combined_arch()
         self.assertEqual(generic_view_arch, '<body>GENERIC<div>VIEW<span>C</span></div></body>')
