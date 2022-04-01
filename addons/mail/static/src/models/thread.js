@@ -123,17 +123,6 @@ registerModel({
     },
     modelMethods: {
         /**
-         * @param {Thread} [thread] the concerned thread
-         */
-        computeLastCurrentPartnerMessageSeenByEveryone(thread = undefined) {
-            const threads = thread ? [thread] : this.messaging.models['Thread'].all();
-            threads.map(localThread => {
-                localThread.update({
-                    lastCurrentPartnerMessageSeenByEveryone: localThread._computeLastCurrentPartnerMessageSeenByEveryone(),
-                });
-            });
-        },
-        /**
          * @param {Object} data
          * @return {Object}
          */
@@ -808,14 +797,6 @@ registerModel({
          */
         getMemberName(partner) {
             return partner.nameOrDisplayName;
-        },
-        /**
-         * Returns the text that identifies this thread in a mention.
-         *
-         * @returns {string}
-         */
-        getMentionText() {
-            return this.name;
         },
         /**
          * Joins this thread. Only makes sense on channels of type channel.

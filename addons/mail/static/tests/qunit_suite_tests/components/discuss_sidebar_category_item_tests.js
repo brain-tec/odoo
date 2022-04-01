@@ -92,7 +92,7 @@ QUnit.test('chat - avatar: should have correct avatar', async function (assert) 
     const resPartnerId1 = pyEnv['res.partner'].create({ name: "Demo", im_status: 'offline' });
     const mailChannelId1 = pyEnv['mail.channel'].create({
         channel_type: 'chat',
-        members: [pyEnv.currentPartnerId, resPartnerId1],
+        channel_partner_ids: [pyEnv.currentPartnerId, resPartnerId1],
         public: 'private',
     });
     const { messaging } = await start({
@@ -137,7 +137,7 @@ QUnit.test('chat - sorting: should be sorted by last activity time', async funct
             last_interest_dt: datetime_to_str(new Date(2021, 0, 2)), // more recent one
         },
     ]);
-    const { messaging } = await start({
+    const { click, messaging } = await start({
         autoOpenDiscuss: true,
         hasDiscuss: true,
     });
@@ -170,7 +170,7 @@ QUnit.test('chat - sorting: should be sorted by last activity time', async funct
     // post a new message on the last channel
     await afterNextRender(() => initialChats[1].click());
     await afterNextRender(() => document.execCommand('insertText', false, "Blabla"));
-    await afterNextRender(() => document.querySelector('.o_Composer_buttonSend').click());
+    await click('.o_Composer_buttonSend');
     const newChats = document.querySelectorAll('.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategoryItem');
     assert.strictEqual(
         newChats.length,
