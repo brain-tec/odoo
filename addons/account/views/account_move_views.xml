@@ -273,7 +273,6 @@
             <field name="arch" type="xml">
                 <field name="account_id" position="attributes">
                     <attribute name="optional">hide</attribute>
-                    <attribute name="readonly">1</attribute>
                 </field>
                 <field name="balance" position="attributes"><attribute name="optional">show</attribute></field>
                 <field name="balance" position="after">
@@ -400,9 +399,10 @@
             <field name="name">account.move.tree</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
-                <tree string="Journal Entries" sample="1" decoration-info="state == 'draft'">
+                <tree string="Journal Entries" sample="1" decoration-info="state == 'draft'" expand="context.get('expand', False)">
+                    <field name="made_sequence_hole" invisible="1"/>
                     <field name="date"/>
-                    <field name="name"/>
+                    <field name="name" decoration-danger="made_sequence_hole"/>
                     <field name="partner_id" optional="show"/>
                     <field name="ref" optional="show"/>
                     <field name="journal_id"/>
@@ -422,13 +422,15 @@
                 <tree string="Invoices"
                       js_class="account_tree"
                       decoration-info="state == 'draft'"
+                      expand="context.get('expand', False)"
                       sample="1">
                     <header>
                         <button name="action_register_payment" type="object" string="Register Payment"
                             groups="account.group_account_user"
                             invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund', 'out_receipt', 'in_invoice', 'in_refund','in_receipt')"/>
                     </header>
-                    <field name="name" decoration-bf="1"/>
+                    <field name="made_sequence_hole" invisible="1"/>
+                    <field name="name" decoration-bf="1" decoration-danger="made_sequence_hole"/>
                     <field name="partner_id" invisible="1"/>
                     <field name="invoice_source_email" invisible="1"/>
                     <field name="invoice_partner_display_name" invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund','in_receipt')" groups="base.group_user" string="Vendor" />
@@ -676,6 +678,10 @@
                     <div class="alert alert-info mb-0" role="alert"
                          attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('auto_post', '=', False)]}">
                         This move is configured to be posted automatically at the accounting date: <field name="date" readonly="1"/>.
+                    </div>
+                    <div class="alert alert-warning mb-0" role="alert"
+                         attrs="{'invisible': [('partner_credit_warning', '=', '')]}">
+                        <field name="partner_credit_warning"/>
                     </div>
                     <!-- Currency consistency -->
                     <div class="alert alert-warning mb-0" role="alert"
@@ -1363,6 +1369,7 @@
                         <separator/>
                         <filter string="Invoice Date" name="invoicedate" context="{'group_by': 'invoice_date'}"/>
                         <filter string="Due Date" name="duedate" context="{'group_by': 'invoice_date_due'}"/>
+                        <filter string="Sequence Prefix" name="group_by_sequence_prefix" context="{'group_by': 'sequence_prefix'}" invisible="1"/>
                     </group>
                </search>
             </field>

@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re, html_escape, is_html_empty, sql
+from odoo.tools import float_compare, date_utils, email_split, email_re, is_html_empty, sql
 from odoo.tools.misc import format_amount, formatLang, format_date, get_lang
 
 from datetime import date, timedelta
@@ -11,7 +11,6 @@ from contextlib import contextmanager
 from itertools import zip_longest
 from hashlib import sha256
 from json import dumps
-from markupsafe import Markup
 
 import ast
 import json
@@ -143,6 +142,7 @@ class AccountMove(models.Model):
     # ==== Business fields ====
     name = fields.Char(string='Number', copy=False, compute='_compute_name', readonly=False, store=True, index='btree', tracking=True)
     highest_name = fields.Char(compute='_compute_highest_name')
+    made_sequence_hole = fields.Boolean(compute='_compute_made_sequence_hole')
     show_name_warning = fields.Boolean(store=False)
     date = fields.Date(
         string='Date',
@@ -375,6 +375,10 @@ class AccountMove(models.Model):
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
     show_reset_to_draft_button = fields.Boolean(compute='_compute_show_reset_to_draft_button')
+    # Credit Limit related field
+    partner_credit_warning = fields.Text(
+        compute='_compute_partner_credit_warning',
+        groups="account.group_account_invoice,account.group_account_readonly")
 
     # ==== Hash Fields ====
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
@@ -1189,6 +1193,25 @@ class AccountMove(models.Model):
         for record in self:
             record.highest_name = record._get_last_sequence()
 
+    @api.depends('name', 'journal_id')
+    def _compute_made_sequence_hole(self):
+        self.env.cr.execute("""
+            SELECT this.id
+              FROM account_move this
+         LEFT JOIN account_move other ON this.journal_id = other.journal_id
+                                     AND this.sequence_prefix = other.sequence_prefix
+                                     AND this.sequence_number = other.sequence_number + 1
+             WHERE other.id IS NULL
+               AND this.sequence_number != 1
+               AND this.name != '/'
+               AND this.id = ANY(%(move_ids)s)
+        """, {
+            'move_ids': self.ids,
+        })
+        made_sequence_hole = set(r[0] for r in self.env.cr.fetchall())
+        for move in self:
+            move.made_sequence_hole = move.id in made_sequence_hole
+
     @api.onchange('name', 'highest_name')
     def _onchange_name_warning(self):
         if self.name and self.name != '/' and self.name <= (self.highest_name or ''):
@@ -1671,6 +1694,37 @@ class AccountMove(models.Model):
         for record in self:
             record.tax_country_code = record.tax_country_id.code
 
+    @api.depends('company_id', 'partner_id', 'amount_total_signed')
+    def _compute_partner_credit_warning(self):
+        for move in self:
+            move.with_company(move.company_id)
+            move.partner_credit_warning = ''
+            show_warning = move.state == 'draft' and \
+                           move.move_type == 'out_invoice' and \
+                           move.company_id.account_use_credit_limit
+            if show_warning:
+                updated_credit = move.partner_id.credit + move.amount_total_signed
+                move.partner_credit_warning = self._build_credit_warning_message(move, updated_credit)
+
+    def _build_credit_warning_message(self, record, updated_credit):
+        ''' Build the warning message that will be displayed in a yellow banner on top of the current record
+            if the partner exceeds a credit limit (set on the company or the partner itself).
+
+            :param record:                  The record where the warning will appear (Invoice, Sales Order...).
+            :param updated_credit (float):  The partner's updated credit limit including the current record.
+            :return (str):                  The warning message to be showed.
+        '''
+        credit_limit = record.partner_id.credit_limit
+        if (not credit_limit) or updated_credit <= credit_limit:
+            return ''
+        msg = _('%s has reached its Credit Limit of : %s\nTotal amount due ',
+                record.partner_id.name,
+                formatLang(self.env, credit_limit, currency_obj=record.company_id.currency_id))
+        if updated_credit > record.partner_id.credit:
+            msg += _('(including this document) ')
+        msg += ': %s' % formatLang(self.env, updated_credit, currency_obj=record.company_id.currency_id)
+        return msg
+
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------
@@ -1786,10 +1840,10 @@ class AccountMove(models.Model):
                  WHERE line.move_id IN %s
               GROUP BY line.move_id, currency.decimal_places
             )
-            SELECT * 
+            SELECT *
               FROM error_moves
-             WHERE balance !=0 
-                OR negative_normal 
+             WHERE balance !=0
+                OR negative_normal
                 OR positive_storno
         ''', [tuple(self.ids)])
 
