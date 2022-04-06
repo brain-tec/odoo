@@ -156,6 +156,19 @@ class SaleOrderLine(models.Model):
             # If company_id is set, always filter taxes by the company
             line.tax_id = line.order_id.fiscal_position_id.map_tax(taxes)
 
+    def _add_precomputed_values(self, vals_list):
+        """ In the specific case where the discount is provided in the create values
+        without being rounded, we have to 'manually' round it otherwise it won't be,
+        because editable precomputed field values are kept 'as is'.
+
+        This is a temporary fix until the problem is fixed in the ORM.
+        """
+        precision = self.env['decimal.precision'].precision_get('Discount')
+        for vals in vals_list:
+            if vals.get('discount'):
+                vals['discount'] = float_round(vals['discount'], precision_digits=precision)
+        return super()._add_precomputed_values(vals_list)
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -319,6 +332,7 @@ class SaleOrderLine(models.Model):
 
     analytic_tag_ids = fields.Many2many(
         'account.analytic.tag', string='Analytic Tags',
+        compute='_compute_analytic_tag_ids', store=True, readonly=False,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     analytic_line_ids = fields.One2many('account.analytic.line', 'so_line', string="Analytic lines")
     is_expense = fields.Boolean('Is expense', help="Is true if the sales order line comes from an expense or a vendor bills")
@@ -569,6 +583,19 @@ class SaleOrderLine(models.Model):
                     amount_to_invoice = price_subtotal - line.untaxed_amount_invoiced
 
             line.untaxed_amount_to_invoice = amount_to_invoice
+
+    @api.depends('product_id', 'order_id.date_order', 'order_id.partner_id')
+    def _compute_analytic_tag_ids(self):
+        for line in self:
+            if not line.display_type and not line.analytic_tag_ids:
+                default_analytic_account = line.env['account.analytic.default'].sudo().account_get(
+                    product_id=line.product_id.id,
+                    partner_id=line.order_id.partner_id.id,
+                    user_id=self.env.uid,
+                    date=line.order_id.date_order,
+                    company_id=line.company_id.id,
+                )
+                line.analytic_tag_ids = default_analytic_account.analytic_tag_ids
 
     def _get_invoice_line_sequence(self, new=0, old=0):
         """

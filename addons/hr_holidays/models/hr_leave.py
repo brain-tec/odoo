@@ -119,7 +119,7 @@ class HolidaysRequest(models.Model):
         "\nThe status is 'Refused', when time off request is refused by manager." +
         "\nThe status is 'Approved', when time off request is approved by manager.")
     report_note = fields.Text('HR Comments', copy=False, groups="hr_holidays.group_hr_holidays_manager")
-    user_id = fields.Many2one('res.users', string='User', related='employee_id.user_id', related_sudo=True, compute_sudo=True, store=True, readonly=True)
+    user_id = fields.Many2one('res.users', string='User', related='employee_id.user_id', related_sudo=True, compute_sudo=True, store=True, readonly=True, index=True)
     manager_id = fields.Many2one('hr.employee', compute='_compute_from_employee_id', store=True, readonly=False)
     # leave type configuration
     holiday_status_id = fields.Many2one(
@@ -295,6 +295,12 @@ class HolidaysRequest(models.Model):
         for leave in self:
             leave.all_employee_ids = leave.employee_id | leave.employee_ids
 
+    @api.constrains('holiday_status_id', 'number_of_days')
+    def _check_allocation_duration(self):
+        for holiday in self:
+            if holiday.holiday_status_id.requires_allocation == 'yes' and holiday.holiday_allocation_id and holiday.number_of_days > holiday.holiday_allocation_id.number_of_days:
+                raise ValidationError(_("You have several allocations for those type and period.\nPlease split your request to fit in their number of days."))
+
     @api.depends_context('uid')
     def _compute_description(self):
         self.check_access_rights('read')
@@ -348,7 +354,7 @@ class HolidaysRequest(models.Model):
                 '&',
                 ('date_to', '=', False),
                 ('date_from', '<=', max(self.mapped('date_from'))),
-            ], ['id', 'date_from', 'date_to', 'holiday_status_id', 'employee_id'], order="date_to, id"
+            ], ['id', 'date_from', 'date_to', 'holiday_status_id', 'employee_id', 'number_of_days'], order="number_of_days desc, date_to, id"
         )
         allocations_dict = defaultdict(lambda: [])
         for allocation in allocations:

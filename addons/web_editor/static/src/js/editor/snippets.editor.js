@@ -296,7 +296,7 @@ var SnippetEditor = Widget.extend({
      */
     buildSnippet: async function () {
         for (var i in this.styles) {
-            this.styles[i].onBuilt();
+            await this.styles[i].onBuilt();
         }
         await this.toggleTargetVisibility(true);
     },
@@ -2403,7 +2403,7 @@ var SnippetsMenu = Widget.extend({
 
         let dragAndDropResolve;
         let $scrollingElement = $().getScrollingElement(this.ownerDocument);
-        if (!$scrollingElement[0] || $scrollingElement.find('body.o_in_iframe')) {
+        if (!$scrollingElement[0] || $scrollingElement.find('body.o_in_iframe').length) {
             $scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
 
