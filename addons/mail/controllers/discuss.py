@@ -97,7 +97,7 @@ class DiscussController(http.Controller):
                     if channel_sudo.public == 'groups':
                         raise NotFound()
                     guest = channel_sudo.env['mail.guest'].create({
-                        'country_id': channel_sudo.env['res.country'].search([('code', '=', request.session.get('geoip', {}).get('country_code'))], limit=1).id,
+                        'country_id': channel_sudo.env['res.country'].search([('code', '=', request.geoip.get('country_code'))], limit=1).id,
                         'lang': get_lang(channel_sudo.env).code,
                         'name': _("Guest"),
                         'timezone': channel_sudo.env['mail.guest']._get_timezone_from_request(request),
@@ -257,17 +257,20 @@ class DiscussController(http.Controller):
         if channel_partner.env.user.share:
             # Only generate the access token if absolutely necessary (= not for internal user).
             vals['access_token'] = channel_partner.env['ir.attachment']._generate_access_token()
-        attachment = channel_partner.env['ir.attachment'].create(vals)
-        attachment._post_add_create()
-        attachmentData = {
-            'filename': ufile.filename,
-            'id': attachment.id,
-            'mimetype': attachment.mimetype,
-            'name': attachment.name,
-            'size': attachment.file_size
-        }
-        if attachment.access_token:
-            attachmentData['accessToken'] = attachment.access_token
+        try:
+            attachment = channel_partner.env['ir.attachment'].create(vals)
+            attachment._post_add_create()
+            attachmentData = {
+                'filename': ufile.filename,
+                'id': attachment.id,
+                'mimetype': attachment.mimetype,
+                'name': attachment.name,
+                'size': attachment.file_size
+            }
+            if attachment.access_token:
+                attachmentData['accessToken'] = attachment.access_token
+        except AccessError:
+            attachmentData = {'error': _("You are not allowed to upload an attachment here.")}
         return request.make_response(
             data=json.dumps(attachmentData),
             headers=[('Content-Type', 'application/json')]
