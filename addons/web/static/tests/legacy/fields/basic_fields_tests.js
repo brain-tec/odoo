@@ -1300,6 +1300,38 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test("click on email field link don't switch to edit mode", async function (assert) {
+        testUtils.mock.patch(field_registry.map.email, {
+            _onClickLink: function (ev) {
+                assert.step(ev.target.nodeName + " clicked");
+                this._super.apply(this, arguments);
+            },
+        });
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="foo" widget="email"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        await testUtils.dom.click(form.el.querySelector('.o_field_email a'));
+        assert.containsOnce(form.el, ".o_form_readonly", "form view is not in edit mode");
+
+        await testUtils.dom.click(form.el.querySelector('.o_field_email'));
+        assert.verifySteps(["A clicked", "DIV clicked"]);
+        assert.containsOnce(form.el, ".o_form_editable", "form view is in edit mode");
+
+        form.destroy();
+        testUtils.mock.unpatch(field_registry.map.email);
+    });
+
     QUnit.module('FieldChar');
 
     QUnit.test('char widget isValid method works', async function (assert) {
@@ -5067,6 +5099,58 @@ QUnit.module('basic_fields', {
         $.each($('.day:not(:last-child):not(:nth-child(2))'), function (index, value) {
             assert.doesNotHaveClass(value, 'disabled', 'other days must stay clickable');
         });
+        form.destroy();
+    });
+
+    QUnit.test('datetime field: hit enter should update value', async function (assert) {
+        /*
+        This test verifies that the field datetime is correctly computed when:
+            - we press enter to validate our entry
+            - we click outside the field to validate our entry
+            - we save
+        */
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners"><field name="datetime"/></form>',
+            res_id: 1,
+            translateParameters: {  // Avoid issues due to localization formats
+                date_format: '%m/%d/%Y',
+                time_format: '%H:%M:%S',
+            },
+            viewOptions: {
+                mode: 'edit',
+            },
+            session: {
+                getTZOffset: function () {
+                    return 120;
+                },
+            },
+        });
+
+        const datetime = form.el.querySelector('input[name="datetime"]');
+
+        // Enter a beginning of date and press enter to validate
+        await testUtils.fields.editInput(datetime, '01/08/22 14:30:40');
+        await testUtils.fields.triggerKeydown(datetime, 'enter');
+
+        const datetimeValue = `01/08/2022 14:30:40`;
+
+        assert.strictEqual(datetime.value, datetimeValue);
+
+        // Click outside the field to check that the field is not changed
+        await testUtils.dom.click(form.$el);
+        assert.strictEqual(datetime.value, datetimeValue);
+
+        // Save and check that it's still ok
+        await testUtils.form.clickSave(form);
+
+        const { textContent } = form.el.querySelector('span[name="datetime"]')
+        assert.strictEqual(textContent, datetimeValue);
+
         form.destroy();
     });
 

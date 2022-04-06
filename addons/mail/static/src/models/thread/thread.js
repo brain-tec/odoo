@@ -663,25 +663,48 @@ registerModel({
                 res_ids: [this.id],
             });
         },
-        /**
-         * Fetch attachments linked to a record. Useful for populating the store
-         * with these attachments, which are used by attachment box in the chatter.
-         */
+         /**
+          * Fetch attachments linked to a record. Useful for populating the store
+          * with these attachments, which are used by attachment box in the chatter.
+          */
         async fetchAttachments() {
-            const attachmentsData = await this.async(() => this.env.services.rpc({
-                model: 'ir.attachment',
-                method: 'search_read',
-                domain: [
-                    ['res_id', '=', this.id],
-                    ['res_model', '=', this.model],
-                ],
-                fields: ['id', 'name', 'mimetype'],
-                orderBy: [{ name: 'id', asc: false }],
-            }, { shadow: true }));
-            this.update({
-                originThreadAttachments: insertAndReplace(attachmentsData),
-            });
-            this.update({ areAttachmentsLoaded: true });
+            return this.fetchData(['attachments']);
+        },
+        /**
+         * Requests the given `requestList` data from the server.
+         *
+         * @param {string[]} requestList
+         */
+        async fetchData(requestList) {
+            if (this.isTemporary) {
+                return;
+            }
+            const requestSet = new Set(requestList);
+            if (requestSet.has('attachments')) {
+                this.update({ isLoadingAttachments: true });
+            }
+            const {
+                attachments: attachmentsData,
+            } = await this.env.services.rpc({
+                route: '/mail/thread/data',
+                params: {
+                    request_list: [...requestSet],
+                    thread_id: this.id,
+                    thread_model: this.model,
+                },
+            }, { shadow: true });
+            if (!this.exists()) {
+                return;
+            }
+            const values = {};
+            if (attachmentsData) {
+                Object.assign(values, {
+                    areAttachmentsLoaded: true,
+                    isLoadingAttachments: false,
+                    originThreadAttachments: insertAndReplace(attachmentsData),
+                });
+            }
+            this.update(values);
         },
         /**
          * Add current user to provided thread's followers.
@@ -1004,9 +1027,7 @@ registerModel({
                 return;
             }
             this.loadNewMessages();
-            this.update({ isLoadingAttachments: true });
             await this.async(() => this.fetchAttachments());
-            this.update({ isLoadingAttachments: false });
         },
         async refreshActivities() {
             if (!this.hasActivities) {
@@ -1367,6 +1388,17 @@ registerModel({
         */
         _computeIsChannelDescriptionChangeable() {
             return this.model === 'mail.channel' && ['channel', 'group'].includes(this.channel_type);
+        },
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsDescriptionEditableByCurrentUser() {
+            return Boolean(
+                this.messaging.currentUser &&
+                this.messaging.currentUser.isInternalUser &&
+                this.isChannelDescriptionChangeable
+            );
         },
         /**
          * @private
@@ -2124,6 +2156,12 @@ registerModel({
         isCurrentPartnerFollowing: attr({
             compute: '_computeIsCurrentPartnerFollowing',
             default: false,
+        }),
+        /**
+         * States whether this thread description is editable by the current user.
+         */
+        isDescriptionEditableByCurrentUser: attr({
+            compute: '_computeIsDescriptionEditableByCurrentUser',
         }),
         /**
          * States whether `this` is currently loading attachments.
