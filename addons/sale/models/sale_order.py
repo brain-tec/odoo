@@ -41,6 +41,12 @@ class SaleOrder(models.Model):
         ('date_order_conditional_required', "CHECK( (state IN ('sale', 'done') AND date_order IS NOT NULL) OR state NOT IN ('sale', 'done') )", "A confirmed sales order requires a confirmation date."),
     ]
 
+    @property
+    def _rec_names_search(self):
+        if self._context.get('sale_show_partner_name'):
+            return ['name', 'partner_id.name']
+        return ['name']
+
     #=== FIELDS ===#
 
     name = fields.Char(
@@ -253,6 +259,7 @@ class SaleOrder(models.Model):
     analytic_account_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string="Analytic Account",
+        compute='_compute_analytic_account_id', store=True, readonly=False,
         copy=False, check_company=True,  # Unrequired company
         states=READONLY_FIELD_STATES,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -509,7 +516,7 @@ class SaleOrder(models.Model):
         for order in self:
             total = 0.0
             for line in order.order_line:
-                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty
+                total += (line.price_subtotal * 100)/(100-line.discount) if line.discount != 100 else (line.price_unit * line.product_uom_qty)
             order.amount_undiscounted = total
 
     @api.depends('order_line.customer_lead', 'date_order', 'state')
@@ -542,6 +549,18 @@ class SaleOrder(models.Model):
                 record.tax_country_id = record.fiscal_position_id.country_id
             else:
                 record.tax_country_id = record.company_id.account_fiscal_country_id
+
+    @api.depends('partner_id', 'date_order')
+    def _compute_analytic_account_id(self):
+        for order in self:
+            if not order.analytic_account_id:
+                default_analytic_account = order.env['account.analytic.default'].sudo().account_get(
+                    partner_id=order.partner_id.id,
+                    user_id=order.env.uid,
+                    date=order.date_order,
+                    company_id=order.company_id.id,
+                )
+                order.analytic_account_id = default_analytic_account.analytic_id
 
     @api.depends('order_line.tax_id', 'order_line.price_unit', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
@@ -1223,19 +1242,6 @@ class SaleOrder(models.Model):
                 res.append((order.id, name))
             return res
         return super().name_get()
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        if self._context.get('sale_show_partner_name'):
-            if operator == 'ilike' and not (name or '').strip():
-                domain = []
-            elif operator in ('ilike', 'like', '=', '=like', '=ilike'):
-                domain = expression.AND([
-                    args or [],
-                    ['|', ('name', operator, name), ('partner_id.name', operator, name)]
-                ])
-                return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
-        return super()._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     #=== BUSINESS METHODS ===#
 

@@ -19,6 +19,7 @@ class PickingType(models.Model):
     _name = "stock.picking.type"
     _description = "Picking Type"
     _order = 'sequence, id'
+    _rec_names_search = ['name', 'warehouse_id.name']
     _check_company_auto = True
 
     def _default_show_operations(self):
@@ -163,14 +164,6 @@ class PickingType(models.Model):
                 name = picking_type.name
             res.append((picking_type.id, name))
         return res
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        domain = []
-        if name:
-            domain = ['|', ('name', operator, name), ('warehouse_id.name', operator, name)]
-        return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
 
     @api.onchange('code')
     def _onchange_picking_code(self):
@@ -720,6 +713,15 @@ class Picking(models.Model):
 
     @api.onchange('location_id', 'location_dest_id')
     def _onchange_locations(self):
+        from_wh = self.location_id.warehouse_id
+        to_wh = self.location_dest_id.warehouse_id
+        is_immediate = self.immediate_transfer if self._origin else self._context.get('default_immediate_transfer')
+        if self.picking_type_id.code == 'internal' and not is_immediate and from_wh and to_wh and from_wh != to_wh:
+            return {'warning': {
+                'title': _("Warning"),
+                'message': _("You should not use a planned internal transfer to move some products between two warehouses. "
+                             "Instead, use an immediate internal transfer or the resupply route.")
+            }}
         (self.move_ids | self.move_ids_without_package).update({
             "location_id": self.location_id,
             "location_dest_id": self.location_dest_id

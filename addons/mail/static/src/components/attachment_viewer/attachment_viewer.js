@@ -50,6 +50,9 @@ export class AttachmentViewer extends Component {
     }
 
     _mounted() {
+        if (!this.root.el) {
+            return;
+        }
         this.root.el.focus();
         this._handleImageLoad();
         this._hideUnwantedPdfJsButtons();
@@ -90,15 +93,6 @@ export class AttachmentViewer extends Component {
      */
     _close() {
         this.attachmentViewer.delete();
-    }
-
-    /**
-     * Download the attachment.
-     *
-     * @private
-     */
-    _download() {
-        this.attachmentViewer.attachment.download();
     }
 
     /**
@@ -317,7 +311,7 @@ export class AttachmentViewer extends Component {
      */
     _onClickDownload(ev) {
         ev.stopPropagation();
-        this._download();
+        this.attachmentViewer.attachment.download();
     }
 
     /**

@@ -12,6 +12,7 @@ from odoo.tools import float_is_zero, float_compare, float_round
 class SaleOrderLine(models.Model):
     _name = 'sale.order.line'
     _description = "Sales Order Line"
+    _rec_names_search = ['name', 'order_id.name']
     _order = 'order_id, sequence, id'
     _check_company_auto = True
 
@@ -218,6 +219,7 @@ class SaleOrderLine(models.Model):
     analytic_tag_ids = fields.Many2many(
         comodel_name='account.analytic.tag',
         string="Analytic Tags",
+        compute='_compute_analytic_tag_ids', store=True, readonly=False,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     analytic_line_ids = fields.One2many(
         comodel_name='account.analytic.line', inverse_name='so_line',
@@ -836,6 +838,19 @@ class SaleOrderLine(models.Model):
 
             line.untaxed_amount_to_invoice = amount_to_invoice
 
+    @api.depends('product_id', 'order_id.date_order', 'order_id.partner_id')
+    def _compute_analytic_tag_ids(self):
+        for line in self:
+            if not line.display_type and not line.analytic_tag_ids:
+                default_analytic_account = line.env['account.analytic.default'].sudo().account_get(
+                    product_id=line.product_id.id,
+                    partner_id=line.order_id.partner_id.id,
+                    user_id=self.env.uid,
+                    date=line.order_id.date_order,
+                    company_id=line.company_id.id,
+                )
+                line.analytic_tag_ids = default_analytic_account.analytic_tag_ids
+
     @api.depends('product_id', 'state', 'qty_invoiced', 'qty_delivered')
     def _compute_product_updatable(self):
         for line in self:
@@ -1050,16 +1065,6 @@ class SaleOrderLine(models.Model):
                 name = '%s (%s)' % (name, so_line.order_partner_id.ref)
             result.append((so_line.id, name))
         return result
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        if operator in ('ilike', 'like', '=', '=like', '=ilike'):
-            args = expression.AND([
-                args or [],
-                ['|', ('order_id.name', operator, name), ('name', operator, name)]
-            ])
-            return self._search(args, limit=limit, access_rights_uid=name_get_uid)
-        return super()._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     #=== HOOKS ===#
 
