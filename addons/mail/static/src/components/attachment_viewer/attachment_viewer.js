@@ -87,15 +87,6 @@ export class AttachmentViewer extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * Close the dialog with this attachment viewer.
-     *
-     * @private
-     */
-    _close() {
-        this.attachmentViewer.delete();
-    }
-
-    /**
      * Determine whether the current image is rendered for the 1st time, and if
      * that's the case, display a spinner until loaded.
      *
@@ -124,67 +115,6 @@ export class AttachmentViewer extends Component {
         if (this._iframeViewerPdfRef.el) {
             hidePDFJSButtons(this._iframeViewerPdfRef.el);
         }
-    }
-
-    /**
-     * Display the previous attachment in the list of attachments.
-     *
-     * @private
-     */
-    _next() {
-        if (!this.attachmentViewer.dialogOwner || !this.attachmentViewer.dialogOwner.attachmentListOwnerAsAttachmentView) {
-            return;
-        }
-        this.attachmentViewer.dialogOwner.attachmentListOwnerAsAttachmentView.selectNextAttachment();
-    }
-
-    /**
-     * Display the previous attachment in the list of attachments.
-     *
-     * @private
-     */
-    _previous() {
-        if (!this.attachmentViewer.dialogOwner || !this.attachmentViewer.dialogOwner.attachmentListOwnerAsAttachmentView) {
-            return;
-        }
-        this.attachmentViewer.dialogOwner.attachmentListOwnerAsAttachmentView.selectPreviousAttachment();
-    }
-
-    /**
-     * Prompt the browser print of this attachment.
-     *
-     * @private
-     */
-    _print() {
-        const printWindow = window.open('about:blank', '_new');
-        printWindow.document.open();
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <script>
-                        function onloadImage() {
-                            setTimeout('printImage()', 10);
-                        }
-                        function printImage() {
-                            window.print();
-                            window.close();
-                        }
-                    </script>
-                </head>
-                <body onload='onloadImage()'>
-                    <img src="${this.attachmentViewer.imageUrl}" alt=""/>
-                </body>
-            </html>`);
-        printWindow.document.close();
-    }
-
-    /**
-     * Rotate the image by 90 degrees to the right.
-     *
-     * @private
-     */
-    _rotate() {
-        this.attachmentViewer.update({ angle: this.attachmentViewer.angle + 90 });
     }
 
     /**
@@ -279,42 +209,6 @@ export class AttachmentViewer extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * Called when clicking on mask of attachment viewer.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClick(ev) {
-        if (this.attachmentViewer.isDragging) {
-            return;
-        }
-        // TODO: clicking on the background should probably be handled by the dialog?
-        // task-2092965
-        this._close();
-    }
-
-    /**
-     * Called when clicking on cross icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickClose(ev) {
-        this._close();
-    }
-
-    /**
-     * Called when clicking on download icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickDownload(ev) {
-        ev.stopPropagation();
-        this.attachmentViewer.attachment.download();
-    }
-
-    /**
      * @private
      * @param {MouseEvent} ev
      */
@@ -327,86 +221,6 @@ export class AttachmentViewer extends Component {
         }
         ev.stopPropagation();
         this._stopDragging();
-    }
-
-    /**
-     * Called when clicking on the header. Stop propagation of event to prevent
-     * closing the dialog.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickHeader(ev) {
-        ev.stopPropagation();
-    }
-
-    /**
-     * Called when clicking on image. Stop propagation of event to prevent
-     * closing the dialog.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickImage(ev) {
-        if (this.attachmentViewer.isDragging) {
-            return;
-        }
-        ev.stopPropagation();
-    }
-
-    /**
-     * Called when clicking on next icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickNext(ev) {
-        ev.stopPropagation();
-        this._next();
-    }
-
-    /**
-     * Called when clicking on previous icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickPrevious(ev) {
-        ev.stopPropagation();
-        this._previous();
-    }
-
-    /**
-     * Called when clicking on print icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickPrint(ev) {
-        ev.stopPropagation();
-        this._print();
-    }
-
-    /**
-     * Called when clicking on rotate icon.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickRotate(ev) {
-        ev.stopPropagation();
-        this._rotate();
-    }
-
-    /**
-     * Called when clicking on embed video player. Stop propagation to prevent
-     * closing the dialog.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickVideo(ev) {
-        ev.stopPropagation();
     }
 
     /**
@@ -449,19 +263,19 @@ export class AttachmentViewer extends Component {
     _onKeydown(ev) {
         switch (ev.key) {
             case 'ArrowRight':
-                this._next();
+                this.attachmentViewer.next();
                 break;
             case 'ArrowLeft':
-                this._previous();
+                this.attachmentViewer.previous();
                 break;
             case 'Escape':
-                this._close();
+                this.attachmentViewer.close();
                 break;
             case 'q':
-                this._close();
+                this.attachmentViewer.close();
                 break;
             case 'r':
-                this._rotate();
+                this.attachmentViewer.rotate();
                 break;
             case '+':
                 this._zoomIn();
@@ -476,20 +290,6 @@ export class AttachmentViewer extends Component {
                 return;
         }
         ev.stopPropagation();
-    }
-
-    /**
-     * Called when new image has been loaded
-     *
-     * @private
-     * @param {Event} ev
-     */
-    _onLoadImage(ev) {
-        if (!this.attachmentViewer) {
-            return;
-        }
-        ev.stopPropagation();
-        this.attachmentViewer.update({ isImageLoading: false });
     }
 
     /**

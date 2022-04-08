@@ -13,13 +13,14 @@ function cycle(num, max) {
 export class Powerbox {
     constructor(options = {}) {
         this.options = options;
-        this.options.width = this.options.width || 340;
         if (!this.options._t) this.options._t = string => string;
 
         this.el = document.createElement('div');
         this.el.className = 'oe-commandbar-wrapper';
         this.el.style.display = 'none';
-        this.el.style.width = `${this.options.width}px`;
+        if (this.options.width !== undefined) {
+            this.el.style.width = `${this.options.width}px`;
+        }
         document.body.append(this.el);
 
         this.addHotKey('/', { commands: this.options.commands });
@@ -41,14 +42,8 @@ export class Powerbox {
         clearTimeout(this._renderingTimeout);
         this._hoverActive = false;
 
+        this._mainWrapperElement.classList.toggle('oe-commandbar-noResult', commands.length === 0);
         if (commands.length === 0) {
-            const groupWrapperEl = document.createElement('div');
-            groupWrapperEl.className = 'oe-commandbar-groupWrapper';
-            const groupNameEl = document.createElement('div');
-            groupNameEl.className = 'oe-commandbar-noResult';
-            groupWrapperEl.append(groupNameEl);
-            this._mainWrapperElement.append(groupWrapperEl);
-            groupNameEl.innerText = this.options._t('No results');
             return;
         }
 
@@ -161,6 +156,7 @@ export class Powerbox {
     open(openOptions) {
         this.options.onActivate && this.options.onActivate();
         this._currentOpenOptions = openOptions;
+        this._currentOpenOptions.commands = this._orderCommandsByGroup(openOptions.commands);
 
         const openOnKeyupTarget =
             this._currentOpenOptions.openOnKeyupTarget || this.options.editable;
@@ -290,6 +286,7 @@ export class Powerbox {
 
     nextOpenOptions(openOptions) {
         this._currentOpenOptions = openOptions;
+        this._currentOpenOptions.commands = this._orderCommandsByGroup(openOptions.commands);
         this._initialValue = (
             this._currentOpenOptions.openOnKeyupTarget || this.options.editable
         ).textContent;
@@ -309,11 +306,11 @@ export class Powerbox {
     }
 
     // -------------------------------------------------------------------------
-    // private
+    // Private
     // -------------------------------------------------------------------------
 
     _filter(term, commands) {
-        const initalCommands = commands;
+        const initialCommands = commands;
         term = term.toLowerCase();
         term = term.replaceAll(/\s/g, '\\s');
         const regex = new RegExp(
@@ -323,14 +320,25 @@ export class Powerbox {
                 .join('.*'),
         );
         if (term.length) {
-            commands = initalCommands.filter(command => {
+            commands = initialCommands.filter(command => {
                 const commandText = (command.groupName + ' ' + command.title).toLowerCase();
                 return commandText.match(regex);
             });
         }
         return commands;
     }
-
+    _orderCommandsByGroup(commands) {
+        const groups = {};
+        for (const command of commands) {
+            groups[command.groupName] = groups[command.groupName] || [];
+            groups[command.groupName].push(command);
+        }
+        const reorderedCommands = [];
+        for (const groupCommands of Object.values(groups)) {
+            reorderedCommands.push(...groupCommands);
+        }
+        return reorderedCommands;
+    }
     _resetPosition() {
         const position = getRangePosition(this.el, this.options.document);
         if (!position) {

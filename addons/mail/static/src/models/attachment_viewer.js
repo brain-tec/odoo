@@ -8,6 +8,12 @@ registerModel({
     identifyingFields: ['dialogOwner'],
     recordMethods: {
         /**
+         * Close the dialog with this attachment viewer.
+         */
+        close() {
+            this.delete();
+        },
+        /**
          * Returns whether the given html element is inside this attachment viewer.
          *
          * @param {Element} element
@@ -15,6 +21,163 @@ registerModel({
          */
         containsElement(element) {
             return Boolean(this.component && this.component.root.el && this.component.root.el.contains(element));
+        },
+        /**
+         * Display the next attachment in the list of attachments.
+         */
+        next() {
+            if (!this.dialogOwner || !this.dialogOwner.attachmentListOwnerAsAttachmentView) {
+                return;
+            }
+            this.dialogOwner.attachmentListOwnerAsAttachmentView.selectNextAttachment();
+        },
+        /**
+         * Called when clicking on mask of attachment viewer.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClick(ev) {
+            if (this.isDragging) {
+                return;
+            }
+            // TODO: clicking on the background should probably be handled by the dialog?
+            // task-2092965
+            this.close();
+        },
+        /**
+         * Called when clicking on cross icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickClose(ev) {
+            this.close();
+        },
+        /**
+         * Called when clicking on download icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickDownload(ev) {
+            ev.stopPropagation();
+            this.attachment.download();
+        },
+        /**
+         * Called when clicking on the header. Stop propagation of event to prevent
+         * closing the dialog.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickHeader(ev) {
+            ev.stopPropagation();
+        },
+        /**
+         * Called when clicking on image. Stop propagation of event to prevent
+         * closing the dialog.
+         *
+         * @param {MouseEvent} ev 
+         */
+        onClickImage(ev) {
+            if (this.isDragging) {
+                return;
+            }
+            ev.stopPropagation();
+        },
+        /**
+         * Called when clicking on next icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickNext(ev) {
+            ev.stopPropagation();
+            this.next();
+        },
+        /**
+         * Called when clicking on previous icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickPrevious(ev) {
+            ev.stopPropagation();
+            this.previous();
+        },
+        /**
+         * Called when clicking on print icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickPrint(ev) {
+            ev.stopPropagation();
+            this.print();
+        },
+        /**
+         * Called when clicking on rotate icon.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickRotate(ev) {
+            ev.stopPropagation();
+            this.rotate();
+        },
+        /**
+         * Called when clicking on embed video player. Stop propagation to prevent
+         * closing the dialog.
+         *
+         * @param {MouseEvent} ev
+         */
+        onClickVideo(ev) {
+            ev.stopPropagation();
+        },
+        /**
+         * Called when new image has been loaded
+         *
+         * @param {Event} ev
+         */
+        onLoadImage(ev) {
+            if (!this.exists()) {
+                return;
+            }
+            ev.stopPropagation();
+            this.update({ isImageLoading: false });
+        },
+        /**
+         * Display the previous attachment in the list of attachments.
+         */
+        previous() {
+            if (!this.dialogOwner || !this.dialogOwner.attachmentListOwnerAsAttachmentView) {
+                return;
+            }
+            this.dialogOwner.attachmentListOwnerAsAttachmentView.selectPreviousAttachment();
+        },
+        /**
+         * Prompt the browser print of this attachment.
+         */
+        print() {
+            const printWindow = window.open('about:blank', '_new');
+            printWindow.document.open();
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <script>
+                            function onloadImage() {
+                                setTimeout('printImage()', 10);
+                            }
+                            function printImage() {
+                                window.print();
+                                window.close();
+                            }
+                        </script>
+                    </head>
+                    <body onload='onloadImage()'>
+                        <img src="${this.imageUrl}" alt=""/>
+                    </body>
+                </html>`);
+            printWindow.document.close();
+        },
+        /**
+         * Rotate the image by 90 degrees to the right.
+         */
+        rotate() {
+            this.update({ angle: this.angle + 90 });
         },
         /**
          * @private
