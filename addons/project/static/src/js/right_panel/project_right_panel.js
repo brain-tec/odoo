@@ -44,9 +44,9 @@ export default class ProjectRightPanel extends LegacyComponent {
             return valueFormatted;
         }
         if (currency.position === "after") {
-            return `${valueFormatted} ${currency.symbol}`;
+            return `${valueFormatted}\u00A0${currency.symbol}`;
         } else {
-            return `${currency.symbol} ${valueFormatted}`;
+            return `${currency.symbol}\u00A0${valueFormatted}`;
         }
     }
 
@@ -82,10 +82,7 @@ export default class ProjectRightPanel extends LegacyComponent {
             if (dataset.resId) {
                 args.push(Number(dataset.resId));
             }
-            let context = {};
-            if (dataset.context) {
-                context = dataset.context;
-            }
+            const context = dataset.context ? JSON.parse(dataset.context) : {};
             action = await this.rpc({
                 // Use the call_button method in order to have an action
                 // with the correct view naming, i.e. list view is named
@@ -101,9 +98,14 @@ export default class ProjectRightPanel extends LegacyComponent {
                 }
             });
         }
-        this._doAction(action, {
-            additional_context: additionalContext
-        });
+        const options = {
+            additional_context: additionalContext,
+        };
+        if (dataset.res_id) {
+            options.res_id = Number(dataset.res_id);
+            options.view_type = 'form';
+        }
+        this._doAction(action, options);
     }
 
     _doAction(action, options) {

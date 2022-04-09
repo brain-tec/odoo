@@ -111,7 +111,7 @@ class Project(models.Model):
                 'name': _('Sales Order Items'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'sale.order.line',
-                'context': {'no_create': True},
+                'context': {'create': False, 'edit': False},
             }
             if res_id:
                 action['res_id'] = res_id
@@ -262,17 +262,17 @@ class Project(models.Model):
             limit=limit,
         )
         # filter to only get the action for the SOLs that the user can read
-        action_per_sol = sols._filter_access_rules_python('read')._get_action_per_item() if with_action else {}
+        action_per_sol = sols.sudo(False)._filter_access_rules_python('read')._get_action_per_item() if with_action else {}
 
         def get_action(sol_id):
             """ Return the action vals to call it in frontend if the user can access to the SO related """
-            action = action_per_sol.get(sol_id)
-            return {'action': action, 'additional_context': json.dumps({'active_id': sol_id})} if action else {}
+            action, res_id = action_per_sol.get(sol_id, (None, None))
+            return {'action': action, 'res_id': res_id, 'additional_context': json.dumps({'active_id': sol_id, 'default_project_id': self.id})} if action else {}
 
         return [{
             **sol_read,
             **get_action(sol_read['id']),
-        } for sol_read in sols.read(['display_name', 'product_uom_qty', 'qty_delivered', 'qty_invoiced', 'product_uom'])]
+        } for sol_read in sols.with_context(with_price_unit=True).read(['display_name', 'product_uom_qty', 'qty_delivered', 'qty_invoiced', 'product_uom'])]
 
     def _get_sale_items_domain(self, additional_domain=None):
         sale_orders = self._get_sale_order_items().sudo().order_id
@@ -285,7 +285,7 @@ class Project(models.Model):
         domain = self.sudo()._get_sale_items_domain()
         return {
             'total': self.env['sale.order.line'].sudo().search_count(domain),
-            'data': self.get_sale_items_data(domain, limit=10, with_action=with_action),
+            'data': self.get_sale_items_data(domain, limit=5, with_action=with_action),
         }
 
     def _show_profitability(self):
@@ -296,7 +296,7 @@ class Project(models.Model):
         return {
             **super()._get_profitability_labels(),
             'service_revenues': _lt('Other Services'),
-            'other_revenues': _lt('Material'),
+            'other_revenues': _lt('Materials'),
         }
 
     def _get_profitability_sequence_per_invoice_type(self):
@@ -373,12 +373,20 @@ class Project(models.Model):
             if display_sol_action:
                 section_name = 'other_revenues'
                 other_revenues = revenues_dict.get(section_name, {})
-                sol_ids = other_revenues.pop('record_ids', [])
-                if sol_ids:
-                    action_params = {'name': 'action_profitability_items', 'type': 'object', 'section': section_name, 'domain': json.dumps(domain)}
-                    if len(sol_ids) == 1:
-                        action_params['res_id'] = sol_ids[0]
-                    other_revenues['action'] = action_params
+                sale_order_items = self.env['sale.order.line'] \
+                    .browse(other_revenues.pop('record_ids', [])) \
+                    ._filter_access_rules_python('read')
+                if sale_order_items:
+                    if sale_order_items:
+                        action_params = {
+                            'name': 'action_profitability_items',
+                            'type': 'object',
+                            'section': section_name,
+                            'domain': json.dumps([('id', 'in', sale_order_items.ids)]),
+                        }
+                        if len(sale_order_items) == 1:
+                            action_params['res_id'] = sale_order_items.id
+                        other_revenues['action'] = action_params
         sequence_per_invoice_type = self._get_profitability_sequence_per_invoice_type()
         return {
             'data': [{'id': invoice_type, 'sequence': sequence_per_invoice_type[invoice_type], **vals} for invoice_type, vals in revenues_dict.items()],

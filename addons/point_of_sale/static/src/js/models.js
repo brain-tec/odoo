@@ -437,7 +437,7 @@ class PosGlobalState extends PosModel {
                     offset: page * this.config.limited_products_amount,
                     limit: this.config.limited_products_amount,
                 }],
-            });
+            }, { shadow: true });
             this._loadProductProduct(products);
             page += 1;
         } while(products.length == this.config.limited_products_amount);
@@ -459,7 +459,7 @@ class PosGlobalState extends PosModel {
                     },
                 ],
                 context: this.env.session.user_context,
-            });
+            }, { shadow: true });
             this.db.add_partners(partners);
             i += 1;
         } while(partners.length);
@@ -1718,7 +1718,7 @@ class Orderline extends PosModel {
         // 1) Flatten the taxes.
 
         var _collect_taxes = function(taxes, all_taxes){
-            taxes.sort(function (tax1, tax2) {
+            taxes = [...taxes].sort(function (tax1, tax2) {
                 return tax1.sequence - tax2.sequence;
             });
             _(taxes).each(function(tax){

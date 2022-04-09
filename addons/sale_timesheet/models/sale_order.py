@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.osv import expression
-from odoo.tools import float_compare, format_amount
+from odoo.tools import float_compare
 
 
 class SaleOrder(models.Model):
@@ -121,65 +121,45 @@ class SaleOrderLine(models.Model):
     remaining_hours_available = fields.Boolean(compute='_compute_remaining_hours_available', compute_sudo=True)
     remaining_hours = fields.Float('Remaining Hours on SO', compute='_compute_remaining_hours', compute_sudo=True, store=True)
     has_displayed_warning_upsell = fields.Boolean('Has Displayed Warning Upsell')
-    timesheet_count = fields.Integer(compute='_compute_timesheet_count', groups='hr_timesheet.group_hr_timesheet_user')
 
     def name_get(self):
         res = super(SaleOrderLine, self).name_get()
         with_remaining_hours = self.env.context.get('with_remaining_hours')
-        with_price_unit = self.env.context.get('with_price_unit')
-        if with_remaining_hours or with_price_unit:
+        if with_remaining_hours:
             names = dict(res)
             result = []
-            uom_hour = with_remaining_hours and self.env.ref('uom.product_uom_hour')
-            uom_day = with_remaining_hours and self.env.ref('uom.product_uom_day')
-            sols_by_so_dict = with_price_unit and defaultdict(lambda: self.env[self._name])  # key: (sale_order_id, product_id), value: sale order line
+            uom_hour = self.env.ref('uom.product_uom_hour')
+            uom_day = self.env.ref('uom.product_uom_day')
             for line in self:
-                if with_remaining_hours:
-                    name = names.get(line.id)
-                    if line.remaining_hours_available:
-                        company = self.env.company
-                        encoding_uom = company.timesheet_encode_uom_id
-                        remaining_time = ''
-                        if encoding_uom == uom_hour:
-                            hours, minutes = divmod(abs(line.remaining_hours) * 60, 60)
-                            round_minutes = minutes / 30
-                            minutes = math.ceil(round_minutes) if line.remaining_hours >= 0 else math.floor(round_minutes)
-                            if minutes > 1:
-                                minutes = 0
-                                hours += 1
-                            else:
-                                minutes = minutes * 30
-                            remaining_time = ' ({sign}{hours:02.0f}:{minutes:02.0f})'.format(
-                                sign='-' if line.remaining_hours < 0 else '',
-                                hours=hours,
-                                minutes=minutes)
-                        elif encoding_uom == uom_day:
-                            remaining_days = company.project_time_mode_id._compute_quantity(line.remaining_hours, encoding_uom, round=False)
-                            remaining_time = ' ({qty:.02f} {unit})'.format(
-                                qty=remaining_days,
-                                unit=_('days') if abs(remaining_days) > 1 else _('day')
-                            )
-                        name = '{name}{remaining_time}'.format(
-                            name=name,
-                            remaining_time=remaining_time
+                name = names.get(line.id)
+                if line.remaining_hours_available:
+                    company = self.env.company
+                    encoding_uom = company.timesheet_encode_uom_id
+                    remaining_time = ''
+                    if encoding_uom == uom_hour:
+                        hours, minutes = divmod(abs(line.remaining_hours) * 60, 60)
+                        round_minutes = minutes / 30
+                        minutes = math.ceil(round_minutes) if line.remaining_hours >= 0 else math.floor(round_minutes)
+                        if minutes > 1:
+                            minutes = 0
+                            hours += 1
+                        else:
+                            minutes = minutes * 30
+                        remaining_time = ' ({sign}{hours:02.0f}:{minutes:02.0f})'.format(
+                            sign='-' if line.remaining_hours < 0 else '',
+                            hours=hours,
+                            minutes=minutes)
+                    elif encoding_uom == uom_day:
+                        remaining_days = company.project_time_mode_id._compute_quantity(line.remaining_hours, encoding_uom, round=False)
+                        remaining_time = ' ({qty:.02f} {unit})'.format(
+                            qty=remaining_days,
+                            unit=_('days') if abs(remaining_days) > 1 else _('day')
                         )
-                        if with_price_unit:
-                            names[line.id] = name
-                    if not with_price_unit:
-                        result.append((line.id, name))
-                if with_price_unit:
-                    sols_by_so_dict[line.order_id.id, line.product_id.id] += line
-
-            if with_price_unit:
-                for sols in sols_by_so_dict.values():
-                    if len(sols) > 1:
-                        result += [(
-                            line.id,
-                            '%s - %s' % (
-                                names.get(line.id), format_amount(self.env, line.price_unit, line.currency_id))
-                        ) for line in sols]
-                    else:
-                        result.append((sols.id, names.get(sols.id)))
+                    name = '{name}{remaining_time}'.format(
+                        name=name,
+                        remaining_time=remaining_time
+                    )
+                result.append((line.id, name))
             return result
         return res
 
@@ -218,12 +198,6 @@ class SaleOrderLine(models.Model):
         mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)
         for line in lines_by_timesheet:
             line.qty_delivered = mapping.get(line.id or line._origin.id, 0.0)
-
-    def _compute_timesheet_count(self):
-        timesheet_read_group = self.env['account.analytic.line']._read_group([('so_line', 'in', self.ids), ('project_id', '!=', False)], ['so_line'], ['so_line'])
-        timesheet_count_per_sol = {res['so_line'][0]: res['so_line_count'] for res in timesheet_read_group}
-        for sol in self:
-            sol.timesheet_count = timesheet_count_per_sol.get(sol.id, 0)
 
     def _timesheet_compute_delivered_quantity_domain(self):
         """ Hook for validated timesheet in addionnal module """
@@ -299,7 +273,12 @@ class SaleOrderLine(models.Model):
         """
         action_per_sol = super()._get_action_per_item()
         timesheet_action = self.env.ref('sale_timesheet.timesheet_action_from_sales_order_item').id
+        timesheet_ids_per_sol = {}
+        if self.user_has_groups('hr_timesheet.group_hr_timesheet_user'):
+            timesheet_read_group = self.env['account.analytic.line']._read_group([('so_line', 'in', self.ids), ('project_id', '!=', False)], ['so_line', 'ids:array_agg(id)'], ['so_line'])
+            timesheet_ids_per_sol = {res['so_line'][0]: res['ids'] for res in timesheet_read_group}
         for sol in self:
-            if sol.is_service and sol.timesheet_count > 0:
-                action_per_sol[sol.id] = timesheet_action
+            timesheet_ids = timesheet_ids_per_sol.get(sol.id, [])
+            if sol.is_service and len(timesheet_ids) > 0:
+                action_per_sol[sol.id] = timesheet_action, timesheet_ids[0] if len(timesheet_ids) == 1 else False
         return action_per_sol
