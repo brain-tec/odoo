@@ -345,7 +345,7 @@
                                         <field name="iface_tax_included" class="o_light_label" widget="radio"/>
                                     </div>
                                     <a attrs="{'invisible': [('iface_tax_included', '!=', 'total')]}"
-                                        href="https://www.odoo.com/documentation/master/applications/finance/accounting/taxation/taxes/B2B_B2C.html"
+                                        href="https://www.odoo.com/documentation/saas-15.3/applications/finance/accounting/taxation/taxes/B2B_B2C.html"
                                         target="_blank" class="oe-link"><i class="fa fa-fw fa-arrow-right"/>How to manage tax-included prices</a>
                                 </div>
                             </div>
@@ -390,7 +390,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" id="pos-loyalty">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_loyalty" widget="upgrade_boolean" nolabel="1"/>
+                                <field name="module_pos_loyalty" nolabel="1"/>
                             </div>
                             <div class="o_setting_right_pane" title="Loyalty program to use for this point of sale. ">
                                 <label for="module_pos_loyalty"/>
