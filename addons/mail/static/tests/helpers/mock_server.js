@@ -171,9 +171,9 @@ MockServer.include({
             return this._mockMailChannelChannelFetchPreview(ids);
         }
         if (args.model === 'mail.channel' && args.method === 'channel_fold') {
-            const uuid = args.args[0] || args.kwargs.uuid;
+            const ids = args.args[0];
             const state = args.args[1] || args.kwargs.state;
-            return this._mockMailChannelChannelFold(uuid, state);
+            return this._mockMailChannelChannelFold(ids, state);
         }
         if (args.model === 'mail.channel' && args.method === 'channel_get') {
             const partners_to = args.args[0] || args.kwargs.partners_to;
@@ -194,9 +194,9 @@ MockServer.include({
             return this._mockMailChannelAddMembers(ids, partner_ids);
         }
         if (args.model === 'mail.channel' && args.method === 'channel_pin') {
-            const uuid = args.args[0] || args.kwargs.uuid;
+            const ids = args.args[0];
             const pinned = args.args[1] || args.kwargs.pinned;
-            return this._mockMailChannelChannelPin(uuid, pinned);
+            return this._mockMailChannelChannelPin(ids, pinned);
         }
         if (args.model === 'mail.channel' && args.method === 'channel_rename') {
             const ids = args.args[0];
@@ -871,25 +871,27 @@ MockServer.include({
      * In particular sends a notification on the bus.
      *
      * @private
-     * @param {string} uuid
+     * @param {number} ids
      * @param {state} [state]
      */
-    _mockMailChannelChannelFold(uuid, state) {
-        const channel = this._getRecords('mail.channel', [['uuid', '=', uuid]])[0];
-        const [memberOfCurrentUser] = this._getRecords('mail.channel.partner', [['channel_id', '=', channel.id], ['partner_id', '=', this.currentPartnerId]]);
-        const foldState = state ? state : memberOfCurrentUser.fold_state === 'open' ? 'folded' : 'open';
-        const vals = {
-            fold_state: foldState,
-            is_minimized: foldState !== 'closed',
-        };
-        this._mockWrite('mail.channel.partner', [[memberOfCurrentUser.id], vals]);
-        this._widget.call('bus_service', 'trigger', 'notification', [{
-            type: 'mail.channel/insert',
-            payload: {
-                id: channel.id,
-                serverFoldState: memberOfCurrentUser.fold_state,
-            },
-        }]);
+    _mockMailChannelChannelFold(ids, state) {
+        const channels = this._getRecords('mail.channel', [['id', 'in', ids]]);
+        for (const channel of channels) {
+            const [memberOfCurrentUser] = this._getRecords('mail.channel.partner', [['channel_id', '=', channel.id], ['partner_id', '=', this.currentPartnerId]]);
+            const foldState = state ? state : memberOfCurrentUser.fold_state === 'open' ? 'folded' : 'open';
+            const vals = {
+                fold_state: foldState,
+                is_minimized: foldState !== 'closed',
+            };
+            this._mockWrite('mail.channel.partner', [[memberOfCurrentUser.id], vals]);
+            this._widget.call('bus_service', 'trigger', 'notification', [{
+                type: 'mail.channel/insert',
+                payload: {
+                    id: channel.id,
+                    serverFoldState: memberOfCurrentUser.fold_state,
+                },
+            }]);
+        }
     },
     /**
      * Simulates 'channel_get' on 'mail.channel'.
@@ -986,11 +988,11 @@ MockServer.include({
      * Simulates the `channel_pin` method of `mail.channel`.
      *
      * @private
-     * @param {string} uuid
+     * @param {number[]} ids
      * @param {boolean} [pinned=false]
      */
-    async _mockMailChannelChannelPin(uuid, pinned = false) {
-        const channel = this._getRecords('mail.channel', [['uuid', '=', uuid]])[0];
+    async _mockMailChannelChannelPin(ids, pinned = false) {
+        const [channel] = this._getRecords('mail.channel', [['id', 'in', ids]]);
         const [memberOfCurrentUser] = this._getRecords('mail.channel.partner', [['channel_id', '=', channel.id], ['partner_id', '=', this.currentPartnerId], ['is_pinned', '!=', pinned]]);
         if (memberOfCurrentUser) {
             this._mockWrite('mail.channel.partner', [
@@ -1854,8 +1856,20 @@ MockServer.include({
      * @returns {boolean}
      */
     _mockMailThreadMessageSubscribe(model, ids, partner_ids, subtype_ids) {
-        // message_subscribe is too complex for a generic mock.
-        // mockRPC should be considered for a specific result.
+        for (const id of ids) {
+            for (const partner_id of partner_ids) {
+                const followerId = this._mockCreate('mail.followers', {
+                    is_active: true,
+                    partner_id,
+                    res_id: id,
+                    res_model: model,
+                    subtype_ids: subtype_ids,
+                });
+                this._mockWrite('res.partner', [[partner_id], {
+                    message_follower_ids: [followerId],
+                }]);
+            }
+        }
     },
     /**
      * Simulates `_notify_thread` on `mail.thread`.

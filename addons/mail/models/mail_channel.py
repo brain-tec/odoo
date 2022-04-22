@@ -633,8 +633,13 @@ class Channel(models.Model):
     def _message_compute_parent_id(self, parent_id):
         # super() unravels the chain of parents to set parent_id as the first
         # ancestor. We don't want that in channel.
-        parent_message = self.env['mail.message'].search([('id', '=', parent_id), ('model', '=', 'mail.channel'), ('res_id', '=', self.id)])
-        return parent_message.id
+        if not parent_id:
+            return parent_id
+        return self.env['mail.message'].search(
+            [('id', '=', parent_id),
+             ('model', '=', self._name),
+             ('res_id', '=', self.id)
+            ]).id
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *, message_type='notification', **kwargs):
@@ -936,14 +941,13 @@ class Channel(models.Model):
             channel._broadcast(partners_to)
         return channel.channel_info()[0]
 
-    @api.model
-    def channel_fold(self, uuid, state=None):
+    def channel_fold(self, state=None):
         """ Update the fold_state of the given session. In order to syncronize web browser
             tabs, the change will be broadcast to himself (the current user channel).
             Note: the user need to be logged
             :param state : the new status of the session for the current user.
         """
-        domain = [('partner_id', '=', self.env.user.partner_id.id), ('channel_id.uuid', '=', uuid)]
+        domain = [('partner_id', '=', self.env.user.partner_id.id), ('channel_id', 'in', self.ids)]
         for session_state in self.env['mail.channel.partner'].search(domain):
             if not state:
                 state = session_state.fold_state
@@ -960,18 +964,11 @@ class Channel(models.Model):
             if vals:
                 session_state.write(vals)
             self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.channel/insert', {
-                'id': session_state.channel_id.channel_info()[0]['id'],
+                'id': session_state.channel_id.id,
                 'serverFoldState': state,
             })
 
-    @api.model
-    def channel_pin(self, uuid, pinned=False):
-        # add the person in the channel, and pin it (or unpin it)
-        channel = self.search([('uuid', '=', uuid)])
-        channel._execute_channel_pin(pinned)
-
-    def _execute_channel_pin(self, pinned=False):
-        """ Hook for website_livechat channel unpin and cleaning """
+    def channel_pin(self, pinned=False):
         self.ensure_one()
         channel_partners = self.env['mail.channel.partner'].search(
             [('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', self.id), ('is_pinned', '!=', pinned)])
@@ -1267,7 +1264,7 @@ class Channel(models.Model):
         if self.channel_type in ('channel', 'group'):
             self.action_unfollow()
         else:
-            self.channel_pin(self.uuid, False)
+            self.channel_pin(False)
 
     def execute_command_who(self, **kwargs):
         partner = self.env.user.partner_id

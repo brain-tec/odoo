@@ -388,16 +388,16 @@ registerModel({
         /**
          * Performs the `channel_fold` RPC on `mail.channel`.
          *
-         * @param {string} uuid
+         * @param {number} channelId
          * @param {string} state
          */
-        async performRpcChannelFold(uuid, state) {
+        async performRpcChannelFold(channelId, state) {
             return this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_fold',
+                args: [[channelId]],
                 kwargs: {
                     state,
-                    uuid,
                 }
             }, { shadow: true });
         },
@@ -439,15 +439,15 @@ registerModel({
          * Performs the `channel_pin` RPC on `mail.channel`.
          *
          * @param {Object} param0
+         * @param {number} param0.channelId
          * @param {boolean} [param0.pinned=false]
-         * @param {string} param0.uuid
          */
-        async performRpcChannelPin({ pinned = false, uuid }) {
+        async performRpcChannelPin({ channelId, pinned = false }) {
             return this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_pin',
+                args: [[channelId]],
                 kwargs: {
-                    uuid,
                     pinned,
                 },
             }, { shadow: true });
@@ -875,10 +875,7 @@ registerModel({
                 // Server sync of fold state is only supported for channels.
                 return;
             }
-            if (!this.uuid) {
-                return;
-            }
-            return this.messaging.models['Thread'].performRpcChannelFold(this.uuid, state);
+            return this.messaging.models['Thread'].performRpcChannelFold(this.id, state);
         },
         /**
          * Notify server to leave the current channel. Useful for cross-tab
@@ -892,15 +889,9 @@ registerModel({
                 return;
             }
             await this.messaging.models['Thread'].performRpcChannelPin({
+                channelId: this.id,
                 pinned: this.isPendingPinned,
-                uuid: this.uuid,
             });
-        },
-        /**
-         * @param {MouseEvent} ev
-         */
-        onClickFollow(ev) {
-            this.follow();
         },
         /**
          * Handles click on the avatar of the given member in the member list of
@@ -919,12 +910,6 @@ registerModel({
          */
         onClickMemberName(member) {
             member.openProfile();
-        },
-        /**
-         * @param {MouseEvent} ev
-         */
-        onClickUnfollow(ev) {
-            this.unfollow();
         },
         /**
          * Opens this thread either as form view, in discuss app, or as a chat
