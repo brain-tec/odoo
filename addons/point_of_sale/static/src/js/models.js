@@ -436,7 +436,7 @@ class PosGlobalState extends PosModel {
                     offset: page * this.config.limited_products_amount,
                     limit: this.config.limited_products_amount,
                 }],
-            });
+            }, { shadow: true });
             this._loadProductProduct(products);
             page += 1;
         } while(products.length == this.config.limited_products_amount);
@@ -458,7 +458,7 @@ class PosGlobalState extends PosModel {
                     },
                 ],
                 context: this.env.session.user_context,
-            });
+            }, { shadow: true });
             this.db.add_partners(partners);
             i += 1;
         } while(partners.length);
@@ -989,13 +989,15 @@ class PosGlobalState extends PosModel {
      * Make the products corresponding to the given ids to be available_in_pos and
      * fetch them to be added on the loaded products.
      */
-    async _addProducts(ids){
-        await this.env.services.rpc({
-            model: 'product.product',
-            method: 'write',
-            args: [ids, {'available_in_pos': true}],
-            context: this.env.session.user_context,
-        });
+    async _addProducts(ids, setAvailable=true){
+        if(setAvailable){
+            await this.env.services.rpc({
+                model: 'product.product',
+                method: 'write',
+                args: [ids, {'available_in_pos': true}],
+                context: this.env.session.user_context,
+            });
+        }
         let product = await this.env.services.rpc({
             model: 'pos.session',
             method: 'get_pos_ui_product_product_by_params',
@@ -1725,7 +1727,7 @@ class Orderline extends PosModel {
         // 1) Flatten the taxes.
 
         var _collect_taxes = function(taxes, all_taxes){
-            taxes.sort(function (tax1, tax2) {
+            taxes = [...taxes].sort(function (tax1, tax2) {
                 return tax1.sequence - tax2.sequence;
             });
             _(taxes).each(function(tax){
@@ -2727,14 +2729,16 @@ class Order extends PosModel {
             return sum + orderLine.get_price_without_tax();
         }), 0), this.pos.currency.rounding);
     }
+    _reduce_total_discount_callback(sum, orderLine) {
+        sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
+        if (orderLine.display_discount_policy() === 'without_discount'){
+            sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+        }
+        return sum;
+    }
     get_total_discount() {
-        return round_pr(this.orderlines.reduce((function(sum, orderLine) {
-            sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-            if (orderLine.display_discount_policy() === 'without_discount'){
-                sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
-            }
-            return sum;
-        }), 0), this.pos.currency.rounding);
+        const reduce_callback = this._reduce_total_discount_callback.bind(this);
+        return round_pr(this.orderlines.reduce(reduce_callback, 0), this.pos.currency.rounding);
     }
     get_total_tax() {
         if (this.pos.company.tax_calculation_rounding_method === "round_globally") {

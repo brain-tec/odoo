@@ -31,8 +31,22 @@ class AccountEdiFormat(models.Model):
         '''Returns a name conform to the Fattura pa Specifications:
            See ES documentation 2.2
         '''
-        a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        n = invoice.id
+        a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        # Each company should have its own filename sequence. If it does not exist, create it
+        n = self.env['ir.sequence'].with_company(invoice.company_id).next_by_code('l10n_it_edi.fattura_filename')
+        if not n:
+            # The offset is used to avoid conflicts with existing filenames
+            offset = 62 ** 4
+            sequence = self.env['ir.sequence'].sudo().create({
+                'name': 'FatturaPA Filename Sequence',
+                'code': 'l10n_it_edi.fattura_filename',
+                'company_id': invoice.company_id.id,
+                'number_next': offset,
+            })
+            n = sequence._next()
+        # The n is returned as a string, but we require an int
+        n = int(''.join(filter(lambda c: c.isdecimal(), n)))
+
         progressive_number = ""
         while n:
             (n, m) = divmod(n, len(a))
@@ -109,9 +123,6 @@ class AccountEdiFormat(models.Model):
         for tax_line in invoice.line_ids.filtered(lambda line: line.tax_line_id):
             if not tax_line.tax_line_id.l10n_it_kind_exoneration and tax_line.tax_line_id.amount == 0:
                 errors.append(_("%s has an amount of 0.0, you must indicate the kind of exoneration.", tax_line.name))
-
-        if not invoice.partner_bank_id:
-            errors.append(_("The seller must have a bank account."))
 
         return errors
 

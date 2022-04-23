@@ -11,7 +11,7 @@ class AccountJournal(models.Model):
 
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
-        if self.type == 'bank':
+        if self._is_payment_method_available('check_printing'):
             res |= self.env.ref('account_check_printing.account_payment_method_check')
         return res
 
@@ -62,12 +62,6 @@ class AccountJournal(models.Model):
         journals = super().create(vals_list)
         journals.filtered(lambda j: not j.check_sequence_id)._create_check_sequence()
         return journals
-
-    @api.returns('self', lambda value: value.id)
-    def copy(self, default=None):
-        rec = super(AccountJournal, self).copy(default)
-        rec._create_check_sequence()
-        return rec
 
     def _create_check_sequence(self):
         """ Create a check sequence for the journal """
