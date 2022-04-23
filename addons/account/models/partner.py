@@ -452,6 +452,7 @@ class ResPartner(models.Model):
         string='Partner Limit', groups='account.group_account_invoice,account.group_account_readonly',
         compute='_compute_use_partner_credit_limit', inverse='_inverse_use_partner_credit_limit')
     show_credit_limit = fields.Boolean(
+        default=lambda self: self.env.company.account_use_credit_limit,
         compute='_compute_show_credit_limit', groups='account.group_account_invoice,account.group_account_readonly')
     debit = fields.Monetary(
         compute='_credit_debit_get', search=_debit_search, string='Total Payable',
@@ -572,14 +573,14 @@ class ResPartner(models.Model):
 
     def action_view_partner_with_same_bank(self):
         self.ensure_one()
-        partners = self._get_duplicated_bank_accounts()
+        bank_partners = self._get_duplicated_bank_accounts()
         # Open a list view or form view of the partner(s) with the same bank accounts
         if self.duplicated_bank_account_partners_count == 1:
             action_vals = {
                 'type': 'ir.actions.act_window',
                 'res_model': 'res.partner',
                 'view_mode': 'form',
-                'res_id': partners.id,
+                'res_id': bank_partners.partner_id.id,
                 'views': [(False, 'form')],
             }
         else:
@@ -589,7 +590,7 @@ class ResPartner(models.Model):
                 'res_model': 'res.partner',
                 'view_mode': 'tree,form',
                 'views': [(False, 'list'), (False, 'form')],
-                'domain': [('id', 'in', partners.ids)],
+                'domain': [('id', 'in', bank_partners.partner_id.ids)],
             }
 
         return action_vals

@@ -184,7 +184,7 @@ class Menu(models.Model):
             menu_id = self.browse(menu['id'])
             # if the url match a website.page, set the m2o relation
             # except if the menu url is '#', meaning it will be used as a menu container, most likely for a dropdown
-            if menu['url'] == '#':
+            if not menu['url'] or menu['url'] == '#':
                 if menu_id.page_id:
                     menu_id.page_id = None
             else:
@@ -197,6 +197,9 @@ class Menu(models.Model):
                 if page:
                     menu['page_id'] = page.id
                     menu['url'] = page.url
+                    if isinstance(menu.get('parent_id'), str):
+                        # Avoid failure if parent_id is sent as a string from a customization.
+                        menu['parent_id'] = int(menu['parent_id'])
                 elif menu_id.page_id:
                     try:
                         # a page shouldn't have the same url as a controller
