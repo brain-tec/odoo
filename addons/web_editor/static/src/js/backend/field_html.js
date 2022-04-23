@@ -44,7 +44,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         wysiwyg_change: '_onChange',
         wysiwyg_attachment: '_onAttachmentChange',
     },
-
     /**
      * @override
      */
@@ -200,6 +199,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             iframeCssAssets: this.nodeOptions.cssEdit,
             snippets: this.nodeOptions.snippets,
             value: this.value,
+            allowCommandVideo: Boolean(this.nodeOptions.allowCommandVideo) && (!this.field.sanitize || !this.field.sanitize_tags),
             mediaModalParams: {
                 noVideos: 'noVideos' in this.nodeOptions ? this.nodeOptions.noVideos : true,
             },
@@ -466,7 +466,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @param {OdooEvent} ev
      */
     _onChange: function (ev) {
-        this._doDebouncedAction.apply(this, arguments);
+        this._doAction();
 
         var $lis = this.$content.find('.note-editable ul.o_checklist > li:not(:has(> ul.o_checklist))');
         if (!$lis.length) {

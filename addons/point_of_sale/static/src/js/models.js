@@ -957,7 +957,7 @@ exports.PosModel = Backbone.Model.extend({
                     'limit': this.env.pos.config.limited_products_amount
                 },
                 context: { ...this.session.user_context, ...product_model.context() },
-            });
+            }, { shadow: true });
             product_model.loaded(this, products);
             page += 1;
         } while(products.length == this.config.limited_products_amount);
@@ -976,7 +976,7 @@ exports.PosModel = Backbone.Model.extend({
                     offset: this.env.pos.config.limited_partners_amount * i
                 },
                 context: this.env.session.user_context,
-            });
+            }, { shadow: true });
             this.env.pos.db.add_partners(PartnerIds);
             i += 1;
         } while(PartnerIds.length);
@@ -1561,13 +1561,15 @@ exports.PosModel = Backbone.Model.extend({
      * Make the products corresponding to the given ids to be available_in_pos and
      * fetch them to be added on the loaded products.
      */
-    async _addProducts(ids){
-        await this.rpc({
-            model: 'product.product',
-            method: 'write',
-            args: [ids, {'available_in_pos': true}],
-            context: this.session.user_context,
-        });
+    async _addProducts(ids, setAvailable=true){
+        if(setAvailable){
+            await this.rpc({
+                model: 'product.product',
+                method: 'write',
+                args: [ids, {'available_in_pos': true}],
+                context: this.session.user_context,
+            });
+        }
         let product_model = _.find(this.models, (model) => model.model === 'product.product');
         let product = await this.rpc({
             model: 'product.product',
@@ -3438,14 +3440,16 @@ exports.Order = Backbone.Model.extend({
             return sum + orderLine.get_price_without_tax();
         }), 0), this.pos.currency.rounding);
     },
+    _reduce_total_discount_callback: function(sum, orderLine) {
+        sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
+        if (orderLine.display_discount_policy() === 'without_discount'){
+            sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+        }
+        return sum;
+    },
     get_total_discount: function() {
-        return round_pr(this.orderlines.reduce((function(sum, orderLine) {
-            sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-            if (orderLine.display_discount_policy() === 'without_discount'){
-                sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
-            }
-            return sum;
-        }), 0), this.pos.currency.rounding);
+        const reduce_callback = this._reduce_total_discount_callback.bind(this);
+        return round_pr(this.orderlines.reduce(reduce_callback, 0), this.pos.currency.rounding);
     },
     get_total_tax: function() {
         if (this.pos.company.tax_calculation_rounding_method === "round_globally") {

@@ -434,6 +434,13 @@ msgstr "訪問全部企業版應用"
 #. openerp-web
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
+msgid "Action"
+msgstr "動作"
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/legacy/xml/base.xml:0
+#, python-format
 msgid "Action ID:"
 msgstr "動作ID:"
 
@@ -577,6 +584,13 @@ msgstr "添加標籤"
 #, python-format
 msgid "Add to Favorites"
 msgstr "添加到收藏"
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/legacy/xml/base.xml:0
+#, python-format
+msgid "Additional actions"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -3399,6 +3413,13 @@ msgstr "列印"
 
 #. module: web
 #. openerp-web
+#: code:addons/web/static/src/legacy/xml/report.xml:0
+#, python-format
+msgid "Printing options"
+msgstr ""
+
+#. module: web
+#. openerp-web
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "Priority"
@@ -4850,6 +4871,12 @@ msgstr "是"
 #, python-format
 msgid "Yesterday"
 msgstr "昨天"
+
+#. module: web
+#: code:addons/web/controllers/main.py:0
+#, python-format
+msgid "You are not allowed to upload an attachment here."
+msgstr "您無權限進行附件的更新"
 
 #. module: web
 #. openerp-web
