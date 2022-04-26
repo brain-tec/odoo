@@ -533,15 +533,18 @@ function makeActionManager(env) {
             reject = _rej;
         });
         const action = controller.action;
-
-        // Compute breadcrumbs
         const index = _computeStackIndex(options);
         const controllerArray = [controller];
         if (options.lazyController) {
             controllerArray.unshift(options.lazyController);
         }
         const nextStack = controllerStack.slice(0, index).concat(controllerArray);
-        controller.config.breadcrumbs = _getBreadcrumbs(nextStack);
+        // Compute breadcrumbs
+        if (action.target === "new") {
+            controller.config.breadcrumbs = _getBreadcrumbs([nextStack[nextStack.length - 1]]);
+        } else {
+            controller.config.breadcrumbs = _getBreadcrumbs(nextStack);
+        }
         controller.config.getDisplayName = () => controller.displayName;
         controller.config.setDisplayName = (displayName) => {
             controller.displayName = displayName;
@@ -1239,6 +1242,11 @@ function makeActionManager(env) {
      */
     async function switchView(viewType, props = {}) {
         await keepLast.add(Promise.resolve());
+        if (dialog) {
+            // we don't want to switch view when there's a dialog open, as we would
+            // not switch in the correct action (action in background != dialog action)
+            return;
+        }
         const controller = controllerStack[controllerStack.length - 1];
         const view = _getView(viewType);
         if (!view) {
