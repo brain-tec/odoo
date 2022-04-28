@@ -43,7 +43,7 @@ class MailPluginController(http.Controller):
 
         normalized_email = partner.email_normalized
         if not normalized_email:
-            return {'error': _('Contact has no valid email')}
+            return {'error': _('The email of this contact is not valid and we can not enrich it')}
 
         company, enrichment_info = self._create_company_from_iap(normalized_email)
 
@@ -70,7 +70,7 @@ class MailPluginController(http.Controller):
 
         normalized_email = partner.email_normalized
         if not normalized_email:
-            return {'error': 'Contact has no valid email'}
+            return {'error': 'The email of this contact is not valid and we can not enrich it'}
 
         domain = tools.email_domain_extract(normalized_email)
         iap_data = self._iap_enrich(domain)
@@ -144,7 +144,7 @@ class MailPluginController(http.Controller):
             return {'error': _('You need to specify at least the partner_id or the name and the email')}
 
         if partner_id:
-            partner = request.env['res.partner'].browse(partner_id)
+            partner = request.env['res.partner'].browse(partner_id).exists()
             return self._get_contact_data(partner)
 
         normalized_email = tools.email_normalize(email)
@@ -184,11 +184,10 @@ class MailPluginController(http.Controller):
         search on.
         The method returns an array containing the dicts of the matched contacts.
         """
-
         normalized_email = tools.email_normalize(search_term)
 
         if normalized_email:
-            filter_domain = [('email_normalized', '=', search_term)]
+            filter_domain = [('email_normalized', 'ilike', search_term)]
         else:
             filter_domain = ['|', '|', ('display_name', 'ilike', search_term), ('ref', '=', search_term),
                              ('email', 'ilike', search_term)]

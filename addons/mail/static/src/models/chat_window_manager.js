@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
+import { clear, insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
 
 const BASE_VISUAL = {
     /**
@@ -113,7 +113,7 @@ registerModel({
             replaceNewMessage = false
         } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isSmall;
             }
             let chatWindow = this.chatWindows.find(chatWindow =>
                 chatWindow.thread === thread
@@ -247,6 +247,16 @@ registerModel({
         },
         /**
          * @private
+         * @returns {FieldCommand}
+         */
+        _computeHiddenChatWindowHeaderViews() {
+            if (this.allOrderedHidden.length > 0) {
+                return insertAndReplace(this.allOrderedHidden.map(chatWindow => ({ chatWindowOwner: replace(chatWindow) })));
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @returns {ChatWindow|undefined}
          */
         _computeLastVisible() {
@@ -281,16 +291,15 @@ registerModel({
             if (!this.messaging || !this.messaging.device) {
                 return visual;
             }
-            const device = this.messaging.device;
             const discuss = this.messaging.discuss;
             const BETWEEN_GAP_WIDTH = 5;
             const CHAT_WINDOW_WIDTH = 325;
-            const END_GAP_WIDTH = device.isMobile ? 0 : 10;
-            const GLOBAL_WINDOW_WIDTH = device.globalWindowInnerWidth;
+            const END_GAP_WIDTH = this.messaging.device.isSmall ? 0 : 10;
+            const GLOBAL_WINDOW_WIDTH = this.messaging.device.globalWindowInnerWidth;
             const HIDDEN_MENU_WIDTH = 200; // max width, including width of dropup list items
-            const START_GAP_WIDTH = device.isMobile ? 0 : 10;
+            const START_GAP_WIDTH = this.messaging.device.isSmall ? 0 : 10;
             const chatWindows = this.allOrdered;
-            if (!device.isMobile && discuss.discussView) {
+            if (!this.messaging.device.isSmall && discuss.discussView) {
                 return visual;
             }
             if (!chatWindows.length) {
@@ -302,7 +311,7 @@ registerModel({
             let maxAmountWithHidden = Math.floor(
                 (relativeGlobalWindowWidth - HIDDEN_MENU_WIDTH - BETWEEN_GAP_WIDTH) /
                 (CHAT_WINDOW_WIDTH + BETWEEN_GAP_WIDTH));
-            if (device.isMobile) {
+            if (this.messaging.device.isSmall) {
                 maxAmountWithoutHidden = 1;
                 maxAmountWithHidden = 1;
             }
@@ -322,7 +331,7 @@ registerModel({
                     visual.visible.push({ chatWindowLocalId, offset });
                 }
                 if (chatWindows.length > maxAmountWithHidden) {
-                    visual.hidden.isVisible = !device.isMobile;
+                    visual.hidden.isVisible = !this.messaging.device.isSmall;
                     visual.hidden.offset = visual.visible[maxAmountWithHidden - 1].offset
                         + CHAT_WINDOW_WIDTH + BETWEEN_GAP_WIDTH;
                 }
@@ -332,7 +341,7 @@ registerModel({
                 visual.availableVisibleSlots = maxAmountWithHidden;
             } else {
                 // all hidden
-                visual.hidden.isVisible = !device.isMobile;
+                visual.hidden.isVisible = !this.messaging.device.isSmall;
                 visual.hidden.offset = START_GAP_WIDTH;
                 visual.hidden.chatWindowLocalIds.concat(chatWindows.map(chatWindow => chatWindow.localId));
                 console.warn('cannot display any visible chat windows (screen is too small)');
@@ -360,6 +369,9 @@ registerModel({
         }),
         hasVisibleChatWindows: attr({
             compute: '_computeHasVisibleChatWindows',
+        }),
+        hiddenChatWindowHeaderViews: many('ChatWindowHeaderView', {
+            compute: '_computeHiddenChatWindowHeaderViews',
         }),
         isHiddenMenuOpen: attr({
             default: false,

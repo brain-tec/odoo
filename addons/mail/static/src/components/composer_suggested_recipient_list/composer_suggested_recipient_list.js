@@ -2,53 +2,25 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component, useState } = owl;
+const { Component } = owl;
 
 export class ComposerSuggestedRecipientList extends Component {
-
-    /**
-     * @override
-     */
-    setup() {
-        super.setup();
-        this.state = useState({
-            hasShowMoreButton: false,
-        });
-    }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {Thread}
+     * @returns {ComposerSuggestedRecipientListView}
      */
-    get thread() {
-        return this.messaging && this.messaging.models['Thread'].get(this.props.threadLocalId);
-    }
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClickShowLess(ev) {
-        this.state.hasShowMoreButton = false;
-    }
-
-    /**
-     * @private
-     */
-    _onClickShowMore(ev) {
-        this.state.hasShowMoreButton = true;
+    get composerSuggestedRecipientListView() {
+        return this.messaging && this.messaging.models['ComposerSuggestedRecipientListView'].get(this.props.localId);
     }
 
 }
 
 Object.assign(ComposerSuggestedRecipientList, {
-    props: { threadLocalId: String },
+    props: { localId: String },
     template: 'mail.ComposerSuggestedRecipientList',
 });
 

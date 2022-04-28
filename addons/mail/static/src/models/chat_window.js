@@ -17,9 +17,9 @@ registerModel({
          */
         close({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isSmall;
             }
-            if (this.messaging.device.isMobile && !this.messaging.discuss.discussView) {
+            if (this.messaging.device.isSmall && !this.messaging.discuss.discussView) {
                 // If we are in mobile and discuss is not open, it means the
                 // chat window was opened from the messaging menu. In that
                 // case it should be re-opened to simulate it was always
@@ -71,7 +71,7 @@ registerModel({
          */
         fold({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isSmall;
             }
             this.update({ isFolded: true });
             // Flux specific: manually folding the chat window should save the
@@ -140,7 +140,7 @@ registerModel({
          * window.
          */
         onClickHeader(ev) {
-            if (!this.exists() || this.messaging.device.isMobile) {
+            if (!this.exists() || this.messaging.device.isSmall) {
                 return;
             }
             if (this.isFolded) {
@@ -316,7 +316,7 @@ registerModel({
          */
         unfold({ notifyServer } = {}) {
             if (notifyServer === undefined) {
-                notifyServer = !this.messaging.device.isMobile;
+                notifyServer = !this.messaging.device.isSmall;
             }
             this.update({ isFolded: false });
             // Flux specific: manually opening the chat window should save the
@@ -324,6 +324,16 @@ registerModel({
             if (this.thread && notifyServer && !this.messaging.currentGuest) {
                 this.thread.notifyFoldStateToServer('open');
             }
+        },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeChannelMemberListView() {
+            if (this.thread && this.thread.hasMemberListFeature && this.isMemberListOpened) {
+                return insertAndReplace();
+            }
+            return clear();
         },
         /**
           * @private
@@ -347,7 +357,7 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeHasCloseAsBackButton() {
-            if (this.isVisible && this.messaging.device.isMobile) {
+            if (this.isVisible && this.messaging.device.isSmall) {
                 return true;
             }
             return clear();
@@ -359,7 +369,7 @@ registerModel({
         _computeHasInviteFeature() {
             return Boolean(
                 this.thread && this.thread.hasInviteFeature &&
-                this.messaging && this.messaging.device && this.messaging.device.isMobile
+                this.messaging && this.messaging.device && this.messaging.device.isSmall
             );
         },
         /**
@@ -410,7 +420,7 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeIsExpandable() {
-            if (this.isVisible && !this.messaging.device.isMobile && this.thread) {
+            if (this.isVisible && !this.messaging.device.isSmall && this.thread) {
                 return true;
             }
             return clear();
@@ -431,7 +441,7 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeIsFullscreen() {
-            if (this.isVisible && this.messaging.device.isMobile) {
+            if (this.isVisible && this.messaging.device.isSmall) {
                 return true;
             }
             return clear();
@@ -584,6 +594,16 @@ registerModel({
          */
         channelInvitationForm: one('ChannelInvitationForm', {
             inverse: 'chatWindow',
+            isCausal: true,
+        }),
+        channelMemberListView: one('ChannelMemberListView', {
+            compute: '_computeChannelMemberListView',
+            inverse: 'chatWindowOwner',
+            isCausal: true,
+        }),
+        chatWindowHeaderView: one('ChatWindowHeaderView', {
+            default: insertAndReplace(),
+            inverse: 'chatWindowOwner',
             isCausal: true,
         }),
         componentStyle: attr({

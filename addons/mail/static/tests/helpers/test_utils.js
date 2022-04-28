@@ -3,10 +3,7 @@
 import BusService from 'bus.BusService';
 
 import { MessagingMenuContainer } from '@mail/components/messaging_menu_container/messaging_menu_container';
-import {
-    addMessagingToEnv,
-    addTimeControlToEnv,
-} from '@mail/env/test_env';
+import { addMessagingToEnv } from '@mail/env/test_env';
 import { insertAndReplace, replace } from '@mail/model/model_field_command';
 import { ChatWindowService } from '@mail/services/chat_window_service/chat_window_service';
 import { MessagingService } from '@mail/services/messaging/messaging';
@@ -15,6 +12,7 @@ import { DialogService } from '@mail/services/dialog_service/dialog_service';
 import { getMessagingComponent } from '@mail/utils/messaging_component';
 import { nextTick } from '@mail/utils/utils';
 import { DiscussWidget } from '@mail/widgets/discuss/discuss';
+import { addTimeControlToEnv } from '@mail/../tests/helpers/time_control';
 
 import core from 'web.core';
 import AbstractStorageService from 'web.AbstractStorageService';
@@ -287,7 +285,7 @@ let pyEnv;
                         if (!Array.isArray(values)) {
                             values = [values];
                         }
-                        const recordIds = values.map(value => target.mockServer._mockCreate(name, value))
+                        const recordIds = values.map(value => target.mockServer.mockCreate(name, value));
                         return recordIds.length === 1 ? recordIds[0] : recordIds;
                     },
                     /**
@@ -298,7 +296,7 @@ let pyEnv;
                      * @returns {integer[]} array of ids corresponding to the given domain.
                      */
                     search(domain, context = {}) {
-                        return target.mockServer._mockSearch(name, [domain], context);
+                        return target.mockServer.mockSearch(name, [domain], context);
                     },
                     /**
                      * Simulate a 'search_read' operation on a model.
@@ -308,7 +306,7 @@ let pyEnv;
                      * @returns {Object[]} array of records corresponding to the given domain.
                      */
                     searchRead(domain, context = {}) {
-                        return target.mockServer._mockSearchRead(name, [], { domain, context });
+                        return target.mockServer.mockSearchRead(name, [], { domain, context });
                     },
                     /**
                      * Simulate an 'unlink' operation on a model.
@@ -317,7 +315,7 @@ let pyEnv;
                      * @returns {boolean} mockServer 'unlink' method always returns true.
                      */
                     unlink(ids) {
-                        return target.mockServer._mockUnlink(name, [ids]);
+                        return target.mockServer.mockUnlink(name, [ids]);
                     },
                     /**
                      * Simulate a 'write' operation on a model.
@@ -327,7 +325,7 @@ let pyEnv;
                      * @returns {boolean} mockServer 'write' method always returns true.
                      */
                     write(ids, values) {
-                        return target.mockServer._mockWrite(name, [ids, values]);
+                        return target.mockServer.mockWrite(name, [ids, values]);
                     },
                 };
             },
@@ -913,6 +911,9 @@ async function start(param0 = {}) {
         pyEnv,
         widget,
     };
+    if (hasTimeControl) {
+        result['advanceTime'] = env.testUtils.advanceTime;
+    }
     const { modelManager } = testEnv.services.messaging;
     registerCleanup(async() => {
         widget.destroy();

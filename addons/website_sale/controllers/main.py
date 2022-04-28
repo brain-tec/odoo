@@ -842,6 +842,10 @@ class WebsiteSale(http.Controller):
                 values = kw
             else:
                 partner_id = self._checkout_form_save(mode, post, kw)
+                # We need to validate _checkout_form_save return, because when partner_id not in shippings
+                # it returns Forbidden() instead the partner_id
+                if isinstance(partner_id, Forbidden):
+                    return partner_id
                 if mode[1] == 'billing':
                     order.partner_id = partner_id
                     # This is the *only* thing that the front end user will see/edit anyway when choosing billing address
@@ -872,6 +876,7 @@ class WebsiteSale(http.Controller):
             'callback': kw.get('callback'),
             'only_services': order and order.only_services,
             'account_on_checkout': request.website.account_on_checkout,
+            'is_public_user': request.website.is_public_user()
         }
         render_values.update(self._get_country_related_render_values(kw, render_values))
         return request.render("website_sale.address", render_values)

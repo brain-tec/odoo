@@ -8,17 +8,18 @@
                     'o-focused': chatWindow.isFocused,
                     'o-folded': chatWindow.isFolded,
                     'o-fullscreen': chatWindow.isFullscreen,
-                    'o-mobile': messaging.device.isMobile,
+                    'o-mobile': messaging.device.isSmall,
                     'o-new-message': !chatWindow.thread,
                 }" t-att-style="chatWindow.componentStyle" t-on-keydown="chatWindow.onKeydown" t-on-focusout="chatWindow.onFocusout" t-att-data-chat-window-local-id="chatWindow.localId" t-att-data-thread-local-id="chatWindow.thread ? chatWindow.thread.localId : ''" t-ref="root"
             >
                 <ChatWindowHeader
                     className="'o_ChatWindow_header'"
                     chatWindowLocalId="chatWindow.localId"
+                    localId="chatWindow.chatWindowHeaderView.localId"
                     onClicked="chatWindow.onClickHeader"
                 />
-                <t t-if="chatWindow.thread and chatWindow.thread.hasMemberListFeature and chatWindow.isMemberListOpened">
-                    <ChannelMemberList channelLocalId="chatWindow.thread.localId" className="'bg-white'"/>
+                <t t-if="chatWindow.channelMemberListView">
+                    <ChannelMemberList localId="chatWindow.channelMemberListView.localId" className="'bg-white'"/>
                 </t>
                 <t t-if="chatWindow.channelInvitationForm">
                     <ChannelInvitationForm className="'o_ChatWindow_channelInvitationForm'" localId="chatWindow.channelInvitationForm.localId"/>

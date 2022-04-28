@@ -280,7 +280,7 @@ registerModel({
             });
         },
         /**
-         * @param {ComposerSuggestion} suggestion 
+         * @param {ComposerSuggestion} suggestion
          */
         onClickSuggestion(suggestion) {
             this.update({ activeSuggestion: replace(suggestion) });
@@ -805,6 +805,16 @@ registerModel({
          * @private
          * @returns {FieldCommand}
          */
+        _computeComposerSuggestedRecipientListView() {
+            if (this.hasHeader && this.hasFollowers && !this.composer.isLog) {
+                return insertAndReplace();
+            }
+            return clear();
+        },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
         _computeComposer() {
             if (this.threadView) {
                 // When replying to a message, always use the composer from that message's thread
@@ -839,13 +849,23 @@ registerModel({
         },
         /**
          * @private
+         * @returns {FieldCommand}
+         */
+        _computeDropZoneView() {
+            if (this.useDragVisibleDropZone.isVisible) {
+                return insertAndReplace();
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @returns {boolean|FieldCommand}
          */
         _computeHasDiscardButton() {
             if (this.messageViewInEditing) {
                 return false;
             }
-            if (this.messaging.device.isMobile) {
+            if (this.messaging.device.isSmall) {
                 return false;
             }
             if (!this.threadView) {
@@ -885,7 +905,7 @@ registerModel({
                 return false;
             }
             if (this.threadView.threadViewer.discuss) {
-                return !this.messaging.device.isMobile;
+                return !this.messaging.device.isSmall;
             }
             return clear();
         },
@@ -927,7 +947,7 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeHasMentionSuggestionsBelowPosition() {
-            if (this.threadView && this.threadView.threadViewer.chatter) {
+            if (this.chatter) {
                 return true;
             }
             if (this.messageViewInEditing) {
@@ -974,7 +994,7 @@ registerModel({
                 return false;
             }
             if (this.threadView && this.threadView.threadViewer.chatWindow) {
-                return this.messaging.device.isMobile;
+                return this.messaging.device.isSmall;
             }
             return clear();
         },
@@ -1044,7 +1064,7 @@ registerModel({
                 // small screen size with a non-mailing channel. Here send will be done on clicking
                 // the button or using the 'ctrl/meta enter' shortcut.
                 if (
-                    this.messaging.device.isMobile ||
+                    this.messaging.device.isSmall ||
                     (
                         this.messaging.discuss.threadView === this.threadView &&
                         this.messaging.discuss.thread === this.messaging.inbox
@@ -1415,6 +1435,11 @@ registerModel({
             inverse: 'composerViews',
             required: true,
         }),
+        composerSuggestedRecipientListView: one('ComposerSuggestedRecipientListView', {
+            compute: '_computeComposerSuggestedRecipientListView',
+            inverse: 'composerViewOwner',
+            isCausal: true,
+        }),
         /**
          * Current partner image URL.
          */
@@ -1425,6 +1450,11 @@ registerModel({
          * Determines whether this composer should be focused at next render.
          */
         doFocus: attr(),
+        dropZoneView: one('DropZoneView', {
+            compute: '_computeDropZoneView',
+            inverse: 'composerViewOwner',
+            isCausal: true,
+        }),
         /**
          * Determines the emojis popover that is active on this composer view.
          */
@@ -1599,6 +1629,13 @@ registerModel({
         threadView: one('ThreadView', {
             inverse: 'composerView',
             readonly: true,
+        }),
+        useDragVisibleDropZone: one('UseDragVisibleDropZone', {
+            default: insertAndReplace(),
+            inverse: 'composerViewOwner',
+            isCausal: true,
+            readonly: true,
+            required: true,
         }),
     },
     onChanges: [
