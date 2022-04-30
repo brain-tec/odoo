@@ -489,6 +489,7 @@ export class OdooEditor extends EventTarget {
             this.observer = new MutationObserver(records => {
                 records = this.filterMutationRecords(records);
                 if (!records.length) return;
+                this.dispatchEvent(new Event('contentChanged'));
                 clearTimeout(this.observerTimeout);
                 if (this._observerTimeoutUnactive.size === 0) {
                     this.observerTimeout = setTimeout(() => {
@@ -721,7 +722,6 @@ export class OdooEditor extends EventTarget {
         this._checkStepUnbreakable = true;
         this._recordHistorySelection();
         this.dispatchEvent(new Event('historyStep'));
-        this.dispatchEvent(new Event('contentChanged'));
         this.multiselectionRefresh();
     }
     // apply changes according to some records
@@ -2817,7 +2817,7 @@ export class OdooEditor extends EventTarget {
         const node = ev.target;
         // handle checkbox lists
         if (node.tagName == 'LI' && getListMode(node.parentElement) == 'CL') {
-            const beforStyle = window.getComputedStyle(node, 'before');
+            const beforStyle = window.getComputedStyle(node, ':before');
             const style1 = {
                 left: parseInt(beforStyle.getPropertyValue('left'), 10),
                 top: parseInt(beforStyle.getPropertyValue('top'), 10),
@@ -2997,6 +2997,7 @@ export class OdooEditor extends EventTarget {
             const linkAttributes = this.options.defaultLinkAttributes || {};
             const selectionIsInsideALink = !!closestElement(sel.anchorNode, 'a');
 
+            this.historyPauseSteps("_onPaste");
             for (let i = 0; i < splitAroundUrl.length; i++) {
                 const url = /^https?:\/\//gi.test(splitAroundUrl[i])
                     ? splitAroundUrl[i]
@@ -3153,6 +3154,7 @@ export class OdooEditor extends EventTarget {
                     }
                 }
             }
+            this.historyUnpauseSteps("_onPaste");
             this.historyStep();
         }
     }
