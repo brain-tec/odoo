@@ -16,7 +16,7 @@ registerModel({
          */
         async onClickCopy(ev) {
             await navigator.clipboard.writeText(this.thread.invitationLink);
-            this.env.services.notification.notify({
+            this.messaging.notify({
                 message: this.env._t('Link copied!'),
                 type: 'success',
             });
@@ -47,7 +47,7 @@ registerModel({
                 }
                 channel.open();
             } else {
-                await this.env.services.rpc(({
+                await this.messaging.rpc(({
                     model: 'mail.channel',
                     method: 'add_members',
                     args: [[this.thread.id]],
@@ -127,7 +127,7 @@ registerModel({
             });
             try {
                 const channelId = (this.thread && this.thread.model === 'mail.channel') ? this.thread.id : undefined;
-                const { count, partners: partnersData } = await this.env.services.rpc(
+                const { count, partners: partnersData } = await this.messaging.rpc(
                     {
                         model: 'res.partner',
                         method: 'search_for_channel_invite',

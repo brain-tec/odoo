@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { executeGracefully } from '@mail/utils/utils';
-import { link, insert, insertAndReplace } from '@mail/model/model_field_command';
+import { link, insert, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'MessagingInitializer',
@@ -35,7 +35,7 @@ registerModel({
             });
             this.messaging.device.start();
             const discuss = this.messaging.discuss;
-            const data = await this.async(() => this.env.services.rpc({
+            const data = await this.async(() => this.messaging.rpc({
                 route: '/mail/init_messaging',
             }, { shadow: true }));
             await this.async(() => this._init(data));
@@ -205,7 +205,7 @@ registerModel({
                 // implicit: failures are sent by the server at initialization
                 // only if the current partner is author of the message
                 if (!message.author && this.messaging.currentPartner) {
-                    message.update({ author: link(this.messaging.currentPartner) });
+                    message.update({ author: replace(this.messaging.currentPartner) });
                 }
             }));
         },
@@ -300,7 +300,7 @@ registerModel({
          * @private
          */
         async _loadMessageFailures() {
-            const data = await this.env.services.rpc({
+            const data = await this.messaging.rpc({
                 route: '/mail/load_message_failures',
             }, { shadow: true });
             this._initMailFailures(data);

@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, insert, unlink, unlinkAll } from '@mail/model/model_field_command';
+import { clear, insert } from '@mail/model/model_field_command';
 
 const { markup } = owl;
 
@@ -50,7 +50,7 @@ registerModel({
             // relation
             if ('activity_type_id' in data) {
                 if (!data.activity_type_id) {
-                    data2.type = unlinkAll();
+                    data2.type = clear();
                 } else {
                     data2.type = insert({
                         displayName: data.activity_type_id[1],
@@ -60,7 +60,7 @@ registerModel({
             }
             if ('create_uid' in data) {
                 if (!data.create_uid) {
-                    data2.creator = unlinkAll();
+                    data2.creator = clear();
                 } else {
                     data2.creator = insert({
                         id: data.create_uid[0],
@@ -79,7 +79,7 @@ registerModel({
             }
             if ('user_id' in data) {
                 if (!data.user_id) {
-                    data2.assignee = unlinkAll();
+                    data2.assignee = clear();
                 } else {
                     data2.assignee = insert({
                         id: data.user_id[0],
@@ -89,7 +89,7 @@ registerModel({
             }
             if ('request_partner_id' in data) {
                 if (!data.request_partner_id) {
-                    data2.requestingPartner = unlink();
+                    data2.requestingPartner = clear();
                 } else {
                     data2.requestingPartner = insert({
                         id: data.request_partner_id[0],
@@ -106,7 +106,7 @@ registerModel({
          * Delete the record from database and locally.
          */
         async deleteServerRecord() {
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 model: 'mail.activity',
                 method: 'unlink',
                 args: [[this.id]],
@@ -137,7 +137,7 @@ registerModel({
             });
         },
         async fetchAndUpdate() {
-            const [data] = await this.env.services.rpc({
+            const [data] = await this.messaging.rpc({
                 model: 'mail.activity',
                 method: 'activity_format',
                 args: [this.id],
@@ -167,7 +167,7 @@ registerModel({
          */
         async markAsDone({ attachments = [], feedback = false }) {
             const attachmentIds = attachments.map(attachment => attachment.id);
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback',
                 args: [[this.id]],
@@ -185,7 +185,7 @@ registerModel({
          * @returns {Object}
          */
         async markAsDoneAndScheduleNext({ feedback }) {
-            const action = await this.async(() => this.env.services.rpc({
+            const action = await this.async(() => this.messaging.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback_schedule_next',
                 args: [[this.id]],
@@ -232,7 +232,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Markup} 
+         * @returns {Markup}
          */
         _computeNoteAsMarkup() {
             return markup(this.note);

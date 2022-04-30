@@ -621,6 +621,41 @@ class TestTranslationWrite(TransactionCase):
                 'state': 'translated',
             })
 
+    def test_write(self):
+        """ What happens with orphan translations. """
+        self.env['res.lang']._activate_lang('fr_FR')
+
+        # create a user with access rights on partner categories
+        user = new_test_user(self.env, 'updater')
+        group = self.env.ref('base.group_system')
+        user.groups_id = [(4, group.id)]
+        action = user.env["ir.actions.act_window"].create({
+            "name": "Dummy Action",
+            "res_model": "res.users",
+            "help": "<p>Cheese</p>",
+        })
+
+        # create a translation, and delete the record from the database
+        translation = user.env['ir.translation'].create({
+            'type': 'model_terms',
+            'name': 'ir.actions.act_window,help',
+            'lang': 'fr_FR',
+            'res_id': action.id,
+            'src': 'Cheese',
+            'value': 'Fromage',
+            'state': 'translated',
+        })
+        translation.flush()
+        translation.invalidate_cache()
+
+        # deleting the translation should be possible, provided the user has
+        # access rights on the translation's model
+        user0 = new_test_user(self.env, 'cannot modify an action')
+        with self.assertRaises(AccessError):
+            translation.with_user(user0).unlink()
+
+        translation.with_user(user).unlink()
+
     def test_field_selection(self):
         """ Test translations of field selections. """
         field = self.env['ir.model']._fields['state']
@@ -638,8 +673,8 @@ class TestTranslationWrite(TransactionCase):
         self.assertEqual(fg['state']['selection'],
                          [('manual', 'Custo'), ('base', 'Pas touche!')])
 
-    def test_fields_view_get(self):
-        """ Test translations of field descriptions in fields_view_get(). """
+    def test_load_views(self):
+        """ Test translations of field descriptions in get_view(). """
         self.env['res.lang']._activate_lang('fr_FR')
 
         # add translation for the string of field ir.model.name
@@ -659,9 +694,9 @@ class TestTranslationWrite(TransactionCase):
         info = model.fields_get(['name'])
         self.assertEqual(info['name']['string'], LABEL)
 
-        # check that fields_view_get() also returns the expected label
-        info = model.fields_view_get()['fields']
-        self.assertEqual(info['name']['string'], LABEL)
+        # check that get_views() also returns the expected label
+        info = model.get_views([(False, 'form')])
+        self.assertEqual(info['models'][model._name]['name']['string'], LABEL)
 
 
 class TestXMLTranslation(TransactionCase):

@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { insert, unlink } from '@mail/model/model_field_command';
+import { clear, insert } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'User',
@@ -19,7 +19,7 @@ registerModel({
             }
             if ('partner_id' in data) {
                 if (!data.partner_id) {
-                    data2.partner = unlink();
+                    data2.partner = clear();
                 } else {
                     const partnerNameGet = data['partner_id'];
                     const partnerData = {
@@ -40,7 +40,7 @@ registerModel({
          * @param {integer[]} param0.ids
          */
         async performRpcRead({ context, fields, ids }) {
-            const usersData = await this.env.services.rpc({
+            const usersData = await this.messaging.rpc({
                 model: 'res.users',
                 method: 'read',
                 args: [ids],
@@ -81,7 +81,7 @@ registerModel({
                 // - Validity of id is not verified at insert.
                 // - There is no bus notification in case of user delete from
                 //   another tab or by another user.
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("You can only chat with existing users."),
                     type: 'warning',
                 });
@@ -104,7 +104,7 @@ registerModel({
                 );
             }
             if (!chat) {
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("An unexpected error occurred during the creation of the chat."),
                     type: 'warning',
                 });
@@ -144,7 +144,7 @@ registerModel({
                 // - Validity of id is not verified at insert.
                 // - There is no bus notification in case of user delete from
                 //   another tab or by another user.
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("You can only open the profile of existing users."),
                     type: 'warning',
                 });

@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, insert, insertAndReplace, link, replace, unlink, unlinkAll } from '@mail/model/model_field_command';
+import { clear, insert, insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 import throttle from '@mail/utils/throttle';
 import Timer from '@mail/utils/timer';
@@ -217,7 +217,7 @@ registerModel({
             if ('members' in data) {
                 // The list syntax is kept here because it is used in livechat override
                 if (!data.members) {
-                    data2.members = [unlinkAll()];
+                    data2.members = [clear()];
                 } else {
                     data2.members = [insertAndReplace(data.members.map(memberData =>
                         this.messaging.models['Partner'].convertData(memberData)
@@ -232,14 +232,14 @@ registerModel({
             }
             if ('seen_partners_info' in data) {
                 if (!data.seen_partners_info) {
-                    data2.partnerSeenInfos = unlinkAll();
+                    data2.partnerSeenInfos = clear();
                 } else {
                     data2.partnerSeenInfos = insertAndReplace(
                         data.seen_partners_info.map(
                             ({ fetched_message_id, partner_id, seen_message_id }) => {
                                 return {
-                                    lastFetchedMessage: fetched_message_id ? insert({ id: fetched_message_id }) : unlinkAll(),
-                                    lastSeenMessage: seen_message_id ? insert({ id: seen_message_id }) : unlinkAll(),
+                                    lastFetchedMessage: fetched_message_id ? insert({ id: fetched_message_id }) : clear(),
+                                    lastSeenMessage: seen_message_id ? insert({ id: seen_message_id }) : clear(),
                                     partner: insertAndReplace({ id: partner_id }),
                             };
                         })
@@ -277,7 +277,7 @@ registerModel({
          * @returns {Thread} The newly created group chat.
          */
         async createGroupChat({ default_display_mode, partners_to }) {
-            const channelData = await this.env.services.rpc({
+            const channelData = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'create_group',
                 kwargs: {
@@ -300,7 +300,7 @@ registerModel({
          *  result in the context of given thread
          */
         async fetchSuggestions(searchTerm, { thread } = {}) {
-            const channelsData = await this.env.services.rpc(
+            const channelsData = await this.messaging.rpc(
                 {
                     model: 'mail.channel',
                     method: 'get_mention_suggestions',
@@ -377,7 +377,7 @@ registerModel({
             if (channelIds.length === 0) {
                 return;
             }
-            const channelPreviews = await this.env.services.rpc({
+            const channelPreviews = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_fetch_preview',
                 args: [channelIds],
@@ -393,7 +393,7 @@ registerModel({
          * @param {string} state
          */
         async performRpcChannelFold(channelId, state) {
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_fold',
                 args: [[channelId]],
@@ -410,7 +410,7 @@ registerModel({
          * @returns {Thread[]}
          */
         async performRpcChannelInfo({ ids }) {
-            const channelInfos = await this.env.services.rpc({
+            const channelInfos = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_info',
                 args: [ids],
@@ -428,7 +428,7 @@ registerModel({
          * @param {integer[]} param0.lastMessageId
          */
         async performRpcChannelSeen({ id, lastMessageId }) {
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 route: `/mail/channel/set_last_seen_message`,
                 params: {
                     channel_id: id,
@@ -444,7 +444,7 @@ registerModel({
          * @param {boolean} [param0.pinned=false]
          */
         async performRpcChannelPin({ channelId, pinned = false }) {
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_pin',
                 args: [[channelId]],
@@ -462,7 +462,7 @@ registerModel({
          * @returns {Thread} the created channel
          */
         async performRpcCreateChannel({ name, privacy }) {
-            const data = await this.env.services.rpc({
+            const data = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_create',
                 args: [name, privacy],
@@ -484,7 +484,7 @@ registerModel({
          */
         async performRpcCreateChat({ partnerIds, pinForCurrentPartner }) {
             // TODO FIX: potential duplicate chat task-2276490
-            const data = await this.env.services.rpc({
+            const data = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_get',
                 kwargs: {
@@ -512,7 +512,7 @@ registerModel({
                 ['name', 'ilike', searchTerm],
             ];
             const fields = ['channel_type', 'name'];
-            const channelsData = await this.env.services.rpc({
+            const channelsData = await this.messaging.rpc({
                 model: "mail.channel",
                 method: "search_read",
                 kwargs: {
@@ -568,7 +568,7 @@ registerModel({
          */
         async changeDescription(description) {
             this.update({ description });
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_change_description',
                 args: [[this.id]],
@@ -584,8 +584,8 @@ registerModel({
                 this.messaging.soundEffects.channelLeave.play();
             }
             this.update({
-                rtc: unlink(),
-                rtcInvitingSession: unlink(),
+                rtc: clear(),
+                rtcInvitingSession: clear(),
             });
         },
         /**
@@ -613,7 +613,7 @@ registerModel({
                 followers: followersData,
                 hasWriteAccess,
                 suggestedRecipients: suggestedRecipientsData,
-            } = await this.env.services.rpc({
+            } = await this.messaging.rpc({
                 route: '/mail/thread/data',
                 params: {
                     request_list: [...requestSet],
@@ -655,7 +655,7 @@ registerModel({
                         id: getSuggestedRecipientInfoNextTemporaryId(),
                         name,
                         lang,
-                        partner: partner_id ? insert({ id: partner_id }) : unlink(),
+                        partner: partner_id ? insert({ id: partner_id }) : clear(),
                         reason,
                     };
                 });
@@ -669,7 +669,7 @@ registerModel({
          * Add current user to provided thread's followers.
          */
         async follow() {
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 model: this.model,
                 method: 'message_subscribe',
                 args: [[this.id]],
@@ -683,7 +683,7 @@ registerModel({
          * Performs the rpc to leave the rtc call of the channel.
          */
         async performRpcLeaveCall() {
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 route: '/mail/rtc/channel/leave_call',
                 params: { channel_id: this.id },
             }, { shadow: true }));
@@ -717,13 +717,13 @@ registerModel({
                 return;
             }
             if (!this.messaging.rtc.isClientRtcCompatible) {
-                this.env.services.notification.notify({
+                this.messaging.notify({
                     message: this.env._t("Your browser does not support webRTC."),
                     type: 'warning',
                 });
                 return;
             }
-            const { rtcSessions, iceServers, sessionId, invitedPartners, invitedGuests } = await this.async(() => this.env.services.rpc({
+            const { rtcSessions, iceServers, sessionId, invitedPartners, invitedGuests } = await this.async(() => this.messaging.rpc({
                 route: '/mail/rtc/channel/join_call',
                 params: {
                     channel_id: this.id,
@@ -734,8 +734,8 @@ registerModel({
                 return;
             }
             this.update({
-                rtc: link(this.messaging.rtc),
-                rtcInvitingSession: unlink(),
+                rtc: replace(this.messaging.rtc),
+                rtcInvitingSession: clear(),
                 rtcSessions,
                 invitedGuests,
                 invitedPartners,
@@ -789,7 +789,7 @@ registerModel({
          * Joins this thread. Only makes sense on channels of type channel.
          */
         async join() {
-            await this.env.services.rpc({
+            await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'add_members',
                 args: [[this.id]],
@@ -800,7 +800,7 @@ registerModel({
          * Leaves this thread. Only makes sense on channels of type channel.
          */
         async leave() {
-            await this.env.services.rpc({
+            await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'action_unfollow',
                 args: [[this.id]],
@@ -810,7 +810,7 @@ registerModel({
          * Mark the specified conversation as fetched.
          */
         async markAsFetched() {
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_fetched',
                 args: [[this.id]],
@@ -1028,7 +1028,7 @@ registerModel({
          */
         async rename(name) {
             this.update({ name });
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_rename',
                 args: [[this.id]],
@@ -1043,7 +1043,7 @@ registerModel({
          * @param {string} newName
          */
         async setCustomName(newName) {
-            return this.env.services.rpc({
+            return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_set_custom_name',
                 args: [this.id],
@@ -1159,20 +1159,20 @@ registerModel({
          */
         _computeCorrespondent() {
             if (this.channel_type === 'channel') {
-                return unlink();
+                return clear();
             }
             const correspondents = this.members.filter(partner =>
                 partner !== this.messaging.currentPartner
             );
             if (correspondents.length === 1) {
                 // 2 members chat
-                return link(correspondents[0]);
+                return replace(correspondents[0]);
             }
             if (this.members.length === 1) {
                 // chat with oneself
-                return link(this.members[0]);
+                return replace(this.members[0]);
             }
-            return unlink();
+            return clear();
         },
         /**
          * @private
@@ -1347,7 +1347,7 @@ registerModel({
                 this.partnerSeenInfos.filter(partnerSeenInfo =>
                     partnerSeenInfo.partner !== this.messaging.currentPartner);
             if (otherPartnerSeenInfos.length === 0) {
-                return unlinkAll();
+                return clear();
             }
 
             const otherPartnersLastSeenMessageIds =
@@ -1355,7 +1355,7 @@ registerModel({
                     partnerSeenInfo.lastSeenMessage ? partnerSeenInfo.lastSeenMessage.id : 0
                 );
             if (otherPartnersLastSeenMessageIds.length === 0) {
-                return unlinkAll();
+                return clear();
             }
             const lastMessageSeenByAllId = Math.min(
                 ...otherPartnersLastSeenMessageIds
@@ -1369,9 +1369,9 @@ registerModel({
                 !currentPartnerOrderedSeenMessages ||
                 currentPartnerOrderedSeenMessages.length === 0
             ) {
-                return unlinkAll();
+                return clear();
             }
-            return link(currentPartnerOrderedSeenMessages.slice().pop());
+            return replace(currentPartnerOrderedSeenMessages.slice().pop());
         },
         /**
          * @private
@@ -1383,9 +1383,9 @@ registerModel({
                 [l - 1]: lastMessage,
             } = this.orderedMessages;
             if (lastMessage) {
-                return link(lastMessage);
+                return replace(lastMessage);
             }
-            return unlink();
+            return clear();
         },
         /**
          * @private
@@ -1397,9 +1397,9 @@ registerModel({
                 [l - 1]: lastMessage,
             } = this.orderedNonTransientMessages;
             if (lastMessage) {
-                return link(lastMessage);
+                return replace(lastMessage);
             }
-            return unlink();
+            return clear();
         },
         /**
          * Adjusts the last seen message received from the server to consider
@@ -1449,9 +1449,9 @@ registerModel({
                 [l - 1]: lastNeedactionMessageAsOriginThread,
             } = orderedNeedactionMessagesAsOriginThread;
             if (lastNeedactionMessageAsOriginThread) {
-                return link(lastNeedactionMessageAsOriginThread);
+                return replace(lastNeedactionMessageAsOriginThread);
             }
-            return unlink();
+            return clear();
         },
         /**
          * @private
@@ -1523,22 +1523,22 @@ registerModel({
          */
         _computeMessageAfterNewMessageSeparator() {
             if (this.model !== 'mail.channel') {
-                return unlink();
+                return clear();
             }
             if (this.localMessageUnreadCounter === 0) {
-                return unlink();
+                return clear();
             }
             const index = this.orderedMessages.findIndex(message =>
                 message.id === this.lastSeenByCurrentPartnerMessageId
             );
             if (index === -1) {
-                return unlink();
+                return clear();
             }
             const message = this.orderedMessages[index + 1];
             if (!message) {
-                return unlink();
+                return clear();
             }
-            return link(message);
+            return replace(message);
         },
         /**
          * @private
@@ -1694,7 +1694,7 @@ registerModel({
                 isTyping !== this._currentPartnerLastNotifiedIsTyping
             ) {
                 if (this.model === 'mail.channel') {
-                    await this.async(() => this.env.services.rpc({
+                    await this.async(() => this.messaging.rpc({
                         model: 'mail.channel',
                         method: 'notify_typing',
                         args: [this.id],
@@ -1827,7 +1827,7 @@ registerModel({
          * Handles click on the "load more members" button.
          */
         async onClickLoadMoreMembers() {
-            const members = await this.env.services.rpc({
+            const members = await this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'load_more_members',
                 args: [[this.id]],

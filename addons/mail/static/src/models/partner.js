@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { insert, link, unlinkAll } from '@mail/model/model_field_command';
+import { clear, insert, link } from '@mail/model/model_field_command';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
 registerModel({
@@ -20,7 +20,7 @@ registerModel({
             }
             if ('country' in data) {
                 if (!data.country) {
-                    data2.country = unlinkAll();
+                    data2.country = clear();
                 } else {
                     data2.country = insert({
                         id: data.country[0],
@@ -47,7 +47,7 @@ registerModel({
             // relation
             if ('user_id' in data) {
                 if (!data.user_id) {
-                    data2.user = unlinkAll();
+                    data2.user = clear();
                 } else {
                     let user = {};
                     if (Array.isArray(data.user_id)) {
@@ -82,7 +82,7 @@ registerModel({
             if (isNonPublicChannel) {
                 kwargs.channel_id = thread.id;
             }
-            const suggestedPartners = await this.env.services.rpc(
+            const suggestedPartners = await this.messaging.rpc(
                 {
                     model: 'res.partner',
                     method: 'get_mention_suggestions',
@@ -195,7 +195,7 @@ registerModel({
                 }
             }
             if (!partners.length) {
-                const partnersData = await this.env.services.rpc(
+                const partnersData = await this.messaging.rpc(
                     {
                         model: 'res.partner',
                         method: 'im_search',
@@ -275,7 +275,7 @@ registerModel({
             if (partnerIds.length === 0) {
                 return;
             }
-            const dataList = await this.env.services.rpc({
+            const dataList = await this.messaging.rpc({
                 route: '/longpolling/im_status',
                 params: {
                     partner_ids: partnerIds,
@@ -299,7 +299,7 @@ registerModel({
          * applicable.
          */
         async checkIsUser() {
-            const userIds = await this.async(() => this.env.services.rpc({
+            const userIds = await this.async(() => this.messaging.rpc({
                 model: 'res.users',
                 method: 'search',
                 args: [[['partner_id', '=', this.id]]],
@@ -325,7 +325,7 @@ registerModel({
             }
             // prevent chatting with non-users
             if (!this.user) {
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("You can only chat with partners that have a dedicated user."),
                     type: 'info',
                 });
@@ -364,9 +364,6 @@ registerModel({
          * @returns {string}
          */
         _computeAvatarUrl() {
-            if (this === this.messaging.partnerRoot) {
-                return '/mail/static/src/img/odoobot.png';
-            }
             return `/web/image/res.partner/${this.id}/avatar_128`;
         },
         /**

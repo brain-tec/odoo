@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, insert, insertAndReplace, link, unlink, unlinkAll } from '@mail/model/model_field_command';
+import { clear, insert, insertAndReplace, link, unlink } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'Follower',
@@ -22,7 +22,7 @@ registerModel({
             }
             if ('partner_id' in data) {
                 if (!data.partner_id) {
-                    data2.partner = unlinkAll();
+                    data2.partner = clear();
                 } else {
                     const partnerData = {
                         display_name: data.display_name,
@@ -79,7 +79,7 @@ registerModel({
         async remove() {
             const partner_ids = [];
             partner_ids.push(this.partner.id);
-            await this.async(() => this.env.services.rpc({
+            await this.async(() => this.messaging.rpc({
                 model: this.followedThread.model,
                 method: 'message_unsubscribe',
                 args: [[this.followedThread.id], partner_ids]
@@ -100,11 +100,11 @@ registerModel({
          * Show (editable) list of subtypes of this follower.
          */
         async showSubtypes() {
-            const subtypesData = await this.async(() => this.env.services.rpc({
+            const subtypesData = await this.async(() => this.messaging.rpc({
                 route: '/mail/read_subscription_data',
                 params: { follower_id: this.id },
             }));
-            this.update({ subtypes: unlinkAll() });
+            this.update({ subtypes: clear() });
             for (const data of subtypesData) {
                 const subtype = this.messaging.models['FollowerSubtype'].insert(
                     this.messaging.models['FollowerSubtype'].convertData(data)
@@ -139,13 +139,13 @@ registerModel({
                 if (this.partner) {
                     kwargs.partner_ids = [this.partner.id];
                 }
-                await this.async(() => this.env.services.rpc({
+                await this.async(() => this.messaging.rpc({
                     model: this.followedThread.model,
                     method: 'message_subscribe',
                     args: [[this.followedThread.id]],
                     kwargs,
                 }));
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     type: 'success',
                     message: this.env._t("The subscription preferences were successfully applied."),
                 });

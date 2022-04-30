@@ -3,7 +3,7 @@
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { OnChange } from '@mail/model/model_onchange';
-import { clear, insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
+import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 import { makeDeferred } from '@mail/utils/deferred';
 
 const { EventBus } = owl;
@@ -53,6 +53,22 @@ registerModel({
                 const partner = this.messaging.models['Partner'].insert({ id: partnerId });
                 return partner.getChat();
             }
+        },
+        /**
+         * Display a notification to the user.
+         *
+         * @param {Object} params
+         * @param {string} [params.message]
+         * @param {string} [params.subtitle]
+         * @param {Object[]} [params.buttons]
+         * @param {boolean} [params.sticky]
+         * @param {string} [params.type]
+         * @param {string} [params.className]
+         * @param {function} [params.onClose]
+         * @return {number} the id of the notification.
+         */
+        notify(params) {
+            return this.env.services.notification.notify(params);
         },
         /**
          * Opens a chat with the provided person and returns it.
@@ -118,7 +134,7 @@ registerModel({
                     ))[0];
                 }
                 if (!channel) {
-                    this.env.services['notification'].notify({
+                    this.messaging.notify({
                         message: this.env._t("You can only open the profile of existing channels."),
                         type: 'warning',
                     });
@@ -127,6 +143,15 @@ registerModel({
                 return channel.openProfile();
             }
             return this.messaging.openDocument({ id, model });
+        },
+        /**
+         * Perform a rpc call and return a promise resolving to the result.
+         *
+         * @param {Object} params
+         * @return {any}
+         */
+        async rpc(params, options) {
+            return this.env.services.rpc(params, options);
         },
         /**
          * Refreshes the value of `isNotificationPermissionDefault`.
@@ -146,10 +171,10 @@ registerModel({
             });
             const focusedSessionId = this.focusedRtcSession && this.focusedRtcSession.id;
             if (!sessionId || focusedSessionId === sessionId) {
-                this.update({ focusedRtcSession: unlink() });
+                this.update({ focusedRtcSession: clear() });
                 return;
             }
-            this.update({ focusedRtcSession: link(rtcSession) });
+            this.update({ focusedRtcSession: replace(rtcSession) });
             if (this.userSetting.rtcLayout !== 'tiled') {
                 return;
             }

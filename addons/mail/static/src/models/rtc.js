@@ -243,7 +243,7 @@ registerModel({
                     const audioStream = await browser.navigator.mediaDevices.getUserMedia({ audio: this.messaging.userSetting.getAudioConstraints() });
                     audioTrack = audioStream.getAudioTracks()[0];
                 } catch (_e) {
-                    this.env.services.notification.notify({
+                    this.messaging.notify({
                         message: sprintf(
                             this.env._t(`"%s" requires microphone access`),
                             window.location.host,
@@ -313,7 +313,7 @@ registerModel({
                  * in that case, voice activation is not enabled
                  * and the microphone is always 'on'.
                  */
-                this.env.services.notification.notify({
+                this.messaging.notify({
                     message: this.env._t("Your browser does not support voice activation"),
                     type: 'warning',
                 });
@@ -691,7 +691,7 @@ registerModel({
          */
         async _pingServer() {
             const channel = this.channel;
-            const { rtcSessions } = await this.env.services.rpc({
+            const { rtcSessions } = await this.messaging.rpc({
                 route: '/mail/channel/ping',
                 params: {
                     'channel_id': channel.id,
@@ -787,7 +787,7 @@ registerModel({
             await new Promise(resolve => setTimeout(resolve, this.peerNotificationWaitDelay));
             const peerNotifications = this.peerNotificationsToSend;
             try {
-                await this.env.services.rpc({
+                await this.messaging.rpc({
                     route: '/mail/rtc/session/notify_call_members',
                     params: {
                         'peer_notifications': peerNotifications.map(peerNotification =>
@@ -1001,7 +1001,7 @@ registerModel({
                     this.messaging.soundEffects.screenSharing.play();
                 }
             } catch (_e) {
-                this.env.services.notification.notify({
+                this.messaging.notify({
                     message: sprintf(
                         this.env._t(`"%s" requires "%s" access`),
                         window.location.host,
@@ -1202,7 +1202,7 @@ registerModel({
         },
         /**
          * @private
-         * @param {boolean} isAboveThreshold 
+         * @param {boolean} isAboveThreshold
          */
         _onThresholdAudioMonitor(isAboveThreshold) {
             this._setSoundBroadcast(isAboveThreshold);

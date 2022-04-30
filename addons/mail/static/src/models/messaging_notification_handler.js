@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registerModel } from '@mail/model/model_core';
-import { decrement, increment, insert, insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
+import { decrement, increment, insert, insertAndReplace, replace, unlink } from '@mail/model/model_field_command';
 import { htmlToTextContentInline } from '@mail/js/utils';
 
 import { escape, sprintf } from '@web/core/utils/strings';
@@ -189,7 +189,7 @@ registerModel({
             const channel = this.messaging.models['Thread'].insert(this.messaging.models['Thread'].convertData(channelData));
             if (this.messaging.currentUser && invitedByUserId !== this.messaging.currentUser.id) {
                 // Current user was invited by someone else.
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: sprintf(
                         this.env._t("You have been invited to #%s"),
                         channel.displayName
@@ -316,7 +316,7 @@ registerModel({
             const shouldComputeSeenIndicators = channel.channel_type !== 'channel';
             if (shouldComputeSeenIndicators) {
                 this.messaging.models['ThreadPartnerSeenInfo'].insert({
-                    lastSeenMessage: link(lastMessage),
+                    lastSeenMessage: replace(lastMessage),
                     partner: insertAndReplace({ id: partner_id }),
                     thread: replace(channel),
                 });
@@ -440,7 +440,7 @@ registerModel({
          * @param {boolean} param1.warning
          */
         _handleNotificationSimpleNotification({ message, message_is_html, sticky, title, warning }) {
-            this.env.services['notification'].notify({
+            this.messaging.notify({
                 message: message_is_html ? Markup(message) : message,
                 sticky,
                 title,
@@ -466,7 +466,7 @@ registerModel({
             const currentSession = this.messaging.rtc.currentRtcSession;
             if (currentSession && currentSession.id === sessionId) {
                 this.messaging.rtc.channel.endCall();
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("Disconnected from the RTC call by the server"),
                     type: 'warning',
                 });
@@ -510,7 +510,7 @@ registerModel({
                 // implicit: failures are sent by the server as notification
                 // only if the current partner is author of the message
                 if (!message.author && this.messaging.currentPartner) {
-                    message.update({ author: link(this.messaging.currentPartner) });
+                    message.update({ author: replace(this.messaging.currentPartner) });
                 }
             }
         },
@@ -593,7 +593,7 @@ registerModel({
             );
             const partnerRoot = this.messaging.partnerRoot;
             const message = this.messaging.models['Message'].create(Object.assign(convertedData, {
-                author: link(partnerRoot),
+                author: replace(partnerRoot),
                 id: lastMessageId + 0.01,
                 isTransient: true,
             }));
@@ -613,7 +613,7 @@ registerModel({
                 return;
             }
             const message = sprintf(this.env._t("You unsubscribed from %s."), channel.displayName);
-            this.env.services['notification'].notify({ message, type: 'info' });
+            this.messaging.notify({ message, type: 'info' });
             // We assume that arriving here the server has effectively
             // unpinned the channel
             channel.update({
@@ -635,7 +635,7 @@ registerModel({
                 return;
             }
             const message = sprintf(this.env._t("You unpinned your conversation with %s."), channel.displayName);
-            this.env.services['notification'].notify({ message, type: 'info' });
+            this.messaging.notify({ message, type: 'info' });
             // We assume that arriving here the server has effectively
             // unpinned the channel
             channel.update({

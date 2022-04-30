@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { insert, unlink } from '@mail/model/model_field_command';
+import { clear, insert } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'Employee',
@@ -20,7 +20,7 @@ registerModel({
             if ('user_id' in data) {
                 data2.hasCheckedUser = true;
                 if (!data.user_id) {
-                    data2.user = unlink();
+                    data2.user = clear();
                 } else {
                     const partnerNameGet = data['user_partner_id'];
                     const partnerData = {
@@ -47,7 +47,7 @@ registerModel({
          * @param {integer[]} param0.ids
          */
         async performRpcRead({ context, fields, ids }) {
-            const employeesData = await this.env.services.rpc({
+            const employeesData = await this.messaging.rpc({
                 model: 'hr.employee.public',
                 method: 'read',
                 args: [ids],
@@ -69,7 +69,7 @@ registerModel({
          * @param {string[]} param0.fields
          */
         async performRpcSearchRead({ context, domain, fields }) {
-            const employeesData = await this.env.services.rpc({
+            const employeesData = await this.messaging.rpc({
                 model: 'hr.employee.public',
                 method: 'search_read',
                 kwargs: {
@@ -108,7 +108,7 @@ registerModel({
             }
             // prevent chatting with non-users
             if (!this.user) {
-                this.env.services['notification'].notify({
+                this.messaging.notify({
                     message: this.env._t("You can only chat with employees that have a dedicated user."),
                     type: 'info',
                 });
