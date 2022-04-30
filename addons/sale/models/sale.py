@@ -452,7 +452,7 @@ class SaleOrder(models.Model):
             # Block if partner only has warning but parent company is blocked
             if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
                 partner = partner.parent_id
-            title = ("Warning for %s") % partner.name
+            title = _("Warning for %s") % partner.name
             message = partner.sale_warn_msg
             warning = {
                     'title': title,
@@ -1105,10 +1105,10 @@ Reason(s) of this behavior could be:
                 line.qty_to_invoice = 0
 
     def payment_action_capture(self):
-        self.authorized_transaction_ids.s2s_capture_transaction()
+        self.authorized_transaction_ids.action_capture()
 
     def payment_action_void(self):
-        self.authorized_transaction_ids.s2s_void_transaction()
+        self.authorized_transaction_ids.action_void()
 
     def get_portal_last_transaction(self):
         self.ensure_one()
