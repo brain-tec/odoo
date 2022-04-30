@@ -474,7 +474,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 if field.type not in ('boolean', 'selection'):
                     raise Exception("Field %s must have type 'boolean' or 'selection'" % field)
                 modules += IrModule._get(name[7:])
-            elif hasattr(field, 'config_parameter'):
+            elif hasattr(field, 'config_parameter') and field.config_parameter:
                 if field.type not in ('boolean', 'integer', 'float', 'char', 'selection', 'many2one', 'datetime'):
                     raise Exception("Field %s must have type 'boolean', 'integer', 'float', 'char', 'selection', 'many2one' or 'datetime'" % field)
                 configs.append((name, field.config_parameter))
@@ -788,7 +788,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     def action_open_template_user(self):
         action = self.env["ir.actions.actions"]._for_xml_id("base.action_res_users")
         template_user_id = literal_eval(self.env['ir.config_parameter'].sudo().get_param('base.template_portal_user_id', 'False'))
-        template_user = self.browse(template_user_id)
+        template_user = self.env['res.users'].browse(template_user_id)
         if not template_user.exists():
             raise ValueError(_('Invalid template user. It seems it has been deleted.'))
         action['res_id'] = template_user_id

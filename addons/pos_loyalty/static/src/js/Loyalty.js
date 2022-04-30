@@ -290,7 +290,16 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
         }
         super.finalize(...arguments);
     }
-
+    //@override
+    _get_ignored_product_ids_total_discount() {
+        const productIds = super._get_ignored_product_ids_total_discount(...arguments);
+        if (this.pos.config.gift_card_program_id) {
+            const program = this.pos.program_by_id[this.pos.config.gift_card_program_id[0]];
+            const giftCardProductId = [...program.rules[0].valid_product_ids][0];
+            productIds.push(giftCardProductId);
+        }
+        return productIds;
+    }
     get_orderlines() {
         const orderlines = super.get_orderlines(this, arguments);
         const rewardLines = [];
@@ -1046,6 +1055,7 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
             pointCost = Math.min(maxDiscount, discountable) / reward.discount;
         }
         // These are considered payments and do not require to be either taxed or split by tax
+        const discountProduct = reward.discount_line_product_id;
         if (['ewallet', 'gift_card'].includes(reward.program_id.program_type)) {
             return [{
                 product: discountProduct,
@@ -1060,7 +1070,6 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
             }];
         }
         const discountFactor = discountable ? Math.min(1, (maxDiscount / discountable)) : 1;
-        const discountProduct = reward.discount_line_product_id;
         const result = Object.entries(discountablePerTax).reduce((lst, entry) => {
             const taxIds = entry[0] === '' ? [] : entry[0].split(',').map((str) => parseInt(str));
             lst.push({
