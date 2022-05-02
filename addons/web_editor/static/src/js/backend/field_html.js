@@ -100,6 +100,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
         var _super = this._super.bind(this);
         this.wysiwyg.odooEditor.clean();
+        this._setValue(this._getValue());
         return this.wysiwyg.saveModifiedImages(this.$content).then(async () => {
             await this.wysiwyg.preSavePromise;
             this._isDirty = this.wysiwyg.isDirty();
@@ -400,8 +401,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
 
         def.then(function () {
-            self.$content.on('click', 'ul.o_checklist > li', self._onReadonlyClickChecklist.bind(self));
-            self.$content.on('click', '.o_stars .fa-star, .o_stars .fa-star-o', self._onReadonlyClickStar.bind(self));
+            if (!self.hasReadonlyModifier) {
+                self.$content.on('click', 'ul.o_checklist > li', self._onReadonlyClickChecklist.bind(self));
+                self.$content.on('click', '.o_stars .fa-star, .o_stars .fa-star-o', self._onReadonlyClickStar.bind(self));
+            }
             if (self.$iframe) {
                 // Iframe is hidden until fully loaded to avoid glitches.
                 self.$iframe.removeClass('d-none');
@@ -469,7 +472,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @param {OdooEvent} ev
      */
     _onChange: function (ev) {
-        this._doAction();
+        this._doDebouncedAction.apply(this, arguments);
     },
     /**
      * Allows Enter keypress in a textarea (source mode)

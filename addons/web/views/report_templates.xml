@@ -282,7 +282,7 @@
                     }
                 </script>
             </head>
-            <body class="container" t-att-onload="subst and 'subst()'" style="overflow:hidden">
+            <body class="container" t-att-data-report-id="report_xml_id" t-att-onload="subst and 'subst()'" style="overflow:hidden">
                 <t t-out="body"/>
             </body>
         </html>
@@ -441,6 +441,8 @@
             <div class="row">
                 <div class="col-6" name="company_address">
                     <span t-if="company.company_details" t-field="company.company_details"></span>
+                    <span t-else="" t-field="company.partner_id"
+                            t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
                 </div>
             </div>
         </div>
