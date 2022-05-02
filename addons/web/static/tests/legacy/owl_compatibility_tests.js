@@ -9,12 +9,17 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         ComponentAdapter,
         ComponentWrapper,
         WidgetAdapterMixin,
+        standaloneAdapter,
     } = require('web.OwlCompatibility');
     const testUtils = require('web.test_utils');
     const Widget = require('web.Widget');
+    const Dialog = require("web.Dialog");
     const { registry } = require("@web/core/registry");
     const { LegacyComponent } = require("@web/legacy/legacy_component");
     const { mapLegacyEnvToWowlEnv, useWowlService } = require("@web/legacy/utils");
+
+    const { legacyServiceProvider } = require("@web/legacy/legacy_service_provider");
+    const { click } = require("@web/../tests/helpers/utils");
 
     const makeTestEnvironment = require("web.test_env");
     const { makeTestEnv } = require("@web/../tests/helpers/mock_env");
@@ -807,6 +812,69 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.verifySteps(["GED", "AAB", "MCM"]);
         });
 
+        QUnit.test("standaloneAdapter can trigger in the DOM and execute action", async (assert) => {
+            assert.expect(3)
+            const done = assert.async();
+
+            const MyDialog = Dialog.extend({
+                async start() {
+                    const res = await this._super(...arguments);
+                    const btn = document.createElement("button");
+                    btn.classList.add("myButton");
+                    btn.addEventListener("click", () => {
+                        this.trigger_up("execute_action", {
+                            action_data: {},
+                            env: {},
+                        });
+                    });
+                    this.el.appendChild(btn);
+                    return res;
+                }
+            });
+
+            const dialogOpened = makeTestPromise();
+            class MyComp extends Component {
+                setup() {
+                    onWillDestroy(() => {
+                        this.dialog.destroy();
+                    })
+                }
+                async spawnDialog() {
+                    const parent = standaloneAdapter();
+                    this.dialog = new MyDialog(parent);
+                    await this.dialog.open();
+                    dialogOpened.resolve();
+                }
+            }
+            MyComp.template = xml`<button class="spawnDialog" t-on-click="spawnDialog"/>`;
+
+            const actionService = {
+                start() {
+                    return {
+                        async doActionButton() {
+                            assert.step("doActionButton");
+                        }
+                    }
+                }
+            }
+
+            registry.category("services").add("action", actionService);
+            registry.category("services").add("legacy_service_provider", legacyServiceProvider);
+
+            const env = await makeTestEnv();
+            await addMockEnvironmentOwl(Component);
+
+            const target = getFixture()
+            await mount(MyComp, target, {env});
+            await click(target.querySelector(".spawnDialog"));
+            await dialogOpened;
+
+            assert.containsOnce(document.body, ".modal"); // legacy modal
+            await click(document.body.querySelector(".modal .myButton"));
+            assert.verifySteps(["doActionButton"]);
+            done();
+        })
+
         QUnit.module('WidgetAdapterMixin and ComponentWrapper');
 
         QUnit.test("widget with sub component", async function (assert) {
@@ -1007,7 +1075,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         });
 
         QUnit.test("lifecycle mount in fragment", async function (assert) {
-            assert.expect(17);
+            assert.expect(18);
 
             class MyChildComponent extends LegacyComponent {
                 setup() {
@@ -1024,8 +1092,8 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             MyComponent.components = { MyChildComponent };
             const MyWidget = WidgetAdapter.extend({
                 start() {
-                    let component = new ComponentWrapper(this, MyComponent, {});
-                    return component.mount(this.el);
+                    this.component = new ComponentWrapper(this, MyComponent, {});
+                    return this.component.mount(this.el);
                 }
             });
 
@@ -1043,6 +1111,9 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                 "onWillRender MyChildComponent",
                 "onRendered MyChildComponent",
             ]);
+
+            await widget.component.update({});
+            assert.verifySteps([]); // Out of DOM: shouldn't do anything.
 
             widget.$el.appendTo(target);
             widget.on_attach_callback();
