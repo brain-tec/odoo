@@ -67,7 +67,7 @@ MockServer.include({
     async _performFetch(resource, init) {
         if (resource === '/mail/attachment/upload') {
             const ufile = init.body.get('ufile');
-            const is_pending = init.body.get('is_pending');
+            const is_pending = init.body.get('is_pending') === 'true';
             const model = is_pending ? 'mail.compose.message' : init.body.get('thread_model');
             const id = is_pending ? 0 : parseInt(init.body.get('thread_id'));
             const attachmentId = this.mockCreate('ir.attachment', {
@@ -1492,6 +1492,7 @@ MockServer.include({
                 history_partner_ids: historyPartnerIds,
                 needaction_partner_ids: needactionPartnerIds,
                 notifications,
+                parentMessage: message.parent_id ? this._mockMailMessageMessageFormat([message.parent_id])[0] : false,
                 recipients: partners.map(p => ({ id: p.id, name: p.name })),
                 record_name: thread && (thread.name !== undefined ? thread.name : thread.display_name),
                 tracking_value_ids: formattedTrackingValues,
