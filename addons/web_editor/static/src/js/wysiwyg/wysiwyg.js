@@ -1299,7 +1299,9 @@ const Wysiwyg = Widget.extend({
             if (!this.lastMediaClicked) {
                 return;
             }
-            new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.$editable);
+            new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.odooEditor.document.body);
+            this.odooEditor.toolbarHide();
+            $(this.lastMediaClicked).on('image_cropper_destroyed', () => this.odooEditor.toolbarShow());
         });
         $toolbar.find('#image-transform').click(e => {
             if (!this.lastMediaClicked) {
@@ -1356,11 +1358,11 @@ const Wysiwyg = Widget.extend({
         setTimeout(() => {
             const scrollableContainer = this.$el.scrollParent();
             if (!options.snippets && scrollableContainer.length) {
-                // this.odooEditor.addDomListener(
-                //   scrollableContainer[0],
-                //   'scroll',
-                //   this.odooEditor.updateToolbarPosition.bind(this.odooEditor),
-                // );
+                this.odooEditor.addDomListener(
+                    scrollableContainer[0],
+                    'scroll',
+                    this.odooEditor.updateToolbarPosition.bind(this.odooEditor),
+                );
             }
         }, 0);
     },

@@ -1709,11 +1709,12 @@ class BaseModel(metaclass=MetaModel):
 
         :param int view_id: id of the view or None
         :param str view_type: type of the view to return if view_id is None ('form', 'tree', ...)
-        :param dict options: bool options to return additional features:
-            - bool load_filters: returns the model's filters (for search views)
-            - bool mobile: true if the web client is currently using the responsive mobile view
+        :param dict options: boolean options to return additional features:
+
+            - load_filters: returns the model's filters (for search views)
+            - mobile: true if the web client is currently using the responsive mobile view
               (to use kanban views instead of list views for x2many fields)
-            - bool toolbar: true to include contextual actions
+            - toolbar: true to include contextual actions
         :return: composition of the requested view (including inherited views and extensions)
         :rtype: dict
         :raise AttributeError:
@@ -5887,14 +5888,14 @@ Fields:
 
                 any(item == record for record in self)
         """
-        if isinstance(item, BaseModel) and self._name == item._name:
-            return len(item) == 1 and item.id in self._ids
-        elif isinstance(item, str):
-            return item in self._fields
-        elif isinstance(item, BaseModel):
-            raise TypeError(f"cannot compare different models: '{self._name}()' and '{item._name}()'")
-        else:
-            raise TypeError(f"unsupported operand type(s) for \"in\": '{self._name}()' and '{type(item)}'")
+        try:
+            if self._name == item._name:
+                return len(item) == 1 and item.id in self._ids
+            raise TypeError(f"inconsistent models in: {item} in {self}")
+        except AttributeError:
+            if isinstance(item, str):
+                return item in self._fields
+            raise TypeError(f"unsupported operand types in: {item!r} in {self}")
 
     def __add__(self, other):
         """ Return the concatenation of two recordsets. """
@@ -5906,37 +5907,37 @@ Fields:
         """
         ids = list(self._ids)
         for arg in args:
-            if isinstance(arg, BaseModel) and arg._name == self._name:
+            try:
+                if arg._name != self._name:
+                    raise TypeError(f"inconsistent models in: {self} + {arg}")
                 ids.extend(arg._ids)
-            elif isinstance(arg, BaseModel):
-                raise TypeError(f"cannot concat different models: '{self._name}()' and '{arg._name}()'")
-            else:
-                raise TypeError(f"unsupported operand type(s) for \"concat\": '{self._name}()' and '{type(arg)}'")
+            except AttributeError:
+                raise TypeError(f"unsupported operand types in: {self} + {arg!r}")
         return self.browse(ids)
 
     def __sub__(self, other):
         """ Return the recordset of all the records in ``self`` that are not in
             ``other``. Note that recordset order is preserved.
         """
-        if isinstance(other, BaseModel) and self._name == other._name:
+        try:
+            if self._name != other._name:
+                raise TypeError(f"inconsistent models in: {self} - {other}")
             other_ids = set(other._ids)
-        elif isinstance(other, BaseModel):
-            raise TypeError(f"cannot substract different models: '{self._name}()' and '{other._name}()'")
-        else:
-            raise TypeError(f"unsupported operand type(s) for \"-\": '{self._name}()' and '{type(other)}'")
-        return self.browse([id for id in self._ids if id not in other_ids])
+            return self.browse([id for id in self._ids if id not in other_ids])
+        except AttributeError:
+            raise TypeError(f"unsupported operand types in: {self} - {other!r}")
 
     def __and__(self, other):
         """ Return the intersection of two recordsets.
             Note that first occurrence order is preserved.
         """
-        if isinstance(other, BaseModel) and self._name == other._name:
+        try:
+            if self._name != other._name:
+                raise TypeError(f"inconsistent models in: {self} & {other}")
             other_ids = set(other._ids)
-        elif isinstance(other, BaseModel):
-            raise TypeError(f"cannot add different models: '{self._name}()' and '{other._name}()'")
-        else:
-            raise TypeError(f"unsupported operand type(s) for \"+\": '{self._name}()' and '{type(other)}'")
-        return self.browse(OrderedSet(id for id in self._ids if id in other_ids))
+            return self.browse(OrderedSet(id for id in self._ids if id in other_ids))
+        except AttributeError:
+            raise TypeError(f"unsupported operand types in: {self} & {other!r}")
 
     def __or__(self, other):
         """ Return the union of two recordsets.
@@ -5950,50 +5951,63 @@ Fields:
         """
         ids = list(self._ids)
         for arg in args:
-            if isinstance(arg, BaseModel) and self._name == arg._name:
+            try:
+                if arg._name != self._name:
+                    raise TypeError(f"inconsistent models in: {self} | {arg}")
                 ids.extend(arg._ids)
-            elif isinstance(arg, BaseModel):
-                raise TypeError(f"cannot union different models: '{self._name}()' and '{arg._name}()'")
-            else:
-                raise TypeError(f"unsupported operand type(s) for \"union\": '{self._name}()' and '{type(arg)}'")
+            except AttributeError:
+                raise TypeError(f"unsupported operand types in: {self} | {arg!r}")
         return self.browse(OrderedSet(ids))
 
     def __eq__(self, other):
         """ Test whether two recordsets are equivalent (up to reordering). """
-        if not isinstance(other, BaseModel):
+        try:
+            return self._name == other._name and set(self._ids) == set(other._ids)
+        except AttributeError:
             if other:
                 filename, lineno = frame_codeinfo(currentframe(), 1)
                 _logger.warning("unsupported operand type(s) for \"==\": '%s()' == '%r' (%s:%s)",
                                 self._name, other, filename, lineno)
-            return NotImplemented
-        return self._name == other._name and set(self._ids) == set(other._ids)
+        return NotImplemented
 
     def __lt__(self, other):
-        if not isinstance(other, BaseModel) or self._name != other._name:
-            return NotImplemented
-        return set(self._ids) < set(other._ids)
+        try:
+            if self._name == other._name:
+                return set(self._ids) < set(other._ids)
+        except AttributeError:
+            pass
+        return NotImplemented
 
     def __le__(self, other):
-        if not isinstance(other, BaseModel) or self._name != other._name:
-            return NotImplemented
-        # these are much cheaper checks than a proper subset check, so
-        # optimise for checking if a null or singleton are subsets of a
-        # recordset
-        if not self or self in other:
-            return True
-        return set(self._ids) <= set(other._ids)
+        try:
+            if self._name == other._name:
+                # these are much cheaper checks than a proper subset check, so
+                # optimise for checking if a null or singleton are subsets of a
+                # recordset
+                if not self or self in other:
+                    return True
+                return set(self._ids) <= set(other._ids)
+        except AttributeError:
+            pass
+        return NotImplemented
 
     def __gt__(self, other):
-        if not isinstance(other, BaseModel) or self._name != other._name:
-            return NotImplemented
-        return set(self._ids) > set(other._ids)
+        try:
+            if self._name == other._name:
+                return set(self._ids) > set(other._ids)
+        except AttributeError:
+            pass
+        return NotImplemented
 
     def __ge__(self, other):
-        if not isinstance(other, BaseModel) or self._name != other._name:
-            return NotImplemented
-        if not other or other in self:
-            return True
-        return set(self._ids) >= set(other._ids)
+        try:
+            if self._name == other._name:
+                if not other or other in self:
+                    return True
+                return set(self._ids) >= set(other._ids)
+        except AttributeError:
+            pass
+        return NotImplemented
 
     def __int__(self):
         return self.id or 0
