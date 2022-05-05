@@ -223,11 +223,11 @@ registerModel({
          * partner Inbox.
          */
         async markAsRead() {
-            await this.async(() => this.messaging.rpc({
+            await this.messaging.rpc({
                 model: 'mail.message',
                 method: 'set_message_done',
                 args: [[this.id]]
-            }));
+            });
         },
         /**
          * Opens the view that allows to resend the message in case of failure.
@@ -267,11 +267,11 @@ registerModel({
          * Toggle the starred status of the provided message.
          */
         async toggleStar() {
-            await this.async(() => this.messaging.rpc({
+            await this.messaging.rpc({
                 model: 'mail.message',
                 method: 'toggle_message_starred',
                 args: [[this.id]]
-            }));
+            });
         },
         /**
          * Updates the message's content.
@@ -462,6 +462,16 @@ registerModel({
          */
         _computeIsCurrentPartnerMentioned() {
             return this.recipients.includes(this.messaging.currentPartner);
+        },
+        /**
+         * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeIsDiscussionOrNotification() {
+            if (this.is_discussion || this.is_notification) {
+                return true;
+            }
+            return clear();
         },
         /**
          * The method does not attempt to cover all possible cases of empty
@@ -799,6 +809,10 @@ registerModel({
          */
         isBodyEqualSubtypeDescription: attr({
             compute: '_computeIsBodyEqualSubtypeDescription',
+            default: false,
+        }),
+        isDiscussionOrNotification: attr({
+            compute: '_computeIsDiscussionOrNotification',
             default: false,
         }),
         /**
