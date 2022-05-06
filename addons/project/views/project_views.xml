@@ -219,12 +219,12 @@
                                 <field name="name"/>
                                 <field name="mail_template_id" context="{'default_model': 'project.task'}"/>
                                 <field name="rating_template_id" groups="project.group_project_rating" context="{'default_model': 'project.task'}"/>
-                                <field name="sequence" groups="base.group_no_one"/>
                                 <div class="alert alert-warning" role="alert" colspan='2' attrs="{'invisible': ['|', ('rating_template_id','=', False), ('disabled_rating_warning', '=', False)]}" groups="project.group_project_rating">
                                     <i class="fa fa-warning" title="Customer disabled on projects"/><b> Customer Ratings</b> are disabled on the following project(s) : <br/>
                                     <field name="disabled_rating_warning" class="mb-0" />
                                 </div>
                                 <field name="auto_validation_kanban_state" attrs="{'invisible': [('rating_template_id','=', False)]}" groups="project.group_project_rating"/>
+                                <field name="sequence" groups="base.group_no_one"/>
                             </group>
                             <group>
                                 <field name="fold"/>
@@ -442,7 +442,8 @@
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <div class="oe_title">
-                        <h1>
+                        <h1 class="d-flex flex-row">
+                            <field name="is_favorite" nolabel="1" widget="boolean_favorite" class="mr-3"/>
                             <field name="name" class="o_text_overflow" placeholder="Project Name"/>
                         </h1>
                     </div>
@@ -612,6 +613,7 @@
                     <field name="sequence" optional="show" widget="handle"/>
                     <field name="message_needaction" invisible="1"/>
                     <field name="active" invisible="1"/>
+                    <field name="is_favorite" nolabel="1" width="1" widget="boolean_favorite"/>
                     <field name="display_name" string="Name" class="font-weight-bold"/>
                     <field name="partner_id" optional="show" string="Customer"/>
                     <field name="privacy_visibility" optional="hide"/>
@@ -622,7 +624,7 @@
                     <field name="user_id" optional="show" string="Project Manager" widget="many2one_avatar_user" options="{'no_open':True, 'no_create': True, 'no_create_edit': True}"/>
                     <field name="last_update_color" invisible="1"/>
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
-                    <field name="last_update_status" string="Status" optional="show" widget="status_with_color" options="{'color_field': 'last_update_color'}"/>
+                    <field name="last_update_status" string="Status" nolabel="1" optional="show" widget="status_with_color" options="{'color_field': 'last_update_color', 'hide_label': True}"/>
                     <field name="stage_id" options="{'no_open': True}" optional="show"/>
                 </tree>
             </field>
@@ -831,6 +833,30 @@
             </field>
         </record>
 
+        <record id="view_project_calendar" model="ir.ui.view">
+            <field name="name">project.project.calendar</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <calendar
+                    date_start="date_start"
+                    date_stop="date"
+                    string="Projects"
+                    mode="month"
+                    scales="month,year"
+                    event_open_popup="true"
+                    quick_add="false"
+                    color="color">
+                    <field name="partner_id" attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                    <field name="user_id" widget="many2one_avatar_user" attrs="{'invisible': [('user_id', '=', False)]}"/>
+                    <field name="is_favorite" widget="boolean_favorite" nolabel="1" string="Favorite"/>
+                    <field name="stage_id" groups="project.group_project_stages"/>
+                    <field name="last_update_color" invisible="1"/>
+                    <field name="last_update_status" string="Status" widget="status_with_color" options="{'color_field': 'last_update_color'}"/>
+                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" attrs="{'invisible': [('tag_ids', '=', [])]}"/>
+                </calendar>
+            </field>
+        </record>
+
         <record id="view_project_kanban_inherit" model="ir.ui.view">
             <field name="name">project.kanban.inherit.project</field>
             <field name="model">project.project</field>
@@ -843,6 +869,7 @@
             </field>
         </record>
 
+        <!-- Please update both act_window when modifying one (open_view_project_all or open_view_project_all_group_stage) as one or the other is used in the menu menu_project -->
         <record id="open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
@@ -861,6 +888,26 @@
             </field>
         </record>
 
+        <!-- Please update both act_window when modifying one (open_view_project_all or open_view_project_all_group_stage) as one or the other is used in the menu menu_project -->
+        <record id="open_view_project_all_group_stage" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">kanban,tree,form,calendar,activity</field>
+            <field name="view_id" ref="view_project_kanban_inherit"/>
+            <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="target">main</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No projects found. Let's create one!
+                </p>
+                <p>
+                    Projects contain tasks on the same topic, and each has its own dashboard.
+                </p>
+            </field>
+        </record>
+
+        <!-- Please update both act_window when modifying one (open_view_project_all_config or open_view_project_all_config_group_stage) as one or the other is used in the menu menu_project_config -->
         <record id="open_view_project_all_config" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
@@ -879,6 +926,37 @@
                     Projects contain tasks on the same topic, and each has its own dashboard.
                 </p>
             </field>
+        </record>
+
+        <!-- Please update both act_window when modifying one (open_view_project_all_config or open_view_project_all_config_group_stage) as one or the other is used in the menu menu_project_config -->
+        <record id="open_view_project_all_config_group_stage" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">tree,kanban,form,calendar,activity</field>
+            <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                   No projects found. Let's create one!
+                </p>
+                <p>
+                    Projects contain tasks on the same topic, and each has its own dashboard.
+                </p>
+            </field>
+        </record>
+
+        <record id="open_view_project_all_config_group_stage_tree_action_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="project.open_view_project_all_config_group_stage"/>
+            <field name="view_id" ref="view_project"/>
+        </record>
+        <record id="open_view_project_all_config_group_stage_kanban_action_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">kanban</field>
+            <field name="act_window_id" ref="project.open_view_project_all_config_group_stage"/>
+            <field name="view_id" ref="view_project_kanban"/>
         </record>
 
         <!-- Task -->
@@ -903,6 +981,7 @@
                         <button name="action_assign_to_me" string="Assign to Me" type="object" attrs="{'invisible': &quot;['|', ('user_ids', 'in', uid), ('user_ids', '=', [])]&quot;}" data-hotkey="q"/>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight" attrs="{'invisible' : &quot;['|', ('user_ids', 'in', uid), ('user_ids', '!=', [])]&quot;}" data-hotkey="q"/>
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]}"/>
+                        <field name="personal_stage_type_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '!=', False)]}" domain="[('user_id', '=', uid)]"/>
                     </header>
                     <div class="alert alert-info oe_edit_only mb-0" role="status" attrs="{'invisible': ['|', ('recurring_task', '=', False), ('recurrence_id', '=', False)]}">
                         <p>Edit recurring task</p>
@@ -963,7 +1042,7 @@
                     <div class="oe_title pr-0">
                         <h1 class="d-flex flex-row justify-content-between">
                             <field name="priority" widget="priority" class="mr-3"/>
-                            <field name="name" class="o_task_name text-truncate" placeholder="Task Title..." default_focus="1" />
+                            <field name="name" class="o_task_name text-truncate" placeholder="Task Title..."/>
                             <field name="kanban_state" widget="state_selection" class="ml-auto"/>
                         </h1>
                     </div>
@@ -1311,11 +1390,11 @@
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
                 <calendar date_start="date_deadline" string="Tasks" mode="month" 
-                          color="user_ids" event_limit="5" hide_time="true" 
+                          color="color" event_limit="5" hide_time="true" 
                           event_open_popup="true" quick_add="false" show_unusual_days="True"
                           js_class="project_calendar"
                           scales="month,year">
-                    <field name="project_id" widget="project_private_task" filters="1"/>
+                    <field name="project_id" widget="project_private_task"/>
                     <field name="user_ids" widget="many2many_avatar_user"/>
                     <field name="partner_id" attrs="{'invisible': [('partner_id', '=', False)]}"/>
                     <field name="priority" widget="priority"/>
@@ -1324,6 +1403,22 @@
                     <field name="stage_id"/>
                     <field name="kanban_state"/>
                 </calendar>
+            </field>
+        </record>
+
+        <record id="view_task_all_calendar" model="ir.ui.view">
+            <field name="name">project.task.all.calendar</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="view_task_calendar"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//calendar" position="attributes">
+                    <attribute name="color">project_color</attribute>
+                </xpath>
+                <xpath expr="//field[@name='project_id']" position="attributes">
+                    <attribute name="filters">1</attribute>
+                    <attribute name="color">color</attribute>
+                </xpath>
             </field>
         </record>
 
@@ -1412,6 +1507,23 @@
             <field name="act_window_id" ref="action_view_task"/>
         </record>
 
+        <record id="open_view_all_task_list_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">kanban</field>
+            <field name="act_window_id" ref="action_view_all_task"/>
+        </record>
+        <record id="open_view_all_task_list_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="action_view_all_task"/>
+        </record>
+        <record id="open_view_all_task_list_calendar" model="ir.actions.act_window.view">
+            <field name="sequence" eval="40"/>
+            <field name="view_mode">calendar</field>
+            <field name="act_window_id" ref="action_view_all_task"/>
+            <field name="view_id" ref="view_task_all_calendar"/>
+        </record>
+
         <menuitem name="My Tasks" id="menu_project_management" parent="menu_main_pm"
             action="action_view_all_task" sequence="2" groups="base.group_no_one,group_project_user"/>
 
@@ -1448,7 +1560,9 @@
         <menuitem action="open_task_type_form" id="menu_project_config_project" name="Task Stages" parent="menu_project_config" sequence="10" groups="base.group_no_one"/>
 
         <menuitem action="open_view_project_all" id="menu_projects" name="Projects" parent="menu_main_pm" sequence="1"/>
+        <menuitem action="open_view_project_all_group_stage" id="menu_projects_group_stage" name="Projects" parent="menu_main_pm" sequence="1" groups="project.group_project_stages"/>
         <menuitem action="open_view_project_all_config" id="menu_projects_config" name="Projects" parent="menu_project_config" sequence="5"/>
+        <menuitem action="open_view_project_all_config_group_stage" id="menu_projects_config_group_stage" name="Projects" parent="menu_project_config" sequence="5" groups="project.group_project_stages"/>
 
         <!-- User Form -->
         <record id="act_res_users_2_project_task_opened" model="ir.actions.act_window">
@@ -1491,7 +1605,7 @@
             <field name="name">Tags</field>
             <field name="model">project.tags</field>
             <field name="arch" type="xml">
-                <tree string="Tags" editable="top" sample="1" multi_edit="1">
+                <tree string="Tags" editable="top" sample="1" multi_edit="1" default_order="name">
                     <field name="name"/>
                     <field name="color" widget="color_picker" optional="show"/>
                 </tree>

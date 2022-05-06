@@ -97,7 +97,7 @@ class ProjectTaskType(models.Model):
         string='Rating Email Template',
         domain=[('model', '=', 'project.task')],
         help="If set and if the project's rating configuration is 'Rating when changing stage', then an email will be sent to the customer when the task reaches this step.")
-    auto_validation_kanban_state = fields.Boolean('Automatic kanban status', default=False,
+    auto_validation_kanban_state = fields.Boolean('Automatic Kanban Status', default=False,
         help="Automatically modify the kanban state when the customer replies to the feedback for this stage.\n"
             " * Good feedback from the customer will update the kanban state to 'ready for the new stage' (green bullet).\n"
             " * Neutral or bad feedback will set the kanban state to 'blocked' (red bullet).\n")
@@ -959,6 +959,12 @@ class Task(models.Model):
         return self.stage_find(project_id, [('fold', '=', False)])
 
     @api.model
+    def _default_personal_stage_type_id(self):
+        if self._context.get('default_project_id'):
+            return False
+        return self.env['project.task.type'].search([('user_id', '=', self.env.user.id)], limit=1).id
+
+    @api.model
     def _default_company_id(self):
         if self._context.get('default_project_id'):
             return self.env['project.project'].browse(self._context['default_project_id']).company_id
@@ -1035,7 +1041,7 @@ class Task(models.Model):
     # saying the field cannot be searched.
     personal_stage_type_id = fields.Many2one('project.task.type', string='Personal User Stage',
         compute='_compute_personal_stage_type_id', inverse='_inverse_personal_stage_type_id', store=False,
-        search='_search_personal_stage_type_id',
+        search='_search_personal_stage_type_id', default=_default_personal_stage_type_id,
         help="The current user's personal task stage.")
     partner_id = fields.Many2one('res.partner',
         string='Customer', recursive=True, tracking=True,
@@ -1055,6 +1061,7 @@ class Task(models.Model):
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False,
         required=True, copy=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
+    project_color = fields.Integer(related='project_id.color', string='Project Color')
     rating_active = fields.Boolean(string='Project Rating Status', related="project_id.rating_active")
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
         help="Attachments that don't come from a message.")
