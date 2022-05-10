@@ -230,7 +230,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         self.assertEqual(so_line1.product_uom_qty, so_line1.task_id.planned_hours, "The planned hours should have changed when updating the ordered quantity of the native SO line")
 
         # cancel SO
-        self.sale_order.action_cancel()
+        self.sale_order._action_cancel()
 
         self.assertTrue(so_line1.task_id, "SO cancellation should keep the task")
         self.assertTrue(so_line1.project_id, "SO cancellation should create a project")
@@ -509,7 +509,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         sale_order_line.write({'product_uom_qty': 20})
         self.assertEqual(sale_order_line.product_uom_qty, sale_order_line.task_id.planned_hours, "The planned hours should have changed when updating the ordered quantity of the native SO line")
 
-        self.sale_order.action_cancel()
+        self.sale_order._action_cancel()
         sale_order_line.write({'product_uom_qty': 30})
         self.assertEqual(sale_order_line.product_uom_qty, sale_order_line.task_id.planned_hours, "The planned hours should have changed when updating the ordered quantity, even after SO cancellation")
 
@@ -602,11 +602,12 @@ class TestSaleService(TestCommonSaleTimesheet):
             'gram': 0.0,
         }
 
+        project = self.project_global.copy({'tasks': False})
         Product = self.env['product.product']
         product_vals = {
             'type': 'service',
             'service_type': 'timesheet',
-            'project_id': self.project_global.id,
+            'project_id': project.id,
             'service_tracking': 'task_global_project',
         }
 
@@ -617,7 +618,6 @@ class TestSaleService(TestCommonSaleTimesheet):
             'order_id': self.sale_order.id,
         }
 
-        self.project_global.task_ids = False
         for uom_name in planned_hours_for_uom:
             uom_id = self.env.ref('uom.product_uom_%s' % uom_name)
 
@@ -637,7 +637,7 @@ class TestSaleService(TestCommonSaleTimesheet):
 
         self.sale_order.action_confirm()
 
-        tasks = self.project_global.task_ids
+        tasks = project.task_ids
         for task in tasks:
             self.assertEqual(task.planned_hours, planned_hours_for_uom[task.sale_line_id.name])
 
