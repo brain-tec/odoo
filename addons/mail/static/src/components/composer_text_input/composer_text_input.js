@@ -53,9 +53,6 @@ export class ComposerTextInput extends Component {
      * @private
      */
     _update() {
-        if (!this.composerView) {
-            return;
-        }
         if (!this.root.el) {
             return;
         }
@@ -77,36 +74,7 @@ export class ComposerTextInput extends Component {
             }
             this.composerView.update({ hasToRestoreContent: false });
         }
-        this._updateHeight();
-    }
-
-    /**
-     * Updates the textarea height.
-     *
-     * @private
-     */
-    _updateHeight() {
-        this.composerView.mirroredTextareaRef.el.value = this.composerView.composer.textInputContent;
-        this.composerView.textareaRef.el.style.height = this.composerView.mirroredTextareaRef.el.scrollHeight + 'px';
-    }
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onInputTextarea() {
-        if (!this.composerView) {
-            return;
-        }
-        this.composerView.saveStateInStore();
-        if (this.composerView.textareaLastInputValue !== this.composerView.textareaRef.el.value) {
-            this.composerView.handleCurrentPartnerIsTyping();
-        }
-        this.composerView.update({ textareaLastInputValue: this.composerView.textareaRef.el.value });
-        this._updateHeight();
+        this.composerView.updateTextInputHeight();
     }
 
 }
