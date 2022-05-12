@@ -206,6 +206,7 @@ export class OdooEditor extends EventTarget {
                         return closestElement(selection.anchorNode, 'P, DIV');
                     }
                 },
+                preHistoryUndo: () => {},
                 isHintBlacklisted: () => false,
                 filterMutationRecords: (records) => records,
                 direction: 'ltr',
@@ -806,6 +807,7 @@ export class OdooEditor extends EventTarget {
      * "consumed": The position has been undone and is considered consumed.
      */
     historyUndo() {
+        this.options.preHistoryUndo();
         // The last step is considered an uncommited draft so always revert it.
         const lastStep = this._currentStep;
         this.historyRevert(lastStep);
@@ -1658,7 +1660,7 @@ export class OdooEditor extends EventTarget {
             focusNode: sel.focusNode,
             focusOffset: sel.focusOffset,
         };
-        if (this._isSelectionInEditable(sel)) {
+        if (!sel.isCollapsed && this.isSelectionInEditable(sel)) {
             this._latestComputedSelectionInEditable = this._latestComputedSelection;
         }
         return this._latestComputedSelection;
@@ -2512,7 +2514,7 @@ export class OdooEditor extends EventTarget {
         this._computeHistorySelection();
 
         const selection = this.document.getSelection();
-        this._updateToolbar(this._isSelectionInEditable(selection));
+        this._updateToolbar(!selection.isCollapsed && this.isSelectionInEditable(selection));
 
         if (this._currentMouseState === 'mouseup') {
             this._fixFontAwesomeSelection();
@@ -2529,13 +2531,12 @@ export class OdooEditor extends EventTarget {
     /**
      * Returns true if the current selection is inside the editable.
      *
-     * @private
-     * @param {Object} selection
+     * @param {Object} [selection]
      * @returns {boolean}
      */
-    _isSelectionInEditable(selection) {
-        return !selection.isCollapsed &&
-            this.editable.contains(selection.anchorNode) &&
+    isSelectionInEditable(selection) {
+        selection = selection || this.document.getSelection()
+        return selection && selection.anchorNode && this.editable.contains(selection.anchorNode) &&
             this.editable.contains(selection.focusNode);
     }
 
