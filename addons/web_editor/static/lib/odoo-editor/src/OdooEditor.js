@@ -1906,6 +1906,7 @@ export class OdooEditor extends EventTarget {
             editable: this.editable,
             document: this.document,
             getContextFromParentRect: this.options.getContextFromParentRect,
+            commandFilters: this.options.powerboxFilters,
             _t: this.options._t,
             onShow: () => {
                 this.commandbarTablePicker.hide();
@@ -2335,14 +2336,17 @@ export class OdooEditor extends EventTarget {
             this._lastBeforeInputType === 'insertParagraph';
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
             if (ev.inputType === 'deleteContentBackward') {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteBackward');
             } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteForward');
             } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
@@ -2404,6 +2408,7 @@ export class OdooEditor extends EventTarget {
                 this.sanitize();
                 this.historyStep();
             } else if (ev.inputType === 'insertLineBreak') {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oShiftEnter');
@@ -2411,6 +2416,8 @@ export class OdooEditor extends EventTarget {
                 this.sanitize();
                 this.historyStep();
             }
+        } else if (ev.inputType === 'insertCompositionText') {
+            this._fromCompositionText = true;
         }
     }
 
@@ -2587,6 +2594,17 @@ export class OdooEditor extends EventTarget {
         return !selection.isCollapsed &&
             this.editable.contains(selection.anchorNode) &&
             this.editable.contains(selection.focusNode);
+    }
+
+    /**
+     * @private
+     */
+    _compositionStep() {
+        if (this._fromCompositionText) {
+            this._fromCompositionText = false;
+            this.sanitize();
+            this.historyStep();
+        }
     }
 
     /**

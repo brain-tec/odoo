@@ -60,6 +60,7 @@ class MrpProduction(models.Model):
         compute='_compute_product_id', store=True, copy=True,
         readonly=True, required=True, check_company=True,
         states={'draft': [('readonly', False)]})
+    product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
     product_tracking = fields.Selection(related='product_id.tracking')
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
     product_qty = fields.Float(
@@ -2043,7 +2044,6 @@ class MrpProduction(models.Model):
             'res_model': 'mrp.production',
             'view_mode': 'form',
             'res_id': production.id,
-            'target': 'main',
         }
 
     def _has_workorders(self):
@@ -2153,7 +2153,7 @@ class MrpProduction(models.Model):
     def _pre_action_split_merge_hook(self, merge=False, split=False):
         if not merge and not split:
             return True
-        ope_str = merge and 'merge' or 'split'
+        ope_str = merge and _('merged') or _('split')
         if any(production.state not in ('draft', 'confirmed') for production in self):
             raise UserError(_("Only manufacturing orders in either a draft or confirmed state can be %s.", ope_str))
         if any(not production.bom_id for production in self):
