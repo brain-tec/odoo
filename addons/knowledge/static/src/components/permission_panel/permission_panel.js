@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { session } from "@web/session";
-import { Dialog } from "@web/core/dialog/dialog";
+import Dialog from 'web.Dialog';
 import { _lt } from "@web/core/l10n/translation";
 import { _t } from 'web.core';
 import { useService } from '@web/core/utils/hooks';
@@ -87,9 +87,6 @@ class PermissionPanel extends Component {
         const index = this.state.members.findIndex(current => {
             return current.partner_id === session.partner_id;
         });
-        if (index < 0) {
-            return;
-        }
         const newPermission = $select.val();
         const oldPermission = this.state.internal_permission;
         const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission]
