@@ -1038,25 +1038,25 @@ class AccountMove(models.Model):
             self.invoice_date_due = new_terms_lines[-1].date_maturity
 
     def _recompute_dynamic_lines(self, recompute_all_taxes=False, recompute_tax_base_amount=False):
-        ''' Recompute all lines that depend of others.
+        ''' Recompute all lines that depend on others.
 
-        For example, tax lines depends of base lines (lines having tax_ids set). This is also the case of cash rounding
-        lines that depend of base lines or tax lines depending the cash rounding strategy. When a payment term is set,
+        For example, tax lines depends on base lines (lines having tax_ids set). This is also the case of cash rounding
+        lines that depend on base lines or tax lines depending on the cash rounding strategy. When a payment term is set,
         this method will auto-balance the move with payment term lines.
 
         :param recompute_all_taxes: Force the computation of taxes. If set to False, the computation will be done
-                                    or not depending of the field 'recompute_tax_line' in lines.
+                                    or not depending on the field 'recompute_tax_line' in lines.
         '''
         for invoice in self:
             # Dispatch lines and pre-compute some aggregated values like taxes.
-            for line in invoice.line_ids:
-                if line.recompute_tax_line:
-                    recompute_all_taxes = True
-                    line.recompute_tax_line = False
-
-            # Compute taxes.
-            if recompute_all_taxes:
+            if (
+                recompute_all_taxes
+                or any(line.recompute_tax_line for line in invoice.line_ids)
+                or invoice.line_ids.tax_ids.flatten_taxes_hierarchy()._origin > invoice.line_ids.tax_line_id._origin
+            ):
+                invoice.line_ids.recompute_tax_line = False
                 invoice._recompute_tax_lines()
+
             if recompute_tax_base_amount:
                 invoice._recompute_tax_lines(recompute_tax_base_amount=True)
 
@@ -3890,6 +3890,7 @@ class AccountMoveLine(models.Model):
                 if tax.price_include:
                     amount_currency += tax_res['amount']
 
+        tax_included_division_is_zero = any(tax.price_include and tax.amount == 100 and tax.amount_type == 'division' for tax in taxes) and amount_currency == 0
         discount_factor = 1 - (discount / 100.0)
         if amount_currency and discount_factor:
             # discount != 100%
@@ -3904,8 +3905,9 @@ class AccountMoveLine(models.Model):
                 'discount': 0.0,
                 'price_unit': amount_currency / (quantity or 1.0),
             }
-        elif not discount_factor:
-            # balance of line is 0, but discount  == 100% so we display the normal unit_price
+        elif not discount_factor or tax_included_division_is_zero:
+            # balance of line is 0, but discount == 100% or taxes (price included) == 100%,
+            # so we display the normal unit_price
             vals = {}
         else:
             # balance is 0, so unit price is 0 as well
@@ -4473,7 +4475,7 @@ class AccountMoveLine(models.Model):
             if line.parent_state == 'posted':
                 if line.move_id.restrict_mode_hash_table and set(vals).intersection(INTEGRITY_HASH_LINE_FIELDS):
                     raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_LINE_FIELDS))
-                if any(key in vals for key in ('tax_ids', 'tax_line_ids')):
+                if any(key in vals for key in ('tax_ids', 'tax_line_id')):
                     raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
             # Check the lock date.
