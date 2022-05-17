@@ -8,12 +8,6 @@ import { clear, insert, insertAndReplace, replace, unlink } from '@mail/model/mo
 import { monitorAudio } from '@mail/utils/media_monitoring';
 import { sprintf } from '@web/core/utils/strings';
 
-/**
- * The order in which transceivers are added, relevant for RTCPeerConnection.getTransceivers which returns
- * transceivers in insertion order as per webRTC specifications.
- */
-const TRANSCEIVER_ORDER = ['audio', 'video'];
-
 const getRTCPeerNotificationNextTemporaryId = (function () {
     let tmpId = 0;
     return () => {
@@ -72,7 +66,7 @@ registerModel({
             for (const rtcSession of this.connectedRtcSessions) {
                 const fullDirection = this.videoTrack ? 'sendrecv' : 'recvonly';
                 const limitedDirection = this.videoTrack ? 'sendonly' : 'inactive';
-                const transceiver = this._getTransceiver(rtcSession.rtcPeerConnection.peerConnection, 'video');
+                const transceiver = rtcSession.rtcPeerConnection.getTransceiver('video')
                 if (!transceiver) {
                     continue;
                 }
@@ -149,6 +143,49 @@ registerModel({
             this.messaging.soundEffects.mute.play();
         },
         /**
+         * @param {number[]} targetToken
+         * @param {Object} param1
+         * @param {String} param1.event
+         * @param {Object} [param1.payload]
+         * @param {String} [param1.type] 'server' or 'peerToPeer',
+         *                 'peerToPeer' requires an active RTCPeerConnection
+         */
+        async notifyPeers(targetTokens, { event, payload, type = 'server' }) {
+            if (!targetTokens.length || !this.channel || !this.currentRtcSession) {
+                return;
+            }
+            if (type === 'server') {
+                this.update({
+                    peerNotificationsToSend: insert({
+                        channelId: this.channel.id,
+                        event,
+                        id: getRTCPeerNotificationNextTemporaryId(),
+                        payload,
+                        senderId: this.currentRtcSession.id,
+                        targetTokens
+                    }),
+                });
+                await this._sendPeerNotifications();
+            }
+            if (type === 'peerToPeer') {
+                for (const token of targetTokens) {
+                    const rtcSession = this.messaging.models['RtcSession'].findFromIdentifyingData({ id: token });
+                    if (!rtcSession) {
+                        continue;
+                    }
+                    const rtcDataChannel = rtcSession.rtcDataChannel;
+                    if (!rtcDataChannel || rtcDataChannel.dataChannel.readyState !== 'open') {
+                        continue;
+                    }
+                    rtcDataChannel.dataChannel.send(JSON.stringify({
+                        event,
+                        channelId: this.channel.id,
+                        payload,
+                    }));
+                }
+            }
+        },
+        /**
          * @param {MouseEvent} ev
          */
         onClickActivityNoticeButton(ev) {
@@ -157,8 +194,6 @@ registerModel({
         /**
          * Resets the state of the model and cleanly ends all connections and
          * streams.
-         *
-         * @private
          */
         reset() {
             for (const rtcSession of this.connectedRtcSessions) {
@@ -278,7 +313,7 @@ registerModel({
                     return;
                 }
                 for (const rtcSession of this.connectedRtcSessions) {
-                    await this._updateRemoteTrack(rtcSession.rtcPeerConnection.peerConnection, 'audio', { token: rtcSession.id });
+                    await rtcSession.updateRemoteTrack('audio');
                 }
             }
         },
@@ -366,8 +401,8 @@ registerModel({
          */
         async _callPeer(rtcSession) {
             this._createPeerConnection(rtcSession);
-            for (const trackKind of TRANSCEIVER_ORDER) {
-                await this._updateRemoteTrack(rtcSession.rtcPeerConnection.peerConnection, trackKind, { initTransceiver: true, sessionId: rtcSession.id });
+            for (const trackKind of this.orderedTransceiverNames) {
+                await rtcSession.updateRemoteTrack(trackKind, { initTransceiver: true });
             }
             rtcSession.update({ isCurrentUserInitiatorOfConnectionOffer: true });
         },
@@ -422,7 +457,7 @@ registerModel({
                 if (!event.candidate) {
                     return;
                 }
-                await this._notifyPeers([rtcSession.id], {
+                await this.notifyPeers([rtcSession.id], {
                     event: 'ice-candidate',
                     payload: { candidate: event.candidate },
                 });
@@ -447,14 +482,14 @@ registerModel({
                     return;
                 }
                 this._addLogEntry(rtcSession.id, `sending notification: offer`, { step: 'sending offer' });
-                await this._notifyPeers([rtcSession.id], {
+                await this.notifyPeers([rtcSession.id], {
                     event: 'offer',
                     payload: { sdp: peerConnection.localDescription },
                 });
             };
             peerConnection.ontrack = ({ transceiver, track }) => {
                 this._addLogEntry(rtcSession.id, `received ${track.kind} track`);
-                this._updateExternalSessionTrack(track, rtcSession);
+                rtcSession.updateStream(track);
             };
             const dataChannel = peerConnection.createDataChannel("notifications", { negotiated: true, id: 1 });
             dataChannel.onmessage = (event) => {
@@ -466,7 +501,7 @@ registerModel({
                  * even when it is disabled on the sender-side.
                  */
                 try {
-                    await this._notifyPeers([rtcSession.id], {
+                    await this.notifyPeers([rtcSession.id], {
                         event: 'trackChange',
                         type: 'peerToPeer',
                         payload: {
@@ -490,16 +525,6 @@ registerModel({
                 rtcSession: replace(rtcSession),
             });
             return rtcSession;
-        },
-        /**
-         * @private
-         * @param {RTCPeerConnection} peerConnection
-         * @param {String} trackKind
-         * @returns {RTCRtpTransceiver} the transceiver used for this trackKind.
-         */
-        _getTransceiver(peerConnection, trackKind) {
-            const transceivers = peerConnection.getTransceivers();
-            return transceivers[TRANSCEIVER_ORDER.indexOf(trackKind)];
         },
         /**
          * @private
@@ -571,8 +596,8 @@ registerModel({
                 this._addLogEntry(rtcSession.id, 'offer handling: failed at setting remoteDescription', { error: e });
                 return;
             }
-            await this._updateRemoteTrack(rtcSession.rtcPeerConnection.peerConnection, 'audio', { sessionId: rtcSession.id });
-            await this._updateRemoteTrack(rtcSession.rtcPeerConnection.peerConnection, 'video', { sessionId: rtcSession.id });
+            await rtcSession.updateRemoteTrack('audio');
+            await rtcSession.updateRemoteTrack('video');
 
             let answer;
             try {
@@ -589,7 +614,7 @@ registerModel({
             }
 
             this._addLogEntry(rtcSession.id, `sending notification: answer`, { step: 'sending answer' });
-            await this._notifyPeers([rtcSession.id], {
+            await this.notifyPeers([rtcSession.id], {
                 event: 'answer',
                 payload: { sdp: rtcSession.rtcPeerConnection.peerConnection.localDescription },
             });
@@ -626,50 +651,6 @@ registerModel({
             }
         },
         /**
-         * @private
-         * @param {number[]} targetToken
-         * @param {Object} param1
-         * @param {String} param1.event
-         * @param {Object} [param1.payload]
-         * @param {String} [param1.type] 'server' or 'peerToPeer',
-         *                 'peerToPeer' requires an active RTCPeerConnection
-         */
-        async _notifyPeers(targetTokens, { event, payload, type = 'server' }) {
-            if (!targetTokens.length || !this.channel || !this.currentRtcSession) {
-                return;
-            }
-            if (type === 'server') {
-                this.update({
-                    peerNotificationsToSend: insert({
-                        channelId: this.channel.id,
-                        event,
-                        id: getRTCPeerNotificationNextTemporaryId(),
-                        payload,
-                        senderId: this.currentRtcSession.id,
-                        targetTokens
-                    }),
-                });
-                await this._sendPeerNotifications();
-            }
-            if (type === 'peerToPeer') {
-                for (const token of targetTokens) {
-                    const rtcSession = this.messaging.models['RtcSession'].findFromIdentifyingData({ id: token });
-                    if (!rtcSession) {
-                        continue;
-                    }
-                    const rtcDataChannel = rtcSession.rtcDataChannel;
-                    if (!rtcDataChannel || rtcDataChannel.dataChannel.readyState !== 'open') {
-                        continue;
-                    }
-                    rtcDataChannel.dataChannel.send(JSON.stringify({
-                        event,
-                        channelId: this.channel.id,
-                        payload,
-                    }));
-                }
-            }
-        },
-        /**
          * @param {RtcSession} rtcSession
          * @param {string} [reason]
          */
@@ -686,7 +667,7 @@ registerModel({
                 return;
             }
             this._addLogEntry(rtcSession.id, `calling back to recover ${rtcPeerConnection.peerConnection.iceConnectionState} connection, reason: ${reason}`);
-            await this._notifyPeers([rtcSession.id], {
+            await this.notifyPeers([rtcSession.id], {
                 event: 'disconnect',
             });
             this._removePeer(rtcSession.id);
@@ -895,7 +876,7 @@ registerModel({
             }
             await this._toggleLocalVideoTrack(trackOptions);
             for (const rtcSession of this.connectedRtcSessions) {
-                await this._updateRemoteTrack(rtcSession.rtcPeerConnection.peerConnection, 'video', { sessionId: rtcSession.id });
+                await rtcSession.updateRemoteTrack('video');
             }
             if (!this.currentRtcSession) {
                 return;
@@ -926,31 +907,7 @@ registerModel({
             if (!this.videoTrack) {
                 this.currentRtcSession.removeVideo();
             } else {
-                this._updateExternalSessionTrack(this.videoTrack, this.currentRtcSession);
-            }
-        },
-        /**
-         * Updates the RtcSession with a new track.
-         *
-         * @private
-         * @param {Track} [track]
-         * @param {RtcSession} rtcSession
-         */
-        _updateExternalSessionTrack(track, rtcSession) {
-            const stream = new window.MediaStream();
-            stream.addTrack(track);
-
-            if (track.kind === 'audio') {
-                rtcSession.setAudio({
-                    audioStream: stream,
-                    isSelfMuted: false,
-                    isTalking: false,
-                });
-            }
-            if (track.kind === 'video') {
-                rtcSession.update({
-                    videoStream: stream,
-                });
+                this.currentRtcSession.updateStream(this.videoTrack);
             }
         },
         /**
@@ -964,7 +921,7 @@ registerModel({
                 return;
             }
             this.audioTrack.enabled = !this.currentRtcSession.isMute && this.currentRtcSession.isTalking;
-            await this._notifyPeers(this.connectedRtcSessions.map(rtcSession => rtcSession.id), {
+            await this.notifyPeers(this.connectedRtcSessions.map(rtcSession => rtcSession.id), {
                 event: 'trackChange',
                 type: 'peerToPeer',
                 payload: {
@@ -1028,62 +985,6 @@ registerModel({
                 sendUserVideo: type === 'user-video' && !!videoTrack,
                 sendDisplay: type === 'display' && !!videoTrack,
             });
-        },
-        /**
-         * Updates the track that is broadcasted to the RTCPeerConnection.
-         * This will start new transaction by triggering a negotiationneeded event
-         * on the peerConnection given as parameter.
-         *
-         * negotiationneeded -> offer -> answer -> ...
-         *
-         * @private
-         * @param {RTCPeerConnection} peerConnection
-         * @param {String} trackKind
-         * @param {Object} [param2]
-         * @param {boolean} [param2.initTransceiver]
-         * @param {number} [param2.sessionId]
-         */
-        async _updateRemoteTrack(peerConnection, trackKind, { initTransceiver, sessionId } = {}) {
-            this._addLogEntry(sessionId, `updating ${trackKind} transceiver`);
-            const track = trackKind === 'audio' ? this.audioTrack : this.videoTrack;
-            const fullDirection = track ? 'sendrecv' : 'recvonly';
-            const limitedDirection = track ? 'sendonly' : 'inactive';
-            let transceiverDirection = fullDirection;
-            if (trackKind === 'video') {
-                const focusedSessionId = this.messaging.focusedRtcSession && this.messaging.focusedRtcSession.id;
-                transceiverDirection = !focusedSessionId || focusedSessionId === sessionId ? fullDirection : limitedDirection;
-            }
-            let transceiver;
-            if (initTransceiver) {
-                transceiver = peerConnection.addTransceiver(trackKind);
-            } else {
-                transceiver = this._getTransceiver(peerConnection, trackKind);
-            }
-            if (track) {
-                try {
-                    await transceiver.sender.replaceTrack(track);
-                    transceiver.direction = transceiverDirection;
-                } catch (_e) {
-                    // ignored, the track is probably already on the peerConnection.
-                }
-                return;
-            }
-            try {
-                await transceiver.sender.replaceTrack(null);
-                transceiver.direction = transceiverDirection;
-            } catch (_e) {
-                // ignored, the transceiver is probably already removed
-            }
-            if (trackKind === 'video') {
-                this._notifyPeers([sessionId], {
-                    event: 'trackChange',
-                    type: 'peerToPeer',
-                    payload: {
-                        type: 'video',
-                        state: { isSendingVideo: false },
-                    },
-                });
-            }
         },
         /**
          * @private
@@ -1231,7 +1132,7 @@ registerModel({
             inverse: 'rtcAsConnectedSession',
         }),
         /**
-         * String, peerToken of the current session used to identify him during the peer-to-peer transactions.
+         * String, peerToken of the current session used to identify them during the peer-to-peer transactions.
          */
         currentRtcSession: one('RtcSession', {
             inverse: 'rtcAsCurrentSession',
@@ -1280,6 +1181,15 @@ registerModel({
          */
         logs: attr({
             default: {},
+        }),
+        /**
+         * List of transceivers in ordered for consistent insertion and retrieval order, relevant for
+         * RTCPeerConnection.getTransceivers which returns transceivers in insertion order as per webRTC specifications.
+         */
+        orderedTransceiverNames: attr({
+            default: ['audio', 'video'],
+            readonly: true,
+            required: true,
         }),
         peerNotificationsToSend: many('RtcPeerNotification', {
             isCausal: true,

@@ -61,56 +61,6 @@ registerModel({
             });
         },
         /**
-         * @param {Object} param0
-         * @param {MediaStream} param0.audioStream
-         * @param {boolean} param0.isSelfMuted
-         * @param {boolean} param0.isTalking
-         */
-        async setAudio({ audioStream, isSelfMuted, isTalking }) {
-            const audioElement = this.audioElement || new window.Audio();
-            try {
-                audioElement.srcObject = audioStream;
-            } catch (error) {
-                this.update({ isAudioInError: true });
-                console.error(error);
-            }
-            audioElement.load();
-            if (this.partner && this.partner.volumeSetting) {
-                audioElement.volume = this.partner.volumeSetting.volume;
-            } else if (this.guest && this.guest.volumeSetting) {
-                audioElement.volume = this.guest.volumeSetting.volume;
-            } else {
-                audioElement.volume = this.volume;
-            }
-            audioElement.muted = this.messaging.rtc.currentRtcSession.isDeaf;
-            // Using both autoplay and play() as safari may prevent play() outside of user interactions
-            // while some browsers may not support or block autoplay.
-            audioElement.autoplay = true;
-            this.update({
-                audioElement,
-                audioStream,
-                isSelfMuted,
-                isTalking,
-            });
-            try {
-                await audioElement.play();
-                if (!this.exists()) {
-                    return;
-                }
-                this.update({ isAudioInError: false });
-            } catch (error) {
-                if (typeof error === 'object' && error.name === 'NotAllowedError') {
-                    // Ignored as some browsers may reject play() calls that do not
-                    // originate from a user input.
-                    return;
-                }
-                if (this.exists()) {
-                    this.update({ isAudioInError: true });
-                }
-                console.error(error);
-            }
-        },
-        /**
          * @param {number} volume
          */
         setVolume(volume) {
@@ -197,6 +147,26 @@ registerModel({
             });
         },
         /**
+         * Updates the RtcSession with a new track.
+         *
+         * @param {Track} [track]
+         */
+        updateStream(track) {
+            const stream = new window.MediaStream();
+            stream.addTrack(track);
+
+            if (track.kind === 'audio') {
+                this._setAudio({
+                    audioStream: stream,
+                    isSelfMuted: false,
+                    isTalking: false,
+                });
+            }
+            if (track.kind === 'video') {
+                this.update({ videoStream: stream });
+            }
+        },
+        /**
          * @private
          * @returns {string}
          */
@@ -228,6 +198,60 @@ registerModel({
             }
             return (this.partner && this.messaging.currentPartner === this.partner) ||
                 (this.guest && this.messaging.currentGuest === this.guest);
+        },
+        /**
+         * Updates the track that is broadcasted to the remote of this session.
+         * This will start new transaction by triggering a negotiationneeded event
+         * on the peerConnection given as parameter.
+         *
+         * negotiationneeded -> offer -> answer -> ...
+         *
+         * @param {String} trackKind
+         * @param {Object} [param1]
+         * @param {boolean} [param1.initTransceiver]
+         */
+        async updateRemoteTrack(trackKind, { initTransceiver } = {}) {
+            if (!this.rtcAsConnectedSession) {
+                return;
+            }
+            const track = trackKind === 'audio' ? this.rtcAsConnectedSession.audioTrack : this.rtcAsConnectedSession.videoTrack;
+            const fullDirection = track ? 'sendrecv' : 'recvonly';
+            const limitedDirection = track ? 'sendonly' : 'inactive';
+            let transceiverDirection = fullDirection;
+            if (trackKind === 'video') {
+                transceiverDirection = !this.messaging.focusedRtcSession || this.messaging.focusedRtcSession === this ? fullDirection : limitedDirection;
+            }
+            let transceiver;
+            if (initTransceiver) {
+                transceiver = this.rtcPeerConnection.peerConnection.addTransceiver(trackKind);
+            } else {
+                transceiver = this.rtcPeerConnection.getTransceiver(trackKind);
+            }
+            if (track) {
+                try {
+                    await transceiver.sender.replaceTrack(track);
+                    transceiver.direction = transceiverDirection;
+                } catch (_e) {
+                    // ignored, the track is probably already on the peerConnection.
+                }
+                return;
+            }
+            try {
+                await transceiver.sender.replaceTrack(null);
+                transceiver.direction = transceiverDirection;
+            } catch (_e) {
+                // ignored, the transceiver is probably already removed
+            }
+            if (trackKind === 'video') {
+                this.rtcAsConnectedSession.notifyPeers([this.id], {
+                    event: 'trackChange',
+                    type: 'peerToPeer',
+                    payload: {
+                        type: 'video',
+                        state: { isSendingVideo: false },
+                    },
+                });
+            }
         },
         /**
          * @private
@@ -322,6 +346,57 @@ registerModel({
                 audioStream: clear(),
                 isAudioInError: false,
             });
+        },
+        /**
+         * @private
+         * @param {Object} param0
+         * @param {MediaStream} param0.audioStream
+         * @param {boolean} param0.isSelfMuted
+         * @param {boolean} param0.isTalking
+         */
+        async _setAudio({ audioStream, isSelfMuted, isTalking }) {
+            const audioElement = this.audioElement || new window.Audio();
+            try {
+                audioElement.srcObject = audioStream;
+            } catch (error) {
+                this.update({ isAudioInError: true });
+                console.error(error);
+            }
+            audioElement.load();
+            if (this.partner && this.partner.volumeSetting) {
+                audioElement.volume = this.partner.volumeSetting.volume;
+            } else if (this.guest && this.guest.volumeSetting) {
+                audioElement.volume = this.guest.volumeSetting.volume;
+            } else {
+                audioElement.volume = this.volume;
+            }
+            audioElement.muted = this.messaging.rtc.currentRtcSession.isDeaf;
+            // Using both autoplay and play() as safari may prevent play() outside of user interactions
+            // while some browsers may not support or block autoplay.
+            audioElement.autoplay = true;
+            this.update({
+                audioElement,
+                audioStream,
+                isSelfMuted,
+                isTalking,
+            });
+            try {
+                await audioElement.play();
+                if (!this.exists()) {
+                    return;
+                }
+                this.update({ isAudioInError: false });
+            } catch (error) {
+                if (typeof error === 'object' && error.name === 'NotAllowedError') {
+                    // Ignored as some browsers may reject play() calls that do not
+                    // originate from a user input.
+                    return;
+                }
+                if (this.exists()) {
+                    this.update({ isAudioInError: true });
+                }
+                console.error(error);
+            }
         },
     },
     fields: {

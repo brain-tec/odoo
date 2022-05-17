@@ -104,6 +104,9 @@ class PosOrder(models.Model):
 
         return new_session
 
+    def _get_fields_for_draft_order(self):
+        """This method is here to be overridden in order to add fields that are required for draft orders."""
+        return []
 
     @api.model
     def _process_order(self, order, draft, existing_order):
@@ -809,22 +812,6 @@ class PosOrder(models.Model):
 
         mail = self.env['mail.mail'].sudo().create(mail_values)
         mail.send()
-
-    @api.model
-    def remove_from_ui(self, server_ids):
-        """ Remove orders from the frontend PoS application
-
-        Remove orders from the server by id.
-        :param server_ids: list of the id's of orders to remove from the server.
-        :type server_ids: list.
-        :returns: list -- list of db-ids for the removed orders.
-        """
-        orders = self.search([('id', 'in', server_ids),('state', '=', 'draft')])
-        orders.write({'state': 'cancel'})
-        # TODO Looks like delete cascade is a better solution.
-        orders.mapped('payment_ids').sudo().unlink()
-        orders.sudo().unlink()
-        return orders.ids
 
     @api.model
     def search_paid_order_ids(self, config_id, domain, limit, offset):
