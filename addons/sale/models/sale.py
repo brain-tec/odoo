@@ -331,7 +331,7 @@ class SaleOrder(models.Model):
         for order in self:
             total = 0.0
             for line in order.order_line:
-                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
+                total += (line.price_subtotal * 100)/(100-line.discount) if line.discount != 100 else (line.price_unit * line.product_uom_qty)
             order.amount_undiscounted = total
 
     @api.depends('state')
@@ -433,7 +433,7 @@ class SaleOrder(models.Model):
             # Block if partner only has warning but parent company is blocked
             if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
                 partner = partner.parent_id
-            title = ("Warning for %s") % partner.name
+            title = _("Warning for %s") % partner.name
             message = partner.sale_warn_msg
             warning = {
                     'title': title,
@@ -1265,7 +1265,7 @@ class SaleOrderLine(models.Model):
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
 
     price_reduce = fields.Float(compute='_get_price_reduce', string='Price Reduce', digits='Product Price', readonly=True, store=True)
-    tax_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    tax_id = fields.Many2many('account.tax', string='Taxes', context={'active_test': False})
     price_reduce_taxinc = fields.Monetary(compute='_get_price_reduce_tax', string='Price Reduce Tax inc', readonly=True, store=True)
     price_reduce_taxexcl = fields.Monetary(compute='_get_price_reduce_notax', string='Price Reduce Tax excl', readonly=True, store=True)
 
@@ -1601,8 +1601,15 @@ class SaleOrderLine(models.Model):
         self._compute_tax_id()
 
         if self.order_id.pricelist_id and self.order_id.partner_id:
-            company = self.company_id or self.order_id.company_id
-            vals['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, company)
+            vals['price_unit'] = product._get_tax_included_unit_price(
+                self.company_id or self.order_id.company_id,
+                self.order_id.currency_id,
+                self.order_id.date_order,
+                'sale',
+                fiscal_position=self.order_id.fiscal_position_id,
+                product_price_unit=self._get_display_price(product),
+                product_currency=self.order_id.currency_id
+            )
         self.update(vals)
 
         title = False
@@ -1635,8 +1642,15 @@ class SaleOrderLine(models.Model):
                 uom=self.product_uom.id,
                 fiscal_position=self.env.context.get('fiscal_position')
             )
-            company = self.company_id or self.order_id.company_id
-            self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, company)
+            self.price_unit = product._get_tax_included_unit_price(
+                self.company_id or self.order_id.company_id,
+                self.order_id.currency_id,
+                self.order_id.date_order,
+                'sale',
+                fiscal_position=self.order_id.fiscal_position_id,
+                product_price_unit=self._get_display_price(product),
+                product_currency=self.order_id.currency_id
+            )
 
     def name_get(self):
         result = []
@@ -1654,6 +1668,8 @@ class SaleOrderLine(models.Model):
                 args or [],
                 ['|', ('order_id.name', operator, name), ('name', operator, name)]
             ])
+            line_ids = self._search(args, limit=limit, access_rights_uid=name_get_uid)
+            return models.lazy_name_get(self.browse(line_ids).with_user(name_get_uid))
         return super(SaleOrderLine, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _check_line_unlink(self):

@@ -1905,10 +1905,18 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
         if (width) {
             $img.attr('width', width);
             $img.css('max-width', width + 'px');
+            if (!height) {
+                $img.css('height', 'auto');
+                $img.css('max-height', '100%');
+            }
         }
         if (height) {
             $img.attr('height', height);
             $img.css('max-height', height + 'px');
+            if (!width) {
+                $img.css('width', 'auto');
+                $img.css('max-width', '100%');
+            }
         }
         this.$('> img').remove();
         this.$el.prepend($img);
@@ -2575,9 +2583,21 @@ var BooleanToggle = FieldBoolean.extend({
      */
     _onClick: function (event) {
         event.stopPropagation();
-        this._setValue(!this.value);
-        this.$el.closest(".o_data_row").toggleClass('text-muted', this.value);
+        if (!this.$input.prop('disabled')) {
+            this._setValue(!this.value);
+            this.$el.closest(".o_data_row").toggleClass('text-muted', this.value);
+        }
     },
+
+    /**
+     * The boolean_toggle should only be disabled when there is a readonly modifier
+     * not when the view is in readonly mode
+     */
+    _render: function() {
+        this._super.apply(this, arguments);
+        const isReadonly = this.record.evalModifiers(this.attrs.modifiers).readonly || false;
+        this.$input.prop('disabled', isReadonly);
+    }
 });
 
 var StatInfo = AbstractField.extend({

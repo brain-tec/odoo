@@ -338,7 +338,7 @@ class MailThread(models.AbstractModel):
         cascaded, because link is done through (res_model, res_id). """
         if not self:
             return True
-        self.env['mail.message'].search([('model', '=', self._name), ('res_id', 'in', self.ids)]).sudo().unlink()
+        self.env['mail.message'].sudo().search([('model', '=', self._name), ('res_id', 'in', self.ids)]).unlink()
         res = super(MailThread, self).unlink()
         self.env['mail.followers'].sudo().search(
             [('res_model', '=', self._name), ('res_id', 'in', self.ids)]
@@ -1473,14 +1473,20 @@ class MailThread(models.AbstractModel):
             msg_dict['date'] = stored_date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
 
         if msg_dict['in_reply_to']:
-            parent_ids = self.env['mail.message'].search([('message_id', '=', msg_dict['in_reply_to'])], limit=1)
+            parent_ids = self.env['mail.message'].search(
+                [('message_id', '=', msg_dict['in_reply_to'])],
+                order='create_date DESC, id DESC',
+                limit=1)
             if parent_ids:
                 msg_dict['parent_id'] = parent_ids.id
                 msg_dict['internal'] = parent_ids.subtype_id and parent_ids.subtype_id.internal or False
 
         if msg_dict['references'] and 'parent_id' not in msg_dict:
             references_msg_id_list = tools.mail_header_msgid_re.findall(msg_dict['references'])
-            parent_ids = self.env['mail.message'].search([('message_id', 'in', [x.strip() for x in references_msg_id_list])], limit=1)
+            parent_ids = self.env['mail.message'].search([
+                ('message_id', 'in', [x.strip() for x in references_msg_id_list])],
+                order='create_date DESC, id DESC',
+                limit=1)
             if parent_ids:
                 msg_dict['parent_id'] = parent_ids.id
                 msg_dict['internal'] = parent_ids.subtype_id and parent_ids.subtype_id.internal or False
@@ -1591,8 +1597,11 @@ class MailThread(models.AbstractModel):
         """
         # find normalized emails and exclude aliases (to avoid subscribing alias emails to records)
         normalized_email = tools.email_normalize(email)
+        if not normalized_email:
+            return self.env['res.users']
+
         catchall_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
-        if normalized_email and catchall_domain:
+        if catchall_domain:
             left_part = normalized_email.split('@')[0] if normalized_email.split('@')[1] == catchall_domain.lower() else False
             if left_part:
                 if self.env['mail.alias'].sudo().search_count([('alias_name', '=', left_part)]):
@@ -1878,6 +1887,13 @@ class MailThread(models.AbstractModel):
         if self._context.get('mail_post_autofollow') and partner_ids:
             self.message_subscribe(list(partner_ids))
 
+        # parent management, depending on ``_mail_flat_thread``
+        # ``_mail_flat_thread`` True: no free message. If no parent, find the first
+        # posted message and attach new message to it. If parent, get back to the first
+        # ancestor and attach it. We don't keep hierarchy (one level of threading).
+        # ``_mail_flat_thread`` False: free message = new thread (think of mailing lists).
+        # If parent get up one level to try to flatten threads without completely
+        # removing hierarchy.
         MailMessage_sudo = self.env['mail.message'].sudo()
         if self._mail_flat_thread and not parent_id:
             parent_message = MailMessage_sudo.search([('res_id', '=', self.id), ('model', '=', self._name), ('message_type', '!=', 'user_notification')], order="id ASC", limit=1)
@@ -1885,16 +1901,17 @@ class MailThread(models.AbstractModel):
             # Note that with sudo we will match message with internal subtypes.
             parent_id = parent_message.id if parent_message else False
         elif parent_id:
-            old_parent_id = parent_id
-            parent_message = MailMessage_sudo.search([('id', '=', parent_id), ('parent_id', '!=', False)], limit=1)
-            # avoid loops when finding ancestors
-            processed_list = []
-            if parent_message:
-                new_parent_id = parent_message.parent_id and parent_message.parent_id.id
-                while (new_parent_id and new_parent_id not in processed_list):
-                    processed_list.append(new_parent_id)
-                    parent_message = parent_message.parent_id
-                parent_id = parent_message.id
+            current_ancestor = MailMessage_sudo.search([('id', '=', parent_id), ('parent_id', '!=', False)])
+            if self._mail_flat_thread:
+                if current_ancestor:
+                    # avoid loops when finding ancestors
+                    processed_list = []
+                    while (current_ancestor.parent_id and current_ancestor.parent_id not in processed_list):
+                        processed_list.append(current_ancestor)
+                        current_ancestor = current_ancestor.parent_id
+                    parent_id = current_ancestor.id
+            else:
+                parent_id = current_ancestor.parent_id.id if current_ancestor.parent_id else parent_id
 
         values = dict(msg_kwargs)
         values.update({
@@ -2259,13 +2276,21 @@ class MailThread(models.AbstractModel):
         mail_subject = message.subject or (message.record_name and 'Re: %s' % message.record_name) # in cache, no queries
         # Replace new lines by spaces to conform to email headers requirements
         mail_subject = ' '.join((mail_subject or '').splitlines())
+        # compute references: set references to the parent and add current message just to
+        # have a fallback in case replies mess with Messsage-Id in the In-Reply-To (e.g. amazon
+        # SES SMTP may replace Message-Id and In-Reply-To refers an internal ID not stored in Odoo)
+        message_sudo = message.sudo()
+        if message_sudo.parent_id:
+            references = f'{message_sudo.parent_id.message_id} {message_sudo.message_id}'
+        else:
+            references = message_sudo.message_id
         # prepare notification mail values
         base_mail_values = {
             'mail_message_id': message.id,
             'mail_server_id': message.mail_server_id.id, # 2 query, check acces + read, may be useless, Falsy, when will it be used?
             'auto_delete': mail_auto_delete,
             # due to ir.rule, user have no right to access parent message if message is not published
-            'references': message.parent_id.sudo().message_id if message.parent_id else False,
+            'references': references,
             'subject': mail_subject,
         }
         base_mail_values = self._notify_by_email_add_values(base_mail_values)
@@ -2628,7 +2653,8 @@ class MailThread(models.AbstractModel):
         for group_name, group_func, group_data in groups:
             group_data.setdefault('notification_group_name', group_name)
             group_data.setdefault('notification_is_customer', False)
-            group_data.setdefault('has_button_access', True)
+            is_thread_notification = self._notify_get_recipients_thread_info(msg_vals=msg_vals)['is_thread_notification']
+            group_data.setdefault('has_button_access', is_thread_notification)
             group_button_access = group_data.setdefault('button_access', {})
             group_button_access.setdefault('url', access_link)
             group_button_access.setdefault('title', view_title)
@@ -2648,6 +2674,15 @@ class MailThread(models.AbstractModel):
                 result.append(group_data)
 
         return result
+
+    def _notify_get_recipients_thread_info(self, msg_vals=None):
+        """ Tool method to compute thread info used in ``_notify_classify_recipients``
+        and its sub-methods. """
+        res_model = msg_vals['model'] if msg_vals and 'model' in msg_vals else self._name
+        res_id = msg_vals['res_id'] if msg_vals and 'res_id' in msg_vals else self.ids[0] if self.ids else False
+        return {
+            'is_thread_notification': res_model and (res_model != 'mail.thread') and res_id
+        }
 
     def _notify_get_reply_to(self, default=None, records=None, company=None, doc_names=None):
         """ Returns the preferred reply-to email address when replying to a thread
@@ -2712,17 +2747,47 @@ class MailThread(models.AbstractModel):
                 if catchall:
                     result_email.update(dict((rid, '%s@%s' % (catchall, alias_domain)) for rid in left_ids))
 
-            # compute name of reply-to - TDE tocheck: quotes and stuff like that
-            company_name = company.name if company else self.env.company.name
-            for res_id in result_email.keys():
-                name = '%s%s%s' % (company_name, ' ' if doc_names.get(res_id) else '', doc_names.get(res_id, ''))
-                result[res_id] = tools.formataddr((name, result_email[res_id]))
+            for res_id in result_email:
+                result[res_id] = self._notify_get_reply_to_formatted_email(
+                    result_email[res_id],
+                    doc_names.get(res_id) or '',
+                    company or self.env.company
+                )
 
         left_ids = set(_res_ids) - set(result_email)
         if left_ids:
             result.update(dict((res_id, default) for res_id in left_ids))
 
         return result
+
+    def _notify_get_reply_to_formatted_email(self, record_email, record_name, company):
+        """ Compute formatted email for reply_to and try to avoid refold issue
+        with python that splits the reply-to over multiple lines. It is due to
+        a bad management of quotes (missing quotes after refold). This appears
+        therefore only when having quotes (aka not simple names, and not when
+        being unicode encoded).
+
+        To avoid that issue when formataddr would return more than 78 chars we
+        return a simplified name/email to try to stay under 78 chars. If not
+        possible we return only the email and skip the formataddr which causes
+        the issue in python. We do not use hacks like crop the name part as
+        encoding and quoting would be error prone.
+        """
+        # address itself is too long for 78 chars limit: return only email
+        if len(record_email) >= 78:
+            return record_email
+
+        company_name = company.name if company else self.env.company.name
+
+        # try company_name + record_name, or record_name alone (or company_name alone)
+        name = f"{company_name} {record_name}" if record_name else company_name
+
+        formatted_email = tools.formataddr((name, record_email))
+        if len(formatted_email) > 78:
+            formatted_email = tools.formataddr((record_name or company_name, record_email))
+        if len(formatted_email) > 78:
+            formatted_email = record_email
+        return formatted_email
 
     @api.model
     def _notify_get_reply_to_on_records(self, default=None, records=None, company=None, doc_names=None):

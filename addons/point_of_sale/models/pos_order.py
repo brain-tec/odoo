@@ -519,6 +519,7 @@ class PosOrder(models.Model):
             for line in order.lines.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not float_is_zero(l.qty, precision_rounding=l.product_id.uom_id.rounding)):
                 moves |= Move.create({
                     'name': line.name,
+                    'company_id': line.company_id.id,
                     'product_uom': line.product_id.uom_id.id,
                     'picking_id': order_picking.id if line.qty >= 0 else return_picking.id,
                     'picking_type_id': picking_type.id if line.qty >= 0 else return_pick_type.id,
@@ -672,7 +673,6 @@ class PosOrder(models.Model):
             'datas': ticket,
             'res_model': 'pos.order',
             'res_id': orders[:1].id,
-            'store_fname': filename,
             'mimetype': 'image/jpeg',
         })
         template_data = {
@@ -691,7 +691,6 @@ class PosOrder(models.Model):
                 'name': filename,
                 'type': 'binary',
                 'datas': base64.b64encode(report[0]),
-                'store_fname': filename,
                 'res_model': 'pos.order',
                 'res_id': orders[:1].id,
                 'mimetype': 'application/x-pdf'
@@ -865,7 +864,7 @@ class PosOrderLineLot(models.Model):
     _description = "Specify product lot/serial number in pos order line"
     _rec_name = "lot_name"
 
-    pos_order_line_id = fields.Many2one('pos.order.line')
+    pos_order_line_id = fields.Many2one('pos.order.line', auto_join=True)
     order_id = fields.Many2one('pos.order', related="pos_order_line_id.order_id", readonly=False)
     lot_name = fields.Char('Lot Name')
     product_id = fields.Many2one('product.product', related='pos_order_line_id.product_id', readonly=False)

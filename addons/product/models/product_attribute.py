@@ -39,7 +39,7 @@ class ProductAttribute(models.Model):
     @api.depends('attribute_line_ids.active', 'attribute_line_ids.product_tmpl_id')
     def _compute_products(self):
         for pa in self:
-            pa.product_tmpl_ids = pa.attribute_line_ids.product_tmpl_id
+            pa.with_context(active_test=False).product_tmpl_ids = pa.attribute_line_ids.product_tmpl_id
 
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pa: pa.create_variant != 'no_variant')
@@ -447,7 +447,10 @@ class ProductTemplateAttributeValue(models.Model):
                         _("You cannot change the product of the value %s set on product %s.") %
                         (ptav.display_name, ptav.product_tmpl_id.display_name)
                     )
-        return super(ProductTemplateAttributeValue, self).write(values)
+        res = super(ProductTemplateAttributeValue, self).write(values)
+        if 'exclude_for' in values:
+            self.product_tmpl_id._create_variant_ids()
+        return res
 
     def unlink(self):
         """Override to:
@@ -499,7 +502,9 @@ class ProductTemplateAttributeValue(models.Model):
 
     def _get_combination_name(self):
         """Exclude values from single value lines or from no_variant attributes."""
-        return ", ".join([ptav.name for ptav in self._without_no_variant_attributes()._filter_single_value_lines()])
+        ptavs = self._without_no_variant_attributes().with_prefetch(self._prefetch_ids)
+        ptavs = ptavs._filter_single_value_lines().with_prefetch(self._prefetch_ids)
+        return ", ".join([ptav.name for ptav in ptavs])
 
     def _filter_single_value_lines(self):
         """Return `self` with values from single value lines filtered out

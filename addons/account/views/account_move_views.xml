@@ -706,7 +706,7 @@
                                         <field name="quantity"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
                                         <field name="price_unit" string="Price"/>
-                                        <field name="discount" string="Disc.%" groups="base.group_no_one" optional="show"/>
+                                        <field name="discount" string="Disc.%" optional="hide"/>
                                         <field name="tax_ids" widget="many2many_tags"
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id)]"
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
@@ -820,6 +820,8 @@
                                         <field name="account_internal_type" invisible="1"/>
                                         <field name="always_set_currency_id" invisible="1"/>
                                     </kanban>
+
+                                    <!-- Form view to cover mobile use -->
                                     <form>
                                         <sheet>
                                             <field name="display_type" invisible="1"/>
@@ -827,11 +829,13 @@
                                             <group>
                                                 <field name="partner_id" invisible="1"/>
                                                 <field name="company_id" invisible="1"/>
+                                                <field name="debit" invisible="1"/>
+                                                <field name="credit" invisible="1"/>
                                                 <field name="product_id" widget="many2one_barcode"/>
                                                 <field name="quantity"/>
                                                 <field name="product_uom_id" groups="uom.group_uom"/>
                                                 <field name="price_unit"/>
-                                                <field name="discount" groups="product.group_discount_per_so_line"/>
+                                                <field name="discount" string="Disc.%"/>
                                                 <field name="currency_id" invisible="1"/>
                                             </group>
                                             <group>
@@ -844,6 +848,10 @@
                                             <label for="name" string="Section" attrs="{'invisible': [('display_type', '!=', 'line_section')]}"/>
                                             <label for="name" string="Note" attrs="{'invisible': [('display_type', '!=', 'line_note')]}"/>
                                             <field name="name" widget="text"/>
+                                            <group>
+                                                <field name="price_subtotal" string="Subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                                <field name="price_total" string="Total" groups="account.group_show_line_subtotals_tax_included"/>
+                                            </group>
                                         </sheet>
                                     </form>
                                 </field>
@@ -1010,7 +1018,7 @@
                                 <group id="other_tab_entry_group">
                                     <group name="misc_group">
                                         <field name="auto_post"
-                                               attrs="{'invisible': [('type', '!=', 'entry')], 'readonly': [('reversed_entry_id', '!=', False)]}"/>
+                                               attrs="{'invisible': [('type', '!=', 'entry')]}"/>
                                         <field name="reversed_entry_id"
                                                attrs="{'invisible': ['|', ('reversed_entry_id', '=', False), ('type', '!=', 'entry')]}"/>
                                         <field name="to_check"

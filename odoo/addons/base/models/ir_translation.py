@@ -506,13 +506,13 @@ class IrTranslation(models.Model):
 
         # collect translated field records (model_ids) and other translations
         trans_ids = []
-        model_ids = defaultdict(list)
-        model_fields = defaultdict(list)
+        model_ids = defaultdict(set)
+        model_fields = defaultdict(set)
         for trans in self:
-            if trans.type == 'model':
+            if trans.type in ('model', 'model_terms'):
                 mname, fname = trans.name.split(',')
-                model_ids[mname].append(trans.res_id)
-                model_fields[mname].append(fname)
+                model_ids[mname].add(trans.res_id)
+                model_fields[mname].add(fname)
             else:
                 trans_ids.append(trans.id)
 
@@ -525,9 +525,13 @@ class IrTranslation(models.Model):
         # check for read/write access on translated field records
         fmode = 'read' if mode == 'read' else 'write'
         for mname, ids in model_ids.items():
-            records = self.env[mname].browse(ids)
+            records = self.env[mname].browse(ids).exists()
             records.check_access_rights(fmode)
             records.check_field_access_rights(fmode, model_fields[mname])
+            if mode == 'create' and set(records._ids) != ids:
+                raise ValidationError(_("Creating translation on non existing records"))
+            if not records:
+                continue
             records.check_access_rule(fmode)
 
     @api.constrains('type', 'name', 'value')

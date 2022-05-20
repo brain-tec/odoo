@@ -111,6 +111,41 @@ class TestMessagePost(BaseFunctionalTest, TestRecipients, MockEmails):
         self.assertNotIn('body', emp_info['button_access']['url'])
         self.assertNotIn('subject', emp_info['button_access']['url'])
 
+        # test when notifying on non-records (e.g. MailThread._message_notify())
+        for model, res_id in ((self.test_record._name, False),
+                              (self.test_record._name, 0),  # browse(0) does not return a valid recordset
+                              (False, self.test_record.id),
+                              (False, False),
+                              ('mail.thread', False),
+                              ('mail.thread', self.test_record.id)):
+            msg_vals.update({
+                'model': model,
+                'res_id': res_id,
+            })
+            # note that msg_vals wins over record on which method is called
+            notify_msg_vals = dict(msg_vals, **link_vals)
+            classify_res = self.test_record._notify_classify_recipients(
+                pdata, 'Test', msg_vals=notify_msg_vals)
+            # find back information for partner
+            partner_info = next(item for item in classify_res if item['recipients'] == self.partner_1.ids)
+            emp_info = next(item for item in classify_res if item['recipients'] == self.partner_employee.ids)
+            # check there is no access button
+            self.assertFalse(partner_info['has_button_access'])
+            self.assertFalse(emp_info['has_button_access'])
+
+            # test on falsy records (False model cannot be browsed, skipped)
+            if model:
+                record_falsy = self.env[model].browse(res_id)
+                classify_res = record_falsy._notify_classify_recipients(
+                    pdata, 'Test', msg_vals=notify_msg_vals)
+                # find back information for partner
+                partner_info = next(item for item in classify_res if item['recipients'] == self.partner_1.ids)
+                emp_info = next(item for item in classify_res if item['recipients'] == self.partner_employee.ids)
+                # check there is no access button
+                self.assertFalse(partner_info['has_button_access'])
+                self.assertFalse(emp_info['has_button_access'])
+
+
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_post_needaction(self):
         (self.user_employee | self.user_admin).write({'notification_type': 'inbox'})
@@ -175,7 +210,7 @@ class TestMessagePost(BaseFunctionalTest, TestRecipients, MockEmails):
             [[self.partner_1], [self.partner_2], [self.user_admin.partner_id]],
             reply_to=msg.reply_to, subject=_subject,
             body_content=_body, body_alt_content=_body_alt,
-            references=False)
+            references=msg.message_id)
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_post_notifications_keep_emails(self):
@@ -246,27 +281,51 @@ class TestMessagePost(BaseFunctionalTest, TestRecipients, MockEmails):
         self.assertEqual(parent_msg.partner_ids, self.env['res.partner'])
         self.assertEmails(self.user_employee.partner_id, [])
 
+        # post a first reply
+        self._init_mock_build_email()
         msg = self.test_record.with_user(self.user_employee).message_post(
             body='<p>Test Answer</p>',
-            message_type='comment', subtype='mt_comment',
+            message_type='comment',
+            subject='Welcome',
+            subtype='mt_comment',
+            parent_id=parent_msg.id,
             partner_ids=[self.partner_1.id],
-            parent_id=parent_msg.id)
+        )
 
         self.assertEqual(msg.parent_id.id, parent_msg.id)
         self.assertEqual(msg.partner_ids, self.partner_1)
         self.assertEqual(parent_msg.partner_ids, self.env['res.partner'])
 
-        # check notification emails: references
-        self.assertEmails(self.user_employee.partner_id, [[self.partner_1]], ref_content='openerp-%d-mail.test.simple' % self.test_record.id)
-        # self.assertTrue(all('openerp-%d-mail.test.simple' % self.test_record.id in m['references'] for m in self._mails))
+        # check notification emails, among other references
+        self.assertEmails(
+            self.user_employee.partner_id,
+            [[self.partner_1]],
+            subject='Welcome',
+            ref_content='openerp-%d-mail.test.simple' % self.test_record.id,
+            # references should be sorted from the oldest to the newest
+            references='%s %s' % (parent_msg.message_id, msg.message_id),
+        )
 
+        # post a reply to the reply: check parent is the first one
+        self._init_mock_build_email()
         new_msg = self.test_record.with_user(self.user_employee).message_post(
             body='<p>Test Answer Bis</p>',
-            message_type='comment', subtype='mt_comment',
-            parent_id=msg.id)
+            message_type='comment',
+            subtype='mt_comment',
+            parent_id=msg.id,
+            partner_ids=[self.partner_2.id],
+        )
 
         self.assertEqual(new_msg.parent_id.id, parent_msg.id, 'message_post: flatten error')
-        self.assertEqual(new_msg.partner_ids, self.env['res.partner'])
+        self.assertEqual(new_msg.partner_ids, self.partner_2)
+        self.assertEmails(
+            self.user_employee.partner_id, [[self.partner_2]],
+            body_content='<p>Test Answer Bis</p>',
+            reply_to=msg.reply_to,
+            subject='Re: %s' % self.test_record.name,
+            ref_content='openerp-%d-mail.test.simple' % self.test_record.id,
+            references='%s %s' % (parent_msg.message_id, new_msg.message_id),
+        )
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_post_email_with_multiline_subject(self):

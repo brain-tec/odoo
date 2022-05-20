@@ -353,6 +353,64 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('boolean toggle widget is not disabled in readonly mode', async function (assert) {
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form><field name="bar" widget="boolean_toggle"/></form>',
+            res_id: 5,
+        });
+
+        assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
+        assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
+        await testUtils.dom.click(form.$('.o_boolean_toggle input'));
+        assert.ok(form.$('.o_boolean_toggle input')[0].checked);
+        form.destroy();
+    });
+
+    QUnit.test('boolean toggle widget is disabled with a readonly attribute', async function (assert) {
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form><field name="bar" widget="boolean_toggle" readonly="1"/></form>',
+            res_id: 5,
+        });
+
+        assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
+        await testUtils.dom.click(form.$buttons.find('.o_form_button_edit'));
+
+        assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
+        await testUtils.dom.click(form.$('.o_boolean_toggle input'));
+        assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
+        form.destroy();
+    });
+
+    QUnit.test('boolean toggle widget is enabled in edit mode', async function (assert) {
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form><field name="bar" widget="boolean_toggle"/></form>',
+            res_id: 5,
+        });
+
+        assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
+        await testUtils.dom.click(form.$buttons.find('.o_form_button_edit'));
+
+        assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
+        await testUtils.dom.click(form.$('.o_boolean_toggle input'));
+        assert.ok(form.$('.o_boolean_toggle input')[0].checked);
+        form.destroy();
+    });
+
     QUnit.module('FieldToggleButton');
 
     QUnit.test('use toggle_button in list view', async function (assert) {
@@ -2543,6 +2601,48 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('image fields are correctly rendered with one dimension set', async function (assert) {
+        assert.expect(6);
+
+        this.data.partner.fields.picture = { string: 'Picture', type: 'binary' };
+        this.data.partner.records[0].__last_update = '2017-02-08 10:00:00';
+        this.data.partner.records[0].document = 'myimage1';
+        this.data.partner.records[0].picture = 'myimage2';
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                '<field name="document" widget="image" options="{\'size\': [180, 0]}"/> ' +
+                '<field name="picture" widget="image" options="{\'size\': [0, 270]}"/> ' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (route.startsWith('data:image/png;base64,myimage')) {
+                    return Promise.resolve('wow');
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.containsOnce(form, 'div[name="document"] > img', "the widget should contain an image");
+        assert.hasAttrValue(form.$('div[name="document"] > img'), 'width', "180",
+            "the image should correctly set its attributes");
+        const image1Style = form.$('div[name="document"] > img').attr('style');
+        assert.ok(['max-width: 180px', 'height: auto', 'max-height: 100%'].every(e => image1Style.includes(e)),
+            "the image should correctly set its style");
+
+        assert.containsOnce(form, 'div[name="picture"] > img', "the widget should contain an image");
+        assert.hasAttrValue(form.$('div[name="picture"] > img'), 'height', "270",
+            "the image should correctly set its attributes");
+        const image2Style = form.$('div[name="picture"] > img').attr('style');
+        assert.ok(['max-height: 270px', 'width: auto', 'max-width: 100%'].every(e => image2Style.includes(e)),
+            "the image should correctly set its style");
+
+        form.destroy();
+    });
+
     QUnit.test('image fields in subviews are loaded correctly', async function (assert) {
         assert.expect(6);
 
@@ -3719,6 +3819,30 @@ QUnit.module('basic_fields', {
         core._t.database.parameters = originalParameters;
 
         form.destroy();
+    });
+
+    QUnit.test('focused date field should cause no error on destroy', async function (assert) {
+        assert.expect(2);
+
+        var originalParameters = _.clone(core._t.database.parameters);
+        _.extend(core._t.database.parameters, {date_format: '%d.%m:%Y'});
+
+        var list = await createView({
+            View: ListView,
+            model: 'partner',
+            data: this.data,
+            arch: '<tree editable="top"><field name="date"/></tree>',
+            domain: [(1, '=', 0)],
+            context: {'default_date': '2020-01-20 00:00:00'},
+        });
+
+        await testUtils.dom.click(list.$('.o_list_button_add'));
+        assert.containsOnce(list, '.o_data_row');
+        await testUtils.fields.triggerKeydown($(document.activeElement), 'escape');
+        assert.containsNone(list, '.o_data_row');
+
+        list.destroy();
+        core._t.database.parameters = originalParameters;
     });
 
     QUnit.module('FieldDatetime');

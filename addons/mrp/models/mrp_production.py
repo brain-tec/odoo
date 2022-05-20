@@ -6,7 +6,7 @@ from collections import defaultdict
 from itertools import groupby
 
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import date_utils, float_compare, float_round, float_is_zero
 
 
@@ -353,11 +353,12 @@ class MrpProduction(models.Model):
                 else:
                     production.state = 'done'
             elif production.move_finished_ids.filtered(lambda m: m.state not in ('cancel', 'done') and m.product_id.id == production.product_id.id)\
-                 and (production.qty_produced >= production.product_qty)\
+                 and (float_compare(production.qty_produced, production.product_qty, precision_rounding=production.product_uom_id.rounding) >= 0)\
                  and (not production.routing_id or all(wo_state in ('cancel', 'done') for wo_state in production.workorder_ids.mapped('state'))):
                 production.state = 'to_close'
             elif production.workorder_ids and any(wo_state in ('progress') for wo_state in production.workorder_ids.mapped('state'))\
-                 or production.qty_produced > 0 and production.qty_produced < production.product_qty:
+                 or float_compare(production.qty_produced, 0, precision_rounding=production.product_uom_id.rounding) > 0 \
+                    and float_compare(production.qty_produced, production.product_qty, precision_rounding=production.product_uom_id.rounding) < 0:
                 production.state = 'progress'
             elif production.workorder_ids:
                 production.state = 'planned'
@@ -495,6 +496,13 @@ class MrpProduction(models.Model):
         self.move_raw_ids.update({'picking_type_id': self.picking_type_id})
         self.location_src_id = self.picking_type_id.default_location_src_id.id or location.id
         self.location_dest_id = self.picking_type_id.default_location_dest_id.id or location.id
+
+    @api.constrains('product_id', 'move_raw_ids')
+    def _check_production_lines(self):
+        for production in self:
+            for move in production.move_raw_ids:
+                if production.product_id == move.product_id:
+                    raise ValidationError(_("The component %s should not be the same as the product to produce.") % production.product_id.display_name)
 
     def write(self, vals):
         res = super(MrpProduction, self).write(vals)

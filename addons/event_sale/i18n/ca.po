@@ -13,6 +13,7 @@
 # M Palau <mpalau@tda.ad>, 2020
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2021
 # jabelchi, 2021
+# marcescu, 2022
 # 
 msgid ""
 msgstr ""
@@ -20,7 +21,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-07 07:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:10+0000\n"
-"Last-Translator: jabelchi, 2021\n"
+"Last-Translator: marcescu, 2022\n"
 "Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,6 +74,8 @@ msgid ""
 "Choose an event ticket and it will automatically create a registration for "
 "this event ticket."
 msgstr ""
+"Trieu un tiquet d'esdeveniment i crearà automàticament un registre per a "
+"aquest tiquet d'esdeveniment."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__company_id
@@ -82,7 +85,7 @@ msgstr "Companyia"
 #. module: event_sale
 #: model:ir.actions.act_window,name:event_sale.event_configurator_action
 msgid "Configure an event"
-msgstr ""
+msgstr "Configura un esdeveniment"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__create_uid
@@ -119,12 +122,12 @@ msgstr "Nom a mostrar"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_registration_editor
 msgid "Edit Attendee Details on Sales Confirmation"
-msgstr ""
+msgstr "Edita els detalls de l'assistent sobre la confirmació de les vendes"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_registration_editor_line
 msgid "Edit Attendee Line on Sales Confirmation"
-msgstr ""
+msgstr "Edita la línia d'assistència en la confirmació de vendes"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__editor_id
@@ -154,7 +157,7 @@ msgstr "Categoria d'esdeveniment"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_event_configurator
 msgid "Event Configurator"
-msgstr ""
+msgstr "Configurador d'esdeveniments"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_form_view
@@ -181,7 +184,7 @@ msgstr "Inscripcions a esdeveniments"
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__event_ticket_id
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_ticket_id
 msgid "Event Ticket"
-msgstr ""
+msgstr "Tiquet d'esdeveniment"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_product_product__event_ticket_ids
@@ -191,7 +194,7 @@ msgstr "Tiquets d'esdeveniment"
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_form_view
 msgid "Event's Ticket"
-msgstr ""
+msgstr "Tiquet de l'esdeveniment"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_product_template_form
@@ -207,7 +210,7 @@ msgstr "Lliure"
 #. module: event_sale
 #: model:event.event.ticket,name:event_sale.event_4_ticket_1
 msgid "General Admission"
-msgstr ""
+msgstr "Admissió general"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__id
@@ -229,7 +232,7 @@ msgstr ""
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__is_expired
 msgid "Is Expired"
-msgstr ""
+msgstr "Està caducat"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_product_product__event_ok
@@ -304,7 +307,7 @@ msgstr "Nom"
 #: code:addons/event_sale/models/event.py:0
 #, python-format
 msgid "No more available seats for this ticket"
-msgstr ""
+msgstr "No hi ha més seients disponibles per a aquest tiquet"
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:0
@@ -390,7 +393,7 @@ msgstr "Registre"
 #: code:addons/event_sale/models/event.py:0
 #, python-format
 msgid "Registration for %s"
-msgstr ""
+msgstr "Registre per %s"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__registration_ids
@@ -433,7 +436,7 @@ msgstr ""
 #. module: event_sale
 #: model:event.type,name:event_sale.event_type_data_sale
 msgid "Sell Online"
-msgstr ""
+msgstr "Venda en línia"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
@@ -460,7 +463,7 @@ msgstr "Estàndard "
 #: code:addons/event_sale/models/event.py:0
 #, python-format
 msgid "The registration must be paid"
-msgstr ""
+msgstr "Cal pagar el registre"
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__campaign_id
@@ -468,11 +471,15 @@ msgid ""
 "This is a name that helps you keep track of your different campaign efforts,"
 " e.g. Fall_Drive, Christmas_Special"
 msgstr ""
+"Es tracta d'un nom que l'ajuda a realitzar un seguiment de les seves "
+"diferents campanyes, per exemple, Fall_Drive, Christmas_Special"
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__medium_id
 msgid "This is the method of delivery, e.g. Postcard, Email, or Banner Ad"
 msgstr ""
+"Aquest és el mètode de lliurament, per exemple, targeta postal, correu "
+"electrònic o anunci publicitari"
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__source_id
@@ -480,6 +487,8 @@ msgid ""
 "This is the source of the link, e.g. Search Engine, another domain, or name "
 "of email list"
 msgstr ""
+"Aquesta és la font de l'enllaç, per exemple, el motor de cerca, un altre "
+"domini, o el nom de la llista de correu electrònic"
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:0
@@ -537,7 +546,7 @@ msgstr "Ilimitat"
 #: model:event.event.ticket,name:event_sale.event_0_ticket_2
 #: model:event.event.ticket,name:event_sale.event_2_ticket_2
 msgid "VIP"
-msgstr ""
+msgstr "VIP"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
@@ -547,9 +556,9 @@ msgstr "doneu detalls sobre els registres"
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "reserved +"
-msgstr ""
+msgstr "reservat +"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "unconfirmed"
-msgstr ""
+msgstr "no confirmat"

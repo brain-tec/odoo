@@ -33,7 +33,8 @@ import operator
 import pytz
 import re
 import uuid
-from collections import defaultdict, MutableMapping, OrderedDict
+from collections import defaultdict, OrderedDict
+from collections.abc import MutableMapping
 from contextlib import closing
 from inspect import getmembers, currentframe
 from operator import attrgetter, itemgetter
@@ -876,7 +877,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                         # a comma-separated list of xids in a single cell
                         if import_compatible and field.type == 'many2many' and len(path) > 1 and path[1] == 'id':
                             xml_ids = [xid for _, xid in value.__ensure_xml_id()]
-                            current[i] = ','.join(xml_ids) or False
+                            current[i] = ','.join(xml_ids)
                             continue
 
                         # recursively export the fields that follow name; use
@@ -892,7 +893,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                             # append the other lines at the end
                             lines += lines2[1:]
                         else:
-                            current[i] = False
+                            current[i] = ''
 
         # if any xid should be exported, only do so at toplevel
         if _is_toplevel_call and any(f[-1] == 'id' for f in fields):
@@ -3368,6 +3369,7 @@ Fields:
             return True
 
         self.check_access_rights('unlink')
+        self.check_access_rule('unlink')
         self._check_concurrency()
 
         # mark fields that depend on 'self' to recompute them after 'self' has
@@ -3376,8 +3378,6 @@ Fields:
         self.modified(self._fields, before=True)
 
         with self.env.norecompute():
-            self.check_access_rule('unlink')
-
             cr = self._cr
             Data = self.env['ir.model.data'].sudo().with_context({})
             Defaults = self.env['ir.default'].sudo()
@@ -4084,11 +4084,15 @@ Fields:
             FROM {0} node
             WHERE node.id IN %s
             AND child.parent_path LIKE concat(node.parent_path, '%%')
-            RETURNING child.id
+            RETURNING child.id, child.parent_path
         """
         cr.execute(query.format(self._table), [prefix, tuple(self.ids)])
-        modified_ids = {row[0] for row in cr.fetchall()}
-        self.browse(modified_ids).modified(['parent_path'])
+
+        # update the cache of updated nodes, and determine what to recompute
+        updated = dict(cr.fetchall())
+        records = self.browse(updated)
+        self.env.cache.update(records, self._fields['parent_path'], updated.values())
+        records.modified(['parent_path'])
 
     def _load_records_write(self, values):
         self.write(values)
@@ -4141,6 +4145,14 @@ Fields:
                 to_create.append(data)
                 continue
             d_id, d_module, d_name, d_model, d_res_id, d_noupdate, r_id = row
+            if self._name != d_model:
+                _logger.warning((
+                    "For external id %s "
+                    "when trying to create/update a record of model %s "
+                    "found record of different model %s (%s)"
+                    "\nUpdating record %s of target model %s"),
+                    xml_id, self._name, d_model, d_id, d_id, self._name
+                )
             record = self.browse(d_res_id)
             if update and d_noupdate:
                 data['record'] = record
@@ -6296,9 +6308,9 @@ Fields:
 
         return result
 
-collections.Set.register(BaseModel)
+collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have __reversed__, index or count
-collections.Sequence.register(BaseModel)
+collections.abc.Sequence.register(BaseModel)
 
 class RecordCache(MutableMapping):
     """ A mapping from field names to values, to read and update the cache of a record. """

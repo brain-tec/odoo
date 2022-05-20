@@ -81,7 +81,8 @@ class ProductPricelist(models.Model):
 
     def _check_website_pricelist(self):
         for website in self.env['website'].search([]):
-            if not website.pricelist_ids:
+            # sudo() to be able to read pricelists/website from another company
+            if not website.sudo().pricelist_ids:
                 raise UserError(_("With this action, '%s' website would not have any pricelist available.") % (website.name))
 
     def _is_available_on_website(self, website_id):
@@ -338,11 +339,11 @@ class ProductTemplate(models.Model):
         :rtype: recordset of 'product.template' or recordset of 'product.product'
         """
         self.ensure_one()
-        if self.image_1920:
+        if self.image_128:
             return self
         variant = self.env['product.product'].browse(self._get_first_possible_variant_id())
         # if the variant has no image anyway, spare some queries by using template
-        return variant if variant.image_variant_1920 else self
+        return variant if variant.image_variant_128 else self
 
     def _get_current_company_fallback(self, **kwargs):
         """Override: if a website is set on the product or given, fallback to
@@ -477,3 +478,7 @@ class Product(models.Model):
         # [1:] to remove the main image from the template, we only display
         # the template extra images here
         return variant_images + self.product_tmpl_id._get_images()[1:]
+
+    def _is_add_to_cart_allowed(self):
+        self.ensure_one()
+        return self.user_has_groups('base.group_system') or (self.sale_ok and self.website_published)

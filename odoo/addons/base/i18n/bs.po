@@ -9,7 +9,7 @@
 # Igor Krizanovic <krizanovic.igor@gmail.com>, 2020
 # Martin Trigaux, 2020
 # Boško Stojaković <bluesoft83@gmail.com>, 2020
-# Ervin Cerović, 2021
+# Ervin Cerović, 2022
 # 
 msgid ""
 msgstr ""
@@ -17,7 +17,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Ervin Cerović, 2021\n"
+"Last-Translator: Ervin Cerović, 2022\n"
 "Language-Team: Bosnian (https://www.transifex.com/odoo/teams/41243/bs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,6 +38,15 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"    Vrsta računa\\Šablon kontnog plana\\PDV\\Kategorija pomoćnog računovodstva\\Knjiga vaučera za upravljačko računovodstvo\\Knjiga vaučera za finansijsko računovodstvo\n"
+"\n"
+"   Dodajte podatke kineske provincije\n"
+"\n"
+"   Dodajte kontni plan za mala preduzeća\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_kitchen_printer
@@ -62,6 +71,16 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"\n"
+"Finansijski izvještaji za Austriju.\n"
+"================================\n"
+"\n"
+"    * Definira sljedeće izvještaje:\n"
+"        * Dobit/gubitak (§ 231 UGB Gesamtkostenverfahren)\n"
+"        * Bilans stanja (§ 224 UGB)\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_invoice_bba
@@ -7236,7 +7255,7 @@ msgstr ""
 #: model:ir.model.fields,help:base.field_res_country_state__name
 msgid ""
 "Administrative divisions of a country. E.g. Fed. State, Departement, Canton"
-msgstr "Administrativna podjela države. (federacije, republike, kantoni...)"
+msgstr "Administrativna podjela države. npr. federacije, republike, kantoni"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0 code:addons/base/models/ir_model.py:0
@@ -7960,7 +7979,7 @@ msgstr "Čarobnjak automatskog spajanja"
 #. module: base
 #: model:ir.model,name:base.model_ir_autovacuum
 msgid "Automatic Vacuum"
-msgstr ""
+msgstr "Automatski vakuum"
 
 #. module: base
 #: code:addons/base/models/ir_module.py:0
@@ -8161,6 +8180,8 @@ msgstr "Žiro račun"
 msgid ""
 "Bank account type: Normal or IBAN. Inferred from the bank account number."
 msgstr ""
+"Vrsta bankovnog računa: normalni ili IBAN. Zaključuje se iz broja bankovnog "
+"računa."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_company__bank_ids
@@ -8303,7 +8324,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_batch_payment
 msgid "Batch Payment"
-msgstr ""
+msgstr "Grupno plaćanje"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_country__name_position__before
@@ -9309,7 +9330,7 @@ msgstr "Podatci kompanije"
 #. module: base
 #: model:ir.model,name:base.model_base_document_layout
 msgid "Company Document Layout"
-msgstr ""
+msgstr "Izgled dokumenta firme"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__favicon
@@ -9664,8 +9685,8 @@ msgstr "Vrijednost konteksta"
 msgid ""
 "Context dictionary as Python expression, empty by default (Default: {})"
 msgstr ""
-"Riječnik (dictionary) konteksta kao Python izraz, početna vrijednost je "
-"prazno (Zadano: {})"
+"Riječnik konteksta kao Python izraz, početna vrijednost je prazno (Zadano: "
+"{})"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract_sign
@@ -13236,8 +13257,8 @@ msgid ""
 "Helps you manage your inventory and main stock operations: delivery orders, "
 "receptions, etc."
 msgstr ""
-"Pomaže Vam u upravljanju popisa zalihe (inventure) i glavnim operacijama "
-"zalihe: nalozi isporuke, prijemi, itd..."
+"Pomaže Vam u upravljanju popisa zalihe i glavnim operacijama zalihe: nalozi "
+"isporuke, prijemi, itd."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_manufacturing_manufacturing
@@ -13321,7 +13342,7 @@ msgstr "Istorija"
 #. module: base
 #: model:res.country,name:base.va
 msgid "Holy See (Vatican City State)"
-msgstr "Vatikan"
+msgstr "Vatikan (Sveta stolica)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__action_id
@@ -13375,7 +13396,7 @@ msgid ""
 "a negative number indicates no limit."
 msgstr ""
 "Koliko pute je pozvana metoda,\n"
-"negativan broj(-1) znači bez limita."
+"negativan broj znači bez limita."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
@@ -13557,7 +13578,7 @@ msgstr "ISO šifra"
 #. module: base
 #: model:ir.model.fields,help:base.field_base_language_import__code
 msgid "ISO Language and Country code, e.g. en_US"
-msgstr "ISO šifra jezika i zemlje (en_US, bs_BS)"
+msgstr "ISO šifra jezika i zemlje npr. bs_BS"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__iso_code
@@ -13846,7 +13867,7 @@ msgstr "Uvoz / Izvoz"
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_amazon
 msgid "Import Amazon orders and sync deliveries"
-msgstr ""
+msgstr "Uvoz narudžbi od Amazona i sinhr isporuka"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_facturx
@@ -14400,7 +14421,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__type__invoice
 msgid "Invoice Address"
-msgstr "Adresa fakture (kupca)"
+msgstr "Adresa fakture"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -14541,7 +14562,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.je
 msgid "Jersey"
-msgstr "Džersi (Jersey)"
+msgstr "Jersey"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__function
@@ -15054,7 +15075,7 @@ msgstr "Pokreni čarobnjaka za konfiguraciju"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Layout"
-msgstr ""
+msgstr "Izgled"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__address_format
@@ -16538,7 +16559,7 @@ msgstr "Višejezični kontni planovi"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_search
 msgid "My Document(s)"
-msgstr "Moj(i) Dokument(i)"
+msgstr "Moji Dokument(i)"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_filters_view_search
@@ -18090,7 +18111,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:base.action_partner_customer_form
 #: model_terms:ir.actions.act_window,help:base.action_partner_form
 msgid "Odoo helps you easily track all activities related to a customer."
-msgstr ""
+msgstr "Odoo pomaže da jednostavnije pratite sve aktivnosti vezane za kupca."
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_supplier_form
@@ -18366,7 +18387,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_client__res_model
 msgid "Optional model, mostly used for needactions."
-msgstr "Opcionalni model, najčešće korišćen za potrebne akcije (needactions)."
+msgstr "Opcionalni model, najčešće korišćen za potrebne akcije."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_mail_server__smtp_pass
@@ -18712,7 +18733,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad_project
 msgid "Pad on tasks"
-msgstr "Blok (pad)  na zadatcima"
+msgstr "Blokpad na zadacima"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_paperformat__page_height
@@ -20473,7 +20494,7 @@ msgstr "Pravila"
 #: code:addons/base/models/ir_rule.py:0
 #, python-format
 msgid "Rules can not be applied on Transient models."
-msgstr "Pravila se ne mogu primjenjivati na prolaznim (transient) modelima."
+msgstr "Pravila se ne mogu primjenjivati na prolaznim modelima."
 
 #. module: base
 #: code:addons/base/models/ir_rule.py:0
@@ -20742,7 +20763,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_users__user_id
 #: model_terms:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Salesperson"
-msgstr "Prodavač(ica)"
+msgstr "Prodavač"
 
 #. module: base
 #: model:res.country,name:base.ws
@@ -20757,7 +20778,7 @@ msgstr "San Marino"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__sanitized_acc_number
 msgid "Sanitized Account Number"
-msgstr ""
+msgstr "Ispravljeni broj računa"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__6
@@ -20932,7 +20953,7 @@ msgstr "Vidi sve moguće vrijednosti"
 #: code:addons/common.py:0
 #, python-format
 msgid "See http://openerp.com"
-msgstr "Pogledajte http://odoo.com"
+msgstr "Pogledajte http://openerp.com"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_report_paperformat__format
@@ -21890,7 +21911,7 @@ msgstr "Sufiks"
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__suffix
 msgid "Suffix value of the record for the sequence"
-msgstr "Sufiks (poslije brojača) za ovu sekvencu"
+msgstr "Vrijednost sufiksa upisa za ovu sekvencu"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__summary
@@ -23042,7 +23063,7 @@ msgstr "Format vremena"
 #: model:ir.module.category,name:base.module_category_human_resources_time_off
 #: model:ir.module.module,shortdesc:base.module_hr_holidays
 msgid "Time Off"
-msgstr ""
+msgstr "Odsustva"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_calendar
@@ -23152,7 +23173,7 @@ msgstr "Treba biti nadograđeno"
 msgid ""
 "To enable it, make sure this directory exists and is writable on the server:"
 msgstr ""
-"Da bi ste ga omogućili, obezbjedite da ovaj direktorijum postoji i da se u "
+"Da bi ste ga omogućili, obezbjedite da ovaj direktorij postoji i da se u "
 "njega može upisivati na serveru:"
 
 #. module: base
@@ -23272,7 +23293,7 @@ msgstr "Prelazan"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__transient
 msgid "Transient Model"
-msgstr "Prolazni model (osv_memory)"
+msgstr "Prolazni model"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -23437,7 +23458,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_twitter_wall
 msgid "Twitter Wall"
-msgstr ""
+msgstr "Twitter zid"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_twitter
@@ -23661,7 +23682,7 @@ msgstr "Deinstaliraj modul"
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module_dependency__state__uninstallable
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module_exclusion__state__uninstallable
 msgid "Uninstallable"
-msgstr "Nemoguće deinstalirati"
+msgstr "Nemoguće instalirati"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -23897,7 +23918,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__use_date_range
 msgid "Use subsequences per date_range"
-msgstr "Koristi podsekvence po rasponima datuma (date_range)"
+msgstr "Koristi podsekvence po rasponima datuma"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_gamification
@@ -24652,7 +24673,9 @@ msgstr ""
 msgid ""
 "Whether values for this field can be translated (enables the translation "
 "mechanism for that field)"
-msgstr "Da li vrijednosti ovog polja mogu biti prevedene na više jezika."
+msgstr ""
+"Da li vrijednosti ovog polja mogu biti prevedene (omogućava mehanizam "
+"prevoda za to polje)"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__implementation
@@ -25198,7 +25221,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_simple_form
 msgid "email@yourcompany.com"
-msgstr "email@vasakompanija.ba"
+msgstr "email@yourcompany.com"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
