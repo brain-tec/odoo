@@ -2266,7 +2266,12 @@ class AccountMove(models.Model):
             if is_internal_partner(partners[0]):
                 # Search for partners in the mail's body.
                 body_mail_addresses = set(email_re.findall(msg_dict.get('body')))
-                partners = [partner for partner in self._mail_find_partner_from_emails(body_mail_addresses, extra_domain) if not is_internal_partner(partner)]
+                company_id = custom_values.get('company_id', self.env.company.id)
+                partners = [
+                    partner
+                    for partner in self._mail_find_partner_from_emails(body_mail_addresses, extra_domain)
+                    if not is_internal_partner(partner) and partner.company_id.id in (False, company_id)
+                ]
 
         # Little hack: Inject the mail's subject in the body.
         if msg_dict.get('subject') and msg_dict.get('body'):
@@ -3112,7 +3117,6 @@ class AccountMoveLine(models.Model):
                 if tax.price_include:
                     balance += tax_res['amount']
 
-        tax_included_division_is_zero = any(tax.price_include and tax.amount == 100 and tax.amount_type == 'division' for tax in taxes) and balance == 0
         discount_factor = 1 - (discount / 100.0)
         if balance and discount_factor:
             # discount != 100%
@@ -3127,9 +3131,8 @@ class AccountMoveLine(models.Model):
                 'discount': 0.0,
                 'price_unit': balance / (quantity or 1.0),
             }
-        elif not discount_factor or tax_included_division_is_zero:
-            # balance of line is 0, but discount == 100% or taxes (price included) == 100%,
-            # so we display the normal unit_price
+        elif not discount_factor:
+            # balance of line is 0, but discount  == 100% so we display the normal unit_price
             vals = {}
         else:
             # balance is 0, so unit price is 0 as well
