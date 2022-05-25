@@ -8,7 +8,8 @@ const weUtils = require('web_editor.utils');
 const {
     CSS_PREFIX, BTN_SIZE_STYLES,
     DEFAULT_BUTTON_SIZE, PRIORITY_STYLES, FONT_FAMILIES,
-    getFontName, normalizeFontFamily, initializeDesignTabCss
+    getFontName, normalizeFontFamily, initializeDesignTabCss,
+    transformFontFamilySelector,
 } = require('mass_mailing.design_constants');
 
 
@@ -237,12 +238,17 @@ options.registry.DesignTab = options.Class.extend({
         if (params.cssProperty.includes('color')) {
             value = weUtils.normalizeColor(value);
         }
-        const selectors = this._getSelectors(params.selectorText);
-        if (params.cssProperty === 'font-family') {
-            // Ensure font-family gets passed to all descendants.
-            selectors.push(...selectors.map(selector => selector + ' *'));
-        }
+        let selectors = this._getSelectors(params.selectorText);
         const firstSelector = selectors[0].replace(CSS_PREFIX, '').trim();
+        if (params.cssProperty === 'font-family') {
+            // Ensure font-family gets passed to all descendants and never
+            // overwrite font awesome.
+            const newSelectors = [];
+            for (const selector of selectors) {
+                newSelectors.push(...transformFontFamilySelector(selector));
+            }
+            selectors = [...new Set(newSelectors)];
+        }
         for (const selector of selectors) {
             const priority = PRIORITY_STYLES[firstSelector].includes(params.cssProperty) ? ' !important' : '';
             const rule = this._getRule(selector);
@@ -258,7 +264,7 @@ options.registry.DesignTab = options.Class.extend({
                     for (const style of rule.style) {
                         const ownPriority = rule.style.getPropertyPriority(style) ? ' !important' : '';
                         if (style !== params.cssProperty) {
-                            cssTexts.push(`${style}: ${rule.style[style]}${priority || ownPriority};`);
+                            cssTexts.push(`${style}: ${rule.style[style]}${ownPriority};`);
                         }
                     }
                     cssTexts.push(`${params.cssProperty}: ${value}${priority};`);
@@ -352,6 +358,8 @@ options.registry.DesignTab = options.Class.extend({
                         }
                         if (params.cssProperty === 'font-weight') {
                             res = parseInt(res) >= 600 ? 'bolder' : '';
+                        } else if (res === 'auto') {
+                            res = '100%';
                         }
                     }
                     fakeElement.remove();

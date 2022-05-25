@@ -26,12 +26,23 @@ export const PRIORITY_STYLES = {
     'h3': ['font-family'],
     'p': ['font-family'],
     'a:not(.btn)': [],
-    'a.btn-primary': [],
-    'a.btn-secondary': [],
-    'hr': [],
+    'a.btn.btn-primary': [],
+    'a.btn.btn-secondary': [],
+    'hr': ['border-top-color'],
 };
 export const RE_CSS_TEXT_MATCH = /([^{]+)([^}]+)/;
+export const RE_SELECTOR_ENDS_WITH_GT_STAR = />\s*\*\s*$/;
 
+export const transformFontFamilySelector = selector => {
+    if (selector.trim().endsWith(':not(.fa)')) {
+        return [selector];
+    }
+    if (!selector.endsWith('*')) {
+        return [`${selector.trim()}:not(.fa)`, `${selector.trim()} :not(.fa)`];
+    } else if (RE_SELECTOR_ENDS_WITH_GT_STAR.test(selector)) {
+        return [`${selector.replace(RE_SELECTOR_ENDS_WITH_GT_STAR, '').trim()} :not(.fa)`];
+    }
+}
 /**
  * Take a css text and splits each comma-separated selector into separate
  * styles, applying the css prefix to each. Return the modified css text.
@@ -46,16 +57,32 @@ export const splitCss = css => {
     document.head.appendChild(styleElement);
     const rules = [...styleElement.sheet.cssRules];
     styleElement.remove();
-    const result = rules.map(rule => {
-        const [, fullSelector, styles] = rule.cssText.match(RE_CSS_TEXT_MATCH);
-        return fullSelector.split(',').map(selector => {
+    const stylesToWrite = {};
+    for (const rule of rules) {
+        const styles = rule.style;
+        for (let selector of rule.selectorText.split(',')) {
             if (!selector.trim().startsWith(CSS_PREFIX)) {
                 selector = `${CSS_PREFIX} ${selector.trim()}`;
             }
-            return `${selector.trim()} {${styles.replace('{', '').trim()}}`;
-        }).join('');
-    }).join('');
-    return result;
+            for (const style of rule.style) {
+                let selectors = [selector];
+                if (style === 'font-family') {
+                    // Ensure font-family gets passed to all descendants and never
+                    // overwrite font awesome.
+                    selectors = transformFontFamilySelector(selector);
+                }
+                for (const selectorToWriteTo of selectors) {
+                    if (!stylesToWrite[selectorToWriteTo]) {
+                        stylesToWrite[selectorToWriteTo] = [];
+                    }
+                    stylesToWrite[selectorToWriteTo].push([style, styles[style] + (styles.getPropertyPriority(style) === 'important' ? ' !important' : '')]);
+                }
+            }
+        }
+    }
+    return Object.entries(stylesToWrite).map(([selector, styles]) => (
+        `${selector.trim()} {\n${styles.map(([styleName, style]) => `    ${styleName}: ${style};`).join('\n')}\n}`
+    )).join('\n');
 };
 export const getFontName = fontFamily => fontFamily.split(',')[0].replace(/"/g, '').replace(/([a-z])([A-Z])/g, (v, a, b) => `${a} ${b}`).trim();
 export const normalizeFontFamily = fontFamily => fontFamily.replace(/"/g, '').replace(/, /g, ',');
@@ -67,10 +94,10 @@ export const initializeDesignTabCss = $editable => {
             // If a style element can't be found, create one and initialize it.
             styleElement = document.createElement('style');
             styleElement.setAttribute('id', 'design-element');
-            // The style element needs to be within the layout of the email in
-            // order to be saved along with it.
-            $editable.find('.o_layout').prepend(styleElement);
         }
+        // The style element needs to be within the layout of the email in
+        // order to be saved along with it.
+        $editable.find('.o_layout').prepend(styleElement);
 };
 
 export const FONT_FAMILIES = [
@@ -87,6 +114,7 @@ export const FONT_FAMILIES = [
 
 export default {
     CSS_PREFIX, BTN_SIZE_STYLES, DEFAULT_BUTTON_SIZE, PRIORITY_STYLES,
-    RE_CSS_TEXT_MATCH, FONT_FAMILIES,
+    RE_CSS_TEXT_MATCH, FONT_FAMILIES, RE_SELECTOR_ENDS_WITH_GT_STAR,
     splitCss, getFontName, normalizeFontFamily, initializeDesignTabCss,
+    transformFontFamilySelector,
 }

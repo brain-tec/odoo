@@ -92,15 +92,11 @@ div.col:not([align]) {
 
     a:not(.btn), .btn.btn-link {
         font-weight: bold;
-        text-decoration: none;
         padding-left: 0 !important;
         padding-right: 0 !important;
         border: none!important;
-
-        &:hover, &:focus, &:active {
-            text-decoration: none !important;
-        }
     }
+
     // Icons
     .fa {
         @mixin size($width, $height: $width) {
@@ -130,6 +126,35 @@ div.col:not([align]) {
             }
         }
     }
+    // Background Images
+    .oe_img_bg {
+        background-size: cover;
+        background-repeat: no-repeat;
+
+        &.o_bg_img_opt_repeat {
+            background-size: auto;
+            background-repeat: repeat;
+        }
+        &.o_bg_img_center {
+            background-position: center;
+        }
+
+        // Compatibility <= 13.0, TODO remove?
+        // -----------------------------------
+        &.o_bg_img_opt_contain {
+            background-size: contain;
+            background-position: center center;
+        }
+        &.o_bg_img_opt_custom {
+            background-size: auto;
+        }
+        &.o_bg_img_opt_repeat_x {
+            background-repeat: repeat-x;
+        }
+        &.o_bg_img_opt_repeat_y {
+            background-repeat: repeat-y;
+        }
+    }
 }
 
 // ===== Snippets (specific) =====
@@ -153,12 +178,14 @@ div.col:not([align]) {
     .btn-link{
         padding: 0;
     }
-    
+
     .o_mail_table_styles {
         padding-top: 20px;
         padding-bottom: 20px;
     }
-
+    .o_mail_footer_social > a {
+        text-decoration: none !important;
+    }
     .o_mail_footer_links {
         padding-top: 10px;
         padding-bottom: 10px;
@@ -183,7 +210,7 @@ div.col:not([align]) {
 
 }
 
-.card {  
+.card {
     border-color: #d2d2d2;
     .card-header,.card-footer {
         background-color: inherit!important;
