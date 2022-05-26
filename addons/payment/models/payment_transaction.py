@@ -80,7 +80,14 @@ class PaymentTransaction(models.Model):
         string="Source Transaction",
         comodel_name='payment.transaction',
         help="The source transaction of related refund transactions",
-        readonly=True
+        readonly=True,
+    )
+    child_transaction_ids = fields.One2many(
+        string="Child Transactions",
+        help="The child transactions of the source transaction.",
+        comodel_name='payment.transaction',
+        inverse_name='source_transaction_id',
+        readonly=True,
     )
     refunds_count = fields.Integer(string="Refunds Count", compute='_compute_refunds_count')
     invoice_ids = fields.Many2many(
@@ -218,8 +225,8 @@ class PaymentTransaction(models.Model):
         # `amount` and `fees` fields for the created transactions. This forces the ORM to read the
         # values from the DB where there were stored using `float_repr`, which produces a result
         # consistent with the format expected by providers.
-        # E.g., tx.create(amount=1111.11) ; tx.invalidate_cache() -> tx.amount == 1111.11
-        txs.invalidate_cache(['amount', 'fees'])
+        # E.g., tx.create(amount=1111.11) ; tx.invalidate_recordset() -> tx.amount == 1111.11
+        txs.invalidate_recordset(['amount', 'fees'])
 
         return txs
 
@@ -703,7 +710,7 @@ class PaymentTransaction(models.Model):
         :param str state_message: The reason for which the transaction is set in 'error' state
         :return: None
         """
-        allowed_states = ('draft', 'pending', 'authorized')
+        allowed_states = ('draft', 'pending', 'authorized', 'done')  # 'done' for Stripe refunds.
         target_state = 'error'
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         txs_to_process._log_received_message()

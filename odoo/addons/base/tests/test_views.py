@@ -280,7 +280,7 @@ class TestViewInheritance(ViewCase):
         # If the query count increases, you probably made the view combination
         # fetch an extra field on views. You better fetch that extra field with
         # the query of _get_inheriting_views() and manually feed the cache.
-        self.View.invalidate_cache()
+        self.env.invalidate_all()
         with self.assertQueryCount(3):
             # 1: browse([self.view_ids['A']])
             # 2: _get_inheriting_views: id, inherit_id, mode, groups
@@ -949,6 +949,73 @@ class TestTemplating(ViewCase):
             '/hello[1]/world[2]',
             initial.get('data-oe-xpath'),
             "The node's xpath position should be correct")
+
+    def test_branding_inherit_remove_node_processing_instruction(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            'arch': """
+                <html>
+                    <head>
+                        <hello></hello>
+                    </head>
+                    <body>
+                        <world></world>
+                    </body>
+                </html>
+            """
+        })
+        self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+                <data>
+                    <xpath expr="//hello" position="replace"/>
+                    <xpath expr="//world" position="replace"/>
+                </data>
+            """
+        })
+
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+        arch = etree.fromstring(arch_string)
+
+        head = arch.xpath('//head')[0]
+        head_child = head[0]
+        self.assertEqual(
+            head_child.target,
+            'apply-inheritance-specs-node-removal',
+            "A node was removed at the start of the <head>, a processing instruction should exist as first child node")
+        self.assertEqual(
+            head_child.text,
+            'hello',
+            "The processing instruction should mention the tag of the node that was removed")
+
+        body = arch.xpath('//body')[0]
+        body_child = body[0]
+        self.assertEqual(
+            body_child.target,
+            'apply-inheritance-specs-node-removal',
+            "A node was removed at the start of the <body>, a processing instruction should exist as first child node")
+        self.assertEqual(
+            body_child.text,
+            'world',
+            "The processing instruction should mention the tag of the node that was removed")
+
+        self.View.distribute_branding(arch)
+
+        # Test that both head and body have their processing instruction
+        # 'apply-inheritance-specs-node-removal' removed after branding
+        # distribution. Note: test head and body separately as the code in
+        # charge of the removal is different in each case.
+        self.assertEqual(
+            len(head),
+            0,
+            "The processing instruction of the <head> should have been removed")
+        self.assertEqual(
+            len(body),
+            0,
+            "The processing instruction of the <body> should have been removed")
 
     def test_branding_inherit_top_t_field(self):
         view1 = self.View.create({
@@ -2510,7 +2577,7 @@ class TestViewTranslations(common.TransactionCase):
         # `arch_db` is in `_write` instead of `create` because `arch_db` is the inverse of `arch`.
         # We need to flush `arch_db` before creating the translations otherwise the translation for which there is no value will be deleted,
         # while the `test_sync_update` specifically needs empty translations
-        view.flush()
+        self.env.flush_all()
         self.env['ir.translation'].create([
             {
                 'type': 'model_terms',
@@ -2712,7 +2779,7 @@ class ViewModeField(ViewCase):
         })
         with self.assertRaises(IntegrityError):
             view_pure_primary.write({'mode': 'extension'})
-            view_pure_primary.flush()
+            view_pure_primary.env.flush_all()
 
     def testInheritPrimaryToExtension(self):
         """
@@ -3239,7 +3306,7 @@ class TestRenderAllViews(common.TransactionCase):
                 with self.subTest(model=model):
                     times = []
                     for _ in range(5):
-                        model.invalidate_cache()
+                        env.invalidate_all()
                         before = time.perf_counter()
                         model.get_view()
                         times.append(time.perf_counter() - before)
