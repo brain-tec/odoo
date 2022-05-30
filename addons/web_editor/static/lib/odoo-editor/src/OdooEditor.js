@@ -197,8 +197,10 @@ export class OdooEditor extends EventTarget {
                 toSanitize: true,
                 isRootEditable: true,
                 placeholder: false,
+                showEmptyElementHint: true,
                 defaultLinkAttributes: {},
                 plugins: [],
+                getReadOnlyAreas: () => [],
                 getContentEditableAreas: () => [],
                 getPowerboxElement: () => {
                     const selection = document.getSelection();
@@ -206,6 +208,7 @@ export class OdooEditor extends EventTarget {
                         return closestElement(selection.anchorNode, 'P, DIV');
                     }
                 },
+                preHistoryUndo: () => {},
                 isHintBlacklisted: () => false,
                 filterMutationRecords: (records) => records,
                 direction: 'ltr',
@@ -806,6 +809,7 @@ export class OdooEditor extends EventTarget {
      * "consumed": The position has been undone and is considered consumed.
      */
     historyUndo() {
+        this.options.preHistoryUndo();
         // The last step is considered an uncommited draft so always revert it.
         const lastStep = this._currentStep;
         this.historyRevert(lastStep);
@@ -1625,6 +1629,9 @@ export class OdooEditor extends EventTarget {
                 node.setAttribute('contenteditable', true);
             }
         }
+        for (const node of this.options.getReadOnlyAreas()) {
+            node.setAttribute('contenteditable', false);
+        }
         this.observerActive('_activateContenteditable');
     }
     _stopContenteditable() {
@@ -1658,7 +1665,7 @@ export class OdooEditor extends EventTarget {
             focusNode: sel.focusNode,
             focusOffset: sel.focusOffset,
         };
-        if (this._isSelectionInEditable(sel)) {
+        if (!sel.isCollapsed && this.isSelectionInEditable(sel)) {
             this._latestComputedSelectionInEditable = this._latestComputedSelection;
         }
         return this._latestComputedSelection;
@@ -2308,14 +2315,17 @@ export class OdooEditor extends EventTarget {
             this._lastBeforeInputType === 'insertParagraph';
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
             if (ev.inputType === 'deleteContentBackward') {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteBackward');
             } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteForward');
             } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
@@ -2377,6 +2387,7 @@ export class OdooEditor extends EventTarget {
                 this.sanitize();
                 this.historyStep();
             } else if (ev.inputType === 'insertLineBreak') {
+                this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oShiftEnter');
@@ -2384,6 +2395,8 @@ export class OdooEditor extends EventTarget {
                 this.sanitize();
                 this.historyStep();
             }
+        } else if (ev.inputType === 'insertCompositionText') {
+            this._fromCompositionText = true;
         }
     }
 
@@ -2512,7 +2525,7 @@ export class OdooEditor extends EventTarget {
         this._computeHistorySelection();
 
         const selection = this.document.getSelection();
-        this._updateToolbar(this._isSelectionInEditable(selection));
+        this._updateToolbar(!selection.isCollapsed && this.isSelectionInEditable(selection));
 
         if (this._currentMouseState === 'mouseup') {
             this._fixFontAwesomeSelection();
@@ -2529,14 +2542,24 @@ export class OdooEditor extends EventTarget {
     /**
      * Returns true if the current selection is inside the editable.
      *
-     * @private
-     * @param {Object} selection
+     * @param {Object} [selection]
      * @returns {boolean}
      */
-    _isSelectionInEditable(selection) {
-        return !selection.isCollapsed &&
-            this.editable.contains(selection.anchorNode) &&
+    isSelectionInEditable(selection) {
+        selection = selection || this.document.getSelection()
+        return selection && selection.anchorNode && this.editable.contains(selection.anchorNode) &&
             this.editable.contains(selection.focusNode);
+    }
+
+    /**
+     * @private
+     */
+    _compositionStep() {
+        if (this._fromCompositionText) {
+            this._fromCompositionText = false;
+            this.sanitize();
+            this.historyStep();
+        }
     }
 
     /**
@@ -2661,10 +2684,12 @@ export class OdooEditor extends EventTarget {
             }
         }
 
-        for (const [selector, text] of Object.entries(selectors)) {
-            for (const el of this.editable.querySelectorAll(selector)) {
-                if (!this.options.isHintBlacklisted(el)) {
-                    this._makeHint(el, text);
+        if (this.options.showEmptyElementHint) {
+            for (const [selector, text] of Object.entries(selectors)) {
+                for (const el of this.editable.querySelectorAll(selector)) {
+                    if (!this.options.isHintBlacklisted(el)) {
+                        this._makeHint(el, text);
+                    }
                 }
             }
         }

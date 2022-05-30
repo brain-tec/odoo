@@ -21,7 +21,7 @@ from odoo import api, http, models, tools, SUPERUSER_ID
 from odoo.exceptions import AccessDenied, AccessError, MissingError
 from odoo.http import request, content_disposition, Response
 from odoo.tools import consteq, pycompat
-from odoo.tools.mimetypes import guess_mimetype
+from odoo.tools.mimetypes import get_extension, guess_mimetype
 from odoo.modules.module import get_resource_path, get_module_path
 
 from odoo.http import ALLOWED_DEBUG_MODES
@@ -408,20 +408,18 @@ class IrHttp(models.AbstractModel):
                 filehash = '"%s"' % hashlib.md5(str(content).encode('utf-8')).hexdigest()
 
         # filename
-        default_filename = False
         if not filename:
             if filename_field in record:
                 filename = record[filename_field]
             if not filename:
-                default_filename = True
                 filename = "%s-%s-%s" % (record._name, record.id, field)
 
         if not mimetype:
             mimetype = guess_mimetype(content, default=default_mimetype)
 
         # extension
-        _, existing_extension = os.path.splitext(filename)
-        if not existing_extension or default_filename:
+        has_extension = get_extension(filename) or mimetypes.guess_type(filename)[0]
+        if not has_extension:
             extension = mimetypes.guess_extension(mimetype)
             if extension:
                 filename = "%s%s" % (filename, extension)

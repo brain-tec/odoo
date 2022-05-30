@@ -80,6 +80,8 @@
 # ramiadavid, 2022
 # Jonatan Gk, 2022
 # Martin Trigaux, 2022
+# Óscar Fonseca <tecnico@extreme-micro.com>, 2022
+# Marian Cuadra, 2022
 # marcescu, 2022
 # 
 msgid ""
@@ -94,7 +96,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_at_reports
@@ -623,6 +625,9 @@ msgid ""
 "        Accounting reports for Pakistan\n"
 "    "
 msgstr ""
+"\n"
+"        Informes contables para Pakistán\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_es_reports
@@ -1692,6 +1697,11 @@ msgid ""
 "    - extended address fields\n"
 "    "
 msgstr ""
+"\n"
+"    Módulo puente para ampliar la guía de entrega (Complemento XML Carta de Porte)\n"
+"    - bienes exportados (COMEX)\n"
+"    - campos de dirección ampliados\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_workorder_iot
@@ -1922,6 +1932,13 @@ msgid ""
 "    guide.\n"
 "    "
 msgstr ""
+"\n"
+"    La guía de entrega (Complemento XML Carta de Porte) es necesaria como prueba\n"
+"    de que está enviando mercancías entre A y B.\n"
+"\n"
+"    Sólo cuando se valida una orden de entrega se puede crear la\n"
+"    guía.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl_edi_stock
@@ -5064,6 +5081,10 @@ msgid ""
 "=======================================================\n"
 "    "
 msgstr ""
+"\n"
+"Localización de puntos de venta GCC\n"
+"=======================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_gamification
@@ -5601,6 +5622,10 @@ msgid ""
 "=======================================================\n"
 "    "
 msgstr ""
+"\n"
+"Localización de puntos de venta K.S.A. \n"
+"=======================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
@@ -9916,6 +9941,8 @@ msgid ""
 " This is the base module to manage chart of accounts and localization for "
 "the Pakistan "
 msgstr ""
+" Este es el módulo base para gestionar el plan de cuentas y la localización "
+"de Pakistán"
 
 #. module: base
 #: code:addons/model.py:0
@@ -11292,7 +11319,7 @@ msgstr "Nombre del titular de la cuenta"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_intrastat_expiry
 msgid "Account Invoice Expiry"
-msgstr ""
+msgstr "Vencimiento de la factura de la cuenta"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_invoice_extract
@@ -15752,7 +15779,7 @@ msgstr "Envio DHL Express"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008
 msgid "DIN 5008"
-msgstr ""
+msgstr "DIN 5008"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008_purchase
@@ -16055,7 +16082,7 @@ msgstr "Definición"
 #: model_terms:ir.ui.view,arch_db:base.view_apikeys
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Delete API key."
-msgstr ""
+msgstr "Eliminar clave API"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_unlink
@@ -16878,7 +16905,7 @@ msgstr "Egipto"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_eg
 msgid "Egypt - Accounting"
-msgstr ""
+msgstr "Egipto - Contabilidad"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__partner_share
@@ -19045,7 +19072,7 @@ msgstr "Consejo de Cooperación para los Estados Árabes del Golfo (CCEAG)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_gcc_pos
 msgid "Gulf Cooperation Council - Point of Sale"
-msgstr ""
+msgstr "Consejo de Cooperación del Golfo - Punto de venta"
 
 #. module: base
 #: model:res.country,name:base.gy
@@ -20952,7 +20979,7 @@ msgstr "Reino de Arabia Saudita - Nómina con contabilidad"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_pos
 msgid "K.S.A. - Point of Sale"
-msgstr ""
+msgstr "K.S.A. - Punto de venta"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_digest
@@ -22578,12 +22605,12 @@ msgstr "México - Contabilidad"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_edi_stock
 msgid "Mexico - Electronic Delivery Guide"
-msgstr ""
+msgstr "México - Guía de entrega electrónica"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mx_edi_stock_extended
 msgid "Mexico - Electronic Delivery Guide Comex"
-msgstr ""
+msgstr "México - Guía de entrega electrónica Comex"
 
 #. module: base
 #: model:res.country,name:base.fm
@@ -22593,7 +22620,7 @@ msgstr "Micronesia"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_microsoft_outlook
 msgid "Microsoft Outlook"
-msgstr ""
+msgstr "Microsoft Outlook"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_microsoft_account
@@ -26709,12 +26736,12 @@ msgstr "Pakistán"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pk
 msgid "Pakistan - Accounting"
-msgstr ""
+msgstr "Pakistán - Contabilidad"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pk_reports
 msgid "Pakistan - Accounting Reports"
-msgstr ""
+msgstr "Pakistán - Informes contables"
 
 #. module: base
 #: model:res.country,name:base.pw
@@ -27160,7 +27187,7 @@ msgstr "Planeación de habilidades"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_planning_holidays
 msgid "Planning Time Off"
-msgstr "Planeación de tiempo libre"
+msgstr "Planificación de tiempo libre"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_planning_contract
@@ -27170,7 +27197,7 @@ msgstr "Integración de planeación con contratos"
 #. module: base
 #: model:ir.module.module,summary:base.module_planning_holidays
 msgid "Planning integration with holidays"
-msgstr "Integración de planeación con las vacaciones"
+msgstr "Integración de planificación con vacaciones"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pt
@@ -27316,7 +27343,7 @@ msgstr "Portugal - Contabilidad"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pt_reports
 msgid "Portugal - Accounting Reports"
-msgstr ""
+msgstr "Portugal - Informes contables"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_constraint__definition
@@ -27764,7 +27791,7 @@ msgstr "Contabilidad de la nómina del proyecto"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_forecast
 msgid "Project Planning"
-msgstr "Planeación del proyecto "
+msgstr "Planificación del proyecto "
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_purchase
@@ -30598,7 +30625,7 @@ msgstr "Suecia"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se
 msgid "Sweden - Accounting"
-msgstr ""
+msgstr "Suecia - Contabilidad"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_reports
@@ -31809,6 +31836,8 @@ msgstr ""
 msgid ""
 "This module adds an expiry feature to transaction account intrastat codes."
 msgstr ""
+"Este módulo añade una función de caducidad a los códigos intrastat de las "
+"cuentas de transacciones."
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail_bot_hr
@@ -34816,7 +34845,7 @@ msgstr "many2many"
 #: code:addons/base/models/ir_actions.py:0
 #, python-format
 msgid "many2many fields cannot be evaluated by reference"
-msgstr ""
+msgstr "Los campos many2many no pueden ser evaluados por referencia"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__many2one

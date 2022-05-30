@@ -35,7 +35,7 @@
 # Kevin Harrings <kha@odoo.com>, 2020
 # Torsten Wichmann <t.wichmann@intero-technologies.de>, 2020
 # Andreas Stauder <andreas.stauder@brain-tec.ch>, 2020
-# TomTietze <t.tietze94@web.de>, 2020
+# TomTietze <tietze.development@web.de>, 2020
 # f91684c3ff9ec3e650d5c8461e534581_686eae3 <449b96d9f63071f94d89e129677b83de_366193>, 2020
 # Christian Oechsner <carinachristian@gmail.com>, 2020
 # Tobias Arndt, 2020
@@ -1086,7 +1086,10 @@ msgid "As soon as possible"
 msgstr "Sobald wie möglich"
 
 #. module: stock
+#. openerp-web
+#: code:addons/stock/static/src/js/report_stock_reception.js:0
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
+#, python-format
 msgid "Assign"
 msgstr "Zuweisen"
 
@@ -1211,7 +1214,7 @@ msgstr "Rückstandsbestätigung"
 #. module: stock
 #: model:ir.model,name:stock.model_stock_backorder_confirmation_line
 msgid "Backorder Confirmation Line"
-msgstr ""
+msgstr "Rückstandsbestätigungszeile"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_backorder_confirmation__backorder_confirmation_line_ids
@@ -5822,7 +5825,7 @@ msgstr "Bestand des Produkts aufstocken"
 #: model:ir.actions.report,name:stock.action_report_stock_rule
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_rules_report
 msgid "Product Routes Report"
-msgstr ""
+msgstr "Bericht Produktrouten"
 
 #. module: stock
 #: model:ir.model,name:stock.model_product_template
@@ -6061,7 +6064,7 @@ msgstr "Qualitätskontrolle"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_quality_control_worksheet
 msgid "Quality Worksheet"
-msgstr ""
+msgstr "Arbeitsblatt Qualität"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_adjustment_name__quant_ids
@@ -8579,7 +8582,10 @@ msgid "USPS Connector"
 msgstr "USPS Schnittstelle"
 
 #. module: stock
+#. openerp-web
+#: code:addons/stock/static/src/js/report_stock_reception.js:0
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
+#, python-format
 msgid "Unassign"
 msgstr "Aufheben der Zuweisung"
 
@@ -9558,15 +9564,6 @@ msgstr "Sie müssen eine Chargen-/Seriennummer setzen für das Produkt:"
 msgid "You need to supply a Lot/Serial number for products %s."
 msgstr ""
 "Sie müssen eine Chargen-/Seriennummer für Produkte zur Verfügung stellen %s."
-
-#. module: stock
-#: code:addons/stock/models/stock_picking.py:0
-#, python-format
-msgid ""
-"You should not use a planned internal transfer to move some products between"
-" two warehouses. Instead, use an immediate internal transfer or the resupply"
-" route."
-msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/stock_warehouse.py:0
