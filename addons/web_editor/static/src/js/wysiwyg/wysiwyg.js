@@ -804,13 +804,15 @@ const Wysiwyg = Widget.extend({
     historyReset: function () {
         this.odooEditor.historyReset();
     },
-
     /**
      * Save the content to the server for the normal mode.
      */
     saveToServer: async function (reload = true) {
         const defs = [];
-        this.trigger_up('edition_will_stopped');
+        if (!this.__edition_will_stopped_already_done) {
+            // TODO remove in master
+            this.trigger_up('edition_will_stopped');
+        }
         this.trigger_up('ready_to_save', {defs: defs});
         await Promise.all(defs);
 
@@ -1256,7 +1258,12 @@ const Wysiwyg = Widget.extend({
     },
     _configureToolbar: function (options) {
         const $toolbar = this.toolbar.$el;
-        $toolbar.find('.btn-group').on('mousedown', e => e.preventDefault());
+        $toolbar.find('.btn-group').on('mousedown', e => {
+            // Do not prevent events on popovers.
+            if (!e.target.closest('.dropdown-menu')) {
+                e.preventDefault();
+            }
+        });
         const openTools = e => {
             e.preventDefault();
             e.stopImmediatePropagation();
