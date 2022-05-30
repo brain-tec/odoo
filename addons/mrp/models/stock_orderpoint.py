@@ -3,6 +3,7 @@
 
 from odoo import _, api, fields, models
 from odoo.tools.float_utils import float_is_zero
+from odoo.osv.expression import AND
 
 
 class StockWarehouseOrderpoint(models.Model):
@@ -15,9 +16,10 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _get_replenishment_order_notification(self):
         self.ensure_one()
-        production = self.env['mrp.production'].search([
-            ('orderpoint_id', 'in', self.ids)
-        ], order='create_date desc', limit=1)
+        domain = [('orderpoint_id', 'in', self.ids)]
+        if self.env.context.get('written_date'):
+            domain = AND([domain, [('write_date', '>', self.env.context.get('written_after'))]])
+        production = self.env['mrp.production'].search(domain, limit=1)
         if production:
             action = self.env.ref('mrp.action_mrp_production_form')
             return {

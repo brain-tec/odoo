@@ -870,6 +870,153 @@ class TestTemplating(ViewCase):
             initial.get('data-oe-xpath'),
             "The node's xpath position should be correct")
 
+    def test_branding_inherit_remove_node(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            # The t-esc node is to ensure branding is distributed to both
+            # <world/> elements from the start
+            'arch': """
+                <hello>
+                    <world></world>
+                    <world></world>
+
+                    <t t-esc="foo"/>
+                </hello>
+            """
+        })
+        self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+                <data>
+                    <xpath expr="/hello/world[1]" position="replace"/>
+                </data>
+            """
+        })
+
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+
+        arch = etree.fromstring(arch_string)
+        self.View.distribute_branding(arch)
+
+        # Only remaining world but still the second in original view
+        [initial] = arch.xpath('/hello[1]/world[1]')
+        self.assertEqual(
+            '/hello[1]/world[2]',
+            initial.get('data-oe-xpath'),
+            "The node's xpath position should be correct")
+
+    def test_branding_inherit_remove_node2(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            'arch': """
+                <hello>
+                    <world></world>
+                    <world></world>
+                </hello>
+            """
+        })
+        self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+                <data>
+                    <xpath expr="/hello/world[1]" position="replace"/>
+                </data>
+            """
+        })
+
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+
+        arch = etree.fromstring(arch_string)
+        self.View.distribute_branding(arch)
+
+        # Note: this test is a variant of the test_branding_inherit_remove_node
+        # -> in this case, we expect the branding to not be distributed on the
+        # <hello/> element anymore but on the only remaining world.
+        [initial] = arch.xpath('/hello[1]')
+        self.assertIsNone(
+            initial.get('data-oe-model'),
+            "The inner content of the root was xpath'ed, it should not receive branding anymore")
+
+        # Only remaining world but still the second in original view
+        [initial] = arch.xpath('/hello[1]/world[1]')
+        self.assertEqual(
+            '/hello[1]/world[2]',
+            initial.get('data-oe-xpath'),
+            "The node's xpath position should be correct")
+
+    def test_branding_inherit_remove_node_processing_instruction(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            'arch': """
+                <html>
+                    <head>
+                        <hello></hello>
+                    </head>
+                    <body>
+                        <world></world>
+                    </body>
+                </html>
+            """
+        })
+        self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+                <data>
+                    <xpath expr="//hello" position="replace"/>
+                    <xpath expr="//world" position="replace"/>
+                </data>
+            """
+        })
+
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+        arch = etree.fromstring(arch_string)
+
+        head = arch.xpath('//head')[0]
+        head_child = head[0]
+        self.assertEqual(
+            head_child.target,
+            'apply-inheritance-specs-node-removal',
+            "A node was removed at the start of the <head>, a processing instruction should exist as first child node")
+        self.assertEqual(
+            head_child.text,
+            'hello',
+            "The processing instruction should mention the tag of the node that was removed")
+
+        body = arch.xpath('//body')[0]
+        body_child = body[0]
+        self.assertEqual(
+            body_child.target,
+            'apply-inheritance-specs-node-removal',
+            "A node was removed at the start of the <body>, a processing instruction should exist as first child node")
+        self.assertEqual(
+            body_child.text,
+            'world',
+            "The processing instruction should mention the tag of the node that was removed")
+
+        self.View.distribute_branding(arch)
+
+        # Test that both head and body have their processing instruction
+        # 'apply-inheritance-specs-node-removal' removed after branding
+        # distribution. Note: test head and body separately as the code in
+        # charge of the removal is different in each case.
+        self.assertEqual(
+            len(head),
+            0,
+            "The processing instruction of the <head> should have been removed")
+        self.assertEqual(
+            len(body),
+            0,
+            "The processing instruction of the <body> should have been removed")
+
     def test_branding_inherit_top_t_field(self):
         view1 = self.View.create({
             'name': "Base view",

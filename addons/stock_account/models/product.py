@@ -156,9 +156,11 @@ class ProductProduct(models.Model):
         :rtype: dict
         """
         self.ensure_one()
+        company_id = self.env.context.get('force_company', self.env.company.id)
+        company = self.env['res.company'].browse(company_id)
         vals = {
             'product_id': self.id,
-            'value': unit_cost * quantity,
+            'value': company.currency_id.round(unit_cost * quantity),
             'unit_cost': unit_cost,
             'quantity': quantity,
         }
@@ -175,11 +177,14 @@ class ProductProduct(models.Model):
         :rtype: dict
         """
         self.ensure_one()
+        company_id = self.env.context.get('force_company', self.env.company.id)
+        company = self.env['res.company'].browse(company_id)
+        currency = company.currency_id
         # Quantity is negative for out valuation layers.
         quantity = -1 * quantity
         vals = {
             'product_id': self.id,
-            'value': quantity * self.standard_price,
+            'value': currency.round(quantity * self.standard_price),
             'unit_cost': self.standard_price,
             'quantity': quantity,
         }
@@ -188,7 +193,6 @@ class ProductProduct(models.Model):
             vals['remaining_qty'] = fifo_vals.get('remaining_qty')
             # In case of AVCO, fix rounding issue of standard price when needed.
             if self.cost_method == 'average':
-                currency = self.env.company.currency_id
                 rounding_error = currency.round(self.standard_price * self.quantity_svl - self.value_svl)
                 if rounding_error:
                     # If it is bigger than the (smallest number of the currency * quantity) / 2,
@@ -756,7 +760,7 @@ class ProductCategory(models.Model):
                 raise ValidationError(_('The Stock Input and/or Output accounts cannot be the same as the Stock Valuation account.'))
 
     @api.onchange('property_cost_method')
-    def onchange_property_valuation(self):
+    def onchange_property_cost(self):
         if not self._origin:
             # don't display the warning when creating a product category
             return
@@ -820,3 +824,16 @@ class ProductCategory(models.Model):
             account_moves = self.env['account.move'].sudo().create(move_vals_list)
             account_moves._post()
         return res
+
+    @api.onchange('property_valuation')
+    def onchange_property_valuation(self):
+        # Remove or set the account stock properties if necessary
+        if self.property_valuation == 'manual_periodic':
+            self.property_stock_account_input_categ_id = False
+            self.property_stock_account_output_categ_id = False
+            self.property_stock_valuation_account_id = False
+        if self.property_valuation == 'real_time':
+            company_id = self.env.company
+            self.property_stock_account_input_categ_id = company_id.property_stock_account_input_categ_id
+            self.property_stock_account_output_categ_id = company_id.property_stock_account_output_categ_id
+            self.property_stock_valuation_account_id = company_id.property_stock_valuation_account_id

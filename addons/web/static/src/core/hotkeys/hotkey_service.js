@@ -73,14 +73,15 @@ export const hotkeyService = {
                 return;
             }
 
-            // FIXME : this is a temporary hack. It replaces all [accesskey] attrs by [data-hotkey] on all elements.
-            const elementsWithoutDataHotkey = getVisibleElements(
-                ui.activeElement,
-                "[accesskey]:not([data-hotkey])"
-            );
-            for (const el of elementsWithoutDataHotkey) {
-                el.dataset.hotkey = el.accessKey;
-                el.removeAttribute("accesskey");
+            // Replace all [accesskey] attrs by [data-hotkey] on all elements.
+            // This is needed to take over on the default accesskey behavior
+            // and also to avoid any conflict with it.
+            const elementsWithAccessKey = document.querySelectorAll("[accesskey]");
+            for (const el of elementsWithAccessKey) {
+                if (el instanceof HTMLElement) {
+                    el.dataset.hotkey = el.accessKey;
+                    el.removeAttribute("accesskey");
+                }
             }
 
             // Special case: open hotkey overlays
@@ -96,11 +97,13 @@ export const hotkeyService = {
                 return;
             }
 
+            // Protect any editable target that does not explicitly accept hotkeys
+            // NB: except for ESC, which is always allowed as hotkey in editables.
             const targetIsEditable =
-                (event.target instanceof Element && /input|textarea/i.test(event.target.tagName)) ||
-                (event.target instanceof HTMLElement && event.target.isContentEditable);
+                event.target instanceof HTMLElement &&
+                (/input|textarea/i.test(event.target.tagName) || event.target.isContentEditable);
             const shouldProtectEditable =
-                targetIsEditable && [...ALPHANUM_KEYS, ...NAV_KEYS].includes(singleKey);
+                targetIsEditable && !event.target.dataset.allowHotkeys && singleKey !== "escape";
 
             // Finally, prepare and dispatch.
             const infos = {

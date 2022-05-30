@@ -138,8 +138,10 @@ const Wysiwyg = Widget.extend({
             autohideToolbar: !!this.options.autohideToolbar,
             isRootEditable: this.options.isRootEditable,
             placeholder: this.options.placeholder,
+            showEmptyElementHint: this.options.showEmptyElementHint,
             controlHistoryFromDocument: this.options.controlHistoryFromDocument,
             getContentEditableAreas: this.options.getContentEditableAreas,
+            getReadOnlyAreas: this.options.getReadOnlyAreas,
             defaultLinkAttributes: this.options.userGeneratedContent ? {rel: 'ugc' } : {},
             allowCommandVideo: this.options.allowCommandVideo,
             getYoutubeVideoElement: getYoutubeVideoElement,
@@ -163,6 +165,12 @@ const Wysiwyg = Widget.extend({
                 return records.filter((record) => {
                     return !(record.target.classList && record.target.classList.contains('o_header_standard'));
                 });
+            },
+            preHistoryUndo: () => {
+                if (this.linkTools) {
+                    this.linkTools.destroy();
+                    this.linkTools = undefined;
+                }
             },
             commands: commands,
             onChange: options.onChange,
@@ -796,21 +804,19 @@ const Wysiwyg = Widget.extend({
     historyReset: function () {
         this.odooEditor.historyReset();
     },
-
     /**
      * Save the content to the server for the normal mode.
      */
     saveToServer: async function (reload = true) {
         const defs = [];
-        this.trigger_up('edition_will_stopped');
+        if (!this.__edition_will_stopped_already_done) {
+            // TODO remove in master
+            this.trigger_up('edition_will_stopped');
+        }
         this.trigger_up('ready_to_save', {defs: defs});
         await Promise.all(defs);
 
-        this._cleanForSave();
-
-        if (this.snippetsMenu) {
-            await this.snippetsMenu.cleanForSave();
-        }
+        await this.cleanForSave();
 
         const editables = this.options.getContentEditableAreas();
         await this.saveModifiedImages(editables.length ? $(editables) : this.$editable);
@@ -936,6 +942,14 @@ const Wysiwyg = Widget.extend({
     },
     isSelectionInEditable: function () {
         return this.odooEditor.isSelectionInEditable();
+    },
+    cleanForSave: async function () {
+        this.odooEditor.clean();
+        this.$editable.find('.oe_edited_link').removeClass('oe_edited_link');
+
+        if (this.snippetsMenu) {
+            await this.snippetsMenu.cleanForSave();
+        }
     },
     /**
      * Start or resume the Odoo field changes muation observers.
@@ -1183,7 +1197,7 @@ const Wysiwyg = Widget.extend({
         const $node = $(params.node);
         // We need to keep track of FA icon because media.js will _clear those classes
         const wasFontAwesome = $node.hasClass('fa');
-        const $editable = $(this.odooEditor.editable);
+        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable'));
         const model = $editable.data('oe-model');
         const field = $editable.data('oe-field');
         const type = $editable.data('oe-type');
@@ -1244,7 +1258,12 @@ const Wysiwyg = Widget.extend({
     },
     _configureToolbar: function (options) {
         const $toolbar = this.toolbar.$el;
-        $toolbar.find('.btn-group').on('mousedown', e => e.preventDefault());
+        $toolbar.find('.btn-group').on('mousedown', e => {
+            // Do not prevent events on popovers.
+            if (!e.target.closest('.dropdown-menu')) {
+                e.preventDefault();
+            }
+        });
         const openTools = e => {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -1316,7 +1335,9 @@ const Wysiwyg = Widget.extend({
             if (!this.lastMediaClicked) {
                 return;
             }
-            new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.$editable);
+            new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.odooEditor.document.body);
+            this.odooEditor.toolbarHide();
+            $(this.lastMediaClicked).on('image_cropper_destroyed', () => this.odooEditor.toolbarShow());
         });
         $toolbar.find('#image-transform').click(e => {
             if (!this.lastMediaClicked) {
@@ -1373,11 +1394,11 @@ const Wysiwyg = Widget.extend({
         setTimeout(() => {
             const scrollableContainer = this.$el.scrollParent();
             if (!options.snippets && scrollableContainer.length) {
-                // this.odooEditor.addDomListener(
-                //   scrollableContainer[0],
-                //   'scroll',
-                //   this.odooEditor.updateToolbarPosition.bind(this.odooEditor),
-                // );
+                this.odooEditor.addDomListener(
+                    scrollableContainer[0],
+                    'scroll',
+                    this.odooEditor.updateToolbarPosition.bind(this.odooEditor),
+                );
             }
         }, 0);
     },
@@ -1778,10 +1799,6 @@ const Wysiwyg = Widget.extend({
                 noContextKeys: 'lang',
             });
         }
-    },
-    _cleanForSave: function () {
-        this.odooEditor.clean();
-        this.$editable.find('.oe_edited_link').removeClass('oe_edited_link');
     },
     _getCommands: function () {
         const options = this._editorOptions();
