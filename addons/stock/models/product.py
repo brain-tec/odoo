@@ -1020,34 +1020,46 @@ class UoM(models.Model):
     _inherit = 'uom.uom'
 
     def write(self, values):
+
+        # Normally, Odoo performs the below check of UOM records
+        # against existing stock moves etc.
+        # For the SV system, we want to disable these checks.
+        # (see bt#18625 and bt#18554 for details)
+        # Data integrity is still guaranteed by the SV system.
+
+        # ---------- BEGIN ODOO CORE CODE ---------- #
+
         # Users can not update the factor if open stock moves are based on it
-        if 'factor' in values or 'factor_inv' in values or 'category_id' in values:
-            changed = self.filtered(
-                lambda u: any(u[f] != values[f] if f in values else False
-                              for f in {'factor', 'factor_inv'})) + self.filtered(
-                lambda u: any(u[f].id != int(values[f]) if f in values else False
-                              for f in {'category_id'}))
-            if changed:
-                error_msg = _(
-                    "You cannot change the ratio of this unit of measure"
-                    " as some products with this UoM have already been moved"
-                    " or are currently reserved."
-                )
-                if self.env['stock.move'].sudo().search_count([
-                    ('product_uom', 'in', changed.ids),
-                    ('state', 'not in', ('cancel', 'done'))
-                ]):
-                    raise UserError(error_msg)
-                if self.env['stock.move.line'].sudo().search_count([
-                    ('product_uom_id', 'in', changed.ids),
-                    ('state', 'not in', ('cancel', 'done')),
-                ]):
-                    raise UserError(error_msg)
-                if self.env['stock.quant'].sudo().search_count([
-                    ('product_id.product_tmpl_id.uom_id', 'in', changed.ids),
-                    ('quantity', '!=', 0),
-                ]):
-                    raise UserError(error_msg)
+        # if 'factor' in values or 'factor_inv' in values or 'category_id' in values:
+        #     changed = self.filtered(
+        #         lambda u: any(u[f] != values[f] if f in values else False
+        #                       for f in {'factor', 'factor_inv'})) + self.filtered(
+        #         lambda u: any(u[f].id != int(values[f]) if f in values else False
+        #                       for f in {'category_id'}))
+        #     if changed:
+        #         error_msg = _(
+        #             "You cannot change the ratio of this unit of measure"
+        #             " as some products with this UoM have already been moved"
+        #             " or are currently reserved."
+        #         )
+        #         if self.env['stock.move'].sudo().search_count([
+        #             ('product_uom', 'in', changed.ids),
+        #             ('state', 'not in', ('cancel', 'done'))
+        #         ]):
+        #             raise UserError(error_msg)
+        #         if self.env['stock.move.line'].sudo().search_count([
+        #             ('product_uom_id', 'in', changed.ids),
+        #             ('state', 'not in', ('cancel', 'done')),
+        #         ]):
+        #             raise UserError(error_msg)
+        #         if self.env['stock.quant'].sudo().search_count([
+        #             ('product_id.product_tmpl_id.uom_id', 'in', changed.ids),
+        #             ('quantity', '!=', 0),
+        #         ]):
+        #             raise UserError(error_msg)
+
+        # ---------- END ODOO CORE CODE ---------- #
+
         return super(UoM, self).write(values)
 
     def _adjust_uom_quantities(self, qty, quant_uom):
