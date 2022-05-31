@@ -1531,7 +1531,7 @@ registerModel({
          * @private
          * @returns {FieldCommand}
          */
-        _computeRtcInvitationCard() {
+        _computeCallInviteRequestPopup() {
             if (this.rtcInvitingSession) {
                 return insertAndReplace();
             }
@@ -1716,18 +1716,18 @@ registerModel({
                     default_res_id: this.id,
                 },
             };
-            this.env.bus.trigger('do-action', {
+            this.env.services.action.doAction(
                 action,
-                options: {
-                    on_close: async () => {
+                {
+                    onClose: async () => {
                         if (!this.exists()) {
                             return;
-                        } 
+                        }
                         await this.fetchData(['followers']);
                         this.env.bus.trigger('Thread:promptAddFollower-closed');
                     },
-                },
-            });
+                }
+            );
         },
         /**
          * @private
@@ -2308,8 +2308,8 @@ registerModel({
         rtc: one('Rtc', {
             inverse: 'channel',
         }),
-        rtcInvitationCard: one('RtcInvitationCard', {
-            compute: '_computeRtcInvitationCard',
+        callInviteRequestPopup: one('CallInviteRequestPopup', {
+            compute: '_computeCallInviteRequestPopup',
             inverse: 'thread',
             isCausal: true,
         }),

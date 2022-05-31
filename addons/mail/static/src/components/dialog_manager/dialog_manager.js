@@ -24,6 +24,14 @@ export class DialogManager extends Component {
     }
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    get dialogManager() {
+        return this.props.record;
+    }
+
+    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
@@ -31,20 +39,16 @@ export class DialogManager extends Component {
      * @private
      */
     _checkDialogOpen() {
-        if (!this.messaging || !this.messaging.dialogManager) {
-            return;
-        }
-        if (this.messaging.dialogManager.dialogs.length > 0) {
+        if (this.dialogManager.dialogs.length > 0) {
             document.body.classList.add('modal-open');
         } else {
             document.body.classList.remove('modal-open');
         }
     }
-
 }
 
 Object.assign(DialogManager, {
-    props: {},
+    props: { record: Object },
     template: 'mail.DialogManager',
 });
 

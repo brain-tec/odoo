@@ -88,7 +88,7 @@ registerModel({
          * @returns {boolean}
          */
         _computeHasConnectionInfo() {
-            return Boolean(this.rtcSession && this.env.isDebug() && this.channel.rtc);
+            return Boolean(this.rtcSession && this.env.debug && this.channel.rtc);
         },
         /**
          * @private
@@ -163,7 +163,7 @@ registerModel({
          * @private
          * @returns {FieldCommand}
          */
-        _computeRtcVideoView() {
+        _computeCallParticipantVideoView() {
             if (this.rtcSession && this.rtcSession.videoStream) {
                 return insertAndReplace();
             }
@@ -260,8 +260,8 @@ registerModel({
          * If set, this card represents a rtcSession.
          */
         rtcSession: one('RtcSession'),
-        rtcVideoView: one('RtcVideoView', {
-            compute: '_computeRtcVideoView',
+        callParticipantVideoView: one('CallParticipantVideoView', {
+            compute: '_computeCallParticipantVideoView',
             inverse: 'rtcCallParticipantCardOwner',
             isCausal: true,
         }),
