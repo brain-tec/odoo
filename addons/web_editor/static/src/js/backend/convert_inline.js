@@ -12,6 +12,7 @@ import { isBlock, rgbToHex } from '../../../lib/odoo-editor/src/utils/utils';
 const RE_COL_MATCH = /(^| )col(-[\w\d]+)*( |$)/;
 const RE_COMMAS_OUTSIDE_PARENTHESES = /,(?![^(]*?\))/g;
 const RE_OFFSET_MATCH = /(^| )offset(-[\w\d]+)*( |$)/;
+const RE_PADDING_MATCH = /[ ]*padding[^;]*;/g;
 const RE_PADDING = /([\d.]+)/;
 const RE_WHITESPACE = /[\s\u200b]*/;
 const SELECTORS_IGNORE = /(^\*$|:hover|:before|:after|:active|:link|::|'|\([^(),]+[,(])/;
@@ -90,8 +91,8 @@ function attachmentThumbnailToLinkImg($editable) {
         const image = document.createElement('img');
         image.setAttribute('src', _getStylePropertyValue(link, 'background-image').replace(/(^url\(['"])|(['"]\)$)/g, ''));
         // Note: will trigger layout thrashing.
-        image.setAttribute('height', Math.max(1, _getHeight(link)) + 'px');
-        image.setAttribute('width', Math.max(1, _getWidth(link)) + 'px');
+        image.setAttribute('height', Math.max(1, _getHeight(link)));
+        image.setAttribute('width', Math.max(1, _getWidth(link)));
         link.prepend(image);
     };
 }
@@ -108,7 +109,13 @@ function bootstrapToTable($editable) {
     const editable = $editable.get(0);
     // First give all rows in columns a separate container parent.
     for (const rowInColumn of [...editable.querySelectorAll('.row')].filter(row => RE_COL_MATCH.test(row.parentElement.className))) {
-        _wrap(rowInColumn, 'div', 'o_fake_table');
+        const previous = rowInColumn.previousElementSibling;
+        if (previous && previous.classList.contains('o_fake_table')) {
+            // If a container was already created there, append to it.
+            previous.append(rowInColumn);
+        } else {
+            _wrap(rowInColumn, 'div', 'o_fake_table');
+        }
     }
 
     // These containers from the mass mailing masonry snippet require full
@@ -125,8 +132,17 @@ function bootstrapToTable($editable) {
         masonryRow.parentElement.style.setProperty('height', '100%');
     }
 
+    const containers = editable.querySelectorAll('.container, .container-fluid, .o_fake_table');
+    // Capture the widths of the containers before manipulating it.
+    for (const container of containers) {
+        container.setAttribute('o-temp-width', _getWidth(container));
+    }
     // Now convert all containers with rows to tables.
-    for (const container of [...editable.querySelectorAll('.container, .container-fluid, .o_fake_table')].filter(n => [...n.children].some(c => c.classList.contains('row')))) {
+    for (const container of [...containers].filter(n => [...n.children].some(c => c.classList.contains('row')))) {
+        // The width of the table was stored in a temporary attribute. Fetch it
+        // for use in `_applyColspan` and remove the attribute at the end.
+        const containerWidth = container.getAttribute('o-temp-width');
+
         // TABLE
         const table = _createTable(container.attributes);
         for (const child of [...container.childNodes]) {
@@ -187,7 +203,7 @@ function bootstrapToTable($editable) {
                 const columnSize = _getColumnSize(bootstrapColumn);
                 if (gridIndex + columnSize < 12) {
                     currentCol = grid[gridIndex];
-                    _applyColspan(currentCol, columnSize);
+                    _applyColspan(currentCol, columnSize, containerWidth);
                     if (columnIndex === bootstrapColumns.length - 1) {
                         // We handled all the columns but there is still space
                         // in the row. Insert the columns and fill the row.
@@ -198,7 +214,7 @@ function bootstrapToTable($editable) {
                 } else if (gridIndex + columnSize === 12) {
                     // Finish the row.
                     currentCol = grid[gridIndex];
-                    _applyColspan(currentCol, columnSize);
+                    _applyColspan(currentCol, columnSize, containerWidth);
                     currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
                     if (columnIndex !== bootstrapColumns.length - 1) {
                         // The row was filled before we handled all of its
@@ -212,7 +228,7 @@ function bootstrapToTable($editable) {
                 } else {
                     // Fill the row with what was in the grid before it
                     // overflowed.
-                    _applyColspan(grid[gridIndex], 12 - gridIndex);
+                    _applyColspan(grid[gridIndex], 12 - gridIndex, containerWidth);
                     currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
                     // Start a new row that starts with the current col.
                     const previousRow = currentRow;
@@ -220,7 +236,7 @@ function bootstrapToTable($editable) {
                     previousRow.after(currentRow);
                     grid = _createColumnGrid();
                     currentCol = grid[0];
-                    _applyColspan(currentCol, columnSize);
+                    _applyColspan(currentCol, columnSize, containerWidth);
                     gridIndex = columnSize;
                     if (columnIndex === bootstrapColumns.length - 1 && gridIndex < 12) {
                         // We handled all the columns but there is still space
@@ -228,7 +244,7 @@ function bootstrapToTable($editable) {
                         grid[gridIndex].setAttribute('colspan', 12 - gridIndex);
                         currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
                         // Adapt width to colspan.
-                        _applyColspan(grid[gridIndex], 12 - gridIndex);
+                        _applyColspan(grid[gridIndex], 12 - gridIndex, containerWidth);
                     }
                 }
                 if (currentCol) {
@@ -246,12 +262,15 @@ function bootstrapToTable($editable) {
                         currentCol.append(child);
                     }
                     // Adapt width to colspan.
-                    _applyColspan(currentCol, +currentCol.getAttribute('colspan'));
+                    _applyColspan(currentCol, +currentCol.getAttribute('colspan'), containerWidth);
                 }
                 columnIndex++;
             }
             tr.remove(); // row was cloned and inserted already
         }
+    }
+    for (const table of editable.querySelectorAll('table')) {
+        table.removeAttribute('o-temp-width');
     }
 }
 /**
@@ -353,14 +372,22 @@ function classToStyle($editable, cssRules) {
             writes.push(() => {
                 node.setAttribute('style', style);
                 if (node.style.width) {
-                    node.setAttribute('width', node.style.width);
+                    node.setAttribute('width', node.style.width.replace('px', '').trim());
                 }
             });
         }
 
-        // Media list images should not have an inline height
-        if (node.nodeName === 'IMG' && node.classList.contains('s_media_list_img')) {
-            writes.push(() => { node.style.removeProperty('height'); });
+        if (node.nodeName === 'IMG') {
+            writes.push(() => {
+                // Media list images should not have an inline height
+                if (node.classList.contains('s_media_list_img')) {
+                    node.style.removeProperty('height');
+                }
+                // Protect aspect ratio when resizing in mobile.
+                if (node.style.getPropertyValue('width') === '100%' && node.style.getPropertyValue('object-fit') === '') {
+                    node.style.setProperty('object-fit', 'cover');
+                }
+            });
         }
         // Apple Mail
         if (node.nodeName === 'TD' && !node.childNodes.length) {
@@ -368,13 +395,108 @@ function classToStyle($editable, cssRules) {
         }
         // Outlook
         if (node.nodeName === 'A' && node.classList.contains('btn') && !node.classList.contains('btn-link') && !node.children.length) {
-            writes.push(() => { node.prepend(document.createComment('[if mso]><i style="letter-spacing: 25px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i><![endif]')); });
-            writes.push(() => { node.append(document.createComment('[if mso]><i style="letter-spacing: 25px; mso-font-width: -100%;">&nbsp;</i><![endif]')); });
+            writes.push(() => {
+                node.before(document.createComment(`[if mso]>
+                    <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 6px; border-collapse: separate !important;">
+                        <tbody>
+                            <tr>
+                                <td style="${node.style.cssText.replace(RE_PADDING_MATCH, '')}" ${
+                                    node.parentElement.style.textAlign === 'center' ? 'align="center" ' : ''
+                                }bgcolor="${rgbToHex(node.style.backgroundColor)}">
+                <![endif]`));
+                node.after(document.createComment(`[if mso]>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                <![endif]`));
+            });
         } else if (node.nodeName === 'IMG' && node.classList.contains('mx-auto') && node.classList.contains('d-block')) {
             writes.push(() => { _wrap(node, 'p', 'o_outlook_hack', 'text-align:center;margin:0'); });
         }
     };
     writes.forEach(fn => fn());
+}
+/**
+ * Add styles to all table rows and columns, that are necessary for them to be
+ * responsive. This only works if columns have a max-width so the styles are
+ * only applied to columns where that is the case.
+ *
+ * @param {Element} editable
+ */
+function enforceTablesResponsivity(editable) {
+    for (const tr of editable.querySelectorAll('tr')) {
+        tr.style.setProperty('width', '100%');
+    }
+    for (const td of editable.querySelectorAll('td[colspan]')) {
+        const colspan = +td.getAttribute('colspan');
+        const tdSiblings = [...td.parentElement.children].filter(child => child.nodeName === 'TD');
+        if ( // Don't allow little duos of columns to wrap (eg., col-2 col-10).
+            colspan > 2 && colspan < 10 || tdSiblings.length > 2
+            || tdSiblings.some(td => [...td.children].some(child => child.style.width === '100%')) // Unless they have a full width child.
+           ) {
+            td.setAttribute('width', '100%');
+            td.style.setProperty('width', '100%');
+            td.style.setProperty('display', 'inline-block'); // Allow cells to wrap.
+        } else if (td.getAttribute('width') === '100%') {
+            if (td.children.length === 1 && td.firstElementChild.nodeName === 'IMG') {
+                const width = td.firstElementChild.getAttribute('width');
+                td.setAttribute('width', width);
+                td.style.removeProperty('width');
+                td.style.setProperty('min-width', width + 'px');
+            } else {
+                td.removeAttribute('width');
+                td.style.removeProperty('width');
+            }
+        }
+    }
+    // Masonry has crazy nested tables that require some extra treatment.
+    for (const td of editable.querySelectorAll('.s_masonry_block td')) {
+        td.classList.toggle('o_desktop_h100', true);
+        td.style.setProperty('height', '100%');
+        const childrenNames = [...td.children].map(child => child.nodeName);
+        if (childrenNames.includes('TABLE')) {
+            td.style.setProperty('height', _getHeight(td.parentElement) + 'px');
+        } else {
+            // Hack that makes vertical-align possible within an inline-block.
+            const wrapper = document.createElement('div');
+            wrapper.style.setProperty('display', 'inline-block');
+            for (const child of [...td.childNodes]) {
+                wrapper.append(child);
+            }
+            td.append(wrapper);
+            const centeringSpan = document.createElement('span');
+            centeringSpan.style.setProperty('height', '100%');
+            centeringSpan.style.setProperty('display', 'inline-block');
+            centeringSpan.style.setProperty('vertical-align', 'middle');
+            td.prepend(centeringSpan);
+        }
+    }
+}
+/**
+ * Modify the styles of images so they are responsive.
+ *
+ * @param {Element} editable
+ */
+function enforceImagesResponsivity(editable) {
+    // Images with 100% height in cells should preserve that height and the
+    // height of the row should be applied to the cell.
+    for (const image of editable.querySelectorAll('td > img')) {
+        const td = image.parentElement;
+        if (td.childElementCount === 1 && (image.classList.contains('h-100') || _getStylePropertyValue(image, 'height') === '100%')) {
+            td.style.setProperty('height', _getHeight(td.parentElement) + 'px');
+            image.style.setProperty('height', '100%');
+        }
+    }
+    // Remove the height attribute in card images so they can resize
+    // responsively, but leave it for Outlook.
+    for (const image of editable.querySelectorAll('img[width="100%"][height]')) {
+        image.before(document.createComment(`[if mso]>${image.outerHTML}<![endif]`))
+        image.classList.toggle('mso-hide', true);
+        image.before(document.createComment('[if !mso]><!'));
+        image.after(document.createComment('<![endif]'));
+        image.removeAttribute('height');
+    }
 }
 /**
  * Convert the contents of an editable area (as a JQuery element) into content
@@ -441,12 +563,21 @@ async function toInline($editable, cssRules, $iframe) {
     cardToTable($editable);
     listGroupToTable($editable);
     addTables($editable);
-    formatTables($editable);
     normalizeColors($editable);
     const rootFontSizeProperty = getComputedStyle(editable.ownerDocument.documentElement).fontSize;
     const rootFontSize = parseFloat(rootFontSizeProperty.replace(/[^\d\.]/g, ''));
     normalizeRem($editable, rootFontSize);
+    responsiveToStaticForOutlook(editable);
+    enforceTablesResponsivity(editable);
+    formatTables($editable);
+    enforceImagesResponsivity(editable);
     await flattenBackgroundImages(editable);
+
+    // Hide replaced cells on Outlook
+    for (const toHide of editable.querySelectorAll('.mso-hide')) {
+        const style = toHide.getAttribute('style') || '';
+        toHide.setAttribute('style', `${style} mso-hide: all;`.trim());
+    }
 
     // Styles were applied inline, we don't need a style element anymore.
     $editable.find('style').remove();
@@ -537,8 +668,8 @@ function fontToImg($editable) {
                 padding += hPadding ? hPadding + 'px' : '0';
             }
             const image = document.createElement('img');
-            image.setAttribute('width', width);
-            image.setAttribute('height', height);
+            image.setAttribute('width', intrinsicWidth);
+            image.setAttribute('height', intrinsicHeight);
             image.setAttribute('src', `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, Math.round(intrinsicWidth))}x${Math.max(1, Math.round(intrinsicHeight))}`);
             image.setAttribute('data-class', font.getAttribute('class'));
             image.setAttribute('data-style', style);
@@ -653,14 +784,26 @@ function formatTables($editable) {
         }
     }
     // Align items doesn't work on table rows.
-    for (const cell of editable.querySelectorAll('tr')) {
-        const alignItems = cell.style.alignItems;
+    for (const row of editable.querySelectorAll('tr')) {
+        const alignItems = row.style.alignItems;
         if (alignItems === 'flex-start') {
-            cell.style.verticalAlign = 'top';
+            row.style.verticalAlign = 'top';
         } else if (alignItems === 'center') {
-            cell.style.verticalAlign = 'middle';
+            row.style.verticalAlign = 'middle';
         } else if (alignItems === 'flex-end' || alignItems === 'baseline') {
-            cell.style.verticalAlign = 'bottom';
+            row.style.verticalAlign = 'bottom';
+        }
+    }
+    // Tables don't properly inherit alignments from their ancestors in Outlook.
+    for (const table of editable.querySelectorAll('table')) {
+        if (table.style.textAlign === 'inherit') {
+            let ancestor = table;
+            while (ancestor && (!ancestor.style.textAlign || ancestor.style.textAlign === 'inherit')) {
+                ancestor = ancestor.parentElement;
+            }
+            if (ancestor) {
+                table.style.setProperty('text-align', ancestor.style.textAlign);
+            }
         }
     }
 }
@@ -813,6 +956,36 @@ function normalizeRem($editable, rootFontSize=16) {
 }
 
 /**
+ * This replaces column html with a dumbed down, Outlook-compliant version of
+ * them just for Outlook so while not responsive, these columns still display OK
+ * on Outlook.
+ *
+ * @param {Element} editable
+ */
+ function responsiveToStaticForOutlook(editable) {
+    // Replace the responsive tables with static ones for Outlook
+    for (const td of editable.querySelectorAll('td')) {
+        const tdStyle = td.getAttribute('style') || '';
+        const msoAttributes = [...td.attributes].filter(attr => attr.name !== 'style' && attr.name !== 'width');
+        const msoWidth = td.style.getPropertyValue('max-width');
+        const msoStyles = tdStyle.replace(/(^| |max-)width:[^;]*;\s*/g, '');
+        const outlookTd = document.createElement('td');
+        for (const attribute of msoAttributes) {
+            outlookTd.setAttribute(attribute.name, td.getAttribute(attribute.name));
+        }
+        if (msoWidth) {
+            outlookTd.setAttribute('width', ('' + msoWidth).replace('px', '').trim());
+            outlookTd.setAttribute('style', `${msoStyles}width: ${msoWidth};`);
+        } else {
+            outlookTd.setAttribute('style', msoStyles);
+        }
+        td.before(document.createComment(`[if mso]>${outlookTd.outerHTML.replace('</td>', '')}<![endif]`));
+        td.before(document.createComment('[if !mso]><!--'));
+        td.prepend(document.createComment('<![endif]'));
+        td.after(document.createComment(`[if mso]></td><![endif]`));
+    }
+}
+/**
  * Convert images of type svg to png.
  *
  * @param {JQuery} $editable
@@ -858,13 +1031,14 @@ async function svgToPng($editable) {
  *
  * @param {Element} element
  * @param {number} colspan
+ * @param {number} tableWidth
  */
-function _applyColspan(element, colspan) {
+function _applyColspan(element, colspan, tableWidth) {
     element.setAttribute('colspan', colspan);
+    const widthPercentage = +element.getAttribute('colspan') / 12;
     // Round to 2 decimal places.
-    const width = (Math.round(+element.getAttribute('colspan') * 10000 / 12) / 100) + '%';
-    element.setAttribute('width', width);
-    element.style.setProperty('width', width);
+    const width = Math.round(tableWidth * widthPercentage * 100) / 100;
+    element.style.setProperty('max-width', width + 'px');
 }
 /**
  * Take a selector and return its specificity according to the w3 specification.

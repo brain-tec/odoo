@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import sys
 from unittest.mock import patch
 
 from odoo.tests import tagged
@@ -15,7 +16,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
 
     def test_processing_values(self):
         dummy_session_id = 'cs_test_sbTG0yGwTszAqFUP8Ulecr1bUwEyQEo29M8taYvdP7UA6Qr37qX6uA6w'
-        tx = self.create_transaction(flow='redirect')  # We don't really care what the flow is here.
+        tx = self._create_transaction(flow='redirect')  # We don't really care what the flow is here.
 
         # Ensure no external API call is done, we only want to check the processing values logic
         def mock_stripe_create_checkout_session(self):
@@ -33,7 +34,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
     @mute_logger('odoo.addons.payment_stripe.models.payment_transaction')
     def test_tx_state_after_send_capture_request(self):
         self.acquirer.capture_manually = True
-        tx = self.create_transaction('redirect', state='authorized')
+        tx = self._create_transaction('redirect', state='authorized')
 
         with patch(
             'odoo.addons.payment_stripe.models.payment_acquirer.PaymentAcquirer'
@@ -48,7 +49,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
     @mute_logger('odoo.addons.payment_stripe.models.payment_transaction')
     def test_tx_state_after_send_void_request(self):
         self.acquirer.capture_manually = True
-        tx = self.create_transaction('redirect', state='authorized')
+        tx = self._create_transaction('redirect', state='authorized')
 
         with patch(
             'odoo.addons.payment_stripe.models.payment_acquirer.PaymentAcquirer'
@@ -63,7 +64,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
     @mute_logger('odoo.addons.payment_stripe.controllers.main')
     def test_webhook_notification_confirms_transaction(self):
         """ Test the processing of a webhook notification. """
-        tx = self.create_transaction('redirect')
+        tx = self._create_transaction('redirect')
         url = self._build_url(StripeController._webhook_url)
         with patch(
             'odoo.addons.payment_stripe.controllers.main.StripeController'
@@ -75,7 +76,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
     @mute_logger('odoo.addons.payment_stripe.controllers.main')
     def test_webhook_notification_tokenizes_payment_method(self):
         """ Test the processing of a webhook notification. """
-        self.create_transaction('dummy', operation='validation', tokenize=True)
+        self._create_transaction('dummy', operation='validation', tokenize=True)
         url = self._build_url(StripeController._webhook_url)
         payment_method_response = {
             'card': {'last4': '4242'},
@@ -101,7 +102,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
     @mute_logger('odoo.addons.payment_stripe.controllers.main')
     def test_webhook_notification_triggers_signature_check(self):
         """ Test that receiving a webhook notification triggers a signature check. """
-        self.create_transaction('redirect')
+        self._create_transaction('redirect')
         url = self._build_url(StripeController._webhook_url)
         with patch(
             'odoo.addons.payment_stripe.controllers.main.StripeController'
@@ -153,5 +154,9 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
             return_value={'url': 'https://dummy.url'},
         ) as mock:
             self.stripe._stripe_create_account_link('dummy', 'dummy')
-            for payload_param in ('account', 'return_url', 'refresh_url', 'type'):
-                self.assertIn(payload_param, mock.call_args.kwargs['payload'].keys())
+            mock.assert_called_once()
+            if sys.version_info >= (3, 8):
+                # call_args.kwargs is only available in python 3.8+
+                call_args = mock.call_args.kwargs['payload'].keys()
+                for payload_param in ('account', 'return_url', 'refresh_url', 'type'):
+                    self.assertIn(payload_param, call_args)

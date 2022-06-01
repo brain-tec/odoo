@@ -2,21 +2,18 @@
 
 import json
 from uuid import uuid4
-
 from lxml import etree, objectify
 
 from odoo.tests import HttpCase
 
-from odoo.addons.payment.tests.utils import PaymentTestUtils
+from odoo.addons.payment.tests.common import PaymentCommon
 
 
-class PaymentHttpCommon(PaymentTestUtils, HttpCase):
+class PaymentHttpCommon(PaymentCommon, HttpCase):
     """ HttpCase common to build and simulate requests going through payment controllers.
 
     Only use if you effectively want to test controllers.
     If you only want to test 'models' code, the PaymentCommon should be sufficient.
-
-    Note: This Common is expected to be used in parallel with the main PaymentCommon.
     """
 
     # Helpers #
@@ -153,7 +150,7 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
             'access_token': self._generate_test_access_token(partner.id, amount, currency.id),
         }
 
-    def portal_pay(self, **route_kwargs):
+    def _portal_pay(self, **route_kwargs):
         """/payment/pay txContext feedback
 
         NOTE: must be authenticated before calling method.
@@ -163,8 +160,8 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
         url = self._build_url(uri)
         return self._make_http_get_request(url, route_kwargs)
 
-    def get_tx_checkout_context(self, **route_kwargs):
-        response = self.portal_pay(**route_kwargs)
+    def _get_tx_checkout_context(self, **route_kwargs):
+        response = self._portal_pay(**route_kwargs)
 
         self.assertEqual(response.status_code, 200)
 
@@ -173,7 +170,7 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
     # /my/payment_method #
     ######################
 
-    def portal_payment_method(self):
+    def _portal_payment_method(self):
         """/my/payment_method txContext feedback
 
         NOTE: must be authenticated before calling method
@@ -183,8 +180,8 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
         url = self._build_url(uri)
         return self._make_http_get_request(url, {})
 
-    def get_tx_manage_context(self):
-        response = self.portal_payment_method()
+    def _get_tx_manage_context(self):
+        response = self._portal_payment_method()
 
         self.assertEqual(response.status_code, 200)
 
@@ -192,7 +189,7 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
 
     # payment/transaction #
     #######################
-    def portal_transaction(self, **route_kwargs):
+    def _portal_transaction(self, **route_kwargs):
         """/payment/transaction feedback
 
         :return: The response to the json request
@@ -204,8 +201,8 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
 
         return response
 
-    def get_processing_values(self, **route_kwargs):
-        response = self.portal_transaction(**route_kwargs)
+    def _get_processing_values(self, **route_kwargs):
+        response = self._portal_transaction(**route_kwargs)
 
         self.assertEqual(response.status_code, 200)
 
