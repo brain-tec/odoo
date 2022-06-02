@@ -4,6 +4,7 @@
 import re
 from markupsafe import Markup
 from odoo import api, fields, Command, models, _
+from odoo.tools import float_round
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import email_split, float_is_zero, float_repr, float_compare, is_html_empty
 from odoo.tools.misc import clean_context, format_date
@@ -69,7 +70,7 @@ class HrExpense(models.Model):
         store=True, copy=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]},
         default=_default_product_uom_id, domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True, string="UoM Category")
-    unit_amount = fields.Float("Unit Price", compute='_compute_unit_amount', readonly=False, store=True, required=True, copy=True,
+    unit_amount = fields.Float("Unit Price", compute='_compute_from_product_id_company_id', readonly=False, store=True, required=True, copy=True,
         states={'done': [('readonly', True)]}, digits='Product Price')
     unit_amount_display = fields.Float("Unit Price Display", compute='_compute_unit_amount_display')
     quantity = fields.Float(required=True, states={'done': [('readonly', True)]}, digits='Product Unit of Measure', default=1)
@@ -250,16 +251,6 @@ class HrExpense(models.Model):
         for expense in self:
             expense.product_description = not is_html_empty(expense.product_id.description) and expense.product_id.description
 
-    @api.depends('product_id', 'company_id')
-    def _compute_unit_amount(self):
-        for expense in self:
-            if not expense.product_id or not expense.product_has_cost or expense.attachment_number or (not expense.attachment_number and expense.unit_amount):
-                continue
-            expense.unit_amount = expense.product_id.price_compute(
-                'standard_price',
-                uom=expense.product_uom_id,
-                currency=expense.currency_id)[expense.product_id.id]
-
     @api.depends('unit_amount', 'total_amount_company', 'product_has_cost')
     def _compute_unit_amount_display(self):
         for expense in self:
@@ -270,6 +261,9 @@ class HrExpense(models.Model):
         for expense in self:
             if not expense.product_id:
                 continue
+            # Only change unit_amount if the product has no cost defined on it
+            if not expense.attachment_number or (expense.attachment_number and not expense.unit_amount):
+                expense.unit_amount = expense.product_id.price_compute('standard_price', currency=expense.currency_id)[expense.product_id.id]
             expense = expense.with_company(expense.company_id)
             expense.name = expense.name or expense.product_id.display_name
             expense.product_uom_id = expense.product_id.uom_id
@@ -501,6 +495,42 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
                 body=_('%(user)s confirms this expense is not a duplicate with similar expense.', user=self.env.user.name),
                 author_id=root
             )
+
+    def _get_split_values(self):
+        self.ensure_one()
+        half_price = self.total_amount / 2
+        price_round_up = float_round(half_price, precision_digits=2, rounding_method='UP')
+        price_round_down = float_round(half_price, precision_digits=2, rounding_method='DOWN')
+
+        return [{
+            'name': self.name,
+            'product_id': self.product_id.id,
+            'total_amount': price,
+            'tax_ids': self.tax_ids.ids,
+            'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id,
+            'analytic_account_id': self.analytic_account_id.id,
+            'employee_id': self.employee_id.id,
+            'expense_id': self.id,
+        } for price in [price_round_up, price_round_down]]
+
+    def action_split_wizard(self):
+        self.ensure_one()
+        splits = self.env['hr.expense.split'].create(self._get_split_values())
+
+        wizard = self.env['hr.expense.split.wizard'].create({
+            'expense_split_line_ids': splits.ids,
+            'expense_id': self.id,
+        })
+        return {
+            'name': _('Expense split'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'hr.expense.split.wizard',
+            'res_id': wizard.id,
+            'target': 'new',
+            'context': self.env.context,
+        }
 
     # ----------------------------------------
     # Business
