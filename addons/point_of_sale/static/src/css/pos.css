@@ -898,6 +898,10 @@ td {
     flex-wrap: wrap;
     gap: 2px;
 }
+.pos .product-list-container .product-list-empty p {
+    margin: 10px;
+    text-align: center;
+}
 @media screen and (max-width: 768px) {
     .pos .product-list {
         padding: 0px;
@@ -968,28 +972,6 @@ td {
     }
 }
 
-/*  b) the search box */
-
-.pos .searchbox {
-    flex-grow: 1;
-    position: relative;
-}
-.pos .searchbox input {
-    width: 150px;
-    border: 1px solid #cecbcb;
-    padding: 10px 20px;
-    margin: 6px;
-    background-color: white;
-    border-radius: 20px;
-    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
-    font-size: 13px;
-}
-.pos .searchbox input:focus {
-    outline: none;
-    box-shadow: 0px 0px 0px 2px rgb(153, 153, 255) inset;
-    color: rgb(153, 153, 255);
-}
-
 .pos .search-clear {
     top: 9px;
     width: 30px;
@@ -1022,12 +1004,6 @@ td {
       position: relative;
       top: -70px;
       left: 85%;
-  }
-  .pos .searchbox input {
-      width: 70%;
-  }
-  .pos .searchbox {
-      position: relative;
   }
 }
 
@@ -1232,7 +1208,7 @@ td {
     border-radius: 2px;
     background-color: #7f82ac;
     color: white;
-    padding: 1px;
+    padding: 1px 4px;
     width: 15px;
     height: 15px;
     display: flex;
@@ -1798,10 +1774,44 @@ td {
 }
 
 
-/* e) The Client List Screen */
+/* e) The Partner List Screen */
 
 .pos .partnerlist-screen .full-content{
     overflow: auto;
+}
+
+.pos .no-results-message {
+    text-align: center;
+}
+
+.pos .no-results-message {
+    margin-top: 45px;
+    padding: 0 10%;
+}
+
+.pos .no-results-message .button {
+    margin: auto;
+    width: 180px;
+    border-radius: 25px;
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: large;
+    box-shadow: 0px -2px 5px -3px rgb(82,82,82) inset;
+    transition: all linear 75ms;
+}
+
+.pos .no-results-message .button:hover {
+    opacity: 0.8;
+}
+
+.pos .no-results-message .button:active {
+    opacity: 0.5;
+}
+
+.pos .partnerlist-screen .top-content div.top-right-buttons {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
 }
 
 .pos .partnerlist-screen .partner-list{
@@ -1813,6 +1823,30 @@ td {
     padding: 12px 8px;
 }
 
+.pos .partnerlist-screen .fa.fa-phone,
+.pos .partnerlist-screen .fa.fa-paper-plane-o {
+    margin-right: 4px;
+}
+
+.pos .partnerlist-screen .e-mail-field {
+    white-space: nowrap;
+}
+
+.pos .partnerlist-screen tr div.company-field {
+    color: #888c8f;
+}
+
+.pos .partnerlist-screen tr.highlight div.company-field {
+    color: white;
+}
+
+.pos .partnerlist-screen tr.highlight div.unselect-tag {
+    font-size: large;
+    color:#555555;
+    font-weight: bold;
+    padding-top: 5px;
+}
+
 .pos .partnerlist-screen .partner-list th.partner-line-last-column-placeholder,
 .pos .partnerlist-screen .partner-list td.partner-line-last-column-placeholder {
     padding: 0;
@@ -1822,22 +1856,31 @@ td {
     transition: all 150ms linear;
     background: rgb(230,230,230);
 }
+.pos .partnerlist-screen tr.partner-line:hover {
+    cursor: pointer;
+}
 .pos .partnerlist-screen .partner-list thead > tr,
 .pos .partnerlist-screen .partner-list tr:nth-child(even) {
-    background: rgb(247,247,247);
+    background: rgb(247,247,247,0.1);
 }
 .pos .partnerlist-screen .partner-list tr.highlight{
-    transition: all 150ms linear;
-    background: rgb(110,200,155) !important;
+    background: rgb(110,200,155);
     color: white;
 }
-.pos .partnerlist-screen .partner-list tr.lowlight{
-    transition: all 150ms linear;
-    background: rgb(216, 238, 227);
+.pos .partnerlist-screen .partner-list tr.highlight:active {
+    background-color: black;
+    color: white;
 }
-.pos .partnerlist-screen .partner-list tr.lowlight:nth-child(even){
-    transition: all 150ms linear;
-    background: rgb(227, 246, 237);
+.pos .partnerlist-screen tr.partner-line:hover {
+    cursor: pointer;
+    background: rgb(207, 238, 222);
+}
+.pos .partnerlist-screen tr.partner-line:active {
+    background-color: black;
+    color: white;
+}
+.pos .edit-partner-button:hover {
+    background: #c7c7c7;
 }
 .pos .partner-line {
     vertical-align: text-top;
@@ -1845,6 +1888,10 @@ td {
 .pos .edit-partner-button {
     margin-top: 6px;
     color: black;
+}
+.pos .partner-list tr.partner-line.highlight{
+    background: rgb(110,200,155);
+    color: white;
 }
 .pos .partnerlist-screen .partner-details{
     padding: 16px;
@@ -1945,60 +1992,8 @@ td {
 .pos .partnerlist-screen .partner-detail > .empty{
     opacity: 0.3;
 }
-.pos .searchbox-partner {
-    padding: 3px 13px;
-    margin-top: 12px;
-    margin-bottom : 12px;
-}
-
-.pos .searchbox-partner input {
-    width: 120px;
-    border: 1px solid #cecbcb;
-    padding: 10px 20px;
-    padding-left: 38px;
-    padding-right: 33px;
-    background-color: white;
-    border-radius: 20px;
-    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
-    font-size: 13px;
-}
-.pos .searchbox-partner input:focus {
-    outline: none;
-    box-shadow: 0px 0px 0px 2px rgb(153, 153, 255) inset;
-    color: rgb(153, 153, 255);
-}
-
-.pos .search-clear-partner {
-    position: absolute;
-    top: 9px;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-clear-partner.left {
-    left: 11px;
-    color: #808080;
-}
-
-.search-clear-partner.right {
-    left: 145px;
-    color: #808080;
-    cursor: pointer;
-}
 
 @media screen and (max-width: 768px) {
-    .searchbox-partner.top-content-center {
-        display: flex
-    }
-    .pos .searchbox-partner input {
-        width: auto;
-        flex-grow: 1;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
     .pos .partnerlist-screen .partner-details-box {
         display: flex;
         flex-wrap: wrap;
@@ -3358,60 +3353,103 @@ td {
     cursor: pointer;
 }
 
+/* Search Bar (PartnerList & Product Screens*/
+
+.pos .search-bar-container {
+    display: flex;
+    align-items: center;
+}
+
+.pos .pos-topheader .pos-search-bar,
+.pos .partnerlist-screen .pos-search-bar {
+    display: flex;
+    align-items: center;
+    padding: 2px 10px;
+    background-color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all linear 150ms;
+}
+
+.pos .pos-topheader .pos-search-bar:focus-within,
+.pos .partnerlist-screen .pos-search-bar:focus-within {
+    box-shadow: 0px 0px 0px 2px rgb(153, 153, 255) inset;
+    color: rgb(153, 153, 255);
+}
+
+.pos .pos-topheader .pos-search-bar input,
+.pos .partnerlist-screen .pos-search-bar input {
+    flex-grow: 1;
+    padding: 0 5px;
+    height: 30px;
+    border: none !important;
+    outline: none !important;
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    color: #63717f;
+}
+
+.pos .pos-topheader .pos-search-bar i,
+.pos .partnerlist-screen .pos-search-bar i {
+    cursor: pointer;
+    transition: color linear 150ms;
+}
+
+.pos .pos-topheader .pos-search-bar i:active,
+.pos .partnerlist-screen .pos-search-bar i:active {
+    color: purple;
+}
+
+/* Partner List Screen Search Bar */
+
+.pos .search-bar-container.sb-partner {
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+.pos .sb-partner .pos-search-bar{
+    width: 40%;
+}
+
 /* Product Screen Search Bar */
 
-.search-bar-portal,
-.search-bar-portal .search-box {
+.pos .search-bar-container.sb-product {
+    width: 75%;
+    max-width: 500px;
+    justify-content: flex-start;
+}
+
+.pos .sb-product .pos-search-bar{
+    flex-grow: 1;
+}
+
+.pos .sb-product .icon {
+    color: white;
+    font-size: medium;
+    padding: 0 12px;
+    margin: 0 5px;
+    height: 80%;
+    border-radius: 20px;
     display: flex;
-    flex: 1;
-}
-
-.search-bar-portal .search-box {
-    font-size: medium;
-    position: relative;
     align-items: center;
-    margin: 0 15px;
 }
 
-.search-bar-portal .search-box input {
-    flex: 1;
-    font-size: medium;
-    height: 30px;
-    border: none;
-    color: #63717f;
-    padding-left: 38px;
-    padding-right: 38px;
-    border-radius: 5px;
+.pos .sb-product .icon:hover {
+    background: rgb(104,69,95);
 }
 
-.search-bar-portal .search-box input:focus {
-    outline: none;
+.pos .sb-product .icon:active {
+    background: rgb(104,69,95, 0.7);
 }
 
-.search-bar-portal .search-box .icon {
-    position: absolute;
-    left: 0;
-    margin-left: 4px;
-    z-index: 1;
-    color: #4f5b66;
-}
+@media screen and (max-width: 768px) {
+    .pos .search-bar-container.sb-product {
+        width: 90%;
+        max-width: none;
+    }
 
-.search-bar-portal .search-box .clear-icon {
-    position: absolute;
-    right: 0;
-    margin-right: 24px;
-    z-index: 1;
-    color: #4f5b66;
-    cursor: pointer;
-}
-
-.search-bar-portal .search-box .database-icon {
-    position: absolute;
-    left: 0;
-    margin-left: 22px;
-    z-index: 1;
-    color: #4f5b66;
-    cursor: pointer;
+    .pos .sb-partner .pos-search-bar {
+        flex-grow: 1;
+    }
 }
 
 .currencyCashBox {
@@ -3534,8 +3572,7 @@ td {
  */
 
  .pos .notification {
-    min-width: 250px;
-    max-width: 500px;
+    width: 350px;
     background-color: #333333AA;
     color: #fff;
     text-align: center;
@@ -3543,7 +3580,7 @@ td {
     padding: 16px;
     position: fixed;
     z-index: 1;
-    left: 50%;
+    left: calc((100% - 350px - 32px)/2);
     bottom: 5%;
     font-size: 17px;
 }
@@ -3553,17 +3590,16 @@ td {
 }
 
 @media screen and (max-width: 768px) {
-
-    .pos .search-bar-portal .search-box .icon .fa-search {
-        color: #f0f0f0;
-    }
-
     .ticket-screen .pos-search-bar .search input {
         padding-left: 10px;
     }
 }
 
 /** CashMovePopup **/
+
+.cash-move-popup {
+    top: 20% !important;
+}
 
 .cash-move {
     display: flex;
@@ -3596,6 +3632,12 @@ td {
     color: white !important;
 }
 
+.cash-move .input-amount .red-highlight {
+    background: #bd2222 !important;
+    border: solid 1px #bd2222 !important;
+    color: white !important;
+}
+
 .cash-move .input-amount input {
     width: 200px;
     min-height: auto;
@@ -3609,6 +3651,7 @@ td {
 }
 
 .cash-move textarea {
+    resize: none;
     margin-top: 10px;
     margin-bottom: 10px;
 }
@@ -3617,6 +3660,20 @@ td {
     color: rgb(197, 52, 0);
     text-align: left;
     padding-left: 5px;
+}
+
+.pos .popup footer.cash-move {
+    display: block;
+    width: calc(100% - 36px);
+    padding: 10px 18px 10px 18px;
+}
+
+.pos .popup .footer.cash-move .button.confirm {
+    float: left;
+}
+
+.pos .popup .footer.cash-move .button.cancel {
+    margin-right: 0;
 }
 
 /* For LoadingScreen */

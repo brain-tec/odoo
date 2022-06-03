@@ -138,8 +138,7 @@ export class ModelManager {
         /**
          * Create the messaging singleton record.
          */
-        const messaging = this.models['Messaging'].insert(values);
-        Object.assign(odoo.__DEBUG__, { messaging });
+        this.models['Messaging'].insert(values);
         this.messagingCreatedPromise.resolve();
         await this.messaging.start();
         this.messagingInitializedPromise.resolve();
@@ -197,6 +196,24 @@ export class ModelManager {
     }
 
     /**
+     * Destroys this model manager, which consists of cleaning all possible
+     * references in order to avoid memory leaks.
+     */
+    destroy() {
+        this.messaging.delete();
+        for (const model of Object.values(this.models)) {
+            delete model.__fieldList;
+            delete model.__fieldMap;
+            delete model.__identifyingFields;
+            delete model.__identifyingFieldsFlattened;
+            delete model.__records;
+            delete model.__requiredFieldsList;
+            delete model.fields;
+            delete model.modelManager;
+        }
+    }
+
+    /**
      * Returns whether the given record still exists.
      *
      * @param {Object} model
@@ -204,8 +221,7 @@ export class ModelManager {
      * @returns {boolean}
      */
     exists(model, record) {
-        const existingRecord = model.__records[record.localId];
-        return Boolean(existingRecord && existingRecord === record);
+        return Boolean(record.localId);
     }
 
     /**
@@ -655,7 +671,7 @@ export class ModelManager {
             get: function getFromProxy(record, prop) {
                 if (
                     !model.__fieldMap[prop] &&
-                    !['_super', 'then'].includes(prop) &&
+                    !['_super', 'then', 'localId'].includes(prop) &&
                     typeof prop !== 'symbol' &&
                     !(prop in record)
                 ) {
@@ -736,6 +752,9 @@ export class ModelManager {
             if (field.fieldType === 'relation') {
                 // ensure inverses are properly unlinked
                 field.parseAndExecuteCommands(record, unlinkAll(), { allowWriteReadonly: true });
+                if (!record.exists()) {
+                    return; // current record might have been deleted from causality
+                }
             }
         }
         this._createdRecordsComputes.delete(record);
@@ -756,7 +775,10 @@ export class ModelManager {
                 infoList,
             });
         }
+        delete record.__values;
+        delete record.__listeners;
         delete model.__records[record.localId];
+        delete record.localId;
     }
 
     /**
@@ -1212,9 +1234,14 @@ export class ModelManager {
                 field => field.required
             );
             // Add field accessors.
-            for (const field of model.__fieldList) {
-                Object.defineProperty(model.prototype, field.fieldName, {
+            for (const fieldName of Object.keys(model.__fieldMap)) {
+                Object.defineProperty(model.prototype, fieldName, {
                     get: function getFieldValue() { // this is bound to record
+                        if (!this.exists()) {
+                            // Deprecated, allows reading fields on deleted records. Use exists() instead.
+                            return undefined;
+                        }
+                        const field = model.__fieldMap[fieldName];
                         if (this.modelManager._listeners.size) {
                             if (!this.modelManager._listenersObservingLocalId.has(this.localId)) {
                                 this.modelManager._listenersObservingLocalId.set(this.localId, new Map());

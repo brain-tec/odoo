@@ -1,6 +1,9 @@
 import { OdooEditor } from '../src/OdooEditor.js';
 import { sanitize } from '../src/utils/sanitize.js';
-import { insertText as insertTextSel } from '../src/utils/utils.js';
+import {
+    closestElement,
+    insertText as insertTextSel,
+} from '../src/utils/utils.js';
 
 export const Direction = {
     BACKWARD: 'BACKWARD',
@@ -398,39 +401,19 @@ export async function click(el, options) {
     const pos = el.getBoundingClientRect();
     options = Object.assign(
         {
-            bubbles: true,
             clientX: pos.left + 1,
             clientY: pos.top + 1,
         },
         options,
     );
-    el.dispatchEvent(new MouseEvent('mousedown', options));
+    triggerEvent(el, 'mousedown', options);
     await nextTickFrame();
-    el.dispatchEvent(new MouseEvent('mouseup', options));
+    triggerEvent(el, 'mouseup', options);
     await nextTick();
-    el.dispatchEvent(new MouseEvent('click', options));
+    triggerEvent(el, 'click', options);
     await nextTickFrame();
 }
 
-export async function keydown(editable, key, options = {}) {
-    options = Object.assign(
-        { key: key },
-        options
-    );
-    const ev = new KeyboardEvent('keydown', options);
-    editable.dispatchEvent(ev);
-    await nextTickFrame();
-}
-
-export async function keyup(editable, key, options = {}) {
-    options = Object.assign(
-        { key: key },
-        options
-    );
-    const ev = new KeyboardEvent('keyup', options);
-    editable.dispatchEvent(ev);
-    await nextTickFrame();
-}
 
 export async function deleteForward(editor) {
     editor.execCommand('oDeleteForward');
@@ -483,13 +466,10 @@ export async function insertText(editor, text) {
     // Unfortunatly those Event are flagged `isTrusted: false`.
     // So we have no choice and need to detect them inside the Editor.
     // But it's the closest to real Browser we can go.
-    var event = new InputEvent('input', {
+    triggerEvent(editor.editable, 'input', {
         inputType: 'insertText',
         data: text,
-        bubbles: true,
-        cancelable: true,
     });
-    editor.editable.dispatchEvent(event);
 }
 
 export function undo(editor) {
@@ -498,6 +478,83 @@ export function undo(editor) {
 
 export function redo(editor) {
     editor.historyRedo();
+}
+
+/**
+ * The class exists because the original `InputEvent` does not allow to override
+ * its inputType property.
+ */
+class SimulatedInputEvent extends InputEvent {
+    constructor(type, eventInitDict) {
+        super(type, eventInitDict);
+        this.eventInitDict = eventInitDict;
+    }
+    get inputType() {
+        return this.eventInitDict.inputType;
+    }
+}
+function getEventConstructor(win, type) {
+    const eventTypes = {
+        'pointer': win.MouseEvent,
+        'contextmenu': win.MouseEvent,
+        'select': win.MouseEvent,
+        'wheel': win.MouseEvent,
+        'click': win.MouseEvent,
+        'dblclick': win.MouseEvent,
+        'mousedown': win.MouseEvent,
+        'mouseenter': win.MouseEvent,
+        'mouseleave': win.MouseEvent,
+        'mousemove': win.MouseEvent,
+        'mouseout': win.MouseEvent,
+        'mouseover': win.MouseEvent,
+        'mouseup': win.MouseEvent,
+        'compositionstart': win.CompositionEvent,
+        'compositionend': win.CompositionEvent,
+        'compositionupdate': win.CompositionEvent,
+        'input': SimulatedInputEvent,
+        'beforeinput': SimulatedInputEvent,
+        'keydown': win.KeyboardEvent,
+        'keypress': win.KeyboardEvent,
+        'keyup': win.KeyboardEvent,
+        'dragstart': win.DragEvent,
+        'dragend': win.DragEvent,
+        'drop': win.DragEvent,
+        'beforecut': win.ClipboardEvent,
+        'cut': win.ClipboardEvent,
+        'paste': win.ClipboardEvent,
+        'touchstart': win.TouchEvent,
+        'touchend': win.TouchEvent,
+    };
+    if (!eventTypes[type]) {
+        throw new Error('The event "' + type + '" is not implemented for the tests.');
+    }
+    return eventTypes[type];
+}
+
+export function triggerEvent(
+    el,
+    eventName,
+    options,
+) {
+    const currentElement = closestElement(el);
+    options = Object.assign(
+        {
+            view: el.ownerDocument.defaultView,
+            bubbles: true,
+            composed: true,
+            cancelable: true,
+            isTrusted: true,
+        },
+        options,
+    );
+    const EventClass = getEventConstructor(el.ownerDocument.defaultView, eventName);
+    if (EventClass.name === 'ClipboardEvent' && !('clipboardData' in options)) {
+        throw new Error('ClipboardEvent must have clipboardData in options');
+    }
+    const ev = new EventClass(eventName, options);
+
+    currentElement.dispatchEvent(ev);
+    return ev;
 }
 
 export class BasicEditor extends OdooEditor {}

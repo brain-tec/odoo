@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { useUpdate } from '@mail/component_hooks/use_update';
-import emojis from '@mail/js/emojis';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { LegacyComponent } from '@web/legacy/legacy_component';
 
@@ -11,8 +10,7 @@ export class EmojiList extends LegacyComponent {
      * @override
      */
     setup() {
-        super.setup();
-        this.emojis = emojis;
+        super.setup();        
         useUpdate({ func: () => this._update() });
     }
 

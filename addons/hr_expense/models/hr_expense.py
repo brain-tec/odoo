@@ -121,6 +121,9 @@ class HrExpense(models.Model):
     sample = fields.Boolean()
     label_convert_rate = fields.Char(compute='_compute_label_convert_rate')
 
+    def attach_document(self, **kwargs):
+        pass
+
     @api.depends('product_has_cost')
     def _compute_currency_id(self):
         for expense in self.filtered("product_has_cost"):
@@ -1093,6 +1096,17 @@ class HrExpenseSheet(models.Model):
     # --------------------------------------------
     # Mail Thread
     # --------------------------------------------
+
+    def _get_mail_thread_data_attachments(self):
+        """
+        In order to see in the sheet attachment preview the corresponding
+        expenses' attachments, the latter attachments are added to the fetched data for the sheet record.
+        """
+        self.ensure_one()
+        res = super()._get_mail_thread_data_attachments()
+        expense_ids = self.expense_line_ids
+        expense_attachments = self.env['ir.attachment'].search([('res_id', 'in', expense_ids.ids), ('res_model', '=', 'hr.expense')], order='id desc')
+        return res | expense_attachments
 
     def _track_subtype(self, init_values):
         self.ensure_one()
