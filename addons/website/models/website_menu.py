@@ -98,10 +98,8 @@ class Menu(models.Model):
         return menus
 
     def write(self, values):
-        res = super().write(values)
-        if 'website_id' in values or 'sequence' in values or 'page_id' in values:
-            self.clear_caches()
-        return res
+        self.clear_caches()
+        return super().write(values)
 
     def unlink(self):
         self.clear_caches()
@@ -119,7 +117,7 @@ class Menu(models.Model):
             if menu.page_id and not menu.user_has_groups('base.group_user') and \
                 (not menu.page_id.sudo().is_visible or
                  (not menu.page_id.view_id._handle_visibility(do_raise=False) and
-                 menu.page_id.view_id.visibility != "password")):
+                 menu.page_id.view_id._get_cached_visibility() != "password")):
                 visible = False
             menu.is_visible = visible
 

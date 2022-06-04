@@ -202,7 +202,7 @@ class Http(models.AbstractModel):
         if user.id == website._get_cached('user_id'):
             # avoid a read on res_company_user_rel in case of public user
             allowed_company_ids = [website_company_id]
-        elif website_company_id in user.company_ids.ids:
+        elif website_company_id in user._get_company_ids():
             allowed_company_ids = [website_company_id]
         else:
             allowed_company_ids = user.company_id.ids
@@ -267,48 +267,12 @@ class Http(models.AbstractModel):
                 path += '?' + request.httprequest.query_string.decode('utf-8')
             return request.redirect(path, code=301)
 
-        if page:
-            # prefetch all menus (it will prefetch website.page too)
-            menu_pages_ids = request.website._get_menu_page_ids()
-            page.browse([page.id] + menu_pages_ids).mapped('view_id.name')
-            request.website.menu_id
-
         if page and (request.website.is_publisher() or page.is_visible):
-            need_to_cache = False
-            cache_key = page._get_cache_key(request)
-            if (
-                page.cache_time  # cache > 0
-                and request.httprequest.method == "GET"
-                and request.env.user._is_public()    # only cache for unlogged user
-                and 'nocache' not in request.httprequest.args  # allow bypass cache / debug
-                and not request.session.debug
-                and len(cache_key) and cache_key[-1] is not None  # nocache via expr
-            ):
-                need_to_cache = True
-                try:
-                    r = page._get_cache_response(cache_key)
-                    if r['time'] + page.cache_time > time.time():
-                        response = odoo.http.Response(r['content'], mimetype=r['contenttype'])
-                        response._cached_template = r['template']
-                        response._cached_page = page
-                        return response
-                except KeyError:
-                    pass
-
             _, ext = os.path.splitext(req_page)
             response = request.render(page.view_id.id, {
                 'deletable': True,
                 'main_object': page,
             }, mimetype=_guess_mimetype(ext))
-
-            if need_to_cache and response.status_code == 200:
-                r = response.render()
-                page._set_cache_response(cache_key, {
-                    'content': r,
-                    'contenttype': response.headers['Content-Type'],
-                    'time': time.time(),
-                    'template': getattr(response, 'qcontext', {}).get('response_template')
-                })
             return response
         return False
 
@@ -382,7 +346,7 @@ class Http(models.AbstractModel):
                 # contains branding (<div t-att-data="request.browse('ok')"/>).
                 et = view.with_context(inherit_branding=False)._get_combined_arch()
                 node = et.xpath(exception.path) if exception.path else et
-                line = node is not None and etree.tostring(node[0], encoding='unicode')
+                line = node is not None and len(node) > 0 and etree.tostring(node[0], encoding='unicode')
                 if line:
                     values['view'] = View._views_get(exception_template).filtered(
                         lambda v: line in v.arch

@@ -58,6 +58,13 @@ class PosSession(models.Model):
 
     def _get_pos_ui_res_partner(self, params):
         result = super()._get_pos_ui_res_partner(params)
+        return self._load_pos_ui_loyalty_points(result)
+
+    def get_pos_ui_res_partner_by_params(self, custom_search_params):
+        partners = super().get_pos_ui_res_partner_by_params(custom_search_params)
+        return self._load_pos_ui_loyalty_points(partners)
+
+    def _load_pos_ui_loyalty_points(self, result):
         # In order to make loyalty programs work offline we load the partner's point into
         # a non-existant field 'loyalty_points'.
         if self.config_id.loyalty_program_id:
@@ -74,6 +81,9 @@ class PosSession(models.Model):
             query = self.env['loyalty.card']._search(
                 [('program_id', '=', self.config_id.loyalty_program_id.id), ('partner_id', 'in', partner_ids)]
             )
+            # query can be falsy
+            if not query:
+                return result
             query_str, params = query.select('id', 'partner_id', 'points')
             self.env.cr.execute(query_str, params)
             for res in self.env.cr.dictfetchall():
@@ -93,4 +103,13 @@ class PosSession(models.Model):
             products = (programs.rule_ids.valid_product_ids | rewards.discount_line_product_id) |\
                 (rewards.all_discount_product_ids | rewards.reward_product_ids)
             result['search_params']['domain'] = OR([result['search_params']['domain'], [('id', 'in', products.ids)]])
+        return result
+
+    def _get_pos_ui_product_product(self, params):
+        result = super()._get_pos_ui_product_product(params)
+        rewards = self.config_id.all_program_ids.reward_ids
+        products = rewards.discount_line_product_id | rewards.reward_product_ids
+        products = self.env['product.product'].search_read([('id', 'in', products.ids)], fields=params['search_params']['fields'])
+        self._process_pos_ui_product_product(products)
+        result.extend(products)
         return result
