@@ -61,16 +61,16 @@ class PaymentPortal(portal.CustomerPortal):
         :param str acquirer_id: The desired acquirer, as a `payment.acquirer` id
         :param str access_token: The access token used to authenticate the partner
         :param str invoice_id: The account move for which a payment id made, as a `account.move` id
-        :param dict kwargs: Optional data. This parameter is not used here
+        :param dict kwargs: Optional data passed to helper methods.
         :return: The rendered checkout form
         :rtype: str
         :raise: werkzeug.exceptions.NotFound if the access token is invalid
         """
         # Cast numeric parameters as int or float and void them if their str value is malformed
         currency_id, acquirer_id, partner_id, company_id, invoice_id = tuple(map(
-            self.cast_as_int, (currency_id, acquirer_id, partner_id, company_id, invoice_id)
+            self._cast_as_int, (currency_id, acquirer_id, partner_id, company_id, invoice_id)
         ))
-        amount = self.cast_as_float(amount)
+        amount = self._cast_as_float(amount)
 
         # Raise an HTTP 404 if a partner is provided with an invalid access token
         if partner_id:
@@ -103,6 +103,9 @@ class PaymentPortal(portal.CustomerPortal):
         company = request.env['res.company'].sudo().browse(company_id)
         currency_id = currency_id or company.currency_id.id
 
+        # Make sure that the company passed as parameter matches the partner's company.
+        PaymentPortal._ensure_matching_companies(partner_sudo, company)
+
         # Make sure that the currency exists and is active
         currency = request.env['res.currency'].browse(currency_id).exists()
         if not currency or not currency.active:
@@ -131,7 +134,9 @@ class PaymentPortal(portal.CustomerPortal):
             'acquirers': acquirers_sudo,
             'tokens': payment_tokens,
             'fees_by_acquirer': fees_by_acquirer,
-            'show_tokenize_input': logged_in,  # Prevent public partner from saving payment methods
+            'show_tokenize_input': self._compute_show_tokenize_input_mapping(
+                acquirers_sudo, logged_in=logged_in, **kwargs
+            ),
             'reference_prefix': reference,
             'amount': amount,
             'currency': currency,
@@ -145,6 +150,26 @@ class PaymentPortal(portal.CustomerPortal):
             **self._get_custom_rendering_context_values(**kwargs),
         }
         return request.render(self._get_payment_page_template_xmlid(**kwargs), rendering_context)
+
+    @staticmethod
+    def _compute_show_tokenize_input_mapping(acquirers_sudo, logged_in=False, **kwargs):
+        """ Determine for each acquirer whether the tokenization input should be shown or not.
+
+        :param recordset acquirers_sudo: The acquirers for which to determine whether the
+                                         tokenization input should be shown or not, as a sudoed
+                                         `payment.acquirer` recordset.
+        :param bool logged_in: Whether the user is logged in or not.
+        :param dict kwargs: The optional data passed to the helper methods.
+        :return: The mapping of the computed value for each acquirer id.
+        :rtype: dict
+        """
+        show_tokenize_input_mapping = {}
+        for acquirer in acquirers_sudo:
+            show_tokenize_input = acquirer.allow_tokenization \
+                                  and not acquirer._is_tokenization_required(**kwargs) \
+                                  and logged_in
+            show_tokenize_input_mapping[acquirer.id] = show_tokenize_input
+        return show_tokenize_input_mapping
 
     def _get_payment_page_template_xmlid(self, **kwargs):
         return 'payment.pay'
@@ -343,7 +368,7 @@ class PaymentPortal(portal.CustomerPortal):
         :param dict kwargs: Optional data. This parameter is not used here
         :raise: werkzeug.exceptions.NotFound if the access token is invalid
         """
-        tx_id = self.cast_as_int(tx_id)
+        tx_id = self._cast_as_int(tx_id)
         if tx_id:
             tx_sudo = request.env['payment.transaction'].sudo().browse(tx_id)
 
@@ -401,7 +426,7 @@ class PaymentPortal(portal.CustomerPortal):
             token_sudo.active = False
 
     @staticmethod
-    def cast_as_int(str_value):
+    def _cast_as_int(str_value):
         """ Cast a string as an `int` and return it.
 
         If the conversion fails, `None` is returned instead.
@@ -416,7 +441,7 @@ class PaymentPortal(portal.CustomerPortal):
             return None
 
     @staticmethod
-    def cast_as_float(str_value):
+    def _cast_as_float(str_value):
         """ Cast a string as a `float` and return it.
 
         If the conversion fails, `None` is returned instead.
@@ -429,3 +454,22 @@ class PaymentPortal(portal.CustomerPortal):
             return float(str_value)
         except (TypeError, ValueError, OverflowError):
             return None
+
+    @staticmethod
+    def _ensure_matching_companies(partner, document_company):
+        """ Check that the partner's company is the same as the document's company.
+
+        If the partner company is not set, the check passes. If the companies don't match, a
+        `UserError` is raised.
+
+        :param recordset partner: The partner on behalf on which the payment is made, as a
+                                  `res.partner` record.
+        :param recordset document_company: The company of the document being paid, as a
+                                           `res.company` record.
+        :return: None
+        :raise UserError: If the companies don't match.
+        """
+        if partner.company_id and partner.company_id != document_company:
+            raise UserError(
+                _("Please switch to company '%s' to make this payment.", document_company.name)
+            )

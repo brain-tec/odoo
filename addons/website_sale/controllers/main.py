@@ -427,9 +427,9 @@ class WebsiteSale(http.Controller):
     @http.route(['/shop/change_pricelist/<model("product.pricelist"):pricelist>'], type='http', auth="public", website=True, sitemap=False)
     def pricelist_change(self, pricelist, **post):
         website = request.env['website'].get_current_website()
+        redirect_url = request.httprequest.referrer
         if (pricelist.selectable or pricelist == request.env.user.partner_id.property_product_pricelist) \
                 and website.is_pricelist_available(pricelist.id):
-            redirect_url = request.httprequest.referrer
             if redirect_url and request.website.is_view_active('website_sale.filter_products_price'):
                 decoded_url = url_parse(redirect_url)
                 args = url_decode(decoded_url.query)
@@ -989,12 +989,6 @@ class WebsiteSale(http.Controller):
                 order.amount_total, order.currency_id, order.partner_id.country_id
             ) for acq_sudo in acquirers_sudo.filtered('fees_active')
         }
-        # Prevent public partner from saving payment methods but force it for logged in partners
-        # buying subscription products
-        show_tokenize_input = logged_in \
-            and not request.env['payment.acquirer'].sudo()._is_tokenization_required(
-                sale_order_id=order.id
-            )
         return {
             'website_sale_order': order,
             'errors': [],
@@ -1005,7 +999,9 @@ class WebsiteSale(http.Controller):
             'acquirers': acquirers_sudo,
             'tokens': tokens,
             'fees_by_acquirer': fees_by_acquirer,
-            'show_tokenize_input': show_tokenize_input,
+            'show_tokenize_input': PaymentPortal._compute_show_tokenize_input_mapping(
+                acquirers_sudo, logged_in=logged_in, sale_order_id=order.id
+            ),
             'amount': order.amount_total,
             'currency': order.currency_id,
             'partner_id': order.partner_id.id,

@@ -160,6 +160,7 @@ from .tools.geoipresolver import GeoIPResolver
 from .tools.func import filter_kwargs, lazy_property
 from .tools.mimetypes import guess_mimetype
 from .tools._vendor import sessions
+from .tools._vendor.useragents import UserAgent
 
 
 _logger = logging.getLogger(__name__)
@@ -282,7 +283,10 @@ def db_list(force=False, host=None):
     :returns: the list of available databases
     :rtype: List[str]
     """
-    dbs = odoo.service.db.list_dbs(force)
+    try:
+        dbs = odoo.service.db.list_dbs(force)
+    except psycopg2.OperationalError:
+        return []
     return db_filter(dbs, host)
 
 def db_filter(dbs, host=None):
@@ -888,7 +892,7 @@ class Response(werkzeug.wrappers.Response):
             _logger.warning("%s returns an HTTPException instead of raising it.", fname)
             raise result
 
-        if isinstance(result, werkzeug.wrappers.BaseResponse):
+        if isinstance(result, werkzeug.wrappers.Response):
             response = cls.force_type(result)
             response.set_default()
             return response
@@ -1357,7 +1361,7 @@ class Request:
             except Exception as exc:
                 if isinstance(exc, HTTPException) and exc.code is None:
                     raise  # bubble up to odoo.http.Application.__call__
-                if 'werkzeug' in config['dev_mode']:
+                if 'werkzeug' in config['dev_mode'] and self.dispatcher.routing_type != 'json':
                     raise  # bubble up to werkzeug.debug.DebuggedApplication
                 exc.error_response = self.registry['ir.http']._handle_error(exc)
                 raise
@@ -1736,6 +1740,7 @@ class Application:
             return response(environ, start_response)
 
         httprequest = werkzeug.wrappers.Request(environ)
+        httprequest.user_agent_class = UserAgent  # use vendored userAgent since it will be removed in 2.1
         httprequest.parameter_storage_class = (
             werkzeug.datastructures.ImmutableOrderedMultiDict)
         request = Request(httprequest)
@@ -1777,7 +1782,7 @@ class Application:
 
             # Server is running with --dev=werkzeug, bubble the error up
             # to werkzeug so he can fire up a debugger.
-            if 'werkzeug' in config['dev_mode']:
+            if 'werkzeug' in config['dev_mode'] and request.dispatcher.routing_type != 'json':
                 raise
 
             # Ensure there is always a Response attached to the exception.

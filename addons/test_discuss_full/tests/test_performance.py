@@ -58,7 +58,7 @@ class TestDiscussFullPerformance(TransactionCase):
     def test_init_messaging(self):
         """Test performance of `_init_messaging`."""
         channel_general = self.env.ref('mail.channel_all_employees')  # Unfortunately #general cannot be deleted. Assertions below assume data from a fresh db with demo.
-        self.env['mail.channel'].search([('id', '!=', channel_general.id)]).unlink()
+        self.env['mail.channel'].sudo().search([('id', '!=', channel_general.id)]).unlink()
         user_root = self.env.ref('base.user_root')
         # create public channels
         channel_channel_public_1 = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='public 1', privacy='public')['id'])
@@ -99,7 +99,7 @@ class TestDiscussFullPerformance(TransactionCase):
         self.maxDiff = None
         self.users[0].flush()
         self.users[0].invalidate_cache()
-        with self.assertQueryCount(emp=85):  # 84 ent
+        with self.assertQueryCount(emp=82):
             init_messaging = self.users[0].with_user(self.users[0])._init_messaging()
 
         self.assertEqual(init_messaging, {
@@ -755,17 +755,9 @@ class TestDiscussFullPerformance(TransactionCase):
                 'out_of_office_date_end': False,
                 'user_id': False,
             },
-            'public_partners': [{
-                'active': False,
-                'display_name': 'Public user',
-                'email': False,
+            'publicPartners': [('insert', [{
                 'id': self.env.ref('base.public_partner').id,
-                'im_status': 'im_partner',
-                'is_internal_user': False,
-                'name': 'Public user',
-                'out_of_office_date_end': False,
-                'user_id': self.env.ref('base.public_user').id,
-            }],
+            }])],
             'currentGuest': False,
             'current_partner': {
                 'active': True,

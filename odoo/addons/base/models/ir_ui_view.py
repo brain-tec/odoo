@@ -1872,7 +1872,12 @@ actual arch.
                 if not attrs.intersection(descendant.attrib):
                     continue
                 self._pop_view_branding(descendant)
-            # TODO: find a better name and check if we have a string to boolean helper
+
+            # Remove the processing instructions indicating where nodes were
+            # removed (see apply_inheritance_specs)
+            for descendant in e.iterdescendants(tag=etree.ProcessingInstruction):
+                if descendant.target == 'apply-inheritance-specs-node-removal':
+                    descendant.getparent().remove(descendant)
             return
 
         node_path = e.get('data-oe-xpath')
@@ -1901,16 +1906,18 @@ actual arch.
                 # TODO: collections.Counter if remove p2.6 compat
                 # running index by tag type, for XPath query generation
                 indexes = collections.defaultdict(lambda: 0)
-                for child in e.iterchildren(tag=etree.Element):
+                for child in e.iterchildren(etree.Element, etree.ProcessingInstruction):
                     if child.get('data-oe-xpath'):
                         # injected by view inheritance, skip otherwise
                         # generated xpath is incorrect
-                        # Also, if a node is known to have been replaced during applying xpath
-                        # increment its index to compute an accurate xpath for susequent nodes
-                        replaced_node_tag = child.attrib.pop('meta-oe-xpath-replacing', None)
-                        if replaced_node_tag:
-                            indexes[replaced_node_tag] += 1
                         self.distribute_branding(child)
+                    elif child.tag is etree.ProcessingInstruction:
+                        # If a node is known to have been replaced during
+                        # applying an inheritance, increment its index to
+                        # compute an accurate xpath for subsequent nodes
+                        if child.target == 'apply-inheritance-specs-node-removal':
+                            indexes[child.text] += 1
+                            e.remove(child)
                     else:
                         indexes[child.tag] += 1
                         self.distribute_branding(
@@ -1929,6 +1936,9 @@ actual arch.
         return any(
             (attr in ('data-oe-model', 'groups') or (attr.startswith('t-')))
             for attr in node.attrib
+        ) or (
+            node.tag is etree.ProcessingInstruction
+            and node.target == 'apply-inheritance-specs-node-removal'
         )
 
     @api.model

@@ -557,7 +557,7 @@ class HolidaysAllocation(models.Model):
             partners_to_subscribe = set()
             if holiday.employee_id.user_id:
                 partners_to_subscribe.add(holiday.employee_id.user_id.partner_id.id)
-            if holiday.validation_type == 'hr':
+            if holiday.validation_type == 'officer':
                 partners_to_subscribe.add(holiday.employee_id.parent_id.user_id.partner_id.id)
                 partners_to_subscribe.add(holiday.employee_id.leave_manager_id.partner_id.id)
             holiday.message_subscribe(partner_ids=tuple(partners_to_subscribe))
@@ -582,6 +582,11 @@ class HolidaysAllocation(models.Model):
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
             raise UserError(_('You cannot delete an allocation request which is in %s state.') % (state_description_values.get(holiday.state),))
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_no_leaves(self):
+        if any(allocation.holiday_status_id.requires_allocation == 'yes' and allocation.leaves_taken > 0 for allocation in self):
+            raise UserError(_('You cannot delete an allocation request which has some validated leaves.'))
 
     def _get_mail_redirect_suggested_company(self):
         return self.holiday_status_id.company_id
@@ -711,17 +716,6 @@ class HolidaysAllocation(models.Model):
             if holiday.employee_id == current_employee and not is_manager and not val_type == 'no':
                 raise UserError(_('Only a time off Manager can approve its own requests.'))
 
-            if (state == 'validate1' and val_type == 'both') or (state == 'validate' and val_type == 'manager'):
-                if self.env.user == holiday.employee_id.leave_manager_id and self.env.user != holiday.employee_id.user_id:
-                    continue
-                manager = holiday.employee_id.parent_id or holiday.employee_id.department_id.manager_id
-                if (manager != current_employee) and not is_manager:
-                    raise UserError(_('You must be either %s\'s manager or time off manager to approve this time off') % (holiday.employee_id.name))
-
-            if state == 'validate' and val_type == 'both':
-                if not is_officer:
-                    raise UserError(_('Only a Time off Approver can apply the second approval on allocation requests.'))
-
     @api.onchange('allocation_type')
     def _onchange_allocation_type(self):
         if self.allocation_type == 'accrual':
@@ -737,7 +731,7 @@ class HolidaysAllocation(models.Model):
         self.ensure_one()
         responsible = self.env.user
 
-        if self.validation_type == 'officer':
+        if self.validation_type == 'officer' or self.validation_type == 'set':
             if self.holiday_status_id.responsible_id:
                 responsible = self.holiday_status_id.responsible_id
 

@@ -118,7 +118,7 @@ tour.register('website_livechat_chatbot_flow_tour', {
     trigger: messagesContain("Ok bye!"),
     run: () => {}  // last step is displayed
 }, {
-    trigger: '.o_livechat_chatbot_main_restart',
+    trigger: '.o_livechat_chatbot_restart',
     run: 'click'
 }, {
     trigger: messagesContain("Restarting conversation..."),

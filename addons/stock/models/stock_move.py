@@ -504,6 +504,8 @@ class StockMove(models.Model):
 
     def _set_lot_ids(self):
         for move in self:
+            if move.product_id.tracking != 'serial':
+                continue
             move_lines_commands = []
             if move.picking_type_id.show_reserved is False:
                 mls = move.move_line_nosuggest_ids
@@ -1075,15 +1077,16 @@ class StockMove(models.Model):
             # for each move that why moves[0] is acceptable
             picking = moves[0]._search_picking_for_assignation()
             if picking:
-                if any(picking.partner_id.id != m.partner_id.id or
-                        picking.origin != m.origin for m in moves):
-                    # If a picking is found, we'll append `move` to its move list and thus its
-                    # `partner_id` and `ref` field will refer to multiple records. In this
-                    # case, we chose to  wipe them.
-                    picking.write({
-                        'partner_id': False,
-                        'origin': False,
-                    })
+                # If a picking is found, we'll append `move` to its move list and thus its
+                # `partner_id` and `ref` field will refer to multiple records. In this
+                # case, we chose to wipe them.
+                vals = {}
+                if any(picking.partner_id.id != m.partner_id.id for m in moves):
+                    vals['partner_id'] = False
+                if any(picking.origin != m.origin for m in moves):
+                    vals['origin'] = False
+                if vals:
+                    picking.write(vals)
             else:
                 # Don't create picking for negative moves since they will be
                 # reverse and assign to another picking
@@ -1924,7 +1927,7 @@ class StockMove(models.Model):
         for move in mtso_moves:
             needed_qty = move.product_qty
             forecasted_qty = mtso_free_qties_by_loc[move.location_id][move.product_id.id]
-            if float_compare(needed_qty, forecasted_qty, precision_rounding=product_id.uom_id.rounding) <= 0:
+            if float_compare(needed_qty, forecasted_qty, precision_rounding=move.product_uom.rounding) <= 0:
                 move.procure_method = 'make_to_stock'
                 mtso_free_qties_by_loc[move.location_id][move.product_id.id] -= needed_qty
             else:

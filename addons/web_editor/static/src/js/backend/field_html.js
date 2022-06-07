@@ -94,15 +94,14 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      *
      * @override
      */
-    commitChanges: function () {
+    commitChanges: async function () {
         if (this.mode == "readonly" || !this.isRendered) {
             return this._super();
         }
         var _super = this._super.bind(this);
-        this.wysiwyg.odooEditor.clean();
+        await this.wysiwyg.cleanForSave();
         this._setValue(this._getValue());
-        return this.wysiwyg.saveModifiedImages(this.$content).then(async () => {
-            await this.wysiwyg.preSavePromise;
+        return this.wysiwyg.saveModifiedImages(this.$content).then(() => {
             this._isDirty = this.wysiwyg.isDirty();
             _super();
         });
@@ -205,6 +204,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             allowCommandVideo: Boolean(this.nodeOptions.allowCommandVideo) && (!this.field.sanitize || !this.field.sanitize_tags),
             mediaModalParams: {
                 noVideos: 'noVideos' in this.nodeOptions ? this.nodeOptions.noVideos : true,
+                res_model: this.model,
+                res_id: this.res_id,
+                useMediaLibrary: true,
             },
             linkForceNewWindow: true,
             tabsize: 0,

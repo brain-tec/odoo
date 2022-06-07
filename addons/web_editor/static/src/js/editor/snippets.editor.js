@@ -1261,7 +1261,7 @@ var SnippetsMenu = Widget.extend({
             this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
             this.$('o_we_ui_loading').addClass('d-none');
             $(this.customizePanel).removeClass('d-none');
-            return Promise.all(defs).then(this._addToolbar.bind(this));
+            return Promise.all(defs);
         }
         this.invisibleDOMPanelEl = document.createElement('div');
         this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
@@ -2114,6 +2114,13 @@ var SnippetsMenu = Widget.extend({
             var target = $style.data('target');
             var noCheck = $style.data('no-check');
             var optionID = $style.data('js') || $style.data('option-name'); // used in tour js as selector
+            // TODO: adapt in master - used to hide XML 'img' options when image
+            // is not supported.
+            const xmlImageOption = !$style[0].hasAttribute('data-js') && (selector.indexOf('img') !== -1);
+            const nonSupportedImageSelector = '[data-oe-type="image"] > img';
+            if (xmlImageOption && !noCheck) {
+                exclude = [exclude, nonSupportedImageSelector].filter(value => !!value).join(', ');
+            }
             var option = {
                 'option': optionID,
                 'base_selector': selector,
@@ -3344,7 +3351,8 @@ var SnippetsMenu = Widget.extend({
         const range = selection && selection.rangeCount && selection.getRangeAt(0);
         if (!range ||
             !$(range.commonAncestorContainer).parents('#wrapwrap, .iframe-editor-wrapper .o_editable').length ||
-            $(range.commonAncestorContainer).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length ||
+            $(selection.anchorNode).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length ||
+            $(selection.focusNode).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length ||
             (e && $(e.target).closest('.fa, img').length ||
             this.options.wysiwyg.lastMediaClicked && $(this.options.wysiwyg.lastMediaClicked).is('.fa, img')) ||
             (this.options.wysiwyg.lastElement && !this.options.wysiwyg.lastElement.isContentEditable)

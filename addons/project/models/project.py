@@ -144,6 +144,37 @@ class ProjectTaskType(models.Model):
             else:
                 stage.disabled_rating_warning = False
 
+    def remove_personal_stage(self):
+        """
+        Remove a personal stage, tasks using that stage will move to the first
+        stage with a lower priority if it exists higher if not.
+        This method will not allow to delete the last personal stage.
+        Having no personal_stage_type_id makes the task not appear when grouping by personal stage.
+        """
+        self.ensure_one()
+        assert self.user_id == self.env.user or self.env.su
+
+        users_personal_stages = self.env['project.task.type']\
+            .search([('user_id', '=', self.user_id.id)], order='sequence DESC')
+        if len(users_personal_stages) == 1:
+            raise ValidationError(_("You should at least have one personal stage. Create a new stage to which the tasks can be transferred after this one is deleted."))
+
+        # Find the most suitable stage, they are already sorted by sequence
+        new_stage = self.env['project.task.type']
+        for stage in users_personal_stages:
+            if stage == self:
+                continue
+            if stage.sequence > self.sequence:
+                new_stage = stage
+            elif stage.sequence <= self.sequence:
+                new_stage = stage
+                break
+
+        self.env['project.task.stage.personal'].search([('stage_id', '=', self.id)]).write({
+            'stage_id': new_stage.id,
+        })
+        self.unlink()
+
 class Project(models.Model):
     _name = "project.project"
     _description = "Project"
@@ -1801,9 +1832,12 @@ class Task(models.Model):
             # since we use sudo to create tasks, we need to check
             # if the portal user could really create the tasks based on the ir rule.
             tasks.with_user(self.env.user).check_access_rule('create')
+        current_partner = self.env.user.partner_id
         for task in tasks:
             if task.project_id.privacy_visibility == 'portal':
                 task._portal_ensure_token()
+            if current_partner not in task.message_partner_ids:
+                task.message_subscribe(current_partner.ids)
         return tasks
 
     def write(self, vals):
@@ -2267,7 +2301,7 @@ class Task(models.Model):
             action['res_id'] = self.dependent_ids.id
             action['views'] = [(False, 'form')]
         else:
-            action['domain'] = [('depend_on_ids', '=', self.id)],
+            action['domain'] = [('depend_on_ids', '=', self.id)]
             action['name'] = _('Dependent Tasks')
             action['view_mode'] = 'tree,form,kanban,calendar,pivot,graph,activity'
         return action
@@ -2376,15 +2410,23 @@ class ProjectTags(models.Model):
         ('name_uniq', 'unique (name)', "A tag with the same name already exists."),
     ]
 
+    def _get_project_tags_domain(self, domain, project_id):
+        return AND([
+            domain,
+            ['|', ('task_ids.project_id', '=', project_id), ('project_ids', 'in', project_id)]
+        ])
+
+    @api.model
+    def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
+        if 'project_id' in self.env.context:
+            domain = self._get_project_tags_domain(domain, self.env.context.get('project_id'))
+        return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order)
+
     @api.model
     def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
         domain = args
         if 'project_id' in self.env.context:
-            project_id = self.env.context.get('project_id')
-            domain = AND([
-                domain,
-                ['|', ('task_ids.project_id', '=', project_id), ('project_ids', 'in', project_id)]
-            ])
+            domain = self._get_project_tags_domain(domain, self.env.context.get('project_id'))
         return super()._name_search(name, domain, operator, limit, name_get_uid)
 
     @api.model

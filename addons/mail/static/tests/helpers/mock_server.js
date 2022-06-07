@@ -67,7 +67,7 @@ MockServer.include({
     async _performFetch(resource, init) {
         if (resource === '/mail/attachment/upload') {
             const ufile = init.body.get('ufile');
-            const is_pending = init.body.get('is_pending');
+            const is_pending = init.body.get('is_pending') === 'true';
             const model = is_pending ? 'mail.compose.message' : init.body.get('thread_model');
             const id = is_pending ? 0 : parseInt(init.body.get('thread_id'));
             const attachmentId = this._mockCreate('ir.attachment', {
@@ -2415,7 +2415,7 @@ MockServer.include({
             menu_id: false, // not useful in QUnit tests
             needaction_inbox_counter: this._mockResPartner_GetNeedactionCount(user.partner_id),
             partner_root: this._mockResPartnerMailPartnerFormat(this.partnerRootId).get(this.partnerRootId),
-            public_partners: [...this._mockResPartnerMailPartnerFormat(this.publicPartnerId).values()],
+            publicPartners: [['insert', [{ 'id': this.publicPartnerId }]]],
             shortcodes: this._mockSearchRead('mail.shortcode', [[], ['source', 'substitution']], {}),
             starred_counter: this._getRecords('mail.message', [['starred_partner_ids', 'in', user.partner_id]]).length,
         };

@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
+from markupsafe import Markup
 from odoo import api, fields, Command, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import email_split, float_is_zero, float_repr, float_compare, is_html_empty
@@ -119,6 +120,9 @@ class HrExpense(models.Model):
     sample = fields.Boolean()
     label_convert_rate = fields.Char(compute='_compute_label_convert_rate')
 
+    def attach_document(self, **kwargs):
+        pass
+
     @api.depends('product_has_cost')
     def _compute_currency_id(self):
         for expense in self.filtered("product_has_cost"):
@@ -195,7 +199,7 @@ class HrExpense(models.Model):
             else:
                 residual_field = 'amount_residual_currency'
             payment_term_lines = expense.sheet_id.account_move_id.sudo().line_ids \
-                .filtered(lambda line: line.expense_id == self and line.account_internal_type in ('receivable', 'payable'))
+                .filtered(lambda line: line.expense_id == expense and line.account_internal_type in ('receivable', 'payable'))
             expense.amount_residual = -sum(payment_term_lines.mapped(residual_field))
 
     @api.depends('currency_rate', 'total_amount', 'amount_tax')
@@ -402,10 +406,10 @@ class HrExpense(models.Model):
         use_mailgateway = self.env['ir.config_parameter'].sudo().get_param('hr_expense.use_mailgateway')
         alias_record = use_mailgateway and self.env.ref('hr_expense.mail_alias_expense') or False
         if alias_record and alias_record.alias_domain and alias_record.alias_name:
-            return """
+            return Markup("""
 <p>
 Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20customer%%3A%%20%%2412.32">%(email)s</a>.
-</p>""" % {'email': '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)}
+</p>""") % {'email': '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)}
         return ""
 
     # ----------------------------------------

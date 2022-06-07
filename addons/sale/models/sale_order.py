@@ -12,6 +12,8 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url, is_html_empty
 
+from odoo.addons.payment import utils as payment_utils
+
 READONLY_FIELD_STATES = {
     state: [('readonly', True)]
     for state in {'sale', 'done', 'cancel'}
@@ -768,7 +770,9 @@ class SaleOrder(models.Model):
                 'It is not allowed to confirm an order in the following states: %s'
             ) % (', '.join(self._get_forbidden_state_confirm())))
 
-        for order in self.filtered(lambda order: order.partner_id not in order.message_partner_ids):
+        for order in self:
+            if order.partner_id in order.message_partner_ids:
+                continue
             order.message_subscribe([order.partner_id.id])
         self.write(self._prepare_confirmation_values())
 
@@ -1079,10 +1083,10 @@ class SaleOrder(models.Model):
         if final:
             moves.sudo().filtered(lambda m: m.amount_total < 0).action_switch_invoice_into_refund_credit_note()
         for move in moves:
-            move.message_post_with_view('mail.message_origin_link',
-                values={'self': move, 'origin': move.line_ids.mapped('sale_line_ids.order_id')},
-                subtype_id=self.env.ref('mail.mt_note').id
-            )
+            move.message_post_with_view(
+                'mail.message_origin_link',
+                values={'self': move, 'origin': move.line_ids.sale_line_ids.order_id},
+                subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'))
         return moves
 
     # MAIL #
@@ -1176,10 +1180,16 @@ class SaleOrder(models.Model):
                 line.qty_to_invoice = 0
 
     def payment_action_capture(self):
-        self.authorized_transaction_ids.action_capture()
+        """ Capture all transactions linked to this sale order. """
+        payment_utils.check_rights_on_recordset(self)
+        # In sudo mode because we need to be able to read on acquirer fields.
+        self.authorized_transaction_ids.sudo().action_capture()
 
     def payment_action_void(self):
-        self.authorized_transaction_ids.action_void()
+        """ Void all transactions linked to this sale order. """
+        payment_utils.check_rights_on_recordset(self)
+        # In sudo mode because we need to be able to read on acquirer fields.
+        self.authorized_transaction_ids.sudo().action_void()
 
     def get_portal_last_transaction(self):
         self.ensure_one()
