@@ -6,6 +6,7 @@ from odoo.tools import float_compare, date_utils, email_split, email_re, is_html
 from odoo.tools.misc import format_amount, formatLang, format_date, get_lang
 
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 from contextlib import contextmanager
 from itertools import zip_longest
@@ -293,8 +294,28 @@ class AccountMove(models.Model):
              "This happens if the move contains no payable or receivable line.")
 
     # ==== Auto-post feature fields ====
-    auto_post = fields.Boolean(string='Post Automatically', default=False, copy=False,
-        help='If this checkbox is ticked, this entry will be automatically posted at its date.')
+    auto_post = fields.Selection(
+        string='Auto-post',
+        selection=[
+            ('no', 'No'),
+            ('at_date', 'At Date'),
+            ('monthly', 'Monthly'),
+            ('quarterly', 'Quarterly'),
+            ('yearly', 'Yearly'),
+        ],
+        default='no', required=True, copy=False,
+        help='Specify whether this entry is posted automatically on its accounting date, and any similar recurring invoices.')
+    auto_post_until = fields.Date(
+        string='Auto-post until',
+        copy=False,
+        compute='_compute_auto_post_until', store=True, readonly=False,
+        help='This recurring move will be posted up to and including this date.')
+    auto_post_origin_id = fields.Many2one(
+        comodel_name='account.move',
+        string='First recurring entry',
+        readonly=True, copy=False,
+    )
+    hide_post_button = fields.Boolean(compute='_compute_hide_post_button', readonly=True)
 
     # ==== Reverse feature fields ====
     reversed_entry_id = fields.Many2one(
@@ -368,9 +389,6 @@ class AccountMove(models.Model):
     invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain',
         help="Technical field used to have a dynamic domain on journal / taxes in the form view.")
     bank_partner_id = fields.Many2one('res.partner', help='Technical field to get the domain on the bank', compute='_compute_bank_partner_id')
-    invoice_has_matching_suspense_amount = fields.Boolean(compute='_compute_has_matching_suspense_amount',
-        groups='account.group_account_invoice,account.group_account_readonly',
-        help="Technical field used to display an alert on invoices if there is at least a matching amount in any supsense account.")
     tax_lock_date_message = fields.Char(
         compute='_compute_tax_lock_date_message',
         help="Technical field used to display a message when the invoice's accounting date is prior of the tax lock date.")
@@ -500,6 +518,20 @@ class AccountMove(models.Model):
                 self._onchange_currency()
             else:
                 self._onchange_recompute_dynamic_lines()
+        elif self.state == 'draft':
+            self.date = fields.Date.context_today(self)  # draft state, no invoice_date: restore accounting date default
+
+    @api.depends('auto_post')
+    def _compute_auto_post_until(self):
+        for record in self:
+            if record.auto_post in ('no', 'at_date'):
+                record.auto_post_until = False
+
+    @api.depends('date', 'auto_post')
+    def _compute_hide_post_button(self):
+        for record in self:
+            record.hide_post_button = record.state != 'draft' \
+                or record.auto_post != 'no' and record.date > fields.Date.today()
 
     @api.onchange('journal_id')
     def _onchange_journal(self):
@@ -1531,33 +1563,6 @@ class AccountMove(models.Model):
 
             move.write({'line_ids': to_write})
 
-    def _get_domain_matching_suspense_moves(self):
-        self.ensure_one()
-        domain = self.env['account.move.line']._get_suspense_moves_domain()
-        domain += ['|', ('partner_id', '=?', self.partner_id.id), ('partner_id', '=', False)]
-        if self.is_inbound():
-            domain.append(('balance', '=', -self.amount_residual))
-        else:
-            domain.append(('balance', '=', self.amount_residual))
-        return domain
-
-    def _compute_has_matching_suspense_amount(self):
-        for r in self:
-            res = False
-            if r.state == 'posted' and r.is_invoice() and r.payment_state == 'not_paid':
-                domain = r._get_domain_matching_suspense_moves()
-                #there are more than one but less than 5 suspense moves matching the residual amount
-                if (0 < self.env['account.move.line'].search_count(domain) < 5):
-                    domain2 = [
-                        ('payment_state', '=', 'not_paid'),
-                        ('state', '=', 'posted'),
-                        ('amount_residual', '=', r.amount_residual),
-                        ('move_type', '=', r.move_type)]
-                    #there are less than 5 other open invoices of the same type with the same residual
-                    if self.env['account.move'].search_count(domain2) < 5:
-                        res = True
-            r.invoice_has_matching_suspense_amount = res
-
     @api.depends('partner_id', 'invoice_source_email', 'partner_id.name')
     def _compute_invoice_partner_display_info(self):
         for move in self:
@@ -1966,6 +1971,13 @@ class AccountMove(models.Model):
                     raise ValidationError(_("This entry contains taxes that are not compatible with your fiscal position. Check the country set in fiscal position and in your tax configuration."))
                 raise ValidationError(_("This entry contains one or more taxes that are incompatible with your fiscal country. Check company fiscal country in the settings and tax country in taxes configuration."))
 
+    @api.constrains('auto_post', 'invoice_date')
+    def _require_bill_date_for_autopost(self):
+        """Vendor bills must have an invoice date set to be posted. Require it for auto-posted bills."""
+        for record in self:
+            if record.auto_post != 'no' and record.is_purchase_document() and not record.invoice_date:
+                raise ValidationError(_("For this entry to be automatically posted, it required a bill date."))
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -2119,9 +2131,12 @@ class AccountMove(models.Model):
                 default_move_type=self.move_type,
             )._get_default_journal().id
         copied_am = super().copy(default)
+        message_origin = '' if not copied_am.auto_post_origin_id else \
+            '<br/>' + _('This recurring entry originated from %s', copied_am.auto_post_origin_id._get_html_link())
         copied_am._message_log(body=_(
-            'This entry has been duplicated from %s',
-            self._get_html_link()
+            'This entry has been duplicated from %s%s',
+            self._get_html_link(),
+            message_origin,
         ))
 
         if copied_am.is_invoice(include_receipts=True):
@@ -2736,8 +2751,9 @@ class AccountMove(models.Model):
         """
         if soft:
             future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
-            future_moves.auto_post = True
             for move in future_moves:
+                if move.auto_post == 'no':
+                    move.auto_post = 'at_date'
                 msg = _('This move will be posted at the accounting date: %(date)s', date=format_date(self.env, move.date))
                 move.message_post(body=msg)
             to_post = self - future_moves
@@ -2754,7 +2770,7 @@ class AccountMove(models.Model):
                 raise UserError(_('The entry %s (id %s) is already posted.') % (move.name, move.id))
             if not move.line_ids.filtered(lambda line: not line.display_type):
                 raise UserError(_('You need to add a line before posting.'))
-            if move.auto_post and move.date > fields.Date.context_today(self):
+            if move.auto_post != 'no' and move.date > fields.Date.context_today(self):
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
                 raise UserError(_("This move is configured to be auto-posted on %s", date_msg))
             if not move.journal_id.active:
@@ -2851,6 +2867,9 @@ class AccountMove(models.Model):
             lambda m: m.is_invoice(include_receipts=True) and m.currency_id.is_zero(m.amount_total)
         ).action_invoice_paid()
 
+        # Trigger copying for recurring invoices
+        to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
+
         # Force balance check since nothing prevents another module to create an incorrect entry.
         # This is performed at the very end to avoid flushing fields before the whole processing.
         to_post._check_balanced()
@@ -2904,12 +2923,6 @@ class AccountMove(models.Model):
             move.to_check = False
 
     def button_draft(self):
-        AccountMoveLine = self.env['account.move.line']
-        excluded_move_ids = []
-
-        if self._context.get('suspense_moves_mode'):
-            excluded_move_ids = AccountMoveLine.search(AccountMoveLine._get_suspense_moves_domain() + [('move_id', 'in', self.ids)]).mapped('move_id').ids
-
         for move in self:
             if move in move.line_ids.mapped('full_reconcile_id.exchange_move_id'):
                 raise UserError(_('You cannot reset to draft an exchange difference journal entry.'))
@@ -2920,7 +2933,7 @@ class AccountMove(models.Model):
                 # so we also check tax_cash_basis_origin_move_id, which stays unchanged
                 # (we need both, as tax_cash_basis_origin_move_id did not exist in older versions).
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
-            if move.restrict_mode_hash_table and move.state == 'posted' and move.id not in excluded_move_ids:
+            if move.restrict_mode_hash_table and move.state == 'posted':
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
             # We remove all the analytics entries for this journal
             move.mapped('line_ids.analytic_line_ids').unlink()
@@ -2929,7 +2942,7 @@ class AccountMove(models.Model):
         self.write({'state': 'draft', 'is_move_sent': False})
 
     def button_cancel(self):
-        self.write({'auto_post': False, 'state': 'cancel'})
+        self.write({'auto_post': 'no', 'state': 'cancel'})
 
     def _get_mail_template(self):
         """
@@ -3132,17 +3145,53 @@ class AccountMove(models.Model):
     def _autopost_draft_entries(self):
         ''' This method is called from a cron job.
         It is used to post entries such as those created by the module
-        account_asset.
+        account_asset and recurring entries created in _post().
         '''
         records = self.search([
             ('state', '=', 'draft'),
             ('date', '<=', fields.Date.context_today(self)),
-            ('auto_post', '=', True),
-        ])
-        for ids in self._cr.split_for_in_conditions(records.ids, size=1000):
-            self.browse(ids)._post()
-            if not self.env.registry.in_test_mode():
-                self._cr.commit()
+            ('auto_post', '!=', 'no'),
+        ], limit=100)
+        records._post()
+
+        if len(records) == 100:  # assumes there are more whenever search hits limit
+            self.env.ref('account.ir_cron_auto_post_draft_entry')._trigger()
+
+    @api.model
+    def _apply_delta_recurring_entries(self, date, date_origin, period):
+        '''Advances date by `period` months, maintaining original day of the month if possible.'''
+        deltas = {'monthly': 1, 'quarterly': 3, 'yearly': 12}
+        prev_months = (date.year - date_origin.year) * 12 + date.month - date_origin.month
+        return date_origin + relativedelta(months=deltas[period] + prev_months)
+
+    def _copy_recurring_entries(self):
+        ''' Creates a copy of a recurring (periodic) entry and adjusts its dates for the next period.
+        Meant to be called right after posting a periodic entry.
+        Copies extra fields as defined by _get_fields_to_copy_recurring_entries().
+        '''
+        for record in self:
+            record.auto_post_origin_id = record.auto_post_origin_id or record  # original entry references itself
+            next_date = self._apply_delta_recurring_entries(record.date, record.auto_post_origin_id.date, record.auto_post)
+
+            if not record.auto_post_until or next_date <= record.auto_post_until:  # recurrence continues
+                record.copy(default=record._get_fields_to_copy_recurring_entries({'date': next_date}))
+
+    def _get_fields_to_copy_recurring_entries(self, values):
+        ''' Determines which extra fields to copy when copying a recurring entry.
+        To be extended by modules that add fields with copy=False (implicit or explicit)
+        whenever the opposite behavior is expected for recurring invoices.
+        '''
+        values.update({
+            'auto_post': self.auto_post,  # copy=False to avoid mistakes but should be the same in recurring copies
+            'auto_post_until': self.auto_post_until,  # same as above
+            'auto_post_origin_id': self.auto_post_origin_id.id,  # same as above
+            'invoice_user_id': self.invoice_user_id.id,  # otherwise user would be OdooBot
+            'invoice_date': self._apply_delta_recurring_entries(self.invoice_date, self.auto_post_origin_id.invoice_date, self.auto_post),
+        })
+        if not self.invoice_payment_term_id and self.invoice_date_due:
+            # no payment terms: maintain timedelta between due date and accounting date
+            values.update({'invoice_date_due': values['date'] + (self.invoice_date_due - self.date)})
+        return values
 
     # offer the possibility to duplicate thanks to a button instead of a hidden menu, which is more visible
     def action_duplicate(self):
@@ -3395,7 +3444,7 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
-    _order = "date desc, move_name desc, id"
+    _order = "date desc, move_name desc, sequence, id"
     _check_company_auto = True
 
     # ==== Business fields ====
@@ -3580,25 +3629,6 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
-
-    @api.model
-    def _get_default_line_name(self, document, amount, currency, date, partner=None):
-        ''' Helper to construct a default label to set on journal items.
-
-        E.g. Vendor Reimbursement $ 1,555.00 - Azure Interior - 05/14/2020.
-
-        :param document:    A string representing the type of the document.
-        :param amount:      The document's amount.
-        :param currency:    The document's currency.
-        :param date:        The document's date.
-        :param partner:     The optional partner.
-        :return:            A string.
-        '''
-        values = ['%s %s' % (document, formatLang(self.env, amount, currency_obj=currency))]
-        if partner:
-            values.append(partner.display_name)
-        values.append(format_date(self.env, fields.Date.to_string(date)))
-        return ' - '.join(values)
 
     @api.model
     def _get_default_tax_account(self, repartition_line):
@@ -4744,31 +4774,286 @@ class AccountMoveLine(models.Model):
     # RECONCILIATION
     # -------------------------------------------------------------------------
 
-    def _prepare_reconciliation_partials(self):
-        ''' Prepare the partials on the current journal items to perform the reconciliation.
-        /!\ The order of records in self is important because the journal items will be reconciled using this order.
+    @api.model
+    def _prepare_reconciliation_single_partial(self, debit_vals, credit_vals):
+        """ Prepare the values to create an account.partial.reconcile later when reconciling the dictionaries passed
+        as parameters, each one representing an account.move.line.
 
-        :return: a tuple of 1) list of vals for partial reconcilation creation, 2) the list of vals for the exchange difference entries to be created
-        '''
-        def get_odoo_rate(line):
-            exchange_rate_date = line.move_id.invoice_date if line.move_id.is_invoice(include_receipts=True) else line.date
-            return recon_currency._get_conversion_rate(company_currency, recon_currency, line.company_id, exchange_rate_date)
+        :param debit_vals:  The values of account.move.line to consider for a debit line.
+        :param credit_vals: The values of account.move.line to consider for a credit line.
+        :return:            A dictionary:
+            * debit_vals:   None if the line has nothing left to reconcile.
+            * credit_vals:  None if the line has nothing left to reconcile.
+            * partial_vals: The newly computed values for the partial.
+        """
 
-        def get_accounting_rate(line):
-            if company_currency.is_zero(line.balance) or line.currency_id.is_zero(line.amount_currency):
+        def get_odoo_rate(vals):
+            if vals.get('record') and vals['record'].move_id.is_invoice(include_receipts=True):
+                exchange_rate_date = vals['record'].move_id.invoice_date
+            else:
+                exchange_rate_date = vals['date']
+            return recon_currency._get_conversion_rate(company_currency, recon_currency, vals['company'], exchange_rate_date)
+
+        def get_accounting_rate(vals):
+            if company_currency.is_zero(vals['balance']) or vals['currency'].is_zero(vals['amount_currency']):
                 return None
             else:
-                return abs(line.amount_currency) / abs(line.balance)
+                return abs(vals['amount_currency']) / abs(vals['balance'])
 
-        debit_lines = iter(self.filtered(lambda line: line.balance > 0.0 or line.amount_currency > 0.0))
-        credit_lines = iter(self.filtered(lambda line: line.balance < 0.0 or line.amount_currency < 0.0))
-        debit_line = None
-        credit_line = None
+        # ==== Determine the currency in which the reconciliation will be done ====
+        # In this part, we retrieve the residual amounts, check if they are zero or not and determine in which
+        # currency and at which rate the reconciliation will be done.
 
-        remaining_debit_amount_curr = 0.0
-        remaining_credit_amount_curr = 0.0
-        remaining_debit_amount = 0.0
-        remaining_credit_amount = 0.0
+        res = {
+            'debit_vals': debit_vals,
+            'credit_vals': credit_vals,
+        }
+
+        remaining_debit_amount_curr = debit_vals['amount_residual_currency']
+        remaining_credit_amount_curr = credit_vals['amount_residual_currency']
+        remaining_debit_amount = debit_vals['amount_residual']
+        remaining_credit_amount = credit_vals['amount_residual']
+
+        company_currency = debit_vals['company'].currency_id
+        has_debit_zero_residual = company_currency.is_zero(remaining_debit_amount)
+        has_credit_zero_residual = company_currency.is_zero(remaining_credit_amount)
+        has_debit_zero_residual_currency = debit_vals['currency'].is_zero(remaining_debit_amount_curr)
+        has_credit_zero_residual_currency = credit_vals['currency'].is_zero(remaining_credit_amount_curr)
+
+        if debit_vals['currency'] == credit_vals['currency'] == company_currency \
+                and not has_debit_zero_residual \
+                and not has_credit_zero_residual:
+            # Everything is expressed in company's currency and there is something left to reconcile.
+            recon_currency = company_currency
+            debit_rate = credit_rate = 1.0
+            recon_debit_amount = remaining_debit_amount
+            recon_credit_amount = -remaining_credit_amount
+        elif debit_vals['currency'] == company_currency \
+                and not has_debit_zero_residual \
+                and credit_vals['currency'] != company_currency \
+                and not has_credit_zero_residual_currency:
+            # The credit line is using a foreign currency but not the opposite line.
+            # In that case, convert the amount in company currency to the foreign currency one.
+            recon_currency = credit_vals['currency']
+            debit_rate = get_odoo_rate(debit_vals)
+            credit_rate = get_accounting_rate(credit_vals)
+            recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
+            recon_credit_amount = -remaining_credit_amount_curr
+        elif debit_vals['currency'] != company_currency \
+                and not has_debit_zero_residual_currency \
+                and credit_vals['currency'] == company_currency \
+                and not has_credit_zero_residual:
+            # The debit line is using a foreign currency but not the opposite line.
+            # In that case, convert the amount in company currency to the foreign currency one.
+            recon_currency = debit_vals['currency']
+            debit_rate = get_accounting_rate(debit_vals)
+            credit_rate = get_odoo_rate(credit_vals)
+            recon_debit_amount = remaining_debit_amount_curr
+            recon_credit_amount = recon_currency.round(-remaining_credit_amount * credit_rate)
+        elif debit_vals['currency'] == credit_vals['currency'] \
+                and debit_vals['currency'] != company_currency \
+                and not has_debit_zero_residual_currency \
+                and not has_credit_zero_residual_currency:
+            # Both lines are sharing the same foreign currency.
+            recon_currency = debit_vals['currency']
+            debit_rate = get_accounting_rate(debit_vals)
+            credit_rate = get_accounting_rate(credit_vals)
+            recon_debit_amount = remaining_debit_amount_curr
+            recon_credit_amount = -remaining_credit_amount_curr
+        elif debit_vals['currency'] == credit_vals['currency'] \
+                and debit_vals['currency'] != company_currency \
+                and (has_debit_zero_residual_currency or has_credit_zero_residual_currency):
+            # Special case for exchange difference lines. In that case, both lines are sharing the same foreign
+            # currency but at least one has no amount in foreign currency.
+            # In that case, we don't want a rate for the opposite line because the exchange difference is supposed
+            # to reduce only the amount in company currency but not the foreign one.
+            recon_currency = company_currency
+            debit_rate = None
+            credit_rate = None
+            recon_debit_amount = remaining_debit_amount
+            recon_credit_amount = -remaining_credit_amount
+        else:
+            # Multiple involved foreign currencies. The reconciliation is done using the currency of the company.
+            recon_currency = company_currency
+            debit_rate = get_accounting_rate(debit_vals)
+            credit_rate = get_accounting_rate(credit_vals)
+            recon_debit_amount = remaining_debit_amount
+            recon_credit_amount = -remaining_credit_amount
+
+        # Check if there is something left to reconcile. Move to the next loop iteration if not.
+        skip_reconciliation = False
+        if recon_currency.is_zero(recon_debit_amount):
+            res['debit_vals'] = None
+            skip_reconciliation = True
+        if recon_currency.is_zero(recon_credit_amount):
+            res['credit_vals'] = None
+            skip_reconciliation = True
+        if skip_reconciliation:
+            return res
+
+        # ==== Match both lines together and compute amounts to reconcile ====
+
+        # Determine which line is fully matched by the other.
+        compare_amounts = recon_currency.compare_amounts(recon_debit_amount, recon_credit_amount)
+        min_recon_amount = min(recon_debit_amount, recon_credit_amount)
+        debit_fully_matched = compare_amounts <= 0
+        credit_fully_matched = compare_amounts >= 0
+
+        # ==== Computation of partial amounts ====
+        if recon_currency == company_currency:
+            # Compute the partial amount expressed in company currency.
+            partial_amount = min_recon_amount
+
+            # Compute the partial amount expressed in foreign currency.
+            if debit_rate:
+                partial_debit_amount_currency = debit_vals['currency'].round(debit_rate * min_recon_amount)
+                partial_debit_amount_currency = min(partial_debit_amount_currency, remaining_debit_amount_curr)
+            else:
+                partial_debit_amount_currency = 0.0
+            if credit_rate:
+                partial_credit_amount_currency = credit_vals['currency'].round(credit_rate * min_recon_amount)
+                partial_credit_amount_currency = min(partial_credit_amount_currency, -remaining_credit_amount_curr)
+            else:
+                partial_credit_amount_currency = 0.0
+
+        else:
+            # recon_currency != company_currency
+            # Compute the partial amount expressed in company currency.
+            if debit_rate:
+                partial_debit_amount = company_currency.round(min_recon_amount / debit_rate)
+                partial_debit_amount = min(partial_debit_amount, remaining_debit_amount)
+            else:
+                partial_debit_amount = 0.0
+            if credit_rate:
+                partial_credit_amount = company_currency.round(min_recon_amount / credit_rate)
+                partial_credit_amount = min(partial_credit_amount, -remaining_credit_amount)
+            else:
+                partial_credit_amount = 0.0
+            partial_amount = min(partial_debit_amount, partial_credit_amount)
+
+            # Compute the partial amount expressed in foreign currency.
+            # Take care to handle the case when a line expressed in company currency is mimicking the foreign
+            # currency of the opposite line.
+            if debit_vals['currency'] == company_currency:
+                partial_debit_amount_currency = partial_amount
+            else:
+                partial_debit_amount_currency = min_recon_amount
+            if credit_vals['currency'] == company_currency:
+                partial_credit_amount_currency = partial_amount
+            else:
+                partial_credit_amount_currency = min_recon_amount
+
+        # Computation of the partial exchange difference. You can skip this part using the
+        # `no_exchange_difference` context key (when reconciling an exchange difference for example).
+        if not self._context.get('no_exchange_difference'):
+            exchange_lines_to_fix = self.env['account.move.line']
+            amounts_list = []
+            if recon_currency == company_currency:
+                if debit_fully_matched:
+                    debit_exchange_amount = remaining_debit_amount_curr - partial_debit_amount_currency
+                    if not debit_vals['currency'].is_zero(debit_exchange_amount):
+                        if debit_vals.get('record'):
+                            exchange_lines_to_fix += debit_vals['record']
+                        amounts_list.append({'amount_residual_currency': debit_exchange_amount})
+                        remaining_debit_amount_curr -= debit_exchange_amount
+                if credit_fully_matched:
+                    credit_exchange_amount = remaining_credit_amount_curr + partial_credit_amount_currency
+                    if not credit_vals['currency'].is_zero(credit_exchange_amount):
+                        if credit_vals.get('record'):
+                            exchange_lines_to_fix += credit_vals['record']
+                        amounts_list.append({'amount_residual_currency': credit_exchange_amount})
+                        remaining_credit_amount_curr += credit_exchange_amount
+
+            else:
+                if debit_fully_matched:
+                    # Create an exchange difference on the remaining amount expressed in company's currency.
+                    debit_exchange_amount = remaining_debit_amount - partial_amount
+                    if not company_currency.is_zero(debit_exchange_amount):
+                        if debit_vals.get('record'):
+                            exchange_lines_to_fix += debit_vals['record']
+                        amounts_list.append({'amount_residual': debit_exchange_amount})
+                        remaining_debit_amount -= debit_exchange_amount
+                        if debit_vals['currency'] == company_currency:
+                            remaining_debit_amount_curr -= debit_exchange_amount
+                else:
+                    # Create an exchange difference ensuring the rate between the residual amounts expressed in
+                    # both foreign and company's currency is still consistent regarding the rate between
+                    # 'amount_currency' & 'balance'.
+                    debit_exchange_amount = partial_debit_amount - partial_amount
+                    if company_currency.compare_amounts(debit_exchange_amount, 0.0) > 0:
+                        if debit_vals.get('record'):
+                            exchange_lines_to_fix += debit_vals['record']
+                        amounts_list.append({'amount_residual': debit_exchange_amount})
+                        remaining_debit_amount -= debit_exchange_amount
+                        if debit_vals['currency'] == company_currency:
+                            remaining_debit_amount_curr -= debit_exchange_amount
+
+                if credit_fully_matched:
+                    # Create an exchange difference on the remaining amount expressed in company's currency.
+                    credit_exchange_amount = remaining_credit_amount + partial_amount
+                    if not company_currency.is_zero(credit_exchange_amount):
+                        if credit_vals.get('record'):
+                            exchange_lines_to_fix += credit_vals['record']
+                        amounts_list.append({'amount_residual': credit_exchange_amount})
+                        remaining_credit_amount += credit_exchange_amount
+                        if credit_vals['currency'] == company_currency:
+                            remaining_credit_amount_curr -= credit_exchange_amount
+                else:
+                    # Create an exchange difference ensuring the rate between the residual amounts expressed in
+                    # both foreign and company's currency is still consistent regarding the rate between
+                    # 'amount_currency' & 'balance'.
+                    credit_exchange_amount = partial_amount - partial_credit_amount
+                    if company_currency.compare_amounts(credit_exchange_amount, 0.0) < 0:
+                        if credit_vals.get('record'):
+                            exchange_lines_to_fix += credit_vals['record']
+                        amounts_list.append({'amount_residual': credit_exchange_amount})
+                        remaining_credit_amount -= credit_exchange_amount
+                        if credit_vals['currency'] == company_currency:
+                            remaining_credit_amount_curr -= credit_exchange_amount
+
+            if exchange_lines_to_fix:
+                res['exchange_vals'] = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
+                    amounts_list,
+                    exchange_date=max(debit_vals['date'], credit_vals['date']),
+                )
+
+        # ==== Create partials ====
+
+        remaining_debit_amount -= partial_amount
+        remaining_credit_amount += partial_amount
+        remaining_debit_amount_curr -= partial_debit_amount_currency
+        remaining_credit_amount_curr += partial_credit_amount_currency
+
+        res['partial_vals'] = {
+            'amount': partial_amount,
+            'debit_amount_currency': partial_debit_amount_currency,
+            'credit_amount_currency': partial_credit_amount_currency,
+            'debit_move_id': debit_vals.get('record') and debit_vals['record'].id,
+            'credit_move_id': credit_vals.get('record') and credit_vals['record'].id,
+        }
+
+        debit_vals['amount_residual'] = remaining_debit_amount
+        debit_vals['amount_residual_currency'] = remaining_debit_amount_curr
+        credit_vals['amount_residual'] = remaining_credit_amount
+        credit_vals['amount_residual_currency'] = remaining_credit_amount_curr
+
+        if debit_fully_matched:
+            res['debit_vals'] = None
+        if credit_fully_matched:
+            res['credit_vals'] = None
+        return res
+
+    @api.model
+    def _prepare_reconciliation_partials(self, vals_list):
+        ''' Prepare the partials on the current journal items to perform the reconciliation.
+        Note: The order of records in self is important because the journal items will be reconciled using this order.
+
+        :return: a tuple of 1) list of vals for partial reconciliation creation, 2) the list of vals for the exchange difference entries to be created
+        '''
+        debit_vals_list = iter([x for x in vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0])
+        credit_vals_list = iter([x for x in vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0])
+        debit_vals = None
+        credit_vals = None
 
         partials_vals_list = []
         exchange_data = {}
@@ -4781,241 +5066,48 @@ class AccountMoveLine(models.Model):
             # and reduced "manually" every time we append a dictionary to 'partials_vals_list'.
 
             # Move to the next available debit line.
-            if not debit_line:
-                debit_line = next(debit_lines, None)
-                if not debit_line:
+            if not debit_vals:
+                debit_vals = next(debit_vals_list, None)
+                if not debit_vals:
                     break
-                remaining_debit_amount_curr = debit_line.amount_residual_currency
-                remaining_debit_amount = debit_line.amount_residual
 
             # Move to the next available credit line.
-            if not credit_line:
-                credit_line = next(credit_lines, None)
-                if not credit_line:
+            if not credit_vals:
+                credit_vals = next(credit_vals_list, None)
+                if not credit_vals:
                     break
-                remaining_credit_amount_curr = credit_line.amount_residual_currency
-                remaining_credit_amount = credit_line.amount_residual
 
-            # ==== Determine the currency in which the reconciliation will be done ====
-            # In this part, we retrieve the residual amounts, check if they are zero or not and determine in which
-            # currency and at which rate the reconciliation will be done.
+            # ==== Compute the amounts to reconcile ====
 
-            company_currency = debit_line.company_currency_id
-            has_debit_zero_residual = debit_line.company_currency_id.is_zero(remaining_debit_amount)
-            has_credit_zero_residual = credit_line.company_currency_id.is_zero(remaining_credit_amount)
-            has_debit_zero_residual_currency = debit_line.currency_id.is_zero(remaining_debit_amount_curr)
-            has_credit_zero_residual_currency = credit_line.currency_id.is_zero(remaining_credit_amount_curr)
+            res = self._prepare_reconciliation_single_partial(debit_vals, credit_vals)
+            if res.get('partial_vals'):
+                if res.get('exchange_vals'):
+                    exchange_data[len(partials_vals_list)] = res['exchange_vals']
+                partials_vals_list.append(res['partial_vals'])
+            if res['debit_vals'] is None:
+                debit_vals = None
+            if res['credit_vals'] is None:
+                credit_vals = None
 
-            if debit_line.currency_id == credit_line.currency_id == company_currency \
-                    and not has_debit_zero_residual \
-                    and not has_credit_zero_residual:
-                # Everything is expressed in company's currency and there is something left to reconcile.
-                recon_currency = company_currency
-                debit_rate = credit_rate = 1.0
-                recon_debit_amount = remaining_debit_amount
-                recon_credit_amount = -remaining_credit_amount
-            elif debit_line.currency_id == company_currency \
-                    and not has_debit_zero_residual \
-                    and credit_line.currency_id != company_currency \
-                    and not has_credit_zero_residual_currency:
-                # The credit line is using a foreign currency but not the opposite line.
-                # In that case, convert the amount in company currency to the foreign currency one.
-                recon_currency = credit_line.currency_id
-                debit_rate = get_odoo_rate(debit_line)
-                credit_rate = get_accounting_rate(credit_line)
-                recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
-                recon_credit_amount = -remaining_credit_amount_curr
-            elif debit_line.currency_id != company_currency \
-                    and not has_debit_zero_residual_currency \
-                    and credit_line.currency_id == company_currency \
-                    and not has_credit_zero_residual:
-                # The debit line is using a foreign currency but not the opposite line.
-                # In that case, convert the amount in company currency to the foreign currency one.
-                recon_currency = debit_line.currency_id
-                debit_rate = get_accounting_rate(debit_line)
-                credit_rate = get_odoo_rate(credit_line)
-                recon_debit_amount = remaining_debit_amount_curr
-                recon_credit_amount = recon_currency.round(-remaining_credit_amount * credit_rate)
-            elif debit_line.currency_id == credit_line.currency_id \
-                    and debit_line.currency_id != company_currency \
-                    and not has_debit_zero_residual_currency \
-                    and not has_credit_zero_residual_currency:
-                # Both lines are sharing the same foreign currency.
-                recon_currency = debit_line.currency_id
-                debit_rate = get_accounting_rate(debit_line)
-                credit_rate = get_accounting_rate(credit_line)
-                recon_debit_amount = remaining_debit_amount_curr
-                recon_credit_amount = -remaining_credit_amount_curr
-            elif debit_line.currency_id == credit_line.currency_id \
-                    and debit_line.currency_id != company_currency \
-                    and (has_debit_zero_residual_currency or has_credit_zero_residual_currency):
-                # Special case for exchange difference lines. In that case, both lines are sharing the same foreign
-                # currency but at least one has no amount in foreign currency.
-                # In that case, we don't want a rate for the opposite line because the exchange difference is supposed
-                # to reduce only the amount in company currency but not the foreign one.
-                recon_currency = company_currency
-                debit_rate = None
-                credit_rate = None
-                recon_debit_amount = remaining_debit_amount
-                recon_credit_amount = -remaining_credit_amount
-            else:
-                # Multiple involved foreign currencies. The reconciliation is done using the currency of the company.
-                recon_currency = company_currency
-                debit_rate = get_accounting_rate(debit_line)
-                credit_rate = get_accounting_rate(credit_line)
-                recon_debit_amount = remaining_debit_amount
-                recon_credit_amount = -remaining_credit_amount
-
-            # Check if there is something left to reconcile. Move to the next loop iteration if not.
-            skip_reconciliation = False
-            if recon_currency.is_zero(recon_debit_amount):
-                debit_line = None
-                skip_reconciliation = True
-            if recon_currency.is_zero(recon_credit_amount):
-                credit_line = None
-                skip_reconciliation = True
-            if skip_reconciliation:
-                continue
-
-            # ==== Match both lines together and compute amounts to reconcile ====
-
-            # Determine which line is fully matched by the other.
-            compare_amounts = recon_currency.compare_amounts(recon_debit_amount, recon_credit_amount)
-            min_recon_amount = min(recon_debit_amount, recon_credit_amount)
-            debit_fully_matched = compare_amounts <= 0
-            credit_fully_matched = compare_amounts >= 0
-
-            # ==== Computation of partial amounts ====
-            if recon_currency == company_currency:
-                # Compute the partial amount expressed in company currency.
-                partial_amount = min_recon_amount
-
-                # Compute the partial amount expressed in foreign currency.
-                if debit_rate:
-                    partial_debit_amount_currency = debit_line.currency_id.round(debit_rate * min_recon_amount)
-                    partial_debit_amount_currency = min(partial_debit_amount_currency, remaining_debit_amount_curr)
-                else:
-                    partial_debit_amount_currency = 0.0
-                if credit_rate:
-                    partial_credit_amount_currency = credit_line.currency_id.round(credit_rate * min_recon_amount)
-                    partial_credit_amount_currency = min(partial_credit_amount_currency, -remaining_credit_amount_curr)
-                else:
-                    partial_credit_amount_currency = 0.0
-
-            else:
-                # recon_currency != company_currency
-                # Compute the partial amount expressed in company currency.
-                if debit_rate:
-                    partial_debit_amount = company_currency.round(min_recon_amount / debit_rate)
-                    partial_debit_amount = min(partial_debit_amount, remaining_debit_amount)
-                else:
-                    partial_debit_amount = 0.0
-                if credit_rate:
-                    partial_credit_amount = company_currency.round(min_recon_amount / credit_rate)
-                    partial_credit_amount = min(partial_credit_amount, -remaining_credit_amount)
-                else:
-                    partial_credit_amount = 0.0
-                partial_amount = min(partial_debit_amount, partial_credit_amount)
-
-                # Compute the partial amount expressed in foreign currency.
-                # Take care to handle the case when a line expressed in company currency is mimicking the foreign
-                # currency of the opposite line.
-                if debit_line.currency_id == company_currency:
-                    partial_debit_amount_currency = partial_amount
-                else:
-                    partial_debit_amount_currency = min_recon_amount
-                if credit_line.currency_id == company_currency:
-                    partial_credit_amount_currency = partial_amount
-                else:
-                    partial_credit_amount_currency = min_recon_amount
-
-            # Computation of the partial exchange difference. You can skip this part using the
-            # `no_exchange_difference` context key (when reconciling an exchange difference for example).
-            if not self._context.get('no_exchange_difference'):
-                exchange_lines_to_fix = self.env['account.move.line']
-                amounts_list = []
-                if recon_currency == company_currency:
-                    if debit_fully_matched:
-                        debit_exchange_amount = remaining_debit_amount_curr - partial_debit_amount_currency
-                        if not debit_line.currency_id.is_zero(debit_exchange_amount):
-                            exchange_lines_to_fix += debit_line
-                            amounts_list.append({'amount_residual_currency': debit_exchange_amount})
-                            remaining_credit_amount_curr -= debit_exchange_amount
-                    if credit_fully_matched:
-                        credit_exchange_amount = remaining_credit_amount_curr + partial_credit_amount_currency
-                        if not credit_line.currency_id.is_zero(credit_exchange_amount):
-                            exchange_lines_to_fix += credit_line
-                            amounts_list.append({'amount_residual_currency': credit_exchange_amount})
-                            remaining_credit_amount_curr += credit_exchange_amount
-
-                else:
-                    if debit_fully_matched:
-                        # Create an exchange difference on the remaining amount expressed in company's currency.
-                        debit_exchange_amount = remaining_debit_amount - partial_amount
-                        if not debit_line.company_currency_id.is_zero(debit_exchange_amount):
-                            exchange_lines_to_fix += debit_line
-                            amounts_list.append({'amount_residual': debit_exchange_amount})
-                            remaining_debit_amount -= debit_exchange_amount
-                    else:
-                        # Create an exchange difference ensuring the rate between the residual amounts expressed in
-                        # both foreign and company's currency is still consistent regarding the rate between
-                        # 'amount_currency' & 'balance'.
-                        debit_exchange_amount = partial_debit_amount - partial_amount
-                        if debit_line.company_currency_id.compare_amounts(debit_exchange_amount, 0.0) > 0:
-                            exchange_lines_to_fix += debit_line
-                            amounts_list.append({'amount_residual': debit_exchange_amount})
-                            remaining_debit_amount -= debit_exchange_amount
-
-                    if credit_fully_matched:
-                        # Create an exchange difference on the remaining amount expressed in company's currency.
-                        credit_exchange_amount = remaining_credit_amount + partial_amount
-                        if not credit_line.company_currency_id.is_zero(credit_exchange_amount):
-                            exchange_lines_to_fix += credit_line
-                            amounts_list.append({'amount_residual': credit_exchange_amount})
-                            remaining_credit_amount += credit_exchange_amount
-                    else:
-                        # Create an exchange difference ensuring the rate between the residual amounts expressed in
-                        # both foreign and company's currency is still consistent regarding the rate between
-                        # 'amount_currency' & 'balance'.
-                        credit_exchange_amount = partial_amount - partial_credit_amount
-                        if credit_line.company_currency_id.compare_amounts(credit_exchange_amount, 0.0) < 0:
-                            exchange_lines_to_fix += credit_line
-                            amounts_list.append({'amount_residual': credit_exchange_amount})
-                            remaining_credit_amount -= credit_exchange_amount
-
-                if exchange_lines_to_fix:
-                    exchange_vals = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
-                        amounts_list,
-                        exchange_date=max(debit_line.date, credit_line.date),
-                    )
-                    exchange_data[len(partials_vals_list)] = exchange_vals
-
-            # ==== Create partials ====
-
-            remaining_debit_amount -= partial_amount
-            remaining_credit_amount += partial_amount
-            remaining_debit_amount_curr -= partial_debit_amount_currency
-            remaining_credit_amount_curr += partial_credit_amount_currency
-
-            partials_vals_list.append({
-                'amount': partial_amount,
-                'debit_amount_currency': partial_debit_amount_currency,
-                'credit_amount_currency': partial_credit_amount_currency,
-                'debit_move_id': debit_line.id,
-                'credit_move_id': credit_line.id,
-            })
-
-            if debit_fully_matched:
-                debit_line = None
-            if credit_fully_matched:
-                credit_line = None
         return partials_vals_list, exchange_data
 
     def _create_reconciliation_partials(self):
         '''create the partial reconciliation between all the records in self
          :return: A recordset of account.partial.reconcile.
         '''
-        partials_vals_list, exchange_data = self._prepare_reconciliation_partials()
+        partials_vals_list, exchange_data = self._prepare_reconciliation_partials([
+            {
+                'record': line,
+                'balance': line.balance,
+                'amount_currency': line.amount_currency,
+                'amount_residual': line.amount_residual,
+                'amount_residual_currency': line.amount_residual_currency,
+                'company': line.company_id,
+                'currency': line.currency_id,
+                'date': line.date,
+            }
+            for line in self
+        ])
         partials = self.env['account.partial.reconcile'].create(partials_vals_list)
 
         # ==== Create exchange difference moves ====
@@ -5740,13 +5832,35 @@ class AccountMoveLine(models.Model):
         action['context'] = ctx
         return action
 
-    @api.model
-    def _get_suspense_moves_domain(self):
-        return [
-            ('move_id.to_check', '=', True),
-            ('full_reconcile_id', '=', False),
-            ('statement_line_id', '!=', False),
-        ]
+    def action_open_business_doc_from_aml(self):
+        self.ensure_one()
+
+        if self.payment_id:
+            name = _("Payment")
+            res_model = 'account.payment'
+            res_id = self.payment_id.id
+        elif self.statement_line_id:
+            name = _("Bank Transaction")
+            res_model = 'account.bank.statement.line'
+            res_id = self.statement_line_id.id
+        else:
+            name = _("Journal Entry")
+            res_model = 'account.move'
+            res_id = self.move_id.id
+
+        return {
+            'name': name,
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': res_model,
+            'res_id': res_id,
+            'context': {
+                'create': False,
+                'delete': False,
+            },
+            'target': 'current',
+        }
 
     def _get_attachment_domains(self):
         self.ensure_one()

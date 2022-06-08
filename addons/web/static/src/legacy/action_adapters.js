@@ -117,7 +117,11 @@ class ActionAdapter extends ComponentAdapter {
                 this.wowlEnv.config.setDisplayName(actionTitle);
             }
         }
-        this.router.pushState(query);
+        if (this.props.onPushState) {
+            this.props.onPushState(query);
+        } else {
+            this.router.pushState(query);
+        }
     }
 
     _trigger_up(ev) {
@@ -332,21 +336,25 @@ export class ViewAdapter extends ActionAdapter {
     /**
      * @override
      */
-    async updateWidget() {
+    async updateWidget(nextProps) {
         const shouldUpdateWidget = this.shouldUpdateWidget;
         this.shouldUpdateWidget = true;
         if (!shouldUpdateWidget) {
             return this.magicReload();
         }
         await this.widget.willRestore();
-        const options = Object.assign({}, this.props.viewParams, {
+        const options = {
+            ...this.props.viewParams,
+            ...nextProps.viewParams,
             shouldUpdateSearchComponents: true,
-        });
+        };
         if (!this.magicReload()) {
             this.widget.reload(options);
         }
         return this.magicReload();
     }
+
+    async renderWidget() {}
 
     /**
      * Override to add the state of the legacy controller in the exported state.
