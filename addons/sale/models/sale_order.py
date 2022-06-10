@@ -463,16 +463,18 @@ class SaleOrder(models.Model):
             elif not is_html_empty(self.env.company.invoice_terms):
                 values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
         if not self.env.context.get('not_self_saleperson') or not self.team_id:
+            default_team = self.env.context.get('default_team_id', False) or self.partner_id.team_id.id
             values['team_id'] = self.env['crm.team'].with_context(
-                default_team_id=self.partner_id.team_id.id
+                default_team_id=default_team
             )._get_default_team_id(domain=['|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)], user_id=user_id)
         self.update(values)
 
     @api.onchange('user_id')
     def onchange_user_id(self):
         if self.user_id:
+            default_team = self.env.context.get('default_team_id', False) or self.team_id.id
             self.team_id = self.env['crm.team'].with_context(
-                default_team_id=self.team_id.id
+                default_team_id=default_team
             )._get_default_team_id(user_id=self.user_id.id, domain=None)
 
     @api.onchange('partner_id')
@@ -1100,6 +1102,7 @@ class SaleOrder(models.Model):
 
         :param optional_values: any parameter that should be added to the returned down payment section
         """
+        context = {'lang': self.partner_id.lang}
         down_payments_section_line = {
             'display_type': 'line_section',
             'name': _('Down Payments'),
@@ -1110,6 +1113,7 @@ class SaleOrder(models.Model):
             'price_unit': 0,
             'account_id': False
         }
+        del context
         if optional_values:
             down_payments_section_line.update(optional_values)
         return down_payments_section_line
