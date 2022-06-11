@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'RtcSession',
@@ -13,34 +13,33 @@ registerModel({
         },
     },
     recordMethods: {
-        /**
-         * Plays the video as some browsers may not support or block autoplay.
-         *
-         * @param {Event} ev
-         */
-        async onVideoLoadedMetaData(ev) {
-            try {
-                await ev.target.play();
-            } catch (error) {
-                if (typeof error === 'object' && error.name === 'NotAllowedError') {
-                    // Ignored as some browsers may reject play() calls that do not
-                    // originate from a user input.
-                    return;
-                }
-                throw error;
-            }
+        onBroadcastTimeout() {
+            this.messaging.rpc(
+                {
+                    route: '/mail/rtc/session/update_and_broadcast',
+                    params: {
+                        session_id: this.id,
+                        values: {
+                            is_camera_on: this.isCameraOn,
+                            is_deaf: this.isDeaf,
+                            is_muted: this.isSelfMuted,
+                            is_screen_sharing_on: this.isScreenSharingOn,
+                        },
+                    },
+                },
+                { shadow: true },
+            );
         },
         /**
          * restores the session to its default values
          */
         reset() {
-            this.messaging.browser.clearTimeout(this.broadcastTimeout);
             this.messaging.browser.clearTimeout(this.connectionRecoveryTimeout);
             this._removeAudio();
             this.removeVideo();
             this.update({
                 audioElement: clear(),
-                broadcastTimeout: clear(),
+                broadcastTimer: clear(),
                 connectionRecoveryTimeout: clear(),
                 isTalking: clear(),
                 localCandidateType: clear(),
@@ -113,11 +112,8 @@ registerModel({
             if (!this.rtcAsCurrentSession) {
                 return;
             }
-            this.update(data);
-            this.messaging.browser.clearTimeout(this.broadcastTimeout);
-            this.update({
-                broadcastTimeout: this.messaging.browser.setTimeout(this._onBroadcastTimeout, 3000),
-            });
+            const data2 = Object.assign({}, data, { broadcastTimer: [clear(), insertAndReplace()] });
+            this.update(data2);
         },
         /**
          * Updates the rtcSession with information on the type of candidate used
@@ -215,11 +211,9 @@ registerModel({
                 return;
             }
             const track = trackKind === 'audio' ? this.rtcAsConnectedSession.audioTrack : this.rtcAsConnectedSession.videoTrack;
-            const fullDirection = track ? 'sendrecv' : 'recvonly';
-            const limitedDirection = track ? 'sendonly' : 'inactive';
-            let transceiverDirection = fullDirection;
-            if (trackKind === 'video') {
-                transceiverDirection = !this.messaging.focusedRtcSession || this.messaging.focusedRtcSession === this ? fullDirection : limitedDirection;
+            let transceiverDirection = track ? 'sendrecv' : 'recvonly';
+            if (trackKind === 'video' && !this.rtcPeerConnection.acceptsVideoStream) {
+                transceiverDirection = track ? 'sendonly' : 'inactive';
             }
             let transceiver;
             if (initTransceiver) {
@@ -298,30 +292,6 @@ registerModel({
             if (this.audioElement) {
                 return this.audioElement.volume;
             }
-        },
-        /**
-         * @private
-         */
-         _onBroadcastTimeout() {
-            if (!this.exists()) {
-                return;
-            }
-            this.update({ broadcastTimeout: clear() });
-            this.messaging.rpc(
-                {
-                    route: '/mail/rtc/session/update_and_broadcast',
-                    params: {
-                        session_id: this.id,
-                        values: {
-                            is_camera_on: this.isCameraOn,
-                            is_deaf: this.isDeaf,
-                            is_muted: this.isSelfMuted,
-                            is_screen_sharing_on: this.isScreenSharingOn,
-                        },
-                    },
-                },
-                { shadow: true },
-            );
         },
         /**
          * cleanly removes the audio stream of the session
@@ -415,7 +385,10 @@ registerModel({
         avatarUrl: attr({
             compute: '_computeAvatarUrl',
         }),
-        broadcastTimeout: attr(),
+        broadcastTimer: one('Timer', {
+            inverse: 'rtcSessionOwnerAsBroadcast',
+            isCausal: true,
+        }),
         /**
          * The mail.channel of the session, rtc sessions are part and managed by
          * mail.channel
@@ -448,6 +421,14 @@ registerModel({
          */
         calledChannels: many('Thread', {
             inverse: 'rtcInvitingSession',
+        }),
+        /**
+         * The participant cards of this session,
+         * this is used to know how many views are displaying this session.
+         */
+        callParticipantCards: many('CallParticipantCard', {
+            inverse: 'rtcSession',
+            isCausal: true,
         }),
         /**
          * States whether there is currently an error with the audio element.

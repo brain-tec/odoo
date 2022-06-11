@@ -17,11 +17,53 @@ registerModel({
             browser.addEventListener('fullscreenchange', this._onFullScreenChange);
         },
         _willDelete() {
-            browser.clearTimeout(this.showOverlayTimeout);
             browser.removeEventListener('fullscreenchange', this._onFullScreenChange);
         },
     },
     recordMethods: {
+        /**
+         * Finds a tile layout and dimensions that respects param0.aspectRatio while maximizing
+         * the total area covered by the tiles within the specified container dimensions.
+         *
+         * @param {Object} param0
+         * @param {number} [param0.aspectRatio]
+         * @param {number} param0.containerHeight
+         * @param {number} param0.containerWidth
+         * @param {number} param0.tileCount
+         */
+        calculateTessellation({ aspectRatio = 1, containerHeight, containerWidth, tileCount }) {
+            let optimalLayout = {
+                area: 0,
+                cols: 0,
+                tileHeight: 0,
+                tileWidth: 0,
+            };
+
+            for (let columnCount = 1; columnCount <= tileCount; columnCount++) {
+                const rowCount = Math.ceil(tileCount / columnCount);
+                const potentialHeight = containerWidth / (columnCount * aspectRatio);
+                const potentialWidth = containerHeight / rowCount;
+                let tileHeight;
+                let tileWidth;
+                if (potentialHeight > potentialWidth) {
+                    tileHeight = Math.floor(potentialWidth);
+                    tileWidth = Math.floor(tileHeight * aspectRatio);
+                } else {
+                    tileWidth = Math.floor(containerWidth / columnCount);
+                    tileHeight = Math.floor(tileWidth / aspectRatio);
+                }
+                const area = tileHeight * tileWidth;
+                if (area <= optimalLayout.area) {
+                    continue;
+                }
+                optimalLayout = {
+                    area,
+                    tileHeight,
+                    tileWidth,
+                };
+            }
+            return optimalLayout;
+        },
         /**
          * @param {MouseEvent} ev
          */
@@ -31,8 +73,14 @@ registerModel({
         /**
          * @param {MouseEvent} ev
          */
-        onLayoutSettingsDialogClosed(ev) {
-            this.toggleLayoutMenu();
+        onClickHideSidebar(ev) {
+            this.update({ hasSidebar: false });
+        },
+        /**
+         * @param {MouseEvent} ev
+         */
+        onClickShowSidebar(ev) {
+            this.update({ hasSidebar: true });
         },
         /**
          * @param {MouseEvent} ev
@@ -69,14 +117,17 @@ registerModel({
             markEventHandled(ev, 'CallView.MouseMoveOverlay');
             this.update({
                 showOverlay: true,
+                showOverlayTimer: clear(),
             });
-            browser.clearTimeout(this.showOverlayTimeout);
         },
         /**
          * @param {MouseEvent} ev
          */
         onRtcSettingsDialogClosed(ev) {
             this.messaging.userSetting.callSettingsMenu.toggle();
+        },
+        onShowOverlayTimeout() {
+            this.update({ showOverlay: false });
         },
         async activateFullScreen() {
             const el = document.body;
@@ -116,13 +167,6 @@ registerModel({
                 this.update({ isFullScreen: false });
             }
         },
-        toggleLayoutMenu() {
-            if (!this.layoutMenu) {
-                this.update({ layoutMenu: insertAndReplace() });
-                return;
-            }
-            this.update({ layoutMenu: clear() });
-        },
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -140,10 +184,7 @@ registerModel({
          * @private
          */
         _computeIsControllerFloating() {
-            return (
-                this.isFullScreen ||
-                this.layout !== "tiled" && !this.threadView.compact
-            );
+            return Boolean(this.isFullScreen || this.activeRtcSession && !this.threadView.compact);
         },
         /**
          * @private
@@ -155,35 +196,10 @@ registerModel({
             if (this.isFullScreen || this.threadView.compact) {
                 return false;
             }
+            if (this.mainParticipantCard) {
+                return false;
+            }
             return !this.threadView.thread.rtc || this.threadView.thread.videoCount === 0;
-        },
-        /**
-         * @private
-         */
-        _computeLayout() {
-            if (!this.threadView) {
-                return 'tiled';
-            }
-            if (this.isMinimized) {
-                return 'tiled';
-            }
-            if (!this.threadView.thread.rtc) {
-                return 'tiled';
-            }
-            if (!this.mainParticipantCard) {
-                return 'tiled';
-            }
-            if (
-                this.threadView.thread.rtcSessions.length +
-                this.threadView.thread.invitedPartners.length +
-                this.threadView.thread.invitedGuests.length < 2
-            ) {
-                return "tiled";
-            }
-            if (this.threadView.compact && this.messaging.userSetting.rtcLayout === 'sidebar') {
-                return 'spotlight';
-            }
-            return this.messaging.userSetting.rtcLayout;
         },
         /**
          * @private
@@ -196,17 +212,13 @@ registerModel({
          * @private
          */
         _computeMainParticipantCard() {
-            if (!this.messaging || !this.threadView) {
+            if (!this.messaging || !this.activeRtcSession || !this.threadView || !this.activeRtcSession) {
                 return clear();
             }
-            if (this.messaging.focusedRtcSession && this.messaging.focusedRtcSession.channel === this.threadView.thread) {
-                return insert({
-                    relationalId: `rtc_session_${this.messaging.focusedRtcSession.localId}_${this.threadView.thread.localId}`,
-                    rtcSession: replace(this.messaging.focusedRtcSession),
-                    channel: replace(this.threadView.thread),
-                });
-            }
-            return clear();
+            return insert({
+                rtcSession: replace(this.activeRtcSession),
+                channel: replace(this.threadView.thread),
+            });
         },
         /**
          * @private
@@ -222,14 +234,19 @@ registerModel({
             if (!this.threadView) {
                 return clear();
             }
+            if (this.activeRtcSession && !this.hasSidebar) {
+                return clear();
+            }
             const tileCards = [];
             const sessionPartners = new Set();
             const sessionGuests = new Set();
             for (const rtcSession of this.threadView.thread.rtcSessions) {
+                if (this.filterVideoGrid && !rtcSession.videoStream) {
+                    continue;
+                }
                 rtcSession.partner && sessionPartners.add(rtcSession.partner.id);
                 rtcSession.guest && sessionPartners.add(rtcSession.guest.id);
                 tileCards.push({
-                    relationalId: `rtc_session_${rtcSession.localId}_${this.threadView.thread.localId}`,
                     rtcSession: replace(rtcSession),
                     channel: replace(this.threadView.thread),
                 });
@@ -239,7 +256,6 @@ registerModel({
                     continue;
                 }
                 tileCards.push({
-                    relationalId: `invited_partner_${partner.localId}_${this.threadView.thread.localId}`,
                     invitedPartner: replace(partner),
                     channel: replace(this.threadView.thread),
                 });
@@ -249,7 +265,6 @@ registerModel({
                     continue;
                 }
                 tileCards.push({
-                    relationalId: `invited_guest_${guest.localId}_${this.threadView.thread.localId}`,
                     invitedGuest: replace(guest),
                     channel: replace(this.threadView.thread),
                 });
@@ -279,10 +294,7 @@ registerModel({
         _showOverlay() {
             this.update({
                 showOverlay: true,
-            });
-            browser.clearTimeout(this.showOverlayTimeout);
-            this.update({
-                showOverlayTimeout: browser.setTimeout(this._onShowOverlayTimeout, 3000),
+                showOverlayTimer: [clear(), insertAndReplace()],
             });
         },
         /**
@@ -296,17 +308,12 @@ registerModel({
             }
             this.update({ isFullScreen: false });
         },
-        /**
-         * @private
-         */
-        _onShowOverlayTimeout() {
-            if (!this.exists()) {
-                return;
-            }
-            this.update({ showOverlay: false });
-        },
     },
     fields: {
+        /**
+         * The rtc session that is the focus/spotlight of the viewer.
+         */
+        activeRtcSession: one('RtcSession'),
         /**
          * The aspect ratio of the tiles.
          */
@@ -314,11 +321,18 @@ registerModel({
             default: 16 / 9,
             compute: '_computeAspectRatio',
         }),
+        tileContainerRef: attr(),
         /**
          * Determines whether we only display the videos or all the participants
          */
         filterVideoGrid: attr({
             default: false,
+        }),
+        /**
+         * Determines if the viewer should have a sidebar.
+         */
+        hasSidebar: attr({
+            default: true,
         }),
         /**
          * Determines if the controller is an overlay or a bottom bar.
@@ -342,13 +356,6 @@ registerModel({
             compute: '_computeIsMinimized',
         }),
         /**
-         * Determines the layout use for the tiling of the participant cards.
-         */
-        layout: attr({
-            default: 'tiled',
-            compute: '_computeLayout',
-        }),
-        /**
          * Text content that is displayed on title of the layout settings dialog.
          */
         layoutSettingsTitle: attr({
@@ -360,6 +367,15 @@ registerModel({
         mainParticipantCard: one('CallParticipantCard', {
             compute: '_computeMainParticipantCard',
             inverse: 'callViewOfMainCard',
+            isCausal: true,
+        }),
+        /**
+         * All the participant cards of the call viewer (main card and tile cards).
+         * this is a technical inverse to distinguish from the other relation 'tileParticipantCards'.
+         */
+        participantCards: many('CallParticipantCard', {
+            inverse: 'callView',
+            isCausal: true,
         }),
         /**
          * The model for the controller (buttons).
@@ -367,13 +383,6 @@ registerModel({
         callActionListView: one('CallActionListView', {
             default: insertAndReplace(),
             readonly: true,
-            inverse: 'callView',
-            isCausal: true,
-        }),
-        /**
-         * The model for the menu to control the layout of the viewer.
-         */
-        layoutMenu: one('CallLayoutMenu', {
             inverse: 'callView',
             isCausal: true,
         }),
@@ -389,7 +398,10 @@ registerModel({
         showOverlay: attr({
             default: true,
         }),
-        showOverlayTimeout: attr(),
+        showOverlayTimer: one('Timer', {
+            inverse: 'callViewAsShowOverlay',
+            isCausal: true,
+        }),
         /**
          * ThreadView on which the call view is attached.
          */
@@ -398,12 +410,19 @@ registerModel({
             readonly: true,
             required: true,
         }),
+        tileHeight: attr({
+            default: 0,
+        }),
         /**
          * List of all participant cards (can either be invitations or rtcSessions).
          */
         tileParticipantCards: many('CallParticipantCard', {
             compute: '_computeTileParticipantCards',
             inverse: 'callViewOfTile',
+            isCausal: true,
+        }),
+        tileWidth: attr({
+            default: 0,
         }),
     },
     onChanges: [

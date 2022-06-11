@@ -117,6 +117,14 @@ Object.assign(ChatterContainer, {
             type: Boolean,
             optional: true,
         },
+        hasParentReloadOnFollowersUpdate: {
+            type: Boolean,
+            optional: true,
+        },
+        hasParentReloadOnMessagePosted: {
+            type: Boolean,
+            optional: true,
+        },
         hasTopbarCloseButton: {
             type: Boolean,
             optional: true,

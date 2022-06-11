@@ -24,16 +24,14 @@ const getMessageNextTemporaryId = (function () {
 registerModel({
     name: 'Chatter',
     identifyingFields: ['id'],
-    lifecycleHooks: {
-        _willDelete() {
-            this.messaging.browser.clearTimeout(this.attachmentsLoaderTimeout);
-        },
-    },
     recordMethods: {
         focus() {
             if (this.composerView) {
                 this.composerView.update({ doFocus: true });
             }
+        },
+        onAttachmentsLoadingTimeout() {
+            this.update({ isShowingAttachmentsLoading: true });
         },
         /**
          * Handles click on the attachments button.
@@ -118,6 +116,37 @@ registerModel({
         },
         openAttachmentBoxView() {
             this.update({ attachmentBoxView: insertAndReplace() });
+        },
+        /**
+         * Open a dialog to add partners as followers.
+         */
+        promptAddPartnerFollower() {
+            const action = {
+                type: 'ir.actions.act_window',
+                res_model: 'mail.wizard.invite',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                name: this.env._t("Invite Follower"),
+                target: 'new',
+                context: {
+                    default_res_model: this.thread.model,
+                    default_res_id: this.thread.id,
+                },
+            };
+            this.env.services.action.doAction(
+                action,
+                {
+                    onClose: async () => {
+                        if (!this.exists() && !this.thread) {
+                            return;
+                        }
+                        await this.thread.fetchData(['followers']);
+                        if (this.exists() && this.hasParentReloadOnFollowersUpdate) {
+                            this.reloadParentView();
+                        }
+                    },
+                }
+            );
         },
         async refresh() {
             const requestData = ['activities', 'followers', 'suggestedRecipients'];
@@ -215,7 +244,7 @@ registerModel({
          * @returns {boolean}
          */
         _computeIsPreparingAttachmentsLoading() {
-            return this.attachmentsLoaderTimeout !== undefined;
+            return Boolean(this.attachmentsLoaderTimer);
         },
         /**
          * @private
@@ -226,15 +255,6 @@ registerModel({
                 hasThreadView: this.hasThreadView,
                 order: 'desc',
                 thread: this.thread ? replace(this.thread) : clear(),
-            });
-        },
-        /**
-         * @private
-         */
-        _onAttachmentsLoadingTimeout() {
-            this.update({
-                attachmentsLoaderTimeout: clear(),
-                isShowingAttachmentsLoading: true,
             });
         },
         /**
@@ -294,19 +314,13 @@ registerModel({
          * @private
          */
         _prepareAttachmentsLoading() {
-            this.update({
-                attachmentsLoaderTimeout: this.messaging.browser.setTimeout(
-                    this._onAttachmentsLoadingTimeout,
-                    this.messaging.loadingBaseDelayDuration,
-                ),
-            });
+            this.update({ attachmentsLoaderTimer: insertAndReplace() });
         },
         /**
          * @private
          */
         _stopAttachmentsLoading() {
-            this.messaging.browser.clearTimeout(this.attachmentsLoaderTimeout);
-            this.update({ attachmentsLoaderTimeout: clear() });
+            this.update({ attachmentsLoaderTimer: clear() });
         },
     },
     fields: {
@@ -319,7 +333,10 @@ registerModel({
             inverse: 'chatter',
             isCausal: true,
         }),
-        attachmentsLoaderTimeout: attr(),
+        attachmentsLoaderTimer: one('Timer', {
+            inverse: 'chatterOwnerAsAttachmentsLoader',
+            isCausal: true,
+        }),
         /**
          * States the OWL Chatter component of this chatter.
          */
@@ -386,6 +403,12 @@ registerModel({
             default: false,
         }),
         hasParentReloadOnAttachmentsChanged: attr({
+            default: false,
+        }),
+        hasParentReloadOnFollowersUpdate: attr({
+            default: false,
+        }),
+        hasParentReloadOnMessagePosted: attr({
             default: false,
         }),
         /**
