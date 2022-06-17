@@ -1764,6 +1764,8 @@ class Task(models.Model):
                 vals['analytic_account_id'] = project.analytic_account_id.id
             if project.analytic_tag_ids:
                 vals['analytic_tag_ids'] = [Command.set(project.analytic_tag_ids.ids)]
+        else:
+            vals['user_ids'] = [Command.link(self.env.user.id)]
 
         return vals
 
@@ -1859,6 +1861,9 @@ class Task(models.Model):
                 vals["company_id"] = self.env["project.project"].browse(
                     project_id
                 ).company_id.id or self.env.company.id
+            if not project_id and ("stage_id" in vals or self.env.context.get('default_stage_id')):
+                vals["stage_id"] = False
+
             if project_id and "stage_id" not in vals:
                 # 1) Allows keeping the batch creation of tasks
                 # 2) Ensure the defaults are correct (and computed once by project),
@@ -1871,6 +1876,10 @@ class Task(models.Model):
             # user_ids change: update date_assign
             if vals.get('user_ids'):
                 vals['date_assign'] = fields.Datetime.now()
+                if not project_id:
+                    user_ids = self._fields['user_ids'].convert_to_cache(vals.get('user_ids', []), self)
+                    if self.env.user.id not in user_ids:
+                        vals['user_ids'] = [Command.set(list(user_ids) + [self.env.user.id])]
             # Stage change: Update date_end if folded stage and date_last_stage_update
             if vals.get('stage_id'):
                 vals.update(self.update_date_end(vals['stage_id']))
@@ -1930,6 +1939,9 @@ class Task(models.Model):
             raise UserError(_('Archived tasks cannot be recurring. Please unarchive the task first.'))
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
+            if not 'project_id' in vals and self.filtered(lambda t: not t.project_id):
+                raise UserError(_('You can only set a personal stage on a private task.'))
+
             vals.update(self.update_date_end(vals['stage_id']))
             vals['date_last_stage_update'] = now
             # reset kanban state when changing stage

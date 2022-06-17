@@ -1,17 +1,30 @@
 /** @odoo-module **/
 
 import { registerModel } from '@mail/model/model_core';
-import { attr, one, many } from '@mail/model/model_field';
+import { attr, many, one } from '@mail/model/model_field';
+import { replace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'Emoji',
     identifyingFields: ['unicode'],
+    recordMethods: {
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeEmojiRegistry() {
+            return replace(this.messaging.emojiRegistry);
+        },
+    },
     fields: {
         description: attr({
             readonly: true,
-            required: true,
+        }),
+        emojiCategories: many('EmojiCategory', {
+            inverse: 'allEmojis',
         }),
         emojiRegistry: one('EmojiRegistry', {
+            compute: '_computeEmojiRegistry',
             inverse: 'allEmojis',
             readonly: true,
             required: true,
@@ -23,7 +36,6 @@ registerModel({
         }),
         sources: attr({
             readonly: true,
-            required: true,
         }),
         unicode: attr({
             readonly: true,

@@ -1309,7 +1309,7 @@ class Orderline extends PosModel {
             this.order.remove_orderline(this);
             return true;
         }else{
-            var quant = typeof(quantity) === 'number' ? quantity : (field_utils.parse.float('' + quantity) || 0);
+            var quant = typeof(quantity) === 'number' ? quantity : (field_utils.parse.float('' + (quantity ? quantity : 0 )));
             if (this.refunded_orderline_id in this.pos.toRefundLines) {
                 const toRefundDetail = this.pos.toRefundLines[this.refunded_orderline_id];
                 const maxQtyToRefund = toRefundDetail.orderline.qty - toRefundDetail.orderline.refundedQty
@@ -1505,6 +1505,8 @@ class Orderline extends PosModel {
             product_name:       this.get_product().display_name,
             product_name_wrapped: this.generate_wrapped_product_name(),
             price_lst:          this.get_lst_price(),
+            fixed_lst_price:    this.get_fixed_lst_price(),
+            price_manually_set: this.price_manually_set,
             display_discount_policy:    this.display_discount_policy(),
             price_display_one:  this.get_display_price_one(),
             price_display :     this.get_display_price(),
