@@ -302,7 +302,8 @@ class Website(models.Model):
         if not (sale_order_sudo or force_create):
             # Do not create a SO record unless needed
             if request.session.get('sale_order_id'):
-                request.session['sale_order_id'] = None
+                request.session.pop('sale_order_id')
+                request.session.pop('website_sale_cart_quantity', None)
             return self.env['sale.order']
 
         # Only set when neeeded
@@ -316,6 +317,7 @@ class Website(models.Model):
             sale_order_sudo = SaleOrder.with_user(SUPERUSER_ID).create(so_data)
 
             request.session['sale_order_id'] = sale_order_sudo.id
+            request.session['website_sale_cart_quantity'] = sale_order_sudo.cart_quantity
             # The order was created with SUPERUSER_ID, revert back to request user.
             sale_order_sudo = sale_order_sudo.with_user(self.env.user).sudo()
             return sale_order_sudo
@@ -327,6 +329,7 @@ class Website(models.Model):
         # case when user emptied the cart
         if not request.session.get('sale_order_id'):
             request.session['sale_order_id'] = sale_order_sudo.id
+            request.session['website_sale_cart_quantity'] = sale_order_sudo.cart_quantity
 
         # check for change of partner_id ie after signup
         if sale_order_sudo.partner_id.id != partner_sudo.id and request.website.partner_id.id != partner_sudo.id:
@@ -418,7 +421,7 @@ class Website(models.Model):
 
     @api.model
     def _get_current_fiscal_position_id(self, partner_sudo):
-        AccountFiscalPosition = self.env['account.fiscal.position']
+        AccountFiscalPosition = self.env['account.fiscal.position'].sudo()
         fpos = AccountFiscalPosition
 
         # If the current user is the website public user, the fiscal position
@@ -427,7 +430,7 @@ class Website(models.Model):
             country_code = request.geoip.get('country_code')
             if country_code:
                 country_id = self.env['res.country'].search([('code', '=', country_code)], limit=1).id
-                fpos = self.env['account.fiscal.position'].sudo()._get_fpos_by_region(country_id)
+                fpos = AccountFiscalPosition._get_fpos_by_region(country_id)
 
         if not fpos:
             fpos = AccountFiscalPosition._get_fiscal_position(partner_sudo)
@@ -435,10 +438,9 @@ class Website(models.Model):
         return fpos.id
 
     def sale_reset(self):
-        request.session.update({
-            'sale_order_id': False,
-            'website_sale_current_pl': False,
-        })
+        request.session.pop('sale_order_id', None)
+        request.session.pop('website_sale_current_pl', None)
+        request.session.pop('website_sale_cart_quantity', None)
 
     @api.model
     def action_dashboard_redirect(self):

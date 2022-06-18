@@ -5,17 +5,17 @@ import { markEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
 
-export class PartnerImStatusIcon extends Component {
+export class PersonaImStatusIcon extends Component {
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {Partner}
+     * @returns {PersonaImStatusIconView}
      */
-    get partner() {
-        return this.props.partner;
+    get personaImStatusIconView() {
+        return this.props.record;
     }
 
     //--------------------------------------------------------------------------
@@ -27,30 +27,30 @@ export class PartnerImStatusIcon extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        markEventHandled(ev, 'PartnerImStatusIcon.Click');
-        if (!this.props.hasOpenChat) {
+        markEventHandled(ev, 'PersonaImStatusIcon.Click');
+        if (!this.props.hasOpenChat || !this.personaImStatusIconView.persona.partner) {
             return;
         }
-        this.partner.openChat();
+        this.personaImStatusIconView.persona.partner.openChat();
     }
 
 }
 
-Object.assign(PartnerImStatusIcon, {
+Object.assign(PersonaImStatusIcon, {
     defaultProps: {
         hasBackground: true,
         hasOpenChat: false,
     },
     props: {
-        partner: Object,
         hasBackground: { type: Boolean, optional: true },
         /**
          * Determines whether a click on `this` should open a chat with
          * `this.partner`.
          */
         hasOpenChat: { type: Boolean, optional: true },
+        record: Object,
     },
-    template: 'mail.PartnerImStatusIcon',
+    template: 'mail.PersonaImStatusIcon',
 });
 
-registerMessagingComponent(PartnerImStatusIcon);
+registerMessagingComponent(PersonaImStatusIcon);

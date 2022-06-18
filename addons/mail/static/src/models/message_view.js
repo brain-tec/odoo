@@ -49,7 +49,7 @@ registerModel({
                 !isEventHandled(ev, 'MessageActionList.Click') &&
                 !isEventHandled(ev, 'MessageReactionGroup.Click') &&
                 !isEventHandled(ev, 'MessageInReplyToView.ClickMessageInReplyTo') &&
-                !isEventHandled(ev, 'PartnerImStatusIcon.Click')
+                !isEventHandled(ev, 'PersonaImStatusIcon.Click')
             ) {
                 if (this.messagingAsClickedMessageView) {
                     this.messaging.update({ clickedMessageView: clear() });
@@ -294,6 +294,13 @@ registerModel({
             }
             return clear();
         },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computePersonaImStatusIconView() {
+            return this.message.author && this.message.author.isImStatusSet ? insertAndReplace() : clear();
+        },
     },
     fields: {
         /**
@@ -438,6 +445,12 @@ registerModel({
         }),
         messagingAsClickedMessageView: one('Messaging', {
             inverse: 'clickedMessageView',
+        }),
+        personaImStatusIconView: one('PersonaImStatusIconView', {
+            compute: '_computePersonaImStatusIconView',
+            inverse: 'messageViewOwner',
+            isCausal: true,
+            readonly: true,
         }),
         /**
          * States the thread view that is displaying this messages (if any).
