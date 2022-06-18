@@ -5,16 +5,14 @@ from datetime import datetime
 
 from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestMailFullRecipients
 from odoo.tests import tagged
-from odoo.tests.common import users, warmup
+from odoo.tests.common import HttpCase, users, warmup
 from odoo.tools import mute_logger
 
 
-@tagged('rating')
-class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
-
+class TestRatingCommon(TestMailFullCommon, TestMailFullRecipients):
     @classmethod
     def setUpClass(cls):
-        super(TestRatingFlow, cls).setUpClass()
+        super(TestRatingCommon, cls).setUpClass()
 
         cls.record_rating = cls.env['mail.test.rating'].create({
             'customer_id': cls.partner_1.id,
@@ -22,6 +20,9 @@ class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
             'user_id': cls.user_admin.id,
         })
 
+
+@tagged('rating')
+class TestRatingFlow(TestRatingCommon):
     def test_initial_values(self):
         record_rating = self.env['mail.test.rating'].browse(self.record_rating.ids)
         self.assertFalse(record_rating.rating_ids)
@@ -74,6 +75,7 @@ class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
         self.assertEqual(rating.feedback, 'Top Feedback')
         self.assertEqual(rating.message_id, message)
         self.assertEqual(rating.rating, 5)
+        self.assertEqual(record_rating.rating_last_value, 5)
 
         # apply a rate again (second click with feedback)
         with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
@@ -96,6 +98,7 @@ class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
         self.assertEqual(rating.feedback, 'Bad Feedback')
         self.assertEqual(rating.message_id, update_message)
         self.assertEqual(rating.rating, 1)
+        self.assertEqual(record_rating.rating_last_value, 1)
 
     @users('__system__')
     @warmup
@@ -124,9 +127,9 @@ class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
             partners = self.env['res.partner'].create([
                 {'name': 'Jean-Luc %s' % (idx), 'email': 'jean-luc-%s@opoo.com' % (idx)} for idx in range(RECORD_COUNT)])
             # 3713 requests if only test_mail_full is installed
-            # 5513 runbot community
-            # 6313 runbot enterprise
-            with self.assertQueryCount(__system__=6313):
+            # 4511 runbot community
+            # 4911 runbot enterprise
+            with self.assertQueryCount(__system__=4912):
                 record_ratings = self.env['mail.test.rating'].create([{
                     'customer_id': partners[idx].id,
                     'name': 'Test Rating',
@@ -144,7 +147,19 @@ class TestRatingFlow(TestMailFullCommon, TestMailFullRecipients):
             new_ratings = record_ratings.rating_ids.filtered(lambda r: r.rating == 1)
             new_ratings.write_date = datetime(2022, 2, 1, 14, 00)
             new_ratings.flush_model(['write_date'])
-            with self.assertQueryCount(__system__=2):
+            with self.assertQueryCount(__system__=1):
                 record_ratings._compute_rating_last_value()
                 vals = [val == 5 for val in record_ratings.mapped('rating_last_value')]
                 self.assertTrue(all(vals), "The last rating is kept.")
+
+
+@tagged('rating')
+class TestRatingRoutes(HttpCase, TestRatingCommon):
+    def test_open_rating_route(self):
+        access_token = self.record_rating._rating_get_access_token()
+        self.url_open(f"/rate/{access_token}/5")
+
+        rating = self.record_rating.rating_ids
+        self.assertTrue(rating.consumed)
+        self.assertEqual(rating.rating, 5)
+        self.assertEqual(self.record_rating.rating_last_value, 5)
