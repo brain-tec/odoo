@@ -154,10 +154,6 @@ class SaleOrder(models.Model):
         store=True, readonly=False, required=True, precompute=True,
         states=LOCKED_FIELD_STATES,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
-    # Credit Limit related field
-    partner_credit_warning = fields.Text(
-        compute='_compute_partner_credit_warning',
-        groups="account.group_account_invoice,account.group_account_readonly")
 
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position',
@@ -192,6 +188,10 @@ class SaleOrder(models.Model):
         digits=(12, 6),
         store=True, precompute=True,
         help='The rate of the currency to the currency of rate 1 applicable at the date of the order')
+    show_update_fpos = fields.Boolean(
+        string="Has Fiscal Position Changed", store=False,
+        help="Technical Field, True if the fiscal position was changed;\n"
+             " this will then display a recomputation button")
     show_update_pricelist = fields.Boolean(
         string="Has Pricelist Changed",
         help="Technical Field, True if the pricelist was changed;\n"
@@ -281,6 +281,9 @@ class SaleOrder(models.Model):
         compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
         help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
     is_expired = fields.Boolean(string="Is Expired", compute='_compute_is_expired')
+    partner_credit_warning = fields.Text(
+        compute='_compute_partner_credit_warning',
+        groups='account.group_account_invoice,account.group_account_readonly')
     tax_country_id = fields.Many2one(
         comodel_name='res.country',
         compute='_compute_tax_country_id',
@@ -564,6 +567,17 @@ class SaleOrder(models.Model):
                 )
                 order.analytic_account_id = default_analytic_account.analytic_id
 
+    @api.depends('company_id', 'partner_id', 'amount_total')
+    def _compute_partner_credit_warning(self):
+        for order in self:
+            order.with_company(order.company_id)
+            order.partner_credit_warning = ''
+            show_warning = order.state in ('draft', 'sent') and \
+                           order.company_id.account_use_credit_limit
+            if show_warning:
+                updated_credit = order.partner_id.credit + (order.amount_total * order.currency_rate)
+                order.partner_credit_warning = self.env['account.move']._build_credit_warning_message(order, updated_credit)
+
     @api.depends('order_line.tax_id', 'order_line.price_unit', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         for order in self:
@@ -613,16 +627,13 @@ class SaleOrder(models.Model):
                 }
             }
 
-    @api.depends('company_id', 'partner_id', 'amount_total')
-    def _compute_partner_credit_warning(self):
-        for order in self:
-            order.with_company(order.company_id)
-            order.partner_credit_warning = ''
-            show_warning = order.state in ('draft', 'sent') and \
-                           order.company_id.account_use_credit_limit
-            if show_warning:
-                updated_credit = order.partner_id.credit + (order.amount_total * order.currency_rate)
-                order.partner_credit_warning = self.env['account.move']._build_credit_warning_message(order, updated_credit)
+    @api.onchange('fiscal_position_id')
+    def _onchange_fpos_id_show_update_fpos(self):
+        if self.order_line and (
+            not self.fiscal_position_id
+            or (self.fiscal_position_id and self._origin.fiscal_position_id != self.fiscal_position_id)
+        ):
+            self.show_update_fpos = True
 
     @api.onchange('partner_id')
     def _onchange_partner_id_warning(self):
@@ -855,6 +866,17 @@ class SaleOrder(models.Model):
         if self.env.context.get('disable_cancel_warning'):
             return False
         return any(so.state != 'draft' for so in self)
+
+    def action_update_taxes(self):
+        self.ensure_one()
+        lines_to_recompute = self.order_line.filtered(lambda line: not line.display_type)
+        lines_to_recompute._compute_tax_id()
+        self.show_update_fpos = False
+        if self.partner_id and self.id:
+            self.message_post(body=_(
+                "Product taxes have been recomputed according to fiscal position %s.",
+                self.fiscal_position_id._get_html_link() if self.fiscal_position_id else "",
+            ))
 
     def update_prices(self):
         self.ensure_one()
