@@ -311,12 +311,17 @@ class Project(models.Model):
         ],
         string='Visibility', required=True,
         default='portal',
-        help="Defines the visibility of the tasks of the project:\n"
-            "- Invited employees: employees may only see the followed project and tasks.\n"
-            "- All employees: employees may see all project and tasks.\n"
-            "- Invited portal users and all employees: employees may see everything."
-            "   Invited portal users may see project and tasks followed by.\n"
-            "   them or by someone of their company.")
+        help="People to whom this project and its tasks will be visible.\n\n"
+            "- Invited internal users: when following a project, internal users will get access to all of its tasks without distinction. "
+            "Otherwise, they will only get access to the specific tasks they are following.\n "
+            "A user with the project > administrator access right level can still access this project and its tasks, even if they are not explicitly part of the followers.\n\n"
+            "- All internal users: all internal users can access the project and all of its tasks without distinction.\n\n"
+            "- Invited portal users and all internal users: all internal users can access the project and all of its tasks without distinction.\n"
+            "When following a project, portal users will get access to all of its tasks without distinction. Otherwise, they will only get access to the specific tasks they are following.\n\n"
+            "When a project is shared in read-only, the portal user is redirected to their portal. They can view the tasks, but not edit them.\n"
+            "When a project is shared in edit, the portal user is redirected to the kanban and list views of the tasks. They can modify a selected number of fields on the tasks.\n\n"
+            "In any case, an internal user with no project access rights can still access a task, "
+            "provided that they are given the corresponding URL (and that they are part of the followers if the project is private).")
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of documents attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, tracking=True)
@@ -1090,10 +1095,10 @@ class Task(models.Model):
         help="Attachments that don't come from a message.")
     # In the domain of displayed_image_id, we couln't use attachment_ids because a one2many is represented as a list of commands so we used res_model & res_id
     displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'project.task'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
-    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True, related_sudo=False)
-    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True, related_sudo=False)
-    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True, related_sudo=False)
-    is_closed = fields.Boolean(related="stage_id.fold", string="Closing Stage", store=True, index=True, related_sudo=False, help="Folded in Kanban stages are closing stages.")
+    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True)
+    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True)
+    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True)
+    is_closed = fields.Boolean(related="stage_id.fold", string="Closing Stage", store=True, index=True, help="Folded in Kanban stages are closing stages.")
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks")
     child_text = fields.Char(compute="_compute_child_text")
