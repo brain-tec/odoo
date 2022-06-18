@@ -677,6 +677,9 @@ class AccountMove(models.Model):
             currency = self.env['res.currency'].browse(update_vals['currency_id'])
             tax_amount = update_vals.pop('tax_amount')
 
+            if currency.is_zero(tax_amount):
+                return True
+
             tax_rep = self.env['account.tax.repartition.line'].browse(update_vals['tax_repartition_line_id'])
             tax_id = update_vals.pop('tax_id')
             if tax_id == tax_rep.tax_id.id:
@@ -741,7 +744,7 @@ class AccountMove(models.Model):
 
         # ===== TAX LINES =====
 
-        # Tax lines that are no longer neeeded.
+        # Tax lines that are no longer needed.
         if not recompute_tax_base_amount:
             for tax_line_vals in tax_results['tax_lines_to_delete']:
                 tax_line = tax_line_vals['record']
@@ -750,19 +753,20 @@ class AccountMove(models.Model):
         # Newly created tax lines.
         if not recompute_tax_base_amount:
             for tax_line_vals in tax_results['tax_lines_to_add']:
-                fill_accounting_tax_vals(tax_line_vals)
-                line_ids_commands.append(Command.create(tax_line_vals))
+                if not fill_accounting_tax_vals(tax_line_vals):
+                    line_ids_commands.append(Command.create(tax_line_vals))
 
         # Update of existing tax lines.
         for tax_line_vals, to_update in tax_results['tax_lines_to_update']:
             tax_line = tax_line_vals['record']
-            fill_accounting_tax_vals(to_update)
-
-            if recompute_tax_base_amount:
-                fields_to_update = ('tax_base_amount',)
+            if fill_accounting_tax_vals(to_update):
+                line_ids_commands.append(Command.unlink(tax_line.id))
             else:
-                fields_to_update = ('tax_base_amount', 'amount_currency', 'debit', 'credit')
-            line_ids_commands.append(Command.update(tax_line.id, {k: v for k, v in to_update.items() if k in fields_to_update}))
+                if recompute_tax_base_amount:
+                    fields_to_update = ('tax_base_amount',)
+                else:
+                    fields_to_update = ('tax_base_amount', 'amount_currency', 'debit', 'credit')
+                line_ids_commands.append(Command.update(tax_line.id, {k: v for k, v in to_update.items() if k in fields_to_update}))
 
         (self.update if in_draft_mode else self.write)({'line_ids': line_ids_commands})
 
@@ -4284,16 +4288,15 @@ class AccountMoveLine(models.Model):
             if account.allowed_journal_ids and journal not in account.allowed_journal_ids:
                 raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.', account.display_name))
 
-            failed_check = False
-            if (journal.type_control_ids - journal.default_account_id.user_type_id) or journal.account_control_ids:
-                failed_check = True
-                if journal.type_control_ids:
-                    failed_check = account.user_type_id not in (journal.type_control_ids - journal.default_account_id.user_type_id)
-                if failed_check and journal.account_control_ids:
-                    failed_check = account not in journal.account_control_ids
+            if account in (journal.default_account_id, journal.suspense_account_id):
+                continue
 
-            if failed_check:
-                raise UserError(_('You cannot use this account (%s) in this journal, check the section \'Control-Access\' under tab \'Advanced Settings\' on the related journal.', account.display_name))
+            is_account_control_ok = not journal.account_control_ids or account in journal.account_control_ids
+            is_type_control_ok = not journal.type_control_ids or account.user_type_id in journal.type_control_ids
+
+            if not is_account_control_ok or not is_type_control_ok:
+                raise UserError(_("You cannot use this account (%s) in this journal, check the section 'Control-Access' under "
+                                  "tab 'Advanced Settings' on the related journal.", account.display_name))
 
     @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
     def _check_off_balance(self):

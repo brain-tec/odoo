@@ -596,10 +596,15 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
 
         for top_ctrl in highest_controllers:
             leaf_controllers = list(unique(get_leaf_classes(top_ctrl)))
-            name = '{} (extended by {})'.format(
-                top_ctrl.__name__,
-                ', '.join(bot_ctrl.__name__ for bot_ctrl in leaf_controllers),
-            )
+
+            name = top_ctrl.__name__
+            if leaf_controllers != [top_ctrl]:
+                name += ' (extended by %s)' %  ', '.join(
+                    bot_ctrl.__name__
+                    for bot_ctrl in leaf_controllers
+                    if bot_ctrl is not top_ctrl
+                )
+
             Ctrl = type(name, tuple(reversed(leaf_controllers)), {})
             yield Ctrl()
 
@@ -1339,8 +1344,7 @@ class Request:
         request to ``_serve_ir_http``.
         """
         try:
-            self.registry = Registry(self.db)
-            self.registry.check_signaling()
+            self.registry = Registry(self.db).check_signaling()
         except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
             # psycopg2 error or attribute error while constructing
             # the registry. That means either
