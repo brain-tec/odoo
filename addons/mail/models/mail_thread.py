@@ -3154,7 +3154,8 @@ class MailThread(models.AbstractModel):
         if 'activities' in request_list:
             res['activities'] = self.activity_ids.activity_format()
         if 'attachments' in request_list:
-            res['attachments'] = self._get_mail_thread_data_attachments()._attachment_format(commands=True)
+            res['attachments'] = self._get_mail_thread_data_attachments()._attachment_format()
+            res['mainAttachment'] = [('insert-and-replace', {'id': self.message_main_attachment_id.id})] if self.message_main_attachment_id else [('clear',)]
         if 'followers' in request_list:
             res['followers'] = [{
                 'id': follower.id,

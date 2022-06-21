@@ -116,7 +116,7 @@ class ResConfigSettings(models.TransientModel):
     module_product_margin = fields.Boolean(string="Allow Product Margin")
     module_l10n_eu_oss = fields.Boolean(string="EU Intra-community Distance Selling")
     module_account_taxcloud = fields.Boolean(string="Account TaxCloud")
-    module_account_invoice_extract = fields.Boolean(string="Document Digitalization")
+    module_account_invoice_extract = fields.Boolean(string="Document Digitization")
     module_snailmail_account = fields.Boolean(string="Snailmail")
     tax_exigibility = fields.Boolean(string='Cash Basis', related='company_id.tax_exigibility', readonly=False)
     tax_cash_basis_journal_id = fields.Many2one('account.journal', related='company_id.tax_cash_basis_journal_id', string="Tax Cash Basis Journal", readonly=False)
@@ -158,6 +158,9 @@ class ResConfigSettings(models.TransientModel):
 
     # Allows for the use of a different delivery address
     group_sale_delivery_address = fields.Boolean("Customer Addresses", implied_group='account.group_delivery_invoice_address')
+
+    # Quick encoding (fiduciary mode)
+    quick_edit_mode = fields.Selection(string="Quick encoding", readonly=False, related='company_id.quick_edit_mode')
 
     def set_values(self):
         super().set_values()
