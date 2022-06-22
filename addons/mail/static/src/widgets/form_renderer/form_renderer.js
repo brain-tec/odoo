@@ -12,11 +12,16 @@ class ChatterContainerWrapperComponent extends ComponentWrapper {}
  * subset of) the mail widgets (mail_thread, mail_followers and mail_activity).
  */
 FormRenderer.include({
+    //--------------------------------------------------------------------------
+    // Form Overrides
+    //--------------------------------------------------------------------------
+
     /**
      * @override
      */
     init(parent, state, params) {
         this._super(...arguments);
+        this.hasChatter = params.hasChatter && !params.isFromFormViewDialog;
         this.chatterFields = params.chatterFields;
         this.mailFields = params.mailFields;
         this._chatterContainerComponent = undefined;
@@ -25,14 +30,66 @@ FormRenderer.include({
          * This is set when arch contains `div.oe_chatter`.
          */
         this._chatterContainerTarget = undefined;
+        if (this.hasChatter) {
+            this._chatterContainerTarget = document.createElement("div");
+            this._chatterContainerTarget.classList.add("o_FormRenderer_chatterContainer");
+        }
         /**
-         * This jQuery element will be set when rendering the form view, and
+         * This element will be set when rendering the form view, and
          * used as a hook to insert the ChatterContainer in the right place,
          * when applying the rendering into the DOM.
          */
-        this.$chatterContainerHook = undefined;
-        // Do not load chatter in form view dialogs
-        this._isFromFormViewDialog = params.isFromFormViewDialog;
+        this.chatterContainerTargetPlaceholder = undefined;
+    },
+    /**
+     * @override
+     */
+    _renderNode(node) {
+        if (node.tag === 'div' && node.attrs.class === 'oe_chatter') {
+            if (!this.hasChatter) {
+                return $('<div/>');
+            }
+            this.chatterContainerTargetPlaceholder = this._chatterContainerTarget.cloneNode(false);
+            return this.chatterContainerTargetPlaceholder;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Overrides the function to render the chatter once the form view is
+     * rendered.
+     *
+     * @override
+     */
+    async __renderView() {
+        await this._super(...arguments);
+        if (this.hasChatter) {
+            if (!this._chatterContainerComponent) {
+                this._makeChatterContainerComponent();
+            } else {
+                return this._updateChatterContainerComponent();
+            }
+            await this._mountChatterContainerComponent();
+        }
+    },
+    /**
+     * The last rendering of the form view has just been applied into the DOM,
+     * so we replace our chatter container hook by the actual chatter container.
+     *
+     * @override
+     */
+    _updateView() {
+        /**
+         * The chatter is detached before it's removed on the super._updateView function,
+         * this is done to avoid losing the event handlers.
+         */
+        if (this.hasChatter) {
+            this._chatterContainerTarget.remove();
+        }
+        this._super(...arguments);
+        if (this.hasChatter) {
+            this.chatterContainerTargetPlaceholder.replaceWith(this._chatterContainerTarget);
+            this._updateChatterContainerTarget();
+        }
     },
     /**
      * @override
@@ -44,18 +101,15 @@ FormRenderer.include({
     },
 
     //--------------------------------------------------------------------------
-    // Private
+    // Mail Methods
     //--------------------------------------------------------------------------
 
     /**
-     * Returns whether the form renderer has a chatter to display or not.
-     * This is based on arch, which should have `div.oe_chatter`.
-     *
      * @private
      * @returns {boolean}
      */
-    _hasChatter() {
-        return !!this._chatterContainerTarget;
+    _isChatterAside() {
+        return false;
     },
     /**
      * @private
@@ -76,10 +130,13 @@ FormRenderer.include({
      * @returns {Object}
      */
     _makeChatterContainerProps() {
+        const isChatterAside = this._isChatterAside();
         return {
             hasActivities: this.chatterFields.hasActivityIds,
+            hasExternalBorder: !isChatterAside,
             hasFollowers: this.chatterFields.hasMessageFollowerIds,
             hasMessageList: this.chatterFields.hasMessageIds,
+            hasMessageListScrollAdjust: isChatterAside,
             hasParentReloadOnAttachmentsChanged: this.chatterFields.hasRecordReloadOnAttachmentsChanged,
             hasParentReloadOnFollowersUpdate: this.chatterFields.hasRecordReloadOnFollowersUpdate,
             hasParentReloadOnMessagePosted: this.chatterFields.hasRecordReloadOnMessagePosted,
@@ -87,22 +144,6 @@ FormRenderer.include({
             threadId: this.state.res_id,
             threadModel: this.state.model,
         };
-    },
-    /**
-     * Create the DOM element that will contain the chatter. This is made in
-     * a separate method so it can be overridden (like in mail_enterprise for
-     * example).
-     *
-     * @private
-     * @returns {jQuery.Element}
-     */
-    _makeChatterContainerTarget() {
-        if (!this._chatterContainerTarget) {
-            this._chatterContainerTarget = document.createElement("div");
-            this._chatterContainerTarget.classList.add("o_FormRenderer_chatterContainer");
-        }
-        this.$chatterContainerHook = $('<div class="o_FormRenderer_chatterContainer"/>');
-        return this.$chatterContainerHook;
     },
     /**
      * Mount the chatter
@@ -123,54 +164,6 @@ FormRenderer.include({
         }
     },
     /**
-     * @override
-     */
-    _renderNode(node) {
-        if (node.tag === 'div' && node.attrs.class === 'oe_chatter') {
-            if (this._isFromFormViewDialog) {
-                return $('<div/>');
-            }
-            return this._makeChatterContainerTarget();
-        }
-        return this._super(...arguments);
-    },
-    /**
-     * The last rendering of the form view has just been applied into the DOM,
-     * so we replace our chatter container hook by the actual chatter container.
-     *
-     * @override
-     */
-    _updateView() {
-        /**
-         * The chatter is detached before it's removed on the super._updateView function,
-         * this is done to avoid losing the event handlers.
-         */
-        if (this._hasChatter()) {
-            this._chatterContainerTarget.remove();
-        }
-        this._super(...arguments);
-        if (this._hasChatter()) {
-            this.$chatterContainerHook.replaceWith(this._chatterContainerTarget);
-        }
-    },
-    /**
-     * Overrides the function to render the chatter once the form view is
-     * rendered.
-     *
-     * @override
-     */
-    async __renderView() {
-        await this._super(...arguments);
-        if (this._hasChatter()) {
-            if (!this._chatterContainerComponent) {
-                this._makeChatterContainerComponent();
-            } else {
-                return this._updateChatterContainerComponent();
-            }
-            await this._mountChatterContainerComponent();
-        }
-    },
-    /**
      * @private
      */
     async _updateChatterContainerComponent() {
@@ -183,11 +176,19 @@ FormRenderer.include({
             }
         }
     },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
+    /**
+     * Add a class to allow styling of chatter depending on the fact is is
+     * printed aside or underneath the form sheet.
+     *
+     * @private
+     */
+    _updateChatterContainerTarget() {
+        if (this._isChatterAside()) {
+            $(this._chatterContainerTarget).addClass('o-aside');
+        } else {
+            $(this._chatterContainerTarget).removeClass('o-aside');
+        }
+    },
     /**
      * @abstract
      * @private

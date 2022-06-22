@@ -11,59 +11,33 @@
     }
 }
 
+.o_CallView_mainView {
+    min-width: 0;
+}
+
 .o_CallView_mainParticipantContainer {
     min-width: 0;
 }
 
-.o_CallView_grid {
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    &::-webkit-scrollbar {
-        width: 0.3vw;
-    }
-
-    &.o-isTiled {
-        overflow-y: hidden;
-
-        .o_CallView_participantCard {
-            width: var(--width);
-            height: var(--height);
-            min-width: var(--width);
-            min-height: var(--height);
-        }
-    }
-
-    &.o-isSidebar {
-        width: 120px;
-        min-width: 120px;
-    }
-}
-
-.o_CallView_gridTile {
+.o_CallView_gridParticipantCard {
+    width: var(--width);
+    height: var(--height);
+    min-width: var(--width);
+    min-height: var(--height);
     aspect-ratio: 16/9;
 }
 
 .o_CallView_sidebarButton {
     font-size: 1.2rem;
     padding: map-get($spacers, 2);
-    top: 48%;
+    top: 50%;
+    transform: translateY(50%);
     right: 0;
 }
 
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
-
-.o_CallView_grid {
-
-    &::-webkit-scrollbar {
-        background: gray('900');
-    }
-    &::-webkit-scrollbar-thumb {
-        background: gray('700');
-    }
-}
 
 .o_CallView_mainParticipantContainer {
     background-color: black;
