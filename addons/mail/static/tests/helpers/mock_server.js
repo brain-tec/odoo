@@ -490,10 +490,10 @@ MockServer.include({
      * @returns {Object}
      */
     async _mockRouteMailThreadData(thread_model, thread_id, request_list) {
-        const res = {};
+        const res = {'hasReadAccess': true};
         const thread = this._mockSearchRead(thread_model, [[['id', '=', thread_id]]], {})[0];
         if (!thread) {
-            console.warn(`mock server: reading data "${request_list}" from invalid thread "${thread_model}_${thread_id}"`);
+            res['hasReadAccess'] = false;
             return res;
         }
         if (request_list.includes('activities')) {
@@ -1877,7 +1877,7 @@ MockServer.include({
             ['res_id', 'in', ids],
             ['partner_id', 'in', partner_ids || []],
         ]);
-        this._mockUnlink(model, [followers.map(follower => follower.id)]);
+        this._mockUnlink('mail.followers', [followers.map(follower => follower.id)]);
     },
     /**
      * Simulates `_get_channels_as_member` on `res.partner`.
