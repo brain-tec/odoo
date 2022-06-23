@@ -688,7 +688,7 @@ class IrActionsReport(models.Model):
 
             bodies, html_ids, header, footer, specific_paperformat_args = self._prepare_html(html, report_model=self_sudo.model)
 
-            if self_sudo.attachment and set(res_ids) != set(html_ids):
+            if self_sudo.attachment and set(res_ids_wo_stream) != set(html_ids):
                 raise UserError(_(
                     "The report's template %r is wrong, please contact your administrator. \n\n"
                     "Can not separate file to save as attachment because the report's template does not contains the"
@@ -717,7 +717,10 @@ class IrActionsReport(models.Model):
 
             # Split the pdf for each record using the PDF outlines.
 
-            if len(res_ids_wo_stream) == 1:
+            if not self.attachment:
+                # Splitting the pdf is not needed since we don't have any attachment to generate.
+                collected_streams[False] = {'stream': pdf_content_stream}
+            elif len(res_ids_wo_stream) == 1:
                 # Only one record: append the whole PDF.
                 collected_streams[res_ids_wo_stream[0]]['stream'] = pdf_content_stream
             else:
@@ -745,7 +748,7 @@ class IrActionsReport(models.Model):
                     node = node['/Next']
                 outlines_pages = sorted(set(outlines_pages))
                 # There should be only one top-level heading by document
-                assert len(outlines_pages) == len(res_ids_wo_stream)
+                assert len(outlines_pages) == len(res_ids)
                 # There should be a top-level heading on first page
                 assert outlines_pages[0] == 0
                 for i, num in enumerate(outlines_pages):
@@ -755,7 +758,7 @@ class IrActionsReport(models.Model):
                         attachment_writer.addPage(reader.getPage(j))
                     stream = io.BytesIO()
                     attachment_writer.write(stream)
-                    collected_streams[res_ids_wo_stream[i]]['stream'] = stream
+                    collected_streams[res_ids[i]]['stream'] = stream
 
         return collected_streams
 
@@ -808,7 +811,7 @@ class IrActionsReport(models.Model):
                     _logger.info("The PDF documents %r are now saved in the database", attachment_names)
 
         # Merge all streams together for a single record.
-        streams_to_merge = [x['stream'] for x in collected_streams.values()]
+        streams_to_merge = [x['stream'] for x in collected_streams.values() if x['stream']]
         if len(streams_to_merge) == 1:
             pdf_content = streams_to_merge[0].getvalue()
         else:

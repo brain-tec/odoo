@@ -354,10 +354,10 @@ class StockMove(TransactionCase):
 
         # no changes on quants, even if i made some move lines with a lot id whom reserved on untracked quants
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, strict=True)), 1.0)  # with a qty of 2
-        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot1, strict=True)), 1.0)
-        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot2, strict=True)), 1.0)
-        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot3, strict=True)), 0)
-        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot4, strict=True)), 0)
+        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot1, strict=True).filtered(lambda q: q.lot_id)), 1.0)
+        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot2, strict=True).filtered(lambda q: q.lot_id)), 1.0)
+        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot3, strict=True).filtered(lambda q: q.lot_id)), 0)
+        self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot4, strict=True).filtered(lambda q: q.lot_id)), 0)
 
         move1.move_line_ids.write({'qty_done': 1.0})
 
@@ -667,7 +667,7 @@ class StockMove(TransactionCase):
         self.assertEqual(move1.reserved_availability, 0.0)
         self.assertEqual(len(move1.move_line_ids), 0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot1, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot1, strict=True), 2.0)
 
     def test_putaway_1(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
@@ -5723,3 +5723,21 @@ class StockMove(TransactionCase):
                 line.qty_done = 1
 
         self.assertEqual(picking.move_line_ids_without_package.location_dest_id, self.stock_location.child_ids[0])
+
+    def test_inter_wh_and_forecast_availability(self):
+        dest_wh = self.env['stock.warehouse'].create({
+            'name': 'Second Warehouse',
+            'code': 'WH02',
+        })
+
+        move = self.env['stock.move'].create({
+            'name': 'test_interwh',
+            'location_id': self.stock_location.id,
+            'location_dest_id': dest_wh.lot_stock_id.id,
+            'product_id': self.product.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        self.assertEqual(move.forecast_availability, -1)
+        move._action_confirm()
+        self.assertEqual(move.forecast_availability, -1)

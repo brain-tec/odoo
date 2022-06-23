@@ -126,6 +126,16 @@ class ProductTemplate(models.Model):
 
         return self._create_product_variant(combination, log_warning=True).id or 0
 
+    @api.onchange('type')
+    def _onchange_type(self):
+        res = super(ProductTemplate, self)._onchange_type()
+        if self._origin and self.sales_count > 0:
+            res['warning'] = {
+                'title': _("Warning"),
+                'message': _("You cannot change the product's type because it is already used in sales orders.")
+            }
+        return res
+
     @api.depends('type')
     def _compute_service_type(self):
         self.filtered(lambda t: t.type == 'consu' or not t.service_type).service_type = 'manual'
@@ -276,6 +286,12 @@ class ProductTemplate(models.Model):
             'has_discounted_price': has_discounted_price,
         }
 
+    def _can_be_added_to_cart(self):
+        """
+        Pre-check to `_is_add_to_cart_possible` to know if product can be sold.
+        """
+        return self.sale_ok
+
     def _is_add_to_cart_possible(self, parent_combination=None):
         """
         It's possible to add to cart (potentially after configuration) if
@@ -289,7 +305,7 @@ class ProductTemplate(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        if not self.active or not self.sale_ok:
+        if not self.active or not self._can_be_added_to_cart():
             # for performance: avoid calling `_get_possible_combinations`
             return False
         return next(self._get_possible_combinations(parent_combination), False) is not False
