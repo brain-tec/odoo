@@ -3,21 +3,19 @@
 import ThreadWidget from '@im_livechat/legacy/widgets/thread/thread';
 
 import config from 'web.config';
-import core from 'web.core';
+import { _t, qweb } from 'web.core';
 import Widget from 'web.Widget';
 
-const QWeb = core.qweb;
-const _t = core._t;
-
 /**
- * This is an abstract widget for rendering thread windows.
- * AbstractThreadWindow is kept for legacy reasons.
+ * This is the widget that represent windows of livechat in the frontend.
+ *
+ * @see @im_livechat/legacy/widgets/public_livechat_window/public_livechat_window for more information
  */
-const AbstractThreadWindow = Widget.extend({
-    template: 'im_livechat.legacy.mail.AbstractThreadWindow',
-    custom_events: {
-        document_viewer_closed: '_onDocumentViewerClose',
-    },
+const PublicLivechatWindow = Widget.extend({
+    FOLD_ANIMATION_DURATION: 200, // duration in ms for (un)fold transition
+    HEIGHT_OPEN: '400px', // height in px of thread window when open
+    HEIGHT_FOLDED: '34px', // height, in px, of thread window when folded
+    template: 'im_livechat.legacy.PublicLivechatWindow',
     events: {
         'click .o_thread_window_close': '_onClickClose',
         'click .o_thread_window_title': '_onClickFold',
@@ -25,23 +23,17 @@ const AbstractThreadWindow = Widget.extend({
         'click .o_mail_thread': '_onThreadWindowClicked',
         'keydown .o_composer_text_field': '_onKeydown',
         'keypress .o_composer_text_field': '_onKeypress',
+        'input .o_composer_text_field': '_onInput',
     },
-    FOLD_ANIMATION_DURATION: 200, // duration in ms for (un)fold transition
-    HEIGHT_OPEN: '400px', // height in px of thread window when open
-    HEIGHT_FOLDED: '34px', // height, in px, of thread window when folded
+    custom_events: {
+        document_viewer_closed: '_onDocumentViewerClose',
+    },
     /**
-     * Children of this class must make use of `thread`, which is an object that
-     * represent the thread that is linked to this thread window.
-     *
-     * If no thread is provided, this will represent the "blank" thread window.
-     *
-     * @abstract
      * @param {Widget} parent
-     * @param {@im_livechat/legacy/models/abstract_thread} [thread=null] the thread that this
-     *   thread window is linked to. If not set, it is the "blank" thread
-     *   window.
+     * @param {@im_livechat/legacy/models/public_livechat} thread
      * @param {Object} [options={}]
-     * @param {@im_livechat/legacy/models/abstract_thread} [options.thread]
+     * @param {string} [options.headerBackgroundColor]
+     * @param {string} [options.titleColor]
      */
     init(parent, thread, options) {
         this._super(parent);
@@ -63,8 +55,13 @@ const AbstractThreadWindow = Widget.extend({
             // internal fold state of thread window without any thread
             this._folded = false;
         }
+        this._thread = thread;
     },
-    start() {
+    /**
+     * @override
+     * @return {Promise}
+     */
+    async start() {
         this.$input = this.$('.o_composer_text_field');
         this.$header = this.$('.o_thread_window_header');
         const options = {
@@ -90,7 +87,13 @@ const AbstractThreadWindow = Widget.extend({
         const def = this._threadWidget.replace(this.$('.o_thread_window_content')).then(() => {
             this._threadWidget.$el.on('scroll', this, this._debouncedOnScroll);
         });
-        return Promise.all([this._super(), def]);
+        await Promise.all([this._super(), def]);
+        if (this.options.headerBackgroundColor) {
+            this.$('.o_thread_window_header').css('background-color', this.options.headerBackgroundColor);
+        }
+        if (this.options.titleColor) {
+            this.$('.o_thread_window_header').css('color', this.options.titleColor);
+        }
     },
     /**
      * @override
@@ -114,16 +117,29 @@ const AbstractThreadWindow = Widget.extend({
         this._super(...arguments);
     },
 
+
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * Close this window
-     *
-     * @abstract
+     * @override
      */
-    close() {},
+    close() {
+        this.trigger_up('close_chat_window');
+    },
+    /**
+     * States whether this thread window is related to a thread or not.
+     *
+     * This is useful in order to provide specific behaviour for thread windows
+     * without any thread, e.g. let them open a thread from this "blank" thread
+     * window.
+     *
+     * @returns {boolean}
+     */
+    hasThread() {
+        return !! this._thread;
+    },
     /**
      * Get the ID of the thread window, which is equivalent to the ID of the
      * thread related to this window
@@ -180,18 +196,6 @@ const AbstractThreadWindow = Widget.extend({
         return this._thread.getUnreadCounter();
     },
     /**
-     * States whether this thread window is related to a thread or not.
-     *
-     * This is useful in order to provide specific behaviour for thread windows
-     * without any thread, e.g. let them open a thread from this "blank" thread
-     * window.
-     *
-     * @returns {boolean}
-     */
-    hasThread() {
-        return !! this._thread;
-    },
-    /**
      * Tells whether the bottom of the thread in the thread window is visible
      * or not.
      *
@@ -214,6 +218,14 @@ const AbstractThreadWindow = Widget.extend({
         return this._thread.isFolded();
     },
     /**
+     * States whether the thread window is hidden or not.
+     *
+     * @returns {boolean}
+     */
+    isHidden() {
+        return this._hidden;
+    },
+    /**
      * States whether the current environment is in mobile or not. This is
      * useful in order to customize the template rendering for mobile view.
      *
@@ -221,14 +233,6 @@ const AbstractThreadWindow = Widget.extend({
      */
     isMobile() {
         return config.device.isMobile;
-    },
-    /**
-     * States whether the thread window is hidden or not.
-     *
-     * @returns {boolean}
-     */
-    isHidden() {
-        return this._hidden;
     },
     /**
      * States whether the input of the thread window should be displayed or not.
@@ -255,10 +259,18 @@ const AbstractThreadWindow = Widget.extend({
      *
      * @private
      */
-     renderHeader() {
+    renderHeader() {
         const options = this._getHeaderRenderingOptions();
         this.$header.html(
-            QWeb.render('im_livechat.legacy.mail.AbstractThreadWindow.HeaderContent', options));
+            qweb.render('im_livechat.legacy.PublicLivechatWindow.HeaderContent', options));
+    },
+    /**
+     * Replace the thread content with provided new content
+     *
+     * @param {$.Element} $element
+     */
+    replaceContentWith($element) {
+        $element.replace(this._threadWidget.$el);
     },
     /**
      * Scroll to the bottom of the thread in the thread window
@@ -271,6 +283,8 @@ const AbstractThreadWindow = Widget.extend({
      * of the thread model. If the boolean parameter `folded` is provided, it
      * folds/unfolds the window when it is set/unset.
      *
+     * Warn the parent widget (LivechatButton)
+     *
      * @param {boolean} [folded] if not a boolean, toggle the fold state.
      *   Otherwise, fold/unfold the window if set/unset.
      */
@@ -279,6 +293,8 @@ const AbstractThreadWindow = Widget.extend({
             folded = !this.isFolded();
         }
         this._updateThreadFoldState(folded);
+        this.trigger_up('save_chat_window');
+        this.updateVisualFoldState();
     },
     /**
      * Update the visual state of the window so that it matched the internal
@@ -363,7 +379,8 @@ const AbstractThreadWindow = Widget.extend({
      * @private
      * @param {Object} messageData
      */
-     _postMessage(messageData) {
+    _postMessage(messageData) {
+        this.trigger_up('post_message_chat_window', { messageData });
         if (!this.hasThread()) {
             return;
         }
@@ -445,6 +462,17 @@ const AbstractThreadWindow = Widget.extend({
         this._focusInput();
     },
     /**
+     * Called when the input in the composer changes
+     *
+     * @private
+     */
+    _onInput() {
+        if (this.hasThread() && this._thread.hasTypingNotification()) {
+            const isTyping = this.$input.val().length > 0;
+            this._thread.setMyselfTyping({ typing: isTyping });
+        }
+    },
+    /**
      * Called when typing something on the composer of this thread window.
      *
      * @private
@@ -487,7 +515,7 @@ const AbstractThreadWindow = Widget.extend({
      *
      * @private
      */
-     _onThreadWindowClicked() {
+    _onThreadWindowClicked() {
         const selectObj = window.getSelection();
         if (selectObj.anchorOffset === selectObj.focusOffset) {
             this.$input.focus();
@@ -495,4 +523,4 @@ const AbstractThreadWindow = Widget.extend({
     },
 });
 
-export default AbstractThreadWindow;
+export default PublicLivechatWindow;

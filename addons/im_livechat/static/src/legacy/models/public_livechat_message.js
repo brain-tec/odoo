@@ -3,27 +3,21 @@
 import * as mailUtils from '@mail/js/utils';
 
 import Class from 'web.Class';
-import core from 'web.core';
+import { _t } from 'web.core';
 import session from 'web.session';
 import time from 'web.time';
 
-const _t = core._t;
-
 /**
- * This is an abstract class for modeling messages in JS.
- * The purpose of this interface is to make im_livechat compatible with
- * mail.widget.Thread, as this widget was designed to work with messages that
- * are instances of mail.model.Messages.
+ * This is a message that is handled by im_livechat, without making use of the
+ * mail.Manager. The purpose of this is to make im_livechat compatible with
+ * mail.widget.Thread.
  *
- * Ideally, im_livechat should also handle mail.model.Message, but this is not
- * feasible for the moment, as mail.model.Message requires mail.Manager to work,
- * and this module should not leak outside of the backend, hence the use of
- * mail.model.AbstractMessage as a work-around.
+ * @see @im_livechat/legacy/models/public_livechat_message for more information.
  */
-const AbstractMessage = Class.extend({
+const PublicLivechatMessage = Class.extend({
 
     /**
-     * @param {Widget} parent
+     * @param {@im_livechat/legacy/widgets/livechat_button} parent
      * @param {Object} data
      * @param {Array} [data.attachment_ids=[]]
      * @param {Array} [data.author_id]
@@ -34,8 +28,11 @@ const AbstractMessage = Class.extend({
      * @param {boolean} [data.is_discussion = false]
      * @param {boolean} [data.is_notification = false]
      * @param {string} [data.message_type = undefined]
+     * @param {Object} options
+     * @param {string} options.default_username
+     * @param {string} options.serverURL
      */
-    init(parent, data) {
+    init(parent, data, options) {
         // Attachments are not supported in (public) livechat.
         // We ignore data from server, otherwise field commands
         // will be wrongly considered as unamed attachments.
@@ -53,6 +50,8 @@ const AbstractMessage = Class.extend({
         this._attachmentIDs.forEach(function (attachment) {
             attachment.filename = attachment.filename || attachment.name || _t("unnamed");
         });
+        this._defaultUsername = options.default_username;
+        this._serverURL = options.serverURL;
     },
 
     //--------------------------------------------------------------------------
@@ -91,13 +90,16 @@ const AbstractMessage = Class.extend({
     /**
      * Get the relative url of the avatar to display next to the message
      *
-     * @abstract
      * @return {string}
      */
     getAvatarSource() {
+        let source = this._serverURL;
         if (this.hasAuthor()) {
-            return '/web/image/res.partner/' + this.getAuthorID() + '/avatar_128';
+            source += `/im_livechat/operator/${this.getAuthorID()}/avatar`;
+        } else {
+            source += '/mail/static/src/img/smiley/avatar.jpg';
         }
+        return source;
     },
     /**
      * Get the body content of this message
@@ -128,18 +130,20 @@ const AbstractMessage = Class.extend({
         return this.getDate().format('LL');
     },
     /**
-     * Get the name of the author, if there is an author of this message
-     * If there are no author of this message, returns 'null'
+     * Get the text to display for the author of the message
+     *
+     * Rule of precedence for the displayed author::
+     *
+     *      author name > default usernane
      *
      * @return {string}
      */
     getDisplayedAuthor() {
-        return this.hasAuthor() ? this._getAuthorName() : null;
+        return (this.hasAuthor() ? this._getAuthorName() : null) || this._defaultUsername;
     },
     /**
      * Get the server ID (number) of this message
      *
-     * @override
      * @return {integer}
      */
     getID() {
@@ -205,7 +209,6 @@ const AbstractMessage = Class.extend({
      * Get the type of message (e.g. 'comment', 'email', 'notification', ...)
      * By default, messages are of type 'undefined'
      *
-     * @override
      * @return {string|undefined}
      */
     getType() {
@@ -214,7 +217,6 @@ const AbstractMessage = Class.extend({
     /**
      * State whether this message contains some attachments.
      *
-     * @override
      * @return {boolean}
      */
     hasAttachments() {
@@ -280,7 +282,6 @@ const AbstractMessage = Class.extend({
      * State whether this message originates from a channel.
      * By default, messages do not originate from a channel.
      *
-     * @override
      * @return {boolean}
      */
     originatesFromChannel() {
@@ -385,7 +386,6 @@ const AbstractMessage = Class.extend({
      * State whether this message is a system notification
      * By default, messages are not system notifications
      *
-     * @override
      * @return {boolean}
      */
     isSystemNotification() {
@@ -459,4 +459,4 @@ const AbstractMessage = Class.extend({
 
 });
 
-export default AbstractMessage;
+export default PublicLivechatMessage;

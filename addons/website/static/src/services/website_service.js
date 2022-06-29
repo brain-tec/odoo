@@ -86,6 +86,8 @@ export const websiteService = {
             set pageDocument(document) {
                 pageDocument = document;
                 if (!document) {
+                    currentMetadata = {};
+                    contentWindow = null;
                     return;
                 }
                 // Not all files have a dataset. (e.g. XML)
@@ -112,13 +114,11 @@ export const websiteService = {
                         viewXmlid: viewXmlid,
                     };
                 }
+                contentWindow = document.defaultView;
                 websiteSystrayRegistry.trigger('CONTENT-UPDATED');
             },
             get pageDocument() {
                 return pageDocument;
-            },
-            set contentWindow(window) {
-                contentWindow = window;
             },
             get contentWindow() {
                 return contentWindow;

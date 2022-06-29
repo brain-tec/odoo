@@ -60,7 +60,7 @@ class MailComposer(models.TransientModel):
         missing_author = 'author_id' in fields and 'author_id' not in result
         missing_email_from = 'email_from' in fields and 'email_from' not in result
         if missing_author or missing_email_from:
-            author_id, email_from = self.env['mail.thread']._message_compute_author(result.get('author_id'), result.get('email_from'), raise_exception=False)
+            author_id, email_from = self.env['mail.thread']._message_compute_author(result.get('author_id'), result.get('email_from'), raise_on_email=False)
             if missing_email_from:
                 result['email_from'] = email_from
             if missing_author:
@@ -602,7 +602,7 @@ class MailComposer(models.TransientModel):
             multi_mode = False
             res_ids = [res_ids]
 
-        subjects = self._render_field('subject', res_ids, options={"render_safe": True})
+        subjects = self._render_field('subject', res_ids)
         # We want to preserve comments in emails so as to keep mso conditionals
         bodies = self._render_field('body', res_ids, post_process=True, options={'preserve_comments': self.composition_mode == 'mass_mail'})
         emails_from = self._render_field('email_from', res_ids)
