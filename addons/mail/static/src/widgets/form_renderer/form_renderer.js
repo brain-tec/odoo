@@ -22,8 +22,13 @@ FormRenderer.include({
     init(parent, state, params) {
         this._super(...arguments);
         this.hasChatter = params.hasChatter && !params.isFromFormViewDialog;
+        this.hasAttachmentViewerFeature = params.hasAttachmentViewerFeature;
         this.chatterFields = params.chatterFields;
         this.mailFields = params.mailFields;
+        this.messaging = undefined;
+        if (owl.Component.env.services.messaging) {
+            owl.Component.env.services.messaging.get().then(messaging => this.messaging = messaging);
+        }
         this._chatterContainerComponent = undefined;
         /**
          * The target of chatter, if chatter has to be appended to the DOM.
@@ -41,6 +46,12 @@ FormRenderer.include({
          * when applying the rendering into the DOM.
          */
         this.chatterContainerTargetPlaceholder = undefined;
+        this.attachmentViewerTarget = undefined;
+        if (this.hasAttachmentViewerFeature) {
+            this.attachmentViewerTarget = document.createElement("div");
+            this.attachmentViewerTarget.classList.add("o_attachment_preview");
+        }
+        this.attachmentViewerTargetPlaceholder = undefined;
         this.on('o_chatter_rendered', this, ev => this._onChatterRendered(ev));
     },
     async initChatter() {
@@ -57,16 +68,25 @@ FormRenderer.include({
     _renderNode(node) {
         if (node.tag === 'div' && node.attrs.class === 'oe_chatter') {
             if (!this.hasChatter) {
-                return $('<div/>');
+                return document.createElement("div");
             }
             this.chatterContainerTargetPlaceholder = this._chatterContainerTarget.cloneNode(false);
             return this.chatterContainerTargetPlaceholder;
         }
+        if (node.tag === 'div' && node.attrs.class === 'o_attachment_preview') {
+            if (!this.hasAttachmentViewerFeature) {
+                return document.createElement("div");
+            }
+            this._registerModifiers(node, this.state, $(this.attachmentViewerTarget)); // support for groups= on the node
+            this.attachmentViewerTargetPlaceholder = this.attachmentViewerTarget.cloneNode(false);
+            return this.attachmentViewerTargetPlaceholder;
+        }
         return this._super(...arguments);
     },
     /**
-     * Overrides the function to render the chatter once the form view is
-     * rendered.
+     * Overrides to re-render the chatter container with potentially new props.
+     * This is done in `__renderView` specifically to wait for this render to
+     * be complete before updating the form view, which prevents flickering.
      *
      * @override
      */
@@ -90,10 +110,16 @@ FormRenderer.include({
         if (this.hasChatter) {
             this._chatterContainerTarget.remove();
         }
+        if (this.hasAttachmentViewerFeature) {
+            this.attachmentViewerTarget.remove();
+        }
         this._super(...arguments);
         if (this.hasChatter) {
             this.chatterContainerTargetPlaceholder.replaceWith(this._chatterContainerTarget);
             this._updateChatterContainerTarget();
+        }
+        if (this.hasAttachmentViewerFeature) {
+            this.attachmentViewerTargetPlaceholder.replaceWith(this.attachmentViewerTarget);
         }
     },
     /**
@@ -109,6 +135,12 @@ FormRenderer.include({
     // Mail Methods
     //--------------------------------------------------------------------------
 
+    /**
+     * @returns {boolean}
+     */
+    hasAttachmentViewer() {
+        return false;
+    },
     /**
      * @private
      * @returns {boolean}
@@ -132,6 +164,7 @@ FormRenderer.include({
             hasParentReloadOnFollowersUpdate: this.chatterFields.hasRecordReloadOnFollowersUpdate,
             hasParentReloadOnMessagePosted: this.chatterFields.hasRecordReloadOnMessagePosted,
             isAttachmentBoxVisibleInitially: this.chatterFields.isAttachmentBoxVisibleInitially,
+            isInFormSheetBg: this.hasAttachmentViewer(),
             threadId: this.state.res_id,
             threadModel: this.state.model,
         };
@@ -157,9 +190,14 @@ FormRenderer.include({
      */
     _updateChatterContainerTarget() {
         if (this._isChatterAside()) {
-            $(this._chatterContainerTarget).addClass('o-aside');
+            this._chatterContainerTarget.classList.add('o-aside');
         } else {
-            $(this._chatterContainerTarget).removeClass('o-aside');
+            this._chatterContainerTarget.classList.remove('o-aside');
+        }
+        if (this.hasAttachmentViewer()) {
+            this._chatterContainerTarget.classList.add('o-isInFormSheetBg');
+        } else {
+            this._chatterContainerTarget.classList.remove('o-isInFormSheetBg');
         }
     },
     /**

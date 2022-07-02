@@ -7,7 +7,7 @@ import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 registerModel({
     name: 'MessageView',
-    identifyingFields: [['threadView', 'deleteMessageConfirmViewOwner'], 'message'],
+    identifyingFields: [['messageListViewMessageViewItemOwner', 'deleteMessageConfirmViewOwner']],
     recordMethods: {
         /**
          * Briefly highlights the message.
@@ -102,7 +102,7 @@ registerModel({
                 this.update({ doHighlight: clear() });
             }
             if (this.threadViewOwnerAsLastMessageView && this.component && this.component.isPartiallyVisible()) {
-                this.threadView.handleVisibleMessage(this.message);
+                this.threadViewOwnerAsLastMessageView.handleVisibleMessage(this.message);
             }
         },
         onHighlightTimerTimeout() {
@@ -122,8 +122,8 @@ registerModel({
          */
         replyTo() {
             // When already replying to this messageView, discard the reply.
-            if (this.threadView.replyingToMessageView === this) {
-                this.threadView.composerView.discard();
+            if (this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.replyingToMessageView === this) {
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.composerView.discard();
                 return;
             }
             this.message.originThread.update({
@@ -131,7 +131,7 @@ registerModel({
                     isLog: !this.message.is_discussion && !this.message.is_notification,
                 }),
             });
-            this.threadView.update({
+            this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.update({
                 replyingToMessageView: replace(this),
                 composerView: insertAndReplace({
                     doFocus: true,
@@ -163,8 +163,8 @@ registerModel({
          * Stops editing this message.
          */
         stopEditing() {
-            if (this.threadView && this.threadView.composerView && !this.messaging.device.isMobileDevice) {
-                this.threadView.composerView.update({ doFocus: true });
+            if (this.messageListViewMessageViewItemOwner && this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.composerView && !this.messaging.device.isMobileDevice) {
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.composerView.update({ doFocus: true });
             }
             this.update({
                 composerForEditing: clear(),
@@ -191,6 +191,9 @@ registerModel({
          * @returns {string}
          */
         _computeDateFromNow() {
+            if (!this.message) {
+                return clear();
+            }
             if (!this.message.date) {
                 return clear();
             }
@@ -208,7 +211,7 @@ registerModel({
          * @returns {string|FieldCommand}
          */
         _computeExtraClass() {
-            if (this.threadView) {
+            if (this.messageListViewMessageViewItemOwner) {
                 return 'o_MessageList_item o_MessageList_message';
             }
             return clear();
@@ -221,13 +224,16 @@ registerModel({
             if (this.messaging.currentGuest) {
                 return false;
             }
+            if (!this.message) {
+                return clear();
+            }
             if (!this.message.author) {
                 return false;
             }
             if (
-                this.threadView &&
-                this.threadView.thread &&
-                this.threadView.thread.correspondent === this.message.author
+                this.messageListViewMessageViewItemOwner &&
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.thread &&
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.thread.correspondent === this.message.author
             ) {
                 return false;
             }
@@ -256,9 +262,32 @@ registerModel({
          */
         _computeIsSelected() {
             return Boolean(
-                this.threadView &&
-                this.threadView.replyingToMessageView === this
+                this.messageListViewMessageViewItemOwner &&
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.replyingToMessageView === this
             );
+        },
+        /**
+         * @private
+         * @returns {boolean|FieldCommand}
+         */
+        _computeIsSquashed() {
+            if (this.messageListViewMessageViewItemOwner) {
+                return this.messageListViewMessageViewItemOwner.isSquashed;
+            }
+            return clear();
+        },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeMessage() {
+            if (this.messageListViewMessageViewItemOwner) {
+                return replace(this.messageListViewMessageViewItemOwner.message);
+            }
+            if (this.deleteMessageConfirmViewOwner) {
+                return replace(this.deleteMessageConfirmViewOwner.message);
+            }
+            return clear();
         },
         /**
          * @private
@@ -286,9 +315,9 @@ registerModel({
         _computeMessageSeenIndicatorView() {
             if (
                 this.message.isCurrentUserOrGuestAuthor &&
-                this.threadView &&
-                this.threadView.thread &&
-                this.threadView.thread.hasSeenIndicators
+                this.messageListViewMessageViewItemOwner &&
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.thread &&
+                this.messageListViewMessageViewItemOwner.messageListViewOwner.threadViewOwner.thread.hasSeenIndicators
             ) {
                 return insertAndReplace();
             }
@@ -409,6 +438,7 @@ registerModel({
          * Determines whether this message view should be squashed visually.
          */
         isSquashed: attr({
+            compute: '_computeIsSquashed',
             default: false,
         }),
         /**
@@ -424,6 +454,7 @@ registerModel({
          * Determines the message that is displayed by this message view.
          */
         message: one('Message', {
+            compute: '_computeMessage',
             inverse: 'messageViews',
             readonly: true,
             required: true,
@@ -438,6 +469,10 @@ registerModel({
             isCausal: true,
             readonly: true,
         }),
+        messageListViewMessageViewItemOwner: one('MessageListViewMessageViewItem', {
+            inverse: 'messageView',
+            readonly: true,
+        }),
         messageSeenIndicatorView: one('MessageSeenIndicatorView', {
             compute: '_computeMessageSeenIndicatorView',
             inverse: 'messageViewOwner',
@@ -450,13 +485,6 @@ registerModel({
             compute: '_computePersonaImStatusIconView',
             inverse: 'messageViewOwner',
             isCausal: true,
-            readonly: true,
-        }),
-        /**
-         * States the thread view that is displaying this messages (if any).
-         */
-        threadView: one('ThreadView', {
-            inverse: 'messageViews',
             readonly: true,
         }),
         /**

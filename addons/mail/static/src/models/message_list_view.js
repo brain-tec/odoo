@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, many, one } from '@mail/model/model_field';
+import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'MessageListView',
@@ -59,6 +59,29 @@ registerModel({
             }
             return this.scrollTop <= endThreshold;
         },
+        /**
+         * @private
+         * @returns {MessageView[]}
+         */
+        _computeMessageListViewMessageViewItems() {
+            if (!this.threadViewOwner.threadCache) {
+                return clear();
+            }
+            const orderedMessages = this.threadViewOwner.threadCache.orderedNonEmptyMessages;
+            if (this.threadViewOwner.order === 'desc') {
+                orderedMessages.reverse();
+            }
+            const messageViewsData = [];
+            let prevMessage;
+            for (const message of orderedMessages) {
+                messageViewsData.push({
+                    isSquashed: this.threadViewOwner._shouldMessageBeSquashed(prevMessage, message),
+                    message: replace(message),
+                });
+                prevMessage = message;
+            }
+            return insertAndReplace(messageViewsData);
+        },
     },
     fields: {
         clientHeight: attr(),
@@ -87,6 +110,14 @@ registerModel({
          */
         isLastScrollProgrammatic: attr({
             default: false,
+        }),
+        /**
+         * States the message views used to display this thread view owner's messages.
+         */
+        messageListViewMessageViewItems: many('MessageListViewMessageViewItem', {
+            compute: '_computeMessageListViewMessageViewItems',
+            inverse: 'messageListViewOwner',
+            isCausal: true,
         }),
         scrollHeight: attr(),
         scrollTop: attr(),

@@ -2,8 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_EmojiList {
-    // Could be replaced by "d-grid" class after migration to BS5
+.o_EmojiGridView {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
 }
