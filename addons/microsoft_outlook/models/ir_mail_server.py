@@ -39,7 +39,9 @@ class IrMailServer(models.Model):
 
         (e.g. the port which is already set)"""
         if not self.use_microsoft_outlook_service:
-            super()._onchange_encryption()
+            # <START_OF_CHANGE>
+            super(IrMailServer, self)._onchange_encryption()
+            # <END_OF_CHANGE>
 
     @api.onchange('use_microsoft_outlook_service')
     def _onchange_use_microsoft_outlook_service(self):
@@ -52,11 +54,18 @@ class IrMailServer(models.Model):
             self.microsoft_outlook_access_token = False
             self.microsoft_outlook_access_token_expiration = False
 
-    def _smtp_login(self, connection, smtp_user, smtp_password):
+    # <START_OF_CHANGE>
+    def connect(self, host, port, user=None, password=None, encryption=False, smtp_debug=False):
         if len(self) == 1 and self.use_microsoft_outlook_service:
-            auth_string = self._generate_outlook_oauth2_string(smtp_user)
+            # Call super without user to setup connection but don't login.
+            connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
+                                                           encryption=encryption, smtp_debug=smtp_debug)
+            auth_string = self._generate_outlook_oauth2_string(user)
             oauth_param = base64.b64encode(auth_string.encode()).decode()
             connection.ehlo()
             connection.docmd('AUTH', 'XOAUTH2 %s' % oauth_param)
         else:
-            super()._smtp_login(connection, smtp_user, smtp_password)
+            connection = super(IrMailServer, self).connect(host, port, user=user, password=password,
+                                                           encryption=encryption, smtp_debug=smtp_debug)
+        return connection
+    # <END_OF_CHANGE>

@@ -12,7 +12,7 @@
     ],
     "data": [
         "views/ir_mail_server_views.xml",
-        "views/res_config_settings_views.xml",
+        "views/base_config_settings_views.xml",
         "views/templates.xml",
     ],
     "auto_install": False,

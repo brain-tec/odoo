@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+# <START_OF_CHANGE>
+from imaplib import IMAP4, IMAP4_SSL
+# <END_OF_CHANGE>
+
 from odoo import _, api, models
 from odoo.exceptions import UserError
+# <START_OF_CHANGE>
+from odoo.addons.fetchmail.models.fetchmail import MAIL_TIMEOUT
+# <END_OF_CHANGE>
 
 
 class FetchmailServer(models.Model):
@@ -29,7 +36,9 @@ class FetchmailServer(models.Model):
                     % server.name)
 
             if not server.is_ssl:
-                raise UserError(_('SSL is required .') % server.name)
+                # <START_OF_CHANGE>
+                raise UserError(_('SSL is required .'))
+                # <END_OF_CHANGE>
 
     @api.onchange('use_microsoft_outlook_service')
     def _onchange_use_microsoft_outlook_service(self):
@@ -44,15 +53,25 @@ class FetchmailServer(models.Model):
             self.microsoft_outlook_access_token = False
             self.microsoft_outlook_access_token_expiration = False
 
-    def _imap_login(self, connection):
+    # <START_OF_CHANGE>
+    @api.multi
+    def connect(self):
         """Authenticate the IMAP connection.
 
         If the mail server is Outlook, we use the OAuth2 authentication protocol.
         """
         self.ensure_one()
         if self.use_microsoft_outlook_service:
+            if self.is_ssl:
+                connection = IMAP4_SSL(self.server, int(self.port))
+            else:
+                connection = IMAP4(self.server, int(self.port))
             auth_string = self._generate_outlook_oauth2_string(self.user)
+            connection.debug = 4
             connection.authenticate('XOAUTH2', lambda x: auth_string)
             connection.select('INBOX')
+            connection.sock.settimeout(MAIL_TIMEOUT)
         else:
-            super()._imap_login(connection)
+            connection = super(FetchmailServer, self).connect()
+        return connection
+    # <END_OF_CHANGE>
