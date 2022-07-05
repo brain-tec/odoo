@@ -1,7 +1,9 @@
 /** @odoo-module **/
 
 import { ChatterContainer } from '@mail/components/chatter_container/chatter_container';
+import { AttachmentViewer } from '@mail/widgets/attachment_viewer/attachment_viewer';
 
+import dom from 'web.dom';
 import FormRenderer from 'web.FormRenderer';
 import { ComponentWrapper } from 'web.OwlCompatibility';
 
@@ -22,6 +24,7 @@ FormRenderer.include({
     init(parent, state, params) {
         this._super(...arguments);
         this.hasChatter = params.hasChatter && !params.isFromFormViewDialog;
+        this.isChatterInSheet = false;
         this.hasAttachmentViewerFeature = params.hasAttachmentViewerFeature;
         this.chatterFields = params.chatterFields;
         this.mailFields = params.mailFields;
@@ -46,6 +49,7 @@ FormRenderer.include({
          * when applying the rendering into the DOM.
          */
         this.chatterContainerTargetPlaceholder = undefined;
+        this.attachmentViewer = undefined;
         this.attachmentViewerTarget = undefined;
         if (this.hasAttachmentViewerFeature) {
             this.attachmentViewerTarget = document.createElement("div");
@@ -114,12 +118,16 @@ FormRenderer.include({
             this.attachmentViewerTarget.remove();
         }
         this._super(...arguments);
-        if (this.hasChatter) {
-            this.chatterContainerTargetPlaceholder.replaceWith(this._chatterContainerTarget);
-            this._updateChatterContainerTarget();
-        }
         if (this.hasAttachmentViewerFeature) {
             this.attachmentViewerTargetPlaceholder.replaceWith(this.attachmentViewerTarget);
+        }
+        if (this.hasChatter) {
+            this.chatterContainerTargetPlaceholder.replaceWith(this._chatterContainerTarget);
+            // isChatterInSheet can only be written from this specific life-cycle method because the
+            // parentNode is not accessible before the target node is actually in DOM. Ideally this
+            // should be determined statically in `_processNode` but the parent is not provided.
+            this.isChatterInSheet = this._chatterContainerTarget.parentNode.classList.contains('o_form_sheet');
+            this._interchangeChatter();
         }
     },
     /**
@@ -140,6 +148,46 @@ FormRenderer.include({
      */
     hasAttachmentViewer() {
         return false;
+    },
+    /**
+     * Interchange the position of the chatter and the attachment preview.
+     *
+     * @private
+     */
+    _interchangeChatter() {
+        const $sheetBg = this.$('.o_form_sheet_bg');
+        if (this._isChatterAside()) {
+            this._chatterContainerTarget.classList.add('o-aside');
+            this._chatterContainerTarget.classList.remove('o-isInFormSheetBg');
+            $(this._chatterContainerTarget).insertAfter($sheetBg);
+        } else {
+            this._chatterContainerTarget.classList.remove('o-aside');
+            if (this.isChatterInSheet) {
+                this._chatterContainerTarget.classList.remove('o-isInFormSheetBg');
+                const $sheet = this.$('.o_form_sheet');
+                dom.append($sheet, $(this._chatterContainerTarget), {
+                    callbacks: [],
+                    in_DOM: this._isInDom,
+                });
+            } else {
+                if (this.hasAttachmentViewer()) {
+                    this._chatterContainerTarget.classList.add('o-isInFormSheetBg');
+                    dom.append($sheetBg, $(this._chatterContainerTarget), {
+                        callbacks: [],
+                        in_DOM: this._isInDom,
+                    });
+                } else {
+                    this._chatterContainerTarget.classList.remove('o-isInFormSheetBg');
+                    $(this._chatterContainerTarget).insertAfter($sheetBg);
+                }
+            }
+        }
+        if (this.hasAttachmentViewer()) {
+            $(this.attachmentViewerTarget).insertAfter($sheetBg);
+        } else {
+            dom.append($sheetBg, $(this.attachmentViewerTarget));
+        }
+        this._updateChatterContainerComponent();
     },
     /**
      * @private
@@ -183,30 +231,41 @@ FormRenderer.include({
         }
     },
     /**
-     * Add a class to allow styling of chatter depending on the fact is is
-     * printed aside or underneath the form sheet.
-     *
-     * @private
-     */
-    _updateChatterContainerTarget() {
-        if (this._isChatterAside()) {
-            this._chatterContainerTarget.classList.add('o-aside');
-        } else {
-            this._chatterContainerTarget.classList.remove('o-aside');
-        }
-        if (this.hasAttachmentViewer()) {
-            this._chatterContainerTarget.classList.add('o-isInFormSheetBg');
-        } else {
-            this._chatterContainerTarget.classList.remove('o-isInFormSheetBg');
-        }
-    },
-    /**
-     * @abstract
      * @private
      * @param {OdooEvent} ev
      * @param {Object} ev.data
      * @param {Attachment[]} ev.data.attachments
      * @param {Thread} ev.data.thread
      */
-    _onChatterRendered(ev) {},
+    _onChatterRendered(ev) {
+        if (!this.hasAttachmentViewer()) {
+            if (this.attachmentViewer) {
+                this.attachmentViewer.destroy();
+                this.attachmentViewer = undefined;
+                this._interchangeChatter();
+            }
+            return;
+        }
+        var self = this;
+        const thread = this.messaging.models['Thread'].insert({
+            id: this.state.res_id,
+            model: this.state.model,
+        });
+        if (this.attachmentViewer) {
+            // FIXME should be improved : what if somehow an attachment is replaced in a thread ?
+            if (
+                this.attachmentViewer.thread !== thread ||
+                this.attachmentViewer.attachments.length !== thread.attachmentsInWebClientView.length
+            ) {
+                this.attachmentViewer.updateContents(thread);
+            }
+            this.trigger_up('preview_attachment_validation');
+        } else {
+            this.attachmentViewer = new AttachmentViewer(this, thread);
+            this.attachmentViewer.appendTo($(this.attachmentViewerTarget)).then(function () {
+                self.trigger_up('preview_attachment_validation');
+                self._interchangeChatter();
+            });
+        }
+    },
 });
