@@ -92,6 +92,8 @@ const Wysiwyg = Widget.extend({
         // more heuristics to bypass the limitation.
         this._isOnline = true;
         this._signalOnline = this._signalOnline.bind(this);
+        this._oNotEditableObservers = new Map();
+        Wysiwyg.activeWysiwygs.add(this);
     },
     /**
      *
@@ -139,6 +141,7 @@ const Wysiwyg = Widget.extend({
             document: this.options.document,
             autohideToolbar: !!this.options.autohideToolbar,
             isRootEditable: this.options.isRootEditable,
+            onPostSanitize: this._setONotEditable.bind(this),
             placeholder: this.options.placeholder,
             powerboxFilters: this.options.powerboxFilters || [],
             showEmptyElementHint: this.options.showEmptyElementHint,
@@ -343,6 +346,15 @@ const Wysiwyg = Widget.extend({
 
         this._onSelectionChange = this._onSelectionChange.bind(this);
         this.odooEditor.document.addEventListener('selectionchange', this._onSelectionChange);
+
+        this.odooEditor.addEventListener('preObserverActive', () => {
+            // The setONotEditable will be called right after the
+            // editor sanitization (to be right before the historyStep).
+            // If any `.o_not_editable` is created while the observer is
+            // unactive, now is the time to call `setONotEditable` before the
+            // editor could register a mutation.
+            this._setONotEditable(this.odooEditor.editable);
+        });
 
         return _super.apply(this, arguments).then(() => {
             if (this.options.autohideToolbar) {
@@ -637,6 +649,7 @@ const Wysiwyg = Widget.extend({
      * @override
      */
     destroy: function () {
+        Wysiwyg.activeWysiwygs.delete(this);
         if (this._collaborationChannelName) {
             Wysiwyg.activeCollaborationChannelNames.delete(this._collaborationChannelName);
         }
@@ -652,6 +665,9 @@ const Wysiwyg = Widget.extend({
             this.odooEditor.document.removeEventListener("keydown", this._signalOnline, true);
             this.odooEditor.document.removeEventListener("keyup", this._signalOnline, true);
             this.odooEditor.document.removeEventListener('selectionchange', this._onSelectionChange);
+            for (const observer of this._oNotEditableObservers.values()) {
+                observer.disconnect();
+            }
             this.odooEditor.destroy();
         }
         // If peer to peer is initializing, wait for properly closing it.
@@ -947,6 +963,9 @@ const Wysiwyg = Widget.extend({
             await this.snippetsMenu.cleanForSave();
         }
     },
+    isSelectionInEditable: function () {
+        return this.odooEditor.isSelectionInEditable();
+    },
     /**
      * Start or resume the Odoo field changes muation observers.
      *
@@ -1036,6 +1055,19 @@ const Wysiwyg = Widget.extend({
         for (let observerData of this.odooFieldObservers) {
             observerData.observer.disconnect();
         }
+    },
+    /**
+     * Open the link tools or the image link tool depending on the selection.
+     */
+    openLinkToolsFromSelection() {
+        const targetEl = this.odooEditor.document.getSelection().getRangeAt(0).startContainer;
+        // Link tool is different if the selection is an image or a text.
+        if (targetEl instanceof HTMLElement
+                && (targetEl.tagName === 'IMG' || targetEl.querySelectorAll('img').length === 1)) {
+            core.bus.trigger('activate_image_link_tool');
+            return;
+        }
+        this.toggleLinkTools();
     },
     /**
      * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
@@ -1233,6 +1265,9 @@ const Wysiwyg = Widget.extend({
             fragment.append(element);
             return this.odooEditor.execCommand('insertFragment', fragment);
         }
+    },
+    getInSelection(selector) {
+        return getInSelection(this.odooEditor.document, selector);
     },
 
     //--------------------------------------------------------------------------
@@ -1551,17 +1586,11 @@ const Wysiwyg = Widget.extend({
      * Handle custom keyboard shortcuts.
      */
     _handleShortcuts: function (e) {
+        const options = this._editorOptions();
         // Open the link tool when CTRL+K is pressed.
-        if (e && e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+        if (options.bindLinkTool && e && e.key === 'k' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
-            const targetEl = this.odooEditor.document.getSelection().getRangeAt(0).startContainer;
-            // Link tool is different if the selection is an image or a text.
-            if (targetEl instanceof HTMLElement
-                    && (targetEl.tagName === 'IMG' || targetEl.querySelectorAll('img').length === 1)) {
-                core.bus.trigger('activate_image_link_tool');
-                return;
-            }
-            this.toggleLinkTools();
+            this.openLinkToolsFromSelection();
         }
         // Override selectAll (CTRL+A) to restrict it to the editable zone / current snippet and prevent traceback.
         if (e && e.key === 'a' && (e.ctrlKey || e.metaKey)) {
@@ -2139,9 +2168,49 @@ const Wysiwyg = Widget.extend({
         this.setValue(value);
         this.odooEditor.historyReset();
         this.ptp.notifyAllClients('ptp_join');
+    },
+    /**
+     * Set contenteditable=false for all `.o_not_editable` found within node if
+     * node is an element.
+     *
+     * For all `.o_not_editable` element found, the attribute contenteditable
+     * will be removed if the class is removed.
+     *
+     * @param {Node} node
+     */
+    _setONotEditable: function (node) {
+        const nodes = (node && node.querySelectorAll && node.querySelectorAll('.o_not_editable:not([contenteditable=false])')) || [];
+        for (const node of nodes) {
+            node.setAttribute('contenteditable', false);
+            let observer = this._oNotEditableObservers.get(node);
+            if (!observer) {
+                observer = new MutationObserver((records) => {
+                    for (const record of records) {
+                        if (record.type === 'attributes' && record.attributeName === 'class') {
+                            // Remove contenteditable=false on nodes that were
+                            // previsouly o_not_editable but are no longer
+                            // o_not_editable.
+                            if (!node.classList.contains('o_not_editable')) {
+                                this.odooEditor.observerUnactive('_setONotEditable');
+                                node.removeAttribute('contenteditable');
+                                this.odooEditor.observerActive('_setONotEditable');
+                                observer.disconnect();
+                                this._oNotEditableObservers.delete(node);
+                            }
+                        }
+                    }
+                });
+                this._oNotEditableObservers.set(node, observer);
+                observer.observe(node, {
+                    attributes: true,
+                });
+            }
+        }
     }
+
 });
 Wysiwyg.activeCollaborationChannelNames = new Set();
+Wysiwyg.activeWysiwygs = new Set();
 //--------------------------------------------------------------------------
 // Public helper
 //--------------------------------------------------------------------------
