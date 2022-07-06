@@ -435,7 +435,7 @@ class StockMove(models.Model):
         prefetch_virtual_available = defaultdict(set)
         virtual_available_dict = {}
         for move in product_moves:
-            if move.picking_type_id.code in self._consuming_picking_types() and move.state == 'draft':
+            if (move.picking_type_id.code in self._consuming_picking_types() or move._is_inter_wh()) and move.state == 'draft':
                 prefetch_virtual_available[key_virtual_available(move)].add(move.product_id.id)
             elif move.picking_type_id.code == 'incoming':
                 prefetch_virtual_available[key_virtual_available(move, incoming=True)].add(move.product_id.id)
@@ -444,7 +444,7 @@ class StockMove(models.Model):
             virtual_available_dict[key_context] = {res['id']: res['virtual_available'] for res in read_res}
 
         for move in product_moves:
-            if move.picking_type_id.code in self._consuming_picking_types():
+            if move.picking_type_id.code in self._consuming_picking_types() or move._is_inter_wh():
                 if move.state == 'assigned':
                     move.forecast_availability = move.product_uom._compute_quantity(
                         move.reserved_availability, move.product_id.uom_id, rounding_method='HALF-UP')
@@ -852,6 +852,8 @@ class StockMove(models.Model):
         moves_by_neg_key = defaultdict(lambda: self.env['stock.move'])
         # Need to check less fields for negative moves as some might not be set.
         neg_qty_moves = self.filtered(lambda m: float_compare(m.product_qty, 0.0, precision_rounding=m.product_uom.rounding) < 0)
+        # Detach their picking as they will either get absorbed or create a backorder, so no extra logs will be put in the chatter
+        neg_qty_moves.picking_id = False
         excluded_fields = self._prepare_merge_negative_moves_excluded_distinct_fields()
         neg_key = itemgetter(*[field for field in distinct_fields if field not in excluded_fields])
 
@@ -879,8 +881,8 @@ class StockMove(models.Model):
                 if float_compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty), precision_rounding=pos_move.product_uom.rounding) >= 0:
                     pos_move.product_uom_qty += neg_move.product_uom_qty
                     pos_move.write({
-                        'move_dest_ids': [Command.link(m.id) for m in self.mapped('move_dest_ids')],
-                        'move_orig_ids': [Command.link(m.id) for m in self.mapped('move_orig_ids')],
+                        'move_dest_ids': [Command.link(m.id) for m in neg_move.mapped('move_dest_ids')],
+                        'move_orig_ids': [Command.link(m.id) for m in neg_move.mapped('move_orig_ids')],
                     })
                     merged_moves |= pos_move
                     moves_to_unlink |= neg_move
@@ -1180,6 +1182,12 @@ class StockMove(models.Model):
         self.ensure_one()
         return bool(not self.picking_id and self.picking_type_id)
 
+    def _is_inter_wh(self):
+        self.ensure_one()
+        from_wh = self.location_id.warehouse_id
+        to_wh = self.location_dest_id.warehouse_id
+        return from_wh and to_wh and from_wh != to_wh
+
     def _action_confirm(self, merge=True, merge_into=False):
         """ Confirms stock move or put it in waiting if it's linked to another move.
         :param: merge: According to this boolean, a newly confirmed move will be merged
@@ -1239,8 +1247,6 @@ class StockMove(models.Model):
             move.product_uom_qty *= -1
             if move.picking_type_id.return_picking_type_id:
                 move.picking_type_id = move.picking_type_id.return_picking_type_id
-        # detach their picking as we inverted the location and potentially picking type
-        neg_r_moves.picking_id = False
         neg_r_moves._assign_picking()
 
         # call `_action_assign` on every confirmed move which location_id bypasses the reservation + those expected to be auto-assigned
@@ -2070,6 +2076,8 @@ class StockMove(models.Model):
                     unreconciled_outs.append((demand, out))
 
             for demand, out in unreconciled_outs:
-                _reconcile_out_with_ins(result, out, ins_per_product[product.id], demand, product_rounding, only_matching_move_dest=False)
+                remaining = _reconcile_out_with_ins(result, out, ins_per_product[product.id], demand, product_rounding, only_matching_move_dest=False)
+                if not float_is_zero(remaining, precision_rounding=out.product_id.uom_id.rounding) and out not in result:
+                    result[out] = (-remaining, False)
 
         return result
