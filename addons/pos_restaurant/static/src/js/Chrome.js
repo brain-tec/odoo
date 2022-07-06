@@ -77,7 +77,7 @@ odoo.define('pos_restaurant.chrome', function (require) {
             }
             _shouldResetIdleTimer() {
                 const stayPaymentScreen = this.mainScreen.name === 'PaymentScreen' && this.env.pos.get_order().paymentlines.length > 0;
-                return super._shouldResetIdleTimer() && !stayPaymentScreen && this.mainScreen.name !== 'FloorScreen';
+                return super._shouldResetIdleTimer() && this.env.pos.config.iface_floorplan && !stayPaymentScreen && this.mainScreen.name !== 'FloorScreen';
             }
             __showScreen() {
                 super.__showScreen(...arguments);
