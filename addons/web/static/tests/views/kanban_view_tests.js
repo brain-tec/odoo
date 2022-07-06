@@ -33,6 +33,7 @@ import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
 import { KanbanAnimatedNumber } from "@web/views/kanban/kanban_animated_number";
 import { kanbanView } from "@web/views/kanban/kanban_view";
+import { ViewButton } from "@web/views/view_button/view_button";
 import AbstractField from "web.AbstractField";
 import legacyFieldRegistry from "web.field_registry";
 import Widget from "web.Widget";
@@ -602,7 +603,7 @@ QUnit.module("Views", (hooks) => {
                 [...target.querySelectorAll(".o_kanban_group")].map((el) =>
                     el.innerText.replace(/\s/g, " ")
                 ),
-                ["None (1)", "gold yopblip", "silver yopgnap"]
+                ["None (1)", "gold yop blip", "silver yop gnap"]
             );
 
             await click(getColumn(0));
@@ -704,6 +705,31 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(
             getNodesTextContent(target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")),
             ["yop", "blip", "gnap", "blip"]
+        );
+    });
+
+    QUnit.test("kanban with t-set outside card", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <field name="int_field"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <t t-set="x" t-value="record.int_field.value"/>
+                            <div>
+                                <t t-esc="x"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")),
+            ["10", "9", "17", "-4"]
         );
     });
 
@@ -833,6 +859,60 @@ QUnit.module("Views", (hooks) => {
             "true/hello blip/hello blip !/hello blip }}",
             "true/hello gnap/hello gnap !/hello gnap }}",
             "true/hello blip/hello blip !/hello blip }}",
+        ]);
+    });
+
+    QUnit.test("view button and string interpolated attribute in kanban", async (assert) => {
+        patchWithCleanup(ViewButton.prototype, {
+            setup() {
+                this._super();
+                assert.step(
+                    `[${this.props.clickParams["name"]}] className: '${this.props.className}'`
+                );
+            },
+        });
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <field name="foo"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <a name="one" type="object" class="hola"/>
+                                <a name="two" type="object" class="hola" t-attf-class="hello"/>
+                                <a name="sri" type="object" class="hola" t-attf-class="{{record.foo.value}}"/>
+                                <a name="foa" type="object" class="hola" t-attf-class="{{record.foo.value}} olleh"/>
+                                <a name="fye" type="object" class="hola" t-attf-class="hello {{record.foo.value}}"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+        assert.verifySteps([
+            "[one] className: 'hola oe_kanban_action oe_kanban_action_a'",
+            "[two] className: 'hola oe_kanban_action oe_kanban_action_a hello'",
+            "[sri] className: 'hola oe_kanban_action oe_kanban_action_a yop'",
+            "[foa] className: 'hola oe_kanban_action oe_kanban_action_a yop olleh'",
+            "[fye] className: 'hola oe_kanban_action oe_kanban_action_a hello yop'",
+            "[one] className: 'hola oe_kanban_action oe_kanban_action_a'",
+            "[two] className: 'hola oe_kanban_action oe_kanban_action_a hello'",
+            "[sri] className: 'hola oe_kanban_action oe_kanban_action_a blip'",
+            "[foa] className: 'hola oe_kanban_action oe_kanban_action_a blip olleh'",
+            "[fye] className: 'hola oe_kanban_action oe_kanban_action_a hello blip'",
+            "[one] className: 'hola oe_kanban_action oe_kanban_action_a'",
+            "[two] className: 'hola oe_kanban_action oe_kanban_action_a hello'",
+            "[sri] className: 'hola oe_kanban_action oe_kanban_action_a gnap'",
+            "[foa] className: 'hola oe_kanban_action oe_kanban_action_a gnap olleh'",
+            "[fye] className: 'hola oe_kanban_action oe_kanban_action_a hello gnap'",
+            "[one] className: 'hola oe_kanban_action oe_kanban_action_a'",
+            "[two] className: 'hola oe_kanban_action oe_kanban_action_a hello'",
+            "[sri] className: 'hola oe_kanban_action oe_kanban_action_a blip'",
+            "[foa] className: 'hola oe_kanban_action oe_kanban_action_a blip olleh'",
+            "[fye] className: 'hola oe_kanban_action oe_kanban_action_a hello blip'",
         ]);
     });
 
@@ -1141,7 +1221,7 @@ QUnit.module("Views", (hooks) => {
             ".o_kanban_group:first-child .o_kanban_quick_create"
         );
 
-        assert.containsOnce(quickCreate, ".o_form_view.o_xxs_form_view");
+        assert.containsOnce(quickCreate, ".o_wowl_form_view.o_xxs_form_view");
         assert.containsOnce(quickCreate, "input");
         assert.containsOnce(
             quickCreate,
@@ -1214,7 +1294,7 @@ QUnit.module("Views", (hooks) => {
             ".o_kanban_group:first-child .o_kanban_quick_create"
         );
 
-        assert.containsOnce(quickCreate, ".o_form_view.o_xxs_form_view");
+        assert.containsOnce(quickCreate, ".o_wowl_form_view.o_xxs_form_view");
         assert.containsOnce(
             target,
             ".o_control_panel",
@@ -1631,13 +1711,13 @@ QUnit.module("Views", (hooks) => {
 
         await quickCreateRecord();
         assert.hasClass(
-            target.querySelector(".o_kanban_quick_create .o_form_view"),
+            target.querySelector(".o_kanban_quick_create .o_wowl_form_view"),
             "o_xxs_form_view"
         );
 
         await triggerEvent(window, "", "resize");
         assert.hasClass(
-            target.querySelector(".o_kanban_quick_create .o_form_view"),
+            target.querySelector(".o_kanban_quick_create .o_wowl_form_view"),
             "o_xxs_form_view"
         );
     });
@@ -3314,7 +3394,7 @@ QUnit.module("Views", (hooks) => {
         blockGetViews = true;
         await quickCreateRecord();
 
-        assert.containsNone(target, ".o_form_view");
+        assert.containsNone(target, ".o_wowl_form_view");
 
         // click to fold the first column
         const clickColumnAction = await toggleColumnActions(0);
@@ -3325,7 +3405,7 @@ QUnit.module("Views", (hooks) => {
         prom.resolve();
         await nextTick();
 
-        assert.containsNone(target, ".o_form_view");
+        assert.containsNone(target, ".o_wowl_form_view");
         assert.containsOnce(target, ".o_column_folded");
     });
 
@@ -3537,7 +3617,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 4);
 
-        await click(target, ".oe_kanban_global_click:first-child .o_field_monetary[name=salary]");
+        await click(target.querySelector(".oe_kanban_global_click .o_field_monetary[name=salary]"));
     });
 
     QUnit.test("o2m loaded in only one batch", async (assert) => {
@@ -10124,4 +10204,131 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(getCardTexts()[0], "yop\nTOGGLER\nMENU");
     });
+
+    QUnit.test("'muted' already in progress bar colors", async (assert) => {
+        serverData.models.partner.records.push({ id: 5, bar: true }, { id: 6, bar: false });
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <field name="bar"/>
+                    <field name="foo"/>
+                    <progressbar field="foo" colors='{"yop": "muted", "gnap": "warning", "blip": "danger"}'/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="state"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            `,
+            groupBy: ["bar"],
+        });
+
+        assert.containsN(target, ".o_kanban_group:nth-child(1) .progress-bar", 2);
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_kanban_group:nth-child(1) .progress-bar")].map(
+                (el) => el.dataset.tooltip
+            ),
+            ["1 blip", "1 Other"]
+        );
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .progress-bar", 4);
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_kanban_group:nth-child(2) .progress-bar")].map(
+                (el) => el.dataset.tooltip
+            ),
+            ["1 yop", "1 gnap", "1 blip", "1 Other"]
+        );
+        assert.deepEqual(getCounters(), ["2", "4"]);
+
+        await click(target.querySelector(".o_kanban_group:nth-child(2) .progress-bar"));
+
+        assert.deepEqual(getCounters(), ["2", "1"]);
+        assert.strictEqual(
+            target.querySelector(".o_kanban_group:nth-child(2) .o_kanban_record").innerText,
+            "ABC"
+        );
+        assert.containsNone(target, ".o_kanban_group:nth-child(2) .o_kanban_load_more");
+
+        await click(
+            target.querySelector(".o_kanban_group:nth-child(2) .progress-bar:nth-child(2)")
+        );
+
+        assert.deepEqual(getCounters(), ["2", "1"]);
+        assert.strictEqual(
+            target.querySelector(".o_kanban_group:nth-child(2) .o_kanban_record").innerText,
+            "GHI"
+        );
+        assert.containsNone(target, ".o_kanban_group:nth-child(2) .o_kanban_load_more");
+
+        await click(
+            target.querySelector(".o_kanban_group:nth-child(2) .progress-bar:nth-child(4)")
+        );
+
+        assert.deepEqual(getCounters(), ["2", "1"]);
+        assert.strictEqual(
+            target.querySelector(".o_kanban_group:nth-child(2) .o_kanban_record").innerText,
+            ""
+        );
+        assert.containsNone(target, ".o_kanban_group:nth-child(2) .o_kanban_load_more");
+    });
+
+    QUnit.test(
+        "keep focus inside control panel when pressing arrowdown and no kanban card",
+        async (assert) => {
+            serverData.models.partner.records = [];
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                groupBy: ["product_id"],
+                arch: /* xml */ `
+                    <kanban on_create="quick_create">
+                        <templates>
+                            <t t-name="kanban-box">
+                                <div>
+                                    <field name="display_name"/>
+                                </div>
+                            </t>
+                        </templates>
+                    </kanban>
+                `,
+            });
+
+            // Check that there is a column quick create
+            assert.containsOnce(target, ".o_column_quick_create");
+            await editColumnName("new col");
+            await validateColumn();
+
+            // Check that there is only one group and no kanban card
+            assert.containsOnce(target, ".o_kanban_group");
+            assert.containsOnce(target, ".o_kanban_group.o_kanban_no_records");
+            assert.containsNone(target, ".o_kanban_record");
+
+            // Check that the focus is on the searchview input
+            await quickCreateRecord();
+            assert.containsOnce(target, ".o_kanban_group.o_kanban_no_records");
+            assert.containsOnce(target, ".o_kanban_quick_create");
+            assert.containsNone(target, ".o_kanban_record");
+
+            // Somehow give the focus in the control panel, i.e. in the search view
+            // Note that a simple click in the control panel should normally close the quick
+            // create, so in order to give the focus in the search input, the user would
+            // normally have to right-click on it then press escape. These are behaviors
+            // handled through the browser, so we simply call focus directly here.
+            target.querySelector(".o_searchview_input").focus();
+
+            // Make sure no async code will have a side effect on the focused element
+            await nextTick();
+            assert.hasClass(document.activeElement, "o_searchview_input");
+
+            // Trigger the ArrowDown hotkey
+            triggerHotkey("ArrowDown");
+            await nextTick();
+            assert.hasClass(document.activeElement, "o_searchview_input");
+        }
+    );
 });

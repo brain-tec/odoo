@@ -62,25 +62,16 @@ function insert(editor, data, {mode = "text"}) {
     }
     const selection = editor.document.getSelection();
     const range = selection.getRangeAt(0);
-    let currentNode;
+    let startNode;
     let insertBefore = false;
     if (selection.isCollapsed) {
         if (range.startContainer.nodeType === Node.TEXT_NODE) {
             insertBefore = !range.startOffset;
             splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
-            currentNode = range.startContainer;
+            startNode = range.startContainer;
         }
     } else {
         editor.deleteRange(selection);
-    }
-    currentNode = currentNode || editor.document.getSelection().anchorNode;
-    if (currentNode.nodeType === Node.ELEMENT_NODE) {
-        if (selection.anchorOffset === 0) {
-            currentNode.prepend(editor.document.createTextNode(''));
-            currentNode = currentNode.firstChild;
-        } else {
-            currentNode = currentNode.childNodes[selection.anchorOffset - 1];
-        }
     }
 
     const container = document.createElement('fake-element');
@@ -99,9 +90,17 @@ function insert(editor, data, {mode = "text"}) {
             break;
     }
 
-    // In case the html inserted is all contained in a single root <P> tag,
-    // we take the all content of the <p> and avoid inserting the <p>.
-    if (container.childElementCount === 1 && container.firstChild.nodeName === 'P') {
+    // In case the html inserted starts with a list and will be inserted within
+    // a list, unwrap the list elements from the list.
+    if (closestElement(selection.anchorNode, 'UL, OL') &&
+        (container.firstChild.nodeName === 'UL' || container.firstChild.nodeName === 'OL')) {
+       container.replaceChildren(...container.firstChild.childNodes);
+    }
+
+    // In case the html inserted is all contained in a single root <p> or <li>
+    // tag, we take the all content of the <p> or <li> and avoid inserting the
+    // <p> or <li>.
+    if (container.childElementCount === 1 && (container.firstChild.nodeName === 'P' || container.firstChild.nodeName === 'LI')) {
         const p = container.firstElementChild;
         container.replaceChildren(...p.childNodes);
     } else if (container.childElementCount > 1) {
@@ -117,24 +116,38 @@ function insert(editor, data, {mode = "text"}) {
         }
     }
 
-    // if we have isolated block content,
-    // first we split the current focus element if it's a block
-    // then we insert the content in the right places
-    let lastChildNode = false;
-    if (containerLastChild.hasChildNodes()) {
-        let tempCurrentNode = currentNode;
-        for (const n of [...containerLastChild.childNodes]) {
-            tempCurrentNode.after(n);
-            tempCurrentNode = n;
+    startNode = startNode || editor.document.getSelection().anchorNode;
+    if (startNode.nodeType === Node.ELEMENT_NODE) {
+        if (selection.anchorOffset === 0) {
+            const textNode = editor.document.createTextNode('');
+            startNode.prepend(textNode);
+            startNode = textNode;
+        } else {
+            startNode = startNode.childNodes[selection.anchorOffset - 1];
         }
-        lastChildNode = tempCurrentNode;
     }
 
-    if (containerFirstChild.hasChildNodes()) {
-        for (const n of [...containerFirstChild.childNodes]) {
-            currentNode.after(n);
-            currentNode = n;
+    // If we have isolated block content, first we split the current focus
+    // element if it's a block then we insert the content in the right places.
+    let currentNode = startNode;
+    let lastChildNode = false;
+    const _insertAt = (reference, nodes, insertBefore) => {
+        for (const child of (insertBefore ? nodes.reverse() : nodes)) {
+            reference[insertBefore ? 'before' : 'after'](child);
+            reference = child;
         }
+    }
+    if (containerLastChild.hasChildNodes()) {
+        const toInsert = [...containerLastChild.childNodes]; // Prevent mutation
+        _insertAt(currentNode, [...toInsert], insertBefore);
+        currentNode = insertBefore ? toInsert[0] : currentNode;
+        lastChildNode = toInsert[toInsert.length - 1];
+    }
+    if (containerFirstChild.hasChildNodes()) {
+        const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
+        _insertAt(currentNode, [...toInsert], insertBefore);
+        currentNode = toInsert[toInsert.length - 1];
+        insertBefore = false;
     }
 
     // If all the Html have been isolated, We force a split of the parent element
@@ -155,10 +168,11 @@ function insert(editor, data, {mode = "text"}) {
     while ((nodeToInsert = container.childNodes[0])) {
         if (isBlock(nodeToInsert) && !allowsParagraphRelatedElements(currentNode)) {
             // Split blocks at the edges if inserting new blocks (preventing
-            // <p><p>text</p></p> scenarios).
+            // <p><p>text</p></p> or <li><li>text</li></li> scenarios).
             while (
                 currentNode.parentElement !== editor.editable &&
-                !allowsParagraphRelatedElements(currentNode.parentElement)
+                (!allowsParagraphRelatedElements(currentNode.parentElement) ||
+                currentNode.parentElement.nodeName === 'LI')
             ) {
                 if (isUnbreakable(currentNode.parentElement)) {
                     makeContentsInline(container);

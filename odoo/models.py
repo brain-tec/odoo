@@ -44,7 +44,8 @@ from operator import attrgetter, itemgetter
 
 import babel.dates
 import dateutil.relativedelta
-import psycopg2, psycopg2.extensions
+import psycopg2
+import psycopg2.extensions
 from lxml import etree
 from lxml.builder import E
 
@@ -53,17 +54,15 @@ from . import SUPERUSER_ID
 from . import api
 from . import tools
 from .exceptions import AccessError, MissingError, ValidationError, UserError
-from .osv.query import Query
-from .tools import frozendict, lazy_classproperty, ormcache, \
-                   LastOrderedSet, OrderedSet, ReversedIterable, \
-                   unique, discardattr, partition
-from .tools.config import config
+from .tools import (
+    clean_context, config, CountingStream, date_utils, discardattr,
+    DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, frozendict,
+    get_lang, LastOrderedSet, lazy_classproperty, OrderedSet, ormcache,
+    partition, populate, Query, ReversedIterable, split_every, unique,
+)
 from .tools.func import frame_codeinfo
-from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang, split_every
-from .tools.translate import _, _lt
-from .tools import date_utils
-from .tools import populate
 from .tools.lru import LRU
+from .tools.translate import _, _lt
 
 _logger = logging.getLogger(__name__)
 _unlink = logging.getLogger(__name__ + '.unlink')
@@ -2315,7 +2314,7 @@ class BaseModel(metaclass=MetaModel):
             These dictionaries contain the qualified name of each groupby
             (fully qualified SQL name for the corresponding field),
             and the (non raw) field name.
-        :param osv.Query query: the query under construction
+        :param Query query: the query under construction
         :return: (groupby_terms, orderby_terms)
         """
         orderby_terms = []
@@ -3402,77 +3401,67 @@ class BaseModel(metaclass=MetaModel):
                 if f.prefetch == field.prefetch
                 # discard fields with groups that the user may not access
                 if not (f.groups and not self.user_has_groups(f.groups))
-                # discard fields that must be recomputed
-                if not (f.compute and self.env.records_to_compute(f))
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
-                self = self - self.env.records_to_compute(field)
         else:
             fnames = [field.name]
         self._read(fnames)
 
-    def _read(self, fields):
+    def _read(self, field_names):
         """ Read the given fields of the records in ``self`` from the database,
-            and store them in cache. Access errors are also stored in cache.
-            Skip fields that are not stored.
+            and store them in cache. Skip fields that are not stored.
 
-            :param field_names: list of column names of model ``self``; all those
-                fields are guaranteed to be read
-            :param inherited_field_names: list of column names from parent
-                models; some of those fields may not be read
+            :param field_names: list of field names to read
         """
         if not self:
             return
         self.check_access_rights('read')
 
-        # if a read() follows a write(), we must flush updates, as read() will
-        # fetch from database and overwrites the cache (`test_update_with_id`)
-        self.flush_recordset(fields)
-
-        field_names = []
-        inherited_field_names = []
-        for name in fields:
+        # determine columns fields and those with their own read() method
+        column_fields = []
+        other_fields = []
+        for name in field_names:
+            if name == 'id':
+                continue
             field = self._fields.get(name)
-            if field:
-                if field.store:
-                    field_names.append(name)
-                elif field.base_field.store:
-                    inherited_field_names.append(name)
-            else:
-                _logger.warning("%s.read() with unknown field '%s'", self._name, name)
+            if not field:
+                _logger.warning("%s._read() with unknown field %r", self._name, name)
+                continue
+            if field.base_field.store and field.base_field.column_type:
+                if not (field.inherited and callable(field.base_field.translate)):
+                    column_fields.append(field)
+            elif field.store and not field.column_type:
+                # non-column fields: for the sake of simplicity, we ignore inherited fields
+                other_fields.append(field)
 
-        # determine the fields that are stored as columns in tables; ignore 'id'
-        fields_pre = [
-            field
-            for field in (self._fields[name] for name in field_names + inherited_field_names)
-            if field.name != 'id'
-            if field.base_field.store and field.base_field.column_type
-            if not (field.inherited and callable(field.base_field.translate))
-        ]
+        if column_fields:
+            cr, context = self.env.cr, self.env.context
 
-        if fields_pre:
-            env = self.env
-            cr, user, context, su = env.args
+            # If a read() follows a write(), we must flush the updates that have
+            # an impact on checking security rules, as they are injected into
+            # the query.  However, we don't need to flush the fields to fetch,
+            # as explained below when putting values in cache.
+            self._flush_search([], order='id')
 
             # make a query object for selecting ids, and apply security rules to it
-            query = Query(self.env.cr, self._table, self._table_query)
+            query = Query(cr, self._table, self._table_query)
             self._apply_ir_rules(query, 'read')
 
             # the query may involve several tables: we need fully-qualified names
             def qualify(field):
-                col = field.name
-                res = self._inherits_join_calc(self._table, field.name, query)
-                if field.type == 'binary' and (context.get('bin_size') or context.get('bin_size_' + col)):
+                qname = self._inherits_join_calc(self._table, field.name, query)
+                if field.type == 'binary' and (
+                        context.get('bin_size') or context.get('bin_size_' + field.name)):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
-                    res = 'pg_size_pretty(length(%s)::bigint)' % res
-                return '%s as "%s"' % (res, col)
+                    qname = f'pg_size_pretty(length({qname})::bigint)'
+                return f'{qname} AS "{field.name}"'
 
-            # selected fields are: 'id' followed by fields_pre
-            qual_names = [qualify(name) for name in [self._fields['id']] + fields_pre]
+            # selected fields are: 'id' followed by column_fields
+            qual_names = [qualify(field) for field in [self._fields['id']] + column_fields]
 
             # determine the actual query to execute (last parameter is added below)
-            query.add_where('"%s".id IN %%s' % self._table)
+            query.add_where(f'"{self._table}".id IN %s')
             query_str, params = query.select(*qual_names)
 
             result = []
@@ -3485,25 +3474,28 @@ class BaseModel(metaclass=MetaModel):
 
         fetched = self.browse()
         if result:
-            cols = zip(*result)
-            ids = next(cols)
+            # result = [(id1, a1, b1), (id2, a2, b2), ...]
+            # column_values = [(id1, id2, ...), (a1, a2, ...), (b1, b2, ...)]
+            column_values = zip(*result)
+            ids = next(column_values)
             fetched = self.browse(ids)
 
-            for field in fields_pre:
-                values = next(cols)
+            # If we assume that the value of a pending update is in cache, we
+            # can avoid flushing pending updates if the fetched values do not
+            # overwrite values in cache.
+            for field in column_fields:
+                values = next(column_values)
+                # post-process translations
                 if context.get('lang') and not field.inherited and callable(field.translate):
                     if any(values):
                         translate = field.get_trans_func(fetched)
                         values = [translate(id_, value) for id_, value in zip(ids, values)]
-                # store values in cache
-                self.env.cache.update(fetched, field, values)
+                # store values in cache, but without overwriting
+                self.env.cache.insert_missing(fetched, field, values)
 
-            # determine the fields that must be processed now;
-            # for the sake of simplicity, we ignore inherited fields
-            for name in field_names:
-                field = self._fields[name]
-                if not field.column_type:
-                    field.read(fetched)
+            # process non-column fields
+            for field in other_fields:
+                field.read(fetched)
 
         # possibly raise exception for the records that could not be read
         missing = self - fetched
@@ -3768,74 +3760,77 @@ class BaseModel(metaclass=MetaModel):
             if func._ondelete or not self._context.get(MODULE_UNINSTALL_FLAG):
                 func(self)
 
-        # mark fields that depend on 'self' to recompute them after 'self' has
-        # been deleted (like updating a sum of lines after deleting one line)
+        # TOFIX: this avoids an infinite loop when trying to recompute a
+        # field, which triggers the recomputation of another field using the
+        # same compute function, which then triggers again the computation
+        # of those two fields
+        for field in self._fields.values():
+            self.env.remove_to_compute(field, self)
+
         self.env.flush_all()
-        self.modified(self._fields, before=True)
 
-        with self.env.norecompute():
-            cr = self._cr
-            Data = self.env['ir.model.data'].sudo().with_context({})
-            Defaults = self.env['ir.default'].sudo()
-            Property = self.env['ir.property'].sudo()
-            Attachment = self.env['ir.attachment'].sudo()
-            ir_model_data_unlink = Data
-            ir_attachment_unlink = Attachment
+        cr = self._cr
+        Data = self.env['ir.model.data'].sudo().with_context({})
+        Defaults = self.env['ir.default'].sudo()
+        Property = self.env['ir.property'].sudo()
+        Attachment = self.env['ir.attachment'].sudo()
+        ir_property_unlink = Property
+        ir_model_data_unlink = Data
+        ir_attachment_unlink = Attachment
 
-            # TOFIX: this avoids an infinite loop when trying to recompute a
-            # field, which triggers the recomputation of another field using the
-            # same compute function, which then triggers again the computation
-            # of those two fields
-            for field in self._fields.values():
-                self.env.remove_to_compute(field, self)
+        for sub_ids in cr.split_for_in_conditions(self.ids):
+            records = self.browse(sub_ids)
 
-            for sub_ids in cr.split_for_in_conditions(self.ids):
-                # Check if the records are used as default properties.
-                refs = ['%s,%s' % (self._name, i) for i in sub_ids]
-                if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)], limit=1):
-                    raise UserError(_('Unable to delete this document because it is used as a default property'))
+            # Check if the records are used as default properties.
+            refs = [f'{self._name},{id_}' for id_ in sub_ids]
+            if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)], limit=1):
+                raise UserError(_('Unable to delete this document because it is used as a default property'))
 
-                # Delete the records' properties.
-                Property.search([('res_id', 'in', refs)]).unlink()
+            # Delete the records' properties.
+            ir_property_unlink |= Property.search([('res_id', 'in', refs)])
 
-                query = "DELETE FROM %s WHERE id IN %%s" % self._table
-                cr.execute(query, (sub_ids,))
+            # mark fields that depend on 'self' to recompute them after 'self' has
+            # been deleted (like updating a sum of lines after deleting one line)
+            with self.env.protecting(self._fields.values(), records):
+                self.modified(self._fields, before=True)
 
-                # Removing the ir_model_data reference if the record being deleted
-                # is a record created by xml/csv file, as these are not connected
-                # with real database foreign keys, and would be dangling references.
-                #
-                # Note: the following steps are performed as superuser to avoid
-                # access rights restrictions, and with no context to avoid possible
-                # side-effects during admin calls.
-                data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
-                if data:
-                    ir_model_data_unlink |= data
+            query = f'DELETE FROM "{self._table}" WHERE id IN %s'
+            cr.execute(query, (sub_ids,))
 
-                # For the same reason, remove the defaults having some of the
-                # records as value
-                Defaults.discard_records(self.browse(sub_ids))
+            # Removing the ir_model_data reference if the record being deleted
+            # is a record created by xml/csv file, as these are not connected
+            # with real database foreign keys, and would be dangling references.
+            #
+            # Note: the following steps are performed as superuser to avoid
+            # access rights restrictions, and with no context to avoid possible
+            # side-effects during admin calls.
+            data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
+            ir_model_data_unlink |= data
 
-                # For the same reason, remove the relevant records in ir_attachment
-                # (the search is performed with sql as the search method of
-                # ir_attachment is overridden to hide attachments of deleted
-                # records)
-                query = 'SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s'
-                cr.execute(query, (self._name, sub_ids))
-                attachments = Attachment.browse([row[0] for row in cr.fetchall()])
-                if attachments:
-                    ir_attachment_unlink |= attachments.sudo()
+            # For the same reason, remove the defaults having some of the
+            # records as value
+            Defaults.discard_records(records)
 
-            # invalidate the *whole* cache, since the orm does not handle all
-            # changes made in the database, like cascading delete!
-            self.env.invalidate_all()
-            if ir_model_data_unlink:
-                ir_model_data_unlink.unlink()
-            if ir_attachment_unlink:
-                ir_attachment_unlink.unlink()
-            # DLE P93: flush after the unlink, for recompute fields depending on
-            # the modified of the unlink
-            self.env.flush_all()
+            # For the same reason, remove the relevant records in ir_attachment
+            # (the search is performed with sql as the search method of
+            # ir_attachment is overridden to hide attachments of deleted
+            # records)
+            query = 'SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s'
+            cr.execute(query, (self._name, sub_ids))
+            ir_attachment_unlink |= Attachment.browse(row[0] for row in cr.fetchall())
+
+        # invalidate the *whole* cache, since the orm does not handle all
+        # changes made in the database, like cascading delete!
+        self.env.invalidate_all(flush=False)
+        if ir_property_unlink:
+            ir_property_unlink.unlink()
+        if ir_model_data_unlink:
+            ir_model_data_unlink.unlink()
+        if ir_attachment_unlink:
+            ir_attachment_unlink.unlink()
+        # DLE P93: flush after the unlink, for recompute fields depending on
+        # the modified of the unlink
+        self.env.flush_all()
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
@@ -4616,7 +4611,7 @@ class BaseModel(metaclass=MetaModel):
         :param bool active_test: whether the default filtering of records with
             ``active`` field set to ``False`` should be applied.
         :return: the query expressing the given domain as provided in domain
-        :rtype: osv.query.Query
+        :rtype: Query
         """
         # if the object has an active field ('active', 'x_active'), filter out all
         # inactive records unless they were explicitly asked for
@@ -4674,6 +4669,8 @@ class BaseModel(metaclass=MetaModel):
         :return: the qualified field name (or expression) to use for ``field``
         """
         if self.env.lang:
+            # for the COALESCE to work properly, the column must be flushed
+            self.flush_model([field])
             alias = query.left_join(
                 table_alias, 'id', 'ir_translation', 'res_id', field,
                 extra='"{rhs}"."type" = \'model\' AND "{rhs}"."name" = %s AND "{rhs}"."lang" = %s AND "{rhs}"."value" != %s',
@@ -6159,22 +6156,32 @@ class BaseModel(metaclass=MetaModel):
         else:
             self.env.invalidate_all()
 
-    def invalidate_model(self, fnames=None):
+    def invalidate_model(self, fnames=None, flush=True):
         """ Invalidate the cache of all records of ``self``'s model, when the
         cached values no longer correspond to the database values.  If the
         parameter is given, only the given fields are invalidated from cache.
 
         :param fnames: optional iterable of field names to invalidate
+        :param flush: whether pending updates should be flushed before invalidation.
+            It is ``True`` by default, which ensures cache consistency.
+            Do not use this parameter unless you know what you are doing.
         """
+        if flush:
+            self.flush_model(fnames)
         self._invalidate_cache(fnames)
 
-    def invalidate_recordset(self, fnames=None):
+    def invalidate_recordset(self, fnames=None, flush=True):
         """ Invalidate the cache of the records in ``self``, when the cached
         values no longer correspond to the database values.  If the parameter
         is given, only the given fields on ``self`` are invalidated from cache.
 
         :param fnames: optional iterable of field names to invalidate
+        :param flush: whether pending updates should be flushed before invalidation.
+            It is ``True`` by default, which ensures cache consistency.
+            Do not use this parameter unless you know what you are doing.
         """
+        if flush:
+            self.flush_recordset(fnames)
         self._invalidate_cache(fnames, self._ids)
 
     def _invalidate_cache(self, fnames=None, ids=None):

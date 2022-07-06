@@ -66,7 +66,7 @@ class TestTermCount(common.TransactionCase):
         odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR', verbose=False, overwrite=True)
 
         # trans_load invalidates ormcache but not record cache
-        menu.env.cache.invalidate()
+        self.env.invalidate_all()
         self.assertEqual(menu.name, "New Name")
         self.assertEqual(menu.with_context(lang='fr_FR').name, "Nouveau nom")
 
@@ -230,7 +230,7 @@ class TestTermCount(common.TransactionCase):
         trans_count = self.env['ir.translation'].search_count([('lang', '=', 'dot')])
         self.assertEqual(trans_count, 1, "The imported translations were not created")
 
-        self.env.context = dict(self.env.context, lang="dot")
+        self.env = self.env(context=dict(self.env.context, lang="dot"))
         self.assertEqual(_("Accounting"), "samva", "The code translation was not applied")
 
     def test_export_pollution(self):

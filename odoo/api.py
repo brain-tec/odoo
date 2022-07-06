@@ -25,8 +25,8 @@ from weakref import WeakSet
 
 from decorator import decorate
 
-from .exceptions import CacheMiss
-from .tools import frozendict, classproperty, lazy_property, StackMap, OrderedSet
+from .exceptions import AccessError, CacheMiss
+from .tools import classproperty, frozendict, lazy_property, OrderedSet, Query, StackMap
 from .tools.translate import _
 
 _logger = logging.getLogger(__name__)
@@ -701,8 +701,15 @@ class Environment(Mapping):
         )
         return self.cr.savepoint()
 
-    def invalidate_all(self):
-        """ Invalidate the cache of all records. """
+    def invalidate_all(self, flush=True):
+        """ Invalidate the cache of all records.
+
+        :param flush: whether pending updates should be flushed before invalidation.
+            It is ``True`` by default, which ensures cache consistency.
+            Do not use this parameter unless you know what you are doing.
+        """
+        if flush:
+            self.flush_all()
         self.cache.invalidate()
 
     def _recompute_all(self):
@@ -918,6 +925,15 @@ class Cache(object):
         field_cache = self._set_field_cache(records, field)
         field_cache.update(zip(records._ids, values))
 
+    def insert_missing(self, records, field, values):
+        """ Set the values of ``field`` for the records in ``records`` that
+        don't have a value yet.  In other words, this does not overwrite
+        existing values in cache.
+        """
+        field_cache = self._set_field_cache(records, field)
+        for id_, val in zip(records._ids, values):
+            field_cache.setdefault(id_, val)
+
     def remove(self, record, field):
         """ Remove the value of ``field`` for ``record``. """
         try:
@@ -997,47 +1013,56 @@ class Cache(object):
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
-        # flush fields to be recomputed before evaluating the cache
-        env._recompute_all()
-
-        # make a copy of the cache, and invalidate it
-        dump = dict(self._data)
-        self.invalidate()
-
         depends_context = env.registry.field_depends_context
-
-        # re-fetch the records, and compare with their former cache
         invalids = []
 
-        def check(model, field, field_dump):
-            records = env[field.model_name].browse(field_dump)
-            for record in records:
-                if not record.id:
-                    continue
-                try:
-                    cached = field_dump[record.id]
-                    value = field.convert_to_record(cached, record)
-                    fetched = record[field.name]
-                    if fetched != value:
-                        info = {'cached': value, 'fetched': fetched}
-                        invalids.append((record, field, info))
-                except (AccessError, MissingError):
-                    pass
+        def process(model, field, field_cache):
+            # ignore new records and records to flush
+            towrite = env.all.towrite.get(model._name) or {}
+            ids = [id_ for id_ in field_cache if id_ and field.name not in towrite.get(id_, ())]
+            if not ids:
+                return
 
-        for field, field_dump in dump.items():
+            # select the column for the given ids
+            query = Query(env.cr, model._table, model._table_query)
+            qname = model._inherits_join_calc(model._table, field.name, query)
+            if field.type == 'binary' and (
+                model.env.context.get('bin_size') or model.env.context.get('bin_size_' + field.name)
+            ):
+                qname = f'pg_size_pretty(length({qname})::bigint)'
+            query.add_where(f'"{model._table}".id IN %s', [tuple(ids)])
+            query_str, params = query.select(f'"{model._table}".id', qname)
+            env.cr.execute(query_str, params)
+
+            # compare returned values with corresponding values in cache
+            for id_, value in env.cr.fetchall():
+                cached = field_cache[id_]
+                if value == cached or (not value and not cached):
+                    continue
+                invalids.append((model.browse(id_), field, {'cached': cached, 'fetched': value}))
+
+        for field, field_cache in self._data.items():
+            # check column fields only
+            if not field.store or not field.column_type or callable(field.translate):
+                continue
+
             model = env[field.model_name]
             if depends_context[field]:
-                for context_keys, field_cache in field_dump.items():
+                for context_keys, inner_cache in field_cache.items():
                     context = dict(zip(depends_context[field], context_keys))
-                    check(model.with_context(context), field, field_cache)
+                    if 'company' in context:
+                        # the cache key 'company' actually comes from context
+                        # key 'allowed_company_ids' (see property env.company
+                        # and method env.cache_key())
+                        context['allowed_company_ids'] = [context.pop('company')]
+                    process(model.with_context(context), field, inner_cache)
             else:
-                check(model, field, field_dump)
+                process(model, field, field_cache)
 
         if invalids:
-            raise UserError('Invalid cache for fields\n' + pformat(invalids))
+            _logger.warning("Invalid cache: %s", pformat(invalids))
 
 
 # keep those imports here in order to handle cyclic dependencies correctly
 from odoo import SUPERUSER_ID
-from odoo.exceptions import UserError, AccessError, MissingError
 from odoo.modules.registry import Registry

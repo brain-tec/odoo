@@ -1734,7 +1734,7 @@ def users(*logins):
                     func(*args, **kwargs)
                 # Invalidate the cache between subtests, in order to not reuse
                 # the former user's cache (`test_read_mail`, `test_write_mail`)
-                self.env.cache.invalidate()
+                self.env.invalidate_all()
         finally:
             self.uid = old_uid
 
@@ -2676,6 +2676,8 @@ def record_to_values(fields, record):
     # emergency_contact or whatever. Since we always get the id anyway, just
     # remove it from the fields to read
     to_read = list(fields.keys() - {'id'})
+    if not to_read:
+        return r
     for f, v in record.read(to_read)[0].items():
         descr = fields[f]
         if descr['type'] == 'many2one':
