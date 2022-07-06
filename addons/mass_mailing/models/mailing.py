@@ -317,7 +317,7 @@ class MassMailing(models.Model):
         that mailing_model being mailing.list means contacting mailing.contact
         (see mailing_model_name versus mailing_model_real). """
         for mailing in self:
-            if mailing.mailing_model_id.model in ['res.partner', 'mailing.list']:
+            if mailing.mailing_model_id.model in ['res.partner', 'mailing.list', 'mailing.contact']:
                 mailing.reply_to_mode = 'new'
             else:
                 mailing.reply_to_mode = 'update'
@@ -563,7 +563,7 @@ class MassMailing(models.Model):
         ])
         failed_mails.mapped('mailing_trace_ids').unlink()
         failed_mails.unlink()
-        self.write({'state': 'in_queue'})
+        self.action_put_in_queue()
 
     def action_view_traces_scheduled(self):
         return self._action_view_traces_filtered('scheduled')
