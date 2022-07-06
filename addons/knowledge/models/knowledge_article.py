@@ -202,13 +202,22 @@ class Article(models.Model):
                 parent = parent.parent_id
             articles.root_article_id = ancestors[-1:]
 
-    @api.depends('parent_id', 'internal_permission')
+    @api.depends('parent_id', 'parent_id.inherited_permission_parent_id', 'internal_permission')
     def _compute_inherited_permission(self):
         """ Computed inherited internal permission. We go up ancestors until
         finding an article with an internal permission set, or a root article
         (without parent) or until finding a desynchronized article which
         serves as permission ancestor. Desynchronized articles break the
-        permission tree finding. """
+        permission tree finding.
+
+        'parent_id.inherited_permission_parent_id' needs to be in the trigger
+        as we will need to update this article's inherited permissions if our parent
+        changes itself from which article it's inheriting.
+        This allows cascading changes "downwards" when we modify the
+        internal_permission of an article in the chain.
+
+        It is however not directly used as we optimize the batching and group all
+        articles by their parent_id."""
         self_inherit = self.filtered(lambda article: article.internal_permission)
         for article in self_inherit:
             article.inherited_permission = article.internal_permission
@@ -599,14 +608,16 @@ class Article(models.Model):
     def write(self, vals):
         # Move under a parent is considered as a write on it (permissions, ...)
         _resequence = False
-        if vals.get('parent_id'):
-            parent = self.browse(vals['parent_id'])
-            try:
-                parent.check_access_rights('write')
-                parent.check_access_rule('write')
-            except AccessError:
-                raise AccessError(_("You cannot move an article under %(parent_name)s as you cannot write on it",
-                                    parent_name=parent.display_name))
+        if 'parent_id' in vals:
+            parent = self.env['knowledge.article']
+            if vals.get('parent_id'):
+                parent = self.browse(vals['parent_id'])
+                try:
+                    parent.check_access_rights('write')
+                    parent.check_access_rule('write')
+                except AccessError:
+                    raise AccessError(_("You cannot move an article under %(parent_name)s as you cannot write on it",
+                                        parent_name=parent.display_name))
             if 'sequence' not in vals:
                 max_sequence = self._get_max_sequence_inside_parents(parent.ids).get(parent.id, -1)
                 vals['sequence'] = max_sequence + 1
@@ -735,7 +746,7 @@ class Article(models.Model):
         :param bool is_private: set as private;
         """
         self.ensure_one()
-        parent = self.browse(parent_id)
+        parent = self.browse(parent_id) if parent_id else self.env['knowledge.article']
         before_article = self.browse(before_article_id)
 
         values = {'parent_id': parent_id}
@@ -829,8 +840,12 @@ class Article(models.Model):
     @api.model
     def _get_max_sequence_inside_parents(self, parent_ids):
         max_sequence_by_parent = {}
+        if parent_ids:
+            domain = [('parent_id', 'in', parent_ids)]
+        else:
+            domain = [('parent_id', '=', False)]
         rg_results = self.env['knowledge.article'].sudo().read_group(
-            [('parent_id', 'in', parent_ids)],
+            domain,
             ['sequence:max'],
             ['parent_id']
         )
@@ -1333,23 +1348,26 @@ class Article(models.Model):
         sql = f'''
     WITH article_permission as (
         WITH RECURSIVE article_perms as (
-            SELECT a.id, a.parent_id, m.id as member_id, m.partner_id,
-                   m.permission
+            SELECT a.id, a.parent_id, a.is_desynchronized, m.id as member_id,
+                   m.partner_id, m.permission
               FROM knowledge_article a
          LEFT JOIN knowledge_article_member m
                 ON a.id = m.article_id
         ), article_rec as (
             SELECT perms1.id, perms1.id as article_id, perms1.parent_id,
                    perms1.member_id, perms1.partner_id, perms1.permission,
-                   perms1.id as origin_id, 0 as level
+                   perms1.id as origin_id, 0 as level,
+                   perms1.is_desynchronized
               FROM article_perms as perms1
              UNION
             SELECT perms2.id, perms_rec.article_id, perms2.parent_id,
                    perms2.member_id, perms2.partner_id, perms2.permission,
-                   perms2.id as origin_id, perms_rec.level + 1
+                   perms2.id as origin_id, perms_rec.level + 1,
+                   perms2.is_desynchronized
               FROM article_perms as perms2
         INNER JOIN article_rec perms_rec
                 ON perms_rec.parent_id=perms2.id
+                   AND perms_rec.is_desynchronized is not true
         )
         SELECT article_id, origin_id, member_id, partner_id,
                permission, min(level) as min_level

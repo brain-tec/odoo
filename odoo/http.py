@@ -1337,7 +1337,7 @@ class Request:
         :param int status: http status code
         :param headers: HTTP headers to set on the response
         :type headers: ``[(name, value)]``
-        :param collections.Mapping cookies: cookies to set on the client
+        :param collections.abc.Mapping cookies: cookies to set on the client
         :returns: a response object.
         :rtype: :class:`~odoo.http.Response`
         """
@@ -1354,7 +1354,7 @@ class Request:
         :param data: the data that will be json-serialized into the response body
         :param int status: http status code
         :param List[(str, str)] headers: HTTP headers to set on the response
-        :param collections.Mapping cookies: cookies to set on the client
+        :param collections.abc.Mapping cookies: cookies to set on the client
         :rtype: :class:`~odoo.http.Response`
         """
         data = json.dumps(data, ensure_ascii=False, default=date_utils.json_default)
@@ -1378,7 +1378,7 @@ class Request:
         if isinstance(location, URL):
             location = location.to_url()
         if local:
-            location = url_parse(location).replace(scheme='', netloc='').to_url()
+            location = '/' + url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/')
         if self.db:
             return self.env['ir.http']._redirect(location, code)
         return werkzeug.utils.redirect(location, code, Response=Response)
