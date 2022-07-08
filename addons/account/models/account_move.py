@@ -470,7 +470,7 @@ class AccountMove(models.Model):
         """
         lock_dates = self._get_violated_lock_dates(invoice_date, has_tax)
         today = fields.Date.today()
-        highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
+        highest_name = self.highest_name or self._get_last_sequence(relaxed=True, lock=False)
         number_reset = self._deduce_sequence_number_reset(highest_name)
         if lock_dates:
             invoice_date = lock_dates[-1][0] + timedelta(days=1)
@@ -546,7 +546,7 @@ class AccountMove(models.Model):
             if new_currency != self.currency_id:
                 self.currency_id = new_currency
                 self._onchange_currency()
-        if self.state == 'draft' and self.name and self.name != '/' and not self.quick_edit_mode and self._get_last_sequence():
+        if self.state == 'draft' and self.name and self.name != '/' and not self.quick_edit_mode and self._get_last_sequence(lock=False):
             self.name = '/'
 
     @api.onchange('partner_id')
@@ -1318,7 +1318,7 @@ class AccountMove(models.Model):
             )
         )
         self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
-        highest_name = self[0]._get_last_sequence() if self else False
+        highest_name = self[0]._get_last_sequence(lock=False) if self else False
 
         # Group the moves by journal and month
         for move in self:
@@ -1381,7 +1381,7 @@ class AccountMove(models.Model):
     @api.depends('journal_id', 'date')
     def _compute_highest_name(self):
         for record in self:
-            record.highest_name = record._get_last_sequence()
+            record.highest_name = record._get_last_sequence(lock=False)
 
     @api.depends('journal_id.type', 'company_id.quick_edit_mode', 'quick_edit_total_amount')
     def _compute_quick_edit_mode(self):
@@ -1536,10 +1536,10 @@ class AccountMove(models.Model):
     @api.depends('commercial_partner_id')
     def _compute_bank_partner_id(self):
         for move in self:
-            if move.is_outbound():
-                move.bank_partner_id = move.commercial_partner_id
-            else:
+            if move.is_inbound():
                 move.bank_partner_id = move.company_id.partner_id
+            else:
+                move.bank_partner_id = move.commercial_partner_id
 
     @api.model
     def _get_invoice_in_payment_state(self):

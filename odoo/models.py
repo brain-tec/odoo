@@ -1867,13 +1867,13 @@ class BaseModel(metaclass=MetaModel):
         return self.get_formview_action(access_uid=access_uid)
 
     @api.model
-    def search_count(self, domain):
+    def search_count(self, domain, limit=None):
         """ search_count(domain) -> int
 
         Returns the number of records in the current model matching :ref:`the
         provided domain <reference/orm/domains>`.
         """
-        res = self.search(domain, count=True)
+        res = self.search(domain, limit=limit, count=True)
         return res if isinstance(res, int) else len(res)
 
     @api.model
@@ -4233,6 +4233,19 @@ class BaseModel(metaclass=MetaModel):
             fname
             for fname, field in self._fields.items()
             if field.precompute and field.readonly
+            # ignore `readonly=True` when it's combined with the `states` attribute,
+            # making the field readonly according to the record state.
+            # e.g.
+            # product_uom = fields.Many2one(
+            #     'uom.uom', 'Product Unit of Measure',
+            #     compute='_compute_product_uom', store=True, precompute=True,
+            #     readonly=True, required=True, states={'draft': [('readonly', False)]},
+            # )
+            and (not field.states or not any(
+                modifier == 'readonly'
+                for modifiers in field.states.values()
+                for modifier, _value in modifiers
+            ))
         )
 
         result_vals_list = []
@@ -4872,17 +4885,19 @@ class BaseModel(metaclass=MetaModel):
 
         query = self._where_calc(domain)
         self._apply_ir_rules(query, 'read')
+        query.limit = limit
 
         if count:
             # Ignore order, limit and offset when just counting, they don't make sense and could
             # hurt performance
-            query_str, params = query.select("count(*)")
+            query_str, params = query.select(limit and "1" or "count(*)")
+            if limit:
+                query_str = "select count(*) from (" + query_str + ") t"
             self._cr.execute(query_str, params)
             res = self._cr.fetchone()
             return res[0]
 
         query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
-        query.limit = limit
         query.offset = offset
 
         return query
