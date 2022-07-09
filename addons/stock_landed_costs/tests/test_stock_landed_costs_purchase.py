@@ -357,7 +357,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         self.price_diff_account = self.env['account.account'].create({
             'name': 'price diff account',
             'code': 'price diff account',
-            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
+            'account_type': 'asset_current',
         })
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 
@@ -409,7 +409,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         move_form.invoice_date = move_form.date
         move_form.partner_id = order.partner_id
-        move_form.purchase_id = order
+        move_form.purchase_vendor_bill_id = self.env['purchase.bill.union'].browse(-order.id)
         move = move_form.save()
         move.action_post()
 

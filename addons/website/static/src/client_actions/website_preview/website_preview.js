@@ -3,6 +3,8 @@
 import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
 import core from 'web.core';
+import { AceEditorAdapterComponent } from '../../components/ace_editor/ace_editor';
+import { PagePropertiesDialogWrapper } from '../../components/dialog/page_properties';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 import { WebsiteTranslator } from '../../components/translator/translator';
 import {OptimizeSEODialog} from '@website/components/dialog/seo';
@@ -50,6 +52,8 @@ export class WebsitePreview extends Component {
         this.dialogService = useService('dialog');
         this.title = useService('title');
         this.user = useService('user');
+        this.router = useService('router');
+        this.action = useService('action');
 
         this.iframeFallbackUrl = '/website/iframefallback';
 
@@ -79,6 +83,10 @@ export class WebsitePreview extends Component {
                     this.dialogService.add(OptimizeSEODialog);
                 }, {once: true});
             }
+            if (this.props.action.context.params && this.props.action.context.params.with_loader) {
+                this.websiteService.showLoader({ showTips: true });
+            }
+
             return () => {
                 this.websiteService.currentWebsiteId = null;
                 this.websiteService.websiteRootInstance = undefined;
@@ -210,7 +218,8 @@ export class WebsitePreview extends Component {
         // The clicks on the iframe are listened, so that links with external
         // redirections can be opened in the top window.
         this.iframe.el.contentDocument.addEventListener('click', (ev) => {
-            if (!this.websiteContext.edition) {
+            const isEditing = this.websiteContext.edition || this.websiteContext.translation;
+            if (!isEditing) {
                 // Forward clicks to close backend client action's navbar
                 // dropdowns.
                 this.iframe.el.dispatchEvent(new MouseEvent('click', ev));
@@ -221,11 +230,26 @@ export class WebsitePreview extends Component {
                 return;
             }
 
-            const { href, target } = linkEl;
-            if (href && target !== '_blank' && !this.websiteContext.edition && this._isTopWindowURL(linkEl)) {
+            const { href, target, classList } = linkEl;
+            if (classList.contains('o_add_language')) {
                 ev.preventDefault();
-                ev.stopPropagation();
-                window.location.replace(href);
+                this.action.doAction('base.action_view_base_language_install', {
+                    target: 'new',
+                    additionalContext: {
+                        params: {
+                            website_id: this.websiteId,
+                            url_return: '/[lang]',
+                        },
+                    },
+                });
+            } else if (classList.contains('js_change_lang') && isEditing) {
+                ev.preventDefault();
+                // The switch to the right language is handled by the
+                // Website Root, inside the iframe.
+                this.websiteService.leaveEditMode();
+            } else if (href && target !== '_blank' && !isEditing && this._isTopWindowURL(linkEl)) {
+                ev.preventDefault();
+                this.router.redirect(href);
             }
         });
         this.iframe.el.contentDocument.addEventListener('keydown', ev => {
@@ -256,6 +280,8 @@ WebsitePreview.components = {
     WebsiteEditorComponent,
     BlockIframe,
     WebsiteTranslator,
+    AceEditorAdapterComponent,
+    PagePropertiesDialogWrapper,
 };
 
 registry.category('actions').add('website_preview', WebsitePreview);

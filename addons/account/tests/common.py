@@ -224,22 +224,22 @@ class AccountTestInvoicingCommon(TransactionCase):
             'currency': company.currency_id,
             'default_account_revenue': cls.env['account.account'].search([
                     ('company_id', '=', company.id),
-                    ('user_type_id', '=', cls.env.ref('account.data_account_type_revenue').id)
+                    ('account_type', '=', 'income')
                 ], limit=1),
             'default_account_expense': cls.env['account.account'].search([
                     ('company_id', '=', company.id),
-                    ('user_type_id', '=', cls.env.ref('account.data_account_type_expenses').id)
+                    ('account_type', '=', 'expense')
                 ], limit=1),
             'default_account_receivable': search_account(company, chart_template, 'property_account_receivable_id', [
-                ('user_type_id.type', '=', 'receivable')
+                ('account_type', '=', 'asset_receivable')
             ]),
             'default_account_payable': cls.env['account.account'].search([
                     ('company_id', '=', company.id),
-                    ('user_type_id.type', '=', 'payable')
+                    ('account_type', '=', 'liability_payable')
                 ], limit=1),
             'default_account_assets': cls.env['account.account'].search([
                     ('company_id', '=', company.id),
-                    ('user_type_id', '=', cls.env.ref('account.data_account_type_current_assets').id)
+                    ('account_type', '=', 'asset_current')
                 ], limit=1),
             'default_account_tax_sale': company.account_sale_tax_id.mapped('invoice_repartition_line_ids.account_id'),
             'default_account_tax_purchase': company.account_purchase_tax_id.mapped('invoice_repartition_line_ids.account_id'),
@@ -385,7 +385,14 @@ class AccountTestInvoicingCommon(TransactionCase):
                     .with_company(company or cls.env.company) \
                     .with_context(default_move_type=move_type, account_predictive_bills_disable_prediction=True))
         move_form.invoice_date = invoice_date or fields.Date.from_string('2019-01-01')
-        move_form.date = move_form.invoice_date
+        # According to the state or type of the invoice, the date field is sometimes visible or not
+        # Besides, the date field can be put multiple times in the view
+        # "invisible": "['|', ('state', '!=', 'draft'), ('auto_post', '!=', 'at_date')]"
+        # "invisible": ['|', '|', ('state', '!=', 'draft'), ('auto_post', '=', 'no'), ('auto_post', '=', 'at_date')]
+        # "invisible": "['&', ('move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('quick_edit_mode', '=', False)]"
+        # :TestAccountMoveOutInvoiceOnchanges, :TestAccountMoveOutRefundOnchanges, .test_00_debit_note_out_invoice, :TestAccountEdi
+        if not move_form._get_modifier('date', 'invisible'):
+            move_form.date = move_form.invoice_date
         move_form.partner_id = partner or cls.partner_a
 
         for product in (products or []):
@@ -595,7 +602,7 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
         cls.tax_waiting_account = cls.env['account.account'].create({
             'name': 'TAX_WAIT',
             'code': 'TWAIT',
-            'user_type_id': cls.env.ref('account.data_account_type_current_liabilities').id,
+            'account_type': 'liability_current',
             'reconcile': True,
             'company_id': cls.company.id,
         })
@@ -603,13 +610,13 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
         cls.tax_final_account = cls.env['account.account'].create({
             'name': 'TAX_TO_DEDUCT',
             'code': 'TDEDUCT',
-            'user_type_id': cls.env.ref('account.data_account_type_current_assets').id,
+            'account_type': 'asset_current',
             'company_id': cls.company.id,
         })
         cls.tax_base_amount_account = cls.env['account.account'].create({
             'name': 'TAX_BASE',
             'code': 'TBASE',
-            'user_type_id': cls.env.ref('account.data_account_type_current_assets').id,
+            'account_type': 'asset_current',
             'company_id': cls.company.id,
         })
         cls.company.account_cash_basis_base_account_id = cls.tax_base_amount_account.id

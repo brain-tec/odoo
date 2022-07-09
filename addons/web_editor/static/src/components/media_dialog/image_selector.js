@@ -239,11 +239,14 @@ export class ImageSelector extends FileSelector {
             const imageEl = document.createElement('img');
             let src = attachment.image_src;
             if (!attachment.public) {
-                const [accessToken] = await orm.call(
-                    'ir.attachment',
-                    'generate_access_token',
-                    [attachment.id],
-                );
+                let accessToken = attachment.access_token;
+                if (!accessToken) {
+                    [accessToken] = await orm.call(
+                        'ir.attachment',
+                        'generate_access_token',
+                        [attachment.id],
+                    );
+                }
                 src += `?access_token=${accessToken}`;
             }
             imageEl.src = src;
@@ -255,7 +258,7 @@ export class ImageSelector extends FileSelector {
 
 ImageSelector.mediaSpecificClasses = ['img', 'img-fluid', 'o_we_custom_image'];
 ImageSelector.mediaExtraClasses = [
-    'rounded-circle', 'rounded', 'thumbnail', 'shadow', /^img-\S+$/,
+    'rounded-circle', 'rounded', 'img-thumbnail', 'shadow',
     'w-25', 'w-50', 'w-75', 'w-100',
 ];
 ImageSelector.tagNames = ['IMG'];

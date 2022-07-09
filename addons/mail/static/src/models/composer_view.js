@@ -134,7 +134,7 @@ registerModel({
                     this.composer.textInputContent.length
                 );
             }
-            const recordReplacement = this.activeSuggestion.mentionText;
+            const recordReplacement = this.composerSuggestionListView.activeSuggestionView.mentionText;
             const updateData = {
                 textInputContent: textLeft + recordReplacement + ' ' + textRight,
                 textInputCursorEnd: textLeft.length + recordReplacement.length + 1,
@@ -143,11 +143,11 @@ registerModel({
             // Specific cases for channel and partner mentions: the message with
             // the mention will appear in the target channel, or be notified to
             // the target partner.
-            if (this.activeSuggestion.suggestable.thread) {
-                Object.assign(updateData, { mentionedChannels: link(this.activeSuggestion.suggestable.thread) });
+            if (this.composerSuggestionListView.activeSuggestionView.suggestable.thread) {
+                Object.assign(updateData, { mentionedChannels: link(this.composerSuggestionListView.activeSuggestionView.suggestable.thread) });
             }
-            if (this.activeSuggestion.suggestable.partner) {
-                Object.assign(updateData, { mentionedPartners: link(this.activeSuggestion.suggestable.partner) });
+            if (this.composerSuggestionListView.activeSuggestionView.suggestable.partner) {
+                Object.assign(updateData, { mentionedPartners: link(this.composerSuggestionListView.activeSuggestionView.suggestable.partner) });
             }
             this.composer.update(updateData);
             for (const composerView of this.composer.composerViews) {
@@ -197,7 +197,9 @@ registerModel({
             if (isEventHandled(ev, 'MessageActionList.replyTo')) {
                 return;
             }
-            this.discard();
+            if (this.exists()) {
+                this.discard();
+            }
         },
         /**
          * Called when clicking on "discard" button.
@@ -270,15 +272,6 @@ registerModel({
             this.threadView.update({
                 replyingToMessageView: clear(),
             });
-        },
-        /**
-         * @param {ComposerSuggestion} suggestion
-         */
-        onClickSuggestion(suggestion) {
-            this.update({ activeSuggestion: replace(suggestion) });
-            this.insertSuggestion();
-            this.closeSuggestions();
-            this.update({ doFocus: true });
         },
         onClickTextarea() {
             if (!this.exists()) {
@@ -445,9 +438,9 @@ registerModel({
                         this.threadView.startEditingLastMessageFromCurrentUser();
                         break;
                     }
-                    if (this.hasSuggestions) {
-                        this.setPreviousSuggestionActive();
-                        this.update({ hasToScrollToActiveSuggestion: true });
+                    if (this.composerSuggestionListView) {
+                        this.composerSuggestionListView.setPreviousSuggestionViewActive();
+                        this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                     }
                     break;
                 case 'ArrowDown':
@@ -456,31 +449,31 @@ registerModel({
                         this.threadView.startEditingLastMessageFromCurrentUser();
                         break;
                     }
-                    if (this.hasSuggestions) {
-                        this.setNextSuggestionActive();
-                        this.update({ hasToScrollToActiveSuggestion: true });
+                    if (this.composerSuggestionListView) {
+                        this.composerSuggestionListView.setNextSuggestionViewActive();
+                        this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                     }
                     break;
                 case 'Home':
-                    if (this.hasSuggestions) {
-                        this.setFirstSuggestionActive();
-                        this.update({ hasToScrollToActiveSuggestion: true });
+                    if (this.composerSuggestionListView) {
+                        this.composerSuggestionListView.setFirstSuggestionViewActive();
+                        this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                     }
                     break;
                 case 'End':
-                    if (this.hasSuggestions) {
-                        this.setLastSuggestionActive();
-                        this.update({ hasToScrollToActiveSuggestion: true });
+                    if (this.composerSuggestionListView) {
+                        this.composerSuggestionListView.setLastSuggestionViewActive();
+                        this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                     }
                     break;
                 case 'Tab':
-                    if (this.hasSuggestions) {
+                    if (this.composerSuggestionListView) {
                         if (ev.shiftKey) {
-                            this.setPreviousSuggestionActive();
-                            this.update({ hasToScrollToActiveSuggestion: true });
+                            this.composerSuggestionListView.setPreviousSuggestionViewActive();
+                            this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                         } else {
-                            this.setNextSuggestionActive();
-                            this.update({ hasToScrollToActiveSuggestion: true });
+                            this.composerSuggestionListView.setNextSuggestionViewActive();
+                            this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
                         }
                     }
                     break;
@@ -677,58 +670,6 @@ registerModel({
             this.postMessage();
         },
         /**
-         * Sets the first suggestion as active. Main and extra records are
-         * considered together.
-         */
-        setFirstSuggestionActive() {
-            const suggestions = this.mainSuggestions.concat(this.extraSuggestions);
-            const firstSuggestion = suggestions[0];
-            this.update({ activeSuggestion: replace(firstSuggestion) });
-        },
-        /**
-         * Sets the last suggestion as active. Main and extra records are
-         * considered together.
-         */
-        setLastSuggestionActive() {
-            const suggestions = this.mainSuggestions.concat(this.extraSuggestions);
-            const { length, [length - 1]: lastSuggestion } = suggestions;
-            this.update({ activeSuggestion: replace(lastSuggestion) });
-        },
-        /**
-         * Sets the next suggestion as active. Main and extra records are
-         * considered together.
-         */
-        setNextSuggestionActive() {
-            const suggestions = this.mainSuggestions.concat(this.extraSuggestions);
-            const activeElementIndex = suggestions.findIndex(
-                suggestion => suggestion === this.activeSuggestion
-            );
-            if (activeElementIndex === suggestions.length - 1) {
-                // loop when reaching the end of the list
-                this.setFirstSuggestionActive();
-                return;
-            }
-            const nextSuggestion = suggestions[activeElementIndex + 1];
-            this.update({ activeSuggestion: replace(nextSuggestion) });
-        },
-        /**
-         * Sets the previous suggestion as active. Main and extra records are
-         * considered together.
-         */
-        setPreviousSuggestionActive() {
-            const suggestions = this.mainSuggestions.concat(this.extraSuggestions);
-            const activeElementIndex = suggestions.findIndex(
-                suggestion => suggestion === this.activeSuggestion
-            );
-            if (activeElementIndex === 0) {
-                // loop when reaching the start of the list
-                this.setLastSuggestionActive();
-                return;
-            }
-            const previousSuggestion = suggestions[activeElementIndex - 1];
-            this.update({ activeSuggestion: replace(previousSuggestion) });
-        },
-        /**
          * Updates the textarea height of text input.
          */
         updateTextInputHeight() {
@@ -765,30 +706,6 @@ registerModel({
                     composer.update({ isPostingMessage: false });
                 }
             }
-        },
-        /**
-         * Clears the active suggestion on closing mentions or adapts it if
-         * the active suggestion is no longer part of the suggestions.
-         *
-         * @private
-         * @returns {FieldCommand}
-         */
-        _computeActiveSuggestion() {
-            if (
-                this.mainSuggestions.length === 0 &&
-                this.extraSuggestions.length === 0
-            ) {
-                return clear();
-            }
-            if (
-                this.mainSuggestions.includes(this.activeSuggestion) ||
-                this.extraSuggestions.includes(this.activeSuggestion)
-            ) {
-                return;
-            }
-            const suggestions = this.mainSuggestions.concat(this.extraSuggestions);
-            const firstSuggestion = suggestions[0];
-            return replace(firstSuggestion);
         },
         /**
          * @private
@@ -1387,22 +1304,12 @@ registerModel({
             mainSuggestedRecords.length = Math.min(mainSuggestedRecords.length, limit);
             extraSuggestedRecords.length = Math.min(extraSuggestedRecords.length, limit - mainSuggestedRecords.length);
             this.update({
-                extraSuggestions: insertAndReplace(
-                    extraSuggestedRecords.map(record => {
-                        return {
-                            suggestable: replace(record.suggestable),
-                        };
-                    }),
-                ),
-                hasToScrollToActiveSuggestion: true,
-                mainSuggestions: insertAndReplace(
-                    mainSuggestedRecords.map(record => {
-                        return {
-                            suggestable: replace(record.suggestable),
-                        };
-                    }),
-                ),
+                extraSuggestions: replace(extraSuggestedRecords.map(record => record.suggestable)),
+                mainSuggestions: replace(mainSuggestedRecords.map(record => record.suggestable)),
             });
+            if (this.composerSuggestionListView) {
+                this.composerSuggestionListView.update({ hasToScrollToActiveSuggestionView: true });
+            }
         },
         /**
          * @private
@@ -1416,14 +1323,6 @@ registerModel({
         }
     },
     fields: {
-        /**
-         * Determines the suggestion that is currently active. This suggestion
-         * is highlighted in the UI and it will be selected when the
-         * suggestion is confirmed by the user.
-         */
-        activeSuggestion: one('ComposerSuggestion', {
-            compute: '_computeActiveSuggestion',
-        }),
         /**
          * Determines the attachment list that will be used to display the attachments.
          */
@@ -1488,13 +1387,8 @@ registerModel({
             inverse: 'composerViewOwnerAsEmoji',
             isCausal: true,
         }),
-        /**
-         * Determines the extra suggestions.
-         */
-        extraSuggestions: many('ComposerSuggestion', {
+        extraSuggestions: many('ComposerSuggestable', {
             compute: '_computeExtraSuggestions',
-            inverse: 'composerViewOwnerAsExtraSuggestion',
-            isCausal: true,
         }),
         fileUploader: one('FileUploader', {
             default: insertAndReplace(),
@@ -1568,13 +1462,6 @@ registerModel({
         hasToRestoreContent: attr({
             default: false,
         }),
-        /**
-         * Determines whether the currently active suggestion should be scrolled
-         * into view.
-         */
-        hasToScrollToActiveSuggestion: attr({
-            default: false,
-        }),
         isCompact: attr({
             compute: '_computeIsCompact',
             default: true,
@@ -1593,13 +1480,8 @@ registerModel({
         textareaLastInputValue: attr({
             default: "",
         }),
-        /**
-         * Determines the main suggestions.
-         */
-        mainSuggestions: many('ComposerSuggestion', {
+        mainSuggestions: many('ComposerSuggestable', {
             compute: '_computeMainSuggestions',
-            inverse: 'composerViewOwnerAsMainSuggestion',
-            isCausal: true,
         }),
         /**
          * States the message view on which this composer allows editing (if any).

@@ -1186,7 +1186,7 @@ options.registry.OptionsTab = options.Class.extend({
         }
         this.trigger_up('request_save', {
             reload: false,
-            onSuccess: () => window.location.href = '/web#action=website.theme_install_kanban_action',
+            action: 'website.theme_install_kanban_action',
         });
     },
 
@@ -1978,6 +1978,29 @@ options.registry.WebsiteLevelColor = options.Class.extend({
         }
         return this._super(...arguments);
     },
+});
+
+options.registry.HeaderLayout = options.registry.WebsiteLevelColor.extend({
+    /**
+     * @overide
+     */
+    async customizeWebsiteViews(previewMode, widgetValue, params) {
+        const _super = this._super.bind(this);
+
+        if (params.name === 'header_sidebar_opt') {
+            // When the user selects sidebar as header, make sure that the
+            // header position is regular.
+            await new Promise(resolve => {
+                this.trigger_up('action_demand', {
+                    actionName: 'toggle_page_option',
+                    params: [{name: 'header_overlay', value: false}],
+                    onSuccess: () => resolve(),
+                });
+            });
+        }
+
+        return _super(...arguments);
+    }
 });
 
 options.registry.HeaderNavbar = options.Class.extend({
