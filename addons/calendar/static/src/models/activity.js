@@ -48,16 +48,14 @@ patchRecordMethods('Activity', {
      */
     async edit() {
         if (!this.calendar_event_id){
-            this._super();
+            await this._super();
         } else {
             const action = await this.messaging.rpc({
                 model: 'mail.activity',
                 method: 'action_create_calendar_event',
                 args: [[this.id]],
             });
-            this.env.bus.trigger('do-action', {
-                action
-            });
+            this.env.services.action.doAction(action);
         }
     },
 });
