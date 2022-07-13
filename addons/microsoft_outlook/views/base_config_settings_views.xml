@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- <START_OF_CHANGE> -->
+        <record id="view_general_configuration_form" model="ir.ui.view">
+            <field name="name">base.config.settings.view.form.inherit.microsoft_outlook</field>
+            <field name="model">base.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_general_configuration"/>
+            <field name="arch" type="xml">
+                <div name="email" position="inside">
+                    <div id="microsoft_outlook_setting">
+                        <separator/>
+                        <h4>Outlook Credentials</h4>
+                        <div class="text-muted">
+                            Send and receive email with your Outlook account.
+                        </div>
+                        <div>
+                            <label string="Client ID" for="microsoft_outlook_client_identifier"
+                                   class="oe_inline"/>
+                            <field name="microsoft_outlook_client_identifier" class="oe_inline"/>
+                        </div>
+                        <div>
+                            <label string="Client Secret" for="microsoft_outlook_client_secret"
+                                class="oe_inline"/>
+                            <field name="microsoft_outlook_client_secret" class="oe_inline"/>
+                        </div>
+                    </div>
+                </div>
+            </field>
+        </record>
+        <!-- <END_OF_CHANGE> -->
+    </data>
+</odoo>
