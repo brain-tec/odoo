@@ -4,24 +4,21 @@ import { Markup } from 'web.utils';
 import { registry } from "@web/core/registry";
 
 export const iapNotificationService = {
-    dependencies: ["notification"],
+    dependencies: ["bus_service", "notification"],
 
-    start(env, { notification }) {
-        env.bus.on("WEB_CLIENT_READY", null, async () => {
-            const legacyEnv = owl.Component.env;
-            legacyEnv.services.bus_service.onNotification(this, (notifications) => {
-                for (const { payload, type } of notifications) {
-                    if (type === 'iap_notification') {
-                        if (payload.error_type == 'success') {
-                            displaySuccessIapNotification(payload);
-                        } else if (payload.error_type == 'danger') {
-                            displayFailureIapNotification(payload);
-                        }
+    start(env, { bus_service, notification }) {
+        bus_service.onNotification(this, (notifications) => {
+            for (const { payload, type } of notifications) {
+                if (type === 'iap_notification') {
+                    if (payload.error_type == 'success') {
+                        displaySuccessIapNotification(payload);
+                    } else if (payload.error_type == 'danger') {
+                        displayFailureIapNotification(payload);
                     }
                 }
-            });
-            legacyEnv.services.bus_service.startPolling();
+            }
         });
+        bus_service.startPolling();
 
         /**
          * Displays the IAP success notification on user's screen
