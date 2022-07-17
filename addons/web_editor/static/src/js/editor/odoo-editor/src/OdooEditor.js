@@ -1893,7 +1893,7 @@ export class OdooEditor extends EventTarget {
                 description: 'Insert a rating over 3 stars.',
                 fontawesome: 'fa-star-o',
                 callback: () => {
-                    let html = '<span contenteditable="false" class="o_stars o_three_stars">';
+                    let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
                     html += Array(3).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                     html += '</span>';
                     this.execCommand('insertHTML', html);
@@ -1905,7 +1905,7 @@ export class OdooEditor extends EventTarget {
                 description: 'Insert a rating over 5 stars.',
                 fontawesome: 'fa-star',
                 callback: () => {
-                    let html = '<span contenteditable="false" class="o_stars o_five_stars">';
+                    let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
                     html += Array(5).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                     html += '</span>';
                     this.execCommand('insertHTML', html);
@@ -3004,14 +3004,13 @@ export class OdooEditor extends EventTarget {
         }
 
         // handle stars
-        if (node.nodeType === Node.ELEMENT_NODE && node.className.includes('fa-star') &&
+        const isStar = el => el.nodeType === Node.ELEMENT_NODE && (
+            el.classList.contains('fa-star') || el.classList.contains('fa-star-o')
+        );
+        if (isStar(node) &&
             node.parentElement && node.parentElement.className.includes('o_stars')) {
-            const previousStars = getAdjacentPreviousSiblings(node, sib => (
-                sib.nodeType === Node.ELEMENT_NODE && sib.className.includes('fa-star')
-            ));
-            const nextStars = getAdjacentNextSiblings(node, sib => (
-                sib.nodeType === Node.ELEMENT_NODE && sib.className.includes('fa-star')
-            ));
+            const previousStars = getAdjacentPreviousSiblings(node, isStar);
+            const nextStars = getAdjacentNextSiblings(node, isStar);
             if (nextStars.length || previousStars.length) {
                 const shouldToggleOff = node.classList.contains('fa-star') &&
                     (!nextStars[0] || !nextStars[0].classList.contains('fa-star'));
