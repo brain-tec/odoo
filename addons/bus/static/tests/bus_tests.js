@@ -3,6 +3,7 @@ odoo.define('web.bus_tests', function (require) {
 
 var { busService } = require('@bus/services/bus_service');
 const { presenceService } = require('@bus/services/presence_service');
+const { multiTabService } = require('@bus/services/multi_tab_service');
 
 var { CrossTab } = require('@bus/crosstab_bus');
 var testUtils = require('web.test_utils');
@@ -14,17 +15,18 @@ const { makeTestEnv } = require('@web/../tests/helpers/mock_env');
 
 QUnit.module('Bus', {
     beforeEach: function () {
-        const customBusService = {
-            ...busService,
+        const customMultiTabService = {
+            ...multiTabService,
             start() {
-                const originalBusService = busService.start(...arguments);
-                originalBusService.TAB_HEARTBEAT_PERIOD = 10;
-                originalBusService.MASTER_TAB_HEARTBEAT_PERIOD = 1;
-                return originalBusService;
+                const originalMultiTabService = multiTabService.start(...arguments);
+                originalMultiTabService.TAB_HEARTBEAT_PERIOD = 10;
+                originalMultiTabService.MAIN_TAB_HEARTBEAT_PERIOD = 1;
+                return originalMultiTabService;
             },
         };
-        registry.category('services').add('bus_service', customBusService);
+        registry.category('services').add('bus_service', busService);
         registry.category('services').add('presence', presenceService);
+        registry.category('services').add('multiTab', customMultiTabService);
     },
 }, function () {
     QUnit.test('notifications received from the longpolling channel', async function (assert) {
@@ -44,7 +46,7 @@ QUnit.module('Bus', {
                 }
             },
         });
-        env.services['bus_service'].onNotification(null, notifications => {
+        env.services['bus_service'].onNotification(notifications => {
             assert.step('notification - ' + notifications.toString());
         });
         env.services['bus_service'].addChannel('lambda');
@@ -161,7 +163,7 @@ QUnit.module('Bus', {
                 }
             }
         });
-        masterEnv.services['bus_service'].onNotification(null, notifications => {
+        masterEnv.services['bus_service'].onNotification(notifications => {
             assert.step('master - notification - ' + notifications.toString());
         });
         masterEnv.services['bus_service'].addChannel('lambda');
@@ -174,7 +176,7 @@ QUnit.module('Bus', {
                 }
             }
         });
-        slaveEnv.services['bus_service'].onNotification(null, notifications => {
+        slaveEnv.services['bus_service'].onNotification(notifications => {
             assert.step('slave - notification - ' + notifications.toString());
         });
         slaveEnv.services['bus_service'].addChannel('lambda');
@@ -194,7 +196,7 @@ QUnit.module('Bus', {
         ]);
     });
 
-    QUnit.test('cross tab bus elect new master on master unload', async function (assert) {
+    QUnit.test('multi tab service elects new master on master unload', async function (assert) {
         assert.expect(8);
 
         // master
@@ -211,7 +213,7 @@ QUnit.module('Bus', {
             }
         });
 
-        masterEnv.services['bus_service'].onNotification(null, notifications => {
+        masterEnv.services['bus_service'].onNotification(notifications => {
             assert.step('master - notification - ' + notifications.toString());
         });
         masterEnv.services['bus_service'].addChannel('lambda');
@@ -228,7 +230,7 @@ QUnit.module('Bus', {
                 }
             }
         });
-        slaveEnv.services['bus_service'].onNotification(null, notifications => {
+        slaveEnv.services['bus_service'].onNotification(notifications => {
             assert.step('slave - notification - ' + notifications.toString());
         });
         slaveEnv.services['bus_service'].addChannel('lambda');
@@ -240,7 +242,7 @@ QUnit.module('Bus', {
         await testUtils.nextTick();
 
         // simulate unloading master
-        masterEnv.services['bus_service']._onUnload();
+        masterEnv.services['multiTab']._onUnload();
 
         pollPromiseSlave.resolve([{
             id: 2,

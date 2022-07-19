@@ -326,7 +326,7 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
         var attributeIds = _.map($attributes, function (elem) {
             return $(elem).data('value_id');
         });
-        history.replaceState(undefined, undefined, '#attr=' + attributeIds.join(','));
+        window.location.hash = 'attr=' + attributeIds.join(',');
     },
     /**
      * Set the checked values active.
@@ -496,22 +496,27 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
      * @override
      * @private
      */
-    _updateProductImage: function ($productContainer, displayImage, productId, productTemplateId, newCarousel, isCombinationPossible) {
-        var $carousel = $productContainer.find('#o-carousel-product');
+    _updateProductImage: function ($productContainer, displayImage, productId, productTemplateId, newImages, isCombinationPossible) {
+        let $images = $productContainer.find('#o-carousel-product');
+        if (!$images.length) {
+            $images = $productContainer.find("#o-grid-product");
+        }
         // When using the web editor, don't reload this or the images won't
         // be able to be edited depending on if this is done loading before
         // or after the editor is ready.
-        if (window.location.search.indexOf('enable_editor') === -1) {
-            var $newCarousel = $(newCarousel);
-            $carousel.after($newCarousel);
-            $carousel.remove();
-            $carousel = $newCarousel;
-            $carousel.carousel(0);
+        if ($images.length && window.location.search.indexOf('enable_editor') === -1) {
+            const $newImages = $(newImages);
+            $images.after($newImages);
+            $images.remove();
+            $images = $newImages;
+            if ($images.attr('id') === 'o-carousel-product') {
+                $images.carousel(0);
+            }
             this._startZoom();
             // fix issue with carousel height
-            this.trigger_up('widgets_start_request', {$target: $carousel});
+            this.trigger_up('widgets_start_request', {$target: $images});
         }
-        $carousel.toggleClass('css_not_available', !isCombinationPossible);
+        $images.toggleClass('css_not_available', !isCombinationPossible);
     },
     /**
      * @private
@@ -784,7 +789,7 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
                 }
             }
             if (dataValueIds.length) {
-                history.replaceState(undefined, undefined, `#attr=${dataValueIds.join(',')}`);
+                window.location.hash = `attr=${dataValueIds.join(',')}`;
             }
         }
         this._applyHash();
@@ -957,7 +962,7 @@ publicWidget.registry.websiteSaleCarouselProduct = publicWidget.Widget.extend({
     /**
      * Center the selected indicator to scroll the indicators list when it
      * overflows.
-     * 
+     *
      * @private
      * @param {Event} ev
      */

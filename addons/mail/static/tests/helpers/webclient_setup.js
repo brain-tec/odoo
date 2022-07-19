@@ -1,24 +1,30 @@
 /** @odoo-module **/
 
 import { busService } from '@bus/services/bus_service';
+import { multiTabService } from '@bus/services/multi_tab_service';
 import { makeBusServiceToLegacyEnv } from '@bus/services/legacy/make_bus_service_to_legacy_env';
+import { makeMultiTabToLegacyEnv } from '@bus/services/legacy/make_multi_tab_to_legacy_env';
 import { makeFakePresenceService } from '@bus/../tests/helpers/mock_services';
 
 import { ChatWindowManagerContainer } from '@mail/components/chat_window_manager_container/chat_window_manager_container';
 import { DialogManagerContainer } from '@mail/components/dialog_manager_container/dialog_manager_container';
 import { DiscussContainer } from '@mail/components/discuss_container/discuss_container';
 import { PopoverManagerContainer } from '@mail/components/popover_manager_container/popover_manager_container';
+import ActivityMenu from '@mail/js/systray/systray_activity_menu';
 import { messagingService } from '@mail/services/messaging_service';
 import { systrayService } from '@mail/services/systray_service';
 import { makeMessagingToLegacyEnv } from '@mail/utils/make_messaging_to_legacy_env';
 
 import { registry } from '@web/core/registry';
+import { Items as legacySystrayItems } from 'web.SystrayMenu';
+import { registerCleanup } from '@web/../tests/helpers/cleanup';
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
 
 const WEBCLIENT_LOAD_ROUTES = [
     '/web/webclient/load_menus',
     '/web/dataset/call_kw/res.users/load_views',
+    '/web/dataset/call_kw/res.users/systray_get_activities'
 ];
 const WEBCLIENT_PARAMETER_NAMES = new Set(['legacyParams', 'mockRPC', 'serverData', 'target', 'webClientClass']);
 const SERVICES_PARAMETER_NAMES = new Set([
@@ -82,6 +88,7 @@ function setupMessagingServiceRegistries({
     };
 
     const customBusService = {
+        ...busService,
         start() {
             const originalService = busService.start(...arguments);
             Object.assign(originalService, {
@@ -102,6 +109,7 @@ function setupMessagingServiceRegistries({
             isOdooFocused: () => true,
         }),
         systrayService,
+        multiTab: multiTabService,
         ...services,
     };
 
@@ -110,6 +118,7 @@ function setupMessagingServiceRegistries({
     });
 
     registry.category('wowlToLegacyServiceMappers').add('bus_service_to_legacy_env', makeBusServiceToLegacyEnv);
+    registry.category('wowlToLegacyServiceMappers').add('multi_tab_to_legacy_env', makeMultiTabToLegacyEnv);
     registry.category('wowlToLegacyServiceMappers').add('messaging_service_to_legacy_env', makeMessagingToLegacyEnv);
 }
 
@@ -129,6 +138,14 @@ function setupMessagingServiceRegistries({
  */
  async function getWebClientReady(param0) {
     setupMainComponentRegistry();
+
+    legacySystrayItems.push(ActivityMenu);
+    registerCleanup(() => {
+        const activityMenuIndex = legacySystrayItems.indexOf(ActivityMenu);
+        if (activityMenuIndex !== -1) {
+            legacySystrayItems.splice(activityMenuIndex, 1);
+        }
+    });
 
     const servicesParameters = {};
     const param0Entries = Object.entries(param0);
