@@ -57,6 +57,7 @@ import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { TextField } from "@web/views/fields/text/text_field";
+import { DynamicRecordList } from "@web/views/relational_model";
 import { registerCleanup } from "../helpers/cleanup";
 
 const { onWillStart } = owl;
@@ -4298,6 +4299,134 @@ QUnit.module("Views", (hooks) => {
         await toggleGroupByMenu(target);
         await toggleMenuItem(target, "Bar");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "2");
+    });
+
+    QUnit.test("pager, ungrouped, with count limit reached", async function (assert) {
+        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree limit="2"><field name="foo"/><field name="bar"/></tree>',
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
+        assert.verifySteps(["get_views", "web_search_read"]);
+
+        await click(target.querySelector(".o_pager_limit"));
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
+        assert.verifySteps(["search_count"]);
+    });
+
+    QUnit.test("pager, ungrouped, with count equals count limit", async function (assert) {
+        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 4 });
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree limit="2"><field name="foo"/><field name="bar"/></tree>',
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
+        assert.verifySteps(["get_views", "web_search_read"]);
+    });
+
+    QUnit.test("pager, ungrouped, reload while fetching count", async function (assert) {
+        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+
+        const def = makeDeferred();
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree limit="2"><field name="foo"/><field name="bar"/></tree>',
+            async mockRPC(route, args) {
+                assert.step(args.method);
+                if (args.method === "search_count") {
+                    await def;
+                }
+            },
+        });
+
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
+        assert.verifySteps(["get_views", "web_search_read"]);
+
+        await click(target.querySelector(".o_pager_limit"));
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
+        assert.verifySteps(["search_count"]);
+
+        await reloadListView(target);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
+        assert.verifySteps(["web_search_read"]);
+
+        def.resolve();
+        await nextTick();
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
+        assert.verifySteps([]);
+    });
+
+    QUnit.test("pager, grouped, with count limit reached", async function (assert) {
+        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        serverData.models.foo.records.push({ id: 398, foo: "ozfijz" }); // to have 4 groups
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree groups_limit="2"><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["foo"],
+        });
+
+        assert.containsN(target, ".o_group_header", 2);
+        assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
+        assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
+    });
+
+    QUnit.test("list keeps offset on switchView", async (assert) => {
+        assert.expect(3);
+        serverData.views = {
+            "foo,false,search": `<search />`,
+            "foo,99,list": `<list limit="1"><field name="display_name" /></list>`,
+            "foo,100,form": `<form><field name="display_name" /></form>`,
+        };
+
+        const offsets = [0, 1, 1];
+        const mockRPC = async (route, args) => {
+            if (args.method === "web_search_read") {
+                assert.strictEqual(args.kwargs.offset, offsets.shift());
+            }
+        };
+        const wc = await createWebClient({ serverData, mockRPC });
+        await doAction(wc, {
+            res_model: "foo",
+            type: "ir.actions.act_window",
+            views: [
+                [99, "list"],
+                [100, "form"],
+            ],
+        });
+        await click(target, ".o_pager_next");
+        await click(target, ".o_data_cell");
+        await click(target, ".o_back_button");
     });
 
     QUnit.test("can sort records when clicking on header", async function (assert) {
@@ -13963,5 +14092,42 @@ QUnit.module("Views", (hooks) => {
             [...target.querySelectorAll(".o_data_row td[name=foo]")].map((r) => r.innerText),
             ["yop", "gnap", "blip", "blip"]
         );
+    });
+
+    QUnit.test("editable list header click should unselect record", async (assert) => {
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: `<list editable="top"><field name="display_name" /></list>`,
+            serverData,
+        });
+
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".o_selected_row");
+        await editInput(target, ".o_data_cell input", "someInput");
+        await click(target.querySelector("thead th:nth-child(2)"));
+        await triggerEvent(target.querySelector("thead th"), null, "keydown", { key: "ArrowDown" });
+
+        assert.containsNone(target, ".o_selected_row");
+    });
+
+    QUnit.test("editable list group header click should unselect record", async (assert) => {
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: `<list editable="top"><field name="display_name" /></list>`,
+            serverData,
+            groupBy: ["bar"],
+        });
+
+        await click(target.querySelector(".o_group_header"));
+        await click(target.querySelector(".o_group_header:not(.o_group_open)"));
+
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".o_selected_row");
+        await editInput(target, ".o_data_cell input", "someInput");
+        await click(target.querySelectorAll(".o_group_header")[1]);
+
+        assert.containsNone(target, ".o_selected_row");
     });
 });

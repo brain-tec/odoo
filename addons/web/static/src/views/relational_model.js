@@ -1700,6 +1700,8 @@ export class DynamicRecordList extends DynamicList {
         /** @type {Record[]} */
         this.records = [];
         this.data = params.data;
+        this.countLimit = this.constructor.WEB_SEARCH_READ_COUNT_LIMIT;
+        this.hasLimitedCount = false;
     }
 
     // -------------------------------------------------------------------------
@@ -1790,6 +1792,28 @@ export class DynamicRecordList extends DynamicList {
         this.count = 0;
     }
 
+    exportState() {
+        return {
+            ...super.exportState(),
+            offset: this.offset,
+        };
+    }
+
+    /**
+     * Performs a search_count with the current domain to set the count. This is
+     * useful as web_search_read limits the count for performance reasons, so it
+     * might sometimes be less than the real number of records matching the domain.
+     *
+     * @returns {number}
+     */
+    async fetchCount() {
+        const keepLast = this.model.keepLast;
+        this.count = await keepLast.add(this.model.orm.searchCount(this.resModel, this.domain));
+        this.countLimit = this.count;
+        this.hasLimitedCount = false;
+        this.model.notify();
+    }
+
     async load(params = {}) {
         this.limit = params.limit === undefined ? this.limit : params.limit;
         this.offset = params.offset === undefined ? this.offset : params.offset;
@@ -1863,6 +1887,7 @@ export class DynamicRecordList extends DynamicList {
             limit: this.limit,
             offset: this.offset,
             order: orderByToString(this.orderBy),
+            count_limit: this.countLimit + 1,
         };
         if (this.loadedCount > this.limit) {
             // This condition means that we are reloading a list of records
@@ -1878,7 +1903,10 @@ export class DynamicRecordList extends DynamicList {
                 this.domain,
                 this.fieldNames,
                 options,
-                { bin_size: true, ...this.context }
+                {
+                    bin_size: true,
+                    ...this.context,
+                }
             ));
 
         const records = await Promise.all(
@@ -1898,11 +1926,17 @@ export class DynamicRecordList extends DynamicList {
         );
 
         delete this.data;
-        this.count = length;
+        if (length === this.countLimit + 1) {
+            this.hasLimitedCount = true;
+            this.count = length - 1;
+        } else {
+            this.count = length;
+        }
 
         return records;
     }
 }
+DynamicRecordList.WEB_SEARCH_READ_COUNT_LIMIT = 10000;
 
 export class DynamicGroupList extends DynamicList {
     setup(params, state) {
