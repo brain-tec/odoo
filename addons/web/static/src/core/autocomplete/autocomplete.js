@@ -18,6 +18,7 @@ export class AutoComplete extends Component {
             optionsRev: 0,
             open: false,
             activeSourceOption: null,
+            value: this.props.value,
         });
 
         this.inputRef = useRef("input");
@@ -29,7 +30,9 @@ export class AutoComplete extends Component {
         this.hotkeysToRemove = [];
 
         owl.onWillUpdateProps((nextProps) => {
-            if (nextProps.forceClose) {
+            if (this.props.value !== nextProps.value || this.forceValFromProp) {
+                this.forceValFromProp = false;
+                this.state.value = nextProps.value;
                 this.inputRef.el.value = nextProps.value;
                 this.close();
             }
@@ -124,6 +127,7 @@ export class AutoComplete extends Component {
     }
     selectOption(indices, params = {}) {
         this.inputRef.el.value = "";
+        this.forceValFromProp = true;
 
         const option = this.sources[indices[0]].options[indices[1]];
         if (option.unselectable) {
@@ -304,7 +308,6 @@ Object.assign(AutoComplete, {
         onInput: { type: Function, optional: true },
         onChange: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
-        forceClose: { type: Boolean, optional: true },
     },
     defaultProps: {
         placeholder: "",
@@ -312,7 +315,6 @@ Object.assign(AutoComplete, {
         onInput: () => {},
         onChange: () => {},
         onBlur: () => {},
-        forceClose: false,
     },
     timeout: 250,
 });
