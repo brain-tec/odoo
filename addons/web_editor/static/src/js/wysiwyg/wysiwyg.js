@@ -11,7 +11,6 @@ const Dialog = require('web.Dialog');
 const customColors = require('web_editor.custom_colors');
 const {ColorPaletteWidget} = require('web_editor.ColorPalette');
 const {ColorpickerWidget} = require('web.Colorpicker');
-const {compatibilityColorNames} = require('web_editor.ColorPalette');
 const concurrency = require('web.concurrency');
 const { device } = require('web.config');
 const { localization } = require('@web/core/l10n/localization');
@@ -381,7 +380,7 @@ const Wysiwyg = Widget.extend({
         this._collaborationChannelName = channelName;
         Wysiwyg.activeCollaborationChannelNames.add(channelName);
 
-        this.call('bus_service', 'onNotification', notifications => {
+        this.call('bus_service', 'addEventListener', 'notification', ({ detail: notifications}) => {
             for (const { payload, type } of notifications) {
                 if (
                     type === 'editor_collaboration' &&
@@ -1236,24 +1235,17 @@ const Wysiwyg = Widget.extend({
     },
     /**
      * Sets custom CSS Variables on the snippet menu element.
-     * Used for color previews and color palette.
+     * Used for color previews and color palette to get the color
+     * values of the editable. (e.g. if the editable is in an iframe
+     * with different SCSS color values as the top window.)
+     *
+     * @param {HTMLElement} element
      */
     setCSSVariables(element) {
-        for (let i = 1; i <= 5; i++) {
-            element.style.setProperty(`--we-cp-o-color-${i}`, weUtils.getCSSVariableValue(`o-color-${i}`));
-            element.style.setProperty(`--we-cp-o-cc${i}-bg`, weUtils.getCSSVariableValue(`o-cc${i}-bg`));
-            element.style.setProperty(`--we-cp-o-cc${i}-h1`, weUtils.getCSSVariableValue(`o-cc${i}-h1`));
-            element.style.setProperty(`--we-cp-o-cc${i}-text`, weUtils.getCSSVariableValue(`o-cc${i}-text`));
-            element.style.setProperty(`--we-cp-o-cc${i}-btn-primary`, weUtils.getCSSVariableValue(`o-cc${i}-btn-primary`));
-            element.style.setProperty(`--we-cp-o-cc${i}-btn-primary-border`, weUtils.getCSSVariableValue(`o-cc${i}-btn-primary-border`));
-            element.style.setProperty(`--we-cp-o-cc${i}-btn-secondary`, weUtils.getCSSVariableValue(`o-cc${i}-btn-secondary`));
-            element.style.setProperty(`--we-cp-o-cc${i}-btn-secondary-border`, weUtils.getCSSVariableValue(`o-cc${i}-btn-secondary-border`));
-        }
-        for (let i = 100; i <= 900; i += 100) {
-            element.style.setProperty(`--we-cp-${i}`, weUtils.getCSSVariableValue(`${i}`));
-        }
-        for (const name of compatibilityColorNames) {
-            element.style.setProperty(`--we-cp-${name}`, weUtils.getCSSVariableValue(name));
+        const stylesToCopy = weUtils.EDITOR_COLOR_CSS_VARIABLES;
+
+        for (const style of stylesToCopy) {
+            element.style.setProperty(`--we-cp-${style}`, weUtils.getCSSVariableValue(style));
         }
     },
     /**
@@ -1740,9 +1732,9 @@ const Wysiwyg = Widget.extend({
                 // Tooltips need to be cleared before leaving the editor.
                 this.saving_mutex.exec(() => {
                     $target.tooltip({title: _t('Double-click to edit'), trigger: 'manual', container: 'body'}).tooltip('show');
+                    this.tooltipTimeouts.push(setTimeout(() => $target.tooltip('dispose'), 800));
                 });
                 this.odooEditor.observerActive();
-                this.tooltipTimeouts.push(setTimeout(() => $target.tooltip('dispose'), 800));
             }, 400));
         }
         // Update color of already opened colorpickers.
@@ -1857,27 +1849,27 @@ const Wysiwyg = Widget.extend({
         const options = this._editorOptions();
         const commands = [
             {
-                groupName: 'Basic blocks',
-                title: 'Quote',
-                description: 'Add a blockquote section.',
+                groupName: _t('Basic blocks'),
+                title: _t('Quote'),
+                description: _t('Add a blockquote section.'),
                 fontawesome: 'fa-quote-right',
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'blockquote');
                 },
             },
             {
-                groupName: 'Basic blocks',
-                title: 'Code',
-                description: 'Add a code section.',
+                groupName: _t('Basic blocks'),
+                title: _t('Code'),
+                description: _t('Add a code section.'),
                 fontawesome: 'fa-code',
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'pre');
                 },
             },
             {
-                groupName: 'Basic blocks',
-                title: 'Signature',
-                description: 'Insert your signature.',
+                groupName: _t('Basic blocks'),
+                title: _t('Signature'),
+                description: _t('Insert your signature.'),
                 fontawesome: 'fa-pencil-square-o',
                 callback: async () => {
                     const res = await this._rpc({
@@ -1894,18 +1886,18 @@ const Wysiwyg = Widget.extend({
         if (options.allowCommandLink) {
             commands.push(
                 {
-                    groupName: 'Navigation',
-                    title: 'Link',
-                    description: 'Add a link.',
+                    groupName: _t('Navigation'),
+                    title: _t('Link'),
+                    description: _t('Add a link.'),
                     fontawesome: 'fa-link',
                     callback: () => {
                         this.toggleLinkTools({forceDialog: true});
                     },
                 },
                 {
-                    groupName: 'Navigation',
-                    title: 'Button',
-                    description: 'Add a button.',
+                    groupName: _t('Navigation'),
+                    title: _t('Button'),
+                    description: _t('Add a button.'),
                     fontawesome: 'fa-link',
                     callback: () => {
                         this.toggleLinkTools({forceDialog: true});
@@ -1919,9 +1911,9 @@ const Wysiwyg = Widget.extend({
         }
         if (options.allowCommandImage) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Image',
-                description: 'Insert an image.',
+                groupName: _t('Medias'),
+                title: _t('Image'),
+                description: _t('Insert an image.'),
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
                     this.openMediaDialog();
@@ -1930,9 +1922,9 @@ const Wysiwyg = Widget.extend({
         }
         if (options.allowCommandVideo) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Video',
-                description: 'Insert a video.',
+                groupName: _t('Medias'),
+                title: _t('Video'),
+                description: _t('Insert a video.'),
                 fontawesome: 'fa-file-video-o',
                 callback: () => {
                     this.openMediaDialog({noVideos: false, noImages: true, noIcons: true, noDocuments: true});

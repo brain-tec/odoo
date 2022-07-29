@@ -52,7 +52,7 @@ export async function makeWithSearch(params) {
     delete props.serverData;
     delete props.mockRPC;
     delete props.config;
-    const componentProps = props.componentProps;
+    const componentProps = props.componentProps || {};
     delete props.componentProps;
     delete props.Component;
 
@@ -60,6 +60,9 @@ export async function makeWithSearch(params) {
         setup() {
             this.withSearchProps = props;
             this.componentProps = componentProps;
+        }
+        getDisplay(display) {
+            return Object.assign({}, display, componentProps.display);
         }
     }
     Parent.template = xml`
@@ -70,12 +73,14 @@ export async function makeWithSearch(params) {
                 domain="search.domain"
                 groupBy="search.groupBy"
                 orderBy="search.orderBy"
-                comparison="search.comparison" />
+                comparison="search.comparison"
+                display="getDisplay(search.display)"/>
         </WithSearch>`;
     Parent.components = { Component: params.Component, WithSearch };
 
-    const env = await makeTestEnv({ serverData, mockRPC, config });
-    const parent = await mount(Parent, getFixture(), { env, props });
+    const env = await makeTestEnv({ serverData, mockRPC });
+    const searchEnv = Object.assign(Object.create(env), { config });
+    const parent = await mount(Parent, getFixture(), { env: searchEnv, props });
     const parentNode = parent.__owl__;
     const withSearchNode = getUniqueChild(parentNode);
     const componentNode = getUniqueChild(withSearchNode);

@@ -1223,6 +1223,46 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".thisisdeletable", 4, "records should be deletable");
     });
 
+    QUnit.test("quick created records in grouped kanban are on displayed top", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban on_create="quick_create">
+                    <field name="product_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div><field name="display_name"/></div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+        });
+
+        assert.containsN(target, ".o_kanban_group", 2);
+        assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 2);
+
+        await createRecord();
+        assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 2);
+        assert.containsOnce(target.querySelector(".o_kanban_group"), ".o_kanban_quick_create");
+
+        await editInput(target, ".o_field_widget[name=display_name] input", "new record");
+        await click(target, ".o_kanban_add");
+        assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 3);
+        assert.containsOnce(target.querySelector(".o_kanban_group"), ".o_kanban_quick_create");
+        // the new record must be the first record of the column
+        assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "new record");
+
+        await editInput(target, ".o_field_widget[name=display_name] input", "another record");
+        await click(target, ".o_kanban_add");
+        assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 4);
+        assert.containsOnce(target.querySelector(".o_kanban_group"), ".o_kanban_quick_create");
+        // the new record must be the first record of the column
+        assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "another record");
+        assert.strictEqual(target.querySelectorAll(".o_kanban_record")[1].innerText, "new record");
+    });
+
     QUnit.test("quick create record without quick_create_view", async (assert) => {
         assert.expect(16);
 
@@ -1829,7 +1869,7 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 5);
-            assert.deepEqual(getCardTexts(0), ["blip", "new partner"]);
+            assert.deepEqual(getCardTexts(0), ["new partner", "blip"]);
         }
     );
 
@@ -1996,6 +2036,101 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps(["create"]);
     });
+
+    QUnit.test(
+        "save a quick create record and create a new record at the same time",
+        async (assert) => {
+            const prom = makeDeferred();
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <kanban on_create="quick_create">
+                        <field name="bar"/>
+                        <templates>
+                            <t t-name="kanban-box">
+                                <div>
+                                    <field name="display_name"/>
+                                </div>
+                            </t>
+                        </templates>
+                    </kanban>`,
+                groupBy: ["bar"],
+                async mockRPC(route, { method }) {
+                    if (method === "name_create") {
+                        assert.step("name_create");
+                        await prom;
+                    }
+                },
+            });
+
+            assert.containsN(
+                target,
+                ".o_kanban_record",
+                4,
+                "should have 4 records at the beginning"
+            );
+
+            // Create and save a record
+            await quickCreateRecord();
+            await editQuickCreateInput("display_name", "new partner");
+            await validateRecord();
+            assert.containsN(
+                target,
+                ".o_kanban_record",
+                4,
+                "should not have created the record yet"
+            );
+            assert.strictEqual(
+                target.querySelector(".o_kanban_quick_create [name=display_name] input").value,
+                "new partner",
+                "quick create should not be empty yet"
+            );
+            assert.hasClass(
+                target.querySelector(".o_kanban_quick_create"),
+                "o_disabled",
+                "quick create should be disabled"
+            );
+
+            // Create a new record during the save of the first one
+            await createRecord();
+            assert.containsN(
+                target,
+                ".o_kanban_record",
+                4,
+                "should not have created the record yet"
+            );
+            assert.strictEqual(
+                target.querySelector(".o_kanban_quick_create [name=display_name] input").value,
+                "new partner",
+                "quick create should not be empty yet"
+            );
+            assert.hasClass(
+                target.querySelector(".o_kanban_quick_create"),
+                "o_disabled",
+                "quick create should be disabled"
+            );
+
+            prom.resolve();
+            await nextTick();
+            assert.containsN(target, ".o_kanban_record", 5, "should have created a new record");
+            assert.strictEqual(
+                target.querySelector(
+                    ".o_kanban_quick_create .o_field_widget[name=display_name] input"
+                ).value,
+                "",
+                "quick create should now be empty"
+            );
+            assert.doesNotHaveClass(
+                target.querySelector(".o_kanban_quick_create"),
+                "o_disabled",
+                "quick create should be enabled"
+            );
+
+            assert.verifySteps(["name_create"]);
+        }
+    );
 
     QUnit.test(
         "quick create record: prevent multiple adds with ENTER, with onchange",
@@ -7323,7 +7458,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
         assert.deepEqual(
             getCardTexts(),
-            ["record1", "record2"],
+            ["record2", "record1"],
             "records should be correctly ordered"
         );
 
@@ -7332,7 +7467,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
         assert.deepEqual(
             getCardTexts(),
-            ["record2", "record1"],
+            ["record1", "record2"],
             "records should be correctly ordered"
         );
 
@@ -7341,7 +7476,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
         assert.deepEqual(
             getCardTexts(),
-            ["record1", "record2"],
+            ["record2", "record1"],
             "records should be correctly ordered"
         );
         assert.verifySteps(["resequence", "resequence"], "should have resequenced twice");
@@ -9661,7 +9796,7 @@ QUnit.module("Views", (hooks) => {
         def.resolve();
         await nextTick();
 
-        assert.deepEqual(getCardTexts(0), ["0", "1", "0"]);
+        assert.deepEqual(getCardTexts(0), ["0", "0", "1"]);
         assert.verifySteps(["name_create", "read"]);
     });
 

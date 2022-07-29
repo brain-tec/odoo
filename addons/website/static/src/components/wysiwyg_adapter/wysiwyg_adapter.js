@@ -321,7 +321,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             case 'get_page_option':
                  return event.data.onSuccess(this.pageOptions[params[0]].value);
             case 'toggle_page_option':
-                return this._togglePageOption(...params);
+                this._togglePageOption(...params);
+                return event.data.onSuccess();
             case 'edit_menu':
                 return this.dialogs.add(EditMenuDialog, {
                     save: () => {
@@ -509,6 +510,12 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             },
         ];
     }
+    /**
+     * @returns {boolean} true if the page has been altered.
+     */
+    _isDirty() {
+        return this.widget.isDirty() || Object.values(this.pageOptions).some(option => option.isDirty);
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -538,7 +545,6 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @private
      */
     async _onSaveRequest(event) {
-        const isDirty = this.widget.isDirty();
         let callback = () => this.props.quitCallback();
         if (event.data.reload || event.data.reloadEditor) {
             this.widget.trigger_up('disable_loading_effects');
@@ -565,7 +571,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this.action.doAction(event.data.action);
             };
         }
-        if (isDirty) {
+        if (this._isDirty()) {
             return this.save().then(callback);
         } else {
             return callback();
@@ -590,8 +596,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @private
      */
     _onCancelRequest(event) {
-        const isDirty = this.widget.isDirty();
-        if (isDirty) {
+        if (this._isDirty()) {
             this.dialogs.add(WebsiteDialog, {
                 body: _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."),
                 primaryClick: () => this.props.quitCallback(),

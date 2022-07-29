@@ -35,7 +35,7 @@ export class VideoSelector extends Component {
             },
             hide_controls: {
                 label: this.env._t("Hide player controls"),
-                platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion],
+                platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion, this.PLATFORMS.vimeo],
                 urlParameter: 'controls=0',
             },
             hide_fullscreen: {
@@ -200,6 +200,7 @@ export class VideoSelector extends Component {
     }
 }
 VideoSelector.mediaSpecificClasses = ['media_iframe_video'];
+VideoSelector.mediaSpecificStyles = [];
 VideoSelector.mediaExtraClasses = [];
 VideoSelector.tagNames = ['IFRAME', 'DIV'];
 VideoSelector.template = 'web_editor.VideoSelector';

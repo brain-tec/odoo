@@ -3746,6 +3746,81 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views", "read", "onchange"]);
     });
 
+    QUnit.test("pressing enter several times in a one2many", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <tree editable="bottom">
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+
+        await clickEdit(target);
+        await addRow(target);
+        assert.containsOnce(target, ".o_data_row");
+        assert.hasClass(target.querySelectorAll(".o_data_row")[0], "o_selected_row");
+
+        await editInput(target, "[name='turtle_foo'] input", "a");
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 2);
+        assert.hasClass(target.querySelectorAll(".o_data_row")[1], "o_selected_row");
+
+        await editInput(target, "[name='turtle_foo'] input", "a");
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 3);
+        assert.hasClass(target.querySelectorAll(".o_data_row")[2], "o_selected_row");
+
+        // this is a weird case, but there's no required fields, so the record is already valid, we can press Enter directly.
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 4);
+        assert.hasClass(target.querySelectorAll(".o_data_row")[3], "o_selected_row");
+    });
+
+    QUnit.test(
+        "creating a new line in an o2m with an handle field does not focus the handler",
+        async function (assert) {
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <field name="turtles">
+                        <tree editable="bottom">
+                            <field name="turtle_int" widget="handle"/>
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+                resId: 2,
+            });
+
+            await clickEdit(target);
+            await addRow(target);
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector("[name='turtle_foo'] input")
+            );
+
+            triggerHotkey("Enter");
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector("[name='turtle_foo'] input")
+            );
+        }
+    );
+
     QUnit.test("editing a o2m, with required field and onchange", async function (assert) {
         serverData.models.turtle.fields.turtle_foo.required = true;
         delete serverData.models.turtle.fields.turtle_foo.default;
@@ -7890,6 +7965,44 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    QUnit.test("one2many with invalid value and click on another row", async function (assert) {
+        serverData.models.partner.records[0].p = [2, 4];
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="bottom">
+                            <field name="display_name"/>
+                            <field name="int_field"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+        await clickEdit(target);
+
+        let rows = target.querySelectorAll(".o_data_row");
+        await click(rows[0].querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".o_data_row.o_selected_row");
+        rows = target.querySelectorAll(".o_data_row");
+        assert.hasClass(rows[0], "o_selected_row");
+        assert.doesNotHaveClass(rows[1], "o_selected_row");
+
+        await editInput(target, ".o_data_row [name='int_field'] input", "abc");
+        rows = target.querySelectorAll(".o_data_row");
+        await click(rows[1].querySelector(".o_data_cell"));
+        // Stays on the invalid row
+        assert.containsOnce(target, ".o_data_row.o_selected_row");
+        rows = target.querySelectorAll(".o_data_row");
+        assert.hasClass(rows[0], "o_selected_row");
+        assert.containsOnce(rows[0], "[name='int_field'] .o_field_invalid");
+        assert.doesNotHaveClass(rows[1], "o_selected_row");
+    });
+
     QUnit.test(
         "default value for nested one2manys (coming from onchange)",
         async function (assert) {
@@ -8906,7 +9019,8 @@ QUnit.module("Fields", (hooks) => {
 
         assert.strictEqual(document.activeElement, input);
 
-        await triggerEvent(input, null, "keydown", { key: "Enter" });
+        triggerHotkey("Enter");
+        await nextTick();
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
             ["", "pizza", ""]
@@ -11557,7 +11671,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test(
-        "when Navigating to a one2many with tabs, it receives the focus and adds a new line",
+        "when Navigating to a one2many with tabs, the button add a line receives the focus",
         async function (assert) {
             await makeView({
                 type: "form",
@@ -11584,21 +11698,19 @@ QUnit.module("Fields", (hooks) => {
             });
 
             await clickEdit(target);
-
             assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
 
             getNextTabableElement(target).focus(); // go inside one2many
             await nextTick();
-
             assert.strictEqual(
-                target.querySelector("[name=turtle_foo] input"),
+                target.querySelector(".o_field_x2many_list_row_add a"),
                 document.activeElement
             );
         }
     );
 
     QUnit.test(
-        "when Navigating to a one2many with tabs, not filling any field and hitting tab, we should not add a first line but navigate to the next control",
+        "Navigate to a one2many with tab then tab again focus the next field",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
 
@@ -11638,16 +11750,85 @@ QUnit.module("Fields", (hooks) => {
             await nextTick();
 
             assert.strictEqual(
+                target.querySelector(".o_field_x2many_list_row_add a"),
+                document.activeElement
+            );
+            assert.containsNone(target, "[name=turtles] .o_selected_row");
+
+            const nextInput = target.querySelector("[name=foo] input");
+            // trigger Tab event and check that the default behavior can happen.
+            const event = triggerEvent(
                 document.activeElement,
-                target.querySelector("[name=turtle_foo] input")
+                null,
+                "keydown",
+                { key: "Tab" },
+                { fast: true }
+            );
+            assert.strictEqual(getNextTabableElement(target), nextInput);
+            assert.ok(!event.defaultPrevented);
+            nextInput.focus();
+            await nextTick();
+            assert.strictEqual(document.activeElement, nextInput);
+        }
+    );
+
+    QUnit.test(
+        "when Navigating to a one2many with tabs, not filling any field and hitting tab, no line is added and the next field is focused",
+        async function (assert) {
+            serverData.models.partner.records[0].turtles = [];
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <sheet>
+                            <group>
+                                <field name="qux"/>
+                            </group>
+                            <notebook>
+                                <page string="Partner page">
+                                    <field name="turtles">
+                                        <tree editable="bottom">
+                                            <field name="turtle_foo"/>
+                                            <field name="turtle_description"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                            </notebook>
+                            <group>
+                                <field name="foo"/>
+                            </group>
+                        </sheet>
+                    </form>`,
+                resId: 1,
+            });
+
+            await clickEdit(target);
+
+            assert.strictEqual(document.activeElement, target.querySelector("[name=qux] input"));
+
+            getNextTabableElement(target).focus(); // go inside one2many
+            await nextTick();
+
+            assert.strictEqual(
+                target.querySelector(".o_field_x2many_list_row_add a"),
+                document.activeElement
+            );
+            assert.containsNone(target, "[name=turtles] .o_selected_row");
+
+            await addRow(target);
+            assert.strictEqual(
+                target.querySelector("[name=turtle_foo] input"),
+                document.activeElement
             );
 
             triggerHotkey("Tab"); // go to turtle_description field
             await nextTick();
-
             assert.strictEqual(
-                document.activeElement,
-                target.querySelector("[name=turtle_description] textarea")
+                target.querySelector("[name=turtle_description] textarea"),
+                document.activeElement
             );
 
             const nextInput = target.querySelector("[name=foo] input");
@@ -11664,9 +11845,6 @@ QUnit.module("Fields", (hooks) => {
             nextInput.focus();
             await nextTick();
             assert.strictEqual(document.activeElement, nextInput);
-            // the default behavior happens but the list renderer makes the edited record
-            // pass in readonly mode.
-            assert.containsNone(target, "[name=turtles] .o_selected_row");
         }
     );
 
@@ -11714,7 +11892,12 @@ QUnit.module("Fields", (hooks) => {
 
             getNextTabableElement(target).focus(); // go inside one2many
             await nextTick();
+            assert.strictEqual(
+                target.querySelector(".o_field_x2many_list_row_add a"),
+                document.activeElement
+            );
 
+            await addRow(target);
             assert.strictEqual(
                 target.querySelector(".modal [name=turtle_foo] input"),
                 document.activeElement
@@ -11823,17 +12006,6 @@ QUnit.module("Fields", (hooks) => {
             firstCreateActionLink.focus(); // goes inside one2many
             await nextTick();
 
-            assert.containsOnce(target, "[name=p] .o_selected_row");
-            assert.strictEqual(
-                document.activeElement,
-                target.querySelector("[name=p] .o_selected_row input")
-            );
-
-            // press ESC to cancel 1st control click (create)
-            triggerHotkey("Escape");
-            await nextTick();
-
-            assert.containsNone(target, "[name=p] .o_selected_row");
             assert.strictEqual(
                 document.activeElement,
                 target.querySelector(".o_field_x2many_list_row_add a")
@@ -11983,4 +12155,44 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".o_list_renderer");
         }
     );
+    QUnit.test("open a one2many record containing a one2many", async (assert) => {
+        serverData.views = {
+            "partner,1234,form": `<form><field name="turtles" >
+                <tree><field name="display_name" /></tree></field>
+                </form>`,
+        };
+
+        patchWithCleanup(browser.localStorage, {
+            setItem(args) {
+                assert.step(`localStorage setItem ${args}`);
+            },
+            getItem(args) {
+                assert.step(`localStorage getItem ${args}`);
+            },
+        });
+
+        const rec = serverData.models.partner.records.find(({ id }) => id === 2);
+        rec.p = [1];
+        await makeView({
+            type: "form",
+            arch: `<form>
+                <field name="p" context="{ 'form_view_ref': 1234 }">
+                    <tree><field name="display_name" /></tree>
+                </field>
+            </form>`,
+            serverData,
+            resModel: "partner",
+            resId: 2,
+        });
+
+        assert.verifySteps([
+            "localStorage getItem optional_fields,partner,form,100000001,p,list,display_name",
+        ]);
+
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".modal .o_data_row");
+        assert.verifySteps([
+            "localStorage getItem optional_fields,partner,form,100000001,turtles,list,display_name",
+        ]);
+    });
 });

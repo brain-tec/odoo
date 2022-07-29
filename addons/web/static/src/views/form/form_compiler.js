@@ -144,7 +144,11 @@ export class FormCompiler extends ViewCompiler {
                         ? `!evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`
                         : true,
             });
-            append(mainSlot, this.compileNode(child, params, false));
+            const button = this.compileNode(child, params, false);
+            if (button.tagName === "ViewButton") {
+                button.setAttribute("defaultRank", "'oe_stat_button'");
+            }
+            append(mainSlot, button);
             append(buttonBox, mainSlot);
         }
 
@@ -186,12 +190,12 @@ export class FormCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileForm(el, params) {
+        const sheetNode = el.querySelector("sheet");
+        const displayClasses = sheetNode ? `d-flex {{ uiService.size < ${SIZES.XXL} ? "flex-column" : "flex-nowrap h-100" }}` : "d-block";
         const form = createElement("div", {
             "t-att-class": "props.class",
-            "t-attf-class": `{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} d-flex {{ uiService.size < ${SIZES.XXL} ? "flex-column" : "flex-nowrap h-100" }}`,
+            "t-attf-class": `{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} ${displayClasses}`,
         });
-
-        const sheetNode = el.querySelector("sheet");
         if (!sheetNode) {
             for (const child of el.childNodes) {
                 append(form, this.compileNode(child, params));
@@ -421,7 +425,7 @@ export class FormCompiler extends ViewCompiler {
         const noteBookAnchors = {};
 
         if (el.hasAttribute("class")) {
-            noteBook.setAttribute("className", `"${el.getAttribute("class")}"`);
+            noteBook.setAttribute("className", toStringExpression(el.getAttribute("class")));
             el.removeAttribute("class");
         }
 
@@ -436,11 +440,6 @@ export class FormCompiler extends ViewCompiler {
 
             const pageSlot = createElement("t");
             append(noteBook, pageSlot);
-
-            if (el.hasAttribute("name")) {
-                noteBook.setAttribute("name", `"${el.getAttribute("name")}"`);
-                el.removeAttribute("name");
-            }
 
             const pageId = `page_${this.id++}`;
             const pageTitle = toStringExpression(

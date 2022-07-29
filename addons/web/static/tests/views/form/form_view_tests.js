@@ -32,12 +32,13 @@ import legacySession from "web.session";
 import { scrollerService } from "@web/core/scroller_service";
 import BasicModel from "web.BasicModel";
 import { localization } from "@web/core/l10n/localization";
+import { SIZES } from "@web/core/ui/ui_service";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
-const { Component, xml } = owl;
+const { Component, xml, EventBus } = owl;
 
 let target;
 let serverData;
@@ -316,6 +317,7 @@ QUnit.module("Views", (hooks) => {
                     value: false,
                 });
                 return {
+                    bus: new EventBus(),
                     size: 0,
                     isSmall: true,
                 };
@@ -344,6 +346,7 @@ QUnit.module("Views", (hooks) => {
                     value: false,
                 });
                 return {
+                    bus: new EventBus(),
                     size: 9,
                     isSmall: false,
                 };
@@ -372,6 +375,49 @@ QUnit.module("Views", (hooks) => {
         for (const btn of buttonBox.children) {
             assert.strictEqual(btn.getBoundingClientRect().top, buttonBoxRect.top);
         }
+    });
+
+    QUnit.test("form view gets size class on small and big screens", async (assert) => {
+        let uiSize = SIZES.MD;
+        const bus = new EventBus();
+        registry.category("services").add("ui", {
+            start(env) {
+                Object.defineProperty(env, "isSmall", {
+                    value: false,
+                });
+                return {
+                    bus,
+                    get size() {
+                        return uiSize;
+                    },
+                    get isSmall() {
+                        return uiSize <= SIZES.SM;
+                    },
+                };
+            },
+        });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `<form><sheet><div></div></sheet></form>`,
+            resId: 2,
+        });
+
+        assert.containsNone(target, ".o_xxl_form_view, .o_xxs_form_view");
+
+        uiSize = SIZES.XXL;
+        bus.trigger("resize");
+        await nextTick();
+        assert.containsNone(target, ".o_xxs_form_view");
+        assert.containsOnce(target, ".o_xxl_form_view");
+
+        uiSize = SIZES.XS;
+        bus.trigger("resize");
+        await nextTick();
+        assert.containsNone(target, ".o_xxl_form_view");
+        assert.containsOnce(target, ".o_xxs_form_view");
     });
 
     QUnit.test("duplicate fields rendered properly", async function (assert) {
@@ -870,7 +916,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="int_field"/>
-                            <notebook class="new_class" attrs='{"invisible": [["int_field", "=", 10]]}'>
+                            <notebook name="test_name" class="new_class" attrs='{"invisible": [["int_field", "=", 10]]}'>
                                 <page string="Foo">
                                     <field name="foo"/>
                                 </page>
@@ -1429,6 +1475,34 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, "button.oe_stat_button");
         await click(target.querySelector(".oe_stat_button")); // should not call doActionButton
+    });
+
+    QUnit.test("rendering stat buttons without class", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <sheet>
+                        <div name="button_box" class="oe_button_box">
+                            <button>
+                                <field name="int_field"/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="foo"/>
+                        </group>
+                    </sheet>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.containsOnce(
+            target,
+            "button.oe_stat_button",
+            "button should have oe_stat_button class"
+        );
     });
 
     QUnit.test("rendering stat buttons without action", async function (assert) {
@@ -2292,6 +2366,26 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsNone(target, "div.o_horizontal_separator");
+    });
+
+    QUnit.test("form views in dialogs do not have a control panel", async function (assert) {
+        serverData.views = {
+            "partner,false,form": `<form><field name="foo"/></form>`,
+        };
+        serverData.actions = {
+            1: {
+                id: 1,
+                name: "Partner",
+                res_model: "partner",
+                type: "ir.actions.act_window",
+                views: [[false, "form"]],
+                target: "new",
+            },
+        };
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, 1);
+        assert.containsOnce(target, ".o_dialog .o_form_view");
+        assert.containsNone(target, ".o_dialog .o_form_view .o_control_panel");
     });
 
     QUnit.test("buttons in form view", async function (assert) {
@@ -5792,6 +5886,7 @@ QUnit.module("Views", (hooks) => {
                     },
                 });
                 return {
+                    bus: new EventBus(),
                     get size() {
                         return 6;
                     },
@@ -5840,6 +5935,21 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsNone(target, ".o-form-buttonbox");
+    });
+
+    QUnit.test("button box accepts extra classes", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <div class="oe_button_box my_class" name="button_box"><div/></div>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.containsOnce(target, ".o-form-buttonbox.my_class");
     });
 
     QUnit.test("one2many default value creation", async function (assert) {
@@ -6749,6 +6859,7 @@ QUnit.module("Views", (hooks) => {
                     },
                 });
                 return {
+                    bus: new EventBus(),
                     get size() {
                         return screenSize;
                     },
@@ -9317,10 +9428,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const input = target.querySelector(".o_field_widget[name=foo] input");
-        input.value = "some foo value";
-        await triggerEvent(input, null, "input");
-
+        await editInput(target, ".o_field_widget[name=foo] input", "some foo value");
         await click(target.querySelector(".o_form_button_save"));
 
         assert.containsOnce(target, ".o_form_readonly", "form view should be in readonly");
@@ -11054,7 +11162,7 @@ QUnit.module("Views", (hooks) => {
         legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
         const fakeUIService = {
             start(env) {
-                let ui = {};
+                const ui = { bus: new EventBus() };
                 Object.defineProperty(env, "isSmall", {
                     get() {
                         return true;
@@ -11094,7 +11202,7 @@ QUnit.module("Views", (hooks) => {
         legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
         const fakeUIService = {
             start(env) {
-                let ui = {};
+                const ui = { bus: new EventBus() };
                 Object.defineProperty(env, "isSmall", {
                     get() {
                         return true;

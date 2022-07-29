@@ -1831,6 +1831,7 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async quickCreate(activeFields, context) {
+        await this.model.mutex.getUnlockedDef();
         const record = this.quickCreateRecord;
         if (record) {
             this.removeRecord(record);
@@ -2518,7 +2519,7 @@ export class Group extends DataPoint {
         }
         const saved = await record.save();
         if (saved) {
-            this.addRecord(this.removeRecord(record));
+            this.addRecord(this.removeRecord(record), 0);
             this.count++;
             this.list.count++;
             return record;

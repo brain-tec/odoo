@@ -3,27 +3,14 @@
 
     <t t-name="ClosePosPopup" owl="1">
             <div class="popup close-pos-popup">
-                <header class="title">
-                    CLOSING CONTROL
+                <header>
+                    <div class="title">Closing Session</div>
+                    <div class="total-orders">
+                        Total <t t-esc="ordersDetails.quantity"/> orders:
+                        <span class="amount" t-esc="env.pos.format_currency(ordersDetails.amount)"/>
+                    </div>
                 </header>
                 <main class="body">
-                    <div class="session-overview">
-                        <div class="overview-info">
-                            <div class="info-title column-left">
-                                <span>Total <t t-esc="ordersDetails.quantity"/> orders</span>
-                                <span>Payments</span>
-                                <span>Customer Account</span>
-                            </div>
-                            <div class="info-value column-left">
-                                <span t-esc="env.pos.format_currency(ordersDetails.amount)"/>
-                                <span t-esc="env.pos.format_currency(paymentsAmount)"/>
-                                <span t-esc="env.pos.format_currency(payLaterAmount)"/>
-                            </div>
-                        </div>
-                        <div t-if="openingNotes" class="opening-note">
-                            <t t-esc="openingNotes"/>
-                        </div>
-                    </div>
                     <div class="payment-methods-overview">
                         <table>
                             <thead>
@@ -60,7 +47,7 @@
                                                 <t t-esc="move.name"/>
                                             </div>
                                         </td>
-                                        <td t-esc="env.pos.format_currency(Math.abs(move.amount))" />
+                                        <td t-esc="env.pos.format_currency(Math.abs(move.amount))"/>
                                     </tr>
                                     <tr t-if="defaultCashDetails.payment_amount">
                                         <td>
@@ -84,18 +71,27 @@
                             </tbody>
                         </table>
                     </div>
-                    <textarea placeholder="Notes" class="closing-notes" t-model="state.notes"/>
-                    <div class="accept-closing" t-att-class="{invisible: !hasDifference()}">
-                        <t t-set="_hasUserAuthority" t-value="hasUserAuthority()" />
-                        <input t-att-disabled="!_hasUserAuthority" type="checkbox" id="accept" t-model="state.acceptClosing"/>
-                        <label t-att-class="{disabled: !_hasUserAuthority}" for="accept">Accept payments difference and post a profit/loss journal entry</label>
-                        <div class="warning" t-att-class="{invisible: _hasUserAuthority}">The maximum difference allowed is <t t-esc="env.pos.format_currency(amountAuthorizedDiff)"/>. Please contact your manager to accept the closing difference.</div>
+                    <div class="notes-container">
+                        <div class="opening-notes" t-if="openingNotes" >
+                            <t t-esc="openingNotes"/>
+                        </div>
+                        <textarea class="closing-notes" placeholder="Add a closing note..." t-model="state.notes"/>
                     </div>
                 </main>
                 <footer class="footer">
-                    <div class="button" t-att-class="{'disabled': !canCancel()}" t-on-click="cancelPopup">Continue Selling</div>
-                    <div class="button" t-on-click="closePos">Keep Session Open</div>
-                    <div class="button" t-att-class="{'disabled': !canCloseSession()}" t-on-click="closeSession">Close Session</div>
+                    <div class="button highlight" t-on-click="onCloseSession">Close Session</div>
+                    <div class="button" t-on-click="closePos" title="Visit the Backend but keep session open">Backend</div>
+                    <div class="button" t-att-class="{'disabled': !canCancel()}" t-on-click="cancelPopup">Discard</div>
+                    <!-- Download Sale Details -->
+                    <div class="small button icon" 
+                        t-on-click="downloadSalesReport" 
+                        title="Download a report with all the sales of the current PoS Session">
+                            <i class="fa fa-download" role="img"/>
+                    </div>
+                    <!-- Print Sale Details -->
+                    <div t-if="env.proxy.printer" class="small button icon">
+                        <SaleDetailsButton/>
+                    </div>
                 </footer>
             </div>
             <MoneyDetailsPopup

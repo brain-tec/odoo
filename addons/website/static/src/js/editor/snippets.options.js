@@ -2175,7 +2175,8 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
         // TODO this is hacky but changing the header visibility may have an
         // effect on features like FullScreenHeight which depend on viewport
         // size so we simulate a resize.
-        $(window).trigger('resize');
+        const targetWindow = this.$target[0].ownerDocument.defaultView;
+        targetWindow.dispatchEvent(new targetWindow.Event('resize'));
     },
 
     //--------------------------------------------------------------------------
@@ -2761,18 +2762,6 @@ options.registry.ScrollButton = options.Class.extend({
     start: async function () {
         await this._super(...arguments);
         this.$button = this.$('.o_scroll_button');
-    },
-    /**
-     * Removes button if the option is not displayed (for example in "fit
-     * content" height).
-     *
-     * @override
-     */
-    updateUIVisibility: async function () {
-        await this._super(...arguments);
-        if (this.$button.length && this.el.offsetParent === null) {
-            this.$button.detach();
-        }
     },
 
     //--------------------------------------------------------------------------

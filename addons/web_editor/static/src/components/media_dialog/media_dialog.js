@@ -159,6 +159,9 @@ export class MediaDialog extends Component {
                     }
                 }
                 for (const otherTab of Object.keys(TABS).filter(key => key !== this.state.activeTab)) {
+                    for (const property of TABS[otherTab].Component.mediaSpecificStyles) {
+                        element.style.removeProperty(property);
+                    }
                     element.classList.remove(...TABS[otherTab].Component.mediaSpecificClasses);
                     const extraClassesToRemove = [];
                     for (const name of TABS[otherTab].Component.mediaExtraClasses) {
@@ -172,7 +175,23 @@ export class MediaDialog extends Component {
                             }
                         }
                     }
-                    element.classList.remove(...extraClassesToRemove);
+                    // Remove classes that do not also exist in the target type.
+                    element.classList.remove(...extraClassesToRemove.filter(candidateName => {
+                        for (const name of TABS[this.state.activeTab].Component.mediaExtraClasses) {
+                            if (typeof(name) === 'string') {
+                                if (candidateName === name) {
+                                    return false;
+                                }
+                            } else { // Regex
+                                for (const className of element.classList) {
+                                    if (className.match(candidateName)) {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    }));
                 }
                 element.classList.remove(...this.initialIconClasses);
                 element.classList.remove('o_modified_image_to_save');

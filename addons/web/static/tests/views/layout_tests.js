@@ -53,13 +53,14 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Simple rendering", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout className="'o_view_sample_data'">
+            <Layout className="'o_view_sample_data'" display="props.display">
                 <div class="toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
 
-        const env = await makeTestEnv({ config: {} });
-        await mount(ToyComponent, getFixture(), { env });
+        const env = await makeTestEnv();
+        const toyEnv = Object.assign(Object.create(env), { config: {} });
+        await mount(ToyComponent, getFixture(), { env: toyEnv });
 
         assert.containsOnce(target, ".o_view_sample_data");
         assert.containsNone(target, ".o_control_panel");
@@ -71,7 +72,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Simple rendering: with search", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout>
+            <Layout display="props.display">
                 <t t-set-slot="control-panel-top-right">
                     <div class="toy_search_bar" />
                 </t>
@@ -95,19 +96,15 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Nested layouts", async (assert) => {
         // Component C: bottom (no control panel)
         class ToyC extends Component {
-            setup() {
-                useChildSubEnv({
-                    searchModel: {
-                        display: {
-                            controlPanel: false,
-                            searchPanel: true,
-                        },
-                    },
-                });
+            get display() {
+                return {
+                    controlPanel: false,
+                    searchPanel: true,
+                };
             }
         }
         ToyC.template = xml`
-            <Layout className="'toy_c'">
+            <Layout className="'toy_c'" display="display">
                 <div class="toy_c_content" />
             </Layout>`;
         ToyC.components = { Layout };
@@ -127,23 +124,22 @@ QUnit.module("Views", (hooks) => {
             }
         }
         ToyB.template = xml`
-            <Layout className="'toy_b'">
+            <Layout className="'toy_b'" display="props.display">
                 <t t-set-slot="control-panel-top-right">
                     <div class="toy_b_breadcrumbs" />
                 </t>
-                <ToyC />
+                <ToyC/>
             </Layout>`;
         ToyB.components = { Layout, ToyC };
 
         // Component A: top
-
         class ToyA extends Component {}
         ToyA.template = xml`
-            <Layout className="'toy_a'">
+            <Layout className="'toy_a'" display="props.display">
                 <t t-set-slot="control-panel-top-right">
                     <div class="toy_a_search" />
                 </t>
-                <ToyB />
+                <ToyB display="props.display"/>
             </Layout>`;
         ToyA.components = { Layout, ToyB };
 
@@ -167,7 +163,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom control panel", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout>
+            <Layout display="props.display">
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
@@ -191,7 +187,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom search panel", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout>
+            <Layout display="props.display">
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
@@ -215,7 +211,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom banner: no bannerRoute in env", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout>
+            <Layout display="props.display">
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
@@ -238,7 +234,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom banner: with bannerRoute in env", async (assert) => {
         class ToyComponent extends Component {}
         ToyComponent.template = xml`
-            <Layout>
+            <Layout display="props.display">
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };

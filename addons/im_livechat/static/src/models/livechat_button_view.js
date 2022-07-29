@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
 import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, many, one } from '@mail/model/model_field';
 import { clear, insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'LivechatButtonView',
-    identifyingFields: ['messaging'],
+    identifyingFields: ['publicLivechatGlobalOwner'],
     recordMethods: {
         /**
          * @private
@@ -263,12 +263,11 @@ registerModel({
         localStorageChatbotState: attr({
             compute: '_computeLocalStorageChatbotState',
         }),
-        messages: attr({
-            default: [],
-        }),
-        publicLivechat: one('PublicLivechat', {
-            inverse: 'livechatButtonOwner',
-            isCausal: true,
+        messages: many('PublicLivechatMessage'),
+        publicLivechatGlobalOwner: one('PublicLivechatGlobal', {
+            inverse: 'livechatButtonView',
+            readonly: true,
+            required: true,
         }),
         rule: attr(),
         serverUrl: attr({

@@ -353,9 +353,10 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
      * - -> The fadeInOutDelay will be 200ms (600ms delay + 200ms * 2 fade in fade out)
      *
      * @private
-     * @param {Array[]} notifications structured as specified by the bus feature
+     * @param {CustomEvent} ev
+     * @param {Array[]} [ev.detail] notifications structured as specified by the bus feature
      */
-    _onNotification: function (notifications) {
+    _onNotification: function ({ detail: notifications }) {
         var nextPageEvent = false;
         if (notifications && notifications.length !== 0) {
             notifications.forEach(function (notification) {
@@ -943,7 +944,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 }, 2000);
             }
 
-            this.call('bus_service', 'onNotification', this._onNotification.bind(this));
+            this.call('bus_service', 'addEventListener', 'notification', this._onNotification.bind(this));
         }
     },
 
@@ -1078,7 +1079,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     * @private
     */
     _checkisOnMainTab: function () {
-        var isOnMainTab = this.call('multiTab', 'isOnMainTab');
+        var isOnMainTab = this.call('multi_tab', 'isOnMainTab');
         var $errorModal = this.$('#MasterTabErrorModal');
         if (isOnMainTab) {
             // Force reload the page when survey is ready to be followed, to force restart long polling
