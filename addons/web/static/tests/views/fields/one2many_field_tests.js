@@ -9559,6 +9559,63 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["onchange"]);
     });
 
+    QUnit.test("edit a field with a slow onchange in one2many", async function (assert) {
+        serverData.models.turtle.onchanges = {
+            turtle_foo: function () {},
+        };
+
+        let def;
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <tree editable="bottom">
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            async mockRPC(route, args) {
+                assert.step(args.method);
+                if (args.method === "onchange") {
+                    await Promise.resolve(def);
+                }
+            },
+        });
+
+        assert.verifySteps(["get_views", "onchange"]);
+
+        const value = "hello";
+
+        // add a new line
+        await addRow(target);
+
+        assert.verifySteps(["onchange"]);
+
+        // we want to add a delay to simulate an onchange
+        def = makeDeferred();
+
+        // write something in the field
+        await editInput(target, "[name=turtle_foo] input", value);
+        assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
+
+        await click(target, ".o_form_view");
+
+        // check that nothing changed before the onchange finished
+        assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
+
+        assert.verifySteps(["onchange"]);
+
+        // unlock onchange
+        def.resolve();
+        await nextTick();
+
+        // check the current line is added with the correct content
+        assert.strictEqual(target.querySelector(".o_data_row [name=turtle_foo]").innerText, value);
+    });
+
     QUnit.test(
         "no deadlock when leaving a one2many line with uncommitted changes",
         async function (assert) {
@@ -12195,4 +12252,50 @@ QUnit.module("Fields", (hooks) => {
             "localStorage getItem optional_fields,partner,form,100000001,turtles,list,display_name",
         ]);
     });
+
+    QUnit.test(
+        "if there are less than 4 lines in a one2many, empty lines must be displayed to cover the difference.",
+        async function (assert) {
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="bottom">
+                            <field name="display_name"/>
+                        </tree>
+                    </field>
+                </form>`,
+                resId: 1,
+            });
+
+            // Should contain 4 blank lines
+            assert.containsNone(target, ".o_list_renderer tbody tr .o_data_row");
+            assert.containsNone(target, ".o_list_renderer tbody tr .o_field_x2many_list_row_add");
+            assert.containsN(target, ".o_list_renderer tbody tr", 4);
+
+            await clickEdit(target);
+            // Should only contain the "Add a line" line and 3 blank lines
+            assert.containsNone(target, ".o_list_renderer tbody tr .o_data_row");
+            assert.containsOnce(target, ".o_list_renderer tbody tr .o_field_x2many_list_row_add");
+            assert.hasClass(
+                target.querySelector(".o_list_renderer tbody tr td"),
+                "o_field_x2many_list_row_add"
+            );
+            assert.containsN(target, ".o_list_renderer tbody tr", 4);
+
+            await addRow(target);
+            // Should only contain a new row, the "Add a line" line and 2 blank lines
+            assert.containsOnce(target, ".o_list_renderer tbody tr.o_data_row");
+            assert.hasClass(target.querySelector(".o_list_renderer tbody tr"), "o_data_row");
+            assert.containsOnce(target, ".o_list_renderer tbody tr .o_field_x2many_list_row_add");
+            assert.hasClass(
+                target.querySelectorAll(".o_list_renderer tbody tr")[1].querySelector("td"),
+                "o_field_x2many_list_row_add"
+            );
+            assert.containsN(target, ".o_list_renderer tbody tr", 4);
+        }
+    );
 });
