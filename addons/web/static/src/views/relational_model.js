@@ -853,15 +853,15 @@ export class Record extends DataPoint {
 
     /**
      * @param {"edit" | "readonly"} mode
-     * @returns {Promise<void>}
+     * @returns {Promise<Boolean>}
      */
     async switchMode(mode) {
         if (this.mode === mode) {
-            return;
+            return true;
         }
-        const preventSwitch = await this._onWillSwitchMode(this, mode);
-        if (preventSwitch === false) {
-            return;
+        const canSwitch = await this._onWillSwitchMode(this, mode);
+        if (canSwitch === false) {
+            return false;
         }
         if (mode === "readonly") {
             for (const fieldName in this.activeFields) {
@@ -876,6 +876,7 @@ export class Record extends DataPoint {
         }
         this.mode = mode;
         this.model.notify();
+        return true;
     }
 
     toggleSelection(selected) {
@@ -1412,7 +1413,7 @@ class DynamicList extends DataPoint {
 
     abandonRecord(recordId) {
         const record = this.records.find((r) => r.id === recordId);
-        this.removeRecord(record);
+        return this.removeRecord(record);
     }
 
     /**
@@ -1697,8 +1698,8 @@ class DynamicList extends DataPoint {
         return records;
     }
 
-    async unselectRecord() {
-        await unselectRecord(this.editedRecord, this.abandonRecord.bind(this));
+    unselectRecord() {
+        return unselectRecord(this.editedRecord, this.abandonRecord.bind(this));
     }
 }
 
@@ -1759,6 +1760,10 @@ export class DynamicRecordList extends DynamicList {
             parentActiveFields: this.activeFields,
             onRecordWillSwitchMode: this.onRecordWillSwitchMode,
             defaultContext: this.defaultContext,
+            rawContext: {
+                parent: this.rawContext,
+                make: () => this.context,
+            },
             ...params,
         });
         if (this.model.useSampleModel) {
@@ -2464,15 +2469,9 @@ export class Group extends DataPoint {
                     return false;
                 }
                 if (type === "date") {
-                    return serializeDate(
-                        DateTime.fromFormat(range.to, "yyyy-MM-dd", { zone: "utc" }).minus({
-                            day: 1,
-                        })
-                    );
+                    return serializeDate(deserializeDate(range.to).minus({ day: 1 }));
                 } else {
-                    return serializeDateTime(
-                        DateTime.fromFormat(range.to, "yyyy-MM-dd HH:mm:ss").minus({ second: 1 })
-                    );
+                    return serializeDateTime(deserializeDateTime(range.to).minus({ second: 1 }));
                 }
             }
             default: {
@@ -3184,8 +3183,8 @@ export class StaticList extends DataPoint {
         await Promise.all(proms);
     }
 
-    async unselectRecord() {
-        await unselectRecord(this.editedRecord);
+    unselectRecord() {
+        return unselectRecord(this.editedRecord);
     }
 }
 

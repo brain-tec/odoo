@@ -9,7 +9,7 @@ from odoo import Command, fields
 from odoo.addons.mail.models.mail_channel import channel_avatar, group_avatar
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged, Form
 from odoo.tests.common import users
 from odoo.tools import html_escape, mute_logger
@@ -22,130 +22,196 @@ class TestChannelAccessRights(MailCommon):
     @classmethod
     def setUpClass(cls):
         super(TestChannelAccessRights, cls).setUpClass()
-        Channel = cls.env['mail.channel'].with_context(cls._test_context)
 
+        cls.user_employee_1 = mail_new_test_user(cls.env, login='user_employee_1', groups='base.group_user', name='Tao Lee')
         cls.user_public = mail_new_test_user(cls.env, login='user_public', groups='base.group_public', name='Bert Tartignole')
         cls.user_portal = mail_new_test_user(cls.env, login='user_portal', groups='base.group_portal', name='Chell Gladys')
 
-        # Pigs: base group for tests
-        cls.group_groups = Channel.create({
-            'name': 'Pigs',
-            'public': 'groups',
-            'group_public_id': cls.env.ref('base.group_user').id})
-        # Jobs: public group
-        cls.group_public = Channel.create({
-            'name': 'Jobs',
-            'description': 'NotFalse',
-            'public': 'public'})
-        # Private: private group
-        cls.group_private = Channel.create({
-            'name': 'Private',
-            'public': 'private'})
+        # Channel for certain group
+        cls.group_restricted_channel = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_create(name='Channel for Groups', privacy='groups', group_id=cls.env.ref('base.group_user').id)['id'])
+        # Public Channel
+        cls.public_channel = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_create(name='Public Channel', privacy='public')['id'])
+        # Group
+        cls.private_group = cls.env['mail.channel'].browse(cls.env['mail.channel'].create_group(partners_to=cls.user_employee.partner_id.ids, name="Group")['id'])
+        # Chat
+        cls.chat_user_employee = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_get(cls.user_employee.partner_id.ids)['id'])
+        cls.chat_user_employee_1 = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_get(cls.user_employee_1.partner_id.ids)['id'])
+        cls.chat_user_portal = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_get(cls.user_portal.partner_id.ids)['id'])
+        cls.chat_user_public = cls.env['mail.channel'].browse(cls.env['mail.channel'].channel_get(cls.user_public.partner_id.ids)['id'])
 
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.base.models.ir_model', 'odoo.models')
-    @users('user_portal')
+    @users('user_public')
     def test_access_public(self):
-        # Read public group -> ok
-        self.env['mail.channel'].browse(self.group_public.id).read()
+        # Read public channel -> ok
+        self.env['mail.channel'].browse(self.public_channel.id).read()
 
-        # Read groups -> ko, restricted to employees
+        # Read group restricted channel -> ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_groups.id).read()
-        # Read private -> ko, restricted to members
+            self.env['mail.channel'].browse(self.group_restricted_channel.id).read()
+        # Read group -> ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_private.id).read()
+            self.env['mail.channel'].browse(self.private_group.id).read()
 
-        # Read a private group when being a member: ok
-        self.group_private.write({'channel_partner_ids': [(4, self.user_portal.partner_id.id)]})
-        self.env['mail.channel'].browse(self.group_private.id).read()
+        # Being a member of public channel: -> ok
+        self.public_channel.add_members(self.user_public.partner_id.id)
+        # Being a member of group restricted channel: -> ko, no access rights
+        with self.assertRaises(UserError):
+            self.group_restricted_channel.add_members(self.user_public.partner_id.id)
+        # Being a group member: -> ok
+        self.private_group.add_members(self.user_public.partner_id.id)
 
-        # Create group: ko, no access rights
+        # Read a group when being a member: -> ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].create({'name': 'Test'})
-
-        # Update group: ko, no access rights
+            self.env['mail.channel'].browse(self.private_group.id).read()
+        # Read a chat when being a member: -> ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_public.id).write({'name': 'Broutouschnouk'})
+            self.env['mail.channel'].browse(self.chat_user_public.id).read()
 
-        # Unlink group: ko, no access rights
+        # Create channel/group/chat: ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_public.id).unlink()
+            self.env['mail.channel'].create({'name': 'Test', 'channel_type': 'channel'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].create({'name': 'Test', 'channel_type': 'group'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].create({'name': 'Test', 'channel_type': 'chat'})
 
-    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models', 'odoo.models.unlink')
+        # Update channel/group/chat: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.public_channel.id).write({'name': 'modified'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.group_restricted_channel.id).write({'name': 'modified'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.private_group.id).write({'name': 'modified'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_public.id).write({'name': 'modified'})
+
+        # Unlink channel/group/chat: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.public_channel.id).unlink()
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.group_restricted_channel.id).unlink()
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.private_group.id).unlink()
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_public.id).unlink()
+
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.base.models.ir_model', 'odoo.models')
     @users('employee')
     def test_access_employee(self):
-        # Employee read employee-based group: ok
-        group_groups = self.env['mail.channel'].browse(self.group_groups.id)
-        group_groups.read()
+        # Read public channel -> ok
+        self.env['mail.channel'].browse(self.public_channel.id).read()
+        # Read group restricted channel -> ok
+        self.env['mail.channel'].browse(self.group_restricted_channel.id).read()
+        # Read chat when not being a member: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_employee_1.id).read()
 
-        # Employee can create a group
-        new_channel = self.env['mail.channel'].create({'name': 'Test'})
+        # Update chat when not being a member: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_employee_1.id).write({'name': 'modified'})
+
+        # Being a channel/group member: -> ok
+        self.public_channel.add_members(self.user_public.partner_id.id)
+        self.group_restricted_channel.add_members(self.env.user.partner_id.id)
+        self.private_group.add_members(self.env.user.partner_id.id)
+
+        # Read a group when being a member: ok
+        self.env['mail.channel'].browse(self.private_group.id).read()
+        # Read a chat when being a member: ok
+        self.env['mail.channel'].browse(self.chat_user_employee.id).read()
+
+        # Update channel/group/chat when being a member: ok
+        self.env['mail.channel'].browse(self.public_channel.id).write({'name': 'modified again'})
+        self.env['mail.channel'].browse(self.group_restricted_channel.id).write({'name': 'modified again'})
+        self.env['mail.channel'].browse(self.private_group.id).write({'name': 'modified again'})
+        self.env['mail.channel'].browse(self.chat_user_employee.id).write({'name': 'modified again'})
+
+        # Create channel/group/chat: ok
+        new_channel = self.env['mail.channel'].create(
+            {'name': 'Test', 'channel_type': 'channel'})
+        new_group = self.env['mail.channel'].create(
+            {'name': 'Test', 'channel_type': 'group'})
+        new_chat = self.env['mail.channel'].create(
+            {'name': 'Test', 'channel_type': 'chat'})
+
+        # Employee should be inside the created chat/group/chat
         self.assertIn(new_channel.channel_partner_ids, self.partner_employee)
+        self.assertIn(new_group.channel_partner_ids, self.partner_employee)
+        self.assertIn(new_chat.channel_partner_ids, self.partner_employee)
 
-        # Employee update employee-based group: ok
-        group_groups.write({'name': 'modified'})
-
-        # Employee unlink employee-based group: ko
+        # Unlink channel/group/chat: ko, no access rights
         with self.assertRaises(AccessError):
-            group_groups.unlink()
-
-        # Employee cannot read a private group
+            self.env['mail.channel'].browse(self.public_channel.id).unlink()
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_private.id).read()
-
-        # Employee cannot write on private
+            self.env['mail.channel'].browse(self.group_restricted_channel.id).unlink()
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_private.id).write({'name': 're-modified'})
-
-        # Employee cannot unlink private
+            self.env['mail.channel'].browse(self.private_group.id).unlink()
         with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_private.id).unlink()
-
-    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models')
-    @users('user_portal')
-    def test_access_portal(self):
-        with self.assertRaises(AccessError):
-            self.env['mail.channel'].browse(self.group_private.id).name
-
-        self.group_private.write({'channel_partner_ids': [(4, self.user_portal.partner_id.id)]})
-        group_private_portal = self.env['mail.channel'].browse(self.group_private.id)
-        group_private_portal.read(['name'])
-        for message in group_private_portal.message_ids:
-            message.read(['subject'])
-
-        # no access to followers (employee only)
-        with self.assertRaises(AccessError):
-            group_private_portal.message_partner_ids
-
-        for partner in self.group_private.message_partner_ids:
-            if partner.id == self.user_portal.partner_id.id:
-                # Chell can read her own partner record
-                continue
-            with self.assertRaises(AccessError):
-                trigger_read = partner.with_user(self.user_portal).name
+            self.env['mail.channel'].browse(self.chat_user_employee.id).unlink()
 
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.base.models.ir_model', 'odoo.models')
     @users('user_portal')
-    def test_members(self):
-        group_public = self.env['mail.channel'].browse(self.group_public.id)
-        group_public.read(['name'])
-        self.assertFalse(group_public.is_member)
-
+    def test_access_portal(self):
+        # Read public channel -> ok
+        self.env['mail.channel'].browse(self.public_channel.id).read()
+        # Read group restricted channel/group -> ko, no access rights
         with self.assertRaises(AccessError):
-            group_public.write({'name': 'Better Name'})
-
+            self.env['mail.channel'].browse(self.group_restricted_channel.id).read()
         with self.assertRaises(AccessError):
-            group_public.add_members(self.env.user.partner_id.ids)
+            self.env['mail.channel'].browse(self.private_group.id).read()
 
-        group_private = self.env['mail.channel'].browse(self.group_private.id)
-        with self.assertRaises(AccessError):
-            group_private.read(['name'])
+        # Being a group member: -> ok
+        self.private_group.add_members(self.user_portal.partner_id.id)
 
+        # Read a group/chat when being a member: ok
+        self.env['mail.channel'].browse(self.private_group.id).read()
+        self.env['mail.channel'].browse(self.chat_user_portal.id).read()
+
+        # Update group/chat when being a member: ko, no access rights
         with self.assertRaises(AccessError):
-            self.env['mail.channel.member'].create({
-                'partner_id': self.env.user.partner_id.id,
-                'channel_id': group_private.id,
-            })
+            self.env['mail.channel'].browse(self.private_group.id).write({'name': 'modified'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_portal.id).write({'name': 'modified'})
+
+        # Create group/chat: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].create({'name': 'Test', 'channel_type': 'group'})
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].create({'name': 'Test', 'channel_type': 'chat'})
+
+        # Unlink group/chat: ko, no access rights
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.private_group.id).unlink()
+        with self.assertRaises(AccessError):
+            self.env['mail.channel'].browse(self.chat_user_portal.id).unlink()
+
+        # Read message from group/chat: ok
+        group_portal = self.env['mail.channel'].browse(self.private_group.id)
+        for message in group_portal.message_ids:
+            message.read(['subject'])
+        chat_portal = self.env['mail.channel'].browse(self.chat_user_portal.id)
+        for message in chat_portal.message_ids:
+            message.read(['subject'])
+
+        # Read partner list from group: ko, no access rights
+        with self.assertRaises(AccessError):
+            group_portal.message_partner_ids
+        for partner in self.private_group.message_partner_ids:
+            if partner.id == self.user_portal.partner_id.id:
+                # Portal user can read their own partner record
+                continue
+            with self.assertRaises(AccessError):
+                partner.with_user(self.user_portal).name
+
+        # Read partner list from chat: ko, no access rights
+        with self.assertRaises(AccessError):
+            chat_portal.message_partner_ids
+        for partner in self.chat_user_portal.message_partner_ids:
+            if partner.id == self.user_portal.partner_id.id:
+                # Portal user can read their own partner record
+                continue
+            with self.assertRaises(AccessError):
+                partner.with_user(self.user_portal).name
 
 
 @tagged('mail_channel')
@@ -155,9 +221,8 @@ class TestChannelInternals(MailCommon):
     def setUpClass(cls):
         super(TestChannelInternals, cls).setUpClass()
         cls.test_channel = cls.env['mail.channel'].with_context(cls._test_context).create({
-            'name': 'Test',
             'channel_type': 'channel',
-            'description': 'Description',
+            'name': 'Channel',
             'public': 'public',
         })
         cls.test_partner = cls.env['res.partner'].with_context(cls._test_context).create({
@@ -272,25 +337,22 @@ class TestChannelInternals(MailCommon):
             'description': 'Channel to travel through time',
             'public': 'private',
         })
-        test_channel_group = self.env['mail.channel'].with_context(self._test_context).create({
-            'name': 'Sic Mundus',
-            'public': 'groups',
-            'group_public_id': self.env.ref('base.group_user').id})
+        group_restricted_channel = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='Sic Mundus', privacy='groups', group_id=self.env.ref('base.group_user').id)['id'])
 
         self.test_channel.add_members((self.partner_employee | self.partner_employee_nomail).ids)
         test_channel_private.add_members((self.partner_employee | self.partner_employee_nomail).ids)
-        test_channel_group.add_members((self.partner_employee | self.partner_employee_nomail).ids)
+        group_restricted_channel.add_members((self.partner_employee | self.partner_employee_nomail).ids)
 
         # Unsubscribe archived user from the private channels, but not from public channels
         self.user_employee.active = False
         self.assertEqual(test_channel_private.channel_partner_ids, self.partner_employee_nomail)
-        self.assertEqual(test_channel_group.channel_partner_ids, self.partner_employee_nomail)
+        self.assertEqual(group_restricted_channel.channel_partner_ids, self.partner_employee_nomail)
         self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | self.partner_employee_nomail)
 
         # Unsubscribe deleted user from the private channels, but not from public channels
         self.user_employee_nomail.unlink()
         self.assertEqual(test_channel_private.channel_partner_ids, self.env['res.partner'])
-        self.assertEqual(test_channel_group.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(group_restricted_channel.channel_partner_ids, self.env['res.partner'])
         self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | self.partner_employee_nomail)
 
     @users('employee_nomail')
@@ -375,7 +437,7 @@ class TestChannelInternals(MailCommon):
             'public': 'private',
             'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
         })
-        test_channel_group = self.env['mail.channel'].with_context(self._test_context).create({
+        group_restricted_channel = self.env['mail.channel'].with_context(self._test_context).create({
             'name': 'Sic Mundus',
             'public': 'groups',
             'group_public_id': self.env.ref('base.group_user').id,
@@ -384,37 +446,49 @@ class TestChannelInternals(MailCommon):
         self.test_channel.with_context(self._test_context).write({
             'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
         })
-        test_chat = self.env['mail.channel'].with_user(self.user_employee).with_context(self._test_context).create({
+        private_group = self.env['mail.channel'].with_user(self.user_employee).with_context(self._test_context).create({
             'name': 'test',
-            'channel_type': 'chat',
+            'channel_type': 'group',
             'public': 'private',
             'channel_partner_ids': [Command.link(self.user_employee.partner_id.id), Command.link(test_partner.id)],
         })
 
-        # Unsubscribe archived user from the private channels, but not from public channels and not from chat
+        # Unsubscribe archived user from the private channels, but not from public channels and not from group
         self.user_employee.active = False
-        (test_chat | self.test_channel).invalidate_recordset(['channel_partner_ids'])
+        (private_group | self.test_channel).invalidate_recordset(['channel_partner_ids'])
         self.assertEqual(test_channel_private.channel_partner_ids, test_partner)
-        self.assertEqual(test_channel_group.channel_partner_ids, test_partner)
+        self.assertEqual(group_restricted_channel.channel_partner_ids, test_partner)
         self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | test_partner)
-        self.assertEqual(test_chat.channel_partner_ids, self.user_employee.partner_id | test_partner)
+        self.assertEqual(private_group.channel_partner_ids, self.user_employee.partner_id | test_partner)
 
-        # Unsubscribe deleted user from the private channels, but not from public channels and not from chat
+        # Unsubscribe deleted user from the private channels, but not from public channels and not from group
         test_user.unlink()
         self.assertEqual(test_channel_private.channel_partner_ids, self.env['res.partner'])
-        self.assertEqual(test_channel_group.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(group_restricted_channel.channel_partner_ids, self.env['res.partner'])
         self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | test_partner)
-        self.assertEqual(test_chat.channel_partner_ids, self.user_employee.partner_id | test_partner)
+        self.assertEqual(private_group.channel_partner_ids, self.user_employee.partner_id | test_partner)
 
     @users('employee')
+    @mute_logger('odoo.models.unlink')
     def test_channel_private_unfollow(self):
-        """ Test that a partner can leave (unfollow) a private channel. """
-        channel_private = self.env['mail.channel'].create({
-            'name': 'Winden caves',
-            'public': 'private',
-        })
-        channel_private.action_unfollow()
-        self.assertEqual(channel_private.channel_partner_ids, self.env['res.partner'])
+        """ Test that a partner can leave (unfollow) a channel/group/chat. """
+        group_restricted_channel = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='Channel for Groups', privacy='groups', group_id=self.env.ref('base.group_user').id)['id'])
+        public_channel = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='Channel for Everyone', privacy='public')['id'])
+        private_group = self.env['mail.channel'].browse(self.env['mail.channel'].create_group(partners_to=self.user_employee.partner_id.ids, name="Group")['id'])
+        chat_user_current = self.env['mail.channel'].browse(self.env['mail.channel'].channel_get(self.env.user.partner_id.ids)['id'])
+
+        group_restricted_channel.add_members(self.env.user.partner_id.id)
+        public_channel.add_members(self.env.user.partner_id.id)
+
+        group_restricted_channel.action_unfollow()
+        public_channel.action_unfollow()
+        private_group.action_unfollow()
+        chat_user_current.action_unfollow()
+
+        self.assertEqual(group_restricted_channel.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(public_channel.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(private_group.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(chat_user_current.channel_partner_ids, self.env['res.partner'])
 
     def test_channel_unfollow_should_not_post_message_if_the_partner_has_been_removed(self):
         '''
@@ -458,15 +532,15 @@ class TestChannelInternals(MailCommon):
     def test_channel_should_generate_correct_default_avatar(self):
         test_channel = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='Channel')['id'])
         test_channel.uuid = 'channel-uuid'
-        test_group = self.env['mail.channel'].browse(self.env['mail.channel'].create_group(partners_to=self.user_employee.partner_id.ids)['id'])
-        test_group.uuid = 'group-uuid'
+        private_group = self.env['mail.channel'].browse(self.env['mail.channel'].create_group(partners_to=self.user_employee.partner_id.ids)['id'])
+        private_group.uuid = 'group-uuid'
         bgcolor_channel = html_escape('hsl(316, 61%, 45%)')  # depends on uuid
         bgcolor_group = html_escape('hsl(17, 60%, 45%)')  # depends on uuid
         expceted_avatar_channel = (channel_avatar.replace('fill="#875a7b"', f'fill="{bgcolor_channel}"')).encode()
         expected_avatar_group = (group_avatar.replace('fill="#875a7b"', f'fill="{bgcolor_group}"')).encode()
 
         self.assertEqual(base64.b64decode(test_channel.avatar_128), expceted_avatar_channel)
-        self.assertEqual(base64.b64decode(test_group.avatar_128), expected_avatar_group)
+        self.assertEqual(base64.b64decode(private_group.avatar_128), expected_avatar_group)
 
         test_channel.image_128 = base64.b64encode(("<svg/>").encode())
         self.assertEqual(test_channel.avatar_128, test_channel.image_128)

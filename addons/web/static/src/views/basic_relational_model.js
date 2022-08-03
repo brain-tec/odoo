@@ -286,9 +286,11 @@ export class Record extends DataPoint {
     }
 
     get dirtyFields() {
-        return Object.keys(this.model.__bm__.localData[this.__bm_handle__]._changes).map(
-            (change) => this.activeFields[change]
-        );
+        const changes = this.model.__bm__.localData[this.__bm_handle__]._changes;
+        if (!changes) {
+            return [];
+        }
+        return Object.keys(changes).map((change) => this.activeFields[change]);
     }
 
     get translatableFields() {
@@ -372,11 +374,11 @@ export class Record extends DataPoint {
 
     async switchMode(mode) {
         if (this.mode === mode) {
-            return;
+            return true;
         }
-        const preventSwitch = await this._onWillSwitchMode(this, mode);
-        if (preventSwitch === false) {
-            return;
+        const canSwitch = await this._onWillSwitchMode(this, mode);
+        if (canSwitch === false) {
+            return false;
         }
 
         if (mode === "edit") {
@@ -397,6 +399,7 @@ export class Record extends DataPoint {
         }
         this.mode = mode;
         this.model.notify();
+        return true;
     }
 
     /**
@@ -479,7 +482,7 @@ export class Record extends DataPoint {
                     if (data[fieldName]) {
                         const deserialize =
                             fieldType === "date" ? deserializeDate : deserializeDateTime;
-                        data[fieldName] = deserialize(JSON.stringify(data[fieldName]));
+                        data[fieldName] = deserialize(data[fieldName].toJSON());
                     }
                     break;
                 }
@@ -1094,9 +1097,9 @@ export class StaticList extends DataPoint {
                 }
                 this.__syncData();
                 this.editedRecord = null;
-                await editedRecord.switchMode("readonly");
+                return await editedRecord.switchMode("readonly");
             } else if (await editedRecord.checkValidity()) {
-                await editedRecord.switchMode("readonly");
+                return await editedRecord.switchMode("readonly");
             } else {
                 if (!editedRecord.isDirty) {
                     this.model.__bm__.discardChanges(handle);
@@ -1104,7 +1107,7 @@ export class StaticList extends DataPoint {
                         this.model.__bm__.removeLine(handle);
                     }
                     this.editedRecord = null;
-                    await editedRecord.switchMode("readonly");
+                    return await editedRecord.switchMode("readonly");
                 }
                 return false;
             }

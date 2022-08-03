@@ -485,29 +485,45 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
     });
 
-    QUnit.test("list view with adjacent buttons and invisible field", async function (assert) {
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: `
+    QUnit.test(
+        "list view with adjacent buttons and invisible field and button",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
                 <tree>
                     <button name="a" type="object" icon="fa-car"/>
                     <field name="foo" invisible="1"/>
+                    <!--Here the invisible=1 is used to simulate a group on the case that the user
+                        don't have the rights to see the button.-->
+                    <button name="b" type="object" icon="fa-car" invisible="1"/>
                     <button name="x" type="object" icon="fa-star"/>
                     <button name="y" type="object" icon="fa-refresh"/>
                     <button name="z" type="object" icon="fa-exclamation"/>
                 </tree>`,
-        });
+            });
 
-        assert.containsN(
-            target,
-            "th",
-            3,
-            "adjacent buttons in the arch must be grouped in a single column"
-        );
-        assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
-    });
+            assert.containsN(
+                target,
+                "th",
+                3,
+                "adjacent buttons in the arch must be grouped in a single column"
+            );
+            assert.containsN(
+                target,
+                "tr:first-child button",
+                4,
+                "Only 4 buttons should be visible"
+            );
+            assert.containsN(
+                target.querySelector(".o_data_row:first-child"),
+                "td.o_list_button",
+                2
+            );
+        }
+    );
 
     QUnit.test(
         "list view with adjacent buttons and invisible field (modifier)",
@@ -5097,7 +5113,7 @@ QUnit.module("Views", (hooks) => {
             "",
             "Char field should yield an empty element"
         );
-        assert.containsOnce(cells[1], ".form-check", "Boolean field has been instantiated");
+        assert.containsOnce(cells[1], ".o-checkbox", "Boolean field has been instantiated");
         assert.notOk(isNaN(cells[2].innerText.trim()), "Intger value is a number");
         assert.ok(cells[3].innerText.trim(), "Many2one field is a string");
 
@@ -13599,6 +13615,56 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
+    QUnit.test(
+        "Auto save: create a new record without modifying it and leave action",
+        async function (assert) {
+            serverData.models.foo.fields.foo.required = true;
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Action 1",
+                    res_model: "foo",
+                    type: "ir.actions.act_window",
+                    views: [[2, "list"]],
+                    search_view_id: [1, "search"],
+                },
+                2: {
+                    id: 2,
+                    name: "Action 2",
+                    res_model: "foo",
+                    type: "ir.actions.act_window",
+                    views: [[3, "list"]],
+                    search_view_id: [1, "search"],
+                },
+            };
+            serverData.views = {
+                "foo,1,search": "<search></search>",
+                "foo,2,list": '<tree editable="top"><field name="foo"/></tree>',
+                "foo,3,list": '<tree editable="top"><field name="foo"/></tree>',
+            };
+            const webClient = await createWebClient({ serverData });
+
+            await doAction(webClient, 1);
+            assert.deepEqual(
+                [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
+                ["yop", "blip", "gnap", "blip"]
+            );
+            assert.containsN(target, ".o_data_row", 4);
+
+            await click(target, ".o_list_button_add");
+            assert.containsN(target, ".o_data_row", 5);
+
+            // change action and come back
+            await doAction(webClient, 2);
+            await doAction(webClient, 1, { clearBreadcrumbs: true });
+            assert.deepEqual(
+                [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
+                ["yop", "blip", "gnap", "blip"]
+            );
+            assert.containsN(target, ".o_data_row", 4);
+        }
+    );
+
     QUnit.test("Auto save: modify a record and leave action", async function (assert) {
         serverData.actions = {
             1: {
@@ -14326,5 +14392,90 @@ QUnit.module("Views", (hooks) => {
         // check the current line is added with the correct content
         assert.strictEqual(target.querySelector(".o_data_row [name=int_field]").innerText, value);
         assert.verifySteps(["create", "read"]);
+    });
+
+    QUnit.test("create a record with the correct context", async (assert) => {
+        serverData.models.foo.fields.text.required = true;
+        serverData.models.foo.records = [];
+
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: ` <list editable="bottom">
+                        <field name="display_name"/>
+                        <field name="text"/>
+                    </list>`,
+            serverData,
+            mockRPC(route, args) {
+                if (args.method === "create") {
+                    assert.step("create");
+                    const { context } = args.kwargs;
+                    assert.strictEqual(context.default_text, "yop");
+                    assert.strictEqual(context.test, true);
+                }
+            },
+            context: {
+                default_text: "yop",
+                test: true,
+            },
+        });
+        await click(target.querySelector(".o_list_button_add"));
+        await editInput(target, "[name='display_name'] input", "blop");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await click(target, ".o_list_view");
+        assert.containsNone(target, ".o_selected_row");
+
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_data_row .o_data_cell")].map((el) => el.textContent)[
+                ("blop", "yop")
+            ]
+        );
+
+        assert.verifySteps(["create"]);
+    });
+
+    QUnit.test("create a record with the correct context in a group", async (assert) => {
+        serverData.models.foo.fields.text.required = true;
+
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: ` <list editable="bottom">
+                        <field name="display_name"/>
+                        <field name="text"/>
+                    </list>`,
+            groupBy: ["bar"],
+            serverData,
+            mockRPC(route, args) {
+                if (args.method === "create") {
+                    assert.step("create");
+                    const { context } = args.kwargs;
+                    assert.strictEqual(context.default_bar, true);
+                    assert.strictEqual(context.default_text, "yop");
+                    assert.strictEqual(context.test, true);
+                }
+            },
+            context: {
+                default_text: "yop",
+                test: true,
+            },
+        });
+        await click(target.querySelectorAll(".o_group_name")[1]);
+
+        await click(target.querySelector(".o_group_field_row_add a"));
+        await editInput(target, "[name='display_name'] input", "blop");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await click(target, ".o_list_view");
+        assert.containsNone(target, ".o_selected_row");
+
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_data_row .o_data_cell")].map((el) => el.textContent)[
+                ("blop", "yop")
+            ]
+        );
+
+        assert.verifySteps(["create"]);
     });
 });

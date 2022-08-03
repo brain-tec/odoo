@@ -293,7 +293,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_field_one2many table");
         assert.containsOnce(
             target,
-            "tbody td:not(.o_list_record_selector) .form-check input:checked"
+            "tbody td:not(.o_list_record_selector) .o-checkbox input:checked"
         );
         assert.containsNone(target, "label.o_form_label_empty:contains(timmy)");
     });
@@ -7833,7 +7833,8 @@ QUnit.module("Views", (hooks) => {
         );
 
         await clickEdit(target);
-        await editInput(target, '[name="display_name"] input', "test2");
+        await editInput(target, '[name="foo"] input', "test2");
+        await editInput(target, '[name="display_name"] input', "test3");
         await clickSave(target);
         assert.containsN(
             target,
@@ -7841,6 +7842,42 @@ QUnit.module("Views", (hooks) => {
             2,
             "should have two translate fields in translation alert"
         );
+    });
+
+    QUnit.test("can save without any dirty translatable fields", async function (assert) {
+        serverData.models.partner.fields.foo.translate = true;
+
+        patchWithCleanup(localization, {
+            multiLang: true,
+        });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo"/>
+                </form>`,
+            resId: 1,
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        assert.verifySteps(["get_views", "read"]);
+        await clickEdit(target);
+        assert.containsOnce(target, ".o_form_editable");
+        // o_field_translate is on the input and on the translate button
+        assert.containsN(target, "div[name='foo'] > .o_field_translate", 2);
+        await clickSave(target);
+        assert.containsNone(
+            target,
+            ".alert .o_field_translate",
+            "should not have a translation alert"
+        );
+        assert.containsOnce(target, ".o_form_readonly");
+        assert.verifySteps([]);
     });
 
     QUnit.test("translation alerts are preserved on pager change", async function (assert) {

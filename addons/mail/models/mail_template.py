@@ -30,7 +30,7 @@ class MailTemplate(models.Model):
 
     # description
     name = fields.Char('Name', translate=True)
-    model_id = fields.Many2one('ir.model', 'Applies to', help="The type of document this template can be used with")
+    model_id = fields.Many2one('ir.model', 'Applies to')
     model = fields.Char('Related Document Model', related='model_id.model', index=True, store=True, readonly=True)
     subject = fields.Char('Subject', translate=True, prefetch=True, help="Subject (placeholders may be used here)")
     email_from = fields.Char('From',
@@ -223,18 +223,18 @@ class MailTemplate(models.Model):
                     report_service = report.report_name
 
                     if report.report_type in ['qweb-html', 'qweb-pdf']:
-                        result, format = report._render_qweb_pdf([res_id])
+                        result, report_format = self.env['ir.actions.report']._render_qweb_pdf(report, [res_id])
                     else:
-                        res = report._render([res_id])
+                        res = self.env['ir.actions.report']._render(report, [res_id])
                         if not res:
                             raise UserError(_('Unsupported report type %s found.', report.report_type))
-                        result, format = res
+                        result, report_format = res
 
                     # TODO in trunk, change return format to binary to match message_post expected format
                     result = base64.b64encode(result)
                     if not report_name:
                         report_name = 'report.' + report_service
-                    ext = "." + format
+                    ext = "." + report_format
                     if not report_name.endswith(ext):
                         report_name += ext
                     attachments.append((report_name, result))
