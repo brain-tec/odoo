@@ -2758,6 +2758,72 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test(
+        "groups can not be sorted on a different field than the first field of the groupBy - 1",
+        async function (assert) {
+            assert.expect(1);
+
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.strictEqual(args.kwargs.orderby, "", "should not have an orderBy");
+                    }
+                },
+                groupBy: ["bar"],
+            });
+        }
+    );
+
+    QUnit.test(
+        "groups can not be sorted on a different field than the first field of the groupBy - 2",
+        async function (assert) {
+            assert.expect(1);
+
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.strictEqual(args.kwargs.orderby, "", "should not have an orderBy");
+                    }
+                },
+                groupBy: ["bar", "foo"],
+            });
+        }
+    );
+
+    QUnit.test("groups can be sorted on the first field of the groupBy", async function (assert) {
+        assert.expect(3);
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree default_order="bar desc"><field name="foo"/><field name="bar"/></tree>',
+            mockRPC(route, args) {
+                if (args.method === "web_read_group") {
+                    assert.strictEqual(args.kwargs.orderby, "bar DESC", "should have an orderBy");
+                }
+            },
+            groupBy: ["bar"],
+        });
+
+        assert.strictEqual(
+            document.querySelector(".o_group_header:first-child").textContent.trim(),
+            "Yes (3)"
+        );
+        assert.strictEqual(
+            document.querySelector(".o_group_header:last-child").textContent.trim(),
+            "No (1)"
+        );
+    });
+
     QUnit.test("groups can be sorted on aggregates", async function (assert) {
         await makeView({
             type: "list",
@@ -14478,4 +14544,39 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps(["create"]);
     });
+    QUnit.test(
+        "classNames given to a field are set on the right field directly",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
+                <tree editable="bottom">
+                    <field class="d-flex align-items-center" name="int_field" widget="progressbar" options="{'editable': true}" />
+                    <field class="d-none" name="bar" />
+                </tree>`,
+            });
+            assert.doesNotHaveClass(
+                target.querySelector(".o_field_cell:nth-child(2)"),
+                "d-flex align-items-center",
+                "classnames are not set on the first cell"
+            );
+            assert.hasClass(
+                target.querySelector(".o_field_progressbar"),
+                "d-flex align-items-center",
+                "classnames are set on the corresponding field div directly"
+            );
+            assert.doesNotHaveClass(
+                target.querySelector(".o_field_cell:nth-child(3)"),
+                "d-none",
+                "classnames are not set on the second cell"
+            );
+            assert.hasClass(
+                target.querySelector(".o_field_boolean"),
+                "d-none",
+                "classnames are set on the second field div directly"
+            );
+        }
+    );
 });

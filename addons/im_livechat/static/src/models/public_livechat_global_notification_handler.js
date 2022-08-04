@@ -61,19 +61,19 @@ registerModel({
                     }
                     const notificationData = payload.message;
                     // If message from notif is already in chatter messages, stop handling
-                    if (this.messaging.publicLivechatGlobal.livechatButtonView.messages.some(message => message.id === notificationData.id)) {
+                    if (this.messaging.publicLivechatGlobal.messages.some(message => message.id === notificationData.id)) {
                         return;
                     }
                     notificationData.body = utils.Markup(notificationData.body);
                     this.messaging.publicLivechatGlobal.livechatButtonView.addMessage(notificationData);
-                    if (this.messaging.publicLivechatGlobal.publicLivechat.isFolded || !this.messaging.publicLivechatGlobal.livechatButtonView.chatWindow.legacyChatWindow._publicLivechatView.isAtBottom()) {
+                    if (this.messaging.publicLivechatGlobal.publicLivechat.isFolded || !this.messaging.publicLivechatGlobal.livechatButtonView.chatWindow.publicLivechatView.widget.isAtBottom()) {
                         this.messaging.publicLivechatGlobal.publicLivechat.update({ unreadCounter: increment() });
                     }
                     this.messaging.publicLivechatGlobal.livechatButtonView.widget._renderMessages();
                     return;
                 }
                 case 'mail.message/insert': {
-                    const message = this.messaging.publicLivechatGlobal.livechatButtonView.messages.find(message => message.id === payload.id);
+                    const message = this.messaging.publicLivechatGlobal.messages.find(message => message.id === payload.id);
                     if (!message) {
                         return;
                     }
