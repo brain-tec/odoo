@@ -1940,6 +1940,38 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
+    QUnit.test("field with readonly modifier depending on id", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="int_field" attrs="{'readonly': [('id', '!=', False)]}"/>
+                </form>`,
+        });
+
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsOnce(target, ".o_field_widget[name=int_field] input");
+        assert.doesNotHaveClass(
+            target.querySelector(".o_field_widget[name=int_field]"),
+            "o_readonly_modifier"
+        );
+
+        await editInput(target, ".o_field_widget[name=int_field] input", "34");
+        await click(target.querySelector(".o_form_button_save"));
+        assert.containsOnce(target, ".o_form_readonly");
+        assert.strictEqual(target.querySelector(".o_field_widget[name=int_field]").innerText, "34");
+
+        await click(target.querySelector(".o_form_button_edit"));
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsNone(target, ".o_field_widget[name=int_field] input");
+        assert.hasClass(
+            target.querySelector(".o_field_widget[name=int_field]"),
+            "o_readonly_modifier"
+        );
+    });
+
     QUnit.test(
         "readonly attrs on lines are re-evaluated on field change 2",
         async function (assert) {
@@ -11416,10 +11448,11 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                     <form>
-                        <field name="p" mode="tree" widget="legacy_one2many"/>
+                        <field name="p" mode="tree" class="o_my_legacy_class" widget="legacy_one2many"/>
                     </form>`,
         });
         assert.containsOnce(target, ".o_field_legacy_one2many .o_legacy_list_view");
+        assert.containsOnce(target, ".o_field_widget.o_legacy_field_widget.o_my_legacy_class");
     });
 
     QUnit.test("Action Button clicked with failing action", async function (assert) {
@@ -11471,4 +11504,44 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_form_view .test");
         assert.verifySteps(["error"]);
     });
+
+    QUnit.test(
+        "form with an initial mode (readonly) -- create new record from an existing one",
+        async (assert) => {
+            await makeView({
+                type: "form",
+                resId: 1, // important
+                resModel: "partner",
+                serverData,
+                arch: `<form><field name="display_name" /></form>`,
+                mode: "readonly", // important
+            });
+
+            assert.containsOnce(target, ".o_form_readonly");
+            assert.containsOnce(target, ".o_form_button_edit");
+            assert.containsOnce(target, ".o_form_button_create");
+
+            await click(target, ".o_form_button_create");
+            assert.containsOnce(target, ".o_form_editable");
+            assert.containsOnce(target, ".o_form_button_save");
+            assert.containsOnce(target, ".o_form_button_cancel");
+        }
+    );
+
+    QUnit.test(
+        "form with an initial mode (readonly) -- new record from scratch",
+        async (assert) => {
+            await makeView({
+                type: "form",
+                resModel: "partner", // no resId: important
+                serverData,
+                arch: `<form><field name="display_name" /></form>`,
+                mode: "readonly", // important
+            });
+
+            assert.containsOnce(target, ".o_form_editable");
+            assert.containsOnce(target, ".o_form_button_save");
+            assert.containsOnce(target, ".o_form_button_cancel");
+        }
+    );
 });

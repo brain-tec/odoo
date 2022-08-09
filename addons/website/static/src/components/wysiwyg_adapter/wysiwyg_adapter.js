@@ -187,6 +187,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @return {Object} Params to pass to the wysiwyg widget.
      */
     get _wysiwygParams() {
+        const powerboxItems = this._getSnippetsPowerboxItems();
         return {
             snippets: 'website.snippets',
             recordInfo: {
@@ -206,7 +207,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             document: this.websiteService.pageDocument,
             sideAttach: true,
             isWebsite: true, // If set to true, it will trigger isolated behaviours in website patches. (.include)
-            powerboxCommands: this._getSnippetsCommands(),
+            powerboxCommands: powerboxItems[0],
+            powerboxCategories: powerboxItems[1],
             bindLinkTool: true,
             showEmptyElementHint: false,
             getReadOnlyAreas: this._getReadOnlyAreas.bind(this),
@@ -406,7 +408,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      *
      * @private
      */
-    _getSnippetsCommands() {
+    _getSnippetsPowerboxItems() {
         const snippetCommandCallback = (selector) => {
             const $separatorBody = $(selector);
             const $clonedBody = $separatorBody.clone().removeClass('oe_snippet_body');
@@ -417,10 +419,11 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this.widget.snippetsMenu.callPostSnippetDrop($clonedBody);
             }
         };
-        return [
+        const commands = [
             {
-                groupName: 'Website',
-                title: 'Alert',
+                category: 'Website',
+                name: 'Alert',
+                priority: 100,
                 description: 'Insert an alert snippet.',
                 fontawesome: 'fa-info',
                 callback: () => {
@@ -428,8 +431,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Rating',
+                category: 'Website',
+                name: 'Rating',
+                priority: 90,
                 description: 'Insert a rating snippet.',
                 fontawesome: 'fa-star-half-o',
                 callback: () => {
@@ -437,8 +441,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Card',
+                category: 'Website',
+                name: 'Card',
+                priority: 80,
                 description: 'Insert a card snippet.',
                 fontawesome: 'fa-sticky-note',
                 callback: () => {
@@ -446,8 +451,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Share',
+                category: 'Website',
+                name: 'Share',
+                priority: 70,
                 description: 'Insert a share snippet.',
                 fontawesome: 'fa-share-square-o',
                 callback: () => {
@@ -455,8 +461,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Text Highlight',
+                category: 'Website',
+                name: 'Text Highlight',
+                priority: 60,
                 description: 'Insert a text Highlight snippet.',
                 fontawesome: 'fa-sticky-note',
                 callback: () => {
@@ -464,8 +471,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Chart',
+                category: 'Website',
+                name: 'Chart',
+                priority: 50,
                 description: 'Insert a chart snippet.',
                 fontawesome: 'fa-bar-chart',
                 callback: () => {
@@ -473,8 +481,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Progress Bar',
+                category: 'Website',
+                name: 'Progress Bar',
+                priority: 40,
                 description: 'Insert a progress bar snippet.',
                 fontawesome: 'fa-spinner',
                 callback: () => {
@@ -482,8 +491,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Badge',
+                category: 'Website',
+                name: 'Badge',
+                priority: 30,
                 description: 'Insert a badge snippet.',
                 fontawesome: 'fa-tags',
                 callback: () => {
@@ -491,8 +501,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Blockquote',
+                category: 'Website',
+                name: 'Blockquote',
+                priority: 20,
                 description: 'Insert a blockquote snippet.',
                 fontawesome: 'fa-quote-left',
                 callback: () => {
@@ -500,8 +511,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Separator',
+                category: 'Website',
+                name: 'Separator',
+                priority: 10,
                 description: 'Insert an horizontal separator sippet.',
                 fontawesome: 'fa-minus',
                 callback: () => {
@@ -509,6 +521,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
         ];
+        return [commands, [{ name: 'Website', priority: 20 }]];
     }
     /**
      * @returns {boolean} true if the page has been altered.

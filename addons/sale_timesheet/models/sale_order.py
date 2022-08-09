@@ -59,10 +59,10 @@ class SaleOrder(models.Model):
         if field.name != 'invoice_status' or self.env.context.get('mail_activity_automation_skip'):
             return
 
-        # Get SOs which their state is not equal to upselling or invoied and if at least a SOL has warning prepaid service upsell set to True and the warning has not already been displayed
+        # Get SOs which their state is not equal to upselling and if at least a SOL has warning prepaid service upsell set to True and the warning has not already been displayed
         upsellable_orders = self.filtered(lambda so:
             so.state == 'sale'
-            and so.invoice_status not in ('upselling', 'invoiced')
+            and so.invoice_status != 'upselling'
             and (so.user_id or so.partner_id.user_id)  # salesperson needed to assign upsell activity
         )
         for order in upsellable_orders:
@@ -98,6 +98,14 @@ class SaleOrder(models.Model):
         action['context'] = {
             'search_default_billable_timesheet': True
         }  # erase default filters
+        if self.order_line:
+            tasks = self.order_line.task_id._filter_access_rules_python('write')
+            if tasks:
+                action['context']['default_task_id'] = tasks[0].id
+            else:
+                projects = self.order_line.project_id._filter_access_rules_python('write')
+                if projects:
+                    action['context']['default_project_id'] = projects[0].id
         if self.timesheet_count > 0:
             action['domain'] = [('so_line', 'in', self.order_line.ids)]
         else:
@@ -121,6 +129,7 @@ class SaleOrderLine(models.Model):
     remaining_hours_available = fields.Boolean(compute='_compute_remaining_hours_available', compute_sudo=True)
     remaining_hours = fields.Float('Remaining Hours on SO', compute='_compute_remaining_hours', compute_sudo=True, store=True)
     has_displayed_warning_upsell = fields.Boolean('Has Displayed Warning Upsell')
+    timesheet_ids = fields.One2many('account.analytic.line', 'so_line', 'Timesheets')
 
     def name_get(self):
         res = super(SaleOrderLine, self).name_get()

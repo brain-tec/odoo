@@ -1261,7 +1261,7 @@ options.registry.OptionsTab = options.Class.extend({
      */
     async _computeWidgetState(methodName, params) {
         if (methodName === 'customizeBodyBgType') {
-            const bgImage = $('#wrapwrap').css('background-image');
+            const bgImage = getComputedStyle(this.ownerDocument.querySelector('#wrapwrap'))['background-image'];
             if (bgImage === 'none') {
                 return "NONE";
             }
@@ -2458,7 +2458,7 @@ options.registry.anchor = options.Class.extend({
             }
             this._setAnchorName(anchorName + n);
         }
-        return `${window.location.pathname}#${this.$target[0].id}`;
+        return `${this.ownerDocument.location.pathname}#${this.$target[0].id}`;
     },
     /**
      * Creates a safe id/anchor from text.

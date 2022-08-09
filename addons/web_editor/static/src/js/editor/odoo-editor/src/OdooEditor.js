@@ -307,7 +307,7 @@ export class OdooEditor extends EventTarget {
 
         this._pluginCall('sanitizeElement', [editable]);
 
-        this._createCommandBar();
+        this._createPowerbox();
 
         this.toolbarTablePicker = new TablePicker({ document: this.document });
         this.toolbarTablePicker.addEventListener('cell-selected', ev => {
@@ -401,8 +401,8 @@ export class OdooEditor extends EventTarget {
     destroy() {
         this.observerUnactive();
         this._removeDomListener();
-        this.commandBar.destroy();
-        this.commandbarTablePicker.el.remove();
+        this.powerbox.destroy();
+        this.powerboxTablePicker.el.remove();
         this._collabSelectionsContainer.remove();
         this._resizeObserver.disconnect();
         clearInterval(this._snapshotInterval);
@@ -1781,61 +1781,31 @@ export class OdooEditor extends EventTarget {
     // COMMAND BAR
     // ===========
 
-    _createCommandBar() {
-        this.commandbarTablePicker = new TablePicker({
+    _createPowerbox() {
+        this.powerboxTablePicker = new TablePicker({
             document: this.document,
             floating: true,
         });
 
-        document.body.appendChild(this.commandbarTablePicker.el);
+        document.body.appendChild(this.powerboxTablePicker.el);
 
-        this.commandbarTablePicker.addEventListener('cell-selected', ev => {
+        this.powerboxTablePicker.addEventListener('cell-selected', ev => {
             this.execCommand('insertTable', {
                 rowNumber: ev.detail.rowNumber,
                 colNumber: ev.detail.colNumber,
             });
         });
 
+        const mainCategories = [
+            { name: this.options._t('Structure'), priority: 70 },
+            { name: this.options._t('Format'), priority: 60 },
+            { name: this.options._t('Widgets'), priority: 30 },
+        ];
         const mainCommands = [
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Heading 1'),
-                description: this.options._t('Big section heading.'),
-                fontawesome: 'fa-header',
-                callback: () => {
-                    this.execCommand('setTag', 'H1');
-                },
-            },
-            {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Heading 2'),
-                description: this.options._t('Medium section heading.'),
-                fontawesome: 'fa-header',
-                callback: () => {
-                    this.execCommand('setTag', 'H2');
-                },
-            },
-            {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Heading 3'),
-                description: this.options._t('Small section heading.'),
-                fontawesome: 'fa-header',
-                callback: () => {
-                    this.execCommand('setTag', 'H3');
-                },
-            },
-            {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Text'),
-                description: this.options._t('Paragraph block.'),
-                fontawesome: 'fa-paragraph',
-                callback: () => {
-                    this.execCommand('setTag', 'P');
-                },
-            },
-            {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Bulleted list'),
+                category: this.options._t('Structure'),
+                name: this.options._t('Bulleted list'),
+                priority: 110,
                 description: this.options._t('Create a simple bulleted list.'),
                 fontawesome: 'fa-list-ul',
                 callback: () => {
@@ -1843,8 +1813,9 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Numbered list'),
+                category: this.options._t('Structure'),
+                name: this.options._t('Numbered list'),
+                priority: 100,
                 description: this.options._t('Create a list with numbering.'),
                 fontawesome: 'fa-list-ol',
                 callback: () => {
@@ -1852,8 +1823,9 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Checklist'),
+                category: this.options._t('Structure'),
+                name: this.options._t('Checklist'),
+                priority: 90,
                 description: this.options._t('Track tasks with a checklist.'),
                 fontawesome: 'fa-check-square-o',
                 callback: () => {
@@ -1861,8 +1833,19 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Separator'),
+                category: this.options._t('Structure'),
+                name: this.options._t('Table'),
+                priority: 80,
+                description: this.options._t('Insert a table.'),
+                fontawesome: 'fa-table',
+                callback: () => {
+                    this.powerboxTablePicker.show();
+                },
+            },
+            {
+                category: this.options._t('Structure'),
+                name: this.options._t('Separator'),
+                priority: 40,
                 description: this.options._t('Insert an horizontal rule separator.'),
                 fontawesome: 'fa-minus',
                 callback: () => {
@@ -1870,17 +1853,39 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Table'),
-                description: this.options._t('Insert a table.'),
-                fontawesome: 'fa-table',
+                category: this.options._t('Format'),
+                name: this.options._t('Heading 1'),
+                priority: 50,
+                description: this.options._t('Big section heading.'),
+                fontawesome: 'fa-header',
                 callback: () => {
-                    this.commandbarTablePicker.show();
+                    this.execCommand('setTag', 'H1');
                 },
             },
             {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Switch direction'),
+                category: this.options._t('Format'),
+                name: this.options._t('Heading 2'),
+                priority: 40,
+                description: this.options._t('Medium section heading.'),
+                fontawesome: 'fa-header',
+                callback: () => {
+                    this.execCommand('setTag', 'H2');
+                },
+            },
+            {
+                category: this.options._t('Format'),
+                name: this.options._t('Heading 3'),
+                priority: 30,
+                description: this.options._t('Small section heading.'),
+                fontawesome: 'fa-header',
+                callback: () => {
+                    this.execCommand('setTag', 'H3');
+                },
+            },
+            {
+                category: this.options._t('Format'),
+                name: this.options._t('Switch direction'),
+                priority: 20,
                 description: this.options._t('Switch the text\'s direction.'),
                 fontawesome: 'fa-exchange',
                 callback: () => {
@@ -1888,9 +1893,20 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Widgets',
-                title: '3 Stars',
-                description: 'Insert a rating over 3 stars.',
+                category: this.options._t('Format'),
+                name: this.options._t('Text'),
+                priority: 10,
+                description: this.options._t('Paragraph block.'),
+                fontawesome: 'fa-paragraph',
+                callback: () => {
+                    this.execCommand('setTag', 'P');
+                },
+            },
+            {
+                category: this.options._t('Widgets'),
+                name: this.options._t('3 Stars'),
+                priority: 20,
+                description: this.options._t('Insert a rating over 3 stars.'),
                 fontawesome: 'fa-star-o',
                 callback: () => {
                     let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
@@ -1900,9 +1916,10 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Widgets',
-                title: '5 Stars',
-                description: 'Insert a rating over 5 stars.',
+                category: this.options._t('Widgets'),
+                name: this.options._t('5 Stars'),
+                priority: 10,
+                description: this.options._t('Insert a rating over 5 stars.'),
                 fontawesome: 'fa-star',
                 callback: () => {
                     let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
@@ -1912,31 +1929,34 @@ export class OdooEditor extends EventTarget {
                 },
             },
         ];
-        this.commandBar = new Powerbox({
+        let beforeStepIndex;
+        this.powerbox = new Powerbox({
             editable: this.editable,
-            document: this.document,
             getContextFromParentRect: this.options.getContextFromParentRect,
             commandFilters: this.options.powerboxFilters,
-            _t: this.options._t,
             onShow: () => {
-                this.commandbarTablePicker.hide();
+                this.powerboxTablePicker.hide();
             },
-            shouldActivate: () => !!this.options.getPowerboxElement(),
-            onActivate: () => {
-                this._beforeCommandbarStepIndex = this._historySteps.length - 1;
+            onOpen: () => {
+                // Undo input '/'.
+                beforeStepIndex = this._historySteps.length - 2;
             },
-            preValidate: () => {
-                this._historyRevertUntil(this._beforeCommandbarStepIndex);
+            beforeCommand: () => {
+                if (this._isPowerboxOpenOnInput) {
+                    this._historyRevertUntil(beforeStepIndex);
+                    this.historyStep(true);
+                    this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
+                    setTimeout(() => {
+                        ensureFocus(this.editable);
+                        getDeepRange(this.editable, { select: true });
+                    });
+                }
+            },
+            afterCommand: () => {
                 this.historyStep(true);
-                this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
-                setTimeout(() => {
-                    ensureFocus(this.editable);
-                    getDeepRange(this.editable, { select: true });
-                });
+                this._isPowerboxOpenOnInput = false;
             },
-            postValidate: () => {
-                this.historyStep(true);
-            },
+            categories: [...mainCategories, ...(this.options.categories || [])],
             commands: [...mainCommands, ...(this.options.commands || [])],
         });
     }
@@ -2349,6 +2369,11 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onInput(ev) {
+        // See if the Powerbox should be opened. If so, it will open at the end.
+        const newSelection = this.document.getSelection();
+        const shouldOpenPowerbox = newSelection.isCollapsed && newSelection.rangeCount &&
+            ev.data === '/' && this.powerbox && !this.powerbox.isOpen &&
+            (!this.options.getPowerboxElement || !!this.options.getPowerboxElement());
         // Record the selection position that was computed on keydown or before
         // contentEditable execCommand (whatever preceded the 'input' event)
         this._recordHistorySelection(true);
@@ -2356,7 +2381,6 @@ export class OdooEditor extends EventTarget {
         const { anchorNodeOid, anchorOffset, focusNodeOid, focusOffset } = selection || {};
         const wasCollapsed =
             !selection || (focusNodeOid === anchorNodeOid && focusOffset === anchorOffset);
-
         // Sometimes google chrome wrongly triggers an input event with `data`
         // being `null` on `deleteContentForward` `insertParagraph`. Luckily,
         // chrome provide the proper signal with the event `beforeinput`.
@@ -2434,8 +2458,7 @@ export class OdooEditor extends EventTarget {
                     selection.anchorNode &&
                     !closestElement(selection.anchorNode).closest('a') &&
                     selection.anchorNode.nodeType === Node.TEXT_NODE &&
-                    (!this.commandBar._active ||
-                        this.commandBar._currentOpenOptions.closeOnSpace !== true)
+                    !this.powerbox.isOpen
                 ) {
                     const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
                     const textNodeSplitted = textSliced.split(/\s/);
@@ -2467,6 +2490,10 @@ export class OdooEditor extends EventTarget {
             }
         } else if (ev.inputType === 'insertCompositionText') {
             this._fromCompositionText = true;
+        }
+        if (shouldOpenPowerbox) {
+            this._isPowerboxOpenOnInput = true;
+            this.powerbox.open();
         }
     }
 
@@ -2784,7 +2811,7 @@ export class OdooEditor extends EventTarget {
 
     }
     /**
-     * Handle the hint preview for the commandbar.
+     * Handle the hint preview for the Powerbox.
      * @private
      */
     _handleCommandHint() {
@@ -3145,8 +3172,8 @@ export class OdooEditor extends EventTarget {
                 if (i % 2 && (isImageUrl || !selectionIsInsideALink)) {
                     const baseEmbedCommand = [
                         {
-                            groupName: 'paste',
-                            title: this.options._t('Paste as URL'),
+                            category: this.options._t('Paste'),
+                            name: this.options._t('Paste as URL'),
                             description: this.options._t('Create an URL.'),
                             fontawesome: 'fa-link',
                             callback: () => {
@@ -3168,8 +3195,8 @@ export class OdooEditor extends EventTarget {
                             },
                         },
                         {
-                            groupName: 'paste',
-                            title: this.options._t('Paste as text'),
+                            category: this.options._t('Paste'),
+                            name: this.options._t('Paste as text'),
                             description: this.options._t('Simple text paste.'),
                             fontawesome: 'fa-font',
                             callback: () => {},
@@ -3189,78 +3216,74 @@ export class OdooEditor extends EventTarget {
                     if (isImageUrl) {
                         const stepIndexBeforeInsert = this._historySteps.length - 1;
                         this.execCommand('insertText', splitAroundUrl[i]);
-                        this.commandBar.open({
-                            commands: [
-                                {
-                                    groupName: this.options._t('Embed'),
-                                    title: this.options._t('Embed Image'),
-                                    description: this.options._t('Embed the image in the document.'),
-                                    fontawesome: 'fa-image',
-                                    shouldPreValidate: () => false,
-                                    callback: () => {
-                                        execCommandAtStepIndex(stepIndexBeforeInsert, () => {
-                                            const img = document.createElement('IMG');
-                                            img.setAttribute('src', url);
-                                            const sel = this.document.getSelection();
-                                            if (!sel.isCollapsed) {
-                                                this.deleteRange(sel);
-                                            }
-                                            if (sel.rangeCount) {
-                                                sel.getRangeAt(0).insertNode(img);
-                                                sel.collapseToEnd();
-                                            }
-                                        });
-                                    },
+                        this.powerbox.open([
+                            {
+                                category: this.options._t('Embed'),
+                                name: this.options._t('Embed Image'),
+                                description: this.options._t('Embed the image in the document.'),
+                                fontawesome: 'fa-image',
+                                callback: () => {
+                                    execCommandAtStepIndex(stepIndexBeforeInsert, () => {
+                                        const img = document.createElement('IMG');
+                                        img.setAttribute('src', url);
+                                        const sel = this.document.getSelection();
+                                        if (!sel.isCollapsed) {
+                                            this.deleteRange(sel);
+                                        }
+                                        if (sel.rangeCount) {
+                                            sel.getRangeAt(0).insertNode(img);
+                                            sel.collapseToEnd();
+                                        }
+                                    });
                                 },
-                            ].concat(baseEmbedCommand),
-                        });
+                            },
+                            ...baseEmbedCommand,
+                        ]);
                     } else if (this.options.allowCommandVideo && youtubeUrl) {
                         const stepIndexBeforeInsert = this._historySteps.length - 1;
                         this.execCommand('insertText', splitAroundUrl[i]);
-                        this.commandBar.open({
-                            commands: [
-                                {
-                                    groupName: this.options._t('Embed'),
-                                    title: this.options._t('Embed Youtube Video'),
-                                    description: this.options._t('Embed the youtube video in the document.'),
-                                    fontawesome: 'fa-youtube-play',
-                                    shouldPreValidate: () => false,
-                                    callback: async () => {
-                                        let videoElement;
-                                        if (this.options.getYoutubeVideoElement) {
-                                            videoElement = await this.options.getYoutubeVideoElement(youtubeUrl[0]);
-                                        } else {
-                                            videoElement = document.createElement('iframe');
-                                            videoElement.setAttribute('width', '560');
-                                            videoElement.setAttribute('height', '315');
-                                            videoElement.setAttribute(
-                                                'src',
-                                                `https://www.youtube.com/embed/${youtubeUrl[1]}`,
-                                            );
-                                            videoElement.setAttribute('title', 'YouTube video player');
-                                            videoElement.setAttribute('frameborder', '0');
-                                            videoElement.setAttribute(
-                                                'allow',
-                                                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
-                                            );
-                                            videoElement.setAttribute('allowfullscreen', '1');
+                        this.powerbox.open([
+                            {
+                                category: this.options._t('Embed'),
+                                name: this.options._t('Embed Youtube Video'),
+                                description: this.options._t('Embed the youtube video in the document.'),
+                                fontawesome: 'fa-youtube-play',
+                                callback: async () => {
+                                    let videoElement;
+                                    if (this.options.getYoutubeVideoElement) {
+                                        videoElement = await this.options.getYoutubeVideoElement(youtubeUrl[0]);
+                                    } else {
+                                        videoElement = document.createElement('iframe');
+                                        videoElement.setAttribute('width', '560');
+                                        videoElement.setAttribute('height', '315');
+                                        videoElement.setAttribute(
+                                            'src',
+                                            `https://www.youtube.com/embed/${youtubeUrl[1]}`,
+                                        );
+                                        videoElement.setAttribute('title', 'YouTube video player');
+                                        videoElement.setAttribute('frameborder', '0');
+                                        videoElement.setAttribute(
+                                            'allow',
+                                            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                                        );
+                                        videoElement.setAttribute('allowfullscreen', '1');
+                                    }
+
+                                    execCommandAtStepIndex(stepIndexBeforeInsert, () => {
+
+                                        const sel = this.document.getSelection();
+                                        if (!sel.isCollapsed) {
+                                            this.deleteRange(sel);
                                         }
-
-                                        execCommandAtStepIndex(stepIndexBeforeInsert, () => {
-
-                                            const sel = this.document.getSelection();
-                                            if (!sel.isCollapsed) {
-                                                this.deleteRange(sel);
-                                            }
-                                            if (sel.rangeCount) {
-                                                sel.getRangeAt(0).insertNode(videoElement);
-                                                sel.collapseToEnd();
-                                            }
-                                        });
-                                    },
+                                        if (sel.rangeCount) {
+                                            sel.getRangeAt(0).insertNode(videoElement);
+                                            sel.collapseToEnd();
+                                        }
+                                    });
                                 },
-                            ].concat(baseEmbedCommand),
-                        });
+                            },
+                            ...baseEmbedCommand,
+                        ]);
                     } else {
                         const link = document.createElement('A');
                         link.setAttribute('href', url);
