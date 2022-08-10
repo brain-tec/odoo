@@ -613,13 +613,13 @@ class AccountReconcileModel(models.Model):
         JOIN account_move st_line_move          ON st_line_move.id = st_line.move_id
         JOIN res_company company                ON company.id = st_line_move.company_id
         , account_move_line aml
-        LEFT JOIN account_move move             ON move.id = aml.move_id AND move.state = 'posted'
+        LEFT JOIN account_move move             ON move.id = aml.move_id AND move.state IN ('posted', 'posted_sent')
         LEFT JOIN account_account account       ON account.id = aml.account_id
         LEFT JOIN res_partner aml_partner       ON aml.partner_id = aml_partner.id
         LEFT JOIN account_payment payment       ON payment.move_id = move.id
         WHERE
             aml.company_id = st_line_move.company_id
-            AND move.state = 'posted'
+            AND move.state IN ('posted', 'posted_sent')
             AND account.reconcile IS TRUE
             AND aml.reconciled IS FALSE
         '''

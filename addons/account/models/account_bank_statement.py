@@ -421,7 +421,8 @@ class AccountBankStatement(models.Model):
                 statement._set_next_sequence()
 
         self.write({'state': 'posted'})
-        lines_of_moves_to_post = self.line_ids.filtered(lambda line: line.move_id.state != 'posted')
+        lines_of_moves_to_post = self.line_ids.filtered(
+            lambda line: line.move_id.state not in ['posted', 'posted_sent'])
         if lines_of_moves_to_post:
             lines_of_moves_to_post.move_id._post(soft=False)
 
@@ -920,7 +921,8 @@ class AccountBankStatementLine(models.Model):
             st_line_vals_to_write = {}
 
             if 'state' in changed_fields:
-                if (st_line.state == 'open' and move.state != 'draft') or (st_line.state in ('posted', 'confirm') and move.state != 'posted'):
+                if (st_line.state == 'open' and move.state != 'draft') or \
+                        (st_line.state in ('posted', 'confirm') and move.state not in ['posted', 'posted_sent']):
                     raise UserError(_(
                         "You can't manually change the state of journal entry %s, as it has been created by bank "
                         "statement %s."

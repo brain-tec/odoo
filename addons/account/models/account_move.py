@@ -1223,7 +1223,7 @@ class AccountMove(models.Model):
                 # In the form view, we need to compute a default sequence so that the user can edit
                 # it. We only check the first move as an approximation (enough for new in form view)
                 pass
-            elif (move.name and move.name != '/') or move.state != 'posted':
+            elif (move.name and move.name != '/') or move.state not in ['posted', 'posted_sent']:
                 try:
                     if not move.posted_before:
                         move._constrains_date_sequence()
@@ -1495,7 +1495,7 @@ class AccountMove(models.Model):
             # Compute 'payment_state'.
             new_pmt_state = 'not_paid' if move.move_type != 'entry' else False
 
-            if move._payment_state_matters() and move.state == 'posted':
+            if move._payment_state_matters() and move.state in ['posted', 'posted_sent']:
                 if currency.is_zero(move.amount_residual):
                     reconciled_payments = move._get_reconciled_payments()
                     if not reconciled_payments or all(payment.is_matched for payment in reconciled_payments):
@@ -1507,7 +1507,10 @@ class AccountMove(models.Model):
 
             if new_pmt_state == 'paid' and move.move_type in ('in_invoice', 'out_invoice', 'entry'):
                 reverse_type = move.move_type == 'in_invoice' and 'in_refund' or move.move_type == 'out_invoice' and 'out_refund' or 'entry'
-                reverse_moves = self.env['account.move'].search([('reversed_entry_id', '=', move.id), ('state', '=', 'posted'), ('move_type', '=', reverse_type)])
+                reverse_moves = self.env['account.move'].search([
+                    ('reversed_entry_id', '=', move.id),
+                    ('state', 'in', ['posted', 'posted_sent']),
+                    ('move_type', '=', reverse_type)])
 
                 # We only set 'reversed' state in cas of 1 to 1 full reconciliation with a reverse entry; otherwise, we use the regular 'paid' state
                 reverse_moves_full_recs = reverse_moves.mapped('line_ids.full_reconcile_id')
@@ -1549,13 +1552,13 @@ class AccountMove(models.Model):
     def _compute_has_matching_suspense_amount(self):
         for r in self:
             res = False
-            if r.state == 'posted' and r.is_invoice() and r.payment_state == 'not_paid':
+            if r.state in ['posted', 'posted_sent'] and r.is_invoice() and r.payment_state == 'not_paid':
                 domain = r._get_domain_matching_suspense_moves()
                 #there are more than one but less than 5 suspense moves matching the residual amount
                 if (0 < self.env['account.move.line'].search_count(domain) < 5):
                     domain2 = [
                         ('payment_state', '=', 'not_paid'),
-                        ('state', '=', 'posted'),
+                        ('state', 'in', ['posted', 'posted_sent']),
                         ('amount_residual', '=', r.amount_residual),
                         ('move_type', '=', r.move_type)]
                     #there are less than 5 other open invoices of the same type with the same residual
@@ -1584,7 +1587,7 @@ class AccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
             move.invoice_has_outstanding = False
 
-            if move.state != 'posted' \
+            if move.state not in ['posted', 'posted_sent'] \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
                 continue
@@ -1594,7 +1597,7 @@ class AccountMove(models.Model):
 
             domain = [
                 ('account_id', 'in', pay_term_lines.account_id.ids),
-                ('parent_state', '=', 'posted'),
+                ('parent_state', 'in', ['posted', 'posted_sent']),
                 ('partner_id', '=', move.commercial_partner_id.id),
                 ('reconciled', '=', False),
                 '|', ('amount_residual', '!=', 0.0), ('amount_residual_currency', '!=', 0.0),
@@ -1677,7 +1680,7 @@ class AccountMove(models.Model):
         for move in self:
             payments_widget_vals = {'title': _('Less Payment'), 'outstanding': False, 'content': []}
 
-            if move.state == 'posted' and move.is_invoice(include_receipts=True):
+            if move.state in ['posted', 'posted_sent'] and move.is_invoice(include_receipts=True):
                 payments_widget_vals['content'] = move._get_reconciled_info_JSON_values()
 
             if payments_widget_vals['content']:
@@ -1966,7 +1969,7 @@ class AccountMove(models.Model):
     @api.depends('restrict_mode_hash_table', 'state')
     def _compute_show_reset_to_draft_button(self):
         for move in self:
-            move.show_reset_to_draft_button = not move.restrict_mode_hash_table and move.state in ('posted', 'cancel')
+            move.show_reset_to_draft_button = not move.restrict_mode_hash_table and move.state in ('posted', 'posted_sent', 'cancel')
 
     @api.depends('company_id.account_fiscal_country_id', 'fiscal_position_id.country_id', 'fiscal_position_id.foreign_vat')
     def _compute_tax_country_id(self):
@@ -2009,7 +2012,7 @@ class AccountMove(models.Model):
 
     @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
-        moves = self.filtered(lambda move: move.state == 'posted')
+        moves = self.filtered(lambda move: move.state in ['posted', 'posted_sent'])
         if not moves:
             return
 
@@ -2024,7 +2027,7 @@ class AccountMove(models.Model):
                 AND move2.journal_id = move.journal_id
                 AND move2.move_type = move.move_type
                 AND move2.id != move.id
-            WHERE move.id IN %s AND move2.state = 'posted'
+            WHERE move.id IN %s AND move2.state IN ('posted', 'posted_sent')
         ''', [tuple(moves.ids)])
         res = self._cr.fetchall()
         if res:
@@ -2033,7 +2036,7 @@ class AccountMove(models.Model):
 
     @api.constrains('ref', 'move_type', 'partner_id', 'journal_id', 'invoice_date', 'state')
     def _check_duplicate_supplier_reference(self):
-        moves = self.filtered(lambda move: move.state == 'posted' and move.is_purchase_document() and move.ref)
+        moves = self.filtered(lambda move: move.state in ['posted', 'posted_sent'] and move.is_purchase_document() and move.ref)
         if not moves:
             return
 
@@ -2289,7 +2292,7 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
-        if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
+        if any('state' in vals and vals.get('state') in ['posted', 'posted_sent'] for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
@@ -2297,7 +2300,7 @@ class AccountMove(models.Model):
 
     def write(self, vals):
         for move in self:
-            if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
+            if (move.restrict_mode_hash_table and move.state in ['posted', 'posted_sent'] and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
                 raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
             if (move.restrict_mode_hash_table and move.inalterable_hash and 'inalterable_hash' in vals) or (move.secure_sequence_number and 'secure_sequence_number' in vals):
                 raise UserError(_('You cannot overwrite the values ensuring the inalterability of the accounting.'))
@@ -2307,12 +2310,12 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
             # You can't change the date of a move being inside a locked period.
-            if move.state == "posted" and 'date' in vals and move.date != vals['date']:
+            if move.state in ['posted', 'posted_sent'] and 'date' in vals and move.date != vals['date']:
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 
             # You can't post subtract a move to a locked period.
-            if 'state' in vals and move.state == 'posted' and vals['state'] != 'posted':
+            if 'state' in vals and move.state in ['posted', 'posted_sent'] and vals['state'] not in ['posted', 'posted_sent']:
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 
@@ -2330,11 +2333,11 @@ class AccountMove(models.Model):
         # You can't change the date of a not-locked move to a locked period.
         # You can't post a new journal entry inside a locked period.
         if 'date' in vals or 'state' in vals:
-            posted_move = self.filtered(lambda m: m.state == 'posted')
+            posted_move = self.filtered(lambda m: m.state in ['posted', 'posted_sent'])
             posted_move._check_fiscalyear_lock_date()
             posted_move.line_ids._check_tax_lock_date()
 
-        if ('state' in vals and vals.get('state') == 'posted'):
+        if ('state' in vals and vals.get('state') in ['posted', 'posted_sent']):
             for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)).sorted(lambda m: (m.date, m.ref or '', m.id)):
                 new_number = move.journal_id.secure_sequence_id.next_by_id()
                 vals_hashing = {'secure_sequence_number': new_number,
@@ -2397,7 +2400,7 @@ class AccountMove(models.Model):
 
         if 'payment_state' in init_values and self.payment_state == 'paid':
             return self.env.ref('account.mt_invoice_paid')
-        elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
+        elif 'state' in init_values and self.state in ['posted', 'posted_sent'] and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
         return super(AccountMove, self)._track_subtype(init_values)
 
@@ -2990,7 +2993,7 @@ class AccountMove(models.Model):
         for move in to_post:
             if move.partner_bank_id and not move.partner_bank_id.active:
                 raise UserError(_("The recipient bank account link to this invoice is archived.\nSo you cannot confirm the invoice."))
-            if move.state == 'posted':
+            if move.state in ['posted', 'posted_sent']:
                 raise UserError(_('The entry %s (id %s) is already posted.') % (move.name, move.id))
             if not move.line_ids.filtered(lambda line: not line.display_type):
                 raise UserError(_('You need to add a line before posting.'))
@@ -3163,7 +3166,7 @@ class AccountMove(models.Model):
                 # so we also check tax_cash_basis_origin_move_id, which stays unchanged
                 # (we need both, as tax_cash_basis_origin_move_id did not exist in older versions).
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
-            if move.restrict_mode_hash_table and move.state == 'posted' and move.id not in excluded_move_ids:
+            if move.restrict_mode_hash_table and move.state in ['posted', 'posted_sent'] and move.id not in excluded_move_ids:
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
             # We remove all the analytics entries for this journal
             move.mapped('line_ids.analytic_line_ids').unlink()
@@ -3246,7 +3249,7 @@ class AccountMove(models.Model):
         """ Returns the hash to write on journal entries when they get posted"""
         self.ensure_one()
         #get the only one exact previous move in the securisation sequence
-        prev_move = self.search([('state', '=', 'posted'),
+        prev_move = self.search([('state', 'in', ['posted', 'posted_sent']),
                                  ('company_id', '=', self.company_id.id),
                                  ('journal_id', '=', self.journal_id.id),
                                  ('secure_sequence_number', '!=', 0),
@@ -4451,7 +4454,7 @@ class AccountMoveLine(models.Model):
         return self.tax_ids or self.tax_line_id or self.tax_tag_ids.filtered(lambda x: x.applicability == "taxes")
 
     def _check_tax_lock_date(self):
-        for line in self.filtered(lambda l: l.move_id.state == 'posted'):
+        for line in self.filtered(lambda l: l.move_id.state in ['posted', 'posted_sent']):
             move = line.move_id
             if move.company_id.tax_lock_date and move.date <= move.company_id.tax_lock_date and line._affect_tax_report():
                 raise UserError(_("The operation is refused as it would impact an already issued tax statement. "
@@ -4608,8 +4611,8 @@ class AccountMoveLine(models.Model):
         moves = lines.mapped('move_id')
         if self._context.get('check_move_validity', True):
             moves._check_balanced()
-        moves.filtered(lambda m: m.state == 'posted')._check_fiscalyear_lock_date()
-        lines.filtered(lambda l: l.parent_state == 'posted')._check_tax_lock_date()
+        moves.filtered(lambda m: m.state in ['posted', 'posted_sent'])._check_fiscalyear_lock_date()
+        lines.filtered(lambda l: l.parent_state in ['posted', 'posted_sent'])._check_tax_lock_date()
         moves._synchronize_business_models({'line_ids'})
 
         return lines
@@ -4629,18 +4632,18 @@ class AccountMoveLine(models.Model):
             raise UserError(_('You cannot use a deprecated account.'))
 
         for line in self:
-            if line.parent_state == 'posted':
+            if line.parent_state in ['posted', 'posted_sent']:
                 if line.move_id.restrict_mode_hash_table and set(vals).intersection(INTEGRITY_HASH_LINE_FIELDS):
                     raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_LINE_FIELDS))
                 if any(key in vals for key in ('tax_ids', 'tax_line_id')):
                     raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
             # Check the lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
+            if line.parent_state in ['posted', 'posted_sent'] and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
                 line.move_id._check_fiscalyear_lock_date()
 
             # Check the tax lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
+            if line.parent_state in ['posted', 'posted_sent'] and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
                 line._check_tax_lock_date()
 
             # Check the reconciliation.
@@ -4746,7 +4749,7 @@ class AccountMoveLine(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted(self):
         # Prevent deleting lines on posted entries
-        if not self._context.get('force_delete') and any(m.state == 'posted' for m in self.move_id):
+        if not self._context.get('force_delete') and any(m.state in ['posted', 'posted_sent'] for m in self.move_id):
             raise UserError(_('You cannot delete an item linked to a posted entry.'))
 
     def unlink(self):
@@ -5337,7 +5340,7 @@ class AccountMoveLine(models.Model):
             if not line.account_id.reconcile and line.account_id.internal_type != 'liquidity':
                 raise UserError(_("Account %s does not allow reconciliation. First change the configuration of this account to allow it.")
                                 % line.account_id.display_name)
-            if line.move_id.state != 'posted':
+            if line.move_id.state not in ['posted', 'posted_sent']:
                 raise UserError(_('You can only reconcile posted entries.'))
             if company is None:
                 company = line.company_id
