@@ -3,6 +3,7 @@
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import {
+    addRow,
     click,
     clickEdit,
     clickSave,
@@ -19,6 +20,7 @@ import {
     triggerEvent,
 } from "@web/../tests/helpers/utils";
 import { FieldOne2Many } from "web.relational_fields";
+import { FieldChar as LegacyFieldChar } from "web.basic_fields";
 import * as legacyFieldRegistry from "web.field_registry";
 import { toggleActionMenu, toggleGroupByMenu, toggleMenuItem } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
@@ -34,6 +36,8 @@ import { scrollerService } from "@web/core/scroller_service";
 import BasicModel from "web.BasicModel";
 import { localization } from "@web/core/l10n/localization";
 import { SIZES } from "@web/core/ui/ui_service";
+
+import * as legacyCore from "web.core";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -8029,6 +8033,103 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
 
+    QUnit.test("ask to save new record before opening translate dialog", async function (assert) {
+        serverData.models.partner.fields.foo.translate = true;
+
+        patchWithCleanup(localization, {
+            multiLang: true,
+        });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo"/>
+                </form>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                if (route === "/web/dataset/call_button") {
+                    return { context: {}, domain: [] };
+                }
+                if (args.method === "get_installed") {
+                    return [
+                        ["CUST", "custom lang"],
+                        ["CUST2", "second custom"],
+                    ];
+                }
+            },
+        });
+
+        assert.verifySteps(["get_views", "onchange"]);
+        assert.containsOnce(target, ".o_form_editable");
+        await click(target, ".o_field_translate.btn-link");
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(target.querySelector(".modal-title").textContent, "Warning");
+
+        await click(target.querySelectorAll(".modal-footer button")[1]); // cancel
+        assert.verifySteps([]);
+
+        await click(target, ".o_field_translate.btn-link");
+        await click(target.querySelectorAll(".modal-footer button")[0]); // save
+        assert.verifySteps(["create", "read", "translate_fields", "get_installed", "search_read"]);
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
+    });
+
+    QUnit.test("legacy field support translation dialog", async (assert) => {
+        serverData.models.partner.fields.foo.translate = true;
+
+        patchWithCleanup(legacyCore._t.database, {
+            multi_lang: true,
+            parameters: {
+                code: "CUST",
+            },
+        });
+
+        const myChar = LegacyFieldChar.extend({
+            async _render() {
+                // DIY because the compatibility layer doesn't support
+                // legacy widget having multiple nodes in their this.$el.
+                await this._super(...arguments);
+                const div = document.createElement("div");
+                const $div = $(div).append(this.$el);
+                this.setElement($div);
+            },
+        });
+
+        legacyFieldRegistry.add("legacy_char", myChar);
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            resId: 1,
+            arch: `
+                <form>
+                    <field name="foo" widget="legacy_char"/>
+                </form>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                if (route === "/web/dataset/call_button") {
+                    return { context: {}, domain: [] };
+                }
+                if (args.method === "get_installed") {
+                    return [
+                        ["CUST", "custom lang"],
+                        ["CUST2", "second custom"],
+                    ];
+                }
+            },
+        });
+        assert.verifySteps(["get_views", "read"]);
+        await clickEdit(target);
+        await click(target, ".o_field_legacy_char .o_field_translate.btn-link");
+        assert.verifySteps(["translate_fields", "get_installed", "search_read"]);
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
+    });
+
     QUnit.test("translation alerts are preserved on pager change", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
@@ -11542,6 +11643,77 @@ QUnit.module("Views", (hooks) => {
             assert.containsOnce(target, ".o_form_editable");
             assert.containsOnce(target, ".o_form_button_save");
             assert.containsOnce(target, ".o_form_button_cancel");
+        });
+
+    QUnit.test("save a form view with an invisible required field", async function (assert) {
+        serverData.models.partner.fields.text = { string: "Text", type: "char", required: 1 };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                    <form>
+                        <sheet>
+                            <field name="text" invisible="1"/>
+                            <field name="int_field"/>
+                        </sheet>
+                    </form>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                if (args.method === "create") {
+                    assert.deepEqual(args.args, [
+                        {
+                            int_field: 0,
+                            text: false,
+                        },
+                    ]);
+                }
+            },
+        });
+
+        await clickSave(target);
+        assert.verifySteps(["get_views", "onchange", "create", "read"]);
+    });
+
+    QUnit.test(
+        "save a form view with an invisible required field in a x2many",
+        async function (assert) {
+            serverData.models.partner.fields.text = { string: "Text", type: "char", required: 1 };
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <sheet>
+                        <field name="p">
+                            <tree editable="top">
+                                <field name="text" invisible="1"/>
+                                <field name="int_field"/>
+                            </tree>
+                        </field>
+                    </sheet>
+                </form>`,
+                mockRPC(route, args) {
+                    assert.step(args.method);
+                    if (args.method === "create") {
+                        assert.deepEqual(args.args[0].p[0][2], { int_field: 1, text: false });
+                    }
+                },
+            });
+
+            await addRow(target);
+            await editInput(target, "[name='int_field'] input", 1);
+            await click(target, ".o_form_view");
+            assert.containsNone(target, "[name='int_field'] input");
+
+            await clickSave(target);
+            assert.containsOnce(target, ".o_list_renderer .o_data_row");
+            assert.strictEqual(
+                target.querySelector(".o_list_renderer .o_data_row [name='int_field']").textContent,
+                "1"
+            );
+            assert.verifySteps(["get_views", "onchange", "onchange", "create", "read", "read"]);
         }
     );
 });
