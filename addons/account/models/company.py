@@ -338,7 +338,7 @@ class ResCompany(models.Model):
 
     def opening_move_posted(self):
         """ Returns true if this company has an opening account move and this move is posted."""
-        return bool(self.account_opening_move_id) and self.account_opening_move_id.state == 'posted'
+        return bool(self.account_opening_move_id) and self.account_opening_move_id.state in ['posted', 'posted_sent']
 
     def get_unaffected_earnings_account(self):
         """ Returns the unaffected earnings account for this company, creating one
@@ -547,8 +547,10 @@ class ResCompany(models.Model):
                 results_by_journal['results'].append(rslt)
                 continue
 
-            all_moves_count = self.env['account.move'].search_count([('state', '=', 'posted'), ('journal_id', '=', journal.id)])
-            moves = self.env['account.move'].search([('state', '=', 'posted'), ('journal_id', '=', journal.id),
+            all_moves_count = self.env['account.move'].search_count([('state', 'in', ['posted', 'posted_sent']),
+                                                                     ('journal_id', '=', journal.id)])
+            moves = self.env['account.move'].search([('state', 'in', ['posted', 'posted_sent']),
+                                                     ('journal_id', '=', journal.id),
                                             ('secure_sequence_number', '!=', 0)], order="secure_sequence_number ASC")
             if not moves:
                 rslt.update({

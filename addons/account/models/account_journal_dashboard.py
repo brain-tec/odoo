@@ -203,7 +203,7 @@ class account_journal(models.Model):
                 MIN(invoice_date_due) AS aggr_date
             FROM account_move move
             WHERE move.journal_id = %(journal_id)s
-            AND move.state = 'posted'
+            AND move.state IN ('posted', 'posted_sent')
             AND move.invoice_payment_state = 'not_paid'
             AND move.type IN %(invoice_types)s
         ''', {
@@ -239,7 +239,7 @@ class account_journal(models.Model):
                 query = """SELECT sum(%s) FROM account_move_line aml
                            LEFT JOIN account_move move ON aml.move_id = move.id
                            WHERE aml.account_id in %%s
-                           AND move.date <= %%s AND move.state = 'posted';""" % (amount_field,)
+                           AND move.date <= %%s AND move.state IN ('posted', 'posted_sent');""" % (amount_field,)
                 self.env.cr.execute(query, (account_ids, fields.Date.context_today(self),))
                 query_results = self.env.cr.dictfetchall()
                 if query_results and query_results[0].get('sum') != None:
@@ -268,7 +268,7 @@ class account_journal(models.Model):
                 FROM account_move move
                 WHERE journal_id = %s
                 AND invoice_date_due <= %s
-                AND state = 'posted'
+                AND state IN ('posted', 'posted_sent')
                 AND invoice_payment_state = 'not_paid'
                 AND type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt');
             '''
@@ -326,7 +326,7 @@ class account_journal(models.Model):
                 move.company_id
             FROM account_move move
             WHERE move.journal_id = %(journal_id)s
-            AND move.state = 'posted'
+            AND move.state IN ('posted', 'posted_sent')
             AND move.invoice_payment_state = 'not_paid'
             AND move.type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt');
         ''', {'journal_id': self.id})

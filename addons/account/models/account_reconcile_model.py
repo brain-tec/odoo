@@ -548,7 +548,7 @@ class AccountReconcileModel(models.Model):
                         )
                     )
                     AND (
-                        move.state = 'posted'
+                        move.state IN ('posted', 'posted_sent')
                         OR
                         ((move.state = 'draft' OR move.state IS NULL) AND journal.post_at = 'bank_rec')
                     )
@@ -557,7 +557,7 @@ class AccountReconcileModel(models.Model):
                     -- black lines appearance conditions
                     account.reconcile IS TRUE
                     AND aml.reconciled IS NOT TRUE
-                    AND move.state = 'posted'
+                    AND move.state IN ('posted', 'posted_sent')
                     )
                 ) 
                 THEN (CASE WHEN

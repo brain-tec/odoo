@@ -48,9 +48,9 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         user_company = self.env.company
         user_currency = user_company.currency_id
         company_ids = self._context.get('company_ids') or [user_company.id]
-        move_state = ['draft', 'posted']
+        move_state = ['draft', 'posted', 'posted_sent']
         if target_move == 'posted':
-            move_state = ['posted']
+            move_state = ['posted', 'posted_sent']
         arg_list = (tuple(move_state), tuple(account_type), date_from,)
         if 'partner_ids' in ctx:
             if ctx['partner_ids']:

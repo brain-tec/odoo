@@ -23,7 +23,7 @@ class Digest(models.Model):
                 JOIN account_account account ON account.id = line.account_id
                 WHERE line.company_id = %s AND line.date >= %s AND line.date < %s
                 AND account.internal_group = 'income'
-                AND move.state = 'posted'
+                AND move.state IN ('posted', 'posted_sent')
             ''', [company.id, start, end])
             query_res = self._cr.fetchone()
             record.kpi_account_total_revenue_value = query_res and query_res[0] or 0.0

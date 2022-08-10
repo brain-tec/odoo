@@ -101,7 +101,7 @@ class account_payment(models.Model):
         invoices = self.env['account.move'].browse(active_ids).filtered(lambda move: move.is_invoice(include_receipts=True))
 
         # Check all invoices are open
-        if not invoices or any(invoice.state not in {'posted', 'posted_sent'} for invoice in invoices):
+        if not invoices or any(invoice.state not in ['posted', 'posted_sent'] for invoice in invoices):
             raise UserError(_("You can only register payments for open invoices"))
         # Check if, in batch payments, there are not negative invoices and positive invoices
         dtype = invoices[0].type
@@ -666,7 +666,7 @@ class account_payment(models.Model):
             if rec.state != 'draft':
                 raise UserError(_("Only a draft payment can be posted."))
 
-            if any(inv.state not in {'posted', 'posted_sent'} for inv in rec.invoice_ids):
+            if any(inv.state not in ['posted', 'posted_sent'] for inv in rec.invoice_ids):
                 raise ValidationError(_("The payment cannot be processed because the invoice is not open!"))
 
             # keep the name in case of a payment reset to draft
@@ -712,7 +712,7 @@ class account_payment(models.Model):
 
     def action_draft(self):
         moves = self.mapped('move_line_ids.move_id')
-        moves.filtered(lambda move: move.state == 'posted').button_draft()
+        moves.filtered(lambda move: move.state in ['posted', 'posted_sent']).button_draft()
         moves.with_context(force_delete=True).unlink()
         self.write({'state': 'draft', 'invoice_ids': False})
 
@@ -754,7 +754,7 @@ class payment_register(models.TransientModel):
         invoices = self.env['account.move'].browse(active_ids)
 
         # Check all invoices are open
-        if any(invoice.state not in {'posted', 'posted_sent'} or invoice.invoice_payment_state != 'not_paid' or not invoice.is_invoice() for invoice in invoices):
+        if any(invoice.state not in ['posted', 'posted_sent'] or invoice.invoice_payment_state != 'not_paid' or not invoice.is_invoice() for invoice in invoices):
             raise UserError(_("You can only register payments for open invoices"))
         # Check all invoices are inbound or all invoices are outbound
         outbound_list = [invoice.is_outbound() for invoice in invoices]

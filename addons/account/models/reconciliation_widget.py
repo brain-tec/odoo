@@ -368,7 +368,8 @@ class AccountReconciliation(models.AbstractModel):
                 WHERE l.account_id = a.id
                 {inner_where}
                 AND l.amount_residual != 0
-                AND (move.state = 'posted' OR (move.state = 'draft' AND journal.post_at = 'bank_rec'))
+                AND (move.state IN ('posted', 'posted_sent') OR (move.state = 'draft' AND journal.post_at = 
+                'bank_rec'))
             )
         """.format(inner_where=is_partner and 'AND l.partner_id = p.id' or ' ')
         only_dual_entries_query = """
@@ -380,7 +381,8 @@ class AccountReconciliation(models.AbstractModel):
                 WHERE l.account_id = a.id
                 {inner_where}
                 AND l.amount_residual > 0
-                AND (move.state = 'posted' OR (move.state = 'draft' AND journal.post_at = 'bank_rec'))
+                AND (move.state IN ('posted', 'posted_sent') OR (move.state = 'draft' AND journal.post_at = 
+                'bank_rec'))
             )
             AND EXISTS (
                 SELECT NULL
@@ -390,7 +392,8 @@ class AccountReconciliation(models.AbstractModel):
                 WHERE l.account_id = a.id
                 {inner_where}
                 AND l.amount_residual < 0
-                AND (move.state = 'posted' OR (move.state = 'draft' AND journal.post_at = 'bank_rec'))
+                AND (move.state IN ('posted', 'posted_sent') OR (move.state = 'draft' AND journal.post_at = 
+                'bank_rec'))
             )
         """.format(inner_where=is_partner and 'AND l.partner_id = p.id' or ' ')
         query = ("""
@@ -629,7 +632,7 @@ class AccountReconciliation(models.AbstractModel):
                     ('reconciled', '=', False),
                     ('account_id', '=', account_id),
                 '|',
-                    ('move_id.state', '=', 'posted'),
+                    ('move_id.state', 'in', ['posted', 'posted_sent']),
                     '&',
                         ('move_id.state', '=', 'draft'),
                         ('move_id.journal_id.post_at', '=', 'bank_rec'),
@@ -813,11 +816,13 @@ class AccountReconciliation(models.AbstractModel):
                  account_journal journal_a, account_journal journal_b
             WHERE a.id != b.id
             AND move_a.id = a.move_id
-            AND (move_a.state = 'posted' OR (move_a.state = 'draft' AND journal_a.post_at = 'bank_rec'))
+            AND (move_a.state IN ('posted', 'posted_sent') OR (move_a.state = 'draft' AND 
+            journal_a.post_at = 'bank_rec'))
             AND move_a.journal_id = journal_a.id
             AND move_b.id = b.move_id
             AND move_b.journal_id = journal_b.id
-            AND (move_b.state = 'posted' OR (move_b.state = 'draft' AND journal_b.post_at = 'bank_rec'))
+            AND (move_b.state IN ('posted', 'posted_sent') OR (move_b.state = 'draft' AND 
+            journal_b.post_at = 'bank_rec'))
             AND a.amount_residual = -b.amount_residual
             AND a.balance != 0.0
             AND b.balance != 0.0
