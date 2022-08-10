@@ -44,7 +44,7 @@ class AccrualAccountingWizard(models.TransientModel):
         active_move_line_ids = self.env['account.move.line'].browse(self.env.context['active_ids'])
         rec['active_move_line_ids'] = active_move_line_ids.ids
 
-        if any(move.state != 'posted' for move in active_move_line_ids.mapped('move_id')):
+        if any(move.state not in ['posted', 'posted_sent'] for move in active_move_line_ids.mapped('move_id')):
             raise UserError(_('You can only change the period for posted journal items.'))
         if any(move_line.reconciled for move_line in active_move_line_ids):
             raise UserError(_('You can only change the period for items that are not yet reconciled.'))

@@ -296,7 +296,7 @@ class AccountBankStatement(models.Model):
                     raise UserError(_('All the account entries lines must be processed in order to close the statement.'))
             moves = statement.mapped('line_ids.journal_entry_ids.move_id')
             if moves:
-                moves.filtered(lambda m: m.state != 'posted').post()
+                moves.filtered(lambda m: m.state not in ['posted', 'posted_sent']).post()
             statement.message_post(body=_('Statement %s confirmed, journal items were created.') % (statement.name,))
             if statement.journal_id.type == 'bank':
                 # Attach report to the Bank statement

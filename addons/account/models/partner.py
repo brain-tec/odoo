@@ -284,7 +284,7 @@ class ResPartner(models.Model):
             RIGHT JOIN account_account acc ON aml.account_id = acc.id
             WHERE acc.internal_type = %s
               AND NOT acc.deprecated AND acc.company_id = %s
-              AND move.state = 'posted'
+              AND move.state IN ('posted', 'posted_sent')
             GROUP BY partner.id
             HAVING %s * COALESCE(SUM(aml.amount_residual), 0) ''' + operator + ''' %s''', (account_type, self.env.company.id, sign, operand))
         res = self._cr.fetchall()
@@ -497,7 +497,7 @@ class ResPartner(models.Model):
         has_invoice = self.env['account.move'].search([
             ('type', 'in', ['out_invoice', 'out_refund']),
             ('partner_id', 'child_of', self.commercial_partner_id.id),
-            ('state', '=', 'posted')
+            ('state', 'in', ['posted', 'posted_sent'])
         ], limit=1)
         return can_edit_vat and not (bool(has_invoice))
 

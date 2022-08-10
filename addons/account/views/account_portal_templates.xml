@@ -54,10 +54,10 @@
                         <td><span t-field="invoice.invoice_date"/></td>
                         <td class='d-none d-md-table-cell'><span t-field="invoice.invoice_date_due"/></td>
                         <td class="tx_status">
-                            <t t-if="invoice.state == 'posted' and invoice.invoice_payment_state != 'paid'">
+                            <t t-if="invoice.state in ['posted', 'posted_sent'] and invoice.invoice_payment_state != 'paid'">
                                 <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-clock-o" aria-label="Opened" title="Opened" role="img"></i><span class="d-none d-md-inline"> Waiting for Payment</span></span>
                             </t>
-                            <t t-if="invoice.state == 'posted' and invoice.invoice_payment_state == 'paid'">
+                            <t t-if="invoice.state in ['posted', 'posted_sent'] and invoice.invoice_payment_state == 'paid'">
                                 <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-check" aria-label="Paid" title="Paid" role="img"></i><span class="d-none d-md-inline"> Paid</span></span>
                             </t>
                             <t t-if="invoice.state == 'cancel'">
