@@ -22,6 +22,9 @@ export class GraphArchParser extends XMLParser {
                     if (node.hasAttribute("stacked")) {
                         archInfo.stacked = archParseBoolean(node.getAttribute("stacked"));
                     }
+                    if (node.hasAttribute("cumulated")) {
+                        archInfo.cumulated = archParseBoolean(node.getAttribute("cumulated"));
+                    }
                     const mode = node.getAttribute("type");
                     if (mode && MODES.includes(mode)) {
                         archInfo.mode = mode;
@@ -37,7 +40,7 @@ export class GraphArchParser extends XMLParser {
                     break;
                 }
                 case "field": {
-                    let fieldName = node.getAttribute("name"); // exists (rng validation)
+                    const fieldName = node.getAttribute("name"); // exists (rng validation)
                     if (fieldName === "id") {
                         break;
                     }

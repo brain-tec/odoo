@@ -1024,6 +1024,56 @@ QUnit.module("Views", (hooks) => {
         checkDatasets(assert, graph, keysToEvaluate, expectedDatasets);
     });
 
+    QUnit.test("Cumulative prop and default line chart", async function (assert) {
+        const graph = await makeView({
+            serverData,
+            type: "graph",
+            resModel: "foo",
+            arch: `
+                <graph type="line" stacked="0">
+                    <field name="bar"/>
+                    <field name="product_id"/>
+                </graph>
+            `,
+        });
+
+        assert.strictEqual(graph.model.metaData.mode, "line", "should be in line chart mode.");
+        assert.strictEqual(
+            graph.model.metaData.cumulated,
+            false,
+            "should not be cumulative by default."
+        );
+
+        await click(target, '[data-tooltip="Cumulative"]');
+        assert.strictEqual(graph.model.metaData.cumulated, true, "should be in cumulative");
+        const expectedDatasets = [
+            {
+                data: [1, 4],
+            },
+            {
+                data: [4, 4],
+            },
+        ];
+        checkDatasets(assert, graph, ["data"], expectedDatasets);
+    });
+
+    QUnit.test("Default cumulative prop", async function (assert) {
+        const graph = await makeView({
+            serverData,
+            type: "graph",
+            resModel: "foo",
+            arch: `
+                <graph type="line" stacked="0" cumulated="1">
+                    <field name="bar"/>
+                    <field name="product_id"/>
+                </graph>
+            `,
+        });
+
+        assert.strictEqual(graph.model.metaData.mode, "line", "should be in line chart mode.");
+        assert.strictEqual(graph.model.metaData.cumulated, true, "should be in cumulative");
+    });
+
     QUnit.test("line chart rendering (no groupBy, several domains)", async function (assert) {
         assert.expect(7);
         const graph = await makeView({
@@ -2101,7 +2151,7 @@ QUnit.module("Views", (hooks) => {
             mode: "line",
             order: "ASC",
         });
-        let arch2 = `<graph disable_linking="0" string="Title" stacked="False"/>`;
+        const arch2 = `<graph disable_linking="0" string="Title" stacked="False"/>`;
         propsFromArch = new GraphArchParser().parse(arch2, fields);
 
         assert.deepEqual(propsFromArch, {
@@ -2118,7 +2168,7 @@ QUnit.module("Views", (hooks) => {
         assert.expect(1);
         const fields = serverData.models.foo.fields;
         fields.fighters = { type: "text", string: "Fighters" };
-        let arch = `
+        const arch = `
             <graph type="pie">
                 <field name="revenue" type="measure"/>
                 <field name="date" interval="day"/>
@@ -2128,7 +2178,7 @@ QUnit.module("Views", (hooks) => {
                 <field name="fighters" string="FooFighters"/>
             </graph>
         `;
-        let propsFromArch = new GraphArchParser().parse(arch, fields);
+        const propsFromArch = new GraphArchParser().parse(arch, fields);
         assert.deepEqual(propsFromArch, {
             fields,
             fieldAttrs: {

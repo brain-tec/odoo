@@ -406,6 +406,21 @@ options.Class.include({
     }),
     specialCheckAndReloadMethodsNames: ['customizeWebsiteViews', 'customizeWebsiteVariable', 'customizeWebsiteColor'],
 
+    /**
+     * @override
+     */
+    init() {
+        this._super(...arguments);
+        // Since the website is displayed in an iframe, its jQuery
+        // instance is not the same as the editor. This property allows
+        // for easy access to bootstrap plugins (Carousel, Modal, ...).
+        // This is only needed because jQuery doesn't send custom events
+        // the same way native javascript does. So if a jQuery instance
+        // triggers a custom event, only that same jQuery instance will
+        // trigger handlers set with `.on`.
+        this.$bsTarget = this.ownerDocument.defaultView.$(this.$target[0]);
+    },
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
@@ -985,12 +1000,13 @@ options.registry.OptionsTab = options.Class.extend({
         const hues = [];
         const saturationDiffs = [];
         let oneHasNoSaturation = false;
+        const baseStyle = getComputedStyle(document.documentElement);
         for (let id = 100; id <= 900; id += 100) {
             const gray = weUtils.getCSSVariableValue(`${id}`, style);
             const grayRGB = ColorpickerWidget.convertCSSColorToRgba(gray);
             const grayHSL = ColorpickerWidget.convertRgbToHsl(grayRGB.red, grayRGB.green, grayRGB.blue);
 
-            const baseGray = weUtils.getCSSVariableValue(`base-${id}`, style);
+            const baseGray = weUtils.getCSSVariableValue(`base-${id}`, baseStyle);
             const baseGrayRGB = ColorpickerWidget.convertCSSColorToRgba(baseGray);
             const baseGrayHSL = ColorpickerWidget.convertRgbToHsl(baseGrayRGB.red, baseGrayRGB.green, baseGrayRGB.blue);
 
@@ -1201,8 +1217,8 @@ options.registry.OptionsTab = options.Class.extend({
      * @returns {String} the adjusted color of gray
      */
     _buildGray(id) {
-        const ownerDocument = this.$target[0].ownerDocument;
-        const gray = weUtils.getCSSVariableValue(`base-${id}`, ownerDocument.defaultView.getComputedStyle(ownerDocument.documentElement));
+        // Getting base grays defined in color_palette.scss
+        const gray = weUtils.getCSSVariableValue(`base-${id}`, getComputedStyle(document.documentElement));
         const grayRGB = ColorpickerWidget.convertCSSColorToRgba(gray);
         const hsl = ColorpickerWidget.convertRgbToHsl(grayRGB.red, grayRGB.green, grayRGB.blue);
         const adjustedGrayRGB = ColorpickerWidget.convertHslToRgb(this.grayParams[this.GRAY_PARAMS.HUE],
@@ -1493,7 +1509,7 @@ options.registry.Carousel = options.Class.extend({
      * @override
      */
     start: function () {
-        this.$target.carousel('pause');
+        this.$bsTarget.carousel('pause');
         this.$indicators = this.$target.find('.carousel-indicators');
         this.$controls = this.$target.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
 
@@ -1503,11 +1519,11 @@ options.registry.Carousel = options.Class.extend({
         this.$controls.addClass('o_we_no_overlay');
 
         let _slideTimestamp;
-        this.$target.on('slide.bs.carousel.carousel_option', () => {
+        this.$bsTarget.on('slide.bs.carousel.carousel_option', () => {
             _slideTimestamp = window.performance.now();
             setTimeout(() => this.trigger_up('hide_overlay'));
         });
-        this.$target.on('slid.bs.carousel.carousel_option', () => {
+        this.$bsTarget.on('slid.bs.carousel.carousel_option', () => {
             // slid.bs.carousel is most of the time fired too soon by bootstrap
             // since it emulates the transitionEnd with a setTimeout. We wait
             // here an extra 20% of the time before retargeting edition, which
@@ -1518,7 +1534,7 @@ options.registry.Carousel = options.Class.extend({
                     $snippet: this.$target.find('.carousel-item.active'),
                     ifInactiveOptions: true,
                 });
-                this.$target.trigger('active_slide_targeted');
+                this.$bsTarget.trigger('active_slide_targeted');
             }, 0.2 * _slideDuration);
         });
 
@@ -1529,7 +1545,7 @@ options.registry.Carousel = options.Class.extend({
      */
     destroy: function () {
         this._super.apply(this, arguments);
-        this.$target.off('.carousel_option');
+        this.$bsTarget.off('.carousel_option');
     },
     /**
      * @override
@@ -1613,7 +1629,7 @@ options.registry.Carousel = options.Class.extend({
         $active.clone(false)
             .removeClass('active')
             .insertAfter($active);
-        this.$target.carousel('next');
+        this.$bsTarget.carousel('next');
     },
 });
 
@@ -1625,7 +1641,7 @@ options.registry.CarouselItem = options.Class.extend({
      * @override
      */
     start: function () {
-        this.$carousel = this.$target.closest('.carousel');
+        this.$carousel = this.$bsTarget.closest('.carousel');
         this.$indicators = this.$carousel.find('.carousel-indicators');
         this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
 
@@ -1683,10 +1699,9 @@ options.registry.CarouselItem = options.Class.extend({
         const $items = this.$carousel.find('.carousel-item');
         const newLength = $items.length - 1;
         if (!this.removing && newLength > 0) {
-            const $toDelete = $items.filter('.active');
+            const $toDelete = $items.filter('.active').add(this.$indicators.find('.active'));
             this.$carousel.one('active_slide_targeted.carousel_item_option', () => {
                 $toDelete.remove();
-                this.$indicators.find('li:last').remove();
                 this.$controls.toggleClass('d-none', newLength === 1);
                 this.$carousel.trigger('content_changed');
                 this.removing = false;
@@ -1862,7 +1877,7 @@ options.registry.collapse = options.Class.extend({
      */
     start: function () {
         var self = this;
-        this.$target.on('shown.bs.collapse hidden.bs.collapse', '[role="tabpanel"]', function () {
+        this.$bsTarget.on('shown.bs.collapse hidden.bs.collapse', '[role="tabpanel"]', function () {
             self.trigger_up('cover_update');
             self.$target.trigger('content_changed');
         });
@@ -1885,7 +1900,7 @@ options.registry.collapse = options.Class.extend({
      */
     onMove: function () {
         this._createIDs();
-        var $panel = this.$target.find('.collapse').removeData('bs.collapse');
+        var $panel = this.$bsTarget.find('.collapse').removeData('bs.collapse');
         if ($panel.attr('aria-expanded') === 'true') {
             $panel.closest('.accordion').find('.collapse[aria-expanded="true"]')
                 .filter((i, el) => (el !== $panel[0]))
@@ -1910,14 +1925,15 @@ options.registry.collapse = options.Class.extend({
         const $tablist = this.$target.closest('[role="tablist"]');
         const $tab = this.$target.find('[role="tab"]');
         const $panel = this.$target.find('[role="tabpanel"]');
+        const $body = this.$target.closest('body');
 
         const setUniqueId = ($elem, label) => {
             let elemId = $elem.attr('id');
-            if (!elemId || $('[id="' + elemId + '"]').length > 1) {
+            if (!elemId || $body.find('[id="' + elemId + '"]').length > 1) {
                 do {
                     time++;
                     elemId = label + time;
-                } while ($('#' + elemId).length);
+                } while ($body.find('#' + elemId).length);
                 $elem.attr('id', elemId);
             }
             return elemId;
