@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
-import { getPyEnv } from "@bus/../tests/helpers/mock_python_environment";
 
 import { patch } from "@web/core/utils/patch";
+import { ConnectionLostError } from "@web/core/network/rpc_service";
 import { MockServer } from "@web/../tests/helpers/mock_server";
 import { makeDeferred } from "@web/../tests/helpers/utils";
 
@@ -13,16 +13,6 @@ patch(MockServer.prototype, 'bus', {
         Object.assign(this, TEST_USER_IDS);
         this.pendingLongpollingPromise = null;
         this.notificationsToBeResolved = [];
-    },
-
-    /**
-     * @override
-     */
-    async setup() {
-        this.pyEnv = await getPyEnv();
-        // link the pyEnv to the actual mockServer after execution of
-        // createWebClient.
-        this.pyEnv.mockServer = this;
     },
 
     //--------------------------------------------------------------------------
@@ -35,7 +25,10 @@ patch(MockServer.prototype, 'bus', {
     async _performRPC(route, args) {
         if (route === '/longpolling/poll') {
             const longpollingPromise = makeDeferred();
-            if (this.notificationsToBeResolved.length) {
+            if (this.hasLostConnection) {
+                longpollingPromise.reject(new ConnectionLostError());
+                this.hasLostConnection = false;
+            } else if (this.notificationsToBeResolved.length) {
                 longpollingPromise.resolve(this.notificationsToBeResolved);
                 this.notificationsToBeResolved = [];
             } else {
@@ -71,6 +64,19 @@ patch(MockServer.prototype, 'bus', {
             this.pendingLongpollingPromise = null;
         } else {
             this.notificationsToBeResolved.push(...values);
+        }
+    },
+
+    /**
+     * Simulate the lost of the connection by rejecting the pending
+     * promise with ConnectionLostError. If there is no pending promise,
+     * reject the next one.
+     */
+    _simulateConnectionLostAndRecovered() {
+        if (this.pendingLongpollingPromise) {
+            this.pendingLongpollingPromise.reject(new ConnectionLostError());
+        } else {
+            this.hasLostConnection = true;
         }
     },
 });
