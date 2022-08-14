@@ -276,7 +276,7 @@ class HrExpense(models.Model):
             expense = expense.with_company(expense.company_id)
             expense.name = expense.name or expense.product_id.display_name
             expense.product_uom_id = expense.product_id.uom_id
-            expense.tax_ids = expense.product_id.supplier_taxes_id.filtered(lambda tax: tax.company_id == expense.company_id)  # taxes only from the same company
+            expense.tax_ids = expense.product_id.supplier_taxes_id.filtered(lambda tax: tax.price_include and tax.company_id == expense.company_id)  # taxes only from the same company
             account = expense.product_id.product_tmpl_id._get_product_accounts()['expense']
             if account:
                 expense.account_id = account
@@ -1284,7 +1284,7 @@ class HrExpenseSheet(models.Model):
             'context': {
                 'active_model': 'account.move',
                 'active_ids': self.account_move_id.ids,
-                'partner_bank_id': self.employee_id.bank_account_id.id
+                'default_partner_bank_id': self.employee_id.bank_account_id.id,
             },
             'target': 'new',
             'type': 'ir.actions.act_window',

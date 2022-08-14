@@ -159,6 +159,11 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         return this._super.apply(this, arguments);
     },
+    _createWysiwygInstance: async function () {
+        const res = await this._super(...arguments);
+        this.wysiwyg.getEditable().find('img').attr('loading', '');
+        return res;
+    },
 
     /**
      * @override
@@ -300,8 +305,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
      */
     _toggleCodeView: function ($codeview) {
         this._super(...arguments);
-        const isFullWidth = !!$(window.top.document).find('.o_mass_mailing_form_full_width')[0];
-        $codeview.css('height', isFullWidth ? $(window).height() : '');
         if ($codeview.hasClass('d-none')) {
             this.trigger_up('iframe_updated', { $iframe: this.wysiwyg.$iframe });
         }

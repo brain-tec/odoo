@@ -7,6 +7,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
 
     const { Observer, debounce } = owl;
     const { isConnectionError } = require('point_of_sale.utils');
+    const { useAsyncLockedMethod } = require('point_of_sale.custom_hooks');
 
     /**
      * Render this screen using `showTempScreen` to select client.
@@ -26,9 +27,10 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     class ClientListScreen extends PosComponent {
         constructor() {
             super(...arguments);
+            this.lockedSaveChanges = useAsyncLockedMethod(this.saveChanges);
             useListener('click-save', () => this.env.bus.trigger('save-customer'));
             useListener('click-edit', () => this.editClient());
-            useListener('save-changes', this.saveChanges);
+            useListener('save-changes', this.lockedSaveChanges);
 
             // We are not using useState here because the object
             // passed to useState converts the object and its contents
@@ -100,7 +102,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         // We declare this event handler as a debounce function in
         // order to lower its trigger rate.
         async updateClientList(event) {
-            var newClientList = await this.getNewClient();
             this.state.query = event.target.value;
             const clients = this.clients;
             if (event.code === 'Enter' && clients.length === 1) {

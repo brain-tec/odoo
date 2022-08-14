@@ -587,6 +587,21 @@ options.Class.include({
         const disableDataKeys = allDataKeys.filter(value => !enableDataKeys.includes(value));
         const resetViewArch = !!params.resetViewArch;
 
+        if (params.name === 'header_sidebar_opt') {
+            // When the user selects sidebar as header, make sure that the
+            // header position is regular.
+            // TODO we should avoid having that `if` in the generic option
+            // class (maybe simply use data-trigger but the header template
+            // option as no associated data-js to hack). To adapt in master.
+            await new Promise(resolve => {
+                this.trigger_up('action_demand', {
+                    actionName: 'toggle_page_option',
+                    params: [{name: 'header_overlay', value: false}],
+                    onSuccess: () => resolve(),
+                });
+            });
+        }
+
         return this._rpc({
             route: '/website/theme_customize_data',
             params: {
@@ -2183,6 +2198,25 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
         }
         return _super(...arguments);
     },
+    /**
+     * @override
+     */
+    _computeWidgetVisibility(widgetName, params) {
+        if (widgetName === 'header_visibility_opt') {
+            return this.$target[0].classList.contains('o_header_sidebar') ? '' : 'true';
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _renderCustomXML(uiFragment) {
+        // TODO in master: put this in the XML.
+        const weSelectEl = uiFragment.querySelector('we-select#option_header_visibility');
+        if (weSelectEl) {
+            weSelectEl.dataset.name = 'header_visibility_opt';
+        }
+    },
 });
 
 options.registry.topMenuColor = options.Class.extend({
@@ -2194,12 +2228,16 @@ options.registry.topMenuColor = options.Class.extend({
     /**
      * @override
      */
-    selectStyle(previewMode, widgetValue, params) {
-        this._super(...arguments);
+    async selectStyle(previewMode, widgetValue, params) {
+        await this._super(...arguments);
         const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
-        this.trigger_up('action_demand', {
-            actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: className}],
+        await new Promise((resolve, reject) => {
+            this.trigger_up('action_demand', {
+                actionName: 'toggle_page_option',
+                params: [{name: 'header_color', value: className}],
+                onSuccess: resolve,
+                onFailure: reject,
+            });
         });
     },
 
@@ -2713,18 +2751,6 @@ options.registry.ScrollButton = options.Class.extend({
         await this._super(...arguments);
         this.$button = this.$('.o_scroll_button');
     },
-    /**
-     * Removes button if the option is not displayed (for example in "fit
-     * content" height).
-     *
-     * @override
-     */
-    updateUIVisibility: async function () {
-        await this._super(...arguments);
-        if (this.$button.length && this.el.offsetParent === null) {
-            this.$button.detach();
-        }
-    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -3005,6 +3031,20 @@ options.registry.ConditionalVisibility = options.Class.extend({
     },
 });
 
+options.registry.ImageTools.include({
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        const result = await this._super(...arguments);
+        if ('transform' in params.optionsPossibleValues) {
+            // TODO adapt in master, use a data-dependencies
+            return result && !this.$target.hasClass('o_animate');
+        }
+        return result;
+    },
+});
+
 options.registry.WebsiteAnimate = options.Class.extend({
     /**
      * @override
@@ -3087,6 +3127,12 @@ options.registry.WebsiteAnimate = options.Class.extend({
         }
         if (widgetName === 'animation_launch_opt') {
             return !this.$target[0].closest('.dropdown');
+        }
+        if (params.isAnimationTypeSelection) {
+            // TODO adapt in master, use a data-dependencies related to the
+            // transform option
+            const transform = this.$target[0].style.transform;
+            return !transform || transform === 'none';
         }
         return this._super(...arguments);
     },

@@ -1327,6 +1327,12 @@ msgid "Extra Variant Media"
 msgstr ""
 
 #. module: website_sale
+#: code:addons/website_sale/models/website.py:0
+#, python-format
+msgid "Featured"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "FedEx"
 msgstr ""
@@ -1685,10 +1691,15 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__name
 #: model:ir.model.fields,field_description:website_sale.field_website_base_unit__name
 #: model_terms:ir.ui.view,arch_db:website_sale.address
-#: model_terms:ir.ui.view,arch_db:website_sale.sort
 #: model_terms:ir.ui.view,arch_db:website_sale.product_ribbon_view_tree
-#, python-format
+#: model_terms:ir.ui.view,arch_db:website_sale.sort
 msgid "Name"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/models/website.py:0
+#, python-format
+msgid "Name (A-Z)"
 msgstr ""
 
 #. module: website_sale
@@ -1707,6 +1718,12 @@ msgstr ""
 #. module: website_sale
 #: model:product.ribbon,html:website_sale.new_ribbon
 msgid "New!"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/models/website.py:0
+#, python-format
+msgid "Newest Arrivals"
 msgstr ""
 
 #. module: website_sale
@@ -2097,6 +2114,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_summary
 #: model_terms:ir.ui.view,arch_db:website_sale.product_searchbar_input_snippet_options
 msgid "Price"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/models/website.py:0
+#, python-format
+msgid "Price - High to Low"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/models/website.py:0
+#, python-format
+msgid "Price - Low to High"
 msgstr ""
 
 #. module: website_sale
@@ -2924,6 +2953,12 @@ msgid "The #1"
 msgstr ""
 
 #. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "The access token is invalid."
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__website_url
 #: model:ir.model.fields,help:website_sale.field_product_template__website_url
 msgid "The full URL to access the document through the website."
@@ -2947,6 +2982,12 @@ msgstr ""
 msgid ""
 "The mode selected here applies as invoicing policy of any new product "
 "created but not of products already existing."
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "The order has been canceled."
 msgstr ""
 
 #. module: website_sale
