@@ -1128,13 +1128,13 @@ class MrpProduction(models.Model):
         self.ensure_one()
         procurement_moves = self.procurement_group_id.stock_move_ids
         child_moves = procurement_moves.move_orig_ids
-        return (procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids - self
+        return (procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
 
     def _get_sources(self):
         self.ensure_one()
         dest_moves = self.procurement_group_id.mrp_production_ids.move_dest_ids
         parent_moves = self.procurement_group_id.stock_move_ids.move_dest_ids
-        return (dest_moves | parent_moves).group_id.mrp_production_ids - self
+        return (dest_moves | parent_moves).group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
 
     def action_view_mrp_production_childs(self):
         self.ensure_one()
@@ -1700,9 +1700,6 @@ class MrpProduction(models.Model):
         self.env['stock.move.line'].browse(move_lines_to_unlink).unlink()
         self.env['stock.move.line'].create(move_lines_vals)
 
-        # We need to adapt `duration_expected` on both the original workorders and their
-        # backordered workorders. To do that, we use the original `duration_expected` and the
-        # ratio of the quantity produced and the quantity to produce.
         workorders_to_cancel = self.env['mrp.workorder']
         workorders_to_update = self.env['mrp.workorder']
         for production in self:
@@ -1712,7 +1709,7 @@ class MrpProduction(models.Model):
 
             # Adapt duration
             for workorder in (production | bo).workorder_ids:
-                workorder.duration_expected = workorder.duration_expected * workorder.production_id.product_qty / initial_qty
+                workorder.duration_expected = workorder._get_duration_expected()
 
             # Adapt quantities produced
             for workorder in production.workorder_ids:
@@ -1731,9 +1728,12 @@ class MrpProduction(models.Model):
         workorders_to_cancel.action_cancel()
         for workorder in workorders_to_update:
             workorder.state = 'ready' if workorder.next_work_order_id.production_availability == 'assigned' else 'waiting'
-        backorders.workorder_ids._action_confirm()
+        backorders._action_confirm_mo_backorders()
 
         return self.env['mrp.production'].browse(production_ids)
+
+    def _action_confirm_mo_backorders(self):
+        self.workorder_ids._action_confirm()
 
     def button_mark_done(self):
         self._button_mark_done_sanity_checks()
@@ -2101,6 +2101,7 @@ class MrpProduction(models.Model):
                     ('qty_done', '=', 1),
                     ('state', '=', 'done'),
                     ('location_dest_id.usage', '=', 'production'),
+                    ('production_id', '!=', False),
                 ])
                 if duplicates:
                     # Maybe some move lines have been compensated by unbuild
