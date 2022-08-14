@@ -996,6 +996,26 @@ export class OdooEditor extends EventTarget {
     historyUnpauseSteps() {
         this._historyStepsActive = true;
     }
+    /**
+     * Stash the mutations of the current step to re-apply them later.
+     */
+    historyStash() {
+        if (!this._historyStashedMutations) {
+            this._historyStashedMutations = [];
+        }
+        this._historyStashedMutations.push(...this._currentStep.mutations);
+        this._currentStep.mutations = [];
+    }
+    /**
+     * Unstash the previously stashed mutations into the current step.
+     */
+    historyUnstash() {
+        if (!this._currentStep.mutations) {
+            this._currentStep.mutations = [];
+        }
+        this._currentStep.mutations.unshift(...this._historyStashedMutations);
+        this._historyStashedMutations = [];
+    }
     _historyClean() {
         this._historySteps = [];
         this._currentStep = {
@@ -1299,12 +1319,12 @@ export class OdooEditor extends EventTarget {
 
     /**
      * Find all descendants of `element` with a `data-call` attribute and bind
-     * them on mousedown to the execution of the command matching that
+     * them on click to the execution of the command matching that
      * attribute.
      */
     bindExecCommand(element) {
         for (const buttonEl of element.querySelectorAll('[data-call]')) {
-            buttonEl.addEventListener('mousedown', ev => {
+            buttonEl.addEventListener('click', ev => {
                 const sel = this.document.getSelection();
                 if (sel.anchorNode && ancestors(sel.anchorNode).includes(this.editable)) {
                     this.execCommand(buttonEl.dataset.call, buttonEl.dataset.arg1);
@@ -1801,7 +1821,7 @@ export class OdooEditor extends EventTarget {
 
         const mainCommands = [
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Heading 1'),
                 description: this.options._t('Big section heading.'),
                 fontawesome: 'fa-header',
@@ -1810,7 +1830,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Heading 2'),
                 description: this.options._t('Medium section heading.'),
                 fontawesome: 'fa-header',
@@ -1819,7 +1839,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Heading 3'),
                 description: this.options._t('Small section heading.'),
                 fontawesome: 'fa-header',
@@ -1828,7 +1848,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Text'),
                 description: this.options._t('Paragraph block.'),
                 fontawesome: 'fa-paragraph',
@@ -1837,7 +1857,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Bulleted list'),
                 description: this.options._t('Create a simple bulleted list.'),
                 fontawesome: 'fa-list-ul',
@@ -1846,7 +1866,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Numbered list'),
                 description: this.options._t('Create a list with numbering.'),
                 fontawesome: 'fa-list-ol',
@@ -1855,7 +1875,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Checklist'),
                 description: this.options._t('Track tasks with a checklist.'),
                 fontawesome: 'fa-check-square-o',
@@ -1864,7 +1884,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Separator'),
                 description: this.options._t('Insert an horizontal rule separator.'),
                 fontawesome: 'fa-minus',
@@ -1873,7 +1893,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Table'),
                 description: this.options._t('Insert a table.'),
                 fontawesome: 'fa-table',
@@ -1882,7 +1902,7 @@ export class OdooEditor extends EventTarget {
                 },
             },
             {
-                groupName: 'Basic blocks',
+                groupName: this.options._t('Basic blocks'),
                 title: this.options._t('Switch direction'),
                 description: this.options._t('Switch the text\'s direction.'),
                 fontawesome: 'fa-exchange',
@@ -1896,7 +1916,7 @@ export class OdooEditor extends EventTarget {
                 description: 'Insert a rating over 3 stars.',
                 fontawesome: 'fa-star-o',
                 callback: () => {
-                    let html = '<span contenteditable="false" class="o_stars o_three_stars">';
+                    let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
                     html += Array(3).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                     html += '</span>';
                     this.execCommand('insertHTML', html);
@@ -1908,7 +1928,7 @@ export class OdooEditor extends EventTarget {
                 description: 'Insert a rating over 5 stars.',
                 fontawesome: 'fa-star',
                 callback: () => {
-                    let html = '<span contenteditable="false" class="o_stars o_five_stars">';
+                    let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
                     html += Array(5).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                     html += '</span>';
                     this.execCommand('insertHTML', html);
@@ -3007,14 +3027,13 @@ export class OdooEditor extends EventTarget {
         }
 
         // handle stars
-        if (node.nodeType === Node.ELEMENT_NODE && node.className.includes('fa-star') &&
+        const isStar = el => el.nodeType === Node.ELEMENT_NODE && (
+            el.classList.contains('fa-star') || el.classList.contains('fa-star-o')
+        );
+        if (isStar(node) &&
             node.parentElement && node.parentElement.className.includes('o_stars')) {
-            const previousStars = getAdjacentPreviousSiblings(node, sib => (
-                sib.nodeType === Node.ELEMENT_NODE && sib.className.includes('fa-star')
-            ));
-            const nextStars = getAdjacentNextSiblings(node, sib => (
-                sib.nodeType === Node.ELEMENT_NODE && sib.className.includes('fa-star')
-            ));
+            const previousStars = getAdjacentPreviousSiblings(node, isStar);
+            const nextStars = getAdjacentNextSiblings(node, isStar);
             if (nextStars.length || previousStars.length) {
                 const shouldToggleOff = node.classList.contains('fa-star') &&
                     (!nextStars[0] || !nextStars[0].classList.contains('fa-star'));
@@ -3110,6 +3129,7 @@ export class OdooEditor extends EventTarget {
     addImagesFiles(imageFiles) {
         for (const imageFile of imageFiles) {
             const imageNode = document.createElement('img');
+            imageNode.style.width = '100%';
             imageNode.dataset.fileName = imageFile.name;
             getImageUrl(imageFile).then((url)=> {
                 imageNode.src = url;
@@ -3125,10 +3145,10 @@ export class OdooEditor extends EventTarget {
         const sel = this.document.getSelection();
         const files = getImageFiles(ev.clipboardData);
         const clipboardHtml = ev.clipboardData.getData('text/html');
-        if (files.length) {
-            this.addImagesFiles(files);
-        } else if (clipboardHtml) {
+        if (clipboardHtml) {
             this.execCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
+        } else if (files.length) {
+            this.addImagesFiles(files);
         } else {
             const text = ev.clipboardData.getData('text/plain');
             const splitAroundUrl = text.split(URL_REGEX);
@@ -3149,8 +3169,8 @@ export class OdooEditor extends EventTarget {
                     const baseEmbedCommand = [
                         {
                             groupName: 'paste',
-                            title: 'Paste as URL',
-                            description: 'Create an URL.',
+                            title: this.options._t('Paste as URL'),
+                            description: this.options._t('Create an URL.'),
                             fontawesome: 'fa-link',
                             callback: () => {
                                 this.historyUndo();
@@ -3172,8 +3192,8 @@ export class OdooEditor extends EventTarget {
                         },
                         {
                             groupName: 'paste',
-                            title: 'Paste as text',
-                            description: 'Simple text paste.',
+                            title: this.options._t('Paste as text'),
+                            description: this.options._t('Simple text paste.'),
                             fontawesome: 'fa-font',
                             callback: () => {},
                         },
@@ -3195,9 +3215,9 @@ export class OdooEditor extends EventTarget {
                         this.commandBar.open({
                             commands: [
                                 {
-                                    groupName: 'Embed',
-                                    title: 'Embed Image',
-                                    description: 'Embed the image in the document.',
+                                    groupName: this.options._t('Embed'),
+                                    title: this.options._t('Embed Image'),
+                                    description: this.options._t('Embed the image in the document.'),
                                     fontawesome: 'fa-image',
                                     shouldPreValidate: () => false,
                                     callback: () => {
@@ -3223,9 +3243,9 @@ export class OdooEditor extends EventTarget {
                         this.commandBar.open({
                             commands: [
                                 {
-                                    groupName: 'Embed',
-                                    title: 'Embed Youtube Video',
-                                    description: 'Embed the youtube video in the document.',
+                                    groupName: this.options._t('Embed'),
+                                    title: this.options._t('Embed Youtube Video'),
+                                    description: this.options._t('Embed the youtube video in the document.'),
                                     fontawesome: 'fa-youtube-play',
                                     shouldPreValidate: () => false,
                                     callback: async () => {
@@ -3281,7 +3301,7 @@ export class OdooEditor extends EventTarget {
                         }
                     }
                 } else if (splitAroundUrl[i] !== '') {
-                    const textFragments = splitAroundUrl[i].split('\n');
+                    const textFragments = splitAroundUrl[i].split(/\r?\n/);
                     let textIndex = 1;
                     for (const textFragment of textFragments) {
                         this.execCommand('insertText', textFragment);

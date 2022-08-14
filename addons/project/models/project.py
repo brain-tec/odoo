@@ -336,7 +336,7 @@ class Project(models.Model):
 
     # Project Sharing fields
     collaborator_ids = fields.One2many('project.collaborator', 'project_id', string='Collaborators', copy=False)
-    collaborator_count = fields.Integer('# Collaborators', compute='_compute_collaborator_count')
+    collaborator_count = fields.Integer('# Collaborators', compute='_compute_collaborator_count', compute_sudo=True)
 
     # rating fields
     rating_request_deadline = fields.Datetime(compute='_compute_rating_request_deadline', store=True)
@@ -1346,7 +1346,7 @@ class Task(models.Model):
                 # In the case no stages have been found, we create the default stages for the user
                 if not stage:
                     stages = self.env['project.task.type'].sudo().with_context(lang=user_id.partner_id.lang, default_project_id=False).create(
-                        self._get_default_personal_stage_create_vals(user_id.id)
+                        self.with_context(lang=user_id.partner_id.lang)._get_default_personal_stage_create_vals(user_id.id)
                     )
                     stage = stages[0]
                 personal_stage_by_user[user_id].sudo().write({'stage_id': stage.id})
@@ -1763,8 +1763,9 @@ class Task(models.Model):
                 )
                 if partner_id:
                     vals['partner_id'] = partner_id
-        if vals.get('project_id'):
-            project = self.env['project.project'].browse(vals.get('project_id'))
+        project_id = vals.get('project_id', self.env.context.get('default_project_id'))
+        if project_id:
+            project = self.env['project.project'].browse(project_id)
             if project.analytic_account_id:
                 vals['analytic_account_id'] = project.analytic_account_id.id
             if project.analytic_tag_ids:

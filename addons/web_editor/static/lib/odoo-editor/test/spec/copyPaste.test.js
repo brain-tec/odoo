@@ -157,6 +157,26 @@ describe('Copy and paste', () => {
                     contentAfter: '<p>a<span>bx[]c</span>d</p>',
                 });
             });
+            // TODO: We might want to have it consider \n as paragraph breaks
+            // instead of linebreaks but that would be an opinionated choice.
+            it('should paste text and understand \n newlines', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>[]<br/></p>',
+                    stepFunction: async editor => {
+                        await pasteText(editor, 'a\nb\nc\nd');
+                    },
+                    contentAfter: '<p>a<br>b<br>c<br>d[]<br></p>',
+                });
+            });
+            it('should paste text and understand \r\n newlines', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>[]<br/></p>',
+                    stepFunction: async editor => {
+                        await pasteText(editor, 'a\r\nb\r\nc\r\nd');
+                    },
+                    contentAfter: '<p>a<br>b<br>c<br>d[]<br></p>',
+                });
+            });
         });
         describe('range not collapsed', async () => {
             it('should paste a text in a p', async () => {
@@ -1239,6 +1259,29 @@ describe('Copy and paste', () => {
                         await pasteText(editor, 'http://www.xyz.com');
                     },
                     contentAfter: '<p>a<a href="http://existing.com">bhttp://www.xyz.com[]c</a>d</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
+                    stepFunction: async editor => {
+                        await pasteText(editor, 'random');
+                    },
+                    contentAfter: '<p>a<a href="http://existing.com">brandom[]c</a>d</p>',
+                });
+            });
+            it('should paste and transform an URL in a existing link if pasting valid url', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<a href="http://existing.com">[]c</a>d</p>',
+                    stepFunction: async editor => {
+                        await pasteText(editor, 'https://www.xyz.xdc');
+                    },
+                    contentAfter: '<p>a<a href="https://www.xyz.xdcc">https://www.xyz.xdc[]c</a>d</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<a href="http://existing.com">b[].com</a>d</p>',
+                    stepFunction: async editor => {
+                        await pasteText(editor, 'oom');
+                    },
+                    contentAfter: '<p>a<a href="https://boom.com">boom[].com</a>d</p>',
                 });
             });
         });

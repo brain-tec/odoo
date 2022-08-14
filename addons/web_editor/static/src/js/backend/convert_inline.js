@@ -121,6 +121,9 @@ function bootstrapToTable($editable) {
     // These containers from the mass mailing masonry snippet require full
     // height contents, which is only possible if the table itself has a set
     // height. We also need to restyle it because of the change in structure.
+    for(const masonryTopInnerContainer of editable.querySelectorAll('.s_masonry_block > .container')) {
+        masonryTopInnerContainer.style.setProperty('height', '100%');
+    }
     for (const masonryGrid of editable.querySelectorAll('.o_masonry_grid_container')) {
         masonryGrid.style.setProperty('padding', 0);
         for (const fakeTable of [...masonryGrid.children].filter(c => c.classList.contains('o_fake_table'))) {
@@ -185,7 +188,7 @@ function bootstrapToTable($editable) {
             // 1. Replace generic "col" classes with specific "col-n", computed
             //    by sharing the available space between them.
             const flexColumns = bootstrapColumns.filter(column => !/\d/.test(column.className.match(RE_COL_MATCH)[0] || '0'));
-            const colTotalSize = bootstrapColumns.map(child => _getColumnSize(child)).reduce((a, b) => a + b, 0);
+            const colTotalSize = bootstrapColumns.map(child => _getColumnSize(child) + _getColumnOffsetSize(child)).reduce((a, b) => a + b, 0);
             const colSize = Math.max(1, Math.round((12 - colTotalSize) / flexColumns.length));
             for (const flexColumn of flexColumns) {
                 flexColumn.classList.remove(flexColumn.className.match(RE_COL_MATCH)[0].trim());
@@ -193,24 +196,38 @@ function bootstrapToTable($editable) {
             }
 
             // 2. Create and fill up the row(s) with grid(s).
+            // Create new, empty columns for column offsets.
+            let columnIndex = 0;
+            for (const bootstrapColumn of [...bootstrapColumns]) {
+                const offsetSize = _getColumnOffsetSize(bootstrapColumn);
+                if (offsetSize) {
+                    const newColumn = document.createElement('div');
+                    newColumn.classList.add(`col-${offsetSize}`);
+                    bootstrapColumn.classList.remove(bootstrapColumn.className.match(RE_OFFSET_MATCH)[0].trim());
+                    bootstrapColumn.before(newColumn);
+                    bootstrapColumns.splice(columnIndex, 0, newColumn);
+                    columnIndex++;
+                }
+                columnIndex++;
+            }
             let grid = _createColumnGrid();
             let gridIndex = 0;
             let currentRow = tr.cloneNode();
             tr.after(currentRow);
             let currentCol;
-            let columnIndex = 0;
+            columnIndex = 0;
             for (const bootstrapColumn of bootstrapColumns) {
                 const columnSize = _getColumnSize(bootstrapColumn);
                 if (gridIndex + columnSize < 12) {
                     currentCol = grid[gridIndex];
                     _applyColspan(currentCol, columnSize, containerWidth);
+                    gridIndex += columnSize;
                     if (columnIndex === bootstrapColumns.length - 1) {
                         // We handled all the columns but there is still space
                         // in the row. Insert the columns and fill the row.
-                        grid[gridIndex].setAttribute('colspan', 12 - gridIndex);
+                        _applyColspan(grid[gridIndex], 12 - gridIndex);
                         currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
                     }
-                    gridIndex += columnSize;
                 } else if (gridIndex + columnSize === 12) {
                     // Finish the row.
                     currentCol = grid[gridIndex];
@@ -241,10 +258,8 @@ function bootstrapToTable($editable) {
                     if (columnIndex === bootstrapColumns.length - 1 && gridIndex < 12) {
                         // We handled all the columns but there is still space
                         // in the row. Insert the columns and fill the row.
-                        grid[gridIndex].setAttribute('colspan', 12 - gridIndex);
-                        currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
-                        // Adapt width to colspan.
                         _applyColspan(grid[gridIndex], 12 - gridIndex, containerWidth);
+                        currentRow.append(...grid.filter(td => td.getAttribute('colspan')));
                     }
                 }
                 if (currentCol) {
@@ -283,18 +298,11 @@ function cardToTable($editable) {
     for (const card of editable.querySelectorAll('.card')) {
         const table = _createTable(card.attributes);
         table.style.removeProperty('overflow');
+        const cardImgTopSuperRows = [];
         for (const child of [...card.childNodes]) {
             const row = document.createElement('tr');
             const col = document.createElement('td');
-            if (child.nodeName === 'IMG') {
-                col.append(child);
-            } else if (child.nodeType === Node.TEXT_NODE) {
-                if (child.textContent.replace(RE_WHITESPACE, '').length) {
-                    col.append(child);
-                } else {
-                    continue;
-                }
-            } else {
+            if (isBlock(child)) {
                 for (const attr of child.attributes) {
                     col.setAttribute(attr.name, attr.value);
                 }
@@ -302,6 +310,14 @@ function cardToTable($editable) {
                     col.append(descendant);
                 }
                 child.remove();
+            } else if (child.nodeType === Node.TEXT_NODE) {
+                if (child.textContent.replace(RE_WHITESPACE, '').length) {
+                    col.append(child);
+                } else {
+                    continue;
+                }
+            } else {
+                col.append(child);
             }
             const subTable = _createTable();
             const superRow = document.createElement('tr');
@@ -311,6 +327,17 @@ function cardToTable($editable) {
             superCol.append(subTable);
             superRow.append(superCol);
             table.append(superRow);
+            if (child.classList && child.classList.contains('card-img-top')) {
+                // Collect .card-img-top superRows to manipulate their heights.
+                cardImgTopSuperRows.push(superRow);
+            }
+        }
+        // We expect successive .card-img-top to have the same height so the
+        // bodies of the cards are aligned. This achieves that without flexboxes
+        // by forcing the height of the smallest card:
+        const smallestCardImgRow = Math.min(0, ...cardImgTopSuperRows.map(row => row.clientHeight));
+        for (const row of cardImgTopSuperRows) {
+            row.style.height = smallestCardImgRow + 'px';
         }
         card.before(table);
         card.remove();
@@ -510,6 +537,7 @@ function enforceImagesResponsivity(editable) {
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
 async function toInline($editable, cssRules, $iframe) {
+    $editable.removeClass('odoo-editor-editable');
     const editable = $editable.get(0);
     const iframe = $iframe && $iframe.get(0);
     const wysiwyg = $editable.data('wysiwyg');
@@ -585,6 +613,7 @@ async function toInline($editable, cssRules, $iframe) {
     for (const [node, displayValue] of displaysToRestore) {
         node.style.setProperty('display', displayValue);
     }
+    $editable.addClass('odoo-editor-editable');
 }
 /**
  * Take all elements with a `background-image` style and convert them, along
@@ -695,7 +724,10 @@ function fontToImg($editable) {
             wrapper.style.setProperty('height', height + 'px');
             wrapper.style.setProperty('vertical-align', 'middle');
             wrapper.style.setProperty('background-color', image.style.backgroundColor);
-            wrapper.setAttribute('class', font.getAttribute('class').replace(new RegExp('(^|\\s+)' + icon + '(-[^\\s]+)?', 'gi'), '')); // remove inline font-awsome style);
+            wrapper.setAttribute('class',
+                'oe_unbreakable ' + // prevent sanitize from grouping image wrappers
+                font.getAttribute('class').replace(new RegExp('(^|\\s+)' + icon + '(-[^\\s]+)?', 'gi'), '') // remove inline font-awsome style
+            );
         } else {
             font.remove();
         }
@@ -792,6 +824,12 @@ function formatTables($editable) {
             row.style.verticalAlign = 'middle';
         } else if (alignItems === 'flex-end' || alignItems === 'baseline') {
             row.style.verticalAlign = 'bottom';
+        } else if (alignItems === 'stretch') {
+            const columns = [...row.children].filter(child => child.nodeName === 'TD');
+            const biggestHeight = Math.max(...columns.map(column => column.clientHeight));
+            for (const column of columns) {
+                column.style.height = biggestHeight + 'px';
+            }
         }
     }
     // Tables don't properly inherit alignments from their ancestors in Outlook.
@@ -1122,7 +1160,6 @@ function _createTable(attributes = []) {
  * its Bootstrap classes.
  *
  * @see RE_COL_MATCH
- * @see RE_OFFSET_MATCH
  * @param {Element} column
  * @returns {number}
  */
@@ -1130,10 +1167,21 @@ function _getColumnSize(column) {
     const colMatch = column.className.match(RE_COL_MATCH);
     const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
     const colSize = colOptions && (colOptions.length === 2 ? +colOptions[1] : +colOptions[0]) || 0;
+    return colSize;
+}
+/**
+ * Take a Bootstrap grid column element and return its offset size, computed by
+ * using its Bootstrap classes.
+ *
+ * @see RE_OFFSET_MATCH
+ * @param {Element} column
+ * @returns {number}
+ */
+function _getColumnOffsetSize(column) {
     const offsetMatch = column.className.match(RE_OFFSET_MATCH);
     const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
     const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]) || 0;
-    return colSize + offsetSize;
+    return offsetSize;
 }
 /**
  * Return the CSS rules which applies on an element, tweaked so that they are
@@ -1168,7 +1216,7 @@ function _getMatchedCSSRules(node, cssRules) {
     }
 
     for (const [key, value] of Object.entries(processedStyle)) {
-        if (value.endsWith('important')) {
+        if (value && value.endsWith('important')) {
             processedStyle[key] = value.replace(/\s*!important\s*$/, '');
         }
     };
