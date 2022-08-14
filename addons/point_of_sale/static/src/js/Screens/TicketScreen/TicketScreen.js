@@ -233,6 +233,16 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         //#endregion
         //#region PUBLIC METHODS
+        close() {
+            /**
+             * Automatically create new order when there is no currently active order.
+             * Important in fiscal modules to keep the sequence of the orders.
+             */
+            if (this.env.pos.orders.length == 0) {
+                this.env.pos.add_new_order();
+            }
+            super.close();
+        }
         getSelectedSyncedOrder() {
             if (this._state.ui.filter == 'SYNCED') {
                 return this._state.syncedOrders.cache[this._state.ui.selectedSyncedOrderId];
@@ -563,8 +573,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     args: [idsNotInCache],
                     context: this.env.session.user_context,
                 });
-                // Check for missing products and load them in the PoS
+                // Check for missing products and partners and load them in the PoS
                 await this.env.pos._loadMissingProducts(fetchedOrders);
+                await this.env.pos._loadMissingPartners(fetchedOrders);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `_onInvoiceOrder`.
                 fetchedOrders.forEach((order) => {

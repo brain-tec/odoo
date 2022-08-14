@@ -45,6 +45,11 @@ const LinkTools = Link.extend({
      * @override
      */
     start: function () {
+        const titleEls = this.el.querySelectorAll('we-title');
+        for (const titleEl of titleEls) {
+            // See _buildTitleElement for explanation
+            titleEl.textContent = titleEl.textContent.replace(/⌙/g, '└');
+        }
         this._addHintClasses();
         return this._super(...arguments);
     },
@@ -53,14 +58,16 @@ const LinkTools = Link.extend({
             return this._super(...arguments);
         }
         const $contents = this.$link.contents();
-        if (!this.$link.attr('href') && !this.colorCombinationClass) {
+        if (this.shouldUnlink()) {
             $contents.unwrap();
         }
         this._observer.disconnect();
         this._super(...arguments);
         this._removeHintClasses();
     },
-
+    shouldUnlink: function () {
+        return !this.$link.attr('href') && !this.colorCombinationClass
+    },
     applyLinkToDom() {
         this._observer.disconnect();
         this._removeHintClasses();
