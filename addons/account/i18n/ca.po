@@ -18,7 +18,6 @@
 # Carles Antoli <carlesantoli@hotmail.com>, 2021
 # Quim - eccit <quim@eccit.com>, 2021
 # Camille Dantinne <cmd@odoo.com>, 2021
-# Eugeni Chafer <eugeni@chafer.cat>, 2022
 # Harcogourmet, 2022
 # AncesLatino2004, 2022
 # ericrolo, 2022
@@ -27,6 +26,7 @@
 # Óscar Fonseca <tecnico@extreme-micro.com>, 2022
 # eriiikgt, 2022
 # jabelchi, 2022
+# Eugeni Chafer <eugeni@chafer.cat>, 2022
 # 
 msgid ""
 msgstr ""
@@ -34,7 +34,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-25 10:15+0000\n"
 "PO-Revision-Date: 2020-09-07 08:09+0000\n"
-"Last-Translator: jabelchi, 2022\n"
+"Last-Translator: Eugeni Chafer <eugeni@chafer.cat>, 2022\n"
 "Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -399,6 +399,8 @@ msgid ""
 "<span attrs=\"{'invisible': ['|', ('state', '!=', 'draft'), ('name', '!=', "
 "'/')]}\">Draft</span>"
 msgstr ""
+"<span attrs=\"{'invisible': ['|', ('state', '!=', 'draft'), ('name', '!=', "
+"'/')]}\">Esborrany</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_send_wizard_form
@@ -6841,7 +6843,7 @@ msgstr "S'ha Enviat el Moviment"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__is_off_balance
 msgid "Is Off Balance"
-msgstr "Està fora d'equilibri"
+msgstr "Està desquadrat"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__printed
@@ -11298,7 +11300,7 @@ msgstr "Rang de subministraments"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__suspense_account_id
 msgid "Suspense Account"
-msgstr "Compte Suspicós"
+msgstr "Compte pont"
 
 #. module: account
 #: model:ir.actions.server,name:account.action_move_switch_invoice_to_credit_note
@@ -12240,9 +12242,9 @@ msgid ""
 "balance."
 msgstr ""
 "La quantitat expressada en la moneda secundaria ha de ser positiva quan el "
-"compte es desbiteix i negativa quan el compte sigui assignat. Si la moneda "
-"és igual que la de la companyia, aquesta quantitat ha de ser estrictament "
-"igual a l'equilibri."
+"compte és deutor i negativa quan el compte és creditor. Si la moneda és "
+"igual que la de la companyia, aquesta quantitat ha de ser estrictament igual"
+" al saldo."
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0

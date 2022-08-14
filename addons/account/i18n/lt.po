@@ -25,13 +25,13 @@
 # Linas Versada <linaskrisiukenas@gmail.com>, 2021
 # Arunas Vaitekunas <vaitekunas@gmail.com>, 2021
 # Paulius Sladkevičius <paulius@versada.eu>, 2021
-# Jonas Zinkevicius <jozi@odoo.com>, 2021
 # grupoda2 <dmitrijus.ivanovas@gmail.com>, 2021
 # Camille Dantinne <cmd@odoo.com>, 2021
 # Donatas <donatasvaliulis16@gmail.com>, 2021
 # Gailius Kazlauskas, 2022
 # Sigitasvia <sigitas@vialaurea.lt>, 2022
 # Arunas V. <arunas@devoro.com>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
 # Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2022
 # 
 msgid ""
@@ -497,6 +497,9 @@ msgid ""
 "('state', '!=', 'draft'), ('invoice_payment_term_id', '!=', False)]}\"> or "
 "</span>"
 msgstr ""
+"<span class=\"o_form_label mx-3 oe_edit_only\" attrs=\"{'invisible': ['|', "
+"('state', '!=', 'draft'), ('invoice_payment_term_id', '!=', False)]}\"> arba"
+" </span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -4911,7 +4914,7 @@ msgstr "Kreditinės sąskaitos šablonas"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Draft Entry"
-msgstr ""
+msgstr "Juodraštinis įrašas"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -10253,7 +10256,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__sale_activity_type_id
 msgid "Schedule Activity"
-msgstr ""
+msgstr "Suplanuoti veiklą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_search
@@ -10550,7 +10553,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_tour_upload_bill_email_confirm
 msgid "Send your email to"
-msgstr ""
+msgstr "Siųsti Jūsų el. laišką į "
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
@@ -10730,6 +10733,8 @@ msgid ""
 "Shorter name used for display. The journal entries of this journal will also"
 " be named using this prefix by default."
 msgstr ""
+"Trumpas kodas naudojamas atvaizdavimui. Šiame žurnale sukurti žurnalo įrašai"
+" taip pat turės šitą kodą kaip priešdėlį prieš numerį."
 
 #. module: account
 #: model:res.groups,name:account.group_account_readonly

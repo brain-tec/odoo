@@ -75,13 +75,13 @@
 # c6006fcfb8a88157145e24bd47011b95_e8661c8, 2021
 # Jonathan Castillo <jcs@odoo.com>, 2021
 # Fabien Pinckaers <fp@openerp.com>, 2021
-# Alexandra Jubert <aju@odoo.com>, 2021
+# Alexandra Jubert, 2021
 # Saad Thaifa <saad.thaifa@gmail.com>, 2021
 # Amaury oci <asalmon@oci.fr>, 2021
 # sbr <sbr@odoo.com>, 2021
-# Rémi CAZENAVE, 2021
 # Thomas Deleval <thd@odoo.com>, 2021
 # Camille Dantinne <cmd@odoo.com>, 2021
+# Rémi CAZENAVE, 2022
 # Cécile Collart <cco@odoo.com>, 2022
 # 
 msgid ""
@@ -96,7 +96,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__amount_type
@@ -2043,6 +2043,8 @@ msgid ""
 "Always positive amount concerned by this matching expressed in the company "
 "currency."
 msgstr ""
+"Montant toujours positif concerné par cet appariement exprimé dans la devise"
+" de l'entreprise."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_partial_reconcile__credit_amount_currency
@@ -4285,7 +4287,7 @@ msgstr "Différence de taux de change"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Currency exchange rate difference (cash basis)"
-msgstr ""
+msgstr "Différence de taux de change (base caisse)"
 
 #. module: account
 #: code:addons/account/models/res_bank.py:0
@@ -6004,7 +6006,7 @@ msgstr "Masquer l'option d'utilisation de la trésorerie"
 #: model:ir.model.fields,field_description:account.field_account_move__highest_name
 #: model:ir.model.fields,field_description:account.field_account_payment__highest_name
 msgid "Highest Name"
-msgstr ""
+msgstr "Nom le plus haut"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_invoice_page
@@ -6214,6 +6216,9 @@ msgid ""
 "related information at the time of the creation of the move and that the "
 "move needs to be checked again."
 msgstr ""
+"Si cette case est cochée, cela signifie que l'utilisateur n'était pas sûr de"
+" toutes les informations relatives au moment de la création du mouvement et "
+"que le mouvement doit être vérifié à nouveau."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__auto_post
@@ -6754,6 +6759,8 @@ msgid ""
 "Invoice and credit note repartition should have at least one tax repartition"
 " line."
 msgstr ""
+"La répartition des factures et des avoirs doit comporter au moins une ligne "
+"de répartition des taxes."
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -6769,6 +6776,8 @@ msgid ""
 "Invoice and credit note distribution should match (same percentages, in the "
 "same order)."
 msgstr ""
+"La répartition des factures et des notes de crédit doit correspondre (mêmes "
+"pourcentages, dans le même ordre)."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__invoice_line_ids
@@ -7004,12 +7013,12 @@ msgstr "JRNL/2016/00001"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__preview_move_data
 msgid "JSON value of the data to be displayed in the previewer"
-msgstr ""
+msgstr "Valeur JSON des données à afficher dans l'aperçu."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__move_data
 msgid "JSON value of the moves to be created"
-msgstr ""
+msgstr "Valeur JSON des mouvements à créer"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
@@ -8046,7 +8055,7 @@ msgstr "Mouvement"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__move_data
 msgid "Move Data"
-msgstr ""
+msgstr "Données de mouvement"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__move_line_ids
@@ -9924,6 +9933,12 @@ msgid "Reconciliation Parts"
 msgstr "Espaces de réconciliation"
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid "Record cannot be deleted. Partner used in Accounting"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Record transactions in foreign currencies"
 msgstr "Enregistrer des transactions dans des devises étrangères"
@@ -10783,6 +10798,11 @@ msgid ""
 "\n"
 "Only PDF and XML files will be interpreted by Odoo"
 msgstr ""
+"Envoyer un courriel distinct pour chaque facture.\n"
+"\n"
+"Toute extension de fichier sera acceptée.\n"
+"\n"
+"Seuls les fichiers PDF et XML seront interprétés par Odoo."
 
 #. module: account
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action
@@ -10857,7 +10877,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__sequence_override_regex
 msgid "Sequence Override Regex"
-msgstr ""
+msgstr "Override Séquence Regex"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__sequence_prefix
@@ -10988,6 +11008,8 @@ msgid ""
 "Shorter name used for display. The journal entries of this journal will also"
 " be named using this prefix by default."
 msgstr ""
+"Nom abrégé utilisé pour l'affichage. Les écritures comptables de ce journal "
+"seront également nommées en utilisant ce préfixe par défaut."
 
 #. module: account
 #: model:res.groups,name:account.group_account_readonly
@@ -11390,7 +11412,7 @@ msgstr "Rang des fournisseurs"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__suspense_account_id
 msgid "Suspense Account"
-msgstr ""
+msgstr "Compte d'attente"
 
 #. module: account
 #: model:ir.actions.server,name:account.action_move_switch_invoice_to_credit_note
@@ -11530,7 +11552,7 @@ msgstr "Taxe due"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
 msgid "Tax Excluded"
-msgstr "Taxes exclues"
+msgstr "Montant HT"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids
@@ -12519,7 +12541,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
 msgid "The following Journal Entries will be generated"
-msgstr ""
+msgstr "Les pièces comptables suivantes seront générées"
 
 #. module: account
 #: code:addons/account/models/res_bank.py:0
@@ -15098,3 +15120,11 @@ msgstr "avec le PDF d'une Facture Client comme pièce jointe"
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_form
 msgid "→ Count"
 msgstr "→ Compter"
+
+#. module: account
+#: code:addons/account/models/account_analytic_default.py:31
+#, python-format
+msgid ""
+"An analytic default requires an analytic account or an analytic tag used for"
+" analytic distribution."
+msgstr ""

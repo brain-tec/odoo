@@ -13907,7 +13907,7 @@ msgstr "Asistente para creación de menú"
 #: model:ir.module.module,summary:base.module_industry_fsm_report
 #: model:ir.module.module,summary:base.module_industry_fsm_sale_report
 msgid "Create Reports for Field service workers"
-msgstr "Crea Informes para Trabajadores en Campo"
+msgstr "Crea reportes para trabajadores que estén realizando servicio externo"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_helpdesk
@@ -16452,7 +16452,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__help
 msgid "Field Help"
-msgstr "Campo ayuda"
+msgstr "Campo de información"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__field_description

@@ -161,7 +161,7 @@ class AccountMove(models.Model):
         # To solve this there is a <Arrotondamento> or 'rounding' field, such that:
         #   taxable base = sum(taxable base for each unit) + Arrotondamento
         tax_details = self._prepare_edi_tax_details(
-            filter_to_apply=lambda l: l['tax_repartition_line_id'].factor_percent > 0
+            filter_to_apply=lambda l: l['tax_repartition_line_id'].factor_percent >= 0
         )
         for _tax_name, tax_dict in tax_details['tax_details'].items():
             base_amount = tax_dict['base_amount_currency']
@@ -183,6 +183,17 @@ class AccountMove(models.Model):
             or (partner.country_id.code == 'IT' and '0000000')
             or 'XXXXXXX')
 
+        # Represent if the document is a reverse charge refund in a single variable
+        rc_refund = self.move_type == 'in_refund' and document_type in ['TD16', 'TD17', 'TD18']
+
+        # Self-invoices are technically -100%/+100% repartitioned
+        # but functionally need to be exported as 100%
+        document_total = self.amount_total
+        if is_self_invoice:
+            document_total += sum([abs(v['tax_amount_currency']) for k, v in tax_details['tax_details'].items()])
+            if rc_refund:
+                document_total = -abs(document_total)
+
         # Create file content.
         template_values = {
             'record': self,
@@ -196,6 +207,7 @@ class AccountMove(models.Model):
             'seller': seller,
             'seller_partner': company.partner_id if not is_self_invoice else partner,
             'currency': self.currency_id or self.company_currency_id,
+            'document_total': document_total,
             'representative': company.l10n_it_tax_representative_partner_id,
             'codice_destinatario': codice_destinatario,
             'regime_fiscale': company.l10n_it_tax_system if not is_self_invoice else 'RF01',
@@ -218,7 +230,8 @@ class AccountMove(models.Model):
             'normalize_codice_fiscale': partner._l10n_it_normalize_codice_fiscale,
             'get_vat_number': get_vat_number,
             'get_vat_country': get_vat_country,
-            'in_eu': in_eu
+            'in_eu': in_eu,
+            'rc_refund': rc_refund,
         }
         return template_values
 
