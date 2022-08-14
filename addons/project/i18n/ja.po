@@ -17,6 +17,7 @@
 # Hau Dao <hau@quartile.co>, 2020
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2020
 # Noma Yuki, 2020
+# 江口和志 <sandwhale1010@gmail.com>, 2022
 # Ryoko Tsuda <ryoko@quartile.co>, 2022
 # 
 msgid ""
@@ -1968,7 +1969,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__rating_percentage_satisfaction
 msgid "Percentage of happy ratings"
-msgstr ""
+msgstr "高評価割合"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
@@ -2623,7 +2624,7 @@ msgstr ""
 #: model:mail.message.subtype,name:project.mt_project_task_new
 #: model:mail.message.subtype,name:project.mt_task_new
 msgid "Task Created"
-msgstr ""
+msgstr "タスク作成"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_res_config_settings__module_hr_timesheet
