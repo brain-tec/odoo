@@ -417,6 +417,7 @@ class PosGlobalState extends PosModel {
     async load_orders(){
         var jsons = this.db.get_unpaid_orders();
         await this._loadMissingProducts(jsons);
+        await this._loadMissingPartners(jsons);
         var orders = [];
 
         for (var i = 0; i < jsons.length; i++) {
@@ -461,6 +462,32 @@ class PosGlobalState extends PosModel {
             args: [odoo.pos_session_id, {domain: [['id', 'in', [...missingProductIds]]]}],
         });
         this._loadProductProduct(products);
+    }
+    // load the partners based on the ids
+    async _loadPartners(partnerIds) {
+        if (partnerIds.length > 0) {
+            var domain = [['id','in', partnerIds]];
+            const fetchedPartners = await this.env.services.rpc({
+                model: 'pos.session',
+                method: 'get_pos_ui_res_partner_by_params',
+                args: [[odoo.pos_session_id], {domain}],
+            }, {
+                timeout: 3000,
+                shadow: true,
+            });
+            this.env.pos.db.add_partners(fetchedPartners);
+        }
+    }
+    async _loadMissingPartners(orders) {
+        const missingPartnerIds = new Set([]);
+        for (const order of orders) {
+            const partnerId = order.partner_id;
+            if(missingPartnerIds.has(partnerId)) continue;
+            if (partnerId && !this.db.get_partner_by_id(partnerId)) {
+                missingPartnerIds.add(partnerId);
+            }
+        }
+        await this._loadPartners([...missingPartnerIds]);
     }
     async loadProductsBackground() {
         let page = 0;
@@ -1532,7 +1559,7 @@ class Orderline extends PosModel {
 
         // Set the quantity of the line based on number of pack lots.
         if(!this.product.to_weight){
-            this.pack_lot_lines.set_quantity_by_lot();
+            this.set_quantity_by_lot();
         }
     }
     set_product_lot(product){
@@ -1711,7 +1738,7 @@ class Orderline extends PosModel {
     can_be_merged_with(orderline){
         var price = parseFloat(round_di(this.price || 0, this.pos.dp['Product Price']).toFixed(this.pos.dp['Product Price']));
         var order_line_price = orderline.get_product().get_price(orderline.order.pricelist, this.get_quantity());
-        order_line_price = orderline.compute_fixed_price(order_line_price);
+        order_line_price = round_di(orderline.compute_fixed_price(order_line_price), this.pos.currency.decimal_places);
         if( this.get_product().id !== orderline.get_product().id){    //only orderline of the same product can be merged
             return false;
         }else if(!this.get_unit() || !this.get_unit().is_pos_groupable){
@@ -1864,6 +1891,16 @@ class Orderline extends PosModel {
         } else {
             return this.get_base_price();
         }
+    }
+    get_taxed_lst_unit_price(){
+        var lst_price = this.get_lst_price();
+        if (this.pos.config.iface_tax_included === 'total') {
+            var product =  this.get_product();
+            var taxes_ids = product.taxes_id;
+            var product_taxes = this.get_taxes_after_fp(taxes_ids);
+            return this.compute_all(product_taxes, lst_price, 1, this.pos.currency.rounding).total_included;
+        }
+        return lst_price;
     }
     get_price_without_tax(){
         return this.get_all_prices().priceWithoutTax;
@@ -2459,6 +2496,9 @@ class Order extends PosModel {
             receipt.footer_html = render_html(this.pos.config.receipt_footer);
         } else {
             receipt.footer = this.pos.config.receipt_footer || '';
+        }
+        if (!receipt.date.localestring && (!this.state || this.state == 'draft')){
+            receipt.date.localestring = field_utils.format.datetime(moment(new Date()), {}, {timezone: false});
         }
 
         return receipt;

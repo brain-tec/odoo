@@ -454,7 +454,7 @@ const Wysiwyg = Widget.extend({
                                 model: "res.users",
                                 method: "search_read",
                                 args: [
-                                    [['id', '=', this.getSession().user_id]],
+                                    [['id', '=', this.getSession().uid]],
                                     ['name']
                                 ],
                             }))[0].name;
@@ -1105,40 +1105,25 @@ const Wysiwyg = Widget.extend({
                     this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this, noFocusUrl: options.noFocusUrl}, this.odooEditor.editable, linkToolsData, $btn, link );
                 }
                 this.linkTools.noFocusUrl = options.noFocusUrl;
-                const _onMousedown = ev => {
+                const _onClick = ev => {
                     if (
-                        !ev.target.closest('.oe-toolbar') &&
+                        !ev.target.closest('#create-link') &&
+                        (!ev.target.closest('.oe-toolbar') || !ev.target.closest('we-customizeblock-option')) &&
                         !ev.target.closest('.ui-autocomplete') &&
                         (!this.linkTools || ![ev.target, ...wysiwygUtils.ancestors(ev.target)].includes(this.linkTools.$link[0]))
                     ) {
                         // Destroy the link tools on click anywhere outside the
                         // toolbar if the target is the orgiginal target not in the original target.
-                        this.linkTools && this.linkTools.destroy();
-                        this.linkTools = undefined;
-                        this.odooEditor.document.removeEventListener('mousedown', _onMousedown, true);
+                        this.destroyLinkTools();
+                        this.odooEditor.document.removeEventListener('click', _onClick, true);
                     }
                 };
-                this.odooEditor.document.addEventListener('mousedown', _onMousedown, true);
+                this.odooEditor.document.addEventListener('click', _onClick, true);
                 if (!this.linkTools.$el) {
                     this.linkTools.appendTo(this.toolbar.$el);
                 }
             } else {
-                const selection = this.odooEditor.document.getSelection();
-                const link = this.linkTools.$link[0];
-                if (selection && link.parentElement) {
-                    // Focus the link after the dialog element is removed.
-                    // In order to not refactor the legacy dialog widget,
-                    // use a hackhy microtask strategy.
-                    // Using a microtask to set the focus might break if
-                    // another microtask which focus an element in the dom
-                    // occurs at the same time (but this case seems
-                    // unlikely).
-                    Promise.resolve().then(() => {
-                        setSelection(link, 0, link, link.childNodes.length, false);
-                    });
-                }
-                this.linkTools.destroy();
-                this.linkTools = undefined;
+                this.destroyLinkTools();
             }
         } else {
             let { link } = Link.getOrCreateLink({
@@ -1186,6 +1171,44 @@ const Wysiwyg = Widget.extend({
                     restoreSelection();
                 }
             });
+        }
+    },
+    /**
+     * Destroy the Link tools/dialog and restore the selection.
+     */
+    destroyLinkTools() {
+        if (this.linkTools) {
+            const selection = this.odooEditor.document.getSelection();
+            const link = this.linkTools.$link[0];
+            let anchorNode
+            let focusNode;
+            let anchorOffset = 0;
+            let focusOffset;
+            if (selection && link.parentElement) {
+                // Focus the link after the dialog element is removed.
+                if (this.linkTools.shouldUnlink()) {
+                    if (link.childNodes.length) {
+                        anchorNode = link.childNodes[0];
+                        focusNode = link.childNodes[link.childNodes.length - 1];
+                    } else {
+                        const parent = link.parentElement;
+                        const index = Array.from(parent.childNodes).indexOf(link);
+                        anchorNode = focusNode = parent;
+                        anchorOffset = focusOffset = index;
+                    }
+                } else {
+                    anchorNode = link;
+                    focusNode = link;
+                }
+                if (!focusOffset) {
+                    focusOffset = focusNode.childNodes.length || focusNode.length;
+                }
+            }
+            this.linkTools.destroy();
+            if (anchorNode) {
+                setSelection(anchorNode, anchorOffset, focusNode, focusOffset, false);
+            }
+            this.linkTools = undefined;
         }
     },
     /**
@@ -1308,7 +1331,7 @@ const Wysiwyg = Widget.extend({
             $toolbar.find('#justify, #table, #media-insert').remove();
         }
         $toolbar.find('#media-insert, #media-replace, #media-description').click(openTools);
-        $toolbar.find('#create-link').mousedown(openTools);
+        $toolbar.find('#create-link').click(openTools);
         $toolbar.find('#image-shape div, #fa-spin').click(e => {
             if (!this.lastMediaClicked) {
                 return;
@@ -1480,6 +1503,10 @@ const Wysiwyg = Widget.extend({
                     const selection = this.odooEditor.document.getSelection();
                     const range = selection.rangeCount && selection.getRangeAt(0);
                     const hadNonCollapsedSelection = range && !selection.isCollapsed;
+                    // The color_leave event will revert the mutations with
+                    // `historyRevertCurrentStep`. We must stash the current
+                    // mutations to prevent them from being reverted.
+                    this.odooEditor.historyStash();
                     colorpicker = new ColorPaletteWidget(this, {
                         excluded: ['transparent_grayscale'],
                         $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
@@ -1492,6 +1519,8 @@ const Wysiwyg = Widget.extend({
                         if (hadNonCollapsedSelection) {
                             this.odooEditor.historyResetLatestComputedSelection(true);
                         }
+                        // Unstash the mutations now that the color is picked.
+                        this.odooEditor.historyUnstash();
                         this._processAndApplyColor(eventName, ev.data.color);
                         this._updateEditorUI();
                     });
@@ -1825,36 +1854,36 @@ const Wysiwyg = Widget.extend({
         const options = this._editorOptions();
         const commands = [
             {
-                groupName: 'Basic blocks',
-                title: 'Quote',
-                description: 'Add a blockquote section.',
+                groupName: _t('Basic blocks'),
+                title: _t('Quote'),
+                description: _t('Add a blockquote section.'),
                 fontawesome: 'fa-quote-right',
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'blockquote');
                 },
             },
             {
-                groupName: 'Basic blocks',
-                title: 'Code',
-                description: 'Add a code section.',
+                groupName: _t('Basic blocks'),
+                title: _t('Code'),
+                description: _t('Add a code section.'),
                 fontawesome: 'fa-code',
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'pre');
                 },
             },
             {
-                groupName: 'Navigation',
-                title: 'Link',
-                description: 'Add a link.',
+                groupName: _t('Navigation'),
+                title: _t('Link'),
+                description: _t('Add a link.'),
                 fontawesome: 'fa-link',
                 callback: () => {
                     this.toggleLinkTools({forceDialog: true});
                 },
             },
             {
-                groupName: 'Navigation',
-                title: 'Button',
-                description: 'Add a button.',
+                groupName: _t('Navigation'),
+                title: _t('Button'),
+                description: _t('Add a button.'),
                 fontawesome: 'fa-link',
                 callback: () => {
                     this.toggleLinkTools({forceDialog: true});
@@ -1867,9 +1896,9 @@ const Wysiwyg = Widget.extend({
         ];
         if (options.isInternalUser) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Image',
-                description: 'Insert an image.',
+                groupName: _t('Medias'),
+                title: _t('Image'),
+                description: _t('Insert an image.'),
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
                     this.openMediaDialog();
@@ -1878,9 +1907,9 @@ const Wysiwyg = Widget.extend({
         }
         if (options.allowCommandVideo) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Video',
-                description: 'Insert a video.',
+                groupName: _t('Medias'),
+                title: _t('Video'),
+                description: _t('Insert a video.'),
                 fontawesome: 'fa-file-video-o',
                 callback: () => {
                     this.openMediaDialog({noVideos: false, noImages: true, noIcons: true, noDocuments: true});
