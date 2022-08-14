@@ -56,3 +56,5 @@ Luigys Toro luigys@vauxoo.com https://github.com/desdelinux
 Francisco J. Luna fluna@vauxoo.com https://github.com/frahikLV
 Andrea Arce andrea@vauxoo.com https://github.com/andreaarce
 Francisco Alejandro González Luna aluna@vauxoo.com https://github.com/TheAlekLuna
+Juan Benavente jbenavente@vauxoo.com https://github.com/jjbenavaz
+Alejandro Garza agarza@vauxoo.com https://github.com/agarzaarvizu

@@ -193,11 +193,14 @@ class PaymentTransaction(models.Model):
                 'partner_phone': partner.phone,
             })
 
-            # Compute fees
-            currency = self.env['res.currency'].browse(values.get('currency_id')).exists()
-            values['fees'] = acquirer._compute_fees(
-                values.get('amount', 0), currency, partner.country_id
-            )
+            # Compute fees, for validation transactions fees are zero
+            if values.get('operation') == 'validation':
+                values['fees'] = 0
+            else:
+                currency = self.env['res.currency'].browse(values.get('currency_id')).exists()
+                values['fees'] = acquirer._compute_fees(
+                    values.get('amount', 0), currency, partner.country_id,
+                )
 
             # Include acquirer-specific create values
             values.update(self._get_specific_create_values(acquirer.provider, values))
@@ -872,8 +875,9 @@ class PaymentTransaction(models.Model):
         if not txs_to_post_process:
             # Let the client post-process transactions so that they remain available in the portal
             client_handling_limit_date = datetime.now() - relativedelta.relativedelta(minutes=10)
-            # Don't try forever to post-process a transaction that doesn't go through
-            retry_limit_date = datetime.now() - relativedelta.relativedelta(days=2)
+            # Don't try forever to post-process a transaction that doesn't go through. Set the limit
+            # to 4 days because some providers (PayPal) need that much for the payment verification.
+            retry_limit_date = datetime.now() - relativedelta.relativedelta(days=4)
             # Retrieve all transactions matching the criteria for post-processing
             txs_to_post_process = self.search([
                 ('state', '=', 'done'),

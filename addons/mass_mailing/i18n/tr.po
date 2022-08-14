@@ -31,6 +31,7 @@
 # Murat Kaplan <muratk@projetgrup.com>, 2022
 # Umur Akın <umura@projetgrup.com>, 2022
 # Tugay Hatıl <tugayh@projetgrup.com>, 2022
+# Halil, 2022
 # Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
 # 
 msgid ""
@@ -2123,17 +2124,17 @@ msgstr "Başlıklar"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "Heading 1"
-msgstr ""
+msgstr "Başlık 1"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "Heading 2"
-msgstr ""
+msgstr "Başlık 2"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "Heading 3"
-msgstr ""
+msgstr "Başlık 3"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
@@ -4994,7 +4995,7 @@ msgstr "⌙ Aktif"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "⌙ Border"
-msgstr ""
+msgstr "⌙ Kenarlık"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_rating_options
@@ -5004,9 +5005,9 @@ msgstr "⌙ Etkin değil"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "⌙ Size"
-msgstr ""
+msgstr "⌙ Boyut"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "⌙ Width"
-msgstr ""
+msgstr "⌙ Genişlik"
