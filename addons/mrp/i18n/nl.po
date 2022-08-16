@@ -4619,6 +4619,17 @@ msgid "The record id this is attached to."
 msgstr "Het record id waaraan dit is verbonden."
 
 #. module: mrp
+#: code:addons/mrp/models/mrp_unbuild.py:0
+#: code:addons/mrp/models/mrp_unbuild.py:0
+#, python-format
+msgid ""
+"The selected serial number does not correspond to the one used in the "
+"manufacturing order, please select another one."
+msgstr ""
+"Het geselecteerde serienummer komt niet overeen met het serienummer dat is "
+"gebruikt in de productieorder, selecteer een ander."
+
+#. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
 #, python-format
 msgid ""
@@ -4665,7 +4676,7 @@ msgstr ""
 #: code:addons/mrp/models/mrp_workorder.py:0
 #, python-format
 msgid "The work order should have already been processed."
-msgstr "De werkbon zou al verwerkt moeten zijn."
+msgstr "De werkorder zou al verwerkt moeten zijn."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_document__theme_template_id

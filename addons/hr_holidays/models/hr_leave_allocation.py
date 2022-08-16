@@ -193,11 +193,10 @@ class HolidaysAllocation(models.Model):
 
     @api.depends('employee_id', 'holiday_status_id', 'taken_leave_ids.number_of_days', 'taken_leave_ids.state')
     def _compute_leaves(self):
+        employee_days_per_allocation = self.holiday_status_id._get_employees_days_per_allocation(self.employee_id.ids)
         for allocation in self:
             allocation.max_leaves = allocation.number_of_hours_display if allocation.type_request_unit == 'hour' else allocation.number_of_days
-            allocation.leaves_taken = sum(taken_leave.number_of_hours_display if taken_leave.leave_type_request_unit == 'hour' else taken_leave.number_of_days\
-                for taken_leave in allocation.taken_leave_ids\
-                if taken_leave.state == 'validate')
+            allocation.leaves_taken = employee_days_per_allocation[allocation.employee_id.id][allocation.holiday_status_id][allocation]['leaves_taken']
 
     @api.depends('number_of_days')
     def _compute_number_of_days_display(self):
@@ -350,7 +349,7 @@ class HolidaysAllocation(models.Model):
         current_level = False
         current_level_idx = -1
         for idx, level in enumerate(level_ids):
-            if date >= self.date_from + get_timedelta(level.start_count, level.start_type):
+            if date > self.date_from + get_timedelta(level.start_count, level.start_type):
                 current_level = level
                 current_level_idx = idx
         # If transition_mode is set to `immediately` or we are currently on the first level
@@ -413,7 +412,7 @@ class HolidaysAllocation(models.Model):
                 allocation.nextcall = first_level._get_next_date(allocation.lastcall)
                 if len(level_ids) > 1:
                     second_level_start_date = allocation.date_from + get_timedelta(level_ids[1].start_count, level_ids[1].start_type)
-                    allocation.nextcall = min(second_level_start_date - relativedelta(days=1), allocation.nextcall)
+                    allocation.nextcall = min(second_level_start_date, allocation.nextcall)
                 allocation._message_log(body=first_allocation)
             days_added_per_level = defaultdict(lambda: 0)
             while allocation.nextcall <= today:
@@ -436,11 +435,13 @@ class HolidaysAllocation(models.Model):
                 # Also prorate this accrual in the event that we are passing from one level to another
                 if current_level_idx < (len(level_ids) - 1) and allocation.accrual_plan_id.transition_mode == 'immediately':
                     next_level = level_ids[current_level_idx + 1]
-                    current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type) - relativedelta(days=1)
+                    current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
                     if allocation.nextcall != current_level_last_date:
                         nextcall = min(nextcall, current_level_last_date)
                 days_added_per_level[current_level] += allocation._process_accrual_plan_level(
                     current_level, period_start, allocation.lastcall, period_end, allocation.nextcall)
+                if current_level.maximum_leave > 0 and sum(days_added_per_level.values()) > current_level.maximum_leave:
+                    days_added_per_level[current_level] -= sum(days_added_per_level.values()) - current_level.maximum_leave
                 allocation.lastcall = allocation.nextcall
                 allocation.nextcall = nextcall
             if days_added_per_level:

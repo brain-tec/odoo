@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from collections import defaultdict
 from urllib3.util.ssl_ import create_urllib3_context, DEFAULT_CIPHERS
+from urllib3.contrib.pyopenssl import inject_into_urllib3
 from OpenSSL.crypto import load_certificate, load_privatekey, FILETYPE_PEM
 from zeep.transports import Transport
 
@@ -27,6 +28,7 @@ class PatchedHTTPAdapter(requests.adapters.HTTPAdapter):
 
     def init_poolmanager(self, *args, **kwargs):
         # OVERRIDE
+        inject_into_urllib3()
         kwargs['ssl_context'] = create_urllib3_context(ciphers=EUSKADI_CIPHERS)
         return super().init_poolmanager(*args, **kwargs)
 
@@ -404,9 +406,15 @@ class AccountEdiFormat(models.Model):
 
     def _l10n_es_edi_web_service_aeat_vals(self, invoices):
         if invoices[0].is_sale_document():
-            return {'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii_1_1/fact/ws/SuministroFactEmitidas.wsdl'}
+            return {
+                'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii_1_1/fact/ws/SuministroFactEmitidas.wsdl',
+                'test_url': 'https://prewww1.aeat.es/wlpl/SSII-FACT/ws/fe/SiiFactFEV1SOAP',
+            }
         else:
-            return {'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii_1_1/fact/ws/SuministroFactRecibidas.wsdl'}
+            return {
+                'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii_1_1/fact/ws/SuministroFactRecibidas.wsdl',
+                'test_url': 'https://prewww1.aeat.es/wlpl/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
+            }
 
     def _l10n_es_edi_web_service_bizkaia_vals(self, invoices):
         if invoices[0].is_sale_document():

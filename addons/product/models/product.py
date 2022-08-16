@@ -70,6 +70,9 @@ class ProductCategory(models.Model):
         main_category = self.env.ref('product.product_category_all')
         if main_category in self:
             raise UserError(_("You cannot delete this product category, it is the default generic category."))
+        expense_category = self.env.ref('product.cat_expense')
+        if expense_category in self:
+            raise UserError(_("You cannot delete the %s product category.", expense_category.name))
 
 
 class ProductProduct(models.Model):
@@ -183,6 +186,15 @@ class ProductProduct(models.Model):
 
     def _set_image_1920(self):
         return self._set_template_field('image_1920', 'image_variant_1920')
+
+    @api.depends("create_date", "write_date", "product_tmpl_id.create_date", "product_tmpl_id.write_date")
+    def compute_concurrency_field_with_access(self):
+        # Intentionally not calling super() to involve all fields explicitly
+        for record in self:
+            record[self.CONCURRENCY_CHECK_FIELD] = max(filter(None, (
+                record.product_tmpl_id.write_date or record.product_tmpl_id.create_date,
+                record.write_date or record.create_date or fields.Datetime.now(),
+            )))
 
     def _compute_image_1024(self):
         """Get the image from the template if no image is set on the variant."""

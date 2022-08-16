@@ -817,7 +817,7 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
-        return []
+        return ['description_picking']
 
     def _clean_merged(self):
         """Cleanup hook used when merging moves"""
@@ -1266,7 +1266,10 @@ class StockMove(models.Model):
                             or (move.reservation_date and move.reservation_date <= fields.Date.today())))\
              ._action_assign()
         if new_push_moves:
-            new_push_moves._action_confirm()
+            neg_push_moves = new_push_moves.filtered(lambda sm: float_compare(sm.product_uom_qty, 0, precision_rounding=sm.product_uom.rounding) < 0)
+            (new_push_moves - neg_push_moves)._action_confirm()
+            # Negative moves do not have any picking, so we should try to merge it with their siblings
+            neg_push_moves._action_confirm(merge_into=neg_push_moves.move_orig_ids.move_dest_ids)
 
         return moves
 
@@ -1624,7 +1627,7 @@ class StockMove(models.Model):
                 precision_rounding=rounding,
                 rounding_method='HALF-UP')
             extra_move_vals = self._prepare_extra_move_vals(extra_move_quantity)
-            extra_move = self.copy(default=extra_move_vals)
+            extra_move = self.copy(default=extra_move_vals).with_context(avoid_putaway_rules=True)
 
             merge_into_self = all(self[field] == extra_move[field] for field in self._prepare_merge_moves_distinct_fields())
 
@@ -1950,7 +1953,8 @@ class StockMove(models.Model):
                 ('product_id', '=', move.product_id.id),
                 ('trigger', '=', 'auto'),
                 ('location_id', 'parent_of', move.location_id.id),
-                ('company_id', '=', move.company_id.id)
+                ('company_id', '=', move.company_id.id),
+                '!', ('location_id', 'parent_of', move.location_dest_id.id),
             ], limit=1)
             if orderpoint:
                 orderpoints_by_company[orderpoint.company_id] |= orderpoint

@@ -8,8 +8,8 @@
 # hamid hvbnet <hvbnet@yahoo.com>, 2022
 # Sahar Daraye <sahar.daraye.1369@gmail.com>, 2022
 # Zahed Alfak <tamass4116@gmail.com>, 2022
-# Faraz Sadri Alamdari <ifarazir@gmail.com>, 2022
 # Far Har <fhari1234@gmail.com>, 2022
+# Faraz Sadri Alamdari <ifarazir@gmail.com>, 2022
 # Hamid Reza Kaveh <hamidrkp@riseup.net>, 2022
 # Mohsen Mohammadi <iammohsen.123@gmail.com>, 2022
 # M.Hossein S.Farvashani <Farvashani@gmail.com>, 2022
@@ -17,6 +17,7 @@
 # Hamed Mohammadi <hamed@dehongi.com>, 2022
 # Martin Trigaux, 2022
 # Hamid Darabi, 2022
+# Hanna Kheradroosta, 2022
 # Mohammad Tahmasebi <hit.tah75@gmail.com>, 2022
 # 
 msgid ""
@@ -45,7 +46,7 @@ msgstr "رکوردها"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "# Code editor"
-msgstr "# ویرایشگر کد"
+msgstr "تعداد ویرایشگر کد"
 
 #. module: web
 #. openerp-web
@@ -99,14 +100,14 @@ msgstr "%s فایل"
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "%s days ago"
-msgstr "%s روز قبل"
+msgstr "%s روز پیش"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/legacy/js/fields/field_utils.js:0
 #, python-format
 msgid "'%s' is not a correct date"
-msgstr "'%s' یک تاریخ درستی نیست"
+msgstr "'%s' تاریخ درستی نیست"
 
 #. module: web
 #. openerp-web
@@ -127,7 +128,7 @@ msgstr "'%s' یک تاریخ،‌تاریخ زمان یا زمان صحیحی ن
 #: code:addons/web/static/src/legacy/js/fields/field_utils.js:0
 #, python-format
 msgid "'%s' is not a correct datetime"
-msgstr "'%s' یک تاریخ صحیح نیست"
+msgstr "'%s' یک تاریخ معتبر نیست"
 
 #. module: web
 #. openerp-web
@@ -297,7 +298,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<span>Amount</span>"
-msgstr "<span>مقدار</span>"
+msgstr "<span>مبلغ</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -360,7 +361,7 @@ msgstr "<strong>تاریخ فاکتور:</strong>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<strong>Subtotal</strong>"
-msgstr "<strong>جمع جزء</strong>"
+msgstr "<strong>جمع جز</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -412,7 +413,7 @@ msgstr "هر"
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #, python-format
 msgid "Access Denied"
-msgstr "دسترسی رد شد"
+msgstr "امکان دسترسی وجود ندارد"
 
 #. module: web
 #. openerp-web
@@ -440,12 +441,12 @@ msgstr "عملیات"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Action ID:"
-msgstr "شناسه عمل:"
+msgstr "شناسه عمل"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_actions_act_window_view
 msgid "Action Window View"
-msgstr "نمایش پنجره عمل"
+msgstr "مشاهده پنجره اقدام"
 
 #. module: web
 #. openerp-web
@@ -518,7 +519,7 @@ msgstr "افزودن یک شرط"
 #: code:addons/web/static/src/legacy/js/views/list/list_editable_renderer.js:0
 #, python-format
 msgid "Add a line"
-msgstr "افزودن سطر"
+msgstr "افزودن یک سطر"
 
 #. module: web
 #. openerp-web
@@ -543,7 +544,7 @@ msgstr "افزودن ستون"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Add filter"
-msgstr "افزودن فیلتر"
+msgstr "اضافه کردن فیلتر"
 
 #. module: web
 #. openerp-web
@@ -601,14 +602,14 @@ msgstr "افزودن: "
 #: code:addons/web/static/src/legacy/js/views/signature_dialog.js:0
 #, python-format
 msgid "Adopt Your Signature"
-msgstr ""
+msgstr "امضا خود را بپذیرید"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/legacy/js/views/signature_dialog.js:0
 #, python-format
 msgid "Adopt and Sign"
-msgstr ""
+msgstr "بپذیرید و امضا کنید"
 
 #. module: web
 #. openerp-web
@@ -616,7 +617,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/core/dialog.js:0
 #, python-format
 msgid "Alert"
-msgstr "هشدار"
+msgstr "اخطار"
 
 #. module: web
 #. openerp-web
@@ -635,7 +636,7 @@ msgstr "همه"
 #: code:addons/web/static/src/legacy/js/views/calendar/calendar_renderer.js:0
 #, python-format
 msgid "All day"
-msgstr "همه روز"
+msgstr "همه روزها"
 
 #. module: web
 #. openerp-web
@@ -694,6 +695,8 @@ msgid ""
 "Appears by default on the top right corner of your printed documents (report"
 " header)."
 msgstr ""
+"به طور پیش فرض در گوشه سمت راست بالای اسناد چاپی شما ظاهر می شود (سرصفحه "
+"گزارش)."
 
 #. module: web
 #. openerp-web
@@ -739,7 +742,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
 #, python-format
 msgid "Are you sure that you want to archive this record?"
-msgstr "مطمئنید می خواهید این رکورد را بایگانی کنید؟"
+msgstr "آیا مطمئن هستید که می خواهید این رکورد را بایگانی کنید؟"
 
 #. module: web
 #. openerp-web
@@ -930,6 +933,9 @@ msgid ""
 "for all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
+"با کلیک بر روی پذیرش و امضا، موافقت می‌کنم که امضای/حرف‌های انتخابی "
+"نشان‌دهنده الکترونیکی معتبر امضای/حرف‌های دست‌نویس من برای همه مقاصد زمانی "
+"که در اسناد، از جمله قراردادهای الزام‌آور قانونی استفاده می‌شود، باشد."
 
 #. module: web
 #. openerp-web
@@ -943,7 +949,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/calendar/calendar_view.js:0
 #, python-format
 msgid "Calendar"
-msgstr "تقویم"
+msgstr "گاهشمار"
 
 #. module: web
 #. openerp-web
@@ -1000,14 +1006,14 @@ msgstr "رنگ کارت: %s"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Change Password"
-msgstr "تغییر گذرواژه"
+msgstr "تغییر کلمه عبور"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Change default:"
-msgstr "تغییر پیش‌فرض:"
+msgstr "تغییر پیش‌فرض"
 
 #. module: web
 #. openerp-web
@@ -1054,7 +1060,7 @@ msgstr "انتخاب فایل"
 #: code:addons/web/static/src/core/debug/debug_menu.js:0
 #, python-format
 msgid "Choose a debug command..."
-msgstr ""
+msgstr "یک دستور دیباگ انتخاب کنید ..."
 
 #. module: web
 #. openerp-web
@@ -1118,7 +1124,7 @@ msgstr "عنوان ستون"
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "Command"
-msgstr ""
+msgstr "دستور"
 
 #. module: web
 #: model:ir.model,name:web.model_res_company
@@ -1134,17 +1140,17 @@ msgstr "شرکت"
 #: model:ir.model.fields,field_description:web.field_base_document_layout__company_details
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Company Details"
-msgstr ""
+msgstr "جزئیات شرکت"
 
 #. module: web
 #: model:ir.model,name:web.model_base_document_layout
 msgid "Company Document Layout"
-msgstr "صفحه‌آرایی مدرک شرکت"
+msgstr "طرح بندی اسناد شرکت"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__logo
 msgid "Company Logo"
-msgstr "لوگوی شرکت"
+msgstr "لوگو شرکت"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__name
@@ -1179,7 +1185,7 @@ msgstr "شرط:"
 #. module: web
 #: model:ir.actions.act_window,name:web.action_base_document_layout_configurator
 msgid "Configure your document layout"
-msgstr "طرح بندی سند خود را پیکربندی کنید"
+msgstr "پیکربندی طرح بندی اسناد شرکت خود"
 
 #. module: web
 #. openerp-web
@@ -1189,7 +1195,7 @@ msgstr "طرح بندی سند خود را پیکربندی کنید"
 #: code:addons/web/static/src/legacy/js/views/list/list_confirm_dialog.js:0
 #, python-format
 msgid "Confirmation"
-msgstr "تایید کردن"
+msgstr "تاییدیه"
 
 #. module: web
 #. openerp-web
@@ -1361,7 +1367,7 @@ msgstr "افزودن \"<strong>%s</strong>\""
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "Create a new record"
-msgstr "ایجاد یک رکورد جدید"
+msgstr "ایجاد رکورد جدید"
 
 #. module: web
 #. openerp-web
@@ -1389,7 +1395,7 @@ msgstr "ایجاد: %s"
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_uid
 msgid "Created by"
-msgstr "ایجادشده توسط"
+msgstr "ایجاد شده توسط"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_date
@@ -1408,7 +1414,7 @@ msgstr "تاریخ ایجاد:"
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #, python-format
 msgid "Creation User:"
-msgstr "کاربر ایجاد:"
+msgstr "ایجاد کاربر:"
 
 #. module: web
 #. openerp-web
@@ -1473,7 +1479,7 @@ msgstr "روز"
 #: code:addons/web/static/src/core/debug/debug_providers.js:0
 #, python-format
 msgid "Deactivate debug mode"
-msgstr ""
+msgstr "غیر فعالسازی حالت دیباگ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.debug_icon
@@ -1667,7 +1673,7 @@ msgstr "دامنه:"
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 #, python-format
 msgid "Don't leave yet,"
-msgstr ""
+msgstr "فعلا ترک نکنید،"
 
 #. module: web
 #. openerp-web
@@ -1686,7 +1692,7 @@ msgstr "دانلود"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Download PDF Preview"
-msgstr ""
+msgstr "دانلود پیش‌نمایش PDF"
 
 #. module: web
 #. openerp-web
@@ -1771,7 +1777,7 @@ msgstr "ویرایش مرحله"
 #: code:addons/web/static/src/views/debug_items.js:0
 #, python-format
 msgid "Edit View: "
-msgstr ""
+msgstr "ویرایش نما: "
 
 #. module: web
 #. openerp-web
@@ -1785,7 +1791,7 @@ msgstr "ویرایش یک رکورد"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Edit record"
-msgstr ""
+msgstr "ویرایش رکورد"
 
 #. module: web
 #. openerp-web
@@ -1794,14 +1800,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.login
 #, python-format
 msgid "Email"
-msgstr "ایمیل"
+msgstr "پست الکترونیک"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/core/debug/profiling/profiling_item.xml:0
 #, python-format
 msgid "Enable profiling"
-msgstr ""
+msgstr "فعالسازی profiling"
 
 #. module: web
 #: code:addons/web/controllers/main.py:0
@@ -1860,7 +1866,7 @@ msgstr "اکسپورت همه"
 #: code:addons/web/static/src/legacy/js/widgets/data_export.js:0
 #, python-format
 msgid "Export Data"
-msgstr "برونش داده"
+msgstr "خروجی داده"
 
 #. module: web
 #. openerp-web
@@ -2074,7 +2080,7 @@ msgstr "سبز"
 #: code:addons/web/static/src/views/graph/graph_view.xml:0
 #, python-format
 msgid "Group By"
-msgstr "گروه بندی بر مبنای"
+msgstr "گروه‌بندی برمبنای"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_http
@@ -2098,7 +2104,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Hide in Kanban"
-msgstr ""
+msgstr "پنهان در کانبان"
 
 #. module: web
 #. openerp-web
@@ -2127,7 +2133,7 @@ msgstr "اینتر بزن برای ایجاد"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Hit ENTER to SAVE"
-msgstr "اینتر بزن برای ذخیره"
+msgstr "برای ذخیره، ENTER را فشار دهید"
 
 #. module: web
 #. openerp-web
@@ -2185,7 +2191,7 @@ msgstr "تصویر"
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "In %s days"
-msgstr ""
+msgstr "در %s روز"
 
 #. module: web
 #. openerp-web
@@ -2303,7 +2309,7 @@ msgstr "آخرین تغییر در"
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_uid
 msgid "Last Updated by"
-msgstr "آخرین به‌روز‌رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_date
@@ -2434,7 +2440,7 @@ msgstr "خروج"
 #: model_terms:ir.ui.view,arch_db:web.frontend_layout
 #: model_terms:ir.ui.view,arch_db:web.login_layout
 msgid "Logo"
-msgstr "لوگو"
+msgstr "نشان"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__logo_primary_color
@@ -2558,14 +2564,14 @@ msgstr "آبی متوسط"
 #: code:addons/web/static/src/legacy/js/views/calendar/calendar_quick_create.js:0
 #, python-format
 msgid "Meeting Subject"
-msgstr "موضوع ملاقات"
+msgstr "موضوع جلسه"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/legacy/xml/web_calendar.xml:0
 #, python-format
 msgid "Meeting Subject:"
-msgstr ""
+msgstr "موضوع جلسه:"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_ui_menu
@@ -2673,7 +2679,7 @@ msgstr "جدید"
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #, python-format
 msgid "New %s"
-msgstr "جدید%s"
+msgstr "جدید %s"
 
 #. module: web
 #. openerp-web
@@ -2694,7 +2700,7 @@ msgstr "کلمه‌ی عبور جدید"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "New Password (Confirmation)"
-msgstr ""
+msgstr "پسوورد جدید (تأیید)"
 
 #. module: web
 #. openerp-web
@@ -2827,7 +2833,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/list/list_controller.js:0
 #, python-format
 msgid "No valid record to save"
-msgstr "هیچ رکورد معتبر برای ذخیره نیست"
+msgstr "هیچ رکورد معتبری برای ذخیره وجود ندارد"
 
 #. module: web
 #. openerp-web
@@ -3248,7 +3254,7 @@ msgstr ""
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 #, python-format
 msgid "Please be patient."
-msgstr ""
+msgstr "لطفا صبور باشید."
 
 #. module: web
 #. openerp-web
@@ -3277,7 +3283,7 @@ msgstr "لطفا نام لیست فیلد ذخیره را وارد کنید"
 #: code:addons/web/static/src/legacy/js/widgets/attach_document.js:0
 #, python-format
 msgid "Please save before attaching a file"
-msgstr ""
+msgstr "لطفا قبل از پیوست کردن فایل ذخیره کنید"
 
 #. module: web
 #. openerp-web
@@ -3298,7 +3304,7 @@ msgstr "لطفا فیلد های مورد نظر جهت خروجی گرفتن ر
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Please update translations of :"
-msgstr "لطفا به روز کن ترجمه‌ی :"
+msgstr "لطفا بروزرسانی کنید، ترجمه های :"
 
 #. module: web
 #. openerp-web
@@ -3335,7 +3341,7 @@ msgstr "ترجیحات"
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__preview
 msgid "Preview"
-msgstr "پیش نمایش"
+msgstr "پیش‌نمایش"
 
 #. module: web
 #: model:ir.actions.report,name:web.action_report_externalpreview
@@ -3345,12 +3351,12 @@ msgstr "پیش‌نمایش گزارش خارجی"
 #. module: web
 #: model:ir.actions.report,name:web.action_report_internalpreview
 msgid "Preview Internal Report"
-msgstr "پیش‌نمایش گزارش داخلی"
+msgstr "پیش‌نمایش گزارش خارجی"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__preview_logo
 msgid "Preview logo"
-msgstr ""
+msgstr "پیش‌نمایش لوگو"
 
 #. module: web
 #. openerp-web
@@ -3383,7 +3389,7 @@ msgstr "سال پیشین"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Previous menu"
-msgstr ""
+msgstr "منوی قبلی"
 
 #. module: web
 #. openerp-web
@@ -3427,7 +3433,7 @@ msgstr "اولویت"
 #: code:addons/web/static/src/legacy/xml/file_upload_progress_card.xml:0
 #, python-format
 msgid "Processing..."
-msgstr ""
+msgstr "درحال پردازش ..."
 
 #. module: web
 #. openerp-web
@@ -3604,7 +3610,7 @@ msgstr "رابطه:"
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "Remaining Days"
-msgstr "روزهای باقی‌مانده"
+msgstr "روزهای باقی مانده"
 
 #. module: web
 #. openerp-web
@@ -3636,7 +3642,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "Remove from Favorites"
-msgstr "حذف از محبوبها"
+msgstr "حذف از علایق"
 
 #. module: web
 #. openerp-web
@@ -3758,14 +3764,14 @@ msgstr "دخیره و جدید:"
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "Save a record"
-msgstr "ذخیره یک رکورد"
+msgstr "ذخیره کردن یک رکورد"
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Save as :"
-msgstr "ذخیره به نام:"
+msgstr "ذخیره به عنوان :"
 
 #. module: web
 #. openerp-web
@@ -3787,7 +3793,7 @@ msgstr "ذخیر به عنوان پیش فرض"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Save record"
-msgstr ""
+msgstr "ذخیره رکورد"
 
 #. module: web
 #. openerp-web
@@ -4033,7 +4039,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/apps.js:0
 #, python-format
 msgid "Showing locally available modules"
-msgstr "در حال نمایش ماژول‌های محلی"
+msgstr "در حال نمایش ماجول‌های در دسترس محلی"
 
 #. module: web
 #. openerp-web
@@ -4093,7 +4099,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #, python-format
 msgid "Start typing..."
-msgstr "شروع کن به تایپ..."
+msgstr "شروع به تایپ کنید..."
 
 #. module: web
 #. openerp-web
@@ -4164,7 +4170,7 @@ msgstr "یه قهوه بد نیست،<br /> چون هنوز کار داره..."
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__vat
 msgid "Tax ID"
-msgstr "شناسه مالیات"
+msgstr "شناسه مالیاتی"
 
 #. module: web
 #. openerp-web
@@ -4176,7 +4182,7 @@ msgstr "ترجمه فنی"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
 msgid "Tel:"
-msgstr "تلفن:"
+msgstr "تلفن تماس:"
 
 #. module: web
 #: code:addons/web/controllers/main.py:0
@@ -4204,6 +4210,8 @@ msgid ""
 "The Tax Identification Number. Complete it if the contact is subjected to "
 "government taxes. Used in some legal statements."
 msgstr ""
+"شماره شناسایی مالیاتی اگر مخاطب مشمول مالیات دولتی است، آن را تکمیل کنید. در"
+" برخی از بیانیه های حقوقی استفاده می شود."
 
 #. module: web
 #: code:addons/web/controllers/main.py:0
@@ -4218,7 +4226,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "The field is empty, there's nothing to save."
-msgstr ""
+msgstr "فیلد خالی است، چیزی برای ذخیره وجود ندارد."
 
 #. module: web
 #: code:addons/web/controllers/main.py:0
@@ -4919,7 +4927,7 @@ msgstr ""
 #: code:addons/web/static/src/public/error_notifications.js:0
 #, python-format
 msgid "Your Odoo session expired. The current page is about to be refreshed."
-msgstr ""
+msgstr "نشست اودوو شما منقضی شده است. این صفحه بازفراخوانی خواهد شد."
 
 #. module: web
 #. openerp-web
@@ -5018,14 +5026,14 @@ msgstr "در:"
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 #, python-format
 msgid "because it's loading..."
-msgstr ""
+msgstr "چون در حال بارگذاری است ..."
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 #, python-format
 msgid "but the application is actually loading..."
-msgstr ""
+msgstr "اما برنامه در حال بازگذاری است ..."
 
 #. module: web
 #. openerp-web
@@ -5070,7 +5078,7 @@ msgstr "شامل نمیشود"
 #: code:addons/web/static/src/core/network/download.js:0
 #, python-format
 msgid "downloading..."
-msgstr ""
+msgstr "در حال دانلود ..."
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -5278,7 +5286,7 @@ msgstr "درست است"
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 #, python-format
 msgid "it's still loading..."
-msgstr ""
+msgstr "هنوز در حال بارگذاری ..."
 
 #. module: web
 #. openerp-web

@@ -2245,12 +2245,16 @@ options.registry.topMenuColor = options.Class.extend({
     /**
      * @override
      */
-    selectStyle(previewMode, widgetValue, params) {
-        this._super(...arguments);
+    async selectStyle(previewMode, widgetValue, params) {
+        await this._super(...arguments);
         const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
-        this.trigger_up('action_demand', {
-            actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: className}],
+        await new Promise((resolve, reject) => {
+            this.trigger_up('action_demand', {
+                actionName: 'toggle_page_option',
+                params: [{name: 'header_color', value: className}],
+                onSuccess: resolve,
+                onFailure: reject,
+            });
         });
     },
 
@@ -2774,18 +2778,6 @@ options.registry.ScrollButton = options.Class.extend({
         await this._super(...arguments);
         this.$button = this.$('.o_scroll_button');
     },
-    /**
-     * Removes button if the option is not displayed (for example in "fit
-     * content" height).
-     *
-     * @override
-     */
-    updateUIVisibility: async function () {
-        await this._super(...arguments);
-        if (this.$button.length && this.el.offsetParent === null) {
-            this.$button.detach();
-        }
-    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -3066,6 +3058,20 @@ options.registry.ConditionalVisibility = options.Class.extend({
     },
 });
 
+options.registry.ImageTools.include({
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        const result = await this._super(...arguments);
+        if ('transform' in params.optionsPossibleValues) {
+            // TODO adapt in master, use a data-dependencies
+            return result && !this.$target.hasClass('o_animate');
+        }
+        return result;
+    },
+});
+
 options.registry.WebsiteAnimate = options.Class.extend({
     /**
      * @override
@@ -3148,6 +3154,12 @@ options.registry.WebsiteAnimate = options.Class.extend({
         }
         if (widgetName === 'animation_launch_opt') {
             return !this.$target[0].closest('.dropdown');
+        }
+        if (params.isAnimationTypeSelection) {
+            // TODO adapt in master, use a data-dependencies related to the
+            // transform option
+            const transform = this.$target[0].style.transform;
+            return !transform || transform === 'none';
         }
         return this._super(...arguments);
     },

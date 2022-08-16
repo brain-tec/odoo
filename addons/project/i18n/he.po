@@ -19,6 +19,7 @@
 # Martin Trigaux, 2021
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2021
 # Netta Waizer, 2022
+# NoaFarkash, 2022
 # Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
 # 
 msgid ""
@@ -2823,7 +2824,7 @@ msgstr "מאי"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__favorite_user_ids
 msgid "Members"
-msgstr "חברים"
+msgstr "מנויים"
 
 #. module: project
 #: model:ir.model,name:project.model_ir_ui_menu
@@ -5133,7 +5134,7 @@ msgstr "השתמש במשימות חוזרות"
 #. module: project
 #: model:res.groups,name:project.group_project_stages
 msgid "Use Stages on Project"
-msgstr "השתמש ב-Stages ב-Project"
+msgstr "השתמש ב-שלבים (Stages) בפרויקט"
 
 #. module: project
 #: model:res.groups,name:project.group_subtask_project

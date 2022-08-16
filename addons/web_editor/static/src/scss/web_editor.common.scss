@@ -670,6 +670,35 @@ blockquote {
                     color: $dropdown-link-disabled-color !important;
                 }
             }
+            .btn-link {
+                // Some search autocomplete results use btn-link for extra
+                // information that can be navigated to. (e.g. products give
+                // access to their categories)
+                // These need to be reset in case a dark palette is applied.
+                color: $link-color;
+
+                &:hover {
+                    color: $link-hover-color;
+                }
+                &:disabled {
+                    color: $btn-link-disabled-color;
+                }
+            }
+        }
+        .dropdown-menu .dropdown-item-text .text-muted {
+            // Search autocomplete messages are shown as text-muted entries.
+            // These need to be reset in case a dark palette is applied.
+            color: $text-muted !important;
+
+            a {
+                // Search autocomplete's fuzzy matched term is shown as a link
+                // within an information message.
+                color: $link-color;
+
+                &:hover {
+                    color: $link-hover-color;
+                }
+            }
         }
     }
 }
@@ -854,6 +883,20 @@ section, .oe_img_bg, [data-oe-shape-data] {
     @extend .container;
     @include media-breakpoint-up(lg) {
         max-width: map-get($container-max-widths, md);
+    }
+}
+
+// Background Images
+.oe_img_bg {
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    &.o_bg_img_opt_repeat {
+        background-size: auto;
+        background-repeat: repeat;
+    }
+    &.o_bg_img_center {
+        background-position: center;
     }
 }
 
