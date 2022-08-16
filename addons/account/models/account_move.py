@@ -1089,8 +1089,8 @@ class AccountMove(models.Model):
     @api.depends('bank_partner_id')
     def _compute_invoice_partner_bank_id(self):
         for move in self:
-            filtered_bank_partner_id = move.bank_partner_id.filtered(lambda bank: bank.company_id.id in (False, move.company_id.id))
-            move.invoice_partner_bank_id = filtered_bank_partner_id.bank_ids[:1]
+            filtered_bank_partner_id = move.bank_partner_id.bank_ids.filtered(lambda bank: bank.company_id is False or bank.company_id == move.company_id)
+            move.invoice_partner_bank_id = filtered_bank_partner_id and filtered_bank_partner_id[0]
 
     @api.depends('commercial_partner_id', 'type')
     def _compute_bank_partner_id(self):
@@ -3371,7 +3371,7 @@ class AccountMoveLine(models.Model):
             #computing the `reconciled` field.
             reconciled = False
             digits_rounding_precision = line.move_id.company_id.currency_id.rounding
-            if float_is_zero(amount, precision_rounding=digits_rounding_precision) and line.move_id.state not in ('draft', 'cancel'):
+            if float_is_zero(amount, precision_rounding=digits_rounding_precision) and (line.matched_debit_ids or line.matched_credit_ids):
                 if line.currency_id and line.amount_currency:
                     if float_is_zero(amount_residual_currency, precision_rounding=line.currency_id.rounding):
                         reconciled = True
@@ -3996,6 +3996,7 @@ class AccountMoveLine(models.Model):
         # Create list of debit and list of credit move ordered by date-currency
         debit_moves = self.filtered(lambda r: r.debit != 0 or r.amount_currency > 0)
         credit_moves = self.filtered(lambda r: r.credit != 0 or r.amount_currency < 0)
+        void_moves = self.filtered(lambda r: not r.credit and not r.debit and not r.amount_currency)
         debit_moves = debit_moves.sorted(key=lambda a: (a.date_maturity or a.date, a.currency_id))
         credit_moves = credit_moves.sorted(key=lambda a: (a.date_maturity or a.date, a.currency_id))
         # Compute on which field reconciliation should be based upon:
@@ -4007,7 +4008,12 @@ class AccountMoveLine(models.Model):
         if self[0].currency_id and all([x.amount_currency and x.currency_id == self[0].currency_id for x in self]):
             field = 'amount_residual_currency'
         # Reconcile lines
-        ret = self._reconcile_lines(debit_moves, credit_moves, field)
+        if debit_moves:
+            ret = self._reconcile_lines(debit_moves, void_moves + credit_moves, field)
+        elif credit_moves:
+            ret = self._reconcile_lines(void_moves + debit_moves, credit_moves, field)
+        else:
+            ret = self._reconcile_lines(void_moves[:len(void_moves) // 2], void_moves[len(void_moves) // 2:], field)
         return ret
 
     def _check_reconcile_validity(self):
@@ -4318,7 +4324,7 @@ class AccountMoveLine(models.Model):
             'ref': self.ref,
             'move_id': self.id,
             'user_id': self.move_id.invoice_user_id.id or self._uid,
-            'company_id': distribution.account_id.company_id.id or self.env.company.id,
+            'company_id': distribution.account_id.company_id.id or self.company_id.id or self.env.company.id,
         }
 
     @api.model
