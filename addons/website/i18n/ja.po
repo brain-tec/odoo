@@ -2292,7 +2292,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.res_config_settings.xml:0
 #, python-format
 msgid "Cookie bars may significantly impair the experience"
-msgstr ""
+msgstr "クッキーバーは、訪問者の体験を著しく損なう可能性があります。"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_cookies_bar
@@ -2907,7 +2907,7 @@ msgstr "ユーザがこのドメインを訪問する際にこのウェブサイ
 #: code:addons/website/static/src/js/backend/res_config_settings.js:0
 #, python-format
 msgid "Do not activate"
-msgstr ""
+msgstr "有効化しない"
 
 #. module: website
 #. openerp-web
@@ -3512,7 +3512,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Force your user to create an account per website"
-msgstr "ウェブサイトに基づいてアカウントを作成させる"
+msgstr "ユーザにウェブサイト毎にアカウントを作成させる"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -3715,7 +3715,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Google Map"
-msgstr ""
+msgstr "グーグルマップ"
 
 #. module: website
 #. openerp-web
@@ -3741,6 +3741,18 @@ msgstr "GoogleマップAPIキー"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__google_search_console
 #: model:ir.model.fields,field_description:website.field_website__google_search_console
 msgid "Google Search Console"
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/website.backend.xml:0
+#, python-format
+msgid ""
+"Google deprecated both its \"Universal Analytics\" and \"Google Sign-In\" "
+"API. It means that only accounts and keys created before 2020 will be able "
+"to integrate their Analytics dashboard in Odoo (or any other website). This "
+"will be possible only up to mid 2023. After that, those services won't work "
+"anymore, at all."
 msgstr ""
 
 #. module: website
@@ -4141,7 +4153,7 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website__social_default_image
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "If set, replaces the website logo as the default social share image."
-msgstr ""
+msgstr "設定すると、Webサイトのロゴがデフォルトのソーシャル共有画像として置き換えられます。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -5224,6 +5236,15 @@ msgstr "新規"
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/xml/website.backend.xml:0
+#, python-format
+msgid ""
+"New Google Analytics accounts and keys are now using Google Analytics 4 "
+"which, for now, can't be integrated/embed in external websites."
+msgstr ""
+
+#. module: website
+#. openerp-web
 #: code:addons/website/static/src/js/menu/new_content.js:0
 #, python-format
 msgid "New Page"
@@ -5755,7 +5776,7 @@ msgstr ""
 #: code:addons/website/static/src/js/backend/res_config_settings.js:0
 #, python-format
 msgid "Please confirm"
-msgstr ""
+msgstr "ご確認ください"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -6638,7 +6659,7 @@ msgstr "スライドショー"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Slogan"
-msgstr ""
+msgstr "スローガン"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -7284,6 +7305,15 @@ msgstr ""
 msgid ""
 "This value will be escaped to be compliant with all major browsers and used "
 "in url. Keep it empty to use the default name of the record."
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/website.backend.xml:0
+#, python-format
+msgid ""
+"Those accounts should now check their Analytics dashboard in the Google "
+"platform directly."
 msgstr ""
 
 #. module: website
@@ -8878,7 +8908,7 @@ msgid ""
 "            your visitors. We recommend you avoid them unless you have\n"
 "            verified with a legal advisor that you absolutely need cookie\n"
 "            consent in your country."
-msgstr ""
+msgstr "あなたの国でクッキーの同意が絶対に必要であることを法律顧問に確認した場合を除き、これらを避けることをお勧めします。"
 
 #. module: website
 #. openerp-web
@@ -8997,7 +9027,7 @@ msgstr "はい"
 #: code:addons/website/static/src/xml/website.res_config_settings.xml:0
 #, python-format
 msgid "you do not need to ask for the consent"
-msgstr ""
+msgstr "同意を求める必要はありません"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_rating_options

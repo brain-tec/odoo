@@ -253,7 +253,7 @@ msgstr ""
 #. module: sale_coupon
 #: model_terms:ir.ui.view,arch_db:sale_coupon.sale_order_view_form
 msgid "Promotions"
-msgstr ""
+msgstr "プロモーション"
 
 #. module: sale_coupon
 #: model:ir.model.fields,field_description:sale_coupon.field_sale_order__reward_amount
@@ -336,7 +336,7 @@ msgstr ""
 #: code:addons/sale_coupon/models/coupon.py:0
 #, python-format
 msgid "This coupon %s exists but the origin sales order is not validated yet."
-msgstr ""
+msgstr "クーポン %s は元の販売オーダが完了していないため、利用できません。"
 
 #. module: sale_coupon
 #: code:addons/sale_coupon/models/coupon.py:0
