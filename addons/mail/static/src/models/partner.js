@@ -7,7 +7,6 @@ import { cleanSearchTerm } from '@mail/utils/utils';
 
 registerModel({
     name: 'Partner',
-    identifyingFields: ['id'],
     modelMethods: {
         /**
          * @param {Object} data
@@ -409,6 +408,7 @@ registerModel({
             default: false,
         }),
         id: attr({
+            identifying: true,
             readonly: true,
             required: true,
         }),
@@ -422,9 +422,6 @@ registerModel({
          */
         isOnline: attr({
             compute: '_computeIsOnline',
-        }),
-        memberThreads: many('Thread', {
-            inverse: 'members',
         }),
         model: attr({
             default: 'res.partner',

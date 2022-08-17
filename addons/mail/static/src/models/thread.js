@@ -22,7 +22,6 @@ const getSuggestedRecipientInfoNextTemporaryId = (function () {
 
 registerModel({
     name: 'Thread',
-    identifyingFields: ['model', 'id'],
     lifecycleHooks: {
         _willDelete() {
             if (this.isTemporary) {
@@ -1949,6 +1948,7 @@ registerModel({
             default: false,
         }),
         id: attr({
+            identifying: true,
             readonly: true,
             required: true,
         }),
@@ -2089,7 +2089,6 @@ registerModel({
          */
         memberCount: attr(),
         members: many('Partner', {
-            inverse: 'memberThreads',
             sort: '_sortPartnerMembers',
         }),
         /**
@@ -2146,6 +2145,7 @@ registerModel({
             readonly: true,
         }),
         model: attr({
+            identifying: true,
             readonly: true,
             required: true,
         }),

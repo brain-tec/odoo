@@ -53,6 +53,7 @@
         margin: 0 0 -1px;
 
         > div {
+            width: 100%;
             height: 100%;
         }
 
@@ -608,6 +609,7 @@
         padding: $o-kanban-record-margin ($o-horizontal-padding - $o-kanban-record-margin);
 
         .o_kanban_record {
+            display: flex;
             flex: 1 1 auto;
             width: $o-kanban-default-record-width;
             margin: ($o-kanban-record-margin * 0.5) $o-kanban-record-margin;

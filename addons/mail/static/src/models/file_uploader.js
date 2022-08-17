@@ -16,7 +16,7 @@ const getAttachmentNextTemporaryId = (function () {
 
 registerModel({
     name: 'FileUploader',
-    identifyingFields: [['activityView', 'attachmentBoxView', 'chatterOwner', 'composerView']],
+    identifyingMode: 'xor',
     recordMethods: {
         openBrowserFileUploader() {
             this.fileInput.click();
@@ -76,7 +76,7 @@ registerModel({
             if (this.chatterOwner) {
                 return replace(this.chatterOwner.thread);
             }
-            if (this.composerView && this.composerView.composer) {
+            if (this.composerView) {
                 return replace(this.composerView.composer.activeThread);
             }
             return clear();
@@ -188,18 +188,22 @@ registerModel({
     },
     fields: {
         activityView: one('ActivityView', {
+            identifying: true,
             inverse: 'fileUploader',
             readonly: true,
         }),
         attachmentBoxView: one('AttachmentBoxView', {
+            identifying: true,
             inverse: 'fileUploader',
             readonly: true,
         }),
         chatterOwner: one('Chatter', {
+            identifying: true,
             inverse: 'fileUploader',
             readonly: true,
         }),
         composerView: one('ComposerView', {
+            identifying: true,
             inverse: 'fileUploader',
             readonly: true,
         }),

@@ -52,7 +52,7 @@ $o-form-label-margin-right: 0px;
     .oe_grey {
         opacity: 0.5;
     }
-    .oe_inline {
+    .oe_inline, .o_field_widget.oe_inline > * {
         width: auto!important;
         @include media-breakpoint-up(vsm, $o-extra-grid-breakpoints) {
             &.o_inner_group {
@@ -174,7 +174,7 @@ $o-form-label-margin-right: 0px;
     }
 
     // No sheet
-    .o_form_nosheet {
+    &.o_form_nosheet, .o_form_nosheet {
         @include o-webclient-padding($top: $o-sheet-vpadding, $bottom: $o-sheet-vpadding);
 
         .o_form_statusbar {
@@ -428,14 +428,16 @@ $o-form-label-margin-right: 0px;
 
     // Avatar
     .oe_avatar {
-        float: right;
-        margin-bottom: 10px;
+        > div {
+            float: right;
+            margin-bottom: 10px;
 
-        > img {
-            max-width: $o-avatar-size;
-            max-height: $o-avatar-size;
-            vertical-align: top;
-            border: 1px solid $o-gray-300;
+            > img {
+                max-width: $o-avatar-size;
+                max-height: $o-avatar-size;
+                vertical-align: top;
+                border: 1px solid $o-gray-300;
+            }
         }
     }
 
