@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
 registerModel({
@@ -31,7 +31,7 @@ registerModel({
             if (!this.messaging) {
                 return clear();
             }
-            return replace(this.messaging);
+            return this.messaging;
         },
         /**
          * @returns {string|FieldCommand}
@@ -118,17 +118,14 @@ registerModel({
         messagingAsHistory: one('Messaging', {
             identifying: true,
             inverse: 'history',
-            readonly: true,
         }),
         messagingAsInbox: one('Messaging', {
             identifying: true,
             inverse: 'inbox',
-            readonly: true,
         }),
         messagingAsStarred: one('Messaging', {
             identifying: true,
             inverse: 'starred',
-            readonly: true,
         }),
         name: attr({
             compute: '_computeName',

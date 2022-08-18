@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one, many } from '@mail/model/model_field';
-import { insertAndReplace, replace } from '@mail/model/model_field_command';
+import { insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'Channel',
@@ -37,7 +37,7 @@ registerModel({
             for (const rtcSession of this.thread.rtcSessions) {
                 callParticipants.push(rtcSession.channelMember);
             }
-            return replace(callParticipants);
+            return callParticipants;
         },
         /**
          * @private
@@ -92,8 +92,6 @@ registerModel({
         channel_type: attr(),
         id: attr({
             identifying: true,
-            readonly: true,
-            required: true,
         }),
         memberCount: attr({
             related: 'thread.memberCount',

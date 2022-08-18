@@ -2,7 +2,6 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { replace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'SnailmailErrorView',
@@ -45,14 +44,14 @@ registerModel({
          * @returns {FieldCommand}
          */
         _computeMessage() {
-            return replace(this.dialogOwner.messageViewOwnerAsSnailmailError.message);
+            return this.dialogOwner.messageViewOwnerAsSnailmailError.message;
         },
         /**
          * @private
          * @returns {FieldCommand}
          */
         _computeNotification() {
-            return replace(this.message.notifications[0]);
+            return this.message.notifications[0];
         },
     },
     fields: {
@@ -60,8 +59,6 @@ registerModel({
         dialogOwner: one('Dialog', {
             identifying: true,
             inverse: 'snailmailErrorView',
-            readonly: true,
-            required: true,
         }),
         hasCreditsError: attr({
             compute: '_computeHasCreditsError',

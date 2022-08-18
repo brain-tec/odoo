@@ -9,7 +9,7 @@ from odoo.addons.test_mail.tests.common import TestMailCommon, TestRecipients
 from odoo.exceptions import AccessError
 from odoo.tests import tagged
 from odoo.tests.common import users, Form
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, formataddr
 
 
 @tagged('mail_composer')
@@ -107,19 +107,16 @@ class TestComposerForm(TestMailComposer):
         composer_form = Form(self.env['mail.compose.message'].with_context(
             self._get_web_context(self.test_record, add_web=True)
         ))
-        # auto_delete not displayed currently in view
-        # self.assertFalse(composer_form.auto_delete)
-        # self.assertFalse(composer_form.auto_delete_message)
-        # author_id not displayed currently in view
-        # self.assertEqual(composer_form.author_id, self.env.user.partner_id)
+        self.assertFalse(composer_form.auto_delete)
+        self.assertFalse(composer_form.auto_delete_message)
+        self.assertEqual(composer_form.author_id, self.env.user.partner_id)
         self.assertFalse(composer_form.body)
         self.assertEqual(composer_form.composition_mode, 'comment')
         self.assertEqual(composer_form.email_from, self.env.user.email_formatted)
         self.assertFalse(composer_form.mail_server_id)
         self.assertEqual(composer_form.model, self.test_record._name)
         self.assertFalse(composer_form.partner_ids)
-        # record name not displayed currently in view
-        # self.assertEqual(composer_form.record_name, self.test_record.name, 'MailComposer: comment mode should compute record name')
+        self.assertEqual(composer_form.record_name, self.test_record.name, 'MailComposer: comment mode should compute record name')
         self.assertFalse(composer_form.reply_to)
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertEqual(composer_form.res_id, self.test_record.id)
@@ -184,19 +181,17 @@ class TestComposerForm(TestMailComposer):
         composer_form = Form(self.env['mail.compose.message'].with_context(
             self._get_web_context(self.test_record, add_web=True, default_template_id=self.template.id)
         ))
-        # auto_delete not displayed currently in view
         # self.assertTrue(composer_form.auto_delete)
-        # self.assertFalse(composer_form.auto_delete_message)
-        # author_id not displayed currently in view
-        # self.assertEqual(composer_form.author_id, self.env.user.partner_id)
+        self.assertFalse(composer_form.auto_delete)  # FIXME: currently not taking template value
+        self.assertFalse(composer_form.auto_delete_message)
+        self.assertEqual(composer_form.author_id, self.env.user.partner_id)
         self.assertEqual(composer_form.body, '<p>TemplateBody %s</p>' % self.test_record.name)
         self.assertEqual(composer_form.composition_mode, 'comment')
         self.assertEqual(composer_form.email_from, self.user_employee_2.email_formatted)
         self.assertEqual(composer_form.mail_server_id, self.mail_server_domain)
         self.assertEqual(composer_form.model, self.test_record._name)
         self.assertEqual(composer_form.partner_ids[:], self.partner_1)
-        # record name not displayed currently in view
-        # self.assertEqual(composer_form.record_name, self.test_record.name, 'MailComposer: comment mode should compute record name')
+        self.assertEqual(composer_form.record_name, self.test_record.name, 'MailComposer: comment mode should compute record name')
         self.assertEqual(composer_form.reply_to, 'info@test.example.com')
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertEqual(composer_form.res_id, self.test_record.id)
@@ -207,18 +202,15 @@ class TestComposerForm(TestMailComposer):
         composer_form = Form(self.env['mail.compose.message'].with_context(
             self._get_web_context(self.test_records, add_web=True)
         ))
-        # auto_delete not displayed currently in view
-        # self.assertFalse(composer_form.auto_delete)
-        # self.assertFalse(composer_form.auto_delete_message)
-        # author_id not displayed currently in view
-        # self.assertEqual(composer_form.author_id, self.env.user.partner_id)
+        self.assertFalse(composer_form.auto_delete)
+        self.assertFalse(composer_form.auto_delete_message)
+        self.assertEqual(composer_form.author_id, self.env.user.partner_id)
         self.assertFalse(composer_form.body)
         self.assertEqual(composer_form.composition_mode, 'mass_mail')
         self.assertEqual(composer_form.email_from, self.env.user.email_formatted)
         self.assertFalse(composer_form.mail_server_id)
         self.assertEqual(composer_form.model, self.test_records._name)
-        # record name not displayed currently in view
-        # self.assertFalse(composer_form.record_name, 'MailComposer: mass mode should have void record name')
+        self.assertFalse(composer_form.record_name, 'MailComposer: mass mode should have void record name')
         self.assertFalse(composer_form.reply_to)
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertEqual(composer_form.res_id, self.test_records[0].id,
@@ -230,11 +222,10 @@ class TestComposerForm(TestMailComposer):
         composer_form = Form(self.env['mail.compose.message'].with_context(
             self._get_web_context(self.test_records, add_web=True, default_template_id=self.template.id)
         ))
-        # auto_delete not displayed currently in view
         # self.assertTrue(composer_form.auto_delete)
-        # self.assertFalse(composer_form.auto_delete_message)
-        # author_id not displayed currently in view
-        # self.assertEqual(composer_form.author_id, self.env.user.partner_id)
+        self.assertFalse(composer_form.auto_delete)  # FIXME: currently not taking template value
+        self.assertFalse(composer_form.auto_delete_message)
+        self.assertEqual(composer_form.author_id, self.env.user.partner_id)
         self.assertEqual(composer_form.body, self.template.body_html,
                          'MailComposer: mass mode should have template raw body if template')
         self.assertEqual(composer_form.composition_mode, 'mass_mail')
@@ -242,8 +233,7 @@ class TestComposerForm(TestMailComposer):
                          'MailComposer: mass mode should have template raw email_from if template')
         self.assertEqual(composer_form.mail_server_id, self.mail_server_domain)
         self.assertEqual(composer_form.model, self.test_records._name)
-        # record name not displayed currently in view
-        # self.assertFalse(composer_form.record_name, 'MailComposer: mass mode should have void record name')
+        self.assertFalse(composer_form.record_name, 'MailComposer: mass mode should have void record name')
         self.assertEqual(composer_form.reply_to, self.template.reply_to)
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertEqual(composer_form.res_id, self.test_records[0].id,
@@ -703,31 +693,6 @@ class TestComposerResultsComment(TestMailComposer):
 
     @users('employee')
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
-    def test_mail_composer_document_based(self):
-        """ Tests a document-based mass mailing with the same address mails
-        This should be allowed and not considered as duplicate in this context
-        """
-        attachment_data = self._generate_attachments_data(2)
-        email_to_1 = self.test_record.customer_id.email
-        self.template.write({
-            'auto_delete': False,  # keep sent emails to check content
-            'attachment_ids': [(0, 0, a) for a in attachment_data],
-            'email_to': '%s, %s' % (email_to_1, email_to_1),
-            'report_name': 'TestReport for {{ object.name }}',  # test cursor forces html
-            'report_template': self.test_report.id,
-        })
-        # launch composer in mass mode
-        composer_form = Form(self.env['mail.compose.message'].with_context(
-            self._get_web_context(self.test_record, add_web=True,
-                                  default_template_id=self.template.id)
-        ))
-        composer = composer_form.save()
-        with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
-            composer.with_context(mailing_document_based=True)._action_send_mail()
-        self.assertEqual(len(self._mails), 2, 'Should have sent 2 emails.')
-
-    @users('employee')
-    @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_notifications_delete(self):
         """ Notifications are correctly deleted once sent """
         composer = self.env['mail.compose.message'].with_context(
@@ -790,6 +755,55 @@ class TestComposerResultsComment(TestMailComposer):
 
     @users('employee')
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_mail_composer_post_parameters(self):
+        """ Test various fields and tweaks in comment mode used for message_post
+        parameters and process.. """
+        # default behavior
+        composer = self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_record)
+        ).create({
+            'body': '<p>Test Body</p>',
+        })
+        composer._action_send_mail()
+
+        message = self.test_record.message_ids[0]
+        self.assertTrue(message.email_add_signature)
+        self.assertFalse(message.email_layout_xmlid)
+        self.assertEqual(message.message_type, 'comment', 'Mail: default message type with composer is user comment')
+        self.assertEqual(message.record_name, self.test_record.name)
+        self.assertEqual(message.subtype_id, self.env.ref('mail.mt_comment', 'Mail: default subtype is comment'))
+
+        # tweaks
+        composer = self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_record)
+        ).create({
+            'body': '<p>Test Body</p>',
+            'email_add_signature': False,
+            'email_layout_xmlid': 'mail.mail_notification_light',
+            'is_log': False,
+            'message_type': 'notification',
+            'subtype_id': self.env.ref('mail.mt_note').id,
+            'partner_ids': [(4, self.partner_1.id), (4, self.partner_2.id)],
+            'record_name': 'Custom record name',
+        })
+        composer._action_send_mail()
+
+        message = self.test_record.message_ids[0]
+        self.assertFalse(message.email_add_signature)
+        self.assertEqual(message.email_layout_xmlid, 'mail.mail_notification_light')
+        self.assertEqual(message.message_type, 'notification')
+        self.assertEqual(message.record_name, 'Custom record name')
+        self.assertEqual(message.subtype_id, self.env.ref('mail.mt_note'))
+
+        composer.write({
+            'is_log': True,
+            'subtype_id': self.env.ref('mail.mt_comment').id,
+        })
+        composer._action_send_mail()
+        self.assertEqual(message.subtype_id, self.env.ref('mail.mt_note'))
+
+    @users('employee')
+    @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_recipients(self):
         """ Test partner_ids given to composer are given to the final message. """
         composer = self.env['mail.compose.message'].with_context(
@@ -842,6 +856,7 @@ class TestComposerResultsComment(TestMailComposer):
                                   default_template_id=self.template.id)
         ))
         composer = composer_form.save()
+        self.assertFalse(composer.reply_to_force_new, 'Mail: thread-enabled models should use auto thread by default')
         with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
             composer._action_send_mail()
 
@@ -920,7 +935,6 @@ class TestComposerResultsMass(TestMailComposer):
             'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
         })
 
-
     @users('employee')
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_delete(self):
@@ -979,6 +993,35 @@ class TestComposerResultsMass(TestMailComposer):
         self.assertFalse(self._new_msgs.exists(), 'Should have deleted mail.message records')
 
     @users('employee')
+    @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_mail_composer_document_based(self):
+        """ Tests a document-based mass mailing with the same address mails
+        This should be allowed and not considered as duplicate in this context
+        """
+        self.test_records.write({
+            'customer_id': False,
+            'email_from': 'duplicate.email@test.example.com',
+        })
+        self.template.write({
+            'auto_delete': False,  # keep sent emails to check content
+            'email_to': '{{ object.email_from }}',
+            'partner_to': '',
+        })
+        # launch composer in mass mode
+        composer_form = Form(self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_records, add_web=True,
+                                  default_template_id=self.template.id)
+        ))
+        composer = composer_form.save()
+        with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
+            composer.with_context(mailing_document_based=False)._action_send_mail()
+        self.assertEqual(len(self._mails), 1, 'Should have sent 1 email, and skipped a duplicate.')
+
+        with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
+            composer.with_context(mailing_document_based=True)._action_send_mail()
+        self.assertEqual(len(self._mails), 2, 'Should have sent 2 emails.')
+
+    @users('employee')
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_mail_composer_wtpl(self):
         self.template.auto_delete = False  # keep sent emails to check content
@@ -992,6 +1035,7 @@ class TestComposerResultsMass(TestMailComposer):
                                   default_template_id=self.template.id)
         ))
         composer = composer_form.save()
+        self.assertFalse(composer.reply_to_force_new, 'Mail: thread-enabled models should use auto thread by default')
         with self.mock_mail_gateway(mail_unlink_sent=True):
             composer._action_send_mail()
 
@@ -1068,7 +1112,6 @@ class TestComposerResultsMass(TestMailComposer):
             [mail for mail in self._mails if '%s-%s' % (record.id, record._name) in mail['message_id']]
             for record in self.test_records
         ]
-        _mails_record2 = [mail for mail in self._mails if '%s-%s' % (self.test_records[1].id, self.test_records._name) in mail['message_id']]
 
         for record, _mails in zip(self.test_records, _mails_records):
             # message copy is kept
@@ -1081,17 +1124,57 @@ class TestComposerResultsMass(TestMailComposer):
                                 mail_message=message,
                                 author=self.partner_employee,
                                 email_values={
-                                    'body_content': 'TemplateBody %s' % record.name,
-                                    'email_from': self.partner_employee_2.email_formatted,
-                                    'subject': 'TemplateSubject %s' % record.name,
                                     'attachments_info': [
                                         {'name': 'AttFileName_00.txt', 'raw': b'AttContent_00', 'type': 'text/plain'},
                                         {'name': 'AttFileName_01.txt', 'raw': b'AttContent_01', 'type': 'text/plain'},
                                         {'name': 'TestReport for %s.html' % record.name, 'type': 'text/plain'},
-                                    ]
+                                    ],
+                                    'body_content': 'TemplateBody %s' % record.name,
+                                    'email_from': self.partner_employee_2.email_formatted,
+                                    'subject': 'TemplateSubject %s' % record.name,
                                 },
                                 fields_values={
+                                    'email_from': self.partner_employee_2.email_formatted,
                                     'mail_server_id': self.mail_server_domain,
+                                    'reply_to': formataddr((
+                                        f'{self.env.user.company_id.name} {record.name}',
+                                        f'{self.alias_catchall}@{self.alias_domain}'
+                                    )),
+                                    'subject': 'TemplateSubject %s' % record.name,
+                                },
+                               )
+
+        # test without catchall filling reply-to
+        composer_form = Form(self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_records, add_web=True,
+                                  default_template_id=self.template.id)
+        ))
+        composer = composer_form.save()
+        with self.mock_mail_gateway(mail_unlink_sent=True):
+            # remove alias so that _notify_get_reply_to will return the default value instead of alias
+            self.env['ir.config_parameter'].sudo().set_param("mail.catchall.domain", None)
+            composer.action_send_mail()
+
+        # hack to use assertEmails: filtering on from/to only is not sufficient to distinguish emails
+        _mails_records = [
+            [mail for mail in self._mails if '%s-%s' % (record.id, record._name) in mail['message_id']]
+            for record in self.test_records
+        ]
+
+        for record, _mails in zip(self.test_records, _mails_records):
+            # template is sent only to partners (email_to are transformed)
+            self._mails = _mails
+            self.assertMailMail(record.customer_id + new_partners + self.partner_admin,
+                                'sent',
+                                mail_message=record.message_ids[0],
+                                author=self.partner_employee,
+                                email_values={
+                                    'email_from': self.partner_employee_2.email_formatted,
+                                    'reply_to': self.partner_employee_2.email_formatted,
+                                },
+                                fields_values={
+                                    'email_from': self.partner_employee_2.email_formatted,
+                                    'reply_to': self.partner_employee_2.email_formatted,
                                 },
                                )
 
@@ -1158,3 +1241,42 @@ class TestComposerResultsMass(TestMailComposer):
         composer = composer_form.save()
         with self.mock_mail_gateway(mail_unlink_sent=False), self.assertRaises(ValueError):
             composer._action_send_mail()
+
+    @users('employee')
+    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
+    def test_mail_composer_wtpl_reply_to_force_new(self):
+        """ Test no auto thread behavior, notably with reply-to. """
+        # launch composer in mass mode
+        composer_form = Form(self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_records, add_web=True,
+                                  default_template_id=self.template.id)
+        ))
+        composer_form.reply_to_mode = 'new'
+        composer_form.reply_to = "{{ '\"' + object.name + '\" <%s>' % 'dynamic.reply.to@test.com' }}"
+        composer = composer_form.save()
+        self.assertTrue(composer.reply_to_force_new)
+        with self.mock_mail_gateway(mail_unlink_sent=False):
+            composer.action_send_mail()
+
+        for record in self.test_records:
+            self.assertMailMail(record.customer_id,
+                                'sent',
+                                mail_message=record.message_ids[0],
+                                author=self.partner_employee,
+                                email_values={
+                                    'body_content': 'TemplateBody %s' % record.name,
+                                    'email_from': self.partner_employee_2.email_formatted,
+                                    'reply_to': formataddr((
+                                        f'{record.name}',
+                                        'dynamic.reply.to@test.com'
+                                    )),
+                                    'subject': 'TemplateSubject %s' % record.name,
+                                },
+                                fields_values={
+                                    'email_from': self.partner_employee_2.email_formatted,
+                                    'reply_to': formataddr((
+                                        f'{record.name}',
+                                        'dynamic.reply.to@test.com'
+                                    )),
+                                },
+                               )

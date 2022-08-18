@@ -8,14 +8,14 @@
                 <t t-call="{{ constructor.popoverTemplate }}"/>
             </t>
             <t t-if="props.type === 'key'">
-                <div t-att-data-template="depTemplate" data-html="true" title="Dependencies" t-ref="action">
+                <div t-att-data-bs-template="depTemplate" data-bs-html="true" title="Dependencies" t-ref="action">
                     It looks like your file is being called by
                     <a href="#" t-on-click="showDependencies"><t t-esc="depText" /></a>.
                     Changing its name will break these calls.
                 </div>
             </t>
             <t t-else="">
-                <div t-att-data-template="depTemplate" data-html="true" title="Dependencies" t-ref="action">
+                <div t-att-data-bs-template="depTemplate" data-bs-html="true" title="Dependencies" t-ref="action">
                     (could be used in <a href="#" t-on-click="showDependencies"><t t-esc="depText" /></a>)
                 </div>
             </t>
@@ -33,7 +33,7 @@
                 <div t-attf-id="collapseDependencies{{ dependency_index }}" class="collapse" aria-expanded="false">
                     <ul>
                         <li t-foreach="dependency_value" t-as="item" t-key="item">
-                            <a t-att-href="item.link" t-out="item.contentToDisplay"/>
+                            <a t-att-href="item.link" t-out="item.contentToDisplay" target="_blank"/>
                         </li>
                     </ul>
                 </div>
@@ -47,7 +47,7 @@
         <b><t t-esc="dependency"/></b>
         <ul>
             <li t-foreach="dependency_value" t-as="item" t-key="item">
-                <a t-att-href="item_value['link']" t-att-title="item_value['item']" class="o_text_overflow">
+                <a t-att-href="item_value['link']" t-att-title="item_value['item']" class="o_text_overflow" target="_blank">
                     <t t-esc="item_value['item']"/>
                 </a>
             </li>

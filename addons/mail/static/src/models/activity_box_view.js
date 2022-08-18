@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { insertAndReplace, replace } from '@mail/model/model_field_command';
+import { insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'ActivityBoxView',
@@ -20,7 +20,7 @@ registerModel({
          */
         _computeActivityViews() {
             return insertAndReplace(this.chatter.thread.activities.map(activity => {
-                return { activity: replace(activity) };
+                return { activity };
             }));
         },
     },
@@ -33,8 +33,6 @@ registerModel({
         chatter: one('Chatter', {
             identifying: true,
             inverse: 'activityBoxView',
-            readonly: true,
-            required: true,
         }),
         isActivityListVisible: attr({
             default: true,

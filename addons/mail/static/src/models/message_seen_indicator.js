@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, replace } from '@mail/model/model_field_command';
+import { clear } from '@mail/model/model_field_command';
 import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
@@ -135,7 +135,7 @@ registerModel({
             if (otherPartnersThatHaveFetched.length === 0) {
                 return clear();
             }
-            return replace(otherPartnersThatHaveFetched);
+            return otherPartnersThatHaveFetched;
         },
         /**
          * Manually called as not always called when necessary
@@ -163,7 +163,7 @@ registerModel({
             if (otherPartnersThatHaveSeen.length === 0) {
                 return clear();
             }
-            return replace(otherPartnersThatHaveSeen);
+            return otherPartnersThatHaveSeen;
         },
         /**
          * @private
@@ -258,8 +258,6 @@ registerModel({
          */
         message: one('Message', {
             identifying: true,
-            readonly: true,
-            required: true,
         }),
         partnersThatHaveFetched: many('Partner', {
             compute: '_computePartnersThatHaveFetched',
@@ -277,8 +275,6 @@ registerModel({
         thread: one('Thread', {
             identifying: true,
             inverse: 'messageSeenIndicators',
-            readonly: true,
-            required: true,
         }),
     },
 });

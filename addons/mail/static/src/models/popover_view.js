@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'PopoverView',
@@ -71,13 +71,13 @@ registerModel({
          */
         _computeContent() {
             if (this.activityMarkDonePopoverContentView) {
-                return replace(this.activityMarkDonePopoverContentView);
+                return this.activityMarkDonePopoverContentView;
             }
             if (this.channelInvitationForm) {
-                return replace(this.channelInvitationForm);
+                return this.channelInvitationForm;
             }
             if (this.emojiPickerView) {
-                return replace(this.emojiPickerView);
+                return this.emojiPickerView;
             }
             return clear();
         },
@@ -129,7 +129,7 @@ registerModel({
          */
         _computeManager() {
             if (this.messaging.popoverManager) {
-                return replace(this.messaging.popoverManager);
+                return this.messaging.popoverManager;
             }
             return clear();
         },
@@ -181,7 +181,6 @@ registerModel({
         activityViewOwnerAsMarkDone: one('ActivityView', {
             identifying: true,
             inverse: 'markDonePopoverView',
-            readonly: true,
         }),
         /**
          * HTML element that is used as anchor position for this popover view.
@@ -209,7 +208,6 @@ registerModel({
         composerViewOwnerAsEmoji: one('ComposerView', {
             identifying: true,
             inverse: 'emojisPopoverView',
-            readonly: true,
         }),
         /**
          * Determines the record that is content of this popover view.
@@ -254,7 +252,6 @@ registerModel({
         messageActionListOwnerAsReaction: one('MessageActionList', {
             identifying: true,
             inverse: 'reactionPopoverView',
-            readonly: true,
         }),
         /**
          * Position of the popover view relative to its anchor point.
@@ -270,7 +267,6 @@ registerModel({
         threadViewTopbarOwnerAsInvite: one('ThreadViewTopbar', {
             identifying: true,
             inverse: 'invitePopoverView',
-            readonly: true,
         }),
     },
 });

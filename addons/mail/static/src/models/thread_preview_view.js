@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace } from '@mail/model/model_field_command';
 import { htmlToTextContentInline } from '@mail/js/utils';
 
 registerModel({
@@ -56,7 +56,7 @@ registerModel({
          */
         _computeLastTrackingValue() {
             if (this.thread.lastMessage && this.thread.lastMessage.lastTrackingValue) {
-                return replace(this.thread.lastMessage.lastTrackingValue);
+                return this.thread.lastMessage.lastTrackingValue;
             }
             return clear();
         },
@@ -108,8 +108,6 @@ registerModel({
         notificationListViewOwner: one('NotificationListView', {
             identifying: true,
             inverse: 'threadPreviewViews',
-            readonly: true,
-            required: true,
         }),
         personaImStatusIconView: one('PersonaImStatusIconView', {
             compute: '_computePersonaImStatusIconView',
@@ -120,8 +118,6 @@ registerModel({
         thread: one('Thread', {
             identifying: true,
             inverse: 'threadPreviewViews',
-            readonly: true,
-            required: true,
         }),
     },
 });

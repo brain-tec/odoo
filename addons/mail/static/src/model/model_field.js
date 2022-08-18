@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { clear, FieldCommand, link, replace, unlink, unlinkAll } from '@mail/model/model_field_command';
+import { clear, FieldCommand, link, unlink, unlinkAll } from '@mail/model/model_field_command';
 
 /**
  * Class whose instances represent field on a model.
@@ -21,6 +21,7 @@ export class ModelField {
         identifying = false,
         inverse,
         isCausal = false,
+        model,
         readonly = false,
         related,
         relationType,
@@ -69,6 +70,7 @@ export class ModelField {
          * relation is removed, the related record is automatically deleted.
          */
         this.isCausal = isCausal;
+        this.model = model;
         /**
          * Determines whether the field is read only. Read only field
          * can't be updated once the record is created.
@@ -137,6 +139,12 @@ export class ModelField {
          * model name this relation refers to.
          */
         this.to = to;
+        if (this.identifying) {
+            this.readonly = true;
+            if (model.identifyingMode === 'and') {
+                this.required = true;
+            }
+        }
     }
 
     /**
@@ -223,7 +231,7 @@ export class ModelField {
                 }
             }
             if (this.fieldType === 'relation') {
-                return replace(newVal);
+                return newVal;
             }
             return newVal;
         }
@@ -234,7 +242,7 @@ export class ModelField {
                 return clear();
             }
             if (this.fieldType === 'relation') {
-                return replace(newVal);
+                return newVal;
             }
             return newVal;
         }
@@ -253,8 +261,11 @@ export class ModelField {
         } else if (newVal instanceof Array && newVal[0] instanceof FieldCommand) {
             return newVal;
         } else if (this.fieldType === 'relation') {
-            // Deprecated. Used only to support old syntax: `[...[name, value]]` command
-            return newVal.map(([name, value]) => new FieldCommand(name, value));
+            if (newVal instanceof Array && newVal[0] && ['clear', 'insert', 'insert-and-replace', 'insert-and-unlink', 'link', 'replace', 'unlink', 'unlink-all'].includes(newVal[0][0])) {
+                return newVal.map(([name, value]) => new FieldCommand(name, value));
+            } else {
+                return [new FieldCommand('replace', newVal)];
+            }
         } else {
             return [new FieldCommand('set', newVal)];
         }
@@ -475,7 +486,7 @@ export class ModelField {
         for (const recordData of (isMulti ? data : [data])) {
             const recordData2 = { ...recordData };
             if (otherField.relationType === 'one') {
-                recordData2[this.inverse] = replace(record);
+                recordData2[this.inverse] = record;
             } else {
                 recordData2[this.inverse] = link(record);
             }

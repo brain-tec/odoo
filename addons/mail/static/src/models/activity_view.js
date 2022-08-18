@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
-import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace } from '@mail/model/model_field_command';
 
 import { auto_str_to_date, getLangDateFormat, getLangDatetimeFormat } from 'web.time';
 import { sprintf } from '@web/core/utils/strings';
@@ -144,7 +144,7 @@ registerModel({
             }
             return insertAndReplace(
                 this.activity.mailTemplates.map(
-                    mailTemplate => ({ mailTemplate: replace(mailTemplate) })
+                    mailTemplate => ({ mailTemplate })
                 ),
             );
         },
@@ -170,14 +170,10 @@ registerModel({
         activity: one('Activity', {
             identifying: true,
             inverse: 'activityViews',
-            required: true,
-            readonly: true,
         }),
         activityBoxView: one('ActivityBoxView', {
             identifying: true,
             inverse: 'activityViews',
-            readonly: true,
-            required: true,
         }),
         /**
          * Determines whether the details are visible.

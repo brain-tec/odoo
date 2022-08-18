@@ -2,7 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
-import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
+import { clear, insertAndReplace } from '@mail/model/model_field_command';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 registerModel({
@@ -37,7 +37,7 @@ registerModel({
             }
             this.attachmentList.update({
                 attachmentListViewDialog: insertAndReplace(),
-                selectedAttachment: replace(this.attachment),
+                selectedAttachment: this.attachment,
             });
         },
         /**
@@ -115,8 +115,6 @@ registerModel({
          */
         attachment: one('Attachment', {
             identifying: true,
-            readonly: true,
-            required: true,
         }),
         attachmentDeleteConfirmDialog: one('Dialog', {
             inverse: 'attachmentImageOwnerAsAttachmentDeleteConfirm',
@@ -128,8 +126,6 @@ registerModel({
         attachmentList: one('AttachmentList', {
             identifying: true,
             inverse: 'attachmentImages',
-            readonly: true,
-            required: true,
         }),
         /**
          * Determines whether `this` should display a download button.

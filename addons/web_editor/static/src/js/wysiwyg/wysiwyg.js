@@ -1047,7 +1047,12 @@ const Wysiwyg = Widget.extend({
                     if ($node.hasClass('o_editable_date_field_format_changed')) {
                         $nodes.addClass('o_editable_date_field_format_changed');
                     }
-                    $nodes.html($node.html());
+                    const html = $node.html();
+                    for (const node of $nodes) {
+                        if (node.innerHTML !== html) {
+                            node.innerHTML = html;
+                        }
+                    }
                     this._observeOdooFieldChanges();
                 });
                 observer.observe(field, observerOptions);
@@ -1567,7 +1572,9 @@ const Wysiwyg = Widget.extend({
                             oldColorpicker.destroy();
                         }
                         manualOpening = true;
-                        $dropdown.children('.dropdown-toggle').dropdown('show');
+                        const $childElement = $dropdown.children('.dropdown-toggle');
+                        const dropdownToggle = new Dropdown($childElement);
+                        dropdownToggle.show();
                         const $colorpicker = $dropdown.find('.colorpicker');
                         const colorpickerHeight = $colorpicker.outerHeight();
                         const toolbarContainerTop = dom.closestScrollable(this.toolbar.el).getBoundingClientRect().top;
