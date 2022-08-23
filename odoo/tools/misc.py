@@ -7,6 +7,7 @@ Miscellaneous tools used by OpenERP.
 """
 import cProfile
 import collections
+import contextlib
 import datetime
 import hmac as hmac_lib
 import hashlib
@@ -23,6 +24,7 @@ import time
 import traceback
 import types
 import unicodedata
+import warnings
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping, MutableMapping, MutableSet
 from contextlib import ContextDecorator, contextmanager
@@ -72,6 +74,7 @@ def find_in_path(name):
     return which(name, path=os.pathsep.join(path))
 
 def _exec_pipe(prog, args, env=None):
+    warnings.warn("Since 16.0, just use `subprocess`.", DeprecationWarning, stacklevel=3)
     cmd = (prog,) + args
     # on win32, passing close_fds=True is not compatible
     # with redirecting std[in/err/out]
@@ -80,6 +83,7 @@ def _exec_pipe(prog, args, env=None):
     return pop.stdin, pop.stdout
 
 def exec_command_pipe(name, *args):
+    warnings.warn("Since 16.0, use `subprocess` directly.", DeprecationWarning, stacklevel=2)
     prog = find_in_path(name)
     if not prog:
         raise Exception('Command `%s` not found.' % name)
@@ -122,6 +126,7 @@ def exec_pg_environ():
     return env
 
 def exec_pg_command(name, *args):
+    warnings.warn("Since 16.0, use `subprocess` directly.", DeprecationWarning, stacklevel=2)
     prog = find_pg_tool(name)
     env = exec_pg_environ()
     with open(os.devnull) as dn:
@@ -131,6 +136,7 @@ def exec_pg_command(name, *args):
             raise Exception('Postgres subprocess %s error %s' % (args2, rc))
 
 def exec_pg_command_pipe(name, *args):
+    warnings.warn("Since 16.0, use `subprocess` directly.", DeprecationWarning, stacklevel=2)
     prog = find_pg_tool(name)
     env = exec_pg_environ()
     return _exec_pipe(prog, args, env)
@@ -370,6 +376,7 @@ except ImportError:
 
 
 def to_xml(s):
+    warnings.warn("Since 16.0, use proper escaping methods (e.g. `markupsafe.escape`).", DeprecationWarning, stacklevel=2)
     return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
 def get_iso_codes(lang):
@@ -443,6 +450,7 @@ def human_size(sz):
     return "%0.2f %s" % (s, units[i])
 
 def logged(f):
+    warnings.warn("Since 16.0, it's never been super useful.", DeprecationWarning, stacklevel=2)
     @wraps(f)
     def wrapper(*args, **kwargs):
         from pprint import pformat
@@ -465,6 +473,7 @@ def logged(f):
 
 class profile(object):
     def __init__(self, fname=None):
+        warnings.warn("Since 16.0.", DeprecationWarning, stacklevel=2)
         self.fname = fname
 
     def __call__(self, f):
@@ -483,6 +492,7 @@ def detect_ip_addr():
        for binding to an interface, but it could be used as basis
        for constructing a remote URL to the server.
     """
+    warnings.warn("Since 16.0.", DeprecationWarning, stacklevel=2)
     def _detect_ip_addr():
         from array import array
         from struct import pack, unpack
@@ -670,6 +680,10 @@ def split_every(n, iterable, piece_maker=tuple):
 # port of python 2.6's attrgetter with support for dotted notation
 raise_error = object()  # sentinel
 def resolve_attr(obj, attr, default=raise_error):
+    warnings.warn(
+        "Since 16.0, component of `attrgetter`.",
+        stacklevel=2
+    )
     for name in attr.split("."):
         obj = getattr(obj, name, default)
         if obj is raise_error:
@@ -679,6 +693,7 @@ def resolve_attr(obj, attr, default=raise_error):
     return obj
 
 def attrgetter(*items):
+    warnings.warn("Since 16.0, super old backport of Python 2.6's `operator.attrgetter`.", stacklevel=2)
     if len(items) == 1:
         attr = items[0]
         def g(obj):
@@ -729,33 +744,6 @@ class unquote(str):
     """
     def __repr__(self):
         return self
-
-class UnquoteEvalContext(defaultdict):
-    """Defaultdict-based evaluation context that returns
-       an ``unquote`` string for any missing name used during
-       the evaluation.
-       Mostly useful for evaluating OpenERP domains/contexts that
-       may refer to names that are unknown at the time of eval,
-       so that when the context/domain is converted back to a string,
-       the original names are preserved.
-
-       **Warning**: using an ``UnquoteEvalContext`` as context for ``eval()`` or
-       ``safe_eval()`` will shadow the builtins, which may cause other
-       failures, depending on what is evaluated.
-
-       Example (notice that ``section_id`` is preserved in the final
-       result) :
-
-       >>> context_str = "{'default_user_id': uid, 'default_section_id': section_id}"
-       >>> eval(context_str, UnquoteEvalContext(uid=1))
-       {'default_user_id': 1, 'default_section_id': section_id}
-
-       """
-    def __init__(self, *args, **kwargs):
-        super(UnquoteEvalContext, self).__init__(None, *args, **kwargs)
-
-    def __missing__(self, key):
-        return unquote(key)
 
 
 class mute_logger(logging.Handler):
@@ -1254,12 +1242,9 @@ class Reverse(object):
     def __le__(self, other): return self.val >= other.val
     def __lt__(self, other): return self.val > other.val
 
-@contextmanager
 def ignore(*exc):
-    try:
-        yield
-    except exc:
-        pass
+    warnings.warn("Since 16.0 `odoo.tools.ignore` is replaced by `contextlib.suppress`.", DeprecationWarning, stacklevel=2)
+    return contextlib.suppress(*exc)
 
 class replace_exceptions(ContextDecorator):
     """
@@ -1389,6 +1374,9 @@ def format_date(env, value, lang_code=False, date_format=False):
             value = odoo.fields.Datetime.context_timestamp(env['res.lang'], value)
         else:
             value = odoo.fields.Datetime.from_string(value)
+    elif isinstance(value, datetime.datetime) and not value.tzinfo:
+        # a datetime, convert to correct timezone
+        value = odoo.fields.Datetime.context_timestamp(env['res.lang'], value)
 
     lang = get_lang(env, lang_code)
     locale = babel_locale_parse(lang.code)
@@ -1572,13 +1560,7 @@ def format_duration(value):
         return '-%02d:%02d' % (hours, minutes)
     return '%02d:%02d' % (hours, minutes)
 
-
-def _consteq(str1, str2):
-    """ Constant-time string comparison. Suitable to compare bytestrings of fixed,
-        known length only, because length difference is optimized. """
-    return len(str1) == len(str2) and sum(ord(x)^ord(y) for x, y in zip(str1, str2)) == 0
-
-consteq = getattr(passlib.utils, 'consteq', _consteq)
+consteq = hmac_lib.compare_digest
 
 # forbid globals entirely: str/unicode, int/long, float, bool, tuple, list, dict, None
 class Unpickler(pickle_.Unpickler, object):
@@ -1657,25 +1639,6 @@ def get_diff(data_from, data_to, custom_style=False):
         numlines=3,
     )
     return handle_style(diff, custom_style)
-
-
-def traverse_containers(val, type_):
-    """ Yields atoms filtered by specified ``type_`` (or type tuple), traverses
-    through standard containers (non-string mappings or sequences) *unless*
-    they're selected by the type filter
-    """
-    from odoo.models import BaseModel
-    if isinstance(val, type_):
-        yield val
-    elif isinstance(val, (str, bytes, BaseModel)):
-        return
-    elif isinstance(val, Mapping):
-        for k, v in val.items():
-            yield from traverse_containers(k, type_)
-            yield from traverse_containers(v, type_)
-    elif isinstance(val, collections.abc.Sequence):
-        for v in val:
-            yield from traverse_containers(v, type_)
 
 
 def hmac(env, scope, message, hash_function=hashlib.sha256):
