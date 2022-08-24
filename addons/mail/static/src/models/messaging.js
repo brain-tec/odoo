@@ -14,6 +14,7 @@ registerModel({
     lifecycleHooks: {
         _created() {
             odoo.__DEBUG__.messaging = this;
+            this.refreshIsNotificationPermissionDefault();
         },
         _willDelete() {
             this.env.bus.removeEventListener('window_focus', this._handleGlobalWindowFocus);
@@ -200,7 +201,10 @@ registerModel({
          * provide an API to detect when this value changes.
          */
         refreshIsNotificationPermissionDefault() {
-            this.update({ isNotificationPermissionDefault: this._computeIsNotificationPermissionDefault() });
+            const browserNotification = this.messaging.browser.Notification;
+            this.update({
+                isNotificationPermissionDefault: Boolean(browserNotification) && browserNotification.permission === 'default',
+            });
         },
         async startFetchImStatus() {
             this.update({
@@ -221,7 +225,7 @@ registerModel({
             }
             if (partnerIds.length !== 0 || guestIds.length !== 0) {
                 const dataList = await this.messaging.rpc({
-                    route: '/longpolling/im_status',
+                    route: '/bus/im_status',
                     params: {
                         partner_ids: partnerIds,
                         guest_ids: guestIds,
@@ -278,14 +282,6 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
-         */
-        _computeIsNotificationPermissionDefault() {
-            const browserNotification = this.messaging.browser.Notification;
-            return browserNotification ? browserNotification.permission === 'default' : false;
-        },
-        /**
-         * @private
          * @returns {FieldCommand}
          */
         _computeCallInviteRequestPopups() {
@@ -313,6 +309,14 @@ registerModel({
         /**
          * @private
          */
+        _onChangeAllCurrentClientThreads() {
+            if (this.isInitialized) {
+                this.env.services.bus_service.forceUpdateChannels();
+            }
+        },
+        /**
+         * @private
+         */
         _onChangeRingingThreads() {
             if (this.ringingThreads && this.ringingThreads.length > 0) {
                 this.soundEffects.incomingCall.play({ loop: true });
@@ -332,6 +336,12 @@ registerModel({
         allRecords: many('Record', {
             inverse: 'messaging',
             isCausal: true,
+        }),
+        /**
+         * This field contains all current client channels.
+         */
+        allCurrentClientThreads: many('Thread', {
+            inverse: 'messagingAsAllCurrentClientThreads',
         }),
         browser: attr({
             compute: '_computeBrowser',
@@ -402,7 +412,6 @@ registerModel({
         initializedPromise: attr({
             compute: '_computeInitializedPromise',
             required: true,
-            readonly: true,
         }),
         initializer: one('MessagingInitializer', {
             default: {},
@@ -426,9 +435,7 @@ registerModel({
          * 'default' state. This means it is allowed to make a request to the
          * user to enable notifications.
          */
-        isNotificationPermissionDefault: attr({
-            compute: '_computeIsNotificationPermissionDefault',
-        }),
+        isNotificationPermissionDefault: attr(),
         locale: one('Locale', {
             default: {},
             isCausal: true,
@@ -446,7 +453,6 @@ registerModel({
          */
         messagingBus: attr({
             compute: '_computeMessagingBus',
-            readonly: true,
             required: true,
         }),
         messagingMenu: one('MessagingMenu', {
@@ -456,7 +462,6 @@ registerModel({
         notificationHandler: one('MessagingNotificationHandler', {
             compute: '_computeNotificationHandler',
             isCausal: true,
-            readonly: true,
         }),
         outOfFocusUnreadMessageCounter: attr({
             default: 0,
@@ -512,6 +517,10 @@ registerModel({
         {
             dependencies: ['ringingThreads'],
             methodName: '_onChangeRingingThreads',
+        },
+        {
+            dependencies: ['allCurrentClientThreads'],
+            methodName: '_onChangeAllCurrentClientThreads',
         },
     ],
 });

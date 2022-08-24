@@ -5017,6 +5017,43 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    QUnit.test(
+        "one2many list not editable, the context is properly evaluated and sent",
+        async function (assert) {
+            assert.expect(3);
+            serverData.views = {
+                "turtle,false,form": '<form><field name="turtle_foo"/></form>',
+            };
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <field name="int_field"/>
+                        <field name="turtles" context="{'hello': 'world', 'abc': int_field}">
+                            <tree>
+                                <field name="turtle_foo"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                resId: 1,
+                mockRPC(route, args) {
+                    if (args.method === "get_views" && args.model === "turtle") {
+                        const context = args.kwargs.context;
+                        assert.strictEqual(context.hello, "world");
+                        assert.strictEqual(context.abc, 10);
+                    }
+                },
+            });
+
+            await clickEdit(target);
+            await addRow(target);
+            assert.containsOnce(target, ".modal");
+        }
+    );
+
     QUnit.test("one2many with many2many widget: create", async function (assert) {
         assert.expect(10);
 
@@ -9097,6 +9134,45 @@ QUnit.module("Fields", (hooks) => {
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
             ["", "pizza", "pasta"]
         );
+    });
+
+    QUnit.test("o2m add an action button control", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            resId: 2,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree>
+                            <control>
+                                <create string="Create" context="{}" />
+                                <button string="Action Button" name="do_something" class="btn-link" type="object" context="{'parent_id': parent.id}"/>
+                            </control>
+                            <field name="display_name"/>
+                        </tree>
+                    </field>
+                </form>`,
+            mockRPC(route, args) {
+                if (args.method === "do_something") {
+                    assert.step("do_something");
+                    assert.strictEqual(args.kwargs.context.parent_id, 2);
+                    return true;
+                }
+            },
+        });
+
+        await clickEdit(target);
+        assert.deepEqual(
+            [...target.querySelector(".o_field_x2many_list_row_add").children].map(
+                (el) => el.textContent
+            ),
+            ["Create", "Action Button"]
+        );
+
+        await click(target, ".o_field_x2many_list_row_add button");
+        assert.verifySteps(["do_something"]);
     });
 
     QUnit.test("o2m add a line custom control create align with handle", async function (assert) {

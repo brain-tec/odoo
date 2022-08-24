@@ -62,7 +62,7 @@ patch(MockServer.prototype, 'mail', {
      */
     async _performRPC(route, args) {
         // routes
-        if (route === '/longpolling/im_status') {
+        if (route === '/bus/im_status') {
             const { partner_ids } = args;
             return {
                 'partners': this.pyEnv['res.partner'].searchRead([['id', 'in', partner_ids]], { context: { 'active_test': false }, fields: ['im_status'] })
@@ -1003,6 +1003,7 @@ patch(MockServer.prototype, 'mail', {
             const channelData = {
                 channel_type: channel.channel_type,
                 id: channel.id,
+                memberCount: channel.member_count,
             };
             const res = Object.assign({}, channel, {
                 last_message_id: lastMessageId,
@@ -1224,6 +1225,10 @@ patch(MockServer.prototype, 'mail', {
                 }).map(channel => {
                     // expected format
                     return {
+                        channel: {
+                            channel_type: channel.channel_type,
+                            id: channel.id,
+                        },
                         id: channel.id,
                         name: channel.name,
                         public: channel.public,

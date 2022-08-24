@@ -140,11 +140,21 @@ export class ModelField {
          * model name this relation refers to.
          */
         this.to = to;
+        /**
+         * Automatically make identifying fields readonly (and required for AND
+         * identifying mode).
+         */
         if (this.identifying) {
             this.readonly = true;
-            if (model.identifyingMode === 'and') {
+            if (this.model.identifyingMode === 'and') {
                 this.required = true;
             }
+        }
+        /**
+         * Automatically make computes and relateds readonly.
+         */
+        if (this.compute || this.related) {
+            this.readonly = true;
         }
     }
 
@@ -215,8 +225,7 @@ export class ModelField {
      */
     computeRelated(record) {
         const [relationName, relatedFieldName] = this.related.split('.');
-        const model = record.constructor;
-        const relationField = model.__fieldMap[relationName];
+        const relationField = this.model.__fieldMap.get(relationName);
         if (relationField.relationType === 'many') {
             const newVal = [];
             for (const otherRecord of record[relationName]) {
@@ -368,7 +377,7 @@ export class ModelField {
                         }
                         break;
                     default:
-                        throw new Error(`Field "${record.constructor.name}/${this.fieldName}"(${this.fieldType} type) does not support command "${commandName}"`);
+                        throw new Error(`Field "${this.model.name}/${this.fieldName}"(${this.fieldType} type) does not support command "${commandName}"`);
                 }
             } else if (this.fieldType === 'relation') {
                 switch (commandName) {
@@ -413,7 +422,7 @@ export class ModelField {
                         }
                         break;
                     default:
-                        throw new Error(`Field "${record.constructor.name}/${this.fieldName}"(${this.fieldType} type) does not support command "${commandName}"`);
+                        throw new Error(`Field "${this.model.name}/${this.fieldName}"(${this.fieldType} type) does not support command "${commandName}"`);
                 }
             }
         }
@@ -428,7 +437,7 @@ export class ModelField {
      * @returns {any}
      */
     read(record) {
-        return record.__values[this.fieldName];
+        return record.__values.get(this.fieldName);
     }
 
     /**
@@ -492,17 +501,15 @@ export class ModelField {
      */
     _insertOtherRecord(record, data, options) {
         const otherModel = record.models[this.to];
-        const otherField = otherModel.__fieldMap[this.inverse];
+        const otherField = otherModel.__fieldMap.get(this.inverse);
         const isMulti = typeof data[Symbol.iterator] === 'function';
-        const dataList = [];
-        for (const recordData of (isMulti ? data : [data])) {
-            const recordData2 = { ...recordData };
+        const dataList = isMulti ? data : [data];
+        for (const recordData of dataList) {
             if (otherField.relationType === 'one') {
-                recordData2[this.inverse] = record;
+                recordData[this.inverse] = record;
             } else {
-                recordData2[this.inverse] = link(record);
+                recordData[this.inverse] = link(record);
             }
-            dataList.push(recordData2);
         }
         const records = record.modelManager._insert(otherModel, dataList, options);
         return isMulti ? records : records[0];
@@ -521,7 +528,7 @@ export class ModelField {
         if (currentValue === newVal) {
             return false;
         }
-        record.__values[this.fieldName] = newVal;
+        record.__values.set(this.fieldName, newVal);
         return true;
     }
 
@@ -655,7 +662,7 @@ export class ModelField {
         // unlink to properly update previous inverse before linking new value
         this._setRelationUnlinkX2One(record, { hasToUpdateInverse: true });
         // link other record to current record
-        record.__values[this.fieldName] = recordToLink;
+        record.__values.set(this.fieldName, recordToLink);
         // link current record to other record
         if (hasToUpdateInverse) {
             record.modelManager._update(
@@ -821,7 +828,7 @@ export class ModelField {
             return false;
         }
         // unlink other record from current record
-        record.__values[this.fieldName] = undefined;
+        record.__values.set(this.fieldName, undefined);
         // unlink current record from other record
         if (hasToUpdateInverse) {
             if (!otherRecord.exists()) {
