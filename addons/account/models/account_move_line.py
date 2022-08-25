@@ -1,7 +1,7 @@
 import ast
 from collections import defaultdict
 from contextlib import contextmanager
-from datetime import date
+from datetime import date, timedelta
 from functools import lru_cache
 
 from odoo import api, fields, models, Command, _
@@ -1828,7 +1828,7 @@ class AccountMoveLine(models.Model):
 
         move_vals = {
             'move_type': 'entry',
-            'date': max(exchange_date or date.min, company._get_user_fiscal_lock_date()),
+            'date': max(exchange_date or date.min, company._get_user_fiscal_lock_date() + timedelta(days=1)),
             'journal_id': journal.id,
             'line_ids': [],
         }
@@ -2140,7 +2140,7 @@ class AccountMoveLine(models.Model):
                 raise UserError(_("Entries are not from the same account: %s != %s")
                                 % (account.display_name, line.account_id.display_name))
 
-        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id))
+        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency))
 
         # ==== Collect all involved lines through the existing reconciliation ====
 
