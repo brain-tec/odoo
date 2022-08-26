@@ -1,4 +1,4 @@
-Italy, 2018-02-05
+Egypt, 2022-08-21
 
 I hereby agree to the terms of the Odoo Individual Contributor License
 Agreement v1.0.
@@ -8,4 +8,4 @@ declaration.
 
 Signed,
 
-Simone Rubino simone.rubino@agilebg.com (up to 2022-08-26) https://github.com/SimoRubi
+Eman Ali emanyousef335@gmail.com https://github.com/EmanAliYousef
