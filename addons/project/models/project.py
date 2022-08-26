@@ -1852,7 +1852,9 @@ class Task(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         fields_list = ([f.split(':')[0] for f in fields] or [])
         if groupby:
-            fields_list += [groupby] if isinstance(groupby, str) else groupby
+            fields_groupby = [groupby] if isinstance(groupby, str) else groupby
+            # only take field name when having ':' e.g 'date_deadline:week' => 'date_deadline'
+            fields_list += [f.split(':')[0] for f in fields_groupby]
         if domain:
             fields_list += [term[0].split('.')[0] for term in domain if isinstance(term, (tuple, list))]
         self._ensure_fields_are_accessible(fields_list)
@@ -2554,8 +2556,11 @@ class Task(models.Model):
             return self.project_id.partner_id
         return res
 
-    def rating_apply(self, rate, token=None, rating=None, feedback=None, subtype_xmlid=None):
-        rating = super(Task, self).rating_apply(rate, token=token, rating=rating, feedback=feedback, subtype_xmlid=subtype_xmlid)
+    def rating_apply(self, rate, token=None, rating=None, feedback=None,
+                     subtype_xmlid=None, notify_delay_send=False):
+        rating = super(Task, self).rating_apply(
+            rate, token=token, rating=rating, feedback=feedback,
+            subtype_xmlid=subtype_xmlid, notify_delay_send=notify_delay_send)
         if self.stage_id and self.stage_id.auto_validation_kanban_state:
             kanban_state = 'done' if rating.rating >= rating_data.RATING_LIMIT_OK else 'blocked'
             self.write({'kanban_state': kanban_state})
