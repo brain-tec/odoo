@@ -144,6 +144,11 @@ class ProjectTaskType(models.Model):
             else:
                 stage.disabled_rating_warning = False
 
+    @api.constrains('user_id', 'project_ids')
+    def _check_personal_stage_not_linked_to_projects(self):
+        if any(stage.user_id and stage.project_ids for stage in self):
+            raise UserError(_('A personal stage cannot be linked to a project because it is only visible to its corresponding user.'))
+
     def remove_personal_stage(self):
         """
         Remove a personal stage, tasks using that stage will move to the first
@@ -1728,7 +1733,9 @@ class Task(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         fields_list = ([f.split(':')[0] for f in fields] or [])
         if groupby:
-            fields_list += [groupby] if isinstance(groupby, str) else groupby
+            fields_groupby = [groupby] if isinstance(groupby, str) else groupby
+            # only take field name when having ':' e.g 'date_deadline:week' => 'date_deadline'
+            fields_list += [f.split(':')[0] for f in fields_groupby]
         if domain:
             fields_list += [term[0].split('.')[0] for term in domain if isinstance(term, (tuple, list))]
         self._ensure_fields_are_accessible(fields_list)
