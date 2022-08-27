@@ -2576,6 +2576,9 @@ class AccountMove(models.Model):
             if line_vals.get('tax_repartition_line_id'):
                 # Tax line.
                 invoice_repartition_line = self.env['account.tax.repartition.line'].browse(line_vals['tax_repartition_line_id'])
+                # CABA taxes should not generate tax grids on reverse move.
+                if invoice_repartition_line.invoice_tax_id.tax_exigibility == 'on_payment':
+                    continue
                 if invoice_repartition_line not in tax_repartition_lines_mapping:
                     raise UserError(_("It seems that the taxes have been modified since the creation of the journal entry. You should create the credit note manually instead."))
                 refund_repartition_line = tax_repartition_lines_mapping[invoice_repartition_line]
@@ -2604,6 +2607,10 @@ class AccountMove(models.Model):
             elif line_vals.get('tax_ids') and line_vals['tax_ids'][0][2]:
                 # Base line.
                 taxes = self.env['account.tax'].browse(line_vals['tax_ids'][0][2]).flatten_taxes_hierarchy()
+                # CABA taxes should not generate tax grids on reverse move.
+                taxes = taxes.filtered(lambda t: t.tax_exigibility != 'on_payment')
+                if not taxes:
+                    continue
                 invoice_repartition_lines = taxes\
                     .mapped('invoice_repartition_line_ids')\
                     .filtered(lambda line: line.repartition_type == 'base')
@@ -2810,7 +2817,8 @@ class AccountMove(models.Model):
             lock_dates = move._get_violated_lock_dates(move.date, affects_tax_report)
             if lock_dates:
                 move.date = move._get_accounting_date(move.invoice_date or move.date, affects_tax_report)
-                move.with_context(check_move_validity=False)._onchange_currency()
+                if move.move_type and move.move_type != 'entry':
+                    move.with_context(check_move_validity=False)._onchange_currency()
 
         # Create the analytic lines in batch is faster as it leads to less cache invalidation.
         to_post.mapped('line_ids').create_analytic_lines()
@@ -2889,10 +2897,12 @@ class AccountMove(models.Model):
         return action
 
     def action_post(self):
-        if self.payment_id:
-            self.payment_id.action_post()
-        else:
-            self._post(soft=False)
+        moves_with_payments = self.filtered('payment_id')
+        other_moves = self - moves_with_payments
+        if moves_with_payments:
+            moves_with_payments.payment_id.action_post()
+        if other_moves:
+            other_moves._post(soft=False)
         return False
 
     def js_assign_outstanding_line(self, line_id):
@@ -3408,6 +3418,13 @@ class AccountMove(models.Model):
         else:
             render_context['subtitle'] = format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang'))
         return render_context
+
+
+    def _is_downpayment(self):
+        ''' Return true if the invoice is a downpayment.
+        Down-payments can be created from a sale order. This method is overridden in the sale order module.
+        '''
+        return False
 
 
 class AccountMoveLine(models.Model):
@@ -5047,7 +5064,7 @@ class AccountMoveLine(models.Model):
 
         move_vals = {
             'move_type': 'entry',
-            'date': max(exchange_date or date.min, company._get_user_fiscal_lock_date()),
+            'date': max(exchange_date or date.min, company._get_user_fiscal_lock_date() + timedelta(days=1)),
             'journal_id': journal.id,
             'line_ids': [],
         }
@@ -5359,7 +5376,7 @@ class AccountMoveLine(models.Model):
                 raise UserError(_("Entries are not from the same account: %s != %s")
                                 % (account.display_name, line.account_id.display_name))
 
-        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id))
+        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency))
 
         # ==== Collect all involved lines through the existing reconciliation ====
 
@@ -5746,3 +5763,9 @@ class AccountMoveLine(models.Model):
         if self.payment_id:
             domains.append([('res_model', '=', 'account.payment'), ('res_id', '=', self.payment_id.id)])
         return domains
+
+    def _get_downpayment_lines(self):
+        ''' Return the downpayment move lines associated with the move line.
+        This method is overridden in the sale order module.
+        '''
+        return self.env['account.move.line']
