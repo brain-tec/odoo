@@ -87,7 +87,7 @@ var ShowPaymentLineWidget = AbstractField.extend({
      * @override
      * @param {MouseEvent} event
      */
-    _onOpenPaymentOrMove: function (event) {
+     _onOpenPaymentOrMove: function (event) {
         var moveId = parseInt($(event.target).attr('move-id'));
         if (!this.viewAlreadyOpened && moveId !== undefined && !isNaN(moveId)) {
             this.viewAlreadyOpened = true;
