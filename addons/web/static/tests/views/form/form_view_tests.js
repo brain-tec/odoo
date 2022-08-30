@@ -2644,6 +2644,32 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("nested buttons in form view header", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <header>
+                        <button name="0"/>
+                        <button name="1"/>
+                        <div>
+                            <button name="2"/>
+                            <button name="3"/>
+                        </div>
+                    </header>
+                </form>`,
+            resId: 2,
+        });
+
+        const buttons = target.querySelectorAll('.o_form_statusbar button');
+        assert.strictEqual(buttons[0].attributes.name.textContent, "0");
+        assert.strictEqual(buttons[1].attributes.name.textContent, "1");
+        assert.strictEqual(buttons[2].attributes.name.textContent, "2");
+        assert.strictEqual(buttons[3].attributes.name.textContent, "3");
+    });
+
     QUnit.test("button in form view and long willStart", async function (assert) {
         const mockedActionService = {
             start() {
@@ -11959,5 +11985,23 @@ QUnit.module("Views", (hooks) => {
             JSON.parse(target.querySelector(".o_field_widget").dataset.tooltipInfo).field.help,
             "xmlHelp"
         );
+    });
+
+    QUnit.test("onSave/onDiscard props", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `<form><field name="foo"/></form>`,
+            resId: 1,
+            onSave: () => assert.step("save"),
+            onDiscard: () => assert.step("discard"),
+        });
+
+        await click(target, ".o_form_button_edit");
+        await click(target, ".o_form_button_save");
+        await click(target, ".o_form_button_edit");
+        await click(target, ".o_form_button_cancel");
+        assert.verifySteps(["save", "discard"]);
     });
 });

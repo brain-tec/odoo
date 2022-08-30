@@ -76,7 +76,7 @@ class SaleOrderLine(models.Model):
     product_id = fields.Many2one(
         comodel_name='product.product',
         string="Product",
-        change_default=True, ondelete='restrict', check_company=True,
+        change_default=True, ondelete='restrict', check_company=True, index='btree_not_null',
         domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     product_template_id = fields.Many2one(
         string="Product Template",
@@ -704,7 +704,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             qty_invoiced = 0.0
             for invoice_line in line._get_invoice_lines():
-                if invoice_line.move_id.state != 'cancel':
+                if invoice_line.move_id.state != 'cancel' or invoice_line.move_id.payment_state == 'invoicing_legacy':
                     if invoice_line.move_id.move_type == 'out_invoice':
                         qty_invoiced += invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
                     elif invoice_line.move_id.move_type == 'out_refund':

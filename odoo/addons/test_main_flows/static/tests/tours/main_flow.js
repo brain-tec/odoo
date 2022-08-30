@@ -706,20 +706,6 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Ove
 },
 tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
 {
-// Run the schedulers
-    trigger: ".o_menu_sections button:contains('Operations')",
-    content: _t("Go to Run Schedulers"),
-    position: "bottom"
-}, {
-    trigger: ".o_menu_sections .dropdown-item[data-menu-xmlid='stock.menu_procurement_compute']",
-    content: _t("Click on schedulers"),
-    position: "bottom"
-}, {
-    trigger: ".modal-footer .btn-primary",
-    extra_trigger: ".modal-dialog",
-    content: _t("Run Schedulers"),
-    position: "bottom",
-}, {
 //Go to purchase:
     edition: "enterprise",
     trigger: '.o_menu_toggle',
@@ -729,7 +715,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
 ...tour.stepUtils.goToAppSteps('purchase.menu_purchase_root', _t('Go to Purchase')),
 {
     mobile: false,
-    trigger: '.o_data_row:has(.o_data_cell:contains("the_flow.vendor"))',
+    trigger: '.o_data_row:has(.o_data_cell:contains("the_flow.vendor")) .o_data_cell:first',
     content: _t('Select the generated request for quotation'),
     position: 'bottom',
 }, {
@@ -787,7 +773,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
     position: 'bottom',
 }, {
     mobile: false,
-    trigger: '.o_data_row:has(.o_data_cell:contains("the_flow.product")):first',
+    trigger: '.o_data_row:has(.o_data_cell:contains("the_flow.product")):first .o_data_cell:first',
     content: _t('Select the generated manufacturing order'),
     position: 'bottom',
 }, {

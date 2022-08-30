@@ -1276,7 +1276,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree><field name="foo"/></tree>',
             groupBy: ["bar"],
-            hasSelectors: false,
+            allowSelectors: false,
         });
 
         assert.containsOnce(target.querySelector(".o_group_header"), "th");
@@ -1303,7 +1303,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree ><field name="foo"/><field name="bar"/></tree>',
             groupBy: ["bar"],
-            hasSelectors: false,
+            allowSelectors: false,
         });
 
         assert.containsN(target.querySelector(".o_group_header"), "th", 2);
@@ -1317,7 +1317,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree ><field name="foo"/><field name="bar"/><field name="text"/></tree>',
             groupBy: ["bar"],
-            hasSelectors: false,
+            allowSelectors: false,
         });
 
         assert.containsN(target.querySelector(".o_group_header"), "th", 2);
@@ -1331,7 +1331,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree ><field name="foo"/><field name="bar"/></tree>',
             groupBy: ["bar"],
-            hasSelectors: true,
+            allowSelectors: true,
         });
 
         assert.containsN(target.querySelector(".o_group_header"), "th", 2);
@@ -1345,7 +1345,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree><field name="foo"/><field name="bar"/><field name="text"/></tree>',
             groupBy: ["bar"],
-            hasSelectors: true,
+            allowSelectors: true,
         });
 
         assert.containsN(target.querySelector(".o_group_header"), "th", 2);
@@ -1797,6 +1797,52 @@ QUnit.module("Views", (hooks) => {
             target.querySelector("tr:not(.o_group_header) td:not(.o_list_record_selector)")
         );
         assert.verifySteps(["openRecord", "openRecord"]);
+    });
+
+    QUnit.test("action/type attributes on tree arch, type='object'", async (assert) => {
+        const list = await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree action="a1" type="object"><field name="foo"/></tree>',
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        patchWithCleanup(list.env.services.action, {
+            doActionButton(params) {
+                assert.step(`doActionButton type ${params.type} name ${params.name}`);
+                params.onClose();
+            },
+        });
+
+        assert.verifySteps(["get_views", "web_search_read"]);
+        await click(target.querySelector(".o_data_cell"));
+        assert.verifySteps(["doActionButton type object name a1", "web_search_read"]);
+    });
+
+    QUnit.test("action/type attributes on tree arch, type='action'", async (assert) => {
+        const list = await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree action="a1" type="action"><field name="foo"/></tree>',
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        patchWithCleanup(list.env.services.action, {
+            doActionButton(params) {
+                assert.step(`doActionButton type ${params.type} name ${params.name}`);
+                params.onClose();
+            },
+        });
+
+        assert.verifySteps(["get_views", "web_search_read"]);
+        await click(target.querySelector(".o_data_cell"));
+        assert.verifySteps(["doActionButton type action name a1", "web_search_read"]);
     });
 
     QUnit.test("editable list view: readonly fields cannot be edited", async function (assert) {

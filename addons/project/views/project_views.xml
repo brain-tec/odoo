@@ -529,7 +529,7 @@
                         <group>
                             <field name="active" invisible="1"/>
                             <field name="user_id" string="Project Manager" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
-                            <label for="date_start" string="Dates"/>
+                            <label for="date_start" string="Planned Date"/>
                             <div name="dates" class="o_row">
                                 <field name="date_start" widget="daterange" options='{"related_end_date": "date"}'/>
                                 <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
@@ -962,25 +962,13 @@
             </field>
         </record>
 
-        <record id="view_project_kanban_inherit" model="ir.ui.view">
-            <field name="name">project.kanban.inherit.project</field>
-            <field name="model">project.project</field>
-            <field name="groups_id" eval="[Command.link(ref('project.group_project_stages'))]"/>
-            <field name="inherit_id" ref="view_project_kanban"/>
-            <field name="arch" type="xml">
-                <xpath expr="//kanban" position="attributes">
-                    <attribute name="default_group_by">stage_id</attribute>
-                </xpath>
-            </field>
-        </record>
-
         <!-- Please update both act_window when modifying one (open_view_project_all or open_view_project_all_group_stage) as one or the other is used in the menu menu_project -->
         <record id="open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
             <field name="domain">[]</field>
             <field name="view_mode">kanban,tree,form</field>
-            <field name="view_id" ref="view_project_kanban_inherit"/>
+            <field name="view_id" ref="view_project_kanban"/>
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="target">main</field>
             <field name="help" type="html">
@@ -997,9 +985,10 @@
         <record id="open_view_project_all_group_stage" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
+            <field name="context">{'search_default_groupby_stage': 1}</field>
             <field name="domain">[]</field>
             <field name="view_mode">kanban,tree,form,calendar,activity</field>
-            <field name="view_id" ref="view_project_kanban_inherit"/>
+            <field name="view_id" ref="view_project_kanban"/>
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="target">main</field>
             <field name="help" type="html">

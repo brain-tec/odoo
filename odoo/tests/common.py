@@ -1491,7 +1491,7 @@ which leads to stray network requests and inconsistencies."""))
 
     def navigate_to(self, url, wait_stop=False):
         self._logger.info('Navigating to: "%s"', url)
-        nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=15.0)
+        nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=20.0)
         self._logger.info("Navigation result: %s", nav_result)
         if wait_stop:
             frame_id = nav_result['frameId']
@@ -1679,7 +1679,7 @@ class HttpCase(TransactionCase):
             cls.browser.stop()
             cls.browser = None
 
-    def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True, head=False):
+    def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
             url = self.base_url() + url
         if head:
