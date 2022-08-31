@@ -850,6 +850,11 @@ class Project(models.Model):
             panel_data['profitability_labels'] = self._get_profitability_labels()
         return panel_data
 
+    def get_milestones(self):
+        if self.user_has_groups('project.group_project_user'):
+            return self._get_milestones()
+        return {}
+
     def _get_profitability_labels(self):
         return {}
 
@@ -2066,7 +2071,7 @@ class Task(models.Model):
 
         # rating on stage
         if 'stage_id' in vals and vals.get('stage_id'):
-            self.filtered(lambda x: x.project_id.rating_active and x.project_id.rating_status == 'stage')._send_task_rating_mail(force_send=True)
+            tasks.filtered(lambda x: x.project_id.rating_active and x.project_id.rating_status == 'stage')._send_task_rating_mail(force_send=True)
         for task in self:
             if task.display_project_id != task.project_id and not task.parent_id:
                 # We must make the display_project_id follow the project_id if no parent_id set

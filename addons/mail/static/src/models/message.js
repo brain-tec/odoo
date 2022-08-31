@@ -817,6 +817,10 @@ registerModel({
             compute: '_computeMessageTypeText',
         }),
         message_type: attr(),
+        notificationMessageViews: many('NotificationMessageView', {
+            inverse: 'message',
+            isCausal: true,
+        }),
         /**
          * States the views that are displaying this message.
          */
@@ -824,7 +828,7 @@ registerModel({
             inverse: 'message',
             isCausal: true,
         }),
-        messageListViewMessageViewItems: many('MessageListViewMessageViewItem', {
+        messageListViewItems: many('MessageListViewItem', {
             inverse: 'message',
             isCausal: true,
         }),

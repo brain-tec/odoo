@@ -28,6 +28,7 @@ class ChannelMember(models.Model):
     is_minimized = fields.Boolean("Conversation is minimized")
     is_pinned = fields.Boolean("Is pinned on the interface", default=True)
     last_interest_dt = fields.Datetime("Last Interest", default=fields.Datetime.now, help="Contains the date and time of the last interesting event that happened in this channel for this partner. This includes: creating, joining, pinning, and new message posted.")
+    last_seen_dt = fields.Datetime("Last seen date")
     # RTC
     rtc_session_ids = fields.One2many(string="RTC Sessions", comodel_name='mail.channel.rtc.session', inverse_name='channel_member_id')
     rtc_inviting_session_id = fields.Many2one('mail.channel.rtc.session', string='Ringing session')
@@ -215,13 +216,14 @@ class ChannelMember(models.Model):
                 target = member.partner_id
             else:
                 target = member.guest_id
-            invitation_notifications.append((target, 'mail.channel/insert', {
+            invitation_notifications.append((target, 'mail.thread/insert', {
                 'id': self.channel_id.id,
+                'model': 'mail.channel',
                 'rtcInvitingSession': [('insert', self.rtc_session_ids._mail_rtc_session_format())],
             }))
         self.env['bus.bus']._sendmany(invitation_notifications)
         if members:
-            channel_data = {'id': self.channel_id.id}
+            channel_data = {'id': self.channel_id.id, 'model': 'mail.channel'}
             channel_data['invitedMembers'] = [('insert', members.mail_channel_member_format())]
-            self.env['bus.bus']._sendone(self.channel_id, 'mail.channel/insert', channel_data)
+            self.env['bus.bus']._sendone(self.channel_id, 'mail.thread/insert', channel_data)
         return members
