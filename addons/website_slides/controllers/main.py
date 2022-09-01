@@ -133,6 +133,7 @@ class WebsiteSlides(WebsiteProfile):
         return slide._compute_quiz_info(request.env.user.partner_id, quiz_done=quiz_done)[slide.id]
 
     def _get_slide_quiz_data(self, slide):
+        is_designer = request.env.user.has_group('website.group_website_designer')
         values = {
             'slide_questions': [{
                 'id': question.id,
@@ -140,8 +141,8 @@ class WebsiteSlides(WebsiteProfile):
                 'answer_ids': [{
                     'id': answer.id,
                     'text_value': answer.text_value,
-                    'is_correct': answer.is_correct if slide.user_has_completed or request.website.is_publisher() else None,
-                    'comment': answer.comment if request.website.is_publisher() else None
+                    'is_correct': answer.is_correct if slide.user_has_completed or is_designer else None,
+                    'comment': answer.comment if is_designer else None
                 } for answer in question.sudo().answer_ids],
             } for question in slide.question_ids]
         }
@@ -904,7 +905,7 @@ class WebsiteSlides(WebsiteProfile):
     @http.route('/slides/slide/archive', type='json', auth='user', website=True)
     def slide_archive(self, slide_id):
         """ This route allows channel publishers to archive slides.
-        It has to be done in sudo mode since only website_publishers can write on slides in ACLs """
+        It has to be done in sudo mode since only restricted_editors can write on slides in ACLs """
         slide = request.env['slide.slide'].browse(int(slide_id))
         if slide.channel_id.can_publish:
             slide.sudo().active = False
