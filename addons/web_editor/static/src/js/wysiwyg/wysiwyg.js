@@ -1327,9 +1327,15 @@ const Wysiwyg = Widget.extend({
     },
     _configureToolbar: function (options) {
         const $toolbar = this.toolbar.$el;
+        // Prevent selection loss when interacting with the toolbar buttons.
         $toolbar.find('.btn-group').on('mousedown', e => {
-            // Do not prevent events on popovers.
-            if (!e.target.closest('.dropdown-menu')) {
+            if (
+                // Prevent when clicking on btn-group but not on dropdown items.
+                !e.target.closest('.dropdown-menu') ||
+                // Unless they have a data-call in which case there is an editor
+                // command that is bound to it so we need to preventDefault.
+                e.target.closest('.btn') && e.target.closest('.btn').getAttribute('data-call')
+            ) {
                 e.preventDefault();
             }
         });
@@ -1674,7 +1680,7 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
         // Hide the create-link button if the selection spans several blocks.
         const selection = this.odooEditor.document.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
+        const range = selection && selection.rangeCount && selection.getRangeAt(0);
         const $rangeContainer = range && $(range.commonAncestorContainer);
         const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length;
         this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
