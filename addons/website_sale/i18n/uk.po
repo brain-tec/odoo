@@ -7,7 +7,7 @@
 # Oleksandr Paziuk <o.paziuk@mobilunity.com>, 2019
 # Bohdan Lisnenko, 2020
 # ТАрас <tratatuta@i.ua>, 2021
-# Alina Lisnenko <alinasemeniuk1@gmail.com>, 2022
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2022
 # Martin Trigaux, 2022
 # 
 msgid ""
@@ -283,7 +283,7 @@ msgstr "<span class=\"o_form_label\">Політика виставлення р�
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Remind Abandonned Carts</span>"
+msgid "<span class=\"o_form_label\">Remind Abandoned Carts</span>"
 msgstr ""
 
 #. module: website_sale
@@ -894,6 +894,16 @@ msgstr ""
 " облікового запису. Зв'яжіться з нами щодо цієї операції."
 
 #. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid ""
+"Changing your name is not allowed once invoices have been issued for your "
+"account. Please contact us directly for this operation."
+msgstr ""
+"Не можна змінити ваше ім'я, якщо рахунки-фактури для вашого рахунку не "
+"видаються. Будь ласка, зв'яжіться з нами безпосередньо для цієї операції."
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
 msgid "Children Categories"
 msgstr "Дочірні категорії"
@@ -1014,7 +1024,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Configure mails at order confirmation, abandonned carts, etc"
+msgid "Configure mails at order confirmation, abandoned carts, etc"
 msgstr ""
 
 #. module: website_sale
@@ -1389,7 +1399,7 @@ msgstr "Помічник створення електронного листа"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Email to authentified customers who did not complete the checkout"
+msgid "Email to authenticated customers who did not complete the checkout"
 msgstr ""
 
 #. module: website_sale

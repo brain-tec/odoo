@@ -279,7 +279,7 @@ msgstr "<span class=\"o_form_label\">سياسة الفوترة</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Remind Abandonned Carts</span>"
+msgid "<span class=\"o_form_label\">Remind Abandoned Carts</span>"
 msgstr ""
 
 #. module: website_sale
@@ -889,6 +889,16 @@ msgstr ""
 "التواصل معنا مباشرة لإتمام هذه العملية. "
 
 #. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid ""
+"Changing your name is not allowed once invoices have been issued for your "
+"account. Please contact us directly for this operation."
+msgstr ""
+"لا يسمح بتغيير اسمك بعد إصدار الفواتير لحسابك. الرجاء التواصل معنا مباشرة "
+"لإتمام هذه العملية."
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
 msgid "Children Categories"
 msgstr "الفئات التابعة"
@@ -1008,7 +1018,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Configure mails at order confirmation, abandonned carts, etc"
+msgid "Configure mails at order confirmation, abandoned carts, etc"
 msgstr ""
 
 #. module: website_sale
@@ -1374,7 +1384,7 @@ msgstr "معالج تأليف رسالة بريد إلكتروني"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Email to authentified customers who did not complete the checkout"
+msgid "Email to authenticated customers who did not complete the checkout"
 msgstr ""
 
 #. module: website_sale

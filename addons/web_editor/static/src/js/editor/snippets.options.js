@@ -4292,12 +4292,6 @@ registry.sizing = SnippetOptionWidget.extend({
 
         return def;
     },
-    /**
-     * @override
-     */
-    onFocus: function () {
-        this._onResize();
-    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -4306,8 +4300,17 @@ registry.sizing = SnippetOptionWidget.extend({
     /**
      * @override
      */
+    async updateUI() {
+        this._updateSizingHandles();
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
     setTarget: function () {
         this._super(...arguments);
+        // TODO master: _onResize should not be called here, need to check if
+        // updateUI is called when the target is changed
         this._onResize();
     },
 
@@ -4338,6 +4341,13 @@ registry.sizing = SnippetOptionWidget.extend({
      * @param {integer} [current] - current increment in this.grid
      */
     _onResize: function (compass, beginClass, current) {
+        this._updateSizingHandles();
+        this._notifyResizeChange();
+    },
+    /**
+     * @private
+     */
+    _updateSizingHandles: function () {
         var self = this;
 
         // Adapt the resize handles according to the classes and dimensions
@@ -4378,6 +4388,11 @@ registry.sizing = SnippetOptionWidget.extend({
             var direction = $handle.hasClass('n') ? 'top' : 'bottom';
             $handle.height(self.$target.css('padding-' + direction));
         });
+    },
+    /**
+     * @override
+     */
+    async _notifyResizeChange() {
         this.$target.trigger('content_changed');
     },
 });
@@ -4473,6 +4488,12 @@ registry['sizing_x'] = registry.sizing.extend({
                 this.$target.addClass('offset-lg-' + offset);
             }
         }
+        this._super.apply(this, arguments);
+    },
+    /**
+     * @override
+     */
+    async _notifyResizeChange() {
         this.trigger_up('option_update', {
             optionName: 'StepsConnector',
             name: 'change_column_size',
@@ -4784,6 +4805,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      */
     onFocus() {
         core.bus.on('activate_image_link_tool', this, this._activateLinkTool);
+        core.bus.on('deactivate_image_link_tool', this, this._deactivateLinkTool);
         // When we start editing an image, rerender the UI to ensure the
         // we-select that suggests the anchors is in a consistent state.
         this.rerender = true;
@@ -4793,6 +4815,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      */
     onBlur() {
         core.bus.off('activate_image_link_tool', this, this._activateLinkTool);
+        core.bus.off('deactivate_image_link_tool', this, this._deactivateLinkTool);
     },
 
     //--------------------------------------------------------------------------
@@ -4850,6 +4873,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         if (!url) {
             // As long as there is no URL, the image is not considered a link.
             linkEl.removeAttribute('href');
+            this.$target.trigger('href_changed');
             return;
         }
         if (!url.startsWith('/') && !url.startsWith('#')
@@ -4860,6 +4884,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         }
         linkEl.setAttribute('href', url);
         this.rerender = true;
+        this.$target.trigger('href_changed');
     },
     /**
      * @override
@@ -4884,6 +4909,15 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         if (this.$target[0].parentElement.tagName === 'A') {
             this._requestUserValueWidgets('media_url_opt')[0].focus();
         } else {
+            this._requestUserValueWidgets('media_link_opt')[0].enable();
+        }
+    },
+    /**
+     * @private
+     */
+    _deactivateLinkTool() {
+        const parentEl = this.$target[0].parentNode;
+        if (parentEl.tagName === 'A') {
             this._requestUserValueWidgets('media_link_opt')[0].enable();
         }
     },

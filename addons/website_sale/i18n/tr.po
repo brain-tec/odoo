@@ -18,7 +18,6 @@
 # Levent Karakaş <levent@mektup.at>, 2021
 # Saban Yildiz <sabany@projetgrup.com>, 2021
 # Buket Şeker <buket_skr@hotmail.com>, 2022
-# Umur Akın <umura@projetgrup.com>, 2022
 # Ediz Duman <neps1192@gmail.com>, 2022
 # Murat Durmuş <muratd@projetgrup.com>, 2022
 # Murat Kaplan <muratk@projetgrup.com>, 2022
@@ -26,6 +25,7 @@
 # Tugay Hatıl <tugayh@projetgrup.com>, 2022
 # Halil, 2022
 # abc Def <hdogan1974@gmail.com>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
 # 
 msgid ""
 msgstr ""
@@ -33,7 +33,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-30 06:06+0000\n"
 "PO-Revision-Date: 2016-08-05 13:14+0000\n"
-"Last-Translator: abc Def <hdogan1974@gmail.com>, 2022\n"
+"Last-Translator: Umur Akın <umura@projetgrup.com>, 2022\n"
 "Language-Team: Turkish (https://www.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -300,7 +300,7 @@ msgstr "<span class=\"o_form_label\">Faturalama Politikası</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Remind Abandonned Carts</span>"
+msgid "<span class=\"o_form_label\">Remind Abandoned Carts</span>"
 msgstr ""
 
 #. module: website_sale
@@ -917,6 +917,16 @@ msgstr ""
 "izin verilmiyor. Bu işlem için lütfen doğrudan bizimle iletişime geçin."
 
 #. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid ""
+"Changing your name is not allowed once invoices have been issued for your "
+"account. Please contact us directly for this operation."
+msgstr ""
+"Hesabınız için düzenlenen bir fatura varsa isminizi değiştirmenize izin "
+"verilemez. Lütfen bu değişiklik için bizimle iletişime geçin."
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
 msgid "Children Categories"
 msgstr "Alt Kategoriler"
@@ -1036,7 +1046,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Configure mails at order confirmation, abandonned carts, etc"
+msgid "Configure mails at order confirmation, abandoned carts, etc"
 msgstr ""
 
 #. module: website_sale
@@ -1407,7 +1417,7 @@ msgstr "E-posta yazma sihirbazı"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Email to authentified customers who did not complete the checkout"
+msgid "Email to authenticated customers who did not complete the checkout"
 msgstr ""
 
 #. module: website_sale

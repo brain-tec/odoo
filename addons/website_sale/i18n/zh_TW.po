@@ -283,7 +283,7 @@ msgstr "<span class=\"o_form_label\">開立應收憑單策略</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Remind Abandonned Carts</span>"
+msgid "<span class=\"o_form_label\">Remind Abandoned Carts</span>"
 msgstr ""
 
 #. module: website_sale
@@ -884,6 +884,14 @@ msgid ""
 msgstr "一旦為您的帳戶簽發了文檔，就不允許更改公司名稱。請直接聯繫我們。"
 
 #. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid ""
+"Changing your name is not allowed once invoices have been issued for your "
+"account. Please contact us directly for this operation."
+msgstr "一旦您的帳戶開具了應收憑單，就無法更改名字. 如需執行此操作，請直接與我們聯繫."
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__child_id
 msgid "Children Categories"
 msgstr "兒童類"
@@ -1002,7 +1010,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Configure mails at order confirmation, abandonned carts, etc"
+msgid "Configure mails at order confirmation, abandoned carts, etc"
 msgstr ""
 
 #. module: website_sale
@@ -1364,7 +1372,7 @@ msgstr "電郵撰寫操作視窗"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Email to authentified customers who did not complete the checkout"
+msgid "Email to authenticated customers who did not complete the checkout"
 msgstr ""
 
 #. module: website_sale

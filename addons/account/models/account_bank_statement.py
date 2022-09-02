@@ -120,7 +120,11 @@ class AccountBankStatement(models.Model):
     # won't be called and therefore the other field will have a value of 0 and we don't want that.
     @api.depends('previous_statement_id', 'previous_statement_id.balance_end_real')
     def _compute_starting_balance(self):
-        for statement in self:
+        # When a bank statement is inserted out-of-order several fields needs to be recomputed.
+        # As the records to recompute are ordered by id, it may occur that the first record
+        # to recompute start a recursive recomputation of field balance_end_real
+        # To avoid this we sort the records by date
+        for statement in self.sorted(key=lambda s: s.date):
             if statement.previous_statement_id.balance_end_real != statement.balance_start:
                 statement.balance_start = statement.previous_statement_id.balance_end_real
             else:
@@ -846,6 +850,8 @@ class AccountBankStatementLine(models.Model):
                 raise ValidationError(_("The foreign currency must be different than the journal one: %s", st_line.currency_id.name))
             if not st_line.foreign_currency_id and st_line.amount_currency:
                 raise ValidationError(_("You can't provide an amount in foreign currency without specifying a foreign currency."))
+            if not st_line.amount_currency and st_line.foreign_currency_id:
+                raise ValidationError(_("You can't provide a foreign currency without specifying an amount in 'Amount in Currency' field."))
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
