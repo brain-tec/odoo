@@ -493,7 +493,7 @@ export class OdooEditor extends EventTarget {
         }
     }
     observerFlush() {
-        this.observerApply(this.observer.takeRecords());
+        this.observerApply(this.filterMutationRecords(this.observer.takeRecords()));
     }
     observerActive(label) {
         this._observerUnactiveLabels.delete(label);
@@ -1783,6 +1783,7 @@ export class OdooEditor extends EventTarget {
         this.commandbarTablePicker = new TablePicker({
             document: this.document,
             floating: true,
+            getContextFromParentRect: this.options.getContextFromParentRect,
         });
 
         document.body.appendChild(this.commandbarTablePicker.el);
