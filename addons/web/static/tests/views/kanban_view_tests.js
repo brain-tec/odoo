@@ -3,6 +3,7 @@
 import { makeFakeDialogService } from "@web/../tests/helpers/mock_services";
 import {
     click,
+    drag,
     dragAndDrop,
     editInput,
     getFixture,
@@ -1397,6 +1398,68 @@ QUnit.module("Views", (hooks) => {
             "onchange", // new quick create
         ]);
     });
+
+    QUnit.test(
+        "quick create record should focus default field [REQUIRE FOCUS]",
+        async function (assert) {
+            serverData.views["partner,some_view_ref,form"] =
+                "<form>" +
+                '<field name="foo"/>' +
+                '<field name="int_field" default_focus="1"/>' +
+                '<field name="state" widget="priority"/>' +
+                "</form>";
+
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch:
+                    '<kanban on_create="quick_create" quick_create_view="some_view_ref">' +
+                    '<field name="bar"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                    '<div><field name="foo"/></div>' +
+                    "</t></templates></kanban>",
+                groupBy: ["bar"],
+            });
+
+            await click(target, ".o-kanban-button-new");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_field_widget[name=int_field] input")
+            );
+        }
+    );
+
+    QUnit.test(
+        "quick create record should focus first field input [REQUIRE FOCUS]",
+        async function (assert) {
+            serverData.views["partner,some_view_ref,form"] =
+                "<form>" +
+                '<field name="foo"/>' +
+                '<field name="int_field"/>' +
+                '<field name="state" widget="priority"/>' +
+                "</form>";
+
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch:
+                    '<kanban on_create="quick_create" quick_create_view="some_view_ref">' +
+                    '<field name="bar"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                    '<div><field name="foo"/></div>' +
+                    "</t></templates></kanban>",
+                groupBy: ["bar"],
+            });
+
+            await click(target, ".o-kanban-button-new");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_field_widget[name=foo] input")
+            );
+        }
+    );
 
     QUnit.test("quick_create_view without quick_create option", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = `
@@ -4039,6 +4102,57 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".thisiseditable", 4);
 
         assert.verifySteps(["resequence"]);
+    });
+
+    QUnit.test("drag and drop highlight on hover", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban on_create="quick_create">
+                <field name="product_id"/>
+                <templates><t t-name="kanban-box">
+                <div class="oe_kanban_global_click"><field name="foo"/>
+                </div>
+                </t></templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+        });
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
+
+        // first record of first column moved to the bottom of second column
+        const drop = drag(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+        assert.hasClass(target.querySelector(".o_kanban_group:nth-child(2)"), "o_kanban_hover");
+        await drop();
+        assert.containsNone(target, ".o_kanban_group:nth-child(2).o_kanban_hover");
+    });
+
+    QUnit.test("drag and drop outside of a column", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban on_create="quick_create">
+                <field name="product_id"/>
+                <templates><t t-name="kanban-box">
+                <div class="oe_kanban_global_click"><field name="foo"/>
+                </div>
+                </t></templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+        });
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
+
+        // first record of first column moved to the right of a column
+        await dragAndDrop(".o_kanban_group:first-child .o_kanban_record", ".o_column_quick_create");
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
     });
 
     QUnit.test("drag and drop a record, grouped by selection", async (assert) => {
@@ -7026,8 +7140,11 @@ QUnit.module("Views", (hooks) => {
                 "</kanban>",
         });
 
-        assert.ok(getCard(0).querySelector(".date").innerText.startsWith("Wed Jan 25 2017"));
-        assert.ok(getCard(1).querySelector(".datetime").innerText.startsWith("Mon Dec 12 2016"));
+        assert.equal(getCard(0).querySelector(".date").innerText, "2017-01-25T00:00:00.000+01:00");
+        assert.equal(
+            getCard(1).querySelector(".datetime").innerText,
+            "2016-12-12T11:55:05.000+01:00"
+        );
     });
 
     QUnit.test("rendering many2one (value)", async (assert) => {

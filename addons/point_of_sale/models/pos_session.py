@@ -92,7 +92,7 @@ class PosSession(models.Model):
         help="Auto-generated session for orphan orders, ignored in constraints",
         readonly=True,
         copy=False)
-    move_id = fields.Many2one('account.move', string='Journal Entry')
+    move_id = fields.Many2one('account.move', string='Journal Entry', index=True)
     payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Payment Methods')
     total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
     is_in_company_currency = fields.Boolean('Is Using Company Currency', compute='_compute_is_in_company_currency')
@@ -1609,6 +1609,7 @@ class PosSession(models.Model):
             fiscal_position['fiscal_position_taxes_by_id'] = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}
 
         loaded_data['attributes_by_ptal_id'] = self._get_attributes_by_ptal_id()
+        loaded_data['base_url'] = self.get_base_url()
 
     @api.model
     def _pos_ui_models_to_load(self):
@@ -1646,7 +1647,7 @@ class PosSession(models.Model):
                 'domain': [('id', '=', self.company_id.id)],
                 'fields': [
                     'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
-                    'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id'
+                    'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
                 ],
             }
         }

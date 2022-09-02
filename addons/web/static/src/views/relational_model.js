@@ -435,9 +435,9 @@ export class Record extends DataPoint {
                 evalContext[fieldName] = list.getContext();
                 // ---> implied to initialize (resIds, commands) currentIds before loading static list
             } else if (value && this.fields[fieldName].type === "date") {
-                evalContext[fieldName] = value.toFormat("yyyy-LL-dd");
+                evalContext[fieldName] = serializeDate(value);
             } else if (value && this.fields[fieldName].type === "datetime") {
-                evalContext[fieldName] = value.toFormat("yyyy-LL-dd HH:mm:ss");
+                evalContext[fieldName] = serializeDateTime(value);
             } else if (value && this.fields[fieldName].type === "many2one") {
                 evalContext[fieldName] = value[0];
             } else if (value && this.fields[fieldName].type === "reference") {
@@ -610,7 +610,9 @@ export class Record extends DataPoint {
     }
 
     async delete() {
-        const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], this.context);
+        const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {
+            context: this.context,
+        });
         if (!unlinked) {
             return false;
         }
@@ -1136,7 +1138,7 @@ export class Record extends DataPoint {
             (!value[1] || activeField.options.always_reload)
         ) {
             const context = this.getFieldContext(fieldName);
-            const result = await this.model.orm.nameGet(relation, [value[0]], context);
+            const result = await this.model.orm.nameGet(relation, [value[0]], { context });
             return result[0];
         }
         return value;
@@ -1153,7 +1155,7 @@ export class Record extends DataPoint {
             }
             const { resModel, resId } = value;
             const context = this.getFieldContext(fieldName);
-            const nameGet = await this.model.orm.nameGet(resModel, [resId], context);
+            const nameGet = await this.model.orm.nameGet(resModel, [resId], { context });
             return {
                 resModel,
                 resId,
@@ -1813,7 +1815,9 @@ export class DynamicRecordList extends DynamicList {
             resIds = await this.getResIds(true);
             records = this.records.filter((r) => resIds.includes(r.resId));
             if (this.isDomainSelected) {
-                await this.model.orm.unlink(this.resModel, resIds, this.context);
+                await this.model.orm.unlink(this.resModel, resIds, {
+                    context: this.context,
+                });
                 deleted = true;
             }
         }
@@ -2453,7 +2457,9 @@ export class Group extends DataPoint {
         if (this.record) {
             return this.record.delete();
         } else {
-            return this.model.orm.unlink(this.resModel, [this.value], this.context);
+            return this.model.orm.unlink(this.resModel, [this.value], {
+                context: this.context,
+            });
         }
     }
 
@@ -2713,13 +2719,25 @@ export class StaticList extends DataPoint {
     /**
      * @param {RecordId} recordId
      */
-    async delete(recordId) {
-        const record = this._cache[recordId];
-        if (record.isVirtual) {
-            delete this._cache[recordId];
+    async delete(recordIds) {
+        if (!Array.isArray(recordIds)) {
+            recordIds = [recordIds];
         }
-        const id = record.resId || record.virtualId;
-        this.applyCommand(x2ManyCommands.delete(id));
+        const ids = [];
+        for (const recordId of recordIds) {
+            const record = this._cache[recordId];
+            if (record.isVirtual) {
+                delete this._cache[recordId];
+            }
+            const id = record.resId || record.virtualId;
+            ids.push(id);
+        }
+        if (this.field.type === "many2many") {
+            const nextIds = this.records.filter((rec) => !ids.includes(rec.resId || rec.virtualId));
+            return this.replaceWith(nextIds);
+        }
+        const commands = ids.map((id) => x2ManyCommands.delete(id));
+        this.applyCommands(commands);
         await this._loadRecords();
         this.records = this._getRecords();
         this.onChanges();

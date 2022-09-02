@@ -18,8 +18,7 @@
                     'o-squashed pt-1': messageView.isSquashed,
                     'o-starred': messageView.message.isStarred,
                     'o-currentAuthor': messageView.message.isCurrentUserOrGuestAuthor,
-                    'mt-1': !messageView.isSquashed,
-                    'mt-5': !messageView.isSquashed and messageView.messageListViewItemOwner,
+                    'mt-1': !messageView.isSquashed and messageView.messageListViewItemOwner,
                     'px-3': !messageView.isInChatWindow,
                     'px-1': messageView.isInChatWindow,
                     'opacity-50': (messageView.messageListViewItemOwner and messageView.messageListViewItemOwner.messageListViewOwner.threadViewOwner.replyingToMessageView) and !messageView.isSelected,
@@ -68,7 +67,7 @@
                                 <t t-if="messageView.message.author">
                                     <strong t-if="messageView.isShowingAuthorName" class="o_Message_authorName o_redirect me-1 text-truncate" t-att-class="{ 'cursor-pointer': messageView.hasAuthorOpenChat }" t-att-role="messageView.hasAuthorOpenChat ? 'button' : ''" t-att-tabindex="messageView.hasAuthorOpenChat ? '0' : ''" t-on-click="messageView.onClickAuthorName" t-att-title="messageView.authorTitleText">
                                         <t t-if="messageView.message.originThread">
-                                            <t t-esc="messageView.message.originThread.getMemberName(messageView.message.author)"/>
+                                            <t t-esc="messageView.message.originThread.getMemberName(messageView.message.author.persona)"/>
                                         </t>
                                         <t t-else="">
                                             <t t-esc="messageView.message.author.nameOrDisplayName"/>

@@ -82,7 +82,7 @@ class SaleOrderLine(models.Model):
         string="Product Template",
         related='product_id.product_tmpl_id',
         domain=[('sale_ok', '=', True)])
-    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
+    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', depends=['product_id'])
 
     product_custom_attribute_value_ids = fields.One2many(
         comodel_name='product.attribute.custom.value', inverse_name='sale_order_line_id',
@@ -388,8 +388,8 @@ class SaleOrderLine(models.Model):
                 line.pricelist_item_id = line.order_id.pricelist_id._get_product_rule(
                     line.product_id,
                     line.product_uom_qty or 1.0,
-                    line.product_uom,
-                    line.order_id.date_order,
+                    uom=line.product_uom,
+                    date=line.order_id.date_order,
                 )
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
@@ -451,9 +451,10 @@ class SaleOrderLine(models.Model):
         order_date = self.order_id.date_order or fields.Date.today()
         product = self.product_id.with_context(**self._get_product_price_context())
         qty = self.product_uom_qty or 1.0
+        uom = self.product_uom or self.product_id.uom_id
 
         price = pricelist_rule._compute_price(
-            product, qty, self.product_uom, order_date, self.currency_id)
+            product, qty, uom, order_date, currency=self.currency_id)
 
         return price
 

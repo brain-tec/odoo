@@ -2566,6 +2566,25 @@ class AccountMove(models.Model):
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
 
+    def _prepare_invoice_aggregated_taxes(self, filter_invl_to_apply=None, filter_tax_values_to_apply=None, grouping_key_generator=None):
+        self.ensure_one()
+
+        base_lines = [
+            x._convert_to_tax_base_line_dict()
+            for x in self.line_ids.filtered(lambda x: x.display_type == 'product' and (not filter_invl_to_apply or filter_invl_to_apply(x)))
+        ]
+
+        to_process = []
+        for base_line in base_lines:
+            to_update_vals, tax_values_list = self.env['account.tax']._compute_taxes_for_single_line(base_line)
+            to_process.append((base_line, to_update_vals, tax_values_list))
+
+        return self.env['account.tax']._aggregate_taxes(
+            to_process,
+            filter_tax_values_to_apply=filter_tax_values_to_apply,
+            grouping_key_generator=grouping_key_generator,
+        )
+
     def _affect_tax_report(self):
         return any(line._affect_tax_report() for line in self.line_ids)
 
@@ -3629,3 +3648,15 @@ class AccountMove(models.Model):
         Down-payments can be created from a sale order. This method is overridden in the sale order module.
         '''
         return False
+
+    @api.model
+    def get_invoice_localisation_fields_required_to_invoice(self, country_id):
+        """ Returns the list of fields that needs to be filled when creating an invoice for the selected country.
+        This is required for some flows that would allow a user to request an invoice from the portal.
+        Using these, we can get their information and dynamically create form inputs based for the fields required legally for the company country_id.
+        The returned fields must be of type ir.model.fields in order to handle translations
+
+        :param country_id: The country for which we want the fields.
+        :return: an array of ir.model.fields for which the user should provide values.
+        """
+        return []

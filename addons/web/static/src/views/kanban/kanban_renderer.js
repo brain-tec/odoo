@@ -65,17 +65,27 @@ export class KanbanRenderer extends Component {
                 },
                 onGroupEnter: (group) => group.classList.add("o_kanban_hover"),
                 onGroupLeave: (group) => group.classList.remove("o_kanban_hover"),
-                onStop: (_group, element) => element.classList.remove("o_dragged", "shadow"),
+                onStop: (group, element) => {
+                    group && group.classList && group.classList.remove("o_kanban_hover");
+                    element.classList.remove("o_dragged", "shadow");
+                },
                 onDrop: async ({ element, previous, parent }) => {
                     element.classList.remove("o_record_draggable");
-                    const refId = previous ? previous.dataset.id : null;
-                    const targetGroupId = parent && parent.dataset.id;
-                    await this.props.list.moveRecord(
-                        dataRecordId,
-                        dataGroupId,
-                        refId,
-                        targetGroupId
-                    );
+                    if (
+                        !this.props.list.isGrouped ||
+                        parent.classList.contains("o_kanban_hover") ||
+                        parent.dataset.id === element.parentElement.dataset.id
+                    ) {
+                        parent && parent.classList && parent.classList.remove("o_kanban_hover");
+                        const refId = previous ? previous.dataset.id : null;
+                        const targetGroupId = parent && parent.dataset.id;
+                        await this.props.list.moveRecord(
+                            dataRecordId,
+                            dataGroupId,
+                            refId,
+                            targetGroupId
+                        );
+                    }
                     element.classList.add("o_record_draggable");
                 },
             });
