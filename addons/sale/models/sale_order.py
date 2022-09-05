@@ -739,31 +739,32 @@ class SaleOrder(models.Model):
             'context': ctx,
         }
 
-    def _find_mail_template(self, force_confirmation_template=False):
-        """ Get the appropriate mail template for the current sales orders based on their state.
+    def _find_mail_template(self):
+        """ Get the appropriate mail template for the current sales order based on its state.
 
-        If all SOs are confirmed or ``force_confirmation_template`` is `True`, we return the mail
-        template for the sale confirmation. Otherwise, we return the quotation email template.
+        If the SO is confirmed, we return the mail template for the sale confirmation.
+        Otherwise, we return the quotation email template.
 
-        :param bool force_confirmation_template: Allows to force the confirmation template to be
-        used in any case
         :return: The correct mail template based on the current status
         :rtype: record of `mail.template` or `None` if not found
         """
-        if force_confirmation_template or (
-            all(order.state == 'sale' for order in self) and not self.env.context.get('proforma')
-        ):
-            default_confirmation_template_id = self.env['ir.config_parameter'].sudo().get_param(
-                'sale.default_confirmation_template'
-            )
-            default_confirmation_template = default_confirmation_template_id \
-                and self.env['mail.template'].browse(int(default_confirmation_template_id)).exists()
-            if default_confirmation_template:
-                return default_confirmation_template
-            else:
-                return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
-        else:
+        self.ensure_one()
+        if self.env.context.get('proforma') or self.state not in ('sale', 'done'):
             return self.env.ref('sale.email_template_edi_sale', raise_if_not_found=False)
+        else:
+            return self._get_confirmation_template()
+
+    def _get_confirmation_template(self):
+        self.ensure_one()
+        default_confirmation_template_id = self.env['ir.config_parameter'].sudo().get_param(
+            'sale.default_confirmation_template'
+        )
+        default_confirmation_template = default_confirmation_template_id \
+            and self.env['mail.template'].browse(int(default_confirmation_template_id)).exists()
+        if default_confirmation_template:
+            return default_confirmation_template
+        else:
+            return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
 
     def action_quotation_sent(self):
         if self.filtered(lambda so: so.state != 'draft'):
@@ -827,7 +828,7 @@ class SaleOrder(models.Model):
             # sending mail in sudo was meant for it being sent from superuser
             self = self.with_user(SUPERUSER_ID)
 
-        mail_template = self._find_mail_template(force_confirmation_template=True)
+        mail_template = self._get_confirmation_template()
         if mail_template:
             self.with_context(force_send=True).message_post_with_template(
                 mail_template.id,
@@ -946,28 +947,26 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
 
-        invoice_vals = {
+        return {
             'ref': self.client_order_ref or '',
             'move_type': 'out_invoice',
             'narration': self.note,
-            'currency_id': self.pricelist_id.currency_id.id,
+            'currency_id': self.currency_id.id,
             'campaign_id': self.campaign_id.id,
             'medium_id': self.medium_id.id,
             'source_id': self.source_id.id,
-            'user_id': self.user_id.id,
-            'invoice_user_id': self.user_id.id,
             'team_id': self.team_id.id,
             'partner_id': self.partner_invoice_id.id,
             'partner_shipping_id': self.partner_shipping_id.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id._get_fiscal_position(self.partner_invoice_id)).id,
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
+            'invoice_user_id': self.user_id.id,
             'payment_reference': self.reference,
             'transaction_ids': [Command.set(self.transaction_ids.ids)],
-            'invoice_line_ids': [],
             'company_id': self.company_id.id,
+            'invoice_line_ids': [],
         }
-        return invoice_vals
 
     def action_view_invoice(self):
         invoices = self.mapped('invoice_ids')

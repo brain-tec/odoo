@@ -9,7 +9,7 @@ from werkzeug.urls import url_encode, url_parse
 
 class WebsiteSale(main.WebsiteSale):
 
-    @http.route(['/shop/pricelist'])
+    @http.route()
     def pricelist(self, promo, **post):
         order = request.website.sale_get_order()
         coupon_status = order._try_apply_code(promo)
@@ -47,6 +47,8 @@ class WebsiteSale(main.WebsiteSale):
         url_parts = url_parse(r)
         url_query = url_parts.decode_query()
         url_query.pop('coupon_error', False)  # trust only Odoo error message
+        url_query.pop('coupon_error_type', False)
+        code = code.strip()
 
         request.session['pending_coupon_code'] = code
         order = request.website.sale_get_order()
@@ -58,6 +60,7 @@ class WebsiteSale(main.WebsiteSale):
                 url_query['notify_coupon'] = code
         else:
             url_query['coupon_error'] = _("The coupon will be automatically applied when you add something in your cart.")
+            url_query['coupon_error_type'] = 'warning'
         redirect = url_parts.replace(query=url_encode(url_query))
         return request.redirect(redirect.to_url())
 
@@ -84,3 +87,13 @@ class WebsiteSale(main.WebsiteSale):
             order._apply_program_reward(reward, coupon)
         except UserError as e:
             request.session['error_promo_code'] = str(e)
+
+    @http.route()
+    def cart_update_json(self, *args, set_qty=None, **kwargs):
+        # When a reward line is deleted we remove it from the auto claimable rewards
+        if set_qty == 0:
+            request.update_context(website_sale_loyalty_delete=True)
+            # We need to update the website since `get_sale_order` is called on the website
+            # and does not follow the request's context
+            request.website = request.website.with_context(website_sale_loyalty_delete=True)
+        return super().cart_update_json(*args, set_qty=set_qty, **kwargs)
