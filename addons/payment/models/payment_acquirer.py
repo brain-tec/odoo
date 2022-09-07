@@ -55,6 +55,12 @@ class PaymentAcquirer(models.Model):
         help="Capture the amount from Odoo, when the delivery is completed.\n"
              "Use this if you want to charge your customers cards only when\n"
              "you are sure you can ship the goods to them.")
+    allow_express_checkout = fields.Boolean(
+        string="Allow Express Checkout",
+        help="This controls whether customers can use express payment methods. Express checkout "
+             "enables customers to pay with Google Pay and Apple Pay from which address "
+             "information is collected at payment.",
+    )
     redirect_form_view_id = fields.Many2one(
         string="Redirect Form Template", comodel_name='ir.ui.view',
         help="The template rendering a form submitted to redirect the user when making a payment",
@@ -69,11 +75,12 @@ class PaymentAcquirer(models.Model):
         help="The template rendering the inline payment form when making a payment by token.",
         domain=[('type', '=', 'qweb')],
     )
-    journal_id = fields.Many2one(
-        string="Payment Journal", comodel_name='account.journal',
-        compute='_compute_journal_id', inverse='_inverse_journal_id',
-        help="The journal in which the successful transactions are posted",
-        domain="[('type', '=', 'bank'), ('company_id', '=', company_id)]")
+    express_checkout_form_view_id = fields.Many2one(
+        string="Express Checkout Form Template",
+        comodel_name='ir.ui.view',
+        help="The template rendering the express payment methods' form.",
+        domain=[('type', '=', 'qweb')],
+    )
 
     # Availability fields.
     available_country_ids = fields.Many2many(
@@ -126,24 +133,25 @@ class PaymentAcquirer(models.Model):
         default=lambda self: _("Your payment has been cancelled."), translate=True)
 
     # Feature support fields
-    support_fees = fields.Boolean(
-        string="Fees Supported", compute='_compute_feature_support_fields'
+    support_tokenization = fields.Boolean(
+        string="Tokenization Supported", compute='_compute_feature_support_fields'
     )
     support_manual_capture = fields.Boolean(
         string="Manual Capture Supported", compute='_compute_feature_support_fields'
+    )
+    support_express_checkout = fields.Boolean(
+        string="Express Checkout Supported", compute='_compute_feature_support_fields'
     )
     support_refund = fields.Selection(
         string="Type of Refund Supported",
         selection=[('full_only', "Full Only"), ('partial', "Partial")],
         compute='_compute_feature_support_fields',
     )
-    support_tokenization = fields.Boolean(
-        string="Tokenization Supported", compute='_compute_feature_support_fields'
+    support_fees = fields.Boolean(
+        string="Fees Supported", compute='_compute_feature_support_fields'
     )
 
     # Kanban view fields
-    description = fields.Html(
-        string="Description", help="The description shown in the card in kanban view ")
     image_128 = fields.Image(string="Image", max_width=128, max_height=128)
     color = fields.Integer(
         string="Color", help="The color of the card in kanban view", compute='_compute_color',
@@ -158,6 +166,7 @@ class PaymentAcquirer(models.Model):
     # View configuration fields
     show_credentials_page = fields.Boolean(compute='_compute_view_configuration_fields')
     show_allow_tokenization = fields.Boolean(compute='_compute_view_configuration_fields')
+    show_allow_express_checkout = fields.Boolean(compute='_compute_view_configuration_fields')
     show_payment_icon_ids = fields.Boolean(compute='_compute_view_configuration_fields')
     show_pre_msg = fields.Boolean(compute='_compute_view_configuration_fields')
     show_pending_msg = fields.Boolean(compute='_compute_view_configuration_fields')
@@ -196,6 +205,7 @@ class PaymentAcquirer(models.Model):
         self.update({
             'show_credentials_page': True,
             'show_allow_tokenization': True,
+            'show_allow_express_checkout': True,
             'show_payment_icon_ids': True,
             'show_pre_msg': True,
             'show_pending_msg': True,
@@ -204,40 +214,6 @@ class PaymentAcquirer(models.Model):
             'show_cancel_msg': True,
         })
 
-    def _compute_journal_id(self):
-        for acquirer in self:
-            payment_method = self.env['account.payment.method.line'].search([
-                ('journal_id.company_id', '=', acquirer.company_id.id),
-                ('code', '=', acquirer.provider)
-            ], limit=1)
-            if payment_method:
-                acquirer.journal_id = payment_method.journal_id
-            else:
-                acquirer.journal_id = False
-
-    def _inverse_journal_id(self):
-        for acquirer in self:
-            payment_method_line = self.env['account.payment.method.line'].search([
-                ('journal_id.company_id', '=', acquirer.company_id.id),
-                ('code', '=', acquirer.provider)
-            ], limit=1)
-            if acquirer.journal_id:
-                if not payment_method_line:
-                    default_payment_method_id = acquirer._get_default_payment_method_id()
-                    existing_payment_method_line = self.env['account.payment.method.line'].search([
-                        ('payment_method_id', '=', default_payment_method_id),
-                        ('journal_id', '=', acquirer.journal_id.id)
-                    ], limit=1)
-                    if not existing_payment_method_line:
-                        self.env['account.payment.method.line'].create({
-                            'payment_method_id': default_payment_method_id,
-                            'journal_id': acquirer.journal_id.id,
-                        })
-                else:
-                    payment_method_line.journal_id = acquirer.journal_id
-            elif payment_method_line:
-                payment_method_line.unlink()
-
     def _compute_feature_support_fields(self):
         """ Compute the feature support fields.
 
@@ -245,14 +221,13 @@ class PaymentAcquirer(models.Model):
 
         :return: None
         """
-        self.update(dict.fromkeys(
-            ('support_fees', 'support_manual_capture', 'support_refund', 'support_tokenization'),
-            None,
-        ))
-
-    def _get_default_payment_method_id(self):
-        self.ensure_one()
-        return self.env.ref('account.account_payment_method_manual_in').id
+        self.update(dict.fromkeys((
+            'support_express_checkout',
+            'support_fees',
+            'support_manual_capture',
+            'support_refund',
+            'support_tokenization',
+        ), None))
 
     #=== ONCHANGE METHODS ===#
 
@@ -393,7 +368,7 @@ class PaymentAcquirer(models.Model):
     @api.model
     def _get_compatible_acquirers(
         self, company_id, partner_id, amount, currency_id=None, force_tokenization=False,
-        is_validation=False, **kwargs
+        is_express_checkout=False, is_validation=False, **kwargs
     ):
         """ Select and return the acquirers matching the criteria.
 
@@ -405,6 +380,7 @@ class PaymentAcquirer(models.Model):
         :param float amount: The amount to pay, `0` for validation transactions.
         :param int currency_id: The payment currency if known beforehand, as a `res.currency` id
         :param bool force_tokenization: Whether only acquirers allowing tokenization can be matched
+        :param bool is_express_checkout: Whether the payment is made through express checkout.
         :param bool is_validation: Whether the operation is a validation
         :param dict kwargs: Optional data. This parameter is not used here
         :return: The compatible acquirers
@@ -446,6 +422,10 @@ class PaymentAcquirer(models.Model):
         # Handle tokenization support requirements
         if force_tokenization or self._is_tokenization_required(**kwargs):
             domain = expression.AND([domain, [('allow_tokenization', '=', True)]])
+
+        # Handle express checkout.
+        if is_express_checkout:
+            domain = expression.AND([domain, [('allow_express_checkout', '=', True)]])
 
         compatible_acquirers = self.env['payment.acquirer'].search(domain)
         return compatible_acquirers
@@ -535,7 +515,7 @@ class PaymentAcquirer(models.Model):
         :rtype: recordset of `res.currency`
         """
         self.ensure_one()
-        return self.journal_id.currency_id or self.company_id.currency_id
+        return self.company_id.currency_id
 
     def _get_redirect_form_view(self, is_validation=False):
         """ Return the view of the template used to render the redirect form.
@@ -551,6 +531,30 @@ class PaymentAcquirer(models.Model):
         """
         self.ensure_one()
         return self.redirect_form_view_id
+
+    @api.model
+    def _setup_provider(self, provider_code):
+        """ Prepare module-specific data for a given provider.
+
+        This method is called after a new provider module is installed and also for all existing
+        providers when `account_payment` is installed.
+
+        :param str provider_code: The code of the provider to setup.
+        :return: None
+        """
+
+    @api.model
+    def _remove_provider(self, provider_code):
+        """ Clean module-specific data for a given provider.
+
+        :param str provider_code: The code of the provider to setup.
+        :return: None
+        """
+        acquirers = self.search([('provider', '=', provider_code)])
+        acquirers.write({
+            'provider': 'none',
+            'state': 'disabled',
+        })
 
     def _neutralize(self):
         super()._neutralize()

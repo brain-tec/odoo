@@ -1128,7 +1128,7 @@ export function containsUnremovable(node) {
 
 export function getInSelection(document, selector) {
     const selection = document.getSelection();
-    const range = !!selection.rangeCount && selection.getRangeAt(0);
+    const range = selection && !!selection.rangeCount && selection.getRangeAt(0);
     return (
         range &&
         (closestElement(range.startContainer, selector) ||
@@ -2178,6 +2178,14 @@ export function rgbToHex(rgb = '') {
                 .join('')
         );
     }
+}
+
+export function parseHTML(html) {
+    const fragment = document.createDocumentFragment();
+    const parser = new DOMParser();
+    const parsedDocument = parser.parseFromString(html, 'text/html');
+    fragment.replaceChildren(...parsedDocument.body.childNodes);
+    return fragment;
 }
 
 /**

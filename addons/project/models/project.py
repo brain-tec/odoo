@@ -1060,8 +1060,6 @@ class Task(models.Model):
 
     @api.model
     def _default_personal_stage_type_id(self):
-        if self._context.get('default_project_id'):
-            return False
         return self.env['project.task.type'].search([('user_id', '=', self.env.user.id)], limit=1).id
 
     @api.model
@@ -1791,6 +1789,13 @@ class Task(models.Model):
         return public_fields
 
     @api.model
+    def _get_view_cache_key(self, view_id=None, view_type='form', **options):
+        """The override of fields_get making fields readonly for portal users
+        makes the view cache dependent on the fact the user has the group portal or not"""
+        key = super()._get_view_cache_key(view_id, view_type, **options)
+        return key + (self.env.user.has_group('base.group_portal'),)
+
+    @api.model
     def default_get(self, default_fields):
         vals = super(Task, self).default_get(default_fields)
 
@@ -2000,8 +2005,7 @@ class Task(models.Model):
         if 'parent_id' in vals and vals['parent_id'] in self.ids:
             raise UserError(_("Sorry. You can't set a task as its parent task."))
         if 'active' in vals and not vals.get('active') and any(self.mapped('recurrence_id')):
-            # TODO: show a dialog to stop the recurrence
-            raise UserError(_('You cannot archive recurring tasks. Please disable the recurrence first.'))
+            vals['recurring_task'] = False
         if 'recurrence_id' in vals and vals.get('recurrence_id') and any(not task.active for task in self):
             raise UserError(_('Archived tasks cannot be recurring. Please unarchive the task first.'))
         # stage change: update date_last_stage_update

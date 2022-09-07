@@ -59,9 +59,19 @@
             <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
-                <field name="user_id" position="before">
-                    <field name="allow_timesheets"/>
-                </field>
+                <xpath expr="//div[hasclass('o_settings_container')]" position="inside">
+                    <div class="col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="allow_timesheets"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="allow_timesheets" string="Timesheets"/>
+                            <div class="text-muted">
+                                Log time on tasks
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
             </field>
         </record>
 
@@ -134,7 +144,7 @@
                                     <label for="planned_hours" string="Allocated Days" attrs="{'invisible': [('encode_uom_in_days', '=', False)]}"/>
                                     <field name="planned_hours" class="oe_inline ms-2" widget="timesheet_uom_no_toggle"/>
                                     <span attrs="{'invisible': ['|', ('allow_subtasks', '=', False), ('subtask_count', '=', 0)]}">
-                                        (incl. <field name="subtask_planned_hours" nolabel="1" groups="project.group_subtask_project" widget="timesheet_uom_no_toggle"/> on
+                                        (incl. <field name="subtask_planned_hours" nolabel="1" groups="project.group_subtask_project" widget="timesheet_uom_no_toggle" class="oe_inline"/> on
                                         <span class="fw-bold text-dark"> Sub-tasks</span>)
                                     </span>
                                 </div>

@@ -37,6 +37,7 @@ const closestElement = OdooEditorLib.closestElement;
 const setSelection = OdooEditorLib.setSelection;
 const endPos = OdooEditorLib.endPos;
 const hasValidSelection = OdooEditorLib.hasValidSelection;
+const parseHTML = OdooEditorLib.parseHTML;
 
 var id = 0;
 const basicMediaSelector = 'img, .fa, .o_image, .media_iframe_video';
@@ -1324,9 +1325,7 @@ const Wysiwyg = Widget.extend({
             this.odooEditor.unbreakableStepUnactive();
             this.odooEditor.historyStep();
         } else {
-            const fragment = new DocumentFragment();
-            fragment.append(element);
-            return this.odooEditor.execCommand('insertFragment', fragment);
+            return this.odooEditor.execCommand('insert', element);
         }
 
         if (this.snippetsMenu) {
@@ -1769,7 +1768,7 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('.only_fa').toggleClass('d-none', !$target.is('.fa'));
         // Hide the create-link button if the selection spans several blocks.
         const selection = this.odooEditor.document.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
+        const range = selection && selection.rangeCount && selection.getRangeAt(0);
         const $rangeContainer = range && $(range.commonAncestorContainer);
         const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length;
         if (!range || spansBlocks) {
@@ -1970,7 +1969,7 @@ const Wysiwyg = Widget.extend({
                         args: [this.getSession().uid, ['signature']],
                     });
                     if (res && res[0] && res[0].signature) {
-                        this.odooEditor.execCommand('insertHTML', res[0].signature);
+                        this.odooEditor.execCommand('insert', parseHTML(res[0].signature));
                     }
                 },
             },

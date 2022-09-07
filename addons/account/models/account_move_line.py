@@ -7,6 +7,7 @@ from functools import lru_cache
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools import frozendict, formatLang, format_date
+from odoo.addons.web.controllers.utils import clean_action
 
 INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
 
@@ -717,7 +718,7 @@ class AccountMoveLine(models.Model):
             line.reconciled = (
                 comp_curr.is_zero(line.amount_residual)
                 and foreign_curr.is_zero(line.amount_residual_currency)
-                and line.move_id.state not in ('draft', 'cancel')
+                and (line.matched_debit_ids or line.matched_credit_ids)
             )
 
     @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id', 'debit', 'credit', 'tax_tag_ids', 'is_refund')
@@ -1569,17 +1570,6 @@ class AccountMoveLine(models.Model):
             recon_debit_amount = remaining_debit_amount
             recon_credit_amount = -remaining_credit_amount
 
-        # Check if there is something left to reconcile. Move to the next loop iteration if not.
-        skip_reconciliation = False
-        if recon_currency.is_zero(recon_debit_amount):
-            res['debit_vals'] = None
-            skip_reconciliation = True
-        if recon_currency.is_zero(recon_credit_amount):
-            res['credit_vals'] = None
-            skip_reconciliation = True
-        if skip_reconciliation:
-            return res
-
         # ==== Match both lines together and compute amounts to reconcile ====
 
         # Determine which line is fully matched by the other.
@@ -1726,9 +1716,9 @@ class AccountMoveLine(models.Model):
         credit_vals['amount_residual'] = remaining_credit_amount
         credit_vals['amount_residual_currency'] = remaining_credit_amount_curr
 
-        if debit_fully_matched:
+        if recon_currency.is_zero(recon_debit_amount) or debit_fully_matched:
             res['debit_vals'] = None
-        if credit_fully_matched:
+        if recon_currency.is_zero(recon_credit_amount) or credit_fully_matched:
             res['credit_vals'] = None
         return res
 
@@ -1738,8 +1728,9 @@ class AccountMoveLine(models.Model):
         Note: The order of records in self is important because the journal items will be reconciled using this order.
         :return: a tuple of 1) list of vals for partial reconciliation creation, 2) the list of vals for the exchange difference entries to be created
         '''
-        debit_vals_list = iter([x for x in vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0])
-        credit_vals_list = iter([x for x in vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0])
+        debit_vals_list = iter([x for x in vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0 and not x['reconciled']])
+        credit_vals_list = iter([x for x in vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0 and not x['reconciled']])
+        void_vals_list = iter([x for x in vals_list if not x['balance'] and not x['amount_currency'] and not x['reconciled']])
         debit_vals = None
         credit_vals = None
 
@@ -1755,13 +1746,13 @@ class AccountMoveLine(models.Model):
 
             # Move to the next available debit line.
             if not debit_vals:
-                debit_vals = next(debit_vals_list, None)
+                debit_vals = next(debit_vals_list, None) or next(void_vals_list, None)
                 if not debit_vals:
                     break
 
             # Move to the next available credit line.
             if not credit_vals:
-                credit_vals = next(credit_vals_list, None)
+                credit_vals = next(void_vals_list, None) or next(credit_vals_list, None)
                 if not credit_vals:
                     break
 
@@ -1793,6 +1784,7 @@ class AccountMoveLine(models.Model):
                 'company': line.company_id,
                 'currency': line.currency_id,
                 'date': line.date,
+                'reconciled': line.reconciled,
             }
             for line in self
         ])
@@ -2142,15 +2134,8 @@ class AccountMoveLine(models.Model):
 
         # ==== Collect all involved lines through the existing reconciliation ====
 
-        involved_lines = sorted_lines
-        involved_partials = self.env['account.partial.reconcile']
-        current_lines = involved_lines
-        current_partials = involved_partials
-        while current_lines:
-            current_partials = (current_lines.matched_debit_ids + current_lines.matched_credit_ids) - current_partials
-            involved_partials += current_partials
-            current_lines = (current_partials.debit_move_id + current_partials.credit_move_id) - current_lines
-            involved_lines += current_lines
+        involved_lines = sorted_lines._all_reconciled_lines()
+        involved_partials = involved_lines.matched_credit_ids | involved_lines.matched_debit_ids
 
         # ==== Create partials ====
 
@@ -2344,6 +2329,16 @@ class AccountMoveLine(models.Model):
             ids.append(aml.id)
         return ids
 
+    def _all_reconciled_lines(self):
+        reconciliation_lines = self.filtered(lambda x: x.account_id.reconcile or x.account_id.account_type in ('asset_cash', 'liability_credit_card'))
+        current_lines = reconciliation_lines
+        current_partials = self.env['account.partial.reconcile']
+        while current_lines:
+            current_partials = (current_lines.matched_debit_ids + current_lines.matched_credit_ids) - current_partials
+            current_lines = (current_partials.debit_move_id + current_partials.credit_move_id) - current_lines
+            reconciliation_lines += current_lines
+        return reconciliation_lines
+
     def _get_attachment_domains(self):
         self.ensure_one()
         domains = [[('res_model', '=', 'account.move'), ('res_id', '=', self.move_id.id)]]
@@ -2456,9 +2451,9 @@ class AccountMoveLine(models.Model):
 
     def open_reconcile_view(self):
         action = self.env['ir.actions.act_window']._for_xml_id('account.action_account_moves_all_grouped_matching')
-        ids = self._reconciled_lines()
+        ids = self._all_reconciled_lines().filtered(lambda l: l.matched_debit_ids or l.matched_credit_ids).ids
         action['domain'] = [('id', 'in', ids)]
-        return action
+        return clean_action(action, self.env)
 
     def open_move(self):
         return self.move_id.open_move()

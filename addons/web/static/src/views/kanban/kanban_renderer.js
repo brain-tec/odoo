@@ -63,8 +63,14 @@ export class KanbanRenderer extends Component {
                     }
                     element.classList.add("o_dragged", "shadow");
                 },
-                onGroupEnter: (group) => group.classList.add("o_kanban_hover"),
-                onGroupLeave: (group) => group.classList.remove("o_kanban_hover"),
+                onGroupEnter: (group) => {
+                    group.classList.add("o_kanban_hover");
+                    group.classList.remove("bg-100");
+                },
+                onGroupLeave: (group) => {
+                    group.classList.remove("o_kanban_hover");
+                    group.classList.add("bg-100");
+                },
                 onStop: (group, element) => {
                     group && group.classList && group.classList.remove("o_kanban_hover");
                     element.classList.remove("o_dragged", "shadow");
@@ -357,6 +363,10 @@ export class KanbanRenderer extends Component {
 
     canEditRecord() {
         return this.props.archInfo.activeActions.edit;
+    }
+
+    canQuickCreate() {
+        return this.props.archInfo.activeActions.quickCreate && this.props.list.canQuickCreate();
     }
 
     // ------------------------------------------------------------------------

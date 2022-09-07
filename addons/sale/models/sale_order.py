@@ -111,13 +111,12 @@ class SaleOrder(models.Model):
         compute='_compute_require_signature',
         store=True, readonly=False, precompute=True,
         states=READONLY_FIELD_STATES,
-        help="Request a online signature to the customer in order to confirm orders automatically.")
+        help="Request a online signature and/or payment to the customer in order to confirm orders automatically.")
     require_payment = fields.Boolean(
         string="Online Payment",
         compute='_compute_require_payment',
         store=True, readonly=False, precompute=True,
-        states=READONLY_FIELD_STATES,
-        help="Request an online payment to the customer in order to confirm orders automatically.")
+        states=READONLY_FIELD_STATES)
 
     signature = fields.Image(
         string="Signature",
@@ -1297,6 +1296,16 @@ class SaleOrder(models.Model):
                 return False
 
         return self.order_line.filtered(show_line)
+
+    def _get_default_payment_link_values(self):
+        self.ensure_one()
+        return {
+            'description': self.name,
+            'amount': self.amount_total - sum(self.invoice_ids.filtered(lambda x: x.state != 'cancel').mapped('amount_total')),
+            'currency_id': self.currency_id.id,
+            'partner_id': self.partner_id.id,
+            'amount_max': self.amount_total,
+        }
 
     # PORTAL #
 

@@ -65,6 +65,7 @@ import {
     hasValidSelection,
     hasTableSelection,
     pxToFloat,
+    parseHTML,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -552,7 +553,7 @@ export class OdooEditor extends EventTarget {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
                         html += Array(3).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                         html += '</span>';
-                        this.execCommand('insertHTML', html);
+                        this.execCommand('insert', parseHTML(html));
                     },
                 },
                 {
@@ -565,7 +566,7 @@ export class OdooEditor extends EventTarget {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
                         html += Array(5).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
                         html += '</span>';
-                        this.execCommand('insertHTML', html);
+                        this.execCommand('insert', parseHTML(html));
                     },
                 },
                 ...(this.options.commands || []),
@@ -591,8 +592,6 @@ export class OdooEditor extends EventTarget {
         this.addDomListener(this.document, 'selectionchange', this._handleCommandHint);
         this.addDomListener(this.document, 'keydown', this._onDocumentKeydown);
         this.addDomListener(this.document, 'keyup', this._onDocumentKeyup);
-        this.addDomListener(this.document, 'mousedown', this._onDocumentMousedown);
-        this.addDomListener(this.document, 'mouseup', this._onDocumentMouseup);
         this.addDomListener(this.document, 'click', this._onDocumentClick);
 
         this.multiselectionRefresh = this.multiselectionRefresh.bind(this);
@@ -2641,11 +2640,11 @@ export class OdooEditor extends EventTarget {
      *
      * @private
      * @param {string} clipboardData
-     * @returns {string}
+     * @returns {Element}
      */
     _prepareClipboardData(clipboardData) {
         const container = document.createElement('fake-container');
-        container.innerHTML = clipboardData;
+        container.append(parseHTML(clipboardData));
 
         for (const tableElement of container.querySelectorAll('table')) {
             tableElement.classList.add('table', 'table-bordered', 'o_table');
@@ -2661,24 +2660,24 @@ export class OdooEditor extends EventTarget {
         // particular case in all of those functions. In fact, this case cannot
         // happen on a new document created using this editor, but will happen
         // instantly when editing a document that was created from Etherpad.
-        const temporaryContainer = document.createElement('template');
-        let temporaryP = document.createElement('p');
+        const fragment = document.createDocumentFragment();
+        let p = document.createElement('p');
         for (const child of [...container.childNodes]) {
             if (isBlock(child)) {
-                if (temporaryP.childNodes.length > 0) {
-                    temporaryContainer.content.appendChild(temporaryP);
-                    temporaryP = document.createElement('p');
+                if (p.childNodes.length > 0) {
+                    fragment.appendChild(p);
+                    p = document.createElement('p');
                 }
-                temporaryContainer.content.appendChild(child);
+                fragment.appendChild(child);
             } else {
-                temporaryP.appendChild(child);
+                p.appendChild(child);
             }
 
-            if (temporaryP.childNodes.length > 0) {
-                temporaryContainer.content.appendChild(temporaryP);
+            if (p.childNodes.length > 0) {
+                fragment.appendChild(p);
             }
         }
-        return temporaryContainer.innerHTML;
+        return fragment;
     }
     /**
      * Clean a node for safely pasting. Cleaning an element involves unwrapping
@@ -3032,7 +3031,7 @@ export class OdooEditor extends EventTarget {
             } else if (closestTag === 'TABLE') {
                 this._onTabulationInTable(ev);
             } else if (!ev.shiftKey) {
-                this.execCommand('insertText', '\u00A0 \u00A0\u00A0');
+                this.execCommand('insert', '\u00A0 \u00A0\u00A0');
             }
             ev.preventDefault();
             ev.stopPropagation();
@@ -3470,6 +3469,11 @@ export class OdooEditor extends EventTarget {
         this._fixFontAwesomeSelection();
 
         this._fixSelectionOnContenteditableFalse();
+
+        this.historyUnpauseSteps('handleSelectionInTable');
+        if (this.toolbar) {
+            this.toolbar.style.pointerEvents = 'auto';
+        }
     }
 
     _onMouseDown(ev) {
@@ -3539,6 +3543,49 @@ export class OdooEditor extends EventTarget {
                 };
             }
         }
+
+        // Handle table selection.
+        if (this.toolbar && !ancestors(ev.target, this.editable).includes(this.toolbar)) {
+            this.toolbar.style.pointerEvents = 'none';
+            if (this.deselectTable() && hasValidSelection(this.editable)) {
+                this.document.getSelection().collapseToStart();
+            }
+        }
+        // Handle table resizing.
+        const isHoveringTdBorder = this._isHoveringTdBorder(ev);
+        if (isHoveringTdBorder) {
+            ev.preventDefault();
+            const direction = { top: 'row', right: 'col', bottom: 'row', left: 'col' }[isHoveringTdBorder] || false;
+            let target1, target2;
+            const column = closestElement(ev.target, 'tr');
+            if (isHoveringTdBorder === 'top' && column) {
+                target1 = getAdjacentPreviousSiblings(column).find(node => node.nodeName === 'TR');
+                target2 = closestElement(ev.target, 'tr');
+            } else if (isHoveringTdBorder === 'right') {
+                target1 = ev.target;
+                target2 = getAdjacentNextSiblings(ev.target).find(node => node.nodeName === 'TD');
+            } else if (isHoveringTdBorder === 'bottom' && column) {
+                target1 = closestElement(ev.target, 'tr');
+                target2 = getAdjacentNextSiblings(column).find(node => node.nodeName === 'TR');
+            } else if (isHoveringTdBorder === 'left') {
+                target1 = getAdjacentPreviousSiblings(ev.target).find(node => node.nodeName === 'TD');
+                target2 = ev.target;
+            }
+            this._isResizingTable = true;
+            this._toggleTableResizeCursor(direction);
+            const resizeTable = ev => this._resizeTable(ev, direction, target1, target2);
+            const stopResizing = ev => {
+                ev.preventDefault();
+                this._isResizingTable = false;
+                this._toggleTableResizeCursor(false);
+                this.document.removeEventListener('mousemove', resizeTable);
+                this.document.removeEventListener('mouseup', stopResizing);
+                this.document.removeEventListener('mouseleave', stopResizing);
+            };
+            this.document.addEventListener('mousemove', resizeTable);
+            this.document.addEventListener('mouseup', stopResizing);
+            this.document.addEventListener('mouseleave', stopResizing);
+        }
     }
 
     _onDocumentKeydown(ev) {
@@ -3578,65 +3625,6 @@ export class OdooEditor extends EventTarget {
             this._onKeyupResetContenteditableNodes = [];
         }
         this._fixSelectionOnContenteditableFalse();
-    }
-
-    _onDocumentMousedown(event) {
-        if (this.toolbar && !ancestors(event.target, this.editable).includes(this.toolbar)) {
-            this.toolbar.style.pointerEvents = 'none';
-            if (this.deselectTable() && hasValidSelection(this.editable)) {
-                this.document.getSelection().collapseToStart();
-            }
-        }
-        // Handle table resizing.
-        const isHoveringTdBorder = this._isHoveringTdBorder(event);
-        if (isHoveringTdBorder) {
-            event.preventDefault();
-            const direction = {top: 'row', right: 'col', bottom: 'row', left: 'col'}[isHoveringTdBorder] || false;
-            let target1, target2;
-            switch (isHoveringTdBorder) {
-                case 'top': {
-                    target1 = getAdjacentPreviousSiblings(closestElement(event.target, 'tr')).find(node => node.nodeName === 'TR');
-                    target2 = closestElement(event.target, 'tr');
-                    break;
-                }
-                case 'right': {
-                    target1 = event.target;
-                    target2 = getAdjacentNextSiblings(event.target).find(node => node.nodeName === 'TD');
-                    break;
-                }
-                case 'bottom': {
-                    target1 = closestElement(event.target, 'tr');
-                    target2 = getAdjacentNextSiblings(closestElement(event.target, 'tr')).find(node => node.nodeName === 'TR');
-                    break;
-                }
-                case 'left': {
-                    target1 = getAdjacentPreviousSiblings(event.target).find(node => node.nodeName === 'TD');
-                    target2 = event.target;
-                    break;
-                }
-            }
-            this._isResizingTable = true;
-            this._toggleTableResizeCursor(direction);
-            const resizeTable = ev => this._resizeTable(ev, direction, target1, target2);
-            const stopResizing = ev => {
-                ev.preventDefault();
-                this._isResizingTable = false;
-                this._toggleTableResizeCursor(false);
-                this.document.removeEventListener('mousemove', resizeTable);
-                this.document.removeEventListener('mouseup', stopResizing);
-                this.document.removeEventListener('mouseleave', stopResizing);
-            };
-            this.document.addEventListener('mousemove', resizeTable);
-            this.document.addEventListener('mouseup', stopResizing);
-            this.document.addEventListener('mouseleave', stopResizing);
-        }
-    }
-
-    _onDocumentMouseup() {
-        this.historyUnpauseSteps('handleSelectionInTable');
-        if (this.toolbar) {
-            this.toolbar.style.pointerEvents = 'auto';
-        }
     }
 
     _onMousemove(ev) {
@@ -3700,7 +3688,7 @@ export class OdooEditor extends EventTarget {
             imageNode.dataset.fileName = imageFile.name;
             getImageUrl(imageFile).then((url)=> {
                 imageNode.src = url;
-                this.execCommand('insertHTML', imageNode.outerHTML);
+                this.execCommand('insert', imageNode);
             });
         }
     }
@@ -3713,7 +3701,7 @@ export class OdooEditor extends EventTarget {
         const files = getImageFiles(ev.clipboardData);
         const clipboardHtml = ev.clipboardData.getData('text/html');
         if (clipboardHtml) {
-            this.execCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
+            this.execCommand('insert', this._prepareClipboardData(clipboardHtml));
         } else if (files.length) {
             this.addImagesFiles(files);
         } else {
@@ -3782,7 +3770,7 @@ export class OdooEditor extends EventTarget {
 
                     if (isImageUrl) {
                         const stepIndexBeforeInsert = this._historySteps.length - 1;
-                        this.execCommand('insertText', splitAroundUrl[i]);
+                        this.execCommand('insert', splitAroundUrl[i]);
                         this.powerbox.open([
                             {
                                 category: this.options._t('Embed'),
@@ -3808,7 +3796,7 @@ export class OdooEditor extends EventTarget {
                         ]);
                     } else if (this.options.allowCommandVideo && youtubeUrl) {
                         const stepIndexBeforeInsert = this._historySteps.length - 1;
-                        this.execCommand('insertText', splitAroundUrl[i]);
+                        this.execCommand('insert', splitAroundUrl[i]);
                         this.powerbox.open([
                             {
                                 category: this.options._t('Embed'),
@@ -3871,7 +3859,7 @@ export class OdooEditor extends EventTarget {
                     const textFragments = splitAroundUrl[i].split(/\r?\n/);
                     let textIndex = 1;
                     for (const textFragment of textFragments) {
-                        this.execCommand('insertText', textFragment);
+                        this.execCommand('insert', textFragment);
                         if (textIndex < textFragments.length) {
                             this._applyCommand('oShiftEnter');
                         }
@@ -3919,7 +3907,7 @@ export class OdooEditor extends EventTarget {
                     const range = this.document.caretRangeFromPoint(ev.clientX, ev.clientY);
                     setSelection(range.startContainer, range.startOffset);
                 }
-                this.execCommand('insertHTML', this._prepareClipboardData(pastedText));
+                this.execCommand('insert', this._prepareClipboardData(pastedText));
             });
         }
         this.historyStep();

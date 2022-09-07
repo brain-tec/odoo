@@ -77,7 +77,7 @@ class AccountMove(models.Model):
         compute='_compute_name', readonly=False, store=True,
         copy=False,
         tracking=True,
-        index='btree',
+        index='btree',  # We need the btree index for unicity constraint (`_check_unique_sequence_number`)
     )
     ref = fields.Char(string='Reference', copy=False, tracking=True)
     date = fields.Date(
@@ -543,8 +543,8 @@ class AccountMove(models.Model):
 
     def _auto_init(self):
         super()._auto_init()
-        if sql.install_pg_trgm(self._cr):
-            # We need the btree index for unicity constraint (on field) AND this one for human searches
+        if self.pool.has_trigram:
+            # This index is for human searches
             sql.create_index(self._cr, 'account_move_name_trigram_index', self._table, ['"name" gin_trgm_ops'], 'gin')
 
         self.env.cr.execute("""
@@ -2248,12 +2248,15 @@ class AccountMove(models.Model):
             return "WHERE FALSE", {}
         where_string = "WHERE journal_id = %(journal_id)s AND name != '/'"
         param = {'journal_id': self.journal_id.id}
+        is_payment = self.payment_id or self._context.get('is_payment')
 
         if not relaxed:
             domain = [('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id), ('name', 'not in', ('/', '', False))]
             if self.journal_id.refund_sequence:
                 refund_types = ('out_refund', 'in_refund')
                 domain += [('move_type', 'in' if self.move_type in refund_types else 'not in', refund_types)]
+            if self.journal_id.payment_sequence:
+                domain += [('payment_id', '!=' if is_payment else '=', False)]
             reference_move_name = self.search(domain + [('date', '<=', self.date)], order='date desc', limit=1).name
             if not reference_move_name:
                 reference_move_name = self.search(domain, order='date asc', limit=1).name
@@ -2276,18 +2279,26 @@ class AccountMove(models.Model):
                 where_string += " AND move_type IN ('out_refund', 'in_refund') "
             else:
                 where_string += " AND move_type NOT IN ('out_refund', 'in_refund') "
+        elif self.journal_id.payment_sequence:
+            if is_payment:
+                where_string += " AND payment_id IS NOT NULL "
+            else:
+                where_string += " AND payment_id IS NULL "
 
         return where_string, param
 
     def _get_starting_sequence(self):
         # EXTENDS account sequence.mixin
         self.ensure_one()
+        is_payment = self.payment_id or self._context.get('is_payment')
         if self.journal_id.type == 'sale':
             starting_sequence = "%s/%04d/00000" % (self.journal_id.code, self.date.year)
         else:
             starting_sequence = "%s/%04d/%02d/0000" % (self.journal_id.code, self.date.year, self.date.month)
         if self.journal_id.refund_sequence and self.move_type in ('out_refund', 'in_refund'):
             starting_sequence = "R" + starting_sequence
+        if self.journal_id.payment_sequence and is_payment:
+            starting_sequence = "P" + starting_sequence
         return starting_sequence
 
     # -------------------------------------------------------------------------

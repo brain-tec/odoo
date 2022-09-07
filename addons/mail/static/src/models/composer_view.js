@@ -214,7 +214,7 @@ registerModel({
          */
         onClickEmoji(ev) {
             this.saveStateInStore();
-            this.insertIntoTextInput(ev.currentTarget.dataset.unicode);
+            this.insertIntoTextInput(ev.currentTarget.dataset.codepoints);
             if (!this.messaging.device.isMobileDevice) {
                 this.update({ doFocus: true });
             }
@@ -240,20 +240,7 @@ registerModel({
          */
         onClickSaveLink(ev) {
             ev.preventDefault();
-            if (!this.composer.canPostMessage) {
-                if (this.composer.hasUploadingAttachment) {
-                    this.messaging.notify({
-                        message: this.env._t("Please wait while the file is uploading."),
-                        type: 'warning',
-                    });
-                }
-                return;
-            }
-            if (this.messageViewInEditing) {
-                this.updateMessage();
-                return;
-            }
-            this.postMessage();
+            this.sendMessage();
         },
         /**
          * Called when clicking on "send" button.
@@ -586,6 +573,14 @@ registerModel({
                 const message = messaging.models['Message'].insert(
                     messaging.models['Message'].convertData(messageData)
                 );
+                if (this.messaging.hasLinkPreviewFeature && !message.isBodyEmpty) {
+                    this.messaging.rpc({
+                        route: `/mail/link_preview`,
+                        params: {
+                            message_id: message.id
+                        }
+                    }, { shadow: true });
+                }
                 for (const threadView of message.originThread.threadViews) {
                     // Reset auto scroll to be able to see the newly posted message.
                     threadView.update({ hasAutoScrollOnMessageReceived: true });
@@ -841,7 +836,7 @@ registerModel({
             return Boolean(
                 (this.hasThreadName && this.composer.thread) ||
                 (this.hasFollowers && !this.composer.isLog) ||
-                this.threadView && this.threadView.replyingToMessageView
+                (this.threadView && this.threadView.replyingToMessageView)
             );
         },
         /**
@@ -1084,7 +1079,7 @@ registerModel({
                     const regexp = new RegExp(
                         '(\\s|^)(' + escapedSource + ')(?=\\s|$)',
                         'g');
-                    htmlString = htmlString.replace(regexp, '$1' + emoji.unicode);
+                    htmlString = htmlString.replace(regexp, '$1' + emoji.codepoints);
                 }
             }
             return htmlString;

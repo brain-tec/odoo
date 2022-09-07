@@ -107,6 +107,14 @@ function getClick({ afterNextRender }) {
     };
 }
 
+function getMouseenter({ afterNextRender }) {
+    return async function mouseenter(selector) {
+        await afterNextRender(() =>
+            document.querySelector(selector).dispatchEvent(new window.MouseEvent('mouseenter'))
+        );
+    };
+}
+
 function getOpenDiscuss(afterEvent, webClient, { context = {}, params, ...props } = {}) {
     return async function openDiscuss({ waitUntilMessagesLoaded = true } = {}) {
         const actionOpenDiscuss = {
@@ -196,11 +204,6 @@ function getOpenFormView(afterEvent, openView) {
  * @param {Deferred|Promise} [param0.messagingBeforeCreationDeferred=Promise.resolve()]
  *   Deferred that let tests block messaging creation and simulate resolution.
  *   Useful for testing working components when messaging is not yet created.
- * @param {Object} [param0.waitUntilEvent]
- * @param {String} [param0.waitUntilEvent.eventName]
- * @param {String} [param0.waitUntilEvent.message]
- * @param {function} [param0.waitUntilEvent.predicate]
- * @param {integer} [param0.waitUntilEvent.timeoutDelay]
  * @param {string} [param0.waitUntilMessagingCondition='initialized'] Determines
  *   the condition of messaging when this function is resolved.
  *   Supported values: ['none', 'created', 'initialized'].
@@ -226,7 +229,6 @@ async function start(param0 = {}) {
     const {
         discuss = {},
         hasTimeControl,
-        waitUntilEvent,
         waitUntilMessagingCondition = 'initialized',
     } = param0;
     const advanceTime = hasTimeControl ? getAdvanceTime() : undefined;
@@ -236,21 +238,23 @@ async function start(param0 = {}) {
         throw Error(`Unknown parameter value ${waitUntilMessagingCondition} for 'waitUntilMessaging'.`);
     }
     const messagingBus = new EventBus();
-    const testSetupDoneDeferred = makeDeferred();
     const afterEvent = getAfterEvent({ messagingBus });
-    let waitUntilEventPromise;
-    if (waitUntilEvent) {
-        waitUntilEventPromise = afterEvent({ func: () => testSetupDoneDeferred.resolve(), ...waitUntilEvent, });
-    } else {
-        testSetupDoneDeferred.resolve();
-        waitUntilEventPromise = Promise.resolve();
-    }
 
     const pyEnv = await getPyEnv();
     param0.serverData = param0.serverData || getActionManagerServerData();
     param0.serverData.models = { ...pyEnv.getData(), ...param0.serverData.models };
     param0.serverData.views = { ...pyEnv.getViews(), ...param0.serverData.views };
-    const webClient = await getWebClientReady({ ...param0, messagingBus, testSetupDoneDeferred });
+    let webClient;
+    await afterNextRender(async () => {
+        webClient = await getWebClientReady({ ...param0, messagingBus });
+        if (waitUntilMessagingCondition === 'created') {
+            await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
+        }
+        if (waitUntilMessagingCondition === 'initialized') {
+            await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
+            await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
+        }
+    });
 
     registerCleanup(async () => {
         await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
@@ -260,18 +264,10 @@ async function start(param0 = {}) {
         delete owl.Component.env[wowlServicesSymbol].messaging;
         delete owl.Component.env;
     });
-    if (waitUntilMessagingCondition === 'created') {
-        await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
-    }
-    if (waitUntilMessagingCondition === 'initialized') {
-        await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
-        await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
-    }
     const openView = async (action, options) => {
         action['type'] = action['type'] || 'ir.actions.act_window';
         await afterNextRender(() => doAction(webClient, action, { props: options }));
     };
-    await waitUntilEventPromise;
     return {
         advanceTime,
         afterEvent,
@@ -280,6 +276,7 @@ async function start(param0 = {}) {
         env: webClient.env,
         insertText,
         messaging: webClient.env.services.messaging.modelManager.messaging,
+        mouseenter: getMouseenter({ afterNextRender }),
         openDiscuss: getOpenDiscuss(afterEvent, webClient, discuss),
         openView,
         openFormView: getOpenFormView(afterEvent, openView),

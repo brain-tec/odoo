@@ -4,10 +4,10 @@ import logging
 import uuid
 
 import requests
-from werkzeug.urls import url_encode, url_join
+from werkzeug.urls import url_encode, url_join, url_parse
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment_stripe import utils as stripe_utils
 from odoo.addons.payment_stripe.const import API_VERSION, PROXY_URL, HANDLED_WEBHOOK_EVENTS
@@ -40,6 +40,7 @@ class PaymentAcquirer(models.Model):
         """ Override of `payment` to enable additional features. """
         super()._compute_feature_support_fields()
         self.filtered(lambda acq: acq.provider == 'stripe').update({
+            'support_express_checkout': True,
             'support_manual_capture': True,
             'support_refund': 'partial',
             'support_tokenization': True,
@@ -108,7 +109,12 @@ class PaymentAcquirer(models.Model):
             connected_account = self._stripe_fetch_or_create_connected_account()
 
             # Link generation
-            menu_id = menu_id or self.env.ref('payment.payment_acquirer_menu').id
+            if not menu_id:
+                # Fall back on `account_payment`'s menu if it is installed. If not, the user is
+                # redirected to the acquirer's form view but without any menu in the breadcrumb.
+                menu = self.env.ref('account_payment.payment_acquirer_menu', False)
+                menu_id = menu and menu.id  # Only set if `account_payment` is installed.
+
             account_link_url = self._stripe_create_account_link(connected_account['id'], menu_id)
             if account_link_url:
                 action = {
@@ -163,6 +169,37 @@ class PaymentAcquirer(models.Model):
                 'type': notification_type,
                 'next': {'type': 'ir.actions.act_window_close'},  # Refresh the form to show the key
             }
+        }
+
+    def action_stripe_verify_apple_pay_domain(self):
+        """ Verify the web domain with Stripe to enable Apple Pay.
+
+        The domain is sent to Stripe API for them to verify that it is valid by making a request to
+        the `/.well-known/apple-developer-merchantid-domain-association` route. If the domain is
+        valid, it is registered to use with Apple Pay.
+        See https://stripe.com/docs/stripe-js/elements/payment-request-button#verifying-your-domain-with-apple-pay.
+
+        :return dict: A client action with a success message.
+        :raise UserError: If test keys are used to make the request.
+        """
+        self.ensure_one()
+
+        web_domain = url_parse(self.get_base_url()).netloc
+        response_content = self._stripe_make_request('apple_pay/domains', payload={
+            'domain_name': web_domain
+        })
+        if not response_content['livemode']:
+            # If test keys are used to make the request, Stripe will respond with an HTTP 200 but
+            # will not register the domain. Ask the user to use live credentials.
+            raise UserError(_("Please use live credentials to enable Apple Pay."))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': _("Your web domain was successfully verified."),
+                'type': 'success',
+            },
         }
 
     def _get_stripe_webhook_url(self):
@@ -226,12 +263,6 @@ class PaymentAcquirer(models.Model):
         :rtype: dict
         """
         return {}
-
-    def _get_default_payment_method_id(self):
-        self.ensure_one()
-        if self.provider != 'stripe':
-            return super()._get_default_payment_method_id()
-        return self.env.ref('payment_stripe.payment_method_stripe').id
 
     def _neutralize(self):
         super()._neutralize()
