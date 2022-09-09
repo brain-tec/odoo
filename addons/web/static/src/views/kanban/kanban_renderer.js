@@ -397,8 +397,8 @@ export class KanbanRenderer extends Component {
                         resModel: this.props.list.resModel,
                         context,
                         title: this.env._t("Create"),
-                        onRecordSaved: (record) => {
-                            group.addRecord(record, 0);
+                        onRecordSaved: async (record) => {
+                            await group.addExistingRecord(record.resId, true);
                         },
                     },
                     {
@@ -536,7 +536,7 @@ export class KanbanRenderer extends Component {
     }
 
     tooltipAttributes(group) {
-        if (!group.tooltip) {
+        if (!group.tooltip.length) {
             return {};
         }
         return {

@@ -5179,6 +5179,45 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
+    QUnit.test("support row decoration (decoration-bf)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree decoration-bf="int_field > 5">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>`,
+        });
+
+        assert.containsN(target, "tbody tr.fw-bold", 3, "should have 3 columns with fw-bold class");
+
+        assert.containsN(target, "tbody tr", 4, "should have 4 rows");
+    });
+
+    QUnit.test("support row decoration (decoration-it)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree decoration-it="int_field > 5">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>`,
+        });
+
+        assert.containsN(
+            target,
+            "tbody tr.fst-italic",
+            3,
+            "should have 3 columns with fst-italic class"
+        );
+
+        assert.containsN(target, "tbody tr", 4, "should have 4 rows");
+    });
+
     QUnit.test("support field decoration", async function (assert) {
         await makeView({
             type: "list",
@@ -5196,6 +5235,44 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody td.text-danger", 3);
         assert.containsN(target, "tbody td.o_list_number", 4);
         assert.containsNone(target, "tbody td.o_list_number.text-danger");
+    });
+
+    QUnit.test("support field decoration (decoration-bf)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="foo" decoration-bf="int_field > 5"/>
+                    <field name="int_field"/>
+                </tree>`,
+        });
+
+        assert.containsN(target, "tbody tr", 4);
+        assert.containsN(target, "tbody td.o_list_char", 4);
+        assert.containsN(target, "tbody td.fw-bold", 3);
+        assert.containsN(target, "tbody td.o_list_number", 4);
+        assert.containsNone(target, "tbody td.o_list_number.fw-bold");
+    });
+
+    QUnit.test("support field decoration (decoration-it)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="foo" decoration-it="int_field > 5"/>
+                    <field name="int_field"/>
+                </tree>`,
+        });
+
+        assert.containsN(target, "tbody tr", 4);
+        assert.containsN(target, "tbody td.o_list_char", 4);
+        assert.containsN(target, "tbody td.fst-italic", 3);
+        assert.containsN(target, "tbody td.o_list_number", 4);
+        assert.containsNone(target, "tbody td.o_list_number.fst-italic");
     });
 
     QUnit.test(
@@ -7112,6 +7189,60 @@ QUnit.module("Views", (hooks) => {
             getNodesTextContent(target.querySelectorAll(".o_cp_action_menus .dropdown-item")),
             ["Export", "Delete", "Action event"]
         );
+    });
+
+    QUnit.test("execute ActionMenus actions", async function (assert) {
+        patchWithCleanup(actionService, {
+            start() {
+                return {
+                    doAction(id, { additionalContext, onClose }) {
+                        assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                        onClose(); // simulate closing of target new action's dialog
+                    },
+                };
+            },
+        });
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree><field name="foo"/></tree>',
+            info: {
+                actionMenus: {
+                    action: [
+                        {
+                            id: 44,
+                            name: "Custom Action",
+                            type: "ir.actions.act_window",
+                            target: "new",
+                        },
+                    ],
+                    print: [],
+                },
+            },
+            actionMenus: {},
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        assert.containsNone(target, "div.o_control_panel .o_cp_action_menus");
+        assert.containsN(target, ".o_data_row", 4);
+        // select all records
+        await click(target, "thead .o_list_record_selector input");
+        assert.containsN(target, ".o_list_record_selector input:checked", 5);
+        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
+
+        await toggleActionMenu(target);
+        await toggleMenuItem(target, "Custom Action");
+
+        assert.verifySteps([
+            "get_views",
+            "web_search_read",
+            `{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}`,
+            "web_search_read",
+        ]);
     });
 
     QUnit.test(

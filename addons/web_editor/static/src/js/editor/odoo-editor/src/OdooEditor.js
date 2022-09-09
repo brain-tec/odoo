@@ -3031,7 +3031,7 @@ export class OdooEditor extends EventTarget {
             } else if (closestTag === 'TABLE') {
                 this._onTabulationInTable(ev);
             } else if (!ev.shiftKey) {
-                this.execCommand('insert', '\u00A0 \u00A0\u00A0');
+                this.execCommand('insert', parseHTML('<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B'));
             }
             ev.preventDefault();
             ev.stopPropagation();
@@ -3101,7 +3101,7 @@ export class OdooEditor extends EventTarget {
             // Move selection if next character is zero-width space
             if (nextCharacter === '\u200B') {
                 focusOffset += 1;
-                while (focusNode && !focusNode.textContent[focusOffset]) {
+                while (focusNode && !focusNode.textContent[focusOffset] || !closestElement(focusNode).isContentEditable) {
                     focusNode = nextLeaf(focusNode);
                     focusOffset = 0;
                 }
@@ -3115,11 +3115,27 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onSelectionChange() {
+        const selection = this.document.getSelection();
+        // When CTRL+A in the editor, sometimes the browser use the editable
+        // element as an anchor & focus node. This is an issue for the commands
+        // and the toolbar so we need to fix the selection to be based on the
+        // editable children. Calling `getDeepRange` ensure the selection is
+        // limited to the editable.
+        if (
+            selection.anchorNode === this.editable &&
+            selection.focusNode === this.editable &&
+            selection.anchorOffset === 0 &&
+            selection.focusOffset === [...this.editable.childNodes].length
+        ) {
+            getDeepRange(this.editable, {select: true});
+            // The selection is changed in `getDeepRange` and will therefore
+            // re-trigger the _onSelectionChange.
+            return;
+        }
+
         // Compute the current selection on selectionchange but do not record it. Leave
         // that to the command execution or the 'input' event handler.
         this._computeHistorySelection();
-
-        const selection = this.document.getSelection();
 
         if (this._currentMouseState === 'mouseup') {
             this._fixFontAwesomeSelection();
@@ -3143,7 +3159,7 @@ export class OdooEditor extends EventTarget {
      * @returns {boolean}
      */
     isSelectionInEditable(selection) {
-        selection = selection || this.document.getSelection()
+        selection = selection || this.document.getSelection();
         return selection && selection.anchorNode && this.editable.contains(selection.anchorNode) &&
             this.editable.contains(selection.focusNode);
     }
@@ -3243,6 +3259,10 @@ export class OdooEditor extends EventTarget {
         // at the end of the edition (see cleanForSave())
         for (const el of element.querySelectorAll('[contenteditable="false"]')) {
             el.setAttribute('data-oe-keep-contenteditable', '');
+        }
+        // Flag elements .oe-tabs contenteditable=false.
+        for (const el of element.querySelectorAll('.oe-tabs')) {
+            el.setAttribute('contenteditable', 'false');
         }
     }
 

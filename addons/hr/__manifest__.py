@@ -26,6 +26,7 @@
         'wizard/hr_plan_wizard_views.xml',
         'wizard/hr_departure_wizard_views.xml',
         'views/hr_departure_reason_views.xml',
+        'views/hr_contract_type_views.xml',
         'views/hr_job_views.xml',
         'views/hr_plan_views.xml',
         'views/hr_employee_category_views.xml',
@@ -70,6 +71,9 @@
             'hr/static/tests/helpers/*.js',
             'hr/static/tests/m2x_avatar_employee_tests.js',
             'hr/static/tests/standalone_m2o_avatar_employee_tests.js',
+        ],
+        'web.assets_tests': [
+            'hr/static/tests/tours/hr_employee_flow.js',
         ],
     },
     'license': 'LGPL-3',

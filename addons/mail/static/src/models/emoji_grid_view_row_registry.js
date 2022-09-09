@@ -28,7 +28,6 @@ registerModel({
                     currentItems = [];
                     index++;
                 }
-                viewCategory.update({ endSectionIndex: index - 1 });
             }
             return value;
         },
@@ -43,10 +42,15 @@ registerModel({
             for (let emoji of emojis) {
                 currentItems.push({ emojiOrEmojiInCategory: { emoji } });
                 if (currentItems.length === this.emojiGridViewOwner.amountOfItemsPerRow) {
-                    index++;
                     value.push({ items: currentItems, index });
                     currentItems = [];
+                    index++;
                 }
+            }
+            if (currentItems.length > 0) {
+                value.push({ items: currentItems, index });
+                currentItems = [];
+                index++;
             }
             return value;
         },

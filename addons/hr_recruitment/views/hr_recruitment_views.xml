@@ -47,6 +47,7 @@
                 <field name="salary_proposed" optional="hide"/>
                 <field name="availability" optional="hide"/>
                 <field name="department_id" invisible="context.get('invisible_department', True)" readonly="1"/>
+                <field name="company_id" invisible="1"/>
                 <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
             </tree>
         </field>
@@ -138,6 +139,7 @@
                         <field name="partner_phone" widget="phone" options="{'enable_sms': 0}"/>
                         <field name="partner_mobile" widget="phone"/>
                         <field name="type_id" placeholder="Degree"/>
+                        <field name="linkedin_profile" widget="url"/>
                     </group>
                     <group>
                         <field name="categ_ids" placeholder="Tags" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
@@ -517,9 +519,10 @@
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr.view_hr_job_form"/>
         <field name="arch" type="xml">
-            <field name="department_id" position="before">
+            <div name="recruitment_target" position="after">
                 <field name="user_id" widget="many2one_avatar_user"/>
-            </field>
+                <field name="interviewer_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}" />
+            </div>
             <xpath expr="//field[@name='department_id']" position="after">
                 <label for="address_id"/>
                 <div class="o_row">
@@ -533,9 +536,6 @@
                         <field name="alias_name" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
                     </div>
                 </div>
-            </xpath>
-            <xpath expr="//div[@name='recruitment_target']" position="after">
-                <field name="interviewer_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}" />
             </xpath>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button"
@@ -863,6 +863,13 @@
         action="hr_recruitment_stage_act"
         groups="base.group_no_one"
         sequence="1"/>
+
+    <menuitem
+        id="menu_hr_recruitment_contract_type"
+        action="hr.hr_contract_type_action"
+        parent="menu_hr_recruitment_config_jobs"
+        sequence="2"
+        groups="hr.group_hr_user"/>
 
     <!-- Tag Form View -->
     <record id="hr_applicant_category_view_form" model="ir.ui.view">

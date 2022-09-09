@@ -635,6 +635,46 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector('.o_field_widget[name="foo"]'), "text-danger");
     });
 
+    QUnit.test("decoration-bf works on fields", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="int_field"/>
+                    <field name="display_name" decoration-bf="int_field &lt; 5"/>
+                    <field name="foo" decoration-bf="int_field &gt; 5"/>
+                </form>`,
+            resId: 2,
+        });
+        assert.doesNotHaveClass(
+            target.querySelector('.o_field_widget[name="display_name"]'),
+            "fw-bold"
+        );
+        assert.hasClass(target.querySelector('.o_field_widget[name="foo"]'), "fw-bold");
+    });
+
+    QUnit.test("decoration-it works on fields", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="int_field"/>
+                    <field name="display_name" decoration-it="int_field &lt; 5"/>
+                    <field name="foo" decoration-it="int_field &gt; 5"/>
+                </form>`,
+            resId: 2,
+        });
+        assert.doesNotHaveClass(
+            target.querySelector('.o_field_widget[name="display_name"]'),
+            "fst-italic"
+        );
+        assert.hasClass(target.querySelector('.o_field_widget[name="foo"]'), "fst-italic");
+    });
+
     QUnit.test("decoration on widgets are reevaluated if necessary", async function (assert) {
         await makeView({
             type: "form",
@@ -859,6 +899,24 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_field_widget[name=foo]");
         assert.containsNone(target, ".o_field_widget[name=qux]");
         assert.containsNone(target, ".o_field_widget[name=p]");
+    });
+
+    QUnit.test("correctly copy attributes to compiled labels", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <label string="Apply after" for="bar" class="a"/>
+                    <field name="bar" class="b"/>
+                    <label string="hours" for="bar" class="c"/>
+                </form>`,
+        });
+
+        assert.hasClass(target.querySelectorAll(".o_form_label")[0], "a");
+        assert.hasClass(target.querySelector(".o_field_widget.o_field_boolean"), "b");
+        assert.hasClass(target.querySelectorAll(".o_form_label")[1], "c");
     });
 
     QUnit.test("invisible elements are properly hidden", async function (assert) {
@@ -7460,6 +7518,53 @@ QUnit.module("Views", (hooks) => {
         await toggleMenuItem(target, "Action partner");
     });
 
+    QUnit.test("execute ActionMenus actions", async function (assert) {
+        const actionService = {
+            start() {
+                return {
+                    doAction(id, { additionalContext, onClose }) {
+                        assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                        onClose(); // simulate closing of target new action's dialog
+                    },
+                };
+            },
+        };
+        registry.category("services").add("action", actionService, { force: true });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            resId: 1,
+            arch: `<form><field name="bar"/></form>`,
+            info: {
+                actionMenus: {
+                    action: [
+                        {
+                            id: 29,
+                            name: "Action partner",
+                        },
+                    ],
+                },
+            },
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        assert.containsOnce(target, ".o_cp_action_menus .dropdown-toggle:contains(Action)");
+
+        await toggleActionMenu(target);
+        await toggleMenuItem(target, "Action Partner");
+
+        assert.verifySteps([
+            "get_views",
+            "read",
+            `{"action_id":29,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1],"active_model":"partner","active_domain":[]}}`,
+            "read",
+        ]);
+    });
+
     QUnit.test("control panel is not present in FormViewDialogs", async function (assert) {
         serverData.models.partner.records[0].product_id = 37;
         serverData.views = {
@@ -9509,32 +9614,11 @@ QUnit.module("Views", (hooks) => {
         widgetRegistry.remove("test_widget");
     });
 
-    QUnit.test("attach document widget calls action with attachment ids", async function (assert) {
-        assert.expect(1);
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            mockRPC(route, args) {
-                if (args.method === "my_action") {
-                    assert.deepEqual(args.kwargs.attachment_ids, [5, 2]);
-                    return true;
-                }
-            },
-            arch: `<form><widget name="attach_document" action="my_action"/></form>`,
+    QUnit.test("support header button as widgets on form statusbar", async function (assert) {
+        serviceRegistry.add("http", {
+            start: () => ({}),
         });
 
-        var onFileLoadedEventName = target.querySelector(".o_form_binary_form").target;
-        // trigger _onFileLoaded function
-        // TODO wowl remove line below when implem don't require jquery
-        $(window).trigger(onFileLoadedEventName, [{ id: 5 }, { id: 2 }]);
-        // await triggerEvent(window, null, onFileLoadedEventName, {
-        //     attachment_ids: [{ id: 5 }, { id: 2 }],
-        // });
-    });
-
-    QUnit.test("support header button as widgets on form statusbar", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

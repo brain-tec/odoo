@@ -140,8 +140,8 @@ class User(models.Model):
     employee_type = fields.Selection(related='employee_id.employee_type', readonly=False, related_sudo=False)
     employee_resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', string="Employee's Working Hours", readonly=True)
 
-    create_employee = fields.Boolean(store=False, default=True, string="Technical field, whether to create an employee")
-    create_employee_id = fields.Many2one('hr.employee', store=False, string="Technical field, bind user to this employee on create")
+    create_employee = fields.Boolean(store=False, default=True, copy=False, string="Technical field, whether to create an employee")
+    create_employee_id = fields.Many2one('hr.employee', store=False, copy=False, string="Technical field, bind user to this employee on create")
 
     can_edit = fields.Boolean(compute='_compute_can_edit')
     is_system = fields.Boolean(compute="_compute_is_system")
@@ -167,6 +167,20 @@ class User(models.Model):
     @property
     def SELF_WRITEABLE_FIELDS(self):
         return super().SELF_WRITEABLE_FIELDS + HR_WRITABLE_FIELDS
+
+    @api.model
+    def get_views(self, views, options=None):
+        # Requests the My Profile form view as last.
+        # Otherwise the fields of the 'search' view will take precedence
+        # and will omit the fields that are requested as SUPERUSER
+        # in `get_view()`.
+        profile_view = self.env.ref("hr.res_users_view_form_profile")
+        profile_form = profile_view and [profile_view.id, 'form']
+        if profile_form and profile_form in views:
+            views.remove(profile_form)
+            views.append(profile_form)
+        result = super().get_views(views, options)
+        return result
 
     @api.model
     def get_view(self, view_id=None, view_type='form', **options):
