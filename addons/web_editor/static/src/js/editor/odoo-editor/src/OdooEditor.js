@@ -2252,6 +2252,10 @@ export class OdooEditor extends EventTarget {
         } else {
             this._columnUi.style.visibility = 'hidden';
         }
+        if (row || column) {
+            const table = closestElement(row || column, 'table');
+            table && table.addEventListener('mouseleave', () => this._toggleTableUi(), { once: true });
+        }
     }
     /**
      * Position the table row/column tools (depending on whether a row or a cell
@@ -3024,7 +3028,7 @@ export class OdooEditor extends EventTarget {
         } else if (ev.key === 'Tab') {
             // Tab
             const sel = this.document.getSelection();
-            const closestTag = (closestElement(sel.anchorNode, 'li, table', true) || {}).tagName;
+            const closestTag = (closestElement(sel.anchorNode, 'li, table') || {}).tagName;
 
             if (closestTag === 'LI') {
                 this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent');
@@ -3116,6 +3120,13 @@ export class OdooEditor extends EventTarget {
      */
     _onSelectionChange() {
         const selection = this.document.getSelection();
+        if (
+            !this.editable.contains(selection.anchorNode) &&
+            !this.editable.contains(selection.focusNode)
+        ) {
+            // Do not affect selection outside of the editable.
+            return;
+        }
         // When CTRL+A in the editor, sometimes the browser use the editable
         // element as an anchor & focus node. This is an issue for the commands
         // and the toolbar so we need to fix the selection to be based on the
@@ -3652,11 +3663,11 @@ export class OdooEditor extends EventTarget {
             this._handleSelectionInTable(ev);
         }
         if (!this._rowUi.classList.contains('o_open') && !this._columnUi.classList.contains('o_open')) {
-            const column = closestElement(ev.target, 'td', true);
+            const column = closestElement(ev.target, 'td');
             if (this._isResizingTable || !column || !ev.target || ev.target.nodeType !== Node.ELEMENT_NODE) {
                 this._toggleTableUi(false, false);
             } else {
-                const row = closestElement(column, 'tr', true);
+                const row = closestElement(column, 'tr');
                 const isFirstColumn = column === row.querySelector('td');
                 const table = column && closestElement(column, 'table');
                 const isFirstRow = table && row === table.querySelector('tr');

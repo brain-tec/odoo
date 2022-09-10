@@ -60,7 +60,12 @@ QUnit.module("Views", (hooks) => {
                         foo: { string: "Foo", type: "char", default: "My little Foo Value" },
                         bar: { string: "Bar", type: "boolean" },
                         int_field: { string: "int_field", type: "integer", sortable: true },
-                        qux: { string: "Qux", type: "float", digits: [16, 1] },
+                        qux: {
+                            string: "Qux",
+                            type: "float",
+                            digits: [16, 1],
+                            group_operator: "sum",
+                        },
                         p: { string: "one2many field", type: "one2many", relation: "partner" },
                         trululu: { string: "Trululu", type: "many2one", relation: "partner" },
                         timmy: { string: "pokemon", type: "many2many", relation: "partner_type" },
@@ -11037,14 +11042,14 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(
             target,
-            ".o_widget .o_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
+            ".o_widget_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
         );
 
         await click(target.querySelector(".o_pager_next"));
 
         assert.containsOnce(
             target,
-            ".o_widget .o_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
+            ".o_widget_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
         );
     });
 
@@ -12122,5 +12127,65 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_form_button_edit");
         await click(target, ".o_form_button_cancel");
         assert.verifySteps(["save", "discard"]);
+    });
+
+    QUnit.test("form view does not deactivate sample data on other views", async function (assert) {
+        serverData.models.partner.records = [];
+        serverData.views = {
+            "partner,false,list": `<tree sample="1"><field name="name"/></tree>`,
+            "partner,false,form": `<form><field name="name"/></form>`,
+            "partner,false,search": `<search/>`,
+        };
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, {
+            name: "Partner",
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+        });
+
+        assert.containsOnce(target, ".o_list_view .o_content.o_view_sample_data");
+        await click(target.querySelector(".o_list_view .o_list_button_add"));
+        assert.containsOnce(target, ".o_form_view");
+        await click(target.querySelector(".o_form_view .breadcrumb-item a"));
+        assert.containsOnce(target, ".o_list_view .o_content.o_view_sample_data");
+    });
+
+    QUnit.test("empty x2manys when coming form a list with sample data", async function (assert) {
+        serverData.models.partner.records = [];
+        serverData.views = {
+            "partner,false,list": `<tree sample="1"><field name="name"/></tree>`,
+            "partner,false,form": `
+                <form>
+                    <field name="p">
+                        <kanban>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div><field name="name"/></div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </form>`,
+            "partner,false,search": `<search/>`,
+        };
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, {
+            name: "Partner",
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+        });
+
+        assert.containsOnce(target, ".o_list_view .o_content.o_view_sample_data");
+        await click(target.querySelector(".o_list_view .o_list_button_add"));
+        assert.containsOnce(target, ".o_form_view .o_field_x2many .o_kanban_renderer");
+        assert.containsNone(target, ".o_view_nocontent");
     });
 });
