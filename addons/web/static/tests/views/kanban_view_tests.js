@@ -626,6 +626,29 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
+    QUnit.test("kanban grouped by date field", async (assert) => {
+        serverData.models.partner.records[0].date = "2007-06-10";
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <field name="date"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div><field name="foo"/></div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["date"],
+        });
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_column_title")), [
+            "None",
+            "June 2007",
+        ]);
+    });
     QUnit.test("context can be used in kanban template", async (assert) => {
         await makeView({
             type: "kanban",
@@ -6272,7 +6295,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test(
-        "nocontent helper for grouped kanban with no records with no group_create",
+        "nocontent helper for grouped kanban (on m2o field) with no records with no group_create",
         async (assert) => {
             serverData.models.partner.records = [];
 
@@ -6302,6 +6325,35 @@ QUnit.module("Views", (hooks) => {
                 ".o_column_quick_create",
                 "there should not be a column quick create"
             );
+        }
+    );
+
+    QUnit.test(
+        "nocontent helper for grouped kanban (on date field) with no records with no group_create",
+        async (assert) => {
+            serverData.models.partner.records = [];
+
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <kanban group_create="false">
+                        <templates>
+                            <t t-name="kanban-box">
+                                <div><field name="foo"/></div>
+                            </t>
+                        </templates>
+                    </kanban>`,
+                groupBy: ["date"],
+                noContentHelp: "No content helper",
+            });
+
+            assert.containsNone(target, ".o_kanban_group");
+            assert.containsNone(target, ".o_kanban_record");
+            assert.containsOnce(target, ".o_view_nocontent");
+            assert.containsNone(target, ".o_column_quick_create");
+            assert.containsNone(target, ".o_kanban_example_background");
         }
     );
 

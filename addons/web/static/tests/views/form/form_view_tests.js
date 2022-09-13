@@ -8140,6 +8140,36 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+     QUnit.test("form rendering innergroup: separator should take one line", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <separator string="sep"/>
+                                <td class="o_td_label">
+                                    <label for="display_name"/>
+                                </td>
+                                <field name="display_name" nolabel="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>`,
+            resId: 1,
+        });
+
+         const rows = document.querySelectorAll('.o_inner_group tr');
+         assert.containsOnce(rows[0], '> td', 'Should only contain one cell');
+         assert.containsOnce(rows[0], '.o_horizontal_separator');
+         assert.containsN(rows[1], '> td', 2, 'Should contain 2 cells');
+         assert.containsOnce(rows[1], 'label[for=display_name]');
+         assert.containsOnce(rows[1], 'div[name=display_name]');
+    });
+
     QUnit.test("outer and inner groups string attribute", async function (assert) {
         await makeView({
             type: "form",
@@ -9495,7 +9525,7 @@ QUnit.module("Views", (hooks) => {
         });
         assert.containsOnce(
             target,
-            ".o_list_renderer thead tr th:not(.o_list_record_remove_header)",
+            ".o_list_renderer thead tr th:not(.o_list_actions_header)",
             "there should be only one column"
         );
     });
@@ -9520,7 +9550,7 @@ QUnit.module("Views", (hooks) => {
         });
         assert.containsOnce(
             target,
-            ".o_list_renderer thead tr th:not(.o_list_record_remove_header)",
+            ".o_list_renderer thead tr th:not(.o_list_actions_header)",
             "there should be only one column"
         );
     });
@@ -11938,6 +11968,8 @@ QUnit.module("Views", (hooks) => {
             // need to preventDefault to remove error from console (so python test pass)
             ev.preventDefault();
         };
+        // fake error service so that the odoo qunit handlers don't think that they need to handle the error
+        registry.category("services").add("error", { start: () => {} });
         window.addEventListener("unhandledrejection", handler);
         registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
         patchWithCleanup(QUnit, {

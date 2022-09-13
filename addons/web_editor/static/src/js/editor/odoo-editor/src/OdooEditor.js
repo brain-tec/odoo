@@ -409,7 +409,6 @@ export class OdooEditor extends EventTarget {
         // Powerbox
         // --------
 
-        let beforeStepIndex;
         this.powerbox = new Powerbox({
             editable: this.editable,
             getContextFromParentRect: this.options.getContextFromParentRect,
@@ -417,13 +416,9 @@ export class OdooEditor extends EventTarget {
             onShow: () => {
                 this.powerboxTablePicker.hide();
             },
-            onOpen: () => {
-                // Undo input '/'.
-                beforeStepIndex = this._historySteps.length - 2;
-            },
             beforeCommand: () => {
                 if (this._isPowerboxOpenOnInput) {
-                    this._historyRevertUntil(beforeStepIndex);
+                    this._historyRevertUntil(this._powerboxBeforeStepIndex);
                     this.historyStep(true);
                     this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
                     setTimeout(() => {
@@ -667,6 +662,16 @@ export class OdooEditor extends EventTarget {
         // Remove table UI
         this._rowUi.remove();
         this._columnUi.remove();
+    }
+
+    resetContent(value = '<p><br></p>') {
+        this.editable.innerHTML = value;
+        this.sanitize();
+        this.historyStep(true);
+        // The unbreakable protection mechanism detects an anomaly and attempts
+        // to trigger a rollback when the content is reset using `innerHTML`.
+        // Prevent this rollback as it would otherwise revert the new content.
+        this._toRollback = false;
     }
 
     sanitize() {
@@ -2812,6 +2817,10 @@ export class OdooEditor extends EventTarget {
         const shouldOpenPowerbox = newSelection.isCollapsed && newSelection.rangeCount &&
             ev.data === '/' && this.powerbox && !this.powerbox.isOpen &&
             (!this.options.getPowerboxElement || !!this.options.getPowerboxElement());
+        if (shouldOpenPowerbox) {
+            // Undo input '/'.
+            this._powerboxBeforeStepIndex = this._historySteps.length - 1;
+        }
         // Record the selection position that was computed on keydown or before
         // contentEditable execCommand (whatever preceded the 'input' event)
         this._recordHistorySelection(true);
@@ -3213,13 +3222,6 @@ export class OdooEditor extends EventTarget {
 
     clean() {
         this.observerUnactive();
-        for (const hint of this.editable.querySelectorAll('.oe-hint')) {
-            hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
-            if (hint.classList.length === 0) {
-                hint.removeAttribute('class');
-            }
-            hint.removeAttribute('placeholder');
-        }
         this.cleanForSave();
         this.observerActive();
     }
@@ -3278,6 +3280,14 @@ export class OdooEditor extends EventTarget {
     }
 
     cleanForSave(element = this.editable) {
+        for (const hint of element.querySelectorAll('.oe-hint')) {
+            hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
+            if (hint.classList.length === 0) {
+                hint.removeAttribute('class');
+            }
+            hint.removeAttribute('placeholder');
+        }
+
         sanitize(element);
 
         this._pluginCall('cleanForSave', [element]);
@@ -3372,7 +3382,7 @@ export class OdooEditor extends EventTarget {
         }
 
         // placeholder hint
-        if (this.editable.textContent === '' && this.options.placeholder) {
+        if (this.editable.textContent === '' && this.options.placeholder && this.editable.firstChild && this.editable.firstChild.innerHTML) {
             this._makeHint(this.editable.firstChild, this.options.placeholder, true);
         }
     }
