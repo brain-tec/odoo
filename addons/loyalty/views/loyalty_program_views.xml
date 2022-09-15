@@ -82,7 +82,7 @@
                             </div>
                             <field name="trigger_product_ids" string="Gift Card Products" widget="many2many_tags" attrs="{'invisible': [('program_type', '!=', 'gift_card')]}"/>
                             <field name="trigger_product_ids" string="eWallet Products" widget="many2many_tags" attrs="{'invisible': [('program_type', '!=', 'ewallet')]}"/>
-                            <field name="mail_template_id" widget="many2one_tags" attrs="{'invisible': [('program_type', 'not in', ('gift_card', 'ewallet'))]}"/>
+                            <field name="mail_template_id" attrs="{'invisible': [('program_type', 'not in', ('gift_card', 'ewallet'))]}"/>
                             <field name="currency_id"/>
                             <field name="currency_symbol" invisible="1"/>
                             <field name="portal_point_name" attrs="{'invisible': [('program_type', 'in', ('loyalty', 'gift_card', 'ewallet'))]}" string="Points Unit" groups="base.group_no_one"/>
@@ -114,11 +114,11 @@
                             <group>
                                 <group>
                                     <field name="rule_ids" colspan="2" mode="kanban" nolabel="1" add-label="Add a rule"
-                                        class="o_loyalty_kanban_inline" widget="loyalty_one2many" context="{'currency_symbol': currency_symbol}"/>
+                                        class="o_loyalty_kanban_inline" widget="loyalty_one2many" context="{'currency_symbol': currency_symbol, 'program_type': program_type}"/>
                                 </group>
                                 <group>
                                     <field name="reward_ids" colspan="2" mode="kanban" nolabel="1" add-label="Add a reward"
-                                      class="o_loyalty_kanban_inline" widget="loyalty_one2many" context="{'currency_symbol': currency_symbol}"/>
+                                      class="o_loyalty_kanban_inline" widget="loyalty_one2many" context="{'currency_symbol': currency_symbol, 'program_type': program_type}"/>
                                 </group>
                             </group>
                         </page>

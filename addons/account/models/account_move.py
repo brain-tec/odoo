@@ -315,6 +315,7 @@ class AccountMove(models.Model):
              "A Company bank account if this is a Customer Invoice or Vendor Credit Note, "
              "otherwise a Partner bank account number.",
         check_company=True,
+        tracking=True,
     )
     fiscal_position_id = fields.Many2one(
         'account.fiscal.position',
@@ -334,6 +335,7 @@ class AccountMove(models.Model):
         index='trigram',
         copy=False,
         help="The payment reference to set on journal items.",
+        tracking=True,
     )
     display_qr_code = fields.Boolean(
         string="Display QR-code",
@@ -1258,7 +1260,7 @@ class AccountMove(models.Model):
                     del context
                 move.narration = narration or False
 
-    @api.depends('company_id', 'partner_id', 'amount_total_signed')
+    @api.depends('company_id', 'partner_id', 'tax_totals', 'currency_id')
     def _compute_partner_credit_warning(self):
         for move in self:
             move.with_company(move.company_id)
@@ -1267,7 +1269,8 @@ class AccountMove(models.Model):
                            move.move_type == 'out_invoice' and \
                            move.company_id.account_use_credit_limit
             if show_warning:
-                updated_credit = move.partner_id.credit + move.amount_total_signed
+                amount_total_currency = move.currency_id._convert(move.tax_totals['amount_total'], move.company_currency_id, move.company_id, move.date)
+                updated_credit = move.partner_id.commercial_partner_id.credit + amount_total_currency
                 move.partner_credit_warning = self._build_credit_warning_message(move, updated_credit)
 
     def _build_credit_warning_message(self, record, updated_credit):
@@ -1277,13 +1280,13 @@ class AccountMove(models.Model):
             :param updated_credit (float):  The partner's updated credit limit including the current record.
             :return (str):                  The warning message to be showed.
         '''
-        credit_limit = record.partner_id.credit_limit
-        if (not credit_limit) or updated_credit <= credit_limit:
+        partner_id = record.partner_id.commercial_partner_id
+        if not partner_id.credit_limit or updated_credit <= partner_id.credit_limit:
             return ''
         msg = _('%s has reached its Credit Limit of : %s\nTotal amount due ',
-                record.partner_id.name,
-                formatLang(self.env, credit_limit, currency_obj=record.company_id.currency_id))
-        if updated_credit > record.partner_id.credit:
+                partner_id.name,
+                formatLang(self.env, partner_id.credit_limit, currency_obj=record.company_id.currency_id))
+        if updated_credit > partner_id.credit:
             msg += _('(including this document) ')
         msg += ': %s' % formatLang(self.env, updated_credit, currency_obj=record.company_id.currency_id)
         return msg
@@ -3061,7 +3064,7 @@ class AccountMove(models.Model):
             'res_model': 'account.invoice.send',
             'view_mode': 'form',
             'context': {
-                'default_email_layout_xmlid': 'mail.mail_notification_paynow',
+                'default_email_layout_xmlid': 'mail.mail_notification_layout_with_responsible_signature',
                 'default_template_id': self.env.ref(self._get_mail_template()).id,
                 'mark_invoice_as_sent': True,
                 'active_model': 'account.move',
@@ -3097,7 +3100,7 @@ class AccountMove(models.Model):
             default_template_id=template and template.id or False,
             default_composition_mode='comment',
             mark_invoice_as_sent=True,
-            default_email_layout_xmlid="mail.mail_notification_paynow",
+            default_email_layout_xmlid="mail.mail_notification_layout_with_responsible_signature",
             model_description=self.with_context(lang=lang).type_name,
             force_email=True,
         )
@@ -3582,13 +3585,15 @@ class AccountMove(models.Model):
             message, msg_vals, model_description=model_description,
             force_email_company=force_email_company, force_email_lang=force_email_lang
         )
+        subtitles = [render_context['record'].name]
         if self.invoice_date_due:
-            render_context['subtitle'] = _('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
+            subtitles.append(_('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
                            amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
                            date=format_date(self.env, self.invoice_date_due, date_format='short', lang_code=render_context.get('lang'))
-                          )
+                          ))
         else:
-            render_context['subtitle'] = format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang'))
+            subtitles.append(format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')))
+        render_context['subtitles'] = subtitles
         return render_context
 
     # -------------------------------------------------------------------------

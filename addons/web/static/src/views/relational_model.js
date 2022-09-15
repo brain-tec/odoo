@@ -15,6 +15,7 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { unique } from "@web/core/utils/arrays";
 import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
+import { memoize } from "@web/core/utils/functions";
 import { escape } from "@web/core/utils/strings";
 import { session } from "@web/session";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
@@ -776,6 +777,11 @@ export class Record extends DataPoint {
         return value.records.every(async (r) => await r.checkValidity());
     }
 
+    /**
+     * @param {Object} [params={}]
+     * @param {Object} [params.values]
+     * @param {Object} [params.changes]
+     */
     async load(params = {}) {
         this._cache = {};
         for (const fieldName in this.activeFields) {
@@ -1289,8 +1295,7 @@ export class Record extends DataPoint {
                 await this.model.orm.write(this.resModel, [this.resId], changes, { context });
             } catch (e) {
                 if (!this.isInEdition) {
-                    await Promise.all([this.model.reloadRecords(this.resId), this.load()]);
-                    this.model.notify();
+                    await this.model.reloadRecords(this);
                 }
                 throw e;
             }
@@ -1304,9 +1309,7 @@ export class Record extends DataPoint {
         }
         this.isInQuickCreation = false;
         if (shouldReload) {
-            await Promise.all([this.model.reloadRecords(this.resId), this.load()]);
-            this.model.trigger("record-updated", { record: this });
-            this.model.notify();
+            await this.model.reloadRecords(this);
         }
         if (!options.stayInEdition) {
             this.switchMode("readonly");
@@ -1719,7 +1722,6 @@ class DynamicList extends DataPoint {
             }
         }
 
-        this.model.notify();
         return records;
     }
 
@@ -1747,6 +1749,10 @@ export class DynamicRecordList extends DynamicList {
 
     get quickCreateRecord() {
         return this.records.find((r) => r.isInQuickCreation);
+    }
+
+    get quickCreateRecordIndex() {
+        return this.records.findIndex((r) => r.isInQuickCreation);
     }
 
     // -------------------------------------------------------------------------
@@ -1900,7 +1906,7 @@ export class DynamicRecordList extends DynamicList {
         }
     }
 
-    async quickCreate(activeFields, context) {
+    async quickCreate(activeFields, context, atFirstPosition = true) {
         await this.model.mutex.getUnlockedDef();
         const record = this.quickCreateRecord;
         if (record) {
@@ -1910,7 +1916,10 @@ export class DynamicRecordList extends DynamicList {
             parent: this.rawContext,
             make: () => makeContext([context, {}]),
         };
-        return this.createRecord({ activeFields, rawContext, isInQuickCreation: true }, true);
+        return this.createRecord(
+            { activeFields, rawContext, isInQuickCreation: true },
+            atFirstPosition
+        );
     }
 
     /**
@@ -1938,6 +1947,7 @@ export class DynamicRecordList extends DynamicList {
 
     async resequence() {
         this.records = await this._resequence(this.records, this.resModel, ...arguments);
+        this.model.notify();
     }
 
     // -------------------------------------------------------------------------
@@ -2050,6 +2060,8 @@ export class DynamicGroupList extends DynamicList {
                 };
                 return onRemoveRecord;
             });
+
+        this._loadQuickCreateView = memoize(this._loadQuickCreateView.bind(this));
     }
 
     // -------------------------------------------------------------------------
@@ -2078,7 +2090,7 @@ export class DynamicGroupList extends DynamicList {
     get records() {
         return this.groups
             .filter((group) => !group.isFolded)
-            .map((group) => group.list.records)
+            .map((group) => group.records)
             .flat();
     }
 
@@ -2103,28 +2115,10 @@ export class DynamicGroupList extends DynamicList {
     }
 
     /**
-     * @param {any} value
-     * @returns {Promise<Group>}
+     * @see {_createGroup}
      */
-    async createGroup(value) {
-        const [id, displayName] = await this.model.mutex.exec(() =>
-            this.model.orm.call(this.groupByField.relation, "name_create", [value], {
-                context: this.context,
-            })
-        );
-        const group = this.model.createDataPoint("group", {
-            ...this.commonGroupParams,
-            count: 0,
-            value: id,
-            displayName,
-            aggregates: {},
-            groupByField: this.groupByField,
-            rawContext: this.rawContext,
-            // FIXME
-            // groupDomain: this.groupDomain,
-        });
-        group.isFolded = false;
-        return this.addGroup(group);
+    async createGroup(groupName) {
+        await this.model.mutex.exec(() => this._createGroup(groupName));
     }
 
     /**
@@ -2216,20 +2210,23 @@ export class DynamicGroupList extends DynamicList {
         return this.groups.reduce((acc, group) => acc + group.count, 0);
     }
 
-    async quickCreate(group) {
+    async quickCreate(group, atFirstPosition = true) {
+        group = group || this.groups[0];
         if (this.model.useSampleModel) {
             // Empty the groups because they contain sample data
-            this.groups.map((group) => group.empty());
+            this.groups.forEach((g) => g.empty());
         }
         this.model.useSampleModel = false;
-        if (!this.quickCreateInfo) {
-            this.quickCreateInfo = await this._loadQuickCreateView();
+        const { isFolded } = group;
+        this.quickCreateInfo = await this._loadQuickCreateView();
+        if (isFolded !== group.isFolded) {
+            // Group has been manually (un)folded => drop the quickCreate action
+            return;
         }
-        group = group || this.groups[0];
-        if (group.isFolded) {
+        if (isFolded) {
             await group.toggle();
         }
-        await group.quickCreate(this.quickCreateInfo.activeFields, this.context);
+        await group.quickCreate(this.quickCreateInfo.activeFields, this.context, atFirstPosition);
     }
 
     /**
@@ -2262,11 +2259,43 @@ export class DynamicGroupList extends DynamicList {
             ? this.groupByField.relation
             : this.resModel;
         this.groups = await this._resequence(this.groups, resModel, ...arguments);
+        this.model.notify();
     }
 
     // ------------------------------------------------------------------------
     // Protected
     // ------------------------------------------------------------------------
+
+    /**
+     * @param {string} groupName
+     * @returns {Promise<Group>}
+     */
+    async _createGroup(groupName) {
+        const [id, displayName] = await this.model.orm.call(
+            this.groupByField.relation,
+            "name_create",
+            [groupName],
+            { context: this.context }
+        );
+        const [lastGroup] = this.groups.slice(-1);
+        const group = this.model.createDataPoint("group", {
+            ...this.commonGroupParams,
+            count: 0,
+            value: id,
+            displayName,
+            aggregates: {},
+            groupByField: this.groupByField,
+            rawContext: this.rawContext,
+        });
+        group.isFolded = false;
+        this.addGroup(group);
+
+        if (lastGroup) {
+            await this.resequence(group.id, lastGroup.id);
+        }
+
+        return group;
+    }
 
     async _loadGroups() {
         const firstGroupByName = this.firstGroupBy.split(":")[0];
@@ -2383,27 +2412,20 @@ export class DynamicGroupList extends DynamicList {
     }
 
     async _loadQuickCreateView() {
-        if (this.isLoadingQuickCreate) {
-            return;
-        }
-        this.isLoadingQuickCreate = true;
         const { quickCreateView: viewRef } = this.model;
         let quickCreateFields = DEFAULT_QUICK_CREATE_FIELDS;
         let quickCreateForm = DEFAULT_QUICK_CREATE_VIEW;
         let quickCreateRelatedModels = {};
         if (viewRef) {
-            const { fields, relatedModels, views } = await this.model.keepLast.add(
-                this.model.viewService.loadViews({
-                    context: { ...this.context, form_view_ref: viewRef },
-                    resModel: this.resModel,
-                    views: [[false, "form"]],
-                })
-            );
+            const { fields, relatedModels, views } = await this.model.viewService.loadViews({
+                context: { ...this.context, form_view_ref: viewRef },
+                resModel: this.resModel,
+                views: [[false, "form"]],
+            });
             quickCreateFields = fields;
             quickCreateForm = views.form;
             quickCreateRelatedModels = relatedModels;
         }
-        this.isLoadingQuickCreate = false;
         const models = {
             ...quickCreateRelatedModels,
             [this.modelName]: quickCreateFields,
@@ -2462,6 +2484,10 @@ export class Group extends DataPoint {
         this.list = this.model.createDataPoint("list", listParams, state.listState);
     }
 
+    get records() {
+        return this.list.records;
+    }
+
     // ------------------------------------------------------------------------
     // Public
     // ------------------------------------------------------------------------
@@ -2477,7 +2503,7 @@ export class Group extends DataPoint {
     addExistingRecord(resId, atFirstPosition = false) {
         this.count++;
         return this.list.addExistingRecord(resId, atFirstPosition);
-    } 
+    }
 
     createRecord(params = {}, atFirstPosition = false) {
         this.count++;
@@ -2574,12 +2600,12 @@ export class Group extends DataPoint {
         });
     }
 
-    quickCreate(activeFields, context) {
+    quickCreate(activeFields, context, atFirstPosition = false) {
         const ctx = {
             ...context,
             [`default_${this.groupByField.name}`]: this.getServerValue(),
         };
-        return this.list.quickCreate(activeFields, ctx);
+        return this.list.quickCreate(activeFields, ctx, atFirstPosition);
     }
 
     /**
@@ -3393,13 +3419,23 @@ export class RelationalModel extends Model {
         return this.root.groups && this.root.groups.length ? this.root.groups : null;
     }
 
-    async reloadRecords(resId) {
-        if (this.rootType !== "form") {
-            const records = this.root.records.filter((r) => r.resId === resId);
-            if (records.length) {
-                await Promise.all(records.map((r) => r.load()));
-            }
-        }
+    /**
+     * Reloads a given record and all related records (those sharing the same resId).
+     * A "record-updated" event containing the given and related records is then
+     * triggered on the model.
+     *
+     * @param {Record} record
+     */
+    async reloadRecords(record) {
+        const records = this.rootType === "record" ? [this.root] : this.root.records;
+        const relatedRecords = records.filter(
+            (r) => r.id !== record.id && r.resId === record.resId
+        );
+
+        await Promise.all([record, ...relatedRecords].map((r) => r.load()));
+
+        this.trigger("record-updated", { record, relatedRecords });
+        this.notify();
     }
 }
 

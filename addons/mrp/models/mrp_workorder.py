@@ -582,9 +582,10 @@ class MrpWorkorder(models.Model):
         if self.product_tracking == 'serial':
             self.qty_producing = 1.0
 
-        self.env['mrp.workcenter.productivity'].create(
-            self._prepare_timeline_vals(self.duration, datetime.now())
-        )
+        if self._should_start_timer():
+            self.env['mrp.workcenter.productivity'].create(
+                self._prepare_timeline_vals(self.duration, datetime.now())
+            )
         if self.production_id.state != 'progress':
             self.production_id.write({
                 'date_start': datetime.now(),
@@ -640,30 +641,10 @@ class MrpWorkorder(models.Model):
         only the one of the current user
         """
         # TDE CLEANME
-        timeline_obj = self.env['mrp.workcenter.productivity']
         domain = [('workorder_id', 'in', self.ids), ('date_end', '=', False)]
         if not doall:
             domain.append(('user_id', '=', self.env.user.id))
-        not_productive_timelines = timeline_obj.browse()
-        for timeline in timeline_obj.search(domain, limit=None if doall else 1):
-            wo = timeline.workorder_id
-            if wo.duration_expected <= wo.duration:
-                if timeline.loss_type == 'productive':
-                    not_productive_timelines += timeline
-                timeline.write({'date_end': fields.Datetime.now()})
-            else:
-                maxdate = fields.Datetime.from_string(timeline.date_start) + relativedelta(minutes=wo.duration_expected - wo.duration)
-                enddate = datetime.now()
-                if maxdate > enddate:
-                    timeline.write({'date_end': enddate})
-                else:
-                    timeline.write({'date_end': maxdate})
-                    not_productive_timelines += timeline.copy({'date_start': maxdate, 'date_end': enddate})
-        if not_productive_timelines:
-            loss_id = self.env['mrp.workcenter.productivity.loss'].search([('loss_type', '=', 'performance')], limit=1)
-            if not len(loss_id):
-                raise UserError(_("You need to define at least one unactive productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."))
-            not_productive_timelines.write({'loss_id': loss_id.id})
+        self.env['mrp.workcenter.productivity'].search(domain, limit=None if doall else 1)._close()
         return True
 
     def end_all(self):
@@ -711,7 +692,7 @@ class MrpWorkorder(models.Model):
             'name': _('Scrap'),
             'view_mode': 'form',
             'res_model': 'stock.scrap',
-            'view_id': self.env.ref('stock.stock_scrap_form_view2').id,
+            'views': [(self.env.ref('stock.stock_scrap_form_view2').id, 'form')],
             'type': 'ir.actions.act_window',
             'context': {'default_company_id': self.production_id.company_id.id,
                         'default_workorder_id': self.id,
@@ -786,20 +767,6 @@ class MrpWorkorder(models.Model):
             res[wo1].append(wo2)
         return res
 
-    @api.model
-    def _prepare_component_quantity(self, move, qty_producing):
-        """ helper that computes quantity to consume (or to create in case of byproduct)
-        depending on the quantity producing and the move's unit factor"""
-        if move.product_id.tracking == 'serial':
-            uom = move.product_id.uom_id
-        else:
-            uom = move.product_uom
-        return move.product_uom._compute_quantity(
-            qty_producing * move.unit_factor,
-            uom,
-            round=False
-        )
-
     def _prepare_timeline_vals(self, duration, date_start, date_end=False):
         # Need a loss in case of the real time exceeding the expected
         if not self.duration_expected or duration <= self.duration_expected:
@@ -872,6 +839,9 @@ class MrpWorkorder(models.Model):
             ])
             if sml:
                 raise UserError(_('This serial number for product %s has already been produced', self.product_id.name))
+
+    def _should_start_timer(self):
+        return True
 
     def _update_qty_producing(self, quantity):
         self.ensure_one()

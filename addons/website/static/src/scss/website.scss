@@ -746,7 +746,7 @@ $-transition-duration: 200ms;
 .o_header_affixed {
     display: block;
     @include o-position-absolute(0, 0, auto, 0);
-    position: fixed;
+    position: sticky;
 
     &:not(.o_header_no_transition) {
         transition: transform $-transition-duration;
@@ -813,7 +813,7 @@ $-transition-duration: 200ms;
             box-shadow: none;
         }
         > .o_mega_menu .row > div { // remove mega menu col-lg-* style
-            max-width: none;
+            width: 100%;
             flex: auto;
         }
     }
@@ -1478,9 +1478,6 @@ $ribbon-padding: 100px;
 
 // Cookies Bar
 #website_cookies_bar {
-    :not(.o_cookies_popup) {
-        bottom: 0;
-    }
     .o_cookies_discrete {
         .js_close_popup.o_cookies_bar_text_button, .o_cookies_bar_text_policy {
             @include media-breakpoint-down(lg) {

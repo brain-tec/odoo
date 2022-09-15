@@ -12,8 +12,6 @@ from odoo.tools import groupby as groupbyelem
 
 from odoo.osv.expression import OR, AND
 
-from odoo.addons.web.controllers.utils import HomeStaticTemplateHelpers
-
 
 class ProjectCustomerPortal(CustomerPortal):
 
@@ -109,10 +107,12 @@ class ProjectCustomerPortal(CustomerPortal):
         """ Redirect the outdated routes to the new routes. """
         return request.redirect(request.httprequest.full_path.replace('/my/project/', '/my/projects/'))
 
-    @http.route(['/my/task', '/my/task/page/<int:page>'], type='http', auth='public')
+    @http.route(['/my/task',
+                 '/my/task/page/<int:page>',
+                 '/my/task/<int:task_id>'], type='http', auth='public')
     def portal_my_task_routes_outdated(self, **kwargs):
         """ Redirect the outdated routes to the new routes. """
-        return request.redirect(request.httprequest.path.replace('/my/task', '/my/tasks'))
+        return request.redirect(request.httprequest.full_path.replace('/my/task', '/my/tasks'))
 
     @http.route(['/my/projects/<int:project_id>', '/my/projects/<int:project_id>/page/<int:page>'], type='http', auth="public", website=True)
     def portal_my_project(self, project_id=None, access_token=None, page=1, date_begin=None, date_end=None, sortby=None, search=None, search_in='content', groupby=None, task_id=None, **kw):
@@ -133,7 +133,6 @@ class ProjectCustomerPortal(CustomerPortal):
         session_info = request.env['ir.http'].session_info()
         user_context = dict(request.env.context) if request.session.uid else {}
         mods = conf.server_wide_modules or []
-        qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(debug=request.session.debug, bundle="project.assets_qweb")
         if request.env.lang:
             lang = request.env.lang
             session_info['user_context']['lang'] = lang
@@ -142,7 +141,6 @@ class ProjectCustomerPortal(CustomerPortal):
         lang = user_context.get("lang")
         translation_hash = request.env['ir.translation'].get_web_translations_hash(mods, lang)
         cache_hashes = {
-            "qweb": qweb_checksum,
             "translations": translation_hash,
         }
 

@@ -100,6 +100,7 @@ You could use this simplified accounting in case you work with an (external) acc
             'account/static/src/js/legacy_account_move_form.js',
             'account/static/src/components/**/*',
             'account/static/src/js/tours/account.js',
+            'account/static/src/xml/**/*',
         ],
         'web.assets_frontend': [
             'account/static/src/js/account_portal_sidebar.js',
@@ -109,12 +110,7 @@ You could use this simplified accounting in case you work with an (external) acc
             'account/static/tests/tours/**/*',
         ],
         'web.qunit_suite_tests': [
-            ('after', 'web/static/tests/legacy/views/kanban_tests.js', 'account/static/tests/account_payment_field_tests.js'),
-            ('after', 'web/static/tests/legacy/views/kanban_tests.js', 'account/static/tests/section_and_note_tests.js'),
-        ],
-        'web.assets_qweb': [
-            'account/static/src/xml/**/*',
-            'account/static/src/components/**/*.xml',
+            'account/static/tests/*.js',
         ],
     },
     'license': 'LGPL-3',

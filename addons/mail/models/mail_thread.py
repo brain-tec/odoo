@@ -85,6 +85,7 @@ class MailThread(models.AbstractModel):
     message_partner_ids = fields.Many2many(
         comodel_name='res.partner', string='Followers (Partners)',
         compute='_compute_message_partner_ids',
+        inverse='_inverse_message_partner_ids',
         search='_search_message_partner_ids',
         groups='base.group_user')
     message_ids = fields.One2many(
@@ -112,6 +113,17 @@ class MailThread(models.AbstractModel):
     def _compute_message_partner_ids(self):
         for thread in self:
             thread.message_partner_ids = thread.message_follower_ids.mapped('partner_id')
+
+    def _inverse_message_partner_ids(self):
+        for thread in self:
+            new_partners_ids = thread.message_partner_ids
+            previous_partners_ids = thread.message_follower_ids.partner_id
+            removed_partners_ids = previous_partners_ids - new_partners_ids
+            added_patners_ids = new_partners_ids - previous_partners_ids
+            if added_patners_ids:
+                thread.message_subscribe(added_patners_ids.ids)
+            if removed_partners_ids:
+                thread.message_unsubscribe(removed_partners_ids.ids)
 
     @api.model
     def _search_message_partner_ids(self, operator, operand):
@@ -2411,7 +2423,7 @@ class MailThread(models.AbstractModel):
                                 mail_auto_delete=True,  # mail.mail
                                 model_description=False, force_email_company=False, force_email_lang=False,  # rendering
                                 resend_existing=False, force_send=True, send_after_commit=True,  # email send
-                                **kwargs):
+                                subtitles=None, **kwargs):
         """ Method to send email linked to notified messages.
 
         :param message: ``mail.message`` record to notify;
@@ -2442,6 +2454,7 @@ class MailThread(models.AbstractModel):
         :param force_send: send emails directly instead of using queue;
         :param send_after_commit: if force_send, tells whether to send emails after
           the transaction has been committed using a post-commit hook;
+        :param subtitles: optional list that will be set as template value "subtitles"
         """
         partners_data = [r for r in recipients_data if r['notif'] == 'email']
         if not partners_data:
@@ -2460,9 +2473,11 @@ class MailThread(models.AbstractModel):
             force_email_company=force_email_company,
             force_email_lang=force_email_lang,
         ) # 10 queries
+        if subtitles:
+            template_values['subtitles'] = subtitles
 
         email_layout_xmlid = msg_vals.get('email_layout_xmlid') if msg_vals else message.email_layout_xmlid
-        template_xmlid = email_layout_xmlid if email_layout_xmlid else 'mail.message_notification_email'
+        template_xmlid = email_layout_xmlid if email_layout_xmlid else 'mail.mail_notification_layout'
         base_mail_values = self._notify_by_email_get_base_mail_values(message, additional_values={'auto_delete': mail_auto_delete})
 
         # Clean the context to get rid of residual default_* keys that could cause issues during
@@ -2649,7 +2664,7 @@ class MailThread(models.AbstractModel):
             'model_description': model_description,
             'record': self,
             'record_name': record_name,
-            'subtitle': False,
+            'subtitles': [record_name],
             # user / environment
             'company': company,
             'email_add_signature': email_add_signature,
@@ -3070,7 +3085,7 @@ class MailThread(models.AbstractModel):
                 body=assignation_msg,
                 partner_ids=partner_ids,
                 record_name=record.display_name,
-                email_layout_xmlid='mail.mail_notification_light',
+                email_layout_xmlid='mail.mail_notification_layout',
                 model_description=model_description,
             )
 
