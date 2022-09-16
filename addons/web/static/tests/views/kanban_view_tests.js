@@ -3,8 +3,8 @@
 import { makeFakeDialogService } from "@web/../tests/helpers/mock_services";
 import {
     click,
-    drag,
     clickSave,
+    drag,
     dragAndDrop,
     editInput,
     getFixture,
@@ -12,6 +12,7 @@ import {
     makeDeferred,
     nextTick,
     patchWithCleanup,
+    selectDropdownItem,
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
@@ -27,16 +28,16 @@ import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { dialogService } from "@web/core/dialog/dialog_service";
-import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { makeErrorFromResponse, RPCError } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
+import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { nbsp } from "@web/core/utils/strings";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
 import { KanbanAnimatedNumber } from "@web/views/kanban/kanban_animated_number";
 import { kanbanView } from "@web/views/kanban/kanban_view";
-import { ViewButton } from "@web/views/view_button/view_button";
 import { DynamicRecordList } from "@web/views/relational_model";
+import { ViewButton } from "@web/views/view_button/view_button";
 import AbstractField from "web.AbstractField";
 import legacyFieldRegistry from "web.field_registry";
 
@@ -4665,6 +4666,82 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps(["resequence"]);
         }
     );
+
+    QUnit.test("Move record in grouped by date, progress bars and sum field", async (assert) => {
+        serverData.models.partner.records[0].date = "2017-01-08";
+        serverData.models.partner.records[1].date = "2017-01-09";
+        serverData.models.partner.records[2].date = "2017-02-08";
+        serverData.models.partner.records[3].date = "2017-02-10";
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban>
+                    <field name="date" allow_group_range_value="true" />
+                    <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}' sum_field="int_field" />
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="id" />
+                        </div>
+                    </templates>
+                </kanban>
+            `,
+            groupBy: ["date:month"],
+        });
+
+        assert.containsN(target, ".o_kanban_group", 2);
+        assert.containsN(
+            target,
+            ".o_kanban_group:first-child .o_kanban_record",
+            2,
+            "1st column should contain 2 records of January month"
+        );
+        assert.containsN(
+            target,
+            ".o_kanban_group:nth-child(2) .o_kanban_record",
+            2,
+            "2nd column should contain 2 records of February month"
+        );
+
+        assert.deepEqual(
+            getProgressBars(0).map((pb) => pb.style.width),
+            ["50%", "50%"]
+        );
+        assert.deepEqual(
+            getProgressBars(1).map((pb) => pb.style.width),
+            ["50%", "50%"]
+        );
+        assert.deepEqual(getCounters(), ["19", "13"]);
+
+        await dragAndDrop(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+
+        assert.containsOnce(
+            target,
+            ".o_kanban_group:first-child .o_kanban_record",
+            "Should only have one record remaining"
+        );
+        assert.containsN(
+            target,
+            ".o_kanban_group:nth-child(2) .o_kanban_record",
+            3,
+            "Should now have 3 records"
+        );
+
+        assert.deepEqual(
+            getProgressBars(0).map((pb) => pb.style.width),
+            ["100%"]
+        );
+        assert.deepEqual(
+            getProgressBars(1).map((pb) => pb.style.width),
+            ["33.3333%", "33.3333%", "33.3333%"] // abridged to e-4
+        );
+        assert.deepEqual(getCounters(), ["9", "23"]);
+    });
 
     QUnit.test(
         "completely prevent drag and drop if records_draggable set to false",
@@ -11682,5 +11759,54 @@ QUnit.module("Views", (hooks) => {
             "read", // read the created record to get foo value
             "onchange", // reopen the quick create automatically
         ]);
+    });
+
+    QUnit.test("Move new record with onchanges and different active fields", async (assert) => {
+        serverData.models.partner.fields.foo.default = "abc";
+        serverData.models.partner.onchanges = {
+            bar(obj) {
+                obj.foo = [...obj.foo].reverse().join("");
+            },
+        };
+        serverData.views["partner,some_view_ref,form"] = /* xml */ `
+            <form>
+                <field name="int_field" />
+                <field name="category_ids" widget="many2many_tags" />
+            </form>`;
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban on_create="quick_create" quick_create_view="some_view_ref">
+                    <field name="foo" />
+                    <field name="bar" />
+                    <templates>
+                        <div t-name="kanban-box">
+                            <t t-esc="record.foo.raw_value" />
+                            <field name="int_field" />
+                        </div>
+                    </templates>
+                </kanban>
+            `,
+            groupBy: ["bar"],
+        });
+
+        assert.deepEqual(getCardTexts(0), ["blip-4"]);
+        assert.deepEqual(getCardTexts(1), ["yop10", "blip9", "gnap17"]);
+
+        await quickCreateRecord(0);
+        await editQuickCreateInput("int_field", "13");
+        await selectDropdownItem(target, "category_ids", "gold");
+        await validateRecord();
+
+        assert.deepEqual(getCardTexts(0), ["abc13", "blip-4"]);
+        assert.deepEqual(getCardTexts(1), ["yop10", "blip9", "gnap17"]);
+
+        await dragAndDrop(".o_kanban_record", ".o_kanban_group:nth-child(2)");
+
+        assert.deepEqual(getCardTexts(0), ["blip-4"]);
+        assert.deepEqual(getCardTexts(1), ["yop10", "blip9", "gnap17", "cba13"]);
     });
 });

@@ -242,7 +242,7 @@ class DataPoint {
         this.model = model;
         this.resModel = params.resModel;
         this.fields = params.fields;
-        this.activeFields = params.activeFields || {};
+        this.setActiveFields(params.activeFields);
 
         this.rawContext = params.rawContext;
         this.defaultContext = params.defaultContext;
@@ -324,6 +324,13 @@ class DataPoint {
         }
     }
 
+    /**
+     * @param {Object} [activeFields={}]
+     */
+    setActiveFields(activeFields) {
+        this.activeFields = activeFields || {};
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
@@ -397,8 +404,6 @@ export class Record extends DataPoint {
         this.onChanges = params.onChanges || (() => {});
 
         this._invalidFields = new Set();
-        this._requiredFields = {};
-        this._setRequiredFields();
         this.preloadedData = {};
         this.preloadedDataCaches = {};
         this.isInQuickCreation = params.isInQuickCreation || false;
@@ -783,6 +788,7 @@ export class Record extends DataPoint {
      * @param {Object} [params.changes]
      */
     async load(params = {}) {
+        this.data = {};
         this._cache = {};
         for (const fieldName in this.activeFields) {
             const field = this.fields[fieldName];
@@ -866,6 +872,23 @@ export class Record extends DataPoint {
      */
     async save(options = { stayInEdition: false, noReload: false }) {
         return this.model.mutex.exec(() => this._save(options));
+    }
+
+    /**
+     * Overridden to set required fields based on the new active fields.
+     *
+     * @override
+     */
+    setActiveFields(activeFields) {
+        super.setActiveFields(activeFields);
+
+        this._requiredFields = {};
+        for (const [fieldName, activeField] of Object.entries(this.activeFields)) {
+            const { modifiers } = activeField;
+            if (modifiers && modifiers.required) {
+                this._requiredFields[fieldName] = modifiers.required;
+            }
+        }
     }
 
     async setInvalidField(fieldName) {
@@ -1258,7 +1281,7 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async _save(options = { stayInEdition: false, noReload: false }) {
-        if (!(await this._checkValidity())) {
+        if (!this._checkValidity()) {
             const invalidFields = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
             }, this);
@@ -1304,7 +1327,7 @@ export class Record extends DataPoint {
 
         // Switch to the parent active fields
         if (this.parentActiveFields) {
-            this.activeFields = this.parentActiveFields;
+            this.setActiveFields(this.parentActiveFields);
             this.parentActiveFields = false;
         }
         this.isInQuickCreation = false;
@@ -1315,15 +1338,6 @@ export class Record extends DataPoint {
             this.switchMode("readonly");
         }
         return true;
-    }
-
-    _setRequiredFields() {
-        for (const [fieldName, activeField] of Object.entries(this.activeFields)) {
-            const { modifiers } = activeField;
-            if (modifiers && modifiers.required) {
-                this._requiredFields[fieldName] = modifiers.required;
-            }
-        }
     }
 
     async _update(changes) {
@@ -1769,7 +1783,6 @@ export class DynamicRecordList extends DynamicList {
             resModel: this.resModel,
             fields: this.fields,
             activeFields: this.activeFields,
-            parentActiveFields: this.activeFields,
             onRecordWillSwitchMode: this.onRecordWillSwitchMode,
             defaultContext: this.defaultContext,
             rawContext: {
@@ -2033,7 +2046,6 @@ export class DynamicGroupList extends DynamicList {
         this.openGroupsByDefault = params.openGroupsByDefault || false;
         /** @type {Group[]} */
         this.groups = state.groups || [];
-        this.activeFields = params.activeFields;
         this.isGrouped = true;
         this.quickCreateInfo = null; // Lazy loaded;
         this.expand = params.expand;
@@ -2297,6 +2309,26 @@ export class DynamicGroupList extends DynamicList {
         return group;
     }
 
+    /**
+     * @param {Object} groupData
+     * @param {string} fieldName
+     * @returns {any}
+     */
+    _getValueFromGroupData(groupData, fieldName) {
+        const field = this.fields[fieldName.split(":")[0]];
+        if (["date", "datetime"].includes(field.type)) {
+            const range = groupData.__range[fieldName];
+            if (!range) {
+                return false;
+            }
+            const dateValue = this._parseServerValue(field, range.to);
+            return dateValue.minus({ [field.type === "date" ? "day" : "second"]: 1 });
+        } else {
+            const value = this._parseServerValue(field, groupData[fieldName]);
+            return Array.isArray(value) ? value[0] : value;
+        }
+    }
+
     async _loadGroups() {
         const firstGroupByName = this.firstGroupBy.split(":")[0];
         const _orderBy = this.orderBy.filter(
@@ -2332,14 +2364,7 @@ export class DynamicGroupList extends DynamicList {
                 const value = data[key];
                 switch (key) {
                     case this.firstGroupBy: {
-                        if (value && ["date", "datetime"].includes(groupByField.type)) {
-                            const dateString = data.__range[this.firstGroupBy].to;
-                            const dateValue = this._parseServerValue(groupByField, dateString);
-                            const granularity = groupByField.type === "date" ? "day" : "second";
-                            groupParams.value = dateValue.minus({ [granularity]: 1 });
-                        } else {
-                            groupParams.value = Array.isArray(value) ? value[0] : value;
-                        }
+                        groupParams.value = this._getValueFromGroupData(data, key);
                         if (groupByField.type === "selection") {
                             groupParams.displayName = Object.fromEntries(groupByField.selection)[
                                 groupParams.value

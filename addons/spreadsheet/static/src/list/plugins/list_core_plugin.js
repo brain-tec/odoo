@@ -17,7 +17,7 @@ import { TOP_LEVEL_STYLE } from "../../helpers/constants";
  * @property {Array<string>} orderBy
  *
  */
-export default class ListPlugin extends spreadsheet.CorePlugin {
+export default class ListCorePlugin extends spreadsheet.CorePlugin {
     constructor(getters, history, range, dispatch, config, uuidGenerator) {
         super(getters, history, range, dispatch, config, uuidGenerator);
         this.dataSources = config.dataSources;
@@ -68,7 +68,7 @@ export default class ListPlugin extends spreadsheet.CorePlugin {
                     columns,
                 } = cmd;
                 const anchor = [col, row];
-                this._addList(id, definition, dataSourceId);
+                this._addList(id, definition, dataSourceId, linesNumber);
                 this._insertList(sheetId, anchor, id, linesNumber, columns);
                 this.nextId = parseInt(id, 10) + 1;
                 break;
@@ -205,7 +205,7 @@ export default class ListPlugin extends spreadsheet.CorePlugin {
     // Private
     // ---------------------------------------------------------------------
 
-    _addList(id, definition, dataSourceId) {
+    _addList(id, definition, dataSourceId, limit) {
         const lists = { ...this.lists };
         lists[id] = {
             id,
@@ -214,7 +214,10 @@ export default class ListPlugin extends spreadsheet.CorePlugin {
         };
 
         if (!this.dataSources.contains(dataSourceId)) {
-            this.dataSources.add(dataSourceId, ListDataSource, definition);
+            this.dataSources.add(dataSourceId, ListDataSource, {
+                ...definition,
+                limit,
+            });
         }
         this.history.update("lists", lists);
     }
@@ -332,13 +335,9 @@ export default class ListPlugin extends spreadsheet.CorePlugin {
                         context: list.context,
                         orderBy: list.orderBy,
                     },
-                    /**
-                     * As we are not able to migrate the json, we have to fallback
-                     * in the case where the name is not yet present
-                     */
-                    name: list.name || list.model,
+                    name: list.name,
                 };
-                this._addList(id, definition, this.uuidGenerator.uuidv4());
+                this._addList(id, definition, this.uuidGenerator.uuidv4(), 0);
             }
         }
         this.nextId = data.listNextId || getMaxObjectId(this.lists) + 1;
@@ -357,7 +356,7 @@ export default class ListPlugin extends spreadsheet.CorePlugin {
     }
 }
 
-ListPlugin.getters = [
+ListCorePlugin.getters = [
     "getListDataSource",
     "getListDisplayName",
     "getAsyncListDataSource",

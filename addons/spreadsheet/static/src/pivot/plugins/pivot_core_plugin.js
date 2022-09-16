@@ -27,7 +27,7 @@ import CommandResult from "../../o_spreadsheet/cancelled_reason";
 
 const { CorePlugin } = spreadsheet;
 
-export default class PivotPlugin extends CorePlugin {
+export default class PivotCorePlugin extends CorePlugin {
     constructor(getters, history, range, dispatch, config, uuidGenerator) {
         super(getters, history, range, dispatch, config, uuidGenerator);
         this.dataSources = config.dataSources;
@@ -443,11 +443,7 @@ export default class PivotPlugin extends CorePlugin {
                         domain: pivot.domain,
                         context: pivot.context,
                     },
-                    /**
-                     * As we are not able to migrate the json, we have to fallback
-                     * in the case where the name is not yet present
-                     */
-                    name: pivot.name || pivot.model,
+                    name: pivot.name,
                 };
                 this._addPivot(id, definition, this.uuidGenerator.uuidv4());
             }
@@ -469,7 +465,7 @@ export default class PivotPlugin extends CorePlugin {
     }
 }
 
-PivotPlugin.getters = [
+PivotCorePlugin.getters = [
     "getNextPivotId",
     "getPivotDefinition",
     "getPivotDisplayName",
