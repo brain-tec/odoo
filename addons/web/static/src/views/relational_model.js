@@ -555,7 +555,7 @@ export class Record extends DataPoint {
     async urgentSave() {
         this._urgentSave = true;
         this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE_URGENTLY");
-        this._save();
+        this._save({ stayInEdition: true, noReload: true });
     }
 
     async archive() {
@@ -1414,7 +1414,7 @@ class DynamicList extends DataPoint {
                 this.editedRecord = record;
             }
             if (params.onRecordWillSwitchMode) {
-                params.onRecordWillSwitchMode(record, mode);
+                await params.onRecordWillSwitchMode(record, mode);
             }
         };
     }
@@ -1445,7 +1445,10 @@ class DynamicList extends DataPoint {
     }
 
     get isM2MGrouped() {
-        return this.groupBy.some((fieldName) => this.fields[fieldName].type === "many2many");
+        return this.groupBy.some((groupBy) => {
+            const fieldName = groupBy.split(":")[0];
+            return this.fields[fieldName].type === "many2many";
+        });
     }
 
     get selection() {

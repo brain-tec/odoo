@@ -56,11 +56,13 @@ import {
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
 import { getNextTabableElement } from "@web/core/utils/ui";
+import { FloatField } from "@web/views/fields/float/float_field";
 import { TextField } from "@web/views/fields/text/text_field";
 import { DynamicRecordList } from "@web/views/relational_model";
 
 const { Component, onWillStart, xml } = owl;
 
+const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
 
 let serverData;
@@ -196,34 +198,6 @@ QUnit.module("Views", (hooks) => {
                         name: { string: "name", type: "char" },
                     },
                     records: [{ id: "2-20170808020000", name: "virtual" }],
-                },
-                "ir.translation": {
-                    fields: {
-                        lang_code: { type: "char" },
-                        src: { type: "char" },
-                        value: { type: "char" },
-                        res_id: { type: "integer" },
-                        name: { type: "char" },
-                        lang: { type: "char" },
-                    },
-                    records: [
-                        {
-                            id: 99,
-                            res_id: 1,
-                            value: "",
-                            lang_code: "en_US",
-                            lang: "en_US",
-                            name: "foo,foo",
-                        },
-                        {
-                            id: 100,
-                            res_id: 1,
-                            value: "",
-                            lang_code: "fr_BE",
-                            lang: "fr_BE",
-                            name: "foo,foo",
-                        },
-                    ],
                 },
             },
         };
@@ -1259,15 +1233,15 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["bar"],
         });
 
-        assert.strictEqual($(target).find("th:contains(Foo)").length, 1, "should contain Foo");
-        assert.strictEqual($(target).find("th:contains(Bar)").length, 1, "should contain Bar");
-        assert.containsN(target, "tr.o_group_header", 2, "should have 2 .o_group_header");
-        assert.containsN(target, "th.o_group_name", 2, "should have 2 .o_group_name");
-        assert.containsNone(
-            target,
-            "th:contains(int_field)",
-            "Should not have int_field in grouped list"
-        );
+        assert.containsN(target, "thead th", 3); // record selector + Foo + Bar
+        assert.containsOnce(target, "thead th.o_list_record_selector");
+        assert.containsOnce(target, "thead th[data-name=foo]");
+        assert.containsOnce(target, "thead th[data-name=bar]");
+        assert.containsNone(target, "thead th[data-name=int_field]");
+        assert.containsN(target, "tr.o_group_header", 2);
+        assert.containsN(target, "th.o_group_name", 2);
+        assert.containsN(target.querySelector(".o_group_header"), "th", 2); // group name + colspan 2
+        assert.containsNone(target.querySelector(".o_group_header"), ".o_list_number");
     });
 
     QUnit.test("basic grouped list rendering 1 col without selector", async function (assert) {
@@ -2674,6 +2648,26 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
     });
 
+    QUnit.test("select a record in list grouped by date with granularity", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["date:year"],
+            // keep the actionMenus, it is relevant as it calls isM2MGrouped which crashes if we
+            // don't correctly extract the fieldName/granularity from the groupBy
+            actionMenus: {},
+        });
+
+        assert.containsN(target, ".o_group_header", 2);
+        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        await click(target.querySelector(".o_group_header"));
+        assert.containsOnce(target, ".o_data_row");
+        await click(target.querySelector(".o_data_row .o_list_record_selector"));
+        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+    });
+
     QUnit.test("aggregates are computed correctly", async function (assert) {
         await makeView({
             type: "list",
@@ -2741,6 +2735,29 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("aggregates are formatted correctly in grouped lists", async function (assert) {
+        // in this scenario, there is a widget on an aggregated field, and this widget has no
+        // associated formatter, so we fallback on the formatter corresponding to the field type
+        fieldRegistry.add("my_float", FloatField);
+        serverData.models.foo.records[0].qux = 5.1654846456;
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="foo"/>
+                    <field name="qux" widget="my_float" sum="Sum"/>
+                </tree>`,
+            groupBy: ["int_field"],
+        });
+
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_group_header .o_list_number")),
+            ["9.00", "13.00", "5.17", "-3.00"]
+        );
+    });
+
     QUnit.test("aggregates in grouped lists with buttons", async function (assert) {
         await makeView({
             type: "list",
@@ -2756,7 +2773,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
         });
 
-        const cellVals = ["23", "6.4", "9", "13", "32", "19.40"];
+        const cellVals = ["23", "6.40", "9", "13.00", "32", "19.40"];
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_list_number")), cellVals);
     });
 
@@ -4096,16 +4113,19 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_button" && args.method === "translate_fields") {
-                    return Promise.resolve({
-                        domain: [],
-                        context: { search_default_name: "foo,foo" },
-                    });
-                }
                 if (route === "/web/dataset/call_kw/res.lang/get_installed") {
                     return Promise.resolve([
                         ["en_US", "English"],
                         ["fr_BE", "Frenglish"],
+                    ]);
+                }
+                if (route === "/web/dataset/call_kw/foo/get_field_translations") {
+                    return Promise.resolve([
+                        [
+                            { lang: "en_US", source: "yop", value: "yop" },
+                            { lang: "fr_BE", source: "yop", value: "valeur français" },
+                        ],
+                        { translation_type: "char", translation_show_source: false },
                     ]);
                 }
             },

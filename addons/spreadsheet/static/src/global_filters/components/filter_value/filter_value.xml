@@ -11,11 +11,11 @@
                 t-att-value="filterValue"
                 t-on-change="(e) => this.onTextInput(filter.id, e.target.value)"/>
         </div>
-        <span t-if="filter.type === 'relation'" t-on-click.stop="">
-            <X2ManyTagSelector
+        <span t-if="filter.type === 'relation'">
+            <RecordsSelector
                 placeholder="filter.label"
-                relatedModel="filter.modelName"
-                selectedValues="filterValue"
+                resModel="filter.modelName"
+                resIds="filterValue"
                 onValueChanged="(value) => this.onTagSelected(filter.id, value)"
             />
         </span>
