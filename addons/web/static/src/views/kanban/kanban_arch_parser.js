@@ -84,11 +84,19 @@ export class KanbanArchParser extends XMLParser {
                 if (fieldInfo.widget === "handle") {
                     handleField = name;
                 }
-                addFieldDependencies(activeFields, fieldInfo.FieldComponent.fieldDependencies);
+                addFieldDependencies(
+                    activeFields,
+                    models[modelName],
+                    fieldInfo.FieldComponent.fieldDependencies
+                );
             }
             if (node.tagName === "widget") {
                 const { WidgetComponent } = Widget.parseWidgetNode(node);
-                addFieldDependencies(activeFields, WidgetComponent.fieldDependencies);
+                addFieldDependencies(
+                    activeFields,
+                    models[modelName],
+                    WidgetComponent.fieldDependencies
+                );
             }
 
             // Keep track of last update so images can be reloaded when they may have changed.
@@ -104,13 +112,7 @@ export class KanbanArchParser extends XMLParser {
         let progressAttributes = false;
         const progressBar = xmlDoc.querySelector("progressbar");
         if (progressBar) {
-            const attrs = extractAttributes(progressBar, ["field", "colors", "sum_field", "help"]);
-            progressAttributes = {
-                fieldName: attrs.field,
-                colors: JSON.parse(attrs.colors),
-                sumField: fields[attrs.sum_field] || false,
-                help: attrs.help,
-            };
+            progressAttributes = this.parseProgressBar(progressBar, fields);
         }
 
         // Concrete kanban box elements in the template
@@ -156,6 +158,16 @@ export class KanbanArchParser extends XMLParser {
             tooltipInfo,
             examples: xmlDoc.getAttribute("examples"),
             __rawArch: arch,
+        };
+    }
+
+    parseProgressBar(progressBar, fields) {
+        const attrs = extractAttributes(progressBar, ["field", "colors", "sum_field", "help"]);
+        return {
+            fieldName: attrs.field,
+            colors: JSON.parse(attrs.colors),
+            sumField: fields[attrs.sum_field] || false,
+            help: attrs.help,
         };
     }
 }

@@ -343,15 +343,15 @@ export class Record extends DataPoint {
         return this.model.__bm__.localData[this.__bm_handle__].res_ids;
     }
 
-    // -------------------------------------------------------------------------
-    // Getters
-    // -------------------------------------------------------------------------
+    async askChanges() {
+        const proms = [];
+        this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
+        return Promise.all([...proms, this._updatePromise]);
+    }
 
     async checkValidity(urgent) {
         if (!urgent) {
-            const proms = [];
-            this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
-            await Promise.all([...proms, this._updatePromise]);
+            await this.askChanges();
         }
         for (const fieldName in this.activeFields) {
             const fieldType = this.fields[fieldName].type;
@@ -1264,6 +1264,7 @@ export class RelationalModel extends Model {
                             const fieldViews = fieldInfo.views || fieldInfo.fieldsInfo || {};
                             const defaultFieldInfo = legRec.data[name].fieldsInfo.default;
                             _.each(fieldViews, function (fieldView) {
+                                _.defaults(fieldView.fields, defaultFieldInfo);
                                 _.each(fieldView.fieldsInfo, function (x2mFieldInfo) {
                                     _.defaults(x2mFieldInfo, defaultFieldInfo);
                                 });

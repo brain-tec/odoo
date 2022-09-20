@@ -1832,6 +1832,7 @@ class BaseModel(metaclass=MetaModel):
 
         node = etree.fromstring(result['arch'])
         node = self.env['ir.ui.view']._postprocess_access_rights(node)
+        node = self.env['ir.ui.view']._postprocess_context_dependent(node)
         result['arch'] = etree.tostring(node, encoding="unicode").replace('\t', '')
 
         return result
@@ -1848,7 +1849,7 @@ class BaseModel(metaclass=MetaModel):
         :return: dict holding the models and field required by the web client given the view type.
         :rtype: list
         """
-        if view_type in ('kanban', 'list', 'form'):
+        if view_type in ('kanban', 'tree', 'form'):
             for model_fields in models.values():
                 model_fields.update({'id', self.CONCURRENCY_CHECK_FIELD})
         elif view_type == 'search':

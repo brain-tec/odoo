@@ -174,6 +174,7 @@ QUnit.module("Views", (hooks) => {
                     fields: {
                         name: { string: "Partner Type", type: "char" },
                         color: { string: "Color index", type: "integer" },
+                        foo: { string: "Foo", type: "char" },
                     },
                     records: [
                         { id: 12, display_name: "gold", color: 2 },
@@ -623,6 +624,85 @@ QUnit.module("Views", (hooks) => {
             "text-danger"
         );
         assert.hasClass(target.querySelector('.o_field_widget[name="foo"]'), "text-danger");
+    });
+
+    QUnit.test(
+        "form with o2m having a many2many fields using the many2many_tags widget along the color_field option",
+        async function (assert) {
+            // In this scenario, the x2many form view isn't inline, so when we click on the record,
+            // it does an independant getView, which doesn't return all fields of the model. In the
+            // x2many list view, there's a field with a many2many_tags widget with the color option,
+            // and the color field (color) in our case, isn't in the form view.
+            // This test ensures that we can open the form view in this situation.
+            serverData.models.partner.records[0].timmy = [12, 14];
+            serverData.views = {
+                "partner,false,form": `
+                <form>
+                    <field name="display_name"/>
+                    <field name="timmy" widget="one2many">
+                        <tree string="Values">
+                            <field name="display_name"/>
+                            <!--
+                                Required to add at least one different field than the fields read
+                                to display <field name="timmy" widget="many2many_tags"/> below.
+                                To force to re-read the record with more fields.
+                            -->
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            };
+            await makeView({
+                type: "form",
+                resModel: "user",
+                serverData,
+                arch: `
+                <form>
+                    <field name="partner_ids">
+                        <tree editable="top">
+                            <field name="display_name"/>
+                            <field name="timmy" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </tree>
+                    </field>
+                </form>`,
+                resId: 17,
+            });
+            assert.containsOnce(target, ".o_field_widget[name=timmy] .o_field_tags");
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.containsOnce(target, ".modal .o_form_view .o_field_widget[name=timmy]");
+        }
+    );
+
+    QUnit.test("form with o2m having a field with fieldDependencies", async function (assert) {
+        // In this scenario, the x2many form view isn't inline, so when we click on the record,
+        // it does an independant getView, which doesn't return all fields of the model. In the
+        // x2many list view, there's a field with fieldDependencies, and the dependency field
+        // (int_field) in our case, isn't in the form view. This test ensures that we can open
+        // the form view in this situation.
+        class MyField extends CharField {}
+        MyField.fieldDependencies = {
+            int_field: { type: "integer" },
+        };
+        fieldRegistry.add("my_widget", MyField);
+        serverData.models.partner.records[1].p = [1];
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree>
+                            <field name="foo" widget="my_widget"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.containsOnce(target, ".o_field_widget[name=p] .o_data_row");
+        await click(target.querySelector(".o_field_widget[name=p] .o_data_row .o_data_cell"));
+        assert.containsOnce(target, ".modal .o_form_view .o_field_widget[name=p]");
     });
 
     QUnit.test("decoration-bf works on fields", async function (assert) {
@@ -4420,7 +4500,79 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_notification_manager .o_notification");
     });
 
-    QUnit.test("keynav switching to another record from a dirty one", async function (assert) {
+    QUnit.test("keynav: switching to another record from an invalid one", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="foo" required="1"/></form>',
+            resIds: [1, 2],
+            resId: 1,
+            mockRPC(route) {
+                if (route === "/web/dataset/call_kw/partner/write") {
+                    throw new Error("Shouldn't call write as the record is invalid");
+                }
+            },
+        });
+
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
+        assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_required_modifier");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
+        assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
+
+        await click(target.querySelector(".o_form_button_edit"));
+        await editInput(target, ".o_field_widget[name=foo] input", "");
+        triggerHotkey("alt+n");
+        await nextTick();
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
+        assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
+        assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_field_invalid");
+        assert.containsOnce(target, ".o_notification_manager .o_notification");
+    });
+
+    QUnit.test("switching to another record from an invalid one (2)", async function (assert) {
+        // in this scenario, the record is already invalid in db, so we should be allowed to
+        // leave it
+        serverData.models.partner.records[0].foo = false;
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo" required="1"/>
+                </form>`,
+            resIds: [1, 2],
+            resId: 1,
+        });
+
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
+        assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_required_modifier");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
+        assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
+
+        await click(target.querySelector(".o_pager_next"));
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "second record");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
+
+        await click(target.querySelector(".o_pager_previous"));
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
+        assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_required_modifier");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
+
+        // same, but in edit mode
+        await click(target.querySelector(".o_form_button_edit"));
+        assert.containsOnce(target, ".o_form_editable");
+
+        await click(target.querySelector(".o_pager_next"));
+        assert.containsOnce(target, ".o_form_editable");
+        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "second record");
+        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
+    });
+
+    QUnit.test("keynav: switching to another record from a dirty one", async function (assert) {
         let nbWrite = 0;
         await makeView({
             type: "form",
@@ -4460,7 +4612,7 @@ QUnit.module("Views", (hooks) => {
         input.value = "new value";
         await triggerEvent(input, null, "input");
 
-        // click on the pager to switch to the next record (will save record)
+        // trigger the pager hotkey to switch to the next record (will save record)
         triggerHotkey("alt+n");
         await nextTick();
         assert.containsNone(document.body, ".modal", "no confirm modal should be displayed");
