@@ -363,13 +363,15 @@ class PurchaseOrder(models.Model):
             message, msg_vals, model_description=model_description,
             force_email_company=force_email_company, force_email_lang=force_email_lang
         )
-        if self.date_order:
-            render_context['subtitle'] = _('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
-                           amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
-                           date=format_date(self.env, self.date_order, date_format='short', lang_code=render_context.get('lang'))
-                          )
-        else:
-            render_context['subtitle'] = format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang'))
+        # don't show price on RFQ mail
+        if self.state not in ['draft', 'sent']:
+            if self.date_order:
+                render_context['subtitle'] = _('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
+                            amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
+                            date=format_date(self.env, self.date_order, date_format='short', lang_code=render_context.get('lang'))
+                            )
+            else:
+                render_context['subtitle'] = format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang'))
         return render_context
 
     def _track_subtype(self, init_values):
@@ -1135,7 +1137,7 @@ class PurchaseOrderLine(models.Model):
     @api.depends('product_id', 'date_order')
     def _compute_account_analytic_id(self):
         for rec in self:
-            if not rec.account_analytic_id:
+            if not rec.display_type:
                 default_analytic_account = rec.env['account.analytic.default'].sudo().account_get(
                     product_id=rec.product_id.id,
                     partner_id=rec.order_id.partner_id.id,
@@ -1148,7 +1150,7 @@ class PurchaseOrderLine(models.Model):
     @api.depends('product_id', 'date_order')
     def _compute_analytic_tag_ids(self):
         for rec in self:
-            if not rec.analytic_tag_ids:
+            if not rec.display_type:
                 default_analytic_account = rec.env['account.analytic.default'].sudo().account_get(
                     product_id=rec.product_id.id,
                     partner_id=rec.order_id.partner_id.id,
