@@ -1613,7 +1613,7 @@ class SaleOrderLine(models.Model):
     @api.depends('product_id', 'order_id.date_order', 'order_id.partner_id')
     def _compute_analytic_tag_ids(self):
         for line in self:
-            if not line.analytic_tag_ids:
+            if not line.display_type and line.state == 'draft':
                 default_analytic_account = line.env['account.analytic.default'].sudo().account_get(
                     product_id=line.product_id.id,
                     partner_id=line.order_id.partner_id.id,
@@ -1653,7 +1653,7 @@ class SaleOrderLine(models.Model):
             'discount': self.discount,
             'price_unit': self.price_unit,
             'tax_ids': [(6, 0, self.tax_id.ids)],
-            'analytic_account_id': self.order_id.analytic_account_id.id,
+            'analytic_account_id': self.order_id.analytic_account_id.id if not self.display_type else False,
             'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
             'sale_line_ids': [(4, self.id)],
         }
