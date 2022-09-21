@@ -69,7 +69,7 @@ msgstr "<em class=\"font-weight-normal text-muted\">时间表上 </em>"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_kanban_account_analytic_line
 msgid "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
-msgstr "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
+msgstr "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"日期\" title=\"日期\"/>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -610,7 +610,7 @@ msgstr "记录任务时间"
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_res_config_settings__reminder_manager_allow
 msgid "Manager Reminder"
-msgstr "经历提醒"
+msgstr "经理提醒"
 
 #. module: hr_timesheet
 #: code:addons/hr_timesheet/models/res_company.py:0

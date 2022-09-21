@@ -776,6 +776,11 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">חויב</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
+msgid "<span class=\"o_stat_text\">Journal Entry</span>"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
 "<span class=\"oe_inline o_form_label mr-3 ml-5 oe_edit_only\" "
@@ -5400,7 +5405,7 @@ msgstr "מיפוי עבור חשבוניות זיכוי"
 #: model:ir.model.fields,field_description:account.field_account_tax__invoice_repartition_line_ids
 #: model_terms:ir.ui.view,arch_db:account.view_tax_form
 msgid "Distribution for Invoices"
-msgstr "הפצה עבור חשבוניות"
+msgstr "מיפוי עבור חשבוניות"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__refund_repartition_line_ids
@@ -7475,7 +7480,7 @@ msgstr "מודפס"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__is_reconciled
 #: model:ir.model.fields,field_description:account.field_account_payment__is_reconciled
 msgid "Is Reconciled"
-msgstr "האם מתפייס"
+msgstr "האם הותאם"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_rounding_line
@@ -7603,7 +7608,6 @@ msgstr "פקודות יומן לפי תאריך"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
-#: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #, python-format
 msgid "Journal Entry"
 msgstr "פקודת יומן"
@@ -9285,12 +9289,12 @@ msgstr "פתח"
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "Open Balance"
-msgstr "מאזן פתוח"
+msgstr "יתרה"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__opening_balance
 msgid "Opening Balance"
-msgstr "מאזן פתיחה"
+msgstr "יתרת פתיחה"
 
 #. module: account
 #: model:ir.model,name:account.model_account_financial_year_op
