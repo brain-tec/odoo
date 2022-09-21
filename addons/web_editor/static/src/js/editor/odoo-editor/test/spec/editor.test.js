@@ -1,4 +1,3 @@
-import { applyInlineStyle } from '../../src/commands/commands.js';
 import { OdooEditor } from '../../src/OdooEditor.js';
 import { getTraversedNodes } from '../../src/utils/utils.js';
 import {
@@ -3043,23 +3042,41 @@ X[]
         });
     });
 
-    describe('insertLineBreak', () => {
-        describe('Selection not collapsed', () => {
-            it('should insert a char into an empty span', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: '<p>ab<span>[]\u200B</span>cd</p>',
-                    stepFunction: async editor => {
-                        await insertText(editor, 'x');
-                    },
-                    contentAfter: '<p>ab<span>x[]</span>cd</p>',
-                });
-                await testEditor(BasicEditor, {
-                    contentBefore: '<p>uv <span>[]\u200B</span> wx</p>',
-                    stepFunction: async editor => {
-                        await insertText(editor, 'y');
-                    },
-                    contentAfter: '<p>uv <span>y[]</span> wx</p>',
-                });
+    describe('ZWS', () => {
+        it('should insert a char into an empty span without removing the zws', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>ab<span>[]\u200B</span>cd</p>',
+                stepFunction: async editor => {
+                    await insertText(editor, 'x');
+                },
+                contentAfter: '<p>ab<span>x[]\u200B</span>cd</p>',
+            });
+        });
+        it('should insert a char into an empty span surrounded by space without removing the zws', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>ab <span>[]\u200B</span> cd</p>',
+                stepFunction: async editor => {
+                    await insertText(editor, 'x');
+                },
+                contentAfter: '<p>ab <span>x[]\u200B</span> cd</p>',
+            });
+        });
+        it('should insert a char into a data-oe-zws-empty-inline span removing the zws and data-oe-zws-empty-inline', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>ab<span data-oe-zws-empty-inline="">[]\u200B</span>cd</p>',
+                stepFunction: async editor => {
+                    await insertText(editor, 'x');
+                },
+                contentAfter: '<p>ab<span>x[]</span>cd</p>',
+            });
+        });
+        it('should insert a char into a data-oe-zws-empty-inline span surrounded by space without removing the zws and data-oe-zws-empty-inline', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>ab<span data-oe-zws-empty-inline="">[]\u200B</span>cd</p>',
+                stepFunction: async editor => {
+                    await insertText(editor, 'x');
+                },
+                contentAfter: '<p>ab<span>x[]</span>cd</p>',
             });
         });
     });
@@ -3635,12 +3652,8 @@ X[]
                     stepFunction: async editor => {
                         // simulate preview
                         editor.historyPauseSteps();
-                        try {
-                            applyInlineStyle(editor, (el) => el.style.color = 'lime');
-                            // a[bcd]e with bcd in lime
-                        } finally {
-                            editor.historyUnpauseSteps();
-                        }
+                        editor.execCommand('bold');
+                        editor.historyUnpauseSteps();
                         // simulate preview's reset
                         editor.historyRevertCurrentStep(); // back to initial state
                     },
@@ -4244,11 +4257,11 @@ X[]
                                                 '<td>ef</td>' +
                                             '</tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('bold'),
-                            contentAfterEdit: '<p>a<span style="font-weight: bolder;">[bc</span></p>' +
+                            contentAfterEdit: '<p>a<strong>[bc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef]</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef]</strong></td>' +
                                             '</tr></tbody></table>',
                         });
                     });
@@ -4261,11 +4274,11 @@ X[]
                                             '</tr></tbody></table><p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                '<td class="o_selected_td"><strong>[ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef</strong></td>' +
                                             '</tr></tbody></table>' +
-                                            '<p><span style="font-weight: bolder;">a]</span>bc</p>',
+                                            '<p><strong>a]</strong>bc</p>',
                         });
                     });
                     it('should apply bold to some characters, a table and some more characters', async () => {
@@ -4278,13 +4291,13 @@ X[]
                                         '</tr></tbody></table>' +
                                         '<p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('bold'),
-                            contentAfterEdit: '<p>a<span style="font-weight: bolder;">[bc</span></p>' +
+                            contentAfterEdit: '<p>a<strong>[bc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef</strong></td>' +
                                             '</tr></tbody></table>' +
-                                            '<p><span style="font-weight: bolder;">a]</span>bc</p>',
+                                            '<p><strong>a]</strong>bc</p>',
                         });
                     });
                     it('should apply bold to some characters, a table, some more characters and another table', async () => {
@@ -4302,17 +4315,17 @@ X[]
                                             '<td>ef</td>' +
                                         '</tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('bold'),
-                            contentAfterEdit: '<p>a<span style="font-weight: bolder;">[bc</span></p>' +
+                            contentAfterEdit: '<p>a<strong>[bc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef</strong></td>' +
                                             '</tr></tbody></table>' +
-                                            '<p><span style="font-weight: bolder;">abc</span></p>' +
+                                            '<p><strong>abc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef]</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef]</strong></td>' +
                                             '</tr></tbody></table>',
                         });
                     });
@@ -4332,19 +4345,19 @@ X[]
                                         '</tr></tbody></table>' +
                                         '<p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('bold'),
-                            contentAfterEdit: '<p>a<span style="font-weight: bolder;">[bc</span></p>' +
+                            contentAfterEdit: '<p>a<strong>[bc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef</strong></td>' +
                                             '</tr></tbody></table>' +
-                                            '<p><span style="font-weight: bolder;">abc</span></p>' +
+                                            '<p><strong>abc</strong></p>' +
                                             '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef</strong></td>' +
                                             '</tr></tbody></table>' +
-                                            '<p><span style="font-weight: bolder;">a]</span>bc</p>',
+                                            '<p><strong>a]</strong>bc</p>',
                         });
                     });
                 });
@@ -4573,8 +4586,8 @@ X[]
                                         '</tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd]</span></td>' +
+                                                '<td class="o_selected_td"><strong>[ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd]</strong></td>' +
                                                 '<td>ef</td>' +
                                             '</tr></tbody></table>',
                         });
@@ -4588,9 +4601,9 @@ X[]
                                         '</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                '<td class="o_selected_td"><span style="font-weight: bolder;">ef]</span></td>' +
+                                                '<td class="o_selected_td"><strong>[ab</strong></td>' +
+                                                '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                '<td class="o_selected_td"><strong>ef]</strong></td>' +
                                             '</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>',
                         });
                     });
@@ -4616,17 +4629,17 @@ X[]
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
+                                                    '<td class="o_selected_td"><strong>[ab</strong></td>' +
                                                     '<td>cd</td>' +
                                                     '<td>ef</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
+                                                    '<td class="o_selected_td"><strong>ab</strong></td>' +
                                                     '<td>cd</td>' +
                                                     '<td>ef</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ab]</span></td>' +
+                                                    '<td class="o_selected_td"><strong>ab]</strong></td>' +
                                                     '<td>cd</td>' +
                                                     '<td>ef</td>' +
                                                 '</tr>' +
@@ -4655,13 +4668,13 @@ X[]
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
+                                                    '<td class="o_selected_td"><strong>[ab</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>cd</strong></td>' +
                                                     '<td>ef</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">cd]</span></td>' +
+                                                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>cd]</strong></td>' +
                                                     '<td>ef</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
@@ -4694,19 +4707,19 @@ X[]
                             stepFunction: async editor => editor.execCommand('bold'),
                             contentAfterEdit: '<table class="o_selected_table"><tbody>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">[ab</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                    '<td class="o_selected_td"><strong>[ab</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>ef</strong></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ef</span></td>' +
+                                                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>ef</strong></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ab</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">cd</span></td>' +
-                                                    '<td class="o_selected_td"><span style="font-weight: bolder;">ef]</span></td>' +
+                                                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                                                    '<td class="o_selected_td"><strong>ef]</strong></td>' +
                                                 '</tr>' +
                                             '</tbody></table>',
                         });

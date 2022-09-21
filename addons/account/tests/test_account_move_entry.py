@@ -212,14 +212,12 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.test_move.action_post()
 
         # Create a bank statement to get a balance in the suspense account.
-        statement = self.env['account.bank.statement'].create({
+        self.env['account.bank.statement.line'].create({
             'journal_id': self.company_data['default_journal_bank'].id,
             'date': '2016-01-01',
-            'line_ids': [
-                (0, 0, {'payment_ref': 'test', 'amount': 10.0})
-            ],
+            'payment_ref': 'test',
+            'amount': 10.0,
         })
-        statement.button_post()
 
         # You can't lock the fiscal year if there is some unreconciled statement.
         with self.assertRaises(RedirectWarning), self.cr.savepoint():
@@ -651,6 +649,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
             'company_id': self.company_data['company'].id,
         })
         self.env.company.account_cash_basis_base_account_id = tax_base_amount_account
+        self.env.company.tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({

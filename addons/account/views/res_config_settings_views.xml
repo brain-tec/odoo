@@ -492,7 +492,7 @@
                             </div>
                         </div>
 
-                        <t groups="account.group_account_user" attrs="{'invisible': [('chart_template_id','=',False)]}">
+                        <t groups="account.group_account_user">
                             <h2>Default Accounts</h2>
                             <div class="row mt16 o_settings_container" id="default_accounts">
                                 <div class="col-12 col-lg-6 o_setting_box"
@@ -633,19 +633,6 @@
                                     <label for="group_analytic_accounting"/>
                                     <div class="text-muted">
                                         Track costs &amp; revenues by project, department, etc
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6 o_setting_box"
-                                id="tag_analytic_entries"
-                                groups="account.group_account_user">
-                                <div class="o_setting_left_pane">
-                                    <field name="group_analytic_tags"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="group_analytic_tags"/>
-                                    <div class="text-muted">
-                                        Allows to tag analytic entries and to manage analytic distributions
                                     </div>
                                 </div>
                             </div>

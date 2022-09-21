@@ -85,19 +85,12 @@ class TestExpenses(TestExpenseCommon):
         in_payment_state = expense_sheet.account_move_id._get_invoice_in_payment_state()
         self.assertEqual(expense_sheet.payment_state, in_payment_state, 'payment_state should be ' + in_payment_state)
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'journal_id': self.company_data['default_journal_bank'].id,
-            'line_ids': [
-                (0, 0, {
-                    'payment_ref': 'pay_ref',
-                    'amount': -350.0,
-                    'partner_id': self.expense_employee.address_home_id.id,
-                }),
-            ],
+            'payment_ref': 'pay_ref',
+            'amount': -350.0,
+            'partner_id': self.expense_employee.address_home_id.id,
         })
-        statement.button_post()
-        statement_line = statement.line_ids
 
         # Reconcile without the bank reconciliation widget since the widget is in enterprise.
         _st_liquidity_lines, st_suspense_lines, _st_other_lines = statement_line\
@@ -128,7 +121,7 @@ class TestExpenses(TestExpenseCommon):
                     'product_id': self.product_a.id,
                     'unit_amount': 1000.0,
                     'tax_ids': [(6, 0, self.company_data['default_tax_purchase'].ids)],
-                    'analytic_account_id': self.analytic_account_1.id,
+                    'analytic_distribution': {self.analytic_account_1.id: 100},
                     'employee_id': self.expense_employee.id,
                 }),
                 (0, 0, {
@@ -138,7 +131,7 @@ class TestExpenses(TestExpenseCommon):
                     'product_id': self.product_b.id,
                     'unit_amount': 1500.0,
                     'tax_ids': [(6, 0, self.company_data['default_tax_purchase'].ids)],
-                    'analytic_account_id': self.analytic_account_2.id,
+                    'analytic_distribution': {self.analytic_account_2.id: 100},
                     'currency_id': self.currency_data['currency'].id,
                     'employee_id': self.expense_employee.id,
                 }),
@@ -162,7 +155,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': False,
                 'currency_id': self.company_data['currency'].id,
                 'tax_line_id': False,
-                'analytic_account_id': False,
+                'analytic_distribution': False,
             },
             # Receivable line (foreign currency):
             {
@@ -173,7 +166,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': False,
                 'currency_id': self.currency_data['currency'].id,
                 'tax_line_id': False,
-                'analytic_account_id': False,
+                'analytic_distribution': False,
             },
             # Tax line (foreign currency):
             {
@@ -184,7 +177,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': False,
                 'currency_id': self.currency_data['currency'].id,
                 'tax_line_id': self.company_data['default_tax_purchase'].id,
-                'analytic_account_id': False,
+                'analytic_distribution': False,
             },
             # Tax line (company currency):
             {
@@ -195,7 +188,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': False,
                 'currency_id': self.company_data['currency'].id,
                 'tax_line_id': self.company_data['default_tax_purchase'].id,
-                'analytic_account_id': False,
+                'analytic_distribution': False,
             },
             # Product line (foreign currency):
             {
@@ -206,7 +199,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': self.product_b.id,
                 'currency_id': self.currency_data['currency'].id,
                 'tax_line_id': False,
-                'analytic_account_id': self.analytic_account_2.id,
+                'analytic_distribution': {self.analytic_account_2.id: 100},
             },
             # Product line (company currency):
             {
@@ -217,7 +210,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': self.product_a.id,
                 'currency_id': self.company_data['currency'].id,
                 'tax_line_id': False,
-                'analytic_account_id': self.analytic_account_1.id,
+                'analytic_distribution': {self.analytic_account_1.id: 100},
             },
         ])
 
@@ -258,7 +251,7 @@ class TestExpenses(TestExpenseCommon):
             'unit_amount': 700.00,
             'tax_ids': [(6, 0, tax.ids)],
             'sheet_id': expense.id,
-            'analytic_account_id': self.analytic_account_1.id,
+            'analytic_distribution': {self.analytic_account_1.id: 100},
             'currency_id': self.currency_data['currency'].id,
         })
 
@@ -273,7 +266,6 @@ class TestExpenses(TestExpenseCommon):
         # Create Expense Entries
         expense.action_sheet_move_create()
         self.assertEqual(expense.state, 'post', 'Expense is not in Waiting Payment state')
-
         # Should get this result [(0.0, 350.0, -700.0), (318.18, 0.0, 636.36), (31.82, 0.0, 63.64)]
         analytic_line = expense.account_move_id.line_ids.analytic_line_ids
         self.assertEqual(len(analytic_line), 1)
@@ -327,9 +319,8 @@ class TestExpenses(TestExpenseCommon):
                 'unit_amount': 350.00,
                 'tax_ids': [(6, 0, [self.tax_purchase_a.id])],
                 'sheet_id': expense.id,
-                'analytic_account_id': self.analytic_account_1.id,
+                'analytic_distribution': {self.analytic_account_1.id: 100},
             })
-            expense_line._onchange_product_id_date_account_id()
 
         expense.action_submit_sheet()
         expense.approve_expense_sheets()

@@ -2777,6 +2777,36 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_list_number")), cellVals);
     });
 
+    QUnit.test("date field aggregates in grouped lists", async function (assert) {
+        // this test simulates a scenario where a date field has a group_operator
+        // and the web_read_group thus return a value for that field for each group
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            groupBy: ["m2o"],
+            arch: `
+                <tree>
+                    <field name="foo"/>
+                    <field name="date"/>
+                </tree>`,
+            async mockRPC(route, args, performRPC) {
+                if (args.method === "web_read_group") {
+                    const res = await performRPC(...arguments);
+                    res.groups[0].date = "2021-03-15";
+                    res.groups[1].date = "2021-02-11";
+                    return res;
+                }
+            },
+        });
+
+        assert.containsN(target, ".o_group_header", 2);
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_group_header")), [
+            `Value 1 (3) `,
+            `Value 2 (1) `,
+        ]);
+    });
+
     QUnit.test(
         "hide aggregated value in grouped lists when no data provided by RPC call",
         async function (assert) {
@@ -3138,11 +3168,20 @@ QUnit.module("Views", (hooks) => {
                     </tree>`,
                 limit: 2,
             });
-            var widthPage1 = target.querySelector(`th[data-name=foo]`).offsetWidth;
+
+            assert.strictEqual(
+                target.querySelector("thead .o_list_record_selector").offsetWidth,
+                40
+            );
+            const widthPage1 = target.querySelector(`th[data-name=foo]`).offsetWidth;
 
             await pagerNext(target);
 
-            var widthPage2 = target.querySelector(`th[data-name=foo]`).offsetWidth;
+            assert.strictEqual(
+                target.querySelector("thead .o_list_record_selector").offsetWidth,
+                40
+            );
+            const widthPage2 = target.querySelector(`th[data-name=foo]`).offsetWidth;
             assert.ok(
                 widthPage1 > widthPage2,
                 "column widths should be computed dynamically according to the content"
@@ -13704,19 +13743,21 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
         });
 
-        // Target handle
+        const originalWidths = [...target.querySelectorAll(".o_list_table th")].map(
+            (th) => th.offsetWidth
+        );
         const th = target.querySelector("th:nth-child(2)");
         const resizeHandle = th.querySelector(".o_resize");
-        const originalWidth = th.offsetWidth;
-        const expectedWidth = Math.floor(originalWidth / 2 + resizeHandle.offsetWidth / 2);
-
+        const expectedWidth =
+            Math.round(originalWidths[1] / 2) + Math.round(resizeHandle.offsetWidth / 2);
         await dragAndDrop(resizeHandle, th);
 
-        assert.strictEqual(
-            th.style.width,
-            `${expectedWidth}px`,
-            "header width should be halved (plus half the width of the handle)"
+        const finalWidths = [...target.querySelectorAll(".o_list_table th")].map(
+            (th) => th.offsetWidth
         );
+        assert.strictEqual(finalWidths[0], originalWidths[0]);
+        assert.ok(Math.abs(finalWidths[1] - expectedWidth) <= 1); // rounding
+        assert.strictEqual(finalWidths[2], originalWidths[2]);
     });
 
     QUnit.test("editable list: resize column headers with max-width", async function (assert) {

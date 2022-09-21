@@ -3,7 +3,7 @@
 import json
 from werkzeug.exceptions import ServiceUnavailable
 
-from odoo.http import Controller, request, route
+from odoo.http import Controller, request, route, SessionExpiredException
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from ..models.bus import channel_with_db
 from ..websocket import WebsocketConnectionHandler
@@ -32,9 +32,14 @@ class WebsocketController(Controller):
         return request.make_response(data, headers)
 
     @route('/websocket/peek_notifications', type='json', auth='public', cors='*')
-    def peek_notifications(self, channels, last):
+    def peek_notifications(self, channels, last, is_first_poll=False):
         if not all(isinstance(c, str) for c in channels):
             raise ValueError("bus.Bus only string channels are allowed.")
+        if is_first_poll:
+            # Used to detect when the current session is expired.
+            request.session['is_websocket_session'] = True
+        elif 'is_websocket_session' not in request.session:
+            raise SessionExpiredException()
         channels = list(set(
             channel_with_db(request.db, c)
             for c in request.env['ir.websocket']._build_bus_channel_list(channels)
@@ -42,9 +47,10 @@ class WebsocketController(Controller):
         notifications = request.env['bus.bus']._poll(channels, last)
         return {'channels': channels, 'notifications': notifications}
 
-    @route('/websocket/update_bus_presence', type='http', auth='public', cors='*')
-    def update_bus_presence(self, inactivity_period):
-        request.env['ir.websocket']._update_bus_presence(int(inactivity_period))
+    @route('/websocket/update_bus_presence', type='json', auth='public', cors='*')
+    def update_bus_presence(self, inactivity_period, im_status_ids_by_model):
+        request.env['ir.websocket']._update_bus_presence(int(inactivity_period), im_status_ids_by_model)
+        return {}
 
     @route('/bus/websocket_worker_bundle', type='http', auth='public', cors='*')
     def get_websocket_worker_bundle(self):
