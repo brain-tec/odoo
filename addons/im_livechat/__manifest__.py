@@ -50,20 +50,21 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/components/*/*',
         ],
         'web.assets_frontend': [
+            ('include', 'mail.assets_public_livechat'),
             'im_livechat/static/src/public/main.js',
             'im_livechat/static/src/services/*.js',
             'im_livechat/static/src/legacy/public_livechat_chatbot.js',
             'im_livechat/static/src/legacy/public_livechat.scss',
             'im_livechat/static/src/legacy/public_livechat_chatbot.scss',
+            'mail/static/src/utils/*.js',
+            'mail/static/src/js/utils.js',
+            'mail/static/src/component_hooks/*.js',
+            'mail/static/src/services/messaging_service.js',
         ],
         'web.assets_backend': [
-            'im_livechat/static/src/js/im_livechat_channel_form_view.js',
-            'im_livechat/static/src/js/im_livechat_channel_form_controller.js',
-            'im_livechat/static/src/js/im_livechat_chatbot_form_view.js',
-            'im_livechat/static/src/js/im_livechat_chatbot_form_controller.js',
-            'im_livechat/static/src/js/im_livechat_chatbot_step_form_view_dialog.js',
-            'im_livechat/static/src/js/chatbot_script_answers_m2m_tags.js',
-            'im_livechat/static/src/js/chatbot_script_step_o2m.js',
+            'im_livechat/static/src/js/colors_reset_button/*',
+            'im_livechat/static/src/js/im_livechat_chatbot_steps_one2many.js',
+            'im_livechat/static/src/js/im_livechat_chatbot_script_answers_m2m.js',
             'im_livechat/static/src/components/*/*.js',
             'im_livechat/static/src/scss/im_livechat_history.scss',
             'im_livechat/static/src/scss/im_livechat_form.scss',
@@ -74,16 +75,19 @@ Help your customers with this chat, and analyse their feedback.
         ],
         'web.qunit_suite_tests': [
             'im_livechat/static/tests/qunit_suite_tests/components/**/*.js',
-            'im_livechat/static/src/legacy/public_livechat_chatbot.js',
         ],
         'web.assets_tests': [
             'im_livechat/static/tests/tours/**/*',
         ],
         'mail.assets_messaging': [
+            'im_livechat/static/src/models/*.js',
+        ],
+        'mail.assets_public_livechat': [
+            ('include', 'mail.assets_core_messaging'),
             'im_livechat/static/src/legacy/models/*',
             'im_livechat/static/src/legacy/widgets/*',
             'im_livechat/static/src/legacy/widgets/*/*',
-            'im_livechat/static/src/models/*.js',
+            'im_livechat/static/src/public_models/*.js',
         ],
         # Bundle of External Librairies of the Livechat (Odoo + required modules)
         'im_livechat.external_lib': [
@@ -198,7 +202,7 @@ Help your customers with this chat, and analyse their feedback.
             'mail/static/src/utils/*.js',
             'mail/static/src/js/emojis.js',
             'mail/static/src/component_hooks/*.js',
-            ('include', 'mail.assets_messaging'),
+            ('include', 'mail.assets_public_livechat'),
             'mail/static/src/services/messaging_service.js',
             # Framework JS
             'bus/static/src/*.js',

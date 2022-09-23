@@ -18,6 +18,23 @@ registerModel({
                 scrollRecomputeCount: increment()
             });
         },
+        doJumpToCategorySelectedByUser() {
+            this.containerRef.el.scrollTo({
+                top: this.rowHeight * this.categorySelectedByUser.emojiGridRowView.index,
+            });
+            this.update({ categorySelectedByUser: clear() });
+        },
+        /**
+         * Handles OWL update on component update.
+         */
+        onComponentUpdate() {
+            if (
+                this.categorySelectedByUser &&
+                this.emojiPickerViewOwner.emojiSearchBarView.currentSearch === ""
+            ) {
+                this.doJumpToCategorySelectedByUser();
+            }
+        },
         onScroll() {
             if (!this.exists()) {
                 return;
@@ -26,7 +43,7 @@ registerModel({
         },
         _onChangeScrollRecomputeCount() {
             for (const viewCategory of this.emojiPickerViewOwner.categories) {
-                const rowIndex = this.firstRenderedRowIndex + this.topBufferAmount;
+                const rowIndex = this.firstRenderedRowIndex;
                 if (
                     viewCategory.emojiGridRowView &&
                     rowIndex >= viewCategory.emojiGridRowView.index &&
@@ -45,11 +62,6 @@ registerModel({
         _filterEmoji(emoji) {
             return (emoji._isStringInEmojiKeywords(this.emojiPickerViewOwner.emojiSearchBarView.currentSearch));
         },
-        _sortRenderedRows() {
-            return [
-                ['smaller-first', 'index'],
-            ];
-        },
     },
     fields: {
         additionalRowsToRender: attr({
@@ -61,6 +73,7 @@ registerModel({
         amountToDisplay: attr({
             default: 50,
         }),
+        categorySelectedByUser: one('EmojiPickerView.Category'),
         containerRef: attr(),
         distanceFromTop: attr({
             compute() {
@@ -145,7 +158,11 @@ registerModel({
                     .filter(row => row !== undefined) // some corner cases where very briefly it doesn't sync with rows and it's bigger
                 );
             },
-            sort: '_sortRenderedRows',
+            sort() {
+                return [
+                    ['smaller-first', 'index'],
+                ];
+            },
         }),
         rowHeight: attr({
             default: 30,
@@ -193,9 +210,6 @@ registerModel({
         searchRowRegistry: one('EmojiGridViewRowRegistry', {
             default: {},
             inverse: 'emojiGridViewOwnerAsSearch',
-        }),
-        topBufferAmount: attr({
-            default: 2,
         }),
         viewBlockRef: attr(),
         width: attr({

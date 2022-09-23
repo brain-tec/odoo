@@ -114,8 +114,12 @@ For more specific needs, you may also assign custom-defined actions
     'installable': True,
     'application': True,
     'assets': {
-        'mail.assets_messaging': [
+        'mail.assets_core_messaging': [
             'mail/static/src/model/*.js',
+            'mail/static/src/core_models/*.js',
+        ],
+        'mail.assets_messaging': [
+            ('include', 'mail.assets_core_messaging'),
             'mail/static/src/models/*.js',
             'mail/static/src/models_data/*.js',
             'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
@@ -172,14 +176,6 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/legacy/utils.js',
             'web/static/src/legacy/xml/base.xml',
         ],
-        'web.assets_frontend': [
-            'mail/static/src/utils/*.js',
-            'mail/static/src/js/emojis.js',
-            'mail/static/src/js/utils.js',
-            'mail/static/src/component_hooks/*.js',
-             ('include', 'mail.assets_messaging'),
-            'mail/static/src/services/messaging_service.js',
-        ],
         'web._assets_primary_variables': [
             'mail/static/src/scss/variables/primary_variables.scss',
         ],
@@ -189,18 +185,19 @@ For more specific needs, you may also assign custom-defined actions
             # defines mixins and variables used by multiple components
             'mail/static/src/components/notification_list/notification_list_item.scss',
             'mail/static/src/js/**/*.js',
-            'mail/static/src/fields/*.js',
-            'mail/static/src/fields/*.xml',
             'mail/static/src/utils/*.js',
             'mail/static/src/scss/*.scss',
             'mail/static/src/xml/*.xml',
             'mail/static/src/component_hooks/*.js',
+            'mail/static/src/backend_components/*/*',
             'mail/static/src/components/*/*.js',
             'mail/static/src/components/*/*.scss',
             'mail/static/src/components/*/*.xml',
             ('include', 'mail.assets_messaging'),
             'mail/static/src/services/*.js',
             'mail/static/src/views/**/*.js',
+            'mail/static/src/views/**/*.xml',
+            'mail/static/src/views/**/*.scss',
             'mail/static/src/webclient/commands/*.js',
             'mail/static/src/widgets/*/*.js',
             'mail/static/src/widgets/*/*.scss',
