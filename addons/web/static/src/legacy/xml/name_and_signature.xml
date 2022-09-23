@@ -16,7 +16,7 @@
                 -> otherwise, it will adapt the space between characters to fill
                 the image with the text.
     -->
-    <t t-name="web.sign_svg_text" name="SVG Signature Text">
+    <t t-name="web.legacy.sign_svg_text" name="SVG Signature Text">
         <svg t-att-width="width" t-att-height="height">
             <defs>
                 <style type="text/css">

@@ -31,6 +31,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
      */
     start: function () {
         this.$main = this.$el.next('main');
+        this.isOverlayHeader = !!this.$el.closest('.o_header_overlay, .o_header_overlay_theme').length;
         this.$dropdowns = this.$el.find('.dropdown, .dropdown-menu');
         this.$navbarCollapses = this.$el.find('.navbar-collapse');
 
@@ -70,12 +71,30 @@ const BaseAnimatedHeader = animations.Animation.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Adapt the 'right' css property of the header by adding the size of a
+     * scrollbar if any.
+     *
+     * @private
+     */
+    _adaptFixedHeaderPosition() {
+        // Compensate scrollbar
+        this.el.style.removeProperty('right');
+        if (this.fixedHeader) {
+            const scrollableEl = $(this.el).parent().closestScrollable()[0];
+            const style = window.getComputedStyle(this.el);
+            const borderLeftWidth = parseInt(style.borderLeftWidth.replace('px', ''));
+            const borderRightWidth = parseInt(style.borderRightWidth.replace('px', ''));
+            const bordersWidth = borderLeftWidth + borderRightWidth;
+            const newValue = parseInt(style['right']) + scrollableEl.offsetWidth - scrollableEl.clientWidth - bordersWidth;
+            this.el.style.setProperty('right', `${newValue}px`, 'important');
+        }
+    },
+    /**
      * @private
      */
     _adaptToHeaderChange: function () {
         this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
-        this.headerHeight = this.$el.outerHeight();
-        this.topGap = this._computeTopGap();
+        this._updateMainPaddingTop();
         // Take menu into account when `dom.scrollTo()` is used whenever it is
         // visible - be it floating, fully displayed or partially hidden.
         this.el.classList.toggle('o_top_fixed_element', this._isShown());
@@ -135,6 +154,19 @@ const BaseAnimatedHeader = animations.Animation.extend({
         this.fixedHeader = useFixed;
         this._adaptToHeaderChange();
         this.el.classList.toggle('o_header_affixed', useFixed);
+        this._adaptFixedHeaderPosition();
+    },
+    /**
+     * @private
+     */
+    _updateMainPaddingTop: function () {
+        this.headerHeight = this.$el.outerHeight();
+        this.topGap = this._computeTopGap();
+
+        if (this.isOverlayHeader) {
+            return;
+        }
+        this.$main.css('padding-top', this.fixedHeader ? this.headerHeight : '');
     },
 
     //--------------------------------------------------------------------------
@@ -178,6 +210,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
      * @private
      */
     _updateHeaderOnResize: function () {
+        this._adaptFixedHeaderPosition();
         if (document.body.classList.contains('overflow-hidden')
                 && config.device.size_class > config.device.SIZES.SM) {
             document.body.classList.remove('overflow-hidden');

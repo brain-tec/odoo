@@ -190,13 +190,17 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         async _onDoRefund() {
             const order = this.getSelectedSyncedOrder();
+
+            if (this._doesOrderHaveSoleItem(order)) {
+                if (!this._prepareAutoRefundOnOrder(order)) {
+                    // Don't proceed on refund if preparation returned false.
+                    return;
+                }
+            }
+
             if (!order) {
                 this._state.ui.highlightHeaderNote = !this._state.ui.highlightHeaderNote;
                 return;
-            }
-
-            if (this._doesOrderHaveSoleItem(order)) {
-                this._prepareAutoRefundOnOrder(order);
             }
 
             const partner = order.get_partner();
@@ -213,7 +217,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const destinationOrder =
                 this.props.destinationOrder && partner === this.props.destinationOrder.get_partner()
                     ? this.props.destinationOrder
-                    : this.env.pos.add_new_order();
+                    : this._getEmptyOrder(partner);
 
             // Add orderline for each toRefundDetail to the destinationOrder.
             for (const refundDetail of allToRefundDetails) {
@@ -227,6 +231,10 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (partner && !destinationOrder.get_partner()) {
                 destinationOrder.set_partner(partner);
                 destinationOrder.updatePricelist(partner);
+            }
+
+            if (this.env.pos.get_order().cid !== destinationOrder.cid) {
+                this.env.pos.set_order(destinationOrder);
             }
 
             this._onCloseScreen();
@@ -377,6 +385,30 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         //#endregion
         //#region PRIVATE METHODS
+        /**
+         * Find the empty order with the following priority:
+         * - The empty order with the same parter as the provided.
+         * - The first empty order without a partner.
+         * - If no empty order, create a new one.
+         * @param {Object | null} partner
+         * @returns {boolean}
+         */
+        _getEmptyOrder(partner) {
+            let emptyOrderForPartner = null;
+            let emptyOrder = null;
+            for (const order of this.env.pos.orders) {
+                if (order.get_orderlines().length === 0 && order.get_paymentlines().length === 0) {
+                    if (order.get_partner() === partner) {
+                        emptyOrderForPartner = order;
+                        break;
+                    } else if (!order.get_partner() && emptyOrder === null) {
+                        // If emptyOrderForPartner is not found, we will use the first empty order.
+                        emptyOrder = order;
+                    }
+                }
+            }
+            return emptyOrderForPartner || emptyOrder || this.env.pos.add_new_order();
+        }
         _doesOrderHaveSoleItem(order) {
             const orderlines = order.get_orderlines();
             if (orderlines.length !== 1) return false;
@@ -387,13 +419,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         _prepareAutoRefundOnOrder(order) {
             const selectedOrderlineId = this.getSelectedOrderlineId();
             const orderline = order.orderlines.find((line) => line.id == selectedOrderlineId);
-            if (!orderline) return;
+            if (!orderline) return false;
 
             const toRefundDetail = this._getToRefundDetail(orderline);
             const refundableQty = orderline.get_quantity() - orderline.refunded_qty;
             if (this.env.pos.isProductQtyZero(refundableQty - 1)) {
                 toRefundDetail.qty = 1;
             }
+            return true;
         }
         /**
          * Returns the corresponding toRefundDetail of the given orderline.
