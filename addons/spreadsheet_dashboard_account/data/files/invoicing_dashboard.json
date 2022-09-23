@@ -61,7 +61,7 @@
                 },
                 "A19": {
                     "style": 1,
-                    "content": "[Top Invoices](https://odoo.com)",
+                    "content": "[Top Invoices](odoo://view/{\"viewType\":\"list\",\"action\":{\"domain\":[[\"move_type\",\"=\",\"out_invoice\"]],\"context\":{\"group_by\":[]},\"modelName\":\"account.move\",\"views\":[[false,\"list\"],[false,\"kanban\"],[false,\"form\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Invoices\"})",
                     "border": 1
                 },
                 "A20": {
@@ -1570,7 +1570,7 @@
     },
     "revisionId": "START_REVISION",
     "chartOdooMenusReferences": {
-        "5ea5dd7f-9f83-4482-a2bb-2ec72ab35912": "account_accountant.menu_accounting"
+        "5ea5dd7f-9f83-4482-a2bb-2ec72ab35912": "account.menu_finance"
     },
     "odooVersion": 3,
     "pivots": {

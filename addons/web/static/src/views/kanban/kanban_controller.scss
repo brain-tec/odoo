@@ -148,7 +148,7 @@
                     object-fit: cover;
                 }
                 .oe_kanban_avatar,
-                .o_field_many2one_avatar > .o_m2o_avatar {
+                .o_field_many2one_avatar > div > .o_m2o_avatar {
                     width: 20px;
                     height: 20px;
                     margin-left: 6px;
@@ -559,7 +559,7 @@
 
             .o_kanban_header {
                 position: sticky; // keep it visible
-                z-index: $zindex-sticky;
+                z-index: 1;
                 background-color: inherit;
             }
         }
