@@ -714,6 +714,44 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test(
+        "many2ones in list views: create a new record with a context",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <tree editable="top">
+                    <field name="user_id" context="{'default_test': 1, 'test':2 }" />
+                </tree>`,
+                context: {
+                    default_yop: 3,
+                    yop: 4,
+                },
+                mockRPC(route, args) {
+                    const { method, model, kwargs } = args;
+                    if (method === "name_create" && model === "user") {
+                        const { context } = kwargs;
+                        assert.step(method);
+                        assert.strictEqual(context.default_test, 1);
+                        assert.strictEqual(context.test, 2);
+                        assert.notOk("default_yop" in context);
+                        assert.strictEqual(context.yop, 4);
+                    }
+                },
+            });
+
+            await click(target.querySelectorAll(".o_data_cell")[0]);
+            const input = target.querySelector(".o_field_widget[name=user_id] input");
+            await editInput(input, null, "yy");
+            await click(target, ".o_field_widget[name=user_id] input");
+            await selectDropdownItem(target, "user_id", 'Create "yy"');
+
+            assert.verifySteps(["name_create"]);
+        }
+    );
+
+    QUnit.test(
         "onchanges on many2ones trigger when editing record in form view",
         async function (assert) {
             assert.expect(11);
@@ -2666,6 +2704,31 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
+    QUnit.test(
+        "empty list with sample data and many2one with option always_reload",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <tree sample="1">
+                    <field name="product_id" options="{'always_reload': True}"/>
+                </tree>`,
+                context: { search_default_empty: true },
+                searchViewArch: `
+                <search>
+                    <filter name="empty" domain="[('id', '&lt;', 0)]"/>
+                </search>`,
+            });
+
+            assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
+            assert.containsOnce(target, ".o_list_table");
+            assert.containsN(target, ".o_data_row", 10);
+            assert.containsN(target, "thead tr th", 2);
+        }
+    );
+
     QUnit.test("selecting a many2one, then discarding", async function (assert) {
         await makeView({
             type: "form",
@@ -3103,8 +3166,8 @@ QUnit.module("Fields", (hooks) => {
 
         assert.deepEqual(
             getNodesTextContent(target.querySelectorAll(".modal-footer button")),
-            ["Cancel"],
-            "Only the cancel button is present in modal"
+            ["Close"],
+            "Only the close button is present in modal"
         );
     });
 
