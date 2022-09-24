@@ -116,23 +116,13 @@ export class ListRenderer extends Component {
             handle: ".o_handle_cell",
             cursor: "grabbing",
             // Hooks
-            onStart: (_group, element) => {
+            onStart: (params) => {
+                const { element } = params;
                 dataRowId = element.dataset.id;
-                element.classList.add("o_dragged");
+                return this.sortStart(params);
             },
-            onStop: (_group, element) => element.classList.remove("o_dragged"),
-            onDrop: async ({ element, previous }) => {
-                if (this.props.list.editedRecord) {
-                    this.props.list.unselectRecord(true);
-                }
-                element.classList.remove("o_row_draggable");
-                const refId = previous ? previous.dataset.id : null;
-                this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
-                    handleField: this.props.archInfo.handleField,
-                });
-                await this.resequencePromise;
-                element.classList.add("o_row_draggable");
-            },
+            onStop: (params) => this.sortStop(params),
+            onDrop: (params) => this.sortDrop(dataRowId, params),
         });
 
         if (this.env.searchModel) {
@@ -1154,46 +1144,6 @@ export class ListRenderer extends Component {
         return false;
     }
 
-    applyCellKeydownEditModeLastRow(hotkey, cell, group, record) {
-        const { activeActions, cycleOnTab, list } = this.props;
-        const row = cell.parentElement;
-        switch (hotkey) {
-            case "tab":
-                // X2many add a line
-                if (this.displayRowCreates) {
-                    if (record.isNew && !record.isDirty) {
-                        list.unselectRecord(true);
-                        return false;
-                    }
-                    // add a line
-                    if (record.checkValidity()) {
-                        const { context } = this.creates[0];
-                        this.add({ context });
-                    }
-                } else if (
-                    activeActions.create &&
-                    !record.canBeAbandoned &&
-                    (record.isDirty || this.lastIsDirty)
-                ) {
-                    this.add({ group });
-                } else if (cycleOnTab) {
-                    if (record.canBeAbandoned) {
-                        list.unselectRecord(true);
-                    }
-                    const futureRecord = list.records[0];
-                    if (record === futureRecord) {
-                        // Refocus first cell of same record
-                        const toFocus = this.findNextFocusableOnRow(row);
-                        this.focus(toFocus);
-                    } else {
-                        futureRecord.switchMode("edit");
-                    }
-                } else {
-                    return false;
-                }
-        }
-    }
-
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
@@ -1308,12 +1258,12 @@ export class ListRenderer extends Component {
                 }
 
                 if (futureRecord) {
-                    futureRecord.switchMode("edit");
+                    futureRecord.switchMode("edit", { checkValidity: true });
                 } else if (this.lastIsDirty || !record.canBeAbandoned || this.displayRowCreates) {
                     this.add({ group });
                 } else {
                     futureRecord = list.records.at(0);
-                    futureRecord.switchMode("edit");
+                    futureRecord.switchMode("edit", { checkValidity: true });
                 }
                 break;
             }
@@ -1761,6 +1711,46 @@ export class ListRenderer extends Component {
     }
     onRowTouchMove(record) {
         this.resetLongTouchTimer();
+    }
+
+    /**
+     * @param {string} dataRowId
+     * @param {Object} params
+     * @param {HTMLElement} params.element
+     * @param {HTMLElement} [params.group]
+     * @param {HTMLElement} [params.next]
+     * @param {HTMLElement} [params.parent]
+     * @param {HTMLElement} [params.previous]
+     */
+    async sortDrop(dataRowId, { element, previous }) {
+        if (this.props.list.editedRecord) {
+            this.props.list.unselectRecord(true);
+        }
+        element.classList.remove("o_row_draggable");
+        const refId = previous ? previous.dataset.id : null;
+        this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
+            handleField: this.props.archInfo.handleField,
+        });
+        await this.resequencePromise;
+        element.classList.add("o_row_draggable");
+    }
+
+    /**
+     * @param {Object} params
+     * @param {HTMLElement} params.element
+     * @param {HTMLElement} [params.group]
+     */
+    sortStart({ element }) {
+        element.classList.add("o_dragged");
+    }
+
+    /**
+     * @param {Object} params
+     * @param {HTMLElement} params.element
+     * @param {HTMLElement} [params.group]
+     */
+    sortStop({ element }) {
+        element.classList.remove("o_dragged");
     }
 }
 
