@@ -81,6 +81,31 @@ function orderByToString(orderBy) {
 }
 
 /**
+ * @param {RawContext} rawContext
+ * @param {Context} defaultContext
+ * @returns {Context}
+ */
+function processRawContext(rawContext, defaultContext) {
+    const contexts = [];
+    if (!rawContext) {
+        return Object.assign({}, defaultContext);
+    }
+    contexts.push({ ...defaultContext, ...rawContext.make() });
+    while (rawContext.parent) {
+        rawContext = rawContext.parent;
+        const context = rawContext.make();
+        for (const key in context) {
+            if (key.startsWith("default_")) {
+                delete context[key];
+            }
+        }
+        contexts.push(context);
+    }
+
+    return Object.assign({}, ...contexts.reverse());
+}
+
+/**
  * FIXME: don't know where this function should be:
  *   - on a dataPoint: don't want to make it accessible everywhere (e.g. in Fields)
  *   - on the model: would still be accessible by views + I like the current light API of the model
@@ -255,25 +280,7 @@ class DataPoint {
     // -------------------------------------------------------------------------
 
     get context() {
-        const contexts = [];
-        let rawContext = this.rawContext;
-        if (!rawContext) {
-            return Object.assign({}, this.defaultContext);
-        }
-        contexts.push({ ...this.defaultContext, ...rawContext.make() });
-
-        while (rawContext.parent) {
-            rawContext = rawContext.parent;
-            const context = rawContext.make();
-            for (const key in context) {
-                if (key.startsWith("default_")) {
-                    delete context[key];
-                }
-            }
-            contexts.push(context);
-        }
-
-        return Object.assign({}, ...contexts.reverse());
+        return processRawContext(this.rawContext, this.defaultContext);
     }
 
     get fieldNames() {
@@ -807,7 +814,7 @@ export class Record extends DataPoint {
             const changes = params.changes || (await this._onChange());
             await this._load({ changes });
         } else {
-            let values = params.values || {};
+            let values = this._parseServerValues(params.values);
             const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in values));
             if (missingFields.length) {
                 values = Object.assign({}, values, await this._read(missingFields));
@@ -999,7 +1006,15 @@ export class Record extends DataPoint {
         if (!id && label) {
             // only display_name given -> do a name_create
             const res = await this.model.orm.call(relation, "name_create", [label], {
-                context: this.context,
+                context: processRawContext({
+                    parent: this.rawContext,
+                    make: () => {
+                        return makeContext(
+                            [this.activeFields[fieldName].context],
+                            this.evalContext
+                        );
+                    },
+                }),
             });
             // Check if a record is really created. Models without defined
             // _rec_name cannot create record based on name_create.
@@ -1400,7 +1415,7 @@ class DynamicList extends DataPoint {
 
         this.editedRecord = null;
         this.onCreateRecord = params.onCreateRecord || (() => {});
-        this.onRecordWillSwitchMode = async (record, mode) => {
+        this.onRecordWillSwitchMode = async (record, mode, options) => {
             const editedRecord = this.editedRecord;
             this.editedRecord = null;
             if (!params.onRecordWillSwitchMode && editedRecord) {
@@ -1419,7 +1434,7 @@ class DynamicList extends DataPoint {
                 this.editedRecord = record;
             }
             if (params.onRecordWillSwitchMode) {
-                await params.onRecordWillSwitchMode(record, mode);
+                await params.onRecordWillSwitchMode(record, mode, options);
             }
         };
     }
@@ -2019,7 +2034,6 @@ export class DynamicRecordList extends DynamicList {
 
         const records = await Promise.all(
             rawRecords.map(async (data) => {
-                data = this._parseServerValues(data);
                 const record = this.model.createDataPoint("record", {
                     resModel: this.resModel,
                     resId: data.id,
@@ -2305,6 +2319,7 @@ export class DynamicGroupList extends DynamicList {
             displayName,
             aggregates: {},
             groupByField: this.groupByField,
+            groupDomain: Domain.and([this.domain, [[this.groupByField.name, "=", id]]]).toList(),
             rawContext: this.rawContext,
         });
         group.isFolded = false;
@@ -2706,17 +2721,25 @@ export class StaticList extends DataPoint {
         this.getParentRecordContext = params.getParentRecordContext;
 
         this.editedRecord = null;
-        this.onRecordWillSwitchMode = async (record, mode) => {
+        this.onRecordWillSwitchMode = async (record, mode, options) => {
             const editedRecord = this.editedRecord;
-            if (editedRecord && editedRecord.id === record.id && mode === "readonly") {
-                const valid = await record.checkValidity();
-                if (valid) {
-                    this.editedRecord = null;
-                }
-                return valid;
-            }
+            this.editedRecord = null;
             if (editedRecord) {
-                await editedRecord.switchMode("readonly");
+                // Validity is checked if one of the following is true:
+                // - "switchMode" has been called with explicit "checkValidity"
+                // - the record is dirty
+                // - the record is new and can be abandonned
+                const shouldCheckValidity =
+                    options.checkValidity || editedRecord.isDirty || editedRecord.canBeAbandoned;
+                const isValid = !shouldCheckValidity || (await editedRecord.checkValidity());
+                if (isValid) {
+                    await editedRecord.switchMode("readonly");
+                } else if (editedRecord.id !== record.id && editedRecord.canBeAbandoned) {
+                    this.abandonRecord(editedRecord.id);
+                } else {
+                    this.editedRecord = editedRecord;
+                    return false;
+                }
             }
             if (mode === "edit") {
                 this.editedRecord = record;
@@ -3206,7 +3229,7 @@ export class StaticList extends DataPoint {
                     if (!this._initialValues) {
                         this._initialValues = {};
                     }
-                    this._initialValues[id] = this._parseServerValues(command[2]);
+                    this._initialValues[id] = command[2];
                 }
                 command[2] = symbolValues;
             }

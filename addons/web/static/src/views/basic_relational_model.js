@@ -326,6 +326,10 @@ export class Record extends DataPoint {
         return !this.resId;
     }
 
+    get isValid() {
+        return !this._invalidFields.size;
+    }
+
     get resId() {
         if (this.__bm_handle__) {
             const resId = this.model.__bm__.localData[this.__bm_handle__].res_id;
@@ -348,6 +352,10 @@ export class Record extends DataPoint {
         this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
         return Promise.all([...proms, this._updatePromise]);
     }
+
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
 
     async checkValidity(urgent) {
         if (!urgent) {
@@ -400,11 +408,11 @@ export class Record extends DataPoint {
         return !this._invalidFields.size;
     }
 
-    async switchMode(mode) {
+    async switchMode(mode, options) {
         if (this.mode === mode) {
             return true;
         }
-        const canSwitch = await this._onWillSwitchMode(this, mode);
+        const canSwitch = await this._onWillSwitchMode(this, mode, options);
         if (canSwitch === false) {
             return false;
         }
@@ -685,7 +693,7 @@ export class Record extends DataPoint {
      *  reloading after changes are applied, typically used to defer the load.
      * @returns {Promise<boolean>}
      */
-    async save(options = { stayInEdition: false, noReload: false, savePoint: false }) {
+    async save(options = { stayInEdition: true, noReload: false, savePoint: false }) {
         const shouldSwitchToReadonly = !options.stayInEdition && this.isInEdition;
         let resolveSavePromise;
         this._savePromise = new Promise((r) => {
@@ -810,9 +818,6 @@ export class Record extends DataPoint {
         this.model.__bm__.discardChanges(this.__bm_handle__);
         this._invalidFields = new Set();
         this.__syncData();
-        if (this.resId) {
-            this.switchMode("readonly");
-        }
         this.model.notify();
     }
 
@@ -824,37 +829,36 @@ export class Record extends DataPoint {
 }
 
 export class StaticList extends DataPoint {
-    setup(params, state) {
+    setup(params) {
         /** @type {Record[]} */
         this.records = [];
 
         this.handleField = params.handleField;
 
         this.editedRecord = null;
-        this.onRecordWillSwitchMode = async (record, mode) => {
+        this.onRecordWillSwitchMode = async (record, mode, options = {}) => {
             if (mode === "edit") {
                 await this.model.__bm__.save(this.__bm_handle__, { savePoint: true });
                 this.model.__bm__.freezeOrder(this.__bm_handle__);
             }
 
             const editedRecord = this.editedRecord;
-            if (editedRecord && editedRecord.id === record.id && mode === "readonly") {
-                const valid = await record.checkValidity();
-                if (valid) {
-                    this.editedRecord = null;
-                }
-                return valid;
-            }
+            this.editedRecord = null;
             if (editedRecord) {
-                const isValid = await editedRecord.checkValidity();
-                if (!isValid) {
-                    if (editedRecord.canBeAbandoned) {
-                        this.abandonRecord(editedRecord.id);
-                    } else {
-                        return false;
-                    }
-                } else {
+                // Validity is checked if one of the following is true:
+                // - "switchMode" has been called with explicit "checkValidity"
+                // - the record is dirty
+                // - the record is new and can be abandonned
+                const shouldCheckValidity =
+                    options.checkValidity || editedRecord.isDirty || editedRecord.canBeAbandoned;
+                const isValid = !shouldCheckValidity || (await editedRecord.checkValidity());
+                if (isValid) {
                     await editedRecord.switchMode("readonly");
+                } else if (editedRecord.id !== record.id && editedRecord.canBeAbandoned) {
+                    this.abandonRecord(editedRecord.id);
+                } else {
+                    this.editedRecord = editedRecord;
+                    return false;
                 }
             }
             if (mode === "edit") {

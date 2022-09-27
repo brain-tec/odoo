@@ -4307,7 +4307,22 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
+        // Whether the kanban is grouped by state, foo or bar
+        // the user must not be able to drag and drop from one group to another,
+        // as state, foo or bar are made readonly one way or another.
+        // However, product_id must be draggable: by default, in the models, it's readonly,
+        // but a counter order is given in the view architecture: readonly="0".
+        // state must not be draggable:
+        // state is not readonly in the model. state is passed in the arch specifying readonly="1".
+        // foo must not be draggable:
+        // foo is readonly in the model fields. foo is passed in the arch but without specifying readonly.
+        // bar must not be draggable:
+        // bar is readonly in the model fields. bar is not passed in the arch.
+        // product_id must be draggable:
+        // product_id is readonly in the model fields. product_id is passed in the arch specifying readonly="0".
         serverData.models.partner.fields.foo.readonly = true;
+        serverData.models.partner.fields.bar.readonly = true;
+        serverData.models.partner.fields.product_id.readonly = true;
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -4317,6 +4332,7 @@ QUnit.module("Views", (hooks) => {
                 "<templates>" +
                 '<t t-name="kanban-box"><div>' +
                 '<field name="foo"/>' +
+                '<field name="product_id" readonly="0" invisible="1"/>' +
                 '<field name="state" readonly="1"/>' +
                 "</div></t>" +
                 "</templates>" +
@@ -4326,7 +4342,12 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/dataset/resequence") {
                     return true;
                 }
-                if (args.model === "partner" && args.method === "write") {
+                if (
+                    args.model === "partner" &&
+                    args.method === "write" &&
+                    !(args.args && args.args[1] && args.args[1].product_id)
+                ) {
+                    // In the test, nothing should be draggable except the test on product_id
                     throw new Error("should not be draggable");
                 }
             },
@@ -4374,6 +4395,48 @@ QUnit.module("Views", (hooks) => {
 
         // should still be able to resequence
         assert.deepEqual(getCardTexts(0), ["blipGHI", "blipDEF"]);
+
+        await reload(kanban, { groupBy: ["bar"] });
+
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
+        assert.deepEqual(getCardTexts(0), ["blipGHI"]);
+
+        // first record of first column moved to the bottom of second column
+        await dragAndDrop(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+
+        // should not be draggable
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
+        assert.deepEqual(getCardTexts(0), ["blipGHI"]);
+
+        await reload(kanban, { groupBy: ["product_id"] });
+
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
+        assert.deepEqual(getCardTexts(0), ["yopABC", "gnapGHI"]);
+
+        // first record of first column moved to the bottom of second column
+        await dragAndDrop(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+
+        // should be draggable
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
+        assert.deepEqual(getCardTexts(0), ["gnapGHI"]);
     });
 
     QUnit.test("prevent drag and drop if grouped by date/datetime field", async (assert) => {
@@ -11095,6 +11158,58 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getProgressBars(1)[0].style.width, "25%"); // abc: 1
         assert.strictEqual(getProgressBars(1)[1].style.width, "50%"); // def: 2
         assert.strictEqual(getProgressBars(1)[2].style.width, "25%"); // ghi: 1
+    });
+
+    QUnit.test("click on the progressBar of a new column", async (assert) => {
+        serverData.models.partner.records = [];
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban on_create="quick_create">
+                    <progressbar field="state" colors='{"abc": "success", "def": "warning", "ghi": "danger"}' />
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="state" widget="state_selection" />
+                            <field name="id" />
+                        </div>
+                    </templates>
+                </kanban>
+            `,
+            groupBy: ["product_id"],
+            domain: [["id", ">", 0]],
+            mockRPC: (route, args) => {
+                const { method, kwargs } = args;
+                if (args.method === "web_search_read") {
+                    assert.step(method);
+                    assert.deepEqual(kwargs.domain, [
+                        "&",
+                        "&",
+                        ["id", ">", 0],
+                        ["product_id", "=", 6],
+                        "!",
+                        ["state", "in", ["abc", "def", "ghi"]],
+                    ]);
+                }
+            },
+        });
+
+        // Create a new column
+        await editColumnName("new column");
+        await validateColumn();
+
+        // Crete a record in the new column
+        await quickCreateRecord();
+        await editQuickCreateInput("display_name", "new product");
+        await validateRecord();
+        assert.containsOnce(target, ".o_kanban_record");
+
+        // Togggle the progressBar
+        await click(getProgressBars(0)[0]);
+        assert.containsOnce(target, ".o_kanban_record");
+
+        assert.verifySteps(["web_search_read"]);
     });
 
     QUnit.test(
