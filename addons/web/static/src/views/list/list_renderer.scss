@@ -136,25 +136,13 @@
             cursor: pointer;
         }
 
-        tbody tr {
-            outline-offset: -1px;
+        .o_selected_row {
+            th:focus-within, td:focus-within {
+                --table-accent-bg: none;
 
-            &:hover {
-                outline: 1px solid $gray-400;
-            }
-
-            &.table-info {
-                outline-color: $info;
-            }
-
-            &.o_selected_row {
-                th:focus-within, td:focus-within {
-                    --table-accent-bg: none;
-
-                    background-color: $o-view-background-color;
-                    outline-offset: -1px;
-                    outline: 1px solid $primary;
-                }
+                background-color: $o-view-background-color;
+                outline: 1px solid $info;
+                outline-offset: -1px;
             }
         }
 
@@ -376,10 +364,10 @@
 
     .o_data_row.o_selected_row > .o_data_cell.o_required_modifier:not(.o_readonly_modifier) {
         border-bottom: 1px solid $o-input-border-required;
+    }
 
-        &.o_invalid_cell {
-            border-bottom-color: 1px solid $danger;
-        }
+    .o_data_row.o_selected_row > .o_data_cell.o_invalid_cell:not(.o_readonly_modifier) {
+        border-bottom: 1px solid $danger;
     }
 
     /**
