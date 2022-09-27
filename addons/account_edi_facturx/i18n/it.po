@@ -4,17 +4,17 @@
 # 
 # Translators:
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
-# Friederike Fasterling-Nesselbosch, 2022
 # Francesco Garganese <francesco.garganese@aeromnia.aero>, 2022
 # Martin Trigaux, 2022
+# Friederike Fasterling-Nesselbosch, 2022
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~15.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-30 06:06+0000\n"
+"POT-Creation-Date: 2022-09-02 08:11+0000\n"
 "PO-Revision-Date: 2020-12-11 11:02+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2022\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,17 +30,17 @@ msgstr "1.0"
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_facturx_export
 msgid "42"
-msgstr ""
+msgstr "42"
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata
 msgid "ConformanceLevel"
-msgstr ""
+msgstr "ConformanceLevel"
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata
 msgid "DocumentFileName"
-msgstr ""
+msgstr "DocumentFileName"
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata
@@ -123,7 +123,7 @@ msgstr "Versione"
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata
 msgid "external"
-msgstr ""
+msgstr "esterno"
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata
@@ -147,8 +147,8 @@ msgstr "nome del file di fattura XML incorporato"
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_facturx_export
-msgid "urn:cen.eu:en16931:2017"
-msgstr "urn:cen.eu:en16931:2017"
+msgid "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
+msgstr ""
 
 #. module: account_edi_facturx
 #: model_terms:ir.ui.view,arch_db:account_edi_facturx.account_invoice_pdfa_3_facturx_metadata

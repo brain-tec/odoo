@@ -1891,16 +1891,21 @@ class MailThread(models.AbstractModel):
         except ImportError:
             values['slug'] = lambda self: self.id
         view_ref = views_or_xmlid.id if isinstance(views_or_xmlid, models.BaseModel) else views_or_xmlid
+
+        messages_as_sudo = self.env['mail.message']
         for record in self:
             values['object'] = record
             rendered_template = self.env['ir.qweb']._render(view_ref, values, minimal_qcontext=True, raise_if_not_found=False)
             if not rendered_template:
                 continue
             if message_log:
-                return record._message_log(body=rendered_template, **kwargs)
+                messages_as_sudo += record._message_log(body=rendered_template, **kwargs)
             else:
                 kwargs['body'] = rendered_template
-                return record.message_post_with_template(False, **kwargs)
+                # ``Composer._action_send_mail`` returns None in 15.0, no message to return here
+                record.message_post_with_template(False, **kwargs)
+
+        return messages_as_sudo
 
     def message_post_with_view(self, views_or_xmlid, **kwargs):
         """ Helper method to send a mail / post a message using a view_id """
@@ -2109,10 +2114,12 @@ class MailThread(models.AbstractModel):
                 create_values.pop(x, None)
             create_values['partner_ids'] = [Command.link(pid) for pid in create_values.get('partner_ids', [])]
             create_values_list.append(create_values)
-        if 'default_child_ids' in self._context:
-            ctx = {key: val for key, val in self._context.items() if key != 'default_child_ids'}
-            self = self.with_context(ctx)
-        return self.env['mail.message'].create(create_values_list)
+
+        # remove context, notably for default keys, as this thread method is not
+        # meant to propagate default values for messages, only for master records
+        return self.env['mail.message'].with_context(
+            clean_context(self.env.context)
+        ).create(create_values_list)
 
     # ------------------------------------------------------
     # NOTIFICATION API

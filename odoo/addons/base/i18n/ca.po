@@ -15,16 +15,16 @@
 # ericrolo, 2022
 # Jonatan Gk, 2022
 # Óscar Fonseca <tecnico@extreme-micro.com>, 2022
+# CristianCruzParra, 2022
 # AncesLatino2004, 2022
+# Harcogourmet, 2022
+# oscaryuu, 2022
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
 # Carles Antoli <carlesantoli@hotmail.com>, 2022
-# Harcogourmet, 2022
-# marcescu, 2022
 # Martin Trigaux, 2022
 # eriiikgt, 2022
 # Pete M, 2022
-# oscaryuu, 2022
-# CristianCruzParra, 2022
+# marcescu, 2022
 # jabelchi, 2022
 # 
 msgid ""
@@ -18458,7 +18458,7 @@ msgstr "Divendres"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range__date_from
 msgid "From"
-msgstr "De"
+msgstr "Des de"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_res_partner_bank_account_form
@@ -23444,7 +23444,7 @@ msgstr "No s'ha pogut trobar una vista per defecte de tipus '%s'!"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_sequence__implementation__no_gap
 msgid "No gap"
-msgstr "No hi ha espai"
+msgstr "Sense espais"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -30633,7 +30633,6 @@ msgstr "El codi de moneda ha de ser únic!"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__inverse_rate
 #: model:ir.model.fields,help:base.field_res_currency_rate__company_rate
-#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
 msgid "The currency of rate 1 to the rate of the currency."
 msgstr "La moneda del tipus 1 al tipus de la moneda."
 
@@ -30924,8 +30923,9 @@ msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency_rate__rate
-msgid "The rate of the currency to the currency of rate 1"
-msgstr "La taxa de canvi de la moneda a la moneda de taxa 1"
+#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
+msgid "The rate of the currency to the currency of rate 1 "
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__rate
@@ -32521,7 +32521,7 @@ msgstr "Usi el codi pitó per a definir els impostos"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__use_date_range
 msgid "Use subsequences per date_range"
-msgstr "Utilitzar subseqüències per date_range"
+msgstr "Utilitzar sub-seqüències per rang de data"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_gamification

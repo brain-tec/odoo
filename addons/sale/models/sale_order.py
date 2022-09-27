@@ -68,7 +68,7 @@ class SaleOrder(models.Model):
         required=True, readonly=False, change_default=True, index=True,
         tracking=1,
         states=READONLY_FIELD_STATES,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        domain="[('type', '!=', 'private'), ('company_id', 'in', (False, company_id))]")
     state = fields.Selection(
         selection=[
             ('draft', "Quotation"),
@@ -111,13 +111,12 @@ class SaleOrder(models.Model):
         compute='_compute_require_signature',
         store=True, readonly=False, precompute=True,
         states=READONLY_FIELD_STATES,
-        help="Request a online signature to the customer in order to confirm orders automatically.")
+        help="Request a online signature and/or payment to the customer in order to confirm orders automatically.")
     require_payment = fields.Boolean(
         string="Online Payment",
         compute='_compute_require_payment',
         store=True, readonly=False, precompute=True,
-        states=READONLY_FIELD_STATES,
-        help="Request an online payment to the customer in order to confirm orders automatically.")
+        states=READONLY_FIELD_STATES)
 
     signature = fields.Image(
         string="Signature",
@@ -287,6 +286,8 @@ class SaleOrder(models.Model):
     tax_country_id = fields.Many2one(
         comodel_name='res.country',
         compute='_compute_tax_country_id',
+        # Avoid access error on fiscal position when reading a sale order with company != user.company_ids
+        compute_sudo=True,
         help="Technical field to filter the available taxes depending on the fiscal country and fiscal position.")
     tax_totals_json = fields.Char(compute='_compute_tax_totals_json')
     terms_type = fields.Selection(related='company_id.terms_type')
@@ -575,7 +576,7 @@ class SaleOrder(models.Model):
             show_warning = order.state in ('draft', 'sent') and \
                            order.company_id.account_use_credit_limit
             if show_warning:
-                updated_credit = order.partner_id.credit + (order.amount_total * order.currency_rate)
+                updated_credit = order.partner_id.commercial_partner_id.credit + (order.amount_total * order.currency_rate)
                 order.partner_credit_warning = self.env['account.move']._build_credit_warning_message(order, updated_credit)
 
     @api.depends('order_line.tax_id', 'order_line.price_unit', 'amount_total', 'amount_untaxed')

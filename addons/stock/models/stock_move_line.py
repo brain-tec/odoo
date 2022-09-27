@@ -386,6 +386,8 @@ class StockMoveLine(models.Model):
                         new_reserved_uom_qty = ml.product_id.uom_id._compute_quantity(reserved_qty, ml.product_uom_id, rounding_method='HALF-UP')
                         moves_to_recompute_state |= ml.move_id
                         ml.with_context(bypass_reservation_update=True).reserved_uom_qty = new_reserved_uom_qty
+                        # we don't want to override the new reserved quantity
+                        vals.pop('reserved_uom_qty', None)
 
         # When editing a done move line, the reserved availability of a potential chained move is impacted. Take care of running again `_action_assign` on the concerned moves.
         if updates or 'qty_done' in vals:
@@ -598,12 +600,12 @@ class StockMoveLine(models.Model):
             lines |= picking_id.move_line_ids.filtered(lambda ml: ml.product_id == self.product_id and (ml.lot_id or ml.lot_name))
         return lines
 
-    def _prepare_new_lot_vals(self):
+    def _get_value_production_lot(self):
         self.ensure_one()
         return {
-            'name': self.lot_name,
-            'product_id': self.product_id.id,
             'company_id': self.company_id.id,
+            'name': self.lot_name,
+            'product_id': self.product_id.id
         }
 
     def _create_and_assign_production_lot(self):
@@ -618,8 +620,7 @@ class StockMoveLine(models.Model):
             key_to_mls[key] |= ml
             if ml.tracking != 'lot' or key not in key_to_index:
                 key_to_index[key] = len(lot_vals)
-                lot_vals.append(ml._prepare_new_lot_vals())
-
+                lot_vals.append(ml._get_value_production_lot())
         lots = self.env['stock.lot'].create(lot_vals)
         for key, mls in key_to_mls.items():
             mls._assign_production_lot(lots[key_to_index[key]].with_prefetch(lots._ids))  # With prefetch to reconstruct the ones broke by accessing by index
