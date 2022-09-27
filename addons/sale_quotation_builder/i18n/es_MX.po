@@ -3,6 +3,7 @@
 # 	* sale_quotation_builder
 # 
 # Translators:
+# Lucia Pacheco <lpo@odoo.com>, 2022
 # Martin Trigaux, 2022
 # 
 msgid ""
@@ -26,6 +27,9 @@ msgid ""
 "                                        this content will appear on the quotation only if this\n"
 "                                        product is put on the quote."
 msgstr ""
+":\n"
+"                                       este contenido aparecerá en la cotización solo si:\n"
+"                                        se añade este producto a la cotización."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
@@ -34,6 +38,9 @@ msgid ""
 "                                        this content will appear on the quotation only if this\n"
 "                                        product is used in the quote."
 msgstr ""
+":\n"
+"                                       este contenido aparecerá en la cotización solo si:\n"
+"                                        se usa este producto a la cotización."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.sale_order_portal_content_inherit_sale_quotation_builder
@@ -42,6 +49,9 @@ msgid ""
 "                        the content below will disappear if this\n"
 "                        product is removed from the quote."
 msgstr ""
+":\n"
+"                        el siguiente contenido desaparecerá si\n"
+"                        se elimina este producto de la cotización."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
@@ -50,6 +60,9 @@ msgid ""
 "                                    will appear on all quotations using this\n"
 "                                    template."
 msgstr ""
+"<strong>Encabezado de la plantilla:</strong> este contenido\n"
+"                                    aparecerá en todas las cotizaciones que usen esta\n"
+"                                    plantilla."
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -59,7 +72,7 @@ msgstr "Sobre nosotros"
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.brand_promotion
 msgid "An awesome"
-msgstr ""
+msgstr "Una asombrosa"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -68,6 +81,9 @@ msgid ""
 "                                we know that success is all about the\n"
 "                                commitment we put on strong services."
 msgstr ""
+"Como empresa líder de servicios profesionales,\n"
+"                                el éxito depende del compromiso\n"
+"                                que pongamos en nuestros servicios."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.sale_order_portal_content_inherit_sale_quotation_builder
@@ -82,7 +98,7 @@ msgstr "Empresas"
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.sale_order_template_view_form_inherit_sale_quotation_builder
 msgid "Design Template"
-msgstr ""
+msgstr "Plantilla de diseño"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -93,6 +109,11 @@ msgid ""
 "                                your references, your methodology or\n"
 "                                guarantees, your team, SLA, terms and conditions, etc."
 msgstr ""
+"El uso de buenas plantillas de cotización incrementará\n"
+"                                <strong>significativamente su tasa de éxito</strong>. La\n"
+"                                primera sección suele ser sobre su empresa,\n"
+"                                sus referencias, su metodología o\n"
+"                                garantías, su equipo, el ANS, los términos y condiciones, etc."
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -102,31 +123,35 @@ msgid ""
 "                        template (from the Configuration menu), all future quotations will\n"
 "                        use this modified template."
 msgstr ""
+"Si edita una cotización desde la \"Vista previa\", solo\n"
+"se actualizará esa cotización. Si edita la plantilla\n"
+"de la cotización (desde el menú Configuración), todas sus siguientes cotizaciones\n"
+"utilizarán esta plantilla modificada."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.brand_promotion
 msgid "Open Source CRM"
-msgstr ""
+msgstr "CRM de código abierto"
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
 msgid "Optional Product:"
-msgstr ""
+msgstr "Producto opcional:"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
 msgid "Our Offer"
-msgstr ""
+msgstr "Nuestra oferta"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
 msgid "Our Quality"
-msgstr ""
+msgstr "Nuestra calidad"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
 msgid "Our Service"
-msgstr ""
+msgstr "Nuestro servicio"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -145,44 +170,47 @@ msgid ""
 "                                stand on; we build it with a relentless\n"
 "                                focus on fabric, performance and craftsmanship."
 msgstr ""
+"La calidad del producto es el elemento fundamental\n"
+"sobre el que nos guiamos; nos centramos en\n"
+"el material, el rendimiento y el trabajo artesanal."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.sale_order_portal_content_inherit_sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
 msgid "Product:"
-msgstr ""
+msgstr "Producto:"
 
 #. module: sale_quotation_builder
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_product_product__quotation_description
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_product_template__quotation_description
 msgid "Quotation Description"
-msgstr ""
+msgstr "Descripción de la cotización"
 
 #. module: sale_quotation_builder
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_product_product__quotation_only_description
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_product_template__quotation_only_description
 msgid "Quotation Only Description"
-msgstr ""
+msgstr "Descripción solo de la cotización"
 
 #. module: sale_quotation_builder
 #: model:ir.model,name:sale_quotation_builder.model_sale_order_template
 msgid "Quotation Template"
-msgstr ""
+msgstr "Plantilla de cotización"
 
 #. module: sale_quotation_builder
 #: model:ir.model,name:sale_quotation_builder.model_sale_order_template_line
 msgid "Quotation Template Line"
-msgstr ""
+msgstr "Línea de plantilla de cotización"
 
 #. module: sale_quotation_builder
 #: model:ir.model,name:sale_quotation_builder.model_sale_order_template_option
 msgid "Quotation Template Option"
-msgstr ""
+msgstr "Opción de plantilla de cotización"
 
 #. module: sale_quotation_builder
 #: model:ir.model,name:sale_quotation_builder.model_sale_order_option
 msgid "Sale Options"
-msgstr ""
+msgstr "Opciones de venta"
 
 #. module: sale_quotation_builder
 #: model:ir.model,name:sale_quotation_builder.model_sale_order
@@ -203,7 +231,7 @@ msgstr "Términos y condiciones"
 #: model:ir.model.fields,help:sale_quotation_builder.field_product_product__quotation_only_description
 #: model:ir.model.fields,help:sale_quotation_builder.field_product_template__quotation_only_description
 msgid "The quotation description (not used on eCommerce)"
-msgstr ""
+msgstr "La descripción de la cotización (no se usa en comercio electrónico)"
 
 #. module: sale_quotation_builder
 #: model:ir.model.fields,help:sale_quotation_builder.field_product_product__quotation_description
@@ -212,6 +240,8 @@ msgid ""
 "This field uses the Quotation Only Description if it is defined, otherwise "
 "it will try to read the eCommerce Description."
 msgstr ""
+"Este campo utiliza la descripción de cotización si se definió, de lo "
+"contrario intentará tomar la descripción del comercio electrónico."
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -221,11 +251,15 @@ msgid ""
 "                                application, using the menu: Configuration /\n"
 "                                Quotation Templates."
 msgstr ""
+"Este es un <strong>ejemplo de una plantilla de cotización</strong>. Debe\n"
+"                                personalizarla según sus necesidades desde la aplicación de <i>Ventas</i>,\n"
+"                                con el menú: Configuración /\n"
+"                                Plantillas de cotización."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
 msgid "This is a preview of the sale order template."
-msgstr ""
+msgstr "Esta es una vista previa de la plantilla de orden de venta."
 
 #. module: sale_quotation_builder
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.so_template
@@ -234,6 +268,9 @@ msgid ""
 "                                    <i>Heading 3</i> will be used to generate the\n"
 "                                    table of content automatically."
 msgstr ""
+"Los títulos con los estilos <i>Encabezado 2</i> y\n"
+"                                                     <i>Encabezado 3</i> se utilizarán para generar la\n"
+"                                                      tabla de contenido de forma automática."
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -242,6 +279,9 @@ msgid ""
 "                                set at a fair price so that you will be\n"
 "                                happy to buy them."
 msgstr ""
+"Siempre garantizamos que nuestros productos\n"
+"                                tengan un precio justo, de forma\n"
+"                                que se alegrarán de comprarlos."
 
 #. module: sale_quotation_builder
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_sale_order__website_description
@@ -252,7 +292,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_quotation_builder.field_sale_order_template_option__website_description
 #: model_terms:ir.ui.view,arch_db:sale_quotation_builder.sale_order_template_view_form_inherit_sale_quotation_builder
 msgid "Website Description"
-msgstr ""
+msgstr "Descripción del sitio web"
 
 #. module: sale_quotation_builder
 #: model_terms:sale.order.template,website_description:sale_quotation_builder.sale_order_template_default
@@ -263,3 +303,8 @@ msgid ""
 "                        on the left is generated automatically using the styles you\n"
 "                        used in your description (heading 1, heading 2, ...)"
 msgstr ""
+"Puede <strong>elegir una descripción por producto</strong>. Odoo creará\n"
+"                        una cotización de forma automática con las descripciones\n"
+"                        de todos los productos de la propuesta. La tabla de contenidos\n"
+"                        de la izquierda se genera de forma automática con los estilos\n"
+"                        que haya usado en la descripción (encabezado 1, encabezado 2...)"

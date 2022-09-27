@@ -3,6 +3,7 @@
 # 	* website_slides_survey
 # 
 # Translators:
+# Cécile Collart <cco@odoo.com>, 2022
 # Martin Trigaux, 2022
 # 
 msgid ""
@@ -18,6 +19,12 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: fr\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+#. module: website_slides_survey
+#: code:addons/website_slides_survey/models/survey_survey.py:0
+#, python-format
+msgid "- %s (Courses - %s)"
+msgstr "- %s (Cours - %s)"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_survey_view_kanban
@@ -413,9 +420,11 @@ msgstr "Certification de test"
 #: code:addons/website_slides_survey/models/survey_survey.py:0
 #, python-format
 msgid ""
-"The Certification '%(certification_name)s' cannot be deleted because it is "
-"still being used by the Course(s) '%(courses_names)s'"
+"Any Survey listed below is currently used as a Course Certification and cannot be deleted:\n"
+"%s"
 msgstr ""
+"Toute enquête répertoriée ci-dessous est actuellement utilisée comme certification de cours et ne peut pas être supprimée :\n"
+"%s"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_slide_slide__is_preview
@@ -431,6 +440,7 @@ msgstr ""
 msgid ""
 "The courses this survey is linked to through the e-learning application"
 msgstr ""
+"Les cours auxquels cette enquête est liée à travers l'application e-learning"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_survey_user_input__slide_id
@@ -441,6 +451,8 @@ msgstr "Le slide de cours connexe quand il n'y a pas d'information d'adhésion"
 #: model:ir.model.fields,help:website_slides_survey.field_survey_survey__slide_ids
 msgid "The slides this survey is linked to through the e-learning application"
 msgstr ""
+"Les Diapos auxquels cette enquête est liée à travers l'application "
+"e-learning"
 
 #. module: website_slides_survey
 #: code:addons/website_slides_survey/controllers/slides.py:0
@@ -452,7 +464,7 @@ msgstr "Vous n'êtes pas autorisé à créer cette enquête."
 #: code:addons/website_slides_survey/controllers/slides.py:0
 #, python-format
 msgid "You are not allowed to link a certification."
-msgstr ""
+msgstr "Vous n'êtes pas autorisé à joindre une certification."
 
 #. module: website_slides_survey
 #. openerp-web
@@ -462,6 +474,9 @@ msgid ""
 "You can create your certification from here or use an existing one. Once "
 "your certification is created, you can still edit it in backend."
 msgstr ""
+"Vous pouvez créer votre attestation à partir d'ici ou bien utiliser un "
+"modèle existant. Une fois elle est créée, vous pouvez toujours la modifier "
+"en arrière-plan."
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.badge_content
@@ -469,6 +484,8 @@ msgid ""
 "You can gain badges by passing certifications. Here is a list of all available certification badges.\n"
 "                            <br/>Follow the links to reach new heights and skill up!"
 msgstr ""
+"Vous pouvez obtenir des badges en passant des certifications. Voici une liste de tous les badges de certification disponibles.\n"
+"<br/>Suivez les liens pour atteindre de nouveaux sommets et améliorer vos compétences !"
 
 #. module: website_slides_survey
 #: model:mail.template,subject:website_slides_survey.mail_template_user_input_certification_failed

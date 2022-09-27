@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2022
 # Moka Tourisme <hello@mokatourisme.fr>, 2022
+# Cécile Collart <cco@odoo.com>, 2022
 # 
 msgid ""
 msgstr ""
@@ -12,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-02-11 14:34+0000\n"
 "PO-Revision-Date: 2022-06-17 09:49+0000\n"
-"Last-Translator: Moka Tourisme <hello@mokatourisme.fr>, 2022\n"
+"Last-Translator: Cécile Collart <cco@odoo.com>, 2022\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1112,7 +1113,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:event.view_event_form
 #: model_terms:ir.ui.view,arch_db:event.view_event_type_form
 msgid "Add some internal notes (to do lists, contact info, ...)"
-msgstr ""
+msgstr "Ajoutez quelques notes internes (listes de tâches, coordonnées, ...)"
 
 #. module: event
 #: model:res.groups,name:event.group_event_manager
@@ -1367,7 +1368,7 @@ msgstr "Confirmé"
 #: model_terms:ir.ui.view,arch_db:event.view_event_form
 #: model_terms:ir.ui.view,arch_db:event.view_event_type_form
 msgid "Confirmed Attendees"
-msgstr ""
+msgstr "Participants confirmés"
 
 #. module: event
 #: model:ir.model,name:event.model_res_partner
@@ -1693,12 +1694,12 @@ msgstr "Modèle d'événement"
 #: model:ir.model,name:event.model_event_type_ticket
 #: model_terms:ir.ui.view,arch_db:event.event_type_ticket_view_form_from_type
 msgid "Event Template Ticket"
-msgstr ""
+msgstr "Modèle de ticket d'événement"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_type_ticket_view_tree_from_type
 msgid "Event Template Tickets"
-msgstr ""
+msgstr "Modèle de tickets d'événement"
 
 #. module: event
 #: model:ir.actions.act_window,name:event.action_event_type
@@ -1949,7 +1950,7 @@ msgstr "Activités futures"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail__mail_state
 msgid "Global communication Status"
-msgstr ""
+msgstr "État de la communication globale"
 
 #. module: event
 #. openerp-web
@@ -2056,6 +2057,8 @@ msgstr "Si actif, certains messages ont une erreur de livraison."
 msgid ""
 "If ticketing is used, contains the earliest starting sale date of tickets."
 msgstr ""
+"Si la billetterie est utilisée, contient la première date de début de vente "
+"des billets."
 
 #. module: event
 #: model:ir.model.fields.selection,name:event.selection__event_mail__interval_unit__now
@@ -2223,7 +2226,7 @@ msgstr "Créons votre premier <b>événement</b>."
 #: model:ir.model.fields,field_description:event.field_event_event_ticket__seats_limited
 #: model:ir.model.fields,field_description:event.field_event_type_ticket__seats_limited
 msgid "Limit Attendees"
-msgstr ""
+msgstr "Limiter les participants"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_form
@@ -2244,7 +2247,7 @@ msgstr "Diffusion en direct"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_res_config_settings__module_website_event_track_live
 msgid "Live Mode"
-msgstr ""
+msgstr "Mode Live"
 
 #. module: event
 #: model:ir.model.fields.selection,name:event.selection__event_mail__notification_type__mail
@@ -2484,7 +2487,7 @@ msgstr "Nombre d'actions"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__seats_used
 msgid "Number of Attendees"
-msgstr ""
+msgstr "Nombre de participants"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__seats_expected
@@ -2553,6 +2556,8 @@ msgid ""
 "Override the default value displayed for the blocked state for kanban "
 "selection."
 msgstr ""
+"Remplacer la valeur par défaut affichée pour l'état 'bloqué' dans la "
+"sélection kanban."
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__legend_done
@@ -2561,6 +2566,8 @@ msgid ""
 "Override the default value displayed for the done state for kanban "
 "selection."
 msgstr ""
+"Remplacer la valeur par défaut affichée pour l'état 'terminé' dans la "
+"sélection kanban."
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__legend_normal
@@ -2569,6 +2576,8 @@ msgid ""
 "Override the default value displayed for the normal state for kanban "
 "selection."
 msgstr ""
+"Remplacer la valeur par défaut affichée pour l'état 'normal' dans la "
+"sélection kanban."
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_registration_search
@@ -2943,7 +2952,7 @@ msgstr "Modèle"
 #: model:ir.model.fields,field_description:event.field_event_mail__template_model_id
 #: model:ir.model.fields,field_description:event.field_event_type_mail__template_model_id
 msgid "Template Model"
-msgstr ""
+msgstr "Modèle"
 
 #. module: event
 #: code:addons/event/models/event_event.py:0
@@ -2978,6 +2987,8 @@ msgid ""
 "The following tickets cannot be deleted while they have one or more registrations linked to them:\n"
 "- %s"
 msgstr ""
+"Les tickets suivants ne peuvent pas être supprimés tant qu'ils sont associés à une ou plusieurs inscriptions :\n"
+"- %s"
 
 #. module: event
 #: model:event.stage,description:event.event_stage_booked
@@ -3016,7 +3027,7 @@ msgstr "C'est le <b>nom</b> que vos invités verront lors de leur inscription."
 #: code:addons/event/models/event_event.py:0
 #, python-format
 msgid "This operator is not supported"
-msgstr ""
+msgstr "Cet opérateur n'est pas pris en charge"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_stage_view_form
@@ -3055,6 +3066,8 @@ msgid ""
 "Ticket types allow you to distinguish your attendees. Let's <b>create</b> a "
 "new one."
 msgstr ""
+"Les types de tickets vous permettent de distinguer vos participants. "
+"<b>Créons-en</b> un nouveau."
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_type__event_type_ticket_ids
@@ -3119,7 +3132,7 @@ msgstr "Non confirmé"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__seats_unconfirmed
 msgid "Unconfirmed Registrations"
-msgstr ""
+msgstr "Inscriptions non confirmées"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_ticket__seats_unconfirmed
@@ -3168,13 +3181,15 @@ msgstr "A venir/En cours"
 #: model_terms:ir.actions.act_window,help:event.event_tag_category_action_tree
 msgid "Use Event Tag Categories to classify and organize your event tags."
 msgstr ""
+"Utilisez les catégories d'étiquettes d'événement pour classer et organiser "
+"vos étiquettes d'événement."
 
 #. module: event
 #. openerp-web
 #: code:addons/event/static/src/js/tours/event_tour.js:0
 #, python-format
 msgid "Use the <b>breadcrumbs</b> to go back to your kanban overview."
-msgstr ""
+msgstr "Utilisez le <b>fil d'Ariane</b> pour revenir à l'aperçu Kanban."
 
 #. module: event
 #: model_terms:ir.actions.act_window,help:event.event_event_action_pivot
@@ -3217,6 +3232,8 @@ msgid ""
 "Wait until Attendees register to your Event or create their registrations "
 "manually."
 msgstr ""
+"Attendez que les participants s'inscrivent à votre événement ou créez leurs "
+"inscriptions manuellement."
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__website_message_ids
@@ -3267,6 +3284,8 @@ msgid ""
 "You can define here labels that will be displayed for the state instead\n"
 "                            of the default labels in the kanban view."
 msgstr ""
+"Vous pouvez définir ici les labels qui seront affichés pour les états à la place\n"
+"                        des labels par défaut dans la vue kanban."
 
 #. module: event
 #: model:mail.template,subject:event.event_registration_mail_template_badge
@@ -3289,6 +3308,8 @@ msgstr "par ex. Conférence pour architectes"
 #: model_terms:ir.ui.view,arch_db:event.view_event_type_form
 msgid "e.g. How to get to your event, door closing time, ..."
 msgstr ""
+"par exemple : Comment se rendre à votre événement, heure de fermeture des "
+"portes, ..."
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_type_form
@@ -3330,6 +3351,8 @@ msgid ""
 "registrations have started if the current datetime is after the earliest "
 "starting date of tickets."
 msgstr ""
+"les inscriptions ont commencé si la date et l'heure actuelles sont "
+"postérieures à la première date de début des billets."
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_ticket_view_kanban_from_event

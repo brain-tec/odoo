@@ -3,6 +3,7 @@
 # 	* hr_holidays
 # 
 # Translators:
+# Friederike Fasterling-Nesselbosch, 2022
 # Martin Trigaux, 2022
 # 
 msgid ""
@@ -2725,7 +2726,7 @@ msgstr "November"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__number_of_hours_text
 msgid "Number Of Hours Text"
-msgstr ""
+msgstr "Stundenanzahl Text"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_needaction_counter
@@ -3197,7 +3198,7 @@ msgstr "Zweiter Monat Tag"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__second_month_day_display
 msgid "Second Month Day Display"
-msgstr ""
+msgstr "Zweiter Monat Tag Anzeige"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_employee__holiday_type
@@ -3349,14 +3350,14 @@ msgstr "Sonntag"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__supported_attachment_ids_count
 msgid "Supported Attachment Ids Count"
-msgstr ""
+msgstr "Anzahl der unterstützten Anlagen-IDs"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__leave_type_support_document
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__support_document
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 msgid "Supporting Document"
-msgstr ""
+msgstr "Begleitdokument"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:0
@@ -3978,7 +3979,7 @@ msgstr "Tz"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__tz_mismatch
 msgid "Tz Mismatch"
-msgstr ""
+msgstr "Tz Mismatch"
 
 #. module: hr_holidays
 #: model:hr.leave.type,name:hr_holidays.holiday_status_unpaid
@@ -4141,7 +4142,7 @@ msgstr "Tag jährlich"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__yearly_day_display
 msgid "Yearly Day Display"
-msgstr ""
+msgstr "Jährlicher Tag Anzeige"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__yearly_month
@@ -4229,6 +4230,8 @@ msgstr "Sie können keine Anfrage im %s Status stornieren"
 msgid ""
 "You cannot delete an allocation request which has some validated leaves."
 msgstr ""
+"Sie können eine Anfrage, die bereits validierte Urlaube enthält, nicht "
+"löschen."
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:0
@@ -4256,12 +4259,14 @@ msgid ""
 "You have several allocations for those type and period.\n"
 "Please split your request to fit in their number of days."
 msgstr ""
+"Sie haben mehrere Zuweisungen für diese Art und diesen Zeitraum.\n"
+"Bitte teilen Sie Ihre Anfrage so auf, dass sie in die Anzahl der Tage passt."
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
 msgid "You must be %s's Manager to approve this leave"
-msgstr ""
+msgstr "Sie müssen %ss Manager sein, um diese Abwesenheit zu genehmigen"
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:0
@@ -4292,7 +4297,7 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_accrual_level_added_value_greater_than_zero
 msgid "You must give a rate greater than 0 in accrual plan levels."
-msgstr ""
+msgstr "In Kumulationsplanstufen müssen Sie einen Satz größer als 0 angeben."
 
 #. module: hr_holidays
 #: code:addons/hr_holidays/models/hr_leave.py:0
@@ -4492,7 +4497,7 @@ msgstr "bis"
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
 msgid "valid until"
-msgstr ""
+msgstr "gültig bis"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_search

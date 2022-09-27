@@ -104,7 +104,9 @@ export const CLIPBOARD_WHITELISTS = {
         'I',
         'B',
         'U',
+        'S',
         'EM',
+        'FONT',
         'STRONG',
         // Table
         'TABLE',
@@ -143,7 +145,8 @@ export const CLIPBOARD_WHITELISTS = {
         /^fa/,
     ],
     attributes: ['class', 'href', 'src'],
-    spanStyle: {
+    styledTags: ['SPAN', 'B', 'STRONG', 'I', 'S', 'U', 'FONT'],
+    styles: {
         'text-decoration': { defaultValues: ['', 'none'] },
         'font-weight': { defaultValues: ['', '400'] },
         'background-color': { defaultValues: ['', '#fff', '#ffffff', 'rgb(255, 255, 255)', 'rgba(255, 255, 255, 1)'] },
@@ -203,6 +206,7 @@ export class OdooEditor extends EventTarget {
                 showEmptyElementHint: true,
                 defaultLinkAttributes: {},
                 plugins: [],
+                getUnremovableElements: () => [],
                 getReadOnlyAreas: () => [],
                 getContentEditableAreas: () => [],
                 getPowerboxElement: () => {
@@ -1660,6 +1664,9 @@ export class OdooEditor extends EventTarget {
         for (const node of this.options.getReadOnlyAreas()) {
             node.setAttribute('contenteditable', false);
         }
+        for (const element of this.options.getUnremovableElements()) {
+            element.classList.add("oe_unremovable");
+        }
         this.observerActive('_activateContenteditable');
     }
     _stopContenteditable() {
@@ -2244,18 +2251,18 @@ export class OdooEditor extends EventTarget {
             // Remove all illegal attributes and classes from the node, then
             // clean its children.
             for (const attribute of [...node.attributes]) {
-                // we kee some style on span to be able to paste text styled in the editor
-                if (node.nodeName === 'SPAN' && attribute.name === 'style') {
-                    const spanInlineStyles = attribute.value.split(';');
+                // Keep allowed styles on nodes with allowed tags.
+                if (CLIPBOARD_WHITELISTS.styledTags.includes(node.nodeName) && attribute.name === 'style') {
+                    const spanInlineStyles = attribute.value.split(';').map(x => x.trim());
                     const allowedSpanInlineStyles = spanInlineStyles.filter(rawStyle => {
                         const [styleName, styleValue] = rawStyle.split(':');
-                        const style = CLIPBOARD_WHITELISTS.spanStyle[styleName.trim()];
+                        const style = CLIPBOARD_WHITELISTS.styles[styleName.trim()];
                         return style && !style.defaultValues.includes(styleValue.trim());
                     });
                     node.removeAttribute(attribute.name);
                     if (allowedSpanInlineStyles.length > 0) {
                         node.setAttribute(attribute.name, allowedSpanInlineStyles.join(';'));
-                    } else {
+                    } else if (['SPAN', 'FONT'].includes(node.tagName)) {
                         for (const unwrappedNode of unwrapContents(node)) {
                             this._cleanForPaste(unwrappedNode);
                         }
@@ -2291,7 +2298,7 @@ export class OdooEditor extends EventTarget {
                 okClass instanceof RegExp ? okClass.test(item) : okClass === item,
             );
         } else {
-            const allowedSpanStyles = Object.keys(CLIPBOARD_WHITELISTS.spanStyle).map(s => `span[style*="${s}"]`);
+            const allowedSpanStyles = Object.keys(CLIPBOARD_WHITELISTS.styles).map(s => `span[style*="${s}"]`);
             return (
                 item.nodeType === Node.TEXT_NODE ||
                 (
@@ -2588,11 +2595,27 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onSelectionChange() {
+        const selection = this.document.getSelection();
+        // When CTRL+A in the editor, sometimes the browser use the editable
+        // element as an anchor & focus node. This is an issue for the commands
+        // and the toolbar so we need to fix the selection to be based on the
+        // editable children. Calling `getDeepRange` ensure the selection is
+        // limited to the editable.
+        if (selection.anchorNode === this.editable && selection.focusNode === this.editable) {
+            getDeepRange(
+                this.editable,
+                {
+                    correctTripleClick: true,
+                    select: true,
+                });
+            // The selection is changed in `getDeepRange` and will therefore
+            // re-trigger the _onSelectionChange.
+            return;
+        }
         // Compute the current selection on selectionchange but do not record it. Leave
         // that to the command execution or the 'input' event handler.
         this._computeHistorySelection();
 
-        const selection = this.document.getSelection();
         this._updateToolbar(!selection.isCollapsed && this.isSelectionInEditable(selection));
 
         if (this._currentMouseState === 'mouseup') {
@@ -2615,8 +2638,9 @@ export class OdooEditor extends EventTarget {
      */
     isSelectionInEditable(selection) {
         selection = selection || this.document.getSelection()
-        return selection && selection.anchorNode && this.editable.contains(selection.anchorNode) &&
-            this.editable.contains(selection.focusNode);
+        return selection && selection.anchorNode &&
+            closestElement(selection.anchorNode).isContentEditable && closestElement(selection.focusNode).isContentEditable &&
+            this.editable.contains(selection.anchorNode) && this.editable.contains(selection.focusNode);
     }
 
     /**
@@ -2718,8 +2742,6 @@ export class OdooEditor extends EventTarget {
     }
 
     cleanForSave(element = this.editable) {
-        sanitize(element);
-
         this._pluginCall('cleanForSave', [element]);
         // Clean the remaining ZeroWidthspaces added by the `fillEmpty` function
         // ( contain "data-oe-zws-empty-inline" attr)
@@ -2740,6 +2762,8 @@ export class OdooEditor extends EventTarget {
                 emptyElement.removeAttribute('data-oe-zws-empty-inline');
             }
         }
+        sanitize(element);
+
         // Remove contenteditable=false on elements
         for (const el of element.querySelectorAll('[contenteditable="false"]')) {
             if (!el.hasAttribute('data-oe-keep-contenteditable')) {

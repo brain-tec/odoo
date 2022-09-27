@@ -195,7 +195,7 @@ class PosSession(models.Model):
                                   "Cash Registers: %r", list(statement.name for statement in closed_statement_ids)))
 
     def _check_invoices_are_posted(self):
-        unposted_invoices = self.order_ids.account_move.filtered(lambda x: x.state != 'posted')
+        unposted_invoices = self.order_ids.sudo().with_company(self.company_id).account_move.filtered(lambda x: x.state != 'posted')
         if unposted_invoices:
             raise UserError(_('You cannot close the POS when invoices are not posted.\n'
                               'Invoices: %s') % str.join('\n',
@@ -1803,6 +1803,30 @@ class PosSession(models.Model):
             domain = [('id', '=', self.config_id.pricelist_id.id)]
         return {'search_params': {'domain': domain, 'fields': ['name', 'display_name', 'discount_policy']}}
 
+    def _product_pricelist_item_fields(self):
+        return [
+                'id',
+                'product_tmpl_id',
+                'product_id',
+                'pricelist_id',
+                'price_surcharge',
+                'price_discount',
+                'price_round',
+                'price_min_margin',
+                'price_max_margin',
+                'company_id',
+                'currency_id',
+                'date_start',
+                'date_end',
+                'compute_price',
+                'fixed_price',
+                'percent_price',
+                'base_pricelist_id',
+                'base',
+                'categ_id',
+                'min_quantity',
+                ]
+
     def _get_pos_ui_product_pricelist(self, params):
         pricelists = self.env['product.pricelist'].search_read(**params['search_params'])
         for pricelist in pricelists:
@@ -1810,9 +1834,8 @@ class PosSession(models.Model):
 
         pricelist_by_id = {pricelist['id']: pricelist for pricelist in pricelists}
         pricelist_item_domain = [('pricelist_id', 'in', [p['id'] for p in pricelists])]
-        for item in self.env['product.pricelist.item'].search_read(pricelist_item_domain, []):
+        for item in self.env['product.pricelist.item'].search_read(pricelist_item_domain, self._product_pricelist_item_fields()):
             pricelist_by_id[item['pricelist_id'][0]]['items'].append(item)
-            item['base_pricelist'] = pricelist_by_id.get(item['base_pricelist_id'][0]) if item['base_pricelist_id'] else None
 
         return pricelists
 
@@ -1956,7 +1979,7 @@ class PosSession(models.Model):
         params = self._loader_params_product_product()
         # custom_search_params will take priority
         params['search_params'] = {**params['search_params'], **custom_search_params}
-        products = self.env['product.product'].search_read(**params['search_params'])
+        products = self.env['product.product'].with_context(active_test=False).search_read(**params['search_params'])
         if len(products) > 0:
             self._process_pos_ui_product_product(products)
         return products

@@ -734,6 +734,9 @@ odoo.define('pos_coupon.pos', function (require) {
                     return program.promo_applicability === 'on_next_order';
                 });
         }
+        _convertToDate(stringDate) {
+            return new Date(stringDate.replace(/ /g, 'T').concat('Z'))
+        }
         /**
          * @param {coupon.program} program
          * @returns {{ successful: boolean, reason: string | undefined }}
@@ -779,7 +782,8 @@ odoo.define('pos_coupon.pos', function (require) {
 
             // Check if valid customer
             const customer = this.get_client();
-            if (program.rule_partners_domain && !program.valid_partner_ids.has(customer ? customer.id : 0)) {
+            const partnersDomain = program.rule_partners_domain || '[]';
+            if (partnersDomain !== '[]' && !program.valid_partner_ids.has(customer ? customer.id : 0)) {
                 return {
                     successful: false,
                     reason: "Current customer can't avail this program.",
@@ -787,8 +791,8 @@ odoo.define('pos_coupon.pos', function (require) {
             }
 
             // Check rule date
-            const ruleFrom = program.rule_date_from ? new Date(program.rule_date_from) : new Date(-8640000000000000);
-            const ruleTo = program.rule_date_to ? new Date(program.rule_date_to) : new Date(8640000000000000);
+            const ruleFrom = program.rule_date_from ? this._convertToDate(program.rule_date_from) : new Date(-8640000000000000);
+            const ruleTo = program.rule_date_to ? this._convertToDate(program.rule_date_to) : new Date(8640000000000000);
             const orderDate = new Date();
             if (!(orderDate >= ruleFrom && orderDate <= ruleTo)) {
                 return {
@@ -1083,21 +1087,24 @@ odoo.define('pos_coupon.pos', function (require) {
                 .join(',');
         }
         _createDiscountRewards(program, coupon_id, amountsToDiscount) {
-            const discountRewards = Object.entries(amountsToDiscount).map(([tax_keys, amount]) => {
+            const rewards = [];
+            const totalAmountsToDiscount = Object.values(amountsToDiscount).reduce((a, b) => a + b, 0);
+            for (let [tax_keys, amount] of Object.entries(amountsToDiscount)) {
                 let discountAmount = (amount * program.discount_percentage) / 100.0;
-                discountAmount = Math.min(discountAmount, program.discount_max_amount || Infinity);
-                return new Reward({
+                let maxDiscount = amount / totalAmountsToDiscount * (program.discount_max_amount || Infinity);
+                discountAmount = Math.min(discountAmount, maxDiscount);
+                rewards.push(new Reward({
                     product: this.pos.db.get_product_by_id(program.discount_line_product_id[0]),
                     unit_price: -discountAmount,
                     quantity: 1,
                     program: program,
                     tax_ids: tax_keys !== '' ? tax_keys.split(',').map((val) => parseInt(val, 10)) : [],
                     coupon_id: coupon_id,
-                });
-            });
-            return [discountRewards, discountRewards.length > 0 ? null : 'No items to discount.'];
+                }));
+            }
+            return [rewards, rewards.length > 0 ? null : 'No items to discount.'];
         }
-    }
+    };
     Registries.Model.extend(Order, PosCouponOrder);
 
 

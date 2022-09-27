@@ -3,6 +3,7 @@
 # 	* web
 # 
 # Translators:
+# Raymond Yu <cl_yu@hotmail.com>, 2022
 # Martin Trigaux, 2022
 # 
 msgid ""
@@ -596,7 +597,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/signature_dialog.js:0
 #, python-format
 msgid "Adopt & Sign"
-msgstr ""
+msgstr "采用并签署"
 
 #. module: web
 #. openerp-web
@@ -925,6 +926,7 @@ msgid ""
 " all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
+"通过单击采用并签名，我同意所选的签名/姓名首字母将是我的手写签名/姓名首字母的有效电子表示，用于文件（包括具有法律约束力的合同）的所有目的。"
 
 #. module: web
 #. openerp-web
@@ -2662,7 +2664,7 @@ msgstr "多行文字"
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 #, python-format
 msgid "My Odoo.com account"
-msgstr ""
+msgstr "Odoo.com账户"
 
 #. module: web
 #. openerp-web
@@ -3433,7 +3435,7 @@ msgstr "打印"
 #: code:addons/web/static/src/legacy/js/components/action_menus.js:0
 #, python-format
 msgid "Printing options"
-msgstr ""
+msgstr "打印选项"
 
 #. module: web
 #. openerp-web

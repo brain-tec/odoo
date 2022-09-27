@@ -2862,7 +2862,7 @@ msgstr "Prognoseomschrijving"
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse_orderpoint_tree_editable
 msgid "Forecast Report"
-msgstr ""
+msgstr "Prognoserapport"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__virtual_available
@@ -3274,6 +3274,13 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_move_line__result_package_id
 msgid "If set, the operations are packed into this package"
 msgstr "Indien ingesteld worden de bewerkingen verpakt in deze verpakking"
+
+#. module: stock
+#: model:ir.model.fields,help:stock.field_lot_label_layout__label_quantity
+msgid ""
+"If the UoM of a lot is not 'units', the lot will be considered as a unit and"
+" only one label will be printed for this lot."
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__active
