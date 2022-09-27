@@ -694,7 +694,8 @@
                          attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('auto_post', '=', False)]}">
                         This move is configured to be posted automatically at the accounting date: <field name="date" readonly="1"/>.
                     </div>
-                    <div class="alert alert-warning mb-0" role="alert"
+                    <div groups="account.group_account_invoice,account.group_account_readonly"
+                         class="alert alert-warning mb-0" role="alert"
                          attrs="{'invisible': [('partner_credit_warning', '=', '')]}">
                         <field name="partner_credit_warning"/>
                     </div>
@@ -806,6 +807,7 @@
                                        context="{
                                             'res_partner_search_mode': (context.get('default_move_type', 'entry') in ('out_invoice', 'out_refund', 'out_receipt') and 'customer') or (context.get('default_move_type', 'entry') in ('in_invoice', 'in_refund', 'in_receipt') and 'supplier') or False,
                                             'show_address': 1, 'default_is_company': True, 'show_vat': True}"
+                                       domain="[('type', '!=', 'private'), ('company_id', 'in', (False, company_id))]"
                                        options='{"always_reload": True, "no_quick_create": True}'
                                        attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                                 <field name="partner_shipping_id"

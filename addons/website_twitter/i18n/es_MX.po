@@ -3,23 +3,37 @@
 # 	* website_twitter
 # 
 # Translators:
-# Lucia Pacheco <lpo@odoo.com>, 2022
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022
 # Martin Trigaux, 2022
+# Lucia Pacheco <lpo@odoo.com>, 2022
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~15.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-19 13:58+0000\n"
+"POT-Creation-Date: 2022-09-02 08:13+0000\n"
 "PO-Revision-Date: 2016-08-05 13:21+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"Last-Translator: Lucia Pacheco <lpo@odoo.com>, 2022\n"
 "Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es_MX\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid ", <strong>create a project</strong> with the following information:"
+msgstr ""
+", <strong>crear proyecto</strong> que contenga la siguiente información:"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid ""
+", click on <strong>Elevated</strong> then on <strong>Apply</strong> and "
+"finally complete the form."
+msgstr ""
+", haga clic en <strong>Elevado</strong> y después en "
+"<strong>Aplicar</strong> y por último termine el formulario."
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -33,12 +47,12 @@ msgstr ""
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Twitter Roller</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Twitter Roller</span>"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "<strong>Callback URL: </strong>Leave blank"
-msgstr "<strong>Callback URL: </strong>Dejar en blanco"
+msgid "<strong>App Name: </strong> choose a unique name"
+msgstr "<strong>Nombre de la aplicación: </strong> escoja un nombre único"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -52,8 +66,8 @@ msgstr "<strong>Nombre: </strong> Integración de Odoo con Twitter"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "<strong>Website: </strong>"
-msgstr "<strong>Sitio web: </strong>"
+msgid "<strong>Use Case: </strong> Embedding Tweets in a website"
+msgstr "<strong>Caso de uso: </strong> Añadir tweets en un sitio web"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_key
@@ -68,15 +82,6 @@ msgid "API secret"
 msgstr "Clave secreta API"
 
 #. module: website_twitter
-#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid ""
-"Accept terms of use and click on the Create your Twitter application button "
-"at the bottom"
-msgstr ""
-"Acepte los términos de uso y a continuación presione el botón Cree su "
-"aplicación de Twitter"
-
-#. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -89,21 +94,14 @@ msgstr ""
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_res_config_settings
 msgid "Config Settings"
-msgstr "Opciones de configuración"
+msgstr "Ajustes de configuración"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid ""
-"Copy/Paste Consumer Key (API Key) and Consumer Secret (API Secret) keys "
-"below."
+msgid "Copy/Paste the API Key and API Key Secret values into the above fields"
 msgstr ""
-"A continuación copie y pegue la clave del consumidor (Clave API) y la clave "
-"secreta del consumidor (Secreto de la API)."
-
-#. module: website_twitter
-#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "Create a new Twitter application on"
-msgstr "Crear una nueva aplicación de Twitter en"
+"Copie/pegue los valores de la clave API y la clave secreta API en los campos"
+" anteriores"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
@@ -118,13 +116,18 @@ msgstr "Creado el"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado en pantalla"
+msgstr "Nombre en pantalla"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_screen_name
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Favorites From"
 msgstr "Favoritos de"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "Get Elevated access by going to"
+msgstr "Obtenga acceso elevado yendo a"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_screen_name
@@ -145,7 +148,7 @@ msgstr "Cómo configurar el acceso al API de Twitter"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__id
 msgid "ID"
-msgstr "Identificación"
+msgstr "ID"
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
@@ -169,6 +172,25 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "Log in or create an account on"
+msgstr "Inicie sesión o cree una cuenta en"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "On the"
+msgstr "En el "
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid ""
+"Once connected, and if not already done, complete the Twitter portal access "
+"process on"
+msgstr ""
+"Una vez conectado, si no lo ha hecho, termine el proceso de acceso al portal"
+" de Twitter en"
 
 #. module: website_twitter
 #: code:addons/website_twitter/controllers/main.py:0
@@ -219,11 +241,6 @@ msgstr ""
 "tiene que ser la misma que la de la clave de API."
 
 #. module: website_twitter
-#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "Switch to the API Keys tab: <br/>"
-msgstr "Cambie a la pestaña de claves API: <br/>"
-
-#. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -239,8 +256,8 @@ msgid ""
 "The Twitter servers are up, but the request could not be serviced due to "
 "some failure within our stack. Try again later."
 msgstr ""
-"Los servidores de Twitter están funcionando, pero la solicitud no ha podido "
-"ser atendida debido a algún fallo interno. Vuelva a intentarlo más tarde."
+"Los servidores de Twitter están funcionando, pero no se pudo atender la "
+"solicitud debido a algún fallo interno. Vuelva a intentarlo más tarde."
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
@@ -249,8 +266,8 @@ msgid ""
 "The request is understood, but it has been refused or access is not allowed."
 " Please check your Twitter API Key and Secret."
 msgstr ""
-"Se entiende la solicitud, pero ha sido rechazada o no se permite el acceso. "
-"Por favor, compruebe su clave y clave secreta API de Twitter."
+"Se entiende la solicitud, pero se ha rechazado o no se permite el acceso. "
+"Revise su clave y clave secreta API de Twitter."
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
@@ -260,7 +277,7 @@ msgid ""
 "authentication are considered invalid and will yield this response."
 msgstr ""
 "La solicitud no es válida o no se puede atender de otra manera. Las "
-"solicitudes sin autenticación se consideran inválidas y darán esta "
+"solicitudes sin autenticación se consideran no válidas y darán esta "
 "respuesta."
 
 #. module: website_twitter
@@ -277,7 +294,7 @@ msgstr "ID del tweet"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet
 msgid "Tweets"
-msgstr "Tuits"
+msgstr "Tweets"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -323,6 +340,11 @@ msgid "Twitter Configuration"
 msgstr "Configuración de Twitter"
 
 #. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "Twitter Portal"
+msgstr "Portal de Twitter"
+
+#. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -366,7 +388,7 @@ msgid ""
 " or choose a different screen name."
 msgstr ""
 "El usuario de Twitter @%(username)s tiene menos de 12 tweets marcados como "
-"favoritos. Por favor agregue más o escoja un nombre diferente."
+"favoritos. Añada más o escoja un nombre diferente."
 
 #. module: website_twitter
 #. openerp-web
@@ -395,10 +417,15 @@ msgstr "Sitio de Twitter"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "https://apps.twitter.com/app/new"
-msgstr "https://apps.twitter.com/app/new"
+msgid "https://developer.twitter.com/"
+msgstr "https://developer.twitter.com/"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "with the following values:"
-msgstr "con los siguientes valores:"
+msgid "https://developer.twitter.com/en/portal/products"
+msgstr "https://developer.twitter.com/en/portal/products"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "https://developer.twitter.com/portal/"
+msgstr "https://developer.twitter.com/portal/"

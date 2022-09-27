@@ -139,6 +139,7 @@
             catch (e) {
                 console.error(e);
             }
+            throw error;
         }
     }
 
@@ -322,7 +323,7 @@
         }
         function listener(ev) {
             const currentTarget = ev.currentTarget;
-            if (!currentTarget || !document.contains(currentTarget))
+            if (!currentTarget || !currentTarget.ownerDocument.contains(currentTarget))
                 return;
             const data = currentTarget[eventKey];
             if (!data)
@@ -674,6 +675,15 @@
                         : document.createElement(tagName);
                 }
                 if (el instanceof Element) {
+                    if (!domParentTree) {
+                        // some html elements may have side effects when setting their attributes.
+                        // For example, setting the src attribute of an <img/> will trigger a
+                        // request to get the corresponding image. This is something that we
+                        // don't want at compile time. We avoid that by putting the content of
+                        // the block in a <template/> element
+                        const fragment = document.createElement("template").content;
+                        fragment.appendChild(el);
+                    }
                     for (let i = 0; i < attrs.length; i++) {
                         const attrName = attrs[i].name;
                         const attrValue = attrs[i].value;
@@ -1567,7 +1577,7 @@
                     this.bdom = node.renderFn();
                 }
                 catch (e) {
-                    handleError({ node, error: e });
+                    node.app.handleError({ node, error: e });
                 }
                 root.setCounter(root.counter - 1);
             }
@@ -1630,7 +1640,7 @@
             }
             catch (e) {
                 this.locked = false;
-                handleError({ fiber: current || this, error: e });
+                node.app.handleError({ fiber: current || this, error: e });
             }
         }
         setCounter(newValue) {
@@ -1684,7 +1694,7 @@
                 }
             }
             catch (e) {
-                handleError({ fiber: current, error: e });
+                this.node.app.handleError({ fiber: current, error: e });
             }
         }
     }
@@ -2130,12 +2140,18 @@
         };
     }
     function validateTarget(target) {
-        if (!(target instanceof HTMLElement)) {
-            throw new OwlError("Cannot mount component: the target is not a valid DOM element");
+        // Get the document and HTMLElement corresponding to the target to allow mounting in iframes
+        const document = target && target.ownerDocument;
+        if (document) {
+            const HTMLElement = document.defaultView.HTMLElement;
+            if (target instanceof HTMLElement) {
+                if (!document.body.contains(target)) {
+                    throw new OwlError("Cannot mount a component on a detached dom node");
+                }
+                return;
+            }
         }
-        if (!document.body.contains(target)) {
-            throw new OwlError("Cannot mount a component on a detached dom node");
-        }
+        throw new OwlError("Cannot mount component: the target is not a valid DOM element");
     }
     class EventBus extends EventTarget {
         trigger(name, payload) {
@@ -2272,7 +2288,7 @@
                 await Promise.all(this.willStart.map((f) => f.call(component)));
             }
             catch (e) {
-                handleError({ node: this, error: e });
+                this.app.handleError({ node: this, error: e });
                 return;
             }
             if (this.status === 0 /* NEW */ && this.fiber === fiber) {
@@ -2347,7 +2363,7 @@
                     }
                 }
                 catch (e) {
-                    handleError({ error: e, node: this });
+                    this.app.handleError({ error: e, node: this });
                 }
             }
             this.status = 2 /* DESTROYED */;
@@ -2592,66 +2608,70 @@
 
     const VText = text("").constructor;
     class VPortal extends VText {
-        constructor(selector, realBDom) {
+        constructor(selector, content) {
             super("");
             this.target = null;
             this.selector = selector;
-            this.realBDom = realBDom;
+            this.content = content;
         }
         mount(parent, anchor) {
             super.mount(parent, anchor);
             this.target = document.querySelector(this.selector);
-            if (!this.target) {
-                let el = this.el;
-                while (el && el.parentElement instanceof HTMLElement) {
-                    el = el.parentElement;
-                }
-                this.target = el && el.querySelector(this.selector);
-                if (!this.target) {
-                    throw new OwlError("invalid portal target");
-                }
+            if (this.target) {
+                this.content.mount(this.target, null);
             }
-            this.realBDom.mount(this.target, null);
+            else {
+                this.content.mount(parent, anchor);
+            }
         }
         beforeRemove() {
-            this.realBDom.beforeRemove();
+            this.content.beforeRemove();
         }
         remove() {
-            if (this.realBDom) {
+            if (this.content) {
                 super.remove();
-                this.realBDom.remove();
-                this.realBDom = null;
+                this.content.remove();
+                this.content = null;
             }
         }
         patch(other) {
             super.patch(other);
-            if (this.realBDom) {
-                this.realBDom.patch(other.realBDom, true);
+            if (this.content) {
+                this.content.patch(other.content, true);
             }
             else {
-                this.realBDom = other.realBDom;
-                this.realBDom.mount(this.target, null);
+                this.content = other.content;
+                this.content.mount(this.target, null);
             }
         }
     }
     /**
-     * <t t-slot="default"/>
+     * kind of similar to <t t-slot="default"/>, but it wraps it around a VPortal
      */
     function portalTemplate(app, bdom, helpers) {
         let { callSlot } = helpers;
         return function template(ctx, node, key = "") {
-            return callSlot(ctx, node, key, "default", false, null);
+            return new VPortal(ctx.props.target, callSlot(ctx, node, key, "default", false, null));
         };
     }
     class Portal extends Component {
         setup() {
             const node = this.__owl__;
-            const renderFn = node.renderFn;
-            node.renderFn = () => new VPortal(this.props.target, renderFn());
-            onWillUnmount(() => {
-                if (node.bdom) {
-                    node.bdom.remove();
+            onMounted(() => {
+                const portal = node.bdom;
+                if (!portal.target) {
+                    const target = document.querySelector(this.props.target);
+                    if (target) {
+                        portal.content.moveBefore(target, null);
+                    }
+                    else {
+                        throw new OwlError("invalid portal target");
+                    }
                 }
+            });
+            onWillUnmount(() => {
+                const portal = node.bdom;
+                portal.remove();
             });
         }
     }
@@ -2975,10 +2995,10 @@
      * visit recursively the props and all the children to check if they are valid.
      * This is why it is only done in 'dev' mode.
      */
-    function validateProps(name, props, parent) {
+    function validateProps(name, props, comp) {
         const ComponentClass = typeof name !== "string"
             ? name
-            : parent.constructor.components[name];
+            : comp.constructor.components[name];
         if (!ComponentClass) {
             // this is an error, wrong component. We silently return here instead so the
             // error is triggered by the usual path ('component' function)
@@ -2986,7 +3006,7 @@
         }
         const schema = ComponentClass.props;
         if (!schema) {
-            if (parent.__owl__.app.warnIfNoStaticProps) {
+            if (comp.__owl__.app.warnIfNoStaticProps) {
                 console.warn(`Component '${ComponentClass.name}' does not have a static props description`);
             }
             return;
@@ -3591,6 +3611,7 @@
             this.target = new CodeTarget("template");
             this.translatableAttributes = TRANSLATABLE_ATTRS;
             this.staticDefs = [];
+            this.slotNames = new Set();
             this.helpers = new Set();
             this.translateFn = options.translateFn || ((s) => s);
             if (options.translatableAttributes) {
@@ -3918,8 +3939,13 @@
                     expr = compileExpr(ast.attrs[key]);
                     if (attrName && isProp(ast.tag, attrName)) {
                         // we force a new string or new boolean to bypass the equality check in blockdom when patching same value
-                        const C = attrName === "value" ? "String" : "Boolean";
-                        expr = `new ${C}(${expr})`;
+                        if (attrName === "value") {
+                            // When the expression is falsy, fall back to an empty string
+                            expr = `new String((${expr}) || "")`;
+                        }
+                        else {
+                            expr = `new Boolean(${expr})`;
+                        }
                     }
                     const idx = block.insertData(expr, "attr");
                     if (key === "t-att") {
@@ -4484,7 +4510,7 @@
                 expr = `\`${ast.name}\``;
             }
             if (this.dev) {
-                this.addLine(`helpers.validateProps(${expr}, ${propVar}, ctx);`);
+                this.addLine(`helpers.validateProps(${expr}, ${propVar}, this);`);
             }
             if (block && (ctx.forceNewBlock === false || ctx.tKeyExpr)) {
                 // todo: check the forcenewblock condition
@@ -4531,31 +4557,39 @@
             let blockString;
             let slotName;
             let dynamic = false;
+            let isMultiple = false;
             if (ast.name.match(INTERP_REGEXP)) {
                 dynamic = true;
+                isMultiple = true;
                 slotName = interpolate(ast.name);
             }
             else {
                 slotName = "'" + ast.name + "'";
+                isMultiple = isMultiple || this.slotNames.has(ast.name);
+                this.slotNames.add(ast.name);
             }
             const dynProps = ast.attrs ? ast.attrs["t-props"] : null;
             if (ast.attrs) {
                 delete ast.attrs["t-props"];
             }
+            let key = this.target.loopLevel ? `key${this.target.loopLevel}` : "key";
+            if (isMultiple) {
+                key = `${key} + \`${this.generateComponentKey()}\``;
+            }
             const props = ast.attrs ? this.formatPropObject(ast.attrs) : [];
             const scope = this.getPropString(props, dynProps);
             if (ast.defaultContent) {
                 const name = this.compileInNewTarget("defaultContent", ast.defaultContent, ctx);
-                blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope}, ${name})`;
+                blockString = `callSlot(ctx, node, ${key}, ${slotName}, ${dynamic}, ${scope}, ${name})`;
             }
             else {
                 if (dynamic) {
                     let name = generateId("slot");
                     this.define(name, slotName);
-                    blockString = `toggler(${name}, callSlot(ctx, node, key, ${name}, ${dynamic}, ${scope}))`;
+                    blockString = `toggler(${name}, callSlot(ctx, node, ${key}, ${name}, ${dynamic}, ${scope}))`;
                 }
                 else {
-                    blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope})`;
+                    blockString = `callSlot(ctx, node, ${key}, ${slotName}, ${dynamic}, ${scope})`;
                 }
             }
             // event handling
@@ -5517,10 +5551,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                     nodeErrorHandlers.set(node, handlers);
                 }
                 handlers.unshift((e) => {
-                    if (isResolved) {
-                        console.error(e);
-                    }
-                    else {
+                    if (!isResolved) {
                         reject(e);
                     }
                     throw e;
@@ -5583,6 +5614,9 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                 parentFiber.childrenMap[key] = node;
                 return node;
             };
+        }
+        handleError(...args) {
+            return handleError(...args);
         }
     }
     App.validateTarget = validateTarget;
@@ -5767,9 +5801,9 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '2.0.0-beta-16';
-    __info__.date = '2022-07-22T07:45:33.825Z';
-    __info__.hash = 'b90aa0e';
+    __info__.version = '2.0.0-beta-21';
+    __info__.date = '2022-09-26T13:49:57.969Z';
+    __info__.hash = 'ab72cdd';
     __info__.url = 'https://github.com/odoo/owl';
 
 

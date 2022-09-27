@@ -33,7 +33,7 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"                    Estimado(a <t t-out=\"object.name or ''\">Abigail Peterson</t>,<br/><br/>\n"
+"                    Apreciable <t t-out=\"object.name or ''\">Abigail Peterson</t>,<br/><br/>\n"
 "                    Ignore esto si es un error de nuestra parte, parece ser que no está en su oficina y no hay ninguna solicitud de tiempo personal de su parte.<br/>\n"
 "                    Tome las medidas adecuadas para poder llevar a cabo esta ausencia laboral.<br/>\n"
 "                    No dude en contactar a su gerente o al departamento de recursos humanos.\n"
@@ -94,7 +94,7 @@ msgstr "Empleado: correo electrónico de ausencia"
 #. module: hr_presence
 #: model:sms.template,name:hr_presence.sms_template_data_hr_presence
 msgid "Employee: Presence Reminder"
-msgstr "Empleado: Recordatorio de presencia"
+msgstr "Empleado: recordatorio de presencia"
 
 #. module: hr_presence
 #: model_terms:ir.ui.view,arch_db:hr_presence.hr_employee_view_presence_search

@@ -594,6 +594,7 @@ class AccountMove(models.Model):
             # Copy currency.
             if self.currency_id != self.invoice_vendor_bill_id.currency_id:
                 self.currency_id = self.invoice_vendor_bill_id.currency_id
+                self._onchange_currency()
 
             # Reset
             self.invoice_vendor_bill_id = False
@@ -1794,7 +1795,7 @@ class AccountMove(models.Model):
                            move.move_type == 'out_invoice' and \
                            move.company_id.account_use_credit_limit
             if show_warning:
-                updated_credit = move.partner_id.credit + move.amount_total_signed
+                updated_credit = move.partner_id.commercial_partner_id.credit + move.amount_total_signed
                 move.partner_credit_warning = self._build_credit_warning_message(move, updated_credit)
 
     def _build_credit_warning_message(self, record, updated_credit):
@@ -1805,13 +1806,13 @@ class AccountMove(models.Model):
             :param updated_credit (float):  The partner's updated credit limit including the current record.
             :return (str):                  The warning message to be showed.
         '''
-        credit_limit = record.partner_id.credit_limit
-        if (not credit_limit) or updated_credit <= credit_limit:
+        partner_id = record.partner_id.commercial_partner_id
+        if not partner_id.credit_limit or updated_credit <= partner_id.credit_limit:
             return ''
         msg = _('%s has reached its Credit Limit of : %s\nTotal amount due ',
-                record.partner_id.name,
-                formatLang(self.env, credit_limit, currency_obj=record.company_id.currency_id))
-        if updated_credit > record.partner_id.credit:
+                partner_id.name,
+                formatLang(self.env, partner_id.credit_limit, currency_obj=record.company_id.currency_id))
+        if updated_credit > partner_id.credit:
             msg += _('(including this document) ')
         msg += ': %s' % formatLang(self.env, updated_credit, currency_obj=record.company_id.currency_id)
         return msg
@@ -3017,8 +3018,10 @@ class AccountMove(models.Model):
             default_email_layout_xmlid="mail.mail_notification_paynow",
             model_description=self.with_context(lang=lang).type_name,
             force_email=True,
+            active_ids=self.ids,
         )
-        return {
+
+        report_action = {
             'name': _('Send Invoice'),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
@@ -3029,6 +3032,11 @@ class AccountMove(models.Model):
             'target': 'new',
             'context': ctx,
         }
+
+        if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
+            return self.env['ir.actions.report']._action_configure_external_report_layout(report_action)
+
+        return report_action
 
     def _get_new_hash(self, secure_seq_number):
         """ Returns the hash to write on journal entries when they get posted"""
@@ -4256,7 +4264,7 @@ class AccountMoveLine(models.Model):
             line.reconciled = (
                 comp_curr.is_zero(line.amount_residual)
                 and foreign_curr.is_zero(line.amount_residual_currency)
-                and line.move_id.state not in ('draft', 'cancel')
+                and (line.matched_debit_ids or line.matched_credit_ids)
             )
 
     @api.depends('tax_repartition_line_id.invoice_tax_id', 'tax_repartition_line_id.refund_tax_id')
@@ -4782,8 +4790,9 @@ class AccountMoveLine(models.Model):
             else:
                 return abs(line.amount_currency) / abs(line.balance)
 
-        debit_lines = iter(self.filtered(lambda line: line.balance > 0.0 or line.amount_currency > 0.0))
-        credit_lines = iter(self.filtered(lambda line: line.balance < 0.0 or line.amount_currency < 0.0))
+        debit_lines = iter(self.filtered(lambda line: line.balance > 0.0 or line.amount_currency > 0.0 and not line.reconciled))
+        credit_lines = iter(self.filtered(lambda line: line.balance < 0.0 or line.amount_currency < 0.0 and not line.reconciled))
+        void_lines = iter(self.filtered(lambda line: not line.balance and not line.amount_currency and not line.reconciled))
         debit_line = None
         credit_line = None
 
@@ -4804,7 +4813,7 @@ class AccountMoveLine(models.Model):
 
             # Move to the next available debit line.
             if not debit_line:
-                debit_line = next(debit_lines, None)
+                debit_line = next(debit_lines, None) or next(void_lines, None)
                 if not debit_line:
                     break
                 remaining_debit_amount_curr = debit_line.amount_residual_currency
@@ -4812,7 +4821,7 @@ class AccountMoveLine(models.Model):
 
             # Move to the next available credit line.
             if not credit_line:
-                credit_line = next(credit_lines, None)
+                credit_line = next(void_lines, None) or next(credit_lines, None)
                 if not credit_line:
                     break
                 remaining_credit_amount_curr = credit_line.amount_residual_currency
@@ -4887,17 +4896,6 @@ class AccountMoveLine(models.Model):
                 credit_rate = get_accounting_rate(credit_line)
                 recon_debit_amount = remaining_debit_amount
                 recon_credit_amount = -remaining_credit_amount
-
-            # Check if there is something left to reconcile. Move to the next loop iteration if not.
-            skip_reconciliation = False
-            if recon_currency.is_zero(recon_debit_amount):
-                debit_line = None
-                skip_reconciliation = True
-            if recon_currency.is_zero(recon_credit_amount):
-                credit_line = None
-                skip_reconciliation = True
-            if skip_reconciliation:
-                continue
 
             # ==== Match both lines together and compute amounts to reconcile ====
 
@@ -5027,9 +5025,9 @@ class AccountMoveLine(models.Model):
                 'credit_move_id': credit_line.id,
             })
 
-            if debit_fully_matched:
+            if recon_currency.is_zero(recon_debit_amount) or debit_fully_matched:
                 debit_line = None
-            if credit_fully_matched:
+            if recon_currency.is_zero(recon_credit_amount) or credit_fully_matched:
                 credit_line = None
         return partials_vals_list, exchange_data
 

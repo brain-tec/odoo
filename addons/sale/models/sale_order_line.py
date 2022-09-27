@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from datetime import timedelta
 
 from odoo import api, fields, models, _
@@ -362,15 +363,30 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id')
     def _compute_tax_id(self):
+        taxes_by_product_company = defaultdict(lambda: self.env['account.tax'])
+        lines_by_company = defaultdict(lambda: self.env['sale.order.line'])
+        cached_taxes = {}
         for line in self:
-            line = line.with_company(line.company_id)
-            taxes = line.product_id.taxes_id.filtered(lambda t: t.company_id == line.env.company)
-            if not line.product_id or not taxes:
-                # Nothing to map
-                line.tax_id = False
-                continue
-            # If company_id is set, always filter taxes by the company
-            line.tax_id = line.order_id.fiscal_position_id.map_tax(taxes)
+            lines_by_company[line.company_id] += line
+        for product in self.product_id:
+            for tax in product.taxes_id:
+                taxes_by_product_company[(product, tax.company_id)] += tax
+        for company, lines in lines_by_company.items():
+            for line in lines.with_company(company):
+                taxes = taxes_by_product_company[(line.product_id, company)]
+                if not line.product_id or not taxes:
+                    # Nothing to map
+                    line.tax_id = False
+                    continue
+                fiscal_position = line.order_id.fiscal_position_id
+                cache_key = (fiscal_position.id, company.id, tuple(taxes.ids))
+                if cache_key in cached_taxes:
+                    result = cached_taxes[cache_key]
+                else:
+                    result = fiscal_position.map_tax(taxes)
+                    cached_taxes[cache_key] = result
+                # If company_id is set, always filter taxes by the company
+                line.tax_id = result
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_pricelist_item_id(self):
@@ -846,7 +862,7 @@ class SaleOrderLine(models.Model):
     @api.depends('product_id', 'order_id.date_order', 'order_id.partner_id')
     def _compute_analytic_tag_ids(self):
         for line in self:
-            if not line.display_type and not line.analytic_tag_ids:
+            if not line.display_type and line.state == 'draft':
                 default_analytic_account = line.env['account.analytic.default'].sudo().account_get(
                     product_id=line.product_id.id,
                     partner_id=line.order_id.partner_id.id,
@@ -1045,7 +1061,7 @@ class SaleOrderLine(models.Model):
             'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
             'sale_line_ids': [(4, self.id)],
         }
-        if self.order_id.analytic_account_id:
+        if self.order_id.analytic_account_id and not self.display_type:
             res['analytic_account_id'] = self.order_id.analytic_account_id.id
         if optional_values:
             res.update(optional_values)
