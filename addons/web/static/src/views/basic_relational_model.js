@@ -677,7 +677,16 @@ export class Record extends DataPoint {
                 viewType: this.__viewType,
             });
             prom.catch(resolveUpdatePromise); // onchange rpc may return an error
-            await prom;
+            const fieldNames = await prom;
+            this._removeInvalidFields(fieldNames);
+            for (const fieldName of fieldNames) {
+                if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                    const { editedRecord } = this.data[fieldName];
+                    if (editedRecord) {
+                        editedRecord._removeAllInvalidFields();
+                    }
+                }
+            }
             this.__syncData();
         }
         this._removeInvalidFields(Object.keys(changes));
@@ -826,6 +835,10 @@ export class Record extends DataPoint {
             this._invalidFields.delete(fieldName);
         }
     }
+
+    _removeAllInvalidFields() {
+        this._removeInvalidFields(Object.keys(this.activeFields));
+    }
 }
 
 export class StaticList extends DataPoint {
@@ -964,10 +977,11 @@ export class StaticList extends DataPoint {
         await this.model.__bm__.save(this.__bm_handle__, { savePoint: true });
         this.model.__bm__.freezeOrder(this.__bm_handle__);
         await this.__syncParent(operation);
+        const newRecord = this.records[position === "bottom" ? this.records.length - 1 : 0];
         if (params.mode === "edit") {
-            const newRecord = this.records[position === "bottom" ? this.records.length - 1 : 0];
             await newRecord.switchMode("edit");
         }
+        return newRecord;
     }
 
     // x2many dialog edition
@@ -1023,6 +1037,30 @@ export class StaticList extends DataPoint {
             return;
         }
         await this.__syncParent(operation);
+    }
+
+    /**
+     * @param {Array[]} commands  array of commands
+     */
+    async applyCommands(fieldName, commands) {
+        const commandsWithId = commands.map((command) => {
+            return {
+                operation: command.operation,
+                id: command.record.__bm_handle__,
+                data: command.data,
+            };
+        });
+
+        const parentID = this.model.__bm__.localData[this.__bm_handle__].parentID;
+        await this.model.__bm__.notifyChanges(parentID, {
+            [fieldName]: {
+                operation: "MULTI",
+                commands: commandsWithId,
+            },
+        });
+
+        this.model.root.__syncData();
+        this.model.notify();
     }
 
     /**

@@ -2032,6 +2032,77 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_field_many2one.o_field_invalid", 2);
     });
 
+    QUnit.test("required field computed by another field in a form view", async function (assert) {
+        serverData.models.partner.fields.foo.default = false;
+        serverData.models.partner.onchanges = {
+            foo(record) {
+                if (record.foo) {
+                    record.display_name = "plop";
+                }
+            },
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                    <form>
+                        <field name="display_name" required="1"/>
+                        <field name="foo"/>
+                    </form>
+                    `,
+        });
+        await clickSave(target);
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsOnce(target, ".o_field_invalid");
+
+        await editInput(target, "[name='foo'] input", "hello");
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsNone(target, ".o_field_invalid");
+    });
+
+    QUnit.test("required field computed by another field in a x2m", async function (assert) {
+        serverData.models.partner.fields.foo.default = false;
+        serverData.models.partner.onchanges = {
+            foo(record) {
+                if (record.foo) {
+                    record.display_name = "plop";
+                }
+            },
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="foo"/>
+                                <field name="int_field"/>
+                                <field name="display_name" required="1"/>
+                            </tree>
+                        </field>
+                    </form>
+                    `,
+        });
+
+        await addRow(target);
+        await editInput(target, ".o_data_row [name='int_field'] input", 1);
+        await click(target, ".o_form_view");
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsOnce(target, ".o_selected_row");
+        assert.containsOnce(target, ".o_field_invalid");
+
+        await editInput(target, ".o_data_row [name='foo'] input", "hello");
+        await click(target, ".o_form_view");
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsNone(target, ".o_selected_row");
+        assert.containsNone(target, ".o_field_invalid");
+    });
+
     QUnit.test("tooltips on multiple occurrences of fields and labels", async function (assert) {
         serverData.models.partner.fields.foo.help = "foo tooltip";
         serverData.models.partner.fields.bar.help = "bar tooltip";
@@ -2807,10 +2878,10 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read1", "willStart"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["read2", "willUpdateProps", "willUpdateProps"]);
+        assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps", "willUpdateProps"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read3", "willUpdateProps", "willUpdateProps"]);
+        assert.verifySteps(["willUpdateProps", "willUpdateProps", "read3", "willUpdateProps", "willUpdateProps"]);
     });
 
     QUnit.test("buttons in form view, new record", async function (assert) {
@@ -4227,6 +4298,31 @@ QUnit.module("Views", (hooks) => {
         await clickDiscard(target);
 
         assert.containsNone(document.body, ".modal", "there should not be a confirm modal");
+    });
+
+    QUnit.test("discard invalid value", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="int_field"></field></form>',
+            resId: 1,
+        });
+
+        await editInput(target, ".o_field_widget[name=int_field] input", "tralala");
+        await click(target, ".o_form_view");
+        assert.containsOnce(target, ".o_field_invalid");
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=int_field] input").value,
+            "tralala"
+        );
+
+        await clickDiscard(target);
+        assert.containsNone(target, ".o_field_invalid");
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=int_field] input").value,
+            "10"
+        );
     });
 
     QUnit.test("Domain: allow empty domain on fieldInfo", async function (assert) {

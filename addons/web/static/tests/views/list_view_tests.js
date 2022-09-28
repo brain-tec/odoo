@@ -1018,6 +1018,44 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange", "create", "read"]);
     });
 
+    QUnit.test("save a record with an required field computed by another", async function (assert) {
+        serverData.models.foo.onchanges = {
+            foo(record) {
+                if (record.foo) {
+                    record.text = "plop";
+                }
+            },
+        };
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree editable="top">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                    <field name="text" required="1"/>
+                </tree>`,
+        });
+        assert.containsN(target, ".o_data_row", 4);
+        assert.containsNone(target, ".o_selected_row");
+
+        await click(target.querySelector(".o_list_button_add"));
+        await editInput(target, "[name='int_field'] input", 1);
+        await click(target, ".o_list_view");
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsOnce(target, ".o_field_invalid");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await editInput(target, "[name='foo'] input", "hello");
+        assert.containsNone(target, ".o_field_invalid");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await click(target, ".o_list_view");
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsNone(target, ".o_selected_row");
+    });
+
     QUnit.test("boolean field has no title (data-tooltip)", async function (assert) {
         await makeView({
             type: "list",
@@ -14959,6 +14997,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps(["create"]);
     });
+
     QUnit.test(
         "classNames given to a field are set on the right field directly",
         async function (assert) {
@@ -14973,7 +15012,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             });
             assert.doesNotHaveClass(
-                target.querySelector(".o_field_cell:nth-child(2)"),
+                target.querySelectorAll(".o_field_cell")[2],
                 "d-flex align-items-center",
                 "classnames are not set on the first cell"
             );
@@ -14982,15 +15021,10 @@ QUnit.module("Views", (hooks) => {
                 "d-flex align-items-center",
                 "classnames are set on the corresponding field div directly"
             );
-            assert.doesNotHaveClass(
-                target.querySelector(".o_field_cell:nth-child(3)"),
-                "d-none",
-                "classnames are not set on the second cell"
-            );
             assert.hasClass(
-                target.querySelector(".o_field_boolean"),
+                target.querySelectorAll(".o_field_cell")[3],
                 "d-none",
-                "classnames are set on the second field div directly"
+                "classnames are set on the second cell"
             );
         }
     );
@@ -15044,5 +15078,21 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(target, ".o_data_row:first-child td.o_list_button", 1);
         await click(target, ".o_data_row:first-child td.o_list_button");
+    });
+
+    QUnit.test("group by going to next page then back to first", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree groups_limit="1"><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["bar"],
+        });
+
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
+        await pagerNext(target);
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [2, 2]);
+        await pagerPrevious(target);
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
     });
 });

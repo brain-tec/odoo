@@ -446,7 +446,7 @@ export class Record extends DataPoint {
                 evalContext[fieldName] = false;
             } else if (isX2Many(this.fields[fieldName])) {
                 const list = this._cache[fieldName];
-                evalContext[fieldName] = list.getContext();
+                evalContext[fieldName] = list.currentIds;
                 // ---> implied to initialize (resIds, commands) currentIds before loading static list
             } else if (value && this.fields[fieldName].type === "date") {
                 evalContext[fieldName] = serializeDate(value);
@@ -1378,6 +1378,7 @@ export class Record extends DataPoint {
                 )
             ) {
                 const changes = await this._onChange(fieldNames);
+                this._removeInvalidFields(Object.keys(changes));
                 for (const [fieldName, value] of Object.entries(changes)) {
                     const field = this.fields[fieldName];
                     // for x2many fields, the onchange returns commands, not ids, so we need to process them
@@ -2223,8 +2224,8 @@ export class DynamicGroupList extends DynamicList {
     }
 
     async load(params = {}) {
-        this.limit = params.limit || this.limit;
-        this.offset = params.offset || this.offset;
+        this.limit = params.limit === undefined ? this.limit : params.limit;
+        this.offset = params.offset === undefined ? this.offset : params.offset;
         /** @type {[Group, number][]} */
         const previousGroups = this.groups.map((g, i) => [g, i]);
         this.groups = await this._loadGroups();
