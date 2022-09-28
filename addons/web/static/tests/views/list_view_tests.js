@@ -14,7 +14,6 @@ import {
     addRow,
     click,
     clickDiscard,
-    clickEdit,
     clickOpenedDropdownItem,
     clickOpenM2ODropdown,
     clickSave,
@@ -1019,6 +1018,44 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange", "create", "read"]);
     });
 
+    QUnit.test("save a record with an required field computed by another", async function (assert) {
+        serverData.models.foo.onchanges = {
+            foo(record) {
+                if (record.foo) {
+                    record.text = "plop";
+                }
+            },
+        };
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree editable="top">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                    <field name="text" required="1"/>
+                </tree>`,
+        });
+        assert.containsN(target, ".o_data_row", 4);
+        assert.containsNone(target, ".o_selected_row");
+
+        await click(target.querySelector(".o_list_button_add"));
+        await editInput(target, "[name='int_field'] input", 1);
+        await click(target, ".o_list_view");
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsOnce(target, ".o_field_invalid");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await editInput(target, "[name='foo'] input", "hello");
+        assert.containsNone(target, ".o_field_invalid");
+        assert.containsOnce(target, ".o_selected_row");
+
+        await click(target, ".o_list_view");
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsNone(target, ".o_selected_row");
+    });
+
     QUnit.test("boolean field has no title (data-tooltip)", async function (assert) {
         await makeView({
             type: "list",
@@ -1897,7 +1934,6 @@ QUnit.module("Views", (hooks) => {
                 }
             },
         });
-        await clickEdit(target);
 
         assert.hasClass(target.querySelectorAll(".o_data_cell")[1], "o_boolean_toggle_cell");
 
@@ -1943,7 +1979,6 @@ QUnit.module("Views", (hooks) => {
                         </field>
                     </form>`,
             });
-            await clickEdit(target);
             await addRow(target);
             await click(
                 [...target.querySelectorAll(".o_data_row")].pop().querySelector("td.o_list_char")
@@ -3245,7 +3280,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("colspan of empty lines is correct in readonly and edit", async function (assert) {
+    QUnit.test("colspan of empty lines is correct in readonly", async function (assert) {
         serverData.models.foo.fields.foo_o2m = {
             string: "Foo O2M",
             type: "one2many",
@@ -3268,10 +3303,33 @@ QUnit.module("Views", (hooks) => {
                         </sheet>
                     </form>`,
         });
-        // in edit mode, the delete action is available and the empty lines should cover that col
+        // in readonly mode, the delete action is available and the empty lines should cover that col
         assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
-        await clickEdit(target);
-        // in edit mode, the colspan shouldn't change
+    });
+
+    QUnit.test("colspan of empty lines is correct in edit", async function (assert) {
+        serverData.models.foo.fields.foo_o2m = {
+            string: "Foo O2M",
+            type: "one2many",
+            relation: "foo",
+        };
+        await makeView({
+            type: "form",
+            resModel: "foo",
+            serverData,
+            resId: 1,
+            arch: `
+                    <form>
+                        <sheet>
+                            <field name="foo_o2m">
+                                <tree editable="bottom">
+                                    <field name="int_field"/>
+                                </tree>
+                            </field>
+                        </sheet>
+                    </form>`,
+        });
+        // in edit mode, the delete action is available and the empty lines should cover that col
         assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
     });
 
@@ -3543,7 +3601,6 @@ QUnit.module("Views", (hooks) => {
                         </sheet>
                     </form>`,
             });
-            await clickEdit(target);
             assert.containsNone(target, ".o_field_one2many");
 
             await click(target.querySelector(".nav-item:last-child .nav-link"));
@@ -3593,7 +3650,6 @@ QUnit.module("Views", (hooks) => {
                     </sheet>
                 </form>`,
         });
-        await clickEdit(target);
         assert.containsNone(target, ".o_field_one2many");
 
         await click(target.querySelector(".o_field_boolean input"));
@@ -3634,7 +3690,6 @@ QUnit.module("Views", (hooks) => {
                     </sheet>
                 </form>`,
         });
-        await clickEdit(target);
         assert.containsNone(target, ".o_field_one2many");
 
         await click(target.querySelector(".o_field_boolean input"));
@@ -4912,7 +4967,6 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
         });
 
-        await clickEdit(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_field_x2many_list .o_data_row")].map(
                 (el) => el.textContent
@@ -4964,7 +5018,6 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
         });
 
-        await clickEdit(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_field_x2many_list .o_data_row")].map(
                 (el) => el.textContent
@@ -6982,7 +7035,6 @@ QUnit.module("Views", (hooks) => {
                     </form>`,
                 resId: 1,
             });
-            await clickEdit(target);
             assert.deepEqual(
                 [
                     ...target.querySelectorAll(
@@ -7874,8 +7926,6 @@ QUnit.module("Views", (hooks) => {
                     }
                 },
             });
-
-            await clickEdit(target);
 
             await click(target.querySelector(".o_data_cell"));
             assert.strictEqual(
@@ -10374,7 +10424,7 @@ QUnit.module("Views", (hooks) => {
         await makeView({
             arch: `
                 <tree editable="top" multi_edit="1">
-                    <field name="m2o"/>
+                    <field name="m2o" open_target="new"/>
                 </tree>`,
             serverData,
             mockRPC: async function (route, args) {
@@ -14502,8 +14552,6 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            await clickEdit(target);
-
             await click(target.querySelector(".o_data_cell"));
             assert.strictEqual(
                 document.activeElement,
@@ -15034,5 +15082,21 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(target, ".o_data_row:first-child td.o_list_button", 1);
         await click(target, ".o_data_row:first-child td.o_list_button");
+    });
+
+    QUnit.test("group by going to next page then back to first", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree groups_limit="1"><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["bar"],
+        });
+
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
+        await pagerNext(target);
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [2, 2]);
+        await pagerPrevious(target);
+        assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
     });
 });

@@ -326,6 +326,10 @@ export class Record extends DataPoint {
         return !this.resId;
     }
 
+    get isValid() {
+        return !this._invalidFields.size;
+    }
+
     get resId() {
         if (this.__bm_handle__) {
             const resId = this.model.__bm__.localData[this.__bm_handle__].res_id;
@@ -348,6 +352,10 @@ export class Record extends DataPoint {
         this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
         return Promise.all([...proms, this._updatePromise]);
     }
+
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
 
     async checkValidity(urgent) {
         if (!urgent) {
@@ -669,7 +677,16 @@ export class Record extends DataPoint {
                 viewType: this.__viewType,
             });
             prom.catch(resolveUpdatePromise); // onchange rpc may return an error
-            await prom;
+            const fieldNames = await prom;
+            this._removeInvalidFields(fieldNames);
+            for (const fieldName of fieldNames) {
+                if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                    const { editedRecord } = this.data[fieldName];
+                    if (editedRecord) {
+                        editedRecord._removeAllInvalidFields();
+                    }
+                }
+            }
             this.__syncData();
         }
         this._removeInvalidFields(Object.keys(changes));
@@ -685,7 +702,7 @@ export class Record extends DataPoint {
      *  reloading after changes are applied, typically used to defer the load.
      * @returns {Promise<boolean>}
      */
-    async save(options = { stayInEdition: false, noReload: false, savePoint: false }) {
+    async save(options = { stayInEdition: true, noReload: false, savePoint: false }) {
         const shouldSwitchToReadonly = !options.stayInEdition && this.isInEdition;
         let resolveSavePromise;
         this._savePromise = new Promise((r) => {
@@ -810,9 +827,6 @@ export class Record extends DataPoint {
         this.model.__bm__.discardChanges(this.__bm_handle__);
         this._invalidFields = new Set();
         this.__syncData();
-        if (this.resId) {
-            this.switchMode("readonly");
-        }
         this.model.notify();
     }
 
@@ -820,6 +834,10 @@ export class Record extends DataPoint {
         for (const fieldName of fieldNames) {
             this._invalidFields.delete(fieldName);
         }
+    }
+
+    _removeAllInvalidFields() {
+        this._removeInvalidFields(Object.keys(this.activeFields));
     }
 }
 

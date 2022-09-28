@@ -88,9 +88,17 @@ export const busService = {
         } else {
             worker.addEventListener('message', handleMessage);
         }
-        send('update_last_notification_id', multiTab.getSharedValue('last_notification_id', 0));
-        browser.addEventListener('unload', () => send('leave'));
-
+        send('initialize_connection', {
+            debug: odoo.debug,
+            lastNotificationId: multiTab.getSharedValue('last_notification_id', 0),
+        });
+        browser.addEventListener('pagehide', ({ persisted }) => {
+            if (!persisted) {
+                // Page is gonna be unloaded, disconnect this client
+                // from the worker.
+                send('leave');
+            }
+        });
 
         return {
             addEventListener: bus.addEventListener.bind(bus),

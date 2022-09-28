@@ -146,7 +146,7 @@ QUnit.module('Bus', {
         ]);
     });
 
-    QUnit.test('second tab still receives notifications after main unload', async function (assert) {
+    QUnit.test('second tab still receives notifications after main pagehide', async function (assert) {
         assert.expect(4);
 
         const pyEnv = await startServer();
@@ -158,10 +158,10 @@ QUnit.module('Bus', {
         mainEnv.services['bus_service'].addChannel('lambda');
 
         // second env
-        // prevent second tab from receiving unload event.
+        // prevent second tab from receiving pagehide event.
         patchWithCleanup(browser, {
             addEventListener(eventName, callback) {
-                if (eventName === 'unload') {
+                if (eventName === 'pagehide') {
                     return;
                 }
                 this._super(eventName, callback);
@@ -176,7 +176,7 @@ QUnit.module('Bus', {
         await nextTick();
 
         // simulate unloading main
-        window.dispatchEvent(new Event('unload'));
+        window.dispatchEvent(new Event('pagehide'));
         await nextTick();
 
         pyEnv['bus.bus']._sendone('lambda', 'notifType', 'gamma');
@@ -366,15 +366,17 @@ QUnit.module('Bus', {
         let updateLastNotificationDeferred = makeDeferred();
         patchWebsocketWorkerWithCleanup({
             _onClientMessage(_, { action, data }) {
-                assert.step(`${action} - ${data}`);
-                updateLastNotificationDeferred.resolve();
+                if (action === 'initialize_connection') {
+                    assert.step(`${action} - ${data['lastNotificationId']}`);
+                    updateLastNotificationDeferred.resolve();
+                }
             },
         });
         await makeTestEnv();
         await updateLastNotificationDeferred;
         // First bus service has never received notifications thus the
         // default is 0.
-        assert.verifySteps(['update_last_notification_id - 0']);
+        assert.verifySteps(['initialize_connection - 0']);
 
         pyEnv['bus.bus']._sendmany([
             ['lambda', 'notifType', 'beta'],
@@ -387,7 +389,7 @@ QUnit.module('Bus', {
         await makeTestEnv();
         await updateLastNotificationDeferred;
         // Second bus service sends the last known notification id.
-        assert.verifySteps([`update_last_notification_id - 1`]);
+        assert.verifySteps([`initialize_connection - 1`]);
     });
 
     QUnit.test('Last notification id reset after db change', async function (assert) {
@@ -395,15 +397,17 @@ QUnit.module('Bus', {
         let updateLastNotificationDeferred = makeDeferred();
         patchWebsocketWorkerWithCleanup({
             _onClientMessage(_, { action, data }) {
-                assert.step(`${action} - ${data}`);
-                updateLastNotificationDeferred.resolve();
+                if (action === 'initialize_connection') {
+                    assert.step(`${action} - ${data['lastNotificationId']}`);
+                    updateLastNotificationDeferred.resolve();
+                }
             },
         });
         await makeTestEnv();
         await updateLastNotificationDeferred;
         // First bus service has never received notifications thus the
         // default is 0.
-        assert.verifySteps(['update_last_notification_id - 0']);
+        assert.verifySteps(['initialize_connection - 0']);
 
         pyEnv['bus.bus']._sendmany([
             ['lambda', 'notifType', 'beta'],
@@ -417,7 +421,7 @@ QUnit.module('Bus', {
         updateLastNotificationDeferred = makeDeferred();
         await makeTestEnv();
         await updateLastNotificationDeferred;
-        assert.verifySteps([`update_last_notification_id - 0`]);
+        assert.verifySteps([`initialize_connection - 0`]);
     });
 });
 
