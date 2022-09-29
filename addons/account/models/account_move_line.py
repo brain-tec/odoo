@@ -113,6 +113,7 @@ class AccountMoveLine(models.Model):
     )
     amount_currency = fields.Monetary(
         string='Amount in Currency',
+        group_operator=None,
         compute='_compute_amount_currency', inverse='_inverse_amount_currency', store=True, readonly=False, precompute=True,
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
     currency_id = fields.Many2one(
@@ -976,22 +977,27 @@ class AccountMoveLine(models.Model):
     @api.depends('move_id.needed_terms', 'account_id', 'analytic_distribution', 'tax_ids', 'tax_tag_ids', 'company_id')
     def _compute_epd_needed(self):
         for line in self:
+            needed_terms = line.move_id.needed_terms
             line.epd_dirty = True
             line.epd_needed = False
             if line.display_type != 'product' or not line.tax_ids.ids or line.company_id.early_pay_discount_computation != 'mixed':
                 continue
 
-            discount_percentages = [
-                x['discount_percentage']
-                for x in line.move_id.needed_terms.values()
-                if x.get('discount_percentage')
-            ]
-            if not discount_percentages:
-                continue
+            percentages_to_apply = []
+            names = []
+            for term in needed_terms.values():
+                if term.get('discount_percentage'):
+                    percentages_to_apply.append({
+                        'discount_percentage': term['discount_percentage'],
+                        'term_percentage': abs(term['amount_currency'] / line.move_id.amount_total) if line.move_id.amount_total else 0
+                    })
+                    names.append(f"{term['discount_percentage']}%")
 
+            discount_percentage_name = ', '.join(names)
             epd_needed = {}
-            for discount_percentage in discount_percentages:
-                percentage = discount_percentage / 100
+            for percentages in percentages_to_apply:
+                percentage = percentages['discount_percentage'] / 100
+                line_percentage = percentages['term_percentage']
                 epd_needed_vals = epd_needed.setdefault(
                     frozendict({
                         'move_id': line.move_id.id,
@@ -1002,15 +1008,15 @@ class AccountMoveLine(models.Model):
                         'display_type': 'epd',
                     }),
                     {
-                        'name': _("Early Payment Discount (%s%%)", discount_percentage),
+                        'name': _("Early Payment Discount (%s)", discount_percentage_name),
                         'amount_currency': 0.0,
                         'balance': 0.0,
                         'price_subtotal': 0.0,
                     },
                 )
-                epd_needed_vals['amount_currency'] -= line.amount_currency * percentage
-                epd_needed_vals['balance'] -= line.balance * percentage
-                epd_needed_vals['price_subtotal'] -= line.price_subtotal * percentage
+                epd_needed_vals['amount_currency'] -= line.amount_currency * percentage * line_percentage
+                epd_needed_vals['balance'] -= line.balance * percentage * line_percentage
+                epd_needed_vals['price_subtotal'] -= line.price_subtotal * percentage * line_percentage
                 epd_needed_vals = epd_needed.setdefault(
                     frozendict({
                         'move_id': line.move_id.id,
@@ -1018,16 +1024,16 @@ class AccountMoveLine(models.Model):
                         'display_type': 'epd',
                     }),
                     {
-                        'name': _("Early Payment Discount (%s%%)", discount_percentage),
+                        'name': _("Early Payment Discount (%s)", discount_percentage_name),
                         'amount_currency': 0.0,
                         'balance': 0.0,
                         'price_subtotal': 0.0,
                         'tax_ids': [],
                     },
                 )
-                epd_needed_vals['amount_currency'] += line.amount_currency * percentage
-                epd_needed_vals['balance'] += line.balance * percentage
-                epd_needed_vals['price_subtotal'] += line.price_subtotal * percentage
+                epd_needed_vals['amount_currency'] += line.amount_currency * percentage * line_percentage
+                epd_needed_vals['balance'] += line.balance * percentage * line_percentage
+                epd_needed_vals['price_subtotal'] += line.price_subtotal * percentage * line_percentage
             line.epd_needed = {k: frozendict(v) for k, v in epd_needed.items()}
 
     @api.depends('move_id.move_type', 'balance', 'tax_ids')
