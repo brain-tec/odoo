@@ -1281,6 +1281,39 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target.querySelector(".o_group_header"), ".o_list_number");
     });
 
+    QUnit.test(
+        "basic grouped list rendering with a date field between two fields with a group_operator",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
+                <tree>
+                    <field name="int_field"/>
+                    <field name="date"/>
+                    <field name="int_field"/>
+                </tree>`,
+                groupBy: ["bar"],
+            });
+
+            assert.containsN(target, "thead th", 4); // record selector + Foo + Int + Date + Int
+            assert.containsOnce(target, "thead th.o_list_record_selector");
+            assert.deepEqual(getNodesTextContent(target.querySelectorAll("thead th")), [
+                "",
+                "int_field",
+                "Some Date",
+                "int_field",
+            ]);
+            assert.containsN(target, "tr.o_group_header", 2);
+            assert.containsN(target, "th.o_group_name", 2);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelector(".o_group_header").querySelectorAll("td")),
+                ["-4", "", "-4"]
+            );
+        }
+    );
+
     QUnit.test("basic grouped list rendering 1 col without selector", async function (assert) {
         await makeView({
             type: "list",
@@ -3291,9 +3324,8 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             resId: 1,
-            mode: "readonly",
             arch: `
-                    <form>
+                    <form edit="0">
                         <sheet>
                             <field name="foo_o2m">
                                 <tree editable="bottom">
@@ -3303,8 +3335,8 @@ QUnit.module("Views", (hooks) => {
                         </sheet>
                     </form>`,
         });
-        // in readonly mode, the delete action is available and the empty lines should cover that col
-        assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
+        // in readonly mode, the delete action is not available
+        assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "1");
     });
 
     QUnit.test("colspan of empty lines is correct in edit", async function (assert) {
@@ -3332,6 +3364,66 @@ QUnit.module("Views", (hooks) => {
         // in edit mode, the delete action is available and the empty lines should cover that col
         assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
     });
+
+    QUnit.test(
+        "colspan of empty lines is correct in readonly with optional fields",
+        async function (assert) {
+            serverData.models.foo.fields.foo_o2m = {
+                string: "Foo O2M",
+                type: "one2many",
+                relation: "foo",
+            };
+            await makeView({
+                type: "form",
+                resModel: "foo",
+                serverData,
+                resId: 1,
+                arch: `
+                    <form edit="0">
+                        <sheet>
+                            <field name="foo_o2m">
+                                <tree editable="bottom">
+                                    <field name="int_field"/>
+                                    <field name="foo" optional="hidden"/>
+                                </tree>
+                            </field>
+                        </sheet>
+                    </form>`,
+            });
+            // in readonly mode, the delete action is not available but the optional fields is and the empty lines should cover that col
+            assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
+        }
+    );
+
+    QUnit.test(
+        "colspan of empty lines is correct in edit with optional fields",
+        async function (assert) {
+            serverData.models.foo.fields.foo_o2m = {
+                string: "Foo O2M",
+                type: "one2many",
+                relation: "foo",
+            };
+            await makeView({
+                type: "form",
+                resModel: "foo",
+                serverData,
+                resId: 1,
+                arch: `
+                    <form>
+                        <sheet>
+                            <field name="foo_o2m">
+                                <tree editable="bottom">
+                                    <field name="int_field"/>
+                                    <field name="foo" optional="hidden"/>
+                                </tree>
+                            </field>
+                        </sheet>
+                    </form>`,
+            });
+            // in edit mode, both the delete action and the optional fields are available and the empty lines should cover that col
+            assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
+        }
+    );
 
     QUnit.test(
         "width of some fields should be hardcoded if no data, and list initially invisible",
@@ -5601,7 +5693,6 @@ QUnit.module("Views", (hooks) => {
         });
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.ok(target.querySelectorAll(".o_data_row").length > 0);
-        assert.hasClass(target.querySelectorAll(".o_data_row"), "o_sample_data_disabled");
         assert.containsN(
             target,
             "th",
@@ -5616,7 +5707,6 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.ok(target.querySelectorAll(".o_data_row").length > 0);
-        assert.hasClass(target.querySelector(".o_data_row"), "o_sample_data_disabled");
         assert.containsN(target, "th", 4);
     });
 
@@ -5635,12 +5725,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         // Check keynav is disabled
-        assert.hasClass(target.querySelector(".o_data_row"), "o_sample_data_disabled");
-        assert.hasClass(target.querySelector(".o_list_table > tfoot"), "o_sample_data_disabled");
-        assert.hasClass(
-            target.querySelector(".o_list_table > thead .o_list_record_selector"),
-            "o_sample_data_disabled"
-        );
+        assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
 
         // From search bar
         assert.hasClass(document.activeElement, "o_searchview_input");
@@ -15094,5 +15179,29 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [2, 2]);
         await pagerPrevious(target);
         assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
+    });
+
+    QUnit.test("list with group_by_no_leaf and group by", async function (assert) {
+        assert.expect(4);
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree expand="1"><field name="foo"/></tree>',
+            groupBy: ["currency_id"],
+            context: { group_by_no_leaf: true },
+        });
+
+        const groups = target.querySelectorAll(".o_group_name");
+        const groupsRecords = [...target.querySelectorAll(".o_data_row .o_data_cell")];
+        assert.strictEqual(groups.length, 2, "There should be 2 groups");
+        assert.strictEqual(groups[0].textContent, "USD (3) ", "Second group should have 3 records");
+        assert.strictEqual(groups[1].textContent, "EUR (1) ", "First group should have 1 record");
+        assert.deepEqual(
+            groupsRecords.map((groupEl) => groupEl.textContent),
+            ["blip", "gnap", "blip", "yop"],
+            "Groups should contains correct records"
+        );
     });
 });

@@ -314,6 +314,7 @@ QUnit.module('web_editor', {}, function () {
             form.destroy();
         });
 
+
         QUnit.test('media dialog: image', async function (assert) {
             assert.expect(1);
 

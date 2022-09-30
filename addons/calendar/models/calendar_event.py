@@ -212,7 +212,7 @@ class Meeting(models.Model):
         MONTH_BY_SELECTION, string='Option', compute='_compute_recurrence', readonly=False)
     day = fields.Integer('Date of month', compute='_compute_recurrence', readonly=False)
     weekday = fields.Selection(WEEKDAY_SELECTION, compute='_compute_recurrence', readonly=False)
-    byday = fields.Selection(BYDAY_SELECTION, compute='_compute_recurrence', readonly=False)
+    byday = fields.Selection(BYDAY_SELECTION, string="By day", compute='_compute_recurrence', readonly=False)
     until = fields.Date(compute='_compute_recurrence', readonly=False)
     # UI Fields.
     display_description = fields.Boolean(compute='_compute_display_description')
@@ -360,7 +360,7 @@ class Meeting(models.Model):
                     for field in recurrence_fields
                     if event.recurrence_id[field]
                 }
-                event.update({**false_values, **event_values, **rrule_values})
+                event.update({**false_values, **defaults, **event_values, **rrule_values})
             else:
                 event.update(false_values)
 

@@ -5,6 +5,7 @@ import { localization as l10n } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { escape, intersperse, nbsp, sprintf } from "@web/core/utils/strings";
+import { isBinarySize } from "@web/core/utils/binary";
 import { session } from "@web/session";
 
 const { markup } = owl;
@@ -87,9 +88,35 @@ function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
     return int + decimalPoint + decimalPart + symbol;
 }
 
+function humanSize(value) {
+    if (!value) {
+        return "";
+    }
+    const suffix = value < 1024 ? " " + _t("Bytes") : "b";
+    return (
+        humanNumber(value, {
+            decimals: 2,
+        }) + suffix
+    );
+}
+
 // -----------------------------------------------------------------------------
 // Exports
 // -----------------------------------------------------------------------------
+
+/**
+ * @param {string} [value] base64 representation of the binary
+ * @returns {string}
+ */
+export function formatBinary(value) {
+    if (!isBinarySize(value)) {
+        // Computing approximate size out of base64 encoded string
+        // http://en.wikipedia.org/wiki/Base64#MIME
+        return humanSize(value.length / 1.37);
+    }
+    // already bin_size
+    return value;
+}
 
 /**
  * @param {boolean} value
@@ -208,7 +235,7 @@ export function formatFloatTime(value, options = {}) {
     let hour = Math.floor(value);
     // Although looking quite overkill, the following line ensures that we do
     // not have float issues while still considering that 59s is 00:00.
-    let min = Math.floor(Math.round((value % 1) * 100) / 100 * 60);
+    let min = Math.floor((Math.round((value % 1) * 100) / 100) * 60);
     if (min === 60) {
         min = 0;
         hour = hour + 1;
@@ -219,7 +246,7 @@ export function formatFloatTime(value, options = {}) {
     }
     let sec = "";
     if (options.displaySeconds) {
-        sec = ":" + `${(Math.round((value % 1) * 3600) - min * 60)}`.padStart(2, "0");
+        sec = ":" + `${Math.round((value % 1) * 3600) - min * 60}`.padStart(2, "0");
     }
     return `${isNegative ? "-" : ""}${hour}:${min}${sec}`;
 }
@@ -368,6 +395,21 @@ export function formatPercentage(value, options = {}) {
 }
 
 /**
+ * Returns a string representing the value of the python properties field
+ * or a properties definition field (see fields.py@Properties).
+ *
+ * @param {array|false} value
+ * @param {Object} [field]
+ *        a description of the field (note: this parameter is ignored)
+ */
+function formatProperties(value, field) {
+    if (!value || !value.length) {
+        return "";
+    }
+    return value.map((property) => property["string"]).join(", ");
+}
+
+/**
  * Returns a string representing the value of the reference field.
  *
  * @param {Object|false} value Object with keys "resId" and "displayName"
@@ -404,6 +446,7 @@ export function formatText(value) {
 
 registry
     .category("formatters")
+    .add("binary", formatBinary)
     .add("boolean", formatBoolean)
     .add("char", formatChar)
     .add("date", formatDate)
@@ -414,10 +457,13 @@ registry
     .add("html", (value) => value)
     .add("integer", formatInteger)
     .add("many2one", formatMany2one)
+    .add("many2one_reference", formatInteger)
     .add("one2many", formatX2many)
     .add("many2many", formatX2many)
     .add("monetary", formatMonetary)
     .add("percentage", formatPercentage)
+    .add("properties", formatProperties)
+    .add("properties_definition", formatProperties)
     .add("reference", formatReference)
     .add("selection", formatSelection)
     .add("text", formatText);

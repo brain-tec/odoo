@@ -1,4 +1,4 @@
-// ------- Kanban View Layout -------
+// ------- Kanban renderer -------
 .o_kanban_renderer {
     // ----------------------------------------------------------------------------
     // Default KanbanView values
@@ -521,6 +521,10 @@
 
     // Kanban Grouped Layout - Column Folded
     .o_kanban_group.o_column_folded {
+        // don't fill the width of record for a folded column
+        .o_kanban_record.o_record_draggable {
+            display: none !important;
+        }
         // don't visually fold on smaller screens (aka. mobile)
         @include media-breakpoint-up(md) {
             @include o-kanban-slim-col;
@@ -603,7 +607,21 @@
     }
 }
 
-// ----------------- Set Cover Dialog -----------------
+// ------- Sample mode -------
+.o_kanban_view .o_view_sample_data {
+    // all records
+    .o_kanban_record,
+    // progress bars and counters
+    .o_kanban_counter,
+    // column actions
+    .o_kanban_toggle_fold,
+    .o_column_archive_records,
+    .o_column_unarchive_records {
+        @include o-sample-data-disabled;
+    }
+}
+
+// ------- Set cover dialog -------
 .modal .o_kanban_cover_container .o_kanban_cover_image {
     height: 120px;
     width: 120px;

@@ -313,7 +313,9 @@ var SnippetEditor = Widget.extend({
         if (this.isDestroyed()) {
             return;
         }
-        await this.toggleTargetVisibility(!this.$target.hasClass('o_snippet_invisible'));
+        await this.toggleTargetVisibility(!this.$target.hasClass('o_snippet_invisible')
+            && !this.$target.hasClass('o_snippet_mobile_invisible')
+            && !this.$target.hasClass('o_snippet_desktop_invisible'));
         const proms = _.map(this.styles, option => {
             return option.cleanForSave();
         });
@@ -703,7 +705,13 @@ var SnippetEditor = Widget.extend({
         const proms = Object.values(this.styles).map(opt => {
             return opt.updateUIVisibility();
         });
-        return Promise.all(proms);
+        await Promise.all(proms);
+        // Hide the snippetEditor if none of its options are visible
+        // This cannot be done using the visibility of the options' UI
+        // because some options can be located in the overlay.
+        const $visibleOptions = this.$optionsSection.find('we-top-button-group, we-customizeblock-option')
+                .children(':not(.d-none)');
+        this.$optionsSection.toggleClass('d-none', !$visibleOptions.length);
     },
     /**
      * Clones the current snippet.
@@ -1691,6 +1699,9 @@ var SnippetsMenu = Widget.extend({
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
+        this.$scrollingTarget = this.$scrollingElement.is(this.ownerDocument.scrollingElement)
+            ? $(this.ownerDocument.defaultView)
+            : this.$scrollingElement;
         this._onScrollingElementScroll = _.throttle(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
@@ -1708,7 +1719,7 @@ var SnippetsMenu = Widget.extend({
         // Setting capture to true allows to take advantage of event bubbling
         // for events that otherwise don’t support it. (e.g. useful when
         // scrolling a modal)
-        this.$scrollingElement[0].addEventListener('scroll', this._onScrollingElementScroll, {capture: true});
+        this.$scrollingTarget[0].addEventListener('scroll', this._onScrollingElementScroll, {capture: true});
 
         // Auto-selects text elements with a specific class and remove this
         // on text changes
@@ -1803,8 +1814,9 @@ var SnippetsMenu = Widget.extend({
             }
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
-            if (this.$scrollingElement) {
-                this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
+
+            if (this.$scrollingTarget) {
+                this.$scrollingTarget[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
             }
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
@@ -2162,7 +2174,14 @@ var SnippetsMenu = Widget.extend({
             this.invisibleDOMMap = new Map();
             const $invisibleDOMPanelEl = $(this.invisibleDOMPanelEl);
             $invisibleDOMPanelEl.find('.o_we_invisible_entry').remove();
-            const $invisibleSnippets = globalSelector.all().find('.o_snippet_invisible').addBack('.o_snippet_invisible');
+            let isMobile;
+            this.trigger_up('service_context_get', {
+                callback: (ctx) => {
+                    isMobile = ctx['isMobile'];
+                },
+            });
+            const invisibleSelector = `.o_snippet_invisible, ${isMobile ? '.o_snippet_mobile_invisible' : '.o_snippet_desktop_invisible'}`;
+            const $invisibleSnippets = globalSelector.all().find(invisibleSelector).addBack(invisibleSelector);
 
             $invisibleDOMPanelEl.toggleClass('d-none', !$invisibleSnippets.length);
 
@@ -2939,7 +2958,7 @@ var SnippetsMenu = Widget.extend({
                 stop: async function (ev, ui) {
                     const doc = self.options.wysiwyg.odooEditor.document;
                     $(doc.body).removeClass('oe_dropzone_active');
-                    self.options.wysiwyg.odooEditor.automaticStepUnactive();
+                    self.options.wysiwyg.odooEditor.automaticStepActive();
                     self.options.wysiwyg.odooEditor.automaticStepSkipStack();
                     $toInsert.removeClass('oe_snippet_body');
                     self.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
@@ -3875,6 +3894,12 @@ var SnippetsMenu = Widget.extend({
         for (const gridItemEl of gridItemEls) {
             gridUtils._reloadLazyImages(gridItemEl);
         }
+        for (const invisibleOverrideEl of this.getEditableArea().find('.o_snippet_mobile_invisible, .o_snippet_desktop_invisible')) {
+            invisibleOverrideEl.classList.remove('o_snippet_override_invisible');
+            invisibleOverrideEl.dataset.invisible = '1';
+        }
+        // This is async but using the main editor mutex.
+        this._updateInvisibleDOM();
     },
     /**
      * Undo..
