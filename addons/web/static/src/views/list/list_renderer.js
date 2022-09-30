@@ -338,7 +338,10 @@ export class ListRenderer extends Component {
         if (this.hasSelectors) {
             nbCols++;
         }
-        if (this.props.activeActions && this.props.activeActions.onDelete) {
+        if (
+            (this.props.activeActions && this.props.activeActions.onDelete) ||
+            this.displayOptionalFields
+        ) {
             nbCols++;
         }
         return nbCols;
@@ -540,6 +543,9 @@ export class ListRenderer extends Component {
         const { widget, rawAttrs } = column;
         const fieldType = this.props.list.fields[column.name].type;
         const aggregateValue = group.aggregates[column.name];
+        if (!(column.name in group.aggregates)) {
+            return "";
+        }
         const formatter = formatters.get(widget, false) || formatters.get(fieldType, false);
         const formatOptions = {
             digits: rawAttrs.digits ? JSON.parse(rawAttrs.digits) : undefined,

@@ -4112,7 +4112,7 @@ const SnippetOptionWidget = Widget.extend({
                 this.options.wysiwyg.odooEditor.historyStep();
             }
 
-            if (previewMode) {
+            if (previewMode || requiresReload) {
                 return;
             }
 
@@ -5129,17 +5129,6 @@ registry.SnippetMove = SnippetOptionWidget.extend({
         $overlayArea.prepend($buttons[0]);
 
         return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    onFocus: function () {
-        // TODO improve this: hack to hide options section if snippet move is
-        // the only one.
-        const $allOptions = this.$el.parent();
-        if ($allOptions.find('we-customizeblock-option').length <= 1) {
-            $allOptions.addClass('d-none');
-        }
     },
 
     //--------------------------------------------------------------------------
