@@ -4112,7 +4112,7 @@ const SnippetOptionWidget = Widget.extend({
                 this.options.wysiwyg.odooEditor.historyStep();
             }
 
-            if (previewMode) {
+            if (previewMode || requiresReload) {
                 return;
             }
 
@@ -4200,6 +4200,7 @@ registry.sizing = SnippetOptionWidget.extend({
         let resizeValues = this._getSize();
         this.$handles.on('mousedown', function (ev) {
             ev.preventDefault();
+            self.options.wysiwyg.odooEditor.automaticStepUnactive('resizing');
 
             // If the handle has the class 'readonly', don't allow to resize.
             // (For the grid handles when we are in mobile view).
@@ -4379,6 +4380,8 @@ registry.sizing = SnippetOptionWidget.extend({
                 setTimeout(function () {
                     self.options.wysiwyg.odooEditor.historyStep();
                 }, 0);
+
+                self.options.wysiwyg.odooEditor.automaticStepActive('resizing');
             };
             $body.on('mousemove', bodyMouseMove);
             $body.on('mouseup', bodyMouseUp);
@@ -5129,17 +5132,6 @@ registry.SnippetMove = SnippetOptionWidget.extend({
         $overlayArea.prepend($buttons[0]);
 
         return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    onFocus: function () {
-        // TODO improve this: hack to hide options section if snippet move is
-        // the only one.
-        const $allOptions = this.$el.parent();
-        if ($allOptions.find('we-customizeblock-option').length <= 1) {
-            $allOptions.addClass('d-none');
-        }
     },
 
     //--------------------------------------------------------------------------
