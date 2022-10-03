@@ -719,6 +719,9 @@
     // Specific style classes
     .o_inner_group.oe_subtotal_footer {
         grid-template-columns: 1fr auto;
+        &.oe_right {
+            margin-left: auto;
+        }
         @extend .oe_right;
         border-top: 1px solid $border-color;
 
@@ -1116,7 +1119,7 @@
 
         > .o_form_sheet {
             width: 100%;
-            max-width: map-get($container-max-widths, xl);
+            max-width: map-get($container-max-widths, xxl);
         }
     }
 }
@@ -1172,4 +1175,9 @@
         left: 0 !important;
         overflow-y: auto;
     }
+}
+
+.o_field_section_and_note_one2many ~ .row.o_group {
+    clear: both;
+    justify-content: space-between;
 }
