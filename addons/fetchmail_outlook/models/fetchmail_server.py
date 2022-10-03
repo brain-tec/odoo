@@ -13,13 +13,13 @@ class FetchmailServer(models.Model):
 
     _OUTLOOK_SCOPE = 'https://outlook.office.com/IMAP.AccessAsUser.All'
 
-    @api.constrains('use_microsoft_outlook_service', 'type', 'password', 'is_ssl')
+    @api.constrains('use_microsoft_outlook_service', 'server_type', 'password', 'is_ssl')
     def _check_use_microsoft_outlook_service(self):
         for server in self:
             if not server.use_microsoft_outlook_service:
                 continue
 
-            if server.type != 'imap':
+            if server.server_type != 'imap':
                 raise UserError(_('Outlook mail server %r only supports IMAP server type.') % server.name)
 
             if server.password:
@@ -36,7 +36,7 @@ class FetchmailServer(models.Model):
         """Set the default configuration for a IMAP Outlook server."""
         if self.use_microsoft_outlook_service:
             self.server = 'imap.outlook.com'
-            self.type = 'imap'
+            self.server_type = 'imap'
             self.is_ssl = True
             self.port = 993
         else:
@@ -46,7 +46,6 @@ class FetchmailServer(models.Model):
 
     def _imap_login(self, connection):
         """Authenticate the IMAP connection.
-
         If the mail server is Outlook, we use the OAuth2 authentication protocol.
         """
         self.ensure_one()
