@@ -5,7 +5,7 @@ import time
 
 from unittest.mock import ANY, Mock, patch
 
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 from odoo.tests.common import SavepointCase
 
 
@@ -26,7 +26,7 @@ class TestFetchmailOutlook(SavepointCase):
             'microsoft_outlook_access_token': 'test_access_token',
             'microsoft_outlook_access_token_expiration': time.time() + 1000000,
             'password': '',
-            'type': 'imap',
+            'server_type': 'imap',
             'is_ssl': True,
         })
 
@@ -42,18 +42,18 @@ class TestFetchmailOutlook(SavepointCase):
 
     def test_constraints(self):
         """Test the constraints related to the Outlook mail server."""
-        with self.assertRaises(ValidationError, msg='Should ensure that the password is empty'):
+        with self.assertRaises(UserError, msg='Should ensure that the password is empty'):
             self.env['fetchmail.server'].create({
                 'name': 'Test server',
                 'use_microsoft_outlook_service': True,
                 'password': 'test',
-                'type': 'imap',
+                'server_type': 'imap',
             })
 
-        with self.assertRaises(ValidationError, msg='Should ensure that the server type is IMAP'):
+        with self.assertRaises(UserError, msg='Should ensure that the server type is IMAP'):
             self.env['fetchmail.server'].create({
                 'name': 'Test server',
                 'use_microsoft_outlook_service': True,
                 'password': '',
-                'type': 'pop',
+                'server_type': 'pop',
             })
