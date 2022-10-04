@@ -16,8 +16,7 @@
                 <div class="flex-grow-1"/>
                 <t t-if="activityListViewItem.activity.canWrite" class="flex-grow-1 text-end">
                     <a t-if="activityListViewItem.fileUploader" class="fa fa-upload" title="Upload file" role="img" t-on-click="activityListViewItem.onClickUploadDocument"/>
-                    <a t-else="" class="o_ActivityListViewItem_markAsDone fa fa-check-circle" t-on-click="activityListViewItem.onClickMarkAsDone" title="Mark as done" role="img" aria-label="Mark as done" t-ref="markDoneButton"/>
-                    <!-- TODO sign override to change the button -->
+                    <a t-if="activityListViewItem.hasMarkDoneButton" class="o_ActivityListViewItem_markAsDone fa fa-check-circle" t-on-click="activityListViewItem.onClickMarkAsDone" title="Mark as done" role="img" aria-label="Mark as done" t-ref="markDoneButton"/>
                     <!-- TODO approvals override to change stuff -->
                 </t>
             </div>
@@ -29,8 +28,13 @@
                 </t>
                 <small t-att-title="activityListViewItem.activity.dateDeadline" t-esc="activityListViewItem.delayLabel"/>
             </div>
-            <!-- TODO handle "mail_template_ids" -->
             <ActivityMarkDonePopoverContent t-if="activityListViewItem.markDoneView" record="activityListViewItem.markDoneView"/>
+            <div t-if="activityListViewItem.mailTemplateViews.length > 0" class="mx-3 mt-2">
+                <MailTemplate
+                    t-foreach="activityListViewItem.mailTemplateViews" t-as="mailTemplateView" t-key="mailTemplateView"
+                    record="mailTemplateView"
+                />
+            </div>
         </div>
     </t>
 </templates>
