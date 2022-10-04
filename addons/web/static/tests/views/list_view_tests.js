@@ -43,6 +43,7 @@ import {
     groupByMenu,
     pagerNext,
     pagerPrevious,
+    removeFacet,
     saveFavorite,
     toggleActionMenu,
     toggleFavoriteMenu,
@@ -100,11 +101,18 @@ QUnit.module("Views", (hooks) => {
                         o2m: { string: "O2M field", type: "one2many", relation: "bar" },
                         m2m: { string: "M2M field", type: "many2many", relation: "bar" },
                         amount: { string: "Monetary field", type: "monetary" },
+                        amount_currency: { string: "Monetary field (currency)", type: "monetary", currency_field: "company_currency_id" },
                         currency_id: {
                             string: "Currency",
                             type: "many2one",
                             relation: "res_currency",
                             default: 1,
+                        },
+                        company_currency_id: {
+                            string: "Company Currency",
+                            type: "many2one",
+                            relation: "res_currency",
+                            default: 2,
                         },
                         datetime: { string: "Datetime Field", type: "datetime" },
                         reference: {
@@ -127,7 +135,9 @@ QUnit.module("Views", (hooks) => {
                             m2o: 1,
                             m2m: [1, 2],
                             amount: 1200,
+                            amount_currency: 1100,
                             currency_id: 2,
+                            company_currency_id: 1,
                             date: "2017-01-25",
                             datetime: "2016-12-12 10:55:05",
                             reference: "bar,1",
@@ -2970,6 +2980,32 @@ QUnit.module("Views", (hooks) => {
             target.querySelectorAll("tfoot td")[1].textContent,
             "2000.000",
             "aggregates monetary use digits attribute if available"
+        );
+    });
+
+    QUnit.test("currency_field is taken into account when formatting monetary values", async (assert) => {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="company_currency_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="amount"/>
+                    <field name="amount_currency"/>
+                </tree>`,
+        });
+
+        assert.strictEqual(
+            target.querySelectorAll('.o_data_row td[name="amount"]')[0].textContent,
+            "1200.00\u00a0€",
+            "field should be formatted based on currency_id"
+        );
+        assert.strictEqual(
+            target.querySelectorAll('.o_data_row td[name="amount_currency"]')[0].textContent,
+            "$\u00a01100.00",
+            "field should be formatted based on company_currency_id"
         );
     });
 
@@ -15240,4 +15276,65 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll("th[data-name=bar]"), "table-active");
         assert.hasClass(target.querySelectorAll("th[data-name=bar] i"), "fa-angle-up");
     });
+
+    QUnit.test(
+        "have some records, then go to next page in pager then group by some field: at least one group should be visible",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
+                    <list limit="2">
+                        <field name="foo"/>
+                        <field name="bar"/>
+                    </list>
+                `,
+                searchViewArch: `
+                    <search>
+                        <filter name="group_by_bar" string="Bar" context="{ 'group_by': 'bar' }"/>
+                    </search>
+                `,
+            });
+            assert.containsN(target, "tbody .o_data_row", 2);
+            assert.deepEqual(
+                [...target.querySelectorAll("tbody .o_data_row")].map((el) => el.innerText.trim()),
+                ["yop", "blip"]
+            );
+
+            await toggleGroupByMenu(target);
+            await toggleMenuItem(target, "Bar");
+            assert.containsN(target, "tbody .o_group_header", 2);
+            assert.deepEqual(
+                [...target.querySelectorAll("tbody .o_group_header")].map((el) =>
+                    el.innerText.trim()
+                ),
+                ["No (1)", "Yes (3)"]
+            );
+
+            await removeFacet(target);
+            assert.containsN(target, "tbody .o_data_row", 2);
+            assert.deepEqual(
+                [...target.querySelectorAll("tbody .o_data_row")].map((el) => el.innerText.trim()),
+                ["yop", "blip"]
+            );
+
+            await pagerNext(target);
+            assert.containsN(target, "tbody .o_data_row", 2);
+            assert.deepEqual(
+                [...target.querySelectorAll("tbody .o_data_row")].map((el) => el.innerText.trim()),
+                ["gnap", "blip"]
+            );
+
+            await toggleGroupByMenu(target);
+            await toggleMenuItem(target, "Bar");
+            assert.containsN(target, "tbody .o_group_header", 2);
+            assert.deepEqual(
+                [...target.querySelectorAll("tbody .o_group_header")].map((el) =>
+                    el.innerText.trim()
+                ),
+                ["No (1)", "Yes (3)"]
+            );
+        }
+    );
 });
