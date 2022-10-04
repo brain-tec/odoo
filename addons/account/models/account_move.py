@@ -1292,8 +1292,8 @@ class AccountMove(models.Model):
                 accounting_date = move._get_accounting_date(invoice_date, affects_tax_report)
                 lock_date, lock_type = lock_dates[-1]
                 tax_lock_date_message = _(
-                    "The accounting date being set prior to the %(lock_type)s lock date %(lock_date)s,"
-                    " it will be changed to %(accounting_date)s upon posting.",
+                    "The date is being set prior to the %(lock_type)s lock date %(lock_date)s. "
+                    "The Journal Entry will be accounted on %(accounting_date)s upon posting.",
                     lock_type=lock_type,
                     lock_date=format_date(move.env, lock_date),
                     accounting_date=format_date(move.env, accounting_date))
@@ -3378,15 +3378,14 @@ class AccountMove(models.Model):
                 'partner_bank_id': False,
                 'currency_id': move.currency_id.id,
             })
-            move.write({
-                'line_ids': [
-                    Command.update(line.id, {
-                        'quantity': -line.quantity,
-                    })
-                    for line in move.line_ids
-                    if line.display_type == 'product' and line.quantity < 0
-                ]
-            })
+            if move.amount_total < 0:
+                move.write({
+                    'line_ids': [
+                        Command.update(line.id, {'quantity': -line.quantity})
+                        for line in move.line_ids
+                        if line.display_type == 'product'
+                    ]
+                })
 
     def action_register_payment(self):
         ''' Open the account.payment.register wizard to pay the selected journal entries.

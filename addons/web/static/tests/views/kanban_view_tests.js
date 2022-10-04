@@ -1182,6 +1182,36 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
+    QUnit.test("click on a button type='delete' to delete a record in a column", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `<kanban limit="3">
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <div><a role="menuitem" type="delete" class="dropdown-item o_delete">Delete</a></div>
+                                <field name="foo"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+        });
+        let column = getColumn();
+        assert.containsN(column, ".o_kanban_record", 2);
+        assert.containsNone(column, ".o_kanban_load_more");
+
+        await click(column.querySelector(".o_kanban_record .o_delete"));
+        assert.containsOnce(target, ".modal");
+
+        await click(target, ".modal .btn-primary");
+        column = getColumn();
+        assert.containsOnce(column, ".o_kanban_record");
+        assert.containsNone(column, ".o_kanban_load_more");
+    });
+
     QUnit.test("kanban with an action id as on_create attrs", async (assert) => {
         const actionService = {
             start() {
@@ -12031,5 +12061,60 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
 
         assert.deepEqual(getCardTexts(), ["1", "3", "4", "2"]);
+    });
+
+    QUnit.test("group key in foreach cannot be a duplicate", async function (assert) {
+        serverData.models.product.records = [
+            {
+                id: 1,
+                name: "Product with id 1",
+            },
+        ];
+
+        serverData.models.partner.records = [
+            {
+                id: 1,
+                name: "Partner 1",
+                product_id: 1,
+            },
+        ];
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban>
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="name" />
+                        </div>
+                    </templates>
+                </kanban>
+            `,
+            groupBy: ["product_id"],
+            async mockRPC(route, args, performRPC) {
+                if (args.method === "web_read_group") {
+                    const result = await performRPC(route, args);
+                    result.groups = [
+                        ...result.groups,
+                        {
+                            // Add an empty and valueless group, will result in foreach key group_key_0
+                            __domain: [["product_id", "=", null]],
+                            __fold: false,
+                        },
+                        {
+                            // Add an empty and valueless group, will result in foreach key group_key_1
+                            __domain: [["product_id", "=", null]],
+                            __fold: false,
+                        },
+                    ];
+                    result.length = 2;
+                    return result;
+                }
+            },
+        });
+        assert.strictEqual(target.querySelectorAll(".o_kanban_group").length, 3);
+        assert.strictEqual(target.querySelectorAll(".o_kanban_record").length, 1);
     });
 });

@@ -2579,8 +2579,9 @@ export class Group extends DataPoint {
     /**
      * @see DynamicRecordList.deleteRecords
      */
-    async deleteRecords() {
-        return this.list.deleteRecords(...arguments);
+    async deleteRecords(records) {
+        this.count = this.count - records.length;
+        return this.list.deleteRecords(records);
     }
 
     empty() {
@@ -3426,7 +3427,10 @@ export class RelationalModel extends Model {
                 return makeContext([rootParams.context], {});
             },
         };
-        const state = this.root ? this.root.exportState() : this.initialRootState;
+        const state = this.root
+            ? Object.assign(this.root.exportState(), { offset: 0 })
+            : this.initialRootState;
+
         const newRoot = this.createDataPoint(this.rootType, rootParams, state);
         await this.keepLast.add(newRoot.load({ values: this.initialValues }));
         this.root = newRoot;
