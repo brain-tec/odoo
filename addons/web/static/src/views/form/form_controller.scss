@@ -42,6 +42,7 @@
             }
 
             .o_field_widget {
+                width: 100%;
                 margin-bottom: $o-form-spacing-unit * 2;
 
                 > .o_field_widget {
@@ -397,8 +398,6 @@
         }
 
         .o_field_widget {
-            width: 100%;
-
             > .btn {
                 flex: 0 0 auto;
                 padding: 0 10px;
@@ -569,8 +568,8 @@
             font-size: $o-font-size-base-touch;
         }
 
-        &.o_form_label_empty, &.o_form_label_false {
-            opacity: 0.5;
+        &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
+            opacity: 0.66;
             font-weight: $font-weight-normal;
         }
     }

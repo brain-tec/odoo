@@ -101,7 +101,11 @@ QUnit.module("Views", (hooks) => {
                         o2m: { string: "O2M field", type: "one2many", relation: "bar" },
                         m2m: { string: "M2M field", type: "many2many", relation: "bar" },
                         amount: { string: "Monetary field", type: "monetary" },
-                        amount_currency: { string: "Monetary field (currency)", type: "monetary", currency_field: "company_currency_id" },
+                        amount_currency: {
+                            string: "Monetary field (currency)",
+                            type: "monetary",
+                            currency_field: "company_currency_id",
+                        },
                         currency_id: {
                             string: "Currency",
                             type: "many2one",
@@ -2983,31 +2987,34 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("currency_field is taken into account when formatting monetary values", async (assert) => {
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: `
+    QUnit.test(
+        "currency_field is taken into account when formatting monetary values",
+        async (assert) => {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
                 <tree>
                     <field name="company_currency_id" invisible="1"/>
                     <field name="currency_id" invisible="1"/>
                     <field name="amount"/>
                     <field name="amount_currency"/>
                 </tree>`,
-        });
+            });
 
-        assert.strictEqual(
-            target.querySelectorAll('.o_data_row td[name="amount"]')[0].textContent,
-            "1200.00\u00a0€",
-            "field should be formatted based on currency_id"
-        );
-        assert.strictEqual(
-            target.querySelectorAll('.o_data_row td[name="amount_currency"]')[0].textContent,
-            "$\u00a01100.00",
-            "field should be formatted based on company_currency_id"
-        );
-    });
+            assert.strictEqual(
+                target.querySelectorAll('.o_data_row td[name="amount"]')[0].textContent,
+                "1200.00\u00a0€",
+                "field should be formatted based on currency_id"
+            );
+            assert.strictEqual(
+                target.querySelectorAll('.o_data_row td[name="amount_currency"]')[0].textContent,
+                "$\u00a01100.00",
+                "field should be formatted based on company_currency_id"
+            );
+        }
+    );
 
     QUnit.test(
         "groups can not be sorted on a different field than the first field of the groupBy - 1",
@@ -3075,6 +3082,33 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test(
+        "groups can't be sorted on aggregates if there is no record",
+        async function (assert) {
+            serverData.models.foo.records = [];
+
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                groupBy: ["foo"],
+                arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="int_field" sum="Sum"/>
+                </tree>`,
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.step(args.kwargs.orderby || "default order");
+                    }
+                },
+            });
+
+            await click(target, ".o_column_sortable");
+            assert.verifySteps(["default order"]);
+        }
+    );
+
     QUnit.test("groups can be sorted on aggregates", async function (assert) {
         await makeView({
             type: "list",
@@ -3127,48 +3161,159 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["default order", "int_field ASC", "int_field DESC"]);
     });
 
-    QUnit.test("groups cannot be sorted on non-aggregable fields", async function (assert) {
-        serverData.models.foo.fields.sort_field = {
-            string: "sortable_field",
-            type: "sting",
-            sortable: true,
-            default: "value",
-        };
-        _.each(serverData.models.records, function (elem) {
-            elem.sort_field = "value" + elem.id;
-        });
-        serverData.models.foo.fields.foo.sortable = true;
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            groupBy: ["foo"],
-            arch: `
+    QUnit.test(
+        "groups cannot be sorted on non-aggregable fields if every group is folded",
+        async function (assert) {
+            serverData.models.foo.fields.sort_field = {
+                string: "sortable_field",
+                type: "sting",
+                sortable: true,
+                default: "value",
+            };
+            serverData.models.foo.records.forEach((elem) => {
+                elem.sort_field = "value" + elem.id;
+            });
+            serverData.models.foo.fields.foo.sortable = true;
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                groupBy: ["foo"],
+                arch: `
                 <tree editable="bottom">
                     <field name="foo"/>
                     <field name="int_field"/>
                     <field name="sort_field"/>
                 </tree>`,
-            mockRPC(route, args) {
-                if (args.method === "web_read_group") {
-                    assert.step(args.kwargs.orderby || "default order");
-                }
-            },
-        });
-        assert.verifySteps(["default order"]);
-        //we cannot sort by sort_field since it doesn't have a group_operator
-        await click(target.querySelectorAll(".o_column_sortable")[2]);
-        assert.verifySteps([]);
-        //we can sort by int_field since it has a group_operator
-        await click(target.querySelectorAll(".o_column_sortable")[1]);
-        assert.verifySteps(["int_field ASC"]);
-        //we keep previous order
-        await click(target.querySelectorAll(".o_column_sortable")[2]);
-        assert.verifySteps([]);
-        //we can sort on foo since we are groupped by foo + previous order
-        await click(target.querySelectorAll(".o_column_sortable")[0]);
-        assert.verifySteps(["foo ASC, int_field ASC"]);
-    });
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.step(args.kwargs.orderby || "default order");
+                    }
+                },
+            });
+            assert.verifySteps(["default order"]);
+
+            // we cannot sort by sort_field since it doesn't have a group_operator
+            await click(target.querySelector(".o_column_sortable[data-name='sort_field']"));
+            assert.verifySteps([]);
+
+            // we can sort by int_field since it has a group_operator
+            await click(target.querySelector(".o_column_sortable[data-name='int_field']"));
+            assert.verifySteps(["int_field ASC"]);
+
+            // we keep previous order
+            await click(target.querySelector(".o_column_sortable[data-name='sort_field']"));
+            assert.verifySteps([]);
+
+            // we can sort on foo since we are groupped by foo + previous order
+            await click(target.querySelector(".o_column_sortable[data-name='foo']"));
+            assert.verifySteps(["foo ASC, int_field ASC"]);
+        }
+    );
+
+    QUnit.test(
+        "groups can be sorted on non-aggregable fields if a group isn't folded",
+        async function (assert) {
+            serverData.models.foo.fields.foo.sortable = true;
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                groupBy: ["bar"],
+                arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                </tree>`,
+                mockRPC(route, args) {
+                    const { method } = args;
+                    if (method === "web_read_group") {
+                        assert.step(
+                            `web_read_group.orderby: ${args.kwargs.orderby || "default order"}`
+                        );
+                        assert.step(
+                            `web_read_group.expand_orderby: ${
+                                args.kwargs.expand_orderby || "default order"
+                            }`
+                        );
+                    }
+                    if (method === "web_search_read") {
+                        assert.step(
+                            `web_search_read.order: ${args.kwargs.order || "default order"}`
+                        );
+                    }
+                },
+            });
+            await click(target.querySelectorAll(".o_group_header")[1]);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_data_cell[name='foo']")),
+                ["yop", "blip", "gnap"]
+            );
+            assert.verifySteps([
+                "web_read_group.orderby: default order",
+                "web_read_group.expand_orderby: default order",
+                "web_search_read.order: default order",
+            ]);
+
+            await click(target.querySelector(".o_column_sortable[data-name='foo']"));
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_data_cell[name='foo']")),
+                ["blip", "gnap", "yop"]
+            );
+            assert.verifySteps([
+                "web_read_group.orderby: default order",
+                "web_read_group.expand_orderby: default order",
+                "web_search_read.order: foo ASC",
+            ]);
+        }
+    );
+
+    QUnit.test(
+        "groups can be sorted on non-aggregable fields if a group isn't folded with expand='1'",
+        async function (assert) {
+            serverData.models.foo.fields.foo.sortable = true;
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                groupBy: ["bar"],
+                arch: `
+                <tree editable="bottom" expand="1">
+                    <field name="foo"/>
+                </tree>`,
+                mockRPC(route, args) {
+                    const { method } = args;
+                    if (method === "web_read_group") {
+                        assert.step(
+                            `web_read_group.orderby: ${args.kwargs.orderby || "default order"}`
+                        );
+                        assert.step(
+                            `web_read_group.expand_orderby: ${
+                                args.kwargs.expand_orderby || "default order"
+                            }`
+                        );
+                    }
+                },
+            });
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_data_cell[name='foo']")),
+                ["blip", "yop", "blip", "gnap"]
+            );
+            assert.verifySteps([
+                "web_read_group.orderby: default order",
+                "web_read_group.expand_orderby: default order",
+            ]);
+
+            await click(target.querySelector(".o_column_sortable[data-name='foo']"));
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_data_cell[name='foo']")),
+                ["blip", "blip", "gnap", "yop"]
+            );
+            assert.verifySteps([
+                "web_read_group.orderby: default order",
+                "web_read_group.expand_orderby: foo ASC",
+            ]);
+        }
+    );
 
     QUnit.test("properly apply onchange in simple case", async function (assert) {
         serverData.models.foo.onchanges = {
@@ -15333,4 +15478,40 @@ QUnit.module("Views", (hooks) => {
             );
         }
     );
+
+    QUnit.test("optional field selection do not unselect current row", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `<tree editable="top">
+                        <field name="text" optional="hide"/>
+                        <field name="foo" optional="show"/>
+                        <field name="bar" optional="hide"/>
+                    </tree>`,
+        });
+
+        await click(target.querySelector(".o_list_button_add"));
+
+        assert.containsOnce(target, ".o_selected_row");
+        assert.containsOnce(target, "div[name=foo] input:focus");
+
+        await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
+
+        assert.containsOnce(target, ".o_selected_row");
+        assert.containsOnce(target, "div[name=foo] input:focus");
+
+        await click(target, ".o_optional_columns_dropdown span.dropdown-item:nth-child(3) label");
+
+        assert.containsOnce(target, ".o_selected_row");
+        assert.containsOnce(target, "div[name=foo] input:focus");
+        assert.containsOnce(target, ".o_selected_row div[name=bar]");
+
+        await click(target, ".o_optional_columns_dropdown span.dropdown-item:nth-child(1) label");
+
+        assert.containsOnce(target, ".o_selected_row");
+        // This below would be better if it still focused foo, but it is an acceptable tradeoff.
+        assert.containsOnce(target, "div[name=text] textarea:focus");
+        assert.containsOnce(target, ".o_selected_row div[name=text]");
+    });
 });
