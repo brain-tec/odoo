@@ -1124,7 +1124,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ":scope .o_notebook .nav");
     });
 
-    QUnit.test("notebook name transferred to DOM", async function (assert) {
+    QUnit.test("notebook page name and class transferred to DOM", async function (assert) {
         await makeView({
             type: "form",
             serverData,
@@ -1133,7 +1133,7 @@ QUnit.module("Views", (hooks) => {
             arch: `<form>
                         <sheet>
                             <notebook>
-                                <page name="choucroute" string="Choucroute">
+                                <page name="choucroute" string="Choucroute" class="sauerKraut">
                                     <field name="foo"/>
                                 </page>
                             </notebook>
@@ -1142,7 +1142,7 @@ QUnit.module("Views", (hooks) => {
         });
         assert.hasClass(
             target.querySelector(".o_notebook .nav .nav-link[name='choucroute']"),
-            "active"
+            "active sauerKraut"
         );
     });
 
@@ -4249,6 +4249,10 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
+        assert.doesNotHaveClass(
+            target.querySelector(".o_form_editable"),
+            "o_form_saved o_form_dirty"
+        );
         // edit the foo field
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo] input").value,
@@ -4257,6 +4261,9 @@ QUnit.module("Views", (hooks) => {
         );
         await editInput(target, ".o_field_widget[name=foo] input", "DEF");
 
+        assert.hasClass(target.querySelector(".o_form_editable"), "o_form_dirty");
+        assert.doesNotHaveClass(target.querySelector(".o_form_editable"), "o_form_saved");
+
         // discard the changes and check it has properly been discarded
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo] input").value,
@@ -4264,6 +4271,11 @@ QUnit.module("Views", (hooks) => {
             "input should be DEF"
         );
         await clickDiscard(target);
+        assert.doesNotHaveClass(
+            target.querySelector(".o_form_editable"),
+            "o_form_saved o_form_dirty"
+        );
+
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo] input").value,
             "ABC",
@@ -4285,6 +4297,28 @@ QUnit.module("Views", (hooks) => {
             "input should now be ABC"
         );
         assert.verifySteps(["history-back"]);
+    });
+
+    QUnit.test("save a new dirty record", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo"/>
+                </form>
+            `,
+        });
+        assert.doesNotHaveClass(
+            target.querySelector(".o_form_editable"),
+            "o_form_saved o_form_dirty"
+        );
+        await editInput(target, ".o_field_widget[name=foo] input", "DEF");
+
+        await clickSave(target);
+        assert.hasClass(target.querySelector(".o_form_editable"), "o_form_saved");
+        assert.doesNotHaveClass(target.querySelector(".o_form_editable"), "o_form_dirty");
     });
 
     QUnit.test("discard changes on a duplicated record", async function (assert) {

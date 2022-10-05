@@ -116,12 +116,12 @@ export class ListRenderer extends Component {
             handle: ".o_handle_cell",
             cursor: "grabbing",
             // Hooks
-            onStart: (params) => {
+            onDragStart: (params) => {
                 const { element } = params;
                 dataRowId = element.dataset.id;
                 return this.sortStart(params);
             },
-            onStop: (params) => this.sortStop(params),
+            onDragEnd: (params) => this.sortStop(params),
             onDrop: (params) => this.sortDrop(dataRowId, params),
         });
 
@@ -390,12 +390,13 @@ export class ListRenderer extends Component {
     focus(el) {
         el.focus();
         if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
-            if (el.selectionStart) {
-                //bad
+            if (el.selectionStart === null) {
+                return;
+            }
+            if (el.selectionStart === el.selectionEnd) {
                 el.selectionStart = 0;
                 el.selectionEnd = el.value.length;
             }
-            el.select();
         }
     }
 
@@ -1514,7 +1515,6 @@ export class ListRenderer extends Component {
     }
 
     async toggleOptionalField(fieldName) {
-        await this.props.list.unselectRecord(true);
         this.optionalActiveFields[fieldName] = !this.optionalActiveFields[fieldName];
         this.state.columns = this.getActiveColumns(this.props.list);
         this.saveOptionalActiveFields(

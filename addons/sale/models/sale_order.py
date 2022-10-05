@@ -273,7 +273,9 @@ class SaleOrder(models.Model):
         groups='account.group_account_invoice,account.group_account_readonly')
     tax_country_id = fields.Many2one(
         comodel_name='res.country',
-        compute='_compute_tax_country_id')   # used to filter available taxes depending on the fiscal country and position
+        compute='_compute_tax_country_id',
+        # Avoid access error on fiscal position when reading a sale order with company != user.company_ids
+        compute_sudo=True)  # used to filter available taxes depending on the fiscal country and position
     tax_totals = fields.Binary(compute='_compute_tax_totals')
     terms_type = fields.Selection(related='company_id.terms_type')
     type_name = fields.Char(string="Type Name", compute='_compute_type_name')
@@ -746,16 +748,7 @@ class SaleOrder(models.Model):
             return self._get_confirmation_template()
 
     def _get_confirmation_template(self):
-        self.ensure_one()
-        default_confirmation_template_id = self.env['ir.config_parameter'].sudo().get_param(
-            'sale.default_confirmation_template'
-        )
-        default_confirmation_template = default_confirmation_template_id \
-            and self.env['mail.template'].browse(int(default_confirmation_template_id)).exists()
-        if default_confirmation_template:
-            return default_confirmation_template
-        else:
-            return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
+        return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
 
     def action_quotation_sent(self):
         if self.filtered(lambda so: so.state != 'draft'):

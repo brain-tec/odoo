@@ -56,13 +56,13 @@ export class KanbanRenderer extends Component {
                 connectGroups: () => this.canMoveRecords,
                 cursor: "move",
                 // Hooks
-                onStart: (params) => {
+                onDragStart: (params) => {
                     const { element, group } = params;
                     dataRecordId = element.dataset.id;
                     dataGroupId = group && group.dataset.id;
                     return this.sortStart(params);
                 },
-                onStop: (params) => this.sortStop(params),
+                onDragEnd: (params) => this.sortStop(params),
                 onGroupEnter: (params) => this.sortRecordGroupEnter(params),
                 onGroupLeave: (params) => this.sortRecordGroupLeave(params),
                 onDrop: (params) => this.sortRecordDrop(dataRecordId, dataGroupId, params),
@@ -75,12 +75,12 @@ export class KanbanRenderer extends Component {
                 handle: ".o_column_title",
                 cursor: "move",
                 // Hooks
-                onStart: (params) => {
+                onDragStart: (params) => {
                     const { element } = params;
                     dataGroupId = element.dataset.id;
                     return this.sortStart(params);
                 },
-                onStop: (params) => this.sortStop(params),
+                onDragEnd: (params) => this.sortStop(params),
                 onDrop: (params) => this.sortGroupDrop(dataGroupId, params),
             });
         }
@@ -347,16 +347,15 @@ export class KanbanRenderer extends Component {
     // Edition methods
     // ------------------------------------------------------------------------
 
-    quickCreate(group, atFirstPosition = true) {
-        return this.props.list.quickCreate(group, atFirstPosition);
+    quickCreate(group) {
+        return this.props.list.quickCreate(group);
     }
 
     async validateQuickCreate(mode, group) {
         const values = group.list.quickCreateRecord.data;
-        const quickCreateRecordIndex = group.list.quickCreateRecordIndex;
         let record;
         try {
-            record = await group.validateQuickCreate(quickCreateRecordIndex);
+            record = await group.validateQuickCreate();
         } catch (e) {
             // TODO: filter RPC errors more specifically (eg, for access denied, there is no point in opening a dialog)
             if (!(e instanceof RPCError)) {
@@ -389,7 +388,7 @@ export class KanbanRenderer extends Component {
             if (mode === "edit") {
                 await this.props.openRecord(record, "edit");
             } else {
-                await this.quickCreate(group, quickCreateRecordIndex === 0);
+                await this.quickCreate(group);
             }
         }
     }
