@@ -348,9 +348,7 @@ export class ListRenderer extends Component {
     }
 
     canUseFormatter(column, record) {
-        return (
-            !record.isInEdition && !column.widget && record.fields[column.name].type !== "boolean"
-        );
+        return !record.isInEdition && !column.widget;
     }
 
     focusCell(column, forward = true) {
@@ -836,15 +834,7 @@ export class ListRenderer extends Component {
         const fieldName = column.name;
         const list = this.props.list;
         if (this.isSortable(column)) {
-            if (list.isGrouped) {
-                const isSortable =
-                    list.groups[0].getAggregates(fieldName) || list.groupBy.includes(fieldName);
-                if (isSortable) {
-                    list.sortBy(fieldName);
-                }
-            } else {
-                list.sortBy(fieldName);
-            }
+            list.sortBy(fieldName);
         }
     }
 
