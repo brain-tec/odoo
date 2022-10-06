@@ -104,12 +104,8 @@ async function createRecord() {
     await click(target, "button.o-kanban-button-new");
 }
 
-async function quickCreateRecord(groupIndex, position = "top") {
-    if (position === "top") {
-        await click(getColumn(groupIndex), ".o_kanban_quick_add");
-    } else if (position === "bottom") {
-        await click(getColumn(groupIndex), ".o_kanban_quick_add_bottom");
-    }
+async function quickCreateRecord(groupIndex) {
+    await click(getColumn(groupIndex), ".o_kanban_quick_add");
 }
 
 async function editQuickCreateInput(field, value) {
@@ -4337,19 +4333,18 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
-        // Whether the kanban is grouped by state, foo or bar
+        // Whether the kanban is grouped by state, foo, bar or product_id
         // the user must not be able to drag and drop from one group to another,
-        // as state, foo or bar are made readonly one way or another.
-        // However, product_id must be draggable: by default, in the models, it's readonly,
-        // but a counter order is given in the view architecture: readonly="0".
+        // as state, foo bar, product_id are made readonly one way or another.
         // state must not be draggable:
         // state is not readonly in the model. state is passed in the arch specifying readonly="1".
         // foo must not be draggable:
         // foo is readonly in the model fields. foo is passed in the arch but without specifying readonly.
         // bar must not be draggable:
         // bar is readonly in the model fields. bar is not passed in the arch.
-        // product_id must be draggable:
-        // product_id is readonly in the model fields. product_id is passed in the arch specifying readonly="0".
+        // product_id must not be draggable:
+        // product_id is readonly in the model fields. product_id is passed in the arch specifying readonly="0",
+        // but the readonly in the model takes over.
         serverData.models.partner.fields.foo.readonly = true;
         serverData.models.partner.fields.bar.readonly = true;
         serverData.models.partner.fields.product_id.readonly = true;
@@ -4372,12 +4367,7 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/dataset/resequence") {
                     return true;
                 }
-                if (
-                    args.model === "partner" &&
-                    args.method === "write" &&
-                    !(args.args && args.args[1] && args.args[1].product_id)
-                ) {
-                    // In the test, nothing should be draggable except the test on product_id
+                if (args.model === "partner" && args.method === "write") {
                     throw new Error("should not be draggable");
                 }
             },
@@ -4461,12 +4451,12 @@ QUnit.module("Views", (hooks) => {
             ".o_kanban_group:nth-child(2)"
         );
 
-        // should be draggable
-        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
-        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        // should not be draggable
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
         assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
 
-        assert.deepEqual(getCardTexts(0), ["gnapGHI"]);
+        assert.deepEqual(getCardTexts(0), ["yopABC", "gnapGHI"]);
     });
 
     QUnit.test("prevent drag and drop if grouped by date/datetime field", async (assert) => {
@@ -11289,36 +11279,6 @@ QUnit.module("Views", (hooks) => {
             assert.hasClass(document.activeElement, "o_searchview_input");
         }
     );
-
-    QUnit.test("quick create record with bottom quick create button", async (assert) => {
-        await makeView({
-            type: "kanban",
-            resModel: "product",
-            serverData,
-            groupBy: ["name"],
-            arch: /* xml */ `
-                <kanban on_create="quick_create">
-                    <templates>
-                        <t t-name="kanban-box">
-                            <div>
-                                <field name="display_name"/>
-                            </div>
-                        </t>
-                    </templates>
-                </kanban>
-            `,
-        });
-
-        // quick create at the bottom and verify the order
-        await quickCreateRecord(1, "bottom");
-        await editQuickCreateInput("display_name", "new product");
-        await validateRecord();
-        assert.deepEqual(getCardTexts(1), ["xmo", "new product"]);
-        // directly re-create another records at the bottom
-        await editQuickCreateInput("display_name", "new product 2");
-        await validateRecord();
-        assert.deepEqual(getCardTexts(1), ["xmo", "new product", "new product 2"]);
-    });
 
     QUnit.test("no leak of TransactionInProgress (grouped case)", async (assert) => {
         let def;
