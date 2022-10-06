@@ -251,7 +251,7 @@ export class MockServer {
             doc = arch;
         }
         const editableView = editable && this._editableNode(doc, modelName);
-        const inTreeView = doc.tagName === "tree";
+        const inTreeView = ["tree", "list"].includes(doc.tagName);
         const inFormView = doc.tagName === "form";
         // mock _postprocess_access_rights
         const isBaseModel = !context.base_model_name || modelName === context.base_model_name;
@@ -285,7 +285,7 @@ export class MockServer {
                 }
                 const defaultValues = {};
                 const stateExceptions = {}; // what is this ?
-                modifiersNames.forEach((attr) => {
+                (editableView && modifiersNames || ["invisible"]).forEach((attr) => {
                     stateExceptions[attr] = [];
                     defaultValues[attr] = !!field[attr];
                 });

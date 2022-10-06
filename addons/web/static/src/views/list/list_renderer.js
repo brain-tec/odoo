@@ -17,6 +17,7 @@ import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { getClassNameFromDecoration } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "@web/views/view_hook";
+import { Widget } from "@web/views/widgets/widget";
 
 const {
     Component,
@@ -793,16 +794,22 @@ export class ListRenderer extends Component {
         if (firstAggregateIndex > -1) {
             colspan = firstAggregateIndex;
         } else {
-            colspan = Math.max(1, this.allColumns.length - DEFAULT_GROUP_PAGER_COLSPAN);
+            colspan = Math.max(1, this.state.columns.length - DEFAULT_GROUP_PAGER_COLSPAN);
         }
-        return this.hasSelectors ? colspan + 1 : colspan;
+        if (this.hasSelectors) {
+            colspan++;
+        }
+        if (this.displayOptionalFields) {
+            colspan++;
+        }
+        return colspan;
     }
     getGroupPagerCellColspan(group) {
         const lastAggregateIndex = this.getLastAggregateIndex(group);
         if (lastAggregateIndex > -1) {
-            return this.allColumns.length - lastAggregateIndex - 1;
+            return this.state.columns.length - lastAggregateIndex - 1;
         } else {
-            return this.allColumns.length > 1 ? DEFAULT_GROUP_PAGER_COLSPAN : 0;
+            return this.state.columns.length > 1 ? DEFAULT_GROUP_PAGER_COLSPAN : 0;
         }
     }
 
@@ -1754,7 +1761,7 @@ ListRenderer.rowsTemplate = "web.ListRenderer.Rows";
 ListRenderer.recordRowTemplate = "web.ListRenderer.RecordRow";
 ListRenderer.groupRowTemplate = "web.ListRenderer.GroupRow";
 
-ListRenderer.components = { DropdownItem, Field, ViewButton, CheckBox, Dropdown, Pager };
+ListRenderer.components = { DropdownItem, Field, ViewButton, CheckBox, Dropdown, Pager, Widget };
 ListRenderer.props = [
     "activeActions?",
     "list",
