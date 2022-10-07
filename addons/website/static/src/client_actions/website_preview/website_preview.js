@@ -86,9 +86,15 @@ export class WebsitePreview extends Component {
             // OdooFrameContentLoaded event to unblock the iframe, as it is
             // triggered faster than the load event.
             this.iframe.el.addEventListener('OdooFrameContentLoaded', () => this.websiteService.unblockPreview('load-iframe'), { once: true });
+            this.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+                this.env.services.messaging.modelManager.messaging.update({ isWebsitePreviewOpen: true });
+            });
         });
 
         onWillUnmount(() => {
+            this.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+                this.env.services.messaging.modelManager.messaging.update({ isWebsitePreviewOpen: false });
+            });
             this.websiteService.currentWebsiteId = null;
             this.websiteService.websiteRootInstance = undefined;
             this.websiteService.pageDocument = null;
@@ -255,7 +261,11 @@ export class WebsitePreview extends Component {
      */
     _isTopWindowURL({ host, pathname }) {
         const backendRoutes = ['/web', '/web/session/logout'];
-        return host !== window.location.host || (pathname && (backendRoutes.includes(pathname) || pathname.startsWith('/@/')));
+        return host !== window.location.host
+            || (pathname
+                && (backendRoutes.includes(pathname)
+                    || pathname.startsWith('/@/')
+                    || pathname.startsWith('/web/content/')));
     }
 
     /**

@@ -144,22 +144,14 @@
                 --table-accent-bg: none;
 
                 background-color: $o-view-background-color;
-                outline: 1px solid $info;
-                outline-offset: -1px;
             }
         }
 
         .o_keyboard_navigation {
-            tr:focus-within {
-                background-color: lighten($o-form-lightsecondary, 10%);
-            }
-
             th:focus-within, td:focus-within {
                 --table-accent-bg: none;
 
                 background-color: $o-view-background-color;
-                outline-offset: -1px;
-                outline: 1px solid $primary;
             }
         }
 
