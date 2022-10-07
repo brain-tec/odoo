@@ -569,12 +569,11 @@ class AccountMoveLine(models.Model):
                 elif line.move_id.is_purchase_document(include_receipts=True):
                     line.account_id = accounts['expense'] or line.account_id
             elif line.partner_id:
-                line.account_id = self.env['account.account']._order_by_frequency_per_partner(
+                line.account_id = self.env['account.account']._get_most_frequent_account_for_partner(
                     company_id=line.company_id.id,
                     partner_id=line.partner_id.id,
                     move_type=line.move_id.move_type,
-                    limit=1,
-                )[0]
+                )
         for line in self:
             if not line.account_id and line.display_type not in ('line_section', 'line_note'):
                 previous_two_accounts = line.move_id.line_ids.filtered(
@@ -583,7 +582,7 @@ class AccountMoveLine(models.Model):
                 if len(previous_two_accounts) == 1:
                     line.account_id = previous_two_accounts
                 else:
-                    line.account_id = line.company_id.account_journal_suspense_account_id
+                    line.account_id = line.move_id.journal_id.default_account_id
 
     @api.depends('move_id')
     def _compute_balance(self):
@@ -948,7 +947,7 @@ class AccountMoveLine(models.Model):
                     'group_tax_id': tax['group'] and tax['group'].id or False,
                     'account_id': tax['account_id'] or line.account_id.id,
                     'currency_id': line.currency_id.id,
-                    'analytic_distribution': tax['analytic'] and line.analytic_distribution,
+                    'analytic_distribution': (tax['analytic'] or not tax['use_in_tax_closing']) and line.analytic_distribution,
                     'tax_ids': [(6, 0, tax['tax_ids'])],
                     'tax_tag_ids': [(6, 0, tax['tag_ids'])],
                     'partner_id': line.move_id.partner_id.id or line.partner_id.id,
@@ -1074,15 +1073,16 @@ class AccountMoveLine(models.Model):
     @api.depends('account_id', 'partner_id', 'product_id')
     def _compute_analytic_distribution_stored_char(self):
         for line in self:
-            distribution = self.env['account.analytic.distribution.model']._get_distributionjson({
-                "product_id": line.product_id.id,
-                "product_categ_id": line.product_id.categ_id.id,
-                "partner_id": line.partner_id.id,
-                "partner_category_id": line.partner_id.category_id.ids,
-                "account_prefix": line.account_id.code,
-                "company_id": line.company_id.id,
-            })
-            line.analytic_distribution_stored_char = distribution or line.analytic_distribution_stored_char
+            if line.display_type == 'product' or not line.move_id.is_invoice(include_receipts=True):
+                distribution = self.env['account.analytic.distribution.model']._get_distributionjson({
+                    "product_id": line.product_id.id,
+                    "product_categ_id": line.product_id.categ_id.id,
+                    "partner_id": line.partner_id.id,
+                    "partner_category_id": line.partner_id.category_id.ids,
+                    "account_prefix": line.account_id.code,
+                    "company_id": line.company_id.id,
+                })
+                line.analytic_distribution_stored_char = distribution or line.analytic_distribution_stored_char
             line._compute_analytic_distribution()
 
     # -------------------------------------------------------------------------
@@ -1492,7 +1492,7 @@ class AccountMoveLine(models.Model):
     def _prevent_automatic_line_deletion(self):
         if not self.env.context.get('dynamic_unlink'):
             for line in self:
-                if line.display_type == 'tax':
+                if line.display_type == 'tax' and line.move_id.line_ids.tax_ids:
                     raise ValidationError(_(
                         "You cannot delete a tax line as it would impact the tax report"
                     ))

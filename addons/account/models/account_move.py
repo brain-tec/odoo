@@ -1668,42 +1668,46 @@ class AccountMove(models.Model):
             if disabled:
                 return
 
+        unbalanced_moves = self._get_unbalanced_moves(container)
+        if unbalanced_moves:
+            error_msg = _("An error has occurred.")
+            for move_id, sum_debit, sum_credit in unbalanced_moves:
+                move = self.browse(move_id)
+                error_msg += _(
+                    "\n\n"
+                    "The move (%s) is not balanced.\n"
+                    "The total of debits equals %s and the total of credits equals %s.\n"
+                    "You might want to specify a default account on journal \"%s\" to automatically balance each move.",
+                    move.display_name,
+                    format_amount(self.env, sum_debit, move.currency_id),
+                    format_amount(self.env, sum_credit, move.currency_id),
+                    move.journal_id.name)
+            raise UserError(error_msg)
+
+    def _get_unbalanced_moves(self, container):
+
         moves = container['records'].filtered(lambda move: move.line_ids)
         if not moves:
             return
 
         # /!\ As this method is called in create / write, we can't make the assumption the computed stored fields
-        # are already done. Then, this query MUST NOT depend of computed stored fields (e.g. balance).
-        # It happens as the ORM makes the create with the 'no_recompute' statement.
-        self.env['account.move.line'].flush_model(['balance', 'currency_id', 'move_id'])
-        self.env['account.move'].flush_model(['journal_id'])
+        # are already done. Then, this query MUST NOT depend on computed stored fields.
+        # It happens as the ORM calls create() with the 'no_recompute' statement.
+        self.env['account.move.line'].flush_model(['debit', 'credit', 'balance', 'currency_id', 'move_id'])
         self._cr.execute('''
-            WITH error_moves AS (
-                SELECT line.move_id,
-                       ROUND(SUM(line.balance), currency.decimal_places) balance
-                  FROM account_move_line line
-                  JOIN account_move move ON move.id = line.move_id
-                  JOIN account_journal journal ON journal.id = move.journal_id
-                  JOIN res_company company ON company.id = journal.company_id
-                  JOIN res_currency currency ON currency.id = company.currency_id
-                 WHERE line.move_id IN %s
-              GROUP BY line.move_id, currency.decimal_places
-            )
-            SELECT *
-              FROM error_moves
-             WHERE balance !=0
+            SELECT line.move_id,
+                   ROUND(SUM(line.debit), currency.decimal_places) debit,
+                   ROUND(SUM(line.credit), currency.decimal_places) credit
+              FROM account_move_line line
+              JOIN account_move move ON move.id = line.move_id
+              JOIN res_company company ON company.id = move.company_id
+              JOIN res_currency currency ON currency.id = company.currency_id
+             WHERE line.move_id IN %s
+          GROUP BY line.move_id, currency.decimal_places
+            HAVING ROUND(SUM(line.balance), currency.decimal_places) != 0
         ''', [tuple(moves.ids)])
 
-        query_res = self._cr.fetchall()
-        if query_res:
-            error_msg = _("There was a problem with the following move(s):\n")
-            for move in query_res:
-                id_, balance = move
-                error_msg += _("- Move with id %i\n", id_)
-                if balance != 0.0:
-                    error_msg += _("\tCannot create unbalanced journal entry. The balance is equal to %s\n",
-                                   format_amount(self.env, balance, self.env['account.move'].browse(id_).currency_id))
-            raise UserError(error_msg)
+        return self._cr.fetchall()
 
     def _check_fiscalyear_lock_date(self):
         for move in self:
@@ -1904,6 +1908,34 @@ class AccountMove(models.Model):
         _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
 
     @contextmanager
+    def _sync_unbalanced_lines(self, container):
+        yield
+
+        # Unlink tax lines if all tax tags have been removed.
+        if not container['records'].line_ids.tax_ids:
+            container['records'].line_ids.filtered('tax_line_id').unlink()
+
+        # Unlink the automatic balancing line, if any, to prevent having multiple ones.
+        balance_name = _('Automatic Balancing Line')
+        container['records'].line_ids.filtered(lambda line: line.name == balance_name).unlink()
+
+        # Create an automatic balancing line to make sure the entry can be saved.
+        vals_list = []
+        unbalanced_moves = self._get_unbalanced_moves(container)
+        if unbalanced_moves:
+            for move_id, debit, credit in unbalanced_moves:
+                move = self.browse(move_id)
+                balance = debit - credit
+                vals_list.append({
+                    'name': balance_name,
+                    'move_id': move.id,
+                    'account_id': move.company_id.account_journal_suspense_account_id.id,
+                    'debit': -balance if balance < 0.0 else 0.0,
+                    'credit': balance if balance > 0.0 else 0.0,
+                })
+        container['records'].env['account.move.line'].create(vals_list)
+
+    @contextmanager
     def _sync_rounding_lines(self, container):
         yield
         for invoice in container['records']:
@@ -2050,8 +2082,10 @@ class AccountMove(models.Model):
             # Only invoice-like and journal entries in "auto tax mode" are synced
             tax_filter = lambda m: (m.is_invoice(True) or m.line_ids.tax_ids and not m.tax_cash_basis_origin_move_id)
             invoice_filter = lambda m: (m.is_invoice(True))
+            misc_filter = lambda m: (m.move_type == 'entry' and not m.tax_cash_basis_origin_move_id)
             tax_container = {'records': container['records'].filtered(tax_filter)}
             invoice_container = {'records': container['records'].filtered(invoice_filter)}
+            misc_container = {'records': container['records'].filtered(misc_filter)}
 
             with ExitStack() as stack:
                 stack.enter_context(self._sync_dynamic_line(
@@ -2061,6 +2095,7 @@ class AccountMove(models.Model):
                     line_type='payment_term',
                     container=invoice_container,
                 ))
+                stack.enter_context(self._sync_unbalanced_lines(misc_container))
                 stack.enter_context(self._sync_rounding_lines(invoice_container))
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='tax_key',
@@ -2083,6 +2118,7 @@ class AccountMove(models.Model):
                     line_container['records'] = self.line_ids
                 tax_container['records'] = container['records'].filtered(tax_filter)
                 invoice_container['records'] = container['records'].filtered(invoice_filter)
+                misc_container['records'] = container['records'].filtered(misc_filter)
 
             # Delete the tax lines if the journal entry is not in "auto tax mode" anymore
             for move in container['records']:
@@ -2179,8 +2215,11 @@ class AccountMove(models.Model):
             if (move.name and move.name != '/' and move.sequence_number not in (0, 1) and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
-            # You can't change the date of a move being inside a locked period.
-            if move.state == "posted" and 'date' in vals and move.date != vals['date']:
+            # You can't change the date or name of a move being inside a locked period.
+            if move.state == "posted" and (
+                    ('name' in vals and move.name != vals['name'])
+                    or ('date' in vals and move.date != vals['date'])
+            ):
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 

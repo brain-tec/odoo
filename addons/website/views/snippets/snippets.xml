@@ -476,9 +476,10 @@
         </we-row>
     </div>
 
+    <!-- Columns only -->
     <div data-js="layout_column"
-        data-selector="section.s_features_grid, section.s_color_blocks_2"
-        data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns">
+        data-selector="section.s_features_grid, section.s_process_steps"
+        data-target="> *:has(> .row), > .s_allow_columns">
         <we-select string="Columns" data-no-preview="true">
             <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
             <we-button data-select-count="1">1</we-button>
@@ -490,10 +491,26 @@
         </we-select>
     </div>
 
+    <!-- Grid only -->
     <div data-js="layout_column"
-        data-selector="section"
-        data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns"
-        data-exclude=".s_masonry_block, .s_features_grid, .s_color_blocks_2">
+        data-selector="section.s_masonry_block"
+        data-target="> *:has(> .row)">
+        <we-button-group class="o_grid" string="Add Elements" data-no-preview="true" data-dependencies="grid_mode">
+            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="image" title="Image" data-name="image">Image</we-button>
+            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="text" title="Text" data-name="text">Text</we-button>
+            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="button" title="Button" data-name="button">Button</we-button>
+        </we-button-group>
+        <we-row string="Padding (Y, X)">
+            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-y" data-unit="px" data-apply-to=".row"/>
+            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-x" data-unit="px" data-apply-to=".row"/>
+        </we-row>
+    </div>
+
+    <!-- Grid and columns -->
+    <div data-js="layout_column"
+        data-selector="section, section.s_carousel_wrapper .carousel-item"
+        data-target="> *:has(> .row), > .s_allow_columns"
+        data-exclude=".s_masonry_block, .s_features_grid, .s_media_list, .s_showcase, .s_table_of_content, .s_process_steps">
         <we-row>
             <we-button-group string="Layout" data-no-preview="true">
                 <we-button data-select-layout="grid" data-name="grid_mode">Grid</we-button>
@@ -623,7 +640,7 @@
     <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_social_media, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge, .s_embed_code, .s_donation, .s_add_to_cart</t>
     <div id="so_content_addition"
         t-att-data-selector="so_content_addition_selector"
-        t-attf-data-drop-near="p, h1, h2, h3, ul, ol, .row > div > img, #{so_content_addition_selector}"
+        t-attf-data-drop-near="p, h1, h2, h3, ul, ol, .row > div:not(.o_grid_item_image) > img, #{so_content_addition_selector}"
         data-drop-in=".content, nav"/>
 
     <div data-js="SnippetSave"

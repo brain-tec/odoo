@@ -889,7 +889,7 @@
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
                                         <field name="quantity" optional="show"/>
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
@@ -1060,7 +1060,7 @@
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
@@ -1071,7 +1071,7 @@
                                         <field name="currency_id" options="{'no_create': True}"
                                                optional="hide" groups="base.group_multi_currency"
                                                attrs="{'column_invisible': [('parent.move_type', '!=', 'entry')]}"/>
-                                        <field name="tax_ids" widget="many2many_tags"
+                                        <field name="tax_ids" widget="autosave_many2many_tags"
                                                optional="hide"
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain)]"
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
@@ -1148,7 +1148,7 @@
                                         <field name="debit" sum="Total Debit"/>
                                         <field name="credit" sum="Total Credit"/>
                                         <field name="balance" invisible="1"/>
-                                        <field name="tax_ids" string="Taxes Applied" widget="many2many_tags" options="{'no_create': True}"/>
+                                        <field name="tax_ids" string="Taxes Applied" widget="autosave_many2many_tags" options="{'no_create': True}"/>
                                         <field name="date_maturity" required="0" invisible="context.get('view_no_maturity', False)"/>
                                       </group>
                                     </form>
