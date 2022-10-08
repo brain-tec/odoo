@@ -942,6 +942,89 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector('.o_field_widget[name="product_id"] .o_external_button'));
     });
 
+    QUnit.test("Form and subsubview with default_ or _view_ref contexts", async function (assert) {
+        serverData.models.partner_type.fields.company_ids = {
+            string: "one2many field",
+            type: "one2many",
+            relation: "res.company",
+        };
+        serverData.views = {
+            "res.company,false,search": "<search></search>",
+            "res.company,false,list": `<tree><field name="name"/></tree>`,
+            "res.company,bar_rescompany_form_view,form": `<form><field name="name"/></form>`,
+            "partner_type,false,search": "<search></search>",
+            "partner_type,false,list": `<tree><field name="name"/></tree>`,
+            "partner_type,foo_partner_type_form_view,form": `
+                <form>
+                    <field name="color"/>
+                    <field name="company_ids" context="{
+                        'default_color': 2,
+                        'form_view_ref': 'bar_rescompany_form_view'
+                    }"/>
+                </form>`,
+        };
+
+        const userContext = {
+            lang: "en",
+            tz: "taht",
+            uid: 7,
+        };
+        const expectedContexts = new Map();
+
+        // Make main form view
+        expectedContexts.set("partner", { ...userContext });
+        expectedContexts.set("partner_type", {
+            ...userContext,
+            base_model_name: "partner",
+            form_view_ref: "foo_partner_type_form_view",
+        });
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field string="Partner Types" name="timmy" widget="one2many" context="{
+                        'default_partner_id': active_id,
+                        'form_view_ref': 'foo_partner_type_form_view'
+                    }"/>
+                </form>`,
+            resId: 2,
+            mockRPC: (route, { method, model, kwargs }) => {
+                if (["get_views", "onchange"].includes(method)) {
+                    const { context } = kwargs;
+                    assert.step(`${method} (${model})`);
+                    assert.deepEqual(context, expectedContexts.get(model));
+                }
+            },
+        });
+        assert.verifySteps(["get_views (partner)", "get_views (partner_type)"]);
+
+        // Add a line in the x2many timmy field
+        expectedContexts.clear();
+        expectedContexts.set("partner_type", {
+            ...userContext,
+            default_partner_id: 2,
+            form_view_ref: "foo_partner_type_form_view",
+        });
+        await click(target, "[name=timmy] .o_field_x2many_list_row_add a");
+        assert.verifySteps(["get_views (partner_type)"]);
+
+        // Create a new timmy
+        await click(target, ".modal .o_create_button");
+        assert.verifySteps(["get_views (partner_type)", "onchange (partner_type)"]);
+
+        // Create a new company
+        expectedContexts.clear();
+        expectedContexts.set("res.company", {
+            ...userContext,
+            default_color: 2,
+            form_view_ref: "bar_rescompany_form_view",
+        });
+        await click(target, ".modal [name=company_ids] .o_field_x2many_list_row_add a");
+        assert.verifySteps(["get_views (res.company)", "onchange (res.company)"]);
+    });
+
     QUnit.test("invisible fields are properly hidden", async function (assert) {
         await makeView({
             type: "form",
@@ -4832,6 +4915,172 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(target.querySelector(".o_notebook .nav-link"), "active");
         assert.hasClass(target.querySelectorAll(".o_notebook .nav-link")[1], "active");
     });
+
+    QUnit.test(
+        "restore the open notebook page when switching to another view",
+        async function (assert) {
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [[false, "list"]],
+                },
+                2: {
+                    id: 2,
+                    name: "test2",
+                    res_model: "partner",
+                    res_id: 1,
+                    type: "ir.actions.act_window",
+                    views: [[false, "form"]],
+                },
+            };
+            serverData.views = {
+                "partner,false,list": `<tree><field name="foo"/></tree>`,
+                "partner,false,search": `<search></search>`,
+                "partner,false,form": `
+                    <form>
+                        <notebook>
+                            <page string="First Page" name="first">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second page" name="second">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                        <notebook>
+                            <page string="Page1" name="p1">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Page2" name="p2" autofocus="autofocus">
+                                <field name="bar"/>
+                            </page>
+                            <page string="Page3" name="p3">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                    </form>`,
+            };
+
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 2);
+
+            let notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // click on second page tab of the first notebook
+            await click(notebooks[0].querySelectorAll(".nav-link")[1]);
+            // click on third page tab of the second notebook
+            await click(notebooks[1].querySelectorAll(".nav-link")[2]);
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // switch to a list view
+            await doAction(webClient, 1);
+
+            // back to the form view
+            await click(target, ".o_back_button");
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+        }
+    );
+
+    QUnit.test(
+        "don't restore the open notebook page when we create a new record",
+        async function (assert) {
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                },
+            };
+            serverData.views = {
+                "partner,false,list": `<tree><field name="foo"/></tree>`,
+                "partner,false,search": `<search></search>`,
+                "partner,false,form": `
+                    <form>
+                        <notebook>
+                            <page string="First Page" name="first">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second page" name="second">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                        <notebook>
+                            <page string="Page1" name="p1">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Page2" name="p2" autofocus="autofocus">
+                                <field name="bar"/>
+                            </page>
+                            <page string="Page3" name="p3">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                    </form>`,
+            };
+
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 1);
+            await click(target.querySelector(".o_data_cell"));
+
+            let notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // click on second page tab of the first notebook
+            await click(notebooks[0].querySelectorAll(".nav-link")[1]);
+            // click on third page tab of the second notebook
+            await click(notebooks[1].querySelectorAll(".nav-link")[2]);
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // back to the list view
+            await click(target, ".o_back_button");
+
+            // Create a new record
+            await click(target, ".o_list_button_add");
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+        }
+    );
 
     QUnit.test("pager is hidden in create mode", async function (assert) {
         await makeView({
@@ -9075,14 +9324,14 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            assert.hasClass(target.querySelector('button[data-value="4"]'), "btn-primary");
+            assert.hasClass(target.querySelector('button[data-value="4"]'), "o_arrow_button_current");
             assert.hasClass(target.querySelector('button[data-value="4"]'), "disabled");
 
             failFlag = true;
             await click(target.querySelector('button[data-value="1"]'));
             assert.hasClass(
                 target.querySelector('button[data-value="4"]'),
-                "btn-primary",
+                "o_arrow_button_current",
                 "initial status should still be active as save failed"
             );
 
@@ -9090,7 +9339,7 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector('button[data-value="1"]'));
             assert.hasClass(
                 target.querySelector('button[data-value="1"]'),
-                "btn-primary",
+                "o_arrow_button_current",
                 "last clicked status should be active"
             );
 
