@@ -24,7 +24,8 @@
                                 domain="props.domain"
                                 onActionExecuted="() => model.load({ resId: model.root.resId, resIds: model.root.resIds })"
                                 shouldExecuteAction.bind="shouldExecuteAction"
-                        />
+                            />
+                            <span class="border-start d-none d-md-inline-block"/>
                         </t>
                     </t>
                     <t t-set-slot="control-panel-status-indicator">
@@ -37,7 +38,7 @@
                             <button type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c" t-on-click.stop="create" t-att-disabled="state.isDisabled">Create</button>
                         </t>
                     </t>
-                    <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="archInfo" translateAlert="translateAlert" enableViewButtons.bind="enableButtons" disableViewButtons.bind="disableButtons"/>
+                    <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="archInfo" translateAlert="translateAlert" enableViewButtons.bind="enableButtons" disableViewButtons.bind="disableButtons" onNotebookPageChange.bind="onNotebookPageChange" activeNotebookPages="props.state and props.state.activeNotebookPages"/>
                 </Layout>
             </div>
         </div>
@@ -46,7 +47,7 @@
     <t t-name="web.FormView.Buttons" owl="1">
         <div class="o_cp_buttons" role="toolbar" aria-label="Main actions" t-ref="cpButtons">
             <div t-if="model.root.isInEdition" class="o_form_buttons_edit">
-                <button type="button" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.save()">
+                <button type="button" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.save({closable: true})">
                     Save
                 </button>
                 <button type="button" class="btn btn-secondary o_form_button_cancel" data-hotkey="j" t-on-click.stop="discard">

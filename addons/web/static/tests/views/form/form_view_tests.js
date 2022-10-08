@@ -20,9 +20,6 @@ import {
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { FieldOne2Many } from "web.relational_fields";
-import { FieldChar as LegacyFieldChar } from "web.basic_fields";
-import * as legacyFieldRegistry from "web.field_registry";
 import { toggleActionMenu, toggleGroupByMenu, toggleMenuItem } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
@@ -39,8 +36,6 @@ import { localization } from "@web/core/l10n/localization";
 import { SIZES } from "@web/core/ui/ui_service";
 import { errorService } from "@web/core/errors/error_service";
 import { RPCError } from "@web/core/network/rpc_service";
-
-import * as legacyCore from "web.core";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -940,6 +935,89 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target.querySelector('.o_field_widget[name="product_id"] .o_external_button'));
+    });
+
+    QUnit.test("Form and subsubview with default_ or _view_ref contexts", async function (assert) {
+        serverData.models.partner_type.fields.company_ids = {
+            string: "one2many field",
+            type: "one2many",
+            relation: "res.company",
+        };
+        serverData.views = {
+            "res.company,false,search": "<search></search>",
+            "res.company,false,list": `<tree><field name="name"/></tree>`,
+            "res.company,bar_rescompany_form_view,form": `<form><field name="name"/></form>`,
+            "partner_type,false,search": "<search></search>",
+            "partner_type,false,list": `<tree><field name="name"/></tree>`,
+            "partner_type,foo_partner_type_form_view,form": `
+                <form>
+                    <field name="color"/>
+                    <field name="company_ids" context="{
+                        'default_color': 2,
+                        'form_view_ref': 'bar_rescompany_form_view'
+                    }"/>
+                </form>`,
+        };
+
+        const userContext = {
+            lang: "en",
+            tz: "taht",
+            uid: 7,
+        };
+        const expectedContexts = new Map();
+
+        // Make main form view
+        expectedContexts.set("partner", { ...userContext });
+        expectedContexts.set("partner_type", {
+            ...userContext,
+            base_model_name: "partner",
+            form_view_ref: "foo_partner_type_form_view",
+        });
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field string="Partner Types" name="timmy" widget="one2many" context="{
+                        'default_partner_id': active_id,
+                        'form_view_ref': 'foo_partner_type_form_view'
+                    }"/>
+                </form>`,
+            resId: 2,
+            mockRPC: (route, { method, model, kwargs }) => {
+                if (["get_views", "onchange"].includes(method)) {
+                    const { context } = kwargs;
+                    assert.step(`${method} (${model})`);
+                    assert.deepEqual(context, expectedContexts.get(model));
+                }
+            },
+        });
+        assert.verifySteps(["get_views (partner)", "get_views (partner_type)"]);
+
+        // Add a line in the x2many timmy field
+        expectedContexts.clear();
+        expectedContexts.set("partner_type", {
+            ...userContext,
+            default_partner_id: 2,
+            form_view_ref: "foo_partner_type_form_view",
+        });
+        await click(target, "[name=timmy] .o_field_x2many_list_row_add a");
+        assert.verifySteps(["get_views (partner_type)"]);
+
+        // Create a new timmy
+        await click(target, ".modal .o_create_button");
+        assert.verifySteps(["get_views (partner_type)", "onchange (partner_type)"]);
+
+        // Create a new company
+        expectedContexts.clear();
+        expectedContexts.set("res.company", {
+            ...userContext,
+            default_color: 2,
+            form_view_ref: "bar_rescompany_form_view",
+        });
+        await click(target, ".modal [name=company_ids] .o_field_x2many_list_row_add a");
+        assert.verifySteps(["get_views (res.company)", "onchange (res.company)"]);
     });
 
     QUnit.test("invisible fields are properly hidden", async function (assert) {
@@ -2641,6 +2719,41 @@ QUnit.module("Views", (hooks) => {
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_dialog .o_form_view");
         assert.containsNone(target, ".o_dialog .o_form_view .o_control_panel");
+    });
+
+    QUnit.test("form views in dialogs closes on save", async function (assert) {
+        serverData.models.partner.records[0].foo = undefined;
+        delete serverData.models.partner.fields.foo.default;
+        serverData.views = {
+            "partner,false,form": `
+                <form>
+                    <field name="foo" required="1"/>
+                </form>`,
+        };
+        serverData.actions = {
+            1: {
+                id: 1,
+                name: "Partner",
+                res_model: "partner",
+                type: "ir.actions.act_window",
+                views: [[false, "form"]],
+                target: "new",
+            },
+        };
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, 1);
+        assert.containsOnce(target, ".o_dialog .o_form_view", "the dialog has been opened");
+
+        await click(target.querySelector(".o_dialog .o_form_button_save"));
+        assert.containsOnce(
+            target,
+            ".o_dialog .o_form_view",
+            "the dialog is still opened as save failed"
+        );
+
+        editInput(target, "[name='foo'] input", "Gizmo");
+        await click(target.querySelector(".o_dialog .o_form_button_save"));
+        assert.containsNone(target, ".o_dialog .o_form_view", "the dialog has been closed");
     });
 
     QUnit.test("form views in dialogs do not have class o_xxl_form_view", async function (assert) {
@@ -4797,6 +4910,172 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(target.querySelector(".o_notebook .nav-link"), "active");
         assert.hasClass(target.querySelectorAll(".o_notebook .nav-link")[1], "active");
     });
+
+    QUnit.test(
+        "restore the open notebook page when switching to another view",
+        async function (assert) {
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [[false, "list"]],
+                },
+                2: {
+                    id: 2,
+                    name: "test2",
+                    res_model: "partner",
+                    res_id: 1,
+                    type: "ir.actions.act_window",
+                    views: [[false, "form"]],
+                },
+            };
+            serverData.views = {
+                "partner,false,list": `<tree><field name="foo"/></tree>`,
+                "partner,false,search": `<search></search>`,
+                "partner,false,form": `
+                    <form>
+                        <notebook>
+                            <page string="First Page" name="first">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second page" name="second">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                        <notebook>
+                            <page string="Page1" name="p1">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Page2" name="p2" autofocus="autofocus">
+                                <field name="bar"/>
+                            </page>
+                            <page string="Page3" name="p3">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                    </form>`,
+            };
+
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 2);
+
+            let notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // click on second page tab of the first notebook
+            await click(notebooks[0].querySelectorAll(".nav-link")[1]);
+            // click on third page tab of the second notebook
+            await click(notebooks[1].querySelectorAll(".nav-link")[2]);
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // switch to a list view
+            await doAction(webClient, 1);
+
+            // back to the form view
+            await click(target, ".o_back_button");
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+        }
+    );
+
+    QUnit.test(
+        "don't restore the open notebook page when we create a new record",
+        async function (assert) {
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                },
+            };
+            serverData.views = {
+                "partner,false,list": `<tree><field name="foo"/></tree>`,
+                "partner,false,search": `<search></search>`,
+                "partner,false,form": `
+                    <form>
+                        <notebook>
+                            <page string="First Page" name="first">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Second page" name="second">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                        <notebook>
+                            <page string="Page1" name="p1">
+                                <field name="foo"/>
+                            </page>
+                            <page string="Page2" name="p2" autofocus="autofocus">
+                                <field name="bar"/>
+                            </page>
+                            <page string="Page3" name="p3">
+                                <field name="bar"/>
+                            </page>
+                        </notebook>
+                    </form>`,
+            };
+
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 1);
+            await click(target.querySelector(".o_data_cell"));
+
+            let notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // click on second page tab of the first notebook
+            await click(notebooks[0].querySelectorAll(".nav-link")[1]);
+            // click on third page tab of the second notebook
+            await click(notebooks[1].querySelectorAll(".nav-link")[2]);
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.doesNotHaveClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+
+            // back to the list view
+            await click(target, ".o_back_button");
+
+            // Create a new record
+            await click(target, ".o_list_button_add");
+            notebooks = target.querySelectorAll(".o_notebook");
+            assert.hasClass(notebooks[0].querySelector(".nav-link"), "active");
+            assert.doesNotHaveClass(notebooks[0].querySelectorAll(".nav-link")[1], "active");
+
+            assert.doesNotHaveClass(notebooks[1].querySelector(".nav-link"), "active");
+            assert.hasClass(notebooks[1].querySelectorAll(".nav-link")[1], "active");
+            assert.doesNotHaveClass(notebooks[1].querySelectorAll(".nav-link")[2], "active");
+        }
+    );
 
     QUnit.test("pager is hidden in create mode", async function (assert) {
         await makeView({
@@ -8147,6 +8426,37 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("inner group with invisible cells", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+            <form>
+                <field name="foo" />
+                <group>
+                    <div class="cell1" attrs='{"invisible": [["foo", "=", "1"]]}' />
+                    <div class="cell2" attrs='{"invisible": [["foo", "=", "2"]]}' />
+                </group>
+            </form>`,
+        });
+
+        await editInput(target, "[name='foo'] input", 1);
+        assert.containsOnce(target, ".o_wrap_field");
+        assert.containsNone(target, ".o_wrap_field .cell1");
+        assert.containsOnce(target, ".o_wrap_field .cell2");
+
+        await editInput(target, "[name='foo'] input", 2);
+        assert.containsOnce(target, ".o_wrap_field");
+        assert.containsOnce(target, ".o_wrap_field .cell1");
+        assert.containsNone(target, ".o_wrap_field .cell2");
+
+        await editInput(target, "[name='foo'] input", 3);
+        assert.containsOnce(target, ".o_wrap_field");
+        assert.containsOnce(target, ".o_wrap_field .cell1");
+        assert.containsOnce(target, ".o_wrap_field .cell2");
+    });
+
     QUnit.test("form group with newline tag inside", async function (assert) {
         await makeView({
             type: "form",
@@ -8431,66 +8741,6 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_field_translate.btn-link");
         await click(target.querySelectorAll(".modal-footer button")[0]); // save
         assert.verifySteps(["create", "read", "get_installed", "get_field_translations"]);
-        assert.containsOnce(target, ".modal");
-        assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
-    });
-
-    QUnit.test("legacy field support translation dialog", async (assert) => {
-        serverData.models.partner.fields.foo.translate = true;
-
-        patchWithCleanup(legacyCore._t.database, {
-            multi_lang: true,
-            parameters: {
-                code: "CUST",
-            },
-        });
-
-        const myChar = LegacyFieldChar.extend({
-            async _render() {
-                // DIY because the compatibility layer doesn't support
-                // legacy widget having multiple nodes in their this.$el.
-                await this._super(...arguments);
-                const div = document.createElement("div");
-                const $div = $(div).append(this.$el);
-                this.setElement($div);
-            },
-        });
-
-        legacyFieldRegistry.add("legacy_char", myChar);
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            resId: 1,
-            arch: `
-                <form>
-                    <field name="foo" widget="legacy_char"/>
-                </form>`,
-            mockRPC(route, args) {
-                assert.step(args.method);
-                if (route === "/web/dataset/call_button") {
-                    return { context: {}, domain: [] };
-                }
-                if (args.method === "get_installed") {
-                    return [
-                        ["CUST", "custom lang"],
-                        ["CUST2", "second custom"],
-                    ];
-                }
-                if (route === "/web/dataset/call_kw/partner/get_field_translations") {
-                    return Promise.resolve([
-                        [
-                            { lang: "CUST", source: "yop", value: "yop" },
-                            { lang: "CUST2", source: "yop", value: "valeur français" },
-                        ],
-                        { translation_type: "char", translation_show_source: false },
-                    ]);
-                }
-            },
-        });
-        assert.verifySteps(["get_views", "read"]);
-        await click(target, ".o_field_legacy_char .o_field_translate.btn-link");
-        assert.verifySteps(["get_installed", "get_field_translations"]);
         assert.containsOnce(target, ".modal");
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
@@ -9040,14 +9290,14 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            assert.hasClass(target.querySelector('button[data-value="4"]'), "btn-primary");
+            assert.hasClass(target.querySelector('button[data-value="4"]'), "o_arrow_button_current");
             assert.hasClass(target.querySelector('button[data-value="4"]'), "disabled");
 
             failFlag = true;
             await click(target.querySelector('button[data-value="1"]'));
             assert.hasClass(
                 target.querySelector('button[data-value="4"]'),
-                "btn-primary",
+                "o_arrow_button_current",
                 "initial status should still be active as save failed"
             );
 
@@ -9055,7 +9305,7 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector('button[data-value="1"]'));
             assert.hasClass(
                 target.querySelector('button[data-value="1"]'),
-                "btn-primary",
+                "o_arrow_button_current",
                 "last clicked status should be active"
             );
 
@@ -11801,133 +12051,6 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps(["get_views", "read"]);
         }
     );
-
-    QUnit.test("legacy one2many view mode", async function (assert) {
-        serverData.models.partner.records[0].p = [1];
-        legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
-                    <form>
-                        <field name="p" mode="tree,kanban" widget="legacy_one2many">
-                            <form><field name="display_name"/></form>
-                            <tree><field name="foo"/></tree>
-                            <kanban>
-                                <field name="display_name"/>
-                                <templates>
-                                    <t t-name="kanban-box">
-                                        <div><t t-esc="record.display_name"/></div>
-                                    </t>
-                                </templates>
-                            </kanban>
-                        </field>
-                    </form>`,
-        });
-        assert.containsOnce(target, ".o_field_legacy_one2many .o_legacy_list_view");
-    });
-
-    QUnit.test("legacy one2many view mode in small env", async function (assert) {
-        serverData.models.partner.records[0].p = [1];
-        legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
-        const fakeUIService = {
-            start(env) {
-                const ui = { bus: new EventBus() };
-                Object.defineProperty(env, "isSmall", {
-                    get() {
-                        return true;
-                    },
-                });
-
-                return ui;
-            },
-        };
-        registry.category("services").add("ui", fakeUIService);
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
-                    <form>
-                        <field name="p" mode="tree,kanban" widget="legacy_one2many">
-                            <form><field name="display_name"/></form>
-                            <tree><field name="foo"/></tree>
-                            <kanban>
-                                <field name="display_name"/>
-                                <templates>
-                                    <t t-name="kanban-box">
-                                        <div><t t-esc="record.display_name"/></div>
-                                    </t>
-                                </templates>
-                            </kanban>
-                        </field>
-                    </form>`,
-        });
-        assert.containsOnce(target, ".o_field_legacy_one2many .o_legacy_kanban_view");
-    });
-
-    QUnit.test("legacy one2many view mode in small env (2)", async function (assert) {
-        serverData.models.partner.records[0].p = [1];
-        legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
-        const fakeUIService = {
-            start(env) {
-                const ui = { bus: new EventBus() };
-                Object.defineProperty(env, "isSmall", {
-                    get() {
-                        return true;
-                    },
-                });
-
-                return ui;
-            },
-        };
-        registry.category("services").add("ui", fakeUIService);
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
-                    <form>
-                        <field name="p" widget="legacy_one2many">
-                            <form><field name="display_name"/></form>
-                            <tree><field name="foo"/></tree>
-                            <kanban>
-                                <field name="display_name"/>
-                                <templates>
-                                    <t t-name="kanban-box">
-                                        <div><t t-esc="record.display_name"/></div>
-                                    </t>
-                                </templates>
-                            </kanban>
-                        </field>
-                    </form>`,
-        });
-        assert.containsOnce(target, ".o_field_legacy_one2many .o_legacy_kanban_view");
-    });
-
-    QUnit.test("legacy one2many with no inlive view", async function (assert) {
-        serverData.models.partner.records[0].p = [1];
-        serverData.views = {
-            "partner,false,list": `<tree><field name="foo"/></tree>`,
-        };
-        legacyFieldRegistry.add("legacy_one2many", FieldOne2Many);
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
-                    <form>
-                        <field name="p" mode="tree" class="o_my_legacy_class" widget="legacy_one2many"/>
-                    </form>`,
-        });
-        assert.containsOnce(target, ".o_field_legacy_one2many .o_legacy_list_view");
-        assert.containsOnce(target, ".o_field_widget.o_legacy_field_widget.o_my_legacy_class");
-    });
 
     QUnit.test("Action Button clicked with failing action", async function (assert) {
         const handler = (ev) => {

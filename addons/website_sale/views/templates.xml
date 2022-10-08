@@ -283,7 +283,7 @@
 
             <t t-set="hasLeftColumn" t-value="opt_wsale_categories or opt_wsale_attributes"/>
 
-            <t t-set="isFilteringByPrice" t-if="opt_wsale_filter_price" t-value="available_min_price != min_price or available_max_price != max_price"/>
+            <t t-set="isFilteringByPrice" t-if="opt_wsale_filter_price" t-value="float_round(available_min_price, 2) != float_round(min_price, 2) or float_round(available_max_price, 2) != float_round(max_price, 2)"/>
             <t t-set="hasPricelistDropdown" t-value="website_sale_pricelists and len(website_sale_pricelists)&gt;1"/>
             <t t-set="isSortingBy" t-value="[sort for sort in website_sale_sortable if sort[0]==request.params.get('order', '')]"/>
 
@@ -472,7 +472,9 @@
         <t t-set="_activeClasses">border-primary</t>
         <div t-attf-class="o_wsale_apply_layout btn-group ms-3 {{_classes}}" t-att-data-active-classes="_activeClasses">
             <input type="radio" class="btn-check" name="wsale_products_layout" id="o_wsale_apply_grid"  t-att-checked="'checked' if layout_mode != 'list' else None" value="grid"/>
-            <label t-attf-class="btn btn-{{navClass}} #{_activeClasses if layout_mode != 'list' else None} fa fa-th-large o_wsale_apply_grid" title="Grid" for="o_wsale_apply_grid"/>
+            <label t-attf-class="btn btn-{{navClass}} #{_activeClasses if layout_mode != 'list' else None} o_wsale_apply_grid" title="Grid" for="o_wsale_apply_grid">
+                <i class="fa fa-th-large"/>
+            </label>
             <input type="radio" class="btn-check" name="wsale_products_layout" id="o_wsale_apply_list" t-att-checked="'checked' if layout_mode == 'list' else None" value="list"/>
             <label t-attf-class="btn btn-{{navClass}} #{_activeClasses if layout_mode == 'list' else None} o_wsale_apply_list" title="List" for="o_wsale_apply_list">
                 <i class="oi oi-view-list"/>
@@ -496,10 +498,46 @@
                 </t>
             </div>
             <div id="o_wsale_offcanvas_content" class="accordion accordion-flush flex-grow-1 overflow-auto">
+                <div class="d-block d-lg-none accordion-item" t-if="hasPricelistDropdown">
+                    <h2 id="o_wsale_offcanvas_orderby_header" class="accordion-header mb-0">
+                        <button class="o_wsale_offcanvas_title accordion-button border-top rounded-0 collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#o_wsale_offcanvas_pricelist"
+                            aria-expanded="false"
+                            aria-controls="o_wsale_offcanvas_pricelist">
+                            <b>Pricelist</b>
+                        </button>
+                    </h2>
+                    <t t-set="curr_pl" t-value="website.pricelist_id"/>
+                    <div id="o_wsale_offcanvas_pricelist"
+                        class="accordion-collapse collapse"
+                        aria-labelledby="o_wsale_offcanvas_orderby_header">
+                        <div class="accordion-body pt-0">
+                            <div class="list-group list-group-flush">
+                                <a t-foreach="website_sale_pricelists" t-as="pl"
+                                    role="menuitem"
+                                    rel="noindex,nofollow"
+                                    t-att-href="'/shop/change_pricelist/%s' % pl.id"
+                                    class="list-group-item border-0 ps-0 pb-0"
+                                    >
+                                    <div class="form-check d-inline-block">
+                                        <input type="radio"
+                                            t-attf-onclick="location.href='/shop/change_pricelist/#{pl.id}';"
+                                            class="form-check-input o_not_editable"
+                                            name="wsale_pricelist_radios_offcanvas"
+                                            t-att-checked="curr_pl == pl">
+                                            <label class="form-check-label fw-normal" t-out="pl.name"/>
+                                        </input>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div t-if="is_view_active('website_sale.sort')" class="accordion-item">
                     <t t-if="isSortingBy" t-set="isSortingBy" t-value="isSortingBy[0][1]"/>
                     <t t-else="" t-set="isSortingBy" t-value="website.shop_default_sort"/>
-
                     <h2 id="o_wsale_offcanvas_orderby_header" class="accordion-header mb-0">
                         <button class="o_wsale_offcanvas_title accordion-button border-top rounded-0 collapsed"
                                 type="button"
@@ -522,6 +560,7 @@
                                    class="list-group-item border-0 ps-0 pb-0">
                                     <div class="form-check d-inline-block">
                                         <input type="radio"
+                                               t-attf-onclick="location.href='#{keep('/shop', order=sortby[0])}';"
                                                class="form-check-input o_not_editable"
                                                name="wsale_sortby_radios_offcanvas"
                                                t-att-checked="isSortingBy and isSortingBy == sortby[1]">
@@ -862,8 +901,10 @@
                                     <t t-set="_form_classes" t-valuef="mb-2 mb-lg-0"/>
                                     <t t-set="_classes" t-value="'me-sm-2'"/>
                                 </t>
+                                <t t-set="website_sale_pricelists" t-value="website.get_pricelist_available(show_visible=True)" />
+                                <t t-set="hasPricelistDropdown" t-value="website_sale_pricelists and len(website_sale_pricelists)&gt;1"/>
                                 <t t-call="website_sale.pricelist_list">
-                                    <t t-set="_classes" t-valuef="ms-2 float-end"/>
+                                    <t t-set="_classes" t-valuef="d-lg-inline ms-2"/>
                                 </t>
                             </div>
                         </div>

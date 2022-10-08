@@ -144,7 +144,7 @@ QUnit.module("Analytic", (hooks) => {
         const input = document.activeElement;
         await editInput(input, null, "19");
 
-        assert.containsOnce(planTable, '.o_analytic_status_orange', "Mandatory plan has incomplete status");
+        assert.containsOnce(planTable, '.o_analytic_status_editing', "Mandatory plan has incomplete status");
 
         let incompleteInputName = planTable.querySelector('tr.incomplete .o_analytic_account_name input');
         assert.strictEqual(document.activeElement, incompleteInputName,
@@ -153,8 +153,7 @@ QUnit.module("Analytic", (hooks) => {
 
         triggerHotkey("Escape");
         await nextTick();
-        assert.containsNone(target, '.analytic_distribution_popup', "The popup should be closed and invalid");
-        assert.containsOnce(target, "div .o_field_analytic_distribution.o_field_invalid", "Field should be invalid");
+        assert.containsNone(target, '.analytic_distribution_popup', "The popup should be closed");
 
         triggerHotkey("arrowdown"); //opens the popup again
         await nextTick();

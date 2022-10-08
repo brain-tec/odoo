@@ -343,6 +343,8 @@ class AccountReportLine(models.Model):
 
             if engine == 'domain' and report_line.domain_formula:
                 subformula, formula = DOMAIN_REGEX.match(report_line.domain_formula or '').groups()
+                # Resolve the calls to ref(), to mimic the fact those formulas are normally given with an eval="..." in XML
+                formula = re.sub(r'''\bref\((?P<quote>['"])(?P<xmlid>.+?)(?P=quote)\)''', lambda m: str(self.env.ref(m['xmlid']).id), formula)
             elif engine == 'account_codes' and report_line.account_codes_formula:
                 subformula, formula = None, report_line.account_codes_formula
             elif engine == 'aggregation' and report_line.aggregation_formula:
@@ -511,7 +513,7 @@ class AccountReportExpression(models.Model):
 
             expression_terms = re.split('[-+/*]', re.sub(r'[\s()]', '', expression.formula))
             for term in expression_terms:
-                if term: # term might be empty if the formula contains a negative term
+                if term and not re.match(r'^([0-9]*[.])?[0-9]*$', term): # term might be empty if the formula contains a negative term
                     line_code, total_name = term.split('.')
                     totals_by_code[line_code].add(total_name)
 
