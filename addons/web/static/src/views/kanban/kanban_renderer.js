@@ -45,7 +45,7 @@ export class KanbanRenderer extends Component {
             useSortable({
                 enable: () => this.canResequenceRecords,
                 // Params
-                ref: rootRef,
+                ref: this.props.layoutContentRef || rootRef,
                 elements: ".o_record_draggable",
                 ignore: ".dropdown",
                 groups: () => this.props.list.isGrouped && ".o_kanban_group",
@@ -157,7 +157,9 @@ export class KanbanRenderer extends Component {
         const { groupByField, fields } = this.props.list;
         const { modifiers, type } = groupByField;
         return Boolean(
-            !(modifiers && "readonly" in modifiers ? modifiers.readonly : fields[groupByField.name].readonly) &&
+            !(modifiers && "readonly" in modifiers
+                ? modifiers.readonly
+                : fields[groupByField.name].readonly) &&
                 (isAllowedDateField(groupByField) || MOVABLE_RECORD_TYPES.includes(type))
         );
     }
@@ -171,7 +173,9 @@ export class KanbanRenderer extends Component {
         const { groupsDraggable } = this.props.archInfo;
         return (
             groupsDraggable &&
-            !(modifiers && "readonly" in modifiers ? modifiers.readonly : fields[groupByField.name].readonly) &&
+            !(modifiers && "readonly" in modifiers
+                ? modifiers.readonly
+                : fields[groupByField.name].readonly) &&
             DRAGGABLE_GROUP_TYPES.includes(type)
         );
     }
@@ -606,6 +610,7 @@ KanbanRenderer.props = [
     "readonly",
     "forceGlobalClick?",
     "noContentHelp?",
+    "layoutContentRef?",
 ];
 KanbanRenderer.components = {
     Dropdown,

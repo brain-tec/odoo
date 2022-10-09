@@ -36,6 +36,7 @@ import { localization } from "@web/core/l10n/localization";
 import { SIZES } from "@web/core/ui/ui_service";
 import { errorService } from "@web/core/errors/error_service";
 import { RPCError } from "@web/core/network/rpc_service";
+import { WarningDialog } from "@web/core/errors/error_dialogs";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -9290,7 +9291,10 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            assert.hasClass(target.querySelector('button[data-value="4"]'), "o_arrow_button_current");
+            assert.hasClass(
+                target.querySelector('button[data-value="4"]'),
+                "o_arrow_button_current"
+            );
             assert.hasClass(target.querySelector('button[data-value="4"]'), "disabled");
 
             failFlag = true;
@@ -11103,32 +11107,6 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("reload a form view with a pie chart does not crash", async function (assert) {
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <widget name="pie_chart" title="qux by product" attrs="{'measure': 'qux', 'groupby': 'product_id'}"/>
-                </form>`,
-            resIds: [1, 2],
-            resId: 1,
-        });
-
-        assert.containsOnce(
-            target,
-            ".o_widget_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
-        );
-
-        await click(target.querySelector(".o_pager_next"));
-
-        assert.containsOnce(
-            target,
-            ".o_widget_pie_chart .o_graph_canvas_container .chartjs-render-monitor"
-        );
-    });
-
     QUnit.test("Auto save: save when page changed", async function (assert) {
         assert.expect(10);
 
@@ -11903,6 +11881,56 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_form_error_dialog");
     });
 
+    QUnit.test("no 'oh snap' error in form view in dialog", async (assert) => {
+        assert.expect(5);
+
+        registry.category("services").add("error", errorService);
+        registry.category("error_dialogs").add("odoo.exceptions.UserError", WarningDialog);
+        // remove the override in qunit.js that swallows unhandledrejection errors
+        // s.t. we let the error service handle them
+        const originalOnUnhandledRejection = window.onunhandledrejection;
+        window.onunhandledrejection = () => {};
+        registerCleanup(() => {
+            window.onunhandledrejection = originalOnUnhandledRejection;
+        });
+
+        serverData.views = {
+            "partner,false,form": `<form><field name="foo"/><footer><button type="object" name="some_method" class="myButton"/></footer></form>`,
+        };
+
+        const webClient = await createWebClient({
+            serverData,
+            mockRPC(route, { method }) {
+                if (method === "create") {
+                    assert.step("create");
+                    const error = new RPCError("Some business message");
+                    error.data = { context: {} };
+                    error.exceptionName = "odoo.exceptions.UserError";
+                    throw error;
+                }
+            },
+        });
+
+        await doAction(webClient, {
+            type: "ir.actions.act_window",
+            target: "new",
+            res_model: "partner",
+            view_mode: "form",
+            views: [[false, "form"]],
+        });
+
+        await editInput(target, ".o_field_widget[name='foo'] input", "test");
+        await click(target.querySelector(".modal  footer .myButton"));
+        assert.verifySteps(["create"]);
+        await nextTick();
+        assert.containsNone(target, ".o_form_error_dialog");
+        assert.containsN(target, ".modal", 2);
+        assert.strictEqual(
+            target.querySelectorAll(".modal .modal-body")[1].textContent,
+            "Some business message"
+        );
+    });
+
     QUnit.test('field "length" with value 0: can apply onchange', async function (assert) {
         serverData.models.partner.fields.length = { string: "Length", type: "float", default: 0 };
         serverData.models.partner.fields.foo.default = "foo default";
@@ -12318,12 +12346,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, ".o_form_status_indicator");
         assert.containsOnce(target, ".o_form_status_indicator_buttons");
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.containsN(target, ".o_form_status_indicator_buttons button", 2);
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
     });
 
     QUnit.test("status indicator: dirty state", async (assert) => {
@@ -12335,17 +12359,9 @@ QUnit.module("Views", (hooks) => {
             arch: `<form><field name="foo"/></form>`,
         });
 
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
     QUnit.test("status indicator: save dirty state", async (assert) => {
@@ -12359,17 +12375,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
         await clickSave(target);
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "dirty");
     });
 
@@ -12384,17 +12392,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
         await clickDiscard(target);
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
     });
 
@@ -12414,17 +12414,17 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(
             target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
+            ""
         );
         await editInput(target, ".o_field_widget input", "");
         assert.strictEqual(
             target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
+            ""
         );
         await clickSave(target);
         assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unable to saveSaveDiscard"
+            target.querySelector(".o_form_status_indicator").textContent.trim(),
+            "Unable to save"
         );
     });
 });
