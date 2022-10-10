@@ -1963,12 +1963,21 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.createWidget) {
             const selectedIds = currentValues.map(({ id }) => id)
                 .filter(id => typeof id === 'number');
-            const selectedIdsDomain = ['id', 'not in', selectedIds];
+            // Note: it's important to simplify the domain at its maximum as the
+            // rpc using it are cached. Similar domains should be written the
+            // same way for the cache to work.
+            const selectedIdsDomain = selectedIds.length ? ['id', 'not in', selectedIds] : null;
             const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain[0] === 'id' && domain[1] === 'not in');
             if (selectedIdsDomainIndex > -1) {
-                this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                } else {
+                    this.createWidget.options.domain.splice(selectedIdsDomainIndex, 1);
+                }
             } else {
-                this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                }
             }
             this.createWidget.setValue('');
             this.createWidget.inputEl.value = '';
@@ -2456,6 +2465,7 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const m2oRpcCache = {};
 const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_many2one',
     events: Object.assign({}, SelectUserValueWidget.prototype.events, {
@@ -2473,7 +2483,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     init(parent, title, options, $target) {
         this.afterSearch = [];
         this.displayNameCache = {};
-        this._rpcCache = {};
+        this._rpcCache = m2oRpcCache;
         const {dataAttributes} = options;
         Object.assign(options, {
             limit: '5',
@@ -7232,7 +7242,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
     _onDragBackgroundStart: function (ev) {
         ev.preventDefault();
         this.$bgDragger.addClass('o_we_grabbing');
-        const $document = $(document);
+        const $document = $(this.$target[0].ownerDocument);
         $document.on('mousemove.bgposition', this._onDragBackgroundMove.bind(this));
         $document.one('mouseup', () => {
             this.$bgDragger.removeClass('o_we_grabbing');
