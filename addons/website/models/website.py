@@ -20,7 +20,7 @@ from werkzeug.exceptions import NotFound
 from markupsafe import Markup
 
 from odoo import api, fields, models, tools, http, release, registry
-from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, _guess_mimetype, url_for
+from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, url_for
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website.tools import similarity_score, text_from_html
 from odoo.addons.portal.controllers.portal import pager
@@ -741,10 +741,6 @@ class Website(models.Model):
             result['menu_id'] = menu.id
         return result
 
-    @api.model
-    def guess_mimetype(self):
-        return _guess_mimetype()
-
     def get_unique_path(self, page_url):
         """ Given an url, return that url suffixed by counter if it already exists
             :param page_url : the url to be checked for uniqueness
@@ -802,7 +798,7 @@ class Website(models.Model):
         return key_copy
 
     @api.model
-    def page_search_dependencies(self, page_id=False):
+    def search_url_dependencies(self, res_model, res_ids):
         """ Search dependencies just for information. It will not catch 100%
             of dependencies and False positive is more than possible
             Each module could add dependences in this dict
@@ -810,109 +806,56 @@ class Website(models.Model):
                 view, and the value is the list of text and link to the resource using given page
         """
         dependencies = {}
-        if not page_id:
-            return dependencies
+        current_website = self.get_current_website()
+        page_model_name = 'Page'
 
-        page = self.env['website.page'].browse(int(page_id))
-        website = page.website_id or self.get_current_website()
-        url = page.url
+        def _handle_views_and_pages(views):
+            page_views = views.filtered('page_ids')
+            views = views - page_views
+            if page_views:
+                dependencies.setdefault(page_model_name, [])
+                dependencies[page_model_name] += [{
+                    'field_name': 'Content',
+                    'record_name': page.name,
+                    'link': page.url,
+                    'model_name': page_model_name,
+                } for page in page_views.page_ids]
+            return views
 
-        # search for website_page with link
-        website_page_search_dom = [('view_id.arch_db', 'ilike', url)] + website.website_domain()
-        pages = self.env['website.page'].search(website_page_search_dom)
-        page_key = _('Page')
-        if len(pages) > 1:
-            page_key = _('Pages')
-        page_view_ids = []
-        for page in pages:
-            dependencies.setdefault(page_key, [])
-            dependencies[page_key].append({
-                'content': Markup(_("Page <b>%s</b> contains a link to this page")) % page.url,
-                'item': page.name,
-                'link': page.url,
-            })
-            page_view_ids.append(page.view_id.id)
+        # Prepare what's needed to later generate the URL search domain for the
+        # given records
+        search_criteria = []
+        for record in self.env[res_model].browse([int(res_id) for res_id in res_ids]):
+            website = 'website_id' in record and record.website_id or current_website
+            url = 'website_url' in record and record.website_url or record.url
+            search_criteria.append((url, website.website_domain()))
 
-        # search for ir_ui_view (not from a website_page) with link
-        page_search_dom = [('arch_db', 'ilike', url), ('id', 'not in', page_view_ids)] + website.website_domain()
-        views = self.env['ir.ui.view'].search(page_search_dom)
-        view_key = _('Template')
-        if len(views) > 1:
-            view_key = _('Templates')
-        for view in views:
-            dependencies.setdefault(view_key, [])
-            dependencies[view_key].append({
-                'content': Markup(_('Template <b>%s (id:%s)</b> contains a link to this page')) % (view.key or view.name, view.id),
-                'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
-                'item': _('%s (id:%s)') % (view.key or view.name, view.id),
-            })
-        # search for menu with link
-        menu_search_dom = [('url', 'ilike', '%s' % url)] + website.website_domain()
+        # Search the URL in every relevant field
+        html_fields_attributes = self._get_html_fields_attributes() + [
+            ('website.menu', 'website_menu', 'url', False),
+        ]
+        for model, _table, column, _translate in html_fields_attributes:
+            Model = self.env[model]
+            # Generate the exact domain to search for the URL in this field
+            domains = []
+            for url, website_domain in search_criteria:
+                domains.append(AND([
+                    [(column, 'ilike', url)],
+                    website_domain if hasattr(Model, 'website_id') else [],
+                ]))
 
-        menus = self.env['website.menu'].search(menu_search_dom)
-        menu_key = _('Menu')
-        if len(menus) > 1:
-            menu_key = _('Menus')
-        for menu in menus:
-            dependencies.setdefault(menu_key, []).append({
-                'content': Markup(_('This page is in the menu <b>%s</b>')) % menu.name,
-                'link': '/web#id=%s&view_type=form&model=website.menu' % menu.id,
-                'item': menu.name,
-            })
-
-        return dependencies
-
-    @api.model
-    def page_search_key_dependencies(self, page_id=False):
-        """ Search dependencies just for information. It will not catch 100%
-            of dependencies and False positive is more than possible
-            Each module could add dependences in this dict
-            :returns a dictionnary where key is the 'categorie' of object related to the given
-                view, and the value is the list of text and link to the resource using given page
-        """
-        dependencies = {}
-        if not page_id:
-            return dependencies
-
-        page = self.env['website.page'].browse(int(page_id))
-        website = page.website_id or self.get_current_website()
-        key = page.key
-
-        # search for website_page with link
-        website_page_search_dom = [
-            ('view_id.arch_db', 'ilike', key),
-            ('id', '!=', page.id)
-        ] + website.website_domain()
-        pages = self.env['website.page'].search(website_page_search_dom)
-        page_key = _('Page')
-        if len(pages) > 1:
-            page_key = _('Pages')
-        page_view_ids = []
-        for p in pages:
-            dependencies.setdefault(page_key, [])
-            dependencies[page_key].append({
-                'content': Markup(_('Page <b>%s</b> is calling this file')) % p.url,
-                'item': p.name,
-                'link': p.url,
-            })
-            page_view_ids.append(p.view_id.id)
-
-        # search for ir_ui_view (not from a website_page) with link
-        page_search_dom = [
-            ('arch_db', 'ilike', key), ('id', 'not in', page_view_ids),
-            ('id', '!=', page.view_id.id),
-        ] + website.website_domain()
-        views = self.env['ir.ui.view'].search(page_search_dom)
-        view_key = _('Template')
-        if len(views) > 1:
-            view_key = _('Templates')
-        for view in views:
-            dependencies.setdefault(view_key, [])
-            dependencies[view_key].append({
-                'content': Markup(_('Template <b>%s (id:%s)</b> is calling this file')) % (view.key or view.name, view.id),
-                'item': _('%s (id:%s)') % (view.key or view.name, view.id),
-                'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
-            })
+            dependency_records = Model.search(OR(domains))
+            if model == 'ir.ui.view':
+                dependency_records = _handle_views_and_pages(dependency_records)
+            if dependency_records:
+                model_name = self.env['ir.model']._display_name_for([model])[0]['display_name']
+                dependencies.setdefault(model_name, [])
+                dependencies[model_name] += [{
+                    'field_name': Model.fields_get()[column]['string'],
+                    'record_name': rec.name,
+                    'link': 'website_url' in rec and rec.website_url or f'/web#id={rec.id}&view_type=form&model={model}',
+                    'model_name': model_name,
+                } for rec in dependency_records]
 
         return dependencies
 
@@ -1094,6 +1037,7 @@ class Website(models.Model):
             raise ValueError('No record found for unique ID %s. It may have been deleted.' % (view_id))
         return view
 
+    @api.model
     @tools.ormcache_context('key', keys=('website_id',))
     def is_view_active(self, key):
         """
@@ -1301,18 +1245,24 @@ class Website(models.Model):
             action_params["enable_editor"] = 1
         return "/web#" + urls.url_encode(action_params)
 
+    def get_client_action(self, url, mode_edit=False, website_id=False):
+        action = self.env["ir.actions.actions"]._for_xml_id("website.website_preview")
+        action['context'] = {
+            'params': {
+                'path': url,
+                'enable_editor': mode_edit,
+                'website_id': website_id,
+            }
+        }
+        return action
+
     def button_go_website(self, path='/', mode_edit=False):
         self._force()
         if mode_edit:
             # If the user gets on a translated page (e.g /fr) the editor will
             # never start. Forcing the default language fixes this issue.
             path = url_for(path, self.default_lang_id.url_code)
-            path = self.get_client_action_url(path, True)
-        return {
-            'type': 'ir.actions.act_url',
-            'url': path,
-            'target': 'self',
-        }
+        return self.get_client_action(path, mode_edit)
 
     def _get_canonical_url_localized(self, lang, canonical_params):
         """Returns the canonical URL for the current request with translatable
@@ -1382,10 +1332,15 @@ class Website(models.Model):
     def _get_cached(self, field):
         return self._get_cached_values()[field]
 
+    def _get_html_fields_attributes_blacklist(self):
+        return (
+            'mail.message', 'mail.activity', 'digest.tip',
+        )
+
     def _get_html_fields_attributes(self):
-        html_fields = [('ir_ui_view', 'arch_db', True)]
+        html_fields = [('ir.ui.view', 'ir_ui_view', 'arch_db', True)]
         cr = self.env.cr
-        cr.execute(r"""
+        cr.execute("""
             SELECT f.model,
                    f.name,
                    f.translate
@@ -1395,13 +1350,13 @@ class Website(models.Model):
              WHERE f.ttype = 'html'
                AND f.store = true
                AND m.transient = false
-               AND f.model NOT LIKE 'ir.actions%'
-               AND f.model != 'mail.message'
-        """)
+               AND f.model NOT LIKE 'ir.actions%%'
+               AND f.model NOT IN %s
+        """, ([self._get_html_fields_attributes_blacklist()]))
         for model, name, translate in cr.fetchall():
             table = self.env[model]._table
             if tools.table_exists(cr, table) and tools.column_exists(cr, table, name):
-                html_fields.append((table, name, translate))
+                html_fields.append((model, table, name, translate))
         return html_fields
 
     def _get_snippets_assets(self):
@@ -1449,7 +1404,7 @@ class Website(models.Model):
                 sql.SQL("->>'en_US'" if translate else ''),
                 sql.Placeholder('snippet_regex'),
                 sql.Identifier(table)
-            ) for table, column, translate in html_fields_attributes
+            ) for _model, table, column, translate in html_fields_attributes
         ), {'snippet_regex': f'<([^>]*data-snippet="{snippet_id}"[^>]*)>'})
         results = self.env.cr.fetchall()
         for r in results:

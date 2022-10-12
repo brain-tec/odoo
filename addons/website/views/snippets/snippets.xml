@@ -577,7 +577,7 @@
     <t t-set="only_bg_image_exclude" t-value="''"/>
 
     <t t-set="both_bg_color_image_selector" t-value="'section, .carousel-item, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .parallax'"/>
-    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map, .s_map, [data-snippet] :not(.oe_structure) > [data-snippet], .s_masonry_block, .s_masonry_block .s_col_no_resize'"/>
+    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_image_gallery .carousel-item, .s_google_map, .s_map, [data-snippet] :not(.oe_structure) > [data-snippet], .s_masonry_block .s_col_no_resize'"/>
 
     <t t-call="website.snippet_options_background_options">
         <t t-set="selector" t-value="both_bg_color_image_selector"/>
@@ -1615,13 +1615,13 @@
         </we-row>
     </div>
     <!-- Info page ('/website/info') -->
-    <div data-selector="main:has(.o_website_info)" data-page-options="true" data-no-check="true" string="Info Page">
+    <div data-selector="main:has(.o_website_info)" data-page-options="true" groups="website.group_website_designer" data-no-check="true" string="Info Page">
         <we-checkbox string="Odoo Information"
                         data-customize-website-views="website.show_website_info"
                         data-no-preview="true"
                         data-reload="/"/>
     </div>
-    <div data-selector="#wrapwrap > main" data-no-check="true" data-js="SwitchableViews">
+    <div data-js="SwitchableViews" data-selector="#wrapwrap > main" data-no-check="true" groups="website.group_website_designer">
             <!-- Options will be populated by JS -->
     </div>
 

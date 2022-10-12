@@ -28,7 +28,7 @@ class AccountReport(models.Model):
     name = fields.Char(string="Name", required=True, translate=True)
     line_ids = fields.One2many(string="Lines", comodel_name='account.report.line', inverse_name='report_id')
     column_ids = fields.One2many(string="Columns", comodel_name='account.report.column', inverse_name='report_id')
-    root_report_id = fields.Many2one(string="Root Report", comodel_name='account.report')
+    root_report_id = fields.Many2one(string="Root Report", comodel_name='account.report', help="The report this report is a variant of.")
     variant_report_ids = fields.One2many(string="Variants", comodel_name='account.report', inverse_name='root_report_id')
     chart_template_id = fields.Many2one(string="Chart of Accounts", comodel_name='account.chart.template')
     country_id = fields.Many2one(string="Country", comodel_name='res.country')
@@ -172,10 +172,16 @@ class AccountReport(models.Model):
             default = {}
         default['name'] = self._get_copied_name()
         copied_report = super().copy(default=default)
-        code_mapping = {}
         for line in self.line_ids.filtered(lambda x: not x.parent_id):
-            line._copy_hierarchy(code_mapping, report=self, copied_report=copied_report)
+            line._copy_hierarchy(copied_report)
+        for column in self.column_ids:
+            column.copy({'report_id': copied_report.id})
         return copied_report
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_no_variant(self):
+        if self.variant_report_ids:
+            raise UserError(_("You can't delete a report that has variants."))
 
     def _get_copied_name(self):
         '''Return a copied name of the account.report record by adding the suffix (copy) at the end
@@ -226,13 +232,13 @@ class AccountReportLine(models.Model):
     )
     parent_id = fields.Many2one(string="Parent Line", comodel_name='account.report.line', ondelete='set null')
     children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id')
-    groupby = fields.Char(string="Group By")
+    groupby = fields.Char(string="Group By", help="Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.")
     sequence = fields.Integer(string="Sequence")
-    code = fields.Char(string="Code")
-    foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked; the line won't be unfolded by default, and a folding button will be displayed")
+    code = fields.Char(string="Code", help="Unique identifier for this line.")
+    foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked, the line won't be unfolded by default, and a folding button will be displayed.")
     print_on_new_page = fields.Boolean('Print On New Page', help='When checked this line and everything after it will be printed on a new page.')
-    action_id = fields.Many2one(string="Action", comodel_name='ir.actions.actions')
-    hide_if_zero = fields.Boolean(string="Hide if Zero", help="This line and its children will be hidden when all of their columns are at 0.")
+    action_id = fields.Many2one(string="Action", comodel_name='ir.actions.actions', help="Setting this field will turn the line into a link, executing the action when clicked.")
+    hide_if_zero = fields.Boolean(string="Hide if Zero", help="This line and its children will be hidden when all of their columns are 0.")
     domain_formula = fields.Char(string="Domain Formula Shortcut", help="Internal field to shorten expression_ids creation for the domain engine", inverse='_inverse_domain_formula', store=False)
     account_codes_formula = fields.Char(string="Account Codes Formula Shortcut", help="Internal field to shorten expression_ids creation for the account_codes engine", inverse='_inverse_account_codes_formula', store=False)
     aggregation_formula = fields.Char(string="Aggregation Formula Shortcut", help="Internal field to shorten expression_ids creation for the aggregation engine", inverse='_inverse_aggregation_formula', store=False)
@@ -270,36 +276,31 @@ class AccountReportLine(models.Model):
                     expression.report_line_id.display_name,
                 ))
 
-    def _copy_hierarchy(self, code_mapping, report=None, copied_report=None, parent=None):
+    def _copy_hierarchy(self, copied_report, parent=None, code_mapping=None):
         ''' Copy the whole hierarchy from this line by copying each line children recursively and adapting the
         formulas with the new copied codes.
 
-        :param report: The financial report that triggered the duplicate.
         :param copied_report: The copy of the report.
         :param parent: The parent line in the hierarchy (a copy of the original parent line).
         :param code_mapping: A dictionary keeping track of mapping old_code -> new_code
         '''
         self.ensure_one()
 
-        # If the line points to the old report, replace with the new one.
-        # Otherwise, cut the link to another financial report.
-        report_id = None
-        if report and copied_report and self.report_id.id == report.id:
-            report_id = copied_report.id
-
         copied_line = self.copy({
-            'report_id': report_id,
+            'report_id': copied_report.id,
             'parent_id': parent and parent.id,
             'code': self.code and self._get_copied_code(),
         })
 
         # Keep track of old_code -> new_code in a mutable dict
+        if not code_mapping:
+            code_mapping = {}
         if self.code:
             code_mapping[self.code] = copied_line.code
 
         # Copy children
         for line in self.children_ids:
-            line._copy_hierarchy(parent=copied_line, code_mapping=code_mapping)
+            line._copy_hierarchy(copied_report, parent=copied_line, code_mapping=code_mapping)
 
         # Update aggregation expressions, so that they use the copied lines
         for expression in self.expression_ids:
@@ -403,7 +404,7 @@ class AccountReportExpression(models.Model):
     )
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES)
     green_on_positive = fields.Boolean(string="Is Growth Good when Positive", default=True)
-    blank_if_zero = fields.Boolean(string="Blank if Zero")
+    blank_if_zero = fields.Boolean(string="Blank if Zero", help="When checked, 0 values will not show when displaying this expression's value.")
     auditable = fields.Boolean(string="Auditable", store=True, readonly=False, compute='_compute_auditable')
 
     # Carryover fields
@@ -596,7 +597,7 @@ class AccountReportColumn(models.Model):
     report_id = fields.Many2one(string="Report", comodel_name='account.report')
     sortable = fields.Boolean(string="Sortable")
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES, default="monetary", required=True)
-    blank_if_zero = fields.Boolean(string="Blank if Zero", default=True)
+    blank_if_zero = fields.Boolean(string="Blank if Zero", default=True, help="When checked, 0 values will not show in this column.")
     custom_audit_action_id = fields.Many2one(string="Custom Audit Action", comodel_name="ir.actions.act_window")
 
 

@@ -2,7 +2,7 @@
 
 import { registerPatch } from '@mail/model/model_core';
 
-import {setCookie} from 'web.utils.cookies';
+import { deleteCookie, setCookie } from 'web.utils.cookies';
 
 registerPatch({
     name: 'PublicLivechatGlobal',
@@ -20,6 +20,28 @@ registerPatch({
         willStart() {
             if (this.isTestChatbot) {
                 /**
+                 * Override of the LivechatButton to create a testing environment for the chatbot script.
+                 *
+                 * The biggest difference here is that we don't have a 'im_livechat.channel' to work with.
+                 * The 'mail.channel' holding the conversation between the bot and the testing user has been created
+                 * by the 'chatbot/<model("chatbot.script"):chatbot>/test' endpoint.
+                 */
+                deleteCookie('im_livechat_session');
+                deleteCookie('im_livechat_auto_popup');
+                deleteCookie('im_livechat_history');
+                deleteCookie('im_livechat_previous_operator_pid');
+                this.update({
+                    rule: {
+                        'action': 'auto_popup',
+                        'auto_popup_timer': 0,
+                    },
+                });
+                this.chatbot.update({
+                    currentStep: {
+                        data: this.chatbot.lastWelcomeStep,
+                    },
+                });
+                /**
                  * Overridden to avoid calling the "init" endpoint as it
                  * requires a im_livechat.channel linked to work properly.
                  */
@@ -29,6 +51,13 @@ registerPatch({
                 setCookie('im_livechat_session', JSON.stringify(this.options.chat_request_session), 60 * 60, 'required');
             }
             return this._super();
+        },
+    },
+    fields: {
+        hasWebsiteLivechatFeature: {
+            compute() {
+                return true;
+            },
         },
     },
 });

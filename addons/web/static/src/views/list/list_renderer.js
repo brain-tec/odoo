@@ -571,7 +571,12 @@ export class ListRenderer extends Component {
             classNames.push("cursor-default");
         }
         const orderBy = this.props.list.orderBy;
-        if (orderBy.length && column.widget !== "handle" && orderBy[0].name === column.name) {
+        if (
+            orderBy.length &&
+            column.widget !== "handle" &&
+            orderBy[0].name === column.name &&
+            column.hasLabel
+        ) {
             classNames.push("table-active");
         }
         if (this.isNumericColumn(column)) {
@@ -672,6 +677,9 @@ export class ListRenderer extends Component {
             }
             if (record.isInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
+            }
+            if (record.isReadonly(column.name)) {
+                classNames.push("o_readonly_modifier");
             }
             if (this.canUseFormatter(column, record)) {
                 // generate field decorations classNames (only if field-specific decorations

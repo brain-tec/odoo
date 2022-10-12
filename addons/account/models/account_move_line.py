@@ -15,7 +15,7 @@ INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
 
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
-    _inherit = 'analytic.mixin'
+    _inherit = "analytic.mixin"
     _description = "Journal Item"
     _order = "date desc, move_name desc, sequence, id"
     _check_company_auto = True
@@ -352,6 +352,9 @@ class AccountMoveLine(models.Model):
         comodel_name='account.analytic.line', inverse_name='move_line_id',
         string='Analytic lines',
     )
+    analytic_distribution = fields.Json(
+        inverse="_inverse_analytic_distribution",
+    ) # add the inverse function used to trigger the creation/update of the analytic lines accordingly (field originally defined in the analytic mixin)
 
     # === Early Pay fields === #
     discount_date = fields.Date(
@@ -1071,10 +1074,10 @@ class AccountMoveLine(models.Model):
                 line.term_key = False
 
     @api.depends('account_id', 'partner_id', 'product_id')
-    def _compute_analytic_distribution_stored_char(self):
+    def _compute_analytic_distribution(self):
         for line in self:
             if line.display_type == 'product' or not line.move_id.is_invoice(include_receipts=True):
-                distribution = self.env['account.analytic.distribution.model']._get_distributionjson({
+                distribution = self.env['account.analytic.distribution.model']._get_distribution({
                     "product_id": line.product_id.id,
                     "product_categ_id": line.product_id.categ_id.id,
                     "partner_id": line.partner_id.id,
@@ -1082,8 +1085,7 @@ class AccountMoveLine(models.Model):
                     "account_prefix": line.account_id.code,
                     "company_id": line.company_id.id,
                 })
-                line.analytic_distribution_stored_char = distribution or line.analytic_distribution_stored_char
-            line._compute_analytic_distribution()
+                line.analytic_distribution = distribution or line.analytic_distribution
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -1125,7 +1127,6 @@ class AccountMoveLine(models.Model):
     @api.onchange('analytic_distribution')
     def _inverse_analytic_distribution(self):
         """ Unlink and recreate analytic_lines when modifying the distribution."""
-        super()._inverse_analytic_distribution()
         lines_to_modify = self.env['account.move.line'].browse([
             line.id for line in self if line.parent_state == "posted"
         ])
@@ -1138,21 +1139,6 @@ class AccountMoveLine(models.Model):
             line.account_id.tax_ids
             and not line.product_id.taxes_id.filtered(lambda tax: tax.company_id == line.company_id)
         ))
-
-    # -------------------------------------------------------------------------
-    # ONCHANGE METHODS
-    # -------------------------------------------------------------------------
-
-    @api.onchange('tax_ids')
-    def _onchange_quick_suggest_price_unit(self):
-        """When a new line is created, we suggest a price_unit according to the quick suggestions"""
-        for line in self:
-            if line.price_unit != 0 or not line.move_id.quick_edit_mode:
-                continue
-            suggestions = line.move_id._get_quick_edit_suggestions()
-            if suggestions:
-                line.price_unit = suggestions['price_unit']
-                line.tax_ids = suggestions['tax_ids']
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
@@ -1308,6 +1294,14 @@ class AccountMoveLine(models.Model):
         create_index(self._cr, 'account_move_line_partner_id_ref_idx', 'account_move_line', ["partner_id", "ref"])
         create_index(self._cr, 'account_move_line_date_name_id_idx', 'account_move_line', ["date desc", "move_name desc", "id"])
 
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        quick_encode_suggestion = self.env.context.get('quick_encoding_vals')
+        if quick_encode_suggestion:
+            defaults['account_id'] = quick_encode_suggestion['account_id']
+            defaults['price_unit'] = quick_encode_suggestion['price_unit']
+            defaults['tax_ids'] = [Command.set(quick_encode_suggestion['tax_ids'])]
+        return defaults
 
     def _sanitize_vals(self, vals):
         if 'debit' in vals or 'credit' in vals:
@@ -1387,12 +1381,6 @@ class AccountMoveLine(models.Model):
 
         lines.move_id._synchronize_business_models(['line_ids'])
         return lines
-
-    def new(self, values=None, origin=None, ref=None):
-        record = super().new(self._sanitize_vals(values), origin, ref)
-        if record.move_id.quick_edit_total_amount and record.move_id.quick_edit_mode:
-            record.move_id._check_total_amount(record.move_id.quick_edit_total_amount)
-        return record
 
     def write(self, vals):
         if not vals:
@@ -2357,7 +2345,7 @@ class AccountMoveLine(models.Model):
                 continue
             distribution_by_root_plan = {}
             for analytic_account_id, percentage in (line.analytic_distribution or {}).items():
-                root_plan = self.env['account.analytic.account'].browse(analytic_account_id).root_plan_id
+                root_plan = self.env['account.analytic.account'].browse(int(analytic_account_id)).root_plan_id
                 distribution_by_root_plan[root_plan.id] = distribution_by_root_plan.get(root_plan.id, 0) + percentage
 
             for plan_id in mandatory_plans_ids:
@@ -2378,7 +2366,6 @@ class AccountMoveLine(models.Model):
     def _prepare_analytic_lines(self):
         self.ensure_one()
         analytic_line_vals = []
-        self._compute_analytic_distribution()
         if self.analytic_distribution:
             # distribution_on_each_plan corresponds to the proportion that is distributed to each plan to be able to
             # give the real amount when we achieve a 100% distribution

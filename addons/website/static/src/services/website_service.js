@@ -32,7 +32,7 @@ export const websiteService = {
         let fullscreen;
         let pageDocument;
         let contentWindow;
-        let editedObjectPath;
+        let lastUrl;
         let websiteRootInstance;
         let Wysiwyg;
         let isRestrictedEditor;
@@ -114,7 +114,10 @@ export const websiteService = {
                     currentMetadata = {};
                 } else {
                     const { mainObject, seoObject, isPublished, canPublish, editableInBackend, translatable, viewXmlid } = document.documentElement.dataset;
-                    const contentMenuEl = document.querySelector('[data-content_menu_id]');
+                    const contentMenus = [...document.querySelectorAll('[data-content_menu_id]')].map(menu => [
+                        menu.dataset.menu_name,
+                        menu.dataset.content_menu_id,
+                    ]);
                     currentMetadata = {
                         path: document.location.href,
                         mainObject: unslugHtmlDataObject(mainObject),
@@ -124,7 +127,7 @@ export const websiteService = {
                         editableInBackend: editableInBackend === 'True',
                         title: document.title,
                         translatable: !!translatable,
-                        contentMenuId: contentMenuEl && contentMenuEl.dataset.content_menu_id,
+                        contentMenus,
                         // TODO: Find a better way to figure out if
                         // a page is editable or not. For now, we use
                         // the editable selector because it's the common
@@ -151,11 +154,11 @@ export const websiteService = {
                 websiteRootInstance = rootInstance;
                 context.isPublicRootReady = !!rootInstance;
             },
-            set editedObjectPath(path) {
-                editedObjectPath = path;
+            set lastUrl(url) {
+                lastUrl = url;
             },
-            get editedObjectPath() {
-                return editedObjectPath;
+            get lastUrl() {
+                return lastUrl;
             },
             get isRestrictedEditor() {
                 return isRestrictedEditor === true;

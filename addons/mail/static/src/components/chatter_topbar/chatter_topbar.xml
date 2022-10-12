@@ -4,7 +4,7 @@
     <t t-name="mail.ChatterTopbar" owl="1">
         <t t-if="chatterTopbar">
             <div class="o_ChatterTopbar justify-content-between d-flex" t-attf-class="{{ className }}" t-ref="root">
-                <div class="o_ChatterTopbar_actions flex-fill d-flex" t-attf-class="{{ chatterTopbar.chatter.composerView ? 'o-has-active-button' : 'border-white' }}">
+                <div class="o_ChatterTopbar_actions flex-fill d-flex border-transparent">
                     <div class="o_ChatterTopbar_controllers d-flex pe-2" t-if="chatterTopbar.chatter.threadView">
                         <button class="o_ChatterTopbar_button o_ChatterTopbar_buttonSendMessage btn text-nowrap me-2"
                             type="button"
@@ -32,14 +32,22 @@
                             Log note
                         </button>
                     </div>
-                    <div class="o_ChatterTopbar_tools position-relative d-flex flex-grow-1 border-start border-bottom ps-2">
+                    <div class="o_ChatterTopbar_tools position-relative d-flex flex-grow-1 border-bottom"
+                        t-att-class="{
+                            'border-start ps-2': chatterTopbar.chatter.hasActivities,
+                        }"
+                    >
                         <t t-if="chatterTopbar.chatter.hasActivities">
                             <button class="o_ChatterTopbar_button o_ChatterTopbar_buttonScheduleActivity btn btn-light text-nowrap" type="button" t-att-disabled="!chatterTopbar.chatter.hasWriteAccess" t-on-click="chatterTopbar.chatter.onClickScheduleActivity" data-hotkey="shift+a">
                                 <i class="fa fa-clock-o me-1"/>
                                 <span>Activities</span>
                             </button>
                         </t>
-                        <div class="flex-grow-1 border-start ms-2 pe-2"/>
+                        <div class="flex-grow-1 border-start pe-2"
+                            t-att-class="{
+                                'ms-2': chatterTopbar.chatter.hasActivities,
+                            }"
+                        />
                         <div class="o_ChatterTopbar_rightSection flex-grow-1 flex-shrink-0 justify-content-end d-flex">
                             <button t-if="chatterTopbar.chatter.thread.allAttachments.length === 0" class="o_ChatterTopbar_button o_ChatterTopbar_buttonAddAttachments btn btn-light btn-primary" type="button" t-att-disabled="!chatterTopbar.chatter.hasWriteAccess" t-on-click="chatterTopbar.chatter.onClickButtonAddAttachments" >
                                 <i class="fa fa-paperclip fa-lg me-1" role="img" aria-label="Attachments"/>

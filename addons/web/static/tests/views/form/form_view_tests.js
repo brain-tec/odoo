@@ -3756,6 +3756,81 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
+    QUnit.test("archive a record with intermediary action", async function (assert) {
+        // add active field on partner model to have archive option
+        serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
+
+        serverData.views = {
+            "product,false,search": `<search />`,
+            "product,false,form": `
+                <form>
+                    <field name="display_name" />
+                    <footer>
+                        <button type="object" name="do_archive" class="myButton" />
+                    </footer>
+                </form>`,
+            "partner,false,search": `<search />`,
+            "partner,false,form": '<form><field name="active"/><field name="foo"/></form>',
+        };
+
+        let readPartner = 0;
+        const webClient = await createWebClient({
+            serverData,
+            mockRPC(route, args) {
+                assert.step(`${args.method || route}${args.method ? ": " + args.model : ""}`);
+                if (args.method === "action_archive") {
+                    return {
+                        type: "ir.actions.act_window",
+                        res_model: "product",
+                        target: "new",
+                        views: [[false, "form"]],
+                    };
+                }
+                if (args.method === "do_archive") {
+                    return false;
+                }
+                if (args.method === "read" && args.model === "partner") {
+                    if (readPartner === 1) {
+                        return [
+                            {
+                                id: 1,
+                                active: "archived",
+                            },
+                        ];
+                    }
+                    readPartner++;
+                }
+            },
+        });
+
+        await doAction(webClient, {
+            type: "ir.actions.act_window",
+            res_model: "partner",
+            res_id: 1,
+            views: [[false, "form"]],
+        });
+
+        assert.strictEqual(target.querySelector("[name='active'] input").value, "true");
+        assert.verifySteps(["/web/webclient/load_menus", "get_views: partner", "read: partner"]);
+        await toggleActionMenu(target);
+        assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
+
+        await toggleMenuItem(target, "Archive");
+        assert.containsOnce(document.body, ".modal");
+        assert.verifySteps([]);
+        await click(document.body.querySelector(".modal-footer .btn-primary"));
+        assert.verifySteps(["action_archive: partner", "get_views: product", "onchange: product"]);
+        await click(target, ".modal footer .myButton");
+        assert.verifySteps([
+            "create: product",
+            "read: product",
+            "do_archive: product",
+            "read: partner",
+        ]);
+        assert.containsNone(target, ".modal");
+        assert.strictEqual(target.querySelector("[name='active'] input").value, "archived");
+    });
+
     QUnit.test("archive action with active field not in view", async function (assert) {
         // add active field on partner model, but do not put it in the view
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
@@ -11379,7 +11454,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
-        assert.expect(2);
+        assert.expect(4);
 
         await makeView({
             type: "form",
@@ -11394,6 +11469,7 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
             mockRPC(route, { args, method, model }) {
                 if (method === "write" && model === "partner") {
+                    assert.step("save"); // should be called
                     assert.deepEqual(args, [[1], { display_name: "test" }]);
                 }
             },
@@ -11405,11 +11481,16 @@ QUnit.module("Views", (hooks) => {
         );
 
         await editInput(target, '.o_field_widget[name="display_name"] input', "test");
-        window.dispatchEvent(new Event("beforeunload"));
+        const evnt = new Event("beforeunload");
+        evnt.preventDefault = () => assert.step("prevented");
+        window.dispatchEvent(evnt);
         await nextTick();
+        assert.verifySteps(["save"], "should not prevent unload");
     });
 
     QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
+        assert.expect(2);
+
         await makeView({
             type: "form",
             resModel: "partner",
@@ -11429,10 +11510,12 @@ QUnit.module("Views", (hooks) => {
         });
 
         await editInput(target, '.o_field_widget[name="display_name"] input', "");
-        window.dispatchEvent(new Event("beforeunload"));
+        const evnt = new Event("beforeunload");
+        evnt.preventDefault = () => assert.step("prevented");
+        window.dispatchEvent(evnt);
         await nextTick();
 
-        assert.verifySteps([], "should not save because of invalid field");
+        assert.verifySteps(["prevented"], "should not save because of invalid field");
     });
 
     QUnit.test("Auto save: save on closing tab/browser (not dirty)", async function (assert) {
