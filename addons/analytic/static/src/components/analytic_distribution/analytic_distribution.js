@@ -56,9 +56,9 @@ export class AnalyticDistribution extends Component {
         this.openTemplate = useOpenMany2XRecord({
             resModel: "account.analytic.distribution.model",
             activeActions: {
-                canCreate: true,
-                canCreateEdit: false,
-                canWrite: true,
+                create: true,
+                edit: false,
+                write: true,
             },
             isToMany: false,
             onRecordSaved: async (record) => {
@@ -106,7 +106,7 @@ export class AnalyticDistribution extends Component {
         this.focusToSelector();
     }
 
-    async formatData(nextProps) { 
+    async formatData(nextProps) {
         const data = nextProps.value;
         const analytic_account_ids = Object.keys(data).map((id) => parseInt(id));
         const records = analytic_account_ids.length ? await this.fetchAnalyticAccounts([["id", "in", analytic_account_ids]]) : [];
@@ -402,21 +402,10 @@ export class AnalyticDistribution extends Component {
         }
     }
 
-    validate() {
-        for (const group_id in this.list) {
-            if (this.groupStatus(group_id) === 'invalid') {
-                this.props.record.setInvalidField(this.props.name);
-                return false;
-            }
-        }
-        return true;
-    }
-
     async save() {
         const currentDistribution = this.listForJson;
         const dataToSave = currentDistribution;
         await this.props.update(dataToSave);
-        this.validate();
     }
 
     onSaveNew() {

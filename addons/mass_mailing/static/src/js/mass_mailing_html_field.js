@@ -5,7 +5,7 @@ import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { initializeDesignTabCss } from "mass_mailing.design_constants";
 import { toInline } from "web_editor.convertInline";
-import { loadBundle } from "@web/core/assets";
+import { loadBundle, loadJS } from "@web/core/assets";
 import { qweb } from 'web.core';
 import { useService } from "@web/core/utils/hooks";
 import { buildQuery } from "web.rpc";
@@ -16,7 +16,9 @@ import { MassMailingMobilePreviewDialog } from "./mass_mailing_mobile_preview";
 import { getRangePosition } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 
 const {
+    onWillStart,
     useEffect,
+    useSubEnv,
     onWillUpdateProps,
 } = owl;
 
@@ -24,9 +26,15 @@ export class MassMailingHtmlField extends HtmlField {
     setup() {
         super.setup();
 
+        useSubEnv({
+            onWysiwygReset: this._resetIframe.bind(this),
+        });
         this.action = useService('action');
         this.rpc = useService('rpc');
         this.dialog = useService('dialog');
+
+        // Load html2canvas for toInline.
+        onWillStart(() => loadJS('/web_editor/static/lib/html2canvas.js'));
 
         onWillUpdateProps(() => {
             if (this.props.record.data.mailing_model_id && this.wysiwyg) {
@@ -51,6 +59,7 @@ export class MassMailingHtmlField extends HtmlField {
             snippets: 'mass_mailing.email_designer_snippets',
             resizable: false,
             defaultDataForLinkTools: { isNewWindow: true },
+            toolbarTemplate: 'mass_mailing.web_editor_toolbar',
             ...this.props.wysiwygOptions,
         };
     }
@@ -120,13 +129,22 @@ export class MassMailingHtmlField extends HtmlField {
                 '/mass_mailing/static/src/snippets/s_rating/options.js',
             ],
         });
+
+        await this._resetIframe();
+    }
+
+    async _resetIframe() {
+        if (this._switchingTheme) {
+            return;
+        }
+        this.wysiwyg.$iframeBody.find('.o_mail_theme_selector_new').remove();
         await this._onSnippetsLoaded();
 
         // Data is removed on save but we need the mailing and its body to be
         // named so they are handled properly by the snippets menu.
         this.wysiwyg.$iframeBody.find('.o_layout').addBack().data('name', 'Mailing');
         // We don't want to drop snippets directly within the wysiwyg.
-        this.wysiwyg.$iframeBody.removeClass('o_editable');
+        this.wysiwyg.$iframeBody.find('.odoo-editor-editable').removeClass('o_editable');
 
         initializeDesignTabCss(this.wysiwyg.getEditable());
         this.wysiwyg.getEditable().find('img').attr('loading', '');
@@ -224,43 +242,47 @@ export class MassMailingHtmlField extends HtmlField {
             });
         });
 
-        if ($themes.length === 0) {
+        if (!this._themeParams) {
+            // Initialize theme parameters.
+            this._themeClassNames = "";
+            this._themeParams = _.map($themes, (theme) => {
+                const $theme = $(theme);
+                const name = $theme.data("name");
+                const classname = "o_" + name + "_theme";
+                this._themeClassNames += " " + classname;
+                const imagesInfo = _.defaults($theme.data("imagesInfo") || {}, {
+                    all: {}
+                });
+                for (const info of Object.values(imagesInfo)) {
+                    _.defaults(info, imagesInfo.all, {
+                        module: "mass_mailing",
+                        format: "jpg"
+                    });
+                }
+                return {
+                    name: name,
+                    title: $theme.attr("title") || "",
+                    className: classname || "",
+                    img: $theme.data("img") || "",
+                    template: $theme.html().trim(),
+                    nowrap: !!$theme.data('nowrap'),
+                    get_image_info: function (filename) {
+                        if (imagesInfo[filename]) {
+                            return imagesInfo[filename];
+                        }
+                        return imagesInfo.all;
+                    },
+                    layoutStyles: $theme.data('layout-styles'),
+                };
+            });
+            $themes.parent().remove();
+        }
+
+        if (!this._themeParams.length) {
             return;
         }
 
-        // Initialize theme parameters.
-        this._themeClassNames = "";
-        const themesParams = _.map($themes, (theme) => {
-            const $theme = $(theme);
-            const name = $theme.data("name");
-            const classname = "o_" + name + "_theme";
-            this._themeClassNames += " " + classname;
-            const imagesInfo = _.defaults($theme.data("imagesInfo") || {}, {
-                all: {}
-            });
-            for (const info of Object.values(imagesInfo)) {
-                _.defaults(info, imagesInfo.all, {
-                    module: "mass_mailing",
-                    format: "jpg"
-                });
-            }
-            return {
-                name: name,
-                title: $theme.attr("title") || "",
-                className: classname || "",
-                img: $theme.data("img") || "",
-                template: $theme.html().trim(),
-                nowrap: !!$theme.data('nowrap'),
-                get_image_info: function (filename) {
-                    if (imagesInfo[filename]) {
-                        return imagesInfo[filename];
-                    }
-                    return imagesInfo.all;
-                },
-                layoutStyles: $theme.data('layout-styles'),
-            };
-        });
-        $themes.parent().remove();
+        const themesParams = [...this._themeParams];
 
         // Create theme selection screen and check if it must be forced opened.
         // Reforce it opened if the last snippet is removed.
@@ -476,7 +498,7 @@ export class MassMailingHtmlField extends HtmlField {
      * @private
      * @param {Object} themeParams
      */
-    _switchThemes(themeParams) {
+    async _switchThemes(themeParams) {
         if (!themeParams || this.switchThemeLast === themeParams) {
             return;
         }
@@ -532,7 +554,9 @@ export class MassMailingHtmlField extends HtmlField {
         // The value of the field gets updated upon editor blur. If for any
         // reason, the selection was not in the editable before modifying
         // another field, ensure that the value is properly set.
-        return this.commitChanges();
+        this._switchingTheme = true;
+        await this.commitChanges();
+        this._switchingTheme = false;
     }
     async _getWysiwygClass() {
         return getWysiwygClass({moduleName: 'mass_mailing.wysiwyg'});
@@ -549,6 +573,7 @@ MassMailingHtmlField.props = {
     ...HtmlField.props,
     filterTemplates: { type: Boolean, optional: true },
     inlineField: { type: String, optional: true },
+    iframeHtmlClass: { type: String, optional: true },
 };
 
 MassMailingHtmlField.displayName = _lt("Email");
@@ -559,6 +584,7 @@ MassMailingHtmlField.extractProps = (...args) => {
         ...htmlProps,
         filterTemplates: attrs.options.filterTemplates,
         inlineField: attrs.options['inline-field'],
+        iframeHtmlClass: attrs['iframeHtmlClass'],
     };
 };
 

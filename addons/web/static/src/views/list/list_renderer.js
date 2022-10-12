@@ -190,7 +190,9 @@ export class ListRenderer extends Component {
     }
 
     add(params) {
-        this.props.onAdd(params);
+        if (this.canCreate) {
+            this.props.onAdd(params);
+        }
     }
 
     // The following code manipulates the DOM directly to avoid having to wait for a
@@ -314,6 +316,10 @@ export class ListRenderer extends Component {
         return columnWidths;
     }
 
+    get activeActions() {
+        return this.props.activeActions || {};
+    }
+
     get canResequenceRows() {
         if (!this.props.list.canResequence()) {
             return false;
@@ -339,10 +345,7 @@ export class ListRenderer extends Component {
         if (this.hasSelectors) {
             nbCols++;
         }
-        if (
-            (this.props.activeActions && this.props.activeActions.onDelete) ||
-            this.displayOptionalFields
-        ) {
+        if (this.activeActions.onDelete || this.displayOptionalFields) {
             nbCols++;
         }
         return nbCols;
@@ -670,6 +673,9 @@ export class ListRenderer extends Component {
             if (record.isInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
+            if (record.isReadonly(column.name)) {
+                classNames.push("o_readonly_modifier");
+            }
             if (this.canUseFormatter(column, record)) {
                 // generate field decorations classNames (only if field-specific decorations
                 // have been defined in an attribute, e.g. decoration-danger="other_field = 5")
@@ -739,6 +745,14 @@ export class ListRenderer extends Component {
         }
     }
 
+    get canCreate() {
+        return "link" in this.activeActions ? this.activeActions.link : this.activeActions.create;
+    }
+
+    get isX2Many() {
+        return this.activeActions.type !== "view";
+    }
+
     get getEmptyRowIds() {
         let nbEmptyRow = Math.max(0, 4 - this.props.list.records.length);
         if (nbEmptyRow > 0 && this.displayRowCreates) {
@@ -748,11 +762,7 @@ export class ListRenderer extends Component {
     }
 
     get displayRowCreates() {
-        const activeActions = this.props.activeActions;
-        return (
-            activeActions &&
-            ("canLink" in activeActions ? activeActions.canLink : activeActions.canCreate)
-        );
+        return this.isX2Many && this.canCreate;
     }
 
     // Group headers logic:
@@ -788,19 +798,24 @@ export class ListRenderer extends Component {
             colspan = firstAggregateIndex;
         } else {
             colspan = Math.max(1, this.state.columns.length - DEFAULT_GROUP_PAGER_COLSPAN);
+            if (this.displayOptionalFields) {
+                colspan++;
+            }
         }
         if (this.hasSelectors) {
             colspan++;
         }
-        if (this.displayOptionalFields) {
-            colspan++;
-        }
         return colspan;
     }
+
     getGroupPagerCellColspan(group) {
         const lastAggregateIndex = this.getLastAggregateIndex(group);
         if (lastAggregateIndex > -1) {
-            return this.state.columns.length - lastAggregateIndex - 1;
+            let colspan = this.state.columns.length - lastAggregateIndex - 1;
+            if (this.displayOptionalFields) {
+                colspan++;
+            }
+            return colspan;
         } else {
             return this.state.columns.length > 1 ? DEFAULT_GROUP_PAGER_COLSPAN : 0;
         }
@@ -891,7 +906,9 @@ export class ListRenderer extends Component {
                 return;
             }
         }
-        this.props.activeActions.onDelete(record);
+        if (this.activeActions.onDelete) {
+            this.activeActions.onDelete(record);
+        }
     }
 
     /**
@@ -1100,8 +1117,8 @@ export class ListRenderer extends Component {
         return false;
     }
 
-    applyCellKeydownEditModeGroup(hotkey, cell, group, record) {
-        const { activeActions, editable } = this.props;
+    applyCellKeydownEditModeGroup(hotkey, _cell, group, record) {
+        const { editable } = this.props;
         const groupIndex = group.list.records.indexOf(record);
         const isLastOfGroup = groupIndex === group.list.records.length - 1;
         const isDirty = record.isDirty || this.lastIsDirty;
@@ -1112,7 +1129,7 @@ export class ListRenderer extends Component {
         }
         if (
             isLastOfGroup &&
-            activeActions.create &&
+            this.canCreate &&
             editable === "bottom" &&
             record.checkValidity() &&
             (isEnterBehavior || isTabBehavior)
@@ -1155,7 +1172,7 @@ export class ListRenderer extends Component {
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownEditMode(hotkey, cell, group, record) {
-        const { activeActions, cycleOnTab, list } = this.props;
+        const { cycleOnTab, list } = this.props;
         const row = cell.parentElement;
         const applyMultiEditBehavior = record && record.selected && list.model.multiEdit;
         const topReCreate = this.props.editable === "top" && record.isNew;
@@ -1191,7 +1208,7 @@ export class ListRenderer extends Component {
                             this.add({ context });
                         }
                     } else if (
-                        activeActions.create &&
+                        this.canCreate &&
                         !record.canBeAbandoned &&
                         (record.isDirty || this.lastIsDirty)
                     ) {
@@ -1250,10 +1267,8 @@ export class ListRenderer extends Component {
                     futureRecord = null;
                 }
 
-                if (!futureRecord) {
-                    if (activeActions && activeActions.create === false) {
-                        futureRecord = list.records[0];
-                    }
+                if (!futureRecord && !this.canCreate) {
+                    futureRecord = list.records[0];
                 }
 
                 if (futureRecord) {

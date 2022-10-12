@@ -94,7 +94,7 @@
                         context="props.context"
                         getDomain.bind="() => propertyDomain"
                         quickCreate.bind="onQuickCreate"
-                        activeActions="{canCreate: true, canCreateEdit: true, canWrite: true}"
+                        activeActions="{ create: true, createEdit: true, write: true }"
                     />
                     <button
                         t-if="!props.readonly &amp;&amp; propertyValue &amp;&amp; propertyValue[0] &amp;&amp; hasAccess"
@@ -102,8 +102,8 @@
                         class="btn btn-secondary fa fa-arrow-right o_external_button o_properties_external_button py-0"
                         tabindex="-1"
                         draggable="false"
-                        aria-label="External link"
-                        data-tooltip="External link"
+                        aria-label="Internal link"
+                        data-tooltip="Internal link"
                         t-on-click="onExternalLinkClick"
                     />
                 </t>
@@ -123,7 +123,7 @@
                         context="props.context"
                         getDomain.bind="() => propertyDomain"
                         quickCreate.bind="onQuickCreate"
-                        activeActions="{canCreate: true, canCreateEdit: true, canWrite: true}"
+                        activeActions="{ create: true, createEdit: true, write: true }"
                         isToMany="true"
                     />
                 </div>

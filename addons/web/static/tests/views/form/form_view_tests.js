@@ -11470,7 +11470,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
-        assert.expect(2);
+        assert.expect(4);
 
         await makeView({
             type: "form",
@@ -11485,6 +11485,7 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
             mockRPC(route, { args, method, model }) {
                 if (method === "write" && model === "partner") {
+                    assert.step("save"); // should be called
                     assert.deepEqual(args, [[1], { display_name: "test" }]);
                 }
             },
@@ -11496,11 +11497,16 @@ QUnit.module("Views", (hooks) => {
         );
 
         await editInput(target, '.o_field_widget[name="display_name"] input', "test");
-        window.dispatchEvent(new Event("beforeunload"));
+        const evnt = new Event("beforeunload");
+        evnt.preventDefault = () => assert.step("prevented");
+        window.dispatchEvent(evnt);
         await nextTick();
+        assert.verifySteps(["save"], "should not prevent unload");
     });
 
     QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
+        assert.expect(2);
+
         await makeView({
             type: "form",
             resModel: "partner",
@@ -11520,10 +11526,12 @@ QUnit.module("Views", (hooks) => {
         });
 
         await editInput(target, '.o_field_widget[name="display_name"] input', "");
-        window.dispatchEvent(new Event("beforeunload"));
+        const evnt = new Event("beforeunload");
+        evnt.preventDefault = () => assert.step("prevented");
+        window.dispatchEvent(evnt);
         await nextTick();
 
-        assert.verifySteps([], "should not save because of invalid field");
+        assert.verifySteps(["prevented"], "should not save because of invalid field");
     });
 
     QUnit.test("Auto save: save on closing tab/browser (not dirty)", async function (assert) {
@@ -12564,12 +12572,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, ".o_form_status_indicator");
         assert.containsOnce(target, ".o_form_status_indicator_buttons");
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.containsN(target, ".o_form_status_indicator_buttons button", 2);
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
     });
 
     QUnit.test("status indicator: dirty state", async (assert) => {
@@ -12581,17 +12585,9 @@ QUnit.module("Views", (hooks) => {
             arch: `<form><field name="foo"/></form>`,
         });
 
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
     QUnit.test("status indicator: save dirty state", async (assert) => {
@@ -12605,17 +12601,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
         await clickSave(target);
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "dirty");
     });
 
@@ -12630,17 +12618,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
         await editInput(target, ".o_field_widget input", "dirty");
-        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
+        assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
         await clickDiscard(target);
-        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
+        assert.containsOnce(target, ".o_form_status_indicator_buttons.invisible");
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
     });
 
@@ -12658,19 +12638,13 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "SaveDiscard"
-        );
+        assert.strictEqual(target.querySelector(".o_form_status_indicator").textContent, "");
         await editInput(target, ".o_field_widget input", "");
-        assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unsaved changesSaveDiscard"
-        );
+        assert.strictEqual(target.querySelector(".o_form_status_indicator").textContent, "");
         await clickSave(target);
         assert.strictEqual(
-            target.querySelector(".o_form_status_indicator").textContent,
-            "Unable to saveSaveDiscard"
+            target.querySelector(".o_form_status_indicator").textContent.trim(),
+            "Unable to save"
         );
     });
 });

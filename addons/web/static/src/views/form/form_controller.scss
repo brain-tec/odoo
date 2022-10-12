@@ -130,9 +130,6 @@
     }
 
     .o_row > div > .o_field_widget,
-    &.o_form_editable .oe_title .o_field_char {
-        width: 100%;
-    }
 
     // Readonly specific rules
     .o_form_readonly {
@@ -153,21 +150,14 @@
 
     .o_form_uri {
         display: inline-block;
-        color: $link-color;
-        &:hover {
-            color: darken($link-color, 15%);
-        }
+        @include o-hover-text-color($link-color, $link-hover-color);
+
         > span {
-            color: $o-main-text-color;
-            &:hover {
-                color: $o-main-text-color;
-            }
+            @include o-hover-text-color($o-main-text-color, $o-main-text-color);
         }
+
         > span:first-child {
-            color: $link-color;
-            &:hover {
-                color: darken($link-color, 15%);
-            }
+            @include o-hover-text-color($link-color, $link-hover-color);
         }
     }
 
@@ -179,6 +169,10 @@
 
         .oe_title {
             max-width: 75%;
+
+            .o_field_char {
+                width: 100%;
+            }
         }
 
         .o_field_x2many .o_list_table .o_handle_cell .o_row_handle {
@@ -206,6 +200,33 @@
         flex-flow: column nowrap;
         height: 100%;
         flex: 1 1 auto;
+    }
+
+    // rules for fields borders: only on hover/focus by default
+    // except when used with o_field_highlight (on parent or on the field)
+    .o_input {
+        border-color: transparent;
+        padding: $o-input-padding-y $o-input-padding-x;
+
+        &:hover, &:focus {
+            border-color: var(--o-input-border-color);
+        }
+    }
+
+    &.o_field_invalid .o_input {
+        border-color: var(--o-input-border-color);
+    }
+
+    .o_datepicker {
+        .o_datepicker_button {
+            visibility: hidden;
+        }
+
+        &:hover, &:focus-within {
+            .o_datepicker_button {
+                visibility: visible;
+            }
+        }
     }
 
     // No sheet
@@ -337,7 +358,7 @@
 
         &:hover, &:focus, &:active {
             &:after {
-                border-left-color: map-get($grays, '100');
+                border-left-color: $o-btn-light-background-hover;
             }
         }
     }
@@ -502,6 +523,9 @@
 
                 > .o_field_html > .note-editable {
                     min-height: 180px;
+                    &:hover, &:focus {
+                        border-color: transparent;
+                    }
                 }
                 > :first-child {
                     // Reset margin to 0 and use tab-pane's padding
@@ -577,8 +601,8 @@
             font-size: $o-font-size-base-touch;
         }
 
-        &.o_form_label_empty, &.o_form_label_false {
-            opacity: 0.5;
+        &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
+            opacity: 0.66;
             font-weight: $font-weight-normal;
         }
     }
@@ -600,7 +624,7 @@
                     box-shadow: inset 0 1px 0 $border-color;
                     > td {
                         border:none;
-    
+
                         &:empty {
                             padding: 0;
                         }
@@ -845,7 +869,7 @@
             table-layout: fixed;
             display: table;
             td {
-                border: 1px solid #dee2e6;
+                border: 1px solid $table-border-color;
             }
             th, td {
                 padding: 0.75rem 0 0.75rem 0;
@@ -1001,6 +1025,8 @@
 // Overridden style when form view in modal
 .modal .modal-dialog {
     .o_form_view {
+        min-height: auto;
+
         .o_statusbar_buttons > .btn {
             /**
              * Override to prevent the status bar from increasing height when
@@ -1086,9 +1112,12 @@
 .o_form_view.o_xxl_form_view {
     flex-flow: row nowrap !important;
 
+    .o_form_view_container {
+        width: $o-form-sheet-min-width + 2 * $o-horizontal-padding;
+    }
+
     .o_form_sheet_bg {
         flex: 1 1 auto; // Side chatter is disabled if this has to shrink but this was added for safety
-        // max-width: map-get($container-max-widths, xl) + 2 * $o-horizontal-padding; // would be logical but breaks no-chatter form views
         padding: 0 $o-horizontal-padding;
         overflow: auto;
         border-bottom: none;

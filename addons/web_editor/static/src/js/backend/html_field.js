@@ -21,6 +21,7 @@ import {
     getRangePosition
 } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { toInline } from 'web_editor.convertInline';
+import { loadJS } from '@web/core/assets';
 const {
     markup,
     Component,
@@ -58,6 +59,7 @@ export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
             this.widget.resetEditor(newValue, {
                 collaborationChannel: newCollaborationChannel,
             });
+            this.env.onWysiwygReset && this.env.onWysiwygReset();
         }
     }
     renderWidget() {}
@@ -93,12 +95,16 @@ export class HtmlField extends Component {
                 this.cssReadonlyAsset = await ajax.loadAsset(this.props.cssReadonlyAssetId);
             }
             if (this.props.cssEditAssetId || this.props.isInlineStyle) {
+                await loadJS('/web_editor/static/lib/html2canvas.js');
                 this.cssEditAsset = await ajax.loadAsset(this.props.cssEditAssetId || 'web_editor.assets_edit_html_field');
             }
         });
         onWillUpdateProps((newProps) => {
             if (!newProps.readonly && this.state.iframeVisible) {
                 this.state.iframeVisible = false;
+            }
+            if (!this._selfUpdating) {
+                this.currentEditingValue = undefined;
             }
         });
         useEffect(() => {
@@ -252,7 +258,7 @@ export class HtmlField extends Component {
             }
         }
     }
-    updateValue() {
+    async updateValue() {
         const value = this.getEditingValue();
         const lastValue = (this.props.value || "").toString();
         if (value !== null && !(!lastValue && value === "<p><br></p>") && value !== lastValue) {
@@ -260,7 +266,9 @@ export class HtmlField extends Component {
                 this.props.setDirty(true);
             }
             this.currentEditingValue = value;
-            return this.props.update(value);
+            this._selfUpdating = true;
+            await this.props.update(value);
+            this._selfUpdating = false;
         }
     }
     async startWysiwyg(wysiwyg) {
@@ -496,7 +504,8 @@ export class HtmlField extends Component {
         return getWysiwygClass();
     }
     _onAttachmentChange(attachment) {
-        if (!this.props.record.fieldNames.includes('attachment_ids')) {
+        // This only needs to happen for the composer for now
+        if (!(this.props.record.fieldNames.includes('attachment_ids') && this.props.record.resModel === 'mail.compose.message')) {
             return;
         }
         this.props.record.update(_.object(['attachment_ids'], [{
@@ -602,6 +611,7 @@ HtmlField.extractProps = ({ attrs, field }) => {
             noAttachment: attrs.options['no-attachment'],
             inIframe: Boolean(attrs.options.cssEdit),
             iframeCssAssets: attrs.options.cssEdit,
+            iframeHtmlClass: attrs.iframeHtmlClass,
             snippets: attrs.options.snippets,
             allowCommandVideo: Boolean(attrs.options.allowCommandVideo) && (!field.sanitize || !field.sanitize_tags),
             mediaModalParams: {

@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import frozendict, formatLang, format_date, float_is_zero
+from odoo.tools import frozendict, formatLang, format_date, float_is_zero, float_compare
 from odoo.tools.sql import create_index
 from odoo.addons.web.controllers.utils import clean_action
 
@@ -1140,21 +1140,6 @@ class AccountMoveLine(models.Model):
         ))
 
     # -------------------------------------------------------------------------
-    # ONCHANGE METHODS
-    # -------------------------------------------------------------------------
-
-    @api.onchange('tax_ids')
-    def _onchange_quick_suggest_price_unit(self):
-        """When a new line is created, we suggest a price_unit according to the quick suggestions"""
-        for line in self:
-            if line.price_unit != 0 or not line.move_id.quick_edit_mode:
-                continue
-            suggestions = line.move_id._get_quick_edit_suggestions()
-            if suggestions:
-                line.price_unit = suggestions['price_unit']
-                line.tax_ids = suggestions['tax_ids']
-
-    # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
@@ -1308,6 +1293,14 @@ class AccountMoveLine(models.Model):
         create_index(self._cr, 'account_move_line_partner_id_ref_idx', 'account_move_line', ["partner_id", "ref"])
         create_index(self._cr, 'account_move_line_date_name_id_idx', 'account_move_line', ["date desc", "move_name desc", "id"])
 
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        quick_encode_suggestion = self.env.context.get('quick_encoding_vals')
+        if quick_encode_suggestion:
+            defaults['account_id'] = quick_encode_suggestion['account_id']
+            defaults['price_unit'] = quick_encode_suggestion['price_unit']
+            defaults['tax_ids'] = [Command.set(quick_encode_suggestion['tax_ids'])]
+        return defaults
 
     def _sanitize_vals(self, vals):
         if 'debit' in vals or 'credit' in vals:
@@ -1387,12 +1380,6 @@ class AccountMoveLine(models.Model):
 
         lines.move_id._synchronize_business_models(['line_ids'])
         return lines
-
-    def new(self, values=None, origin=None, ref=None):
-        record = super().new(self._sanitize_vals(values), origin, ref)
-        if record.move_id.quick_edit_total_amount and record.move_id.quick_edit_mode:
-            record.move_id._check_total_amount(record.move_id.quick_edit_total_amount)
-        return record
 
     def write(self, vals):
         if not vals:
@@ -2344,9 +2331,31 @@ class AccountMoveLine(models.Model):
     # ANALYTIC
     # -------------------------------------------------------------------------
 
+    def _validate_distribution(self):
+        for line in self.filtered(lambda line: line.display_type == 'product'):
+            mandatory_plans_ids = [plan['id'] for plan in self.env['account.analytic.plan'].sudo().get_relevant_plans(**{
+                        'product': line.product_id.id,
+                        'account': line.account_id.id,
+                        'business_domain': line.move_id.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice'
+                                           or line.move_id.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill'
+                                           or 'general'
+                        }) if plan['applicability'] == 'mandatory']
+            if not mandatory_plans_ids:
+                continue
+            distribution_by_root_plan = {}
+            for analytic_account_id, percentage in (line.analytic_distribution or {}).items():
+                root_plan = self.env['account.analytic.account'].browse(analytic_account_id).root_plan_id
+                distribution_by_root_plan[root_plan.id] = distribution_by_root_plan.get(root_plan.id, 0) + percentage
+
+            for plan_id in mandatory_plans_ids:
+                if float_compare(distribution_by_root_plan.get(plan_id, 0), 100, precision_digits=2) != 0:
+                    raise ValidationError(_("One or more lines require a 100% analytic distribution."))
+
     def _create_analytic_lines(self):
         """ Create analytic items upon validation of an account.move.line having an analytic distribution.
         """
+        if self.env.context.get('validate_analytic', False):
+            self._validate_distribution()
         analytic_line_vals = []
         for line in self:
             analytic_line_vals.extend(line._prepare_analytic_lines())

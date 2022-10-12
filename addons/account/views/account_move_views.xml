@@ -184,7 +184,6 @@
                     <field name="tax_line_id" string="Originator Tax" optional="hide" readonly="1"/>
                     <field name="date_maturity" readonly="1" optional="hide"/>
                     <field name="balance" sum="Total Balance" optional="hide" readonly="1"/>
-                    <field name="cumulated_balance" readonly="1" optional="hide"/>
                     <field name="matching_number" readonly="1" optional="show"/>
                     <field name="amount_residual" sum="Total Residual" string="Residual" readonly="1" optional="hide" attrs="{'invisible':[('is_account_reconcile', '=', False)]}"/>
                     <field name="amount_residual_currency" sum="Total Residual in Currency" string="Residual in Currency" readonly="1" optional="hide" attrs="{'invisible':['|', ('is_same_currency', '=', True), ('is_account_reconcile', '=', False)]}"/>
@@ -248,7 +247,6 @@
             <field name="arch" type="xml">
                 <field name="account_id" position="attributes"><attribute name="optional">hide</attribute></field>
                 <field name="balance" position="attributes"><attribute name="optional">show</attribute></field>
-                <field name="cumulated_balance" position="attributes"><attribute name="optional">show</attribute></field>
             </field>
         </record>
 
@@ -262,7 +260,6 @@
                 <field name="partner_id" position="attributes"><attribute name="optional">hide</attribute></field>
                 <field name="date_maturity" position="attributes"><attribute name="optional">show</attribute></field>
                 <field name="balance" position="attributes"><attribute name="optional">show</attribute></field>
-                <field name="cumulated_balance" position="attributes"><attribute name="optional">show</attribute></field>
             </field>
         </record>
 
@@ -570,9 +567,11 @@
                         <!-- Post -->
                         <button name="action_post" string="Post" class="oe_highlight"
                                 type="object" groups="account.group_account_invoice" data-hotkey="v"
+                                context="{'validate_analytic': True}"
                                 attrs="{'invisible': ['|', ('hide_post_button', '=', True), ('move_type', '!=', 'entry')]}"/>
                         <button name="action_post" string="Confirm" class="oe_highlight"
                                 type="object" groups="account.group_account_invoice" data-hotkey="v"
+                                context="{'validate_analytic': True}"
                                 attrs="{'invisible': ['|', '|', ('hide_post_button', '=', True), ('move_type', '=', 'entry'), ('display_inactive_currency_warning','=',True)]}"/>
                         <!-- Send (only invoices) -->
                         <button name="action_invoice_sent"
@@ -743,6 +742,7 @@
                         <field name="quick_edit_mode" invisible="1"/>
                         <field name="hide_post_button" invisible="1"/>
                         <field name="duplicated_ref_ids" invisible="1"/>
+                        <field name="quick_encoding_vals" invisible="1"/>
 
                         <div class="oe_title">
                             <span class="o_form_label"><field name="move_type" attrs="{'invisible': [('move_type', '=', 'entry')]}" readonly="1" nolabel="1"/></span>
@@ -860,6 +860,7 @@
                                            'default_partner_id': commercial_partner_id,
                                            'default_currency_id': currency_id or company_currency_id,
                                            'default_display_type': 'product',
+                                           'quick_encoding_vals': quick_encoding_vals,
                                        }">
                                     <tree editable="bottom" string="Journal Items" default_order="sequence, id">
                                         <control>
@@ -889,7 +890,7 @@
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
                                         <field name="quantity" optional="show"/>
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
@@ -1060,7 +1061,7 @@
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
