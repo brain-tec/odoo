@@ -2151,6 +2151,9 @@ class AccountMove(models.Model):
         if copied_am.is_invoice(include_receipts=True):
             # Make sure to recompute payment terms. This could be necessary if the date is different for example.
             # Also, this is necessary when creating a credit note because the current invoice is copied.
+            if copied_am.currency_id != self.company_id.currency_id:
+                copied_am.with_context(check_move_validity=False)._onchange_currency()
+                copied_am._check_balanced()
             copied_am._recompute_payment_terms_lines()
 
         return copied_am
@@ -4841,6 +4844,7 @@ class AccountMoveLine(models.Model):
             has_credit_zero_residual = credit_line.company_currency_id.is_zero(remaining_credit_amount)
             has_debit_zero_residual_currency = debit_line.currency_id.is_zero(remaining_debit_amount_curr)
             has_credit_zero_residual_currency = credit_line.currency_id.is_zero(remaining_credit_amount_curr)
+            is_rec_pay_account = debit_line.account_internal_type in ('receivable', 'payable')
 
             if debit_line.currency_id == credit_line.currency_id == company_currency \
                     and not has_debit_zero_residual \
@@ -4851,6 +4855,7 @@ class AccountMoveLine(models.Model):
                 recon_debit_amount = remaining_debit_amount
                 recon_credit_amount = -remaining_credit_amount
             elif debit_line.currency_id == company_currency \
+                    and is_rec_pay_account \
                     and not has_debit_zero_residual \
                     and credit_line.currency_id != company_currency \
                     and not has_credit_zero_residual_currency:
@@ -4862,6 +4867,7 @@ class AccountMoveLine(models.Model):
                 recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
                 recon_credit_amount = -remaining_credit_amount_curr
             elif debit_line.currency_id != company_currency \
+                    and is_rec_pay_account \
                     and not has_debit_zero_residual_currency \
                     and credit_line.currency_id == company_currency \
                     and not has_credit_zero_residual:
