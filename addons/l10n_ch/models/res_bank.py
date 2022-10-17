@@ -261,6 +261,9 @@ class ResPartnerBank(models.Model):
             reference = structured_communication.replace(' ', '')
 
         currency = currency or self.currency_id or self.company_id.currency_id
+        # --- SV Adaptions for debtor name ---
+        debtor_name = \
+            debtor_partner.name or debtor_partner.parent_id.name or ''
 
         return [
             'SPC',                                                # QR Type
@@ -284,7 +287,7 @@ class ResPartnerBank(models.Model):
             '{:.2f}'.format(amount),                              # Amount
             currency.name,                                        # Currency
             'K',                                                  # Ultimate Debtor Address Type
-            debtor_partner.commercial_partner_id.name[:70],       # Ultimate Debtor Name
+            debtor_name[:70],                                          # Ultimate Debtor Name
             debtor_addr_1,                                        # Ultimate Debtor Address Line 1
             debtor_addr_2,                                        # Ultimate Debtor Address Line 2
             '',                                                   # Ultimate Debtor Postal Code (not to be provided for address type K)
