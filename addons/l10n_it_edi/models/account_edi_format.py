@@ -200,9 +200,6 @@ class AccountEdiFormat(models.Model):
         if not buyer.city:
             errors.append(_("%s must have a city.", buyer.display_name))
 
-        if any(line.quantity < 0 for line in invoice.invoice_line_ids):
-            errors.append(_("All quantities should be positive."))
-
         for tax_line in invoice.line_ids.filtered(lambda line: line.tax_line_id):
             if not tax_line.tax_line_id.l10n_it_kind_exoneration and tax_line.tax_line_id.amount == 0:
                 errors.append(_("%s has an amount of 0.0, you must indicate the kind of exoneration.", tax_line.name))
@@ -221,13 +218,14 @@ class AccountEdiFormat(models.Model):
     def _l10n_it_document_type_mapping(self):
         return {
             'TD01': dict(move_types=['out_invoice'], import_type='in_invoice'),
+            'TD02': dict(move_types=['out_invoice'], import_type='in_invoice', downpayment=True),
             'TD04': dict(move_types=['out_refund'], import_type='in_refund'),
             'TD07': dict(move_types=['out_invoice'], import_type='in_invoice', simplified=True),
             'TD08': dict(move_types=['out_refund'], import_type='in_refund', simplified=True),
             'TD09': dict(move_types=['out_invoice'], import_type='in_invoice', simplified=True),
-            'TD17': dict(move_types=['in_invoice', 'in_refund'], import_type='out_invoice', self_invoice=True, services_or_goods="service"),
-            'TD18': dict(move_types=['in_invoice', 'in_refund'], import_type='out_invoice', self_invoice=True, services_or_goods="consu", partner_in_eu=True),
-            'TD19': dict(move_types=['in_invoice', 'in_refund'], import_type='out_invoice', self_invoice=True, services_or_goods="consu", goods_in_italy=True),
+            'TD17': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="service"),
+            'TD18': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", partner_in_eu=True),
+            'TD19': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", goods_in_italy=True),
         }
 
     def _l10n_it_get_document_type(self, invoice):
@@ -241,6 +239,7 @@ class AccountEdiFormat(models.Model):
             info_partner_in_eu = infos.get('partner_in_eu', False)
             if all([
                 invoice.move_type in infos.get('move_types', False),
+                invoice._is_downpayment() == infos.get('downpayment', False),
                 is_self_invoice == infos.get('self_invoice', False),
                 is_simplified == infos.get('simplified', False),
                 info_services_or_goods in ("both", services_or_goods),
@@ -306,7 +305,7 @@ class AccountEdiFormat(models.Model):
             res['success'] = True
         return {invoice: res}
 
-    def _post_invoice_edi(self, invoices, test_mode=False):
+    def _post_invoice_edi(self, invoices):
         # OVERRIDE
         self.ensure_one()
         edi_result = super()._post_invoice_edi(invoices)
@@ -320,7 +319,7 @@ class AccountEdiFormat(models.Model):
     # -------------------------------------------------------------------------
 
     def _check_filename_is_fattura_pa(self, filename):
-        return re.search("([A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}.(xml.p7m|xml))", filename)
+        return re.search("[A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}.((?i:xml.p7m|xml))", filename)
 
     def _is_fattura_pa(self, filename, tree):
         return self.code == 'fattura_pa' and self._check_filename_is_fattura_pa(filename)

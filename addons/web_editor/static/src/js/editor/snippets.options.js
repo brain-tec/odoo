@@ -1949,12 +1949,21 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.createWidget) {
             const selectedIds = currentValues.map(({ id }) => id)
                 .filter(id => typeof id === 'number');
-            const selectedIdsDomain = ['id', 'not in', selectedIds];
+            // Note: it's important to simplify the domain at its maximum as the
+            // rpc using it are cached. Similar domains should be written the
+            // same way for the cache to work.
+            const selectedIdsDomain = selectedIds.length ? ['id', 'not in', selectedIds] : null;
             const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain[0] === 'id' && domain[1] === 'not in');
             if (selectedIdsDomainIndex > -1) {
-                this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                } else {
+                    this.createWidget.options.domain.splice(selectedIdsDomainIndex, 1);
+                }
             } else {
-                this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                }
             }
             this.createWidget.setValue('');
             this.createWidget.inputEl.value = '';
@@ -2404,6 +2413,7 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const m2oRpcCache = {};
 const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_many2one',
     events: Object.assign({}, SelectUserValueWidget.prototype.events, {
@@ -2421,7 +2431,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     init(parent, title, options, $target) {
         this.afterSearch = [];
         this.displayNameCache = {};
-        this._rpcCache = {};
+        this._rpcCache = m2oRpcCache;
         const {dataAttributes} = options;
         Object.assign(options, {
             limit: '5',
@@ -4133,6 +4143,7 @@ registry.sizing = SnippetOptionWidget.extend({
         var resizeValues = this._getSize();
         this.$handles.on('mousedown', function (ev) {
             ev.preventDefault();
+            self.options.wysiwyg.odooEditor.automaticStepUnactive('resizing');
 
             // First update size values as some element sizes may not have been
             // initialized on option start (hidden slides, etc)
@@ -4224,6 +4235,8 @@ registry.sizing = SnippetOptionWidget.extend({
                 setTimeout(function () {
                     self.options.wysiwyg.odooEditor.historyStep();
                 }, 0);
+
+                self.options.wysiwyg.odooEditor.automaticStepActive('resizing');
             };
             $body.on('mousemove', bodyMouseMove);
             $body.on('mouseup', bodyMouseUp);
@@ -4725,6 +4738,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      */
     onFocus() {
         core.bus.on('activate_image_link_tool', this, this._activateLinkTool);
+        core.bus.on('deactivate_image_link_tool', this, this._deactivateLinkTool);
         // When we start editing an image, rerender the UI to ensure the
         // we-select that suggests the anchors is in a consistent state.
         this.rerender = true;
@@ -4734,6 +4748,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      */
     onBlur() {
         core.bus.off('activate_image_link_tool', this, this._activateLinkTool);
+        core.bus.off('deactivate_image_link_tool', this, this._deactivateLinkTool);
     },
 
     //--------------------------------------------------------------------------
@@ -4791,6 +4806,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         if (!url) {
             // As long as there is no URL, the image is not considered a link.
             linkEl.removeAttribute('href');
+            this.$target.trigger('href_changed');
             return;
         }
         if (!url.startsWith('/') && !url.startsWith('#')
@@ -4801,6 +4817,7 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         }
         linkEl.setAttribute('href', url);
         this.rerender = true;
+        this.$target.trigger('href_changed');
     },
     /**
      * @override
@@ -4825,6 +4842,15 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
         if (this.$target[0].parentElement.tagName === 'A') {
             this._requestUserValueWidgets('media_url_opt')[0].focus();
         } else {
+            this._requestUserValueWidgets('media_link_opt')[0].enable();
+        }
+    },
+    /**
+     * @private
+     */
+    _deactivateLinkTool() {
+        const parentEl = this.$target[0].parentNode;
+        if (parentEl.tagName === 'A') {
             this._requestUserValueWidgets('media_link_opt')[0].enable();
         }
     },

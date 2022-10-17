@@ -18,7 +18,7 @@
                <search string="Tasks">
                     <field name="name" string="Task"/>
                     <field name="tag_ids"/>
-                    <field name="user_ids" filter_domain="[('user_ids', 'ilike', self), ('user_ids.active', 'in', [True, False])]"/>
+                    <field name="user_ids" filter_domain="[('user_ids.name', 'ilike', self), ('user_ids.active', 'in', [True, False])]"/>
                     <field string="Project" name="display_project_id"/>
                     <field name="stage_id"/>
                     <field name="partner_id" operator="child_of"/>
@@ -249,6 +249,7 @@
             <field name="res_model">project.task.type</field>
             <field name="view_mode">tree,kanban,form</field>
             <field name="view_id" ref="task_type_tree"/>
+            <field name="domain">[('user_id', '=', False)]</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                 No stages found. Let's create one!
@@ -1034,7 +1035,7 @@
                     <group>
                         <field name="name" string = "Task Title" placeholder="e.g. New Design"/>
                         <field name="user_ids" options="{'no_open': True,'no_create': True}" domain="[('share', '=', False), ('active', '=', True)]"
-                            widget="many2many_tags"/>
+                            widget="many2many_avatar_user"/>
                         <field name="company_id" invisible="1"/>
                         <field name="parent_id" invisible="1" groups="base.group_no_one"/>
                     </group>

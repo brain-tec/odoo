@@ -298,8 +298,8 @@ class AccountEdiFormat(models.Model):
         if issuer:
             address['address']['branchID'] = invoice.journal_id.l10n_eg_branch_identifier or ''
         individual_type = self._l10n_eg_get_partner_tax_type(partner, issuer)
+        address['type'] = individual_type or ''
         if invoice.amount_total >= invoice.company_id.l10n_eg_invoicing_threshold or individual_type != 'P':
-            address['type'] = individual_type or ''
             address['id'] = partner.vat or ''
         return address
 
@@ -348,7 +348,7 @@ class AccountEdiFormat(models.Model):
             return {
                 invoice: {
                     'error':  _("An error occured in created the ETA invoice, please retry signing"),
-                    'blocking_level': 'info'
+                    'blocking_level': 'error'
                 }
             }
         invoice_json = json.loads(invoice.l10n_eg_eta_json_doc_id.raw)['request']
@@ -356,7 +356,7 @@ class AccountEdiFormat(models.Model):
             return {
                 invoice: {
                     'error':  _("Please make sure the invoice is signed"),
-                    'blocking_level': 'info'
+                    'blocking_level': 'error'
                 }
             }
         return {invoice: self._l10n_eg_edi_post_invoice_web_service(invoice)}
