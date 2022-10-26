@@ -1071,6 +1071,41 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
+    QUnit.test(
+        "multi_edit: clicking on a readonly field switches the focus to the next editable field",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
+                <tree multi_edit="1">
+                    <field name="int_field" readonly="1"/>
+                    <field name="foo" />
+                </tree>`,
+            });
+
+            const firstRow = target.querySelector(".o_data_row");
+            await click(firstRow, ".o_list_record_selector input");
+
+            let intField = firstRow.querySelector("[name='int_field']");
+            intField.focus();
+            await click(intField);
+            assert.strictEqual(
+                document.activeElement.closest(".o_field_widget").getAttribute("name"),
+                "foo"
+            );
+
+            intField = firstRow.querySelector("[name='int_field']");
+            intField.focus();
+            await click(intField);
+            assert.strictEqual(
+                document.activeElement.closest(".o_field_widget").getAttribute("name"),
+                "foo"
+            );
+        }
+    );
+
     QUnit.test("save a record with an required field computed by another", async function (assert) {
         serverData.models.foo.onchanges = {
             foo(record) {
@@ -14666,6 +14701,13 @@ QUnit.module("Views", (hooks) => {
         };
         const webClient = await createWebClient({ serverData });
 
+        patchWithCleanup(webClient.env.services.notification, {
+            add: (message, options) => {
+                assert.step(options.title.toString());
+                assert.step(message.toString());
+            },
+        });
+
         await doAction(webClient, 1);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
@@ -14674,13 +14716,15 @@ QUnit.module("Views", (hooks) => {
 
         await click(target.querySelector(".o_data_cell"));
         await editInput(target, '.o_data_cell [name="foo"] input', "");
-        await assert.rejects(doAction(webClient, 2));
+        await doAction(webClient, 2);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
             ["", "blip", "gnap", "blip"]
         );
         assert.hasClass(target.querySelector('.o_data_cell [name="foo"]'), "o_field_invalid");
         assert.containsN(target, ".o_data_row", 4);
+
+        assert.verifySteps(["Invalid fields: ", "<ul><li>Foo</li></ul>"]);
     });
 
     QUnit.test("Auto save: add a record and change page", async function (assert) {
