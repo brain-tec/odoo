@@ -127,6 +127,15 @@ class TestResConfigExecute(TransactionCase):
             ('model', '=', 'res.config.settings'),
         ]).groups_id
 
+        # Semi hack to recover part of the coverage lost when the groups_id
+        # were moved from the views records to the view nodes (with groups attributes)
+        groups_data = self.env['res.groups'].get_groups_by_application()
+        for group_data in groups_data:
+            if group_data[1] == 'selection' and group_data[3] != (100, 'Other'):
+                manager_group = group_data[2][-1]
+                settings_view_conditional_groups += manager_group
+        settings_view_conditional_groups -= group_system  # Already tested above
+
         for group in settings_view_conditional_groups:
             group_name = group.full_name
             _logger.info("Testing settings access for group %s", group_name)
@@ -159,7 +168,12 @@ class TestResConfigExecute(TransactionCase):
         settings_view_arch = etree.fromstring(settings.get_view(view_id=self.settings_view.id)['arch'])
         seen_fields = set()
         for node in settings_view_arch.iterdescendants(tag='field'):
-            seen_fields.add(node.get('name'))
+            fname = node.get('name')
+            if fname not in settings._fields:
+                # fname isn't a settings fields, but the field of a model
+                # linked to settings through a relational field
+                continue
+            seen_fields.add(fname)
 
         models_to_check = defaultdict(set)
         for field_name in seen_fields:

@@ -43,6 +43,7 @@ class AccountMoveLine(models.Model):
     )
     company_id = fields.Many2one(
         related='move_id.company_id', store=True, readonly=True, precompute=True,
+        index=True,
     )
     company_currency_id = fields.Many2one(
         string='Company Currency',
@@ -1326,10 +1327,10 @@ class AccountMoveLine(models.Model):
         def existing():
             return {
                 line: {
-                    'amount_currency': line.amount_currency,
-                    'balance': line.balance,
+                    'amount_currency': line.currency_id.round(line.amount_currency),
+                    'balance': line.company_id.currency_id.round(line.balance),
                     'currency_rate': line.currency_rate,
-                    'price_subtotal': line.price_subtotal,
+                    'price_subtotal': line.currency_id.round(line.price_subtotal),
                     'move_type': line.move_id.move_type,
                 } for line in container['records'].with_context(
                     skip_sync_invoice=True,
@@ -1355,12 +1356,11 @@ class AccountMoveLine(models.Model):
 
         after = existing()
         for line in after:
-            balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
-
             if (
                 (changed('amount_currency') or changed('currency_rate') or changed('move_type'))
                 and (not changed('balance') or (line not in before and not line.balance))
             ):
+                balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
                 line.balance = balance
         # Since this method is called during the sync, inside of `create`/`write`, these fields
         # already have been computed and marked as so. But this method should re-trigger it since
@@ -1609,6 +1609,8 @@ class AccountMoveLine(models.Model):
         has_credit_zero_residual = company_currency.is_zero(remaining_credit_amount)
         has_debit_zero_residual_currency = debit_vals['currency'].is_zero(remaining_debit_amount_curr)
         has_credit_zero_residual_currency = credit_vals['currency'].is_zero(remaining_credit_amount_curr)
+        is_rec_pay_account = debit_vals.get('record') \
+                             and debit_vals['record'].account_type in ('asset_receivable', 'liability_payable')
 
         if debit_vals['currency'] == credit_vals['currency'] == company_currency \
                 and not has_debit_zero_residual \
@@ -1619,6 +1621,7 @@ class AccountMoveLine(models.Model):
             recon_debit_amount = remaining_debit_amount
             recon_credit_amount = -remaining_credit_amount
         elif debit_vals['currency'] == company_currency \
+                and is_rec_pay_account \
                 and not has_debit_zero_residual \
                 and credit_vals['currency'] != company_currency \
                 and not has_credit_zero_residual_currency:
@@ -1630,6 +1633,7 @@ class AccountMoveLine(models.Model):
             recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
             recon_credit_amount = -remaining_credit_amount_curr
         elif debit_vals['currency'] != company_currency \
+                and is_rec_pay_account \
                 and not has_debit_zero_residual_currency \
                 and credit_vals['currency'] == company_currency \
                 and not has_credit_zero_residual:
