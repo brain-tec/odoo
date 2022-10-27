@@ -1490,10 +1490,26 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         if (this._value) {
             if (ColorpickerWidget.isCSSColor(this._value)) {
                 this.colorPreviewEl.style.backgroundColor = this._value;
-            } else if (!weUtils.isColorGradient(this._value)) {
-                this.colorPreviewEl.classList.add(`bg-${this._value}`);
-            } else {
+            } else if (weUtils.isColorGradient(this._value)) {
                 this.colorPreviewEl.style.backgroundImage = this._value;
+            } else {
+                // Checking if the className actually exists seems overkill but
+                // it is actually needed to prevent a crash. As an example, if a
+                // colorpicker widget is linked to a SnippetOption instance's
+                // `selectStyle` method designed to handle the "border-color"
+                // property of an element, the value received can be split if
+                // the item uses different colors for its top/right/bottom/left
+                // borders. For instance, you could receive "red blue" if the
+                // item as red top and bottom borders and blue left and right
+                // borders, in which case you would reach this `else` and try to
+                // add the class "bg-red blue" which would crash because of the
+                // space inside). In that case, we simply do not show any color.
+                // We could choose to handle this split-value case specifically
+                // but it was decided that this is enough for the moment.
+                const className = `bg-${this._value}`;
+                if (classes.includes(className)) {
+                    this.colorPreviewEl.classList.add(className);
+                }
             }
         }
         // If the palette was already opened (e.g. modifying a gradient), the new DOM state must be
@@ -1952,12 +1968,21 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.createWidget) {
             const selectedIds = currentValues.map(({ id }) => id)
                 .filter(id => typeof id === 'number');
-            const selectedIdsDomain = ['id', 'not in', selectedIds];
+            // Note: it's important to simplify the domain at its maximum as the
+            // rpc using it are cached. Similar domains should be written the
+            // same way for the cache to work.
+            const selectedIdsDomain = selectedIds.length ? ['id', 'not in', selectedIds] : null;
             const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain[0] === 'id' && domain[1] === 'not in');
             if (selectedIdsDomainIndex > -1) {
-                this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
+                } else {
+                    this.createWidget.options.domain.splice(selectedIdsDomainIndex, 1);
+                }
             } else {
-                this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                if (selectedIdsDomain) {
+                    this.createWidget.options.domain = [...this.createWidget.options.domain, selectedIdsDomain];
+                }
             }
             this.createWidget.setValue('');
             this.createWidget.inputEl.value = '';
@@ -2432,6 +2457,7 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const m2oRpcCache = {};
 const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_many2one',
     events: Object.assign({}, SelectUserValueWidget.prototype.events, {
@@ -2449,7 +2475,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     init(parent, title, options, $target) {
         this.afterSearch = [];
         this.displayNameCache = {};
-        this._rpcCache = {};
+        this._rpcCache = m2oRpcCache;
         const {dataAttributes} = options;
         Object.assign(options, {
             limit: '5',
@@ -3163,6 +3189,14 @@ const SnippetOptionWidget = Widget.extend({
      * @param {boolean} previewMode - @see this.selectClass
      * @param {string} widgetValue
      * @param {Object} params
+     * @param {string} [params.forceStyle] if undefined, the method will not
+     *      set the inline style (and thus even remove it) if the item would
+     *      already have the given style without it (thanks to a CSS rule for
+     *      example). If defined (as a string), it acts as the "priority" param
+     *      of @see CSSStyleDeclaration.setProperty: it should be 'important' to
+     *      set the style as important or '' otherwise. Note that if forceStyle
+     *      is undefined, the style is set as important only if required to have
+     *      an effect.
      * @returns {Promise|undefined}
      */
     selectStyle: async function (previewMode, widgetValue, params) {
@@ -3284,6 +3318,11 @@ const SnippetOptionWidget = Widget.extend({
         hasUserValue = applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
 
         function applyCSS(cssProp, cssValue, styles) {
+            if (typeof params.forceStyle !== 'undefined') {
+                this.$target[0].style.setProperty(cssProp, cssValue, params.forceStyle);
+                return true;
+            }
+
             // This condition requires extraClass to NOT be set.
             if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue, cssProp, this.$target[0])) {
                 // Property must be set => extraClass will be enabled.
