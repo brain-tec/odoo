@@ -138,11 +138,11 @@ registerModel({
             if (this.threadViewOwnerAsLastMessageView && this.isPartiallyVisible()) {
                 this.threadViewOwnerAsLastMessageView.handleVisibleMessage(this.message);
             }
-            if (this.component._prettyBodyRef.el && this.message.prettyBody !== this.lastPrettyBody) {
-                this.component._update();
+            if (this.prettyBodyRef.el && this.message.prettyBody !== this.lastPrettyBody) {
+                this.prettyBodyRef.el.innerHTML = this.message.prettyBody;
                 this.update({ lastPrettyBody: this.message.prettyBody });
             }
-            if (!this.component._prettyBodyRef.el) {
+            if (!this.prettyBodyRef.el) {
                 this.update({ lastPrettyBody: clear() });
             }
             // Remove all readmore before if any before reinsert them with insertReadMoreLess.
@@ -380,10 +380,10 @@ registerModel({
                     return clear();
                 }
                 const now = moment(this.clockWatcher.clock.date.getTime());
-                if (now.diff(this.message.date, 'seconds') < 45) {
+                if (now.diff(this.message.momentDate, 'seconds') < 45) {
                     return this.env._t("now");
                 }
-                return this.message.date.fromNow();
+                return this.message.momentDate.fromNow();
             },
         }),
         /**
@@ -705,6 +705,11 @@ registerModel({
             },
             inverse: 'messageViewOwner',
         }),
+        /**
+         * Reference to element containing the prettyBody. Useful to be able to
+         * replace prettyBody with new value in JS (which is faster than t-raw).
+         */
+        prettyBodyRef: attr(),
         readLessText: attr({
             compute() {
                 return this.env._t("Read Less");

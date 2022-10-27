@@ -4,6 +4,7 @@ import {
     areDateEquals,
     formatDate,
     formatDateTime,
+    luxonToMoment,
     luxonToMomentFormat,
     parseDate,
     parseDateTime,
@@ -25,14 +26,6 @@ const {
 const { DateTime } = luxon;
 
 let datePickerId = 0;
-
-/**
- * @param {DateTime} date
- * @returns {moment}
- */
-function luxonDateToMomentDate(date) {
-    return date.isValid ? window.moment(String(date)) : null;
-}
 
 /**
  * @param {string} format
@@ -86,7 +79,7 @@ export class DatePicker extends Component {
         this.setDateAndFormat(this.props);
 
         useAutofocus();
-        useExternalListener(window, "scroll", this.onWindowScroll);
+        useExternalListener(window, "scroll", this.onWindowScroll, { capture: true });
 
         onMounted(this.onMounted);
         onWillUpdateProps(this.onWillUpdateProps);
@@ -195,7 +188,7 @@ export class DatePicker extends Component {
             };
             for (const prop in params) {
                 if (params[prop] instanceof DateTime) {
-                    params[prop] = luxonDateToMomentDate(params[prop]);
+                    params[prop] = params[prop].isValid ? luxonToMoment(params[prop]) : null;
                 }
             }
             commandOrParams = params;
