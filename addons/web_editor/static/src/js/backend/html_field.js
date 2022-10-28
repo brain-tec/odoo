@@ -22,7 +22,7 @@ import {
 } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { toInline } from 'web_editor.convertInline';
 import { loadJS } from '@web/core/assets';
-const {
+import {
     markup,
     Component,
     useRef,
@@ -33,7 +33,7 @@ const {
     onWillUpdateProps,
     useEffect,
     onWillUnmount,
-} = owl;
+} from "@odoo/owl";
 
 export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     setup() {
@@ -354,10 +354,13 @@ export class HtmlField extends Component {
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
             if (this.wysiwyg) {
+                // Avoid listening to changes made during the _toInline process.
+                this.wysiwyg.odooEditor.observerUnactive('commitChanges');
                 await this.wysiwyg.saveModifiedImages();
                 if (this.props.isInlineStyle) {
                     await this._toInline();
                 }
+                this.wysiwyg.odooEditor.observerActive('commitChanges');
             }
             await this.updateValue();
         }
