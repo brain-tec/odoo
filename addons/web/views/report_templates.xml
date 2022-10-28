@@ -20,6 +20,11 @@
                 <script type="text/javascript">
                     window.odoo = {};
                     window.odoo.__session_info__ = {is_report: true};
+                    // Using web.assets_common without assets_frontend or assets_backend creates a lot
+                    // of module dependency errors. Either assets_common should be reworked to work
+                    // as a standalone bundle, or this template should not use it and add what it needs
+                    // from it into its own bundle. Silence these errors in the meantime
+                    window.__odooIgnoreModuleErrors = true;
                 </script>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <t t-call-assets="web.report_assets_common" t-css="false"/>
@@ -46,6 +51,13 @@
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
+                <script type="text/javascript">
+                    // Using web.assets_common without assets_frontend or assets_backend creates a lot
+                    // of module dependency errors. Either assets_common should be reworked to work
+                    // as a standalone bundle, or this template should not use it and add what it needs
+                    // from it into its own bundle. Silence these errors in the meantime
+                    window.__odooIgnoreModuleErrors = true;
+                </script>
                 <t t-call-assets="web.report_assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <style>
@@ -384,17 +396,7 @@
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
                 </div>
                 <div class="col-5 offset-1" name="company_address">
-                    <ul class="list-unstyled">
-                        <strong><li t-if="company.name"><span t-field="company.name"/></li></strong>
-                        <li t-if="forced_vat or company.vat">
-                            <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
-                            <span t-if="forced_vat" t-esc="forced_vat"/>
-                            <span t-else="" t-field="company.vat"/>
-                        </li>
-                        <li t-if="company.phone">Tel: <span class="o_force_ltr" t-field="company.phone"/></li>
-                        <li t-if="company.email"><span t-field="company.email"/></li>
-                        <li t-if="company.website"><span t-field="company.website"/></li>
-                    </ul>
+                    <span t-if="company.company_details" t-field="company.company_details"></span>
                 </div>
             </div>
             </div>
