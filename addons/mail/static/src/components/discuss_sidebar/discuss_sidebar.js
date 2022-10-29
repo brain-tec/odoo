@@ -4,9 +4,9 @@ import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class DiscussSidebar extends Component {
+export class DiscussSidebarView extends Component {
 
     /**
      * @override
@@ -26,9 +26,9 @@ export class DiscussSidebar extends Component {
 
 }
 
-Object.assign(DiscussSidebar, {
+Object.assign(DiscussSidebarView, {
     props: { record: Object },
-    template: 'mail.DiscussSidebar',
+    template: 'mail.DiscussSidebarView',
 });
 
-registerMessagingComponent(DiscussSidebar);
+registerMessagingComponent(DiscussSidebarView);

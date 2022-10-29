@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class MessageAuthorPrefix extends Component {
+export class MessageAuthorPrefixView extends Component {
 
     /**
      * @returns {MessageAuthorPrefixView}
@@ -15,9 +15,9 @@ export class MessageAuthorPrefix extends Component {
 
 }
 
-Object.assign(MessageAuthorPrefix, {
+Object.assign(MessageAuthorPrefixView, {
     props: { record: Object },
-    template: 'mail.MessageAuthorPrefix',
+    template: 'mail.MessageAuthorPrefixView',
 });
 
-registerMessagingComponent(MessageAuthorPrefix);
+registerMessagingComponent(MessageAuthorPrefixView);

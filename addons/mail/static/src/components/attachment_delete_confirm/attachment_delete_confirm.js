@@ -3,9 +3,9 @@
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class AttachmentDeleteConfirm extends Component {
+export class AttachmentDeleteConfirmView extends Component {
 
     /**
      * @override
@@ -23,9 +23,9 @@ export class AttachmentDeleteConfirm extends Component {
 
 }
 
-Object.assign(AttachmentDeleteConfirm, {
+Object.assign(AttachmentDeleteConfirmView, {
     props: { record: Object },
-    template: 'mail.AttachmentDeleteConfirm',
+    template: 'mail.AttachmentDeleteConfirmView',
 });
 
-registerMessagingComponent(AttachmentDeleteConfirm);
+registerMessagingComponent(AttachmentDeleteConfirmView);

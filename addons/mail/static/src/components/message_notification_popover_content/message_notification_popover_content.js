@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class MessageNotificationPopoverContent extends Component {
+export class MessageNotificationPopoverContentView extends Component {
 
     /**
      * @returns {MessageNotificationPopoverContentView}
@@ -15,9 +15,9 @@ export class MessageNotificationPopoverContent extends Component {
 
 }
 
-Object.assign(MessageNotificationPopoverContent, {
+Object.assign(MessageNotificationPopoverContentView, {
     props: { record: Object },
-    template: 'mail.MessageNotificationPopoverContent',
+    template: 'mail.MessageNotificationPopoverContentView',
 });
 
-registerMessagingComponent(MessageNotificationPopoverContent);
+registerMessagingComponent(MessageNotificationPopoverContentView);

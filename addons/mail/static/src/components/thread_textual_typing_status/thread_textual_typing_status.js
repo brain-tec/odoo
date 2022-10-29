@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class ThreadTextualTypingStatus extends Component {
+export class ThreadTextualTypingStatusView extends Component {
 
     /**
      * @returns {ThreadTextualTypingStatusView}
@@ -15,9 +15,9 @@ export class ThreadTextualTypingStatus extends Component {
 
 }
 
-Object.assign(ThreadTextualTypingStatus, {
+Object.assign(ThreadTextualTypingStatusView, {
     props: { record: Object },
-    template: 'mail.ThreadTextualTypingStatus',
+    template: 'mail.ThreadTextualTypingStatusView',
 });
 
-registerMessagingComponent(ThreadTextualTypingStatus);
+registerMessagingComponent(ThreadTextualTypingStatusView);

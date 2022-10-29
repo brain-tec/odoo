@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class MessagingMenuTab extends Component {
+export class MessagingMenuTabView extends Component {
 
     /**
      * @returns {MessagingMenuTabView}
@@ -15,9 +15,9 @@ export class MessagingMenuTab extends Component {
 
 }
 
-Object.assign(MessagingMenuTab, {
+Object.assign(MessagingMenuTabView, {
     props: { record: Object },
-    template: 'mail.MessagingMenuTab',
+    template: 'mail.MessagingMenuTabView',
 });
 
-registerMessagingComponent(MessagingMenuTab);
+registerMessagingComponent(MessagingMenuTabView);

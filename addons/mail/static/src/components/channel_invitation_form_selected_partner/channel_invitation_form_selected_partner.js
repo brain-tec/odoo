@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class ChannelInvitationFormSelectedPartner extends Component {
+export class ChannelInvitationFormSelectedPartnerView extends Component {
 
     /**
      * @returns {ChannelInvitationFormSelectedPartnerView}
@@ -15,9 +15,9 @@ export class ChannelInvitationFormSelectedPartner extends Component {
 
 }
 
-Object.assign(ChannelInvitationFormSelectedPartner, {
+Object.assign(ChannelInvitationFormSelectedPartnerView, {
     props: { record: Object },
-    template: 'mail.ChannelInvitationFormSelectedPartner',
+    template: 'mail.ChannelInvitationFormSelectedPartnerView',
 });
 
-registerMessagingComponent(ChannelInvitationFormSelectedPartner);
+registerMessagingComponent(ChannelInvitationFormSelectedPartnerView);

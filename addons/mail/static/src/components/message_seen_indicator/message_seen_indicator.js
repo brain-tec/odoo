@@ -2,25 +2,25 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class MessageSeenIndicator extends Component {
+export class MessageSeenIndicatorView extends Component {
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {MessageSeenIndicator}
+     * @returns {MessageSeenIndicatorView}
      */
      get messageSeenIndicatorView() {
         return this.props.record;
     }
 }
 
-Object.assign(MessageSeenIndicator, {
+Object.assign(MessageSeenIndicatorView, {
     props: { record: Object },
-    template: 'mail.MessageSeenIndicator',
+    template: 'mail.MessageSeenIndicatorView',
 });
 
-registerMessagingComponent(MessageSeenIndicator);
+registerMessagingComponent(MessageSeenIndicatorView);

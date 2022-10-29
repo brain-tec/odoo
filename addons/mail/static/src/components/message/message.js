@@ -5,9 +5,9 @@ import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class Message extends Component {
+export class MessageView extends Component {
 
     /**
      * @override
@@ -30,9 +30,9 @@ export class Message extends Component {
 
 }
 
-Object.assign(Message, {
+Object.assign(MessageView, {
     props: { record: Object },
-    template: 'mail.Message',
+    template: 'mail.MessageView',
 });
 
-registerMessagingComponent(Message);
+registerMessagingComponent(MessageView);

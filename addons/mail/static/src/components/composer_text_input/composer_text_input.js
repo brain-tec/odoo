@@ -5,9 +5,9 @@ import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class ComposerTextInput extends Component {
+export class ComposerTextInputView extends Component {
 
     /**
      * @override
@@ -33,9 +33,9 @@ export class ComposerTextInput extends Component {
 
 }
 
-Object.assign(ComposerTextInput, {
+Object.assign(ComposerTextInputView, {
     props: { record: Object },
-    template: 'mail.ComposerTextInput',
+    template: 'mail.ComposerTextInputView',
 });
 
-registerMessagingComponent(ComposerTextInput);
+registerMessagingComponent(ComposerTextInputView);

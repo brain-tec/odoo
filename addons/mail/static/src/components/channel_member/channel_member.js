@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class ChannelMember extends Component {
+export class ChannelMemberView extends Component {
 
     /**
      * @returns {ChannelMemberView}
@@ -15,11 +15,11 @@ export class ChannelMember extends Component {
 
 }
 
-Object.assign(ChannelMember, {
+Object.assign(ChannelMemberView, {
     props: {
         record: Object,
     },
-    template: 'mail.ChannelMember',
+    template: 'mail.ChannelMemberView',
 });
 
-registerMessagingComponent(ChannelMember);
+registerMessagingComponent(ChannelMemberView);

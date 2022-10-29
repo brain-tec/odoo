@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class FollowerSubtype extends Component {
+export class FollowerSubtypeView extends Component {
 
     //--------------------------------------------------------------------------
     // Public
@@ -19,9 +19,9 @@ export class FollowerSubtype extends Component {
 
 }
 
-Object.assign(FollowerSubtype, {
+Object.assign(FollowerSubtypeView, {
     props: { record: Object },
-    template: 'mail.FollowerSubtype',
+    template: 'mail.FollowerSubtypeView',
 });
 
-registerMessagingComponent(FollowerSubtype);
+registerMessagingComponent(FollowerSubtypeView);

@@ -4,9 +4,9 @@ import { useComponentToModel } from '@mail/component_hooks/use_component_to_mode
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class CallParticipantVideo extends Component {
+export class CallParticipantVideoView extends Component {
 
     /**
      * @override
@@ -30,9 +30,9 @@ export class CallParticipantVideo extends Component {
 
 }
 
-Object.assign(CallParticipantVideo, {
+Object.assign(CallParticipantVideoView, {
     props: { record: Object },
-    template: 'mail.CallParticipantVideo',
+    template: 'mail.CallParticipantVideoView',
 });
 
-registerMessagingComponent(CallParticipantVideo);
+registerMessagingComponent(CallParticipantVideoView);

@@ -5,9 +5,9 @@ import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class ChatWindowHiddenMenu extends Component {
+export class ChatWindowHiddenMenuView extends Component {
 
     /**
      * @override
@@ -28,9 +28,9 @@ export class ChatWindowHiddenMenu extends Component {
 
 }
 
-Object.assign(ChatWindowHiddenMenu, {
+Object.assign(ChatWindowHiddenMenuView, {
     props: { record: Object },
-    template: 'mail.ChatWindowHiddenMenu',
+    template: 'mail.ChatWindowHiddenMenuView',
 });
 
-registerMessagingComponent(ChatWindowHiddenMenu);
+registerMessagingComponent(ChatWindowHiddenMenuView);

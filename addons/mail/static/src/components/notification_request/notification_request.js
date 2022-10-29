@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class NotificationRequest extends Component {
+export class NotificationRequestView extends Component {
 
     /**
      * @returns {NotificationRequestView}
@@ -15,9 +15,9 @@ export class NotificationRequest extends Component {
 
 }
 
-Object.assign(NotificationRequest, {
+Object.assign(NotificationRequestView, {
     props: { record: Object },
-    template: 'mail.NotificationRequest',
+    template: 'mail.NotificationRequestView',
 });
 
-registerMessagingComponent(NotificationRequest);
+registerMessagingComponent(NotificationRequestView);

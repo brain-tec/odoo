@@ -2,9 +2,9 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
+import { Component } from '@odoo/owl';
 
-export class MailTemplate extends Component {
+export class MailTemplateView extends Component {
 
     //--------------------------------------------------------------------------
     // Public
@@ -19,9 +19,9 @@ export class MailTemplate extends Component {
 
 }
 
-Object.assign(MailTemplate, {
+Object.assign(MailTemplateView, {
     props: { record: Object },
-    template: 'mail.MailTemplate',
+    template: 'mail.MailTemplateView',
 });
 
-registerMessagingComponent(MailTemplate);
+registerMessagingComponent(MailTemplateView);
