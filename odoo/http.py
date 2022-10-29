@@ -975,6 +975,15 @@ class Session(collections.abc.MutableMapping):
 _request_stack = werkzeug.local.LocalStack()
 request = _request_stack()
 
+@contextlib.contextmanager
+def borrow_request():
+    """ Get the current request and unexpose it from the local stack. """
+    req = _request_stack.pop()
+    try:
+        yield req
+    finally:
+        _request_stack.push(req)
+
 
 class Response(werkzeug.wrappers.Response):
     """
@@ -1786,7 +1795,6 @@ class JsonRPCDispatcher(Dispatcher):
             'data': serialize_exception(exc),
         }
         if isinstance(exc, NotFound):
-            error['http_status'] = 404
             error['code'] = 404
             error['message'] = "404: Not Found"
         elif isinstance(exc, SessionExpiredException):
@@ -1797,11 +1805,9 @@ class JsonRPCDispatcher(Dispatcher):
 
     def _response(self, result=None, error=None):
         request_id = self.jsonrequest.get('id')
-        status = 200
         response = {'jsonrpc': '2.0', 'id': request_id}
         if error is not None:
             response['error'] = error
-            status = error.pop('http_status', 200)
         if result is not None:
             response['result'] = result
 
