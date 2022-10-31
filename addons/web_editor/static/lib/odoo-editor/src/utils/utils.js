@@ -1251,14 +1251,13 @@ export function isUnbreakable(node) {
 }
 
 export function isUnremovable(node) {
-    if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) {
-        return true;
-    }
     return (
+        (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
         node.oid === 'root' ||
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.classList.contains('o_editable') || node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
-        (node.classList && node.classList.contains('oe_unremovable'))
+        (node.classList && node.classList.contains('oe_unremovable')) ||
+        (node.ownerDocument && node.ownerDocument.defaultWindow && !ancestors(node).find(ancestor => ancestor.oid === 'root')) // Node is in DOM but not in editable.
     );
 }
 
@@ -2073,6 +2072,12 @@ const priorityRestoreStateRules = [
         // Replace a space by &nbsp; when it was content before and now it is
         // a BR.
         { direction: DIRECTIONS.LEFT, cType1: CTGROUPS.INLINE, cType2: CTGROUPS.BR },
+        { spaceVisibility: true },
+    ],
+    [
+        // Replace a space by &nbsp; when it was content before and now it is
+        // a BR (removal of last character before a BR for example).
+        { direction: DIRECTIONS.RIGHT, cType1: CTGROUPS.CONTENT, cType2: CTGROUPS.BR },
         { spaceVisibility: true },
     ],
     [

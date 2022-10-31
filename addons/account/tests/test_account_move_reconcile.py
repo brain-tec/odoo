@@ -2307,6 +2307,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         - Check there is no rounding issue when making the percentage.
         - Check there is no lost cents when the journal entry is fully reconciled.
         '''
+        self.env.company.tax_exigibility = True
         cash_basis_move = self.env['account.move'].create({
             'move_type': 'entry',
             'date': '2016-01-01',
@@ -2511,6 +2512,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     def test_reconcile_cash_basis_workflow_multi_currency(self):
         ''' Same as before with a foreign currency. '''
 
+        self.env.company.tax_exigibility = True
         currency_id = self.currency_data['currency'].id
         taxes = self.cash_basis_tax_a_third_amount + self.cash_basis_tax_tiny_amount
 
@@ -2736,6 +2738,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not reconcilable.
         '''
+        self.env.company.tax_exigibility = True
         currency_id = self.currency_data['currency'].id
 
         # Rate 1/3 in 2016.
@@ -2866,6 +2869,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not a reconcile one.
         '''
+        self.env.company.tax_exigibility = True
         currency_id = self.setup_multi_currency_data(default_values={
             'name': 'bitcoin',
             'symbol': 'bc',
@@ -2954,6 +2958,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the transfer
         account is not a reconcile one.
         '''
+        self.env.company.tax_exigibility = True
         currency_id = self.setup_multi_currency_data(default_values={
             'name': 'bitcoin',
             'symbol': 'bc',
@@ -3043,6 +3048,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ''' Test the generation of the exchange difference for a tax cash basis journal entry when the tax
         account is a reconcile one.
         '''
+        self.env.company.tax_exigibility = True
         currency_id = self.currency_data['currency'].id
         cash_basis_transition_account = self.env['account.account'].create({
             'code': '209.01.01',
@@ -3154,8 +3160,162 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             {'debit': 0.0,      'credit': 50.0,     'currency_id': currency_id,     'account_id': self.cash_basis_base_account.id},
         ])
 
+    def test_reconcile_cash_basis_refund_multicurrency(self):
+        self.env.company.tax_exigibility = True
+        rates_data = self.setup_multi_currency_data(default_values={
+            'name': 'Playmock',
+            'symbol': '🦌',
+            'rounding': 0.01,
+            'currency_unit_label': 'Playmock',
+            'currency_subunit_label': 'Cent',
+        }, rate2016=0.5, rate2017=0.33333333333333333)
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'currency_id': rates_data['currency'].id,
+            'invoice_date': '2016-01-01',
+            'invoice_line_ids': [(0, 0, {
+                'name': 'dudu',
+                'account_id': self.company_data['default_account_revenue'].id,
+                'price_unit': 100.0,
+                'tax_ids': [(6, 0, self.cash_basis_tax_a_third_amount.ids)],
+            })],
+        })
+
+        refund = self.env['account.move'].create({
+            'move_type': 'out_refund',
+            'partner_id': self.partner_a.id,
+            'currency_id': rates_data['currency'].id,
+            'invoice_date': '2017-01-01',
+            'invoice_line_ids': [(0, 0, {
+                'name': 'dudu',
+                'account_id': self.company_data['default_account_revenue'].id,
+                'price_unit': 100.0,
+                'tax_ids': [(6, 0, self.cash_basis_tax_a_third_amount.ids)],
+            })],
+        })
+
+        invoice.action_post()
+        refund.action_post()
+
+        (refund + invoice).line_ids.filtered(lambda x: x.account_id.user_type_id.type == 'receivable').reconcile()
+
+        # Check the cash basis moves
+        self.assertRecordValues(
+            self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)]).line_ids,
+            [
+                {
+                    'debit': 200,
+                    'credit': 0,
+                    'amount_currency': 100,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+                {
+                    'debit': 0,
+                    'credit': 200,
+                    'amount_currency': -100,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': self.cash_basis_tax_a_third_amount.ids,
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': self.tax_tags[0].ids,
+                },
+                {
+                    'debit': 66.66,
+                    'credit': 0,
+                    'amount_currency': 33.33,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+                {
+                    'debit': 0,
+                    'credit': 66.66,
+                    'amount_currency': -33.33,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': self.cash_basis_tax_a_third_amount.invoice_repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax').id,
+                    'tax_tag_ids': self.tax_tags[1].ids,
+                },
+            ]
+        )
+
+        self.assertRecordValues(
+            self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', refund.id)]).line_ids,
+            [
+                {
+                    'debit': 0,
+                    'credit': 300,
+                    'amount_currency': -100,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+                {
+                    'debit': 300,
+                    'credit': 0,
+                    'amount_currency': 100,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': self.cash_basis_tax_a_third_amount.ids,
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': self.tax_tags[2].ids,
+                },
+                {
+                    'debit': 0,
+                    'credit': 99.99,
+                    'amount_currency': -33.33,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+                {
+                    'debit': 99.99,
+                    'credit': 0,
+                    'amount_currency': 33.33,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': self.cash_basis_tax_a_third_amount.refund_repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax').id,
+                    'tax_tag_ids': self.tax_tags[3].ids,
+                },
+            ]
+        )
+
+        # Check the exchange difference move, to be sure no cash basis rounding data was added into it
+        self.assertRecordValues(
+            invoice.line_ids.filtered(lambda x: x.account_id.user_type_id.type == 'receivable').matched_credit_ids.exchange_move_id.line_ids,
+            [
+                {
+                    'debit': 133.33,
+                    'credit': 0,
+                    'amount_currency': 0,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+                {
+                    'debit': 0,
+                    'credit': 133.33,
+                    'amount_currency': 0,
+                    'currency_id': rates_data['currency'].id,
+                    'tax_ids': [],
+                    'tax_repartition_line_id': None,
+                    'tax_tag_ids': [],
+                },
+            ]
+        )
+
+        self.assertFalse(invoice.line_ids.full_reconcile_id.exchange_move_id)
+
     def test_reconcile_cash_basis_revert(self):
         ''' Ensure the cash basis journal entry can be reverted. '''
+        self.env.company.tax_exigibility = True
         self.cash_basis_transfer_account.reconcile = True
         self.cash_basis_tax_a_third_amount.cash_basis_transition_account_id = self.tax_account_1
 
@@ -3237,6 +3397,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertFullReconcile(reversed_taxes_full_reconcile, reversed_taxes_lines)
 
     def test_reconcile_cash_basis_tax_grid_refund(self):
+        self.env.company.tax_exigibility = True
         invoice_move = self.env['account.move'].create({
             'move_type': 'entry',
             'date': '2016-01-01',
@@ -3382,6 +3543,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
     def test_reconcile_cash_basis_tax_grid_multi_taxes(self):
         ''' Test the tax grid when reconciling an invoice with multiple taxes/tax repartition. '''
+        self.env.company.tax_exigibility = True
         base_taxes = self.cash_basis_tax_a_third_amount + self.cash_basis_tax_tiny_amount
         base_tags = self.tax_tags[0] + self.tax_tags[4]
 
@@ -3459,6 +3621,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
+        self.env.company.tax_exigibility = True
 
         # Create a tax using the same accounts as the CABA one
         non_caba_tax = self.env['account.tax'].create({
@@ -3541,6 +3704,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
+        self.env.company.tax_exigibility = True
 
         # Create an invoice with a CABA tax using 'Include in analytic cost'
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice', account_predictive_bills_disable_prediction=True))
@@ -3588,6 +3752,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     def test_caba_double_tax_negative_line(self):
         """ Tests making a cash basis invoice with 2 lines using the same tax: a positive and a negative one.
         """
+        self.env.company.tax_exigibility = True
         invoice = self.init_invoice('in_invoice', amounts=[300, -60], post=True, taxes=self.cash_basis_tax_a_third_amount)
 
         pmt_wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({
@@ -3620,6 +3785,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
+        self.env.company.tax_exigibility = True
 
         # Create an invoice with a CABA tax using the same tax account and pay half of it
         caba_inv = self.init_invoice('in_invoice', amounts=[900], post=True, taxes=self.cash_basis_tax_a_third_amount)
@@ -3688,6 +3854,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         bill.button_draft()
 
     def test_caba_foreign_vat(self):
+        self.env.company.tax_exigibility = True
+
         test_country = self.env['res.country'].create({
             'name': "Bretonnia",
             'code': 'wh',
@@ -3757,6 +3925,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         """ Test the CABA entries generated from an invoice with
         a tax group
         """
+        self.env.company.tax_exigibility = True
+
         # Make the tax account reconcilable
         self.tax_account_1.reconcile = True
 

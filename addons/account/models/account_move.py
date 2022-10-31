@@ -289,6 +289,7 @@ class AccountMove(models.Model):
     always_tax_exigible = fields.Boolean(
         compute='_compute_always_tax_exigible',
         store=True,
+        readonly=False,
         help="Technical field used by cash basis taxes, telling the lines of the move are always exigible. "
              "This happens if the move contains no payable or receivable line.")
 
@@ -1230,6 +1231,7 @@ class AccountMove(models.Model):
         self.env.cr.execute("""
             SELECT this.id
               FROM account_move this
+              JOIN res_company company ON company.id = this.company_id
          LEFT JOIN account_move other ON this.journal_id = other.journal_id
                                      AND this.sequence_prefix = other.sequence_prefix
                                      AND this.sequence_number = other.sequence_number + 1
@@ -1237,6 +1239,7 @@ class AccountMove(models.Model):
                AND this.sequence_number != 1
                AND this.name != '/'
                AND this.id = ANY(%(move_ids)s)
+               AND (company.fiscalyear_lock_date IS NULL OR this.date >= company.fiscalyear_lock_date)
         """, {
             'move_ids': self.ids,
         })
@@ -2149,6 +2152,9 @@ class AccountMove(models.Model):
         if copied_am.is_invoice(include_receipts=True):
             # Make sure to recompute payment terms. This could be necessary if the date is different for example.
             # Also, this is necessary when creating a credit note because the current invoice is copied.
+            if copied_am.currency_id != self.company_id.currency_id:
+                copied_am.with_context(check_move_validity=False)._onchange_currency()
+                copied_am._check_balanced()
             copied_am._recompute_payment_terms_lines()
 
         return copied_am
@@ -2173,8 +2179,11 @@ class AccountMove(models.Model):
             if (move.name and move.name != '/' and move.sequence_number not in (0, 1) and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
-            # You can't change the date of a move being inside a locked period.
-            if move.state == "posted" and 'date' in vals and move.date != vals['date']:
+            # You can't change the date or name of a move being inside a locked period.
+            if move.state == "posted" and (
+                    ('name' in vals and move.name != vals['name'])
+                    or ('date' in vals and move.date != vals['date'])
+            ):
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 
@@ -3476,7 +3485,7 @@ class AccountMoveLine(models.Model):
     sequence = fields.Integer(default=10)
     name = fields.Char(string='Label', tracking=True)
     quantity = fields.Float(string='Quantity',
-        default=1.0, digits='Product Unit of Measure',
+        default=lambda self: 0 if self._context.get('default_display_type') else 1.0, digits='Product Unit of Measure',
         help="The optional quantity expressed by this line, eg: number of product sold. "
              "The quantity is not a legal requirement but is very useful for some reports.")
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
@@ -4836,6 +4845,7 @@ class AccountMoveLine(models.Model):
             has_credit_zero_residual = credit_line.company_currency_id.is_zero(remaining_credit_amount)
             has_debit_zero_residual_currency = debit_line.currency_id.is_zero(remaining_debit_amount_curr)
             has_credit_zero_residual_currency = credit_line.currency_id.is_zero(remaining_credit_amount_curr)
+            is_rec_pay_account = debit_line.account_internal_type in ('receivable', 'payable')
 
             if debit_line.currency_id == credit_line.currency_id == company_currency \
                     and not has_debit_zero_residual \
@@ -4846,6 +4856,7 @@ class AccountMoveLine(models.Model):
                 recon_debit_amount = remaining_debit_amount
                 recon_credit_amount = -remaining_credit_amount
             elif debit_line.currency_id == company_currency \
+                    and is_rec_pay_account \
                     and not has_debit_zero_residual \
                     and credit_line.currency_id != company_currency \
                     and not has_credit_zero_residual_currency:
@@ -4857,6 +4868,7 @@ class AccountMoveLine(models.Model):
                 recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
                 recon_credit_amount = -remaining_credit_amount_curr
             elif debit_line.currency_id != company_currency \
+                    and is_rec_pay_account \
                     and not has_debit_zero_residual_currency \
                     and credit_line.currency_id == company_currency \
                     and not has_credit_zero_residual:
@@ -5070,6 +5082,7 @@ class AccountMoveLine(models.Model):
             'date': max(exchange_date or date.min, company._get_user_fiscal_lock_date() + timedelta(days=1)),
             'journal_id': journal.id,
             'line_ids': [],
+            'always_tax_exigible': True,
         }
         to_reconcile = []
 
@@ -5408,7 +5421,7 @@ class AccountMoveLine(models.Model):
 
         # ==== Create entries for cash basis taxes ====
 
-        is_cash_basis_needed = account.user_type_id.type in ('receivable', 'payable')
+        is_cash_basis_needed = account.company_id.tax_exigibility and account.user_type_id.type in ('receivable', 'payable')
         if is_cash_basis_needed and not self._context.get('move_reverse_cancel'):
             tax_cash_basis_moves = partials._create_tax_cash_basis_moves()
             results['tax_cash_basis_moves'] = tax_cash_basis_moves

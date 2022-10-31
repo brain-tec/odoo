@@ -66,6 +66,13 @@ msgid ""
 "                </p>\n"
 "            "
 msgstr ""
+"\n"
+"                <p class=\"o_view_nocontent_smiling_face\">\n"
+"                    没有找到里程碑。让我们创建一个!\n"
+"                </p><p>\n"
+"                    追踪必须达到的主要进展点，以获得成功。\n"
+"                </p>\n"
+"            "
 
 #. module: project
 #. openerp-web
@@ -432,11 +439,14 @@ msgid ""
 "                            <i class=\"fa fa-fw o_button_icon fa-meh-o text-warning\" attrs=\"{'invisible': ['|', ('rating_avg', '&lt;', 2.33), ('rating_avg', '&gt;=', 3.66)]}\" title=\"Okay\"/>\n"
 "                            <i class=\"fa fa-fw o_button_icon fa-frown-o text-danger\" attrs=\"{'invisible': [('rating_avg', '&gt;=', 2.33)]}\" title=\"Dissatisfied\"/>"
 msgstr ""
+"<i class=\"fa fa-fw o_button_icon fa-smile-o text-success\" attrs=\"{'invisible': [('rating_avg', '&lt;', 3.66)]}\" title=\"Satisfied\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-meh-o text-warning\" attrs=\"{'invisible': ['|', ('rating_avg', '&lt;', 2.33), ('rating_avg', '&gt;=', 3.66)]}\" title=\"Okay\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-frown-o text-danger\" attrs=\"{'invisible': [('rating_avg', '&gt;=', 2.33)]}\" title=\"Dissatisfied\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_task_view_activity
 msgid "<i class=\"fa fa-lock\"/> Private"
-msgstr ""
+msgstr "私人的"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -572,7 +582,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "<span class=\"o_stat_text\">Sub-tasks</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">子任务</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -676,7 +686,7 @@ msgstr "个人阶段无法链接到项目，因为它只对其相应的用户可
 #. module: project
 #: model:ir.model.constraint,message:project.constraint_project_tags_name_uniq
 msgid "A tag with the same name already exists."
-msgstr ""
+msgstr "已存在具有相同名称的标记"
 
 #. module: project
 #: model:ir.model.constraint,message:project.constraint_project_task_user_rel_project_personal_stage_unique
@@ -900,13 +910,13 @@ msgstr "辅助核算"
 msgid ""
 "Analyze how quickly your team is completing your project's tasks and check "
 "if everything is progressing according to plan."
-msgstr ""
+msgstr "分析你的团队是如何快速完成你的项目任务的，并检查一切是否按计划进行。"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.action_project_task_user_tree
 msgid ""
 "Analyze the progress of your projects and the performance of your employees."
-msgstr ""
+msgstr "分析你的项目进展和你的员工表现。"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_month__april
@@ -950,7 +960,7 @@ msgstr "已归档"
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Archived tasks cannot be recurring. Please unarchive the task first."
-msgstr ""
+msgstr "存档的任务不能重复进行。请先将任务取消存档。"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_delete_confirmation_wizard
@@ -1102,30 +1112,30 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__rating_avg
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__rating_avg
 msgid "Average Rating"
-msgstr ""
+msgstr "平均评价"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_avg_percentage
 msgid "Average Rating (%)"
-msgstr ""
+msgstr "平均评价（%）"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Average Rating: Dissatisfied"
-msgstr ""
+msgstr "平均评价：不满意"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Average Rating: Okay"
-msgstr ""
+msgstr "平均评价：满意"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Average Rating: Satisfied"
-msgstr ""
+msgstr "平均评价：满意"
 
 #. module: project
 #. openerp-web
@@ -1363,7 +1373,7 @@ msgstr "确认"
 #: code:addons/project/static/src/js/tours/project.js:0
 #, python-format
 msgid "Congratulations, you are now a master of project management."
-msgstr ""
+msgstr "恭喜您，您现在是一个项目管理的大师"
 
 #. module: project
 #. openerp-web
@@ -1417,7 +1427,7 @@ msgstr "创建"
 #, python-format
 msgid ""
 "Create <b>activities</b> to set yourself to-dos or to schedule meetings."
-msgstr ""
+msgstr "创建<b>活动</b>为自己设定待办事项或安排会议"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__create_date
@@ -1687,12 +1697,12 @@ msgstr "定义在项目里的步骤有创建任务，更新已结束的任务或
 #: model_terms:ir.actions.act_window,help:project.project_project_stage_configure
 msgid ""
 "Define the steps your projects move through from creation to completion."
-msgstr ""
+msgstr "定义项目从创建到完成的步骤。"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_task_type_form
 msgid "Define the steps your tasks move through from creation to completion."
-msgstr ""
+msgstr "定义任务从创建到完成的步骤。"
 
 #. module: project
 #: model:ir.actions.server,name:project.unlink_project_action
@@ -1828,7 +1838,7 @@ msgstr "显示名称"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__display_parent_task_button
 msgid "Display Parent Task Button"
-msgstr ""
+msgstr "显示上级任务按钮"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__display_project_id
@@ -2390,13 +2400,13 @@ msgstr "和这个项目相关的内部邮件。收件会自动同步为任务（
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Invalid operator: %s"
-msgstr ""
+msgstr "无效运算符：%s"
 
 #. module: project
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Invalid value: %s"
-msgstr ""
+msgstr "无效值：%s"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_share_wizard_view_form
@@ -2441,7 +2451,7 @@ msgstr "关注者"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__is_milestone_exceeded
 msgid "Is Milestone Exceeded"
-msgstr ""
+msgstr "是否超越了里程碑"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__is_private
@@ -2472,7 +2482,7 @@ msgstr "似乎有些任务是重复发生的一部分。"
 msgid ""
 "It seems that some tasks are part of a recurrence. At least one of them must"
 " be kept as a model to create the next occurences."
-msgstr ""
+msgstr "似乎某些任务是重复执行的一部分。必须将其中至少一个保留为模型，以创建下一个事件。"
 
 #. module: project
 #. openerp-web
@@ -2545,6 +2555,8 @@ msgid ""
 "Keep track of the progress of your tasks from creation to completion.<br>\n"
 "                    Collaborate efficiently by chatting in real-time or via email."
 msgstr ""
+"追踪你的任务从创建到完成的进度。\n"
+"                    通过实时聊天或电子邮件进行高效协作。"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_sharing_project_task_action
@@ -2552,6 +2564,8 @@ msgid ""
 "Keep track of the progress of your tasks from creation to completion.<br>\n"
 "                Collaborate efficiently by chatting in real-time or via email."
 msgstr ""
+"追踪你的任务从创建到完成的进度。\n"
+"                通过实时聊天或电子邮件进行高效协作。"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_digest_digest__kpi_project_task_opened_value
@@ -2665,7 +2679,7 @@ msgstr "最近的活动"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 msgid "Late Milestones"
-msgstr ""
+msgstr "最近的里程碑"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_search
@@ -2814,7 +2828,7 @@ msgstr "五月"
 msgid ""
 "Measure your customer satisfaction by sending rating requests when your "
 "tasks reach a certain stage."
-msgstr ""
+msgstr "当您的任务达到一定阶段时，通过发送评价请求来衡量你的客户满意度。"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__favorite_user_ids
@@ -3054,7 +3068,7 @@ msgstr "下一个循环"
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "No Rating"
-msgstr ""
+msgstr "没有评级"
 
 #. module: project
 #: code:addons/project/models/project.py:0
@@ -3286,6 +3300,8 @@ msgid ""
 "Organize your tasks by dispatching them across the pipeline.<br>\n"
 "                    Collaborate efficiently by chatting in real-time or via email."
 msgstr ""
+"通过跨管道分派任务来组织任务。<br>\n"
+"                    通过实时或通过电子邮件聊天高效协作。"
 
 #. module: project
 #: code:addons/project/controllers/portal.py:0
@@ -3749,7 +3765,7 @@ msgstr "项目存档"
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all_config
 msgid ""
 "Projects contain tasks on the same topic, and each has its own dashboard."
-msgstr ""
+msgstr "项目包括相同主题的任务，并且每个都有其仪表板。"
 
 #. module: project
 #. openerp-web
@@ -3786,7 +3802,7 @@ msgstr "评价 (/5)"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_avg_text
 msgid "Rating Avg Text"
-msgstr ""
+msgstr "评价平均文本"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__rating_template_id
@@ -3828,7 +3844,7 @@ msgstr "评级满意度"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_text
 msgid "Rating Text"
-msgstr ""
+msgstr "评分文本"
 
 #. module: project
 #. openerp-web
@@ -4118,7 +4134,7 @@ msgstr "周六"
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Satisfaction"
-msgstr ""
+msgstr "满意度"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
@@ -4250,7 +4266,7 @@ msgstr "设置封面图像"
 #: model:ir.model.fields.selection,name:project.selection__project_project__last_update_status__to_define
 #, python-format
 msgid "Set Status"
-msgstr ""
+msgstr "设定状态"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -4434,7 +4450,7 @@ msgstr "状态"
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Status Update - "
-msgstr ""
+msgstr "状态更新"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__activity_state
@@ -4485,7 +4501,7 @@ msgstr "子任务计划工时"
 #: model_terms:ir.ui.view,arch_db:project.rating_rating_view_form_project
 #: model_terms:ir.ui.view,arch_db:project.rating_rating_view_search_project
 msgid "Submitted On"
-msgstr ""
+msgstr "提交日期"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__subtask_planned_hours
@@ -4650,7 +4666,7 @@ msgstr "受阻的任务"
 #. module: project
 #: model:mail.message.subtype,name:project.mt_task_progress
 msgid "Task in Progress"
-msgstr ""
+msgstr "进行中的任务"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
@@ -4819,7 +4835,7 @@ msgstr "项目无法与收件人共享，因为项目的隐私受限制。 将�
 #. module: project
 #: model:ir.model.constraint,message:project.constraint_project_project_project_date_greater
 msgid "The project's start date must be before its end date."
-msgstr ""
+msgstr "项目的开始时间必须在结束时间之前。"
 
 #. module: project
 #: code:addons/project/models/project.py:0
@@ -4856,7 +4872,7 @@ msgstr "没有任务。"
 #: code:addons/project/controllers/portal.py:0
 #, python-format
 msgid "There is nothing to report."
-msgstr ""
+msgstr "没有什么要报告。"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__email_from
@@ -4965,7 +4981,7 @@ msgstr "更新的标题"
 #: code:addons/project/static/src/xml/project_templates.xml:0
 #, python-format
 msgid "To Bill"
-msgstr ""
+msgstr "开账单"
 
 #. module: project
 #: model:project.project.stage,name:project.project_project_stage_0
@@ -5066,7 +5082,7 @@ msgstr "一个月两次"
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "Two tasks cannot depend on each other."
-msgstr ""
+msgstr "两个任务不能相互依赖。"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__activity_exception_decoration
@@ -5126,7 +5142,7 @@ msgstr "更新"
 #: model:mail.message.subtype,name:project.mt_project_update_create
 #: model:mail.message.subtype,name:project.mt_update_create
 msgid "Update Created"
-msgstr ""
+msgstr "已创建的更新"
 
 #. module: project
 #. openerp-web
@@ -5437,7 +5453,7 @@ msgstr "例如，办公场所"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_quick_create_task_form
 #: model_terms:ir.ui.view,arch_db:project.quick_create_task_form
 msgid "e.g. Send Invitations"
-msgstr ""
+msgstr "例如：发送邀请"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified

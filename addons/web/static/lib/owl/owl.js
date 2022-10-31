@@ -41,8 +41,11 @@
             this.parentEl = parent;
             this.child.mount(parent, afterNode);
         }
-        moveBefore(other, afterNode) {
-            this.child.moveBefore(other ? other.child : null, afterNode);
+        moveBeforeDOMNode(node, parent) {
+            this.child.moveBeforeDOMNode(node, parent);
+        }
+        moveBeforeVNode(other, afterNode) {
+            this.moveBeforeDOMNode((other && other.firstNode()) || afterNode);
         }
         patch(other, withBeforeRemove) {
             if (this === other) {
@@ -418,7 +421,22 @@
             this.anchors = anchors;
             this.parentEl = parent;
         }
-        moveBefore(other, afterNode) {
+        moveBeforeDOMNode(node, parent = this.parentEl) {
+            this.parentEl = parent;
+            const children = this.children;
+            const anchors = this.anchors;
+            for (let i = 0, l = children.length; i < l; i++) {
+                let child = children[i];
+                if (child) {
+                    child.moveBeforeDOMNode(node, parent);
+                }
+                else {
+                    const anchor = anchors[i];
+                    nodeInsertBefore$3.call(parent, anchor, node);
+                }
+            }
+        }
+        moveBeforeVNode(other, afterNode) {
             if (other) {
                 const next = other.children[0];
                 afterNode = (next ? next.firstNode() : other.anchors[0]) || null;
@@ -429,7 +447,7 @@
             for (let i = 0, l = children.length; i < l; i++) {
                 let child = children[i];
                 if (child) {
-                    child.moveBefore(null, afterNode);
+                    child.moveBeforeVNode(null, afterNode);
                 }
                 else {
                     const anchor = anchors[i];
@@ -527,9 +545,12 @@
             nodeInsertBefore$2.call(parent, node, afterNode);
             this.el = node;
         }
-        moveBefore(other, afterNode) {
-            const target = other ? other.el : afterNode;
-            nodeInsertBefore$2.call(this.parentEl, this.el, target);
+        moveBeforeDOMNode(node, parent = this.parentEl) {
+            this.parentEl = parent;
+            nodeInsertBefore$2.call(parent, this.el, node);
+        }
+        moveBeforeVNode(other, afterNode) {
+            nodeInsertBefore$2.call(this.parentEl, this.el, other ? other.el : afterNode);
         }
         beforeRemove() { }
         remove() {
@@ -971,9 +992,12 @@
             firstNode() {
                 return this.el;
             }
-            moveBefore(other, afterNode) {
-                const target = other ? other.el : afterNode;
-                nodeInsertBefore.call(this.parentEl, this.el, target);
+            moveBeforeDOMNode(node, parent = this.parentEl) {
+                this.parentEl = parent;
+                nodeInsertBefore.call(parent, this.el, node);
+            }
+            moveBeforeVNode(other, afterNode) {
+                nodeInsertBefore.call(this.parentEl, this.el, other ? other.el : afterNode);
             }
             toString() {
                 const div = document.createElement("div");
@@ -1110,14 +1134,22 @@
             }
             this.parentEl = parent;
         }
-        moveBefore(other, afterNode) {
+        moveBeforeDOMNode(node, parent = this.parentEl) {
+            this.parentEl = parent;
+            const children = this.children;
+            for (let i = 0, l = children.length; i < l; i++) {
+                children[i].moveBeforeDOMNode(node, parent);
+            }
+            parent.insertBefore(this.anchor, node);
+        }
+        moveBeforeVNode(other, afterNode) {
             if (other) {
                 const next = other.children[0];
                 afterNode = (next ? next.firstNode() : other.anchor) || null;
             }
             const children = this.children;
             for (let i = 0, l = children.length; i < l; i++) {
-                children[i].moveBefore(null, afterNode);
+                children[i].moveBeforeVNode(null, afterNode);
             }
             this.parentEl.insertBefore(this.anchor, afterNode);
         }
@@ -1132,7 +1164,7 @@
             }
             this.children = ch2;
             const proto = ch2[0] || ch1[0];
-            const { mount: cMount, patch: cPatch, remove: cRemove, beforeRemove, moveBefore: cMoveBefore, firstNode: cFirstNode, } = proto;
+            const { mount: cMount, patch: cPatch, remove: cRemove, beforeRemove, moveBeforeVNode: cMoveBefore, firstNode: cFirstNode, } = proto;
             const _anchor = this.anchor;
             const isOnlyChild = this.isOnlyChild;
             const parent = this.parentEl;
@@ -1314,12 +1346,15 @@
                 nodeInsertBefore.call(parent, textNode, afterNode);
             }
         }
-        moveBefore(other, afterNode) {
-            const target = other ? other.content[0] : afterNode;
-            const parent = this.parentEl;
+        moveBeforeDOMNode(node, parent = this.parentEl) {
+            this.parentEl = parent;
             for (let elem of this.content) {
-                nodeInsertBefore.call(parent, elem, target);
+                nodeInsertBefore.call(parent, elem, node);
             }
+        }
+        moveBeforeVNode(other, afterNode) {
+            const target = other ? other.content[0] : afterNode;
+            this.moveBeforeDOMNode(target);
         }
         patch(other) {
             if (this === other) {
@@ -1398,7 +1433,7 @@
                         const target = ev.target;
                         let currentNode = self.child.firstNode();
                         const afterNode = self.afterNode;
-                        while (currentNode !== afterNode) {
+                        while (currentNode && currentNode !== afterNode) {
                             if (currentNode.contains(target)) {
                                 return origFn.call(this, ev);
                             }
@@ -1407,8 +1442,17 @@
                     };
                 }
             }
-            moveBefore(other, afterNode) {
-                this.child.moveBefore(other ? other.child : null, afterNode);
+            moveBeforeDOMNode(node, parent = this.parentEl) {
+                this.parentEl = parent;
+                this.child.moveBeforeDOMNode(node, parent);
+                parent.insertBefore(this.afterNode, node);
+            }
+            moveBeforeVNode(other, afterNode) {
+                if (other) {
+                    // check this with @ged-odoo for use in foreach
+                    afterNode = other.firstNode() || afterNode;
+                }
+                this.child.moveBeforeVNode(other ? other.child : null, afterNode);
                 this.parentEl.insertBefore(this.afterNode, afterNode);
             }
             patch(other, withBeforeRemove) {
@@ -2444,8 +2488,11 @@
             this.children = this.fiber.childrenMap;
             this.fiber = null;
         }
-        moveBefore(other, afterNode) {
-            this.bdom.moveBefore(other ? other.bdom : null, afterNode);
+        moveBeforeDOMNode(node, parent) {
+            this.bdom.moveBeforeDOMNode(node, parent);
+        }
+        moveBeforeVNode(other, afterNode) {
+            this.bdom.moveBeforeVNode(other ? other.bdom : null, afterNode);
         }
         patch() {
             if (this.fiber && this.fiber.parent) {
@@ -2662,7 +2709,7 @@
                 if (!portal.target) {
                     const target = document.querySelector(this.props.target);
                     if (target) {
-                        portal.content.moveBefore(target, null);
+                        portal.content.moveBeforeDOMNode(target.firstChild, target);
                     }
                     else {
                         throw new OwlError("invalid portal target");
@@ -2906,14 +2953,15 @@
         return true;
     }
     class LazyValue {
-        constructor(fn, ctx, component, node) {
+        constructor(fn, ctx, component, node, key) {
             this.fn = fn;
             this.ctx = capture(ctx);
             this.component = component;
             this.node = node;
+            this.key = key;
         }
         evaluate() {
-            return this.fn.call(this.component, this.ctx, this.node);
+            return this.fn.call(this.component, this.ctx, this.node, this.key);
         }
         toString() {
             return this.evaluate().toString();
@@ -3068,7 +3116,7 @@
                         if (line[columnIndex]) {
                             msg +=
                                 `\nThe error might be located at xml line ${lineNumber} column ${columnIndex}\n` +
-                                    `${line}\n${"-".repeat(columnIndex - 1)}^`;
+                                `${line}\n${"-".repeat(columnIndex - 1)}^`;
                         }
                     }
                 }
@@ -3599,6 +3647,13 @@
             result.push(`}`);
             return result.join("\n  ");
         }
+        currentKey(ctx) {
+            let key = this.loopLevel ? `key${this.loopLevel}` : "key";
+            if (ctx.tKeyExpr) {
+                key = `${ctx.tKeyExpr} + ${key}`;
+            }
+            return key;
+        }
     }
     const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
     const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
@@ -3728,18 +3783,14 @@
         }
         insertBlock(expression, block, ctx) {
             let blockExpr = block.generateExpr(expression);
-            const tKeyExpr = ctx.tKeyExpr;
             if (block.parentVar) {
-                let keyArg = `key${this.target.loopLevel}`;
-                if (tKeyExpr) {
-                    keyArg = `${tKeyExpr} + ${keyArg}`;
-                }
+                let key = this.target.currentKey(ctx);
                 this.helpers.add("withKey");
-                this.addLine(`${block.parentVar}[${ctx.index}] = withKey(${blockExpr}, ${keyArg});`);
+                this.addLine(`${block.parentVar}[${ctx.index}] = withKey(${blockExpr}, ${key});`);
                 return;
             }
-            if (tKeyExpr) {
-                blockExpr = `toggler(${tKeyExpr}, ${blockExpr})`;
+            if (ctx.tKeyExpr) {
+                blockExpr = `toggler(${ctx.tKeyExpr}, ${blockExpr})`;
             }
             if (block.isRoot && !ctx.preventRoot) {
                 if (this.target.on) {
@@ -3772,86 +3823,74 @@
             const mapping = new Map();
             return tokens
                 .map((tok) => {
-                if (tok.varName && !tok.isLocal) {
-                    if (!mapping.has(tok.varName)) {
-                        const varId = generateId("v");
-                        mapping.set(tok.varName, varId);
-                        this.define(varId, tok.value);
+                    if (tok.varName && !tok.isLocal) {
+                        if (!mapping.has(tok.varName)) {
+                            const varId = generateId("v");
+                            mapping.set(tok.varName, varId);
+                            this.define(varId, tok.value);
+                        }
+                        tok.value = mapping.get(tok.varName);
                     }
-                    tok.value = mapping.get(tok.varName);
-                }
-                return tok.value;
-            })
+                    return tok.value;
+                })
                 .join("");
         }
+        /**
+         * @returns the newly created block name, if any
+         */
         compileAST(ast, ctx) {
             switch (ast.type) {
                 case 1 /* Comment */:
-                    this.compileComment(ast, ctx);
-                    break;
+                    return this.compileComment(ast, ctx);
                 case 0 /* Text */:
-                    this.compileText(ast, ctx);
-                    break;
+                    return this.compileText(ast, ctx);
                 case 2 /* DomNode */:
-                    this.compileTDomNode(ast, ctx);
-                    break;
+                    return this.compileTDomNode(ast, ctx);
                 case 4 /* TEsc */:
-                    this.compileTEsc(ast, ctx);
-                    break;
+                    return this.compileTEsc(ast, ctx);
                 case 8 /* TOut */:
-                    this.compileTOut(ast, ctx);
-                    break;
+                    return this.compileTOut(ast, ctx);
                 case 5 /* TIf */:
-                    this.compileTIf(ast, ctx);
-                    break;
+                    return this.compileTIf(ast, ctx);
                 case 9 /* TForEach */:
-                    this.compileTForeach(ast, ctx);
-                    break;
+                    return this.compileTForeach(ast, ctx);
                 case 10 /* TKey */:
-                    this.compileTKey(ast, ctx);
-                    break;
+                    return this.compileTKey(ast, ctx);
                 case 3 /* Multi */:
-                    this.compileMulti(ast, ctx);
-                    break;
+                    return this.compileMulti(ast, ctx);
                 case 7 /* TCall */:
-                    this.compileTCall(ast, ctx);
-                    break;
+                    return this.compileTCall(ast, ctx);
                 case 15 /* TCallBlock */:
-                    this.compileTCallBlock(ast, ctx);
-                    break;
+                    return this.compileTCallBlock(ast, ctx);
                 case 6 /* TSet */:
-                    this.compileTSet(ast, ctx);
-                    break;
+                    return this.compileTSet(ast, ctx);
                 case 11 /* TComponent */:
-                    this.compileComponent(ast, ctx);
-                    break;
+                    return this.compileComponent(ast, ctx);
                 case 12 /* TDebug */:
-                    this.compileDebug(ast, ctx);
-                    break;
+                    return this.compileDebug(ast, ctx);
                 case 13 /* TLog */:
-                    this.compileLog(ast, ctx);
-                    break;
+                    return this.compileLog(ast, ctx);
                 case 14 /* TSlot */:
-                    this.compileTSlot(ast, ctx);
-                    break;
+                    return this.compileTSlot(ast, ctx);
                 case 16 /* TTranslation */:
-                    this.compileTTranslation(ast, ctx);
-                    break;
+                    return this.compileTTranslation(ast, ctx);
                 case 17 /* TPortal */:
-                    this.compileTPortal(ast, ctx);
+                    return this.compileTPortal(ast, ctx);
             }
         }
         compileDebug(ast, ctx) {
             this.addLine(`debugger;`);
             if (ast.content) {
-                this.compileAST(ast.content, ctx);
+                return this.compileAST(ast.content, ctx);
             }
+            return null;
         }
         compileLog(ast, ctx) {
             this.addLine(`console.log(${compileExpr(ast.expr)});`);
             if (ast.content) {
-                this.compileAST(ast.content, ctx);
+                return this.compileAST(ast.content, ctx);
             }
+            return null;
         }
         compileComment(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -3867,6 +3906,7 @@
                 const text = xmlDoc.createComment(ast.value);
                 block.insert(text);
             }
+            return block.varName;
         }
         compileText(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -3886,17 +3926,18 @@
                 const createFn = ast.type === 0 /* Text */ ? xmlDoc.createTextNode : xmlDoc.createComment;
                 block.insert(createFn.call(xmlDoc, value));
             }
+            return block.varName;
         }
         generateHandlerCode(rawEvent, handler) {
             const modifiers = rawEvent
                 .split(".")
                 .slice(1)
                 .map((m) => {
-                if (!MODS.has(m)) {
-                    throw new OwlError(`Unknown event modifier: '${m}'`);
-                }
-                return `"${m}"`;
-            });
+                    if (!MODS.has(m)) {
+                        throw new OwlError(`Unknown event modifier: '${m}'`);
+                    }
+                    return `"${m}"`;
+                });
             let modifiersCode = "";
             if (modifiers.length) {
                 modifiersCode = `${modifiers.join(",")}, `;
@@ -4078,6 +4119,7 @@
                     this.addLine(`let ${block.children.map((c) => c.varName)};`, codeIdx);
                 }
             }
+            return block.varName;
         }
         compileTEsc(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -4102,6 +4144,7 @@
                 const text = xmlDoc.createElement(`block-text-${idx}`);
                 block.insert(text);
             }
+            return block.varName;
         }
         compileTOut(ast, ctx) {
             let { block } = ctx;
@@ -4127,6 +4170,7 @@
                 blockStr = `safeOutput(${compileExpr(ast.expr)})`;
             }
             this.insertBlock(blockStr, block, ctx);
+            return block.varName;
         }
         compileTIfBranch(content, block, ctx) {
             this.target.indentLevel++;
@@ -4181,6 +4225,7 @@
                 const args = block.children.map((c) => c.varName).join(", ");
                 this.insertBlock(`multi([${args}])`, block, ctx);
             }
+            return block.varName;
         }
         compileTForeach(ast, ctx) {
             let { block } = ctx;
@@ -4220,8 +4265,8 @@
             if (this.dev) {
                 // Throw error on duplicate keys in dev mode
                 this.helpers.add("OwlError");
-                this.addLine(`if (keys${block.id}.has(key${this.target.loopLevel})) { throw new OwlError(\`Got duplicate key in t-foreach: \${key${this.target.loopLevel}}\`)}`);
-                this.addLine(`keys${block.id}.add(key${this.target.loopLevel});`);
+                this.addLine(`if (keys${block.id}.has(String(key${this.target.loopLevel}))) { throw new OwlError(\`Got duplicate key in t-foreach: \${key${this.target.loopLevel}}\`)}`);
+                this.addLine(`keys${block.id}.add(String(key${this.target.loopLevel}));`);
             }
             let id;
             if (ast.memo) {
@@ -4253,6 +4298,7 @@
                 this.addLine(`ctx = ctx.__proto__;`);
             }
             this.insertBlock("l", block, ctx);
+            return block.varName;
         }
         compileTKey(ast, ctx) {
             const tKeyExpr = generateId("tKey_");
@@ -4262,7 +4308,7 @@
                 block: ctx.block,
                 index: ctx.index,
             });
-            this.compileAST(ast.content, ctx);
+            return this.compileAST(ast.content, ctx);
         }
         compileMulti(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -4270,11 +4316,13 @@
             let codeIdx = this.target.code.length;
             if (isNewBlock) {
                 const n = ast.content.filter((c) => c.type !== 6 /* TSet */).length;
+                let result = null;
                 if (n <= 1) {
                     for (let child of ast.content) {
-                        this.compileAST(child, ctx);
+                        const blockName = this.compileAST(child, ctx);
+                        result = result || blockName;
                     }
-                    return;
+                    return result;
                 }
                 block = this.createBlock(block, "multi", ctx);
             }
@@ -4314,6 +4362,7 @@
                 const args = block.children.map((c) => c.varName).join(", ");
                 this.insertBlock(`multi([${args}])`, block, ctx);
             }
+            return block.varName;
         }
         compileTCall(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -4326,12 +4375,11 @@
                 this.addLine(`${ctxVar} = Object.create(${ctxVar});`);
                 this.addLine(`${ctxVar}[isBoundary] = 1;`);
                 this.helpers.add("isBoundary");
-                const nextId = BlockDescription.nextBlockId;
                 const subCtx = createContext(ctx, { preventRoot: true, ctxVar });
-                this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
-                if (nextId !== BlockDescription.nextBlockId) {
+                const bl = this.compileMulti({ type: 3 /* Multi */, content: ast.body }, subCtx);
+                if (bl) {
                     this.helpers.add("zero");
-                    this.addLine(`${ctxVar}[zero] = b${nextId};`);
+                    this.addLine(`${ctxVar}[zero] = ${bl};`);
                 }
             }
             const isDynamic = INTERP_REGEXP.test(ast.name);
@@ -4366,6 +4414,7 @@
             if (ast.body && !ctx.isLast) {
                 this.addLine(`${ctxVar} = ${ctxVar}.__proto__;`);
             }
+            return block.varName;
         }
         compileTCallBlock(ast, ctx) {
             let { block, forceNewBlock } = ctx;
@@ -4376,6 +4425,7 @@
             }
             block = this.createBlock(block, "multi", ctx);
             this.insertBlock(compileExpr(ast.name), block, { ...ctx, forceNewBlock: !block });
+            return block.varName;
         }
         compileTSet(ast, ctx) {
             this.target.shouldProtectScope = true;
@@ -4385,7 +4435,8 @@
                 this.helpers.add("LazyValue");
                 const bodyAst = { type: 3 /* Multi */, content: ast.body };
                 const name = this.compileInNewTarget("value", bodyAst, ctx);
-                let value = `new LazyValue(${name}, ctx, this, node)`;
+                let key = this.target.currentKey(ctx);
+                let value = `new LazyValue(${name}, ctx, this, node, ${key})`;
                 value = ast.value ? (value ? `withDefault(${expr}, ${value})` : expr) : value;
                 this.addLine(`ctx[\`${ast.name}\`] = ${value};`);
             }
@@ -4405,6 +4456,7 @@
                 this.helpers.add("setContextValue");
                 this.addLine(`setContextValue(${ctx.ctxVar || "ctx"}, "${ast.name}", ${value});`);
             }
+            return null;
         }
         generateComponentKey() {
             const parts = [generateId("__")];
@@ -4535,6 +4587,7 @@
             }
             block = this.createBlock(block, "multi", ctx);
             this.insertBlock(blockExpr, block, ctx);
+            return block.varName;
         }
         wrapWithEventCatcher(expr, on) {
             this.helpers.add("createCatcher");
@@ -4601,11 +4654,13 @@
             }
             block = this.createBlock(block, "multi", ctx);
             this.insertBlock(blockString, block, { ...ctx, forceNewBlock: false });
+            return block.varName;
         }
         compileTTranslation(ast, ctx) {
             if (ast.content) {
-                this.compileAST(ast.content, Object.assign({}, ctx, { translate: false }));
+                return this.compileAST(ast.content, Object.assign({}, ctx, { translate: false }));
             }
+            return null;
         }
         compileTPortal(ast, ctx) {
             if (!this.staticDefs.find((d) => d.id === "Portal")) {
@@ -4632,6 +4687,7 @@
             }
             block = this.createBlock(block, "multi", ctx);
             this.insertBlock(blockString, block, { ...ctx, forceNewBlock: false });
+            return block.varName;
         }
     }
 
@@ -5158,8 +5214,9 @@
             }
             // default slot
             const defaultContent = parseChildNodes(clone, ctx);
-            if (defaultContent) {
-                slots = slots || {};
+            slots = slots || {};
+            // t-set-slot="default" has priority over content
+            if (defaultContent && !slots.default) {
                 slots.default = { content: defaultContent, on, attrs: null, scope: defaultSlotScope };
             }
         }
@@ -5361,7 +5418,7 @@
                         if (line[columnIndex]) {
                             msg +=
                                 `\nThe error might be located at xml line ${lineNumber} column ${columnIndex}\n` +
-                                    `${line}\n${"-".repeat(columnIndex - 1)}^`;
+                                `${line}\n${"-".repeat(columnIndex - 1)}^`;
                         }
                     }
                 }
@@ -5801,9 +5858,9 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '2.0.0-beta-21';
-    __info__.date = '2022-09-26T13:49:57.969Z';
-    __info__.hash = 'ab72cdd';
+    __info__.version = '2.0.1';
+    __info__.date = '2022-10-21T08:41:11.269Z';
+    __info__.hash = '9fe8e93';
     __info__.url = 'https://github.com/odoo/owl';
 
 
