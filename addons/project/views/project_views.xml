@@ -1188,14 +1188,14 @@
                         </group>
                     </group>
                     <field attrs="{'invisible': [('project_id', '=', False)]}"
-                        name="task_properties" nolabel="1" columns="2"/>
+                        name="task_properties" nolabel="1" columns="2" hideKanbanOption="1"/>
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" type="html" options="{'collaborative': true, 'resizable': false}" placeholder="Task description..."/>
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
                             <field name="child_ids"
-                                   context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id,
+                                   context="{'search_view_ref' : 'project.view_task_search_form_extended', 'default_project_id': project_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id,
                                     'default_partner_id': partner_id, 'default_milestone_id': allow_milestones and milestone_id, 'search_default_display_project_id': project_id }"
                                    widget="many2many"
                                    domain="['!', ('id', 'parent_of', id)]">

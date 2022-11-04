@@ -6,6 +6,8 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'LinkPreviewCardView',
+    template: 'mail.LinkPreviewCardView',
+    templateGetter: 'linkPreviewCardView',
     recordMethods: {
         /**
          * Handles mouse enter event for the container of this element.
@@ -27,13 +29,8 @@ registerModel({
         },
     },
     fields: {
-        isHovered: attr({
-            default: false,
-        }),
-        linkPreview: one('LinkPreview', {
-            identifying: true,
-            inverse: 'linkPreviewCardView',
-        }),
+        isHovered: attr({ default: false }),
+        linkPreview: one('LinkPreview', { identifying: true, inverse: 'linkPreviewCardView' }),
         linkPreviewAsideView: one('LinkPreviewAsideView', {
             compute() {
                 if (!this.linkPreview.isDeletable) {
@@ -49,9 +46,6 @@ registerModel({
             },
             inverse: 'linkPreviewCardView',
         }),
-        linkPreviewListViewOwner: one('LinkPreviewListView', {
-            identifying: true,
-            inverse: 'linkPreviewAsCardViews',
-        }),
+        linkPreviewListViewOwner: one('LinkPreviewListView', { identifying: true, inverse: 'linkPreviewAsCardViews' }),
     },
 });

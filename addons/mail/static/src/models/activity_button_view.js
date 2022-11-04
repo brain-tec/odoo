@@ -1,11 +1,17 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'ActivityButtonView',
+    template: 'mail.ActivityButtonView',
+    templateGetter: 'activityButtonView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'buttonRef', refName: 'button' });
+    },
     identifyingMode: 'xor',
     recordMethods: {
         onClick(ev) {
@@ -19,9 +25,7 @@ registerModel({
         },
     },
     fields: {
-        activityListPopoverView: one('PopoverView', {
-            inverse: 'activityButtonViewOwnerAsActivityList',
-        }),
+        activityListPopoverView: one('PopoverView', { inverse: 'activityButtonViewOwnerAsActivityList' }),
         buttonClass: attr({
             compute() {
                 if (!this.thread) {
@@ -63,15 +67,9 @@ registerModel({
             },
         }),
         buttonRef: attr(),
-        kanbanFieldActivityViewOwner: one('KanbanFieldActivityView', {
-            identifying: true,
-            inverse: 'activityButtonView',
-        }),
-        listFieldActivityViewOwner: one('ListFieldActivityView', {
-            identifying: true,
-            inverse: 'activityButtonView',
-        }),
-        thread: one('Thread', {
+        kanbanFieldActivityViewOwner: one('KanbanFieldActivityView', { identifying: true, inverse: 'activityButtonView' }),
+        listFieldActivityViewOwner: one('ListFieldActivityView', { identifying: true, inverse: 'activityButtonView' }),
+        thread: one('Thread', { required: true,
             compute() {
                 if (this.kanbanFieldActivityViewOwner) {
                     return this.kanbanFieldActivityViewOwner.thread;
@@ -81,9 +79,8 @@ registerModel({
                 }
                 return clear();
             },
-            required: true,
         }),
-        webRecord: attr({
+        webRecord: attr({ required: true,
             compute() {
                 if (this.kanbanFieldActivityViewOwner) {
                     return this.kanbanFieldActivityViewOwner.webRecord;
@@ -93,7 +90,6 @@ registerModel({
                 }
                 return clear();
             },
-            required: true,
         }),
     },
 });

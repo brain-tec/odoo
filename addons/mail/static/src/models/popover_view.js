@@ -1,11 +1,27 @@
 /** @odoo-module **/
 
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
+import { usePosition } from '@web/core/position_hook';
+
 registerModel({
     name: 'PopoverView',
+    template: 'mail.PopoverView',
+    templateGetter: 'popoverView',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+        usePosition(
+            () => this.popoverView.anchorRef && this.popoverView.anchorRef.el,
+            {
+                popper: "root",
+                margin: 16,
+                position: this.popoverView.position,
+            }
+        );
+    },
     identifyingMode: 'xor',
     lifecycleHooks: {
         _created() {
@@ -46,37 +62,26 @@ registerModel({
         },
     },
     fields: {
-        activityButtonViewOwnerAsActivityList: one('ActivityButtonView', {
-            identifying: true,
-            inverse: 'activityListPopoverView',
-        }),
-        activityCellViewOwnerAsActivityList: one('ActivityCellView', {
-            identifying: true,
-            inverse: 'activityListPopoverView',
-        }),
-        activityListView: one('ActivityListView', {
+        activityButtonViewOwnerAsActivityList: one('ActivityButtonView', { identifying: true, inverse: 'activityListPopoverView' }),
+        activityCellViewOwnerAsActivityList: one('ActivityCellView', { identifying: true, inverse: 'activityListPopoverView' }),
+        activityListView: one('ActivityListView', { inverse: 'popoverViewOwner',
             compute() {
                 return this.activityButtonViewOwnerAsActivityList || this.activityCellViewOwnerAsActivityList ? {} : clear();
             },
-            inverse: 'popoverViewOwner',
         }),
-        activityMarkDonePopoverContentView: one('ActivityMarkDonePopoverContentView', {
+        activityMarkDonePopoverContentView: one('ActivityMarkDonePopoverContentView', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.activityViewOwnerAsMarkDone) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
-        activityViewOwnerAsMarkDone: one('ActivityView', {
-            identifying: true,
-            inverse: 'markDonePopoverView',
-        }),
+        activityViewOwnerAsMarkDone: one('ActivityView', { identifying: true, inverse: 'markDonePopoverView' }),
         /**
          * HTML element that is used as anchor position for this popover view.
          */
-        anchorRef: attr({
+        anchorRef: attr({ required: true,
             compute() {
                 if (this.activityViewOwnerAsMarkDone) {
                     return this.activityViewOwnerAsMarkDone.markDoneButtonRef;
@@ -107,45 +112,35 @@ registerModel({
                 }
                 return clear();
             },
-            required: true,
         }),
-        callActionListViewOwnerAsMoreMenu: one('CallActionListView', {
-            identifying: true,
-            inverse: 'moreMenuPopoverView',
-        }),
-        callOptionMenuView: one('CallOptionMenu', {
+        callActionListViewOwnerAsMoreMenu: one('CallActionListView', { identifying: true, inverse: 'moreMenuPopoverView' }),
+        callOptionMenuView: one('CallOptionMenu', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.callActionListViewOwnerAsMoreMenu) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
-        callParticipantCardOwner: one('CallParticipantCard', {
-            identifying: true,
-            inverse: 'callParticipantCardPopoverView',
-        }),
-        callParticipantCardPopoverContentView: one('CallParticipantCardPopoverContentView', {
+        callParticipantCardOwner: one('CallParticipantCard', { identifying: true, inverse: 'callParticipantCardPopoverView' }),
+        callParticipantCardPopoverContentView: one('CallParticipantCardPopoverContentView', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.callParticipantCardOwner) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
         /**
          * The record that represents the content inside the popover view.
          */
-        channelInvitationForm: one('ChannelInvitationForm', {
+        channelInvitationForm: one('ChannelInvitationForm', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.threadViewTopbarOwnerAsInvite) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
         /**
          * States the OWL component of this popover view.
@@ -154,14 +149,11 @@ registerModel({
         /**
          * If set, this popover view is owned by a composer view.
          */
-        composerViewOwnerAsEmoji: one('ComposerView', {
-            identifying: true,
-            inverse: 'emojisPopoverView',
-        }),
+        composerViewOwnerAsEmoji: one('ComposerView', { identifying: true, inverse: 'emojisPopoverView' }),
         /**
          * Determines the record that is content of this popover view.
          */
-        content: one('Record', {
+        content: one('Record', { required: true,
             compute() {
                 if (this.activityMarkDonePopoverContentView) {
                     return this.activityMarkDonePopoverContentView;
@@ -186,13 +178,12 @@ registerModel({
                 }
                 return clear();
             },
-            required: true,
         }),
         /**
          * Determines the class name for the component
          * that is content of this popover view.
          */
-        contentClassName: attr({
+        contentClassName: attr({ default: '',
             compute() {
                 if (this.channelInvitationForm) {
                     return 'o_PopoverView_channelInvitationForm';
@@ -202,12 +193,11 @@ registerModel({
                 }
                 return clear();
             },
-            default: '',
         }),
         /**
          * Determines the component name of the content.
          */
-        contentComponentName: attr({
+        contentComponentName: attr({ default: '', required: true,
             compute() {
                 if (this.activityMarkDonePopoverContentView) {
                     return 'ActivityMarkDonePopoverContentView';
@@ -232,13 +222,11 @@ registerModel({
                 }
                 return clear();
             },
-            default: '',
-            required: true,
         }),
         /**
          * If set, the content of this popover view is a list of emojis.
          */
-        emojiPickerView: one('EmojiPickerView', {
+        emojiPickerView: one('EmojiPickerView', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.composerViewOwnerAsEmoji) {
                     return {};
@@ -248,42 +236,33 @@ registerModel({
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
-        manager: one('PopoverManager', {
+        manager: one('PopoverManager', { inverse: 'popoverViews',
             compute() {
                 if (this.messaging.popoverManager) {
                     return this.messaging.popoverManager;
                 }
                 return clear();
             },
-            inverse: 'popoverViews',
         }),
         /**
          * If set, this popover view is owned by a message action view.
          */
-        messageActionViewOwnerAsReaction: one('MessageActionView', {
-            identifying: true,
-            inverse: 'reactionPopoverView',
-        }),
-        messageNotificationPopoverContentView: one('MessageNotificationPopoverContentView', {
+        messageActionViewOwnerAsReaction: one('MessageActionView', { identifying: true, inverse: 'reactionPopoverView' }),
+        messageNotificationPopoverContentView: one('MessageNotificationPopoverContentView', { inverse: 'popoverViewOwner',
             compute() {
                 if (this.messageViewOwnerAsNotificationContent) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'popoverViewOwner',
         }),
-        messageViewOwnerAsNotificationContent: one('MessageView', {
-            identifying: true,
-            inverse: 'notificationPopoverView',
-        }),
+        messageViewOwnerAsNotificationContent: one('MessageView', { identifying: true, inverse: 'notificationPopoverView' }),
         /**
          * Position of the popover view relative to its anchor point.
          * Valid values: 'top', 'right', 'bottom', 'left'
          */
-        position: attr({
+        position: attr({ default: 'top',
             compute() {
                 if (this.activityViewOwnerAsMarkDone) {
                     return 'right';
@@ -311,14 +290,10 @@ registerModel({
                 }
                 return clear();
             },
-            default: 'top',
         }),
         /**
          * If set, this popover view is owned by a thread view topbar record.
          */
-        threadViewTopbarOwnerAsInvite: one('ThreadViewTopbar', {
-            identifying: true,
-            inverse: 'invitePopoverView',
-        }),
+        threadViewTopbarOwnerAsInvite: one('ThreadViewTopbar', { identifying: true, inverse: 'invitePopoverView' }),
     },
 });

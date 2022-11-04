@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
@@ -9,6 +10,11 @@ import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
     name: 'ActivityView',
+    template: 'mail.ActivityView',
+    templateGetter: 'activityView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'markDoneButtonRef', refName: 'markDoneButton', });
+    },
     recordMethods: {
         /**
          * Handles the click on a link inside the activity.
@@ -68,20 +74,12 @@ registerModel({
         },
     },
     fields: {
-        activity: one('Activity', {
-            identifying: true,
-            inverse: 'activityViews',
-        }),
-        activityBoxView: one('ActivityBoxView', {
-            identifying: true,
-            inverse: 'activityViews',
-        }),
+        activity: one('Activity', { identifying: true, inverse: 'activityViews' }),
+        activityBoxView: one('ActivityBoxView', { identifying: true, inverse: 'activityViews' }),
         /**
          * Determines whether the details are visible.
          */
-        areDetailsVisible: attr({
-            default: false,
-        }),
+        areDetailsVisible: attr({ default: false }),
         /**
          * Compute the string for the assigned user.
          */
@@ -93,14 +91,7 @@ registerModel({
                 return sprintf(this.env._t("for %s"), this.activity.assignee.nameOrDisplayName);
             },
         }),
-        clockWatcher: one('ClockWatcher', {
-            default: {
-                clock: {
-                    frequency: 60 * 1000,
-                },
-            },
-            inverse: 'activityViewOwner',
-        }),
+        clockWatcher: one('ClockWatcher', { default: { clock: { frequency: 60 * 1000 } }, inverse: 'activityViewOwner' }),
         /**
          * Compute the label for "when" the activity is due.
          */
@@ -129,11 +120,10 @@ registerModel({
                 }
             },
         }),
-        fileUploader: one('FileUploader', {
+        fileUploader: one('FileUploader', { inverse: 'activityView',
             compute() {
                 return this.activity.category === 'upload_file' ? {} : clear();
             },
-            inverse: 'activityView',
         }),
         /**
          * Format the create date to something human reabable.
@@ -161,16 +151,13 @@ registerModel({
                 return momentDeadlineDate.format(datetimeFormat);
             },
         }),
-        mailTemplateViews: many('MailTemplateView', {
+        mailTemplateViews: many('MailTemplateView', { inverse: 'activityViewOwner',
             compute() {
                 return this.activity.mailTemplates.map(mailTemplate => ({ mailTemplate }));
             },
-            inverse: 'activityViewOwner',
         }),
         markDoneButtonRef: attr(),
-        markDonePopoverView: one('PopoverView', {
-            inverse: 'activityViewOwnerAsMarkDone',
-        }),
+        markDonePopoverView: one('PopoverView', { inverse: 'activityViewOwnerAsMarkDone', }),
         /**
          * Label for mark as done. This is just for translations purpose.
          */

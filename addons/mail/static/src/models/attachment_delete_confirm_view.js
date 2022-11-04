@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
@@ -7,6 +8,11 @@ import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
     name: 'AttachmentDeleteConfirmView',
+    template: 'mail.AttachmentDeleteConfirmView',
+    templateGetter: 'attachmentDeleteConfirmView',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+    },
     recordMethods: {
         /**
          * Returns whether the given html element is inside this attachment delete confirm view.
@@ -29,7 +35,7 @@ registerModel({
         },
     },
     fields: {
-        attachment: one('Attachment', {
+        attachment: one('Attachment', { required: true,
             compute() {
                 if (this.dialogOwner && this.dialogOwner.attachmentCardOwnerAsAttachmentDeleteConfirm) {
                     return this.dialogOwner.attachmentCardOwnerAsAttachmentDeleteConfirm.attachment;
@@ -39,7 +45,6 @@ registerModel({
                 }
                 return clear();
             },
-            required: true,
         }),
         body: attr({
             compute() {
@@ -66,9 +71,6 @@ registerModel({
             },
         }),
         component: attr(),
-        dialogOwner: one('Dialog', {
-            identifying: true,
-            inverse: 'attachmentDeleteConfirmView',
-        }),
+        dialogOwner: one('Dialog', { identifying: true, inverse: 'attachmentDeleteConfirmView' }),
     },
 });

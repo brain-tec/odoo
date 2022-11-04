@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
@@ -7,6 +8,11 @@ import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 registerModel({
     name: 'CallParticipantCard',
+    template: 'mail.CallParticipantCard',
+    templateGetter: 'callParticipantCard',
+    componentSetup() {
+        useRefToModel({ fieldName: 'volumeMenuAnchorRef', refName: 'volumeMenuAnchor' });
+    },
     identifyingMode: 'xor',
     recordMethods: {
         /**
@@ -61,68 +67,52 @@ registerModel({
         },
     },
     fields: {
-        callParticipantCardPopoverView: one('PopoverView', {
-            inverse: 'callParticipantCardOwner',
-        }),
-        channelMember: one('ChannelMember', {
+        callParticipantCardPopoverView: one('PopoverView', { inverse: 'callParticipantCardOwner' }),
+        channelMember: one('ChannelMember', { inverse: 'callParticipantCards',
             compute() {
                 if (this.sidebarViewTileOwner) {
                     return this.sidebarViewTileOwner.channelMember;
                 }
                 return this.mainViewTileOwner.channelMember;
             },
-            inverse: 'callParticipantCards',
         }),
-        mainViewTileOwner: one('CallMainViewTile', {
-            identifying: true,
-            inverse: 'participantCard',
-        }),
+        mainViewTileOwner: one('CallMainViewTile', { identifying: true, inverse: 'participantCard', }),
         /**
          * Determines if this card has to be displayed in a minimized form.
          */
-        isMinimized: attr({
+        isMinimized: attr({ default: false,
             compute() {
                 return Boolean(this.callView && this.callView.isMinimized);
             },
-            default: false,
         }),
         /**
          * Determines if the rtcSession is in a valid "talking" state.
          */
-        isTalking: attr({
+        isTalking: attr({ default: false,
             compute() {
                 return Boolean(this.rtcSession && this.rtcSession.isTalking && !this.rtcSession.isMute);
             },
-            default: false,
         }),
         /**
          * The callView that displays this card.
          */
-        callView: one('CallView', {
+        callView: one('CallView', { inverse: 'participantCards',
             compute() {
                 if (this.sidebarViewTileOwner) {
                     return this.sidebarViewTileOwner.callSidebarViewOwner.callView;
                 }
                 return this.mainViewTileOwner.callMainViewOwner.callView;
             },
-            inverse: 'participantCards',
         }),
-        rtcSession: one('RtcSession', {
-            related: 'channelMember.rtcSession',
-            inverse: 'callParticipantCards',
-        }),
-        sidebarViewTileOwner: one('CallSidebarViewTile', {
-            identifying: true,
-            inverse: 'participantCard',
-        }),
-        callParticipantVideoView: one('CallParticipantVideoView', {
+        rtcSession: one('RtcSession', { inverse: 'callParticipantCards', related: 'channelMember.rtcSession' }),
+        sidebarViewTileOwner: one('CallSidebarViewTile', { identifying: true, inverse: 'participantCard' }),
+        callParticipantVideoView: one('CallParticipantVideoView', { inverse: 'callParticipantCardOwner',
             compute() {
                 if (this.rtcSession && this.rtcSession.videoStream) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'callParticipantCardOwner',
         }),
         volumeMenuAnchorRef: attr(),
     },

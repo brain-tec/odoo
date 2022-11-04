@@ -1,11 +1,17 @@
 /** @odoo-module **/
 
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'EmojiPickerView',
+    template: 'mail.EmojiPickerView',
+    templateGetter: 'emojiPickerView',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+    },
     lifecycleHooks: {
         _created() {
             if (this.messaging.emojiRegistry.isLoaded || this.messaging.emojiRegistry.isLoading) {
@@ -31,11 +37,10 @@ registerModel({
             },
             inverse: 'emojiPickerViewAsActive',
         }),
-        categories: many('EmojiPickerView.Category', {
+        categories: many('EmojiPickerView.Category', { inverse: 'emojiPickerViewOwner',
             compute() {
                 return this.messaging.emojiRegistry.allCategories.map(category => ({ category }));
             },
-            inverse: 'emojiPickerViewOwner',
         }),
         defaultActiveCategory: one('EmojiPickerView.Category', {
             compute() {
@@ -45,27 +50,10 @@ registerModel({
                 return this.categories[0];
             },
         }),
-        emojiGridView: one('EmojiGridView', {
-            default: {},
-            inverse: 'emojiPickerViewOwner',
-            readonly: true,
-            required: true,
-        }),
-        emojiSearchBarView: one('EmojiSearchBarView', {
-            default: {},
-            inverse: 'emojiPickerView',
-            readonly: true,
-        }),
-        headerView: one('EmojiPickerHeaderView', {
-            default: {},
-            inverse: 'emojiPickerViewOwner',
-            readonly: true,
-            required: true,
-        }),
-        popoverViewOwner: one('PopoverView', {
-            identifying: true,
-            inverse: 'emojiPickerView',
-        }),
+        emojiGridView: one('EmojiGridView', { default: {}, inverse: 'emojiPickerViewOwner', readonly: true, required: true }),
+        emojiSearchBarView: one('EmojiSearchBarView', { default: {}, inverse: 'emojiPickerView', readonly: true }),
+        headerView: one('EmojiPickerHeaderView', { default: {}, inverse: 'emojiPickerViewOwner', readonly: true, required: true }),
+        popoverViewOwner: one('PopoverView', { identifying: true, inverse: 'emojiPickerView' }),
         component: attr(),
     },
 });

@@ -7,6 +7,8 @@ import { isEventHandled } from '@mail/utils/utils';
 
 registerModel({
     name: 'ChatWindowHeaderView',
+    template: 'mail.ChatWindowHeaderView',
+    templateGetter: 'chatWindowHeaderView',
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -30,21 +32,15 @@ registerModel({
         },
     },
     fields: {
-        chatWindowOwner: one('ChatWindow', {
-            identifying: true,
-            inverse: 'chatWindowHeaderView',
-        }),
-        hiddenMenuItem: one('ChatWindowHiddenMenuItemView', {
-            inverse: 'chatWindowHeaderView',
-        }),
-        threadIconView: one('ThreadIconView', {
+        chatWindowOwner: one('ChatWindow', { identifying: true, inverse: 'chatWindowHeaderView' }),
+        hiddenMenuItem: one('ChatWindowHiddenMenuItemView', { inverse: 'chatWindowHeaderView' }),
+        threadIconView: one('ThreadIconView', { inverse: 'chatWindowHeaderViewOwner',
             compute() {
                 if (this.chatWindowOwner.thread && this.chatWindowOwner.thread.channel) {
                     return {};
                 }
                 return clear();
             },
-            inverse: 'chatWindowHeaderViewOwner',
         })
     },
 });

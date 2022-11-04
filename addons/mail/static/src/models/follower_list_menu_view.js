@@ -1,10 +1,16 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 
 registerModel({
     name: 'FollowerListMenuView',
+    template: 'mail.FollowerListMenuView',
+    templateGetter: 'followerListMenuView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'dropdownRef', refName: 'dropdown' });
+    },
     lifecycleHooks: {
         _created() {
             document.addEventListener('click', this._onClickCaptureGlobal, true);
@@ -60,24 +66,18 @@ registerModel({
         },
     },
     fields: {
-        chatterOwner: one('Chatter', {
-            identifying: true,
-            inverse: 'followerListMenuView',
-        }),
+        chatterOwner: one('Chatter', { identifying: true, inverse: 'followerListMenuView' }),
         dropdownRef: attr(),
-        followerViews: many('FollowerView', {
+        followerViews: many('FollowerView', { inverse: 'followerListMenuViewOwner',
             compute() {
                 return this.chatterOwner.thread.followers.map(follower => ({ follower }));
             },
-            inverse: 'followerListMenuViewOwner',
         }),
         isDisabled: attr({
             compute() {
                 return !this.chatterOwner.hasReadAccess;
             }
         }),
-        isDropdownOpen: attr({
-            default: false,
-        }),
+        isDropdownOpen: attr({ default: false }),
     },
 });

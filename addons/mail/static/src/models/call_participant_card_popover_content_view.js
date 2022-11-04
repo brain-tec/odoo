@@ -7,6 +7,8 @@ import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
     name: 'CallParticipantCardPopoverContentView',
+    template: 'mail.CallParticipantCardPopoverContentView',
+    templateGetter: 'callParticipantCardPopoverContentView',
     recordMethods: {
         /**
          * @param {Event} ev
@@ -16,9 +18,7 @@ registerModel({
         },
     },
     fields: {
-        callParticipantCard: one('CallParticipantCard', {
-            related: 'popoverViewOwner.callParticipantCardOwner',
-        }),
+        callParticipantCard: one('CallParticipantCard', { related: 'popoverViewOwner.callParticipantCardOwner' }),
         /**
          * Determines whether or not we show the connection info.
          */
@@ -61,9 +61,6 @@ registerModel({
                 );
             },
         }),
-        popoverViewOwner: one('PopoverView', {
-            identifying: true,
-            inverse: 'callParticipantCardPopoverContentView',
-        })
+        popoverViewOwner: one('PopoverView', { identifying: true, inverse: 'callParticipantCardPopoverContentView' }),
     },
 });

@@ -5,6 +5,8 @@ import { one } from '@mail/model/model_field';
 
 registerModel({
     name: 'FollowerView',
+    template: 'mail.FollowerView',
+    templateGetter: 'followerView',
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -36,13 +38,7 @@ registerModel({
         },
     },
     fields: {
-        follower: one('Follower', {
-            identifying: true,
-            inverse: 'followerViews',
-        }),
-        followerListMenuViewOwner: one('FollowerListMenuView', {
-            identifying: true,
-            inverse: 'followerViews',
-        }),
+        follower: one('Follower', { identifying: true, inverse: 'followerViews' }),
+        followerListMenuViewOwner: one('FollowerListMenuView', { identifying: true, inverse: 'followerViews' }),
     },
 });

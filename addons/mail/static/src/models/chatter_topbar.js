@@ -6,11 +6,13 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'ChatterTopbar',
+    template: 'mail.ChatterTopbar',
+    templateGetter: 'chatterTopbar',
     fields: {
         /**
          * Determines the label on the attachment button of the topbar.
          */
-        attachmentButtonText: attr({
+        attachmentButtonText: attr({ default: "",
             compute() {
                 if (!this.chatter || !this.chatter.thread) {
                     return clear();
@@ -21,11 +23,7 @@ registerModel({
                 }
                 return attachments.length;
             },
-            default: "",
         }),
-        chatter: one('Chatter', {
-            identifying: true,
-            inverse: 'topbar',
-        }),
+        chatter: one('Chatter', { identifying: true, inverse: 'topbar' }),
     },
 });

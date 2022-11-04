@@ -6,6 +6,8 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'MobileMessagingNavbarView',
+    template: 'mail.MobileMessagingNavbarView',
+    templateGetter: 'mobileMessagingNavbarView',
     identifyingMode: 'xor',
     recordMethods: {
         /**
@@ -54,14 +56,8 @@ registerModel({
                 return clear();
             },
         }),
-        discuss: one('Discuss', {
-            identifying: true,
-            inverse: 'mobileMessagingNavbarView',
-        }),
-        messagingMenu: one('MessagingMenu', {
-            identifying: true,
-            inverse: 'mobileMessagingNavbarView',
-        }),
+        discuss: one('Discuss', { identifying: true, inverse: 'mobileMessagingNavbarView' }),
+        messagingMenu: one('MessagingMenu', { identifying: true, inverse: 'mobileMessagingNavbarView' }),
         /**
          * Ordered list of tabs that this navbar has.
          * Format of tab:

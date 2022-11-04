@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
@@ -7,6 +8,11 @@ import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
     name: 'MessageActionView',
+    template: "mail.MessageActionView",
+    templateGetter: 'messageActionView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'actionRef', refName: 'action' });
+    },
     recordMethods: {
         /**
          * @private
@@ -56,10 +62,7 @@ registerModel({
          * States the reference to the action in the component.
          */
         actionRef: attr(),
-        actionViewCounterContribution: attr({
-            default: 1,
-            readonly: true,
-        }),
+        actionViewCounterContribution: attr({ default: 1, readonly: true }),
         ariaPressedState: attr({
             compute() {
                 if (this.messageAction.messageActionListOwnerAsToggleStar) {
@@ -68,7 +71,7 @@ registerModel({
                 return clear();
             },
         }),
-        classNames: attr({
+        classNames: attr({ default: '',
             compute() {
                 const classNames = [];
                 classNames.push(this.paddingClassNames);
@@ -102,16 +105,10 @@ registerModel({
                 }
                 return classNames.join(' ');
             },
-            default: '',
         }),
-        deleteConfirmDialog: one('Dialog', {
-            inverse: 'messageActionViewOwnerAsDeleteConfirm',
-        }),
-        messageAction: one('MessageAction', {
-            identifying: true,
-            inverse: 'messageActionView',
-        }),
-        paddingClassNames: attr({
+        deleteConfirmDialog: one('Dialog', { inverse: 'messageActionViewOwnerAsDeleteConfirm' }),
+        messageAction: one('MessageAction', { identifying: true, inverse: 'messageActionView' }),
+        paddingClassNames: attr({ default: '',
             compute() {
                 const isDeviceSmall = this.messaging.device.isSmall;
                 const paddingClassNames = [];
@@ -146,11 +143,8 @@ registerModel({
                 paddingClassNames.push(isDeviceSmall ? 'py-3' : 'py-2');
                 return paddingClassNames.join(' ');
             },
-            default: '',
         }),
-        reactionPopoverView: one('PopoverView', {
-            inverse: 'messageActionViewOwnerAsReaction',
-        }),
+        reactionPopoverView: one('PopoverView', { inverse: 'messageActionViewOwnerAsReaction' }),
         tabindex: attr({
             compute() {
                 if (this.messageAction.messageActionListOwnerAsReaction) {
@@ -159,7 +153,7 @@ registerModel({
                 return 0;
             },
         }),
-        title: attr({
+        title: attr({ default: '',
             compute() {
                 switch (this.messageAction.messageActionListOwner) {
                     case this.messageAction.messageActionListOwnerAsDelete:
@@ -183,7 +177,6 @@ registerModel({
                         return clear();
                 }
             },
-            default: '',
         }),
     },
 });

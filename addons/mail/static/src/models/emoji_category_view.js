@@ -5,6 +5,8 @@ import { attr, one } from '@mail/model/model_field';
 
 registerModel({
     name: 'EmojiCategoryView',
+    template: 'mail.EmojiCategoryView',
+    templateGetter: 'emojiCategoryView',
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -33,27 +35,15 @@ registerModel({
         },
     },
     fields: {
-        category: one('EmojiCategory', {
-            related: 'viewCategory.category',
-        }),
-        emojiCategoryBarViewOwner: one('EmojiCategoryBarView', {
-            identifying: true,
-            inverse: 'emojiCategoryViews',
-        }),
-        emojiPickerView: one('EmojiPickerView', {
-            related: 'emojiCategoryBarViewOwner.emojiPickerView',
-        }),
+        category: one('EmojiCategory', { related: 'viewCategory.category' }),
+        emojiCategoryBarViewOwner: one('EmojiCategoryBarView', { identifying: true, inverse: 'emojiCategoryViews' }),
+        emojiPickerView: one('EmojiPickerView', { related: 'emojiCategoryBarViewOwner.emojiPickerView' }),
         isActive: attr({
             compute() {
                 return Boolean(this.viewCategory.emojiPickerViewAsActive);
             },
         }),
-        isHovered: attr({
-            default: false,
-        }),
-        viewCategory: one('EmojiPickerView.Category', {
-            identifying: true,
-            inverse: 'emojiCategoryView',
-        }),
+        isHovered: attr({ default: false }),
+        viewCategory: one('EmojiPickerView.Category', { identifying: true, inverse: 'emojiCategoryView' }),
     },
 });

@@ -6,22 +6,18 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'EmojiCategoryBarView',
+    template: 'mail.EmojiCategoryBarView',
+    templateGetter: 'emojiCategoryBarView',
     fields: {
-        emojiCategoryViews: many('EmojiCategoryView', {
+        emojiCategoryViews: many('EmojiCategoryView', { inverse: 'emojiCategoryBarViewOwner',
             compute() {
                 if (!this.emojiPickerView) {
                     return clear();
                 }
                 return this.emojiPickerView.categories.map(category => ({ viewCategory: category }));
             },
-            inverse: 'emojiCategoryBarViewOwner',
         }),
-        emojiPickerHeaderViewOwner: one('EmojiPickerHeaderView', {
-            identifying: true,
-            inverse: 'emojiCategoryBarView',
-        }),
-        emojiPickerView: one('EmojiPickerView', {
-            related: 'emojiPickerHeaderViewOwner.emojiPickerViewOwner',
-        }),
+        emojiPickerHeaderViewOwner: one('EmojiPickerHeaderView', { identifying: true, inverse: 'emojiCategoryBarView' }),
+        emojiPickerView: one('EmojiPickerView', { related: 'emojiPickerHeaderViewOwner.emojiPickerViewOwner' }),
     },
 });

@@ -1,11 +1,17 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'CallActionListView',
+    template: 'mail.CallActionListView',
+    templateGetter: 'callActionListView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'moreButtonRef', refName: 'moreButton' });
+    },
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -81,7 +87,7 @@ registerModel({
         },
     },
     fields: {
-        callButtonTitle: attr({
+        callButtonTitle: attr({ default: '',
             compute() {
                 if (!this.thread) {
                     return clear();
@@ -92,17 +98,10 @@ registerModel({
                     return this.env._t("Join Call");
                 }
             },
-            default: '',
         }),
-        callMainView: one('CallMainView', {
-            identifying: true,
-            inverse: 'callActionListView',
-        }),
-        callView: one('CallView', {
-            related: 'callMainView.callView',
-            required: true,
-        }),
-        cameraButtonTitle: attr({
+        callMainView: one('CallMainView', { identifying: true, inverse: 'callActionListView' }),
+        callView: one('CallView', { related: 'callMainView.callView', required: true }),
+        cameraButtonTitle: attr({ default: '',
             compute() {
                 if (this.messaging.rtc.sendUserVideo) {
                     return this.env._t("Stop camera");
@@ -110,9 +109,8 @@ registerModel({
                     return this.env._t("Turn camera on");
                 }
             },
-            default: '',
         }),
-        headphoneButtonTitle: attr({
+        headphoneButtonTitle: attr({ default: '',
             compute() {
                 if (!this.messaging.rtc.currentRtcSession) {
                     return clear();
@@ -123,7 +121,6 @@ registerModel({
                     return this.env._t("Deafen");
                 }
             },
-            default: '',
         }),
         isSmall: attr({
             compute() {
@@ -143,10 +140,8 @@ registerModel({
             },
         }),
         moreButtonRef: attr(),
-        moreMenuPopoverView: one('PopoverView', {
-            inverse: 'callActionListViewOwnerAsMoreMenu',
-        }),
-        screenSharingButtonTitle: attr({
+        moreMenuPopoverView: one('PopoverView', { inverse: 'callActionListViewOwnerAsMoreMenu' }),
+        screenSharingButtonTitle: attr({ default: '',
             compute() {
                 if (this.messaging.rtc.sendDisplay) {
                     return this.env._t("Stop screen sharing");
@@ -154,11 +149,7 @@ registerModel({
                     return this.env._t("Share screen");
                 }
             },
-            default: '',
         }),
-        thread: one('Thread', {
-            related: 'callMainView.thread',
-            required: true,
-        }),
+        thread: one('Thread', { related: 'callMainView.thread', required: true }),
     },
 });

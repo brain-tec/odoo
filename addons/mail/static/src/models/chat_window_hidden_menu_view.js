@@ -1,11 +1,21 @@
 /** @odoo-module **/
 
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
+import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'ChatWindowHiddenMenuView',
+    template: 'mail.ChatWindowHiddenMenuView',
+    templateGetter: 'chatWindowHiddenMenuView',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+        useRefToModel({ fieldName: 'listRef', refName: 'list' });
+        useUpdateToModel({ methodName: 'onComponentUpdate' });
+    },
     lifecycleHooks: {
         _created() {
             document.addEventListener('click', this._onClickCaptureGlobal, true);
@@ -48,14 +58,11 @@ registerModel({
     },
     fields: {
         component: attr(),
-        isOpen: attr({
-            default: false,
-        }),
-        items: many('ChatWindowHiddenMenuItemView', {
+        isOpen: attr({ default: false }),
+        items: many('ChatWindowHiddenMenuItemView', { inverse: 'owner',
             compute() {
                 return this.owner.hiddenChatWindowHeaderViews.map(chatWindowHeaderView => ({ chatWindowHeaderView }));
             },
-            inverse: 'owner',
         }),
         lastItem: one('ChatWindowHiddenMenuItemView', {
             compute() {
@@ -70,9 +77,6 @@ registerModel({
          * browser screen height.
          */
         listRef: attr(),
-        owner: one('ChatWindowManager', {
-            identifying: true,
-            inverse: 'hiddenMenuView',
-        }),
+        owner: one('ChatWindowManager', { identifying: true, inverse: 'hiddenMenuView' }),
     },
 });

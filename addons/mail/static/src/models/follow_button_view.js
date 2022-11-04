@@ -6,6 +6,8 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'FollowButtonView',
+    template: 'mail.FollowButtonView',
+    templateGetter: 'followButtonView',
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -52,10 +54,7 @@ registerModel({
         },
     },
     fields: {
-        chatterOwner: one('Chatter', {
-            identifying: true,
-            inverse: 'followButtonView',
-        }),
+        chatterOwner: one('Chatter', { identifying: true, inverse: 'followButtonView' }),
         followingText: attr({
             compute() {
                 return this.env._t("Following");
@@ -69,9 +68,7 @@ registerModel({
                 return !this.chatterOwner.hasReadAccess;
             },
         }),
-        isUnfollowButtonHighlighted: attr({
-            default: false,
-        }),
+        isUnfollowButtonHighlighted: attr({ default: false }),
         unfollowingText: attr({
             compute() {
                 return this.env._t("Unfollow");

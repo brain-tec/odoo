@@ -6,6 +6,8 @@ import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
     name: 'MessageInReplyToView',
+    template: "mail.MessageInReplyToView",
+    templateGetter: 'messageInReplyToView',
     recordMethods: {
         /**
          * @private
@@ -47,9 +49,6 @@ registerModel({
                 return !this.messageView.message.parentMessage.isBodyEmpty;
             },
         }),
-        messageView: one('MessageView', {
-            identifying: true,
-            inverse: 'messageInReplyToView',
-        }),
+        messageView: one('MessageView', { identifying: true, inverse: 'messageInReplyToView' }),
     },
 });

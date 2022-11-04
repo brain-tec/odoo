@@ -5,6 +5,8 @@ import { one } from '@mail/model/model_field';
 
 registerModel({
     name: 'MailTemplateView',
+    template: 'mail.MailTemplateView',
+    templateGetter: 'mailTemplateView',
     recordMethods: {
         /**
          * @param {MouseEvent} ev
@@ -40,14 +42,8 @@ registerModel({
                 }
             }
         }),
-        activityListViewItemOwner: one('ActivityListViewItem', {
-            inverse: 'mailTemplateViews',
-        }),
-        activityViewOwner: one('ActivityView', {
-            inverse: 'mailTemplateViews',
-        }),
-        mailTemplate: one('MailTemplate', {
-            identifying: true,
-        }),
+        activityListViewItemOwner: one('ActivityListViewItem', { inverse: 'mailTemplateViews' }),
+        activityViewOwner: one('ActivityView', { inverse: 'mailTemplateViews' }),
+        mailTemplate: one('MailTemplate', { identifying: true }),
     },
 });

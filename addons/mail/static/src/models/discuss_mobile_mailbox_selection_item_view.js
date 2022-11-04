@@ -5,6 +5,8 @@ import { one } from '@mail/model/model_field';
 
 registerModel({
     name: 'DiscussMobileMailboxSelectionItemView',
+    template: 'mail.DiscussMobileMailboxSelectionItemView',
+    templateGetter: 'discussMobileMailboxSelectionItemView',
     recordMethods: {
         onClick() {
             if (!this.exists()) {
@@ -14,13 +16,7 @@ registerModel({
         },
     },
     fields: {
-        mailbox: one('Mailbox', {
-            identifying: true,
-            inverse: 'discussMobileSelectionItems',
-        }),
-        owner: one('DiscussMobileMailboxSelectionView', {
-            identifying: true,
-            inverse: 'items',
-        }),
+        mailbox: one('Mailbox', { identifying: true, inverse: 'discussMobileSelectionItems' }),
+        owner: one('DiscussMobileMailboxSelectionView', { identifying: true, inverse: 'items' }),
     },
 });

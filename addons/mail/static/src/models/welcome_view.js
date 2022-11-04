@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
+import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
@@ -11,6 +13,12 @@ const getNextGuestNameInputId = (function () {
 
 registerModel({
     name: 'WelcomeView',
+    template: 'mail.WelcomeView',
+    templateGetter: 'welcomeView',
+    componentSetup() {
+        useRefToModel({ fieldName: 'guestNameInputRef', modelName: 'WelcomeView', refName: 'guestNameInput' });
+        useUpdateToModel({ methodName: 'onComponentUpdate', modelName: 'WelcomeView' });
+    },
     recordMethods: {
         /**
          * Updates guest if needed then displays the thread view instead of the
@@ -97,17 +105,11 @@ registerModel({
          * States the channel to redirect to once the user clicks on the
          * 'joinButton'.
          */
-        channel: one('Thread', {
-            readonly: true,
-            required: true,
-        }),
+        channel: one('Thread', { readonly: true, required: true }),
         /**
          * States discuss public view on which this welcome view is displayed.
          */
-        discussPublicView: one('DiscussPublicView', {
-            identifying: true,
-            inverse: 'welcomeView',
-        }),
+        discussPublicView: one('DiscussPublicView', { identifying: true, inverse: 'welcomeView' }),
         /**
          * States the OWL ref the to input element containing the
          * 'pendingGuestName'.
@@ -154,13 +156,12 @@ registerModel({
         /**
          * States the media preview embedded in this welcome view.
          */
-        callDemoView: one('CallDemoView', {
+        callDemoView: one('CallDemoView', { inverse: 'welcomeView',
             compute() {
                 return (this.channel && this.channel.defaultDisplayMode === 'video_full_screen')
                     ? {}
                     : clear();
             },
-            inverse: 'welcomeView',
         }),
         /**
          * States the name the guest had when landing on the welcome view.
@@ -174,8 +175,6 @@ registerModel({
          * Will be used to update the current guest's name when joining the
          * channel by clicking on the 'joinButton'.
          */
-        pendingGuestName: attr({
-            default: '',
-        }),
+        pendingGuestName: attr({ default: '' }),
     },
 });

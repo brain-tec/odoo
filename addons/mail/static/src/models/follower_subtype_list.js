@@ -1,11 +1,17 @@
 /** @odoo-module **/
 
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'FollowerSubtypeList',
+    template: 'mail.FollowerSubtypeList',
+    templateGetter: 'followerSubtypeList',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+    },
     recordMethods: {
         /**
          * Returns whether the given html element is inside this follower subtype list.
@@ -41,23 +47,15 @@ registerModel({
         /**
          * States the dialog displaying this follower subtype list.
          */
-        dialogOwner: one('Dialog', {
-            identifying: true,
-            inverse: 'followerSubtypeList',
-            isCausal: true,
-        }),
-        follower: one('Follower', {
-            related: 'dialogOwner.followerOwnerAsSubtypeList',
-            required: true,
-        }),
-        followerSubtypeViews: many('FollowerSubtypeView', {
+        dialogOwner: one('Dialog', { identifying: true, inverse: 'followerSubtypeList', isCausal: true }),
+        follower: one('Follower', { related: 'dialogOwner.followerOwnerAsSubtypeList', required: true }),
+        followerSubtypeViews: many('FollowerSubtypeView', { inverse: 'followerSubtypeListOwner',
             compute() {
                 if (this.follower.subtypes.length === 0) {
                     return clear();
                 }
                 return this.follower.subtypes.map(subtype => ({ subtype }));
             },
-            inverse: 'followerSubtypeListOwner',
             sort: [
                 ['falsy-first', 'subtype.parentModel'],
                 ['case-insensitive-asc', 'subtype.parentModel'],

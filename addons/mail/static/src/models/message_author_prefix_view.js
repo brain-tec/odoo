@@ -6,12 +6,11 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'MessageAuthorPrefixView',
+    template: 'mail.MessageAuthorPrefixView',
+    templateGetter: 'messageAuthorPrefixView',
     identifyingMode: 'xor',
     fields: {
-        channelPreviewViewOwner: one('ChannelPreviewView', {
-            identifying: true,
-            inverse: 'messageAuthorPrefixView',
-        }),
+        channelPreviewViewOwner: one('ChannelPreviewView', { identifying: true, inverse: 'messageAuthorPrefixView' }),
         message: one('Message', {
             compute() {
                 if (this.channelPreviewViewOwner) {
@@ -34,9 +33,6 @@ registerModel({
                 return clear();
             },
         }),
-        threadNeedactionPreviewViewOwner: one('ThreadNeedactionPreviewView', {
-            identifying: true,
-            inverse: 'messageAuthorPrefixView',
-        }),
+        threadNeedactionPreviewViewOwner: one('ThreadNeedactionPreviewView', { identifying: true, inverse: 'messageAuthorPrefixView' }),
     },
 });

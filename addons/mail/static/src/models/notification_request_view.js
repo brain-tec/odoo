@@ -8,6 +8,8 @@ import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
     name: 'NotificationRequestView',
+    template: 'mail.NotificationRequestView',
+    templateGetter: 'notificationRequestView',
     recordMethods: {
         onClick() {
             this.messaging.requestNotificationPermission();
@@ -28,15 +30,11 @@ registerModel({
                 );
             },
         }),
-        notificationListViewOwner: one('NotificationListView', {
-            identifying: true,
-            inverse: 'notificationRequestView',
-        }),
-        personaImStatusIconView: one('PersonaImStatusIconView', {
+        notificationListViewOwner: one('NotificationListView', { identifying: true, inverse: 'notificationRequestView' }),
+        personaImStatusIconView: one('PersonaImStatusIconView', { inverse: 'notificationRequestViewOwner',
             compute() {
                 return this.messaging.partnerRoot && this.messaging.partnerRoot.isImStatusSet ? {} : clear();
             },
-            inverse: 'notificationRequestViewOwner',
         }),
     },
 });

@@ -7,6 +7,8 @@ import { sprintf } from '@web/core/utils/strings';
 
 registerModel({
     name: 'MessageReactionGroup',
+    template: 'mail.MessageReactionGroup',
+    templateGetter: 'messageReactionGroup',
     recordMethods: {
         /**
          * Handles click on the reaction group.
@@ -23,29 +25,21 @@ registerModel({
         },
     },
     fields: {
-        content: attr({
-            identifying: true,
-        }),
-        count: attr({
-            required: true,
-        }),
+        content: attr({ identifying: true }),
+        count: attr({ required: true }),
         /**
          * States the guests that have used this reaction on this message.
          */
         guests: many('Guest'),
-        hasUserReacted: attr({
+        hasUserReacted: attr({ default: false,
             compute() {
                 return Boolean(
                     (this.messaging.currentPartner && this.partners.includes(this.messaging.currentPartner)) ||
                     (this.messaging.currentGuest && this.guests.includes(this.messaging.currentGuest))
                 );
             },
-            default: false,
         }),
-        message: one('Message', {
-            identifying: true,
-            inverse: 'messageReactionGroups',
-        }),
+        message: one('Message', { identifying: true, inverse: 'messageReactionGroups' }),
         /**
          * States the partners that have used this reaction on this message.
          */

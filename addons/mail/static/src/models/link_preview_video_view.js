@@ -6,6 +6,8 @@ import { clear } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'LinkPreviewVideoView',
+    template: 'mail.LinkPreviewVideoView',
+    templateGetter: 'linkPreviewVideoView',
     recordMethods: {
         /**
          * Handles mouse enter event for the container of this element.
@@ -27,14 +29,9 @@ registerModel({
         },
     },
     fields: {
-        isHovered: attr({
-            default: false,
-        }),
-        linkPreview: one('LinkPreview', {
-            identifying: true,
-            inverse: 'linkPreviewVideoView',
-        }),
-        linkPreviewAsideView: one('LinkPreviewAsideView', {
+        isHovered: attr({ default: false }),
+        linkPreview: one('LinkPreview', { identifying: true, inverse: 'linkPreviewVideoView' }),
+        linkPreviewAsideView: one('LinkPreviewAsideView', { inverse: 'linkPreviewVideoView',
             compute() {
                 if (!this.linkPreview.isDeletable) {
                     return clear();
@@ -47,11 +44,7 @@ registerModel({
                 }
                 return clear();
             },
-            inverse: 'linkPreviewVideoView',
         }),
-        linkPreviewListViewOwner: one('LinkPreviewListView', {
-            identifying: true,
-            inverse: 'linkPreviewAsVideoViews',
-        }),
+        linkPreviewListViewOwner: one('LinkPreviewListView', { identifying: true, inverse: 'linkPreviewAsVideoViews' }),
     },
 });
