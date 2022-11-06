@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { decrement, increment, insert } from '@mail/model/model_field_command';
+import { decrement, increment, insert, Model } from '@mail/model';
 import { htmlToTextContentInline } from '@mail/js/utils';
 
 import { escape, sprintf } from '@web/core/utils/strings';
@@ -10,7 +9,7 @@ import { Markup } from 'web.utils';
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
-registerModel({
+Model({
     name: 'MessagingNotificationHandler',
     lifecycleHooks: {
         _willDelete() {

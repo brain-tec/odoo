@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { many, one } from '@mail/model/model_field';
+import { many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'LinkPreviewListView',
     template: 'mail.LinkPreviewListView',
-    templateGetter: 'linkPreviewListView',
     fields: {
         /**
          * Determines if we are in the ChatWindow view AND if the message is left aligned

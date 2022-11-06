@@ -2,14 +2,11 @@
 
 import { browser } from "@web/core/browser/browser";
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'CallView',
     template: 'mail.CallView',
-    templateGetter: 'callView',
     lifecycleHooks: {
         _created() {
             browser.addEventListener('fullscreenchange', this._onFullScreenChange);

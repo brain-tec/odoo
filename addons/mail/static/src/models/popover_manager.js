@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { many } from '@mail/model/model_field';
+import { many, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'PopoverManager',
+    template: 'mail.PopoverManager',
     fields: {
         // FIXME: dependent on implementation that uses insert order in relations!!
         popoverViews: many('PopoverView', { inverse: 'manager', isCausal: true }),

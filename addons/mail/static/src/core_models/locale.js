@@ -1,11 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
+import { attr, Model } from '@mail/model';
 
 import { localization } from '@web/core/l10n/localization';
 
-registerModel({
+Model({
     name: 'Locale',
     fields: {
         /**

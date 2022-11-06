@@ -1,13 +1,11 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Patch } from '@mail/model';
 
 import {unaccent} from 'web.utils';
 import {setCookie} from 'web.utils.cookies';
 
-registerPatch({
+Patch({
     name: 'LivechatButtonView',
     recordMethods: {
         /**

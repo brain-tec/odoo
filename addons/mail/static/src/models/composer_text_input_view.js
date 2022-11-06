@@ -1,19 +1,14 @@
 /** @odoo-module **/
 
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'ComposerTextInputView',
     template: 'mail.ComposerTextInputView',
-    templateGetter: 'composerTextInputView',
     componentSetup() {
         useComponentToModel({ fieldName: 'component' });
-        useRefToModel({ fieldName: 'mirroredTextareaRef', refName: 'mirroredTextarea' });
-        useRefToModel({ fieldName: 'textareaRef', refName: 'textarea' });
         /**
          * Updates the composer text input content when composer is mounted
          * as textarea content can't be changed from the DOM.
@@ -53,12 +48,12 @@ registerModel({
          * based on the text content. We need it to downsize the textarea
          * properly without flicker.
          */
-        mirroredTextareaRef: attr(),
+        mirroredTextareaRef: attr({ ref: 'mirroredTextarea' }),
         owner: one('ComposerView', { identifying: true, inverse: 'textInput' }),
         /**
          * Reference of the textarea. Useful to set height, selection and
          * content.
          */
-        textareaRef: attr(),
+        textareaRef: attr({ ref: 'textarea' }),
     },
 });

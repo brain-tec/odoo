@@ -1,14 +1,11 @@
 /** @odoo-module **/
 
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'DeleteMessageConfirmView',
     template: 'mail.DeleteMessageConfirmView',
-    templateGetter: 'deleteMessageConfirmView',
     componentSetup() {
         useComponentToModel({ fieldName: 'component' });
     },

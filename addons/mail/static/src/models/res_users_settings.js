@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
+import { attr, many, one, Model } from '@mail/model';
 
 /**
  * Mirrors the fields of the python model res.users.settings.
  */
-registerModel({
+Model({
     name: 'res.users.settings',
     fields: {
         id: attr({ identifying: true }),

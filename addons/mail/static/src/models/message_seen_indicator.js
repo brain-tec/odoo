@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 import { sprintf } from '@web/core/utils/strings';
 
-registerModel({
+Model({
     name: 'MessageSeenIndicator',
     fields: {
         hasEveryoneFetched: attr({ default: false,

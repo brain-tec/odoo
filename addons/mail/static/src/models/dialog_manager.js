@@ -1,10 +1,14 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { many } from '@mail/model/model_field';
+import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
+import { many, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'DialogManager',
+    template: 'mail.DialogManager',
+    componentSetup() {
+        useUpdateToModel({ methodName: 'onComponentUpdate' });
+    },
     recordMethods: {
         onComponentUpdate() {
             if (this.dialogs.length > 0) {

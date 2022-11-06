@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'Dialog',
     identifyingMode: 'xor',
+    template: 'mail.Dialog',
     lifecycleHooks: {
         _created() {
             document.addEventListener('click', this._onClickGlobal, true);

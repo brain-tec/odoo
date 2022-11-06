@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
+import { Patch } from '@mail/model';
 
 import { deleteCookie, setCookie } from 'web.utils.cookies';
 
-registerPatch({
+Patch({
     name: 'PublicLivechatGlobal',
     recordMethods: {
         /**

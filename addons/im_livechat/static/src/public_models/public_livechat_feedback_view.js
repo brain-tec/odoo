@@ -2,10 +2,9 @@
 
 import Feedback from '@im_livechat/legacy/widgets/feedback/feedback';
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'PublicLivechatFeedbackView',
     lifecycleHooks: {
         _created() {

@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'ChatWindowHiddenMenuItemView',
     template: 'mail.ChatWindowHiddenMenuItemView',
-    templateGetter: 'chatWindowHiddenMenuItemView',
     fields: {
         chatWindowHeaderView: one('ChatWindowHeaderView', { identifying: true, inverse: 'hiddenMenuItem' }),
         isLast: attr({ default: false,

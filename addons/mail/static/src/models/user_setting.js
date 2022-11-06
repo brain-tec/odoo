@@ -2,9 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 
-import { registerModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, Model } from '@mail/model';
 
 /**
  * Models various user settings. It is used as a complement to
@@ -12,7 +10,7 @@ import { clear } from '@mail/model/model_field_command';
  * client-side. This is particularly useful for allowing guests to have their
  * own settings.
  */
-registerModel({
+Model({
     name: 'UserSetting',
     lifecycleHooks: {
         _created() {

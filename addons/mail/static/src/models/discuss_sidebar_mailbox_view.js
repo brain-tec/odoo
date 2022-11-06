@@ -1,13 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'DiscussSidebarMailboxView',
     template: 'mail.DiscussSidebarMailboxView',
-    templateGetter: 'discussSidebarMailboxView',
     identifyingMode: 'xor',
     fields: {
         discussViewOwnerAsHistory: one('DiscussView', { identifying: true, inverse: 'historyView' }),

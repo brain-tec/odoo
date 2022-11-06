@@ -1,11 +1,14 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
+import { attr, clear, many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'MessagingMenu',
+    template: 'mail.MessagingMenu',
+    componentSetup() {
+        useComponentToModel({ fieldName: 'component' });
+    },
     lifecycleHooks: {
         _created() {
             document.addEventListener('click', this._onClickCaptureGlobal, true);

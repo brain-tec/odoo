@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { many, one } from '@mail/model/model_field';
+import { many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'CallSidebarView',
     template: 'mail.CallSidebarView',
-    templateGetter: 'callSidebarView',
     fields: {
         callView: one('CallView', { identifying: true, inverse: 'callSidebarView' }),
         sidebarTiles: many('CallSidebarViewTile', { inverse: 'callSidebarViewOwner',

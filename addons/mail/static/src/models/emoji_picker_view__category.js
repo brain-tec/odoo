@@ -1,13 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
 /**
  * Emoji category info of a specific emoji picker view
  */
-registerModel({
+Model({
     name: 'EmojiPickerView.Category',
     fields: {
         category: one('EmojiCategory', { identifying: true, inverse: 'allEmojiPickerViewCategory' }),

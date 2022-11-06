@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
-import { many } from '@mail/model/model_field';
+import { many, Patch } from '@mail/model';
 
-registerPatch({
+Patch({
     name: 'ActivityGroup',
     modelMethods: {
         /**

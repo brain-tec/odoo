@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { attr, one } from '@mail/model/model_field';
-import { registerModel } from '@mail/model/model_core';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'MessagingMenuTabView',
     template: 'mail.MessagingMenuTabView',
-    templateGetter: 'messagingMenuTabView',
     identifyingMode: 'xor',
     recordMethods: {
         /**

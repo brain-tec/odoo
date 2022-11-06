@@ -2,11 +2,9 @@
 
 import PublicLivechat from '@im_livechat/legacy/models/public_livechat';
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'PublicLivechat',
     lifecycleHooks: {
         _created() {

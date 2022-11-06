@@ -1,18 +1,11 @@
 /** @odoo-module **/
 
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 import { markEventHandled } from '@mail/utils/utils';
 
-registerModel({
+Model({
     name: 'MessageActionView',
     template: "mail.MessageActionView",
-    templateGetter: 'messageActionView',
-    componentSetup() {
-        useRefToModel({ fieldName: 'actionRef', refName: 'action' });
-    },
     recordMethods: {
         /**
          * @private
@@ -61,7 +54,7 @@ registerModel({
         /**
          * States the reference to the action in the component.
          */
-        actionRef: attr(),
+        actionRef: attr({ ref: 'action' }),
         actionViewCounterContribution: attr({ default: 1, readonly: true }),
         ariaPressedState: attr({
             compute() {

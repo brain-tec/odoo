@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
+import { one, Model } from '@mail/model';
 
 /**
  * Models a record that makes use of a clock.
  */
-registerModel({
+Model({
     name: 'ClockWatcher',
     identifyingMode: 'xor',
     fields: {

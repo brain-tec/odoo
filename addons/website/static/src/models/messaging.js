@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
+import { attr, Patch } from '@mail/model';
 
-registerPatch({
+Patch({
     name: 'Messaging',
     fields: {
         isWebsitePreviewOpen: attr({

@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
+import { one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'VisitorBannerView',
     template: 'website_livechat.VisitorBannerView',
-    templateGetter: 'visitorBannerView',
     fields: {
         owner: one('ThreadView', {
             identifying: true,

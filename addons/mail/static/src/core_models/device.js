@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
+import { attr, Model } from '@mail/model';
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { SIZES } from '@web/core/ui/ui_service';
 
-registerModel({
+Model({
     name: 'Device',
     lifecycleHooks: {
         _created() {

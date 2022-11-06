@@ -1,14 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
-registerModel({
+Model({
     name: 'AttachmentImage',
     template: 'mail.AttachmentImage',
-    templateGetter: 'attachmentImage',
     recordMethods: {
         /**
          * Called when clicking on download icon.
@@ -91,7 +88,7 @@ registerModel({
                 if (this.attachmentList.composerViewOwner) {
                     return 50;
                 }
-                if (this.attachmentList.attachmentBoxViewOwner) {
+                if (this.attachmentList.chatterOwner) {
                     return 160;
                 }
                 if (this.attachmentList.messageViewOwner) {

@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many } from '@mail/model/model_field';
-import { insert } from '@mail/model/model_field_command';
+import { attr, insert, many, Model } from '@mail/model';
 import { getBundle, loadBundle } from '@web/core/assets';
 
-registerModel({
+Model({
     name: 'EmojiRegistry',
     recordMethods: {
         async loadEmojiData() {

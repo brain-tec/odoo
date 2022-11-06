@@ -1,11 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'ListFieldActivityView',
+    template: 'mail.ListFieldActivityView',
     fields: {
         activityButtonView: one('ActivityButtonView', { default: {}, inverse: 'listFieldActivityViewOwner', required: true }),
         id: attr({ identifying: true }),

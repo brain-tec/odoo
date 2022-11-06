@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear, insert } from '@mail/model/model_field_command';
+import { attr, clear, insert, many, one, Model } from '@mail/model';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
-registerModel({
+Model({
     name: 'Partner',
     modelMethods: {
         /**

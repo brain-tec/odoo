@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
+import { one, Model } from '@mail/model';
 
 /**
  * The object below defines a model. Instances of such model (or inherited
@@ -9,7 +8,7 @@ import { one } from '@mail/model/model_field';
  * represent server record (e.g. Thread, Message) or UI elements (e.g.
  * MessagingMenu, ChatWindow). These instances are called "records".
  */
-registerModel({
+ Model({
     /**
      * Name of the model. Important to refer to appropriate model like in
      * relational fields. Name of models must be unique.

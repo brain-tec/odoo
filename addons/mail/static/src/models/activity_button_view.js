@@ -1,17 +1,10 @@
 /** @odoo-module **/
 
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'ActivityButtonView',
     template: 'mail.ActivityButtonView',
-    templateGetter: 'activityButtonView',
-    componentSetup() {
-        useRefToModel({ fieldName: 'buttonRef', refName: 'button' });
-    },
     identifyingMode: 'xor',
     recordMethods: {
         onClick(ev) {
@@ -66,7 +59,7 @@ registerModel({
                 return classes.join(' ');
             },
         }),
-        buttonRef: attr(),
+        buttonRef: attr({ ref: 'button' }),
         kanbanFieldActivityViewOwner: one('KanbanFieldActivityView', { identifying: true, inverse: 'activityButtonView' }),
         listFieldActivityViewOwner: one('ListFieldActivityView', { identifying: true, inverse: 'activityButtonView' }),
         thread: one('Thread', { required: true,

@@ -1,8 +1,6 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
 import core from 'web.core';
 
@@ -14,7 +12,7 @@ const getAttachmentNextTemporaryId = (function () {
     };
 })();
 
-registerModel({
+Model({
     name: 'FileUploader',
     identifyingMode: 'xor',
     recordMethods: {
@@ -43,8 +41,8 @@ registerModel({
             if (this.fileInput && this.fileInput.el) {
                 this.fileInput.el.value = '';
             }
-            if (this.chatterOwner && !this.chatterOwner.attachmentBoxView) {
-                this.chatterOwner.openAttachmentBoxView();
+            if (this.chatterOwner && !this.chatterOwner.hasAttachmentBox) {
+                this.chatterOwner.openAttachmentBox();
             }
             this.messaging.messagingBus.trigger('o-file-uploader-upload', { files });
         },
@@ -100,8 +98,7 @@ registerModel({
             const thread = this.thread; // save before async
             const chatter = (
                 (this.chatterOwner) ||
-                (this.attachmentBoxView && this.attachmentBoxView.chatter) ||
-                (this.activityView && this.activityView.activityBoxView.chatter)
+                (this.activityView && this.activityView.chatterOwner)
             ); // save before async
             const activity = (
                 this.activityView && this.activityView.activity ||
@@ -167,7 +164,6 @@ registerModel({
     fields: {
         activityListViewItemOwner: one('ActivityListViewItem', { identifying: true, inverse: 'fileUploader' }),
         activityView: one('ActivityView', { identifying: true, inverse: 'fileUploader' }),
-        attachmentBoxView: one('AttachmentBoxView', { identifying: true, inverse: 'fileUploader' }),
         chatterOwner: one('Chatter', { identifying: true, inverse: 'fileUploader' }),
         composerView: one('ComposerView', { identifying: true, inverse: 'fileUploader' }),
         fileInput: attr({
@@ -191,9 +187,6 @@ registerModel({
                 }
                 if (this.activityListViewItemOwner) {
                     return this.activityListViewItemOwner.activity.thread;
-                }
-                if (this.attachmentBoxView) {
-                    return this.attachmentBoxView.chatter.thread;
                 }
                 if (this.chatterOwner) {
                     return this.chatterOwner.thread;

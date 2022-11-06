@@ -1,14 +1,11 @@
 /** @odoo-module **/
 
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'FollowerSubtypeList',
     template: 'mail.FollowerSubtypeList',
-    templateGetter: 'followerSubtypeList',
     componentSetup() {
         useComponentToModel({ fieldName: 'component' });
     },

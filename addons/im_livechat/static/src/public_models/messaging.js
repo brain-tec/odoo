@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
+import { one, Patch } from '@mail/model';
 
-registerPatch({
+Patch({
     name: 'Messaging',
     fields: {
         publicLivechatGlobal: one('PublicLivechatGlobal', {

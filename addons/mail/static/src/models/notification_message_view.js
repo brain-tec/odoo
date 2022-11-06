@@ -2,13 +2,11 @@
 
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'NotificationMessageView',
     template: 'mail.NotificationMessageView',
-    templateGetter: 'notificationMessageView',
     componentSetup() {
         useComponentToModel({ fieldName: 'component' });
         useUpdateToModel({ methodName: 'onComponentUpdate' });

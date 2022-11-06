@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
 import { format } from 'web.field_utils';
 import { session } from '@web/session';
@@ -10,7 +9,7 @@ import { deserializeDateTime } from '@web/core/l10n/dates';
 
 const formatters = registry.category("formatters");
 
-registerModel({
+Model({
     name: 'TrackingValueItem',
     identifyingMode: 'xor',
     fields: {

@@ -1,13 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'MessageActionList',
     template: "mail.MessageActionList",
-    templateGetter: 'messageActionList',
     fields: {
         actionViewsCount: attr({ default: 0, readonly: true, sum: 'messageActionViews.actionViewCounterContribution' }),
         actionsWithoutCompactCount: attr({ default: 0, readonly: true, sum: 'messageActions.isNonCompactActionContribution' }),

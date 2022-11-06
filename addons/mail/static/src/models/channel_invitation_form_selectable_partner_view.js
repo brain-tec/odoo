@@ -1,13 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'ChannelInvitationFormSelectablePartnerView',
     template: 'mail.ChannelInvitationFormSelectablePartnerView',
-    templateGetter: 'channelInvitationFormSelectablePartnerView',
     fields: {
         channelInvitationFormOwner: one('ChannelInvitationForm', { identifying: true, inverse: 'selectablePartnerViews' }),
         partner: one('Partner', { identifying: true, inverse: 'channelInvitationFormSelectablePartnerViews' }),

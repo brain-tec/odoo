@@ -2,25 +2,20 @@
 
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model';
 import { useUpdateToModel } from '@mail/component_hooks/use_update_to_model';
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { onMounted, onWillUnmount } from '@odoo/owl';
 
-registerModel({
+Model({
     name: 'CallMainView',
     template: 'mail.CallMainView',
-    templateGetter: 'callMainView',
     componentSetup() {
         useComponentToModel({ fieldName: 'component' });
-        useRefToModel({ fieldName: 'tileContainerRef', refName: 'tileContainer', });
         useUpdateToModel({ methodName: 'onComponentUpdate' });
         onMounted(() => {
-            this.resizeObserver = new ResizeObserver(() => this.callMainView.onResize());
+            this.resizeObserver = new ResizeObserver(() => this.onResize());
             this.resizeObserver.observe(this.root.el);
         });
         onWillUnmount(() => this.resizeObserver.disconnect());
@@ -210,7 +205,7 @@ registerModel({
         showOverlay: attr({ default: true }),
         showOverlayTimer: one('Timer', { inverse: 'callMainViewAsShowOverlay' }),
         thread: one('Thread', { related: 'callView.thread', required: true }),
-        tileContainerRef: attr(),
+        tileContainerRef: attr({ ref: 'tileContainer' }),
         tileHeight: attr({ default: 0 }),
         tileWidth: attr({ default: 0 }),
     },

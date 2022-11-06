@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { registerPatch } from '@mail/model/model_core';
+import { Patch } from '@mail/model';
 
-registerPatch({
+Patch({
     name: 'NotificationGroup',
     recordMethods: {
         /**

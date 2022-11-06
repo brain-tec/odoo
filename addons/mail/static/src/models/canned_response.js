@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
-registerModel({
+Model({
     name: 'CannedResponse',
     modelMethods: {
         /**

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
 import { IS_RECORD, patchesAppliedPromise, registry } from '@mail/model/model_core';
 import { ModelField } from '@mail/model/model_field';
 import { ModelIndexAnd } from '@mail/model/model_index_and';
@@ -10,6 +11,8 @@ import { Listener } from '@mail/model/model_listener';
 import { followRelations } from '@mail/model/model_utils';
 import { makeDeferred } from '@mail/utils/deferred';
 import { registerMessagingComponent, unregisterMessagingComponent } from '@mail/utils/messaging_component';
+
+import { LegacyComponent } from '@web/legacy/legacy_component';
 
 import { Component } from '@odoo/owl';
 
@@ -171,9 +174,10 @@ export class ModelManager {
     destroy() {
         this.messaging.delete();
         for (const model of Object.values(this.models)) {
-            if (model.hasComponent) {
+            if (model.__messagingComponent) {
+                delete model.__fieldAndRefNames;
                 unregisterMessagingComponent(model.name);
-                model.hasComponent = false;
+                delete model.__messagingComponent;
             }
             delete model.__fieldList;
             delete model.__fieldMap;
@@ -394,25 +398,15 @@ export class ModelManager {
     _applyModelDefinition(model) {
         const definition = registry.get(model.name);
         if (definition.get('template')) {
-            const ModelComponent = { [model.name]: class extends Component {} }[model.name];
-            if (definition.get('componentSetup')) {
-                Object.assign(ModelComponent.prototype, { setup() {
-                    return definition.get('componentSetup').call(this);
-                } });
-            }
-            Object.defineProperty(
-                ModelComponent.prototype,
-                definition.get('templateGetter') ? definition.get('templateGetter') : 'record',
-                { get() {
-                    return this.props.record;
-                } },
-            );
+            const ComponentClass = definition.get('isLegacyComponent') ? LegacyComponent : Component;
+            const ModelComponent = { [model.name]: class extends ComponentClass {} }[model.name];
             Object.assign(ModelComponent, {
                 props: { record: Object },
                 template: definition.get('template'),
             });
             registerMessagingComponent(ModelComponent);
-            model.hasComponent = true;
+            model.__messagingComponent = ModelComponent;
+            model.__fieldAndRefNames = [];
         }
         Object.assign(model, Object.fromEntries(definition.get('modelMethods')));
         Object.assign(model.prototype, Object.fromEntries(definition.get('recordMethods')));
@@ -464,6 +458,7 @@ export class ModelManager {
                             'fieldType',
                             'identifying',
                             'readonly',
+                            'ref',
                             'related',
                             'required',
                             'sum',
@@ -572,6 +567,11 @@ export class ModelManager {
                     }
                     if ('readonly' in field) {
                         throw new Error(`Related field ${model}/${fieldName} has unnecessary "readonly" attribute (readonly is implicit for related fields).`);
+                    }
+                }
+                if (field.ref) {
+                    if (!model.__messagingComponent) {
+                        throw new Error(`Field ${model}/${fieldName} has a 'ref' attribute but its model is not linked to any component.`);
                     }
                 }
             }
@@ -1221,9 +1221,34 @@ export class ModelManager {
                         to: fieldName,
                     });
                 }
+                if (fieldData.ref) {
+                    model.__fieldAndRefNames.push([fieldName, fieldData.ref]);
+                }
             }
             for (const [fieldName, sumContributions] of sumContributionsByFieldName) {
                 model.fields[fieldName].sumContributions = sumContributions;
+            }
+            if (model.__messagingComponent) {
+                const setupFunctions = [];
+                if (registry.get(model.name).has('componentSetup')) {
+                    setupFunctions.push(registry.get(model.name).get('componentSetup'));
+                }
+                if (model.__fieldAndRefNames.length > 0) {
+                    setupFunctions.push(function () {
+                        for (const [fieldName, refName] of model.__fieldAndRefNames) {
+                            useRefToModel({ fieldName, refName });
+                        }
+                    });
+                }
+                if (setupFunctions.length > 0) {
+                    Object.assign(model.__messagingComponent.prototype, {
+                        setup() {
+                            for (const fun of setupFunctions) {
+                                fun.call(this);
+                            }
+                        },
+                    });
+                }
             }
         }
         /**
@@ -1285,7 +1310,7 @@ export class ModelManager {
                 if (field.identifying) {
                     model.__identifyingFieldNames.add(fieldName);
                 }
-                // Add field accessors.
+                // Add field accessors on model.
                 Object.defineProperty(model.prototype, fieldName, {
                     get: function getFieldValue() { // this is bound to record
                         const record = this.modelManager.isDebug ? this.__proxifiedRecord : this;
@@ -1319,6 +1344,37 @@ export class ModelManager {
                         return field.get(record);
                     },
                 });
+                if (model.__messagingComponent) {
+                    // Add field accessors on related component
+                    Object.defineProperty(model.__messagingComponent.prototype, fieldName, {
+                        get: function getFieldValue() { // this is bound to record
+                            return this.props.record[fieldName];
+                        },
+                    });
+                }
+            }
+            if (model.__messagingComponent) {
+                // Add record method accessors + localId
+                Object.defineProperty(model.__messagingComponent.prototype, 'localId', {
+                    get: function getFieldValue() { // this is bound to record
+                        return this.props.record.localId;
+                    },
+                });
+                const definition = registry.get(model.name);
+                for (const name of definition.get('recordMethods').keys()) {
+                    Object.defineProperty(model.__messagingComponent.prototype, name, {
+                        get() {
+                            return this.props.record[name];
+                        },
+                    });
+                }
+                for (const name of definition.get('recordGetters').keys()) {
+                    Object.defineProperty(model.__messagingComponent.prototype, name, {
+                        get() {
+                            return this.props.record[name];
+                        },
+                    });
+                }
             }
             delete model.__combinedFields;
         }

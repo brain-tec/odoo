@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear, increment } from '@mail/model/model_field_command';
+import { attr, clear, increment, many, one, Model } from '@mail/model';
 
 import { hidePDFJSButtons } from '@web/legacy/js/libs/pdfjs';
 
-registerModel({
+Model({
     name: 'AttachmentViewer',
     identifyingMode: 'xor',
     lifecycleHooks: {

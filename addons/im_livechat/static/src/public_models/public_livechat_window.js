@@ -2,10 +2,9 @@
 
 import PublicLivechatWindow from '@im_livechat/legacy/widgets/public_livechat_window/public_livechat_window';
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'PublicLivechatWindow',
     lifecycleHooks: {
         _created() {

@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
+import { one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'FollowerSubtypeView',
     template: 'mail.FollowerSubtypeView',
-    templateGetter: 'followerSubtypeView',
     recordMethods: {
         /**
          * Called when clicking on cancel button.

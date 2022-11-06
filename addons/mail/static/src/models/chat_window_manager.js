@@ -1,8 +1,6 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
 export const BASE_VISUAL = {
     /**
@@ -42,8 +40,9 @@ export const BASE_VISUAL = {
     visible: [],
 };
 
-registerModel({
+Model({
     name: 'ChatWindowManager',
+    template: 'mail.ChatWindowManager',
     recordMethods: {
         /**
          * Close all chat windows.

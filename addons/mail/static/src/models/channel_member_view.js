@@ -1,14 +1,11 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 import { isEventHandled } from '@mail/utils/utils';
 
-registerModel({
+Model({
     name: 'ChannelMemberView',
     template: 'mail.ChannelMemberView',
-    templateGetter: 'channelMemberView',
     recordMethods: {
         /**
          * Handles click on channel member in the member list of this channel.

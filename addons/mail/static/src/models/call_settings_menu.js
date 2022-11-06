@@ -2,14 +2,11 @@
 
 import { browser } from "@web/core/browser/browser";
 
-import { registerModel } from '@mail/model/model_core';
-import { clear } from '@mail/model/model_field_command';
-import { attr, one } from '@mail/model/model_field';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'CallSettingsMenu',
     template: 'mail.CallSettingsMenu',
-    templateGetter: 'callSettingsMenu',
     identifyingMode: 'xor',
     lifecycleHooks: {
         async _created() {

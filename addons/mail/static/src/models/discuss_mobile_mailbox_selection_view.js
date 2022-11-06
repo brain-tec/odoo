@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { many, one } from '@mail/model/model_field';
+import { many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'DiscussMobileMailboxSelectionView',
     template: 'mail.DiscussMobileMailboxSelectionView',
-    templateGetter: 'discussMobileMailboxSelectionView',
     fields: {
         items: many('DiscussMobileMailboxSelectionItemView', { inverse: 'owner',
             compute() {

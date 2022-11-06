@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
+import { attr, many, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'EmojiCategory',
     fields: {
         allEmojiInCategoryOfCurrent: many('EmojiInCategory', { inverse: 'category' }),

@@ -1,13 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'MessageAuthorPrefixView',
     template: 'mail.MessageAuthorPrefixView',
-    templateGetter: 'messageAuthorPrefixView',
     identifyingMode: 'xor',
     fields: {
         channelPreviewViewOwner: one('ChannelPreviewView', { identifying: true, inverse: 'messageAuthorPrefixView' }),

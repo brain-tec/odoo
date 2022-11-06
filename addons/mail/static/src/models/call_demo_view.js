@@ -1,17 +1,10 @@
 /** @odoo-module **/
 
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
-import { attr, one } from '@mail/model/model_field';
-import { registerModel } from '@mail/model/model_core';
+import { attr, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'CallDemoView',
     template: 'mail.CallDemoView',
-    templateGetter: 'callDemoView',
-    componentSetup() {
-        useRefToModel({ fieldName: 'audioRef', refName: 'audio' });
-        useRefToModel({ fieldName: 'videoRef', refName: 'video' });
-    },
     recordMethods: {
         /**
          * Stops recording user's microphone.
@@ -109,7 +102,7 @@ registerModel({
         /**
          * Ref to the audio element used for the audio feedback.
          */
-        audioRef: attr(),
+        audioRef: attr({ ref: 'audio' }),
         /**
          * The MediaStream from the microphone.
          *
@@ -149,7 +142,7 @@ registerModel({
         /**
          * Ref to the video element used for the video feedback.
          */
-        videoRef: attr(),
+        videoRef: attr({ ref: 'video' }),
         /**
          * The MediaStream from the camera.
          *

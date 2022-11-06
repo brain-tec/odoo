@@ -1,19 +1,14 @@
 /** @odoo-module **/
 
-import { useRefToModel } from '@mail/component_hooks/use_ref_to_model';
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
 import { onMounted } from '@odoo/owl';
 
-registerModel({
+Model({
     name: 'ActivityMarkDonePopoverContentView',
     template: 'mail.ActivityMarkDonePopoverContentView',
-    templateGetter: 'activityMarkDonePopoverContentView',
     componentSetup() {
-        useRefToModel({ fieldName: 'feedbackTextareaRef', refName: 'feedbackTextarea' });
-        onMounted(this.activityMarkDonePopoverContentView.onMounted);
+        onMounted(this.onMounted);
     },
     identifyingMode: 'xor',
     recordMethods: {
@@ -42,7 +37,7 @@ registerModel({
          * Handles click on this "Done" button.
          */
         async onClickDone() {
-            const chatter = this.activityViewOwner && this.activityViewOwner.activityBoxView.chatter;
+            const chatter = this.activityViewOwner && this.activityViewOwner.chatterOwner;
             const reloadFunc = this.reloadFunc;
             const webRecord = this.webRecord;
             const thread = this.activity.thread;
@@ -63,7 +58,7 @@ registerModel({
          * Handles click on this "Done & Schedule Next" button.
          */
         async onClickDoneAndScheduleNext() {
-            const chatter = this.activityViewOwner && this.activityViewOwner.activityBoxView.chatter;
+            const chatter = this.activityViewOwner && this.activityViewOwner.chatterOwner;
             const reloadFunc = this.reloadFunc;
             const webRecord = this.webRecord;
             const thread = this.activity.thread;
@@ -136,7 +131,7 @@ registerModel({
                 return clear();
             },
         }),
-        feedbackTextareaRef: attr(),
+        feedbackTextareaRef: attr({ ref: 'feedbackTextarea' }),
         hasHeader: attr({
             compute() {
                 return Boolean(this.popoverViewOwner);

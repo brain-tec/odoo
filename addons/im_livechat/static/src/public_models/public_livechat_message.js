@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, Model } from '@mail/model';
 
 import PublicLivechatMessage from '@im_livechat/legacy/models/public_livechat_message';
 
-registerModel({
+Model({
     name: 'PublicLivechatMessage',
     lifecycleHooks: {
         _created() {

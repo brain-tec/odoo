@@ -1,11 +1,10 @@
 /** @odoo-module **/
 
-import { attr, one } from '@mail/model/model_field';
-import { registerModel } from '@mail/model/model_core';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
-registerModel({
+Model({
     name: 'DiscussPublicView',
+    template: 'mail.DiscussPublicView',
     recordMethods: {
         /**
          * Creates and displays the thread view and clears the welcome view.

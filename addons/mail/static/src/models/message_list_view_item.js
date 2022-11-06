@@ -1,14 +1,12 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, one, Model } from '@mail/model';
 
 /**
  * Models a relation between a message list view and a message view where
  * message is used as iterating field.
  */
-registerModel({
+Model({
     name: 'MessageListViewItem',
     recordMethods: {
         /**

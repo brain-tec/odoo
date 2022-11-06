@@ -1,15 +1,12 @@
 /** @odoo-module **/
 
-import { registerModel } from '@mail/model/model_core';
-import { attr, many, one } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+import { attr, clear, many, one, Model } from '@mail/model';
 
 import session from 'web.session';
 
-registerModel({
+Model({
     name: 'ActivityListView',
     template: 'mail.ActivityListView',
-    templateGetter: 'activityListView',
     lifecycleHooks: {
         async _created() {
             if (this.activities.length === 0) {
