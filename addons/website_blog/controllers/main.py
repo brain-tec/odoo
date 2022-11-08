@@ -113,7 +113,7 @@ class WebsiteBlog(http.Controller):
         # if blog, we show blog title, if use_cover and not fullwidth_cover we need pager + latest always
         offset = (page - 1) * self._blog_post_per_page
         if not blog:
-            if use_cover and not fullwidth_cover:
+            if use_cover and not fullwidth_cover and not tags and not date_begin and not date_end:
                 offset += 1
 
         options = self._get_blog_post_search_options(
@@ -198,7 +198,7 @@ class WebsiteBlog(http.Controller):
         if not blog and len(blogs) == 1:
             return request.redirect('/blog/%s' % slug(blogs[0]), code=302)
 
-        date_begin, date_end, state = opt.get('date_begin'), opt.get('date_end'), opt.get('state')
+        date_begin, date_end = opt.get('date_begin'), opt.get('date_end')
 
         if tag and request.httprequest.method == 'GET':
             # redirect get tag-1,tag-2 -> get tag-1
@@ -207,7 +207,7 @@ class WebsiteBlog(http.Controller):
                 url = QueryURL('' if blog else '/blog', ['blog', 'tag'], blog=blog, tag=tags[0], date_begin=date_begin, date_end=date_end, search=search)()
                 return request.redirect(url, code=302)
 
-        values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search, **opt)
+        values = self._prepare_blog_values(blogs=blogs, blog=blog, tags=tag, page=page, search=search, **opt)
 
         # in case of a redirection need by `_prepare_blog_values` we follow it
         if isinstance(values, werkzeug.wrappers.Response):
@@ -215,9 +215,7 @@ class WebsiteBlog(http.Controller):
 
         if blog:
             values['main_object'] = blog
-            values['blog_url'] = QueryURL('', ['blog', 'tag'], blog=blog, tag=tag, date_begin=date_begin, date_end=date_end, search=search)
-        else:
-            values['blog_url'] = QueryURL('/blog', ['tag'], date_begin=date_begin, date_end=date_end, search=search)
+        values['blog_url'] = QueryURL('/blog', ['blog', 'tag'], blog=blog, tag=tag, date_begin=date_begin, date_end=date_end, search=search)
 
         return request.render("website_blog.blog_post_short", values)
 
