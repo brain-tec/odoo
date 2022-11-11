@@ -984,7 +984,7 @@ msgstr "推迟后，购物车被标记为废弃。"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_view_tree_website_sale
 msgid "Categories"
-msgstr "电商品类"
+msgstr "类别"
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_public_category_action
@@ -3117,6 +3117,12 @@ msgstr "#1"
 #, python-format
 msgid "The access token is invalid."
 msgstr "访问令牌无效。"
+
+#. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "The cart has been updated. Please refresh the page."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__website_url
