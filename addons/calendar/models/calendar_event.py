@@ -474,6 +474,7 @@ class Meeting(models.Model):
             for attendee in meeting.attendee_ids:
                 attendee_add = event.add('attendee')
                 attendee_add.value = u'MAILTO:' + (attendee.email or u'')
+            event.add('organizer').value = u'MAILTO:' + (meeting.user_id.email or u'')
             result[meeting.id] = cal.serialize().encode('utf-8')
 
         return result
@@ -741,7 +742,7 @@ class Meeting(models.Model):
                 if values.get('activity_ids'):
                     continue
                 res_model_id = values.get('res_model_id', defaults.get('res_model_id'))
-                res_id = values.get('res_id', defaults.get('res_id'))
+                values['res_id'] = res_id = values.get('res_id') or defaults.get('res_id')
                 user_id = values.get('user_id', defaults.get('user_id'))
                 if not res_model_id or not res_id:
                     continue
