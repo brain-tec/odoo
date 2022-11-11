@@ -760,6 +760,10 @@ class Session(collections.abc.MutableMapping):
         else:
             self[key] = val
 
+    def clear(self):
+        self.data.clear()
+        self.is_dirty = True
+
     #
     # Session methods
     #
@@ -844,6 +848,15 @@ class Session(collections.abc.MutableMapping):
 # Thread local global request object
 _request_stack = werkzeug.local.LocalStack()
 request = _request_stack()
+
+@contextlib.contextmanager
+def borrow_request():
+    """ Get the current request and unexpose it from the local stack. """
+    req = _request_stack.pop()
+    try:
+        yield req
+    finally:
+        _request_stack.push(req)
 
 
 class Response(werkzeug.wrappers.Response):
