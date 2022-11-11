@@ -8212,7 +8212,7 @@ msgstr ""
 "* Valoració d'existències (periòdica o automàtica)\n"
 "* Facturació d'aquest albarà\n"
 "\n"
-"El taulell / els informes per la gestió de magatzem inclou:\n"
+"El tauler / els informes per la gestió de magatzem inclou:\n"
 "-------------------------------------------------------------------------\n"
 "* Valoració d'existències en una data donada (suporta dates en el passat)"
 
@@ -29208,3 +29208,9 @@ msgstr "sí"
 #: model:res.country,name:base.ax
 msgid "Åland Islands"
 msgstr "Illes Åland"
+
+#. module: base
+#: code:addons/base/models/res_currency.py:0
+#, python-format
+msgid "This currency is set on a company and therefore must be active."
+msgstr ""
