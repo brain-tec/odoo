@@ -5,6 +5,8 @@
 # Translators:
 # Thin Tran <trvathin@gmail.com>, 2022
 # Martin Trigaux, 2022
+# NGUYỄN HỮU DŨNG, 2022
+# Duy BQ <duybq86@gmail.com>, 2022
 # 
 msgid ""
 msgstr ""
@@ -12,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-04-19 09:19+0000\n"
 "PO-Revision-Date: 2022-06-17 09:48+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"Last-Translator: Duy BQ <duybq86@gmail.com>, 2022\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -110,7 +112,7 @@ msgstr "%(action)s cho bút toán %(journal)s"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "%(amount)s due %(date)s"
-msgstr ""
+msgstr "%(amount)shạn %(date)s"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
@@ -719,6 +721,11 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">Đã xuất hóa đơn</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
+msgid "<span class=\"o_stat_text\">Journal Entry</span>"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
 "<span class=\"oe_inline o_form_label mr-3 ml-5 oe_edit_only\" "
@@ -1003,7 +1010,7 @@ msgstr "<strong>Tổng tiền cần trả</strong>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Credit Note Date:</strong>"
-msgstr ""
+msgstr "<strong>Ngày ghi nợ:</strong>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -7779,7 +7786,6 @@ msgstr "Bút toán theo tháng"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
-#: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #, python-format
 msgid "Journal Entry"
 msgstr "Bút toán sổ nhật ký"
@@ -10992,7 +10998,7 @@ msgstr "Đối soát các phần"
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid "Record cannot be deleted. Partner used in Accounting"
-msgstr ""
+msgstr "Bản ghi này không thể xóa. Đối tác đã được sử dụng trong Kế toán."
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -17018,3 +17024,5 @@ msgid ""
 "An analytic default requires an analytic account or an analytic tag used for"
 " analytic distribution."
 msgstr ""
+"Một yêu cầu mặc định của Phân tích kế toán hoặc một thẻ phân tích đã được "
+"dùng cho Điều phối phân tích."
