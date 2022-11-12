@@ -127,9 +127,12 @@ class SnailmailLetter(models.Model):
             else:
                 report_name = 'Document'
             filename = "%s.%s" % (report_name, "pdf")
+            paperformat = report.get_paperformat()
+            if (paperformat.format == 'custom' and paperformat.page_width != 210 and paperformat.page_height != 297) or paperformat.format != 'A4':
+                raise UserError(_("Please use an A4 Paper format."))
             if not self.cover:
                 raise UserError(_("Snailmails without covers are no longer supported in Odoo 13.\nPlease enable the 'Add a Cover Page' option in your Invoicing settings or upgrade your Odoo."))
-            pdf_bin, unused_filetype = report.with_context(snailmail_layout=not self.cover).render_qweb_pdf(self.res_id)
+            pdf_bin, unused_filetype = report.with_context(snailmail_layout=not self.cover, lang='en_US').render_qweb_pdf(self.res_id)
             if self.cover:
                 pdf_bin = self._append_cover_page(pdf_bin)
             attachment = self.env['ir.attachment'].create({
@@ -410,7 +413,7 @@ class SnailmailLetter(models.Model):
         return failures_infos
 
     def _append_cover_page(self, invoice_bin: bytes):
-        address = self.partner_id.with_context(show_address=True)._get_name().replace('\n', '<br/>')
+        address = self.partner_id.with_context(show_address=True, lang='en_US')._get_name().replace('\n', '<br/>')
         address_x = 118 * mm
         address_y = 60 * mm
         frame_width = 85.5 * mm
