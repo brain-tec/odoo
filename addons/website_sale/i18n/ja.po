@@ -18,6 +18,7 @@
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2022
 # 森岡広道 <hiromichi.morioka@pro-spire.co.jp>, 2022
 # Martin Trigaux, 2022
+# Tatsuki Kanda, 2022
 # Ryoko Tsuda <ryoko@quartile.co>, 2022
 # 
 msgid ""
@@ -246,6 +247,9 @@ msgid ""
 "<span class=\"fa fa-chevron-left\"/>\n"
 "                                    Continue<span class=\"d-none d-md-inline\"> Shopping</span>"
 msgstr ""
+"<span class=\"fa fa-chevron-left\"/>\n"
+"続ける\n"
+"</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
@@ -2492,7 +2496,7 @@ msgstr "最後の評価"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_percentage_satisfaction
 msgid "Rating Satisfaction"
-msgstr ""
+msgstr "評価満足度"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_last_text
@@ -3030,6 +3034,12 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_template__compare_list_price
 msgid ""
 "The amount will be displayed strikethroughed on the eCommerce product page"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "The cart has been updated. Please refresh the page."
 msgstr ""
 
 #. module: website_sale

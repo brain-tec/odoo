@@ -9,7 +9,7 @@ from socket import gethostbyname
 import odoo
 from odoo.http import Request, Session
 from odoo.tests import tagged
-from odoo.tests.common import HOST, HttpCase, new_test_user
+from odoo.tests.common import HOST, HttpCase, new_test_user, get_db_name
 from odoo.tools import config, file_open, mute_logger
 from odoo.tools.func import lazy_property
 from odoo.addons.test_http.controllers import CT_JSON
@@ -418,6 +418,26 @@ class TestHttpMisc(TestHttpBase):
         self.assertEqual(self.nodb_redirect('https://www.domain.comhttps://www.domain2.com/hello?a=b'), '/www.domain2.com/hello?a=b')
         self.assertEqual(self.nodb_redirect('https://https://www.domain.com/hello?a=b'), '/www.domain.com/hello?a=b')
 
+    def test_misc3_rpc_qweb(self):
+        jack = new_test_user(self.env, 'jackoneill', context={'lang': 'en_US'})
+        milky_way = self.env.ref('test_http.milky_way')
+
+        payload = json.dumps({'jsonrpc': '2.0', 'method': 'call', 'id': None, 'params': {
+            'service': 'object', 'method': 'execute', 'args': [
+                get_db_name(), jack.id, 'jackoneill', 'test_http.galaxy', 'render', milky_way.id
+            ]
+        }})
+
+        for method in (self.db_url_open, self.nodb_url_open):
+            with self.subTest(method=method.__name__):
+
+                res = method('/jsonrpc', data=payload, headers=CT_JSON)
+                res.raise_for_status()
+
+                res_rpc = res.json()
+                self.assertNotIn('error', res_rpc.keys(), res_rpc.get('error', {}).get('data', {}).get('message'))
+                self.assertIn(milky_way.name, res_rpc['result'], "QWeb template was correctly rendered")
+
 
 @tagged('post_install', '-at_install')
 class TestHttpCors(TestHttpBase):
@@ -574,6 +594,22 @@ class TestHttpSession(TestHttpBase):
             res.raise_for_status()
             self.assertEqual(res.text, str(GEOIP_ODOO_FARM_2))
             mock_resolve.assert_called_once()
+
+    def test_session3_logout_15_0_geoip(self):
+        session = self.authenticate(None, None)
+        session['db'] = 'idontexist'
+        session['geoip'] = {}  # Until saas-15.2 geoip was directly stored in the session
+        odoo.http.root.session_store.save(session)
+
+        with self.assertLogs('odoo.http', level='WARNING') as (_, warnings):
+            res = self.multidb_url_open('/test_http/ensure_db', dblist=['db1', 'db2'])
+
+        self.assertEqual(warnings, [
+            "WARNING:odoo.http:Logged into database 'idontexist', but dbfilter rejects it; logging session out.",
+        ])
+        self.assertFalse(session['db'])
+        self.assertEqual(res.status_code, 303)
+        self.assertEqual(urlparse(res.headers['Location']).path, '/web/database/selector')
 
 class TestHttpJsonError(TestHttpBase):
 
