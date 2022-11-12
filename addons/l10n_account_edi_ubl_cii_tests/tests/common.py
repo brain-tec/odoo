@@ -74,7 +74,7 @@ class TestUBLCommon(AccountEdiTestCommon):
         new_invoice = self.edi_format._create_invoice_from_xml_tree(
             xml_filename,
             xml_etree,
-            self.company_data['default_journal_purchase'],
+            invoice.journal_id
         )
 
         self.assertTrue(new_invoice)
