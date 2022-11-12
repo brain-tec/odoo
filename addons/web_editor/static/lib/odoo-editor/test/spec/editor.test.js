@@ -2941,18 +2941,15 @@ X[]
                     await testEditor(BasicEditor, {
                         contentBefore: '<p>ab []cd</p>',
                         stepFunction: insertLineBreak,
-                        // The space is converted to a non-breaking
-                        // space so it is visible (because it's before a
-                        // <br>).
-                        // JW cAfter: '<p>ab&nbsp;<br>[]cd</p>',
-                        contentAfter: '<p>ab <br>[]cd</p>', // Note: JW seems just wrong here...
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's before a <br>).
+                        contentAfter: '<p>ab&nbsp;<br>[]cd</p>',
                     });
                     await testEditor(BasicEditor, {
                         contentBefore: '<p>ab[] cd</p>',
                         stepFunction: insertLineBreak,
-                        // The space is converted to a non-breaking
-                        // space so it is visible (because it's after a
-                        // <br>).
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's after a <br>).
                         contentAfter: '<p>ab<br>[]&nbsp;cd</p>',
                     });
                 });
@@ -3049,16 +3046,15 @@ X[]
                     await testEditor(BasicEditor, {
                         contentBefore: '<p>abc <b>[]def</b></p>',
                         stepFunction: insertLineBreak,
-                        // JW cAfter: '<p>abc&nbsp;<br><b>[]def</b></p>',
-                        contentAfter: '<p>abc <b><br>[]def</b></p>', // Note: JW seems just wrong here
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's before a <br>).
+                        contentAfter: '<p>abc&nbsp;<b><br>[]def</b></p>',
                     });
                     await testEditor(BasicEditor, {
                         contentBefore: '<p>abc<b>[] def </b></p>',
                         stepFunction: insertLineBreak,
-                        // The space is converted to a non-breaking
-                        // space so it is visible (because it's before a
-                        // <br>).
-                        // JW cAfter: '<p>abc<br><b>[]&nbsp;def</b></p>',
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's before a <br>).
                         contentAfter: '<p>abc<b><br>[]&nbsp;def </b></p>',
                     });
                 });
@@ -3089,8 +3085,9 @@ X[]
                     await testEditor(BasicEditor, {
                         contentBefore: '<p><b>abc []</b>def</p>',
                         stepFunction: insertLineBreak,
-                        // JW cAfter: '<p><b>abc&nbsp;[]<br></b>def</p>',
-                        contentAfter: '<p><b>abc <br>[]</b>def</p>', // Note: JW seems wrong here
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's before a <br>).
+                        contentAfter: '<p><b>abc&nbsp;<br>[]</b>def</p>',
                     });
                 });
                 it('should insert a <br> at the beginning of a format node', async () => {
@@ -3122,10 +3119,9 @@ X[]
                     await testEditor(BasicEditor, {
                         contentBefore: '<p><b>ab []cd</b></p>',
                         stepFunction: insertLineBreak,
-                        // The space is converted to a non-breaking
-                        // space so it is visible.
-                        // JW cAfter: '<p><b>ab&nbsp;<br>[]cd</b></p>',
-                        contentAfter: '<p><b>ab <br>[]cd</b></p>', // Note: JW seems just wrong here...
+                        // The space is converted to a non-breaking space so it
+                        // is visible (because it's before a <br>).
+                        contentAfter: '<p><b>ab&nbsp;<br>[]cd</b></p>',
                     });
                     await testEditor(BasicEditor, {
                         contentBefore: '<p><b>ab[] cd</b></p>',
@@ -3285,6 +3281,27 @@ X[]
                             ),
                         )
                         .to.eql(['abc', 'DIV', 'def']);
+                },
+            });
+        });
+        it('should return an image in a parent selection', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<div id="parent-element-to-select"><img/></div>',
+                stepFunction: editor => {
+                    const sel = editor.document.getSelection();
+                    const range = editor.document.createRange();
+                    const parent = editor.document.querySelector('div#parent-element-to-select');
+                    range.setStart(parent, 0);
+                    range.setEnd(parent, 1);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    window.chai
+                        .expect(
+                            getTraversedNodes(editor.editable).map(node =>
+                                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName,
+                            ),
+                        )
+                        .to.eql(['DIV', 'IMG']);
                 },
             });
         });
@@ -3485,6 +3502,56 @@ X[]
                         editor.historyStep();
                     },
                     contentAfter: `<div contenteditable="false"><div contenteditable="true">abc</div></div>`,
+                });
+            });
+        });
+        describe('prevent renderingClasses to be set from history', () => {
+            it('should prevent renderingClasses to be added', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        p.className = 'x';
+                        editor.observerFlush();
+                        editor.historyStep();
+                        window.chai.expect(editor._historySteps.length).to.eql(1);
+                    },
+                }, {
+                    renderingClasses: ['x']
+                });
+            });
+            it('should prevent renderingClasses to be added when adding 2 classes', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        p.className = 'x y';
+                        editor.observerFlush();
+                        editor.historyStep();
+                        editor.historyUndo();
+                        editor.historyRedo();
+                    },
+                    contentAfter: `<p class="y">a</p>`,
+                }, {
+                    renderingClasses: ['x']
+                });
+            });
+            it('should prevent renderingClasses to be added in historyApply', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        editor.historyApply([{
+                            attributeName:"class",
+                            id: p.oid,
+                            oldValue: null,
+                            type:"attributes",
+                            value: "x y",
+                        }]);
+                    },
+                    contentAfter: `<p class="y">a</p>`,
+                }, {
+                    renderingClasses: ['x']
                 });
             });
         });

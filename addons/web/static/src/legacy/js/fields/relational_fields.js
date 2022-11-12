@@ -642,7 +642,10 @@ var FieldMany2One = AbstractField.extend({
             domain.push(['id', 'not in', blackListedIds]);
         }
 
-        const nameSearch = this._rpc({
+        if (this.lastNameSearch) {
+            this.lastNameSearch.abort(false)
+        }
+        this.lastNameSearch = this._rpc({
             model: this.field.relation,
             method: "name_search",
             kwargs: {
@@ -653,7 +656,7 @@ var FieldMany2One = AbstractField.extend({
                 context,
             }
         });
-        const results = await this.orderer.add(nameSearch);
+        const results = await this.orderer.add(this.lastNameSearch);
 
         // Format results to fit the options dropdown
         let values = results.map((result) => {
@@ -2349,8 +2352,6 @@ var FieldMany2ManyBinaryMultiFiles = AbstractField.extend({
     fieldsToFetch: {
         name: {type: 'char'},
         mimetype: {type: 'char'},
-        res_id: {type: 'number'},
-        access_token: {type: 'char'},
     },
     events: {
         'click .o_attach': '_onAttach',

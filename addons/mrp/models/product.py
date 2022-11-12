@@ -232,11 +232,11 @@ class ProductProduct(models.Model):
                 ratios_free_qty.append(component_res["free_qty"] / qty_per_kit)
             if bom_sub_lines and ratios_virtual_available:  # Guard against all cnsumable bom: at least one ratio should be present.
                 res[product.id] = {
-                    'virtual_available': min(ratios_virtual_available) // 1,
-                    'qty_available': min(ratios_qty_available) // 1,
-                    'incoming_qty': min(ratios_incoming_qty) // 1,
-                    'outgoing_qty': min(ratios_outgoing_qty) // 1,
-                    'free_qty': min(ratios_free_qty) // 1,
+                    'virtual_available': min(ratios_virtual_available) * bom_kits[product].product_qty // 1,
+                    'qty_available': min(ratios_qty_available) * bom_kits[product].product_qty // 1,
+                    'incoming_qty': min(ratios_incoming_qty) * bom_kits[product].product_qty // 1,
+                    'outgoing_qty': min(ratios_outgoing_qty) * bom_kits[product].product_qty // 1,
+                    'free_qty': min(ratios_free_qty) * bom_kits[product].product_qty // 1,
                 }
             else:
                 res[product.id] = {
@@ -285,12 +285,11 @@ class ProductProduct(models.Model):
         them has to be found on the variant.
         """
         self.ensure_one()
-        if not product_template_attribute_value_ids:
-            return True
-        for _, iter_ptav in groupby(product_template_attribute_value_ids, lambda ptav: ptav.attribute_line_id):
-            if not any(ptav in self.product_template_attribute_value_ids for ptav in iter_ptav):
-                return False
-        return True
+        # The intersection of the values of the product and those of the line satisfy:
+        # * the number of items equals the number of attributes (since a product cannot
+        #   have multiple values for the same attribute),
+        # * the attributes are a subset of the attributes of the line.
+        return len(self.product_template_attribute_value_ids & product_template_attribute_value_ids) == len(product_template_attribute_value_ids.attribute_id)
 
     def _count_returned_sn_products(self, sn_lot):
         res = self.env['stock.move.line'].search_count([

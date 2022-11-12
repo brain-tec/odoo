@@ -155,8 +155,19 @@ const Wysiwyg = Widget.extend({
             getPowerboxElement: () => {
                 const selection = (this.options.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
-                    const node = closestElement(selection.anchorNode, 'P, DIV');
-                    return !(node && node.hasAttribute && node.hasAttribute('data-oe-model')) && node;
+                    const baseNode = closestElement(selection.anchorNode, 'P, DIV');
+                    const fieldContainer = closestElement(selection.anchorNode, '[data-oe-field]');
+                    if (!baseNode ||
+                        (
+                            fieldContainer &&
+                            !(
+                                fieldContainer.getAttribute('data-oe-field') === 'arch' ||
+                                fieldContainer.getAttribute('data-oe-type') === 'html'
+                            )
+                        )) {
+                        return false;
+                    }
+                    return baseNode;
                 }
             },
             isHintBlacklisted: node => {
@@ -181,6 +192,7 @@ const Wysiwyg = Widget.extend({
             commands: commands,
             plugins: options.editorPlugins,
             direction: localization.direction || 'ltr',
+            renderingClasses: ['o_dirty', 'o_transform_removal', 'oe_edited_link'],
         }, editorCollaborationOptions));
 
         this.odooEditor.addEventListener('contentChanged', function () {
@@ -257,20 +269,22 @@ const Wysiwyg = Widget.extend({
         this.$editable.on('click', '.o_image, .media_iframe_video', e => e.preventDefault());
         this.showTooltip = true;
         this.$editable.on('dblclick', mediaSelector, function () {
-            self.showTooltip = false;
-            const $el = $(this);
-            let params = {node: $el};
-            $el.selectElement();
+            if (this.isContentEditable || (this.parentElement && this.parentElement.isContentEditable)) {
+                self.showTooltip = false;
+                const $el = $(this);
+                const params = {node: $el};
+                $el.selectElement();
 
-            if ($el.is('.fa')) {
-                // save layouting classes from icons to not break the page if you edit an icon
-                params.htmlClass = [...$el[0].classList].filter((className) => {
-                    return !className.startsWith('fa') || faZoomClassRegex.test(className);
-                }).join(' ');
-            }
+                if ($el.is('.fa')) {
+                    // save layouting classes from icons to not break the page if you edit an icon
+                    params.htmlClass = [...$el[0].classList].filter((className) => {
+                        return !className.startsWith('fa') || faZoomClassRegex.test(className);
+                    }).join(' ');
+                }
 
-            if (!$el.parent().hasClass('o_stars')) {
-                self.openMediaDialog(params);
+                if (!$el.parent().hasClass('o_stars')) {
+                    self.openMediaDialog(params);
+                }
             }
         });
 
@@ -985,6 +999,7 @@ const Wysiwyg = Widget.extend({
             subtree: true,
             attributes: true,
             characterData: true,
+            attributeOldValue: true,
         };
         if (this.odooFieldObservers) {
             for (let observerData of this.odooFieldObservers) {
@@ -996,7 +1011,11 @@ const Wysiwyg = Widget.extend({
             this.odooFieldObservers = [];
 
             $odooFields.each((i, field) => {
-                const observer = new MutationObserver(() => {
+                const observer = new MutationObserver((mutations) => {
+                    mutations = this.odooEditor.filterMutationRecords(mutations);
+                    if (!mutations.length) {
+                        return;
+                    }
                     let $node = $(field);
                     let $nodes = $odooFields.filter(function () {
                         return this !== field;
@@ -1692,7 +1711,8 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
         // Only show the media tools in the toolbar if the current selected
         // snippet is a media.
-        const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars');
+        const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars') && e.target &&
+            (e.target.isContentEditable || (e.target.parentElement && e.target.parentElement.isContentEditable));
         this.toolbar.$el.find([
             '#image-shape',
             '#image-width',

@@ -94,14 +94,11 @@ class AccountMove(models.Model):
         lines = self.invoice_line_ids.filtered(lambda l: not l.display_type)
 
         for num, line in enumerate(lines):
-            price_subtotal = line.balance if convert_to_euros else line.price_subtotal
-            # The price_subtotal should be negative when:
-            # The line has downpayment lines, but is not a downpayment (i.e. the final invoice, from which downpayment lines are subtracted) or,
-            # the line is a reverse charge refund.
-            if (line._get_downpayment_lines() and not is_downpayment) or reverse_charge_refund:
-                price_subtotal = -abs(price_subtotal)
-            else:
-                price_subtotal = abs(price_subtotal)
+            sign = -1 if line.move_id.is_inbound() else 1
+            price_subtotal = (line.balance * sign) if convert_to_euros else line.price_subtotal
+            # The price_subtotal should be inverted when the line is a reverse charge refund.
+            if reverse_charge_refund:
+                price_subtotal = -price_subtotal
 
             # Unit price
             price_unit = 0
@@ -284,7 +281,7 @@ class AccountMove(models.Model):
             'document_total': document_total,
             'representative': company.l10n_it_tax_representative_partner_id,
             'codice_destinatario': codice_destinatario,
-            'regime_fiscale': company.l10n_it_tax_system if not is_self_invoice else 'RF01',
+            'regime_fiscale': company.l10n_it_tax_system if not is_self_invoice else 'RF18',
             'is_self_invoice': is_self_invoice,
             'partner_bank': self.partner_bank_id,
             'format_date': format_date,

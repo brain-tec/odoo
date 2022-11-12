@@ -3,10 +3,12 @@
 # 	* base
 # 
 # Translators:
-# Raymond Yu <cl_yu@hotmail.com>, 2022
 # 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2022
 # Martin Trigaux, 2022
+# 深圳 JM <3440895@qq.com>, 2022
+# Raymond Yu <cl_yu@hotmail.com>, 2022
 # Jeffery CHEN <jeffery9@gmail.com>, 2022
+# Emily Jia <eji@odoo.com>, 2022
 # 
 msgid ""
 msgstr ""
@@ -14,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-04-19 09:36+0000\n"
 "PO-Revision-Date: 2022-06-17 09:47+0000\n"
-"Last-Translator: Jeffery CHEN <jeffery9@gmail.com>, 2022\n"
+"Last-Translator: Emily Jia <eji@odoo.com>, 2022\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10349,7 +10351,7 @@ msgstr "2FA 邀请邮件"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_totp_mail_enforce
 msgid "2FA by mail"
-msgstr ""
+msgstr "通过Email进行双重验证"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -11287,7 +11289,7 @@ msgstr "会计科目自动转帐样例数据"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_account_avatax
 msgid "Account Avatax - Ecommerce"
-msgstr ""
+msgstr "Avatax 帐户 - 电子商务"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import
@@ -11418,7 +11420,7 @@ msgstr "会计 - MRP"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_account_enterprise
 msgid "Accounting - MRP Subcontracting"
-msgstr ""
+msgstr "会计 - MRP 分包"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_timesheet_account_budget
@@ -11438,7 +11440,7 @@ msgstr "会计报表"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_reports_tax_reminder
 msgid "Accounting Reports Tax Reminder"
-msgstr ""
+msgstr "会计报告 税务提醒"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_timesheet_account_budget
@@ -11685,7 +11687,7 @@ msgstr "向 CRM 增加 SMS 功能"
 msgid ""
 "Add Subcontracting information in Cost Analysis Reports and Production "
 "Analysis"
-msgstr ""
+msgstr "在成本分析报告和生产分析中添加分包信息"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_transifex
@@ -11695,7 +11697,7 @@ msgstr "增加连结以在 Transifex 中编辑译文"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_reports_tax_reminder
 msgid "Add a notification when the tax report has been generated"
-msgstr ""
+msgstr "在生成税务报告时添加通知"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_form_project
@@ -12497,7 +12499,7 @@ msgstr "预约潜在客户创建"
 #: model:ir.module.module,shortdesc:base.module_test_appointment_full
 #: model:ir.module.module,summary:base.module_test_appointment_full
 msgid "Appointment Testing Module"
-msgstr ""
+msgstr "约会测试模块"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment
@@ -12517,7 +12519,7 @@ msgstr "审批 - 问卷"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal_contract
 msgid "Appraisal Contract"
-msgstr ""
+msgstr "评价合同"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_appraisals
@@ -12687,7 +12689,7 @@ msgstr "资产管理"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_asset_fleet
 msgid "Assets/Fleet bridge"
-msgstr ""
+msgstr "资产/车队桥"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_category_form
@@ -12968,12 +12970,12 @@ msgstr "阿凡达克斯"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_avatax_sale
 msgid "Avatax for SO"
-msgstr ""
+msgstr "销售订单Avatax"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_avatax_sale_subscription
 msgid "Avatax for Subscriptions"
-msgstr ""
+msgstr "订阅Avatax"
 
 #. module: base
 #: model:res.country,name:base.az
@@ -13291,7 +13293,7 @@ msgstr "批量付款"
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_stock_picking_batch
 msgid "Batch Transfer, Carrier"
-msgstr ""
+msgstr "批量调拨，承运商"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ar_website_sale
@@ -14725,7 +14727,7 @@ msgstr "连接"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_encryption
 msgid "Connection Encryption"
-msgstr ""
+msgstr "连接加密"
 
 #. module: base
 #: code:addons/base/models/ir_mail_server.py:0
@@ -15955,7 +15957,7 @@ msgstr "定义"
 #: model_terms:ir.ui.view,arch_db:base.view_apikeys
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Delete API key."
-msgstr ""
+msgstr "删除API密钥"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_unlink
@@ -15990,7 +15992,7 @@ msgstr "交货成本"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_stock_picking_batch
 msgid "Delivery Stock Picking Batch"
-msgstr ""
+msgstr "出库发货批次"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_demo
@@ -16956,7 +16958,7 @@ msgstr "移动的员工"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_hr
 msgid "Employees on Appointments"
-msgstr ""
+msgstr "预约员工"
 
 #. module: base
 #: code:addons/base/models/ir_model.py:0
@@ -17537,7 +17539,7 @@ msgstr "F 建筑"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__from_filter
 msgid "FROM Filtering"
-msgstr ""
+msgstr "发件人过滤"
 
 #. module: base
 #: model:ir.actions.server,name:base.demo_failure_action
@@ -18696,7 +18698,7 @@ msgstr "Google网络硬盘™整合"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_gmail
 msgid "Google Gmail"
-msgstr ""
+msgstr "谷歌Gmail"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_google_map
@@ -18977,7 +18979,7 @@ msgstr "求助"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_forum
 msgid "Help Center for helpdesk based on Odoo Forum"
-msgstr ""
+msgstr "基于Odoo论坛的服务台帮助中心"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -19048,12 +19050,12 @@ msgstr "服务台 库存"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_stock_account
 msgid "Helpdesk Stock Account"
-msgstr ""
+msgstr "服务台库存会计"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_holidays
 msgid "Helpdesk Time Off"
-msgstr ""
+msgstr "服务台休假"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_timesheet
@@ -19063,17 +19065,17 @@ msgstr "服务台 工时表"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_holidays
 msgid "Helpdesk integration with holidays"
-msgstr ""
+msgstr "服务台与假期集成"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_stock_account
 msgid "Helpdesk, Stock, Account"
-msgstr ""
+msgstr "服务台, 库存, 会计"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_forum
 msgid "Helpdesk: Help Center"
-msgstr ""
+msgstr "服务台：服务中心"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_sales_point_of_sale
@@ -19736,7 +19738,7 @@ msgstr "图像混合"
 #: code:addons/fields.py:0
 #, python-format
 msgid "Image is not encoded in base64."
-msgstr ""
+msgstr "图片未在base64中加密。"
 
 #. module: base
 #: code:addons/image.py:0
@@ -21231,7 +21233,7 @@ msgstr "潜在客户联机客服作业阶段"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_crm
 msgid "Leads statistics and generation on social"
-msgstr ""
+msgstr "基于社交的线索统计和生成"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.module_view_kanban
@@ -21750,7 +21752,7 @@ msgstr "马尔他"
 #. module: base
 #: model:ir.module.module,summary:base.module_appointment_hr
 msgid "Manage Appointments with Employees"
-msgstr ""
+msgstr "管理员工预约"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_title_contact
@@ -21879,7 +21881,7 @@ msgstr "管理和发布电子学习平台"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_asset_fleet
 msgid "Manage assets with fleets"
-msgstr ""
+msgstr "管理车队资产"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_disallowed_expenses
@@ -22314,7 +22316,7 @@ msgstr "密克罗尼西亚"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_microsoft_outlook
 msgid "Microsoft Outlook"
-msgstr ""
+msgstr "微软Outlook"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_microsoft_account
@@ -26923,7 +26925,7 @@ msgstr "网站入口评级"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_search
 msgid "Portal Users"
-msgstr ""
+msgstr "门户网站用户"
 
 #. module: base
 #: model:res.groups,comment:base.group_portal
@@ -29348,7 +29350,7 @@ msgstr "通过USPS运输货物并联机跟踪物流信息"
 #. module: base
 #: model:ir.module.module,summary:base.module_survey
 msgid "Send your surveys or share them live."
-msgstr ""
+msgstr "发送或实时共享您的调查。"
 
 #. module: base
 #: model:res.country,name:base.sn
@@ -30450,7 +30452,7 @@ msgstr "台湾"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__tajawal
 msgid "Tajawal"
-msgstr ""
+msgstr "Tajawal"
 
 #. module: base
 #: model:res.country,name:base.tj
@@ -30605,7 +30607,7 @@ msgstr "测试讨论 (完整)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_crm_full
 msgid "Test Full Crm Flow"
-msgstr ""
+msgstr "测试全CRM流程"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_event_full
@@ -30827,7 +30829,7 @@ msgstr "国家代码须唯一!"
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_partner_bank_unique_number
 msgid "The combination Account Number/Partner must be unique."
-msgstr ""
+msgstr "组合帐号/合伙人须唯一。"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_company_name_uniq
@@ -31140,7 +31142,7 @@ msgstr ""
 #: model:ir.model.fields,help:base.field_res_currency_rate__rate
 #: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
 msgid "The rate of the currency to the currency of rate 1 "
-msgstr ""
+msgstr "货币到其它货币的比率为 1 "
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__rate
@@ -31370,7 +31372,7 @@ msgstr ""
 #: code:addons/image.py:0 code:addons/image.py:0 code:addons/image.py:0
 #, python-format
 msgid "This file could not be decoded as an image file."
-msgstr ""
+msgstr "无法将此文件解码为图像文件。"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -31435,7 +31437,7 @@ msgstr "此方法只能通过 HTTP 访问"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_appraisal_contract
 msgid "This model is used to make a bridge between Appraisal and Contract"
-msgstr ""
+msgstr "该模型用于在评估和合同之间架起一座桥梁"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_intrastat_expiry
@@ -34173,7 +34175,7 @@ msgstr "例如 我的公司"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_mail_server_form
 msgid "e.g. My Outgoing Server"
-msgstr ""
+msgstr "例如：我的外发服务器"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -34228,7 +34230,7 @@ msgstr "数位教学"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_enterprise
 msgid "eLearning enterprise"
-msgstr ""
+msgstr "电子学习企业"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_services_expenses

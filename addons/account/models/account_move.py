@@ -289,6 +289,7 @@ class AccountMove(models.Model):
     always_tax_exigible = fields.Boolean(
         compute='_compute_always_tax_exigible',
         store=True,
+        readonly=False,
         help="Technical field used by cash basis taxes, telling the lines of the move are always exigible. "
              "This happens if the move contains no payable or receivable line.")
 
@@ -332,7 +333,7 @@ class AccountMove(models.Model):
     invoice_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
         default=_get_default_invoice_incoterm,
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
-    display_qr_code = fields.Boolean(string="Display QR-code", related='company_id.qr_code')
+    display_qr_code = fields.Boolean(string="Display QR-code", compute='_compute_display_qr_code')
     qr_code_method = fields.Selection(string="Payment QR-code", copy=False,
         selection=lambda self: self.env['res.partner.bank'].get_available_qr_methods_in_sequence(),
         help="Type of QR-code to be generated for the payment of this invoice, when printing it. If left blank, the first available and usable method will be used.")
@@ -1560,10 +1561,12 @@ class AccountMove(models.Model):
             if new_pmt_state == 'paid' and move.move_type in ('in_invoice', 'out_invoice', 'entry'):
                 reverse_type = move.move_type == 'in_invoice' and 'in_refund' or move.move_type == 'out_invoice' and 'out_refund' or 'entry'
                 reverse_moves = self.env['account.move'].search([('reversed_entry_id', '=', move.id), ('state', '=', 'posted'), ('move_type', '=', reverse_type)])
+                caba_moves = self.env['account.move'].search([('tax_cash_basis_origin_move_id', 'in', move.ids + reverse_moves.ids), ('state', '=', 'posted')])
 
                 # We only set 'reversed' state in cas of 1 to 1 full reconciliation with a reverse entry; otherwise, we use the regular 'paid' state
+                # We ignore potentials cash basis moves reconciled because the transition account of the tax is reconcilable
                 reverse_moves_full_recs = reverse_moves.mapped('line_ids.full_reconcile_id')
-                if reverse_moves_full_recs.mapped('reconciled_line_ids.move_id').filtered(lambda x: x not in (reverse_moves + reverse_moves_full_recs.mapped('exchange_move_id'))) == move:
+                if reverse_moves_full_recs.mapped('reconciled_line_ids.move_id').filtered(lambda x: x not in (caba_moves + reverse_moves + reverse_moves_full_recs.mapped('exchange_move_id'))) == move:
                     new_pmt_state = 'reversed'
 
             move.payment_state = new_pmt_state
@@ -2033,6 +2036,14 @@ class AccountMove(models.Model):
         for record in self:
             record.tax_country_code = record.tax_country_id.code
 
+    @api.depends('company_id')
+    def _compute_display_qr_code(self):
+        for record in self:
+            record.display_qr_code = (
+                record.move_type in ('out_invoice', 'out_receipt')
+                and record.company_id.qr_code
+            )
+
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------
@@ -2365,6 +2376,9 @@ class AccountMove(models.Model):
         if copied_am.is_invoice(include_receipts=True):
             # Make sure to recompute payment terms. This could be necessary if the date is different for example.
             # Also, this is necessary when creating a credit note because the current invoice is copied.
+            if copied_am.currency_id != self.company_id.currency_id:
+                copied_am.with_context(check_move_validity=False)._onchange_currency()
+                copied_am._check_balanced()
             copied_am._recompute_payment_terms_lines()
 
         return copied_am
@@ -2389,8 +2403,11 @@ class AccountMove(models.Model):
             if (move.name and move.name != '/' and move.sequence_number not in (0, 1) and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
-            # You can't change the date of a move being inside a locked period.
-            if move.state == "posted" and 'date' in vals and move.date != vals['date']:
+            # You can't change the date or name of a move being inside a locked period.
+            if move.state == "posted" and (
+                    ('name' in vals and move.name != vals['name'])
+                    or ('date' in vals and move.date != vals['date'])
+            ):
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 
@@ -3434,8 +3451,8 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
 
-        if not self.is_invoice():
-            raise UserError(_("QR-codes can only be generated for invoice entries."))
+        if not self.display_qr_code:
+            return None
 
         qr_code_method = self.qr_code_method
         if qr_code_method:
@@ -3686,7 +3703,7 @@ class AccountMoveLine(models.Model):
     sequence = fields.Integer(default=10)
     name = fields.Char(string='Label', tracking=True)
     quantity = fields.Float(string='Quantity',
-        default=1.0, digits='Product Unit of Measure',
+        default=lambda self: 0 if self._context.get('default_display_type') else 1.0, digits='Product Unit of Measure',
         help="The optional quantity expressed by this line, eg: number of product sold. "
              "The quantity is not a legal requirement but is very useful for some reports.")
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
@@ -4385,6 +4402,13 @@ class AccountMoveLine(models.Model):
         order = (order or self._order) + ', id'
         # Add the domain and order by in order to compute the cumulated balance in _compute_cumulated_balance
         return super(AccountMoveLine, self.with_context(domain_cumulated_balance=to_tuple(domain or []), order_cumulated_balance=order)).search_read(domain, fields, offset, limit, order)
+
+    @api.model
+    def fields_get(self, allfields=None, attributes=None):
+        res = super().fields_get(allfields, attributes)
+        if res.get('cumulated_balance'):
+            res['cumulated_balance']['exportable'] = False
+        return res
 
     @api.depends_context('order_cumulated_balance', 'domain_cumulated_balance')
     def _compute_cumulated_balance(self):
@@ -5355,6 +5379,7 @@ class AccountMoveLine(models.Model):
             'date': date.min,
             'journal_id': journal.id,
             'line_ids': [],
+            'always_tax_exigible': True, # Enforce exigibility in case some cash basis adjustments were made in this exchange difference
         }
 
         # Fix residual amounts.
@@ -5477,7 +5502,7 @@ class AccountMoveLine(models.Model):
 
         # ==== Create entries for cash basis taxes ====
 
-        is_cash_basis_needed = account.user_type_id.type in ('receivable', 'payable')
+        is_cash_basis_needed = account.company_id.tax_exigibility and account.user_type_id.type in ('receivable', 'payable')
         if is_cash_basis_needed and not self._context.get('move_reverse_cancel'):
             tax_cash_basis_moves = partials._create_tax_cash_basis_moves()
             results['tax_cash_basis_moves'] = tax_cash_basis_moves
