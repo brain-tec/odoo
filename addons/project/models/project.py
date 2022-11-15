@@ -139,6 +139,12 @@ class ProjectTaskType(models.Model):
             self.env['project.task'].search([('stage_id', 'in', self.ids)]).write({'active': False})
         return super(ProjectTaskType, self).write(vals)
 
+    def copy(self, default=None):
+        default = dict(default or {})
+        if not default.get('name'):
+            default['name'] = _("%s (copy)") % (self.name)
+        return super().copy(default)
+
     def toggle_active(self):
         res = super().toggle_active()
         stage_active = self.filtered('active')
@@ -494,11 +500,11 @@ class Project(models.Model):
         for project in self:
             project.milestone_count_reached = mapped_count.get(project.id, 0)
 
-    @api.depends('milestone_ids', 'milestone_ids.is_reached', 'milestone_ids.deadline')
+    @api.depends('milestone_ids', 'milestone_ids.is_reached', 'milestone_ids.deadline', 'allow_milestones')
     def _compute_is_milestone_exceeded(self):
         today = fields.Date.context_today(self)
         read_group = self.env['project.milestone']._read_group([
-            ('project_id', 'in', self.ids),
+            ('project_id', 'in', self.filtered('allow_milestones').ids),
             ('is_reached', '=', False),
             ('deadline', '<', today)], ['project_id'], ['project_id'])
         mapped_count = {group['project_id'][0]: group['project_id_count'] for group in read_group}
@@ -517,6 +523,7 @@ class Project(models.Model):
               FROM project_project P
          LEFT JOIN project_milestone M ON P.id = M.project_id
              WHERE M.is_reached IS false
+               AND P.allow_milestones IS true
                AND M.deadline < CAST(now() AS date)
         """
         if (operator == '=' and value is True) or (operator == '!=' and value is False):
@@ -1216,7 +1223,8 @@ class Task(models.Model):
         compute='_compute_has_late_and_unreached_milestone',
         search='_search_has_late_and_unreached_milestone',
     )
-
+    #used to display the stage of the task in the tree view (if the project is private will return the personnal_stage_id, else will return the stage_id)
+    stage_display = fields.Char(compute='_compute_stage_display', string='Stage Display')
     # Task Dependencies fields
     allow_task_dependencies = fields.Boolean(related='project_id.allow_task_dependencies')
     # Tracking of this field is done in the write function
@@ -1676,6 +1684,11 @@ class Task(models.Model):
                     task.stage_id = task.stage_find(task.project_id.id, [('fold', '=', False)])
             else:
                 task.stage_id = False
+
+    @api.depends('project_id', 'stage_id', 'personal_stage_id')
+    def _compute_stage_display(self):
+        for task in self:
+            task.stage_display = task.stage_id.name if task.project_id else task.personal_stage_id.stage_id.name
 
     @api.depends('user_ids')
     def _compute_portal_user_names(self):
