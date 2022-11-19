@@ -691,7 +691,7 @@ class MrpProduction(models.Model):
             list_move_raw = [Command.link(move.id) for move in production.move_raw_ids.filtered(lambda m: not m.bom_line_id)]
             if not production.bom_id and not production._origin.product_id:
                 production.move_raw_ids = list_move_raw
-            if production.product_id != production._origin.product_id:
+            if production.bom_id != production._origin.bom_id:
                 production.move_raw_ids = [Command.clear()]
             if production.bom_id and production.product_id and production.product_qty > 0:
                 # keep manual entries
@@ -1901,11 +1901,11 @@ class MrpProduction(models.Model):
         return action
 
     @api.model
-    def get_empty_list_help(self, help):
+    def get_empty_list_help(self, help_message):
         self = self.with_context(
             empty_list_help_document_name=_("manufacturing order"),
         )
-        return super(MrpProduction, self).get_empty_list_help(help)
+        return super(MrpProduction, self).get_empty_list_help(help_message)
 
     def _log_downside_manufactured_quantity(self, moves_modification, cancel=False):
 

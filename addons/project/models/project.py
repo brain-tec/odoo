@@ -610,7 +610,8 @@ class Project(models.Model):
             default = {}
         if not default.get('name'):
             default['name'] = _("%s (copy)") % (self.name)
-        project = super(Project, self).copy(default)
+        self_with_mail_context = self.with_context(mail_auto_subscribe_no_notify=True, mail_create_nosubscribe=True)
+        project = super(Project, self_with_mail_context).copy(default)
         for follower in self.message_follower_ids:
             project.message_subscribe(partner_ids=follower.partner_id.ids, subtype_ids=follower.subtype_ids.ids)
         if 'tasks' not in default:
@@ -1104,7 +1105,7 @@ class Task(models.Model):
         ('normal', 'In Progress'),
         ('done', 'Ready'),
         ('blocked', 'Blocked')], string='Status',
-        copy=False, default='normal', required=True)
+        copy=False, default='normal', required=True, compute='_compute_kanban_state', readonly=False, store=True)
     kanban_state_label = fields.Char(compute='_compute_kanban_state_label', string='Kanban State Label', tracking=True, task_dependency_tracking=True)
     create_date = fields.Datetime("Created On", readonly=True)
     write_date = fields.Datetime("Last Updated On", readonly=True)
@@ -1363,6 +1364,10 @@ class Task(models.Model):
             for node in arch.xpath("//filter[@name='message_needaction']"):
                 node.set('invisible', '1')
         return arch, view
+
+    @api.depends('stage_id', 'project_id')
+    def _compute_kanban_state(self):
+        self.kanban_state = 'normal'
 
     @api.depends('parent_id.ancestor_id')
     def _compute_ancestor_id(self):
@@ -1726,7 +1731,8 @@ class Task(models.Model):
             default['recurrence_id'] = self.recurrence_id.copy().id
         if self.allow_subtasks:
             default['child_ids'] = [child.copy({'name': child.name} if has_default_name else None).id for child in self.child_ids]
-        task_copy = super(Task, self).copy(default)
+        self_with_mail_context = self.with_context(mail_auto_subscribe_no_notify=True, mail_create_nosubscribe=True)
+        task_copy = super(Task, self_with_mail_context).copy(default)
         if self.allow_task_dependencies:
             task_mapping = self.env.context.get('task_mapping')
             task_mapping[self.id] = task_copy.id
@@ -2018,6 +2024,8 @@ class Task(models.Model):
         for task in tasks:
             if task.project_id.privacy_visibility == 'portal':
                 task._portal_ensure_token()
+            for follower in task.parent_id.message_follower_ids:
+                task.message_subscribe(follower.partner_id.ids, follower.subtype_ids.ids)
             if current_partner not in task.message_partner_ids:
                 task.message_subscribe(current_partner.ids)
         return tasks
@@ -2045,9 +2053,6 @@ class Task(models.Model):
 
             vals.update(self.update_date_end(vals['stage_id']))
             vals['date_last_stage_update'] = now
-            # reset kanban state when changing stage
-            if 'kanban_state' not in vals:
-                vals['kanban_state'] = 'normal'
         task_ids_without_user_set = set()
         if 'user_ids' in vals and 'date_assign' not in vals:
             # prepare update of date_assign after super call
@@ -2205,6 +2210,8 @@ class Task(models.Model):
 
     @api.model
     def _task_message_auto_subscribe_notify(self, users_per_task):
+        if self.env.context.get('mail_auto_subscribe_no_notify'):
+            return
         # Utility method to send assignation notification upon writing/creation.
         template_id = self.env['ir.model.data']._xmlid_to_res_id('project.project_message_user_assigned', raise_if_not_found=False)
         if not template_id:
