@@ -46,7 +46,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         parent = await mount(Parent, { env, target });
         assert.strictEqual(
             parent.el.outerHTML,
-            '<div class="o-dropdown dropdown o-dropdown--no-caret"><button class="dropdown-toggle  "></button></div>'
+            '<div class="o-dropdown dropdown o-dropdown--no-caret"><button class="dropdown-toggle  " aria-expanded="false"></button></div>'
         );
         assert.containsOnce(parent.el, "button.dropdown-toggle");
         assert.containsNone(parent.el, ".dropdown-menu");
@@ -57,7 +57,10 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<DropdownItem>coucou</DropdownItem>`;
         env = await makeTestEnv();
         parent = await mount(Parent, { env, target });
-        assert.strictEqual(parent.el.outerHTML, '<span class="dropdown-item">coucou</span>');
+        assert.strictEqual(
+            parent.el.outerHTML,
+            '<span role="menuitem" tabindex="0" class="dropdown-item">coucou</span>'
+        );
     });
 
     QUnit.test("DropdownItem (with href prop) can be rendered as <a/>", async (assert) => {
@@ -65,7 +68,10 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
         env = await makeTestEnv();
         parent = await mount(Parent, { env, target });
-        assert.strictEqual(parent.el.outerHTML, '<a href="#" class="dropdown-item">coucou</a>');
+        assert.strictEqual(
+            parent.el.outerHTML,
+            '<a href="#" role="menuitem" tabindex="0" class="dropdown-item">coucou</a>'
+        );
     });
 
     QUnit.test("DropdownItem: prevents click default with href", async (assert) => {
@@ -119,7 +125,6 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("menu can be toggled", async (assert) => {
-        assert.expect(5);
         const beforeOpenProm = makeDeferred();
         class Parent extends Component {
             constructor() {
@@ -136,11 +141,15 @@ QUnit.module("Components", ({ beforeEach }) => {
         await click(parent.el, "button.dropdown-toggle");
         assert.verifySteps(["beforeOpen"]);
         assert.containsNone(parent.el, ".dropdown-menu");
+        assert.strictEqual(parent.el.querySelector("button.dropdown-toggle").ariaExpanded, "false");
         beforeOpenProm.resolve();
         await nextTick();
         assert.containsOnce(parent.el, ".dropdown-menu");
+        assert.strictEqual(parent.el.querySelector(".dropdown-menu").getAttribute("role"), "menu");
+        assert.strictEqual(parent.el.querySelector("button.dropdown-toggle").ariaExpanded, "true");
         await click(parent.el, "button.dropdown-toggle");
         assert.containsNone(parent.el, ".dropdown-menu");
+        assert.strictEqual(parent.el.querySelector("button.dropdown-toggle").ariaExpanded, "false");
     });
 
     QUnit.test("initial open state can be true", async (assert) => {
@@ -546,8 +555,30 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsOnce(parent.el, ".dropdown-menu");
     });
 
+    QUnit.test("siblings dropdowns: toggler focused on mouseenter", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`
+        <div>
+            <Dropdown class="one" />
+            <Dropdown class="two" />
+        </div>
+        `;
+        env = await makeTestEnv();
+        parent = await mount(Parent, { env, target });
+        // Click on one
+        parent.el.querySelector(".one button").focus(); // mocks a real click flow
+        await click(parent.el, ".one button");
+        assert.strictEqual(document.activeElement, parent.el.querySelector(".one button"));
+        assert.containsOnce(parent.el, ".dropdown-menu");
+        // Hover on two
+        const two = parent.el.querySelector(".two");
+        two.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+        await nextTick();
+        assert.strictEqual(document.activeElement, two.querySelector("button"));
+    });
+
     QUnit.test("dropdowns keynav", async (assert) => {
-        assert.expect(26);
+        assert.expect(41);
         class Parent extends Component {
             onItemSelected(value) {
                 assert.step(value.toString());
@@ -601,6 +632,10 @@ QUnit.module("Components", ({ beforeEach }) => {
             triggerHotkey(step.hotkey);
             await nextTick();
             assert.hasClass(parent.el.querySelector(".dropdown-menu > .focus"), step.expected);
+            assert.strictEqual(
+                document.activeElement,
+                parent.el.querySelector(".dropdown-menu > .focus")
+            );
         }
 
         // Select last one activated in previous scenario (item1)
@@ -687,13 +722,45 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsOnce(parent, ".dropdown");
         assert.containsNone(parent, ".dropdown .dropdown-menu");
         assert.containsNone(parent, ".dropdown button.dropdown-toggle");
+        assert.strictEqual(parent.el.querySelector(".my_custom_toggler").ariaExpanded, "false");
         await click(parent.el, ".my_custom_toggler");
         assert.containsOnce(parent, ".dropdown .dropdown-menu");
         assert.containsN(parent, ".dropdown .dropdown-menu .dropdown-item", 2);
+        assert.strictEqual(parent.el.querySelector(".my_custom_toggler").ariaExpanded, "true");
+    });
+
+    QUnit.test("props toggler='parent': refocus toggler on close with keynav", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`
+            <div>
+                <div class="my_custom_toggler">
+                    Click Me
+                    <Dropdown toggler="'parent'">
+                        <DropdownItem>Element 1</DropdownItem>
+                        <DropdownItem>Element 2</DropdownItem>
+                    </Dropdown>
+                </div>
+            </div>`;
+
+        env = await makeTestEnv();
+        parent = await mount(Parent, { env, target });
+        assert.strictEqual(document.activeElement, document.body);
+        parent.el.querySelector(".my_custom_toggler").focus(); // mocks a real click flow
+        await click(parent.el, ".my_custom_toggler");
+        assert.strictEqual(document.activeElement, parent.el.querySelector(".my_custom_toggler"));
+        triggerHotkey("ArrowDown");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            parent.el.querySelector(".dropdown-item:first-child")
+        );
+        triggerHotkey("Escape");
+        await nextTick();
+        assert.strictEqual(document.activeElement, parent.el.querySelector(".my_custom_toggler"));
     });
 
     QUnit.test("multi-level dropdown: keynav", async (assert) => {
-        assert.expect(125);
+        assert.expect(213);
         class Parent extends Component {
             onItemSelected(value) {
                 assert.step(value);
@@ -782,6 +849,20 @@ QUnit.module("Components", ({ beforeEach }) => {
                 );
                 for (const element of activeElements) {
                     assert.hasClass(element, step.highlighted[index++]);
+                }
+                const lastActiveElement = activeElements.slice(-1)[0];
+                if (lastActiveElement) {
+                    assert.hasClass(lastActiveElement, step.highlighted.slice(-1)[0]);
+                    assert.strictEqual(
+                        document.activeElement,
+                        lastActiveElement.classList.contains("dropdown")
+                            ? lastActiveElement.querySelector(":scope > .dropdown-toggle")
+                            : lastActiveElement
+                    );
+                } else {
+                    // no active element means that the main dropdown is closed
+                    assert.hasClass(document.activeElement, "dropdown-toggle");
+                    assert.hasClass(document.activeElement.parentElement, "first");
                 }
             }
             if (step.selected !== undefined) {
