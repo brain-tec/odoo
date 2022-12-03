@@ -18,8 +18,8 @@ class ReportBomStructure(models.AbstractModel):
             'level': level or 0
         }
 
-    def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, bom_line=False, level=0, parent_bom=False, index=0, product_info=False, ignore_stock=False):
-        res = super()._get_bom_data(bom, warehouse, product, line_qty, bom_line, level, parent_bom, index, product_info, ignore_stock)
+    def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, bom_line=False, level=0, parent_bom=False, parent_product=False, index=0, product_info=False, ignore_stock=False):
+        res = super()._get_bom_data(bom, warehouse, product, line_qty, bom_line, level, parent_bom, parent_product, index, product_info, ignore_stock)
         if bom.type == 'subcontract' and not self.env.context.get('minimized', False):
             seller = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.product_uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
             if seller:
@@ -46,6 +46,26 @@ class ReportBomStructure(models.AbstractModel):
         return lines
 
     @api.model
+    def _need_special_rules(self, product_info, parent_bom=False, parent_product=False):
+        if parent_bom and parent_product:
+            parent_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+            return parent_info and parent_info.get('route_type') == 'subcontract'
+        return super()._need_special_rules(product_info, parent_bom, parent_product)
+
+    @api.model
+    def _find_special_rules(self, product, product_info, parent_bom=False, parent_product=False):
+        res = super()._find_special_rules(product, product_info, parent_bom, parent_product)
+        if not parent_bom or not parent_product:
+            return res
+        # If no rules could be found within the warehouse, check if the product is a component from a subcontracted product.
+        parent_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+        if parent_info and parent_info.get('route_type') == 'subcontract':
+            # Since the product is subcontracted, check the subcontracted location for rules instead of the warehouse.
+            subcontracting_loc = parent_info['supplier'].partner_id.property_stock_subcontractor
+            return product._get_rules_from_location(subcontracting_loc)
+        return res
+
+    @api.model
     def _format_route_info(self, rules, rules_delay, warehouse, product, bom, quantity):
         res = super()._format_route_info(rules, rules_delay, warehouse, product, bom, quantity)
         subcontract_rules = [rule for rule in rules if rule.action == 'buy' and bom and bom.type == 'subcontract']
@@ -65,10 +85,9 @@ class ReportBomStructure(models.AbstractModel):
         return res
 
     @api.model
-    def _get_quantities_info(self, product, bom_uom, parent_bom, product_info):
-        if parent_bom and parent_bom.type == 'subcontract' and product.detailed_type == 'product':
-            parent_product = parent_bom.product_id or parent_bom.product_tmpl_id.product_variant_id
-            route_info = product_info[parent_product.id].get(parent_bom.id, {})
+    def _get_quantities_info(self, product, bom_uom, product_info, parent_bom=False, parent_product=False):
+        if parent_product and parent_bom and parent_bom.type == 'subcontract' and product.type == 'product':
+            route_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
             if route_info and route_info['route_type'] == 'subcontract':
                 subcontracting_loc = route_info['supplier'].partner_id.property_stock_subcontractor
                 subloc_product = product.with_context(location=subcontracting_loc.id, warehouse=False).read(['free_qty', 'qty_available'])[0]
@@ -81,7 +100,7 @@ class ReportBomStructure(models.AbstractModel):
                     'stock_loc': stock_loc,
                 }
 
-        return super()._get_quantities_info(product, bom_uom, parent_bom, product_info)
+        return super()._get_quantities_info(product, bom_uom, product_info, parent_product)
 
     @api.model
     def _get_resupply_availability(self, route_info, components):
