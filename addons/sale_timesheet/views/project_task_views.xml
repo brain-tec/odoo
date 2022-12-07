@@ -101,9 +101,6 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
             <field name="arch" type="xml">
-                <xpath expr="//header" position="inside">
-                    <field name="allow_billable" invisible="1"/>
-                </xpath>
                 <xpath expr="//field[@name='child_ids']/tree//field[@name='remaining_hours']" position="after">
                     <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"/>
                 </xpath>
@@ -188,14 +185,8 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="sale_project.view_sale_project_inherit_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='sale_line_id']" position="attributes">
-                    <attribute name="context">{'with_remaining_hours': True, 'with_price_unit': True}</attribute>
-                    <attribute name="attrs">
-                        {'invisible': [('allow_billable', '=', False)]}
-                    </attribute>
-                </xpath>
-                <xpath expr="//field[@name='sale_order_id']" position="attributes">
-                    <attribute name="invisible">1</attribute>
+                <xpath expr="//field[@name='sale_line_id'][2]" position="attributes">
+                    <attribute name="context">{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True, 'with_remaining_hours': True}</attribute>
                 </xpath>
             </field>
         </record>
