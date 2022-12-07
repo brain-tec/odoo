@@ -1576,7 +1576,7 @@ const Wysiwyg = Widget.extend({
                         // Unstash the mutations now that the color is picked.
                         this.odooEditor.historyUnstash();
                         this._processAndApplyColor(eventName, ev.data.color);
-                        this._updateEditorUI();
+                        this._updateEditorUI(this.lastMediaClicked && { target: this.lastMediaClicked });
                     });
                     colorpicker.on('color_hover', null, ev => {
                         if (hadNonCollapsedSelection) {
@@ -1621,17 +1621,19 @@ const Wysiwyg = Widget.extend({
         }
         const fonts = this.odooEditor.execCommand('applyColor', color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
 
-        // Ensure the selection in the fonts tags, otherwise an undetermined
-        // race condition could generate a wrong selection later.
-        const first = fonts[0];
-        const last = fonts[fonts.length - 1];
+        if (!this.lastMediaClicked) {
+            // Ensure the selection in the fonts tags, otherwise an undetermined
+            // race condition could generate a wrong selection later.
+            const first = fonts[0];
+            const last = fonts[fonts.length - 1];
 
-        const sel = this.odooEditor.document.getSelection();
-        sel.removeAllRanges();
-        const range = new Range();
-        range.setStart(first, 0);
-        range.setEnd(...endPos(last));
-        sel.addRange(range);
+            const sel = this.odooEditor.document.getSelection();
+            sel.removeAllRanges();
+            const range = new Range();
+            range.setStart(first, 0);
+            range.setEnd(...endPos(last));
+            sel.addRange(range);
+        }
 
         const hexColor = this._colorToHex(color);
         this.odooEditor.updateColorpickerLabels({
@@ -1913,6 +1915,7 @@ const Wysiwyg = Widget.extend({
                 title: _t('Quote'),
                 description: _t('Add a blockquote section.'),
                 fontawesome: 'fa-quote-right',
+                isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'blockquote');
                 },
@@ -1922,6 +1925,7 @@ const Wysiwyg = Widget.extend({
                 title: _t('Code'),
                 description: _t('Add a code section.'),
                 fontawesome: 'fa-code',
+                isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'pre');
                 },
