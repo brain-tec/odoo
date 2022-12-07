@@ -2822,6 +2822,9 @@ class AccountMove(models.Model):
                 raise UserError(_("You cannot validate an invoice with an inactive currency: %s",
                                   move.currency_id.name))
 
+            if move.line_ids.account_id.filtered(lambda account: account.deprecated):
+                raise UserError(_("A line of this move is using a deprecated account, you cannot post it."))
+
             # Handle case when the invoice_date is not set. In that case, the invoice_date is set at today and then,
             # lines are recomputed accordingly.
             # /!\ 'check_move_validity' must be there since the dynamic lines will be recomputed outside the 'onchange'
@@ -5475,16 +5478,16 @@ class AccountMoveLine(models.Model):
 
         # ==== Check if a full reconcile is needed ====
 
-        def is_line_reconciled(line):
+        def is_line_reconciled(line, has_multiple_currencies):
             # Check if the journal item passed as parameter is now fully reconciled.
             return line.reconciled \
-                   or line.currency_id.is_zero(line.amount_residual_currency) \
-                   or (
-                       line.company_currency_id.is_zero(line.amount_residual)
-                       and (line.matched_debit_ids.debit_move_id + line.matched_credit_ids.credit_move_id).currency_id != line.currency_id
+                   or (line.company_currency_id.is_zero(line.amount_residual)
+                       if has_multiple_currencies
+                       else line.currency_id.is_zero(line.amount_residual_currency)
                    )
 
-        if all(is_line_reconciled(line) for line in involved_lines):
+        has_multiple_currencies = len(involved_lines.currency_id) > 1
+        if all(is_line_reconciled(line, has_multiple_currencies) for line in involved_lines):
             # ==== Create the exchange difference move ====
             # This part could be bypassed using the 'no_exchange_difference' key inside the context. This is useful
             # when importing a full accounting including the reconciliation like Winbooks.
