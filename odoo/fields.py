@@ -1732,8 +1732,12 @@ class _String(Field):
 
         for lang, to_lang_value in to_lang_values.items():
             to_lang_terms = self.get_trans_terms(to_lang_value)
-            for from_lang_term, to_lang_term in zip(from_lang_terms, to_lang_terms):
-                dictionary[from_lang_term].update({lang: to_lang_term})
+            if len(from_lang_terms) != len(to_lang_terms):
+                for from_lang_term in from_lang_terms:
+                    dictionary[from_lang_term][lang] = from_lang_term
+            else:
+                for from_lang_term, to_lang_term in zip(from_lang_terms, to_lang_terms):
+                    dictionary[from_lang_term][lang] = to_lang_term
         return dictionary
 
     def _get_stored_translations(self, record):
@@ -2437,6 +2441,11 @@ class Image(Binary):
     max_width = 0
     max_height = 0
     verify_resolution = True
+
+    def setup(self, model):
+        super().setup(model)
+        if not model._abstract and not model._log_access:
+            warnings.warn(f"Image field {self} requires the model to have _log_access = True")
 
     def create(self, record_values):
         new_record_values = []
