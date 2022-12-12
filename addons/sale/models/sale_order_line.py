@@ -623,7 +623,7 @@ class SaleOrderLine(models.Model):
             # Find biggest suitable packaging
             if line.product_id and line.product_uom_qty and line.product_uom:
                 line.product_packaging_id = line.product_id.packaging_ids.filtered(
-                    'sales')._find_suitable_product_packaging(line.product_uom_qty, line.product_uom)
+                    'sales')._find_suitable_product_packaging(line.product_uom_qty, line.product_uom) or line.product_packaging_id
 
     @api.depends('product_packaging_id', 'product_uom', 'product_uom_qty')
     def _compute_product_packaging_qty(self):
@@ -975,7 +975,13 @@ class SaleOrderLine(models.Model):
                 % '\n'.join(fields.mapped('field_description'))
             )
 
-        return super().write(values)
+        result = super().write(values)
+
+        # Don't recompute the package_id if we are setting the quantity of the items and the quantity of packages
+        if 'product_uom_qty' in values and 'product_packaging_qty' in values and 'product_packaging_id' not in values:
+            self.env.remove_to_compute(self._fields['product_packaging_id'], self)
+
+        return result
 
     def _get_protected_fields(self):
         return [

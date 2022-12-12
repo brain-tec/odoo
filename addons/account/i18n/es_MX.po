@@ -1336,6 +1336,14 @@ msgstr ""
 "                relacionados con el día a día de la empresa."
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "A line of this move is using a deprecated account, you cannot post it."
+msgstr ""
+"Una línea de este movimiento utiliza una cuenta obsoleta, no puede "
+"publicarla."
+
+#. module: account
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "A payment must always belongs to a bank or cash journal."
@@ -3679,6 +3687,12 @@ msgstr "Redondeos de efectivo"
 #: model_terms:ir.ui.view,arch_db:account.report_statement
 msgid "Cash Statement"
 msgstr "Estado de cuenta de efectivo"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "Cash basis rounding difference"
+msgstr "Diferencia por redondeo de base de efectivo"
 
 #. module: account
 #: code:addons/account/models/chart_template.py:0

@@ -503,6 +503,8 @@ msgid ""
 "<span>Name all the animals</span><br/>\n"
 "                                    <i class=\"fa fa-align-justify fa-4x\" role=\"img\" aria-label=\"Multiple lines\" title=\"Multiple Lines\"/>"
 msgstr ""
+"<span>Sebutkan semua hewan</span><br/>\n"
+"                                    <i class=\"fa fa-align-justify fa-4x\" role=\"img\" aria-label=\"Multiple lines\" title=\"Multiple Lines\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -991,7 +993,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
 msgid "Chart"
-msgstr ""
+msgstr "Bagan"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__is_attempts_limited
@@ -1059,8 +1061,8 @@ msgstr "Komentar"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__comment_count_as_answer
-msgid "Comment Field is an Answer Choice"
-msgstr "Komentar Lapangan adalah Jawaban Pilihan"
+msgid "Comment is an answer"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__comments_message
@@ -1542,7 +1544,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_open
 msgid "Go to"
-msgstr ""
+msgstr "Pergi ke"
 
 #. module: survey
 #: code:addons/survey/models/survey_survey_template.py:0
@@ -2390,7 +2392,7 @@ msgstr "Halaman"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__questions_layout
 msgid "Pagination"
-msgstr ""
+msgstr "Penomoran Halaman"
 
 #. module: survey
 #: code:addons/survey/models/survey_survey_template.py:0
@@ -2481,7 +2483,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__question_placeholder
 msgid "Placeholder"
-msgstr ""
+msgstr "Placeholder"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__copyvalue
@@ -3755,7 +3757,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "dropdown-item d-flex align-items-center justify-content-between"
-msgstr ""
+msgstr "dropdown-item d-flex align-items-center justify-content-between"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -3865,7 +3867,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_403_page
 msgid "this page"
-msgstr ""
+msgstr "halaman ini"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
