@@ -1278,6 +1278,12 @@ msgstr ""
 " contables asociados a los negocios diarios."
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "A line of this move is using a deprecated account, you cannot post it."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "A payment must always belongs to a bank or cash journal."
@@ -4059,7 +4065,7 @@ msgstr "Diseño de documentos de la empresa"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_storno
 msgid "Company Storno Accounting"
-msgstr ""
+msgstr "Contabilidad Storno de la Empresa"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__has_chart_of_accounts
@@ -5666,6 +5672,8 @@ msgid ""
 "Downpayments posted on this account will be considered by the Tax Closing "
 "Entry."
 msgstr ""
+"Los anticipos publicados en esta cuenta serán considerados por  la Entrada "
+"de Cierre de Impuestos."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__state__draft
@@ -5836,7 +5844,7 @@ msgstr "Correo electrónico"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__email_add_signature
 msgid "Email Add Signature"
-msgstr ""
+msgstr "Añadir Firma de Correo Electrónico"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__alias_id
@@ -6161,7 +6169,7 @@ msgstr "Etiquetas Financieras"
 #. module: account
 #: model:account.account.tag,name:account.account_tag_financing
 msgid "Financing Activities"
-msgstr ""
+msgstr "Actividades de Financiamiento"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
@@ -7414,7 +7422,7 @@ msgstr "Invertir etiquetas"
 #. module: account
 #: model:account.account.tag,name:account.account_tag_investing
 msgid "Investing & Extraordinary Activities"
-msgstr ""
+msgstr "Inversión y Actividades Extraordinarias"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -9589,6 +9597,8 @@ msgstr "Una vez que tu factura esté lista, presiona CONFIRMAR"
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
 msgid "One or more Bank Accounts set on this partner are also used by other"
 msgstr ""
+"Una o más de las Cuentas Bancarias establecidas a este socio, están siendo "
+"utilizadas también por otro."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_partner_category_ids

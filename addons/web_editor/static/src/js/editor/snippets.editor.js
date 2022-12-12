@@ -327,6 +327,7 @@ var SnippetEditor = Widget.extend({
         if (this.isDestroyed()) {
             return;
         }
+        this.willDestroyEditors = true;
         await this.toggleTargetVisibility(!this.$target.hasClass('o_snippet_invisible'));
         const proms = _.map(this.styles, option => {
             return option.cleanForSave();
@@ -941,6 +942,13 @@ var SnippetEditor = Widget.extend({
                 $selectorChildren = $selectorChildren.add(self.selectorChildren[i].all());
             }
         }
+        // TODO In master, do not reference other module class + find a better
+        // system to define such cases + avoid duplicated code (drag & drop from
+        // editor panel + drag & drop from move button of existing block).
+        // Prevent dropping ToC inside another ToC. grep: NO_DOUBLE_TOC
+        if (this.$target[0].classList.contains('s_table_of_content')) {
+            $selectorChildren = $selectorChildren.filter((i, el) => !el.closest('.s_table_of_content'));
+        }
         const canBeSanitizedUnless = this._canBeSanitizedUnless(this.$target[0]);
 
         this.trigger_up('activate_snippet', {$snippet: this.$target.parent()});
@@ -1139,6 +1147,10 @@ var SnippetEditor = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onSnippetOptionVisibilityUpdate: function (ev) {
+        if (this.willDestroyEditors) {
+            // Do not update the option visibilities if we are destroying them.
+            return;
+        }
         ev.data.show = this._toggleVisibilityStatus(ev.data.show);
     },
     /**
@@ -1574,6 +1586,7 @@ var SnippetsMenu = Widget.extend({
         // may be the moment where the public widgets need to be destroyed).
         this.trigger_up('ready_to_clean_for_save');
 
+        this.willDestroyEditors = true;
         // Then destroy all snippet editors, making them call their own
         // "clean for save" methods (and options ones).
         await this._destroyEditors();
@@ -2355,6 +2368,16 @@ var SnippetsMenu = Widget.extend({
         // Force non editable part to contentEditable=false
         $html.find('.o_not_editable').attr('contentEditable', false);
 
+        // TODO remove me in 16.0: introduced in a 14.0 fix to allow users to
+        // switch between the different tabs of a custom tabs even in the
+        // editor mode. Before this fix, it was not possible because the
+        // elements of the tabs located on the website and the elements of the
+        // save tabs located on the editor had the same id's so the anchors
+        // were referring to the wrong elements.
+        for (const customTabPaneEl of $html.find('#snippet_custom_body .tab-pane')) {
+            customTabPaneEl.removeAttribute('id');
+        }
+
         // Add the computed template and make elements draggable
         this.$el.html($html);
         this.$el.append(this.customizePanel);
@@ -2598,6 +2621,16 @@ var SnippetsMenu = Widget.extend({
                                 $selectorChildren = $selectorChildren.add(temp[k]['drop-in'].all());
                             }
                         }
+                    }
+
+                    // TODO In master, do not reference other module class +
+                    // find a better system to define such cases + avoid
+                    // duplicated code (drag & drop from editor panel + drag &
+                    // drop from move button of existing block).
+                    // Prevent dropping ToC inside another ToC.
+                    // grep: NO_DOUBLE_TOC
+                    if ($baseBody[0].classList.contains('s_table_of_content')) {
+                        $selectorChildren = $selectorChildren.filter((i, el) => !el.closest('.s_table_of_content'));
                     }
 
                     $toInsert = $baseBody.clone();
@@ -3436,6 +3469,10 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onSnippetOptionVisibilityUpdate: async function (ev) {
+        if (this.willDestroyEditors) {
+            // Do not update the option visibilities if we are destroying them.
+            return;
+        }
         if (!ev.data.show) {
             await this._activateSnippet(false);
         }

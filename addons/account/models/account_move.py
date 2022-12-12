@@ -1562,7 +1562,15 @@ class AccountMove(models.Model):
             if new_pmt_state == 'paid' and move.move_type in ('in_invoice', 'out_invoice', 'entry'):
                 reverse_type = move.move_type == 'in_invoice' and 'in_refund' or move.move_type == 'out_invoice' and 'out_refund' or 'entry'
                 reverse_moves = self.env['account.move'].search([('reversed_entry_id', '=', move.id), ('state', '=', 'posted'), ('move_type', '=', reverse_type)])
-                caba_moves = self.env['account.move'].search([('tax_cash_basis_origin_move_id', 'in', move.ids + reverse_moves.ids), ('state', '=', 'posted')])
+                if self.env.company.tax_exigibility:
+                    domain = [
+                        ('tax_cash_basis_origin_move_id', 'in', move.ids + reverse_moves.ids),
+                        ('state', '=', 'posted'),
+                        ('move_type', '=', 'entry')
+                    ]
+                    caba_moves = self.env['account.move'].search(domain)
+                else:
+                    caba_moves = self.env['account.move']
 
                 # We only set 'reversed' state in cas of 1 to 1 full reconciliation with a reverse entry; otherwise, we use the regular 'paid' state
                 # We ignore potentials cash basis moves reconciled because the transition account of the tax is reconcilable
@@ -1756,7 +1764,7 @@ class AccountMove(models.Model):
 
             move.tax_totals_json = json.dumps({
                 **self._get_tax_totals(move.partner_id, tax_lines_data, move.amount_total, move.amount_untaxed, move.currency_id),
-                'allow_tax_edition': move.is_purchase_document(include_receipts=False) and move.state == 'draft',
+                'allow_tax_edition': move.is_purchase_document(include_receipts=True) and move.state == 'draft',
             })
 
     def _prepare_tax_lines_data_for_totals_from_invoice(self, tax_line_id_filter=None, tax_ids_filter=None):
@@ -3033,6 +3041,9 @@ class AccountMove(models.Model):
             if move.display_inactive_currency_warning:
                 raise UserError(_("You cannot validate an invoice with an inactive currency: %s",
                                   move.currency_id.name))
+
+            if move.line_ids.account_id.filtered(lambda account: account.deprecated):
+                raise UserError(_("A line of this move is using a deprecated account, you cannot post it."))
 
             # Handle case when the invoice_date is not set. In that case, the invoice_date is set at today and then,
             # lines are recomputed accordingly.

@@ -265,12 +265,14 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  * @returns {HTMLElement}
  */
 export function closestElement(node, selector, restrictToEditable=false) {
-    const element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-    if (restrictToEditable && selector && element) {
-        const elementFound = element.closest(selector);
-        return elementFound && elementFound.querySelector('.odoo-editor-editable') ? null : elementFound;
+    let element = node;
+    while (element && element.nodeType !== Node.ELEMENT_NODE) {
+        element = element.parentNode;
     }
-    return selector && element ? element.closest(selector) : element || node;
+    if (element && selector) {
+        element = element.closest(selector);
+    }
+    return restrictToEditable && element && element.querySelector('.odoo-editor-editable') ? null : element;
 }
 
 /**
@@ -977,7 +979,7 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
                     removeFormat(splitNode, formatSpec);
                 } else {
                     if (firstBlockOrClassHasFormat && !applyStyle) {
-                        formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
+                        formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
                     } else if (!firstBlockOrClassHasFormat && applyStyle) {
                         const tag = formatSpec.tagName && document.createElement(formatSpec.tagName);
                         if (tag) {
@@ -1298,13 +1300,17 @@ export function containsUnremovable(node) {
 export function getInSelection(document, selector) {
     const selection = document.getSelection();
     const range = selection && !!selection.rangeCount && selection.getRangeAt(0);
-    return (
-        range &&
-        (closestElement(range.startContainer, selector) ||
-            [...closestElement(range.commonAncestorContainer).querySelectorAll(selector)].find(
+    if (range) {
+        const selectorInStartAncestors = closestElement(range.startContainer, selector);
+        if (selectorInStartAncestors) {
+            return selectorInStartAncestors;
+        } else {
+            const commonElementAncestor = closestElement(range.commonAncestorContainer);
+            return commonElementAncestor && [...commonElementAncestor.querySelectorAll(selector)].find(
                 node => range.intersectsNode(node),
-            ))
-    );
+            );
+        }
+    }
 }
 
 // This is a list of "paragraph-related elements", defined as elements that
