@@ -22,7 +22,7 @@ from odoo.tools.misc import get_lang
 from . import crm_stage
 
 _logger = logging.getLogger(__name__)
-
+_schema = logging.getLogger('odoo.schema')
 
 
 CRM_LEAD_FIELDS_TO_MERGE = [
@@ -176,10 +176,10 @@ class Lead(models.Model):
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
     contact_name = fields.Char(
-        'Contact Name', tracking=30,
+        'Contact Name', index='trigram', tracking=30,
         compute='_compute_contact_name', readonly=False, store=True)
     partner_name = fields.Char(
-        'Company Name', tracking=20,
+        'Company Name', index='trigram', tracking=20,
         compute='_compute_partner_name', readonly=False, store=True,
         help='The name of the future partner company that will be created while converting the lead into opportunity')
     function = fields.Char('Job Position', compute='_compute_function', readonly=False, store=True)
@@ -187,6 +187,7 @@ class Lead(models.Model):
     email_from = fields.Char(
         'Email', tracking=40, index='trigram',
         compute='_compute_email_from', inverse='_inverse_email_from', readonly=False, store=True)
+    email_normalized = fields.Char(index='trigram')  # inherited via mail.thread.blacklist
     phone = fields.Char(
         'Phone', tracking=50,
         compute='_compute_phone', inverse='_inverse_phone', readonly=False, store=True)
@@ -566,7 +567,7 @@ class Lead(models.Model):
 
             if email_search:
                 duplicate_lead_ids |= return_if_relevant('crm.lead', common_lead_domain + [
-                    '|', ('email_normalized', 'ilike', email_search), ('email_from', 'ilike', email_search)
+                    ('email_normalized', 'ilike', email_search)
                 ])
             if lead.partner_name and len(lead.partner_name) >= MIN_NAME_LENGTH:
                 duplicate_lead_ids |= return_if_relevant('crm.lead', common_lead_domain + [
@@ -706,12 +707,22 @@ class Lead(models.Model):
     # ------------------------------------------------------------
 
     def _auto_init(self):
-        res = super(Lead, self)._auto_init()
+        super()._auto_init()
         tools.create_index(self._cr, 'crm_lead_user_id_team_id_type_index',
                            self._table, ['user_id', 'team_id', 'type'])
         tools.create_index(self._cr, 'crm_lead_create_date_team_id_idx',
                            self._table, ['create_date', 'team_id'])
-        return res
+        phone_pattern = r'[\s\\./\(\)\-]'
+        for field_name in ('phone', 'mobile'):
+            index_name = f'crm_lead_{field_name}_partial_tgm'
+            if tools.index_exists(self._cr, index_name):
+                continue
+            regex_expression = "regexp_replace((phone::text), %s::text, ''::text, 'g'::text)"
+            self._cr.execute(
+                f'CREATE INDEX "{index_name}" ON "{self._table}" ({regex_expression}) WHERE {field_name} IS NOT NULL',
+                (phone_pattern,)
+            )
+            _schema.debug("Table %r: created index %r (%s)", self._table, index_name, regex_expression)
 
     @api.model_create_multi
     def create(self, vals_list):
