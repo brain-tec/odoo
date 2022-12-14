@@ -1907,7 +1907,7 @@ msgstr ""
 #: code:addons/project/controllers/portal.py:0
 #, python-format
 msgid "Others"
-msgstr ""
+msgstr "Lainnya"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.action_view_task_overpassed_draft
@@ -3027,7 +3027,7 @@ msgstr "Email Pengguna"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__privacy_visibility
 msgid "Visibility"
-msgstr ""
+msgstr "Visibilitas"
 
 #. module: project
 #. openerp-web
