@@ -13,6 +13,7 @@ import './commands/align.js';
 import { sanitize } from './utils/sanitize.js';
 import { serializeNode, unserializeNode, serializeSelection } from './utils/serialize.js';
 import {
+    isMacOS,
     closestBlock,
     commonParentGet,
     containsUnremovable,
@@ -237,6 +238,7 @@ export class OdooEditor extends EventTarget {
                 _t: string => string,
                 allowCommandVideo: true,
                 renderingClasses: [],
+                allowInlineAtRoot: false,
             },
             options,
         );
@@ -363,15 +365,15 @@ export class OdooEditor extends EventTarget {
             // Create the move buttons.
             if (direction === 'column') {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_move_left"><span class="fa fa-chevron-left"></span>Move left</div>
-                    <div class="o_move_right"><span class="fa fa-chevron-right"></span>Move right</div>
+                    <div class="o_move_left"><span class="fa fa-chevron-left"></span>` + this.options._t('Move left') + `</div>
+                    <div class="o_move_right"><span class="fa fa-chevron-right"></span>` + this.options._t('Move right') + `</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_move_left'), 'click', this._onTableMoveLeftClick);
                 this.addDomListener(uiMenu.querySelector('.o_move_right'), 'click', this._onTableMoveRightClick);
             } else {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_move_up"><span class="fa fa-chevron-left" style="transform: rotate(90deg);"></span>Move up</div>
-                    <div class="o_move_down"><span class="fa fa-chevron-right" style="transform: rotate(90deg);"></span>Move down</div>
+                    <div class="o_move_up"><span class="fa fa-chevron-left" style="transform: rotate(90deg);"></span>` + this.options._t('Move up') + `</div>
+                    <div class="o_move_down"><span class="fa fa-chevron-right" style="transform: rotate(90deg);"></span>` + this.options._t('Move down') + `</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_move_up'), 'click', this._onTableMoveUpClick);
                 this.addDomListener(uiMenu.querySelector('.o_move_down'), 'click', this._onTableMoveDownClick);
@@ -380,15 +382,15 @@ export class OdooEditor extends EventTarget {
             // Create the add buttons.
             if (direction === 'column') {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_insert_left"><span class="fa fa-plus"></span>Insert left</div>
-                    <div class="o_insert_right"><span class="fa fa-plus"></span>Insert right</div>
+                    <div class="o_insert_left"><span class="fa fa-plus"></span>` + this.options._t('Insert left') + `</div>
+                    <div class="o_insert_right"><span class="fa fa-plus"></span>` + this.options._t('Insert right') +`</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_insert_left'), 'click', () => this.execCommand('addColumn', 'before', this._columnUiTarget));
                 this.addDomListener(uiMenu.querySelector('.o_insert_right'), 'click', () => this.execCommand('addColumn', 'after', this._columnUiTarget));
             } else {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_insert_above"><span class="fa fa-plus"></span>Insert above</div>
-                    <div class="o_insert_below"><span class="fa fa-plus"></span>Insert below</div>
+                    <div class="o_insert_above"><span class="fa fa-plus"></span>` + this.options._t('Insert above') + `</div>
+                    <div class="o_insert_below"><span class="fa fa-plus"></span>` + this.options._t('Insert below') + `</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_insert_above'), 'click', () => this.execCommand('addRow', 'before', this._rowUiTarget));
                 this.addDomListener(uiMenu.querySelector('.o_insert_below'), 'click', () => this.execCommand('addRow', 'after', this._rowUiTarget));
@@ -396,10 +398,12 @@ export class OdooEditor extends EventTarget {
 
             // Add the delete button.
             if (direction === 'column') {
-                uiMenu.append(parser.parseFromString(`<div class="o_delete_column"><span class="fa fa-trash"></span>Delete</div>`, 'text/html').body.firstChild)
+                uiMenu.append(parser.parseFromString(`<div class="o_delete_column"><span class="fa fa-trash"></span>` + this.options._t('Delete') + `</div>
+                `, 'text/html').body.firstChild)
                 this.addDomListener(uiMenu.querySelector('.o_delete_column'), 'click', this._onTableDeleteColumnClick);
             } else {
-                uiMenu.append(parser.parseFromString(`<div class="o_delete_row"><span class="fa fa-trash"></span>Delete</div>`, 'text/html').body.firstChild)
+                uiMenu.append(parser.parseFromString(`<div class="o_delete_row"><span class="fa fa-trash"></span>` + this.options._t('Delete') + `</div>
+                `, 'text/html').body.firstChild)
                 this.addDomListener(uiMenu.querySelector('.o_delete_row'), 'click', this._onTableDeleteRowClick);
             }
 
@@ -3322,7 +3326,7 @@ export class OdooEditor extends EventTarget {
         // is a non-empty Unicode character string containing the printable
         // representation of the key. In this case, call `deleteRange` before
         // inserting the printed representation of the character.
-        if (/^.$/u.test(ev.key) && !ev.ctrlKey && !ev.metaKey) {
+        if (/^.$/u.test(ev.key) && !ev.ctrlKey && !ev.metaKey && (isMacOS() || !ev.altKey)) {
             const selection = this.document.getSelection();
             if (selection && !selection.isCollapsed) {
                 this.deleteRange(selection);
@@ -3667,7 +3671,7 @@ export class OdooEditor extends EventTarget {
         const orphanInlineChildNodes = [...element.childNodes].find(
             (n) => !isBlock(n) && (n.nodeType === Node.ELEMENT_NODE || n.textContent.trim() !== "")
         );
-        if (orphanInlineChildNodes) {
+        if (orphanInlineChildNodes && !this.options.allowInlineAtRoot) {
             const childNodes = [...element.childNodes];
             const tempEl = document.createElement('temp-container');
             let currentP = document.createElement('p');
@@ -4023,6 +4027,7 @@ export class OdooEditor extends EventTarget {
                     star.classList.toggle('fa-star-o', true);
                     star.classList.toggle('fa-star', false);
                 };
+                this.historyStep();
             }
         }
 

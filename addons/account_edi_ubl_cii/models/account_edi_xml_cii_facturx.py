@@ -223,7 +223,7 @@ class AccountEdiXmlCII(models.AbstractModel):
             vat=_find_value(f"//ram:{partner_type}/ram:SpecifiedTaxRegistration/ram:ID"),
         )
         if not invoice.partner_id:
-            logs.append(_("Could not retrieve the vendor."))
+            logs.append(_("Could not retrieve the %s.", _("customer") if invoice.is_sale_document() else _("vendor")))
 
         # ==== currency_id ====
 
@@ -352,9 +352,9 @@ class AccountEdiXmlCII(models.AbstractModel):
         if move_type_code is None:
             return None, None
         if move_type_code.text == '381':
-            return 'in_refund', 1
+            return 'refund', 1
         if move_type_code.text == '380':
             amount_node = tree.find('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TaxBasisTotalAmount')
             if amount_node is not None and float(amount_node.text) < 0:
-                return 'in_refund', -1
-            return 'in_invoice', 1
+                return 'refund', -1
+            return 'invoice', 1
