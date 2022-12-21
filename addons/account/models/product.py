@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 ACCOUNT_DOMAIN = "[('deprecated', '=', False), ('internal_type','=','other'), ('company_id', '=', current_company_id), ('is_off_balance', '=', False)]"
 
@@ -52,6 +53,16 @@ class ProductTemplate(models.Model):
         if not fiscal_pos:
             fiscal_pos = self.env['account.fiscal.position']
         return fiscal_pos.map_accounts(accounts)
+
+    @api.constrains('uom_id')
+    def _check_uom_not_in_invoice(self):
+        for template in self:
+            aml_domain = [('product_id.product_tmpl_id.id', '=', template.id),
+                          ('product_uom_id.category_id.id', '!=', template.uom_id.category_id.id),
+                          ]
+            if self.env['account.move.line'].sudo().search(aml_domain, limit=1):
+                raise ValidationError(_("This product is already being used in posted Journal Entries.\n"
+                                        "If you want to change its Unit of Measure, please archive this product and create a new one."))
 
 
 class ProductProduct(models.Model):
