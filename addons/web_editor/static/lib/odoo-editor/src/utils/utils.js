@@ -1259,6 +1259,7 @@ export function isUnremovable(node) {
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.classList.contains('o_editable') || node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
         (node.classList && node.classList.contains('oe_unremovable')) ||
+        (node.nodeName === 'SPAN' && node.parentElement && node.parentElement.getAttribute('data-oe-type') === 'monetary') ||
         (node.ownerDocument && node.ownerDocument.defaultWindow && !ancestors(node).find(ancestor => ancestor.oid === 'root')) // Node is in DOM but not in editable.
     );
 }
@@ -1388,6 +1389,15 @@ export function getOuid(node, optimize = false) {
         node = node.parentNode;
     }
     return node && node.oid;
+}
+/**
+ * Returns true if the provided node can suport html content.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isHtmlContentSupported(node) {
+    return !closestElement(node, '[data-oe-model]:not([data-oe-field="arch"]),[data-oe-translation-id]', true);
 }
 /**
  * Returns whether the given node is a element that could be considered to be
@@ -2368,6 +2378,12 @@ export function getRangePosition(el, document, options = {}) {
         offset.left = marginLeft;
     }
 
+    if (options.getContextFromParentRect) {
+        const parentContextRect = options.getContextFromParentRect();
+        offset.left += parentContextRect.left;
+        offset.top += parentContextRect.top;
+    }
+
     if (
         offset.top - marginTop + offset.height + el.offsetHeight > window.innerHeight &&
         offset.top - el.offsetHeight - marginBottom > 0
@@ -2428,4 +2444,11 @@ export const rightLeafOnlyNotBlockNotEditablePath = createDOMPathGenerator(DIREC
 //------------------------------------------------------------------------------
 export function peek(arr) {
     return arr[arr.length - 1];
+}
+/**
+ * Check user OS 
+ * @returns {boolean} 
+ */
+export function isMacOS() {
+    return window.navigator.userAgent.includes('Mac');
 }
