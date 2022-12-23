@@ -65,6 +65,12 @@
             return content;
         }
         /**
+         * Check if the key is already in the registry
+         */
+        contains(key) {
+            return key in this.content;
+        }
+        /**
          * Get a list of all elements in the registry
          */
         getAll() {
@@ -365,8 +371,10 @@
     const PADDING_AUTORESIZE_VERTICAL = 3;
     const PADDING_AUTORESIZE_HORIZONTAL = MIN_CELL_TEXT_MARGIN;
     const FILTER_ICON_MARGIN = 2;
+    const FILTER_ICON_EDGE_LENGTH = 17;
     // Menus
     const MENU_WIDTH = 250;
+    const MENU_VERTICAL_PADDING = 8;
     const MENU_ITEM_HEIGHT = 28;
     const MENU_SEPARATOR_BORDER_WIDTH = 1;
     const MENU_SEPARATOR_PADDING = 5;
@@ -4234,7 +4242,7 @@
         return "\n" + str + "\n";
     }
 
-    const ERROR_TOOLTIP_HEIGHT = 40;
+    const ERROR_TOOLTIP_MAX_HEIGHT = 80;
     const ERROR_TOOLTIP_WIDTH = 180;
     css /* scss */ `
   .o-error-tooltip {
@@ -4242,11 +4250,13 @@
     background-color: white;
     border-left: 3px solid red;
     padding: 10px;
+    width: ${ERROR_TOOLTIP_WIDTH}px;
+    box-sizing: border-box !important;
   }
 `;
     class ErrorToolTip extends owl.Component {
     }
-    ErrorToolTip.size = { width: ERROR_TOOLTIP_WIDTH, height: ERROR_TOOLTIP_HEIGHT };
+    ErrorToolTip.maxSize = { maxHeight: ERROR_TOOLTIP_MAX_HEIGHT };
     ErrorToolTip.template = "o-spreadsheet-ErrorToolTip";
     ErrorToolTip.components = {};
     ErrorToolTip.props = {
@@ -4620,8 +4630,8 @@
      * Return the o-spreadsheet element position relative
      * to the browser viewport.
      */
-    function useSpreadsheetPosition() {
-        const position = owl.useState({ x: 0, y: 0 });
+    function useSpreadsheetRect() {
+        const position = owl.useState({ x: 0, y: 0, width: 0, height: 0 });
         let spreadsheetElement = document.querySelector(".o-spreadsheet");
         updatePosition();
         function updatePosition() {
@@ -4629,9 +4639,11 @@
                 spreadsheetElement = document.querySelector(".o-spreadsheet");
             }
             if (spreadsheetElement) {
-                const { top, left } = spreadsheetElement.getBoundingClientRect();
+                const { top, left, width, height } = spreadsheetElement.getBoundingClientRect();
                 position.x = left;
                 position.y = top;
+                position.width = width;
+                position.height = height;
             }
         }
         owl.onMounted(updatePosition);
@@ -4662,76 +4674,266 @@
         owl.onPatched(updateElPosition);
         return position;
     }
+    /**
+     * Get the rectangle inside which a popover should stay when being displayed.
+     * It's the value defined in `env.getPopoverContainerRect`, or the Rect of the "o-spreadsheet"
+     * element by default.
+     *
+     * Coordinates are expressed expressed as absolute DOM position.
+     */
+    function usePopoverContainer() {
+        const container = owl.useState({ x: 0, y: 0, width: 0, height: 0 });
+        const component = owl.useComponent();
+        const spreadsheetRect = useSpreadsheetRect();
+        function updateRect() {
+            const env = component.env;
+            const newRect = "getPopoverContainerRect" in env ? env.getPopoverContainerRect() : spreadsheetRect;
+            container.x = newRect.x;
+            container.y = newRect.x;
+            container.width = newRect.width;
+            container.height = newRect.height;
+        }
+        updateRect();
+        owl.onMounted(updateRect);
+        owl.onPatched(updateRect);
+        return container;
+    }
 
+    /**
+     * Compute the intersection of two rectangles. Returns nothing if the two rectangles don't overlap
+     */
+    function rectIntersection(rect1, rect2) {
+        return zoneToRect(intersection(rectToZone(rect1), rectToZone(rect2)));
+    }
+    function rectToZone(rect) {
+        return {
+            left: rect.x,
+            top: rect.y,
+            right: rect.x + rect.width,
+            bottom: rect.y + rect.height,
+        };
+    }
+    function zoneToRect(zone) {
+        if (!zone)
+            return undefined;
+        return {
+            x: zone.left,
+            y: zone.top,
+            width: zone.right - zone.left,
+            height: zone.bottom - zone.top,
+        };
+    }
+
+    css /* scss */ `
+  .o-popover {
+    position: absolute;
+    z-index: ${ComponentsImportance.Popover};
+    overflow: auto;
+    box-shadow: 1px 2px 5px 2px rgb(51 51 51 / 15%);
+    width: fit-content;
+    height: fit-content;
+  }
+`;
     class Popover extends owl.Component {
         constructor() {
             super(...arguments);
-            this.spreadsheetPosition = useSpreadsheetPosition();
+            this.popoverRef = owl.useRef("popover");
+            this.currentPosition = undefined;
+            this.currentVisibility = undefined;
+            this.spreadsheetRect = useSpreadsheetRect();
         }
-        get style() {
-            // the props's position is expressed relative to the "body" element
-            // but we teleport the element in ".o-spreadsheet" to keep everything
-            // within our control and to avoid leaking into external DOM
-            const horizontalPosition = `left:${this.horizontalPosition() - this.spreadsheetPosition.x}`;
-            const verticalPosition = `top:${this.verticalPosition() - this.spreadsheetPosition.y}`;
-            const height = `max-height:${this.viewportDimension.height - BOTTOMBAR_HEIGHT - SCROLLBAR_WIDTH$1}`;
-            return `
-      position: absolute;
-      z-index: ${ComponentsImportance.Popover};
-      ${verticalPosition}px;
-      ${horizontalPosition}px;
-      ${height}px;
-      width:${this.props.childWidth}px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      box-shadow: 1px 2px 5px 2px rgb(51 51 51 / 15%);
-    `;
+        setup() {
+            this.containerRect = usePopoverContainer();
+            // useEffect occurs after the DOM is created and the element width/height are computed, but before
+            // the element in rendered, so we can still set its position
+            owl.useEffect(() => {
+                var _a, _b, _c, _d;
+                if (!this.containerRect)
+                    throw new Error("Popover container is not defined");
+                this.resetPopoverElStyle();
+                const el = this.popoverRef.el;
+                const propsMaxSize = { width: this.props.maxWidth, height: this.props.maxHeight };
+                const elDims = {
+                    width: el.getBoundingClientRect().width,
+                    height: el.getBoundingClientRect().height,
+                };
+                const spreadsheetRect = this.spreadsheetRect;
+                const anchor = rectIntersection(this.props.anchorRect, this.containerRect);
+                const newVisibility = anchor ? "visible" : "hidden";
+                if (this.currentVisibility !== "hidden" && newVisibility === "hidden") {
+                    (_b = (_a = this.props).onPopoverHidden) === null || _b === void 0 ? void 0 : _b.call(_a);
+                }
+                el.style.visibility = newVisibility;
+                this.currentVisibility = newVisibility;
+                if (!anchor)
+                    return;
+                const popoverPositionHelper = this.props.positioning === "BottomLeft"
+                    ? new BottomLeftPopoverContext(anchor, this.containerRect, propsMaxSize, spreadsheetRect)
+                    : new TopRightPopoverContext(anchor, this.containerRect, propsMaxSize, spreadsheetRect);
+                const style = popoverPositionHelper.getCss(elDims, this.props.verticalOffset);
+                for (const property of Object.keys(style)) {
+                    el.style[property] = style[property];
+                }
+                const newPosition = popoverPositionHelper.getCurrentPosition(elDims);
+                if (this.currentPosition && newPosition !== this.currentPosition) {
+                    (_d = (_c = this.props).onPopoverMoved) === null || _d === void 0 ? void 0 : _d.call(_c);
+                }
+                this.currentPosition = newPosition;
+            });
         }
-        get viewportDimension() {
-            return this.env.model.getters.getSheetViewDimensionWithHeaders();
-        }
-        get shouldRenderRight() {
-            const { x } = this.props.position;
-            return x + this.props.childWidth < this.viewportDimension.width;
-        }
-        get shouldRenderBottom() {
-            const { y } = this.props.position;
-            return (y + this.props.childHeight <
-                this.viewportDimension.height + (this.env.isDashboard() ? 0 : TOPBAR_HEIGHT));
-        }
-        horizontalPosition() {
-            const { x } = this.props.position;
-            if (this.shouldRenderRight) {
-                return x;
-            }
-            return x - this.props.childWidth - this.props.flipHorizontalOffset;
-        }
-        verticalPosition() {
-            const { y } = this.props.position;
-            if (this.shouldRenderBottom) {
-                return y;
-            }
-            return Math.max(y - this.props.childHeight + this.props.flipVerticalOffset, this.props.marginTop);
+        resetPopoverElStyle() {
+            const el = this.popoverRef.el;
+            if (!el)
+                return;
+            el.style["visibility"] = "visible";
+            el.style["max-height"] = el.style["max-width"] = "";
+            el.style["bottom"] = el.style["top"] = el.style["right"] = el.style["left"] = "";
         }
     }
     Popover.template = "o-spreadsheet-Popover";
     Popover.defaultProps = {
-        flipHorizontalOffset: 0,
-        flipVerticalOffset: 0,
+        positioning: "BottomLeft",
         verticalOffset: 0,
-        marginTop: 0,
         onMouseWheel: () => { },
+        onPopoverMoved: () => { },
+        onPopoverHidden: () => { },
     };
     Popover.props = {
-        position: Object,
-        marginTop: { type: Number, optional: true },
-        childWidth: Number,
-        childHeight: Number,
-        flipHorizontalOffset: { type: Number, optional: true },
-        flipVerticalOffset: { type: Number, optional: true },
+        anchorRect: Object,
+        containerRect: { type: Object, optional: true },
+        positioning: { type: String, optional: true },
+        maxWidth: { type: Number, optional: true },
+        maxHeight: { type: Number, optional: true },
+        verticalOffset: { type: Number, optional: true },
         onMouseWheel: { type: Function, optional: true },
+        onPopoverHidden: { type: Function, optional: true },
+        onPopoverMoved: { type: Function, optional: true },
         slots: Object,
     };
+    class PopoverPositionContext {
+        constructor(anchorRect, containerRect, propsMaxSize, spreadsheetOffset) {
+            this.anchorRect = anchorRect;
+            this.containerRect = containerRect;
+            this.propsMaxSize = propsMaxSize;
+            this.spreadsheetOffset = spreadsheetOffset;
+        }
+        /** Check if there is enough space for the popover to be rendered at the bottom of the anchorRect */
+        shouldRenderAtBottom(elementHeight) {
+            return (elementHeight <= this.availableHeightDown ||
+                this.availableHeightDown >= this.availableHeightUp);
+        }
+        /** Check if there is enough space for the popover to be rendered at the right of the anchorRect */
+        shouldRenderAtRight(elementWidth) {
+            return (elementWidth <= this.availableWidthRight ||
+                this.availableWidthRight >= this.availableWidthLeft);
+        }
+        getMaxHeight(elementHeight) {
+            const shouldRenderAtBottom = this.shouldRenderAtBottom(elementHeight);
+            const availableHeight = shouldRenderAtBottom
+                ? this.availableHeightDown
+                : this.availableHeightUp;
+            return this.propsMaxSize.height
+                ? Math.min(availableHeight, this.propsMaxSize.height)
+                : availableHeight;
+        }
+        getMaxWidth(elementWidth) {
+            const shouldRenderAtRight = this.shouldRenderAtRight(elementWidth);
+            const availableWidth = shouldRenderAtRight ? this.availableWidthRight : this.availableWidthLeft;
+            return this.propsMaxSize.width
+                ? Math.min(availableWidth, this.propsMaxSize.width)
+                : availableWidth;
+        }
+        getCss(elDims, verticalOffset) {
+            const maxHeight = this.getMaxHeight(elDims.height);
+            const maxWidth = this.getMaxWidth(elDims.width);
+            const actualHeight = Math.min(maxHeight, elDims.height);
+            const actualWidth = Math.min(maxWidth, elDims.width);
+            const shouldRenderAtBottom = this.shouldRenderAtBottom(elDims.height);
+            const shouldRenderAtRight = this.shouldRenderAtRight(elDims.width);
+            verticalOffset = shouldRenderAtBottom ? verticalOffset : -verticalOffset;
+            const cssProperties = {
+                "max-height": maxHeight + "px",
+                "max-width": maxWidth + "px",
+                top: this.getTopCoordinate(actualHeight, shouldRenderAtBottom) -
+                    this.spreadsheetOffset.y -
+                    verticalOffset +
+                    "px",
+                left: this.getLeftCoordinate(actualWidth, shouldRenderAtRight) - this.spreadsheetOffset.x + "px",
+            };
+            return cssProperties;
+        }
+        getCurrentPosition(elDims) {
+            const shouldRenderAtBottom = this.shouldRenderAtBottom(elDims.height);
+            const shouldRenderAtRight = this.shouldRenderAtRight(elDims.width);
+            if (shouldRenderAtBottom && shouldRenderAtRight)
+                return "BottomRight";
+            if (shouldRenderAtBottom && !shouldRenderAtRight)
+                return "BottomLeft";
+            if (!shouldRenderAtBottom && shouldRenderAtRight)
+                return "TopRight";
+            return "TopLeft";
+        }
+    }
+    class BottomLeftPopoverContext extends PopoverPositionContext {
+        get availableHeightUp() {
+            return this.anchorRect.y - this.containerRect.y;
+        }
+        get availableHeightDown() {
+            return this.containerRect.height - this.availableHeightUp - this.anchorRect.height;
+        }
+        get availableWidthRight() {
+            return this.containerRect.x + this.containerRect.width - this.anchorRect.x;
+        }
+        get availableWidthLeft() {
+            return this.anchorRect.x + this.anchorRect.width - this.containerRect.x;
+        }
+        getTopCoordinate(elementHeight, shouldRenderAtBottom) {
+            if (shouldRenderAtBottom) {
+                return this.anchorRect.y + this.anchorRect.height;
+            }
+            else {
+                return this.anchorRect.y - elementHeight;
+            }
+        }
+        getLeftCoordinate(elementWidth, shouldRenderAtRight) {
+            if (shouldRenderAtRight) {
+                return this.anchorRect.x;
+            }
+            else {
+                return this.anchorRect.x + this.anchorRect.width - elementWidth;
+            }
+        }
+    }
+    class TopRightPopoverContext extends PopoverPositionContext {
+        get availableHeightUp() {
+            return this.anchorRect.y + this.anchorRect.height - this.containerRect.y;
+        }
+        get availableHeightDown() {
+            return this.containerRect.y + this.containerRect.height - this.anchorRect.y;
+        }
+        get availableWidthRight() {
+            return this.containerRect.width - this.anchorRect.width - this.availableWidthLeft;
+        }
+        get availableWidthLeft() {
+            return this.anchorRect.x - this.containerRect.x;
+        }
+        getTopCoordinate(elementHeight, shouldRenderAtBottom) {
+            if (shouldRenderAtBottom) {
+                return this.anchorRect.y;
+            }
+            else {
+                return this.anchorRect.y + this.anchorRect.height - elementHeight;
+            }
+        }
+        getLeftCoordinate(elementWidth, shouldRenderAtRight) {
+            if (shouldRenderAtRight) {
+                return this.anchorRect.x + this.anchorRect.width;
+            }
+            else {
+                return this.anchorRect.x - elementWidth;
+            }
+        }
+    }
 
     //------------------------------------------------------------------------------
     // Context Menu Component
@@ -4739,7 +4941,10 @@
     css /* scss */ `
   .o-menu {
     background-color: white;
-    padding: 5px 0px;
+    padding: ${MENU_VERTICAL_PADDING}px 0px;
+    width: ${MENU_WIDTH}px;
+    box-sizing: border-box !important;
+
     .o-menu-item {
       display: flex;
       justify-content: space-between;
@@ -4787,7 +4992,6 @@
     class Menu extends owl.Component {
         constructor() {
             super(...arguments);
-            this.MENU_WIDTH = MENU_WIDTH;
             this.subMenu = owl.useState({
                 isOpen: false,
                 position: null,
@@ -4812,20 +5016,25 @@
             return position;
         }
         get menuHeight() {
-            return this.menuComponentHeight(this.props.menuItems);
-        }
-        get subMenuHeight() {
-            return this.menuComponentHeight(this.subMenu.menuItems);
+            const menuItems = this.props.menuItems;
+            let menuItemsHeight = this.getMenuItemsHeight(menuItems);
+            // We don't display separator at the end of a menu
+            if (menuItems[menuItems.length - 1].separator) {
+                menuItemsHeight -= MENU_SEPARATOR_HEIGHT;
+            }
+            return 2 * MENU_VERTICAL_PADDING + menuItemsHeight;
         }
         get popover() {
             const isRoot = this.props.depth === 1;
-            // TODO: see if we could reformulate this margin
-            const marginTop = 6 + TOPBAR_HEIGHT + HEADER_HEIGHT;
             return {
-                // some margin between the header and the component
-                marginTop,
-                flipHorizontalOffset: MENU_WIDTH * (this.props.depth - 1),
-                flipVerticalOffset: isRoot ? 0 : MENU_ITEM_HEIGHT,
+                anchorRect: {
+                    x: this.props.position.x - MENU_WIDTH * (this.props.depth - 1),
+                    y: this.props.position.y,
+                    width: isRoot ? 0 : MENU_WIDTH,
+                    height: isRoot ? 0 : MENU_ITEM_HEIGHT,
+                },
+                positioning: "TopRight",
+                verticalOffset: isRoot ? 0 : MENU_VERTICAL_PADDING,
             };
         }
         getColor(menu) {
@@ -4845,9 +5054,9 @@
          * Return the number of pixels between the top of the menu
          * and the menu item at a given index.
          */
-        subMenuVerticalPosition(position) {
-            const menusAbove = this.props.menuItems.slice(0, position);
-            return this.menuComponentHeight(menusAbove) + this.position.y;
+        subMenuVerticalPosition(menuIndex) {
+            const menusAbove = this.props.menuItems.slice(0, menuIndex);
+            return this.position.y + this.getMenuItemsHeight(menusAbove) + MENU_VERTICAL_PADDING;
         }
         onClick(ev) {
             // Don't close a root menu when clicked to open the submenus.
@@ -4865,14 +5074,9 @@
             }
             this.closeSubMenu();
         }
-        /**
-         * Return the total height (in pixels) needed for some
-         * menu items
-         */
-        menuComponentHeight(menuItems) {
-            const separators = menuItems.filter((m) => m.separator);
-            const others = menuItems;
-            return MENU_ITEM_HEIGHT * others.length + separators.length * MENU_SEPARATOR_HEIGHT;
+        getMenuItemsHeight(menuItems) {
+            const numberOfSeparators = menuItems.filter((m) => m.separator).length;
+            return MENU_ITEM_HEIGHT * menuItems.length + MENU_SEPARATOR_HEIGHT * numberOfSeparators;
         }
         getName(menu) {
             return getMenuName(menu, this.env);
@@ -4896,8 +5100,8 @@
          * If the given menu is not disabled, open it's submenu at the
          * correct position according to available surrounding space.
          */
-        openSubMenu(menu, position) {
-            const y = this.subMenuVerticalPosition(position);
+        openSubMenu(menu, menuIndex) {
+            const y = this.subMenuVerticalPosition(menuIndex);
             this.subMenu.position = {
                 x: this.position.x + MENU_WIDTH,
                 y: y - (this.subMenu.scrollOffset || 0),
@@ -4914,10 +5118,10 @@
             this.subMenu.isOpen = false;
             this.subMenu.parentMenu = undefined;
         }
-        onClickMenu(menu, position) {
+        onClickMenu(menu, menuIndex) {
             if (this.isEnabled(menu)) {
                 if (this.isRoot(menu)) {
-                    this.openSubMenu(menu, position);
+                    this.openSubMenu(menu, menuIndex);
                 }
                 else {
                     this.activateMenu(menu);
@@ -4948,7 +5152,7 @@
         onMenuClicked: { type: Function, optional: true },
     };
 
-    const LINK_TOOLTIP_HEIGHT = 43;
+    const LINK_TOOLTIP_HEIGHT = 32;
     const LINK_TOOLTIP_WIDTH = 220;
     css /* scss */ `
   .o-link-tool {
@@ -4959,6 +5163,9 @@
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
+    height: ${LINK_TOOLTIP_HEIGHT}px;
+    width: ${LINK_TOOLTIP_WIDTH}px;
+    box-sizing: border-box !important;
 
     img {
       margin-right: 3px;
@@ -5038,7 +5245,6 @@
     }
     LinkDisplay.components = { Menu };
     LinkDisplay.template = "o-spreadsheet-LinkDisplay";
-    LinkDisplay.size = { width: LINK_TOOLTIP_WIDTH, height: LINK_TOOLTIP_HEIGHT };
     const LinkCellPopoverBuilder = {
         onHover: (position, getters) => {
             const cell = getters.getEvaluatedCell(position);
@@ -5145,7 +5351,7 @@
     const MENU_OFFSET_Y = 100;
     const PADDING = 12;
     const LINK_EDITOR_WIDTH = 340;
-    const LINK_EDITOR_HEIGHT = 180;
+    const LINK_EDITOR_HEIGHT = 165;
     css /* scss */ `
   .o-link-editor {
     font-size: 13px;
@@ -5155,6 +5361,9 @@
     display: flex;
     flex-direction: column;
     border-radius: 4px;
+    height: ${LINK_EDITOR_HEIGHT}px;
+    width: ${LINK_EDITOR_WIDTH}px;
+
     .o-section {
       .o-section-title {
         font-weight: bold;
@@ -5307,7 +5516,6 @@
         }
     }
     LinkEditor.template = "o-spreadsheet-LinkEditor";
-    LinkEditor.size = { width: LINK_EDITOR_WIDTH, height: LINK_EDITOR_HEIGHT };
     LinkEditor.components = { Menu };
     const LinkEditorPopoverBuilder = {
         onOpen: (position, getters) => {
@@ -5352,10 +5560,7 @@
         .add("HIDE_COLUMNS_ROWS", inverseHideColumnsRows)
         .add("UNHIDE_COLUMNS_ROWS", inverseUnhideColumnsRows);
     for (const cmd of coreTypes.values()) {
-        try {
-            inverseCommandRegistry.get(cmd);
-        }
-        catch (_) {
+        if (!inverseCommandRegistry.contains(cmd)) {
             inverseCommandRegistry.add(cmd, identity);
         }
     }
@@ -5939,6 +6144,30 @@
             })),
         };
     }
+    /**
+     * Aggregates data based on labels
+     */
+    function aggregateDataForLabels(labels, datasets) {
+        const parseNumber = (value) => (typeof value === "number" ? value : 0);
+        const labelSet = new Set(labels);
+        const labelMap = {};
+        labelSet.forEach((label) => {
+            labelMap[label] = new Array(datasets.length).fill(0);
+        });
+        for (const indexOfLabel of range(0, labels.length)) {
+            const label = labels[indexOfLabel];
+            for (const indexOfDataset of range(0, datasets.length)) {
+                labelMap[label][indexOfDataset] += parseNumber(datasets[indexOfDataset].data[indexOfLabel]);
+            }
+        }
+        return {
+            labels: Object.keys(labelMap),
+            dataSetsValues: datasets.map((dataset, indexOfDataset) => ({
+                ...dataset,
+                data: Object.values(labelMap).map((dataOfLabel) => dataOfLabel[indexOfDataset]),
+            })),
+        };
+    }
     function truncateLabel(label) {
         if (!label) {
             return "";
@@ -6086,6 +6315,7 @@
             this.verticalAxisPosition = definition.verticalAxisPosition;
             this.legendPosition = definition.legendPosition;
             this.stacked = definition.stacked;
+            this.aggregated = definition.aggregated;
         }
         static transformDefinition(definition, executed) {
             return transformChartDefinitionWithDataSetsWithZone(definition, executed);
@@ -6099,6 +6329,7 @@
                 dataSets: context.range ? context.range : [],
                 dataSetsHaveTitle: false,
                 stacked: false,
+                aggregated: false,
                 legendPosition: "top",
                 title: context.title || "",
                 type: "bar",
@@ -6142,9 +6373,13 @@
                     : undefined,
                 title: this.title,
                 stacked: this.stacked,
+                aggregated: this.aggregated,
             };
         }
         getDefinitionForExcel() {
+            // Excel does not support aggregating labels
+            if (this.aggregated)
+                return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
@@ -6216,6 +6451,9 @@
         let labels = labelValues.formattedValues;
         let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
+        if (chart.aggregated) {
+            ({ labels, dataSetsValues } = aggregateDataForLabels(labels, dataSetsValues));
+        }
         const config = getBarConfiguration(chart, labels);
         const colors = new ChartColors();
         for (let { label, data } of dataSetsValues) {
@@ -6375,6 +6613,7 @@
             this.legendPosition = definition.legendPosition;
             this.labelsAsText = definition.labelsAsText;
             this.stacked = definition.stacked;
+            this.aggregated = definition.aggregated;
         }
         static validateChartDefinition(validator, definition) {
             return validator.checkValidations(definition, checkDataset, checkLabelRange);
@@ -6394,6 +6633,7 @@
                 verticalAxisPosition: "left",
                 labelRange: context.auxiliaryRange || undefined,
                 stacked: false,
+                aggregated: false,
             };
         }
         getDefinition() {
@@ -6413,6 +6653,7 @@
                 title: this.title,
                 labelsAsText: this.labelsAsText,
                 stacked: this.stacked,
+                aggregated: this.aggregated,
             };
         }
         getContextCreation() {
@@ -6434,6 +6675,9 @@
             return new LineChart(definition, this.sheetId, this.getters);
         }
         getDefinitionForExcel() {
+            // Excel does not support aggregating labels
+            if (this.aggregated)
+                return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
@@ -6577,6 +6821,9 @@
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
         if (axisType === "time") {
             ({ labels, dataSetsValues } = fixEmptyLabelsForDateCharts(labels, dataSetsValues));
+        }
+        if (chart.aggregated) {
+            ({ labels, dataSetsValues } = aggregateDataForLabels(labels, dataSetsValues));
         }
         const config = getLineConfiguration(chart, labels);
         const labelFormat = getLabelFormat(getters, chart.labelRange);
@@ -6742,6 +6989,7 @@
                 dataSets,
                 labelsAsText: false,
                 stacked: false,
+                aggregated: false,
                 labelRange: labelRangeXc,
                 type: "line",
                 background: BACKGROUND_CHART_COLOR,
@@ -6757,6 +7005,7 @@
             type: "bar",
             background: BACKGROUND_CHART_COLOR,
             stacked: false,
+            aggregated: false,
             dataSetsHaveTitle,
             verticalAxisPosition: "left",
             legendPosition: newLegendPos,
@@ -7055,6 +7304,7 @@
             this.labelRange = createRange(getters, sheetId, definition.labelRange);
             this.background = definition.background;
             this.legendPosition = definition.legendPosition;
+            this.aggregated = definition.aggregated;
         }
         static transformDefinition(definition, executed) {
             return transformChartDefinitionWithDataSetsWithZone(definition, executed);
@@ -7071,6 +7321,7 @@
                 title: context.title || "",
                 type: "pie",
                 labelRange: context.auxiliaryRange || undefined,
+                aggregated: false,
             };
         }
         getDefinition() {
@@ -7097,6 +7348,7 @@
                     ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
                     : undefined,
                 title: this.title,
+                aggregated: this.aggregated,
             };
         }
         copyForSheetId(sheetId) {
@@ -7110,6 +7362,9 @@
             return new PieChart(definition, sheetId, this.getters);
         }
         getDefinitionForExcel() {
+            // Excel does not support aggregating labels
+            if (this.aggregated)
+                return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
@@ -7169,6 +7424,9 @@
         let labels = labelValues.formattedValues;
         let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
+        if (chart.aggregated) {
+            ({ labels, dataSetsValues } = aggregateDataForLabels(labels, dataSetsValues));
+        }
         const config = getPieConfiguration(chart, labels);
         const colors = new ChartColors();
         for (let { label, data } of dataSetsValues) {
@@ -9299,6 +9557,11 @@
                 labelRange: this.labelRange,
             });
         }
+        onUpdateAggregated(ev) {
+            this.props.updateChart({
+                aggregated: ev.target.checked,
+            });
+        }
     }
     LineBarPieConfigPanel.template = "o-spreadsheet-LineBarPieConfigPanel";
     LineBarPieConfigPanel.components = { SelectionInput };
@@ -9312,6 +9575,11 @@
         onUpdateStacked(ev) {
             this.props.updateChart({
                 stacked: ev.target.checked,
+            });
+        }
+        onUpdateAggregated(ev) {
+            this.props.updateChart({
+                aggregated: ev.target.checked,
             });
         }
     }
@@ -9781,6 +10049,11 @@
         onUpdateStacked(ev) {
             this.props.updateChart({
                 stacked: ev.target.checked,
+            });
+        }
+        onUpdateAggregated(ev) {
+            this.props.updateChart({
+                aggregated: ev.target.checked,
             });
         }
     }
@@ -11382,9 +11655,6 @@
                         sheetId: this.env.model.getters.getActiveSheetId(),
                         id: this.props.figure.id,
                     });
-                    if (this.props.sidePanelIsOpen) {
-                        this.env.toggleSidePanel("ChartPanel");
-                    }
                     this.props.onFigureDeleted();
                 },
             });
@@ -11426,7 +11696,6 @@
     ChartFigure.components = { Menu };
     ChartFigure.props = {
         figure: Object,
-        sidePanelIsOpen: Boolean,
         onFigureDeleted: Function,
     };
 
@@ -18340,6 +18609,31 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         TEXT: TEXT
     });
 
+    // -----------------------------------------------------------------------------
+    // HYPERLINK
+    // -----------------------------------------------------------------------------
+    const HYPERLINK = {
+        description: _lt("Creates a hyperlink in a cell."),
+        args: args(`
+    url (string) ${_lt("The full URL of the link enclosed in quotation marks.")}
+    link_label (string, optional) ${_lt("The text to display in the cell, enclosed in quotation marks.")}
+  `),
+        returns: ["STRING"],
+        compute: function (url, linkLabel) {
+            const processedUrl = toString(url).trim();
+            const processedLabel = toString(linkLabel) || processedUrl;
+            if (processedUrl === "")
+                return processedLabel;
+            return markdownLink(processedLabel, processedUrl);
+        },
+        isExported: true,
+    };
+
+    var web = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        HYPERLINK: HYPERLINK
+    });
+
     const functions$3 = {
         database,
         date,
@@ -18353,6 +18647,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         statistical,
         text,
         engineering,
+        web,
     };
     const functionNameRegex = /^[A-Z0-9\_\.]+$/;
     //------------------------------------------------------------------------------
@@ -19676,7 +19971,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     break;
                 case "STOP_EDITION":
                     if (cmd.cancel) {
-                        this.cancelEdition();
+                        this.cancelEditionAndActivateSheet();
                         this.resetContent();
                     }
                     else {
@@ -19692,7 +19987,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.replaceSelection(cmd.text);
                     break;
                 case "SELECT_FIGURE":
-                    this.cancelEdition();
+                    this.cancelEditionAndActivateSheet();
                     this.resetContent();
                     break;
                 case "ADD_COLUMNS_ROWS":
@@ -19737,6 +20032,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.selectionEnd = this.currentContent.length;
                     break;
                 case "ACTIVATE_SHEET":
+                    if (!this.currentContent.startsWith("=")) {
+                        this.cancelEdition();
+                        this.resetContent();
+                    }
                     if (cmd.sheetIdFrom !== cmd.sheetIdTo) {
                         const { col, row } = this.getters.getNextVisibleCellPosition({
                             sheetId: cmd.sheetIdTo,
@@ -19753,7 +20052,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const sheetIdExists = !!this.getters.tryGetSheet(this.sheetId);
                     if (!sheetIdExists && this.mode !== "inactive") {
                         this.sheetId = this.getters.getActiveSheetId();
-                        this.cancelEdition();
+                        this.cancelEditionAndActivateSheet();
                         this.resetContent();
                         this.ui.notifyUI({
                             type: "ERROR",
@@ -19918,7 +20217,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         stopEdition() {
             if (this.mode !== "inactive") {
-                this.cancelEdition();
+                this.cancelEditionAndActivateSheet();
                 const col = this.col;
                 const row = this.row;
                 let content = this.currentContent;
@@ -19958,12 +20257,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.setContent("");
             }
         }
-        cancelEdition() {
+        cancelEditionAndActivateSheet() {
             if (this.mode === "inactive") {
                 return;
             }
-            this.mode = "inactive";
-            this.selection.release(this);
+            this.cancelEdition();
             const sheetId = this.getters.getActiveSheetId();
             if (sheetId !== this.sheetId) {
                 this.dispatch("ACTIVATE_SHEET", {
@@ -19998,6 +20296,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return `${value * 100}%`;
             }
             return numberToString(value);
+        }
+        cancelEdition() {
+            if (this.mode === "inactive") {
+                return;
+            }
+            this.mode = "inactive";
+            this.selection.release(this);
         }
         /**
          * Reset the current content to the active cell content
@@ -21076,8 +21381,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     display: flex;
     align-items: center;
     justify-content: center;
-    width: ${ICON_EDGE_LENGTH}px;
-    height: ${ICON_EDGE_LENGTH}px;
+    width: ${FILTER_ICON_EDGE_LENGTH}px;
+    height: ${FILTER_ICON_EDGE_LENGTH}px;
 
     svg {
       path {
@@ -21121,10 +21426,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const rowDims = this.env.model.getters.getRowDimensionsInViewport(sheetId, position.row);
             const colDims = this.env.model.getters.getColDimensionsInViewport(sheetId, position.col);
             // TODO : change this offset when we support vertical cell align
-            const centeringOffset = (rowDims.size - ICON_EDGE_LENGTH) / 2;
+            const centeringOffset = Math.floor((rowDims.size - FILTER_ICON_EDGE_LENGTH) / 2);
             return {
-                x: colDims.end - ICON_EDGE_LENGTH + this.props.gridPosition.x - FILTER_ICON_MARGIN,
-                y: rowDims.end - ICON_EDGE_LENGTH + this.props.gridPosition.y - centeringOffset,
+                x: colDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.x - FILTER_ICON_MARGIN - 1,
+                y: rowDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.y - centeringOffset,
             };
         }
         isFilterActive(position) {
@@ -21281,7 +21586,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.borderWidth = borderWidth !== undefined ? borderWidth : BORDER_WIDTH;
             owl.useEffect((selectedFigureId, thisFigureId, el) => {
                 if (selectedFigureId === thisFigureId) {
-                    el === null || el === void 0 ? void 0 : el.focus();
+                    /** Scrolling on a newly inserted figure that overflows outside the viewport
+                     * will break the whole layout.
+                     * NOTE: `preventScroll`does not work on mobile but then again,
+                     * mobile is not really supported ATM.
+                     *
+                     * TODO: When implementing proper mobile, we will need to scroll the viewport
+                     * correctly (and render?) before focusing the element.
+                     */
+                    el === null || el === void 0 ? void 0 : el.focus({ preventScroll: true });
                 }
             }, () => [this.env.model.getters.getSelectedFigureId(), this.props.figure.id, this.figureRef.el]);
         }
@@ -21404,7 +21717,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             ev.stopPropagation();
             const initialX = ev.clientX;
             const initialY = ev.clientY;
-            this.dnd.isActive = true;
             this.dnd.x = figure.x;
             this.dnd.y = figure.y;
             this.dnd.width = figure.width;
@@ -21412,6 +21724,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             let onMouseMove;
             if (this.keepRatio && dirX != 0 && dirY != 0) {
                 onMouseMove = (ev) => {
+                    this.dnd.isActive = true;
                     const deltaX = Math.min(dirX * (initialX - ev.clientX), figure.width - this.minFigSize);
                     const deltaY = Math.min(dirY * (initialY - ev.clientY), figure.height - this.minFigSize);
                     const fraction = Math.min(deltaX / figure.width, deltaY / figure.height);
@@ -21427,6 +21740,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             else {
                 onMouseMove = (ev) => {
+                    this.dnd.isActive = true;
                     const deltaX = Math.max(dirX * (ev.clientX - initialX), MIN_FIG_SIZE - figure.width);
                     const deltaY = Math.max(dirY * (ev.clientY - initialY), MIN_FIG_SIZE - figure.height);
                     this.dnd.width = figure.width + deltaX;
@@ -21469,20 +21783,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!selectResult.isSuccessful) {
                 return;
             }
-            if (this.props.sidePanelIsOpen) {
-                this.env.openSidePanel("ChartPanel");
-            }
             const position = gridOverlayPosition();
             const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
             const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
             const initialX = ev.clientX - position.left;
             const initialY = ev.clientY - position.top;
-            this.dnd.isActive = true;
             this.dnd.x = figure.x;
             this.dnd.y = figure.y;
             this.dnd.width = figure.width;
             this.dnd.height = figure.height;
             const onMouseMove = (ev) => {
+                this.dnd.isActive = true;
                 const newX = ev.clientX - position.left;
                 let deltaX = newX - initialX;
                 if (newX > offsetCorrectionX && initialX < offsetCorrectionX) {
@@ -21551,12 +21862,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     FigureComponent.template = "o-spreadsheet-FigureComponent";
     FigureComponent.components = {};
     FigureComponent.defaultProps = {
-        sidePanelIsOpen: false,
         onFigureDeleted: function () { },
     };
     FigureComponent.props = {
         figure: Object,
-        sidePanelIsOpen: { type: Boolean, optional: true },
         onFigureDeleted: { type: Function, optional: true },
     };
 
@@ -21580,7 +21889,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     FiguresContainer.template = "o-spreadsheet-FiguresContainer";
     FiguresContainer.components = { FigureComponent };
     FiguresContainer.props = {
-        sidePanelIsOpen: Boolean,
         onFigureDeleted: Function,
     };
     figureRegistry.add("chart", { Component: ChartFigure, SidePanelComponent: "ChartPanel" });
@@ -21761,7 +22069,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onCellRightClicked: () => { },
         onGridResized: () => { },
         onFigureDeleted: () => { },
-        sidePanelIsOpen: false,
     };
     GridOverlay.props = {
         onCellHovered: { type: Function, optional: true },
@@ -21772,7 +22079,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onFigureDeleted: { type: Function, optional: true },
         onGridMoved: Function,
         gridOverlayDimensions: String,
-        sidePanelIsOpen: { type: Boolean, optional: true },
     };
 
     class GridPopover extends owl.Component {
@@ -21781,13 +22087,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!popover.isOpen) {
                 return { isOpen: false };
             }
-            const coordinates = popover.coordinates;
+            const anchorRect = popover.anchorRect;
             return {
                 ...popover,
                 // transform from the "canvas coordinate system" to the "body coordinate system"
-                coordinates: {
-                    x: coordinates.x + this.props.gridPosition.x,
-                    y: coordinates.y + this.props.gridPosition.y,
+                anchorRect: {
+                    ...anchorRect,
+                    x: anchorRect.x + this.props.gridRect.x,
+                    y: anchorRect.y + this.props.gridRect.y,
                 },
             };
         }
@@ -21795,10 +22102,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     GridPopover.template = "o-spreadsheet-GridPopover";
     GridPopover.components = { Popover };
     GridPopover.props = {
-        gridPosition: Object,
         hoveredCell: Object,
         onClosePopover: Function,
         onMouseWheel: Function,
+        gridRect: Object,
     };
 
     class AbstractResizer extends owl.Component {
@@ -22733,7 +23040,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 left: `${this.props.leftOffset + x}px`,
                 bottom: "0px",
                 height: `${SCROLLBAR_WIDTH$1}px`,
-                right: `${SCROLLBAR_WIDTH$1}px`,
+                right: `0px`,
             };
         }
         onScroll(offset) {
@@ -22778,7 +23085,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 top: `${this.props.topOffset + y}px`,
                 right: "0px",
                 width: `${SCROLLBAR_WIDTH$1}px`,
-                bottom: `${SCROLLBAR_WIDTH$1}px`,
+                bottom: `0px`,
             };
         }
         onScroll(offset) {
@@ -22942,6 +23249,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.hiddenInput = owl.useRef("hiddenInput");
             this.canvasPosition = useAbsolutePosition(this.gridRef);
             this.hoveredCell = owl.useState({ col: undefined, row: undefined });
+            owl.useChildSubEnv({ getPopoverContainerRect: () => this.getGridRect() });
             owl.useExternalListener(document.body, "cut", this.copy.bind(this, true));
             owl.useExternalListener(document.body, "copy", this.copy.bind(this, false));
             owl.useExternalListener(document.body, "paste", this.paste);
@@ -22972,7 +23280,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.focus();
         }
         focus() {
-            if (!this.env.model.getters.getSelectedFigureId()) {
+            if (!this.env.model.getters.getSelectedFigureId() &&
+                this.env.model.getters.getEditionMode() === "inactive") {
                 this.hiddenInput.el.focus();
             }
         }
@@ -23021,6 +23330,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         isCellHovered(col, row) {
             return this.hoveredCell.col === col && this.hoveredCell.row === row;
+        }
+        getGridRect() {
+            return { ...this.canvasPosition, ...this.env.model.getters.getSheetViewDimensionWithHeaders() };
         }
         // ---------------------------------------------------------------------------
         // Zone selection with mouse
@@ -23123,6 +23435,21 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         // ---------------------------------------------------------------------------
         // Context Menu
         // ---------------------------------------------------------------------------
+        onInputContextMenu(ev) {
+            ev.preventDefault();
+            const lastZone = this.env.model.getters.getSelectedZone();
+            const { left: col, top: row } = lastZone;
+            let type = "CELL";
+            this.env.model.dispatch("STOP_EDITION");
+            if (this.env.model.getters.getActiveCols().has(col)) {
+                type = "COL";
+            }
+            else if (this.env.model.getters.getActiveRows().has(row)) {
+                type = "ROW";
+            }
+            const { x, y, width, height } = this.env.model.getters.getVisibleRect(lastZone);
+            this.toggleContextMenu(type, x + width, y + height);
+        }
         onCellRightClicked(col, row, { x, y }) {
             const zones = this.env.model.getters.getSelectedZones();
             const lastZone = zones[zones.length - 1];
@@ -24600,6 +24927,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             verticalAxisPosition: chartData.verticalAxisPosition,
             legendPosition: chartData.legendPosition,
             stacked: chartData.stacked || false,
+            aggregated: false,
             labelsAsText: false,
         };
     }
@@ -29255,6 +29583,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     ImageFigure.template = "o-spreadsheet-ImageFigure";
     ImageFigure.components = { Menu };
+    ImageFigure.props = {
+        figure: Object,
+        onFigureDeleted: Function,
+    };
 
     class ImagePlugin extends CorePlugin {
         constructor() {
@@ -29341,6 +29673,24 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 tag: "image",
             };
             this.dispatch("CREATE_FIGURE", { sheetId, figure });
+        }
+        import(data) {
+            for (const sheet of data.sheets) {
+                const images = (sheet.figures || []).filter((figure) => figure.tag === "image");
+                for (const image of images) {
+                    this.history.update("nextId", this.nextId + 1);
+                    this.history.update("images", sheet.id, image.id, image.data);
+                }
+            }
+        }
+        export(data) {
+            var _a;
+            for (const sheet of data.sheets) {
+                const images = sheet.figures.filter((figure) => figure.tag === "image");
+                for (const image of images) {
+                    image.data = (_a = this.images[sheet.id]) === null || _a === void 0 ? void 0 : _a[image.id];
+                }
+            }
         }
     }
     ImagePlugin.getters = ["getImage", "getImagePath", "getImageSize"];
@@ -31154,6 +31504,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.isUpToDate = false;
             this.evaluatedCells = {};
             this.evalContext = config.external;
+            this.lazyEvaluation = config.lazyEvaluation;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -31254,6 +31605,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.evaluatedCells[sheetId][col] = {};
             }
             this.evaluatedCells[sheetId][col][row] = evaluatedCell;
+            if (!this.lazyEvaluation) {
+                this.evaluatedCells[sheetId][col][row]();
+            }
         }
         *getAllCells() {
             // use a generator function to avoid re-building a new object
@@ -33718,7 +34072,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     ? { isOpen: false }
                     : {
                         ...popover,
-                        ...this.computePopoverProps(this.persistentPopover, popover.cellCorner),
+                        anchorRect: this.computePopoverAnchorRect(this.persistentPopover),
                     };
             }
             if (col === undefined ||
@@ -33735,7 +34089,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ? { isOpen: false }
                 : {
                     ...popover,
-                    ...this.computePopoverProps(position, popover.cellCorner),
+                    anchorRect: this.computePopoverAnchorRect(position),
                 };
         }
         getPersistentPopoverTypeAtPosition({ col, row }) {
@@ -33746,29 +34100,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             return undefined;
         }
-        computePopoverProps({ col, row }, corner) {
-            const { width, height } = this.getters.getVisibleRect(positionToZone({ col, row }));
-            return {
-                coordinates: this.computePopoverPosition({ col, row }, corner),
-                cellWidth: -width,
-                cellHeight: -height,
-            };
-        }
-        computePopoverPosition({ col, row }, corner) {
+        computePopoverAnchorRect({ col, row }) {
             const sheetId = this.getters.getActiveSheetId();
             const merge = this.getters.getMerge({ sheetId, col, row });
             if (merge) {
-                col = corner === "TopRight" ? merge.right : merge.left;
-                row = corner === "TopRight" ? merge.top : merge.bottom;
+                return this.getters.getVisibleRect(merge);
             }
-            // x, y are relative to the canvas
-            const { x, y, width, height } = this.getters.getVisibleRect(positionToZone({ col, row }));
-            switch (corner) {
-                case "BottomLeft":
-                    return { x, y: y + height };
-                case "TopRight":
-                    return { x: x + width, y: y };
-            }
+            return this.getters.getVisibleRect(positionToZone({ col, row }));
         }
     }
     CellPopoverPlugin.getters = ["getCellPopover", "getPersistentPopoverTypeAtPosition"];
@@ -34704,7 +35042,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             /** Filter Header */
             box.isFilterHeader = this.getters.isFilterHeader(position);
-            const headerIconWidth = box.isFilterHeader ? ICON_EDGE_LENGTH + FILTER_ICON_MARGIN : 0;
+            const headerIconWidth = box.isFilterHeader ? FILTER_ICON_EDGE_LENGTH + FILTER_ICON_MARGIN : 0;
             /** Content */
             const text = this.getters.getCellText(position, showFormula);
             const textWidth = this.getters.getTextWidth(position) + MIN_CELL_TEXT_MARGIN;
@@ -38040,6 +38378,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const gridRef = owl.useRef("grid");
             this.canvasPosition = useAbsolutePosition(gridRef);
             this.hoveredCell = owl.useState({ col: undefined, row: undefined });
+            owl.useChildSubEnv({ getPopoverContainerRect: () => this.getGridRect() });
             useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimension());
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
                 this.moveCanvas(deltaX, deltaY);
@@ -38140,13 +38479,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 offsetY: offsetScrollbarY + deltaY,
             });
         }
-        copy(ev) {
-            this.env.model.dispatch("COPY");
-            const content = this.env.model.getters.getClipboardContent();
-            // TODO use env.clipboard
-            // TODO add a test
-            ev.clipboardData.setData("text/plain", content);
-            ev.preventDefault();
+        getGridRect() {
+            return { ...this.canvasPosition, ...this.env.model.getters.getSheetViewDimensionWithHeaders() };
         }
     }
     SpreadsheetDashboard.template = "o-spreadsheet-SpreadsheetDashboard";
@@ -42747,6 +43081,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 moveClient: () => { },
                 snapshotRequested: false,
                 notifyUI: (payload) => this.trigger("notify-ui", payload),
+                lazyEvaluation: "lazyEvaluation" in config ? config.lazyEvaluation : true,
             };
         }
         setupCorePluginConfig() {
@@ -42768,6 +43103,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 moveClient: this.session.move.bind(this.session),
                 external: this.config.external,
                 uiActions: this.config,
+                lazyEvaluation: this.config.lazyEvaluation,
             };
         }
         // ---------------------------------------------------------------------------
@@ -42928,6 +43264,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         formatValue,
         computeTextWidth,
         createEmptyWorkbookData,
+        createEmptySheet,
+        createEmptyExcelSheet,
         getDefaultChartJsRuntime,
         chartFontColor,
         getMenuChildren,
@@ -43000,8 +43338,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-12-09T15:01:03.892Z';
-    exports.__info__.hash = '1419e57';
+    exports.__info__.date = '2022-12-22T13:54:58.664Z';
+    exports.__info__.hash = '4c5002d';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
