@@ -26,10 +26,11 @@ import { archParseBoolean, evalDomain, isNumeric, isRelational, isX2Many } from 
 const { DateTime } = luxon;
 import { markRaw, markup, toRaw } from "@odoo/owl";
 
+const formatters = registry.category("formatters");
 const preloadedDataRegistry = registry.category("preloadedData");
 
 const { CREATE, UPDATE, DELETE, FORGET, LINK_TO, DELETE_ALL, REPLACE_WITH } = x2ManyCommands;
-const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection"];
+const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
 const DEFAULT_HANDLE_FIELD = "sequence";
 const DEFAULT_QUICK_CREATE_FIELDS = {
@@ -396,6 +397,48 @@ function clearObject(obj) {
     }
 }
 
+/**
+ * Returns a "raw" version of the field value on a given record.
+ *
+ * @param {Record} record
+ * @param {string} fieldName
+ * @returns {any}
+ */
+export function getRawValue(record, fieldName) {
+    const field = record.fields[fieldName];
+    const value = record.data[fieldName];
+    switch (field.type) {
+        case "one2many":
+        case "many2many": {
+            return value.count ? value.currentIds : [];
+        }
+        case "many2one": {
+            return (value && value[0]) || false;
+        }
+        case "date":
+        case "datetime": {
+            return value && value.toISO();
+        }
+        default: {
+            return value;
+        }
+    }
+}
+
+/**
+ * Returns a formatted version of the field value on a given record.
+ *
+ * @param {Record} record
+ * @param {string} fieldName
+ * @returns {string}
+ */
+export function getValue(record, fieldName) {
+    const field = record.fields[fieldName];
+    const value = record.data[fieldName];
+    const formatter = formatters.get(field.type, String);
+    return formatter(value, { field, data: record.data });
+}
+
 export class Record extends DataPoint {
     setup(params, state) {
         if ("resId" in params) {
@@ -530,6 +573,17 @@ export class Record extends DataPoint {
             return [];
         }
         return this._changes.map((change) => this.activeFields[change]);
+    }
+
+    get formattedRecord() {
+        const record = Object.create(this, Object.getOwnPropertyDescriptors(this));
+        for (const fieldName in this.activeFields) {
+            record[fieldName] = {
+                value: getValue(this, fieldName),
+                raw_value: getRawValue(this, fieldName),
+            };
+        }
+        return record;
     }
 
     get isInEdition() {
@@ -1245,7 +1299,11 @@ export class Record extends DataPoint {
             return;
         }
 
-        const { domain, value: changes, warning } = await this.model.orm.call(
+        const {
+            domain,
+            value: changes,
+            warning,
+        } = await this.model.orm.call(
             this.resModel,
             "onchange",
             [
@@ -2658,11 +2716,15 @@ export class Group extends DataPoint {
 
     getServerValue() {
         const { name, selection, type, granularity } = this.groupByField;
+
         switch (type) {
             case "many2one":
             case "char":
             case "boolean": {
                 return this.value || false;
+            }
+            case "many2many": {
+                return this.value ? [this.value] : false;
             }
             case "selection": {
                 const descriptor = selection.find((opt) => opt[0] === this.value);
