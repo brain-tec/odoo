@@ -848,7 +848,7 @@ QUnit.module("Views", (hooks) => {
                 [...cpButtons.querySelectorAll("button")].map((button) =>
                     button.textContent.trim()
                 ),
-                ["Create", "display", ""]
+                ["New", "display", ""]
             );
 
             await click(
@@ -859,7 +859,7 @@ QUnit.module("Views", (hooks) => {
                 [...cpButtons.querySelectorAll("button")].map((button) =>
                     button.textContent.trim()
                 ),
-                ["Create", "display", "default-selection"]
+                ["New", "display", "default-selection"]
             );
 
             await click(
@@ -870,7 +870,7 @@ QUnit.module("Views", (hooks) => {
                 [...cpButtons.querySelectorAll("button")].map((button) =>
                     button.textContent.trim()
                 ),
-                ["Create", "display", ""]
+                ["New", "display", ""]
             );
         }
     );
@@ -3418,7 +3418,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.strictEqual(
-            target.querySelector('td[data-tooltip="Sum"]').innerText,
+            target.querySelector('span[data-tooltip="Sum"]').innerText,
             "32",
             "current total should be 32"
         );
@@ -3427,7 +3427,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, "td.o_data_cell input", "15");
 
         assert.strictEqual(
-            target.querySelector('td[data-tooltip="Sum"]').innerText,
+            target.querySelector('span[data-tooltip="Sum"]').innerText,
             "37",
             "current total should be 37"
         );
