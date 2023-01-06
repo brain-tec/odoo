@@ -128,14 +128,15 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
         for account_tax in taxes_to_check:
             message_body += f"<li>{html_escape(account_tax.name)}</li>"
         message_body += "</ul>"
-        partner_managers_ids.message_post(
-            subject=_('Your taxes have been updated !'),
-            author_id=odoobot.id,
-            body=message_body,
-            message_type='notification',
-            subtype_xmlid='mail.mt_comment',
-            partner_ids=[partner.id for partner in partner_managers_ids],
-        )
+        for partner_manager in partner_managers_ids:
+            partner_manager.message_post(
+                subject=_('Your taxes have been updated !'),
+                author_id=odoobot.id,
+                body=message_body,
+                message_type='notification',
+                subtype_xmlid='mail.mt_comment',
+                partner_ids=partner_manager.ids,
+            )
 
     env = api.Environment(cr, SUPERUSER_ID, {})
     chart_template_id = env['ir.model.data'].xmlid_to_res_id(chart_template_xmlid)
@@ -143,7 +144,7 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
     outdated_taxes = []
     for company in companies:
         template_to_tax = _get_template_to_tax_xmlid_mapping(company)
-        templates = env['account.tax.template'].search([("chart_template_id", "=", chart_template_id)])
+        templates = env['account.tax.template'].with_context(active_test=False).search([("chart_template_id", "=", chart_template_id)])
         for template in templates:
             tax = env["account.tax"].browse(template_to_tax.get(template.id))
             if not tax or not _is_tax_and_template_same(template, tax):
