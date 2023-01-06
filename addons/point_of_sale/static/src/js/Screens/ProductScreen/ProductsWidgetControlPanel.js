@@ -1,18 +1,18 @@
 /** @odoo-module */
 
-import { identifyError } from "@point_of_sale/js/utils";
-import { ConnectionLostError, ConnectionAbortedError } from "@web/core/network/rpc_service";
 import PosComponent from "@point_of_sale/js/PosComponent";
 import Registries from "@point_of_sale/js/Registries";
 import { debounce } from "@web/core/utils/timing";
+import { usePos } from "@point_of_sale/app/pos_store";
 
-const { onMounted, onWillUnmount } = owl;
+import { onMounted, onWillUnmount, useState } from "@odoo/owl";
 
 class ProductsWidgetControlPanel extends PosComponent {
     setup() {
         super.setup();
+        this.pos = usePos();
         this.updateSearch = debounce(this.updateSearch, 100);
-        this.state = { searchInput: "" };
+        this.state = useState({ searchInput: "", mobileSearchBarIsShown: false });
 
         onMounted(() => {
             this.env.posbus.on("search-product-from-info-popup", this, this.searchProductFromInfo);
@@ -24,6 +24,9 @@ class ProductsWidgetControlPanel extends PosComponent {
         onWillUnmount(() => {
             this.env.posbus.off("search-product-from-info-popup", this);
         });
+    }
+    toggleMobileSearchBar() {
+        this.state.mobileSearchBarIsShown = !this.state.mobileSearchBarIsShown;
     }
     _clearSearch() {
         this.state.searchInput = "";
@@ -65,55 +68,35 @@ class ProductsWidgetControlPanel extends PosComponent {
         this.trigger("switch-category", 0);
         this.trigger("update-search", productName);
     }
-    _toggleMobileSearchbar() {
-        this.trigger("toggle-mobile-searchbar");
-    }
     async loadProductFromDB() {
         if (!this.state.searchInput) {
             return;
         }
 
-        try {
-            const ProductIds = await this.rpc({
-                model: "product.product",
-                method: "search",
-                args: [
-                    [
-                        "&",
-                        ["available_in_pos", "=", true],
-                        "|",
-                        "|",
-                        ["name", "ilike", this.state.searchInput],
-                        ["default_code", "ilike", this.state.searchInput],
-                        ["barcode", "ilike", this.state.searchInput],
-                    ],
+        const ProductIds = await this.rpc({
+            model: "product.product",
+            method: "search",
+            args: [
+                [
+                    "&",
+                    ["available_in_pos", "=", true],
+                    "|",
+                    "|",
+                    ["name", "ilike", this.state.searchInput],
+                    ["default_code", "ilike", this.state.searchInput],
+                    ["barcode", "ilike", this.state.searchInput],
                 ],
-                context: this.env.session.user_context,
-            });
-            if (ProductIds.length) {
-                if (!this.env.pos.isEveryProductLoaded) {
-                    await this.env.pos.updateIsEveryProductLoaded();
-                }
-                await this.env.pos._addProducts(ProductIds, false);
+            ],
+            context: this.env.session.user_context,
+        });
+        if (ProductIds.length) {
+            if (!this.env.pos.isEveryProductLoaded) {
+                await this.env.pos.updateIsEveryProductLoaded();
             }
-            this.trigger("update-product-list");
-            return ProductIds;
-        } catch (error) {
-            const identifiedError = identifyError(error);
-            if (
-                identifiedError instanceof ConnectionLostError ||
-                identifiedError instanceof ConnectionAbortedError
-            ) {
-                return this.showPopup("OfflineErrorPopup", {
-                    title: this.env._t("Network Error"),
-                    body: this.env._t(
-                        "Product is not loaded. Tried loading the product from the server but there is a network error."
-                    ),
-                });
-            } else {
-                throw error;
-            }
+            await this.env.pos._addProducts(ProductIds, false);
         }
+        this.trigger("update-product-list");
+        return ProductIds;
     }
 }
 ProductsWidgetControlPanel.template = "ProductsWidgetControlPanel";

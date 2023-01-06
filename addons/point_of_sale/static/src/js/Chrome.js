@@ -1,48 +1,96 @@
 /** @odoo-module */
 
 import { loadCSS } from "@web/core/assets";
-import { useListener, useBus } from "@web/core/utils/hooks";
+import { useListener, useBus, useService } from "@web/core/utils/hooks";
 import BarcodeParser from "barcodes.BarcodeParser";
 import PosComponent from "@point_of_sale/js/PosComponent";
 import NumberBuffer from "@point_of_sale/js/Misc/NumberBuffer";
 import Registries from "@point_of_sale/js/Registries";
 import IndependentToOrderScreen from "@point_of_sale/js/Misc/IndependentToOrderScreen";
-import { identifyError, batched } from "@point_of_sale/js/utils";
-import { odooExceptionTitleMap } from "@web/core/errors/error_dialogs";
-import {
-    ConnectionLostError,
-    ConnectionAbortedError,
-    RPCError,
-} from "@web/core/network/rpc_service";
+import { batched } from "@point_of_sale/js/utils";
 import { debounce } from "@web/core/utils/timing";
 import { Transition } from "@web/core/transition";
+import { MainComponentsContainer } from "@web/core/main_components_container";
+import { WithEnv } from "@web/core/utils/components";
+import { Navbar } from "@point_of_sale/app/navbar/navbar";
 
-const {
-    onError,
+// ChromeAdapter imports
+import ProductScreen from "@point_of_sale/js/Screens/ProductScreen/ProductScreen";
+import { PosGlobalState } from "@point_of_sale/js/models";
+import { configureGui } from "@point_of_sale/js/Gui";
+import { registry } from "@web/core/registry";
+import env from "@point_of_sale/js/pos_env";
+
+import {
     onMounted,
     onWillDestroy,
     useExternalListener,
-    useRef,
     useState,
     useSubEnv,
     reactive,
-} = owl;
+    markRaw,
+    onWillUnmount,
+} from "@odoo/owl";
+import { usePos } from "@point_of_sale/app/pos_store";
 
 /**
  * Chrome is the root component of the PoS App.
  */
-class Chrome extends PosComponent {
+export class Chrome extends PosComponent {
     setup() {
+        // BEGIN ChromeAdapter
+        ProductScreen.sortControlButtons();
+        const legacyActionManager = useService("legacy_action_manager");
+
+        // Instantiate PosGlobalState here to ensure that every extension
+        // (or class overloads) is taken into consideration.
+        const pos = PosGlobalState.create({ env: markRaw(env) });
+
+        this.batchedCustomerDisplayRender = batched(() => {
+            reactivePos.send_current_order_to_customer_facing_display();
+        });
+        const reactivePos = reactive(pos, this.batchedCustomerDisplayRender);
+        env.pos = reactivePos;
+        env.legacyActionManager = legacyActionManager;
+
+        // The proxy requires the instance of PosGlobalState to function properly.
+        env.proxy.set_pos(reactivePos);
+
+        // TODO: Should we continue on exposing posmodel as global variable?
+        // Expose only the reactive version of `pos` when in debug mode.
+        window.posmodel = pos.debug ? reactivePos : pos;
+
+        this.wowlEnv = this.env;
+        env.services.pos = this.wowlEnv.services.pos;
+        env.services.sound = this.wowlEnv.services.sound;
+        window.sound = env.services.sound;
+        this.env = env;
+        this.__owl__.childEnv = env;
+        useSubEnv({
+            get isMobile() {
+                return window.innerWidth <= 768;
+            },
+        });
+        let currentIsMobile = this.env.isMobile;
+        const updateUI = debounce(() => {
+            if (this.env.isMobile !== currentIsMobile) {
+                currentIsMobile = this.env.isMobile;
+                this.render(true);
+            }
+        }, 15); // FIXME POSREF use throttleForAnimation?
+        useExternalListener(window, "resize", updateUI);
+        onWillUnmount(updateUI.cancel);
+        // END ChromeAdapter
+
         super.setup();
         useExternalListener(window, "beforeunload", this._onBeforeUnload);
         useListener("show-main-screen", this.__showScreen);
-        useListener("toggle-debug-widget", debounce(this._toggleDebugWidget, 100));
-        useListener("toggle-mobile-searchbar", this._toggleMobileSearchBar);
         useListener("show-temp-screen", this.__showTempScreen);
         useListener("close-temp-screen", this.__closeTempScreen);
         useListener("close-pos", this._closePos);
         useListener("loading-skip-callback", () => this.env.proxy.stop_searching());
-        useListener("play-sound", this._onPlaySound);
+        const sound = useService("sound");
+        useListener("play-sound", ({ detail: name }) => sound.play(name));
         useListener("set-sync-status", this._onSetSyncStatus);
         useListener("show-notification", this._onShowNotification);
         useListener("close-notification", this._onCloseNotification);
@@ -50,38 +98,24 @@ class Chrome extends PosComponent {
         useBus(this.env.posbus, "start-cash-control", this.openCashControl);
         NumberBuffer.activate();
 
-        this.state = useState({
-            uiState: "LOADING", // 'LOADING' | 'READY' | 'CLOSING'
-            debugWidgetIsShown: true,
-            mobileSearchBarIsShown: false,
-            hasBigScrollBars: false,
-            sound: { src: null },
-            notification: {
-                isShown: false,
-                message: "",
-                duration: 2000,
-            },
-            loadingSkipButtonIsShown: false,
-        });
+        this.state = usePos();
 
-        this.mainScreen = useState({ name: null, component: null });
+        this.mainScreen = this.state.mainScreen;
         this.mainScreenProps = {};
 
         this.tempScreen = useState({ isShown: false, name: null, component: null });
         this.tempScreenProps = {};
 
-        this.progressbar = useRef("progressbar");
-
-        this.previous_touch_y_coordinate = -1;
-
-        const pos = reactive(
-            this.env.pos,
-            batched(() => this.render(true))
-        );
-        useSubEnv({ pos });
+        useSubEnv({
+            pos: reactive(
+                this.env.pos,
+                batched(() => this.render(true)) // FIXME POSREF remove render(true)
+            ),
+        });
 
         onMounted(() => {
             // remove default webclient handlers that induce click delay
+            // FIXME POSREF if these handlers shouldn't be there we should not load the files that add them.
             $(document).off();
             $(window).off();
             $("html").off();
@@ -89,31 +123,18 @@ class Chrome extends PosComponent {
         });
 
         onWillDestroy(() => {
-            this.env.pos.destroy();
+            try {
+                // FIXME POSREF is this needed?
+                this.env.pos.destroy();
+            } catch {
+                // throwing here causes loop
+            }
         });
 
-        onError((error) => {
-            // error is an OwlError object.
-            console.error(error.cause);
-        });
-
-        this.props.setupIsDone(this);
+        this.start();
     }
 
     // GETTERS //
-
-    get customerFacingDisplayButtonIsShown() {
-        return this.env.pos.config.iface_customer_facing_display;
-    }
-
-    /**
-     * Used to give the `state.mobileSearchBarIsShown` value to main screen props
-     */
-    get mainScreenPropsFielded() {
-        return Object.assign({}, this.mainScreenProps, {
-            mobileSearchBarIsShown: this.state.mobileSearchBarIsShown,
-        });
-    }
 
     /**
      * Startup screen can be based on pos config so the startup screen
@@ -137,6 +158,12 @@ class Chrome extends PosComponent {
      * This will load pos and assign it to the environment.
      */
     async start() {
+        // Little trick to avoid displaying the block ui during the POS models loading
+        // FIXME POSREF: use a silent RPC instead
+        const BlockUiFromRegistry = registry.category("main_components").get("BlockUI");
+        registry.category("main_components").remove("BlockUI");
+        configureGui({ component: this }); // FIXME POSREF: move Gui functions to services
+
         try {
             await this.env.pos.load_server_data();
             await this.setupBarcodeParser();
@@ -159,8 +186,8 @@ class Chrome extends PosComponent {
             this._showStartScreen();
             setTimeout(() => this._runBackgroundTasks());
         } catch (error) {
-            let title = "Unknown Error",
-                body;
+            let title = "Unknown Error";
+            let body;
 
             if (error.message && [100, 200, 404, -32098].includes(error.message.code)) {
                 // this is the signature of rpc error
@@ -180,12 +207,12 @@ class Chrome extends PosComponent {
                 body = error.stack;
             }
 
-            await this.showPopup("ErrorTracebackPopup", {
-                title,
-                body,
-                exitButtonIsShown: true,
-            });
+            return this.showPopup("ErrorTracebackPopup", { title, body, exitButtonIsShown: true });
         }
+        registry.category("main_components").add("BlockUI", BlockUiFromRegistry);
+
+        // Subscribe to the changes in the models.
+        this.batchedCustomerDisplayRender();
     }
 
     _runBackgroundTasks() {
@@ -358,31 +385,13 @@ class Chrome extends PosComponent {
                     body: reason,
                 });
                 if (confirmed) {
+                    // FIXME POSREF setting the location prevents the next render, the loading screen never shows
                     this.state.uiState = "CLOSING";
                     this.state.loadingSkipButtonIsShown = false;
                     window.location = "/web#action=point_of_sale.action_client_pos_menu";
                 }
             }
         }
-    }
-    _toggleDebugWidget() {
-        this.state.debugWidgetIsShown = !this.state.debugWidgetIsShown;
-    }
-    _toggleMobileSearchBar({ detail: isSearchBarEnabled }) {
-        if (isSearchBarEnabled !== null) {
-            this.state.mobileSearchBarIsShown = isSearchBarEnabled;
-        } else {
-            this.state.mobileSearchBarIsShown = !this.state.mobileSearchBarIsShown;
-        }
-    }
-    _onPlaySound({ detail: name }) {
-        let src;
-        if (name === "error") {
-            src = "/point_of_sale/static/src/sounds/error.wav";
-        } else if (name === "bell") {
-            src = "/point_of_sale/static/src/sounds/bell.wav";
-        }
-        this.state.sound.src = src;
     }
     _onSetSyncStatus({ detail: { status, pending } }) {
         this.env.pos.synch.status = status;
@@ -402,10 +411,6 @@ class Chrome extends PosComponent {
      */
     _onBeforeUnload() {
         this.env.pos.db.save("TO_REFUND_LINES", this.env.pos.toRefundLines);
-    }
-
-    get isTicketScreenShown() {
-        return this.mainScreen.name === "TicketScreen";
     }
 
     // MISC METHODS //
@@ -474,83 +479,22 @@ class Chrome extends PosComponent {
             false
         );
     }
-    showCashMoveButton() {
+    get showCashMoveButton() {
         return this.env.pos && this.env.pos.config && this.env.pos.config.cash_control;
-    }
-
-    // UNEXPECTED ERROR HANDLING //
-
-    /**
-     * This method is used to handle unexpected errors. It is registered to
-     * the `error_handlers` service when this component is properly mounted.
-     * See `onMounted` hook of the `ChromeAdapter` component.
-     * @param {*} env
-     * @param {UncaughtClientError | UncaughtPromiseError} error
-     * @param {*} originalError
-     * @returns {boolean}
-     */
-    errorHandler(env, error, originalError) {
-        if (!env.pos) {
-            return false;
-        }
-        const errorToHandle = identifyError(originalError);
-        // Assume that the unhandled falsey rejections can be ignored.
-        if (errorToHandle) {
-            this._errorHandler(error, errorToHandle);
-        }
-        return true;
-    }
-
-    _errorHandler(error, errorToHandle) {
-        if (errorToHandle instanceof RPCError) {
-            const { message, data } = errorToHandle;
-            if (odooExceptionTitleMap.has(errorToHandle.exceptionName)) {
-                const title = odooExceptionTitleMap.get(errorToHandle.exceptionName).toString();
-                this.showPopup("ErrorPopup", { title, body: data.message });
-            } else {
-                this.showPopup("ErrorTracebackPopup", {
-                    title: message,
-                    body: data.message + "\n" + data.debug + "\n",
-                });
-            }
-        } else if (errorToHandle instanceof ConnectionLostError) {
-            this.showPopup("OfflineErrorPopup", {
-                title: this.env._t("Connection is lost"),
-                body: this.env._t("Check the internet connection then try again."),
-            });
-        } else if (errorToHandle instanceof ConnectionAbortedError) {
-            this.showPopup("OfflineErrorPopup", {
-                title: this.env._t("Connection is aborted"),
-                body: this.env._t("Check the internet connection then try again."),
-            });
-        } else if (errorToHandle instanceof Error) {
-            // If `errorToHandle` is a normal Error (such as TypeError),
-            // the annotated traceback can be found from `error`.
-            this.showPopup("ErrorTracebackPopup", {
-                // Hopefully the message is translated.
-                title: `${errorToHandle.name}: ${errorToHandle.message}`,
-                body: error.traceback,
-            });
-        } else {
-            // Hey developer. It's your fault that the error reach here.
-            // Please, throw an Error object in order to get stack trace of the error.
-            // At least we can find the file that throws the error when you look
-            // at the console.
-            this.showPopup("ErrorPopup", {
-                title: this.env._t("Unknown Error"),
-                body: this.env._t("Unable to show information about this error."),
-            });
-            console.error(
-                "Unknown error. Unable to show information about this error.",
-                errorToHandle
-            );
-        }
     }
 }
 Chrome.template = "Chrome";
 Object.defineProperty(Chrome, "components", {
     get() {
-        return Object.assign({ Transition }, PosComponent.components);
+        return Object.assign(
+            {
+                Transition,
+                MainComponentsContainer,
+                WithEnv,
+                Navbar,
+            },
+            PosComponent.components
+        );
     },
 });
 

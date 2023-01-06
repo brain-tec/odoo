@@ -1,16 +1,21 @@
 /** @odoo-module */
 
-import { getFileAsText } from "@point_of_sale/js/utils";
 import { parse } from "web.field_utils";
 import NumberBuffer from "@point_of_sale/js/Misc/NumberBuffer";
 import PosComponent from "@point_of_sale/js/PosComponent";
-import Registries from "@point_of_sale/js/Registries";
+import { usePos } from "@point_of_sale/app/pos_store";
+import { registry } from "@web/core/registry";
+import { Transition } from "@web/core/transition";
+import Draggable from "@point_of_sale/js/Misc/Draggable";
 
 const { onMounted, onWillUnmount, useRef, useState } = owl;
 
-class DebugWidget extends PosComponent {
+export class DebugWidget extends PosComponent {
+    static components = { Transition, Draggable };
+    static template = "point_of_sale.DebugWidget";
     setup() {
         super.setup();
+        this.pos = usePos();
         this.state = useState({
             barcodeInput: "",
             weightInput: "",
@@ -122,6 +127,7 @@ class DebugWidget extends PosComponent {
         var URL = window.URL || window.webkitURL;
         return URL.createObjectURL(this.paidOrdersBlob);
     }
+    // FIXME POSREF why is this two steps?
     prepareUnpaidOrders() {
         try {
             this.unpaidOrdersBlob = this._createBlob(this.env.pos.export_unpaid_orders());
@@ -140,7 +146,7 @@ class DebugWidget extends PosComponent {
     async importOrders(event) {
         const file = event.target.files[0];
         if (file) {
-            const report = this.env.pos.import_orders(await getFileAsText(file));
+            const report = this.env.pos.import_orders(await file.text());
             await this.showPopup("OrderImportPopup", { report });
         }
     }
@@ -154,8 +160,5 @@ class DebugWidget extends PosComponent {
         return `"${this.state.buffer}"`;
     }
 }
-DebugWidget.template = "DebugWidget";
 
-Registries.Component.add(DebugWidget);
-
-export default DebugWidget;
+registry.category("main_components").add("DebugWidget", { Component: DebugWidget });
