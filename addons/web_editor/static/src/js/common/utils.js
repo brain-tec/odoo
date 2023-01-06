@@ -118,7 +118,7 @@ function _convertNumericToUnit(value, unitFrom, unitTo, cssProp, $target) {
  * @returns {Array|null}
  */
 function _getNumericAndUnit(value) {
-    const m = value.trim().match(/^(-?[0-9.]+)([A-Za-z% -]*)$/);
+    const m = value.trim().match(/^(-?[0-9.]+(?:e[+|-]?[0-9]+)?)\s*([A-Za-z%-]*)$/);
     if (!m) {
         return null;
     }
@@ -137,6 +137,23 @@ function _getNumericAndUnit(value) {
 function _areCssValuesEqual(value1, value2, cssProp, $target) {
     // String comparison first
     if (value1 === value2) {
+        return true;
+    }
+
+    // In case the values are a size, they might be made of two parts.
+    if (cssProp && cssProp.endsWith('-size')) {
+        // Avoid re-splitting each part during their individual comparison.
+        const pseudoPartProp = cssProp + '-part';
+        const re = /-?[0-9.]+(?:e[+|-]?[0-9]+)?\s*[A-Za-z%-]+|auto/g;
+        const parts1 = value1.match(re);
+        const parts2 = value2.match(re);
+        for (const index of [0, 1]) {
+            const part1 = parts1 && parts1.length > index ? parts1[index] : 'auto';
+            const part2 = parts2 && parts2.length > index ? parts2[index] : 'auto';
+            if (!_areCssValuesEqual(part1, part2, pseudoPartProp, $target)) {
+                return false;
+            }
+        }
         return true;
     }
 
