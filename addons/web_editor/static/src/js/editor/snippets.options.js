@@ -2584,18 +2584,6 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      * @private
      */
     async _search(needle) {
-        this._userValueWidgets = this._userValueWidgets.filter(widget => !widget.isDestroyed());
-        // Remove select options
-        this._userValueWidgets
-            .filter(widget => {
-                return widget instanceof ButtonUserValueWidget &&
-                    widget.el.parentElement.matches('we-selection-items');
-            }).forEach(button => {
-                if (button.isPreviewed()) {
-                    button.notifyValueChange('reset');
-                }
-                button.destroy();
-            });
         const recTuples = await this._rpc({
             model: this.options.model,
             method: 'name_search',
@@ -2611,6 +2599,18 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             method: 'read',
             args: [recTuples.map(([id, _name]) => id), this.options.fields],
         });
+        // Remove select options.
+        this._userValueWidgets.filter(widget => {
+            return widget instanceof ButtonUserValueWidget &&
+                !widget.isDestroyed() &&
+                widget.el.parentElement.matches('we-selection-items');
+        }).forEach(button => {
+            if (button.isPreviewed()) {
+                button.notifyValueChange('reset');
+            }
+            button.destroy();
+        });
+        this._userValueWidgets = this._userValueWidgets.filter(widget => !widget.isDestroyed());
         records.forEach(record => {
             this.displayNameCache[record.id] = record.display_name;
         });
@@ -2747,6 +2747,11 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             return;
         }
         if (widget && widget === this.createButton) {
+            // When the create button is clicked, make sure the text
+            // value is restored from the actual input element because
+            // it might have been removed when hovering existing tags.
+            // TODO review this, there is probably better to do
+            this.createInput._value = this.createInput.el.querySelector('input').value;
             if (!this.createInput._value) {
                 ev.stopPropagation();
             }
