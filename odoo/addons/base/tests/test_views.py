@@ -1548,6 +1548,11 @@ class TestViews(ViewCase):
         kw.setdefault('active', True)
         if 'arch_db' in kw:
             arch_db = kw['arch_db']
+            if kw.get('inherit_id'):
+                self.cr.execute('SELECT type FROM ir_ui_view WHERE id = %s', [kw['inherit_id']])
+                kw['type'] = self.cr.fetchone()[0]
+            else:
+                kw['type'] = etree.fromstring(arch_db).tag
             kw['arch_db'] = Json({'en_US': arch_db}) if self.env.lang == 'en_US' else Json({'en_US': arch_db, self.env.lang: arch_db})
 
         keys = sorted(kw)
@@ -1557,6 +1562,32 @@ class TestViews(ViewCase):
         query = 'INSERT INTO ir_ui_view(%s) VALUES(%s) RETURNING id' % (fields, params)
         self.cr.execute(query, kw)
         return self.cr.fetchone()[0]
+
+    def test_view_root_node_matches_view_type(self):
+        view = self.View.create({
+            'name': 'foo',
+            'model': 'ir.ui.view',
+            'arch': """
+                <form>
+                </form>
+            """,
+        })
+        self.assertEqual(view.type, 'form')
+
+        with self.assertRaises(ValidationError):
+            self.View.create({
+                'name': 'foo',
+                'model': 'ir.ui.view',
+                'type': 'form',
+                'arch': """
+                    <data>
+                        <div>
+                        </div>
+                        <form>
+                        </form>
+                    </data>
+                """,
+            })
 
     def test_custom_view_validation(self):
         model = 'ir.actions.act_url'
@@ -3277,6 +3308,96 @@ class TestViews(ViewCase):
             len(field_groups_id.xpath(".//*[@class='canary']")),
             0,
             "The view test_views_test_view_ref should not be in the views of the many2many field groups_id"
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_forbidden_owl_directives_in_form(self):
+        arch = "<form>%s</form>"
+
+        self.assertInvalid(
+            arch % ('<span t-esc="x"/>'),
+            """Error while validating view near:
+
+<form __validate__="1"><span t-esc="x"/></form>
+Forbidden owl directive used in arch (t-esc).""",
+        )
+
+        self.assertInvalid(
+            arch % ('<span t-on-click="x.doIt()"/>'),
+            """Error while validating view near:
+
+<form __validate__="1"><span t-on-click="x.doIt()"/></form>
+Forbidden owl directive used in arch (t-on-click).""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_forbidden_owl_directives_in_kanban(self):
+        arch = "<kanban><templates><t t-name='kanban-box'>%s</t></templates></kanban>"
+
+        self.assertValid(arch % ('<span t-esc="record.resId"/>'))
+
+        self.assertInvalid(
+            arch % ('<span t-on-click="x.doIt()"/>'),
+            """Error while validating view near:
+
+<kanban __validate__="1"><templates><t t-name="kanban-box"><span t-on-click="x.doIt()"/></t></templates></kanban>
+Forbidden owl directive used in arch (t-on-click).""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_forbidden_data_tooltip_attributes_in_form(self):
+        arch = "<form>%s</form>"
+
+        self.assertInvalid(
+            arch % ('<span data-tooltip="Test"/>'),
+            """Error while validating view near:
+
+<form __validate__="1"><span data-tooltip="Test"/></form>
+Forbidden attribute used in arch (data-tooltip)."""
+        )
+
+        self.assertInvalid(
+            arch % ('<span data-tooltip-template="test"/>'),
+            """Error while validating view near:
+
+<form __validate__="1"><span data-tooltip-template="test"/></form>
+Forbidden attribute used in arch (data-tooltip-template)."""
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_forbidden_data_tooltip_attributes_in_kanban(self):
+        arch = "<kanban><templates><t t-name='kanban-box'>%s</t></templates></kanban>"
+
+        self.assertInvalid(
+            arch % ('<span data-tooltip="Test"/>'),
+            """Error while validating view near:
+
+<kanban __validate__="1"><templates><t t-name="kanban-box"><span data-tooltip="Test"/></t></templates></kanban>
+Forbidden attribute used in arch (data-tooltip)."""
+        )
+
+        self.assertInvalid(
+            arch % ('<span data-tooltip-template="test"/>'),
+            """Error while validating view near:
+
+<kanban __validate__="1"><templates><t t-name="kanban-box"><span data-tooltip-template="test"/></t></templates></kanban>
+Forbidden attribute used in arch (data-tooltip-template)."""
+        )
+
+        self.assertInvalid(
+            arch % ('<span t-att-data-tooltip="test"/>'),
+            """Error while validating view near:
+
+<kanban __validate__="1"><templates><t t-name="kanban-box"><span t-att-data-tooltip="test"/></t></templates></kanban>
+Forbidden attribute used in arch (t-att-data-tooltip)."""
+        )
+
+        self.assertInvalid(
+            arch % ('<span t-attf-data-tooltip-template="{{ test }}"/>'),
+            """Error while validating view near:
+
+<kanban __validate__="1"><templates><t t-name="kanban-box"><span t-attf-data-tooltip-template="{{ test }}"/></t></templates></kanban>
+Forbidden attribute used in arch (t-attf-data-tooltip-template)."""
         )
 
 
