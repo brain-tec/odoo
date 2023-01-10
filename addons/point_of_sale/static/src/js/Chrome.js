@@ -25,7 +25,6 @@ import {
     onMounted,
     onWillDestroy,
     useExternalListener,
-    useState,
     useSubEnv,
     reactive,
     markRaw,
@@ -102,9 +101,6 @@ export class Chrome extends PosComponent {
 
         this.mainScreen = this.state.mainScreen;
         this.mainScreenProps = {};
-
-        this.tempScreen = useState({ isShown: false, name: null, component: null });
-        this.tempScreenProps = {};
 
         useSubEnv({
             pos: reactive(
@@ -204,7 +200,11 @@ export class Chrome extends PosComponent {
                 }
             } else if (error instanceof Error) {
                 title = error.message;
-                body = error.stack;
+                if (error.cause) {
+                    body = error.cause.message;
+                } else {
+                    body = error.stack;
+                }
             }
 
             return this.showPopup("ErrorTracebackPopup", { title, body, exitButtonIsShown: true });
@@ -225,22 +225,25 @@ export class Chrome extends PosComponent {
             this.env.pos.config.limited_partners_loading &&
             this.env.pos.config.partner_load_background
         ) {
-            this.env.pos.loadPartnersBackground().then(() => {
-                this.env.pos.isEveryPartnerLoaded = true;
-            });
+            this.env.pos.loadPartnersBackground();
         }
         if (
             this.env.pos.config.limited_products_loading &&
             this.env.pos.config.product_load_background
         ) {
             this.env.pos.loadProductsBackground().then(() => {
-                this.env.pos.isEveryProductLoaded = true;
                 this.render(true);
             });
         }
     }
 
     setupBarcodeParser() {
+        if (!this.env.pos.company.nomenclature_id) {
+            const errorMessage = this.env._t("The barcode nomenclature setting is not configured. " +
+                "Make sure to configure it on your Point of Sale configuration settings");
+            throw new Error(this.env._t("Missing barcode nomenclature"), { cause: { message: errorMessage } });
+
+        }
         const barcode_parser = new BarcodeParser({
             nomenclature_id: this.env.pos.company.nomenclature_id,
         });
@@ -310,14 +313,14 @@ export class Chrome extends PosComponent {
     }
     __showTempScreen(event) {
         const { name, props, resolve } = event.detail;
-        this.tempScreen.isShown = true;
-        this.tempScreen.name = name;
-        this.tempScreen.component = this.constructor.components[name];
-        this.tempScreenProps = Object.assign({}, props, { resolve });
+        this.state.tempScreen = {
+            name,
+            component: this.constructor.components[name],
+            props: { ...props, resolve },
+        };
     }
     __closeTempScreen() {
-        this.tempScreen.isShown = false;
-        this.tempScreen.name = null;
+        this.state.tempScreen = null;
     }
     __showScreen({ detail: { name, props = {} } }) {
         const component = this.constructor.components[name];
