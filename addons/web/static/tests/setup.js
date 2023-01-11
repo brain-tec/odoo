@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import core, { _t } from "web.core";
+import { _t } from "web.core";
+import LegacyBus from "web.Bus";
 import session from "web.session";
 import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -13,24 +14,8 @@ import { config as transitionConfig } from "@web/core/transition";
 
 transitionConfig.disabled = true;
 
-import { patch } from "@web/core/utils/patch";
 import { processTemplates } from "@web/core/assets";
 const { App, whenReady, loadFile } = owl;
-
-patch(App.prototype, "TestOwlApp", {
-    destroy() {
-        if (!this.destroyed) {
-            this._super(...arguments);
-            this.destroyed = true;
-        }
-    },
-    addTemplate(name) {
-        registerCleanup(() => {
-            delete this.constructor.sharedTemplates[name];
-        });
-        return this._super(...arguments);
-    },
-});
 
 function stringifyObjectValues(obj, properties) {
     let res = "";
@@ -110,6 +95,23 @@ function makeMockLocation(hasListeners = () => true) {
     });
 }
 
+function patchOwlApp() {
+    patchWithCleanup(App.prototype, {
+        destroy() {
+            if (!this.destroyed) {
+                this._super(...arguments);
+                this.destroyed = true;
+            }
+        },
+        addTemplate(name) {
+            registerCleanup(() => {
+                delete this.constructor.sharedTemplates[name];
+            });
+            return this._super(...arguments);
+        },
+    });
+}
+
 function patchBrowserWithCleanup() {
     const originalAddEventListener = browser.addEventListener;
     const originalRemoveEventListener = browser.removeEventListener;
@@ -151,16 +153,14 @@ function patchBrowserWithCleanup() {
     );
 }
 
-function patchLegacyCoreBus() {
+function patchLegacyBus() {
     // patch core.bus.on to automatically remove listners bound on the legacy bus
     // during a test (e.g. during the deployment of a service)
-    const originalOn = core.bus.on.bind(core.bus);
-    const originalOff = core.bus.off.bind(core.bus);
-    patchWithCleanup(core.bus, {
+    patchWithCleanup(LegacyBus.prototype, {
         on() {
-            originalOn(...arguments);
+            this._super(...arguments);
             registerCleanup(() => {
-                originalOff(...arguments);
+                this.off(...arguments);
             });
         },
     });
@@ -238,9 +238,10 @@ export async function setupTests() {
         prepareLegacyRegistriesWithCleanup();
         forceLocaleAndTimezoneWithCleanup();
         patchBrowserWithCleanup();
-        patchLegacyCoreBus();
+        patchLegacyBus();
         patchOdoo();
         patchSessionInfo();
+        patchOwlApp();
     });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
