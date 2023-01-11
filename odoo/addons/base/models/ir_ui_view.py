@@ -254,7 +254,6 @@ class View(models.Model):
                                                                          Useful to (soft) reset a broken view.""")
     inherit_id = fields.Many2one('ir.ui.view', string='Inherited View', ondelete='restrict', index=True)
     inherit_children_ids = fields.One2many('ir.ui.view', 'inherit_id', string='Views which inherit from this one')
-    field_parent = fields.Char(string='Child Field')
     model_data_id = fields.Many2one('ir.model.data', string="Model Data",
                                     compute='_compute_model_data_id', search='_search_model_data_id')
     xml_id = fields.Char(string="External ID", compute='_compute_xml_id',
@@ -1961,6 +1960,7 @@ actual arch.
                 "t-key",
                 "t-att.*",
                 "t-call",
+                "t-debug",
             ])
         if (not next(filter(lambda regex: re.match(regex, directive), allowed_directives), None)):
             self._raise_view_error(_("Forbidden owl directive used in arch (%s).", directive), node)
@@ -2739,66 +2739,6 @@ class Model(models.AbstractModel):
             'help', 'name', 'readonly', 'related', 'relation', 'relation_field', 'required', 'searchable', 'selection', 'size',
             'sortable', 'store', 'string', 'translate', 'trim', 'type',
         ]
-
-    @api.model
-    def load_views(self, views, options=None):
-        warnings.warn(
-            '`load_views` method is deprecated, use `get_views` instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        return self.get_views(views, options=options)
-
-    @api.model
-    def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        warnings.warn(
-            'Method `_fields_view_get` is deprecated, use `_get_view` instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        arch, view = self._get_view(view_id, view_type, toolbar=toolbar, submenu=submenu)
-        result = {
-            'arch': etree.tostring(arch, encoding='unicode'),
-            'model': self._name,
-            'field_parent': False,
-        }
-        if view:
-            result['name'] = view.name
-            result['type'] = view.type
-            result['view_id'] = view.id
-            result['field_parent'] = view.field_parent
-            result['base_model'] = view.model
-        else:
-            result['type'] = view_type
-            result['name'] = 'default'
-        return result
-
-    @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        """
-        .. deprecated:: saas-15.4
-
-            Use :meth:`~odoo.models.Model.get_view()` instead.
-        """
-        warnings.warn(
-            'Method `fields_view_get` is deprecated, use `get_view` instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        result = self.get_views([(view_id, view_type)], {'toolbar': toolbar, 'submenu': submenu})['views'][view_type]
-        node = etree.fromstring(result['arch'])
-        view_fields = set(el.get('name') for el in node.xpath('.//field[not(ancestor::field)]'))
-        result['fields'] = self.fields_get(view_fields)
-        result.pop('models', None)
-        if 'id' in result:
-            view = self.env['ir.ui.view'].sudo().browse(result.pop('id'))
-            result['name'] = view.name
-            result['type'] = view.type
-            result['view_id'] = view.id
-            result['field_parent'] = view.field_parent
-            result['base_model'] = view.model
-        else:
-            result['type'] = view_type
-            result['name'] = 'default'
-            result['field_parent'] = False
-        return result
 
     def get_formview_id(self, access_uid=None):
         """ Return a view id to open the document ``self`` with. This method is
