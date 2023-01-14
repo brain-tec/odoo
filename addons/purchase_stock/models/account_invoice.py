@@ -42,16 +42,9 @@ class AccountMove(models.Model):
                     continue
 
                 # Retrieve accounts needed to generate the price difference.
-                if line.product_id.cost_method == 'standard':
-                    debit_expense_account = line.product_id.property_account_creditor_price_difference \
-                        or line.product_id.categ_id.property_account_creditor_price_difference_categ
-                    debit_expense_account = line.move_id.fiscal_position_id.map_account(debit_expense_account)
-                else:
-                    accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=move.fiscal_position_id)
-                    debit_expense_account = accounts['expense']
+                debit_expense_account = line._get_price_diff_account()
                 if not debit_expense_account:
                     continue
-
                 if line.product_id.cost_method != 'standard' and line.purchase_line_id:
 
                     # Retrieve stock valuation moves.
@@ -81,6 +74,7 @@ class AccountMove(models.Model):
                         price_unit, move.currency_id,
                         move.company_id, fields.Date.today(), round=False
                     )
+
 
                 price_unit = line._get_gross_unit_price()
 

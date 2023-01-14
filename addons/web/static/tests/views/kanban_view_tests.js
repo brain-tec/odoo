@@ -8169,7 +8169,7 @@ QUnit.module("Views", (hooks) => {
             3,
             "there should now be 3 records in the column"
         );
-        assert.verifySteps(["2 - 0", "2 - 0", "2 - 2"], "the records should be correctly fetched");
+        assert.verifySteps(["2 - 0", "2 - 0", "4 - 0"], "the records should be correctly fetched");
         assert.deepEqual(getCardTexts(1), ["1", "2", "3"]);
 
         // reload
@@ -8182,12 +8182,10 @@ QUnit.module("Views", (hooks) => {
             "there should still be 3 records in the column after reload"
         );
         assert.deepEqual(getCardTexts(1), ["1", "2", "3"]);
-        assert.verifySteps(["2 - 0", "3 - 0"]);
+        assert.verifySteps(["2 - 0", "4 - 0"]);
     });
 
     QUnit.test("load more records in column with x2many", async (assert) => {
-        assert.expect(10);
-
         serverData.models.partner.records[0].category_ids = [7];
         serverData.models.partner.records[1].category_ids = [];
         serverData.models.partner.records[2].category_ids = [6];
@@ -8211,28 +8209,22 @@ QUnit.module("Views", (hooks) => {
             limit: 2,
             async mockRPC(_route, { args, kwargs, model, method }) {
                 if (model === "category" && method === "read") {
-                    assert.step(String(args[0]));
+                    assert.step(`read ${String(args[0])}`);
                 } else if (method === "web_search_read") {
-                    const { limit, offset } = kwargs;
-                    if (limit) {
-                        assert.strictEqual(limit, 2);
-                    }
-                    if (offset) {
-                        assert.strictEqual(offset, 2);
-                    }
+                    assert.step(`web_search_read ${kwargs.limit}-${kwargs.offset}`);
                 }
             },
         });
 
         assert.containsN(getColumn(1), ".o_kanban_record", 2);
 
-        assert.verifySteps(["7"], "only the appearing category should be fetched");
+        assert.verifySteps(["web_search_read 2-0", "web_search_read 2-0", "read 7"]);
 
         // load more
         await loadMore(1);
 
         assert.containsN(getColumn(1), ".o_kanban_record", 3);
-        assert.verifySteps(["6"], "the other categories should not be fetched");
+        assert.verifySteps(["web_search_read 4-0", "read 7,6"]);
     });
 
     QUnit.test("update buttons after column creation", async (assert) => {
@@ -12321,5 +12313,47 @@ QUnit.module("Views", (hooks) => {
             "December 2022"
         );
         assert.containsN(target, ".o_kanban_group .o_kanban_record", 16);
+    });
+
+    QUnit.test("scroll on group unfold and progressbar click", async (assert) => {
+        assert.expect(7);
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}' sum_field="int_field" />
+                    <templates>
+                        <t t-name="kanban-box">Record</t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+            async mockRPC(route, args, performRPC) {
+                if (args.method === "web_read_group") {
+                    const result = await performRPC(route, args);
+                    if (result.groups.length) {
+                        result.groups[0].__fold = false;
+                        result.groups[1].__fold = true;
+                    }
+                    return result;
+                }
+            },
+        });
+
+        const content = target.querySelector(".o_content");
+        content.scrollTo = (params) => {
+            assert.step("scrolled");
+            assert.strictEqual(params.top, 0);
+        };
+
+        await click(getProgressBars(0)[0]);
+        assert.verifySteps(["scrolled"]);
+
+        const column1 = getColumn(1);
+        assert.hasClass(column1, "o_column_folded");
+        await click(column1);
+        assert.verifySteps(["scrolled"]);
     });
 });
