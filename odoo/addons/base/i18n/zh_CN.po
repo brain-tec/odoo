@@ -53,7 +53,7 @@
 # Martin Trigaux, 2022
 # 深圳 JM <3440895@qq.com>, 2022
 # Raymond Yu <cl_yu@hotmail.com>, 2022
-# Jeffery CHEN <jeffery9@gmail.com>, 2022
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2022
 # Emily Jia <eji@odoo.com>, 2022
 # 
 msgid ""
@@ -20855,8 +20855,8 @@ msgstr "LGPL 第3版"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
-msgid "LT - Accounting Reports"
-msgstr "LT - 会计报表"
+msgid "Lithuania - Accounting Reports"
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -30767,6 +30767,12 @@ msgstr "泰国"
 #: model:ir.module.module,shortdesc:base.module_l10n_th
 msgid "Thailand - Accounting"
 msgstr "泰国 - 会计"
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid "The \"%s\" action cannot be selected as home action."
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/res_users.py:0

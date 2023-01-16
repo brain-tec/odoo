@@ -36,10 +36,14 @@
             'website_blog/static/src/js/options.js',
             'website_blog/static/src/js/wysiwyg.js',
             'website_blog/static/src/snippets/s_blog_posts/options.js',
+            'website_blog/static/src/js/snippets.editor.js',
         ],
         'website.assets_editor': [
             'website_blog/static/src/js/website_blog.editor.js',
             'website_blog/static/src/js/tours/website_blog.js',
+        ],
+        'web.assets_tests': [
+            'website_blog/static/tests/**/*',
         ],
         'web.assets_frontend': [
             'website_blog/static/src/scss/website_blog.scss',

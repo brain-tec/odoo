@@ -20386,8 +20386,8 @@ msgstr "LGPL Version 3"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
-msgid "LT - Accounting Reports"
-msgstr "Litauen - regnskabsposteringer "
+msgid "Lithuania - Accounting Reports"
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -29198,6 +29198,12 @@ msgstr "Thailand"
 #: model:ir.module.module,shortdesc:base.module_l10n_th
 msgid "Thailand - Accounting"
 msgstr "Thailand - Regnskab"
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid "The \"%s\" action cannot be selected as home action."
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/res_users.py:0

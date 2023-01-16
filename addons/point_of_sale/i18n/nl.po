@@ -14,8 +14,8 @@
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2021
 # Martin Trigaux, 2022
 # Lukas Van Cauter <cvl@odoo.com>, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
 # Jolien De Paepe, 2022
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
 # 
 msgid ""
 msgstr ""
@@ -23,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-02 08:11+0000\n"
 "PO-Revision-Date: 2016-08-05 13:07+0000\n"
-"Last-Translator: Jolien De Paepe, 2022\n"
+"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2023\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -5372,6 +5372,8 @@ msgstr "Toon afrekening aan klanten met een extern verbonden scherm."
 msgid ""
 "Show customers checkout in a pop-up window. Can be moved to a second screen."
 msgstr ""
+"Laat klanten afrekenen in een pop-upvenster. Kan worden verplaatst naar een "
+"tweede scherm."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_customer_facing_display_local
@@ -5379,6 +5381,8 @@ msgid ""
 "Show customers checkout in a pop-up window. Recommend to be moved to a "
 "second screen visible to the client."
 msgstr ""
+"Laat klanten afrekenen in een pop-upvenster. Er wordt aanbevolen om dit te "
+"verplaatsen naar een tweede scherm dat zichtbaar is voor de klant."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__module_pos_hr
@@ -6848,6 +6852,12 @@ msgid ""
 msgstr ""
 "Je probeert producten te verkopen met serie-/partnummers, maar sommige zijn niet ingesteld.\n"
 "Wil je toch doorgaan?"
+
+#. module: point_of_sale
+#: code:addons/point_of_sale/models/pos_config.py:0
+#, python-format
+msgid "You can only have one cash payment method."
+msgstr "Je kunt slechts één kasbetaalmethode hebben."
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/account_bank_statement.py:0

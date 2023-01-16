@@ -16,6 +16,7 @@ import {
     closestElement,
     getUrlsInfosInString,
     URL_REGEX,
+    isVoidElement,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -188,7 +189,7 @@ class Sanitize {
             // Ensure elements which should not contain any content are tagged
             // contenteditable=false to avoid any hiccup.
             if (
-                (isMediaElement(node) || node.tagName === 'HR') &&
+                isVoidElement(node) &&
                 node.getAttribute('contenteditable') !== 'false'
             ) {
                 node.setAttribute('contenteditable', 'false');
@@ -200,7 +201,7 @@ class Sanitize {
             if (node.nodeName === 'A' && anchorEl === node) {
                 const linkLabel = node.textContent;
                 const match = linkLabel.match(URL_REGEX);
-                if (match && match[0] === node.textContent) {
+                if (match && match[0] === node.textContent && !node.href.startsWith('mailto:')) {
                     const urlInfo = getUrlsInfosInString(linkLabel)[0];
                     node.setAttribute('href', urlInfo.url);
                 }

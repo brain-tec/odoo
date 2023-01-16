@@ -94,7 +94,7 @@
 # Daniel Salazar, 2022
 # Braulio D. López Vázquez <bdl@odoo.com>, 2022
 # Farouk Jabiri, 2022
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -102,7 +102,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-02 08:11+0000\n"
 "PO-Revision-Date: 2016-08-05 12:55+0000\n"
-"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022\n"
+"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10719,6 +10719,15 @@ msgstr ""
 "en la empresa."
 
 #. module: account
+#: code:addons/account/models/chart_template.py:0
+#, python-format
+msgid ""
+"Please check these taxes. They might be outdated. We did not update them. "
+"Indeed, they do not exactly match the taxes of the original version of the "
+"localization module.<br/>You might want to archive or adapt them.<br/><ul>"
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "Please define a payment method line on your payment."
@@ -10825,7 +10834,7 @@ msgstr "Contabilizar la diferencia en"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
 msgid "Post Journal Entries"
-msgstr "Validar asientos"
+msgstr "Publicar asientos"
 
 #. module: account
 #: model:ir.actions.server,name:account.action_account_confirm_payments
@@ -10861,7 +10870,7 @@ msgstr "Solo asientos publicados"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 msgid "Posted Journal Entries"
-msgstr "Asientos validados"
+msgstr "Asientos publicados"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -17071,6 +17080,12 @@ msgstr ""
 msgid "You should update this document to reflect your T&amp;C."
 msgstr ""
 "Debe actualizar este documento para que refleje sus términos y condiciones."
+
+#. module: account
+#: code:addons/account/models/chart_template.py:0
+#, python-format
+msgid "Your taxes have been updated !"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
