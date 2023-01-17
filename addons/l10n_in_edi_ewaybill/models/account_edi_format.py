@@ -9,6 +9,7 @@ from odoo import models, fields, api, _
 from odoo.tools import html_escape
 from odoo.exceptions import AccessError
 from odoo.addons.iap import jsonrpc
+from .error_codes import ERROR_CODES
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -149,7 +150,7 @@ class AccountEdiFormat(models.Model):
             if "312" in error_codes:
                 # E-waybill is already canceled
                 # this happens when timeout from the Government portal but IRN is generated
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 error = []
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
@@ -167,7 +168,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -226,7 +227,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes or "waiting" in error_codes:
                     blocking_level = "warning"
@@ -310,7 +311,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -333,12 +334,16 @@ class AccountEdiFormat(models.Model):
             res[invoices] = inv_res
         return res
 
+    def _l10n_in_edi_ewaybill_get_error_message(self, code):
+        error_message = ERROR_CODES.get(code)
+        return error_message or _("We don't know the error message for this error code. Please contact support.")
+
     def _get_l10n_in_edi_saler_buyer_party(self, move):
         res = super()._get_l10n_in_edi_saler_buyer_party(move)
         if move.is_purchase_document(include_receipts=True):
             res = {
                 "seller_details":  move.partner_id,
-                "dispatch_details": move._l10n_in_get_shipping_partner(),
+                "dispatch_details": move.partner_shipping_id or move.partner_id,
                 "buyer_details": move.company_id.partner_id,
                 "ship_to_details": move._l10n_in_get_warehouse_address() or move.company_id.partner_id,
             }
