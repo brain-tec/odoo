@@ -734,7 +734,7 @@ class Project(models.Model):
         project = self[0]
         if self.user_has_groups('project.group_project_stages') and 'stage_id' in changes and project.stage_id.mail_template_id:
             res['stage_id'] = (project.stage_id.mail_template_id, {
-                'auto_delete_message': True,
+                'auto_delete_keep_log': False,
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
                 'email_layout_xmlid': 'mail.mail_notification_light',
             })
@@ -1873,7 +1873,7 @@ class Task(models.Model):
             project = self.env['project.project'].browse(project_id)
             if project.analytic_account_id:
                 vals['analytic_account_id'] = project.analytic_account_id.id
-        else:
+        elif 'default_user_ids' not in self.env.context:
             user_ids = vals.get('user_ids', [])
             user_ids.append(Command.link(self.env.user.id))
             vals['user_ids'] = user_ids
@@ -2028,6 +2028,7 @@ class Task(models.Model):
             ctx = {
                 key: value for key, value in self.env.context.items()
                 if key == 'default_project_id' \
+                    or key == 'default_user_ids' and value is False \
                     or not key.startswith('default_') \
                     or key[8:] in self.SELF_WRITABLE_FIELDS
             }
@@ -2329,7 +2330,7 @@ class Task(models.Model):
         test_task = self[0]
         if 'stage_id' in changes and test_task.stage_id.mail_template_id:
             res['stage_id'] = (test_task.stage_id.mail_template_id, {
-                'auto_delete_message': True,
+                'auto_delete_keep_log': False,
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
                 'email_layout_xmlid': 'mail.mail_notification_light'
             })

@@ -494,6 +494,40 @@ class TestSaleToInvoice(TestSaleCommon):
         aml = self.env['account.move.line'].search([('move_id', 'in', so.invoice_ids.ids)])[0]
         self.assertRecordValues(aml, [{'analytic_distribution': {str(analytic_account_default.id): 100, str(analytic_account_so.id): 100}}])
 
+    def test_invoice_analytic_rule_with_account_prefix(self):
+        """
+        Test whether, when an analytic account rule is set within the scope (applicability) of invoice
+        and with an account prefix set,
+        the default analytic account is correctly set during the conversion from so to invoice
+        """
+        self.env.user.groups_id += self.env.ref('analytic.group_analytic_accounting')
+        analytic_plan_default = self.env['account.analytic.plan'].create({
+            'name': 'default',
+            'applicability_ids': [Command.create({
+                'business_domain': 'invoice',
+                'applicability': 'optional',
+            })]
+        })
+        analytic_account_default = self.env['account.analytic.account'].create({'name': 'default', 'plan_id': analytic_plan_default.id})
+
+        analytic_distribution_model = self.env['account.analytic.distribution.model'].create({
+            'account_prefix': '400000',
+            'analytic_distribution': {analytic_account_default.id: 100},
+            'product_id': self.product_a.id,
+        })
+
+        so = self.env['sale.order'].create({'partner_id': self.partner_a.id})
+        self.env['sale.order.line'].create({
+            'order_id': so.id,
+            'name': 'test',
+            'product_id': self.product_a.id
+        })
+        self.assertFalse(so.order_line.analytic_distribution, "There should be no tag set.")
+        so.action_confirm()
+        so.order_line.qty_delivered = 1
+        aml = so._create_invoices().invoice_line_ids
+        self.assertRecordValues(aml, [{'analytic_distribution': analytic_distribution_model.analytic_distribution}])
+
     def test_invoice_after_product_return_price_not_default(self):
         so = self.env['sale.order'].create({
             'name': 'Sale order',
@@ -632,7 +666,10 @@ class TestSaleToInvoice(TestSaleCommon):
         # send quotation
         email_act = self.sale_order.action_quotation_send()
         email_ctx = email_act.get('context', {})
-        self.sale_order.with_context(**email_ctx).message_post_with_template(email_ctx.get('default_template_id'))
+        self.sale_order.with_context(**email_ctx).message_post_with_source(
+            self.env['mail.template'].browse(email_ctx.get('default_template_id')),
+            subtype_xmlid='mail.mt_comment',
+        )
         self.assertTrue(self.sale_order.state == 'sent', 'Sale: state after sending is wrong')
         self.sale_order.order_line._compute_product_updatable()
         self.assertTrue(self.sale_order.order_line[0].product_updatable)

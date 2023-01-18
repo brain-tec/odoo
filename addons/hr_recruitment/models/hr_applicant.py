@@ -261,15 +261,15 @@ class Applicant(models.Model):
             applicant.email_from = applicant.partner_id.email
 
     def _inverse_partner_email(self):
-        for applicant in self.filtered(lambda a: a.partner_id and a.email_from):
+        for applicant in self.filtered(lambda a: a.partner_id and a.email_from and not a.partner_id.email):
             applicant.partner_id.email = applicant.email_from
 
     def _inverse_partner_phone(self):
-        for applicant in self.filtered(lambda a: a.partner_id and a.partner_phone):
+        for applicant in self.filtered(lambda a: a.partner_id and a.partner_phone and not a.partner_id.phone):
             applicant.partner_id.phone = applicant.partner_phone
 
     def _inverse_partner_mobile(self):
-        for applicant in self.filtered(lambda a: a.partner_id and a.partner_mobile):
+        for applicant in self.filtered(lambda a: a.partner_id and a.partner_mobile and not a.partner_id.mobile):
             applicant.partner_id.mobile = applicant.partner_mobile
 
     @api.depends('stage_id.hired_stage')
@@ -450,7 +450,7 @@ class Applicant(models.Model):
         applicant = self[0]
         if 'stage_id' in changes and applicant.stage_id.template_id:
             res['stage_id'] = (applicant.stage_id.template_id, {
-                'auto_delete_message': True,
+                'auto_delete_keep_log': False,
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
                 'email_layout_xmlid': 'mail.mail_notification_light'
             })

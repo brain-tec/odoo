@@ -1889,8 +1889,13 @@ class AccountMove(models.Model):
         # Skip posted moves.
         for invoice in (x for x in container['records'] if x.state != 'posted'):
 
-            # Unlink tax lines if all tax tags have been removed.
+            # Unlink tax lines if all taxes have been removed.
             if not invoice.line_ids.tax_ids:
+                # if there isn't any tax but there remains a tax_line_id, it means we are currently in the process of
+                # removing the taxes from the entry. Thus, we want the automatic balancing to happen in order  to have
+                # a smooth process for tax deletion
+                if not invoice.line_ids.filtered('tax_line_id'):
+                    continue
                 invoice.line_ids.filtered('tax_line_id').unlink()
 
             # Set the balancing line's balance and amount_currency to zero,
@@ -2542,7 +2547,7 @@ class AccountMove(models.Model):
         for that partner as the default one, otherwise the default of the journal.
         """
         self.ensure_one()
-        if not self.quick_edit_total_amount:
+        if not self.quick_edit_mode or not self.quick_edit_total_amount:
             return False
         count, account_id, tax_ids = self._get_frequent_account_and_taxes(
             self.company_id.id,
@@ -2776,6 +2781,8 @@ class AccountMove(models.Model):
 
         product_lines = self.line_ids.filtered(lambda x: x.display_type == 'product')
         base_lines = [x._convert_to_tax_base_line_dict() for x in product_lines]
+        for base_line in base_lines:
+            base_line['taxes'] = base_line['taxes'].filtered(lambda t: t.amount_type != 'fixed')
 
         if self.is_inbound(include_receipts=True):
             cash_discount_account = self.company_id.account_journal_early_pay_discount_loss_account_id
@@ -3502,12 +3509,7 @@ class AccountMove(models.Model):
         compose_form = self.env.ref('account.account_invoice_send_wizard_form', raise_if_not_found=False)
         ctx = dict(
             default_model='account.move',
-            default_res_id=self.id,
-            # For the sake of consistency we need a default_res_model if
-            # default_res_id is set. Not renaming default_model as it can
-            # create many side-effects.
-            default_res_model='account.move',
-            default_use_template=bool(template),
+            default_res_ids=self.ids,
             default_template_id=template and template.id or False,
             default_composition_mode='comment',
             mark_invoice_as_sent=True,
