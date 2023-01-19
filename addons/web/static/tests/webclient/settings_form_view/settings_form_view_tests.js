@@ -15,6 +15,8 @@ import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { registry } from "@web/core/registry";
 import { SettingsFormCompiler } from "@web/webclient/settings_form_view/settings_form_compiler";
 import { registerCleanup } from "../../helpers/cleanup";
+import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
+import { session } from "@web/session";
 
 let target;
 let serverData;
@@ -446,6 +448,84 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
+    QUnit.test("resIds should contains only 1 id", async function (assert) {
+        assert.expect(1);
+
+        serverData.models["res.config.settings"].fields.foo_text = {
+            string: "Foo",
+            type: "char",
+            default: "My little Foo Value",
+            translate: true,
+            searchable: true,
+            trim: true,
+        };
+        registry
+            .category("services")
+            .add("localization", makeFakeLocalizationService({ multiLang: true }), {
+                force: true,
+            });
+        patchWithCleanup(session.user_context, {
+            lang: "en_US",
+        });
+
+        await makeView({
+            type: "form",
+            resModel: "res.config.settings",
+            serverData,
+            arch: `
+                <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
+                    <div class="o_setting_container">
+                        <div class="settings">
+                            <app string="CRM" name="crm">
+                                <block>
+                                    <setting title="Foo Text">
+                                        <field name="foo_text"/>
+                                    </setting>
+                                </block>
+                            </app>
+                        </div>
+                    </div>
+                </form>`,
+            mockRPC(route, { args, method, model }) {
+                if (route === "/web/dataset/call_kw/res.lang/get_installed") {
+                    return Promise.resolve([
+                        ["en_US", "English"],
+                        ["fr_BE", "French (Belgium)"],
+                    ]);
+                }
+                if (route === "/web/dataset/call_kw/res.config.settings/get_field_translations") {
+                    return Promise.resolve([
+                        [
+                            {
+                                lang: "en_US",
+                                source: "My little Foo Value",
+                                value: "My little Foo Value",
+                            },
+                            {
+                                lang: "fr_BE",
+                                source: "My little Foo Value",
+                                value: "Valeur de mon petit Foo",
+                            },
+                        ],
+                        {
+                            translation_type: "char",
+                            translation_show_source: true,
+                        },
+                    ]);
+                }
+                if (route === "/web/dataset/call_button" && method === "execute") {
+                    assert.deepEqual(args, [[2]]);
+                    return true;
+                }
+            },
+        });
+
+        await click(target.querySelector(".o_field_char .btn.o_field_translate")); // Transalte
+        await click(target.querySelector(".modal-footer .btn-primary")); // Warning dialog (OK)
+        await click(target.querySelectorAll(".modal-footer .btn")[1]); // Discard
+        await click(target.querySelector(".o_form_button_save")); // Save Settings
+    });
+
     QUnit.test("settings views does not read existing id when reload", async function (assert) {
         serverData.actions = {
             1: {
@@ -516,6 +596,62 @@ QUnit.module("SettingsFormView", (hooks) => {
             "onchange", // settings: when we come back, we want to restart from scratch
         ]);
     });
+
+    QUnit.test(
+        "settings views ask for confirmation when leaving if dirty",
+        async function (assert) {
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Settings view",
+                    res_model: "res.config.settings",
+                    type: "ir.actions.act_window",
+                    views: [[1, "form"]],
+                },
+                4: {
+                    id: 4,
+                    name: "Other action",
+                    res_model: "task",
+                    type: "ir.actions.act_window",
+                    views: [["view_ref", "form"]],
+                },
+            };
+
+            serverData.views = {
+                "res.config.settings,1,form": `
+                    <form string="Settings" js_class="base_settings">
+                        <app string="CRM" name="crm">
+                            <block>
+                                <setting label="Foo" help="this is foo">
+                                    <field name="foo"/>
+                                </setting>
+                            </block>
+                        </app>
+                    </form>`,
+                "res.config.settings,false,search": `<search/>`,
+                "task,view_ref,form": `
+                        <form>
+                            <field name="display_name"/>
+                        </form>`,
+                "task,false,search": "<search></search>",
+            };
+
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 1);
+
+            const action = doAction(webClient, 4);
+            await nextTick();
+            assert.containsNone(target, ".modal", "do not open modal if there is no change");
+            await action;
+
+            await doAction(webClient, 1);
+            await click(target, ".o_field_boolean input");
+            doAction(webClient, 4);
+            await nextTick();
+            assert.containsOnce(target, ".modal", "open modal if there is change");
+            assert.strictEqual(target.querySelector(".modal-title").textContent, "Unsaved changes");
+        }
+    );
 
     QUnit.test("Auto save: don't save on closing tab/browser", async function (assert) {
         assert.expect(3);
@@ -1401,11 +1537,11 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
 
         const expectedCompiled = `
-            <SettingsPage slots="{NoContentHelper:this.props.slots.NoContentHelper}" initialTab="this.props.initialApp" t-slot-scope="settings" modules="[{&quot;key&quot;:&quot;crm&quot;,&quot;string&quot;:&quot;CRM&quot;,&quot;imgurl&quot;:&quot;/crm/static/description/icon.png&quot;}]">
+            <SettingsPage slots="{NoContentHelper:__comp__.props.slots.NoContentHelper}" initialTab="__comp__.props.initialApp" t-slot-scope="settings" modules="[{&quot;key&quot;:&quot;crm&quot;,&quot;string&quot;:&quot;CRM&quot;,&quot;imgurl&quot;:&quot;/crm/static/description/icon.png&quot;}]">
                 <SettingsApp key="\`crm\`" string="\`CRM\`" imgurl="\`/crm/static/description/icon.png\`" selectedTab="settings.selectedTab">
-                    <Setting title="\`\`"  help="\`\`" companyDependent="false" documentation="\`\`" record="this.props.record" string="\`\`" addLabel="true" labels="[&quot;\`My\\&quot; little '  Label\`&quot;]">
-                        <FormLabel id="'display_name'" fieldName="'display_name'" record="this.props.record" fieldInfo="this.props.archInfo.fieldNodes['display_name']" className="&quot;highhopes&quot;" string="\`My&quot; little '  Label\`"/>
-                        <Field id="'display_name'" name="'display_name'" record="this.props.record" fieldInfo="this.props.archInfo.fieldNodes['display_name']"/>
+                    <Setting title="\`\`"  help="\`\`" companyDependent="false" documentation="\`\`" record="__comp__.props.record" string="\`\`" addLabel="true" labels="[&quot;\`My\\&quot; little '  Label\`&quot;]">
+                        <FormLabel id="'display_name'" fieldName="'display_name'" record="__comp__.props.record" fieldInfo="__comp__.props.archInfo.fieldNodes['display_name']" className="&quot;highhopes&quot;" string="\`My&quot; little '  Label\`"/>
+                        <Field id="'display_name'" name="'display_name'" record="__comp__.props.record" fieldInfo="__comp__.props.archInfo.fieldNodes['display_name']"/>
                     </Setting>
                 </SettingsApp>
             </SettingsPage>`;
@@ -1446,7 +1582,7 @@ QUnit.module("SettingsFormView", (hooks) => {
 
         const expectedCompiled = `
             <HighlightText originalText="\`this is Baz value: \`"/>
-            <Field id="'baz'" name="'baz'" record="this.props.record" fieldInfo="this.props.archInfo.fieldNodes['baz']"/>
+            <Field id="'baz'" name="'baz'" record="__comp__.props.record" fieldInfo="__comp__.props.archInfo.fieldNodes['baz']"/>
             <HighlightText originalText="\` and this is the after text\`"/>`;
         assert.areEquivalent(
             compiled.querySelector("Setting div.text-muted").innerHTML,

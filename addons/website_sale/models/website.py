@@ -28,12 +28,9 @@ class Website(models.Model):
         default=_default_salesteam_id)
 
     pricelist_id = fields.Many2one(
-        'product.pricelist',
-        compute='_compute_pricelist_id',
-        string='Default Pricelist')
+        'product.pricelist', compute='_compute_pricelist_id', string="Default Pricelist if any")
     currency_id = fields.Many2one(
-        related='pricelist_id.currency_id', depends=(), related_sudo=False,
-        string='Default Currency', readonly=False)
+        'res.currency', compute='_compute_currency_id', string="Default Currency")
     pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
                                     string='Price list available for this Ecommerce/Website')
     # Technical: Used to recompute pricelist_ids
@@ -124,6 +121,11 @@ class Website(models.Model):
     # NOTE VFE: moving this computation doesn't change much
     # Because most of it must still be computed for the pricelist choice template (`pricelist_list`)
     # Therefore, avoiding all pricelist computation is impossible in fact...
+
+    @api.depends('all_pricelist_ids', 'pricelist_id', 'company_id')
+    def _compute_currency_id(self):
+        for website in self:
+            website.currency_id = website.pricelist_id.currency_id or website.company_id.currency_id
 
     # This method is cached, must not return records! See also #8795
     @tools.ormcache(
@@ -276,11 +278,6 @@ class Website(models.Model):
                 # then this special pricelist is amongs these available pricelists, and therefore it won't fall in this case.
                 pricelist = available_pricelists[0]
 
-            if not pricelist:
-                _logger.error(
-                    'Failed to find pricelist for partner "%s" (id %s)',
-                    partner_sudo.name, partner_sudo.id,
-                )
         return pricelist
 
     def sale_product_domain(self):
@@ -310,7 +307,8 @@ class Website(models.Model):
             sale_order_sudo = self.env.user.partner_id.last_website_so_id
             if sale_order_sudo:
                 available_pricelists = self.get_pricelist_available()
-                if sale_order_sudo.pricelist_id not in available_pricelists:
+                so_pricelist_sudo = sale_order_sudo.pricelist_id
+                if so_pricelist_sudo and so_pricelist_sudo not in available_pricelists:
                     # Do not reload the cart of this user last visit
                     # if the cart uses a pricelist no longer available.
                     sale_order_sudo = SaleOrder
@@ -462,7 +460,7 @@ class Website(models.Model):
 
         # If the current user is the website public user, the fiscal position
         # is computed according to geolocation.
-        if request.website.partner_id.id == partner_sudo.id:
+        if request and request.website.partner_id.id == partner_sudo.id:
             if request.geoip.country_code:
                 country_id = self.env['res.country'].search([('code', '=', request.geoip.country_code)], limit=1).id
                 fpos = AccountFiscalPosition._get_fpos_by_region(country_id)
