@@ -5654,6 +5654,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("pager, ungrouped, with count limit reached", async function (assert) {
         patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
 
+        let expectedCountLimit = 4;
         await makeView({
             type: "list",
             resModel: "foo",
@@ -5661,6 +5662,9 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree limit="2"><field name="foo"/><field name="bar"/></tree>',
             mockRPC(route, args) {
                 assert.step(args.method);
+                if (args.method === "web_search_read") {
+                    assert.strictEqual(args.kwargs.count_limit, expectedCountLimit);
+                }
             },
         });
 
@@ -5674,6 +5678,10 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
         assert.verifySteps(["search_count"]);
+
+        expectedCountLimit = undefined;
+        await click(target.querySelector(".o_pager_next"));
+        assert.verifySteps(["web_search_read"]);
     });
 
     QUnit.test("pager, ungrouped, with count equals count limit", async function (assert) {
@@ -16522,6 +16530,38 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll("th[data-name=bar]"), "o_column_sortable");
         assert.hasClass(target.querySelectorAll("th[data-name=bar]"), "table-active");
         assert.hasClass(target.querySelectorAll("th[data-name=bar] i"), "fa-angle-up");
+    });
+
+    QUnit.test("sort rows in a grouped list view", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <list>
+                    <field name="int_field"/>
+                </list>`,
+            groupBy: ["bar"],
+        });
+
+        await click(target.querySelectorAll(".o_group_header")[1]);
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell")), [
+            "10",
+            "9",
+            "17",
+        ]);
+        assert.hasClass(target.querySelectorAll("th[data-name=int_field]"), "o_column_sortable");
+
+        await click(target, "th[data-name=int_field]");
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell")), [
+            "9",
+            "10",
+            "17",
+        ]);
+        assert.hasClass(target.querySelectorAll("th[data-name=int_field]"), "o_column_sortable");
+        assert.hasClass(target.querySelectorAll("th[data-name=int_field] i"), "fa-angle-up");
     });
 
     QUnit.test(
