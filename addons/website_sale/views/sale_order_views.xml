@@ -60,6 +60,10 @@
                     class="btn-primary"
                     attrs="{'invisible': ['|', ('is_abandoned_cart', '=', False), ('cart_recovery_email_sent', '=', True)]}"/>
             </xpath>
+            <xpath expr="//button[@name='action_quotation_send' and @states='sent,sale']" position="after">
+                <button name="action_quotation_send" string="Send by Email" type="object"
+                    attrs="{'invisible': ['|', '|', ('is_abandoned_cart', '=', False), ('cart_recovery_email_sent', '=', True), ('state', '!=', 'draft')]}"/>
+            </xpath>
         </field>
     </record>
 
@@ -245,8 +249,8 @@
         action="payment.action_payment_token"
         groups="base.group_no_one"
         parent="menu_ecommerce_settings"/>
-    <menuitem id="menu_ecommerce_payment_icons"
-        action="payment.action_payment_icon"
+    <menuitem id="menu_ecommerce_payment_methods"
+        action="payment.action_payment_method"
         groups="base.group_no_one"
         parent="menu_ecommerce_settings"/>
     <menuitem id="menu_ecommerce_payment_transactions"
