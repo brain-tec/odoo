@@ -130,12 +130,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('event_ticket_id')
     def _compute_price_unit(self):
-        """Do not update the price on qty/uom change"""
-        event_lines = self.filtered('event_ticket_id')
-        super(SaleOrderLine, self-event_lines)._compute_price_unit()
-        for line in event_lines:
-            if not line.product_id or line._origin.product_id != line.product_id:
-                super(SaleOrderLine, line)._compute_price_unit()
+        super()._compute_price_unit()
 
     @api.depends('event_ticket_id')
     def _compute_discount(self):
@@ -174,12 +169,14 @@ class SaleOrderLine(models.Model):
 
     def _get_display_price(self):
         if self.event_ticket_id and self.event_id:
-            # FIXME this is strange
-            # price_reduce is the price after discount
-            # shouldn't we leave the discount computation to sale
-            # and use the non reduced price here (aka price field)
-            return self.event_ticket_id.with_context(
+            event_ticket = self.event_ticket_id.with_context(
                 pricelist=self.order_id.pricelist_id.id,
-                uom=self.product_uom.id).price_reduce
-        else:
-            return super()._get_display_price()
+                uom=self.product_uom.id
+            )
+            company = event_ticket.company_id or self.env.company
+            currency = company.currency_id
+            return currency._convert(
+                event_ticket.price_reduce, self.order_id.currency_id,
+                self.order_id.company_id or self.env.company.id,
+                self.order_id.date_order or fields.Date.today())
+        return super()._get_display_price()

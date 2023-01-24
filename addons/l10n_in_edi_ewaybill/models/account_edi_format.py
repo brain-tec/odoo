@@ -9,12 +9,13 @@ from odoo import models, fields, api, _
 from odoo.tools import html_escape
 from odoo.exceptions import AccessError
 from odoo.addons.iap import jsonrpc
+from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT
+
+from .error_codes import ERROR_CODES
+
 import logging
 
 _logger = logging.getLogger(__name__)
-
-DEFAULT_IAP_ENDPOINT = "https://l10n-in-edi.api.odoo.com"
-DEFAULT_IAP_TEST_ENDPOINT = "https://l10n-in-edi-demo.api.odoo.com"
 
 
 class AccountEdiFormat(models.Model):
@@ -69,7 +70,8 @@ class AccountEdiFormat(models.Model):
         if self.code != "in_ewaybill_1_03":
             return super()._check_move_configuration(move)
         error_message = []
-        if not move.l10n_in_type_id:
+        base = self._l10n_in_edi_ewaybill_base_irn_or_direct(move)
+        if not move.l10n_in_type_id and base == "direct":
             error_message.append(_("- Document Type"))
         if not move.l10n_in_mode:
             error_message.append(_("- Transportation Mode"))
@@ -83,7 +85,6 @@ class AccountEdiFormat(models.Model):
                 error_message.append(_("- Transport document number and date is required when Transportation Mode is Rail,Air or Ship"))
         if error_message:
             error_message.insert(0, _("The following information are missing on the invoice (see eWayBill tab):"))
-        base = self._l10n_in_edi_ewaybill_base_irn_or_direct(move)
         if base == "irn":
             # already checked by E-invoice (l10n_in_edi) so no need to check
             return error_message
@@ -149,7 +150,7 @@ class AccountEdiFormat(models.Model):
             if "312" in error_codes:
                 # E-waybill is already canceled
                 # this happens when timeout from the Government portal but IRN is generated
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 error = []
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
@@ -167,7 +168,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -226,7 +227,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes or "waiting" in error_codes:
                     blocking_level = "warning"
@@ -310,7 +311,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -332,6 +333,10 @@ class AccountEdiFormat(models.Model):
             inv_res = {"success": True, "attachment": attachment}
             res[invoices] = inv_res
         return res
+
+    def _l10n_in_edi_ewaybill_get_error_message(self, code):
+        error_message = ERROR_CODES.get(code)
+        return error_message or _("We don't know the error message for this error code. Please contact support.")
 
     def _get_l10n_in_edi_saler_buyer_party(self, move):
         res = super()._get_l10n_in_edi_saler_buyer_party(move)

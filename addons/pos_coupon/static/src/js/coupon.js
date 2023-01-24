@@ -280,8 +280,11 @@ odoo.define('pos_coupon.pos', function (require) {
             this._updateRewards();
         }
         _getRegularOrderlines() {
-            const orderlines = this.get_orderlines();
-            return orderlines.filter((line) => !line.is_program_reward && !line.refunded_orderline_id && (!this.pos.config.discount_product_id || line.product.id !== this.pos.config.discount_product_id[0]));
+            const orderlines = super.get_orderlines(...arguments);
+            const is_discount_product = (line) => this.pos.config.discount_product_id && line.product.id === this.pos.config.discount_product_id[0];
+            const is_gift_card_product = (line) => this.pos.config.gift_card_product_id && line.product.id === this.pos.config.gift_card_product_id[0];
+            const is_tips_product = (line) => this.pos.config.tip_product_id && line.product.id === this.pos.config.tip_product_id[0];
+            return orderlines.filter((line) => !line.is_program_reward && !line.refunded_orderline_id && !is_discount_product(line) && !is_gift_card_product(line) && !is_tips_product(line));
         }
         _getRewardLines() {
             const orderlines = this.get_orderlines();
@@ -1128,7 +1131,7 @@ odoo.define('pos_coupon.pos', function (require) {
                 if (this.coupon_id && this.coupon_id[1]) {
                     this.order.bookedCouponCodes[this.coupon_id[1]] = new CouponCode(this.coupon_id[1], this.coupon_id[0], this.program_id);
                     this.coupon_id = json.coupon_id[0];
-                } else if (json.program_id) {
+                } else if (json.program_id && this.order.activePromoProgramIds.indexOf(json.program_id) === -1) {
                     this.order.activePromoProgramIds.push(json.program_id);
                 }
             }

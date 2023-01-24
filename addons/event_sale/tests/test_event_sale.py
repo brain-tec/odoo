@@ -179,6 +179,11 @@ class TestEventSale(TestEventSaleCommon):
         # ------------------------------------------------------------
 
         ticket2_line.write({'product_uom_qty': 3})
+
+        # Whenever the quantity is modified the price is recomputed in function of the ticket,
+        # so we reapply the wanted price.
+        ticket2_line.write({'price_unit': 50})
+
         editor_action = customer_so.action_confirm()
         self.assertEqual(customer_so.state, 'sale')
         self.assertEqual(customer_so.amount_untaxed, TICKET1_COUNT * 10 + (TICKET2_COUNT + 2) * 50)
@@ -191,6 +196,68 @@ class TestEventSale(TestEventSaleCommon):
 
         self.assertEqual(editor_action['type'], 'ir.actions.act_window')
         self.assertEqual(editor_action['res_model'], 'registration.editor')
+
+    def test_ticket_price_with_currency_conversion(self):
+        def _prepare_currency(self, currency_name):
+            currency = self.env['res.currency'].with_context(active_test=False).search(
+                [('name', '=', currency_name)]
+            )
+            currency.action_unarchive()
+            return currency
+
+        currency_VEF = _prepare_currency(self, 'VEF')
+        currency_USD = _prepare_currency(self, 'USD')
+        self.env.user.company_id.currency_id = currency_USD
+
+        pricelist_USD = self.env['product.pricelist'].create({
+            'name': 'pricelist_USD',
+            'currency_id': currency_USD.id,
+        })
+        pricelist_VEF = self.env['product.pricelist'].create({
+            'name': 'pricelist_VEF',
+            'currency_id': currency_VEF.id,
+        })
+
+        event_product = self.env['product.template'].create({
+            'name': 'Event Product',
+            'list_price': 10.0,
+            'taxes_id': False,
+        })
+
+        event = self.env['event.event'].create({
+            'name': 'New Event',
+            'date_begin': '2020-02-02',
+            'date_end': '2020-04-04',
+        })
+        event_ticket = self.env['event.event.ticket'].create({
+            'name': 'VIP',
+            'price': 1000.0,
+            'event_id': event.id,
+            'product_id': event_product.product_variant_id.id,
+        })
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.env.user.partner_id.id,
+            'pricelist_id': pricelist_USD.id,
+        })
+        self.env['sale.order.line'].create({
+            'product_id': event_product.product_variant_id.id,
+            'order_id': so.id,
+            'event_id': event.id,
+            'event_ticket_id': event_ticket.id,
+        })
+        self.assertEqual(so.amount_total, event_ticket.price)
+
+        so.pricelist_id = pricelist_VEF
+        so.update_prices()
+
+        self.assertAlmostEqual(
+            so.amount_total,
+            currency_USD._convert(
+                event_ticket.price, currency_VEF, self.env.user.company_id, so.date_order
+            ),
+            delta=1,
+        )
 
     def test_ticket_price_with_pricelist_and_tax(self):
         self.env.user.partner_id.country_id = False
