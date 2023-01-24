@@ -553,6 +553,13 @@ class MrpWorkorder(models.Model):
         vals['leave_id'] = leave.id
         self.write(vals)
 
+    def _cal_cost(self):
+        total = 0
+        for wo in self:
+            duration = sum(wo.time_ids.mapped('duration'))
+            total += (duration / 60.0) * wo.workcenter_id.costs_hour
+        return total
+
     @api.model
     def gantt_unavailability(self, start_date, end_date, scale, group_bys=None, rows=None):
         """Get unavailabilities data to display in the Gantt view."""
@@ -636,10 +643,9 @@ class MrpWorkorder(models.Model):
             vals['leave_id'] = leave.id
             return self.write(vals)
         else:
-            if self.date_planned_start > start_date:
+            if not self.date_planned_start or self.date_planned_start > start_date:
                 vals['date_planned_start'] = start_date
-                if self.duration_expected:
-                    vals['date_planned_finished'] = self._calculate_date_planned_finished(start_date)
+                vals['date_planned_finished'] = self._calculate_date_planned_finished(start_date)
             if self.date_planned_finished and self.date_planned_finished < start_date:
                 vals['date_planned_finished'] = start_date
             return self.with_context(bypass_duration_calculation=True).write(vals)
