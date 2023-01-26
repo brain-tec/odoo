@@ -50,6 +50,7 @@ function compileChatter(node, params) {
         threadId: params.threadId,
         threadModel: params.threadModel,
         webRecord: params.webRecord,
+        saveRecord: "() => __comp__.saveButtonClicked and __comp__.saveButtonClicked()",
     });
     const chatterContainerHookXml = createElement("div");
     chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");
@@ -121,7 +122,7 @@ export class MailFormCompiler extends ViewCompiler {
 
     compileChatter(node) {
         return compileChatter(node, {
-            chatter: "chatter",
+            chatter: "__comp__.chatter",
             threadId: "__comp__.model.root.resId or undefined",
             threadModel: "__comp__.model.root.resModel",
             webRecord: "__comp__.model.root",
@@ -169,6 +170,7 @@ patch(FormCompiler.prototype, "mail", {
             hasExternalBorder: "true",
             hasMessageListScrollAdjust: "false",
             isInFormSheetBg: "false",
+            saveRecord: "__comp__.props.saveButtonClicked",
         });
         if (chatterContainerHookXml.parentNode.classList.contains("o_form_sheet")) {
             return res; // if chatter is inside sheet, keep it there
@@ -186,9 +188,8 @@ patch(FormCompiler.prototype, "mail", {
                 "t-if": `__comp__.props.hasAttachmentViewer`,
             });
             append(formSheetBgXml, sheetBgChatterContainerHookXml);
-            const sheetBgChatterContainerXml = sheetBgChatterContainerHookXml.querySelector(
-                "ChatterContainer"
-            );
+            const sheetBgChatterContainerXml =
+                sheetBgChatterContainerHookXml.querySelector("ChatterContainer");
             setAttributes(sheetBgChatterContainerXml, {
                 isInFormSheetBg: "true",
             });

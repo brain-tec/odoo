@@ -1,21 +1,12 @@
 /** @odoo-module **/
 
-import { escapeRegExp } from "@web/core/utils/strings";
-import { HighlightText } from "../highlight_text/highlight_text";
 import { session } from "@web/session";
-import { FormLabelHighlightText } from "../highlight_text/form_label_highlight_text";
-import { Component, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
+import { FormLabel } from "../form_label";
+import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
 
-
-const LINK_REGEX = new RegExp("^https?://");
 export class Setting extends Component {
     setup() {
-        this.state = useState({
-            search: this.env.searchState,
-            showAllContainer: this.env.showAllContainer,
-        });
-        this.labels = this.props.labels || [];
-        this.labels.push(this.labelString, this.props.help);
         if (this.props.fieldName) {
             this.fieldType = this.props.record.fields[this.props.fieldName].type;
             if (
@@ -33,7 +24,6 @@ export class Setting extends Component {
             o_setting_box: true,
             "col-12": true,
             "col-lg-6": true,
-            o_searchable_setting: Boolean(this.labels.length),
             [_class]: Boolean(_class),
         };
 
@@ -56,38 +46,13 @@ export class Setting extends Component {
             this.props.record.fields[this.props.fieldName].string;
         return label || "";
     }
-
-    get url() {
-        if (LINK_REGEX.test(this.props.documentation)) {
-            return this.props.documentation;
-        } else {
-            const serverVersion = session.server_version.includes("alpha")
-                ? "master"
-                : session.server_version;
-            return "https://www.odoo.com/documentation/" + serverVersion + this.props.documentation;
-        }
-    }
-    visible() {
-        if (!this.state.search.value) {
-            return true;
-        }
-        if (this.state.showAllContainer.showAllContainer) {
-            return true;
-        }
-        const regexp = new RegExp(escapeRegExp(this.state.search.value), "i");
-        if (regexp.test(this.labels.join())) {
-            return true;
-        }
-        return false;
-    }
 }
 Setting.components = {
-    FormLabelHighlightText,
-    HighlightText,
+    FormLabel,
+    DocumentationLink,
 };
 Setting.template = "web.Setting";
 Setting.props = {
-    labels: { type: Array, optional: 1 },
     title: { type: String, optional: 1 },
     fieldId: { type: String, optional: 1 },
     help: { type: String, optional: 1 },
