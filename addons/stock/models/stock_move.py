@@ -581,6 +581,8 @@ class StockMove(models.Model):
         # messages according to the state of the stock.move records.
         receipt_moves_to_reassign = self.env['stock.move']
         move_to_recompute_state = self.env['stock.move']
+        if 'quantity_done' in vals and any(move.state == 'cancel' for move in self):
+            raise UserError(_('You cannot change a cancelled stock move, create a new line instead.'))
         if 'product_uom' in vals and any(move.state == 'done' for move in self):
             raise UserError(_('You cannot change the UoM for a stock move that has been set to \'Done\'.'))
         if 'product_uom_qty' in vals:
@@ -877,7 +879,7 @@ class StockMove(models.Model):
             for pos_move in moves_by_neg_key.get(neg_key(neg_move), []):
                 currency_prec = pos_move.product_id.currency_id.decimal_places
                 rounding = min(currency_prec, price_unit_prec)
-                if float_compare(pos_move.price_unit, neg_move.price_unit, precision_rounding=rounding) == 0:
+                if float_compare(pos_move.price_unit, neg_move.price_unit, precision_digits=rounding) == 0:
                     new_total_value = pos_move.product_qty * pos_move.price_unit + neg_move.product_qty * neg_move.price_unit
                     # If quantity can be fully absorbed by a single move, update its quantity and remove the negative move
                     if float_compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty), precision_rounding=pos_move.product_uom.rounding) >= 0:
