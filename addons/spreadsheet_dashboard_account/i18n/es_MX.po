@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_account
 # 
-# Translators:
-# Braulio D. López Vázquez <bdl@odoo.com>, 2022
-# Martin Trigaux, 2022
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-27 15:12+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022\n"
+"POT-Creation-Date: 2023-01-17 08:01+0000\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,21 +16,21 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid " days"
-msgstr "días"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "# days"
-msgstr "# días"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
@@ -44,250 +38,255 @@ msgstr "# días"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Amount"
-msgstr "Importe"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Average Invoice"
-msgstr "Factura promedio"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "COGS"
-msgstr "Costo de los bienes vendidos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Country"
-msgstr "País"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Current year"
-msgstr "Año actual"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Customer"
-msgstr "Cliente"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "DSO"
-msgstr "Periodo medio de cobro"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Date"
-msgstr "Fecha"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Income"
-msgstr "Ingreso"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoiced"
-msgstr "Facturado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoiced by Month"
-msgstr "Facturado al mes"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoices"
-msgstr "Facturas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoices by Total Signed"
-msgstr "Facturas por total firmado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_account.dashboard_invoicing
+msgid "Invoicing"
+msgstr ""
+
+#. module: spreadsheet_dashboard_account
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Average Invoice"
-msgstr "KPI - factura promedio"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - DSO"
-msgstr "KPI - periodo medio de cobro"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Income"
-msgstr "KPI - Ingresos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Invoice Count"
-msgstr "KPI - Conteo de facturas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Unpaid Invoices"
-msgstr "KPI - Facturas sin pagar"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Periodo"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Product"
-msgstr "Producto"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Product Category"
-msgstr "Categoría de producto"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Ratio"
-msgstr "Proporción"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Receivable"
-msgstr "Por cobrar"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Reference"
-msgstr "Referencia"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Ingreso"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Salesperson"
-msgstr "Vendedor"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Status"
-msgstr "Estado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Categories"
-msgstr "Mejores categorías"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Countries"
-msgstr "Países principales"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Invoices"
-msgstr "Facturas principales"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Products"
-msgstr "Mejores productos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Salespeople"
-msgstr "Mejores vendedores"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "in current year"
-msgstr "en el año actual"
+msgstr ""
 
 #. module: spreadsheet_dashboard_account
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "unpaid"
-msgstr "sin pagar"
+msgstr ""

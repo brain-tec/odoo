@@ -2,17 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* mass_mailing_themes
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022\n"
+"PO-Revision-Date: 2023-01-17 14:37+0000\n"
 "Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,64 +18,64 @@ msgstr ""
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "$100 OFF"
-msgstr "$100 DE DESCUENTO"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "&amp;nbsp; &amp;nbsp;"
-msgstr "&amp;nbsp; &amp;nbsp;"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;"
-msgstr "&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "*But hurry! Offer ends on"
-msgstr "*¡Apresúrate! La oferta termina el"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "*For orders over $39."
-msgstr "*Para órdenes de más de $39."
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "24/7 <br/>Customer Service"
-msgstr "Servicio al cliente <br/> 24/7"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "5 Ways Drones Can Better Your Live Events"
-msgstr "5 maneras en la que los drones pueden mejorar sus eventos"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "<font style=\"background-color: rgb(231, 148, 57);\">TRAVEL</font>"
-msgstr "<font style=\"background-color: rgb(231, 148, 57);\">VIAJES</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "<font style=\"background-color: rgb(231, 99, 99);\">LIFESTYLE</font>"
-msgstr "<font style=\"background-color: rgb(231, 99, 99);\">ESTILO DE VIDA</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "<font style=\"background-color: rgb(57, 123, 33);\">FOOD</font>"
-msgstr "<font style=\"background-color: rgb(57, 123, 33);\">COMIDA</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "<font style=\"color: rgb(173, 173, 173);\">Unsubscribe</font>"
-msgstr "<font style=\"color: rgb(173, 173, 173);\">Cancelar suscripción</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid ""
 "<font style=\"color: rgb(255, 255, 255);\">And it won't cost you a "
 "thing!</font>"
-msgstr "<font style=\"color: rgb(255, 255, 255);\">¡Y no le costará nada!</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
@@ -88,8 +83,6 @@ msgid ""
 "<font style=\"color: rgb(255, 255, 255);\">EXCLUSIVE</font>\n"
 "                        <br/><span style=\"font-weight: bolder\"><font style=\"color: rgb(255, 255, 255);\">DEALS</font></span>"
 msgstr ""
-"<font style=\"color: rgb(255, 255, 255);\">OFERTAS</font>\n"
-"                        <br/><span style=\"font-weight: bolder\"><font style=\"color: rgb(255, 255, 255);\">EXCLUSIVAS</font></span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
@@ -97,13 +90,11 @@ msgid ""
 "<font style=\"color: rgb(255, 255, 255);\">FREE</font>\n"
 "                        <br/><span style=\"font-weight: bolder\"><font style=\"color: rgb(255, 255, 255);\">SHIPPING</font></span>"
 msgstr ""
-"<font style=\"color: rgb(255, 255, 255);\">ENVÍOS</font>\n"
-"                        <br/><span style=\"font-weight: bolder\"><font style=\"color: rgb(255, 255, 255);\">GRATIS</font></span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "<font style=\"color: rgb(255, 255, 255);\">Hi there!</font>"
-msgstr "<font style=\"color: rgb(255, 255, 255);\">¡Hola!</font>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -111,8 +102,6 @@ msgid ""
 "<font style=\"color: rgb(255, 255, 255);\">The next edition of <span style=\"font-weight: bolder;\">Odoo Experience Online</span> is coming soon!\n"
 "                    <br/>To stir up your curiosity, have a look at all the great talks scheduled and highlighted in our agenda!</font>"
 msgstr ""
-"<font style=\"color: rgb(255, 255, 255);\">¡Ya viene la siguiente edición de <span style=\"font-weight: bolder;\">Odoo Experience en línea</span> !\n"
-"                    <br/>Para despertar su curiosidad puede ver las maravillosas presentaciones que tenemos programadas en nuestra agenda.</font>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -120,8 +109,6 @@ msgid ""
 "<font style=\"color: rgb(255, 255, 255);\">Zero, zilch, nada! Odoo "
 "Experience is free for everyone!</font>"
 msgstr ""
-"<font style=\"color: rgb(255, 255, 255);\">¡Zero, zilch, nada! La Odoo "
-"Experience es gratis para todos!</font>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
@@ -130,9 +117,6 @@ msgid ""
 "                    <br/>\n"
 "                        <font style=\"font-size: 62px; background-color: rgb(255, 255, 255);\">&amp;nbsp;SALES&amp;nbsp;</font>"
 msgstr ""
-"<font style=\"font-size: 62px; background-color: rgb(255, 255, 255);\">&amp;nbsp;10% de descuento&amp;nbsp;</font>\n"
-"                    <br/>\n"
-"                        <font style=\"font-size: 62px; background-color: rgb(255, 255, 255);\">&amp;nbsp;PROMOCIONES&amp;nbsp;</font>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
@@ -140,8 +124,6 @@ msgid ""
 "<i class=\"fa fa-2x fa-ticket\" style=\"color: rgb(36, 37, 48) "
 "!important;\"/>​"
 msgstr ""
-"<i class=\"fa fa-2x fa-ticket\" style=\"color: rgb(36, 37, 48) "
-"!important;\"/>​"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -149,8 +131,6 @@ msgid ""
 "<span class=\"fa fa-facebook\" style=\"color: rgb(54, 166, 210) !important; "
 "font-size: 18px;\"/>​"
 msgstr ""
-"<span class=\"fa fa-facebook\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -158,13 +138,11 @@ msgid ""
 "<span class=\"fa fa-linkedin\" style=\"color: rgb(54, 166, 210) !important; "
 "font-size: 18px;\"/>​"
 msgstr ""
-"<span class=\"fa fa-linkedin\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "<span class=\"fa fa-play\"/>&amp;nbsp;&amp;nbsp;WATCH VIDEO"
-msgstr "<span class=\"fa fa-play\"/>&amp;nbsp;&amp;nbsp;VER EL VIDEO"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -172,8 +150,6 @@ msgid ""
 "<span class=\"fa fa-twitter\" style=\"color: rgb(54, 166, 210) !important; "
 "font-size: 18px;\"/>​"
 msgstr ""
-"<span class=\"fa fa-twitter\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
@@ -182,9 +158,6 @@ msgid ""
 "rgb(255, 255, 255); background-color: rgb(255, 187, "
 "0);\">SOLAR</font></span>"
 msgstr ""
-"<span style=\"font-size: 32px;\"><font style=\"font-weight: bolder; color: "
-"rgb(255, 255, 255); background-color: rgb(255, 187, "
-"0);\">SOLAR</font></span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
@@ -193,14 +166,11 @@ msgid ""
 "                                <font style=\"background-color: rgb(255, 255, 255); color: rgb(255, 187, 0);\">SOLAR</font>\n"
 "                            </span>"
 msgstr ""
-"<span style=\"font-weight: bolder;\">\n"
-"                                <font style=\"background-color: rgb(255, 255, 255); color: rgb(255, 187, 0);\">SOLAR</font>\n"
-"                            </span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "<span style=\"font-weight: bolder;\">VIP10</span>"
-msgstr "<span style=\"font-weight: bolder;\">VIP10</span>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
@@ -208,8 +178,6 @@ msgid ""
 "<span style=\"font-weight: bolder;\">View online</span>&amp;nbsp;<span "
 "class=\"fa fa-external-link\"/>"
 msgstr ""
-"<span style=\"font-weight: bolder;\">Ver en línea</span>&amp;nbsp;<span "
-"class=\"fa fa-external-link\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
@@ -219,7 +187,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "All Rights Reserved"
-msgstr "Todos los derechos reservados"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -227,8 +195,6 @@ msgid ""
 "An interactive, fun\n"
 "                                    <br/>and comprehensive experience"
 msgstr ""
-"Una experiencia interactiva,\n"
-"                                    <br/>divertida e integral"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -236,18 +202,16 @@ msgid ""
 "Anyone with an ounce of business acumen knows that any business that wants "
 "to succeed needs a website."
 msgstr ""
-"Cualquiera que sea bueno para los negocios sabrá que cualquier empresa "
-"exitosa necesita tener un sitio web."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 msgid "BEGINNING"
-msgstr "INICIO"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Big News"
-msgstr "Noticias importantes"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -255,13 +219,11 @@ msgid ""
 "Bitten by the travel bug but looking to travel consciously? Eco-travel is "
 "the way forward."
 msgstr ""
-"¿Tiene muchas ganas de viajar pero quiere hacerlo con consciencia? El eco-"
-"travel es el futuro."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Blogging"
-msgstr "Publicaciones de blog"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -269,23 +231,21 @@ msgid ""
 "Breaking IT news\n"
 "                            <br/>and Analysis"
 msgstr ""
-"Últimas noticias de TI\n"
-"<br/>y análisis"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Coupon Code"
-msgstr "Código de cupón"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Cover"
-msgstr "Portada"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 msgid "Cover image"
-msgstr "Imagen de la portada"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -293,18 +253,16 @@ msgid ""
 "Create your very own chat room or join an existing one that sparks your "
 "interest."
 msgstr ""
-"Cree su propia sala de chat o únase a una existente que le llame la "
-"atención."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Customer Service"
-msgstr "Servicio al cliente"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Delicious recipes from around the world"
-msgstr "Recetas deliciosas de todo el mundo"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -312,13 +270,11 @@ msgid ""
 "Delicious recipes from around the world&amp;nbsp;\n"
 "                                <span class=\"fa fa-angle-right\"/>"
 msgstr ""
-"Deliciosas recetas de todo el mundo&amp;nbsp;\n"
-"                                <span class=\"fa fa-angle-right\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Destinations for an eco-holiday"
-msgstr "Destinos para vacaciones ecológicas"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -326,23 +282,21 @@ msgid ""
 "Destinations for an eco-holiday&amp;nbsp;\n"
 "                                <span class=\"fa fa-angle-right\"/>"
 msgstr ""
-"Destinos para vacaciones ecológicas&amp;nbsp;\n"
-"                                <span class=\"fa fa-angle-right\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "ENDOFSUMMER20"
-msgstr "FINDELVERANO20"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Easy Returns"
-msgstr "Devoluciones fáciles"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Event Promo"
-msgstr "Promoción del evento"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -350,38 +304,36 @@ msgid ""
 "Experience everything from a virtual exhibitor's hall to multiple "
 "interactive presentations and demos."
 msgstr ""
-"Experimente todo desde un pabellón virtual de expositores hasta múltiples "
-"presentaciones y demostraciones interactivas."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "Facebook"
-msgstr "Facebook"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "Find out more"
-msgstr "Aprenda más"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Find out more&amp;nbsp;<span class=\"fa fa-angle-right\"/>"
-msgstr "Aprenda más&amp;nbsp;<span class=\"fa fa-angle-right\"/>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Free Delivery"
-msgstr "Entregas gratis"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Free delivery*"
-msgstr "Entregas gratis*"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "GET 10%&amp;nbsp;OFF"
-msgstr "OBTENGA EL 10%&amp;nbsp;DE DESCUENTO"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -389,28 +341,26 @@ msgid ""
 "Get 6-months' worth of knowledge\n"
 "                                    <br/>in just 2 days"
 msgstr ""
-"Obtenga 6 meses de conocimiento\n"
-"                                    <br/>en 2 días"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "Go to the chatrooms"
-msgstr "Ir a las salas de chat"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Here's your coupon code* :"
-msgstr "Este es el cupón de su código* :"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "How to Code a Website Without Experience"
-msgstr "Cómo hacer el código para un sitio web sin experiencia previa"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "IN THIS ISSUE"
-msgstr "EN ESTA EDICIÓN"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -418,13 +368,11 @@ msgid ""
 "Imagine waking up with more energy, more flexibility, with less stress and "
 "fewer instances of anxiously rushing out the door."
 msgstr ""
-"Imagine despertar con más energía, más flexibilidad, menos estrés y menos "
-"episodios de ansiedad que lo inunden."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "Instagram"
-msgstr "Instagram"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -432,8 +380,6 @@ msgid ""
 "Interview with Janet James&amp;nbsp;\n"
 "                                <span class=\"fa fa-angle-right\"/>"
 msgstr ""
-"Entrevista con Janet James&amp;nbsp;\n"
-"                                <span class=\"fa fa-angle-right\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -441,21 +387,17 @@ msgid ""
 "Issue\n"
 "                            <br/><span style=\"font-weight: bolder;\">#42</span>"
 msgstr ""
-"Edición\n"
-"                            <br/><span style=\"font-weight: bolder;\">#42</span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid ""
 "Join the community to see our latest news, events, discounts and much more!"
 msgstr ""
-"Únase a la comunidad para ver nuestras noticias más recientes, eventos, "
-"descuentos, ¡y mucho más!"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Join us"
-msgstr "Únase a nosotros"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -463,18 +405,16 @@ msgid ""
 "Learn through workshops, product demos, and inspiring talks from Odoo "
 "Experts and Partners."
 msgstr ""
-"Aprenda a través de talleres, demos de productos y pláticas inspiradoras de "
-"expertos de Odoo y Partners."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "LinkedIn"
-msgstr "LinkedIn"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Man on a rock looking at mountains in the distance"
-msgstr "Hombre en una roca mirando a las montañas que están en la distancia."
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
@@ -482,8 +422,6 @@ msgid ""
 "Meet (other) awesome members\n"
 "                                    <br/>of the community"
 msgstr ""
-"Conozca a otros miembros asombrosos\n"
-"                                    <br/>de la comunidad"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
@@ -491,8 +429,6 @@ msgid ""
 "Michael Fletcher<br/>\n"
 "                   <span style=\"font-size: 12px; font-weight: bolder;\">Customer Service</span>"
 msgstr ""
-"Michael Fletcher<br/>\n"
-"                   <span style=\"font-size: 12px; font-weight: bolder;\">Servicio al cliente</span>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -500,13 +436,11 @@ msgid ""
 "Modern smartphones have all the built-in tech equal to a majority of the "
 "current professional cameras."
 msgstr ""
-"Los celulares modernos vienen con tecnología que se iguala a la mayoría de "
-"las cámaras profesionales."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Newsletter"
-msgstr "Boletín de noticias"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -514,8 +448,6 @@ msgid ""
 "One clever use of drones is for delivering gifts — but another that's "
 "becoming popular for event safety purposes."
 msgstr ""
-"Una manera inteligente de usar drones es para entregar regalos — pero "
-"también se está volviendo común usarlos para la seguridad de eventos."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
@@ -523,19 +455,17 @@ msgid ""
 "Our roundup of the most popular and latest tech related videos from last "
 "week.<br/>"
 msgstr ""
-"Nuestro resumen de los videos tecnológicos más populares durante la semana "
-"pasada.<br/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.email_designer_snippets
 msgid "Promotion Program"
-msgstr "Programa de promoción"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "READ MORE"
-msgstr "MÁS INFORMACIÓN"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -543,58 +473,56 @@ msgid ""
 "Rainy day ideas&amp;nbsp;\n"
 "                                <span class=\"fa fa-angle-right\"/>"
 msgstr ""
-"Ideas para un día lluvioso&amp;nbsp;\n"
-"                                <span class=\"fa fa-angle-right\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Read More&amp;nbsp;<span class=\"fa fa-angle-right\"/>"
-msgstr "Aprenda más&amp;nbsp;<span class=\"fa fa-angle-right\"/>"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Redeem it now"
-msgstr "Canjear ahora"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "Register now!"
-msgstr "¡Regístrese ahora!"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "See what we've got planned"
-msgstr "Vea lo que tenemos planeado"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 msgid "See you there,"
-msgstr "Nos vemos,"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 msgid "Signature"
-msgstr "Firma"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "THE DAILY"
-msgstr "LO DIARIO"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Thank you for being one of our most loyal customers."
-msgstr "Gracias por ser uno de nuestros clientes más leales."
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "The future of smartphone video production"
-msgstr "El futuro de la producción de video en teléfonos inteligentes"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Top 5 energy-boosting morning routines"
-msgstr "Las 5 mejores rutinas para amentar su energía en la mañana"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -602,8 +530,6 @@ msgid ""
 "Top 5 energy-boosting morning routines&amp;nbsp;\n"
 "                                <span class=\"fa fa-angle-right\"/>"
 msgstr ""
-"Top 5 de rutinas matutinas para aumentar tu energía&amp;nbsp;\n"
-"                                <span class=\"fa fa-angle-right\"/>"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
@@ -611,13 +537,11 @@ msgid ""
 "Travel without leaving your kitchen with these international recipes. From "
 "Canada to Australia, Mexico to Sweden, and everywhere in between."
 msgstr ""
-"Con estas recetas internacionales viaje sin dejar su cocina. Desde Canadá "
-"hasta Australia, de México a Suecia y todo el resto del mundo."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "Twitter"
-msgstr "Twitter"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
@@ -626,32 +550,32 @@ msgstr "Twitter"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "Unsubscribe"
-msgstr "Cancelar suscripción"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_vip_template
 msgid "VIP members only"
-msgstr "Solo miembros VIP"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_tech_template
 msgid "VISIT OUR WEBSITE"
-msgstr "VISITE NUESTRO SITIO WEB"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Valid on all sales prices in our webshop."
-msgstr "Válido en los precios de ventas de nuestra tienda en línea"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_solar_template
 msgid "Visit the website"
-msgstr "Visite nuestro sitio web"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
 msgid "WE'RE MOVING"
-msgstr "NOS MUDAMOS"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bignews_template
@@ -660,16 +584,13 @@ msgid ""
 "                   <br/>We will continue to offer the same friendly service at our new address on <span style=\"font-weight: bolder\">1600 Main Street</span>,\n"
 "                   <br/>which will allow us to offer an even larger selection of products and services."
 msgstr ""
-"Nos enorgullece anunciar que gracias a nuestro crecimiento en el área de Springfield, nos mudaremos a otra ubicación el 1 de julio.\n"
-"               <br/>Seguiremos ofreciendo nuestro servicio amistoso de siempre en nuestra nueva dirección, <span style=\"font-weight: bolder\">1600 Main Street</span>.\n"
-"               <br/>Así podremos ofrecer una selección de productos y servicios mucho más amplia."
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_bold_template
 msgid "Woman having breakfast in bed"
-msgstr "Mujer comiendo el desayuno en la cama"
+msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
 msgid "Your Logo"
-msgstr "Su logo"
+msgstr ""

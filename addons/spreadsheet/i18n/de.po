@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet
 # 
-# Translators:
-# Andreas Schmidt <schmigo@gmail.com>, 2022
-# Friederike Fasterling-Nesselbosch, 2022
-# Martin Trigaux, 2022
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:44+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2023-01-17 08:01+0000\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,6 +26,13 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/ir_ui_menu/index.js:0
+#, python-format
+msgid "#LINK"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "%s %s and %s"
@@ -42,28 +43,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "%s Columns left"
-msgstr "%s Spalten links"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "%s Columns right"
-msgstr "%s Spalten rechts"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "%s Rows above"
-msgstr "%s Zeilen oben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "%s Rows below"
-msgstr "%s Zeilen unten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -167,14 +168,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "A conditional count across a range."
-msgstr "Eine bedingte Zählung über einen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "A conditional sum across a range."
-msgstr "Eine bedingte Summe über einen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -202,21 +203,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "A number raised to a power."
-msgstr "Eine Zahl, die zu einer Potenz erhoben wird."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "A random number between 0 inclusive and 1 exclusive."
-msgstr "Eine Zufallszahl zwischen 0 einschließlich und 1 ausschließlich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "A range needs to be defined"
-msgstr "Es muss ein Bereich definiert werden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -224,8 +225,6 @@ msgstr "Es muss ein Bereich definiert werden"
 #, python-format
 msgid "A sheet with the name %s already exists. Please select another name."
 msgstr ""
-"Ein Blatt mit dem Namen %s existiert bereits. Bitte wählen Sie einen anderen"
-" Namen."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -246,7 +245,16 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Absolute value of a number."
-msgstr "Absoluter Wert einer Zahl."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid ""
+"Access to the clipboard denied by the browser. Please enable clipboard "
+"permission for this page in your browser settings."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -267,13 +275,6 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Add"
-msgstr "Hinzufügen"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#, python-format
-msgid "Add Filter"
 msgstr ""
 
 #. module: spreadsheet
@@ -288,6 +289,22 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Additional text item(s)."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, python-format
+msgid "Aggregate"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Alignment"
 msgstr ""
 
 #. module: spreadsheet
@@ -310,8 +327,15 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
+msgid "An unexpected error occurred during the image transfer"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
 msgid "Angle from the X axis to a point (x,y), in radians."
-msgstr "Winkel von der X-Achse zu einem Punkt (x,y), im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -353,7 +377,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Anonymous"
-msgstr "Anonym"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -368,7 +392,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Apply"
-msgstr "Anwenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -387,23 +411,24 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "April"
-msgstr "April"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Are you sure you want to delete this sheet ?"
-msgstr "Sind Sie sicher, dass Sie dieses Blatt löschen möchten?"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Argument must be a reference to a cell or range."
-msgstr "Das Argument muss ein Verweis auf eine Zelle oder einen Bereich sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -411,49 +436,50 @@ msgstr "Das Argument muss ein Verweis auf eine Zelle oder einen Bereich sein."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Ascending (A ⟶ Z)"
-msgstr "Aufsteigend (A ⟶ Z)"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "August"
-msgstr "August"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Automatic"
-msgstr "Automatik"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Average magnitude of deviations from mean."
-msgstr "Durchschnittliche Größe der Abweichung vom Mittelwert."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Average of a set of values from a table-like range."
-msgstr "Mittelwert einer Menge von Werten aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Average of values depending on criteria."
-msgstr "Mittelwert der Werte in Abhängigkeit von den Kriterien."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Average of values depending on multiple criteria."
-msgstr "Durchschnitt der Werte in Abhängigkeit von mehreren Kriterien."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -469,7 +495,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Background Color"
-msgstr "Hintergrundfarbe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -480,7 +506,7 @@ msgstr "Hintergrundfarbe"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Background color"
-msgstr "Hintergrundfarbe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -495,7 +521,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/chart/odoo_chart/odoo_bar_chart.js:0
 #, python-format
 msgid "Bar"
-msgstr "Balken"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -539,7 +565,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Bold"
-msgstr "Fett:"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -555,7 +581,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Bottom"
-msgstr "Unten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -580,7 +606,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -618,8 +644,6 @@ msgid ""
 "Cannot sort. To sort, select only cells or only merges that have the same "
 "size."
 msgstr ""
-"Kann nicht sortiert werden. Wählen Sie zum Sortieren nur Zellen oder nur "
-"Zusammenführungen aus, die die gleiche Größe haben."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -628,14 +652,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Categories / Labels"
-msgstr "Kategorien / Labels"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Cell values"
-msgstr "Zellenwerte"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -643,7 +667,7 @@ msgstr "Zellenwerte"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Chart"
-msgstr "Diagramm"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -657,14 +681,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Chart type"
-msgstr "Chart-Typ"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Circular reference"
-msgstr "Kreisförmige Referenz"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -672,7 +696,7 @@ msgstr "Kreisförmige Referenz"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Clear"
-msgstr "Löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -686,7 +710,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Clear column %s"
-msgstr "Spalte %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -700,7 +724,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Clear columns %s - %s"
-msgstr "Spalten %s - %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -714,7 +738,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Clear row %s"
-msgstr "Zeile %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -728,14 +752,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Clear rows %s - %s"
-msgstr "Zeilen %s - %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Code"
-msgstr "Code"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -764,28 +788,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Color scale"
-msgstr "Farbskala"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Column left"
-msgstr "Spalte links"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Column number of a specified cell."
-msgstr "Spaltennummer einer bestimmten Zelle."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Column right"
-msgstr "Spalte rechts"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -801,8 +825,6 @@ msgstr ""
 msgid ""
 "Computes the number of periods needed for an investment to reach a value."
 msgstr ""
-"Berechnet die Anzahl der Perioden, die eine Investition benötigt, um einen "
-"bestimmten Wert zu erreichen."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -821,14 +843,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Conditional formatting"
-msgstr "Bedingte Formatierung"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Configuration"
-msgstr "Konfiguration"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -837,14 +859,14 @@ msgstr "Konfiguration"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Confirm"
-msgstr "Bestätigen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Contains"
-msgstr "Beinhaltet"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -865,45 +887,46 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts a date string to a date value."
-msgstr "Konvertiert eine Datumszeichenfolge in einen Datumswert."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts a time string into its serial number representation."
-msgstr "Konvertiert eine Zeitzeichenfolge in ihre Seriennummerndarstellung."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts an angle value in radians to degrees."
-msgstr "Wandelt einen Winkelwert im Bogenmaß in Grad um."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts from another base to decimal."
-msgstr "Konvertiert von einer anderen Basis in dezimal."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts hour/minute/second into a time."
-msgstr "Wandelt Stunde/Minute/Sekunde in eine Uhrzeit um."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Converts year/month/day into a date."
-msgstr "Wandelt Jahr/Monat/Tag in ein Datum um."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
@@ -911,35 +934,42 @@ msgstr "Wandelt Jahr/Monat/Tag in ein Datum um."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Copy"
-msgstr "Kopieren"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Copy of %s"
-msgstr "Kopie von %s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Copy/Paste is not supported in this browser."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Cosecant of an angle provided in radians."
-msgstr "Kosekans eines Winkels, angegeben im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Cosine of an angle provided in radians."
-msgstr "Kosinus eines Winkels, der im Bogenmaß angegeben wird."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Cotangent of an angle provided in radians."
-msgstr "Cotangens eines Winkels, angegeben im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -947,7 +977,7 @@ msgstr "Cotangens eines Winkels, angegeben im Bogenmaß."
 #: code:addons/spreadsheet/static/src/pivot/pivot_model.js:0
 #, python-format
 msgid "Count"
-msgstr "Anzahl"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -961,7 +991,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Count values depending on multiple criteria."
-msgstr "Zählwerte in Abhängigkeit von mehreren Kriterien."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -970,32 +1000,31 @@ msgstr "Zählwerte in Abhängigkeit von mehreren Kriterien."
 msgid ""
 "Counts number of unique values in a range, filtered by a set of criteria."
 msgstr ""
-"Zählt die Anzahl der eindeutigen Werte in einem Bereich, gefiltert nach "
-"einer Reihe von Kriterien."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Counts number of unique values in a range."
-msgstr "Zählt die Anzahl der eindeutigen Werte in einem Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Counts values and text from a table-like range."
-msgstr "Zählt Werte und Text aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Counts values from a table-like range."
-msgstr "Zählt Werte aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Create filter"
@@ -1022,12 +1051,12 @@ msgstr ""
 #: model:ir.model,name:spreadsheet.model_res_currency
 #, python-format
 msgid "Currency"
-msgstr "Währung"
+msgstr ""
 
 #. module: spreadsheet
 #: model:ir.model,name:spreadsheet.model_res_currency_rate
 msgid "Currency Rate"
-msgstr "Wechselkurs"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1055,14 +1084,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Current date and time as a date value."
-msgstr "Aktuelles Datum und Uhrzeit als Datumswert."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Current date as a date value."
-msgstr "Aktuelles Datum als Datumswert."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1070,7 +1099,7 @@ msgstr "Aktuelles Datum als Datumswert."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Custom"
-msgstr "Benutzerdefiniert"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1093,16 +1122,17 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Cut"
-msgstr "Ausschneiden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Data"
-msgstr "Persönliche Daten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1111,7 +1141,7 @@ msgstr "Persönliche Daten"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Data Series"
-msgstr "Datenreihe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1149,14 +1179,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Date"
-msgstr "Datum"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Date a number of months before/after another date."
-msgstr "Datum eine Anzahl von Monaten vor/nach einem anderen Datum."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1184,14 +1214,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Day of the month that a specific date falls on."
-msgstr "Tag des Monats, auf den ein bestimmtes Datum fällt."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Day of the week of the date provided (as number)."
-msgstr "Wochentag des angegebenen Datums (als Zahl)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1211,9 +1241,10 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "December"
-msgstr "Dezember"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1228,35 +1259,35 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete"
-msgstr "Löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete cell and shift left"
-msgstr "Zelle löschen und nach links verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete cell and shift up"
-msgstr "Zelle löschen und nach oben verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete cells"
-msgstr "Zellen löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete column %s"
-msgstr "Spalte %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1270,14 +1301,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete columns %s - %s"
-msgstr "Spalten %s - %s löschen"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Delete image"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete row %s"
-msgstr "Zeile %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1291,14 +1329,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete rows %s - %s"
-msgstr "Zeilen %s - %s löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Delete values"
-msgstr "Werte löschen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1319,7 +1357,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Depreciation via declining balance method."
-msgstr "Degressive Abschreibung"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1341,25 +1379,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Descending (Z ⟶ A)"
-msgstr "Absteigend (Z ⟶ A)"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Design"
-msgstr "Design"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Did not find value '%s' in [[FUNCTION_NAME]] evaluation."
 msgstr ""
-"Der Wert '%s' wurde in der [[FUNCTION_NAME]]-Auswertung nicht gefunden."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1373,21 +1407,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Does not contain"
-msgstr "enthält nicht"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Duplicate"
-msgstr "Duplizieren"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Duration"
-msgstr "Dauer"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1395,14 +1429,14 @@ msgstr "Dauer"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Edit"
-msgstr "Bearbeiten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Edit link"
-msgstr "Link bearbeiten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1410,14 +1444,14 @@ msgstr "Link bearbeiten"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Else"
-msgstr "Sonst"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Ends with"
-msgstr "Endet mit"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1431,7 +1465,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Euler's number, e (~2.718) raised to a power."
-msgstr "Eulersche Zahl, e (~2,718) hochgezählt."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1451,22 +1485,21 @@ msgstr "Eulersche Zahl, e (~2,718) hochgezählt."
 msgid ""
 "Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error."
 msgstr ""
-"Die Auswertung der Funktion [[FUNCTION_NAME]] hat einen Fehler beim Teilen "
-"durch Null verursacht."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Exact number of years between two dates."
-msgstr "Genaue Anzahl der Jahre zwischen zwei Daten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "February"
-msgstr "Februar"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1487,7 +1520,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "File"
-msgstr "Datei"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1497,7 +1530,7 @@ msgstr "Datei"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Fill Color"
-msgstr "Füllfarbe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1511,21 +1544,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/global_filters/plugins/global_filters_ui_plugin.js:0
 #, python-format
 msgid "Filter \"%s\" not found"
-msgstr "Filter \"%s\" nicht gefunden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Find and Replace"
-msgstr "Suchen und Ersetzen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Find and replace"
-msgstr "Suchen und Ersetzen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1560,14 +1593,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Font Size"
-msgstr "Schriftgröße"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Font size"
-msgstr "Schriftgröße"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1575,7 +1608,7 @@ msgstr "Schriftgröße"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Format"
-msgstr "Format"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1589,21 +1622,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Format cells if..."
-msgstr "Zellen formatieren, wenn..."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Format rules"
-msgstr "Format-Regeln"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Formatting style"
-msgstr "Formatierungsstil"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1612,13 +1645,20 @@ msgstr "Formatierungsstil"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Formula"
-msgstr "Formel"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Freeze"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Friday"
 msgstr ""
 
 #. module: spreadsheet
@@ -1638,9 +1678,6 @@ msgid ""
 "Function ${name} has at mandatory arguments declared after optional ones. "
 "All optional arguments must be after all mandatory arguments."
 msgstr ""
-"Funktion ${name} hat bei obligatorischen Argumenten nach den optionalen "
-"deklariert. Alle optionalen Argumente müssen hinter allen obligatorischen "
-"Argumenten stehen."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1650,9 +1687,6 @@ msgid ""
 "Function ${name} has no-repeatable arguments declared after repeatable ones."
 " All repeatable arguments must be declared last."
 msgstr ""
-"Die Funktion ${name} hat nicht wiederholbare Argumente, die nach den "
-"wiederholbaren Argumenten deklariert werden. Alle wiederholbaren Argumente "
-"müssen zuletzt deklariert werden."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1662,8 +1696,6 @@ msgid ""
 "Function %s expects its parameters to be single values or single cell "
 "references, not ranges."
 msgstr ""
-"Die Funktion %s erwartet, dass ihre Parameter Einzelwerte oder einzelne "
-"Zellbezüge sind, keine Bereiche."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1673,8 +1705,6 @@ msgid ""
 "Function %s expects the parameter %s to be a single value or a single cell "
 "reference, not a range."
 msgstr ""
-"Die Funktion %s erwartet, dass der Parameter %s ein einzelner Wert oder ein "
-"einzelner Zellverweis ist, nicht ein Bereich."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1684,15 +1714,13 @@ msgid ""
 "Function %s expects the parameter %s to be reference to a cell or range, not"
 " a %s."
 msgstr ""
-"Die Funktion %s erwartet, dass der Parameter %s ein Verweis auf eine Zelle "
-"oder einen Bereich ist, nicht auf ein(en) %s."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "Function PIVOT takes an even number of arguments."
-msgstr "Die Funktion PIVOT benötigt eine gerade Anzahl von Argumenten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1700,8 +1728,6 @@ msgstr "Die Funktion PIVOT benötigt eine gerade Anzahl von Argumenten."
 #, python-format
 msgid "Function [[FUNCTION_NAME]] caused a divide by zero error."
 msgstr ""
-"Die Funktion [[FUNCTION_NAME]] hat einen Fehler beim Teilen durch Null "
-"verursacht."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1719,8 +1745,6 @@ msgid ""
 "Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in "
 "pairs."
 msgstr ""
-"Die Funktion [[FUNCTION_NAME]] erwartet, dass criteria_range und criterion "
-"paarweise vorliegen."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1729,8 +1753,6 @@ msgstr ""
 msgid ""
 "Function [[FUNCTION_NAME]] expects criteria_range to have the same dimension"
 msgstr ""
-"Die Funktion [[FUNCTION_NAME]] erwartet, dass criteria_range die gleiche "
-"Dimension hat"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1753,7 +1775,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Future value of an annuity investment."
-msgstr "Zukünftiger Wert einer Renteninvestition."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1767,21 +1789,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "Get the absolute ID of an element in the pivot"
-msgstr "Abrufen der absoluten ID eines Elements im Pivot"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/list/list_functions.js:0
 #, python-format
 msgid "Get the header of a list."
-msgstr "Überschrift einer Liste erhalten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "Get the header of a pivot."
-msgstr "Holt die Kopfzeile eines Pivots."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1795,70 +1817,70 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/list/list_functions.js:0
 #, python-format
 msgid "Get the value from a list."
-msgstr "Extrahieren Sie den Wert aus einer Liste."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "Get the value from a pivot."
-msgstr "Holt den Wert aus einem Pivot."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide column %s"
-msgstr "Spalte %s ausblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide columns"
-msgstr "Spalten ausblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide columns %s - %s"
-msgstr "Spalten %s-%s verbergen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide formulas"
-msgstr "Formeln ausblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide gridlines"
-msgstr "Gitterlinien verbergen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide row %s"
-msgstr "Zeile %s verbergen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide rows"
-msgstr "Zeilen verbergen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hide rows %s - %s"
-msgstr "Zeilen %s-%s ausblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1879,63 +1901,63 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Horizontal lookup"
-msgstr "Horizontale Suche"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hour component of a specific time."
-msgstr "Stundenkomponente einer bestimmten Zeit."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic cosecant of any real number."
-msgstr "Hyperbolische Kosekans einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic cosine of any real number."
-msgstr "Hyperbolischer Kosinus einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic cotangent of any real number."
-msgstr "Hyperbolischer Kotangens einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic secant of any real number."
-msgstr "Hyperbolische Sekante einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic sine of any real number."
-msgstr "Hyperbolischer Sinus einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Hyperbolic tangent of any real number."
-msgstr "Hyperbolischer Tangens einer beliebigen reellen Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "ISO week number of the year."
-msgstr "ISO-Wochennummer des Jahres."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1950,13 +1972,20 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Icons"
-msgstr "Symbole"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "If a valid match is not found, return this value."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Image"
 msgstr ""
 
 #. module: spreadsheet
@@ -1971,119 +2000,119 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert"
-msgstr "Einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s columns"
-msgstr "Spalten %s einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s columns left"
-msgstr "%s Spalten links einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s columns right"
-msgstr "%s Spalten rechts einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s rows"
-msgstr "Einfügen von %s Zeilen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s rows above"
-msgstr "Zeilen %s oben einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert %s rows below"
-msgstr "Fügen Sie %s Zeilen unten ein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert cells"
-msgstr "Zellen einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert cells and shift down"
-msgstr "Zellen einfügen und nach unten verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert cells and shift right"
-msgstr "Zellen einfügen und nach rechts verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert column"
-msgstr "Spalte einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert column left"
-msgstr "Spalte links einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert column right"
-msgstr "Spalte rechts einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert link"
-msgstr "Link einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert row"
-msgstr "Zeile hinzufügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert row above"
-msgstr "Zeile oben einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Insert row below"
-msgstr "Zeile unten einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2104,49 +2133,49 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Internal rate of return given periodic cashflows."
-msgstr "Interner Zinsfuß bei periodischen Zahlungsströmen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid Maxpoint formula"
-msgstr "Ungültige Maxpoint-Formel"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid Midpoint formula"
-msgstr "Ungültige Minpoint-Formel"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid Minpoint formula"
-msgstr "Ungültige Minpoint-Formel"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid expression"
-msgstr "Ungültiger Ausdruck"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid lower inflection point formula"
-msgstr "Ungültige Formel für den unteren Wendepunkt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid merge zone"
-msgstr "Ungültige Merge-Zone"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2156,8 +2185,6 @@ msgid ""
 "Invalid number of arguments for the %s function. Expected %s maximum, but "
 "got %s instead."
 msgstr ""
-"Ungültige Anzahl von Argumenten für die Funktion %s. Maximum, von %s "
-"erwartet, aber stattdessen %s erhalten."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2167,8 +2194,6 @@ msgid ""
 "Invalid number of arguments for the %s function. Expected %s minimum, but "
 "got %s instead."
 msgstr ""
-"Ungültige Anzahl von Argumenten für die Funktion %s. Minimum von %s "
-"erwartet, aber stattdessen %s erhalten."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2184,161 +2209,161 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid reference"
-msgstr "Ungültige Referenz"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid sheet"
-msgstr "Ungültiges Tabellenblatt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid sheet name"
-msgstr "Ungültiger Blattname"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid sheet name: %s"
-msgstr "Ungültiger Blattname: %s"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Invalid upper inflection point formula"
-msgstr "Ungültige Formel für den oberen Wendepunkt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse cosine of a value, in radians."
-msgstr "Inverser Kosinus eines Wertes, im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse cotangent of a value."
-msgstr "Inverser Kotangens eines Wertes."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse hyperbolic cosine of a number."
-msgstr "Inverser hyperbolischer Kosinus einer Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse hyperbolic cotangent of a value."
-msgstr "Inverser hyperbolischer Kotangens eines Wertes."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse hyperbolic sine of a number."
-msgstr "Inverser hyperbolischer Sinus einer Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse hyperbolic tangent of a number."
-msgstr "Inverser hyperbolischer Tangens einer Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse sine of a value, in radians."
-msgstr "Inverser Sinus eines Wertes, im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Inverse tangent of a value, in radians."
-msgstr "Inverser Tangens eines Wertes, im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is between"
-msgstr "Liegt zwischen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is empty"
-msgstr "Ist leer"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is equal to"
-msgstr "Entspricht"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is greater than"
-msgstr "Ist größer als"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is greater than or equal to"
-msgstr "Ist größer oder gleich"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is less than"
-msgstr "Ist weniger als"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is less than or equal to"
-msgstr "Ist weniger oder gleich"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is not between"
-msgstr "Liegt nicht zwischen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is not empty"
-msgstr "Ist nicht leer"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Is not equal to"
-msgstr "Ist nicht gleich"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2347,28 +2372,31 @@ msgstr "Ist nicht gleich"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Italic"
-msgstr "Kursiv"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "January"
-msgstr "Januar"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "July"
-msgstr "Juli"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "June"
-msgstr "Juni"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2382,7 +2410,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Labels are invalid"
-msgstr "Labels sind ungültig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2403,21 +2431,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/helpers/constants.js:0
 #, python-format
 msgid "Last 30 Days"
-msgstr "Letzten 30 Tage"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/helpers/constants.js:0
 #, python-format
 msgid "Last 365 Days"
-msgstr "Die letzten 365 Tage"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/helpers/constants.js:0
 #, python-format
 msgid "Last 7 Days"
-msgstr "Letzten 7 Tage"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2438,7 +2466,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Last day of a month before or after a date."
-msgstr "Letzter Tag eines Monats vor oder nach einem Datum."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2470,7 +2498,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Left"
-msgstr "Links"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2479,14 +2507,14 @@ msgstr "Links"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Legend position"
-msgstr "Position der Legende"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/chart/odoo_chart/odoo_line_chart.js:0
 #, python-format
 msgid "Line"
-msgstr "Zeile"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2494,14 +2522,14 @@ msgstr "Zeile"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Link"
-msgstr "Link"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Link sheet"
-msgstr "Blatt verlinken"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2515,35 +2543,35 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/errors.js:0
 #, python-format
 msgid "Loading..."
-msgstr "Lädt…"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Logical `and` operator."
-msgstr "Logischer `und`-Operator."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Logical `or` operator."
-msgstr "Logischer `oder`-Operator."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Logical `xor` operator."
-msgstr "Logischer `xor`-Operator."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Look up a value."
-msgstr "Schlagen Sie einen Wert nach."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2555,9 +2583,10 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "March"
-msgstr "März"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2571,7 +2600,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Match entire cell content"
-msgstr "Gesamten Zellinhalt abgleichen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2592,34 +2621,42 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Maximum numeric value in a dataset."
-msgstr "Maximaler numerischer Wert in einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Maximum of values from a table-like range."
-msgstr "Maximum der Werte aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Maximum value in a numeric dataset."
-msgstr "Maximaler Wert in einem numerischen Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "May"
-msgstr "Mai"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Median value in a numeric dataset."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/ir_ui_menu/index.js:0
+#, python-format
+msgid "Menu %s not found. You may not have the required access rights."
 msgstr ""
 
 #. module: spreadsheet
@@ -2637,8 +2674,6 @@ msgid ""
 "Merged cells are preventing this operation. Unmerge those cells and try "
 "again."
 msgstr ""
-"Verschmolzene Zellen verhindern diesen Vorgang. Heben Sie die Verschmelzung "
-"dieser Zellen auf und versuchen Sie es erneut."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2647,8 +2682,6 @@ msgstr ""
 msgid ""
 "Merging these cells will only preserve the top-leftmost value. Merge anyway?"
 msgstr ""
-"Wenn Sie diese Zellen zusammenführen, bleibt nur der Wert ganz oben links "
-"erhalten. Trotzdem zusammenführen?"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2662,7 +2695,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Midpoint must be smaller then Maximum"
-msgstr "Der Midpoint muss kleiner sein als das Maximum"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2676,28 +2709,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minimum must be smaller then Maximum"
-msgstr "Minimum muss kleiner sein als Maximum"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minimum must be smaller then Midpoint"
-msgstr "Minimum muss kleiner sein als Mittelpunkt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minimum numeric value in a dataset."
-msgstr "Minimaler numerischer Wert in einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minimum of values from a table-like range."
-msgstr "Minimum von Werten aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2711,14 +2744,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minimum value in a numeric dataset."
-msgstr "Minimaler Wert in einem numerischen Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Minpoint"
-msgstr "Minpoint"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2726,14 +2759,14 @@ msgstr "Minpoint"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Minute component of a specific time."
-msgstr "Minutenanteil einer bestimmten Zeit."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Modified Macaulay duration."
-msgstr "Modifizierte Macaulay-Duration"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2747,14 +2780,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Modulo (remainder) operator."
-msgstr "Modulo (Rest)-Operator."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Monday"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Month of the year a specific date falls in"
-msgstr "Monat des Jahres, in den ein bestimmtes Datum fällt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2775,7 +2815,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "More than one match found in DGET evaluation."
-msgstr "Mehr als eine Übereinstimmung in der DGET-Auswertung gefunden."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2789,14 +2829,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Move left"
-msgstr "Nach links bewegen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Move right"
-msgstr "Nach rechts bewegen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2810,14 +2850,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Net working days between two dates (specifying weekends)."
-msgstr "Netto-Arbeitstage zwischen zwei Daten (unter Angabe von Wochenenden)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Net working days between two provided days."
-msgstr "Nettoarbeitstage zwischen zwei bereitgestellten Tagen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2828,21 +2868,21 @@ msgstr "Nettoarbeitstage zwischen zwei bereitgestellten Tagen."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "New Chart"
-msgstr "Neue Tabelle"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "New sheet"
-msgstr "Neues Blatt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Next"
-msgstr "Weiter"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2863,14 +2903,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "No match."
-msgstr "Keine Übereinstimmung."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "No results"
-msgstr "Keine Treffer"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2889,7 +2929,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/pivot/pivot_model.js:0
 #, python-format
 msgid "None"
-msgstr "Keine"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2901,23 +2941,24 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "November"
-msgstr "November"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Nth largest element from a data set."
-msgstr "N-te größte Element aus einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Nth smallest element in a data set."
-msgstr "N-te kleinste Element in einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2927,14 +2968,14 @@ msgstr "N-te kleinste Element in einem Datensatz."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Number"
-msgstr "Nummer"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Number of columns in a specified array or range."
-msgstr "Anzahl der Spalten in einem angegebenen Array oder Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2956,14 +2997,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Number of days between two dates."
-msgstr "Anzahl der Tage zwischen zwei Daten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Number of empty values."
-msgstr "Anzahl der leeren Werte."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2978,22 +3019,20 @@ msgstr ""
 #, python-format
 msgid "Number of periods for an investment to reach a value."
 msgstr ""
-"Anzahl der Perioden, nach denen eine Investition einen bestimmten Wert "
-"erreicht."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Number of rows in a specified array or range."
-msgstr "Anzahl der Zeilen in einem angegebenen Array oder Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Numbers"
-msgstr "Nummern"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3001,22 +3040,21 @@ msgstr "Nummern"
 #, python-format
 msgid "Numerical average value in a dataset, ignoring text."
 msgstr ""
-"Numerischer Durchschnittswert in einem Datensatz, ohne Berücksichtigung von "
-"Text."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Numerical average value in a dataset."
-msgstr "Numerischer Durchschnittswert in einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "October"
-msgstr "Oktober"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3033,7 +3071,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Paste"
-msgstr "Einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3043,7 +3081,7 @@ msgstr "Einfügen"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Paste format only"
-msgstr "Nur Einfügeformat"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3053,7 +3091,7 @@ msgstr "Nur Einfügeformat"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Paste special"
-msgstr "Spezial einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3062,14 +3100,23 @@ msgstr "Spezial einfügen"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Paste value only"
-msgstr "Nur Wert einfügen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Paste values only"
-msgstr "Nur Werte einfügen"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid ""
+"Pasting from the context menu is not supported in this browser. Use keyboard"
+" shortcuts ctrl+c / ctrl+v instead."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3084,7 +3131,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Percent"
-msgstr "Prozent"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3094,7 +3141,7 @@ msgstr "Prozent"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Percentage"
-msgstr "Prozentsatz"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3110,7 +3157,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Percentile"
-msgstr "Perzentil"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3124,7 +3171,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/chart/odoo_chart/odoo_pie_chart.js:0
 #, python-format
 msgid "Pie"
-msgstr "Kreis"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3138,28 +3185,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Position of item in range that matches value."
-msgstr "Position des Elements im Bereich, das mit dem Wert übereinstimmt."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Positive square root of a positive number."
-msgstr "Positive Quadratwurzel aus einer positiven Zahl."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Present value of an annuity investment."
-msgstr "Barwert einer Renteninvestition."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Preview"
-msgstr "Vorschau"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3167,14 +3214,14 @@ msgstr "Vorschau"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Preview text"
-msgstr "Vorschau-Text"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Previous"
-msgstr "Vorherige"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3195,14 +3242,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Price of a security paying periodic interest."
-msgstr "Preis eines Wertpapiers mit periodischer Verzinsung."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Product of values from a table-like range."
-msgstr "Produkt von Werten aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3216,14 +3263,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Random integer between two values, inclusive."
-msgstr "Zufällige Ganzzahl zwischen zwei Werten, einschließlich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Range"
-msgstr "Bereich"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3238,13 +3285,13 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Redo"
-msgstr "Wiederholen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
-msgid "Remove Filter"
+msgid "Remove filter"
 msgstr ""
 
 #. module: spreadsheet
@@ -3252,14 +3299,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Remove link"
-msgstr "Link entfernen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Remove rule"
-msgstr "Regel entfernen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3273,14 +3320,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rename"
-msgstr "Umbenennen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rename Sheet"
-msgstr "Blatt umbenennen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3295,35 +3342,42 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Replace"
-msgstr "Ersetzen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Replace all"
-msgstr "Alle ersetzen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Reset"
-msgstr "Zurücksetzen"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Reset size"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Result of multiplying a series of numbers together."
-msgstr "Ergebnis der Multiplikation einer Reihe von Zahlen miteinander."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "Return the current value of a spreadsheet filter."
-msgstr "Gibt den aktuellen Wert eines Tabellenkalkulationsfilters aus."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3331,14 +3385,13 @@ msgstr "Gibt den aktuellen Wert eines Tabellenkalkulationsfilters aus."
 #, python-format
 msgid "Returns a value depending on multiple logical expressions."
 msgstr ""
-"Gibt einen Wert in Abhängigkeit von mehreren logischen Ausdrücken zurück."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Returns opposite of provided logical value."
-msgstr "Gibt das Gegenteil des angegebenen logischen Wertes zurück."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3362,8 +3415,6 @@ msgid ""
 "Returns the maximum value in a range of cells, filtered by a set of "
 "criteria."
 msgstr ""
-"Gibt den Maximalwert in einem Bereich von Zellen zurück, gefiltert nach "
-"einer Reihe von Kriterien."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3373,15 +3424,13 @@ msgid ""
 "Returns the minimum value in a range of cells, filtered by a set of "
 "criteria."
 msgstr ""
-"Liefert den Mindestwert in einem Bereich von Zellen, gefiltert nach einer "
-"Reihe von Kriterien."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Returns value depending on logical expression."
-msgstr "Gibt den Wert abhängig vom logischen Ausdruck zurück."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3399,28 +3448,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Right"
-msgstr "Rechts"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds a number according to standard rules."
-msgstr "Rundet eine Zahl nach den Standardregeln."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds a number up to the nearest odd integer."
-msgstr "Rundet eine Zahl auf die nächste ungerade ganze Zahl auf."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds down a number."
-msgstr "Rundet eine Zahl ab."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3429,7 +3478,7 @@ msgstr "Rundet eine Zahl ab."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds number down to nearest multiple of factor."
-msgstr "Rundet die Zahl auf das nächste Vielfache des Faktors ab."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3439,35 +3488,42 @@ msgstr "Rundet die Zahl auf das nächste Vielfache des Faktors ab."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds number up to nearest multiple of factor."
-msgstr "Rundet die Zahl auf das nächste Vielfache des Faktors."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Rounds up a number."
-msgstr "Rundet eine Zahl auf."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Row above"
-msgstr "Zeile oben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Row below"
-msgstr "Zeile unten"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Row number of a specified cell."
-msgstr "Zeilennummer einer bestimmten Zelle."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Saturday"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3475,14 +3531,14 @@ msgstr "Zeilennummer einer bestimmten Zelle."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Save"
-msgstr "Speichern"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Search"
-msgstr "Suchen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3498,21 +3554,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Search in formulas"
-msgstr "In Formeln suchen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Search..."
-msgstr "Suchen..."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Secant of an angle provided in radians."
-msgstr "Sekante eines Winkels, angegeben im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3526,7 +3582,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/pivot/index.js:0
 #, python-format
 msgid "See records"
-msgstr "Datensätze ansehen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3537,14 +3593,14 @@ msgstr "Datensätze ansehen"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Select a color..."
-msgstr "Farbe auswählen..."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Select all"
-msgstr "Alle auswählen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3557,16 +3613,17 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/assets_backend/constants.js:0
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "September"
-msgstr "September"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Series"
-msgstr "Serien"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3574,70 +3631,77 @@ msgstr "Serien"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sheet"
-msgstr "Tabelle"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-python
+#: code:addons/spreadsheet/utils.py:0
+#, python-format
+msgid "Sheet1"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Shift down"
-msgstr "Nach unten verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Shift left"
-msgstr "Nach links verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Shift right"
-msgstr "Nach rechts verschieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Shift up"
-msgstr "Nach oben schieben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Show formulas"
-msgstr "Formeln anzeigen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Show gridlines"
-msgstr "Gitterlinien anzeigen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sine of an angle provided in radians."
-msgstr "Sinus eines Winkels, der im Bogenmaß angegeben wird."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Single color"
-msgstr "Einfarbig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Single value from a table-like range."
-msgstr "Einzelwert aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3660,14 +3724,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sort column"
-msgstr "Spalte sortieren"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sort columns"
-msgstr "Spalten sortieren"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3702,21 +3766,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Standard"
-msgstr "Standard"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation of entire population (text as 0)."
-msgstr "Standardabweichung der Grundgesamtheit (Text als 0)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation of entire population from table."
-msgstr "Standardabweichung der Grundgesamtheit aus der Tabelle."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3724,21 +3788,21 @@ msgstr "Standardabweichung der Grundgesamtheit aus der Tabelle."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation of entire population."
-msgstr "Standardabweichung der Grundgesamtheit."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation of population sample from table."
-msgstr "Standardabweichung der Stichprobe aus der Tabelle."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation of sample (text as 0)."
-msgstr "Standardabweichung der Stichprobe (Text als 0)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3746,14 +3810,14 @@ msgstr "Standardabweichung der Stichprobe (Text als 0)."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Standard deviation."
-msgstr "Standardabweichung."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Starts with"
-msgstr "Beginnt mit"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3769,63 +3833,70 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Strikethrough"
-msgstr "Durchstreichen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sum"
-msgstr "Summe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sum of a series of numbers and/or cells."
-msgstr "Summe einer Reihe von Zahlen und/oder Zellen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sum of values from a table-like range."
-msgstr "Summe von Werten aus einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Sums a range depending on multiple criteria."
-msgstr "Summiert einen Bereich in Abhängigkeit von mehreren Kriterien."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Sunday"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Symbol"
-msgstr "Symbol"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Tangent of an angle provided in radians."
-msgstr "Tangens eines Winkels, angegeben im Bogenmaß."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Text"
-msgstr "Text"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Text Color"
-msgstr "Textfarbe"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3839,28 +3910,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The anchor must be part of the provided zone"
-msgstr "Der Anker muss Teil der vorgesehenen Zone sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "The argument %s is not a valid measure. Here are the measures: %s"
-msgstr "Das Argument %s ist kein gültiges Maß. Hier sind die Maße: %s"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The argument is missing. Please provide a value"
-msgstr "Das Argument fehlt. Bitte geben Sie einen Wert an"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The base (%s) must be between 2 and 36 inclusive."
-msgstr "Die Basis (%s) muss zwischen 2 und 36 liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3883,14 +3954,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The cashflow_amounts must include negative and positive values."
-msgstr "Die cashflow_amounts müssen negative und positive Werte enthalten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The cell you are trying to edit has been deleted."
-msgstr "Die Zelle, die Sie bearbeiten möchten, wurde gelöscht."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3912,7 +3983,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The chart definition is invalid for an unknown reason"
-msgstr "Die Diagrammdefinition ist aus einem unbekannten Grund ungültig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3926,7 +3997,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The cost (%s) must be strictly positive."
-msgstr "Die Kosten (%s) müssen unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3934,7 +4005,7 @@ msgstr "Die Kosten (%s) müssen unbedingt positiv sein."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The covariance of a dataset."
-msgstr "Die Kovarianz eines Datensatzes."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3942,7 +4013,6 @@ msgstr "Die Kovarianz eines Datensatzes."
 #, python-format
 msgid "The criteria range contains %s row, it must be at least 2 rows."
 msgstr ""
-"Der Kriterienbereich enthält %s Zeile, es müssen mindestens 2 Zeilen sein."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3965,7 +4035,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The dataset is invalid"
-msgstr "Der Datensatz ist ungültig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3980,7 +4050,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The day_count_convention (%s) must be between 0 and 4 inclusive."
-msgstr "Die day_count_convention (%s) muss zwischen 0 und 4 inklusive liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3994,7 +4064,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The discount (%s) must be different from -1."
-msgstr "Der Rabatt (%s) darf nicht -1 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4015,7 +4085,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The divisor must be different from 0."
-msgstr "Der Divisor darf nicht 0 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4029,7 +4099,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The end_date (%s) must be positive or null."
-msgstr "Das end_datum (%s) muss positiv oder 0 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4051,7 +4121,6 @@ msgstr ""
 #, python-format
 msgid "The exponent (%s) must be an integer when the base is negative."
 msgstr ""
-"Der Exponent (%s) muss eine ganze Zahl sein, wenn die Basis negativ ist."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4066,7 +4135,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The factor (%s) must be positive when the value (%s) is positive."
-msgstr "Der Faktor (%s) muss positiv sein, wenn der Wert (%s) positiv ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4074,7 +4143,6 @@ msgstr "Der Faktor (%s) muss positiv sein, wenn der Wert (%s) positiv ist."
 #, python-format
 msgid "The field %s does not exist or you do not have access to that field"
 msgstr ""
-"Das Feld %s existiert nicht oder Sie haben keinen Zugriff auf dieses Feld"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4084,22 +4152,20 @@ msgid ""
 "The field (%s) must be one of %s or must be a number between 1 and %s "
 "inclusive."
 msgstr ""
-"Das Feld (%s) muss eines von %s oder eine Zahl zwischen 1 und einschließlich"
-" %s sein."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The field (%s) must be one of %s."
-msgstr "Das Feld (%s) muss teil von %s sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The field must be a number or a string"
-msgstr "Das Feld muss eine Nummer oder ein String sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4127,7 +4193,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The first value must be a number"
-msgstr "Der erste Wert muss eine Zahl sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4164,7 +4230,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The frequency (%s) must be one of %s"
-msgstr "Die Frequenz (%s) muss teil von %s sein."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "The full URL of the link enclosed in quotation marks."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4174,8 +4247,6 @@ msgid ""
 "The function [[FUNCTION_NAME]] expects a boolean value, but '%s' is a text, "
 "and cannot be coerced to a number."
 msgstr ""
-"Die Funktion [[FUNCTION_NAME]] erwartet einen booleschen Wert, aber '%s' ist"
-" ein Text und kann nicht in eine Zahl umgewandelt werden."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4185,15 +4256,13 @@ msgid ""
 "The function [[FUNCTION_NAME]] expects a number value, but '%s' is a string,"
 " and cannot be coerced to a number."
 msgstr ""
-"Die Funktion [[FUNCTION_NAME]] erwartet einen Zahlenwert, aber '%s' ist eine"
-" Zeichenkette und kann nicht in eine Zahl umgewandelt werden."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The function [[FUNCTION_NAME]] result cannot be negative"
-msgstr "Das Ergebnis der Funktion [[FUNCTION_NAME]]  darf nicht negativ sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4209,14 +4278,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The future_value (%s) must be strictly positive."
-msgstr "future_value (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The high (%s) must be greater than or equal to the low (%s)."
-msgstr "Das Hoch (%s) muss größer oder gleich dem Tief (%s) sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4286,14 +4355,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The life (%s) must be strictly positive."
-msgstr "Das Leben (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The logarithm of a number, base e (euler's number)."
-msgstr "Der Logarithmus einer Zahl, Basis e (Eulersche Zahl)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4321,14 +4390,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The maxpoint must be a number"
-msgstr "Das Maximum muss eine Zahl sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The midpoint must be a number"
-msgstr "Der Mittelpunkt muss eine Zahl sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4342,7 +4411,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The minpoint must be a number"
-msgstr "Der Minpunkt muss eine Zahl sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4356,7 +4425,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The month (%s) must be between 1 and 12 inclusive."
-msgstr "Der Wert des Monats (%s) muss zwischen 1 und 12 liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4400,7 +4469,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The number of numeric values in dataset."
-msgstr "Die Anzahl der numerischen Werte im Dataset."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4431,14 +4500,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The number of values in a dataset."
-msgstr "Die Anzahl der Werte in einem Datensatz."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The number pi."
-msgstr "Die Zahl pi."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4503,7 +4572,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
-msgid "The period (%s) must be less than or equal life (%."
+msgid "The period (%s) must be less than or equal life (%s)."
 msgstr ""
 
 #. module: spreadsheet
@@ -4511,7 +4580,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The period (%s) must be less than or equal to %s."
-msgstr "Der Zeitraum (%s) muss kleiner oder gleich %s sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4525,7 +4594,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The period (%s) must be strictly positive."
-msgstr "Der Zeitraum (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4553,14 +4622,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The present_value (%s) must be strictly positive."
-msgstr "Der present_value (%s) muss streng positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The price (%s) must be strictly positive."
-msgstr "Der Preis (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4590,14 +4659,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The range is invalid"
-msgstr "Der Bereich ist ungültig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The range must be a single row or a single column."
-msgstr "Der Bereich muss eine einzelne Zeile oder eine einzelne Spalte sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4617,14 +4686,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The rate (%s) must be positive or null."
-msgstr "Die Rate (%s) muss positiv oder Null sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The rate (%s) must be strictly positive."
-msgstr "Die Rate (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4638,28 +4707,28 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The redemption (%s) must be strictly positive."
-msgstr "Die Rückzahlung (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The result_range must be a single row or a single column."
-msgstr "result_range muss eine einzelne Zeile oder eine einzelne Spalte sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The rule is invalid for an unknown reason"
-msgstr "Die Regel ist aus einem unbekannten Grund ungültig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The salvage (%s) must be positive or null."
-msgstr "Der Bergungswert (%s) muss positiv oder null sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4673,7 +4742,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The sample covariance of a dataset."
-msgstr "Die Stichprobenkovarianz eines Datensatzes."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4687,7 +4756,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The second argument is missing. Please provide a value"
-msgstr "Das zweite Argument fehlt. Bitte geben Sie einen Wert an"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4708,7 +4777,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The second value must be a number"
-msgstr "Der zweite Wert muss eine Zahl sein"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4748,14 +4817,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The sheet name cannot be empty."
-msgstr "Der Name des Blattes kann nicht leer bleiben."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The start_date (%s) must be positive or null."
-msgstr "Das start_datum (%s) muss positiv oder 0 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4852,6 +4921,13 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "The text to display in the cell, enclosed in quotation marks."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The text to search for the first occurrence of search_for."
@@ -4906,14 +4982,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The type (%s) is out of range."
-msgstr "Der Typ (%s) liegt außerhalb des zulässigen Bereichs."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The type (%s) must be 1, 2 or 3."
-msgstr "Der Typ (%s) muss 1, 2 oder 3 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4935,7 +5011,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) cannot be between -1 and 1 inclusive."
-msgstr "Der Wert (%s) darf nicht zwischen -1 und 1 inklusive liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4950,7 +5026,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be between -1 and 1 exclusive."
-msgstr "Der Wert (%s) muss zwischen -1 und 1 liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4958,28 +5034,28 @@ msgstr "Der Wert (%s) muss zwischen -1 und 1 liegen."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be between -1 and 1 inclusive."
-msgstr "Der Wert (%s) muss zwischen -1 und 1 inklusive liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be greater than or equal to 1."
-msgstr "Der Wert (%s) muss größer oder gleich 1 sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be positive or null."
-msgstr "Der Wert (%s) muss positiv oder Null sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be strictly positive."
-msgstr "Der Wert (%s) muss unbedingt positiv sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5065,15 +5141,13 @@ msgstr ""
 msgid ""
 "The weekend (%s) must be a string or a number in the range 1-7 or 11-17."
 msgstr ""
-"Das Wochenende (%s) muss ein String oder eine Nummer im Bereich von 1-7 oder"
-" 11-17 sein."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The weekend (%s) must be different from '1111111'."
-msgstr "Das Wochenende (%s) darf nicht '1111111' sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5087,7 +5161,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The year (%s) must be between 0 and 9999 inclusive."
-msgstr "Das Jahr (%s) muss zwischen 0 und 9999 liegen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5096,7 +5170,7 @@ msgstr "Das Jahr (%s) muss zwischen 0 und 9999 liegen."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The yield (%s) must be positive or null."
-msgstr "Der Ertrag (%s) muss positiv oder null sein."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5117,7 +5191,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 #, python-format
 msgid "There is no pivot with id \"%s\""
-msgstr "Es gibt keinen Pivot mit id \"%s\""
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5150,7 +5224,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "This formula depends on invalid values"
-msgstr "Diese Formel hängt von ungültigen Werten ab"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5160,8 +5234,6 @@ msgid ""
 "This formula has over 100 parts. It can't be processed properly, consider "
 "splitting it into multiple cells"
 msgstr ""
-"Diese Formel hat über 100 Teile. Sie kann nicht richtig verarbeitet werden, "
-"erwägen Sie, sie in mehrere Zellen aufzuteilen"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5178,7 +5250,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "This operation is not allowed with multiple selections."
-msgstr "Dieser Vorgang ist bei Mehrfachauswahlen nicht zulässig."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5188,8 +5260,6 @@ msgid ""
 "This operation is not possible due to a merge. Please remove the merges "
 "first than try again."
 msgstr ""
-"Dieser Vorgang ist aufgrund einer Zusammenführung nicht möglich. Bitte "
-"entfernen Sie zuerst die Zusammenführungen und versuchen Sie es dann erneut."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5202,8 +5272,15 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
+msgid "Thursday"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
 msgid "Time"
-msgstr "Uhrzeit"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5214,7 +5291,7 @@ msgstr "Uhrzeit"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Title"
-msgstr "Titel"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5223,14 +5300,14 @@ msgstr "Titel"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Top"
-msgstr "Oben"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/plugins/pivot_ui_plugin.js:0
 #, python-format
 msgid "Total"
-msgstr "Total"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5244,7 +5321,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Truncates a number."
-msgstr "Schneidet eine Zahl ab."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Tuesday"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5252,14 +5336,14 @@ msgstr "Schneidet eine Zahl ab."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Type"
-msgstr "Typ"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/data_sources/metadata_repository.js:0
 #, python-format
 msgid "Unable to fetch the label of %s of model %s"
-msgstr "Die Bezeichnung %s des Modells %s kann nicht abgerufen werden "
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5267,7 +5351,7 @@ msgstr "Die Bezeichnung %s des Modells %s kann nicht abgerufen werden "
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Underline"
-msgstr "Unterstrichen"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5275,7 +5359,7 @@ msgstr "Unterstrichen"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Undo"
-msgstr "Rückgängig"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5289,14 +5373,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Unhide all columns"
-msgstr "Alle Spalten einblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Unhide all rows"
-msgstr "Alle Zeilen einblenden"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5310,7 +5394,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/helpers/constants.js:0
 #, python-format
 msgid "Untitled spreadsheet"
-msgstr "Unbenanntes Tabellenblatt"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5333,7 +5417,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Value"
-msgstr "Wert"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5341,8 +5425,6 @@ msgstr "Wert"
 #, python-format
 msgid "Value at a given percentile of a dataset exclusive of 0 and 1."
 msgstr ""
-"Wert bei einem bestimmten Perzentil eines Datensatzes mit Ausnahme von 0 und"
-" 1."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5350,7 +5432,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Value at a given percentile of a dataset."
-msgstr "Wert bei einem bestimmten Perzentil eines Datensatzes."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5371,7 +5453,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Value if it is not an error, otherwise 2nd argument."
-msgstr "Wert, wenn es sich nicht um einen Fehler handelt, sonst 2. Argument."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5380,8 +5462,6 @@ msgstr "Wert, wenn es sich nicht um einen Fehler handelt, sonst 2. Argument."
 msgid ""
 "Value nearest to a specific quartile of a dataset exclusive of 0 and 4."
 msgstr ""
-"Valore più vicino a uno specifico quartile di un set di dati al netto di 0 e"
-" 4."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5390,7 +5470,6 @@ msgstr ""
 #, python-format
 msgid "Value nearest to a specific quartile of a dataset."
 msgstr ""
-"Wert, der einem bestimmten Quartil eines Datensatzes am nächsten liegt."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5404,14 +5483,14 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance of a population from a table-like range."
-msgstr "Abweichung einer Grundgesamtheit von einem tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance of entire population (text as 0)."
-msgstr "Varianz der Grundgesamtheit (Text als 0)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5419,21 +5498,21 @@ msgstr "Varianz der Grundgesamtheit (Text als 0)."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance of entire population."
-msgstr "Varianz der gesamten Population."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance of population sample from table-like range."
-msgstr "Abweichung der Stichprobe vom tabellenartigen Bereich."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance of sample (text as 0)."
-msgstr "Varianz der Stichprobe (Text als 0)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5441,7 +5520,7 @@ msgstr "Varianz der Stichprobe (Text als 0)."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Variance."
-msgstr "Abweichung."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5449,21 +5528,21 @@ msgstr "Abweichung."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Vertical axis position"
-msgstr "Position der vertikalen Achse"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Vertical lookup."
-msgstr "Vertikales Nachschlagen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "View"
-msgstr "Ansicht"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5473,30 +5552,34 @@ msgid ""
 "We found data next to your selection. Since this data was not selected, it "
 "will not be sorted. Do you want to extend your selection?"
 msgstr ""
-"Wir haben Daten außerhalb Ihrer Auswahl gefunden. Da diese Daten nicht "
-"ausgewählt wurden, werden sie auch nicht sortiert. Möchten Sie Ihre Auswahl "
-"erweitern?"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "Wednesday"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Week number of the year."
-msgstr "Wochennummer des Jahres."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Weighted average."
-msgstr "Gewichteter Durchschnitt."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "When value is"
-msgstr "Bei einem Wert von"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5511,22 +5594,20 @@ msgstr ""
 #, python-format
 msgid "When weekend is a string (%s) it must be composed of \"0\" or \"1\"."
 msgstr ""
-"Wenn das Wochenende ein String (%s) ist, muss es aus \"0\" oder \"1\" "
-"bestehen. "
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether a value is `true` or `false`."
-msgstr "Ob ein Wert `true` oder `false` ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether a value is a number."
-msgstr "Ob ein Wert eine Zahl ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5540,21 +5621,21 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether a value is an error."
-msgstr "Ob ein Wert ein Fehler ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether a value is non-textual."
-msgstr "Ob ein Wert nicht textuell ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether a value is text."
-msgstr "Ob ein Wert Text ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5569,7 +5650,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Whether the provided value is even."
-msgstr "Ob der bereitgestellte Wert gerade ist."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5598,15 +5679,13 @@ msgstr ""
 #, python-format
 msgid "Wrong number of arguments. Expected an even number of arguments."
 msgstr ""
-"Falsche Anzahl von Argumenten. Erwartet wird eine gerade Anzahl von "
-"Argumenten."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "Year specified by a given date."
-msgstr "Jahr, das durch ein bestimmtes Datum angegeben wird."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5635,7 +5714,6 @@ msgstr ""
 #, python-format
 msgid "[[FUNCTION_NAME]] cannot be called from the spreadsheet."
 msgstr ""
-"[[FUNCTION_NAME]] kann nicht aus der Tabellenkalkulation aufgerufen werden."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5643,7 +5721,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "[[FUNCTION_NAME]] evaluates to an out of bounds range."
-msgstr "[[FUNCTION_NAME]] wertet einen Bereich außerhalb der Grenzen aus."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5658,15 +5736,13 @@ msgstr ""
 #, python-format
 msgid "[[FUNCTION_NAME]] evaluates to an out of range row value %s."
 msgstr ""
-"[[FUNCTION_NAME]] ergibt einen Zeilenwert, der außerhalb des Bereichs liegt "
-"%s."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "[[FUNCTION_NAME]] expects number values."
-msgstr "[[FUNCTION_NAME]] erwartet Zahlenwerte."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5674,21 +5750,20 @@ msgstr "[[FUNCTION_NAME]] erwartet Zahlenwerte."
 #, python-format
 msgid "[[FUNCTION_NAME]] expects the weight to be positive or equal to 0."
 msgstr ""
-"[[FUNCTION_NAME]] erwartet, dass das Gewicht positiv oder gleich 0 ist."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "[[FUNCTION_NAME]] has mismatched argument count %s vs %s."
-msgstr "[[FUNCTION_NAME]] hat nicht übereinstimmende Argumentanzahl %s vs %s."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "[[FUNCTION_NAME]] has mismatched range sizes."
-msgstr "[[FUNCTION_NAME]] hat nicht übereinstimmende Bereichsgrößen."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5700,14 +5775,14 @@ msgstr "[[FUNCTION_NAME]] hat nicht übereinstimmende Bereichsgrößen."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "[[FUNCTION_NAME]] has no valid input data."
-msgstr "[[FUNCTION_NAME]] hat keine gültigen Eingabedaten."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "and"
-msgstr "und"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript

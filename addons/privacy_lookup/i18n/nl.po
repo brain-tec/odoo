@@ -2,19 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* privacy_lookup
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Gunther Clauwaert <gclauwae@hotmail.com>, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
-# Jolien De Paepe, 2023
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~15.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-09 14:06+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"PO-Revision-Date: 2023-01-17 14:38+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,118 +18,118 @@ msgstr ""
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__additional_note
 msgid "Additional Note"
-msgstr "Extra notitie"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__anonymized_email
 msgid "Anonymized Email"
-msgstr "Geanonimiseerde e-mail"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__anonymized_name
 msgid "Anonymized Name"
-msgstr "Geanonimiseerde naam"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.actions.server,name:privacy_lookup.ir_actions_server_archive_all
 msgid "Archive Selection"
-msgstr "Selectie archiveren"
+msgstr ""
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/wizard/privacy_lookup_wizard.py:0
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_search
 #, python-format
 msgid "Archived"
-msgstr "Gearchiveerd"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_search
 msgid "Can be archived"
-msgstr "Kan gearchiveerd worden"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model,name:privacy_lookup.model_res_partner
 msgid "Contact"
-msgstr "Contact"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__create_uid
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__create_uid
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__create_uid
 msgid "Created by"
-msgstr "Gemaakt door"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__create_date
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__create_date
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__create_date
 msgid "Created on"
-msgstr "Gemaakt op"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__date
 msgid "Date"
-msgstr "Datum"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_tree
 msgid "Delete"
-msgstr "Verwijderen"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.actions.server,name:privacy_lookup.ir_actions_server_unlink_all
 msgid "Delete Selection"
-msgstr "Selectie verwijderen"
+msgstr ""
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/wizard/privacy_lookup_wizard.py:0
 #, python-format
 msgid "Deleted"
-msgstr "Verwijderen"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__display_name
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__display_name
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__display_name
 msgid "Display Name"
-msgstr "Weergavenaam"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__res_model
 msgid "Document Model"
-msgstr "Documentmodel"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__email
 msgid "Email"
-msgstr "E-mail"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__execution_details
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__execution_details
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__execution_details
 msgid "Execution Details"
-msgstr "Uitvoeringsdetails"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__records_description
 msgid "Found Records"
-msgstr "Records gevonden"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_search
 msgid "Group By"
-msgstr "Groeperen op"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__user_id
 msgid "Handled By"
-msgstr "Behandeld door"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__has_active
 msgid "Has Active"
-msgstr "Heeft actieve"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__id
@@ -144,84 +137,84 @@ msgstr "Heeft actieve"
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__id
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_tree
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__is_active
 msgid "Is Active"
-msgstr "Is Actief"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__is_unlinked
 msgid "Is Unlinked"
-msgstr "Is ontkoppeld"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log____last_update
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard____last_update
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line____last_update
 msgid "Last Modified on"
-msgstr "Laatst gewijzigd op"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__write_uid
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__write_uid
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__write_uid
 msgid "Last Updated by"
-msgstr "Laatst bijgewerkt door"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_log__write_date
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__write_date
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__write_date
 msgid "Last Updated on"
-msgstr "Laatst geupdate op"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__line_ids
 msgid "Line"
-msgstr "Regel"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__line_count
 msgid "Line Count"
-msgstr "Aantal regels"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__log_id
 msgid "Log"
-msgstr "Logboek"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_view_form
 msgid "Lookup"
-msgstr "Lookup"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_search
 msgid "Model"
-msgstr "Model"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__name
 msgid "Name"
-msgstr "Naam"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_tree
 msgid "Open Record"
-msgstr "Record openen"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.ui.menu,name:privacy_lookup.privacy_menu
 msgid "Privacy"
-msgstr "Privacy"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model,name:privacy_lookup.model_privacy_log
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_log_view_form
 msgid "Privacy Log"
-msgstr "Privacy Logboek"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.actions.act_window,name:privacy_lookup.privacy_log_action
@@ -229,7 +222,7 @@ msgstr "Privacy Logboek"
 #: model:ir.ui.menu,name:privacy_lookup.pricacy_log_menu
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_log_view_list
 msgid "Privacy Logs"
-msgstr "Privacy Logboeken"
+msgstr ""
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/wizard/privacy_lookup_wizard.py:0
@@ -239,69 +232,69 @@ msgstr "Privacy Logboeken"
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_view_form
 #, python-format
 msgid "Privacy Lookup"
-msgstr "Privacy Lookup"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.actions.act_window,name:privacy_lookup.action_privacy_lookup_wizard_line
 msgid "Privacy Lookup Line"
-msgstr "Privacy Lookup regel"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model,name:privacy_lookup.model_privacy_lookup_wizard
 msgid "Privacy Lookup Wizard"
-msgstr "Privacy Lookup Wizard"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model,name:privacy_lookup.model_privacy_lookup_wizard_line
 msgid "Privacy Lookup Wizard Line"
-msgstr "Privacy Lookup Wizard regel"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__resource_ref
 msgid "Record"
-msgstr "Record"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard__records_description
 msgid "Records Description"
-msgstr "Records omschrijving"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_view_form
 msgid "References"
-msgstr "Referenties"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__res_model_id
 msgid "Related Document Model"
-msgstr "Gerelateerde documentmodel"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__res_id
 msgid "Resource ID"
-msgstr "Resource-ID"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__res_name
 msgid "Resource name"
-msgstr "Naam resource"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_search
 msgid "Search References"
-msgstr "Referenties opzoeken"
+msgstr ""
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/wizard/privacy_lookup_wizard.py:0
 #, python-format
 msgid "The record is already unlinked."
-msgstr "Het record is al ontkoppeld."
+msgstr ""
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/models/privacy_log.py:0
 #, python-format
 msgid "This email address is not valid (%s)"
-msgstr "Dit e-mailadres is niet geldig (%s)"
+msgstr ""
 
 #. module: privacy_lookup
 #: model_terms:ir.ui.view,arch_db:privacy_lookup.privacy_lookup_wizard_line_view_tree
@@ -309,16 +302,14 @@ msgid ""
 "This operation is irreversible. Do you wish to proceed to the record "
 "deletion ?"
 msgstr ""
-"Deze operatie is onomkeerbaar. Wil je doorgaan met het verwijderen van het "
-"record?"
 
 #. module: privacy_lookup
 #: code:addons/privacy_lookup/wizard/privacy_lookup_wizard.py:0
 #, python-format
 msgid "Unarchived"
-msgstr "Niet gearchiveerd"
+msgstr ""
 
 #. module: privacy_lookup
 #: model:ir.model.fields,field_description:privacy_lookup.field_privacy_lookup_wizard_line__wizard_id
 msgid "Wizard"
-msgstr "Wizard"
+msgstr ""

@@ -2,16 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_pos_hr
 # 
-# Translators:
-# Martin Trigaux, 2022
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-27 15:12+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,28 +29,28 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Attuale"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Customer"
-msgstr "Cliente"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Date"
-msgstr "Data"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Employee"
-msgstr "Dipendente"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -68,7 +64,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Order"
-msgstr "Ordina"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -80,7 +76,7 @@ msgstr "Ordina"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Orders"
-msgstr "Ordini"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -101,7 +97,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Periodo"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -110,7 +106,7 @@ msgstr "Periodo"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Point of Sale"
-msgstr "Punto vendita"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -146,7 +142,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Precedente"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -154,7 +150,7 @@ msgstr "Precedente"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Product"
-msgstr "Prodotto"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -162,7 +158,7 @@ msgstr "Prodotto"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Responsible"
-msgstr "Responsabile"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -174,7 +170,7 @@ msgstr "Responsabile"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Ricavi"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -182,14 +178,14 @@ msgstr "Ricavi"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Session"
-msgstr "Sessione"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Sessions"
-msgstr "Sessioni"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web
@@ -231,7 +227,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #, python-format
 msgid "Total"
-msgstr "Totale"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. openerp-web

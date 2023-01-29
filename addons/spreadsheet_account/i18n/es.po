@@ -2,17 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_account
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Oscar Yu, 2022
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-27 15:12+0000\n"
-"PO-Revision-Date: 2022-09-23 08:34+0000\n"
-"Last-Translator: Oscar Yu, 2022\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,7 +20,7 @@ msgstr ""
 #: code:addons/spreadsheet_account/static/src/accounting_datasource.js:0
 #, python-format
 msgid "%s is not a valid year."
-msgstr "%sno es un año validado"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -35,52 +30,50 @@ msgid ""
 "'%s' is not a valid period. Supported formats are \"21/12/2022\", "
 "\"Q1/2022\", \"12/2022\", and \"2022\"."
 msgstr ""
-"'%s' no es un periodo validado. Los formatos de soportes son \"21/12/2022\","
-"  \"Q1/2022\", \"12/2022\", y \"2022\""
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_account_account
 msgid "Account"
-msgstr "Cuenta"
+msgstr ""
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total balance for the specified account(s) and period."
-msgstr "Consiga el balance total para la cuenta especificada(s) y su periodo."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total credit for the specified account(s) and period."
-msgstr "Consiga el crédito total para la cuenta especificada(s) y su periodo."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total debit for the specified account(s) and period."
-msgstr "Consiga el debito total para la cuenta especificada(s) y periodo."
+msgstr ""
 
 #. module: spreadsheet_account
 #: code:addons/spreadsheet_account/models/account.py:0
 #, python-format
 msgid "Journal items for account prefix %s"
-msgstr "Elementos diarios para el prefijo de la cuenta%s"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Returns the account ids of a given group."
-msgstr "Devolver la cueta ids para un grupo dado"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -88,7 +81,7 @@ msgstr "Devolver la cueta ids para un grupo dado"
 #, python-format
 msgid ""
 "Returns the ending date of the fiscal year encompassing the provided date."
-msgstr "Devolver la fecha final del año fiscal englobando la fecha prevista."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -96,18 +89,18 @@ msgstr "Devolver la fecha final del año fiscal englobando la fecha prevista."
 #, python-format
 msgid ""
 "Returns the starting date of the fiscal year encompassing the provided date."
-msgstr "Devolver la fecha inical del año fiscal englobando la fecha prevista."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/index.js:0
 #, python-format
 msgid "See records"
-msgstr "Ver registros"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_datasource.js:0
 #, python-format
 msgid "The company fiscal year could not be found."
-msgstr "El año de la compañia fiscal no pudo ser encontrada."
+msgstr ""

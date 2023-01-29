@@ -2,17 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_sale
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:23+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2023\n"
+"POT-Creation-Date: 2023-01-17 10:54+0000\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
@@ -34,160 +29,160 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Amount"
-msgstr "Bedrag"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Average Order"
-msgstr "Gemiddelde order"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Average order amount"
-msgstr "Gemiddeld orderbedrag"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Category"
-msgstr "Beste categorie"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Seller"
-msgstr "Bestverkopende"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Sellers by Revenue"
-msgstr "Bestverkopende per omzet"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Sellers by Units Sold"
-msgstr "Bestverkopende per aantal verkocht"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Selling Categories"
-msgstr "Bestverkopende categorieën"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best Selling Products"
-msgstr "Best verkopende producten"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best selling category"
-msgstr "Bestverkopende categorie"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Best selling product"
-msgstr "Bestverkopende product"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Category"
-msgstr "Categorie"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Country"
-msgstr "Land"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Huidig"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Customer"
-msgstr "Klant"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Draft quotations"
-msgstr "Concept offertes"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Medium"
-msgstr "Medium"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Monthly Sales"
-msgstr "Maandelijkse verkopen"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Name"
-msgstr "Naam"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Order"
-msgstr "Order"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
@@ -200,64 +195,65 @@ msgstr "Order"
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Orders"
-msgstr "Orders"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Periode"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Vorige"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_sale.spreadsheet_dashboard_product
 #, python-format
 msgid "Product"
-msgstr "Product"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Quotation"
-msgstr "Offerte"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Quotations"
-msgstr "Offertes"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Quotations by Untaxed Amount"
-msgstr "Offertes per bedrag excl. BTW"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Quotations sent"
-msgstr "Offertes verzonden"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
@@ -265,220 +261,225 @@ msgstr "Offertes verzonden"
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Omzet"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_sale.spreadsheet_dashboard_sales
+msgid "Sales"
+msgstr ""
+
+#. module: spreadsheet_dashboard_sale
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Customer"
-msgstr "Verkoopanalyse per klant"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Customer Country"
-msgstr "Verkoopanalyse per land van de klant"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Medium"
-msgstr "Verkoopanalyse per medium"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Product Category"
-msgstr "Verkoopanalyse per productcategorie"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Product Variant"
-msgstr "Verkoopanalyse per productvariant"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Sales Team"
-msgstr "Verkoopanalyse per verkoopteam"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Salesperson"
-msgstr "Verkoopanalyse per verkoper"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Analysis by Source"
-msgstr "Verkoopanalyse per bron"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Orders by Untaxed Amount"
-msgstr "Verkooporders per bedrag excl. BTW"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Sales Team"
-msgstr "Verkoopteam"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Salesperson"
-msgstr "Verkoper"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Source"
-msgstr "Bron"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Categories"
-msgstr "Top categorieën"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Countries"
-msgstr "Toplanden"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Customers"
-msgstr "Topklanten"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Mediums"
-msgstr "Topmediums"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Products"
-msgstr "Topproducten"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Quotations"
-msgstr "Topoffertes"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Sales Orders"
-msgstr "Topverkooporders"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Sales Teams"
-msgstr "Topverkoopteams"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Salespeople"
-msgstr "Topverkopers"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Top Sources"
-msgstr "Topbronnen"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Total orders"
-msgstr "Totaal orders"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "Total quotations"
-msgstr "Totaal offertes"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "Units"
-msgstr "Stuks"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "sinds vorige periode"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "so stats - current"
-msgstr "verkoop statistieken - actueel"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/sales_dashboard.json:0
 #, python-format
 msgid "so stats - previous"
-msgstr "verkoop statistieken - vorige"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale/data/files/product_dashboard.json:0
 #, python-format
 msgid "sold"
-msgstr "verkocht"
+msgstr ""

@@ -2,89 +2,81 @@
 # This file contains the translation of the following modules:
 # 	* base_import_module
 # 
-# Translators:
-# Martin Trigaux, 2019
-# Eloïse Stilmant <est@odoo.com>, 2019
-# Cécile Collart <cco@odoo.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-26 08:16+0000\n"
-"PO-Revision-Date: 2019-08-26 09:09+0000\n"
-"Last-Translator: Cécile Collart <cco@odoo.com>, 2019\n"
+"PO-Revision-Date: 2023-01-17 11:02+0000\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Cancel"
-msgstr "Annuler"
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Close"
-msgstr "Fermer"
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/controllers/main.py:0
 #, python-format
 msgid "Could not select database '%s'"
-msgstr "Impossible de sélectionner la base de données '%s'"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__create_uid
 msgid "Created by"
-msgstr "Créé par"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__create_date
 msgid "Created on"
-msgstr "Créé le"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__display_name
 msgid "Display Name"
-msgstr "Afficher Nom"
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "File '%s' exceed maximum allowed file size"
-msgstr "Le fichier '%s'  dépasse la taille maximale autorisée"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__force
 msgid "Force init"
-msgstr "Forcer la réinitialisation"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,help:base_import_module.field_base_import_module__force
 msgid ""
 "Force init mode even if installed. (will update `noupdate='1'` records)"
 msgstr ""
-"Forcer la réinitialisation même si le module a déjà été installé. (remettra "
-"même à jour les enregistrements de type 'noupdate='1'')"
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Import App"
-msgstr "Importer l'application"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__import_message
 msgid "Import Message"
-msgstr "Message d'import"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.actions.act_window,name:base_import_module.action_view_base_module_import
@@ -92,94 +84,92 @@ msgstr "Message d'import"
 #: model:ir.ui.menu,name:base_import_module.menu_view_base_module_import
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Import Module"
-msgstr "Importer un module"
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Import module"
-msgstr "Importer le module"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__imported
 msgid "Imported Module"
-msgstr "Module importé"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module____last_update
 msgid "Last Modified on"
-msgstr "Dernière modification le"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model,name:base_import_module.model_ir_module_module
 msgid "Module"
-msgstr "Module"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__module_file
 msgid "Module .ZIP file"
-msgstr "Fichier .ZIP du module"
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "No file sent."
-msgstr "Aucun fichier envoyé."
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Note: you can only import data modules (.xml files and static assets)"
 msgstr ""
-"Remarque: vous ne pouvez importer que des modules de données (fichiers .xml "
-"et actifs statiques)."
 
 #. module: base_import_module
 #: code:addons/base_import_module/controllers/main.py:0
 #, python-format
 msgid "Only administrators can upload a module"
-msgstr "Seuls els "
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "Only zip files are supported."
-msgstr "Seuls les fichiers ZIP sont supportés."
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Open Modules"
-msgstr "Ouvrir les modules"
+msgstr ""
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Select module package to import (.zip file):"
-msgstr "Sélectionner un module à importer (fichier .zip):"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__state
 msgid "Status"
-msgstr "État"
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "Studio customizations require Studio"
-msgstr "Les personnalisations de studio nécessitent Studio"
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "Studio customizations require the Odoo Studio app."
-msgstr "Les personnalisations Studio nécessitent l'application Studio."
+msgstr ""
 
 #. module: base_import_module
 #: code:addons/base_import_module/models/ir_module.py:0
@@ -189,21 +179,18 @@ msgid ""
 "\n"
 " - %s"
 msgstr ""
-"Dépendances du module non satisfaites : \n"
-"\n"
-"- %s"
 
 #. module: base_import_module
 #: model:ir.model,name:base_import_module.model_ir_ui_view
 msgid "View"
-msgstr "Vue"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__done
 msgid "done"
-msgstr "terminée"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__init
 msgid "init"
-msgstr "init"
+msgstr ""

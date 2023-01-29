@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* mrp_subcontracting_dropshipping
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Raymond Yu <cl_yu@hotmail.com>, 2022
-# Jeffery CHEN Fan <jeffery9@gmail.com>, 2022
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Jeffery CHEN Fan <jeffery9@gmail.com>, 2022\n"
+"POT-Creation-Date: 2023-01-17 10:54+0000\n"
+"PO-Revision-Date: 2023-01-17 14:37+0000\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,17 +21,17 @@ msgid ""
 "Check this box to create a new dedicated subcontracting location for this "
 "company. Note that standard subcontracting routes will be adapted so as to "
 "take these into account automatically."
-msgstr "选中此框可为该公司创建新的专用外包位置。 请注意，将调整标准外包路线，以便自动考虑这些路线。"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_res_company
 msgid "Companies"
-msgstr "公司"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model.fields,field_description:mrp_subcontracting_dropshipping.field_res_company__dropship_subcontractor_pick_type_id
 msgid "Dropship Subcontractor Pick Type"
-msgstr "代发货给外包商拣货类型"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #. odoo-python
@@ -47,22 +41,22 @@ msgstr "代发货给外包商拣货类型"
 #: model:stock.route,name:mrp_subcontracting_dropshipping.route_subcontracting_dropshipping
 #, python-format
 msgid "Dropship Subcontractor on Order"
-msgstr "按订单代发货给外包商"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model.fields,field_description:mrp_subcontracting_dropshipping.field_stock_warehouse__subcontracting_dropshipping_to_resupply
 msgid "Dropship Subcontractors"
-msgstr "代发货给外包商"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model.fields,help:mrp_subcontracting_dropshipping.field_stock_warehouse__subcontracting_dropshipping_to_resupply
 msgid "Dropship subcontractors with components"
-msgstr "以零件代发货给外包商"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model.fields,field_description:mrp_subcontracting_dropshipping.field_purchase_order__default_location_dest_id_is_subcontracting_loc
 msgid "Is a Subcontracting Location?"
-msgstr "是外包位置吗？"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #. odoo-python
@@ -71,39 +65,39 @@ msgstr "是外包位置吗？"
 msgid ""
 "It appears some components in this RFQ are not meant for subcontracting. "
 "Please create a separate order for these."
-msgstr "本询价中的一些部件似乎不适合外包。请为这些部件创建一个单独的订单。"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_stock_warehouse_orderpoint
 msgid "Minimum Inventory Rule"
-msgstr "最小库存规则"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_purchase_order
 msgid "Purchase Order"
-msgstr "采购订单"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_stock_move
 msgid "Stock Move"
-msgstr "库存移动"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_stock_rule
 msgid "Stock Rule"
-msgstr "库存规则"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model.fields,field_description:mrp_subcontracting_dropshipping.field_stock_warehouse__subcontracting_dropshipping_pull_id
 msgid "Subcontracting-Dropshipping MTS Rule"
-msgstr "外包-代发货MTS规则"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_stock_picking
 msgid "Transfer"
-msgstr "调拨"
+msgstr ""
 
 #. module: mrp_subcontracting_dropshipping
 #: model:ir.model,name:mrp_subcontracting_dropshipping.model_stock_warehouse
 msgid "Warehouse"
-msgstr "仓库"
+msgstr ""

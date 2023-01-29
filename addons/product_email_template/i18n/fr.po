@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* product_email_template
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Cécile Collart <cco@odoo.com>, 2022
-# Jolien De Paepe, 2023
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"PO-Revision-Date: 2023-01-17 14:38+0000\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,39 +18,39 @@ msgstr ""
 #. module: product_email_template
 #: model_terms:ir.ui.view,arch_db:product_email_template.product_template_form_view
 msgid "Automatic Email at Invoice"
-msgstr "Email Automatique à la Facturation"
+msgstr ""
 
 #. module: product_email_template
 #: model_terms:ir.ui.view,arch_db:product_email_template.email_template_form_simplified
 msgid "Body"
-msgstr "Corps"
+msgstr ""
 
 #. module: product_email_template
 #: model_terms:ir.ui.view,arch_db:product_email_template.email_template_form_simplified
 #: model_terms:ir.ui.view,arch_db:product_email_template.product_template_form_view
 msgid "Email Template"
-msgstr "Modèle d'email"
+msgstr ""
 
 #. module: product_email_template
 #: model:ir.model,name:product_email_template.model_account_move
 msgid "Journal Entry"
-msgstr "Pièce comptable"
+msgstr ""
 
 #. module: product_email_template
 #: model:ir.model,name:product_email_template.model_product_template
 msgid "Product"
-msgstr "Produit"
+msgstr ""
 
 #. module: product_email_template
 #: model:ir.model.fields,field_description:product_email_template.field_product_product__email_template_id
 #: model:ir.model.fields,field_description:product_email_template.field_product_template__email_template_id
 msgid "Product Email Template"
-msgstr "Modèle d'email de produit"
+msgstr ""
 
 #. module: product_email_template
 #: model_terms:ir.ui.view,arch_db:product_email_template.product_template_form_view
 msgid "Send a product-specific email once the invoice is validated"
-msgstr "Envoyer un email spécifique quand la facture est payée"
+msgstr ""
 
 #. module: product_email_template
 #: model:ir.model.fields,help:product_email_template.field_product_product__email_template_id
@@ -66,6 +60,3 @@ msgid ""
 "this template. The customer will receive an email for each product linked to"
 " an email template."
 msgstr ""
-"Lors de la validation d'une facture, un email sera envoyé au client sur base"
-" de ce modèle. Le client recevra un email pour chaque produit lié à un "
-"modèle d'email."

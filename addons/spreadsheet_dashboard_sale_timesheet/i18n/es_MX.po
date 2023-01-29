@@ -2,19 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_sale_timesheet
 # 
-# Translators:
-# Braulio D. López Vázquez <bdl@odoo.com>, 2022
-# Martin Trigaux, 2022
-# Lucia Pacheco <lpo@odoo.com>, 2022
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-27 15:12+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022\n"
+"POT-Creation-Date: 2023-01-17 10:54+0000\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,28 +16,28 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable Hours"
-msgstr "Horas facturables"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable Rate"
-msgstr "Tasa facturable"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable hours"
-msgstr "Horas facturables"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
@@ -52,220 +45,225 @@ msgstr "Horas facturables"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable rate"
-msgstr "Tasa facturables"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed fixed price"
-msgstr "Precio fijo facturado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed manually"
-msgstr "facturado manualmente"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed timesheets"
-msgstr "Hojas de horas facturadas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actual"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Department"
-msgstr "Departamento"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Employee"
-msgstr "Empleado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Grand total"
-msgstr "Total general"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Hours billed"
-msgstr "Horas facturadas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Hours spent"
-msgstr "Horas gastadas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Non-billable Hours"
-msgstr "Horas no facturables"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Non-billable hours"
-msgstr "Horas no facturables"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Periodo"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Anterior"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Project"
-msgstr "Proyecto"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Task"
-msgstr "Tarea"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Time Billed by Week"
-msgstr "Tiempo facturado por semana"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_sale_timesheet.spreadsheet_dashboard_timesheet
+msgid "Timesheets"
+msgstr ""
+
+#. module: spreadsheet_dashboard_sale_timesheet
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Department"
-msgstr "Análisis de las hojas de horas por departamento "
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Employee"
-msgstr "Análisis de las hojas de horas por empleado"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Project"
-msgstr "Análisis de las hojas de horas por proyecto"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Task"
-msgstr "Análisis de las hojas de horas por tarea"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Departments"
-msgstr "Mejores departamentos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Employees"
-msgstr "Mejores empleados"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Projects"
-msgstr "Proyectos principales"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Tasks"
-msgstr "Tareas principales"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "último periodo"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "desde el último periodo"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "stats - current"
-msgstr "estadísticas - actuales"
+msgstr ""
 
 #. module: spreadsheet_dashboard_sale_timesheet
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "stats - previous"
-msgstr "estadísticas - previas"
+msgstr ""

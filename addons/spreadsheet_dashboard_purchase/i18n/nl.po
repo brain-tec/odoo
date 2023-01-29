@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_purchase
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-26 07:30+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2023\n"
+"POT-Creation-Date: 2023-01-17 10:54+0000\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,86 +16,86 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid " days"
-msgstr " dagen"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Amount"
-msgstr "Bedrag"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Buyer"
-msgstr "Koper"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Country"
-msgstr "Land"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Huidig"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Days to receive"
-msgstr "Dagen tot ontvangst"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Lines"
-msgstr "Regels"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Order"
-msgstr "Order"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Ordered"
-msgstr "Besteld"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
@@ -109,157 +103,162 @@ msgstr "Besteld"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Orders"
-msgstr "Orders"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Periode"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Vorige"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Partner Country"
-msgstr "Inkoopanalyse per land relatie"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Purchase Representative"
-msgstr "Inkoopanalyse per inkoopvertegenwoordiger"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Vendor"
-msgstr "Inkoopanalyse per leverancier"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Orders by Untaxed Amount"
-msgstr "Inkooporders per bedrag excl. BTW"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchased"
-msgstr "Ingekocht"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Qty ordered"
-msgstr "Bestelde hvh"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Quantity ordered"
-msgstr "Bestelde hoeveelheid"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Source"
-msgstr "Bron"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Sourcing by Country"
-msgstr "Sourcing per land"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Buyers"
-msgstr "Topkopers"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Orders"
-msgstr "Toporders"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Vendors"
-msgstr "Topleveranciers"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Vendors by Amount"
-msgstr "Topleveranciers per bedrag"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Untaxed total"
-msgstr "Onbelast totaal"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Vendor"
-msgstr "Leverancier"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_purchase.spreadsheet_dashboard_vendors
+msgid "Vendors"
+msgstr ""
+
+#. module: spreadsheet_dashboard_purchase
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "laatste periode"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "sinds vorige periode"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "stats - current"
-msgstr "statistieken - actueel"
+msgstr ""
 
 #. module: spreadsheet_dashboard_purchase
-#. openerp-web
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "stats - previous"
-msgstr "statistieken - vorige"
+msgstr ""

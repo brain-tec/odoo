@@ -2,18 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* web_unsplash
 # 
-# Translators:
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
-# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server saas~16.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:45+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2023-01-17 08:01+0000\n"
+"PO-Revision-Date: 2023-01-17 14:59+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,12 +18,12 @@ msgstr ""
 #. module: web_unsplash
 #: model_terms:ir.ui.view,arch_db:web_unsplash.res_config_settings_view_form
 msgid "<i class=\"fa fa-arrow-right\"/> Generate an Access Key"
-msgstr "<i class=\"fa fa-arrow-right\"/> Genereer een toegangssleutel"
+msgstr ""
 
 #. module: web_unsplash
 #: model:ir.model.fields,field_description:web_unsplash.field_res_config_settings__unsplash_access_key
 msgid "Access Key"
-msgstr "Toegangssleutel"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
@@ -37,73 +31,73 @@ msgstr "Toegangssleutel"
 #: model:ir.model.fields,field_description:web_unsplash.field_res_config_settings__unsplash_app_id
 #, python-format
 msgid "Application ID"
-msgstr "Applicatie ID"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "Apply"
-msgstr "Toepassen"
+msgstr ""
 
 #. module: web_unsplash
 #: model:ir.model,name:web_unsplash.model_ir_attachment
 msgid "Attachment"
-msgstr "Bijlage"
+msgstr ""
 
 #. module: web_unsplash
 #: model:ir.model,name:web_unsplash.model_res_config_settings
 msgid "Config Settings"
-msgstr "Configuratie instellingen"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-python
 #: code:addons/web_unsplash/controllers/main.py:0
 #, python-format
 msgid "ERROR: Unknown Unsplash URL!"
-msgstr "FOUTMELDiNG: onbekende Unsplash URL!"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-python
 #: code:addons/web_unsplash/controllers/main.py:0
 #, python-format
 msgid "ERROR: Unknown Unsplash notify URL!"
-msgstr "FOUTMELDING: onbekende Unsplash notify URL!"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "Get an Access key"
-msgstr "Een toegangssleutel verkrijgen"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "Paste your access key here"
-msgstr "Plak je toegangssleutel hier"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "Paste your application ID here"
-msgstr "Plak je applicatie ID hier"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "Photos (via Unsplash)"
-msgstr "Foto's (via Unsplash)"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Please check your Unsplash access key and application ID."
-msgstr "Controleer je Unsplash toegangssleutel en application ID."
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
@@ -111,34 +105,32 @@ msgstr "Controleer je Unsplash toegangssleutel en application ID."
 #, python-format
 msgid "Please check your internet connection or contact administrator."
 msgstr ""
-"Je dient je internetverbinding te controleren of je administrator te "
-"contacteren."
 
 #. module: web_unsplash
 #: model:ir.model,name:web_unsplash.model_ir_qweb_field_image
 msgid "Qweb Field Image"
-msgstr "Qweb veld afbeelding"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Search is temporarily unavailable"
-msgstr "Zoeken is tijdelijk onbeschikbaar"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Setup Unsplash to access royalty free photos."
-msgstr "Stel Unsplash in voor toegang tot royaltyvrije foto's."
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Something went wrong"
-msgstr "Er is iets misgegaan"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
@@ -148,52 +140,50 @@ msgid ""
 "The max number of searches is exceeded. Please retry in an hour or extend to"
 " a better account."
 msgstr ""
-"Het maximale aantal zoekopdrachten is bereikt. Probeer het over een uur "
-"opnieuw of breid je account uit."
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Unauthorized Key"
-msgstr "Ongeautoriseerde sleutel"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Uploading %s '%s' images."
-msgstr "Uploaden %s '%s' afbeeldingen."
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.js:0
 #, python-format
 msgid "Uploading '%s' image."
-msgstr "Uploaden '%s' afbeelding."
+msgstr ""
 
 #. module: web_unsplash
 #: model:ir.model,name:web_unsplash.model_res_users
 msgid "User"
-msgstr "Gebruiker"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "and paste"
-msgstr "en plakken"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "and paste it here:"
-msgstr "en hier plakken:"
+msgstr ""
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/components/media_dialog/image_selector.xml:0
 #, python-format
 msgid "here:"
-msgstr "hier"
+msgstr ""

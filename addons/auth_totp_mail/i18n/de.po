@@ -2,16 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* auth_totp_mail
 # 
-# Translators:
-# Martin Trigaux, 2022
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-04 09:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"PO-Revision-Date: 2023-01-17 11:02+0000\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,35 +35,17 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
-"<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hallo<t t-out=\"object.partner_id.name or ''\"/><br/><br/>\n"
-"        <t t-out=\"user.name  or ''\"/> fordert Sie dazu auf, Zwei-Faktor-Authentisierung zu aktivieren, um Ihr Konto zu schützen.<br/><br/>\n"
-"        Zwei-Faktor-Authentisierung (\"2FA\") ist ein System der doppelten Authentifizierung.\n"
-"        Die erste erfolgt mit Ihrem Passwort, die zweite mit einem Code, den Sie über eine spezielle mobile App erhalten.\n"
-"        Zu den beliebtesten gehören Authy, Google Authenticator oder Microsoft Authenticator.\n"
-"\n"
-"        <p style=\"margin: 16px 0px 16px 0px; text-align: center;\">\n"
-"            <a t-att-href=\"object.get_totp_invite_url()\" style=\"background-color:#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                Meine 2-Faktor-Authentisierung aktivieren\n"
-"            </a>\n"
-"        </p>\n"
-"    </p>\n"
-"</div>\n"
-"        "
 
 #. module: auth_totp_mail
 #: code:addons/auth_totp_mail/models/res_users.py:0
 #, python-format
 msgid "Account Security"
-msgstr "Account Sicherheit"
+msgstr ""
 
 #. module: auth_totp_mail
 #: model:mail.template,subject:auth_totp_mail.mail_template_totp_invite
 msgid "Invitation to activate two-factor authentication on your Odoo account"
 msgstr ""
-"Aufforderung zur Aktivierung der Zwei-Faktor-Authentifizierung für Ihr Odoo-"
-"Konto"
 
 #. module: auth_totp_mail
 #: code:addons/auth_totp_mail/models/res_users.py:0
@@ -76,28 +54,26 @@ msgid ""
 "Invitation to use two-factor authentication sent for the following user(s): "
 "%s"
 msgstr ""
-"Aufforderung zur Verwendung der Zwei-Faktor-Authentifizierung für "
-"folgende(n) Benutzer gesendet: %s"
 
 #. module: auth_totp_mail
 #: model_terms:ir.ui.view,arch_db:auth_totp_mail.view_users_form
 msgid "Invite to use 2FA"
-msgstr "Zur Nutzung von 2FA einladen"
+msgstr ""
 
 #. module: auth_totp_mail
 #: model:ir.actions.server,name:auth_totp_mail.action_invite_totp
 msgid "Invite to use two-factor authentication"
-msgstr "Einladung zur Verwendung der Zwei-Faktor-Authentifizierung"
+msgstr ""
 
 #. module: auth_totp_mail
 #: model_terms:ir.ui.view,arch_db:auth_totp_mail.res_users_view_form
 msgid "Name"
-msgstr "Name"
+msgstr ""
 
 #. module: auth_totp_mail
 #: model:ir.actions.server,name:auth_totp_mail.action_activate_two_factor_authentication
 msgid "Open two-factor authentication configuration"
-msgstr "Konfiguration der Zwei-Faktor-Authentifizierung öffnen"
+msgstr ""
 
 #. module: auth_totp_mail
 #: model:mail.template,name:auth_totp_mail.mail_template_totp_invite
@@ -107,4 +83,4 @@ msgstr ""
 #. module: auth_totp_mail
 #: model:ir.model,name:auth_totp_mail.model_res_users
 msgid "User"
-msgstr "Benutzer"
+msgstr ""

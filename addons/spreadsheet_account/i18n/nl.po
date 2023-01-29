@@ -2,17 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* spreadsheet_account
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-27 15:12+0000\n"
-"PO-Revision-Date: 2022-09-23 08:34+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"PO-Revision-Date: 2023-01-17 14:58+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,7 +20,7 @@ msgstr ""
 #: code:addons/spreadsheet_account/static/src/accounting_datasource.js:0
 #, python-format
 msgid "%s is not a valid year."
-msgstr "%s is geen geldig jaar."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -35,52 +30,50 @@ msgid ""
 "'%s' is not a valid period. Supported formats are \"21/12/2022\", "
 "\"Q1/2022\", \"12/2022\", and \"2022\"."
 msgstr ""
-"'%s' is geen geldige periode. Ondersteunde formaten zijn \"21/12/2022\", "
-"\"K1/2022\", \"12/2022\", en \"2022\"."
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_account_account
 msgid "Account"
-msgstr "Rekening"
+msgstr ""
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_res_company
 msgid "Companies"
-msgstr "Bedrijven"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total balance for the specified account(s) and period."
-msgstr "Bekom de totale balans voor de bepaalde rekening(en) en periode."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total credit for the specified account(s) and period."
-msgstr "Bekom het totale credit voor de bepaalde rekening(en) en periode."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Get the total debit for the specified account(s) and period."
-msgstr "Bekom het totale debit voor de bepaalde rekening(en) en periode."
+msgstr ""
 
 #. module: spreadsheet_account
 #: code:addons/spreadsheet_account/models/account.py:0
 #, python-format
 msgid "Journal items for account prefix %s"
-msgstr "Boekingen voor de rekeningprefix %s"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
 msgid "Returns the account ids of a given group."
-msgstr "Retourneert de rekening ids van een bepaalde groep."
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -89,8 +82,6 @@ msgstr "Retourneert de rekening ids van een bepaalde groep."
 msgid ""
 "Returns the ending date of the fiscal year encompassing the provided date."
 msgstr ""
-"Retourneert de sluitingsdatum van het boekjaar omvattende de voorziene "
-"datum."
 
 #. module: spreadsheet_account
 #. openerp-web
@@ -99,18 +90,17 @@ msgstr ""
 msgid ""
 "Returns the starting date of the fiscal year encompassing the provided date."
 msgstr ""
-"Retourneert de begindatum van het boekjaar omvattende de voorziene datum."
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/index.js:0
 #, python-format
 msgid "See records"
-msgstr "Records bekijken"
+msgstr ""
 
 #. module: spreadsheet_account
 #. openerp-web
 #: code:addons/spreadsheet_account/static/src/accounting_datasource.js:0
 #, python-format
 msgid "The company fiscal year could not be found."
-msgstr "Het boekjaar van de vennootschap kon niet worden gevonden."
+msgstr ""

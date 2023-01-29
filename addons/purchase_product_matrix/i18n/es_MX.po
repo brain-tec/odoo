@@ -2,16 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* purchase_product_matrix
 # 
-# Translators:
-# Martin Trigaux, 2022
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-04 09:25+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"PO-Revision-Date: 2023-01-17 14:38+0000\n"
 "Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,50 +18,50 @@ msgstr ""
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_template_attribute_value_ids
 msgid "Attribute Values"
-msgstr "Valores de atributo"
+msgstr ""
 
 #. module: purchase_product_matrix
 #. openerp-web
 #: code:addons/purchase_product_matrix/static/src/js/purchase_product_field.js:0
 #, python-format
 msgid "Choose Product Variants"
-msgstr "Seleccione las variantes de producto"
+msgstr ""
 
 #. module: purchase_product_matrix
 #. openerp-web
 #: code:addons/purchase_product_matrix/static/src/js/purchase_product_field.js:0
 #, python-format
 msgid "Close"
-msgstr "Cerrar"
+msgstr ""
 
 #. module: purchase_product_matrix
 #. openerp-web
 #: code:addons/purchase_product_matrix/static/src/js/purchase_product_field.js:0
 #, python-format
 msgid "Confirm"
-msgstr "Confirmar"
+msgstr ""
 
 #. module: purchase_product_matrix
 #. openerp-web
 #: code:addons/purchase_product_matrix/static/src/js/purchase_product_field.js:0
 #, python-format
 msgid "Edit Configuration"
-msgstr "Editar configuración"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid
 msgid "Grid"
-msgstr "Rejilla"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid_product_tmpl_id
 msgid "Grid Product Tmpl"
-msgstr "Plantilla de las rejillas del producto"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid_update
 msgid "Grid Update"
-msgstr "Actualización de las rejillas"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__report_grids
@@ -73,48 +69,46 @@ msgid ""
 "If set, the matrix of configurable products will be shown on the report of "
 "this order."
 msgstr ""
-"Si se establece, la matriz de productos configurables se mostrará en el "
-"reporte de este pedido."
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__is_configurable_product
 msgid "Is the product configurable?"
-msgstr "¿El producto es configurable?"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__report_grids
 msgid "Print Variant Grids"
-msgstr "Imprimir cuadrículas de variantes"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model_terms:ir.ui.view,arch_db:purchase_product_matrix.purchase_order_form_matrix
 msgid "Product"
-msgstr "Producto"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_template_id
 msgid "Product Template"
-msgstr "Plantilla de producto"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_no_variant_attribute_value_ids
 msgid "Product attribute values that do not create variants"
-msgstr "Valores de atributos del producto que no crean variantes"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model,name:purchase_product_matrix.model_purchase_order
 msgid "Purchase Order"
-msgstr "Orden de compra"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model,name:purchase_product_matrix.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Línea de la orden de compra"
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__grid_product_tmpl_id
 msgid "Technical field for product_matrix functionalities."
-msgstr "Campo técnico de las funcionalidades de product_matrix."
+msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__grid
@@ -123,14 +117,11 @@ msgid ""
 "If grid_update, will be loaded on the PO. \n"
 "If not, represents the matrix to open."
 msgstr ""
-"Almacenamiento técnico de rejilla.\n"
-"Si grid_update se cargará en la orden de compra.\n"
-"Si no, representa la matriz a abrir."
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__grid_update
 msgid "Whether the grid field contains a new matrix to apply or not."
-msgstr "Si el campo de rejilla contiene una nueva matriz para aplicar o no."
+msgstr ""
 
 #. module: purchase_product_matrix
 #: code:addons/purchase_product_matrix/models/purchase.py:0
@@ -139,5 +130,3 @@ msgid ""
 "You cannot change the quantity of a product present in multiple purchase "
 "lines."
 msgstr ""
-"No puede cambiar la cantidad de un producto presente en varias líneas de "
-"compra."

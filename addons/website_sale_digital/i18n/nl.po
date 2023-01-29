@@ -2,17 +2,12 @@
 # This file contains the translation of the following modules:
 # 	* website_sale_digital
 # 
-# Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-04 09:26+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"PO-Revision-Date: 2023-01-17 15:00+0000\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,57 +20,57 @@ msgstr ""
 #: code:addons/website_sale_digital/models/product.py:0
 #, python-format
 msgid "Add attachments for this digital product"
-msgstr "Bijlagen toevoegen voor dit digitale product"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_ir_attachment
 msgid "Attachment"
-msgstr "Bijlage"
+msgstr ""
 
 #. module: website_sale_digital
 #: code:addons/website_sale_digital/models/product.py:0
 #: code:addons/website_sale_digital/models/product.py:0
 #, python-format
 msgid "Digital Attachments"
-msgstr "Digitale bijlagen"
+msgstr ""
 
 #. module: website_sale_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.product_product_view_form_inherit_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.product_template_view_form_inherit_digital
 msgid "Digital Files"
-msgstr "Digitale bestanden"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model.fields,field_description:website_sale_digital.field_ir_attachment__product_downloadable
 #: model:ir.model.fields,field_description:website_sale_digital.field_mrp_document__product_downloadable
 msgid "Downloadable from product portal"
-msgstr "Downloadbaar vanaf productportaal"
+msgstr ""
 
 #. module: website_sale_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.sale_order_portal_content_inherit_website_sale_digital
 msgid "Downloads"
-msgstr "Downloads"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model.fields,field_description:website_sale_digital.field_product_product__attachment_count
 #: model:ir.model.fields,field_description:website_sale_digital.field_product_template__attachment_count
 msgid "File"
-msgstr "Bestand"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_account_move_line
 msgid "Journal Item"
-msgstr "Boekingsregel"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_product_template
 msgid "Product"
-msgstr "Product"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_product_product
 msgid "Product Variant"
-msgstr "Productvariant"
+msgstr ""
 
 #. module: website_sale_digital
 #: code:addons/website_sale_digital/models/product.py:0
@@ -85,15 +80,13 @@ msgid ""
 "The attached files are the ones that will be purchased and sent to the "
 "customer."
 msgstr ""
-"De bijgevoegde bestanden zijn degene die worden gekocht en naar de klant "
-"worden verzonden."
 
 #. module: website_sale_digital
 #: model:product.template,uom_name:website_sale_digital.product_1
 msgid "Units"
-msgstr "Stuks"
+msgstr ""
 
 #. module: website_sale_digital
 #: model:product.template,name:website_sale_digital.product_1
 msgid "eBook: Office Renovation for Dummies"
-msgstr "eBook: Kantoorrenovatie for Dummies"
+msgstr ""
