@@ -100,12 +100,12 @@ def slug(value):
 
 
 # NOTE: as the pattern is used as it for the ModelConverter (ir_http.py), do not use any flags
-_UNSLUG_RE = re.compile(r'(?:(\w{1,2}|\w[A-Za-z0-9-_]+?\w)-)?(-?\d+)(?=$|/)')
+_UNSLUG_RE = re.compile(r'(?:(\w{1,2}|\w[A-Za-z0-9-_]+?\w)-)?(-?\d+)(?=$|\/|#|\?)')
 
 
 def unslug(s):
-    """Extract slug and id from a string.
-        Always return un 2-tuple (str|None, int|None)
+    """ Extract slug and id from a string.
+        Always return a 2-tuple (str|None, int|None)
     """
     m = _UNSLUG_RE.match(s)
     if not m:
