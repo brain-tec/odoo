@@ -36,11 +36,10 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='sale.automatic_invoice',
     )
     deposit_default_product_id = fields.Many2one(
-        comodel_name='product.product',
-        string="Deposit Product",
-        domain=[('type', '=', 'service')],
-        config_parameter='sale.default_deposit_product_id',
-        help="Default product used for payment advances")
+        related='company_id.sale_down_payment_product_id',
+        readonly=False,
+        # previously config_parameter='sale.default_deposit_product_id',
+    )
 
     invoice_mail_template_id = fields.Many2one(
         comodel_name='mail.template',
@@ -49,14 +48,8 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='sale.default_invoice_email_template',
         help="Email sent to the customer once the invoice is available.",
     )
-
-    use_quotation_validity_days = fields.Boolean(
-        string="Default Quotation Validity", config_parameter='sale.use_quotation_validity_days')
-
-    # Company setup
     quotation_validity_days = fields.Integer(
         related='company_id.quotation_validity_days',
-        string="Default Quotation Validity (Days)",
         readonly=False)
     portal_confirmation_sign = fields.Boolean(
         related='company_id.portal_confirmation_sign',
@@ -82,21 +75,16 @@ class ResConfigSettings(models.TransientModel):
 
     #=== ONCHANGE METHODS ===#
 
-    @api.onchange('use_quotation_validity_days')
-    def _onchange_use_quotation_validity_days(self):
-        if self.quotation_validity_days <= 0:
-            self.quotation_validity_days = self.env['res.company'].default_get(['quotation_validity_days'])['quotation_validity_days']
-
     @api.onchange('quotation_validity_days')
     def _onchange_quotation_validity_days(self):
-        if self.quotation_validity_days <= 0:
+        if self.quotation_validity_days < 0:
             self.quotation_validity_days = self.env['res.company'].default_get(
                 ['quotation_validity_days']
             )['quotation_validity_days']
             return {
                 'warning': {
                     'title': _("Warning"),
-                    'message': _("Quotation Validity is required and must be greater than 0."),
+                    'message': _("Quotation Validity is required and must be greater or equal to 0."),
                 },
             }
 

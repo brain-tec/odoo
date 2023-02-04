@@ -344,14 +344,6 @@ export class OdooEditor extends EventTarget {
                 colNumber: ev.detail.colNumber,
             });
         });
-        // Create the table picker for the toolbar.
-        this.toolbarTablePicker = new TablePicker({ document: this.document });
-        this.toolbarTablePicker.addEventListener('cell-selected', ev => {
-            this.execCommand('insertTable', {
-                rowNumber: ev.detail.rowNumber,
-                colNumber: ev.detail.colNumber,
-            });
-        });
         // Create the table UI.
         const parser = new DOMParser();
         for (const direction of ['row', 'column']) {
@@ -634,14 +626,6 @@ export class OdooEditor extends EventTarget {
             // Ensure anchors in the toolbar don't trigger a hash change.
             const toolbarAnchors = this.toolbar.querySelectorAll('a');
             toolbarAnchors.forEach(a => a.addEventListener('click', e => e.preventDefault()));
-            const tablepickerDropdown = this.toolbar.querySelector('.oe-tablepicker-dropdown');
-            tablepickerDropdown && tablepickerDropdown.append(this.toolbarTablePicker.el);
-            this.toolbarTablePicker.show();
-            const tableDropdownButton = this.toolbar.querySelector('#tableDropdownButton');
-            tableDropdownButton &&
-                tableDropdownButton.addEventListener('click', () => {
-                    this.toolbarTablePicker.reset();
-                });
             for (const colorLabel of this.toolbar.querySelectorAll('label')) {
                 colorLabel.addEventListener('mousedown', ev => {
                     // Hack to prevent loss of focus (done by preventDefault) while still opening
@@ -709,6 +693,19 @@ export class OdooEditor extends EventTarget {
         }
         if (!commonAncestor) {
             return false;
+        }
+
+        // If the common ancestor is in a nested list, make sure to sanitize
+        // that list's parent <li> instead, so there is enough context to
+        // potentially merge sibling nested lists
+        // (eg, <ol>
+        //          <li class="oe-nested"><ul>...</ul></li>
+        //          <li class="oe-nested"><ul>...</ul></li>
+        //      </ol>: these two lists should be merged together so the common
+        // ancestor should be the <ol> element).
+        const nestedListAncestor = closestElement(commonAncestor, '.oe-nested');
+        if (nestedListAncestor && nestedListAncestor.parentElement) {
+            commonAncestor = nestedListAncestor.parentElement;
         }
 
         // sanitize and mark current position as sanitized
@@ -2204,7 +2201,7 @@ export class OdooEditor extends EventTarget {
     _handleSelectionInTable(ev=undefined) {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+        if (anchorNode && (closestElement(anchorNode, '[data-oe-protected="true"]') || !ancestors(anchorNode).includes(this.editable))) {
             return false;
         }
         this.deselectTable();
@@ -3646,21 +3643,6 @@ export class OdooEditor extends EventTarget {
             this.sanitize();
             this.historyStep();
         }
-    }
-
-    /**
-     * Returns true if the current selection content is only one ZWS
-     *
-     * @private
-     * @param {Object} selection
-     * @returns {boolean}
-     */
-    _isSelectionOnlyZws(selection) {
-        let range = selection.getRangeAt(0);
-        if (selection.isCollapsed || !range) {
-            return false;
-        }
-        return range.cloneContents().textContent === '\u200B';
     }
 
     getCurrentCollaborativeSelection() {

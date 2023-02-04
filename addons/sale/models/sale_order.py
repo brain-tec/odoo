@@ -309,11 +309,6 @@ class SaleOrder(models.Model):
 
     @api.depends('company_id')
     def _compute_validity_date(self):
-        enabled_feature = bool(self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days'))
-        if not enabled_feature:
-            self.validity_date = False
-            return
-
         today = fields.Date.context_today(self)
         for order in self:
             days = order.company_id.quotation_validity_days
@@ -784,7 +779,16 @@ class SaleOrder(models.Model):
 
         :return: `mail.template` record or None if default template wasn't found
         """
-        return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
+        self.ensure_one()
+        default_confirmation_template_id = self.env['ir.config_parameter'].sudo().get_param(
+            'sale.default_confirmation_template'
+        )
+        default_confirmation_template = default_confirmation_template_id \
+            and self.env['mail.template'].browse(int(default_confirmation_template_id)).exists()
+        if default_confirmation_template:
+            return default_confirmation_template
+        else:
+            return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
 
     def action_quotation_sent(self):
         """ Mark the given draft quotation(s) as sent.
