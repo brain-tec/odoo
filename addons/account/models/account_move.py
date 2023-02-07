@@ -44,6 +44,8 @@ TYPE_REVERSE_MAP = {
     'in_receipt': 'entry',
 }
 
+EMPTY = object()
+
 
 class AccountMove(models.Model):
     _name = "account.move"
@@ -1507,6 +1509,11 @@ class AccountMove(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
+    @api.onchange('date')
+    def _onchange_date(self):
+        if not self.is_invoice(True):
+            self.line_ids._inverse_amount_currency()
+
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
         if self.invoice_vendor_bill_id:
@@ -1910,13 +1917,8 @@ class AccountMove(models.Model):
             unbalanced_moves = self._get_unbalanced_moves({'records': invoice})
             if isinstance(unbalanced_moves, list) and len(unbalanced_moves) == 1:
                 dummy, debit, credit = unbalanced_moves[0]
-                balance = debit - credit
 
-                vals = {
-                    'debit': -balance if balance < 0.0 else 0.0,
-                    'credit': balance if balance > 0.0 else 0.0,
-                }
-
+                vals = {'balance': credit - debit}
                 if existing_balancing_line:
                     existing_balancing_line.write(vals)
                 else:
@@ -1926,7 +1928,7 @@ class AccountMove(models.Model):
                         'account_id': invoice.company_id.account_journal_suspense_account_id.id,
                         'currency_id': invoice.currency_id.id,
                     })
-                    container['records'].env['account.move.line'].create(vals)
+                    self.env['account.move.line'].create(vals)
 
     @contextmanager
     def _sync_rounding_lines(self, container):
@@ -2072,14 +2074,14 @@ class AccountMove(models.Model):
             if disabled:
                 yield
                 return
-            # Only invoice-like and journal entries in "auto tax mode" are synced
-            tax_filter = lambda m: (m.is_invoice(True) or m.line_ids.tax_ids and not m.tax_cash_basis_origin_move_id)
-            invoice_filter = lambda m: (m.is_invoice(True))
-            misc_filter = lambda m: (m.move_type == 'entry' and not m.tax_cash_basis_origin_move_id)
-            tax_container = {'records': container['records'].filtered(tax_filter)}
-            invoice_container = {'records': container['records'].filtered(invoice_filter)}
-            misc_container = {'records': container['records'].filtered(misc_filter)}
+            def update_containers():
+                # Only invoice-like and journal entries in "auto tax mode" are synced
+                tax_container['records'] = container['records'].filtered(lambda m: (m.is_invoice(True) or m.line_ids.tax_ids and not m.tax_cash_basis_origin_move_id))
+                invoice_container['records'] = container['records'].filtered(lambda m: m.is_invoice(True))
+                misc_container['records'] = container['records'].filtered(lambda m: m.move_type == 'entry' and not m.tax_cash_basis_origin_move_id)
 
+            tax_container, invoice_container, misc_container = ({} for __ in range(3))
+            update_containers()
             with ExitStack() as stack:
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='term_key',
@@ -2109,16 +2111,7 @@ class AccountMove(models.Model):
                 with self.line_ids._sync_invoice(line_container):
                     yield
                     line_container['records'] = self.line_ids
-                tax_container['records'] = container['records'].filtered(tax_filter)
-                invoice_container['records'] = container['records'].filtered(invoice_filter)
-                misc_container['records'] = container['records'].filtered(misc_filter)
-
-            # Delete the tax lines if the journal entry is not in "auto tax mode" anymore
-            for move in container['records']:
-                if move.move_type == 'entry' and not move.line_ids.tax_ids:
-                    move.line_ids.filtered(
-                        lambda l: l.display_type == 'tax'
-                    ).with_context(dynamic_unlink=True).unlink()
+                update_containers()
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -2182,7 +2175,7 @@ class AccountMove(models.Model):
     def create(self, vals_list):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
-        container = {'records': self, 'self': self}
+        container = {'records': self}
         with self._check_balanced(container):
             with self._sync_dynamic_lines(container):
                 moves = super().create([self._sanitize_vals(vals) for vals in vals_list])
@@ -3739,7 +3732,7 @@ class AccountMove(models.Model):
             line[2]['credit'] = currency_id and formatLang(self.env, line[2]['credit'], currency_obj=currency_id) or line[2]['debit']
         return preview_vals
 
-    def _generate_qr_code(self):
+    def _generate_qr_code(self, silent_errors=False):
         """ Generates and returns a QR-code generation URL for this invoice,
         raising an error message if something is misconfigured.
 
@@ -3770,7 +3763,7 @@ class AccountMove(models.Model):
             return None
 
         unstruct_ref = self.ref if self.ref else self.name
-        rslt = self.partner_bank_id.build_qr_code_base64(self.amount_residual, unstruct_ref, self.payment_reference, self.currency_id, self.partner_id, qr_code_method, silent_errors=False)
+        rslt = self.partner_bank_id.build_qr_code_base64(self.amount_residual, unstruct_ref, self.payment_reference, self.currency_id, self.partner_id, qr_code_method, silent_errors=silent_errors)
 
         # We only set qr_code_method after generating the url; otherwise, it
         # could be set even in case of a failure in the QR code generation
@@ -3846,16 +3839,39 @@ class AccountMove(models.Model):
 
     @contextmanager
     def _disable_recursion(self, container, key, default=None, target=True):
-        previous_env = {key: container[key].env for key in container}
-        previous_key = previous_env['records'].context.get(key, default)
+        """Apply the context key to all environments inside this context manager.
 
-        for recordset in container.values():
-            recordset.env = recordset.with_context(**{key: target}).env
+        If this context key is already set on the recordsets, yield `True`.
+        The recordsets modified are the one in the container, as well as all the
+        `self` recordsets of the calling stack.
+        This more or less gives the wanted context to all records inside of the
+        context manager.
+
+        :param container: A mutable dict that needs to at least contain the key
+                          `records`. Can contain other items if changing the env
+                          is needed.
+        :param key: The context key to apply to the recordsets.
+        :param default: the default value of the context key, if it isn't defined
+                        yet in the context
+        :param target: the value of the context key meaning that we shouldn't
+                       recurse
+        :return: True iff we should just exit the context manager
+        """
+
+        disabled = container['records'].env.context.get(key, default) == target
+        previous_values = {}
+        if not disabled:  # it wasn't disabled yet, disable it now
+            for env in self.env.transaction.envs:
+                previous_values[env] = env.context.get(key, EMPTY)
+                env.context = frozendict({**env.context, key: target})
         try:
-            yield previous_key == target
+            yield disabled
         finally:
-            for key, recordset in container.items():
-                recordset.env = previous_env[key]
+            for env, val in previous_values.items():
+                if val != EMPTY:
+                    env.context = frozendict({**env.context, key: val})
+                else:
+                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
 
     # ------------------------------------------------------------
     # MAIL.THREAD
