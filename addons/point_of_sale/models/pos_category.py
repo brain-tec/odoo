@@ -31,6 +31,10 @@ class PosCategory(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_session_open(self):
-        if self.search_count([('id', 'in', self.ids)]):
+        # Modification to allow POS categories' deletion with open sessions. We
+        # should only permit that when all current open sessions belong to
+        # pos.configs that are used in the TCPOS process, where POS orders
+        # are created automatically and not with the Odoo POS UI.
+        if not self._context.get('allow_edition') and self.search_count([('id', 'in', self.ids)]):
             if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
                 raise UserError(_('You cannot delete a point of sale category while a session is still opened.'))
