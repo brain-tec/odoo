@@ -1591,9 +1591,8 @@ class StockMove(models.Model):
         self.env['stock.move.line'].create(move_line_vals_list)
         StockMove.browse(partially_available_moves_ids).write({'state': 'partially_available'})
         StockMove.browse(assigned_moves_ids).write({'state': 'assigned'})
-        if self.env.context.get('bypass_entire_pack'):
-            return
-        self.mapped('picking_id')._check_entire_pack()
+        if not self.env.context.get('bypass_entire_pack'):
+            self.mapped('picking_id')._check_entire_pack()
         StockMove.browse(moves_to_redirect).move_line_ids._apply_putaway_strategy()
 
     def _action_cancel(self):
@@ -2118,3 +2117,16 @@ class StockMove(models.Model):
                     result[out] = (-remaining, False)
 
         return result
+
+    def _get_moves_orig(self, moves=False):
+        self.ensure_one()
+        if not moves:
+            moves = self.env['stock.move']
+        if self in moves:
+            return self.env['stock.move']
+        if self.picking_type_id.code == 'incoming':
+            return self.env['stock.move']
+        moves |= self
+        for move in self.move_orig_ids:
+            moves |= move._get_moves_orig(moves)
+        return moves
