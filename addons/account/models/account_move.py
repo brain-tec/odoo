@@ -449,6 +449,10 @@ class AccountMove(models.Model):
         copy=False,
         tracking=True,
     )
+    amount_total_words = fields.Char(
+        string="Amount total in words",
+        compute="_compute_amount_total_words",
+    )
 
     # === Reverse feature fields === #
     reversed_entry_id = fields.Many2one(
@@ -774,6 +778,8 @@ class AccountMove(models.Model):
                 move.invoice_payment_term_id = move.partner_id.property_payment_term_id
             elif move.is_purchase_document(include_receipts=True) and move.partner_id.property_supplier_payment_term_id:
                 move.invoice_payment_term_id = move.partner_id.property_supplier_payment_term_id
+            else:
+                move.invoice_payment_term_id = False
 
     @api.depends('needed_terms')
     def _compute_invoice_date_due(self):
@@ -1425,11 +1431,16 @@ class AccountMove(models.Model):
 
     @api.depends('company_id')
     def _compute_display_qr_code(self):
-        for record in self:
-            record.display_qr_code = (
-                record.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt')
-                and record.company_id.qr_code
+        for move in self:
+            move.display_qr_code = (
+                move.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt')
+                and move.company_id.qr_code
             )
+
+    @api.depends('amount_total', 'currency_id')
+    def _compute_amount_total_words(self):
+        for move in self:
+            move.amount_total_words = move.currency_id.amount_to_text(move.amount_total).replace(',', '')
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
