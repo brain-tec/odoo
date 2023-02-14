@@ -30,9 +30,12 @@ const {
     createDataURL,
     isGif,
 } = require('web_editor.image_processing');
+const OdooEditorLib = require('@web_editor/../lib/odoo-editor/src/OdooEditor');
 
 var qweb = core.qweb;
 var _t = core._t;
+const preserveCursor = OdooEditorLib.preserveCursor;
+const descendants = OdooEditorLib.descendants;
 
 /**
  * @param {HTMLElement} el
@@ -1233,6 +1236,7 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
     async setValue() {
         await this._super(...arguments);
         this.inputEl.value = this._value;
+        this._oldValue = this._value;
     },
 
     //--------------------------------------------------------------------------
@@ -1256,25 +1260,47 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
      */
     _onInputInput: function (ev) {
         this._value = this.inputEl.value;
+        // When the value changes as a result of a arrow up/down, the change
+        // event is not called, unless a real user input has been triggered.
+        // This event handler holds a variable for this in order to not call
+        // `_onUserValueChange` two times. If the users only uses arrow up/down
+        // it will be trigger on blur otherwise it will be triggered on change.
+        if (!ev.detail || !ev.detail.keyUpOrDown) {
+            this.changeEventWillBeTriggered = true;
+        }
         this._onUserValuePreview(ev);
     },
     /**
-     * TODO remove in master
+     * @private
+     * @param {Event} ev
      */
-    _onInputBlur: function (ev) {},
+    _onInputBlur: function (ev) {
+        if (this.notifyValueChangeOnBlur && !this.changeEventWillBeTriggered) {
+            // In case the input value has been modified with arrow up/down, the
+            // change event is not triggered (except if there has been a natural
+            // input event), so if the element doesn't trigger a preview, we
+            // have to notify that the value changes now.
+            this._onUserValueChange(ev);
+            this.notifyValueChangeOnBlur = false;
+        }
+        this.changeEventWillBeTriggered = false;
+    },
     /**
      * @private
      * @param {Event} ev
      */
     _onInputKeydown: function (ev) {
+        const params = this._methodsParams;
+        if (!params.unit && !params.step) {
+            return;
+        }
         switch (ev.which) {
+            case $.ui.keyCode.ENTER:
+                this._onUserValueChange(ev);
+                break;
             case $.ui.keyCode.UP:
             case $.ui.keyCode.DOWN: {
                 const input = ev.currentTarget;
-                const params = this._methodsParams;
-                if (!params.unit && !params.step) {
-                    break;
-                }
                 let value = parseFloat(input.value || input.placeholder);
                 if (isNaN(value)) {
                     value = 0.0;
@@ -1285,11 +1311,28 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
                 }
                 value += (ev.which === $.ui.keyCode.UP ? step : -step);
                 input.value = this._floatToStr(value);
-                $(input).trigger('input');
+                // We need to know if the change event will be triggered or not.
+                // Change is triggered if there has been a "natural" input event
+                // from the user. Since we are triggering a "fake" input event,
+                // we specify that the original event is a key up/down.
+                input.dispatchEvent(new CustomEvent('input', {
+                    bubbles: true,
+                    cancelable: true,
+                    detail: {keyUpOrDown: true}
+                }));
+                this.notifyValueChangeOnBlur = true;
                 break;
             }
         }
     },
+    /**
+     * @override
+     */
+    _onUserValueChange() {
+        if (this._oldValue !== this._value) {
+            this._super(...arguments);
+        }
+    }
 });
 
 const MultiUserValueWidget = UserValueWidget.extend({
@@ -4672,7 +4715,12 @@ registry.layout_column = SnippetOptionWidget.extend({
         const previousNbColumns = this.$('> .row').children().length;
         let $row = this.$('> .row');
         if (!$row.length) {
+            const restoreCursor = preserveCursor(this.$target[0].ownerDocument);
+            for (const node of descendants(this.$target[0])) {
+                node.ouid = undefined;
+            }
             $row = this.$target.contents().wrapAll($('<div class="row"><div class="col-lg-12"/></div>')).parent().parent();
+            restoreCursor();
         }
 
         const nbColumns = parseInt(widgetValue);
@@ -4682,7 +4730,12 @@ registry.layout_column = SnippetOptionWidget.extend({
         // TODO: make this more generic in activate_snippet event handler.
         await new Promise(resolve => setTimeout(resolve));
         if (nbColumns === 0) {
+            const restoreCursor = preserveCursor(this.$target[0].ownerDocument);
+            for (const node of descendants($row[0])) {
+                node.ouid = undefined;
+            }
             $row.contents().unwrap().contents().unwrap();
+            restoreCursor();
             this.trigger_up('activate_snippet', {$snippet: this.$target});
         } else if (previousNbColumns === 0) {
             this.trigger_up('activate_snippet', {$snippet: this.$('> .row').children().first()});
