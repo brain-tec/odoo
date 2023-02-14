@@ -103,6 +103,7 @@ class Product(models.Model):
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     valid_ean = fields.Boolean('Barcode is valid EAN', compute='_compute_valid_ean')
 
+    @api.depends('product_tmpl_id')
     def _compute_show_qty_status_button(self):
         for product in self:
             product.show_on_hand_qty_status_button = product.product_tmpl_id.show_on_hand_qty_status_button
@@ -689,6 +690,7 @@ class ProductTemplate(models.Model):
     show_on_hand_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
 
+    @api.depends('type')
     def _compute_show_qty_status_button(self):
         for template in self:
             template.show_on_hand_qty_status_button = template.type == 'product'
@@ -907,11 +909,10 @@ class ProductTemplate(models.Model):
     def action_update_quantity_on_hand(self):
         advanced_option_groups = [
             'stock.group_stock_multi_locations',
-            'stock.group_production_lot',
             'stock.group_tracking_owner',
-            'product.group_tracking_lot'
+            'stock.group_tracking_lot'
         ]
-        if (self.env.user.user_has_groups(','.join(advanced_option_groups))):
+        if (self.env.user.user_has_groups(','.join(advanced_option_groups))) or self.tracking != 'none':
             return self.action_open_quants()
         else:
             default_product_id = self.env.context.get('default_product_id', len(self.product_variant_ids) == 1 and self.product_variant_id.id)
