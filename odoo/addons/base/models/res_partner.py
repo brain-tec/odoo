@@ -131,14 +131,7 @@ class PartnerCategory(models.Model):
     def name_get(self):
         """ Return the categories' display name, including their direct
             parent by default.
-
-            If ``context['partner_category_display']`` is ``'short'``, the short
-            version of the category name (without the direct parent) is used.
-            The default is the long version.
         """
-        if self._context.get('partner_category_display') == 'short':
-            return super(PartnerCategory, self).name_get()
-
         res = []
         for category in self:
             names = []
@@ -600,10 +593,10 @@ class Partner(models.Model):
         if self.commercial_partner_id == self:
             commercial_fields = self._commercial_fields()
             if any(field in values for field in commercial_fields):
-                self._commercial_sync_to_children()
+                self.sudo()._commercial_sync_to_children()
         for child in self.child_ids.filtered(lambda c: not c.is_company):
             if child.commercial_partner_id != self.commercial_partner_id:
-                self._commercial_sync_to_children()
+                self.sudo()._commercial_sync_to_children()
                 break
         # 2b. Address fields: sync if address changed
         address_fields = self._address_fields()
@@ -814,8 +807,6 @@ class Partner(models.Model):
                 name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
             if not partner.is_company:
                 name = self._get_contact_name(partner, name)
-        if self._context.get('show_address_only'):
-            name = partner._display_address(without_company=True)
         if self._context.get('show_address'):
             name = name + "\n" + partner._display_address(without_company=True)
         name = name.replace('\n\n', '\n')
@@ -827,8 +818,6 @@ class Partner(models.Model):
             name = ", ".join([n for n in splitted_names if n.strip()])
         if self._context.get('show_email') and partner.email:
             name = "%s <%s>" % (name, partner.email)
-        if self._context.get('html_format'):
-            name = name.replace('\n', '<br/>')
         if self._context.get('show_vat') and partner.vat:
             name = "%s ‒ %s" % (name, partner.vat)
         return name

@@ -21,12 +21,18 @@ import { session } from "@web/session";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { ListConfirmationDialog } from "@web/views/list/list_confirmation_dialog";
 import { Model } from "@web/views/model";
-import { archParseBoolean, evalDomain, isNumeric, isRelational, isX2Many } from "@web/views/utils";
+import {
+    archParseBoolean,
+    evalDomain,
+    isNumeric,
+    isRelational,
+    isX2Many,
+    orderByToString,
+} from "@web/views/utils";
 
 const { DateTime } = luxon;
 import { markRaw, markup, toRaw } from "@odoo/owl";
 
-const formatters = registry.category("formatters");
 const preloadedDataRegistry = registry.category("preloadedData");
 
 const { CREATE, UPDATE, DELETE, FORGET, LINK_TO, DELETE_ALL, REPLACE_WITH } = x2ManyCommands;
@@ -65,20 +71,6 @@ export function isAllowedDateField(groupByField) {
         ["date", "datetime"].includes(groupByField.type) &&
         archParseBoolean(groupByField.rawAttrs.allow_group_range_value)
     );
-}
-
-/**
- * @typedef {Object} OrderTerm ?
- * @property {string} name
- * @property {boolean} asc
- */
-
-/**
- * @param {OrderTerm[]} orderBy
- * @returns {string}
- */
-function orderByToString(orderBy) {
-    return orderBy.map((o) => `${o.name} ${o.asc ? "ASC" : "DESC"}`).join(", ");
 }
 
 /**
@@ -401,48 +393,6 @@ function clearObject(obj) {
     }
 }
 
-/**
- * Returns a "raw" version of the field value on a given record.
- *
- * @param {Record} record
- * @param {string} fieldName
- * @returns {any}
- */
-export function getRawValue(record, fieldName) {
-    const field = record.fields[fieldName];
-    const value = record.data[fieldName];
-    switch (field.type) {
-        case "one2many":
-        case "many2many": {
-            return value.count ? value.currentIds : [];
-        }
-        case "many2one": {
-            return (value && value[0]) || false;
-        }
-        case "date":
-        case "datetime": {
-            return value && value.toISO();
-        }
-        default: {
-            return value;
-        }
-    }
-}
-
-/**
- * Returns a formatted version of the field value on a given record.
- *
- * @param {Record} record
- * @param {string} fieldName
- * @returns {string}
- */
-export function getValue(record, fieldName) {
-    const field = record.fields[fieldName];
-    const value = record.data[fieldName];
-    const formatter = formatters.get(field.type, String);
-    return formatter(value, { field, data: record.data });
-}
-
 export class Record extends DataPoint {
     setup(params, state) {
         if ("resId" in params) {
@@ -577,17 +527,6 @@ export class Record extends DataPoint {
             return [];
         }
         return this._changes.map((change) => this.activeFields[change]);
-    }
-
-    get formattedRecord() {
-        const record = Object.create(this, Object.getOwnPropertyDescriptors(this));
-        for (const fieldName in this.activeFields) {
-            record[fieldName] = {
-                value: getValue(this, fieldName),
-                raw_value: getRawValue(this, fieldName),
-            };
-        }
-        return record;
     }
 
     get isInEdition() {
