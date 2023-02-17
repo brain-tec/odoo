@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { FloatField } from "@web/views/fields/float/float_field";
+import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { _lt } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
@@ -37,7 +37,7 @@ export class ProductDiscountField extends FloatField {
                         return {
                             operation: "UPDATE",
                             record: line,
-                            data: {["discount"]: Number(ev.target.value)},
+                            data: {["discount"]: this.props.value},
                         };
                     });
 
@@ -57,6 +57,11 @@ export function sameValue(orderLines) {
 
 ProductDiscountField.components = { ConfirmationDialog };
 ProductDiscountField.template = "sale.ProductDiscountField";
-ProductDiscountField.displayName = _lt("Disc.%");
 
-registry.category("fields").add("sol_discount", ProductDiscountField)
+export const productDiscountField = {
+    ...floatField,
+    component: ProductDiscountField,
+    displayName: _lt("Disc.%"),
+};
+
+registry.category("fields").add("sol_discount", productDiscountField)
