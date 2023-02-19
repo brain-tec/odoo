@@ -1,4 +1,2 @@
-
-
-def load_translations(env):
-    env.ref("l10n_my.l10n_my_chart_template").process_coa_translations()
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+from . import models

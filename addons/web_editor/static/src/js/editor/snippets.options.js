@@ -863,7 +863,14 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
 
         this.menuEl = document.createElement('we-selection-items');
         if (this.options && this.options.childNodes) {
-            this.options.childNodes.forEach(node => node && this.menuEl.appendChild(node));
+            this.options.childNodes.forEach(node => {
+                // Ensure to only put element nodes inside the selection menu
+                // as there could be an :empty CSS rule to handle the case when
+                // the menu is empty (so it should not contain any whitespace).
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    this.menuEl.appendChild(node);
+                }
+            });
         }
         this.containerEl.appendChild(this.menuEl);
     },
@@ -1956,7 +1963,8 @@ const ListUserValueWidget = UserValueWidget.extend({
         'click we-button.o_we_list_add_existing': '_onAddExistingItemClick',
         'click we-select.o_we_user_value_widget.o_we_add_list_item': '_onAddItemSelectClick',
         'click we-button.o_we_checkbox_wrapper': '_onAddItemCheckboxClick',
-        'change table input': '_onListItemChange',
+        'input table input': '_onListItemBlurInput',
+        'blur table input': '_onListItemBlurInput',
     },
 
     /**
@@ -2171,8 +2179,9 @@ const ListUserValueWidget = UserValueWidget.extend({
     },
     /**
      * @private
+     * @param {Boolean} [preview]
      */
-    _notifyCurrentState() {
+    _notifyCurrentState(preview = false) {
         const values = [...this.listTable.querySelectorAll('.o_we_list_record_name input')].map(el => {
             let id = this.isCustom ? el.value : el.name;
             if (this.el.dataset.idMode && this.el.dataset.idMode === "name") {
@@ -2199,7 +2208,11 @@ const ListUserValueWidget = UserValueWidget.extend({
             });
         }
         this._value = JSON.stringify(values);
-        this.notifyValueChange(false);
+        if (preview) {
+            this._onUserValuePreview();
+        } else {
+            this._onUserValueChange();
+        }
         if (!this.createWidget && !this.isCustom) {
             this._reloadSelectDropdown(values);
         }
@@ -2243,6 +2256,9 @@ const ListUserValueWidget = UserValueWidget.extend({
         }
         this._addItemToTable(undefined, this.el.dataset.defaultValue, recordData);
         this._notifyCurrentState();
+        // Scroll to the new list element.
+        this.el.querySelector('tr:last-child')
+            .scrollIntoView({behavior: 'smooth', block: 'nearest'});
     },
     /**
      * @private
@@ -2274,9 +2290,19 @@ const ListUserValueWidget = UserValueWidget.extend({
     },
     /**
      * @private
+     * @param {Event} ev
      */
-    _onListItemChange() {
-        this._notifyCurrentState();
+    _onListItemBlurInput(ev) {
+        const preview = ev.type === 'input';
+        if (preview || !this.el.contains(ev.relatedTarget) || this.el.dataset.renderOnInputBlur) {
+            // We call the function below only if the element that recovers the
+            // focus after this blur is not an element of the we-list or if it
+            // is an input event (preview). This allows to use the TAB key to go
+            // from one input to another in the list. This behavior can be
+            // cancelled if the widget has reloadOnInputBlur = "true" in its
+            // dataset.
+            this._notifyCurrentState(preview);
+        }
     },
     /**
      * @private

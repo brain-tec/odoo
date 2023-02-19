@@ -1407,14 +1407,6 @@ class BaseModel(metaclass=MetaModel):
         return defaults
 
     @api.model
-    def fields_get_keys(self):
-        warnings.warn(
-            'fields_get_keys() method is deprecated, use `_fields` or `get_views` instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        return list(self._fields)
-
-    @api.model
     def _rec_name_fallback(self):
         # if self._rec_name is set, it belongs to self._fields
         return self._rec_name or 'id'
@@ -3526,8 +3518,11 @@ class BaseModel(metaclass=MetaModel):
 
             # Check if the records are used as default properties.
             refs = [f'{self._name},{id_}' for id_ in sub_ids]
-            if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)], limit=1):
+            default_properties = Property.search([('res_id', '=', False), ('value_reference', 'in', refs)])
+            if not self._context.get(MODULE_UNINSTALL_FLAG) and default_properties:
                 raise UserError(_('Unable to delete this document because it is used as a default property'))
+            else:
+                ir_property_unlink |= default_properties
 
             # Delete the records' properties.
             ir_property_unlink |= Property.search([('res_id', 'in', refs)])
@@ -4915,14 +4910,6 @@ class BaseModel(metaclass=MetaModel):
         return {key: val[0] if val else ''
                 for key, val in results.items()}
 
-    def get_xml_id(self):
-        warnings.warn(
-            'get_xml_id() is deprecated method, use get_external_id() instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        return self.get_external_id()
-
-    # Transience
     @classmethod
     def is_transient(cls):
         """ Return whether the model is transient.
@@ -5510,27 +5497,6 @@ class BaseModel(metaclass=MetaModel):
         for name, value in values.items():
             self[name] = value
 
-    @api.model
-    def flush(self, fnames=None, records=None):
-        """ Process all the pending computations (on all models), and flush all
-        the pending updates to the database.
-
-        :param list[str] fnames: list of field names to flush.  If given,
-            limit the processing to the given fields of the current model.
-        :param Model records: if given (together with ``fnames``), limit the
-            processing to the given records.
-        """
-        warnings.warn(
-            "Deprecated method flush(), use flush_model(), flush_recordset() or env.flush_all() instead",
-            DeprecationWarning, stacklevel=2,
-        )
-        if fnames is None:
-            self.env.flush_all()
-        elif records is None:
-            self.flush_model(fnames)
-        else:
-            records.flush_recordset(fnames)
-
     def flush_model(self, fnames=None):
         """ Process the pending computations and database updates on ``self``'s
         model.  When the parameter is given, the method guarantees that at least
@@ -5875,36 +5841,6 @@ class BaseModel(metaclass=MetaModel):
         # the sake of code simplicity.
         return self.browse(ids)
 
-    @api.model
-    def refresh(self):
-        """ Clear the records cache.
-
-            .. deprecated:: 8.0
-                The record cache is automatically invalidated.
-        """
-        warnings.warn('refresh() is deprecated method, use invalidate_cache() instead',
-                      DeprecationWarning, stacklevel=2)
-        self.env.invalidate_all()
-
-    @api.model
-    def invalidate_cache(self, fnames=None, ids=None):
-        """ Invalidate the record caches after some records have been modified.
-            If both ``fnames`` and ``ids`` are ``None``, the whole cache is cleared.
-
-            :param fnames: the list of modified fields, or ``None`` for all fields
-            :param ids: the list of modified record ids, or ``None`` for all
-        """
-        warnings.warn(
-            "Deprecated method invalidate_cache(), use invalidate_model(), invalidate_recordset() or env.invalidate_all() instead",
-            DeprecationWarning, stacklevel=2
-        )
-        if ids is not None:
-            self.browse(ids).invalidate_recordset(fnames)
-        elif fnames is not None:
-            self.invalidate_model(fnames)
-        else:
-            self.env.invalidate_all()
-
     def invalidate_model(self, fnames=None, flush=True):
         """ Invalidate the cache of all records of ``self``'s model, when the
         cached values no longer correspond to the database values.  If the
@@ -6083,23 +6019,6 @@ class BaseModel(metaclass=MetaModel):
                     records |= cache_records.filtered(lambda r: set(r[field.name]._ids) & set(self._ids))
 
             yield from records._modified_triggers(subtree)
-
-    @api.model
-    def recompute(self, fnames=None, records=None):
-        """ Recompute all function fields (or the given ``fnames`` if present).
-            The fields and records to recompute have been determined by method
-            :meth:`modified`.
-        """
-        warnings.warn(
-            "Deprecated method recompute(), use flush_model(), flush_recordset() or env.flush_all() instead",
-            DeprecationWarning, stacklevel=2,
-        )
-        if fnames is None:
-            self.env._recompute_all()
-        elif records is None:
-            self._recompute_model(fnames)
-        else:
-            records._recompute_recordset(fnames)
 
     def _recompute_model(self, fnames=None):
         """ Process the pending computations of the fields of ``self``'s model.
