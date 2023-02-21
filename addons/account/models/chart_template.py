@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+
 from odoo.exceptions import AccessError
 from odoo import api, fields, models, _
 from odoo import SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 from odoo.addons.account.models.account_tax import TYPE_TAX_USE
+from odoo.tools import html_escape
+
 
 import logging
 
@@ -61,7 +65,7 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
                 for index, conflict_taxes in enumerate(conflict_taxes):
                     conflict_taxes.name = f"[old{index if index > 0 else ''}] {conflict_taxes.name}"
 
-        templates_to_create = env['account.tax.template'].with_context(active_test=False)
+        templates_to_create = env['account.tax.template']
         for template, old_tax in template2tax_mapping:
             if old_tax:
                 xml_id = old_tax.get_external_id().get(old_tax.id)
@@ -69,7 +73,7 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
                     _remove_xml_id(xml_id)
             _avoid_name_conflict(company, template)
             templates_to_create += template
-        new_template2tax_company = templates_to_create._generate_tax(company, accounts_exist=True)['tax_template_to_tax']
+        new_template2tax_company = templates_to_create._generate_tax(company)['tax_template_to_tax']
         return [(template.id, tax.id) for template, tax in new_template2tax_company.items()]
 
     def _update_taxes_from_template(template2tax_mapping):
