@@ -1348,7 +1348,8 @@ export class Record extends DataPoint {
                 );
                 this.resId = resId;
             } else {
-                this.resId = await this.model.orm.create(this.resModel, [changes], { context });
+                const [resId] = await this.model.orm.create(this.resModel, [changes], { context });
+                this.resId = resId;
             }
             delete this.virtualId;
             this.data.id = this.resId;
@@ -1795,13 +1796,14 @@ class DynamicList extends DataPoint {
 DynamicList.DEFAULT_LIMIT = 80;
 
 export class DynamicRecordList extends DynamicList {
-    setup(params) {
+    setup(params, state) {
         super.setup(...arguments);
 
         /** @type {Record[]} */
         this.records = [];
         this.data = params.data;
-        this.countLimit = params.countLimit || this.constructor.WEB_SEARCH_READ_COUNT_LIMIT;
+        this.countLimit =
+            state.countLimit || params.countLimit || this.constructor.WEB_SEARCH_READ_COUNT_LIMIT;
         this.hasLimitedCount = false;
     }
 
@@ -1936,6 +1938,7 @@ export class DynamicRecordList extends DynamicList {
         return {
             ...super.exportState(),
             offset: this.offset,
+            countLimit: this.countLimit,
         };
     }
 
@@ -1952,6 +1955,7 @@ export class DynamicRecordList extends DynamicList {
         this.countLimit = Number.MAX_SAFE_INTEGER;
         this.hasLimitedCount = false;
         this.model.notify();
+        return this.count;
     }
 
     async load(params = {}) {
@@ -2026,6 +2030,9 @@ export class DynamicRecordList extends DynamicList {
      * @returns {Promise<Record[]>}
      */
     async _loadRecords() {
+        if (this.countLimit < this.offset + this.limit) {
+            this.countLimit = this.offset + this.limit;
+        }
         const kwargs = {
             limit: this.limit,
             offset: this.offset,
@@ -2065,6 +2072,7 @@ export class DynamicRecordList extends DynamicList {
             this.hasLimitedCount = true;
             this.count = length - 1;
         } else {
+            this.hasLimitedCount = false;
             this.count = length;
         }
 
@@ -2453,7 +2461,8 @@ export class DynamicGroupList extends DynamicList {
                     }
                     case "__fold": {
                         // optional
-                        groupParams.isFolded = value;
+                        groupParams.isFolded =
+                            openGroups >= this.constructor.DEFAULT_LOAD_LIMIT || value;
                         if (!value) {
                             openGroups++;
                         }
