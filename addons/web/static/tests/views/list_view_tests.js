@@ -1006,6 +1006,50 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test(
+        "list view: click on an action button saves the record before executing the action",
+        async function (assert) {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo" />
+                        <button name="toDo" type="object" class="do_something" string="Do Something"/>
+                    </tree>`,
+                mockRPC: async (route, args) => {
+                    assert.step(args.method);
+                    if (route === "/web/dataset/call_button") {
+                        return true;
+                    }
+                },
+            });
+
+            await click(target.querySelector(".o_data_cell"));
+            await editInput(target, ".o_data_row [name='foo'] input", "plop");
+            assert.strictEqual(
+                target.querySelector(".o_data_row [name='foo'] input").value,
+                "plop"
+            );
+
+            await click(target.querySelector(".o_data_row button"));
+            assert.strictEqual(
+                target.querySelector(".o_data_row [name='foo']").textContent,
+                "plop"
+            );
+
+            assert.verifySteps([
+                "get_views",
+                "web_search_read",
+                "write",
+                "read",
+                "toDo",
+                "web_search_read",
+            ]);
+        }
+    );
+
+    QUnit.test(
         "list view: action button executes action on click: correct parameters",
         async function (assert) {
             assert.expect(6);
@@ -16870,9 +16914,13 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("view widgets are rendered in list view", async function (assert) {
-        class TestWidget extends Component {}
-        TestWidget.template = xml`<div class="test_widget" t-esc="props.record.data.bar"/>`;
-        registry.category("view_widgets").add("test_widget", TestWidget);
+        class TestWidget extends Component {
+            static template = xml`<div class="test_widget" t-esc="props.record.data.bar"/>`;
+        }
+        const testWidget = {
+            component: TestWidget,
+        };
+        registry.category("view_widgets").add("test_widget", testWidget);
         await makeView({
             type: "list",
             resModel: "foo",
