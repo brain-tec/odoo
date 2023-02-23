@@ -42,7 +42,7 @@ export class RadioField extends Component {
         return this.props.record.activeFields[this.props.name].string;
     }
     get value() {
-        switch (this.props.type) {
+        switch (this.props.record.fields[this.props.name].type) {
             case "selection":
                 return this.props.value;
             case "many2one":
@@ -56,12 +56,12 @@ export class RadioField extends Component {
      * @param {any} value
      */
     onChange(value) {
-        switch (this.props.type) {
+        switch (this.props.record.fields[this.props.name].type) {
             case "selection":
-                this.props.update(value[0]);
+                this.props.record.update({ [this.props.name]: value[0] });
                 break;
             case "many2one":
-                this.props.update(value);
+                this.props.record.update({ [this.props.name]: value });
                 break;
         }
     }

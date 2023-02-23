@@ -157,29 +157,15 @@ export class Field extends Component {
         delete props.showTooltip;
         delete props.fieldInfo;
         delete props.attrs;
+        delete props.type;
 
         return {
             ...fieldInfo.props,
-            update: async (value) => {
-                await record.update({ [this.props.name]: value });
-                if (record.selected && record.model.multiEdit) {
-                    return;
-                }
-                const rootRecord =
-                    record.model.root instanceof record.constructor && record.model.root;
-                const isInEdition = rootRecord ? rootRecord.isInEdition : record.isInEdition;
-                // We save only if we're on view mode readonly and no readonly field modifier
-                if (!isInEdition && !readonlyFromModifiers) {
-                    // TODO: maybe move this in the model
-                    return record.save();
-                }
-            },
             value: this.props.record.data[this.props.name],
             decorations: decorationMap,
             readonly: !record.isInEdition || readonlyFromModifiers || false,
             ...propsFromAttrs,
             ...props,
-            type: field.type,
         };
     }
 

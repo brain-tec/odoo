@@ -34,7 +34,7 @@ export class ReferenceField extends Component {
                 this.state.resModel &&
                 this.getRelation(nextProps) !== this.state.resModel
             ) {
-                nextProps.update(false);
+                nextProps.record.update({ [this.props.name]: false });
             }
         });
     }
@@ -43,7 +43,7 @@ export class ReferenceField extends Component {
         return p.record.preloadedData[p.name];
     }
     getValue(p) {
-        if (p.type === "char") {
+        if (p.record.fields[p.name].type === "char") {
             const pdata = this.getPreloadedData(p);
             if (!pdata) {
                 return null;
@@ -69,7 +69,10 @@ export class ReferenceField extends Component {
         return p;
     }
     get selection() {
-        if (this.props.type !== "char" && !this.props.hideModelSelector) {
+        if (
+            this.props.record.fields[this.props.name].type !== "char" &&
+            !this.props.hideModelSelector
+        ) {
             return this.props.record.fields[this.props.name].selection;
         }
         return [];
@@ -102,20 +105,21 @@ export class ReferenceField extends Component {
 
     updateModel(value) {
         this.state.resModel = value;
-        this.props.update(false);
+        this.props.record.update({ [this.props.name]: false });
     }
 
-    updateM2O(value) {
+    updateM2O(data) {
+        const value = data[this.props.name];
         if (!this.state.resModel) {
             this.state.resModel = this.relation;
         }
-        this.props.update(
-            value && {
+        this.props.record.update({
+            [this.props.name]: value && {
                 resModel: this.state.resModel,
                 resId: value[0],
                 displayName: value[1],
-            }
-        );
+            },
+        });
     }
 }
 
