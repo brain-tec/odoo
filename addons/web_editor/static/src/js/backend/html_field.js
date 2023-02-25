@@ -8,7 +8,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { getWysiwygClass } from 'web_editor.loader';
 import { QWebPlugin } from '@web_editor/js/backend/QWebPlugin';
 import { TranslationButton } from "@web/views/fields/translation_button";
-import { useDynamicPlaceholder } from "@web/views/fields/dynamicplaceholder_hook";
+import { useDynamicPlaceholder } from "@web/views/fields/dynamic_placeholder_hook";
 import { QWeb } from 'web.core';
 import ajax from 'web.ajax';
 import {
@@ -157,6 +157,9 @@ export class HtmlField extends Component {
                 }
             })();
         });
+        onMounted(() => {
+            this.dynamicPlaceholder?.setElementRef(this.wysiwyg);
+        });
         onWillUnmount(() => {
             if (this._qwebPlugin) {
                 this._qwebPlugin.destroy();
@@ -191,22 +194,18 @@ export class HtmlField extends Component {
                         fontawesome: 'fa-magic',
                         callback: () => {
                             this.wysiwygRangePosition = getRangePosition(document.createElement('x'), this.wysiwyg.options.document || document);
-                            const baseModel = this.props.record.data.mailing_model_real || this.props.record.data.model;
-                            if (baseModel) {
-                                // The method openDynamicPlaceholder need to be triggered
-                                // after the focus from powerBox prevalidate.
-                                setTimeout(async () => {
-                                    await this.dynamicPlaceholder.open(
-                                        this.wysiwyg.$editable[0],
-                                        baseModel,
-                                        {
-                                            validateCallback: this.onDynamicPlaceholderValidate.bind(this),
-                                            closeCallback: this.onDynamicPlaceholderClose.bind(this),
-                                            positionCallback: this.positionDynamicPlaceholder.bind(this),
-                                        }
-                                    );
-                                });
-                            }
+                            this.dynamicPlaceholder.updateModel(this.props.dynamicPlaceholderModelReferenceField);
+                            // The method openDynamicPlaceholder need to be triggered
+                            // after the focus from powerBox prevalidate.
+                            setTimeout(async () => {
+                                await this.dynamicPlaceholder.open(
+                                    {
+                                        validateCallback: this.onDynamicPlaceholderValidate.bind(this),
+                                        closeCallback: this.onDynamicPlaceholderClose.bind(this),
+                                        positionCallback: this.positionDynamicPlaceholder.bind(this),
+                                    }
+                                );
+                            });
                         },
                     }
                 ],
@@ -385,7 +384,9 @@ export class HtmlField extends Component {
         }
     }
     _isDirty() {
-        return !this.props.readonly && this.props.value.toString() !== this.getEditingValue();
+        const strippedPropValue = stripHistoryIds(String(this.props.value));
+        const strippedEditingValue = stripHistoryIds(this.getEditingValue());
+        return !this.props.readonly && strippedPropValue !== strippedEditingValue;
     }
     _getCodeViewEl() {
         return this.state.showCodeView && this.codeViewRef.el;
@@ -619,6 +620,7 @@ HtmlField.props = {
     codeview: { type: Boolean, optional: true },
     isCollaborative: { type: Boolean, optional: true },
     dynamicPlaceholder: { type: Boolean, optional: true, default: false },
+    dynamicPlaceholderModelReferenceField: { type: String, optional: true },
     cssReadonlyAssetId: { type: String, optional: true },
     cssEditAssetId: { type: String, optional: true },
     isInlineStyle: { type: Boolean, optional: true },
@@ -630,49 +632,50 @@ export const htmlField = {
     component: HtmlField,
     displayName: _lt("Html"),
     supportedTypes: ["html"],
-    extractProps: ({ attrs }) => {
+    extractProps: ({ attrs, options }) => {
         const wysiwygOptions = {
             placeholder: attrs.placeholder,
-            noAttachment: attrs.options['no-attachment'],
-            inIframe: Boolean(attrs.options.cssEdit),
-            iframeCssAssets: attrs.options.cssEdit,
+            noAttachment: options['no-attachment'],
+            inIframe: Boolean(options.cssEdit),
+            iframeCssAssets: options.cssEdit,
             iframeHtmlClass: attrs.iframeHtmlClass,
-            snippets: attrs.options.snippets,
+            snippets: options.snippets,
             mediaModalParams: {
-                noVideos: 'noVideos' in attrs.options ? attrs.options.noVideos : true,
+                noVideos: 'noVideos' in options ? options.noVideos : true,
                 useMediaLibrary: true,
             },
             linkForceNewWindow: true,
             tabsize: 0,
-            height: attrs.options.height,
-            minHeight: attrs.options.minHeight,
-            maxHeight: attrs.options.maxHeight,
-            resizable: 'resizable' in attrs.options ? attrs.options.resizable : false,
+            height: options.height,
+            minHeight: options.minHeight,
+            maxHeight: options.maxHeight,
+            resizable: 'resizable' in options ? options.resizable : false,
             editorPlugins: [QWebPlugin],
         };
-        if ('collaborative' in attrs.options) {
-            wysiwygOptions.collaborative = attrs.options.collaborative;
+        if ('collaborative' in options) {
+            wysiwygOptions.collaborative = options.collaborative;
         }
-        if ('allowCommandImage' in attrs.options) {
+        if ('allowCommandImage' in options) {
             // Set the option only if it is explicitly set in the view so a default
             // can be set elsewhere otherwise.
-            wysiwygOptions.allowCommandImage = Boolean(attrs.options.allowCommandImage);
+            wysiwygOptions.allowCommandImage = Boolean(options.allowCommandImage);
         }
-        if ('allowCommandVideo' in attrs.options) {
+        if ('allowCommandVideo' in options) {
             // Set the option only if it is explicitly set in the view so a default
             // can be set elsewhere otherwise.
-            wysiwygOptions.allowCommandVideo = Boolean(attrs.options.allowCommandVideo);
+            wysiwygOptions.allowCommandVideo = Boolean(options.allowCommandVideo);
         }
         return {
-            codeview: Boolean(odoo.debug && attrs.options.codeview),
+            codeview: Boolean(odoo.debug && options.codeview),
             placeholder: attrs.placeholder,
 
-            isCollaborative: attrs.options.collaborative,
-            cssReadonlyAssetId: attrs.options.cssReadonly,
-            dynamicPlaceholder: attrs.options.dynamic_placeholder,
-            cssEditAssetId: attrs.options.cssEdit,
-            isInlineStyle: attrs.options['style-inline'],
-            wrapper: attrs.options.wrapper,
+            isCollaborative: options.collaborative,
+            cssReadonlyAssetId: options.cssReadonly,
+            dynamicPlaceholder: options?.dynamic_placeholder || false,
+            dynamicPlaceholderModelReferenceField: options?.dynamic_placeholder_model_reference_field || "",
+            cssEditAssetId: options.cssEdit,
+            isInlineStyle: options['style-inline'],
+            wrapper: options.wrapper,
 
             wysiwygOptions,
         };

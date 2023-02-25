@@ -69,7 +69,7 @@ const DEFAULT_QUICK_CREATE_VIEW = {
 export function isAllowedDateField(groupByField) {
     return (
         ["date", "datetime"].includes(groupByField.type) &&
-        archParseBoolean(groupByField.rawAttrs.allow_group_range_value)
+        archParseBoolean(groupByField.attrs.allow_group_range_value)
     );
 }
 
@@ -724,7 +724,9 @@ export class Record extends DataPoint {
                     : false;
             } else if (fieldType === "reference") {
                 const value = changes[fieldName];
-                changes[fieldName] = value ? `${value.resModel},${value.resId}` : false;
+                changes[fieldName] = value && value.resModel && value.resId
+                    ? `${value.resModel},${value.resId}`
+                    : (value || false);
             }
         }
 
@@ -1481,7 +1483,7 @@ class DynamicList extends DataPoint {
         }
         const [groupByFieldName, granularity] = this.firstGroupBy.split(":");
         return {
-            rawAttrs: {},
+            attrs: {},
             ...this.fields[groupByFieldName],
             ...this.activeFields[groupByFieldName],
             granularity: granularity,
