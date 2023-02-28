@@ -228,7 +228,7 @@ export class HtmlField extends Component {
                 collaborationResId: parseInt(this.props.record.resId),
             },
             mediaModalParams: {
-                ...this.props.mediaModalParams,
+                ...this.props.wysiwygOptions.mediaModalParams,
                 res_model: this.props.record.resModel,
                 res_id: this.props.record.resId,
             },
@@ -281,7 +281,11 @@ export class HtmlField extends Component {
     async updateValue() {
         const value = this.getEditingValue();
         const lastValue = (this.props.value || "").toString();
-        if (value !== null && !(!lastValue && stripHistoryIds(value) === "<p><br></p>") && value !== lastValue) {
+        if (
+            value !== null &&
+            !(!lastValue && stripHistoryIds(value) === "<p><br></p>") &&
+            stripHistoryIds(value) !== stripHistoryIds(lastValue)
+        ) {
             this.props.setDirty(false);
             this.currentEditingValue = value;
             await this.props.update(value);
