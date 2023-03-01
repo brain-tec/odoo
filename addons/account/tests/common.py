@@ -126,13 +126,13 @@ class AccountTestInvoicingCommon(TransactionCase):
                 (0, 0, {
                     'value': 'percent',
                     'value_amount': 30.0,
-                    'days': 0,
+                    'nb_days': 0,
                 }),
                 (0, 0, {
-                    'value': 'balance',
-                    'value_amount': 0.0,
-                    'months': 1,
-                    'end_month': True,
+                    'value': 'percent',
+                    'value_amount': 70.0,
+                    'delay_type': 'days_after_end_of_next_month',
+                    'nb_days': 0,
                 }),
             ],
         })
@@ -379,7 +379,7 @@ class AccountTestInvoicingCommon(TransactionCase):
         for product in (products or []):
             with move_form.invoice_line_ids.new() as line_form:
                 line_form.product_id = product
-                if taxes:
+                if taxes is not None:
                     line_form.tax_ids.clear()
                     for tax in taxes:
                         line_form.tax_ids.add(tax)
@@ -388,7 +388,7 @@ class AccountTestInvoicingCommon(TransactionCase):
             with move_form.invoice_line_ids.new() as line_form:
                 line_form.name = "test line"
                 line_form.price_unit = amount
-                if taxes:
+                if taxes is not None:
                     line_form.tax_ids.clear()
                     for tax in taxes:
                         line_form.tax_ids.add(tax)

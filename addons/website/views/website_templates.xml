@@ -206,9 +206,11 @@
     </xpath>
     <xpath expr="//header" position="attributes">
         <attribute name="t-attf-class" add="#{'d-none o_snippet_invisible' if 'header_visible' in main_object and not main_object.header_visible else ''}" separator=" "/>
+        <attribute name="t-att-data-invisible">'1' if 'header_visible' in main_object and not main_object.header_visible else None</attribute>
     </xpath>
     <xpath expr="//footer[@id='bottom']" position="attributes">
         <attribute name="t-attf-class" add="#{'d-none o_snippet_invisible' if 'footer_visible' in main_object and not main_object.footer_visible else ''}" separator=" "/>
+        <attribute name="t-att-data-invisible">'1' if 'footer_visible' in main_object and not main_object.footer_visible else None</attribute>
     </xpath>
 </template>
 
@@ -1430,6 +1432,13 @@
         <t t-call="website.layout">
             <div class="oe_website_login_container" t-out="0"/>
         </t>
+    </xpath>
+</template>
+
+<!-- Area for blocks shared by all pages (e.g. all pages popups) -->
+<template id="shared_blocks" inherit_id="website.layout" name="Shared blocks">
+    <xpath expr="//main" position="inside">
+        <div id="o_shared_blocks" class="oe_unremovable"/>
     </xpath>
 </template>
 
