@@ -49,7 +49,7 @@ EMPTY = object()
 
 class AccountMove(models.Model):
     _name = "account.move"
-    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'sequence.mixin']
+    _inherit = ['portal.mixin', 'mail.thread.main.attachment', 'mail.activity.mixin', 'sequence.mixin']
     _description = "Journal Entry"
     _order = 'date desc, name desc, id desc'
     _mail_post_access = 'read'
@@ -282,7 +282,9 @@ class AccountMove(models.Model):
     )
     needed_terms = fields.Binary(compute='_compute_needed_terms')
     needed_terms_dirty = fields.Boolean(compute='_compute_needed_terms')
-
+    tax_calculation_rounding_method = fields.Selection(
+        related='company_id.tax_calculation_rounding_method',
+        string='Tax calculation rounding method', readonly=True)
     # === Partner fields === #
     partner_id = fields.Many2one(
         'res.partner',
