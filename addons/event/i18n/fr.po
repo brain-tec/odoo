@@ -3965,7 +3965,7 @@ msgstr "VIP"
 #: code:addons/event/models/event_event.py:0
 #, python-format
 msgid "Value should be True or False (not %s)"
-msgstr "Les valeurs doivent être True ou False (pas %s)"
+msgstr "Les valeurs doivent être vrai ou faux (pas %s)"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__address_id
@@ -3998,7 +3998,7 @@ msgstr ""
 #. module: event
 #: model_terms:event.event,description:event.event_2
 msgid "Warehouse management, Manufacturing (MRP) &amp; Sales, Import/Export."
-msgstr "Gestion de stock, Fabrication (MRP) &amp; Ventes, Import/Export."
+msgstr "Gestion de l'entrepôt, Fabrication (MRP) &amp; Ventes, Import/Export."
 
 #. module: event
 #: model_terms:event.event,description:event.event_1

@@ -317,7 +317,7 @@ msgid ""
 "If True, users may belong to several sales teams. Otherwise membership is "
 "limited to a single sales team."
 msgstr ""
-"Si True, les utilisateurs peuvent appartenir à plusieurs équipes "
+"Si vrai, les utilisateurs peuvent appartenir à plusieurs équipes "
 "commerciales. Sinon, l'adhésion est limitée à une seule équipe commerciale."
 
 #. module: sales_team
@@ -348,8 +348,8 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the Sales "
 "Team without removing it."
 msgstr ""
-"Si le champ actif est défini sur false, il vous permettra de masquer "
-"l'équipe commerciale sans la supprimer."
+"Si le champ actif n'est pas coché, il vous permettra de masquer l'équipe "
+"commerciale sans la supprimer."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__image_1920

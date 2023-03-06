@@ -1306,7 +1306,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Activer l'assistant TVA lors de la validation d'une écriture comptable de déclaration de revenus"
+"Activer l'assistant TVA lors de la validation d'une pièce comptable de déclaration de revenus"
 
 #. module: base
 #: model:ir.module.module,description:base.module_digest_enterprise
@@ -1860,7 +1860,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        Export XML des écritures comptables pour les autorités fiscales mexicaines pour un audit obligatoire.\n"
+"        Export XML des pièces comptables pour les autorités fiscales mexicaines pour un audit obligatoire.\n"
 "    "
 
 #. module: base
@@ -2696,7 +2696,7 @@ msgstr ""
 "\n"
 "Droits d'accès sur la comptabilité\n"
 "===============================\n"
-"L'administrateur a accès à toutes les fonctionnalités de la comptabilité tels que les imputations comptables et le plan comptable.\n"
+"L'administrateur a accès à toutes les fonctionnalités de la comptabilité tels que les écritures comptables et le plan comptable.\n"
 "\n"
 "Il attribue des droits d'accès de gestionnaire et d'utilisateur à l'administrateur pour l'application de comptabilité et uniquement des droits d'utilisateur à l'utilisateur Démo.\n"
 
@@ -3689,7 +3689,7 @@ msgstr ""
 "Gestion des immobilisations\n"
 "=========================\n"
 "Gestion des immobilisations détenues par une société ou une personne.\n"
-"Assure le suivi des amortissements, et crée des écritures comptables correspondantes."
+"Assure le suivi des amortissements, et crée des pièces comptables correspondantes."
 
 #. module: base
 #: model:ir.module.module,description:base.module_attachment_indexation
@@ -3784,7 +3784,7 @@ msgstr ""
 "\n"
 "Le rapport annuel doit être remis au commissaire au plus tard le 28 août suivant la fin de l'exercice financier. Les rapports peuvent être envoyés plus fréquemment pour ceux qui le souhaitent.\n"
 "\n"
-"Le rapport utilise les balises fiscales ``Service`` et ``Tax Withheld`` afin de trouver les imputations comptables adéquates. Celles-ci sont définies à l'aide des positions fiscales et du bon type de produit (Services)."
+"Le rapport utilise les balises fiscales ``Service`` et ``Tax Withheld`` afin de trouver les écritures comptables adéquates. Celles-ci sont définies à l'aide des positions fiscales et du bon type de produit (Services)."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_hr_payroll_dimona
@@ -8544,7 +8544,7 @@ msgstr ""
 "\n"
 "Le module ajoute les fonctionnalités suivantes:\n"
 "\n"
-"    Inaltérabilité : désactivation de toutes les méthodes permettant d'annuler ou de modifier les données clés des commandes, des factures et des écritures comptables\n"
+"    Inaltérabilité : désactivation de toutes les méthodes permettant d'annuler ou de modifier les données clés des commandes, des factures et des pièces comptables\n"
 "\n"
 "    Sécurité : algorithme de chaînage pour vérifier l'inaltérabilité\n"
 "\n"
@@ -9222,7 +9222,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Ce module ajoute un bloc de contenu Fil Twitter au constructeur de site web, vous permettant d'ajouter des flux Twitter sur n'importe quelle page de votre site web.\n"
+"Ce module ajoute un bloc de contenu Défilement Twitter au constructeur de site web, vous permettant d'ajouter des flux Twitter sur n'importe quelle page de votre site web.\n"
 "    "
 
 #. module: base
@@ -10291,7 +10291,7 @@ msgstr ""
 "Les dates suivantes peuvent être suivies :\n"
 "-------------------------------\n"
 "- fin de vie\n"
-"- à consommer de préférence avant le\n"
+"- date limite d'utilisation optimale\n"
 "- date de retrait\n"
 "- date d'alerte\n"
 "\n"
@@ -18821,7 +18821,7 @@ msgstr ""
 "\n"
 "- Plan comptable\n"
 "- Balance de vérification\n"
-"- Imputations comptables\n"
+"- Écritures comptables\n"
 "\n"
 "Ajouter d'autres rapports opérationnels comme DIOT.\n"
 "\n"
@@ -18836,7 +18836,7 @@ msgstr ""
 "------\n"
 "\n"
 "  - Dans les taxes, vous pouvez définir le compte `Base Tax Received Account`, c'est-à-dire\n"
-" le compte qui sera défini sur les lignes créées dans une écriture comptable\n"
+" le compte qui sera défini sur les lignes créées dans une pièce comptable\n"
 " basée sur la comptabilité de caisse et utilisé pour suivre le montant de base de l'impôt, ce compte n'est pas pris en considération dans les rapports mexicains.\n"
 "\n"
 "Configuration\n"
@@ -18905,7 +18905,7 @@ msgstr "Email"
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
 #: model_terms:ir.ui.view,arch_db:base.view_users_simple_form
 msgid "Email Address"
-msgstr "Adresse électronique"
+msgstr "Adresse email"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_marketing_email_marketing
@@ -21794,7 +21794,7 @@ msgid ""
 "If set to true, the action will not be displayed on the right toolbar of a "
 "form view."
 msgstr ""
-"Si défini sur true, l'action ne sera pas affichée dans la barre d'outil à "
+"Si défini sur vrai, l'action ne sera pas affichée dans la barre d'outil à "
 "droite de la vue formulaire."
 
 #. module: base
@@ -21850,8 +21850,8 @@ msgid ""
 "         "
 msgstr ""
 "Indique cette vue est héritée,\n"
-"* Si True, la vue étend toujours son parent\n"
-"* Si False, la vue n'étend pas son parent, mais elle peut être activée"
+"* Si vrai, la vue étend toujours son parent\n"
+"* Si faux, la vue n'étend pas son parent, mais elle peut être activée"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
@@ -24181,7 +24181,7 @@ msgstr ""
 "---------------------------------\n"
 "\n"
 "Connectez-vous automatiquement aux sites d'offres d'emploi les plus connus : linkedIn, Monster,\n"
-"Craigslist, ... Une nouvelle adresse électronique est automatiquement\n"
+"Craigslist, ... Une nouvelle adresse email est automatiquement\n"
 "attribuée à chaque poste afin d'acheminer les candidatures vers la bonne offre.\n"
 "\n"
 "Que les candidats vous contactent par email ou via un formulaire en ligne, vous obtenez\n"
@@ -31459,7 +31459,7 @@ msgstr "Gestion de Ventes et MRP"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_stock
 msgid "Sales and Warehouse Management"
-msgstr "Gestion de Ventes et Entrepôt"
+msgstr "Gestion des ventes et des entrepôts"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale
@@ -35175,12 +35175,12 @@ msgstr "Modèle transitoire"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "Transient: False"
-msgstr "Transitoire : False"
+msgstr "Transitoire : Faux"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "Transient: True"
-msgstr "Transitoire : True"
+msgstr "Transitoire : Vrai"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__trans_implied_ids
@@ -37726,7 +37726,7 @@ msgstr "id externe"
 #: code:addons/base/models/ir_fields.py:0
 #, python-format
 msgid "false"
-msgstr "false"
+msgstr "faux"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__float
@@ -38142,7 +38142,7 @@ msgstr "titre"
 #: code:addons/base/models/ir_fields.py:0
 #, python-format
 msgid "true"
-msgstr "true"
+msgstr "vrai"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_delivery_mondialrelay

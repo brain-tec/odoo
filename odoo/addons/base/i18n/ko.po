@@ -636,6 +636,9 @@ msgid ""
 "            Kenya Tremol Device EDI Integration\n"
 "        "
 msgstr ""
+"\n"
+"            케냐 Tremol 장치의 EDI 통합\n"
+"        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_timesheet
@@ -760,6 +763,9 @@ msgid ""
 "        Accounting reports for Poland\n"
 "    "
 msgstr ""
+"\n"
+"        폴란드 회계 보고서\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_rs_reports
@@ -1103,7 +1109,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"        리투아니아의 회계를 위한 계정과목표(COA) 서식.\n"
+"        리투아니아에서 회계 관리를 위한 계정과목표(COA) 서식.\n"
 "\n"
 "        This module also includes:\n"
 "\n"
@@ -1535,6 +1541,9 @@ msgid ""
 "        This is the module to manage the accounting chart for The Philippines.\n"
 "    "
 msgstr ""
+"\n"
+"        필리핀 회계 계정과목표를 관리하는 모듈입니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_qr_code_sepa
@@ -1914,6 +1923,9 @@ msgid ""
 "       This module integrates with the Kenyan G03 Tremol control unit device to the KRA through TIMS.\n"
 "    "
 msgstr ""
+"\n"
+"       이 모듈은 TIMS를 통해 KRA에 케냐 G03 Tremol 제어 장치와 통합됩니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_multilang
@@ -1927,10 +1939,10 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    * 계정과목 일람표, 세금, 세법, 분개장,\n"
-"      회계 양식, 계정과목 일람표 분석 및 분개장 분석에 대한 다국어 지원.\n"
-"    * 설치 마법사 변경\n"
-"        - COA, 세금, 세법 및 회계연도회계감사에 대한\n"
+"    * 계정과목 일람표, 세무, 세무 코드, 분개장,\n"
+"      회계 서식, 계정과목 일람표 분석 및 분개장 분석에 대한 다국어 지원.\n"
+"    * 설치 마법사 변경 사항\n"
+"        - COA, 세무, 세무 코드 및 재정 상태에 대한\n"
 "          대한 번역을 서식에서 대상 객체로 복사합니다.\n"
 "    "
 
@@ -4841,7 +4853,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"체코 회계 차트 및 현지화. 세금 및 기본 재정 위치가 있는 계정과목표 포함.\n"
+"체코 회계 계정과목표 및 현지화. 세금 및 기본 재정 상태를 표시하는 계정과목표 포함.\n"
 "\n"
 "Tento modul definuje:\n"
 "\n"
@@ -4931,6 +4943,24 @@ msgid ""
 "invoice line to export in the FatturaPA XML.   \n"
 "    "
 msgstr ""
+"\n"
+"Documento di Trasporto (DDT)\n"
+"\n"
+"A와 B 사이에서 품목을 이동시킬 때마다 DDT를 이용하여 법적인 역할을\n"
+"수행할 수 있으며, 일례로 경찰의 저지를 받는 경우가 있겠습니다. \n"
+"\n"
+"이탈리아에 있는 회사로 가는 물품 배송을 위해서 인쇄를 할 경우, \n"
+"DDT를 대신 인쇄하게 됩니다.  배송표와 비슷하지만, \n"
+"배송품의 가격 정보와 같은 내용을 담고 있으며, \n"
+"DDT를 통해 배송 사유나 배송업체 등을 포함할 수 있습니다.  \n"
+"\n"
+"또한 DDT 에 대해서 별도의 결과를 사용할 수 있으나, 관련\n"
+"번호에는 공백란이 있어서는 안되고 해당 품목이 발송되는 시점에만 적용될 수 있습니다. \n"
+"\n"
+"청구서가 판매주문서나 배송과 관련된 판매주문서와 관련된 경우 시스템에서는\n"
+"FatturaPA XML로 내보낼 모든 청구서 항목에 대해 연결되어 있는 DDT를 \n"
+"자동으로 계산합니다.   \n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi
@@ -4963,6 +4993,11 @@ msgid ""
 "Convert CFDI XML documents to version 4.0 (from 3.3).\n"
 "    "
 msgstr ""
+"\n"
+"EDI CFDI 4.0\n"
+"============\n"
+"CFDI XML 문서를 4.0 버전으로 변환 (3.3 에서 변환).\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl_edi
@@ -5157,6 +5192,24 @@ msgid ""
 "Pro rules and show the errors.\n"
 "    "
 msgstr ""
+"\n"
+"전자 청구서 발행 모듈\n"
+"===========================\n"
+"\n"
+"내보내기 및 가져오기 파일 형식: E-FFF, UBL Bis 3, EHF3, NLCIUS, Factur-X (CII), XRechnung (UBL).\n"
+"청구서를 PDF 파일로 생성할 경우 PDF는 모든 UBL 형식의 xml 로 내장되어 생성됩니다. 이를 통해 \n"
+"수신된 파일에서 xml 파일만으로도 PDF 검색이 가능합니다. UBL Bis 3를 통해서 **EHF3을 완전히 구현 가능함을 참고하시기 바랍니다 (`참조 <https://anskaffelser.dev/postaward/g3/spec/current/billing-3.0/norway/#_implementation>`_).\n"
+"\n"
+"청구서에 연결된 분개장 (분개장 > 고급 설정)에서 형식을 선택할 수 있습니다. \n"
+"\n"
+"E-FFF, NLCIUS 및 XRechnung(UBL)은 각각 벨기에, 네덜란드 및 독일 회사에서만 사용할 수 있음을 참고하십시오.\n"
+"UBL Bis 3는 `EAS 목록에 있는 국가가 있는 회사에서만 사용할 수 있습니다.\n"
+"<https://docs.peppol.eu/poacc/billing/3.0/codelist/eas/>`_.\n"
+"\n"
+"또한 Chorus Pro가 \"PDF/A-3(Factur-X)\" 형식을 자동으로 감지하려면 분개장 항목에서\n"
+"\"Factur-X PDF/A-3\" 옵션을 활성화해야 합니다. 이 옵션을 통해서 Factur-X 및 Chorus Pro 규칙에 대해 xml을\n"
+"검증하고 오류를 표시할 수 있도록 하는 것도 가능합니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_l10n_be_hr_payroll
@@ -5675,6 +5728,10 @@ msgid ""
 "=======================================================\n"
 "    "
 msgstr ""
+"\n"
+"GCC POS 현지화\n"
+"=======================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_reports_gstr
@@ -5831,6 +5888,8 @@ msgid ""
 "\n"
 "Germany TSS Regulation\n"
 msgstr ""
+"\n"
+"독일 TSS 규정\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_de_pos_res_cert
@@ -5911,6 +5970,8 @@ msgid ""
 "\n"
 "Helpdesk integration with knowledge\n"
 msgstr ""
+"\n"
+"헬프데스크를 지식센터와 통합\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_holidays
@@ -5918,6 +5979,8 @@ msgid ""
 "\n"
 "Helpdesk integration with time off\n"
 msgstr ""
+"\n"
+"헬프데스크를 휴가관리와 통합\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_import_module
@@ -6007,6 +6070,28 @@ msgid ""
 "correctly when the cn2an library is installed. (e.g. with pip3 install cn2an)\n"
 "    "
 msgstr ""
+"\n"
+"중국 현지화를 위해 다음 정보를 표시합니다.\n"
+"========================================================\n"
+"\n"
+"계정 유형/科目类型\n"
+"\n"
+"상태 정보/省份数据\n"
+"\n"
+"    科目类型\\会计科目表模板\\增值税\\辅助核算类别\\管理会计凭证簿\\财务会计凭证簿\n"
+"\n"
+"    添加中文省份数据\n"
+"\n"
+"    增加小企业会计科目表\n"
+"\n"
+"    修改小企业会计科目表\n"
+"\n"
+"    修改小企业会计税率\n"
+"\n"
+"cn2an 라이브러리가 설치되면 해당 금액을 단어 (숫자의 경우 특수 한자)로 \n"
+"올바른 방식으로 표시하는 바우처를 인쇄하는\n"
+"옵션을 추가하였습니다 (예: pip3 설치 cn2an 사용).\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cn_city
@@ -6214,6 +6299,10 @@ msgid ""
 "=======================================================\n"
 "    "
 msgstr ""
+"\n"
+"K.S.A. POS 현지화\n"
+"=======================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ke_hr_payroll
@@ -6876,6 +6965,21 @@ msgid ""
 "of recall defined. You can define different policies for different companies.\n"
 "\n"
 msgstr ""
+"\n"
+"미수금 청구 건에 대해서 다양한 단계별 연락을 통해 안내를 자동화하는 모듈.\n"
+"=========================================================================\n"
+"\n"
+"메뉴에서 연락 수준을 여러 가지로 결정할 수 있습니다:\n"
+"---------------------------------------------------------------\n"
+"    구성 / 후속조치 / 후속조치 수준\n"
+"\n"
+"결정한 후에는, 메뉴를 클릭하기만 하면 매일 자동으로 안내 내용을 프린트할 수 있습니다:\n"
+"------------------------------------------------------------------------------------------------------\n"
+"    결제 후속조치 / 이메일 및 우편 전송\n"
+"\n"
+"결정한 수준에 따라서 PDF / 이메일 전송 / 작업 설정을 생성할 수 있습니다.\n"
+"각 회사마다 다른 방침을 정의해서 결정해놓을 수도 있습니다.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_bank_statement_import_camt
@@ -7201,6 +7305,8 @@ msgid ""
 "\n"
 "Odoo Arabic localization for most Saudi Arabia.\n"
 msgstr ""
+"\n"
+"대부분의 사우디아라비아 국가에 적용 가능한 Odoo 아랍어 현지화.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_enterprise
@@ -8102,6 +8208,12 @@ msgid ""
 "This module adds TCS and TDS Tax Report and load related Taxes in Indian Company.\n"
 "    "
 msgstr ""
+"\n"
+"인도의 TCS/TDS 세금 신고서\n"
+"====================================\n"
+"\n"
+"이 모듈은 TCS 및 TDS 세금신고서를 추가하고 인도 회사의 세무 관련 업무를 불러옵니다.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_product_expiry
@@ -8680,6 +8792,15 @@ msgid ""
 " - Multiple Fiscal positions\n"
 " "
 msgstr ""
+"\n"
+"이 내용은 이스라엘에서 Odoo를 실행하기 위해 필요한 최신 기본 이스라엘 현지화 항목입니다:\n"
+"================================================================================\n"
+"\n"
+"이 모듈은 다음을 포함하고 있습니다:\n"
+" - 일반적인 이스라엘 계정과목표\n"
+" - 세금 및 세무 보고서\n"
+" - 다중 재정 상태\n"
+" "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_za
@@ -10951,6 +11072,11 @@ msgid ""
 "- Private: Private addresses are only visible by authorized users and contain sensitive data (employee home addresses, ...).\n"
 "- Other: Other address for the company (e.g. subsidiary, ...)"
 msgstr ""
+"- 연락처: 해당 회사의 임직원 (예: CEO나 CFO 등)의 연락처 세부 정보를 구성하는데 사용합니다.\n"
+"- 청구서 주소 : 전체 청구서 관련 기본 주소입니다. 이 회사와 관련된 주문서에 대한 청구서 발행 시 기본 주소로 선택됩니다..\n"
+"- 배송지 주소 : 전체 배송 관련 기본 주소입니다. 이 회사와 관련된 주문 배송 시 기본 주소로 선택됩니다.\n"
+"- 개인 주소: 비공개 개인 주소는 권한이 있는 사용자만 열람이 가능하며 민감한 정보가 포함되어 있습니다 (임직원 자택 주소 등).\n"
+"- 기타: 회사의 기타 주소입니다 (예: 자회사 등)"
 
 #. module: base
 #. odoo-python
@@ -11232,6 +11358,8 @@ msgid ""
 "<i class=\"fa fa-info fa-3x text-info float-start\" role=\"img\" aria-"
 "label=\"Info\" title=\"Info\"/>"
 msgstr ""
+"<i class=\"fa fa-info fa-3x text-info float-start\" role=\"img\" aria-"
+"label=\"Info\" title=\"Info\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
@@ -11261,7 +11389,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_kanban_view
 msgid "<span class=\"bg-danger\">Archived</span>"
-msgstr ""
+msgstr "<span class=\"bg-danger\">보관 처리됨</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
@@ -11451,7 +11579,7 @@ msgstr "<strong>상속됨</strong>"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Label</strong>"
-msgstr "<strong>꼬리표</strong>"
+msgstr "<strong>라벨</strong>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodulereference
@@ -12260,7 +12388,7 @@ msgstr "회계 일관성 검사"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_base_import
 msgid "Accounting Import"
-msgstr ""
+msgstr "회계 가져오기"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_reports
@@ -15619,7 +15747,7 @@ msgstr "회사 정보"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__company_details
 msgid "Company Details"
-msgstr ""
+msgstr "회사 상세 정보"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__favicon
@@ -15631,7 +15759,7 @@ msgstr "회사용 파비콘"
 #: model:ir.model.fields,field_description:base.field_res_partner__company_registry
 #: model:ir.model.fields,field_description:base.field_res_users__company_registry
 msgid "Company ID"
-msgstr ""
+msgstr "회사 ID"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__logo
@@ -19075,7 +19203,7 @@ msgstr "필드 도움말"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__field_description
 msgid "Field Label"
-msgstr "필드 꼬리표"
+msgstr "필드 라벨"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -19989,7 +20117,7 @@ msgstr "구글 캘린더"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_gmail
 msgid "Google Gmail"
-msgstr ""
+msgstr "구글 지메일"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_google_map
@@ -20004,7 +20132,7 @@ msgstr "구글 사용자"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_autocomplete
 msgid "Google places autocompletion"
-msgstr ""
+msgstr "구글 장소 자동 완성"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_recaptcha
@@ -21321,7 +21449,7 @@ msgstr "인도 - 재고 보고서(GST)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_tcs_tds
 msgid "Indian - TCS/TDS Accounting Report and Taxes"
-msgstr ""
+msgstr "인도 - TCS/TDS 회계 보고서 및 세금"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_upi
@@ -27386,7 +27514,7 @@ msgstr "파키스탄"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pk
 msgid "Pakistan - Accounting"
-msgstr ""
+msgstr "파키스탄 - 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pk_reports
@@ -27824,7 +27952,7 @@ msgstr "필리핀"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ph
 msgid "Philippines - Accounting"
-msgstr ""
+msgstr "필리핀 - 회계"
 
 #. module: base
 #. odoo-python
@@ -28349,7 +28477,7 @@ msgstr "프로젝트 유료버전 HR 계약"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_hr_expense
 msgid "Project Expenses"
-msgstr ""
+msgstr "프로젝트 경비"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_helpdesk
@@ -28483,7 +28611,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_project_hr_expense
 msgid "Project expenses"
-msgstr ""
+msgstr "프로젝트 경비"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_project
@@ -30263,7 +30391,7 @@ msgstr "작업 기록을 기반으로 한 판매"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_digital
 msgid "Sell digital products in your eCommerce store"
-msgstr "e커머스 스토어에서 디지털 제품을 판매합니다"
+msgstr "이커머스 스토어에서 디지털 제품을 판매합니다"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event_sale
@@ -30487,7 +30615,7 @@ msgstr "세르비아"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_rs
 msgid "Serbia - Accounting"
-msgstr ""
+msgstr "세르비아 - 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_rs_reports
@@ -30808,7 +30936,7 @@ msgstr "삭감"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sk
 msgid "Slovak - Accounting"
-msgstr ""
+msgstr "슬로바키아 - 회계"
 
 #. module: base
 #: model:res.country,name:base.sk
@@ -31119,7 +31247,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_account
 msgid "Spreadsheet Accounting Formulas"
-msgstr ""
+msgstr "스프레드시트 회계 수식"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_documents_spreadsheet_account
@@ -31130,7 +31258,7 @@ msgstr "스프레드시트 회계 서식"
 #: model:ir.module.module,description:base.module_spreadsheet_account
 #: model:ir.module.module,summary:base.module_spreadsheet_account
 msgid "Spreadsheet Accounting formulas"
-msgstr ""
+msgstr "스프레드시트 회계 수식"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_spreadsheet_account
@@ -31181,7 +31309,7 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_account
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_account_accountant
 msgid "Spreadsheet dashboard for accounting"
-msgstr ""
+msgstr "회계 전용 스프레드시트 현황판"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_website_sale_slides
@@ -31196,7 +31324,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_hr_expense
 msgid "Spreadsheet dashboard for expenses"
-msgstr ""
+msgstr "경비 관련 스프레드시트 현황판"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_sale_expense
@@ -31564,7 +31692,7 @@ msgstr "스웨덴"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se
 msgid "Sweden - Accounting"
-msgstr ""
+msgstr "스웨덴 - 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_reports
@@ -31710,7 +31838,7 @@ msgstr "대만"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_tw
 msgid "Taiwan - Accounting"
-msgstr ""
+msgstr "타이완 - 회계"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__tajawal
@@ -31770,7 +31898,7 @@ msgstr "사업자등록번호"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_taxcloud_delivery
 msgid "TaxCloud and Delivery - Ecommerce"
-msgstr "TaxCloud 및 납품 - e커머스"
+msgstr "TaxCloud 및 납품 - 이커머스"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_taxcloud
@@ -32105,6 +32233,8 @@ msgid ""
 "country format. You can use '/' to indicate that the partner is not subject "
 "to tax."
 msgstr ""
+"세금 식별 번호. 여기에 해당하는 값은 국가별로 인정되는 형식을 기준으로 확인합니다. '/' 기호를 사용하여 협력업체가 과세 대상이 아닌"
+" 경우 표시할 수 있습니다."
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_lang_url_code_uniq
@@ -32159,7 +32289,7 @@ msgstr "시/도 코드는 고유해야 합니다!"
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_partner_bank_unique_number
 msgid "The combination Account Number/Partner must be unique."
-msgstr ""
+msgstr "계정 번호 / 협력사는 고유한 조합이어야 합니다."
 
 #. module: base
 #. odoo-python
@@ -32487,7 +32617,7 @@ msgstr ""
 #: code:addons/model.py:0 code:addons/model.py:0
 #, python-format
 msgid "The operation cannot be completed: %s"
-msgstr ""
+msgstr "작업을 완료할 수 없습니다: %s"
 
 #. module: base
 #. odoo-python
@@ -32499,6 +32629,9 @@ msgid ""
 "Model: %(model_name)s (%(model_tech_name)s)\n"
 "Constraint: %(constraint)s\n"
 msgstr ""
+"작업을 완료할 수 없습니다: 다른 모델에서 레코드를 삭제해야 합니다. 그 대신, 보관 처리할 수 있습니다.\n"
+"모델: %(model_name)s (%(model_tech_name)s)\n"
+"통제항목: %(constraint)s\n"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__domain
@@ -32575,7 +32708,7 @@ msgstr "환율 1에 대한 통화 비율"
 msgid ""
 "The registry number of the company. Use it if it is different from the Tax "
 "ID. It must be unique across all partners of a same country"
-msgstr ""
+msgstr "회사 등록 번호. 세무용으로 사용중인 사업자등록번호와 다른 경우 이"
 
 #. module: base
 #. odoo-python
@@ -32786,7 +32919,7 @@ msgstr "현재 창"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_bank__allow_out_payment
 msgid "This account can be used for outgoing payments"
-msgstr ""
+msgstr "이 계정은 결제용으로 사용할 수 없습니다."
 
 #. module: base
 #. odoo-python
@@ -33860,7 +33993,7 @@ msgstr "아랍 에미리트"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae
 msgid "United Arab Emirates - Accounting"
-msgstr ""
+msgstr "아랍 에미리트 - 회계"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_pos
@@ -33875,7 +34008,7 @@ msgstr "영국"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_uk
 msgid "United Kingdom - Accounting"
-msgstr ""
+msgstr "영국 - 회계"
 
 #. module: base
 #: model:res.country,name:base.us
@@ -35458,7 +35591,7 @@ msgstr "연락처를 부모와 병합할 수 없습니다."
 msgid ""
 "You cannot reduce the number of decimal places of a currency already used on"
 " an accounting entry."
-msgstr ""
+msgstr "회계 상 이미 입력에 사용된 통화에 대해서는 소숫점 자릿수를 줄일 수 없습니다."
 
 #. module: base
 #. odoo-python
@@ -35821,17 +35954,17 @@ msgstr "이베이 연결기"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale
 msgid "eCommerce"
-msgstr "e커머스"
+msgstr "이커머스"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_delivery
 msgid "eCommerce Delivery"
-msgstr "e커머스 배송"
+msgstr "이커머스 배송"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_renting
 msgid "eCommerce Rental"
-msgstr "e커머스 렌탈"
+msgstr "이커머스 렌탈"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_renting_comparison

@@ -1416,7 +1416,7 @@ msgstr ""
 #: model:ir.model.fields,help:purchase.field_product_packaging__purchase
 msgid "If true, the packaging can be used for purchase orders"
 msgstr ""
-"Si true, le conditionnement peut être utilisé dans des bons de commande"
+"Si vrai, le conditionnement peut être utilisé dans des bons de commande"
 
 #. module: purchase
 #. odoo-python
@@ -1471,12 +1471,12 @@ msgstr "Est un abonné"
 #. module: purchase
 #: model:ir.model,name:purchase.model_account_move
 msgid "Journal Entry"
-msgstr "Écriture comptable"
+msgstr "Pièce comptable"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_account_move_line
 msgid "Journal Item"
-msgstr "Imputation comptable"
+msgstr "Écriture comptable"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union____last_update
@@ -2382,7 +2382,7 @@ msgstr "Demande de prix terminée"
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_report__state__sent
 #: model:mail.message.subtype,name:purchase.mt_rfq_sent
 msgid "RFQ Sent"
-msgstr "Evoyée"
+msgstr "Envoyé"
 
 #. module: purchase
 #: model:mail.template,report_name:purchase.email_template_edi_purchase
@@ -2612,7 +2612,7 @@ msgstr "Nom de section (par ex. Produits, Services)"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_config_settings__use_po_lead
 msgid "Security Lead Time for Purchase"
-msgstr "Délai de livraison pour les achats"
+msgstr "Délai de sécurité pour les achats"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__access_token
@@ -3032,12 +3032,12 @@ msgstr "Montant total"
 #: model:ir.model.fields,help:purchase.field_purchase_order__mail_reception_confirmed
 msgid "True if PO reception is confirmed by the vendor."
 msgstr ""
-"True si la réception du bon de commande est confirmée par le fournisseur."
+"Vrai si la réception du bon de commande est confirmée par le fournisseur."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__mail_reminder_confirmed
 msgid "True if the reminder email is confirmed by the vendor."
-msgstr "True si le mail de rappel est confirmé par le fournisseur."
+msgstr "Vrai si le mail de rappel est confirmé par le fournisseur."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_partner_view_purchase_buttons
