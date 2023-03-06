@@ -1161,6 +1161,8 @@ class Field(MetaField('DummyField', (object,), {})):
                 try:
                     recs._fetch_field(self)
                 except AccessError:
+                    if len(recs) == 1:
+                        raise
                     record._fetch_field(self)
                 if not env.cache.contains(record, self):
                     raise MissingError("\n".join([
@@ -4293,20 +4295,18 @@ class One2many(_RelationalMulti):
         comodel = records.env[self.comodel_name].with_context(**context)
         inverse = self.inverse_name
         inverse_field = comodel._fields[inverse]
-        domain = self.get_domain_list(records) + [(inverse, 'in', records.ids)]
-        lines = comodel.search(domain)
 
-        if len(records) == 1:
-            # optimization: all lines have the same value for 'inverse_field',
-            # so we don't need to fetch it from database
-            records.env.cache.insert_missing(records, self, [lines._ids])
-            records.env.cache.insert_missing(lines, inverse_field, itertools.repeat(records.id))
-            return
+        # optimization: fetch the inverse and active fields with search()
+        domain = self.get_domain_list(records) + [(inverse, 'in', records.ids)]
+        field_names = [inverse]
+        if comodel._active_name:
+            field_names.append(comodel._active_name)
+        lines = comodel.search_fetch(domain, field_names)
 
         # group lines by inverse field (without prefetching other fields)
         get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
         group = defaultdict(list)
-        for line in lines.with_context(prefetch_fields=False):
+        for line in lines:
             # line[inverse] may be a record or an integer
             group[get_id(line[inverse])].append(line.id)
 
@@ -4659,7 +4659,7 @@ class Many2many(_RelationalMulti):
         context.update(self.context)
         comodel = records.env[self.comodel_name].with_context(**context)
         domain = self.get_domain_list(records)
-        comodel._flush_search(domain)
+        comodel._flush_search(domain, order=comodel._order)
         wquery = comodel._where_calc(domain)
         comodel._apply_ir_rules(wquery, 'read')
         order_by = comodel._generate_order_by(None, wquery)

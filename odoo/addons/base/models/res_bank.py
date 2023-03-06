@@ -38,14 +38,14 @@ class Bank(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        domain = []
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
+        domain = domain or []
         if name:
-            domain = ['|', ('bic', '=ilike', name + '%'), ('name', operator, name)]
+            name_domain = ['|', ('bic', '=ilike', name + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
-                domain = ['&'] + domain
-        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+                name_domain = ['&', '!'] + name_domain[1:]
+            domain = domain + name_domain
+        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
 
     @api.onchange('country')
     def _onchange_country_id(self):
@@ -113,19 +113,18 @@ class ResPartnerBank(models.Model):
                 for acc in self]
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        pos = 0
-        while pos < len(args):
-            # DLE P14
-            if args[pos][0] == 'acc_number':
-                op = args[pos][1]
-                value = args[pos][2]
+    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
+        def sanitize(arg):
+            if isinstance(arg, (tuple, list)) and arg[0] == 'acc_number':
+                value = arg[2]
                 if not isinstance(value, str) and isinstance(value, Iterable):
                     value = [sanitize_account_number(i) for i in value]
                 else:
                     value = sanitize_account_number(value)
-                if 'like' in op:
+                if 'like' in arg[1]:
                     value = '%' + value + '%'
-                args[pos] = ('sanitized_acc_number', op, value)
-            pos += 1
-        return super(ResPartnerBank, self)._search(args, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
+                return ('sanitized_acc_number', arg[1], value)
+            return arg
+
+        domain = [sanitize(item) for item in domain]
+        return super()._search(domain, offset, limit, order, access_rights_uid)

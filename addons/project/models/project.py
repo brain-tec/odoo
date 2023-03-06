@@ -672,18 +672,20 @@ class Project(models.Model):
         return result
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
+        if not order:
+            return super()._search(domain, offset, limit, order, access_rights_uid)
         new_order, item_index, desc = [], -1, False
-        for index, order_item in enumerate((order or self._order).split(',')):
+        for index, order_item in enumerate(order.split(',')):
             order_item_list = order_item.strip().lower().split(' ')
             if order_item_list[0] == 'is_favorite':
                 item_index = index
                 desc = order_item_list[-1] == 'desc'
             else:
                 new_order.append(order_item)
-        query = super()._search(args, offset, limit, ', '.join(new_order), count, access_rights_uid)
+        query = super()._search(domain, offset, limit, ', '.join(new_order), access_rights_uid)
         if item_index != -1:
-            query_order_list = query.order.split(',')
+            query_order_list = query.order.split(',') if query.order else []
             query_order_list.insert(item_index, f"""
                 "project_project"."id" IN (
                     SELECT project_id
@@ -1220,6 +1222,7 @@ class Task(models.Model):
         readonly=False,
         store=True,
         tracking=True,
+        index='btree_not_null',
         help="Deliver your services automatically when a milestone is reached by linking it to a sales order item."
     )
     has_late_and_unreached_milestone = fields.Boolean(
@@ -1680,10 +1683,10 @@ class Task(models.Model):
             can normally see.
             (In other words, this compute is only used in project sharing views to see all assignees for each task)
         """
-        if self.ids:
+        if self._origin:
             # fetch 'user_ids' in superuser mode (and override value in cache
             # browse is useful to avoid miscache because of the newIds contained in self
-            self.browse(self.ids)._read(['user_ids'])
+            self._origin.fetch(['user_ids'])
         for task in self.with_context(prefetch_fields=False):
             task.portal_user_names = ', '.join(task.user_ids.mapped('name'))
 
@@ -1889,10 +1892,10 @@ class Task(models.Model):
         return super(Task, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        fields_list = {term[0] for term in args if isinstance(term, (tuple, list)) and term not in [expression.TRUE_LEAF, expression.FALSE_LEAF]}
+    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
+        fields_list = {term[0] for term in domain if isinstance(term, (tuple, list)) and term not in [expression.TRUE_LEAF, expression.FALSE_LEAF]}
         self._ensure_fields_are_accessible(fields_list)
-        return super(Task, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
+        return super()._search(domain, offset, limit, order, access_rights_uid)
 
     def mapped(self, func):
         # Note: This will protect the filtered method too
@@ -2680,11 +2683,10 @@ class ProjectTags(models.Model):
         return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order)
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        domain = args
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
         if 'project_id' in self.env.context:
-            domain = self._get_project_tags_domain(domain, self.env.context.get('project_id'))
-        return super()._name_search(name, domain, operator, limit, name_get_uid)
+            domain = self._get_project_tags_domain(domain or [], self.env.context['project_id'])
+        return super()._name_search(name, domain, operator, limit, order, name_get_uid)
 
     @api.model
     def name_create(self, name):
