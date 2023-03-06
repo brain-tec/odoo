@@ -27,6 +27,7 @@
 # RGB Consulting <odoo@rgbconsulting.com>, 2022
 # Ivan Espinola, 2023
 # Harcogourmet, 2023
+# marcescu, 2023
 # Óscar Fonseca <tecnico@extreme-micro.com>, 2023
 # marcescu, 2023
 # 
@@ -5181,7 +5182,7 @@ msgstr "Actualitzar pantalla"
 #: code:addons/point_of_sale/static/src/xml/Screens/TicketScreen/TicketScreen.xml:0
 #, python-format
 msgid "Refund"
-msgstr "Factura rectificativa (abonament)"
+msgstr "Abonament"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__refund_orderline_ids

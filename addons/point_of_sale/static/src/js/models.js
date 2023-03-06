@@ -10,6 +10,7 @@ var time = require('web.time');
 var utils = require('web.utils');
 var { Gui } = require('point_of_sale.Gui');
 const { batched, uuidv4 } = require("point_of_sale.utils");
+const { escape } = require("@web/core/utils/strings");
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -1317,6 +1318,9 @@ class PosGlobalState extends PosModel {
         this.db.update_partners(partnerWithUpdatedTotalDue);
         return partnerWithUpdatedTotalDue;
     }
+    doNotAllowRefundAndSales() {
+        return false;
+    }
 }
 PosGlobalState.prototype.electronic_payment_interfaces = {};
 Registries.Model.add(PosGlobalState);
@@ -1980,8 +1984,8 @@ class Orderline extends PosModel {
             0
         );
     }
-    _map_tax_fiscal_position(tax, order = false) {
-        return this.pos._map_tax_fiscal_position(tax, order);
+    _mapTaxFiscalPosition(tax, order = false) {
+        return this.pos._mapTaxFiscalPosition(tax, order);
     }
     /**
      * Mirror JS method of:
@@ -2233,11 +2237,12 @@ class Payment extends PosModel {
     }
     //exports as JSON for receipt printing
     export_for_printing(){
+        const ticket = escape(this.ticket).replace(/\n/g, "<br />"); // formatting
         return {
             cid: this.cid,
             amount: this.get_amount(),
             name: this.name,
-            ticket: Markup(this.ticket),
+            ticket: Markup(ticket),
         };
     }
     // If payment status is a non-empty string, then it is an electronic payment.
@@ -2717,7 +2722,21 @@ class Order extends PosModel {
         line.set_unit_price(line.compute_fixed_price(line.price));
     }
 
+    _isRefundAndSaleOrder() {
+        if (this.orderlines.length && this.orderlines[0].refunded_orderline_id) {
+            return true;
+        }
+        return false;
+    }
+
     add_product(product, options){
+        if(this.pos.doNotAllowRefundAndSales() && this.orderlines[0] && this.orderlines[0].refunded_orderline_id) {
+            Gui.showPopup('ErrorPopup', {
+                title: _t('Refund and Sales not allowed'),
+                body: _t('It is not allowed to mix refunds and sales')
+            });
+            return;
+        }
         if(this._printed){
             // when adding product with a barcode while being in receipt screen
             this.pos.removeOrder(this);
@@ -3087,7 +3106,7 @@ class Order extends PosModel {
                 var remaining = this.get_total_with_tax() - this.get_total_paid();
                 var sign = this.get_total_with_tax() > 0 ? 1.0 : -1.0;
                 if(this.get_total_with_tax() < 0 && remaining > 0 || this.get_total_with_tax() > 0 && remaining < 0) {
-                    rounding_method = rounding_method.endsWith("UP") ? "DOWN" : rounding_method;
+                    rounding_method = rounding_method.endsWith("UP") ? "DOWN" : "UP";
                 }
 
                 remaining *= sign;

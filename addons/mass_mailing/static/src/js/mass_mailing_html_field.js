@@ -46,10 +46,11 @@ export class MassMailingHtmlField extends HtmlField {
         return {
             ...super.wysiwygOptions,
             onIframeUpdated: () => this.onIframeUpdated(),
+            foldSnippets: device.isMobile,
             snippets: 'mass_mailing.email_designer_snippets',
             resizable: false,
             defaultDataForLinkTools: { isNewWindow: true },
-            toolbarTemplate: 'mass_mailing.web_editor_toolbar',
+            toolbarTemplate: device.isMobile ? 'web_editor.toolbar' : 'mass_mailing.web_editor_toolbar',
             ...this.props.wysiwygOptions,
         };
     }
@@ -108,20 +109,22 @@ export class MassMailingHtmlField extends HtmlField {
             const iframe = document.createElement('iframe');
             iframe.style.height = '0px';
             iframe.style.visibility = 'hidden';
+            iframe.setAttribute('sandbox', 'allow-same-origin'); // Make sure no scripts get executed.
             const clonedHtmlNode = $editable[0].closest('html').cloneNode(true);
             // Replace the body to only contain the target as we do not care for
             // other elements (e.g. sidebar, toolbar, ...)
             const clonedBody = clonedHtmlNode.querySelector('body');
             const clonedIframeTarget = clonedHtmlNode.querySelector('#iframe_target');
             clonedBody.replaceChildren(clonedIframeTarget);
-            const editableClone = clonedHtmlNode.querySelector('.note-editable');
+            clonedHtmlNode.querySelectorAll('script').forEach(script => script.remove()); // Remove scripts.
+            iframe.srcdoc = clonedHtmlNode.outerHTML;
             const iframePromise = new Promise((resolve) => {
                 iframe.addEventListener("load", resolve);
             });
             document.body.append(iframe);
-            iframe.contentDocument.firstChild.replaceWith(clonedHtmlNode);
             // Wait for the css and images to be loaded.
             await iframePromise;
+            const editableClone = iframe.contentDocument.querySelector('.note-editable');
             this.cssRules = this.cssRules || getCSSRules($editable[0].ownerDocument);
             await toInline($(editableClone), this.cssRules, $(iframe));
             iframe.remove();
@@ -224,11 +227,6 @@ export class MassMailingHtmlField extends HtmlField {
         // Overide `d-flex` class which style is `!important`
         $snippetsSideBar.find(`.o_we_website_top_actions > *:not(${selectorToKeep})`).attr('style', 'display: none!important');
 
-        if (device.isMobile) {
-            $snippetsSideBar.hide();
-            this.wysiwyg.$iframe.attr('style', 'padding-left: 0px !important');
-        }
-
         if (!odoo.debug) {
             $snippetsSideBar.find('.o_codeview_btn').hide();
         }
@@ -267,7 +265,11 @@ export class MassMailingHtmlField extends HtmlField {
         if (!this._themeParams) {
             // Initialize theme parameters.
             this._themeClassNames = "";
-            this._themeParams = _.map($themes, (theme) => {
+            const displayableThemes =
+                device.isMobile ?
+                _.filter($themes, theme => !$(theme).data("hideFromMobile")) :
+                $themes;
+            this._themeParams = _.map(displayableThemes, (theme) => {
                 const $theme = $(theme);
                 const name = $theme.data("name");
                 const classname = "o_" + name + "_theme";
@@ -333,6 +335,8 @@ export class MassMailingHtmlField extends HtmlField {
         const editableAreaIsEmpty = value === "" || value === blankEditable;
 
         if (editableAreaIsEmpty) {
+            // unfold to prevent toolbar from going over the menu
+            this.wysiwyg.snippetsMenu.setFolded(false);
             $themeSelectorNew.appendTo(this.wysiwyg.$iframeBody);
         }
 
@@ -348,6 +352,9 @@ export class MassMailingHtmlField extends HtmlField {
             this.wysiwyg.$iframeBody.closest('body').removeClass("o_force_mail_theme_choice");
 
             $themeSelectorNew.remove();
+            if (device.isMobile) {
+                this.wysiwyg.snippetsMenu.setFolded(true);
+            }
 
             this._switchImages(themeParams, $snippets);
 
