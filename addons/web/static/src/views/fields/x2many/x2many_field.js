@@ -103,7 +103,7 @@ export class X2ManyField extends Component {
                 : true;
 
         const selectCreate = useSelectCreate({
-            resModel: this.props.value.resModel,
+            resModel: this.props.record.data[this.props.name].resModel,
             activeActions: this.activeActions,
             onSelected: (resIds) => saveRecord(resIds),
             onCreateEdit: ({ context }) => this._openRecord({ context }),
@@ -112,7 +112,11 @@ export class X2ManyField extends Component {
 
         this.selectCreate = (params) => {
             const p = Object.assign({}, params);
-            p.domain = [...(p.domain || []), "!", ["id", "in", this.props.value.currentIds]];
+            p.domain = [
+                ...(p.domain || []),
+                "!",
+                ["id", "in", this.props.record.data[this.props.name].currentIds],
+            ];
             return selectCreate(p);
         };
     }
@@ -138,7 +142,7 @@ export class X2ManyField extends Component {
     }
 
     get list() {
-        return this.props.value;
+        return this.props.record.data[this.props.name];
     }
 
     get nestedKeyOptionalFieldsData() {
@@ -246,7 +250,7 @@ export class X2ManyField extends Component {
         if (editable) {
             if (this.list.editedRecord) {
                 const proms = [];
-                this.list.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
+                this.list.model.trigger("NEED_LOCAL_CHANGES", { proms });
                 await Promise.all([...proms, this.list.editedRecord._updatePromise]);
                 await this.list.editedRecord.switchMode("readonly", { checkValidity: true });
             }

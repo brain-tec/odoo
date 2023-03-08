@@ -22,19 +22,20 @@ from odoo.tools import (
     email_split,
     float_compare,
     float_is_zero,
+    float_repr,
     format_amount,
     format_date,
     formatLang,
     frozendict,
     get_lang,
+    index_exists,
     is_html_empty,
-    sql
 )
 
 _logger = logging.getLogger(__name__)
 
 
-MAX_HASH_VERSION = 2
+MAX_HASH_VERSION = 3
 
 TYPE_REVERSE_MAP = {
     'entry': 'entry',
@@ -574,14 +575,29 @@ class AccountMove(models.Model):
     show_payment_term_details = fields.Boolean(compute="_compute_show_payment_term_details")
     show_discount_details = fields.Boolean(compute="_compute_show_payment_term_details")
 
+    _sql_constraints = [(
+        'unique_name', "", "Another entry with the same name already exists.",
+    )]
+
     def _auto_init(self):
         super()._auto_init()
-        self.env.cr.execute("""
-            CREATE INDEX IF NOT EXISTS account_move_to_check_idx
-            ON account_move(journal_id) WHERE to_check = true;
-            CREATE INDEX IF NOT EXISTS account_move_payment_idx
-            ON account_move(journal_id, state, payment_state, move_type, date);
-        """)
+        if not index_exists(self.env.cr, 'account_move_to_check_idx'):
+            self.env.cr.execute("""
+                CREATE INDEX account_move_to_check_idx
+                          ON account_move(journal_id)
+                       WHERE to_check = true
+            """)
+        if not index_exists(self.env.cr, 'account_move_payment_idx'):
+            self.env.cr.execute("""
+                CREATE INDEX account_move_payment_idx
+                          ON account_move(journal_id, state, payment_state, move_type, date)
+            """)
+        if not index_exists(self.env.cr, 'account_move_unique_name'):
+            self.env.cr.execute("""
+                CREATE UNIQUE INDEX account_move_unique_name
+                                 ON account_move(name, journal_id)
+                              WHERE (state = 'posted' AND name != '/')
+            """)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -722,7 +738,7 @@ class AccountMove(models.Model):
     @api.depends('journal_id', 'date')
     def _compute_highest_name(self):
         for record in self:
-            record.highest_name = record._get_last_sequence(lock=False)
+            record.highest_name = record._get_last_sequence()
 
     @api.depends('name', 'journal_id')
     def _compute_made_sequence_hole(self):
@@ -1670,37 +1686,13 @@ class AccountMove(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
-        if not self.quick_edit_mode and self._get_last_sequence(lock=False):
+        if not self.quick_edit_mode and self._get_last_sequence():
             self.name = '/'
             self._compute_name()
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
-
-    @api.constrains('name', 'journal_id', 'state')
-    def _check_unique_sequence_number(self):
-        moves = self.filtered(lambda move: move.state == 'posted')
-        if not moves:
-            return
-
-        self.flush_model(['name', 'journal_id', 'move_type', 'state'])
-
-        # /!\ Computed stored fields are not yet inside the database.
-        self._cr.execute('''
-            SELECT move2.id, move2.name
-            FROM account_move move
-            INNER JOIN account_move move2 ON
-                move2.name = move.name
-                AND move2.journal_id = move.journal_id
-                AND move2.move_type = move.move_type
-                AND move2.id != move.id
-            WHERE move.id IN %s AND move2.state = 'posted'
-        ''', [tuple(moves.ids)])
-        res = self._cr.fetchall()
-        if res:
-            raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
-                                    'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
 
     @contextmanager
     def _check_balanced(self, container):
@@ -2690,7 +2682,7 @@ class AccountMove(models.Model):
         hash_version = self._context.get('hash_version', MAX_HASH_VERSION)
         if hash_version == 1:
             return ['date', 'journal_id', 'company_id']
-        elif hash_version == MAX_HASH_VERSION:
+        elif hash_version in (2, 3):
             return ['name', 'date', 'journal_id', 'company_id']
         raise NotImplementedError(f"hash_version={hash_version} doesn't exist")
 
@@ -2724,9 +2716,12 @@ class AccountMove(models.Model):
     @api.depends_context('hash_version')
     def _compute_string_to_hash(self):
         def _getattrstring(obj, field_str):
+            hash_version = self._context.get('hash_version', MAX_HASH_VERSION)
             field_value = obj[field_str]
             if obj._fields[field_str].type == 'many2one':
                 field_value = field_value.id
+            if obj._fields[field_str].type == 'monetary' and hash_version >= 3:
+                return float_repr(field_value, obj.currency_id.decimal_places)
             return str(field_value)
 
         for move in self:
@@ -3850,7 +3845,7 @@ class AccountMove(models.Model):
         """
         lock_dates = self._get_violated_lock_dates(invoice_date, has_tax)
         today = fields.Date.today()
-        highest_name = self.highest_name or self._get_last_sequence(relaxed=True, lock=False)
+        highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
         number_reset = self._deduce_sequence_number_reset(highest_name)
         if lock_dates:
             invoice_date = lock_dates[-1][0] + timedelta(days=1)
