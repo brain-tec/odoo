@@ -55,7 +55,6 @@
 
     <record id="product_normal_action_puchased" model="ir.actions.act_window">
         <field name="name">Products</field>
-        <field name="type">ir.actions.act_window</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form,activity</field>
         <field name="context">{"search_default_filter_to_purchase":1, "purchase_product_template": 1}</field>
@@ -595,6 +594,7 @@
                     <field name="partner_id" readonly="1"/>
                     <field name="company_id" readonly="1" options="{'no_create': True}"
                         groups="base.group_multi_company" optional="show"/>
+                    <field name="company_id" groups="!base.group_multi_company" invisible="1"/>
                     <field name="date_planned" invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="user_id" optional="show" widget="many2one_avatar_user"/>
                     <field name="date_order" attrs="{'invisible': ['|', '|', ('state', '=', 'purchase'), ('state', '=', 'done'), ('state', '=', 'cancel')]}"
@@ -629,6 +629,7 @@
                     <field name="date_approve" widget="date" invisible="context.get('quotation_only', False)" optional="show"/>
                     <field name="partner_id"/>
                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>
+                    <field name="company_id" groups="!base.group_multi_company" invisible="1"/>
                     <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                     <field name="date_order" invisible="not context.get('quotation_only', False)" optional="show"/>
                     <field name="activity_ids" widget="list_activity" optional="show"/>
@@ -662,7 +663,6 @@
 
         <record id="purchase_rfq" model="ir.actions.act_window">
             <field name="name">Requests for Quotation</field>
-            <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
             <field name="view_id" ref="purchase_order_kpis_tree"/>
@@ -684,7 +684,6 @@
 
         <record id="purchase_form_action" model="ir.actions.act_window">
             <field name="name">Purchase Orders</field>
-            <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
             <field name="view_ids" eval="[(5, 0, 0),
@@ -837,7 +836,6 @@
 
     <record id="action_accrued_expense_entry" model="ir.actions.act_window">
         <field name="name">Accrued Expense Entry</field>
-        <field name="type">ir.actions.act_window</field>
         <field name="res_model">account.accrued.orders.wizard</field>
         <field name="view_mode">form</field>
         <field name="binding_model_id" ref="purchase.model_purchase_order"/>

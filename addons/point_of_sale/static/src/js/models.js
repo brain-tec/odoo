@@ -145,6 +145,9 @@ export class PosGlobalState extends PosModel {
             selectedOrder: null,
             selectedPartner: null,
             selectedCategoryId: null,
+            // FIXME POSREF this piece of state should probably be private to the product screen
+            // but it currently needs to be available to the ProductInfo screen for dubious functional reasons
+            searchProductWord: "",
         });
 
         this.ready = new Promise((resolve) => {
@@ -2343,7 +2346,6 @@ export class Orderline extends PosModel {
         return {
             priceWithTax: all_taxes.total_included,
             priceWithoutTax: all_taxes.total_excluded,
-            priceSumTaxVoid: all_taxes.total_void,
             priceWithTaxBeforeDiscount: all_taxes_before_discount.total_included,
             tax: taxtotal,
             taxDetails: taxdetail,
