@@ -107,12 +107,11 @@ class MailRenderMixin(models.AbstractModel):
 
     def _update_field_translations(self, fname, translations, digest=None):
         res = super()._update_field_translations(fname, translations, digest)
-        # TBD the below check is only for model_term translations.
-        # Because for model translations, super().update_field_translations will call write to check
         if self._unrestricted_rendering:
-            # If the rendering is unrestricted (e.g. mail.template),
-            # check the user is part of the mail editor group to modify a template if the template is dynamic
-            self._check_access_right_dynamic_template()
+            for lang in translations:
+                # If the rendering is unrestricted (e.g. mail.template),
+                # check the user is part of the mail editor group to modify a template if the template is dynamic
+                self.with_context(lang=lang)._check_access_right_dynamic_template()
         return res
 
     # ------------------------------------------------------------
@@ -514,6 +513,13 @@ class MailRenderMixin(models.AbstractModel):
             raise ValueError(
                 _('Template rendering supports only inline_template, qweb, or qweb_view (view or raw); received %(engine)s instead.',
                   engine=engine)
+            )
+        valid_render_options = {'post_process', 'preserve_comments'}
+        if not set((options or {}).keys()) <= valid_render_options:
+            raise ValueError(
+                _('Those values are not supported as options when rendering: %(param_names)s',
+                  param_names=', '.join(set(options.keys()) - valid_render_options)
+                 )
             )
 
         if engine == 'qweb_view':

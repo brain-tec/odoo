@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.tools import str2bool
 
 from odoo.addons.payment import utils as payment_utils
 
@@ -41,12 +42,19 @@ class AccountMove(models.Model):
     def _has_to_be_paid(self):
         self.ensure_one()
         transactions = self.transaction_ids.filtered(lambda tx: tx.state in ('authorized', 'done'))
-        return bool(
+        pending_transactions = self.transaction_ids.filtered(
+            lambda tx: tx.state == 'pending' and tx.provider_code not in ('none', 'custom'))
+        enabled_feature = str2bool(
+            self.env['ir.config_parameter'].sudo().get_param(
+                'account_payment.enable_portal_payment'
+            )
+        )
+        return enabled_feature and bool(
             (
                 self.amount_residual
                 # FIXME someplace we check amount_residual and some other amount_paid < amount_total
                 # what is the correct heuristic to check ?
-                or not transactions
+                or not (transactions or pending_transactions)
             )
             and self.state == 'posted'
             and self.payment_state in ('not_paid', 'partial')
@@ -60,14 +68,17 @@ class AccountMove(models.Model):
 
     def payment_action_capture(self):
         """ Capture all transactions linked to this invoice. """
+        self.ensure_one()
         payment_utils.check_rights_on_recordset(self)
-        # In sudo mode because we need to be able to read on provider fields.
-        self.authorized_transaction_ids.sudo().action_capture()
+
+        # In sudo mode to bypass the checks on the rights on the transactions.
+        return self.transaction_ids.sudo().action_capture()
 
     def payment_action_void(self):
         """ Void all transactions linked to this invoice. """
         payment_utils.check_rights_on_recordset(self)
-        # In sudo mode because we need to be able to read on provider fields.
+
+        # In sudo mode to bypass the checks on the rights on the transactions.
         self.authorized_transaction_ids.sudo().action_void()
 
     def action_view_payment_transactions(self):

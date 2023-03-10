@@ -1249,11 +1249,13 @@ class SaleOrder(models.Model):
             kwargs['notify_author'] = self.env.user.partner_id.id in (kwargs.get('partner_ids') or [])
         return super(SaleOrder, self.with_context(**so_ctx)).message_post(**kwargs)
 
-    def _notify_get_recipients_groups(self, msg_vals=None):
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
         """ Give access button to users and portal customer as portal is integrated
         in sale. Customer and portal group have probably no right to see
         the document so they don't have the access button. """
-        groups = super()._notify_get_recipients_groups(msg_vals=msg_vals)
+        groups = super()._notify_get_recipients_groups(
+            message, model_description, msg_vals=msg_vals
+        )
         if not self:
             return groups
 
@@ -1339,14 +1341,17 @@ class SaleOrder(models.Model):
 
     def payment_action_capture(self):
         """ Capture all transactions linked to this sale order. """
+        self.ensure_one()
         payment_utils.check_rights_on_recordset(self)
-        # In sudo mode because we need to be able to read on provider fields.
-        self.authorized_transaction_ids.sudo().action_capture()
+
+        # In sudo mode to bypass the checks on the rights on the transactions.
+        return self.transaction_ids.sudo().action_capture()
 
     def payment_action_void(self):
         """ Void all transactions linked to this sale order. """
         payment_utils.check_rights_on_recordset(self)
-        # In sudo mode because we need to be able to read on provider fields.
+
+        # In sudo mode to bypass the checks on the rights on the transactions.
         self.authorized_transaction_ids.sudo().action_void()
 
     def get_portal_last_transaction(self):
