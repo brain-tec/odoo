@@ -11,6 +11,7 @@ import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 import { ErrorBarcodePopup } from "@point_of_sale/js/Popups/ErrorBarcodePopup";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
 import { ControlButtonPopup } from "@point_of_sale/js/Popups/ControlButtonPopup";
+import { ConnectionLostError } from "@web/core/network/rpc_service";
 
 import { ActionpadWidget } from "./ActionpadWidget";
 import { MobileOrderWidget } from "../../Misc/MobileOrderWidget";
@@ -34,7 +35,8 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         super.setup();
         this.pos = usePos();
         this.popup = useService("popup");
-        this.rpc = useService("rpc");
+        this.orm = useService("orm");
+        this.notification = useService("pos_notification");
         this.numberBuffer = useService("number_buffer");
         onMounted(this.onMounted);
         // Call `reset` when the `onMounted` callback in `numberBuffer.use` is done.
@@ -126,12 +128,9 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         if (!product) {
             // find the barcode in the backend
             let foundProductIds = [];
-            foundProductIds = await this.rpc({
-                model: "product.product",
-                method: "search",
-                args: [[["barcode", "=", code.base_code]]],
-                context: this.env.session.user_context,
-            });
+            foundProductIds = await this.orm.search("product.product", [
+                ["barcode", "=", code.base_code],
+            ]);
             if (foundProductIds.length) {
                 await this.env.pos._addProducts(foundProductIds);
                 // assume that the result is unique.
@@ -235,6 +234,34 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         }
     }
     async onClickPay() {
+        if (this.env.pos.get_order().server_id) {
+            try {
+                const isPaid = await this.orm.call("pos.order", "is_already_paid", [
+                    this.env.pos.get_order().server_id,
+                ]);
+                if (isPaid) {
+                    const searchDetails = { fieldName: "RECEIPT_NUMBER", searchTerm: this.env.pos.get_order().uid }
+                    this.pos.showScreen("TicketScreen", {
+                        ui: { filter: "SYNCED", searchDetails }
+                    });
+                    this.notification.add(
+                        _.str.sprintf(
+                            this.env._t('The order has been already paid.')
+                        ),
+                        3000
+                    );
+                    this.env.pos.removeOrder(this.env.pos.get_order(), false);
+                    this.env.pos.add_new_order();
+                    return;
+                }
+            } catch (error) {
+                if (!(error.message instanceof ConnectionLostError)) {
+                    throw error;
+                }
+                // Reject error in a separate stack to display the offline popup, but continue the flow
+                Promise.reject(error);
+            }
+        }
         if (
             this.env.pos
                 .get_order()

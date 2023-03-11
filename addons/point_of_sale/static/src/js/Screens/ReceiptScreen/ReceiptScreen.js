@@ -19,7 +19,7 @@ export class ReceiptScreen extends AbstractReceiptScreen {
         super.setup();
         this.pos = usePos();
         useErrorHandlers();
-        this.rpc = useService("rpc");
+        this.orm = useService("orm");
         this.orderReceipt = useRef("order-receipt");
         this.buttonMailReceipt = useRef("order-mail-receipt-button");
         this.buttonPrintReceipt = useRef("order-print-receipt-button");
@@ -100,6 +100,9 @@ export class ReceiptScreen extends AbstractReceiptScreen {
     get nextScreen() {
         return { name: "ProductScreen" };
     }
+    get ticketScreen() {
+        return { name: "TicketScreen" };
+    }
     whenClosing() {
         this.orderDone();
     }
@@ -112,7 +115,12 @@ export class ReceiptScreen extends AbstractReceiptScreen {
         if (this._shouldAutoPrint()) {
             const currentOrder = this.currentOrder;
             await this.printReceipt();
-            if (this.currentOrder && this.currentOrder === currentOrder && currentOrder._printed && this._shouldCloseImmediately()) {
+            if (
+                this.currentOrder &&
+                this.currentOrder === currentOrder &&
+                currentOrder._printed &&
+                this._shouldCloseImmediately()
+            ) {
                 this.whenClosing();
             }
         }
@@ -125,6 +133,15 @@ export class ReceiptScreen extends AbstractReceiptScreen {
         if (this.env.pos.config.iface_customer_facing_display) {
             this.env.pos.send_current_order_to_customer_facing_display();
         }
+    }
+    resumeOrder() {
+        this.env.pos.removeOrder(this.currentOrder);
+        this.env.pos.selectNextOrder();
+        const { name, props } = this.ticketScreen;
+        this.pos.showScreen(name, props);
+    }
+    isResumeVisible() {
+        return this.env.pos.get_order_list().length > 1;
     }
     async printReceipt() {
         this.buttonPrintReceipt.el.className = "fa fa-fw fa-spin fa-circle-o-notch";
@@ -171,11 +188,12 @@ export class ReceiptScreen extends AbstractReceiptScreen {
             });
             return Promise.reject();
         }
-        await this.rpc({
-            model: "pos.order",
-            method: "action_receipt_to_customer",
-            args: [[order_server_id], orderName, orderPartner, ticketImage],
-        });
+        await this.orm.call("pos.order", "action_receipt_to_customer", [
+            [order_server_id],
+            orderName,
+            orderPartner,
+            ticketImage,
+        ]);
     }
 }
 

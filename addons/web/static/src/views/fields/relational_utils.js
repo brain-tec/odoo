@@ -226,6 +226,12 @@ export class Many2XAutocomplete extends Component {
         this.props.update([record], params);
     }
 
+    mapRecordToOption(result) {
+        return {
+            value: result[0],
+            label: result[1].split("\n")[0],
+        };
+    }
     async loadOptionsSource(request) {
         if (this.lastProm) {
             this.lastProm.abort(false);
@@ -239,10 +245,7 @@ export class Many2XAutocomplete extends Component {
         });
         const records = await this.lastProm;
 
-        const options = records.map((result) => ({
-            value: result[0],
-            label: result[1].split("\n")[0],
-        }));
+        const options = records.map((result) => this.mapRecordToOption(result));
 
         if (this.props.quickCreate && request.length) {
             options.push({
@@ -383,6 +386,21 @@ Many2XAutocomplete.defaultProps = {
     context: {},
 };
 
+export class AvatarMany2XAutocomplete extends Many2XAutocomplete {
+    mapRecordToOption(result) {
+        return {
+            ...super.mapRecordToOption(result),
+            resModel: this.props.resModel,
+        };
+    }
+    get optionsSource() {
+        return {
+            ...super.optionsSource,
+            optionTemplate: "web.AvatarMany2XAutocomplete",
+        };
+    }
+}
+
 export function useOpenMany2XRecord({
     resModel,
     onRecordSaved,
@@ -460,7 +478,7 @@ export class X2ManyFieldDialog extends Component {
         this.title = this.props.title;
         useSubEnv({ config: this.props.config });
 
-        useBus(this.record.model, "update", () => this.render(true));
+        useBus(this.record.model.bus, "update", () => this.render(true));
 
         this.modalRef = useChildRef();
 

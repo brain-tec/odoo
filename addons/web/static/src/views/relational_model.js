@@ -558,7 +558,7 @@ export class Record extends DataPoint {
      */
     async urgentSave() {
         this._urgentSave = true;
-        this.model.trigger("WILL_SAVE_URGENTLY");
+        this.model.bus.trigger("WILL_SAVE_URGENTLY");
         return this._save({ stayInEdition: true, noReload: true });
     }
 
@@ -571,7 +571,7 @@ export class Record extends DataPoint {
 
     async askChanges() {
         const proms = [];
-        this.model.trigger("NEED_LOCAL_CHANGES", { proms });
+        this.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
         await Promise.all([...proms, this.model.mutex.getUnlockedDef()]);
     }
 
@@ -776,7 +776,7 @@ export class Record extends DataPoint {
      * @param {string} fieldName
      * @returns {boolean}
      */
-    isInvisible(fieldName) {
+    _isInvisible(fieldName) {
         const activeField = this.activeFields[fieldName];
         const { invisible } = activeField.modifiers || {};
         return invisible ? evalDomain(invisible, this.evalContext) : false;
@@ -859,7 +859,7 @@ export class Record extends DataPoint {
             const activeField = this.activeFields[fieldName];
             // @FIXME type should not be get like this
             const type = activeField.widget || this.fields[fieldName].type;
-            if (!this.isInvisible(fieldName) && preloadedDataRegistry.contains(type)) {
+            if (!this._isInvisible(fieldName) && preloadedDataRegistry.contains(type)) {
                 proms.push(fetchPreloadedData(preloadedDataRegistry.get(type), fieldName));
             }
         }
@@ -1326,7 +1326,7 @@ export class Record extends DataPoint {
         const activeField = this.activeFields[fieldName];
         if (
             activeField &&
-            !this.isInvisible(fieldName) &&
+            !this._isInvisible(fieldName) &&
             value &&
             (!value[1] || activeField.options.always_reload)
         ) {
@@ -1360,7 +1360,7 @@ export class Record extends DataPoint {
     }
 
     async _loadX2ManyData(fieldName) {
-        if (!this.isInvisible(fieldName)) {
+        if (!this._isInvisible(fieldName)) {
             await this.data[fieldName].load();
         }
     }
@@ -1792,11 +1792,11 @@ class DynamicList extends DataPoint {
                 record,
                 fieldNodes: this.model.fieldNodes,
             };
-            this.model.trigger("list-confirmation-dialog-will-open");
+            this.model.bus.trigger("list-confirmation-dialog-will-open");
             await new Promise((resolve) => {
                 this.model.dialogService.add(ListConfirmationDialog, dialogProps, {
                     onClose: () => {
-                        this.model.trigger("list-confirmation-dialog-closed");
+                        this.model.bus.trigger("list-confirmation-dialog-closed");
                         resolve();
                     },
                 });
@@ -3677,7 +3677,7 @@ export class RelationalModel extends Model {
 
         await Promise.all([record, ...relatedRecords].map((r) => r.load()));
 
-        this.trigger("record-updated", { record, relatedRecords });
+        this.bus.trigger("record-updated", { record, relatedRecords });
         this.notify();
     }
 }
