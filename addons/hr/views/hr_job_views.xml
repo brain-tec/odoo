@@ -59,6 +59,7 @@
                     <field name="no_of_hired_employee" optional="hide"/>
                     <field name="message_needaction" invisible="1"/>
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                    <field name="company_id" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -78,7 +79,7 @@
                                     <span><field name="department_id"/>&amp;nbsp;</span>
                                 </div>
                                 <div t-if="!selection_mode">
-                                    <span>Vacancies : <field name="expected_employees"/></span>
+                                    <span>Vacancies: <field name="expected_employees"/></span>
                                 </div>
                             </div>
                         </t>

@@ -97,7 +97,7 @@ class Location(models.Model):
     net_weight = fields.Float('Net Weight', compute="_compute_weight")
     forecast_weight = fields.Float('Forecasted Weight', compute="_compute_weight")
 
-    _sql_constraints = [('barcode_company_uniq', 'unique (barcode,company_id)', 'The barcode for a location must be unique per company !'),
+    _sql_constraints = [('barcode_company_uniq', 'unique (barcode,company_id)', 'The barcode for a location must be unique per company!'),
                         ('inventory_freq_nonneg', 'check(cyclic_inventory_frequency >= 0)', 'The inventory frequency (days) for a location must be non-negative')]
 
     @api.depends('outgoing_move_line_ids.reserved_qty', 'incoming_move_line_ids.reserved_qty',
@@ -152,6 +152,8 @@ class Location(models.Model):
         view_by_wh = OrderedDict((wh.view_location_id.id, wh.id) for wh in warehouses)
         self.warehouse_id = False
         for loc in self:
+            if not loc.parent_path:
+                continue
             path = set(int(loc_id) for loc_id in loc.parent_path.split('/')[:-1])
             for view_location_id in view_by_wh:
                 if view_location_id in path:
