@@ -755,7 +755,6 @@
                 >
                     <field name="display_name"/>
                     <field name="partner_id"/>
-                    <field name="commercial_partner_id"/>
                     <field name="color"/>
                     <field name="task_count"/>
                     <field name="milestone_count_reached"/>
@@ -1499,11 +1498,11 @@
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <xpath expr="//calendar" position="attributes">
-                    <attribute name="color">project_color</attribute>
+                    <attribute name="color">project_id</attribute>
                 </xpath>
                 <xpath expr="//field[@name='project_id']" position="attributes">
                     <attribute name="filters">1</attribute>
-                    <attribute name="color">color</attribute>
+                    <attribute name="color">id</attribute>
                 </xpath>
             </field>
         </record>
