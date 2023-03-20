@@ -213,11 +213,21 @@ class StockQuant(models.Model):
     def _load_records_create(self, values):
         """ Add default location if import file did not fill it"""
         company_user = self.env.company
+        self = self.with_context(inventory_mode=True)
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
         for value in values:
             if 'location_id' not in value:
                 value['location_id'] = warehouse.lot_stock_id.id
         return super()._load_records_create(values)
+
+    def _load_records_write(self, values):
+        """ Only allowed fields should be modified """
+        self = self.with_context(inventory_mode=True)
+        allowed_fields = self._get_inventory_fields_write()
+        for field in values.keys():
+            if field not in allowed_fields:
+                raise UserError(_("Changing %s is restricted, you can't do this operation.") % (field))
+        return super()._load_records_write(values)
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -252,6 +262,15 @@ class StockQuant(models.Model):
                 raise UserError(_("Quant's editing is restricted, you can't do this operation."))
             self = self.sudo()
         return super(StockQuant, self).write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_wrong_permission(self):
+        if not self.env.is_superuser():
+            if not self.user_has_groups('stock.group_stock_manager'):
+                raise UserError(_("Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it."))
+            self = self.with_context(inventory_mode=True)
+            self.inventory_quantity = 0
+            self._apply_inventory()
 
     def action_view_stock_moves(self):
         self.ensure_one()

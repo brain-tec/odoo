@@ -431,6 +431,11 @@ class Meeting(models.Model):
 
         return events.with_context(is_calendar_event_new=False)
 
+    def _compute_field_value(self, field):
+        if field.compute_sudo:
+            return super(Meeting, self.with_context(prefetch_fields=False))._compute_field_value(field)
+        return super()._compute_field_value(field)
+
     def _read(self, fields):
         if self.env.is_system():
             super()._read(fields)
@@ -1046,6 +1051,7 @@ class Meeting(models.Model):
             for attendee in meeting.attendee_ids:
                 attendee_add = event.add('attendee')
                 attendee_add.value = u'MAILTO:' + (attendee.email or u'')
+            event.add('organizer').value = u'MAILTO:' + (meeting.user_id.email or u'')
             result[meeting.id] = cal.serialize().encode('utf-8')
 
         return result

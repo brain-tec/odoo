@@ -573,11 +573,11 @@ class AccountJournal(models.Model):
                     if bank_account.partner_id != company.partner_id:
                         raise UserError(_("The partners of the journal's company and the related bank account mismatch."))
             if 'restrict_mode_hash_table' in vals and not vals.get('restrict_mode_hash_table'):
-                journal_entry = self.env['account.move'].search([
+                journal_entry = self.env['account.move'].sudo().search([
                     ('journal_id', '=', self.id),
                     ('state', 'in', ['posted', 'posted_sent']),
                     ('secure_sequence_number', '!=', 0)], limit=1)
-                if len(journal_entry) > 0:
+                if journal_entry:
                     field_string = self._fields['restrict_mode_hash_table'].get_description(self.env)['string']
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.", field_string))
         result = super(AccountJournal, self).write(vals)
@@ -600,7 +600,7 @@ class AccountJournal(models.Model):
     @api.model
     def get_next_bank_cash_default_code(self, journal_type, company):
         journal_code_base = (journal_type == 'cash' and 'CSH' or 'BNK')
-        journals = self.env['account.journal'].search([('code', 'like', journal_code_base + '%'), ('company_id', '=', company.id)])
+        journals = self.env['account.journal'].with_context(active_test=False).search([('code', 'like', journal_code_base + '%'), ('company_id', '=', company.id)])
         for num in range(1, 100):
             # journal_code has a maximal size of 5, hence we can enforce the boundary num < 100
             journal_code = journal_code_base + str(num)
@@ -735,7 +735,6 @@ class AccountJournal(models.Model):
 
         invoices = self.env['account.move']
         for attachment in attachments:
-            attachment.write({'res_model': 'mail.compose.message'})
             decoders = self.env['account.move']._get_create_invoice_from_attachment_decoders()
             invoice = False
             for decoder in sorted(decoders, key=lambda d: d[0]):
@@ -745,6 +744,7 @@ class AccountJournal(models.Model):
             if not invoice:
                 invoice = self.env['account.move'].create({})
             invoice.with_context(no_new_invoice=True).message_post(attachment_ids=[attachment.id])
+            attachment.write({'res_model': 'account.move', 'res_id': invoice.id})
             invoices += invoice
         return invoices
 
@@ -935,8 +935,8 @@ class AccountJournal(models.Model):
         '''
         self.ensure_one()
         last_statement_domain = (domain or []) + [('journal_id', '=', self.id)]
-        last_st_line = self.env['account.bank.statement.line'].search(last_statement_domain, order='date desc, id desc', limit=1)
-        return last_st_line.statement_id
+        last_statement = self.env['account.bank.statement'].search(last_statement_domain, order='date desc, id desc', limit=1)
+        return last_statement
 
     def _get_available_payment_method_lines(self, payment_type):
         """

@@ -13,6 +13,8 @@ from odoo.tools import mute_logger
 from odoo.tests.common import Form
 from odoo.tests import tagged
 
+from odoo.exceptions import UserError
+
 from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 
 @tagged('leave_requests')
@@ -62,9 +64,18 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'requires_allocation': 'no',
             'leave_validation_type': 'manager',
         })
-
-        self.set_employee_create_date(self.employee_emp_id, '2010-02-03 00:00:00')
-        self.set_employee_create_date(self.employee_hruser_id, '2010-02-03 00:00:00')
+        self.holidays_type_4 = LeaveType.create({
+            'name': 'Limited with 2 approvals',
+            'requires_allocation': 'yes',
+            'employee_requests': 'yes',
+            'leave_validation_type': 'both',
+        })
+        self.holidays_support_document = LeaveType.create({
+            'name': 'Time off with support document',
+            'support_document': True,
+            'requires_allocation': 'no',
+            'leave_validation_type': 'no_validation',
+        })
 
     def set_employee_create_date(self, id, newdate):
         """ This method is a hack in order to be able to define/redefine the create_date
@@ -792,31 +803,50 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 ml=10, lt=5, rl=5, vrl=5, vlt=5,
             )
 
-            allocation_2021.active = False
+            with self.assertRaisesRegex(UserError,
+                r'You cannot archive an allocation which is in confirm or validate state.'):
 
-            # If the allocation is archived, the leaves taken are still counted on this allocation
-            # but the max leaves and remaining leaves are not counted anymore
-            self._check_holidays_count(
-                self.holidays_type_2.get_employees_days([self.employee_emp_id], date=date(2021, 12, 1))[self.employee_emp_id][self.holidays_type_2.id],
-                ml=0, lt=5, rl=0, vrl=0, vlt=5,
-            )
+                # The logic of the test is relevant, so we do not remove it.
+                # However, the behaviour will change.
+                # Indeed, a confirmed or validated allocation cannot be archived
 
-            # The holidays count in 2022 is not affected by the archived allocation in 2021
-            self._check_holidays_count(
-                self.holidays_type_2.get_employees_days([self.employee_emp_id])[self.employee_emp_id][self.holidays_type_2.id],
-                ml=20, lt=4, rl=16, vrl=16, vlt=4,
-            )
+                allocation_2021.active = False
 
-            allocation_2021.active = True
+                # If the allocation is archived, the leaves taken are still counted on this allocation
+                # but the max leaves and remaining leaves are not counted anymore
+                self._check_holidays_count(
+                    self.holidays_type_2.get_employees_days([self.employee_emp_id], date=date(2021, 12, 1))[self.employee_emp_id][self.holidays_type_2.id],
+                    ml=0, lt=5, rl=0, vrl=0, vlt=5,
+                )
 
-            # The holidays count in 2021 is back to what it was when the allocation was active
-            self._check_holidays_count(
-                self.holidays_type_2.get_employees_days([self.employee_emp_id], date=date(2021, 12, 1))[self.employee_emp_id][self.holidays_type_2.id],
-                ml=10, lt=5, rl=5, vrl=5, vlt=5,
-            )
+                # The holidays count in 2022 is not affected by the archived allocation in 2021
+                self._check_holidays_count(
+                    self.holidays_type_2.get_employees_days([self.employee_emp_id])[self.employee_emp_id][self.holidays_type_2.id],
+                    ml=20, lt=4, rl=16, vrl=16, vlt=4,
+                )
 
-            # The holidays count in 2022 is still not affected by the allocation in 2021
-            self._check_holidays_count(
-                self.holidays_type_2.get_employees_days([self.employee_emp_id])[self.employee_emp_id][self.holidays_type_2.id],
-                ml=20, lt=4, rl=16, vrl=16, vlt=4,
-            )
+                allocation_2021.active = True
+
+                # The holidays count in 2021 is back to what it was when the allocation was active
+                self._check_holidays_count(
+                    self.holidays_type_2.get_employees_days([self.employee_emp_id], date=date(2021, 12, 1))[self.employee_emp_id][self.holidays_type_2.id],
+                    ml=10, lt=5, rl=5, vrl=5, vlt=5,
+                )
+
+                # The holidays count in 2022 is still not affected by the allocation in 2021
+                self._check_holidays_count(
+                    self.holidays_type_2.get_employees_days([self.employee_emp_id])[self.employee_emp_id][self.holidays_type_2.id],
+                    ml=20, lt=4, rl=16, vrl=16, vlt=4,
+                )
+
+    def test_create_support_document_in_the_past(self):
+        with freeze_time('2022-10-19'):
+            self.env['hr.leave'].with_user(self.user_employee_id).create({
+                'name': 'Holiday Request',
+                'employee_id': self.employee_emp_id,
+                'holiday_status_id': self.holidays_support_document.id,
+                'date_from': '2022-10-17',
+                'date_to': '2022-10-17',
+                'number_of_days': 1,
+                'supported_attachment_ids': [(6, 0, [])],  # Sent by webclient
+            })

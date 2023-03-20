@@ -197,7 +197,7 @@ class PosOrder(models.Model):
             'quantity': order_line.qty if self.amount_total >= 0 else -order_line.qty,
             'discount': order_line.discount,
             'price_unit': order_line.price_unit,
-            'name': order_line.full_product_name or order_line.product_id.display_name,
+            'name': order_line.product_id.display_name or order_line.full_product_name,
             'tax_ids': [(6, 0, order_line.tax_ids_after_fiscal_position.ids)],
             'product_uom_id': order_line.product_uom_id.id,
         }
@@ -206,7 +206,7 @@ class PosOrder(models.Model):
         invoice_lines = []
         for line in self.lines:
             invoice_lines.append((0, None, self._prepare_invoice_line(line)))
-            if line.order_id.pricelist_id.discount_policy == 'without_discount' and line.price_unit != line.product_id.lst_price:
+            if line.order_id.pricelist_id.discount_policy == 'without_discount' and float_compare(line.price_unit, line.product_id.lst_price, precision_rounding=self.currency_id.rounding) < 0:
                 invoice_lines.append((0, None, {
                     'name': _('Price discount from %s -> %s',
                               float_repr(line.product_id.lst_price, self.currency_id.decimal_places),
@@ -361,7 +361,7 @@ class PosOrder(models.Model):
             if order.is_total_cost_computed:
                 order.margin = sum(order.lines.mapped('margin'))
                 amount_untaxed = order.currency_id.round(sum(line.price_subtotal for line in order.lines))
-                order.margin_percent = not float_is_zero(amount_untaxed, order.currency_id.rounding) and order.margin / amount_untaxed or 0
+                order.margin_percent = not float_is_zero(amount_untaxed, precision_rounding=order.currency_id.rounding) and order.margin / amount_untaxed or 0
             else:
                 order.margin = 0
                 order.margin_percent = 0
@@ -369,6 +369,8 @@ class PosOrder(models.Model):
     @api.onchange('payment_ids', 'lines')
     def _onchange_amount_all(self):
         for order in self:
+            if not order.pricelist_id.currency_id:
+                raise UserError(_("You can't: create a pos order from the backend interface, or unset the pricelist, or create a pos.order in a python test with Form tool, or edit the form view in studio if no PoS order exist"))
             currency = order.pricelist_id.currency_id
             order.amount_paid = sum(payment.amount for payment in order.payment_ids)
             order.amount_return = sum(payment.amount < 0 and payment.amount or 0 for payment in order.payment_ids)
@@ -440,6 +442,7 @@ class PosOrder(models.Model):
     def action_stock_picking(self):
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id('stock.action_picking_tree_ready')
+        action['display_name'] = _('Pickings')
         action['context'] = {}
         action['domain'] = [('id', 'in', self.picking_ids.ids)]
         return action
@@ -616,7 +619,7 @@ class PosOrder(models.Model):
     def action_pos_order_invoice(self):
         self.write({'to_invoice': True})
         res = self._generate_pos_order_invoice()
-        if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing:
+        if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and not self.to_ship:
             self._create_order_picking()
         return res
 
@@ -662,12 +665,11 @@ class PosOrder(models.Model):
     def _apply_invoice_payments(self):
         receivable_account = self.env["res.partner"]._find_accounting_partner(self.partner_id).property_account_receivable_id
         payment_moves = self.payment_ids.sudo().with_company(self.company_id)._create_payment_moves()
-        invoice_receivable = self.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account)
-        # Reconcile the invoice to the created payment moves.
-        # But not when the invoice's total amount is zero because it's already reconciled.
-        if not invoice_receivable.reconciled and receivable_account.reconcile:
-            payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account and line.partner_id)
-            (invoice_receivable | payment_receivables).sudo().with_company(self.company_id).reconcile()
+        if receivable_account.reconcile:
+            invoice_receivables = self.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account and not line.reconciled)
+            if invoice_receivables:
+                payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account and line.partner_id)
+                (invoice_receivables | payment_receivables).sudo().with_company(self.company_id).reconcile()
 
     @api.model
     def create_from_ui(self, orders, draft=False):
@@ -853,7 +855,7 @@ class PosOrder(models.Model):
             'partner_id': order.partner_id.id,
             'user_id': order.user_id.id,
             'sequence_number': order.sequence_number,
-            'creation_date': order.date_order.astimezone(timezone),
+            'creation_date': str(order.date_order.astimezone(timezone)),
             'fiscal_position_id': order.fiscal_position_id.id,
             'to_invoice': order.to_invoice,
             'to_ship': order.to_ship,
@@ -867,6 +869,10 @@ class PosOrder(models.Model):
     def _get_fields_for_order_line(self):
         """This function is here to be overriden"""
         return []
+
+    def _prepare_order_line(self, order_line):
+        """This function is here to be overriden"""
+        return order_line
 
     def export_for_ui(self):
         """ Returns a list of dict with each item having similar signature as the return of
@@ -1038,6 +1044,7 @@ class PosOrderLine(models.Model):
             'pack_lot_ids': [[0, 0, lot] for lot in orderline.pack_lot_ids.export_for_ui()],
             'customer_note': orderline.customer_note,
             'refunded_qty': orderline.refunded_qty,
+            'refunded_orderline_id': orderline.refunded_orderline_id,
         }
 
     def export_for_ui(self):
@@ -1143,7 +1150,7 @@ class PosOrderLine(models.Model):
     def _compute_margin(self):
         for line in self:
             line.margin = line.price_subtotal - line.total_cost
-            line.margin_percent = not float_is_zero(line.price_subtotal, line.currency_id.rounding) and line.margin / line.price_subtotal or 0
+            line.margin_percent = not float_is_zero(line.price_subtotal, precision_rounding=line.currency_id.rounding) and line.margin / line.price_subtotal or 0
 
 
 class PosOrderLineLot(models.Model):

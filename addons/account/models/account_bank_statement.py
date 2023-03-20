@@ -876,6 +876,12 @@ class AccountBankStatementLine(models.Model):
             if 'date' not in vals:
                 vals['date'] = statement.date
 
+            # Avoid having the same foreign_currency_id as currency_id.
+            journal_currency = journal.currency_id or journal.company_id.currency_id
+            if vals.get('foreign_currency_id') == journal_currency.id:
+                vals['foreign_currency_id'] = None
+                vals['amount_currency'] = 0.0
+
             # Hack to force different account instead of the suspense account.
             counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
 
@@ -1075,7 +1081,7 @@ class AccountBankStatementLine(models.Model):
         reconciliation_overview = []
 
         total_balance = liquidity_lines.balance
-        total_amount_currency = liquidity_lines.amount_currency
+        total_amount_currency = -self._prepare_move_line_default_vals()[1]['amount_currency']
         sign = 1 if liquidity_lines.balance > 0.0 else -1
 
         # Step 1: Split 'lines_vals_list' into two batches:

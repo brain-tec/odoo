@@ -5,9 +5,8 @@ from markupsafe import Markup
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, AccessError
 from odoo.tools.safe_eval import safe_eval, time
-from odoo.tools.misc import find_in_path
+from odoo.tools.misc import find_in_path, ustr
 from odoo.tools import config, is_html_empty, parse_version
-from odoo.sql_db import TestCursor
 from odoo.http import request
 from odoo.osv.expression import NEGATIVE_TERM_OPERATORS, FALSE_DOMAIN
 
@@ -327,6 +326,9 @@ class IrActionsReport(models.Model):
             if paperformat_id.disable_shrinking:
                 command_args.extend(['--disable-smart-shrinking'])
 
+        # Add extra time to allow the page to render
+        command_args.extend(['--javascript-delay', '1000'])
+
         if landscape:
             command_args.extend(['--orientation', 'landscape'])
 
@@ -484,6 +486,7 @@ class IrActionsReport(models.Model):
             wkhtmltopdf = [_get_wkhtmltopdf_bin()] + command_args + files_command_args + paths + [pdf_report_path]
             process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = process.communicate()
+            err = ustr(err)
 
             if process.returncode not in [0, 1]:
                 if process.returncode == -11:
@@ -732,8 +735,8 @@ class IrActionsReport(models.Model):
                     # the top level heading in /Outlines.
                     reader = PdfFileReader(pdf_content_stream)
                     root = reader.trailer['/Root']
+                    outlines_pages = []
                     if '/Outlines' in root and '/First' in root['/Outlines']:
-                        outlines_pages = []
                         node = root['/Outlines']['/First']
                         while True:
                             outlines_pages.append(root['/Dests'][node['/Dest']][0])
@@ -741,10 +744,9 @@ class IrActionsReport(models.Model):
                                 break
                             node = node['/Next']
                         outlines_pages = sorted(set(outlines_pages))
-                        # There should be only one top-level heading by document
-                        assert len(outlines_pages) == len(res_ids)
-                        # There should be a top-level heading on first page
-                        assert outlines_pages[0] == 0
+                    # There should be only one top-level heading by document
+                    # There should be a top-level heading on first page
+                    if len(outlines_pages) == len(res_ids) and outlines_pages[0] == 0:
                         for i, num in enumerate(outlines_pages):
                             to = outlines_pages[i + 1] if i + 1 < len(outlines_pages) else reader.numPages
                             attachment_writer = PdfFileWriter()
@@ -761,7 +763,9 @@ class IrActionsReport(models.Model):
                             streams.append(stream)
                         close_streams([pdf_content_stream])
                     else:
-                        # If no outlines available, do not save each record
+                        # We can not generate separate attachments because the outlines
+                        # do not reveal where the splitting points should be in the pdf.
+                        _logger.info('The PDF report can not be saved as attachment.')
                         streams.append(pdf_content_stream)
 
         # If attachment_use is checked, the records already having an existing attachment

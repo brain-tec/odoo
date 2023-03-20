@@ -298,6 +298,7 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     } else {
         document.getSelection().removeAllRanges();
     }
+    editor.observerUnactive('beforeUnitTests');
 
     // we have to sanitize after having put the cursor
     sanitize(editor.editable);
@@ -315,7 +316,9 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     }
 
     if (spec.stepFunction) {
-            await spec.stepFunction(editor);
+        editor.observerActive('beforeUnitTests');
+        await spec.stepFunction(editor);
+        editor.observerUnactive('afterUnitTests');
     }
 
     if (spec.contentAfterEdit) {
@@ -398,6 +401,7 @@ export async function click(el, options) {
             bubbles: true,
             clientX: pos.left + 1,
             clientY: pos.top + 1,
+            view: el.ownerDocument.defaultView,
         },
         options,
     );
@@ -421,6 +425,18 @@ export async function deleteForward(editor) {
 
 export async function deleteBackward(editor) {
     editor.execCommand('oDeleteBackward');
+}
+
+export async function deleteBackwardMobile(editor) {
+    // Some mobile keyboard use input event to trigger delete.
+    // This is a way to simulate this behavior.
+    const inputEvent = new InputEvent('input', {
+        inputType: 'deleteContentBackward',
+        data: null,
+        bubbles: true,
+        cancelable: false,
+    });
+    editor._onInput(inputEvent);
 }
 
 export async function insertParagraphBreak(editor) {

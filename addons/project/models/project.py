@@ -8,9 +8,10 @@ from datetime import timedelta, datetime
 from random import randint
 
 from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _, _lt
+from odoo.addons.web_editor.controllers.main import handle_history_divergence
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.tools import format_amount
-from odoo.osv.expression import OR
+from odoo.osv.expression import OR, TRUE_LEAF, FALSE_LEAF
 
 from .project_task_recurrence import DAYS, WEEKS
 from .project_update import STATUS_COLOR
@@ -1045,7 +1046,7 @@ class Task(models.Model):
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related="project_id.allow_subtasks", readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index=True,
-        compute='_compute_email_from', recursive=True, store=True, readonly=False)
+        compute='_compute_email_from', recursive=True, store=True, readonly=False, copy=False)
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
     # Computed field about working time elapsed between record creation and assignation/closing.
     working_hours_open = fields.Float(compute='_compute_elapsed', string='Working Hours to Assign', digits=(16, 2), store=True, group_operator="avg")
@@ -1625,7 +1626,11 @@ class Task(models.Model):
         if fields and (not check_group_user or self.env.user.has_group('base.group_portal')) and not self.env.su:
             unauthorized_fields = set(fields) - (self.SELF_READABLE_FIELDS if operation == 'read' else self.SELF_WRITABLE_FIELDS)
             if unauthorized_fields:
-                raise AccessError(_('You cannot %s %s fields in task.', operation if operation == 'read' else '%s on' % operation, ', '.join(unauthorized_fields)))
+                if operation == 'read':
+                    error_message = _('You cannot read %s fields in task.', ', '.join(unauthorized_fields))
+                else:
+                    error_message = _('You cannot write on %s fields in task.', ', '.join(unauthorized_fields))
+                raise AccessError(error_message)
 
     def read(self, fields=None, load='_classic_read'):
         self._ensure_fields_are_accessible(fields)
@@ -1639,13 +1644,13 @@ class Task(models.Model):
             # only take field name when having ':' e.g 'date_deadline:week' => 'date_deadline'
             fields_list += [f.split(':')[0] for f in fields_groupby]
         if domain:
-            fields_list += [term[0].split('.')[0] for term in domain if isinstance(term, (tuple, list))]
+            fields_list += [term[0].split('.')[0] for term in domain if isinstance(term, (tuple, list)) and term not in [TRUE_LEAF, FALSE_LEAF]]
         self._ensure_fields_are_accessible(fields_list)
         return super(Task, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        fields_list = {term[0] for term in args if isinstance(term, (tuple, list))}
+        fields_list = {term[0] for term in args if isinstance(term, (tuple, list)) and term not in [TRUE_LEAF, FALSE_LEAF]}
         self._ensure_fields_are_accessible(fields_list)
         return super(Task, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
 
@@ -1657,7 +1662,7 @@ class Task(models.Model):
         return super(Task, self).mapped(func)
 
     def filtered_domain(self, domain):
-        fields_list = [term[0] for term in domain if isinstance(term, (tuple, list))]
+        fields_list = [term[0] for term in domain if isinstance(term, (tuple, list)) and term not in [TRUE_LEAF, FALSE_LEAF]]
         self._ensure_fields_are_accessible(fields_list)
         return super(Task, self).filtered_domain(domain)
 
@@ -1683,7 +1688,16 @@ class Task(models.Model):
                 else:
                     for field_name in self._get_recurrence_fields() + ['recurring_task']:
                         vals.pop(field_name, None)
-        return super()._load_records_create(vals_list)
+        tasks = super()._load_records_create(vals_list)
+        stage_ids_per_project = defaultdict(list)
+        for task in tasks:
+            if task.stage_id and task.stage_id not in task.project_id.type_ids and task.stage_id.id not in stage_ids_per_project[task.project_id]:
+                stage_ids_per_project[task.project_id].append(task.stage_id.id)
+
+        for project, stage_ids in stage_ids_per_project.items():
+            project.write({'type_ids': [Command.link(stage_id) for stage_id in stage_ids]})
+
+        return tasks
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1753,6 +1767,8 @@ class Task(models.Model):
         return tasks
 
     def write(self, vals):
+        if len(self) == 1:
+            handle_history_divergence(self, 'description', vals)
         portal_can_write = False
         if self.env.user.has_group('base.group_portal') and not self.env.su:
             # Check if all fields in vals are in SELF_WRITABLE_FIELDS

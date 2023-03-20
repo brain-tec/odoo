@@ -1676,6 +1676,16 @@ msgid "Next Activity Type"
 msgstr "نوع النشاط التالي"
 
 #. module: product
+#: code:addons/product/wizard/product_label_layout.py:0
+#, python-format
+msgid ""
+"No product to print, if the product is archived please unarchive it before "
+"printing its label."
+msgstr ""
+"لا يوجد منتج لطباعته. إذا كان المنتج مؤرشفاً، يرجى إلغاء أرشفته قبل طباعة "
+"ملصقه. "
+
+#. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid "No vendor pricelist found"
 msgstr "لم يتم العثور على قائمة أسعار مورّد "
@@ -2470,11 +2480,9 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
 msgid ""
-"Specify the fixed amount to add or substract(if negative) to the amount "
+"Specify the fixed amount to add or subtract(if negative) to the amount "
 "calculated with the discount."
 msgstr ""
-"حدد المبلغ الثابت الذي تريد إضافته أو طرحه (إذا كان سالبًا) إلى المبلغ "
-"المحسوب بالخصم."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -3227,7 +3235,7 @@ msgstr "لا يمكنك تغيير القيمة للقيمة %s المعينة �
 #: code:addons/product/models/product.py:0
 #, python-format
 msgid "You cannot create recursive categories."
-msgstr "لا يمكنك إنشاء فئات متكررة."
+msgstr "لا يمكنك إنشاء فئات متداخلة. "
 
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_attribute_value_value_company_uniq
@@ -3244,6 +3252,12 @@ msgid ""
 msgstr ""
 "لا يمكنك تعريف الدقة العشرية للـ'حساب' أكبر من عامل التقريب للعملة الرئيسية "
 "للشركة "
+
+#. module: product
+#: code:addons/product/models/product.py:0
+#, python-format
+msgid "You cannot delete the %s product category."
+msgstr "لا يمكنك حذف فئة المنتج %s. "
 
 #. module: product
 #: code:addons/product/models/product_attribute.py:0

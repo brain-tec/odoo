@@ -36,13 +36,9 @@ class AccountMove(models.Model):
             ('08', '08 Penyerahan yang PPN-nya Dibebaskan (Impor Barang Tertentu)'),
             ('09', '09 Penyerahan Aktiva ( Pasal 16D UU PPN )'),
         ], string='Kode Transaksi', help='Dua digit pertama nomor pajak',
-        readonly=True, states={'draft': [('readonly', False)]}, copy=False)
+        readonly=False, states={'posted': [('readonly', True)], 'cancel': [('readonly', True)]}, copy=False,
+        compute="_compute_kode_transaksi", store=True)
     l10n_id_need_kode_transaksi = fields.Boolean(compute='_compute_need_kode_transaksi')
-
-    @api.onchange('partner_id')
-    def _onchange_partner_id(self):
-        self.l10n_id_kode_transaksi = self.partner_id.l10n_id_kode_transaksi
-        return super(AccountMove, self)._onchange_partner_id()
 
     @api.onchange('l10n_id_tax_number')
     def _onchange_l10n_id_tax_number(self):
@@ -54,6 +50,11 @@ class AccountMove(models.Model):
     def _compute_csv_created(self):
         for record in self:
             record.l10n_id_csv_created = bool(record.l10n_id_attachment_id)
+
+    @api.depends('partner_id')
+    def _compute_kode_transaksi(self):
+        for move in self:
+            move.l10n_id_kode_transaksi = move.partner_id.l10n_id_kode_transaksi
 
     @api.depends('partner_id')
     def _compute_need_kode_transaksi(self):
@@ -155,7 +156,8 @@ class AccountMove(models.Model):
             else:
                 number_ref = str(move.name) + " " + nik
 
-            street = ', '.join([x for x in (move.partner_id.street, move.partner_id.street2) if x])
+            shipping_partner = self.env['res.partner'].browse(move._get_invoice_delivery_partner_id())
+            street = ', '.join([x for x in (shipping_partner.street, shipping_partner.street2) if x])
 
             invoice_npwp = '000000000000000'
             if move.partner_id.vat and len(move.partner_id.vat) >= 12:
@@ -173,7 +175,7 @@ class AccountMove(models.Model):
             eTax['TANGGAL_FAKTUR'] = '{0}/{1}/{2}'.format(move.invoice_date.day, move.invoice_date.month, move.invoice_date.year)
             eTax['NPWP'] = invoice_npwp
             eTax['NAMA'] = move.partner_id.name if eTax['NPWP'] == '000000000000000' else move.partner_id.l10n_id_tax_name or move.partner_id.name
-            eTax['ALAMAT_LENGKAP'] = move.partner_id.contact_address.replace('\n', '') if eTax['NPWP'] == '000000000000000' else move.partner_id.l10n_id_tax_address or street
+            eTax['ALAMAT_LENGKAP'] = move.partner_id.contact_address.replace('\n', '') if eTax['NPWP'] == '000000000000000' else shipping_partner.l10n_id_tax_address or street
             eTax['JUMLAH_DPP'] = int(float_round(move.amount_untaxed, 0)) # currency rounded to the unit
             eTax['JUMLAH_PPN'] = int(float_round(move.amount_tax, 0))
             eTax['ID_KETERANGAN_TAMBAHAN'] = '1' if move.l10n_id_kode_transaksi == '07' else ''

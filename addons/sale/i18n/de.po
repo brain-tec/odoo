@@ -12,14 +12,16 @@
 # TomTietze <tietze.development@web.de>, 2022
 # Desausoi Laurent, 2022
 # Friederike Fasterling-Nesselbosch, 2022
+# Felix Schubert <felix.schubert@go-erp.com>, 2022
+# Thomas, 2023
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-24 08:20+0000\n"
+"POT-Creation-Date: 2023-03-10 09:48+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Friederike Fasterling-Nesselbosch, 2022\n"
+"Last-Translator: Thomas, 2023\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -877,7 +879,7 @@ msgstr "Konto für Anzahlungen"
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_accrued_revenue_entry
 msgid "Accrued Revenue Entry"
-msgstr ""
+msgstr "Passive Rechnungsabgrenzungsbuchung"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_needaction
@@ -1733,7 +1735,7 @@ msgstr "Anzahlungen"
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:0
 #, python-format
 msgid "Down payment"
-msgstr ""
+msgstr "Anzahlung"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_advance_payment_inv__advance_payment_method__fixed
@@ -4274,14 +4276,9 @@ msgid ""
 "There is nothing to invoice!\n"
 "\n"
 "Reason(s) of this behavior could be:\n"
-"- You should deliver your products before invoicing them: Click on the \"truck\" icon (top-right of your screen) and follow instructions.\n"
+"- You should deliver your products before invoicing them.\n"
 "- You should modify the invoicing policy of your product: Open the product, go to the \"Sales\" tab and modify invoicing policy from \"delivered quantities\" to \"ordered quantities\". For Services, you should modify the Service Invoicing Policy to 'Prepaid'."
 msgstr ""
-"Es gibt nichts in Rechnung zu stellen!\n"
-"\n"
-"Mögliche Ursache(n) könnten sein:\n"
-"- Sie sollten Ihre Produkte ausliefern, bevor Sie sie in Rechnung stellen: Klicken Sie auf das \"LKW\"-Symbol (oben rechts auf Ihrem Bildschirm) und folgen Sie den Anweisungen.\n"
-"- Sie sollten die Abrechnungsregeln für Ihr Produkt ändern: Öffnen Sie das Produkt, gehen Sie auf die Registerkarte \"Verkauf\" und ändern Sie die Abrechnungsregel von \"gelieferte Mengen\" auf \"bestellte Mengen\". Für Dienstleistungen sollten Sie die Abrechnungsregel auf \" Vorkasse\" ändern."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -4745,6 +4742,8 @@ msgid ""
 "You cannot change the product's type because it is already used in sales "
 "orders."
 msgstr ""
+"Sie können den Typ des Produkts nicht ändern, weil er sich bereits in "
+"Aufträgen befindet."
 
 #. module: sale
 #: code:addons/sale/models/sale_order_line.py:0

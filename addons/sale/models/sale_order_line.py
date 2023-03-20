@@ -66,8 +66,6 @@ class SaleOrderLine(models.Model):
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
             })
-            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups('account.group_account_manager'):
-                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
 
     @api.depends('product_id', 'order_id.state', 'qty_invoiced', 'qty_delivered')
     def _compute_product_updatable(self):
@@ -243,7 +241,7 @@ class SaleOrderLine(models.Model):
     price_total = fields.Monetary(compute='_compute_amount', string='Total', store=True)
 
     price_reduce = fields.Float(compute='_compute_price_reduce', string='Price Reduce', digits='Product Price', store=True)
-    tax_id = fields.Many2many('account.tax', string='Taxes', context={'active_test': False})
+    tax_id = fields.Many2many('account.tax', string='Taxes', context={'active_test': False}, check_company=True)
     price_reduce_taxinc = fields.Monetary(compute='_compute_price_reduce_taxinc', string='Price Reduce Tax inc', store=True)
     price_reduce_taxexcl = fields.Monetary(compute='_compute_price_reduce_taxexcl', string='Price Reduce Tax excl', store=True)
 
@@ -320,7 +318,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.product_uom_readonly = line.state in ['sale', 'done', 'cancel']
 
-    @api.depends('state', 'is_expense')
+    @api.depends('is_expense')
     def _compute_qty_delivered_method(self):
         """ Sale module compute delivered qty for product [('type', 'in', ['consu']), ('service_type', '=', 'manual')]
                 - consu + expense_policy : analytic (sum of analytic unit_amount)
@@ -412,7 +410,7 @@ class SaleOrderLine(models.Model):
             self.product_packaging_id = False
         # suggest biggest suitable packaging
         if self.product_id and self.product_uom_qty and self.product_uom:
-            self.product_packaging_id = self.product_id.packaging_ids.filtered('sales')._find_suitable_product_packaging(self.product_uom_qty, self.product_uom)
+            self.product_packaging_id = self.product_id.packaging_ids.filtered('sales')._find_suitable_product_packaging(self.product_uom_qty, self.product_uom) or self.product_packaging_id
 
     @api.onchange('product_packaging_id')
     def _onchange_product_packaging_id(self):
@@ -531,6 +529,9 @@ class SaleOrderLine(models.Model):
                 )
                 line.analytic_tag_ids = default_analytic_account.analytic_tag_ids
 
+    def compute_uom_qty(self, new_qty, stock_move, rounding=True):
+        return self.product_uom._compute_quantity(new_qty, stock_move.product_uom, rounding)
+
     def _get_invoice_line_sequence(self, new=0, old=0):
         """
         Method intended to be overridden in third-party module if we want to prevent the resequencing
@@ -561,11 +562,12 @@ class SaleOrderLine(models.Model):
             'discount': self.discount,
             'price_unit': self.price_unit,
             'tax_ids': [(6, 0, self.tax_id.ids)],
-            'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
             'sale_line_ids': [(4, self.id)],
         }
         if self.order_id.analytic_account_id and not self.display_type:
             res['analytic_account_id'] = self.order_id.analytic_account_id.id
+        if self.analytic_tag_ids and not self.display_type:
+            res['analytic_tag_ids'] = [(6, 0, self.analytic_tag_ids.ids)]
         if optional_values:
             res.update(optional_values)
         if self.display_type:

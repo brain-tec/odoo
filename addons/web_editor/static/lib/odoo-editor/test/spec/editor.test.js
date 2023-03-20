@@ -84,6 +84,28 @@ describe('Editor', () => {
                 });
             });
         });
+        describe('allowInlineAtRoot options', () => {
+            it('should wrap inline node inside a p by default', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: 'abc',
+                    contentAfter: '<p style="margin-bottom: 0px;">abc</p>',
+                });
+            });
+            it('should wrap inline node inside a p if value is false', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: 'abc',
+                    contentAfter: '<p style="margin-bottom: 0px;">abc</p>',
+                }, { allowInlineAtRoot: false }
+                );
+            });
+            it('should keep inline nodes unchanged if value is true', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: 'abc',
+                    contentAfter: 'abc',
+                }, { allowInlineAtRoot: true, }
+                );
+            });
+        });
     });
     describe('deleteForward', () => {
         describe('Selection collapsed', () => {
@@ -1130,6 +1152,11 @@ X[]
                     stepFunction: deleteForward,
                     // JW cAfter: '<p>[]def</p>',
                     contentAfter: '<h1>[]<br></h1><p>def</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1>[abc</h1><p>]<br></p><p>def</p>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<h1>[]<br></h1><p><br></p><p>def</p>',
                 });
             });
             it('should empty an inline unremovable but remain in it', async () => {
@@ -2350,6 +2377,11 @@ X[]
                     // JW cAfter: '<p>[]def</p>',
                     contentAfter: '<h1>[]<br></h1><p>def</p>',
                 });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1>[abc</h1><p>]<br></p><p>def</p>',
+                    stepFunction: deleteBackward,
+                    contentAfter: '<h1>[]<br></h1><p><br></p><p>def</p>',
+                });
             });
             it('should delete last character of paragraph, ignoring the selected paragraph break', async () => {
                 await testEditor(BasicEditor, {
@@ -2359,6 +2391,14 @@ X[]
                     // doesn't remove a paragraph break.
                     stepFunction: deleteBackward,
                     contentAfter: '<p>ab[]</p><p>def</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab[c</p><p>]<br></p><p>def</p>',
+                    // This type of selection (typically done with a triple
+                    // click) is "corrected" before remove so triple clicking
+                    // doesn't remove a paragraph break.
+                    stepFunction: deleteBackward,
+                    contentAfter: '<p>ab[]</p><p><br></p><p>def</p>',
                 });
             });
             it('should delete first character of paragraph, as well as selected paragraph break', async () => {
@@ -2376,6 +2416,22 @@ X[]
                     // doesn't remove a paragraph break.
                     stepFunction: deleteBackward,
                     contentAfter: '<p>ab[]</p><p t="unbreak">def</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab[c</p><p t="unbreak">]<br></p><p>def</p>',
+                    // This type of selection (typically done with a triple
+                    // click) is "corrected" before remove so triple clicking
+                    // doesn't remove a paragraph break.
+                    stepFunction: deleteBackward,
+                    contentAfter: '<p>ab[]</p><p t="unbreak"><br></p><p>def</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab[c</p><p>]<br></p><p t="unbreak">def</p>',
+                    // This type of selection (typically done with a triple
+                    // click) is "corrected" before remove so triple clicking
+                    // doesn't remove a paragraph break.
+                    stepFunction: deleteBackward,
+                    contentAfter: '<p>ab[]</p><p><br></p><p t="unbreak">def</p>',
                 });
             });
             it('should delete first character of unbreakable, ignoring selected paragraph break', async () => {
@@ -2426,7 +2482,20 @@ X[]
                     contentAfter: '<p>ab<b class="oe_unremovable">[]\u200B</b>ef</p>',
                 });
             });
+            it('should delete if first element and append in paragraph', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<blockquote><br>[]</blockquote>`,
+                    stepFunction: deleteBackward,
+                    contentAfter: `<p>[]<br></p>`,
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: `<h1>[]abcd</h1>`,
+                    stepFunction: deleteBackward,
+                    contentAfter: `<p>[]abcd</p>`,
+                });
+            });
         });
+
     });
 
     describe('deleterange', () => {
@@ -3284,6 +3353,27 @@ X[]
                 },
             });
         });
+        it('should return an image in a parent selection', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<div id="parent-element-to-select"><img/></div>',
+                stepFunction: editor => {
+                    const sel = editor.document.getSelection();
+                    const range = editor.document.createRange();
+                    const parent = editor.document.querySelector('div#parent-element-to-select');
+                    range.setStart(parent, 0);
+                    range.setEnd(parent, 1);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    window.chai
+                        .expect(
+                            getTraversedNodes(editor.editable).map(node =>
+                                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName,
+                            ),
+                        )
+                        .to.eql(['DIV', 'IMG']);
+                },
+            });
+        });
     });
 
     describe('automatic link creation when typing a space after an url', () => {
@@ -3481,6 +3571,56 @@ X[]
                         editor.historyStep();
                     },
                     contentAfter: `<div contenteditable="false"><div contenteditable="true">abc</div></div>`,
+                });
+            });
+        });
+        describe('prevent renderingClasses to be set from history', () => {
+            it('should prevent renderingClasses to be added', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        p.className = 'x';
+                        editor.observerFlush();
+                        editor.historyStep();
+                        window.chai.expect(editor._historySteps.length).to.eql(1);
+                    },
+                }, {
+                    renderingClasses: ['x']
+                });
+            });
+            it('should prevent renderingClasses to be added when adding 2 classes', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        p.className = 'x y';
+                        editor.observerFlush();
+                        editor.historyStep();
+                        editor.historyUndo();
+                        editor.historyRedo();
+                    },
+                    contentAfter: `<p class="y">a</p>`,
+                }, {
+                    renderingClasses: ['x']
+                });
+            });
+            it('should prevent renderingClasses to be added in historyApply', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<p>a</p>`,
+                    stepFunction: async editor => {
+                        const p = editor.editable.querySelector('p');
+                        editor.historyApply([{
+                            attributeName:"class",
+                            id: p.oid,
+                            oldValue: null,
+                            type:"attributes",
+                            value: "x y",
+                        }]);
+                    },
+                    contentAfter: `<p class="y">a</p>`,
+                }, {
+                    renderingClasses: ['x']
                 });
             });
         });
@@ -3740,6 +3880,22 @@ X[]
                     contentAfter: '<p>a[b<span>]\u200B</span>cd</p>',
                     // Final state: '<p>a[]b<span>\u200B</span>cd</p>'
                 });
+            });
+        });
+        it('should apply a color to a slice of text containing a span', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>a[b<span>c</span>d]e</p>',
+                stepFunction: editor => editor.execCommand('applyColor', 'rgb(255, 0, 0)', 'color'),
+                contentAfter: '<p>a<font style="color: rgb(255, 0, 0);">[b<span>c</span>d]</font>e</p>',
+            });
+        });
+        it('should distribute color to texts and to button separately', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>a[b<a class="btn">c</a>d]e</p>',
+                stepFunction: editor => editor.execCommand('applyColor', 'rgb(255, 0, 0)', 'color'),
+                contentAfter: '<p>a<font style="color: rgb(255, 0, 0);">[b</font>' +
+                    '<a class="btn"><font style="color: rgb(255, 0, 0);">c</font></a>' +
+                    '<font style="color: rgb(255, 0, 0);">d]</font>e</p>',
             });
         });
     });

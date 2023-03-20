@@ -12,6 +12,7 @@
 # Vallen Delobel <edv@odoo.com>, 2021
 # Rémi CAZENAVE, 2021
 # Cécile Collart <cco@odoo.com>, 2022
+# Jinjiu Liu, 2022
 # Jolien De Paepe, 2022
 # 
 msgid ""
@@ -1128,6 +1129,16 @@ msgid "You can not delete a program in active state"
 msgstr "Vous ne pouvez pas supprimer un programme actif"
 
 #. module: coupon
+#: code:addons/coupon/models/product_product.py:0
+#, python-format
+msgid ""
+"You cannot delete a product that is linked with Coupon or Promotion program."
+" Archive it instead."
+msgstr ""
+"Vous ne pouvez pas supprimer un produit qui est lié à un programme de coupon"
+" ou de promotion. Veuillez plutôt l'archiver."
+
+#. module: coupon
 #: model_terms:ir.ui.view,arch_db:coupon.coupon_program_view_promo_program_form
 msgid "e.g. 10% Discount"
 msgstr "par exemple : 10% de réduction"
@@ -1135,7 +1146,7 @@ msgstr "par exemple : 10% de réduction"
 #. module: coupon
 #: model_terms:ir.ui.view,arch_db:coupon.report_coupon
 msgid "off %s"
-msgstr "de remise sur %s"
+msgstr "de remise %s"
 
 #. module: coupon
 #: model_terms:ir.ui.view,arch_db:coupon.report_coupon

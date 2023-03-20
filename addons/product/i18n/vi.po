@@ -1678,6 +1678,14 @@ msgid "Next Activity Type"
 msgstr "Kiểu hoạt động kế tiếp"
 
 #. module: product
+#: code:addons/product/wizard/product_label_layout.py:0
+#, python-format
+msgid ""
+"No product to print, if the product is archived please unarchive it before "
+"printing its label."
+msgstr ""
+
+#. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid "No vendor pricelist found"
 msgstr "Không tìm thấy bảng giá của nhà cung cấp"
@@ -2475,11 +2483,9 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
 msgid ""
-"Specify the fixed amount to add or substract(if negative) to the amount "
+"Specify the fixed amount to add or subtract(if negative) to the amount "
 "calculated with the discount."
 msgstr ""
-"Xác định số tiền cố định để cộng thêm hoặc trừ đi (số âm) số tiền được tính "
-"toán với chiết khấu."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -2665,6 +2671,12 @@ msgstr "Giá để mua một sản phẩm"
 msgid "The product template is archived so no combination is possible."
 msgstr ""
 "Sản phẩm mẫu đã được lưu trữ vì vậy không có sự kết hợp nào có khả năng."
+
+#. module: product
+#: code:addons/product/models/product.py:0
+#, python-format
+msgid "The product variant must be a variant of the product template."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
@@ -3247,6 +3259,12 @@ msgid ""
 msgstr ""
 "Bạn không thể định nghĩa độ chính xác thập phân của 'Account' mà lớn hơn hệ "
 "số làm tròn của tiền tệ chính của công ty"
+
+#. module: product
+#: code:addons/product/models/product.py:0
+#, python-format
+msgid "You cannot delete the %s product category."
+msgstr ""
 
 #. module: product
 #: code:addons/product/models/product_attribute.py:0

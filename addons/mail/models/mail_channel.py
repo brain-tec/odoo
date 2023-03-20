@@ -749,7 +749,7 @@ class Channel(models.Model):
             [('partner_id', '=', self.env.user.partner_id.id)] if self.env.user and self.env.user.partner_id else expression.FALSE_LEAF,
         ])
         all_needed_members = self.env['mail.channel.partner'].search(expression.AND([[('channel_id', 'in', self.ids)], all_needed_members_domain]))
-        partner_format_by_partner = all_needed_members.partner_id.mail_partner_format()
+        partner_format_by_partner = all_needed_members.partner_id.sudo().mail_partner_format()
         members_by_channel = defaultdict(lambda: self.env['mail.channel.partner'])
         invited_members_by_channel = defaultdict(lambda: self.env['mail.channel.partner'])
         member_of_current_user_by_channel = defaultdict(lambda: self.env['mail.channel.partner'])
@@ -805,8 +805,8 @@ class Channel(models.Model):
                     'seen_message_id': cp.seen_message_id.id,
                 } for cp in members_by_channel[channel] if cp.partner_id], key=lambda p: p['partner_id'])
                 info['guestMembers'] = [('insert', sorted([{
-                    'id': member.guest_id.id,
-                    'name': member.guest_id.name,
+                    'id': member.guest_id.sudo().id,
+                    'name': member.guest_id.sudo().name,
                 } for member in members_by_channel[channel] if member.guest_id], key=lambda g: g['id']))]
 
             # add RTC sessions info
@@ -885,7 +885,13 @@ class Channel(models.Model):
         else:
             # create a new one
             channel = self.create({
-                'channel_partner_ids': [Command.link(partner_id) for partner_id in partners_to],
+                'channel_last_seen_partner_ids': [
+                    Command.create({
+                        'partner_id': partner_id,
+                        # only pin for the current user, so the chat does not show up for the correspondent until a message has been sent
+                        'is_pinned': partner_id == self.env.user.partner_id.id
+                    }) for partner_id in partners_to
+                ],
                 'public': 'private',
                 'channel_type': 'chat',
                 'name': ', '.join(self.env['res.partner'].sudo().browse(partners_to).mapped('name')),
@@ -917,7 +923,7 @@ class Channel(models.Model):
             if vals:
                 session_state.write(vals)
             self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.channel/insert', {
-                'id': session_state.channel_id.channel_info()[0]['id'],
+                'id': session_state.channel_id.id,
                 'serverFoldState': state,
             })
 
@@ -1198,13 +1204,13 @@ class Channel(models.Model):
     def execute_command_help(self, **kwargs):
         partner = self.env.user.partner_id
         if self.channel_type == 'channel':
-            msg = _("You are in channel <b>#%s</b>.", self.name)
+            msg = _("You are in channel <b>#%s</b>.", html_escape(self.name))
             if self.public == 'private':
                 msg += _(" This channel is private. People must be invited to join it.")
         else:
             all_channel_partners = self.env['mail.channel.partner'].with_context(active_test=False)
             channel_partners = all_channel_partners.search([('partner_id', '!=', partner.id), ('channel_id', '=', self.id)])
-            msg = _("You are in a private conversation with <b>@%s</b>.", html_escape(channel_partners[0].partner_id.name if channel_partners else _('Anonymous')))
+            msg = _("You are in a private conversation with <b>@%s</b>.", _(" @").join(html_escape(member.partner_id.name or member.guest_id.name) for member in channel_partners) if channel_partners else _('Anonymous'))
         msg += self._execute_command_help_message_extra()
 
         self._send_transient_message(partner, msg)
@@ -1223,15 +1229,15 @@ class Channel(models.Model):
             self.channel_pin(self.uuid, False)
 
     def execute_command_who(self, **kwargs):
-        partner = self.env.user.partner_id
+        channel_members = self.env['mail.channel.partner'].with_context(active_test=False).search([('partner_id', '!=', self.env.user.partner_id.id), ('channel_id', '=', self.id)])
         members = [
-            f'<a href="#" data-oe-id={str(p.id)} data-oe-model="res.partner">@{html_escape(p.name)}</a>'
-            for p in self.channel_partner_ids[:30] if p != partner
+            f'<strong><a href="#" data-oe-id={str(m.partner_id.id)} data-oe-model="res.partner">@{html_escape(m.partner_id.name)}</a></strong>' if m.partner_id else f'<strong>@{html_escape(m.guest_id.name)}</strong>'
+            for m in channel_members[:30]
         ]
         if len(members) == 0:
             msg = _("You are alone in this channel.")
         else:
-            dots = "..." if len(members) != len(self.channel_partner_ids) - 1 else ""
+            dots = "..." if len(members) != len(channel_members) else ""
             msg = _("Users in this channel: %(members)s %(dots)s and you.", members=", ".join(members), dots=dots)
 
-        self._send_transient_message(partner, msg)
+        self._send_transient_message(self.env.user.partner_id, msg)

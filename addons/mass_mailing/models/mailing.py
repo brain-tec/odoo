@@ -199,8 +199,8 @@ class MassMailing(models.Model):
     def _compute_total(self):
         for mass_mailing in self:
             total = self.env[mass_mailing.mailing_model_real].search_count(mass_mailing._parse_mailing_domain())
-            if mass_mailing.ab_testing_pc < 100:
-                total = int(total / 100.0 * mass_mailing.ab_testing_pc)
+            if total and mass_mailing.ab_testing_enabled and mass_mailing.ab_testing_pc < 100:
+                total = max(int(total / 100.0 * mass_mailing.ab_testing_pc), 1)
             mass_mailing.total = total
 
     def _compute_clicks_ratio(self):
@@ -260,15 +260,19 @@ class MassMailing(models.Model):
             self.browse(row.pop('mailing_id')).update(row)
 
     def _compute_next_departure(self):
-        cron_next_call = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').sudo().nextcall
-        str2dt = fields.Datetime.from_string
-        cron_time = str2dt(cron_next_call)
+        # Schedule_date should only be False if schedule_type = "now" or
+        # mass_mailing is canceled.
+        # A cron.trigger is created when mailing is put "in queue"
+        # so we can reasonably expect that the cron worker will
+        # execute this based on the cron.trigger's call_at which should
+        # be now() when clicking "Send" or schedule_date if scheduled
+
         for mass_mailing in self:
             if mass_mailing.schedule_date:
-                schedule_date = str2dt(mass_mailing.schedule_date)
-                mass_mailing.next_departure = max(schedule_date, cron_time)
+                # max in case the user schedules a date in the past
+                mass_mailing.next_departure = max(mass_mailing.schedule_date, fields.datetime.now())
             else:
-                mass_mailing.next_departure = cron_time
+                mass_mailing.next_departure = fields.datetime.now()
 
     @api.depends('email_from', 'mail_server_id')
     def _compute_warning_message(self):
@@ -479,7 +483,7 @@ class MassMailing(models.Model):
 
     def action_schedule(self):
         self.ensure_one()
-        if self.schedule_date:
+        if self.schedule_date and self.schedule_date > fields.Datetime.now():
             return self.action_put_in_queue()
         else:
             action = self.env["ir.actions.actions"]._for_xml_id("mass_mailing.mailing_mailing_schedule_date_action")
@@ -609,7 +613,7 @@ class MassMailing(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'tree,kanban,form,calendar,graph',
             'res_model': 'mailing.mailing',
-            'domain': [('campaign_id', '=', self.campaign_id.id), ('ab_testing_enabled', '=', True)],
+            'domain': [('campaign_id', '=', self.campaign_id.id), ('ab_testing_enabled', '=', True), ('mailing_type', '=', self.mailing_type)],
         }
         if self.mailing_type == 'mail':
             action['views'] = [
@@ -746,7 +750,7 @@ class MassMailing(models.Model):
               JOIN %(target)s t ON (s.res_id = t.id)
               %(join_domain)s
              WHERE substring(t.%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL
-              %(where_domain)s                               
+              %(where_domain)s
         """
 
         # Apply same 'get email field' rule from mail_thread.message_get_default_recipients
@@ -757,9 +761,9 @@ class MassMailing(models.Model):
                   FROM mailing_trace s
                   JOIN %(target)s t ON (s.res_id = t.id)
                   JOIN res_partner p ON (t.partner_id = p.id)
-                  %(join_domain)s                  
+                  %(join_domain)s
                  WHERE substring(p.%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL
-                  %(where_domain)s 
+                  %(where_domain)s
             """
         elif issubclass(type(target), self.pool['mail.thread.blacklist']):
             mail_field = 'email_normalized'
@@ -806,7 +810,9 @@ class MassMailing(models.Model):
         # randomly choose a fragment
         if self.ab_testing_enabled and self.ab_testing_pc < 100:
             contact_nbr = self.env[self.mailing_model_real].search_count(mailing_domain)
-            topick = int(contact_nbr / 100.0 * self.ab_testing_pc)
+            topick = 0
+            if contact_nbr:
+                topick = max(int(contact_nbr / 100.0 * self.ab_testing_pc), 1)
             if self.campaign_id and self.ab_testing_enabled:
                 already_mailed = self.campaign_id._get_mailing_recipients()[self.campaign_id.id]
             else:
