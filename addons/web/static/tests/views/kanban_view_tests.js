@@ -8417,6 +8417,30 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["1", "3", "2", "4"]);
     });
 
+    QUnit.test(
+        "column config dropdown should not crash when records_draggable and groups_draggable are set to false",
+        async (assert) => {
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <kanban groups_draggable='0' records_draggable='0'>
+                    <field name="product_id"/>
+                    <templates><t t-name="kanban-box">
+                        <div><field name="id"/></div>
+                    </t></templates>
+                </kanban>`,
+                groupBy: ["product_id"],
+            });
+            assert.containsN(target, ".o_kanban_group .o_kanban_config", 2);
+
+            assert.containsNone(target, ".o_kanban_config .o-dropdown--menu");
+            await click(target.querySelectorAll(".o_kanban_config .dropdown-toggle")[0]);
+            assert.containsOnce(target, ".o_kanban_config .o-dropdown--menu");
+        }
+    );
+
     QUnit.test("properly evaluate more complex domains", async (assert) => {
         await makeView({
             type: "kanban",
@@ -13074,4 +13098,33 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps(["execute_action"]);
         }
     );
+
+    QUnit.test("Keep scrollTop when loading records with load more", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `<kanban>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div style="height:1000px;"><field name="id"/></div>
+                    </t>
+                </templates>
+            </kanban>`,
+            groupBy: ["bar"],
+            limit: 1,
+        });
+        target.querySelector(".o_kanban_renderer").style.overflow = "scroll";
+        target.querySelector(".o_kanban_renderer").style.height = "500px";
+        const loadMoreButton = target.querySelector(".o_kanban_load_more button");
+        loadMoreButton.scrollIntoView();
+        const previousScrollTop = target.querySelector(".o_kanban_renderer").scrollTop;
+        await click(loadMoreButton);
+        assert.strictEqual(
+            previousScrollTop,
+            target.querySelector(".o_kanban_renderer").scrollTop,
+            "Should have the same scrollTop value"
+        );
+        assert.notEqual(previousScrollTop, 0, "Should not have the scrollTop value at 0");
+    });
 });
