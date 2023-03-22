@@ -7774,6 +7774,49 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
+    QUnit.test("editable list view, should refocus date field", async (assert) => {
+        patchDate(2017, 1, 10, 0, 0, 0);
+        serverData.models.foo.records = [];
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: /* xml */ `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="date"/>
+                </tree>`,
+        });
+        await click(target, ".o_list_button_add");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_field_widget[name=foo] input")
+        );
+
+        await click(target, ".o_field_widget[name=date] input");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_field_widget[name=date] input")
+        );
+        assert.containsOnce(document.body, ".bootstrap-datetimepicker-widget");
+
+        await click(
+            document.body,
+            ".bootstrap-datetimepicker-widget [data-action=selectDay][data-day='02/15/2017']"
+        );
+        assert.containsNone(document.body, ".bootstrap-datetimepicker-widget");
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=date] input").value,
+            "02/15/2017"
+        );
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_field_widget[name=date] input")
+        );
+        assert.strictEqual(document.activeElement.selectionStart, 0);
+        assert.strictEqual(document.activeElement.selectionEnd, 10);
+    });
+
     QUnit.test("click on a button in a list view", async function (assert) {
         assert.expect(10);
 
@@ -18121,5 +18164,36 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsNone(target, ".o_optional_columns_dropdown_toggle");
         assert.verifySteps(["get_views", "web_search_read"]);
+    });
+
+    QUnit.test("header buttons in list view", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <header>
+                        <button name="a" type="object" string="Confirm" confirm="Are you sure?" />
+                    </header>
+                    <field name="foo"/>
+                    <field name="bar" />
+                </tree>`,
+
+            mockRPC: async (route, args) => {
+                if (route === "/web/dataset/call_button") {
+                    assert.step(args.method);
+                    return true;
+                }
+            },
+        });
+        await click(target.querySelector(".o_data_row .o_list_record_selector input"));
+        const cpButtons = getButtons(target);
+        await click(cpButtons[0].querySelector('button[name="a"]'));
+        assert.containsOnce(document.body, ".modal");
+        const modalText = target.querySelector(".modal-body").textContent;
+        assert.strictEqual(modalText, "Are you sure?");
+        await click(document, "body .modal footer button.btn-primary");
+        assert.verifySteps(["a"]);
     });
 });
