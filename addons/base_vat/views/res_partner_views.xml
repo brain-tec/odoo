@@ -6,9 +6,16 @@
             <field name="name">view.partner.base.vat.form</field>
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('alert')]" position="after">
-                    <div class="alert alert-warning oe_edit_only" role="alert" attrs="{'invisible': [('vies_failed_message', '=', False)]}">
-                        <field name="vies_failed_message" nolabel="1" readonly="1"/>
+                <xpath expr="//field[@name='vat']" position="replace">
+                    <field name="perform_vies_validation" invisible="1"/>
+                    <label for="vat" string="Tax ID"/>
+                    <div attrs="{'invisible': [('perform_vies_validation', '=', False)]}">
+                        <field name="vat" placeholder="e.g. BE0477472701" class="oe_inline" attrs="{'readonly': [('parent_id', '!=', False)]}"/>
+                        <label for="vies_valid"/>
+                        <field name="vies_valid" attrs="{'readonly': [('parent_id', '!=', False)]}"/>
+                    </div>
+                    <div attrs="{'invisible': [('perform_vies_validation', '=', True)]}">
+                        <field name="vat" placeholder="e.g. BE0477472701" attrs="{'readonly': [('parent_id','!=', False)]}"/>
                     </div>
                 </xpath>
             </field>
