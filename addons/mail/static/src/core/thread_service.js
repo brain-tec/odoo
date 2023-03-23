@@ -14,6 +14,8 @@ import { prettifyMessageContent } from "../utils/format";
 import { registry } from "@web/core/registry";
 import { url } from "@web/core/utils/urls";
 import { DEFAULT_AVATAR } from "@mail/core/persona_service";
+import { loadEmoji } from "@mail/emoji_picker/emoji_picker";
+import { browser } from "@web/core/browser/browser";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -670,6 +672,7 @@ export class ThreadService {
                 .map((recipient) => recipient.persona.id);
             partner_ids?.push(...recipientIds);
         }
+        const tmpId = `${thread.localId}_${new Date().valueOf()}`;
         const params = {
             post_data: {
                 body: await prettifyMessageContent(body, validMentions),
@@ -677,6 +680,7 @@ export class ThreadService {
                 message_type: "comment",
                 partner_ids,
                 subtype_xmlid: subtype,
+                temporary_id: tmpId,
             },
             thread_id: thread.id,
             thread_model: thread.model,
@@ -688,8 +692,6 @@ export class ThreadService {
             params.thread_id = thread.id;
             params.thread_model = thread.model;
         } else {
-            const lastMessageId = this.messageService.getLastMessageId();
-            const tmpId = lastMessageId + 0.01;
             const tmpData = {
                 id: tmpId,
                 attachments: attachments,
@@ -705,11 +707,26 @@ export class ThreadService {
             if (parentId) {
                 tmpData.parentMessage = this.store.messages[parentId];
             }
+            const prettyContent = await prettifyMessageContent(body, validMentions);
+            const { emojis } = await loadEmoji();
+            const recentEmojis = JSON.parse(
+                browser.localStorage.getItem("mail.emoji.frequent") || "{}"
+            );
+            const emojisInContent =
+                prettyContent.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu) ?? [];
+            for (const codepoints of emojisInContent) {
+                if (emojis.some((emoji) => emoji.codepoints === codepoints)) {
+                    recentEmojis[codepoints] ??= 0;
+                    recentEmojis[codepoints]++;
+                }
+            }
+            browser.localStorage.setItem("mail.emoji.frequent", JSON.stringify(recentEmojis));
             tmpMsg = this.messageService.insert({
                 ...tmpData,
-                body: markup(await prettifyMessageContent(body, validMentions)),
+                body: markup(prettyContent),
                 res_id: thread.id,
                 model: thread.model,
+                temporary_id: tmpId,
             });
         }
         const data = await this.rpc("/mail/message/post", params);
@@ -717,6 +734,9 @@ export class ThreadService {
             data.parentMessage.body = data.parentMessage.body
                 ? markup(data.parentMessage.body)
                 : data.parentMessage.body;
+        }
+        if (data.id in this.store.messages) {
+            data.temporary_id = null;
         }
         const message = this.messageService.insert(
             Object.assign(data, { body: markup(data.body) })
@@ -782,7 +802,7 @@ export class ThreadService {
             countFromId = lastSeenMessageId;
         }
         return thread.messages.reduce((total, message) => {
-            if (message.id <= countFromId) {
+            if (message.id <= countFromId || message.temporary_id) {
                 return total;
             }
             return total + 1;
@@ -805,7 +825,7 @@ export class ThreadService {
             if (message.id <= thread.serverLastSeenMsgBySelf) {
                 continue;
             }
-            if (message.isSelfAuthored || message.isTransient) {
+            if (message.temporary_id || message.isTransient) {
                 lastSeenMessageId = message.id;
                 continue;
             }

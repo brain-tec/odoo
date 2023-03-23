@@ -596,7 +596,7 @@ QUnit.test(
 );
 
 QUnit.test(
-    "new message separator is not shown in a chat window of a chat on receiving new message if there is no history of conversation",
+    "new message separator is shown in chat window of chat on receiving new message when there was no history",
     async (assert) => {
         const pyEnv = await startServer();
         const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
@@ -621,7 +621,7 @@ QUnit.test(
                 uuid: "channel-10-uuid",
             })
         );
-        assert.containsNone($, "hr + span:contains(New messages)");
+        assert.containsOnce($, "hr + span:contains(New messages)");
     }
 );
 
@@ -932,3 +932,24 @@ QUnit.test(
         assert.strictEqual($(".o-mail-Thread")[0].scrollTop, 142);
     }
 );
+
+QUnit.test("folded chat window should hide member-list and settings buttons", async (assert) => {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({});
+    await start();
+    // Open Thread
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem");
+    assert.containsOnce($, "div[title='Show Member List']");
+    assert.containsOnce($, "div[title='Show Call Settings']");
+
+    // Fold chat window
+    await click(".o-mail-ChatWindow-header");
+    assert.containsNone($, "div[title='Show Member List']");
+    assert.containsNone($, "div[title='Show Call Settings']");
+
+    // Unfold chat window
+    await click(".o-mail-ChatWindow-header");
+    assert.containsOnce($, "div[title='Show Member List']");
+    assert.containsOnce($, "div[title='Show Call Settings']");
+});

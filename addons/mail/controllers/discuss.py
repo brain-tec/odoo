@@ -229,7 +229,7 @@ class DiscussController(http.Controller):
     # --------------------------------------------------------------------------
 
     def _get_allowed_message_post_params(self):
-        return {'attachment_ids', 'body', 'message_type', 'partner_ids', 'subtype_xmlid', 'parent_id'}
+        return {'attachment_ids', 'body', 'message_type', 'partner_ids', 'subtype_xmlid', 'temporary_id', 'parent_id'}
 
     @http.route('/mail/message/post', methods=['POST'], type='json', auth='public')
     def mail_message_post(self, thread_model, thread_id, post_data, **kwargs):
@@ -238,7 +238,10 @@ class DiscussController(http.Controller):
             thread = channel_member_sudo.channel_id
         else:
             thread = request.env[thread_model].browse(int(thread_id)).exists()
-        return thread.message_post(**{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}).message_format()[0]
+        message_data = thread.message_post(**{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}).message_format()[0]
+        if 'temporary_id' in post_data:
+            message_data['temporary_id'] = post_data['temporary_id']
+        return message_data
 
     @http.route('/mail/message/update_content', methods=['POST'], type='json', auth='public')
     def mail_message_update_content(self, message_id, body, attachment_ids):
@@ -415,9 +418,9 @@ class DiscussController(http.Controller):
         return messages.message_format()
 
     @http.route('/mail/channel/set_last_seen_message', methods=['POST'], type='json', auth='public')
-    def mail_channel_mark_as_seen(self, channel_id, last_message_id, **kwargs):
+    def mail_channel_mark_as_seen(self, channel_id, last_message_id, allow_older=False, **kwargs):
         channel_member_sudo = request.env['mail.channel.member']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        return channel_member_sudo.channel_id._channel_seen(int(last_message_id))
+        return channel_member_sudo.channel_id._channel_seen(last_message_id, allow_older=allow_older)
 
     @http.route('/mail/channel/notify_typing', methods=['POST'], type='json', auth='public')
     def mail_channel_notify_typing(self, channel_id, is_typing, **kwargs):
