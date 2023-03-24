@@ -864,7 +864,8 @@ class AccountMove(models.Model):
         'line_ids.amount_residual',
         'line_ids.amount_residual_currency',
         'line_ids.payment_id.state',
-        'line_ids.full_reconcile_id')
+        'line_ids.full_reconcile_id',
+        'state')
     def _compute_amount(self):
         for move in self:
             total_untaxed, total_untaxed_currency = 0.0, 0.0
@@ -1819,7 +1820,7 @@ class AccountMove(models.Model):
         self._compute_tax_country_id() # We need to ensure this field has been computed, as we use it in our check
         for record in self:
             amls = record.line_ids
-            impacted_countries = amls.tax_ids.country_id | amls.tax_line_id.country_id | amls.tax_tag_ids.country_id
+            impacted_countries = amls.tax_ids.country_id | amls.tax_line_id.country_id
             if impacted_countries and impacted_countries != record.tax_country_id:
                 if record.fiscal_position_id and impacted_countries != record.fiscal_position_id.country_id:
                     raise ValidationError(_("This entry contains taxes that are not compatible with your fiscal position. Check the country set in fiscal position and in your tax configuration."))
@@ -3501,7 +3502,7 @@ class AccountMove(models.Model):
 
         return to_post
 
-    def _find_and_set_purchase_orders(self, po_references, partner_id, amount_total, prefer_purchase_line=False, timeout=10):
+    def _find_and_set_purchase_orders(self, po_references, partner_id, amount_total, from_ocr=False, timeout=10):
         # hook to be used with purchase, so that vendor bills are sync/autocompleted with purchase orders
         self.ensure_one()
 
