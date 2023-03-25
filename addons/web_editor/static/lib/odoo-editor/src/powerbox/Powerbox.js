@@ -139,6 +139,10 @@ export class Powerbox {
                 );
             }
         }
+        // Hide group name if there is only a single group.
+        if (Object.entries(groups).length === 1) {
+            this._mainWrapperElement.querySelector('.oe-commandbar-groupName').style.display = 'none';
+        }
         this._resetPosition();
     }
 
@@ -293,6 +297,8 @@ export class Powerbox {
             document.addEventListener('mousemove', mousemove);
             document.addEventListener('mousedown', this._stop);
         }
+        // Display powerbox immediately when forceShow is set.
+        if (this._currentOpenOptions.forceShow) showOnceOnKeyup();
     }
 
     nextOpenOptions(openOptions) {
