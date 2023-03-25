@@ -687,7 +687,7 @@ exports.PosModel = Backbone.Model.extend({
                     reject();
                 };
                 self.company_logo.crossOrigin = "anonymous";
-                self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + self.session.db + '&company=' + self.company.id + '&_' + Math.random();
+                self.company_logo.src = `/web/image?model=res.company&id=${self.company.id}&field=logo`;
             });
         },
     }, {
@@ -2465,7 +2465,6 @@ exports.Orderline = Backbone.Model.extend({
             customer_note: this.get_customer_note(),
             refunded_orderline_id: this.refunded_orderline_id,
             price_manually_set: this.price_manually_set,
-            refunded_orderline_id: this.refunded_orderline_id,
         };
     },
     //used to create a json of the ticket, to be sent to the printer
