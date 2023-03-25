@@ -101,7 +101,10 @@ export class ThreadService {
     /**
      * @param {Thread} thread
      */
-    markAsRead(thread) {
+    async markAsRead(thread) {
+        if (!thread.isLoaded && thread.status === "loading") {
+            await thread.isLoadedDeferred;
+        }
         const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
         if (
             this.isUnread(thread) &&
@@ -486,6 +489,7 @@ export class ThreadService {
                 "last_interest_dt",
                 "defaultDisplayMode",
             ]);
+            thread.lastServerMessageId = serverData.last_message_id ?? thread.lastServerMessageId;
             if (thread.model === "mail.channel" && serverData.channel) {
                 thread.channel = assignDefined(thread.channel ?? {}, serverData.channel);
             }
@@ -614,6 +618,7 @@ export class ThreadService {
             return thread;
         }
         let thread = new Thread(this.store, data);
+        onChange(thread, "isLoaded", () => thread.isLoadedDeferred.resolve());
         onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
         onChange(thread, "is_pinned", () => {
             if (!thread.is_pinned && this.store.discuss.threadLocalId === thread.localId) {
@@ -672,15 +677,18 @@ export class ThreadService {
                 .map((recipient) => recipient.persona.id);
             partner_ids?.push(...recipientIds);
         }
-        const tmpId = `${thread.localId}_${new Date().valueOf()}`;
+        const lastMessageId = this.messageService.getLastMessageId();
+        const tmpId = lastMessageId + 0.01;
         const params = {
+            context: {
+                temporary_id: tmpId,
+            },
             post_data: {
                 body: await prettifyMessageContent(body, validMentions),
                 attachment_ids: attachments.map(({ id }) => id),
                 message_type: "comment",
                 partner_ids,
                 subtype_xmlid: subtype,
-                temporary_id: tmpId,
             },
             thread_id: thread.id,
             thread_model: thread.model,
@@ -794,12 +802,12 @@ export class ThreadService {
      */
     localMessageUnreadCounter(thread) {
         let baseCounter = thread.serverMessageUnreadCounter;
-        let countFromId = thread.serverLastSeenMsgBySelf ? thread.serverLastSeenMsgBySelf : 0;
+        let countFromId = thread.lastServerMessageId ? thread.lastServerMessageId : 0;
         const lastSeenMessageId = this.lastSeenBySelfMessageId(thread);
         const firstMessage = thread.messages[0];
-        if (firstMessage && lastSeenMessageId && lastSeenMessageId >= firstMessage.id) {
+        if (firstMessage && (lastSeenMessageId === false || lastSeenMessageId >= firstMessage.id)) {
             baseCounter = 0;
-            countFromId = lastSeenMessageId;
+            countFromId = lastSeenMessageId || 0;
         }
         return thread.messages.reduce((total, message) => {
             if (message.id <= countFromId || message.temporary_id) {
