@@ -25,9 +25,10 @@ QUnit.test("basic rendering", async (assert) => {
     assert.containsOnce($, ".o-mail-CallParticipantCard[aria-label='Mitchell Admin']");
     assert.containsOnce($, ".o-mail-CallActionList");
     assert.containsOnce($, ".o-mail-CallMenu-buttonContent");
-    assert.containsN($, ".o-mail-CallActionList button", 6);
+    assert.containsN($, ".o-mail-CallActionList button", 7);
     assert.containsOnce($, "button[aria-label='Unmute'], button[aria-label='Mute']"); // FIXME depends on current browser permission
     assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Deafen']");
+    assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Raise hand']");
     assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Turn camera on']");
     assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Share screen']");
     assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Enter Full Screen']");
@@ -39,7 +40,7 @@ QUnit.test("no call with odoobot", async (assert) => {
     const channelId = pyEnv["mail.channel"].create({
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.partnerRootId }],
+            [0, 0, { partner_id: pyEnv.odoobotId }],
         ],
         channel_type: "chat",
     });
