@@ -58,10 +58,11 @@ class IrMailServer(models.Model):
         if len(self) == 1 and self.use_microsoft_outlook_service:
             # Call super without user to setup connection but don't login.
             if mail_server_id:
-                connection = super(IrMailServer, self).connect(mail_server_id.smtp_host, mail_server_id.smtp_port,
-                                                               user=None, password=mail_server_id.smtp_pass,
-                                                               encryption=mail_server_id.smtp_encryption,
-                                                               smtp_debug=mail_server_id.smtp_debug,
+                mail_server = self.sudo().browse(mail_server_id)
+                connection = super(IrMailServer, self).connect(mail_server.smtp_host, mail_server.smtp_port,
+                                                               user=None, password=mail_server.smtp_pass,
+                                                               encryption=mail_server.smtp_encryption,
+                                                               smtp_debug=mail_server.smtp_debug,
                                                                mail_server_id=None)
             else:
                 connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
