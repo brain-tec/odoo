@@ -39,6 +39,11 @@
                 <field name="company_id" invisible="1"/>
                 <setting help="Invoice your time and material to customers">
                     <field name="allow_billable"/>
+                    <div attrs="{'invisible': [('allow_billable', '=', False)]}">
+                        <label for="partner_id"/>
+                        <field name="partner_id" class="ms-1" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer'}"
+                            options="{'no_create_edit': True, 'no_open': True}"/>
+                    </div>
                 </setting>
             </xpath>
         </field>
@@ -88,10 +93,16 @@
             <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='child_ids']/tree//field[@name='remaining_hours']" position="after">
-                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"/>
+                    <field name="sale_line_id" invisible="1"/>
+                    <field name="remaining_hours_available" invisible="1"/>
+                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"
+                        attrs="{'invisible': ['|', ('sale_line_id', '=', False), ('remaining_hours_available', '=', False)]}"/>
                 </xpath>
                 <xpath expr="//field[@name='depend_on_ids']/tree//field[@name='remaining_hours']" position="after">
-                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"/>
+                    <field name="sale_line_id" invisible="1"/>
+                    <field name="remaining_hours_available" invisible="1"/>
+                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"
+                        attrs="{'invisible': ['|', ('sale_line_id', '=', False), ('remaining_hours_available', '=', False)]}"/>
                 </xpath>
 
             </field>
@@ -103,7 +114,9 @@
             <field name="inherit_id" ref="hr_timesheet.view_task_tree2_inherited" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='remaining_hours']" position="after">
-                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide"/>
+                    <field name="sale_line_id" invisible="1"/>
+                    <field name="remaining_hours_available" invisible="1"/>
+                    <field name="remaining_hours_so" attrs="{'invisible': ['|', ('sale_line_id', '=', False), ('remaining_hours_available', '=', False)]}" widget="timesheet_uom" optional="hide"/>
                 </xpath>
             </field>
         </record>

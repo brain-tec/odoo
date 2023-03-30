@@ -45,6 +45,16 @@ export class KanbanColumnQuickCreate extends Component {
         useHotkey("escape", () => this.fold());
     }
 
+    get canShowExamples() {
+        const { allowedGroupBys = [], examples = [] } = this.props.exampleData || {};
+        const hasExamples = Boolean(examples.length);
+        return hasExamples && allowedGroupBys.includes(this.props.groupByField.name);
+    }
+
+    get relatedFieldName() {
+        return this.props.groupByField.string;
+    }
+
     fold() {
         this.props.onFoldChange(true);
     }
@@ -66,8 +76,13 @@ export class KanbanColumnQuickCreate extends Component {
             applyExamplesText:
                 this.props.exampleData.applyExamplesText || this.env._t("Use This For My Kanban"),
             applyExamples: (index) => {
-                for (const groupName of this.props.exampleData.examples[index].columns) {
+                const { examples, foldField } = this.props.exampleData;
+                const { columns, foldedColumns = [] } = examples[index];
+                for (const groupName of columns) {
                     this.props.onValidate(groupName);
+                }
+                for (const groupName of foldedColumns) {
+                    this.props.onValidate(groupName, { [foldField]: true }, true);
                 }
             },
         });
@@ -78,6 +93,6 @@ KanbanColumnQuickCreate.props = {
     onFoldChange: Function,
     onValidate: Function,
     folded: Boolean,
-    groupByFieldString: String,
+    groupByField: Object,
 };
 KanbanColumnQuickCreate.template = "web.KanbanColumnQuickCreate";

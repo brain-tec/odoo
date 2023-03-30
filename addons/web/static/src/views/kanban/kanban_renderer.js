@@ -50,6 +50,20 @@ export function canQuickCreate(list) {
     );
 }
 
+function validateColumnQuickCreateExamples(data) {
+    const { allowedGroupBys = [], examples = [], foldField = "" } = data;
+    if (!allowedGroupBys.length) {
+        throw new Error("The example data must contain an array of allowed groupbys");
+    }
+    if (!examples.length) {
+        throw new Error("The example data must contain an array of examples");
+    }
+    const someHasFoldedColumns = examples.some(({ foldedColumns = [] }) => foldedColumns.length);
+    if (!foldField && someHasFoldedColumns) {
+        throw new Error("The example data must contain a fold field if there are folded columns");
+    }
+}
+
 export class KanbanRenderer extends Component {
     static template = "web.KanbanRenderer";
     static components = {
@@ -88,6 +102,9 @@ export class KanbanRenderer extends Component {
         this.exampleData = registry
             .category("kanban_examples")
             .get(this.props.archInfo.examples, null);
+        if (this.exampleData) {
+            validateColumnQuickCreateExamples(this.exampleData);
+        }
         this.ghostColumns = this.generateGhostColumns();
 
         // Sortable
