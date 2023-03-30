@@ -502,8 +502,11 @@ class AccountMove(models.Model):
         default=False,
         copy=False,
         tracking=True,
-        help="It indicates that the invoice/payment has been sent.",
+        store=True,
+        compute="_compute_is_move_sent",
+        help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+
     invoice_user_id = fields.Many2one(
         string='Salesperson',
         comodel_name='res.users',
@@ -599,10 +602,21 @@ class AccountMove(models.Model):
                                  ON account_move(name, journal_id)
                               WHERE (state = 'posted' AND name != '/')
             """)
+        if not index_exists(self.env.cr, 'account_move_sequence_index3'):
+            # Used for gap detection in list views
+            self.env.cr.execute("""
+                CREATE INDEX account_move_sequence_index3
+                          ON account_move (journal_id, sequence_prefix desc, (sequence_number+1) desc)
+            """)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('invoice_pdf_report_id')
+    def _compute_is_move_sent(self):
+        for move in self:
+            move.is_move_sent = bool(move.invoice_pdf_report_id)
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
