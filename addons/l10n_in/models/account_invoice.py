@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, RedirectWarning
+from odoo.exceptions import ValidationError, RedirectWarning, UserError
 
 
 class AccountMove(models.Model):
@@ -98,3 +98,9 @@ class AccountMove(models.Model):
         # TO OVERRIDE
         self.ensure_one()
         return False
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_l10n_in_except_once_post(self):
+        # Prevent deleting entries once it's posted for Indian Company only
+        if any(m.country_code == 'IN' and m.posted_before for m in self):
+            raise UserError(_("To keep the audit trail rules you can not delete journal entries once they have been posted."))
