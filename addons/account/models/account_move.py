@@ -502,8 +502,11 @@ class AccountMove(models.Model):
         default=False,
         copy=False,
         tracking=True,
-        help="It indicates that the invoice/payment has been sent.",
+        store=True,
+        compute="_compute_is_move_sent",
+        help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+
     invoice_user_id = fields.Many2one(
         string='Salesperson',
         comodel_name='res.users',
@@ -609,6 +612,11 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('invoice_pdf_report_id')
+    def _compute_is_move_sent(self):
+        for move in self:
+            move.is_move_sent = bool(move.invoice_pdf_report_id)
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
@@ -2701,8 +2709,8 @@ class AccountMove(models.Model):
         totals = self.tax_totals
         tax_amount_rounding_error = amount_total - totals['amount_total']
         if not float_is_zero(tax_amount_rounding_error, precision_rounding=self.currency_id.rounding):
-            if 'Untaxed Amount' in totals['groups_by_subtotal']:
-                totals['groups_by_subtotal']['Untaxed Amount'][0]['tax_group_amount'] += tax_amount_rounding_error
+            if _('Untaxed Amount') in totals['groups_by_subtotal']:
+                totals['groups_by_subtotal'][_('Untaxed Amount')][0]['tax_group_amount'] += tax_amount_rounding_error
                 totals['amount_total'] = amount_total
                 self.tax_totals = totals
 
