@@ -2065,7 +2065,10 @@ class AccountMove(models.Model):
 
         def dirty():
             *path, dirty_fname = needed_dirty_fname.split('.')
-            dirty_recs = container['records'].mapped('.'.join(path)).filtered(dirty_fname)
+            eligible_recs = container['records'].mapped('.'.join(path))
+            if eligible_recs._name == 'account.move.line':
+                eligible_recs = eligible_recs.filtered(lambda l: l.display_type != 'cogs')
+            dirty_recs = eligible_recs.filtered(dirty_fname)
             return dirty_recs, dirty_fname
 
         existing_before = existing()
@@ -2074,7 +2077,7 @@ class AccountMove(models.Model):
         dirty_recs_before[dirty_fname] = False
         yield
         dirty_recs_after, dirty_fname = dirty()
-        if dirty_recs_before and not dirty_recs_after:  # TODO improve filter
+        if not dirty_recs_after:  # TODO improve filter
             return
         existing_after = existing()
         needed_after = needed()
@@ -2709,8 +2712,8 @@ class AccountMove(models.Model):
         totals = self.tax_totals
         tax_amount_rounding_error = amount_total - totals['amount_total']
         if not float_is_zero(tax_amount_rounding_error, precision_rounding=self.currency_id.rounding):
-            if 'Untaxed Amount' in totals['groups_by_subtotal']:
-                totals['groups_by_subtotal']['Untaxed Amount'][0]['tax_group_amount'] += tax_amount_rounding_error
+            if _('Untaxed Amount') in totals['groups_by_subtotal']:
+                totals['groups_by_subtotal'][_('Untaxed Amount')][0]['tax_group_amount'] += tax_amount_rounding_error
                 totals['amount_total'] = amount_total
                 self.tax_totals = totals
 
