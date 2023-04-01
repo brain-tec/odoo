@@ -97,8 +97,7 @@ class Project(models.Model):
     def _read_group_stage_ids(self, stages, domain, order):
         return self.env['project.project.stage'].search([], order=order)
 
-    name = fields.Char("Name", index='trigram', required=True, tracking=True, translate=True, default_export_compatible=True,
-        help="Name of your project. It can be anything you want e.g. the name of a customer or a service.")
+    name = fields.Char("Name", index='trigram', required=True, tracking=True, translate=True, default_export_compatible=True)
     description = fields.Html(help="Description to provide more information and context about this project")
     active = fields.Boolean(default=True,
         help="If the active field is set to False, it will allow you to hide the project without removing it.")
@@ -405,6 +404,11 @@ class Project(models.Model):
     def create(self, vals_list):
         # Prevent double project creation
         self = self.with_context(mail_create_nosubscribe=True)
+        if any('label_tasks' in vals and not vals['label_tasks'] for vals in vals_list):
+            task_label = _("Tasks")
+            for vals in vals_list:
+                if 'label_tasks' in vals and not vals['label_tasks']:
+                    vals['label_tasks'] = task_label
         projects = super().create(vals_list)
         return projects
 
@@ -731,7 +735,7 @@ class Project(models.Model):
                 'active_id': self.id,
             }),
             'show': True,
-            'sequence': 3,
+            'sequence': 1,
         }]
         if self.rating_count != 0 and self.user_has_groups('project.group_project_rating'):
             if self.rating_avg >= rating_data.RATING_AVG_TOP:
@@ -766,6 +770,9 @@ class Project(models.Model):
     # ---------------------------------------------------
     #  Business Methods
     # ---------------------------------------------------
+
+    def _get_hide_partner(self):
+        return False
 
     @api.model
     def _create_analytic_account_from_values(self, values):

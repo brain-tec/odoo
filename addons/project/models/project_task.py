@@ -153,7 +153,7 @@ class Task(models.Model):
     project_id = fields.Many2one('project.project', string='Project',
         index=True, tracking=True, check_company=True, change_default=True)
     task_properties = fields.Properties('Properties', definition='project_id.task_properties_definition', copy=True)
-    planned_hours = fields.Float("Initially Planned Hours", tracking=True)
+    planned_hours = fields.Float("Allocated Time", tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the hours allocated for all the sub-tasks (and their own sub-tasks) linked to this task. Usually less than or equal to the allocated hours of this task.")
     # Tracking of this field is done in the write function
@@ -179,10 +179,6 @@ class Task(models.Model):
         string='Customer', recursive=True, tracking=True,
         compute='_compute_partner_id', store=True, readonly=False,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
-    partner_phone = fields.Char(
-        compute='_compute_partner_phone', inverse='_inverse_partner_phone',
-        string="Phone", readonly=False, store=True, copy=False)
-    partner_city = fields.Char(related='partner_id.city', readonly=False)
     email_cc = fields.Char(help='Email addresses that were in the CC of the incoming emails from this task and that are not currently linked to an existing customer.')
     company_id = fields.Many2one(
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False, recursive=True,
@@ -468,17 +464,6 @@ class Task(models.Model):
             }
             for task in tasks_with_dependency:
                 task.dependent_tasks_count = dependent_tasks_count_dict.get(task.id, 0)
-
-    @api.depends('partner_id.phone')
-    def _compute_partner_phone(self):
-        for task in self:
-            if task.partner_phone != task.partner_id.phone:
-                task.partner_phone = task.partner_id.phone
-
-    def _inverse_partner_phone(self):
-        for task in self:
-            if task.partner_id and task.partner_phone != task.partner_id.phone:
-                task.partner_id.phone = task.partner_phone
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
@@ -1546,7 +1531,8 @@ class Task(models.Model):
     def _send_task_rating_mail(self, force_send=False):
         for task in self:
             rating_template = task.stage_id.rating_template_id
-            if rating_template:
+            partner = task.partner_id
+            if rating_template and partner and partner != self.env.user.partner_id:
                 task.rating_send_request(rating_template, lang=task.partner_id.lang, force_send=force_send)
 
     def _rating_get_partner(self):

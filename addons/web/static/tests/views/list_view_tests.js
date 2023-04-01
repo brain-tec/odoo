@@ -3335,7 +3335,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree><field name="foo"/><field name="bar"/></tree>',
             groupBy: ["date:year"],
-            // keep the actionMenus, it is relevant as it calls isM2MGrouped which crashes if we
+            // keep the actionMenus, it is relevant as it computes isM2MGrouped which crashes if we
             // don't correctly extract the fieldName/granularity from the groupBy
             actionMenus: {},
         });
@@ -6087,6 +6087,51 @@ QUnit.module("Views", (hooks) => {
             assert.strictEqual(
                 target.querySelector(".o_group_header:first-of-type .o_pager_limit").innerText,
                 "6"
+            );
+        }
+    );
+
+    QUnit.test(
+        "pager, grouped, group pager should update after removing a filter",
+        async function (assert) {
+            patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+            serverData.models.foo.records = [
+                { id: 121, foo: "aaa" },
+                { id: 122, foo: "blip" },
+                { id: 123, foo: "blip" },
+                { id: 124, foo: "blip" },
+                { id: 125, foo: "blip" },
+                { id: 126, foo: "blip" },
+            ];
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: '<tree limit="2"><field name="foo"/><field name="bar"/></tree>',
+                searchViewArch: `
+                    <search>
+                        <filter name="foo" domain="[('foo','=','aaa')]"/>
+                        <filter name="groupby_foo" context="{'group_by': 'bar'}"/>
+                    </search>`,
+            });
+
+            await toggleFilterMenu(target);
+            await toggleMenuItem(target, "Foo");
+
+            await toggleGroupByMenu(target);
+            await toggleMenuItem(target, "Bar");
+
+            // expand group
+            await click(target, "th.o_group_name");
+
+            assert.containsNone(target, "th.o_group_name .o_pager_counter");
+
+            // remove filter
+            await removeFacet(target);
+
+            assert.strictEqual(
+                $(target).find("th.o_group_name:eq(0) .o_pager_counter").text().trim(),
+                "1-2 / 6"
             );
         }
     );

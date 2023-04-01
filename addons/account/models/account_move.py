@@ -2065,7 +2065,10 @@ class AccountMove(models.Model):
 
         def dirty():
             *path, dirty_fname = needed_dirty_fname.split('.')
-            dirty_recs = container['records'].mapped('.'.join(path)).filtered(dirty_fname)
+            eligible_recs = container['records'].mapped('.'.join(path))
+            if eligible_recs._name == 'account.move.line':
+                eligible_recs = eligible_recs.filtered(lambda l: l.display_type != 'cogs')
+            dirty_recs = eligible_recs.filtered(dirty_fname)
             return dirty_recs, dirty_fname
 
         existing_before = existing()
@@ -2074,7 +2077,7 @@ class AccountMove(models.Model):
         dirty_recs_before[dirty_fname] = False
         yield
         dirty_recs_after, dirty_fname = dirty()
-        if dirty_recs_before and not dirty_recs_after:  # TODO improve filter
+        if not dirty_recs_after:  # TODO improve filter
             return
         existing_after = existing()
         needed_after = needed()
@@ -3964,12 +3967,14 @@ class AccountMove(models.Model):
         qr_code_method = self.qr_code_method
         if qr_code_method:
             # If the user set a qr code generator manually, we check that we can use it
-            if not self.partner_bank_id._eligible_for_qr_code(self.qr_code_method, self.partner_id, self.currency_id):
-                raise UserError(_("The chosen QR-code type is not eligible for this invoice."))
+            error_msg = self.partner_bank_id._get_error_messages_for_qr(self.qr_code_method, self.partner_id, self.currency_id)
+            if error_msg:
+                raise UserError(error_msg)
         else:
             # Else we find one that's eligible and assign it to the invoice
             for candidate_method, _candidate_name in self.env['res.partner.bank'].get_available_qr_methods_in_sequence():
-                if self.partner_bank_id._eligible_for_qr_code(candidate_method, self.partner_id, self.currency_id, raises_error=False):
+                error_msg = self.partner_bank_id._get_error_messages_for_qr(candidate_method, self.partner_id, self.currency_id)
+                if not error_msg:
                     qr_code_method = candidate_method
                     break
 
