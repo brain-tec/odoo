@@ -57,18 +57,20 @@ class IrMailServer(models.Model):
                 smtp_debug=False, mail_server_id=None):
         if len(self) == 1 and self.use_microsoft_outlook_service:
             # Call super without user to setup connection but don't login.
+            mail_server_user = user
             if mail_server_id:
                 mail_server = self.sudo().browse(mail_server_id)
-                connection = super(IrMailServer, self).connect(mail_server.smtp_host, mail_server.smtp_port,
-                                                               user=None, password=mail_server.smtp_pass,
-                                                               encryption=mail_server.smtp_encryption,
-                                                               smtp_debug=mail_server.smtp_debug,
-                                                               mail_server_id=None)
+                mail_server_user = mail_server.smtp_user
+                mail_server.smtp_user = None
+                connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
+                                                               encryption=encryption, smtp_debug=smtp_debug,
+                                                               mail_server_id=mail_server_id)
+                mail_server.smtp_user = mail_server_user
             else:
                 connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
                                                                encryption=encryption, smtp_debug=smtp_debug,
                                                                mail_server_id=mail_server_id)
-            auth_string = self._generate_outlook_oauth2_string(user)
+            auth_string = self._generate_outlook_oauth2_string(mail_server_user)
             oauth_param = base64.b64encode(auth_string.encode()).decode()
             connection.ehlo()
             connection.docmd('AUTH', 'XOAUTH2 %s' % oauth_param)
