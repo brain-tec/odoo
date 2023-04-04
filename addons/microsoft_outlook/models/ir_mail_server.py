@@ -57,12 +57,16 @@ class IrMailServer(models.Model):
     # <START_OF_CHANGE>
     def connect(self, host=None, port=None, user=None, password=None, encryption=None,
                 smtp_debug=False, mail_server_id=None):
-        _logger.info('IrMailServer1::connect()', locals())
-        _logger.info('(stso) self.use_microsoft_outlook_service: ', self.use_microsoft_outlook_service)
+
+        msg = "IrMailServer1::connect() user %s, encryption %s, mail_server_id %s, " \
+              "self.use_microsoft_outlook_service %s" % (
+            user, encryption, mail_server_id, self.use_microsoft_outlook_service)
+        _logger.info(msg)
         if len(self) == 1 and self.use_microsoft_outlook_service:
             # Call super without user to setup connection but don't login.
             mail_server_user = user
             if mail_server_id:
+                _logger.info('if mail_server_id')
                 mail_server = self.sudo().browse(mail_server_id)
                 mail_server_user = mail_server.smtp_user
                 mail_server.smtp_user = None
@@ -71,6 +75,7 @@ class IrMailServer(models.Model):
                                                                mail_server_id=mail_server_id)
                 mail_server.smtp_user = mail_server_user
             else:
+                _logger.info('else mail_server_id')
                 connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
                                                                encryption=encryption, smtp_debug=smtp_debug,
                                                                mail_server_id=mail_server_id)
@@ -79,6 +84,7 @@ class IrMailServer(models.Model):
             connection.ehlo()
             connection.docmd('AUTH', 'XOAUTH2 %s' % oauth_param)
         else:
+            _logger.info('else use_microsoft_outlook_service')
             connection = super(IrMailServer, self).connect(host, port, user=user, password=password,
                                                            encryption=encryption, smtp_debug=smtp_debug,
                                                            mail_server_id=mail_server_id)

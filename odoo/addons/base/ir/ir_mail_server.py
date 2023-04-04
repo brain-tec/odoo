@@ -207,8 +207,12 @@ class IrMailServer(models.Model):
             smtp_encryption = encryption
             if smtp_encryption is None and tools.config.get('smtp_ssl'):
                 smtp_encryption = 'starttls' # smtp_ssl => STARTTLS as of v7
-
-        _logger.info('IrMailServer0::connect()', locals())
+        msg = "IrMailServer0::connect() user %s, encryption %s, mail_server_id %s" % (
+            user, encryption, mail_server_id)
+        _logger.info(msg)
+        msg1 = "IrMailServer0::connect() smtp_user %s, smtp_server %s, smtp_port %s, smtp_encryption %s" % (
+            smtp_user, smtp_server, smtp_port, smtp_encryption)
+        _logger.info(msg1)
         if not smtp_server:
             raise UserError(
                 (_("Missing SMTP Server") + "\n" +
