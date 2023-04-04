@@ -78,7 +78,7 @@ class IrMailServer(models.Model):
                                                            encryption=encryption, smtp_debug=smtp_debug,
                                                            mail_server_id=mail_server_id)
             mail_server.smtp_user = mail_server_user
-            connection = self.connect_oauth(user, connection)
+            connection = mail_server.connect_oauth(user, connection)
         elif len(self) == 1 and self.use_microsoft_outlook_service:
             _logger.info('elif use_microsoft_outlook_service')
             connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
