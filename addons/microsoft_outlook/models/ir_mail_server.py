@@ -55,28 +55,35 @@ class IrMailServer(models.Model):
     # <START_OF_CHANGE>
     def connect(self, host=None, port=None, user=None, password=None, encryption=None,
                 smtp_debug=False, mail_server_id=None):
-        if len(self) == 1 and self.use_microsoft_outlook_service:
-            # Call super without user to setup connection but don't login.
-            mail_server_user = user
-            if mail_server_id:
-                mail_server = self.sudo().browse(mail_server_id)
-                mail_server_user = mail_server.smtp_user
-                mail_server.smtp_user = None
-                connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
-                                                               encryption=encryption, smtp_debug=smtp_debug,
-                                                               mail_server_id=mail_server_id)
-                mail_server.smtp_user = mail_server_user
-            else:
-                connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
-                                                               encryption=encryption, smtp_debug=smtp_debug,
-                                                               mail_server_id=mail_server_id)
-            auth_string = self._generate_outlook_oauth2_string(mail_server_user)
-            oauth_param = base64.b64encode(auth_string.encode()).decode()
-            connection.ehlo()
-            connection.docmd('AUTH', 'XOAUTH2 %s' % oauth_param)
+        mail_server = self.env['ir.mail_server']
+        # as in super(), get the default mail server, if non is given.
+        if mail_server_id:
+            mail_server = self.sudo().browse(mail_server_id)
+        elif not host:
+            mail_server = self.sudo().search([], order='sequence', limit=1)
+        if mail_server and mail_server.use_microsoft_outlook_service:
+            # Call super without user to setup connection but don't login. Because mail_server_id is there, it
+            # will not take the parameters, but the mail_server_id configurations.
+            mail_server_user = mail_server.smtp_user
+            mail_server.smtp_user = None
+            connection = super(IrMailServer, self).connect(host, port, user=None, password=password,
+                                                           encryption=encryption, smtp_debug=smtp_debug,
+                                                           mail_server_id=mail_server.id)
+            mail_server.smtp_user = mail_server_user
+            connection = mail_server.connect_oauth(mail_server_user, connection)
         else:
             connection = super(IrMailServer, self).connect(host, port, user=user, password=password,
                                                            encryption=encryption, smtp_debug=smtp_debug,
                                                            mail_server_id=mail_server_id)
+        return connection
+
+    def connect_oauth(self, user, connection):
+        """
+        Create oauth connection string and connect
+        """
+        auth_string = self._generate_outlook_oauth2_string(user)
+        oauth_param = base64.b64encode(auth_string.encode()).decode()
+        connection.ehlo()
+        connection.docmd('AUTH', 'XOAUTH2 %s' % oauth_param)
         return connection
     # <END_OF_CHANGE>
