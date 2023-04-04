@@ -1,9 +1,8 @@
-odoo.define('website.s_popup', function (require) {
-'use strict';
+/** @odoo-module alias=website.s_popup **/
 
-const config = require('web.config');
-const publicWidget = require('web.public.widget');
-const {getCookie, setCookie} = require('web.utils.cookies');
+import config from "web.config";
+import publicWidget from "web.public.widget";
+import {getCookie, setCookie} from "web.utils.cookies";
 
 // TODO In master, export this class too or merge it with PopupWidget
 const SharedPopupWidget = publicWidget.Widget.extend({
@@ -53,6 +52,14 @@ const SharedPopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _onModalHidden() {
+        if (this.el.querySelector('.s_popup_no_backdrop')) {
+            // We trigger a scroll event here to call the
+            // '_hideBottomFixedElements' method and re-display any bottom fixed
+            // elements that may have been hidden (e.g. the live chat button
+            // hidden when the cookies bar is open).
+            $().getScrollingElement()[0].dispatchEvent(new Event('scroll'));
+        }
+
         this.el.classList.add('d-none');
     },
 });
@@ -194,5 +201,4 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
     },
 });
 
-return PopupWidget;
-});
+export default PopupWidget;

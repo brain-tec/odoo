@@ -1,23 +1,28 @@
 /** @odoo-module **/
 
-import { Component, useState, useRef } from "@odoo/owl";
+import { Component, useState, useRef, onWillUpdateProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _lt } from "@web/core/l10n/translation";
+import { shallowEqual } from "@web/core/utils/objects";
 import { useDebounced } from "@web/core/utils/timing";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { TagsList } from "@web/core/tags_list/tags_list";
 
 export class SelectMenu extends Component {
     static template = "web.SelectMenu";
 
-    static components = { Dropdown, DropdownItem };
+    static components = { Dropdown, DropdownItem, TagsList };
 
     static defaultProps = {
         value: undefined,
         class: "",
         togglerClass: "",
+        multiSelect: false,
         onSelect: () => {},
+        required: false,
+        searchable: true,
         searchPlaceholder: _lt("Search..."),
         choices: [],
         groups: [],
@@ -57,8 +62,11 @@ export class SelectMenu extends Component {
         },
         class: { type: String, optional: true },
         togglerClass: { type: String, optional: true },
+        required: { type: Boolean, optional: true },
+        searchable: { type: Boolean, optional: true },
         searchPlaceholder: { type: String, optional: true },
         value: { optional: true },
+        multiSelect: { type: Boolean, optional: true },
         onSelect: { type: Function, optional: true },
         slots: { type: Object, optional: true },
     };
@@ -80,14 +88,43 @@ export class SelectMenu extends Component {
             () => this.onInput(this.inputRef.el ? this.inputRef.el.value.trim() : ""),
             250
         );
+
+        this.selectedChoice = this.getSelectedChoice(this.props);
+        onWillUpdateProps((nextProps) => {
+            if (this.props.value !== nextProps.value) {
+                this.selectedChoice = this.getSelectedChoice(nextProps);
+            }
+        });
     }
 
     get displayValue() {
-        if (this.props.value !== undefined) {
-            const choices = [...this.props.choices, ...this.props.groups.flatMap((g) => g.choices)];
-            const value = choices.find((c) => c.value === this.props.value);
-            return value ? value.label : this.props.value;
-        }
+        return this.selectedChoice ? this.selectedChoice.label : "";
+    }
+
+    get canDeselect() {
+        return (
+            !this.props.required &&
+            this.selectedChoice !== undefined &&
+            this.selectedChoice !== null
+        );
+    }
+
+    get multiSelectChoices() {
+        const choices = [
+            ...this.props.choices,
+            ...this.props.groups.flatMap((g) => g.choices),
+        ].filter((c) => this.props.value.includes(c.value));
+        return choices.map((c) => {
+            return {
+                id: c.value,
+                text: c.label,
+                onDelete: () => {
+                    const values = [...this.props.value];
+                    values.splice(values.indexOf(c.value), 1);
+                    this.props.onSelect(values);
+                },
+            };
+        });
     }
 
     onOpened() {
@@ -104,6 +141,9 @@ export class SelectMenu extends Component {
     }
 
     isOptionSelected(choice) {
+        if (this.props.multiSelect) {
+            return this.props.value.includes(choice.value);
+        }
         return this.props.value === choice.value;
     }
 
@@ -115,10 +155,6 @@ export class SelectMenu extends Component {
         }
     }
 
-    canClear() {
-        return this.props.value != null;
-    }
-
     onInput(searchString) {
         this.filterOptions(searchString);
 
@@ -126,6 +162,36 @@ export class SelectMenu extends Component {
         const inputContainer = this.inputContainerRef.el;
         if (inputContainer && inputContainer.parentNode) {
             inputContainer.parentNode.scrollTo(0, 0);
+        }
+    }
+
+    getSelectedChoice(props) {
+        if (props.value) {
+            const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices)];
+            return choices.find((c) => {
+                if (typeof c.value === "object" && typeof props.value === "object") {
+                    return shallowEqual(c.value, props.value);
+                }
+                return c.value === props.value;
+            });
+        } else {
+            return undefined;
+        }
+    }
+
+    onItemSelected(value) {
+        if (this.props.multiSelect) {
+            const values = [...this.props.value];
+            const valueIndex = values.indexOf(value);
+
+            if (valueIndex !== -1) {
+                values.splice(valueIndex, 1);
+                this.props.onSelect(values);
+            } else {
+                this.props.onSelect([...this.props.value, value]);
+            }
+        } else if (!this.selectedChoice || this.selectedChoice.value !== value) {
+            this.props.onSelect(value);
         }
     }
 

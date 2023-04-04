@@ -65,7 +65,7 @@
                    <a name="action_view_all_rating" type="object">
                     Customer Ratings
                     </a>
-                </div> 
+                </div>
             </xpath>
         </field>
     </record>
@@ -87,27 +87,6 @@
         </field>
     </record>
 
-        <record id="view_sale_service_inherit_form2" model="ir.ui.view">
-            <field name="name">sale.service.form.view.inherit</field>
-            <field name="model">project.task</field>
-            <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='child_ids']/tree//field[@name='remaining_hours']" position="after">
-                    <field name="sale_line_id" invisible="1"/>
-                    <field name="remaining_hours_available" invisible="1"/>
-                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"
-                        attrs="{'invisible': ['|', ('sale_line_id', '=', False), ('remaining_hours_available', '=', False)]}"/>
-                </xpath>
-                <xpath expr="//field[@name='depend_on_ids']/tree//field[@name='remaining_hours']" position="after">
-                    <field name="sale_line_id" invisible="1"/>
-                    <field name="remaining_hours_available" invisible="1"/>
-                    <field name="remaining_hours_so" widget="timesheet_uom" optional="hide" groups="base.group_user"
-                        attrs="{'invisible': ['|', ('sale_line_id', '=', False), ('remaining_hours_available', '=', False)]}"/>
-                </xpath>
-
-            </field>
-        </record>
-
         <record id="view_task_tree2_inherited" model="ir.ui.view">
             <field name="name">project.task.tree.inherited</field>
             <field name="model">project.task</field>
@@ -126,10 +105,6 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
-                    <!-- <field name="timesheet_ids"/> is already inside a block groups="hr_timesheet.group_hr_timesheet_user"  -->
-                    <attribute name="decoration-muted">timesheet_invoice_id != False</attribute>
-                </xpath>
                 <xpath expr="//field[@name='user_ids']" position="after">
                     <field name="is_project_map_empty" invisible="1" groups="hr_timesheet.group_hr_timesheet_user"/>
                     <field name="has_multi_sol" invisible="1" groups="hr_timesheet.group_hr_timesheet_user"/>
@@ -149,12 +124,12 @@
                     <!-- <field name="timesheet_ids"/> is already inside a block groups="hr_timesheet.group_hr_timesheet_user"  -->
                     <field name="timesheet_invoice_id" invisible="1"/>
                     <field name="so_line" groups="!sales_team.group_sale_salesman"
-                        attrs="{'column_invisible': [('parent.allow_billable', '=', False)]}"
+                        attrs="{'column_invisible': [('parent.allow_billable', '=', False)], 'readonly': [('readonly_timesheet', '=', True)]}"
                         context="{'with_remaining_hours': True, 'with_price_unit': True}" options="{'no_create': True, 'no_open': True}"
                         domain="[('is_service', '=', True), ('order_partner_id', 'child_of', parent.partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]"
                         optional="hide"/>
                     <field name="so_line" groups="sales_team.group_sale_salesman"
-                        attrs="{'column_invisible': [('parent.allow_billable', '=', False)]}"
+                        attrs="{'column_invisible': [('parent.allow_billable', '=', False)], 'readonly': [('readonly_timesheet', '=', True)]}"
                         context="{'with_remaining_hours': True, 'with_price_unit': True}" options="{'no_create': True}"
                         domain="[('is_service', '=', True), ('order_partner_id', 'child_of', parent.partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]"
                         optional="hide"/>

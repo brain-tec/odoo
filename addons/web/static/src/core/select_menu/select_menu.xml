@@ -3,27 +3,34 @@
 
     <t t-name="web.SelectMenu" owl="1">
         <Dropdown
-            class="`o_select_menu border w-100 rounded-2 overflow-hidden ${props.class || ''}`"
-            togglerClass="`o_select_menu_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ${props.togglerClass || ''}`"
-            menuClass="'o_select_menu_menu pt-0'"
+            class="`o_select_menu border w-auto rounded-2 overflow-hidden ${props.class || ''}`"
+            togglerClass="`o_select_menu_toggler btn btn-secondary w-100 bg-light ${props.togglerClass || ''} ${canDeselect ? 'o_can_deselect' : ''}`"
+            menuClass="`o_select_menu_menu${props.searchable ? ' pt-0' : ''}${props.multiSelect ? ' o_select_menu_multi_select' : ''}`"
             position="'bottom-fit'"
             beforeOpen.bind="filterOptions"
             onOpened.bind="onOpened"
             onScroll.bind="onScroll"
         >
             <t t-set-slot="toggler">
-                <span class="o_select_menu_toggler_slot text-start">
-                    <t t-if="!props.slots or !props.slots.default" t-esc="displayValue" />
-                    <t t-else="" t-slot="default" />
-                </span>
-                <span t-if="canClear()" t-on-click.stop="() => this.props.onSelect(null)" class="o_select_menu_toggler_clear p-0 m-0">
-                    <i class="fa fa-times"></i>
-                </span>
+                <t t-if="props.multiSelect">
+                    <div class="text-wrap text-start">
+                        <TagsList tags="multiSelectChoices"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <span class="o_select_menu_toggler_slot text-start text-truncate">
+                        <t t-if="!props.slots or !props.slots.default" t-esc="displayValue" />
+                        <t t-else="" t-slot="default" />
+                    </span>
+                    <span t-if="canDeselect" t-on-click.stop="() => this.props.onSelect(null)" class="o_select_menu_toggler_clear p-0 m-0">
+                        <i class="fa fa-times"></i>
+                    </span>
+                </t>
                 <span class="o_select_menu_toggler_caret p-0 m-0">
                     <i class="fa fa-caret-down"></i>
                 </span>
             </t>
-            <div class="o_select_menu_input p-2 position-sticky top-0 start-0" t-ref="inputContainerRef">
+            <div t-if="props.searchable" class="o_select_menu_input p-2 position-sticky top-0 start-0" t-ref="inputContainerRef">
                 <input
                     type="text"
                     class="form-control"
@@ -45,8 +52,8 @@
                 </div>
                 <DropdownItem
                     t-if="!choice.isGroup"
-                    onSelected="() => this.props.onSelect(choice.value)"
-                    class="getItemClass(choice)"
+                    onSelected="() => this.onItemSelected(choice.value)"
+                    class="getItemClass(choice) + ' d-flex align-items-center'"
                 >
                     <t t-if="props.slots and props.slots.choice" t-slot="choice" data="choice"/>
                     <t t-else="">

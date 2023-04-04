@@ -100,16 +100,12 @@ QUnit.module("Web Components", (hooks) => {
             class Parent extends Component {
                 setup() {
                     this.state = useState({ value: "world" });
-                    this.choices = [
-                        { label: "Hello", value: "hello" },
-                    ];
+                    this.choices = [{ label: "Hello", value: "hello" }];
                     this.groups = [
                         {
                             label: "Group A",
-                            choices: [
-                                { label: "World", value: "world" },
-                            ]
-                        }
+                            choices: [{ label: "World", value: "world" }],
+                        },
                     ];
                 }
 
@@ -178,12 +174,126 @@ QUnit.module("Web Components", (hooks) => {
         assert.equal(document.activeElement, target.querySelector(".o_select_menu_input input"));
     });
 
+    QUnit.test("value props accept array", async (assert) => {
+        class Parent extends Component {
+            setup() {
+                this.choices = [
+                    { label: "Z", value: [1, 2] },
+                    { label: "A", value: [1, 3] },
+                ];
+                this.value = [1, 2];
+            }
+        }
+        Parent.components = { SelectMenu };
+        Parent.template = xml`
+                <SelectMenu
+                    choices="this.choices"
+                    value="this.value"
+                />
+            `;
+
+        await mount(Parent, target, { env });
+        assert.equal(
+            target.querySelector(".o_select_menu_toggler_slot").innerText,
+            "Z",
+            `The select value shoud be "Z"`
+        );
+    });
+
+    QUnit.test("value props accept object", async (assert) => {
+        class Parent extends Component {
+            setup() {
+                this.choices = [
+                    { label: "Z", value: { hello: "world" } },
+                    { label: "A", value: { paper: "company" } },
+                ];
+                this.value = { paper: "company" };
+            }
+        }
+        Parent.components = { SelectMenu };
+        Parent.template = xml`
+                <SelectMenu
+                    choices="this.choices"
+                    value="this.value"
+                />
+            `;
+
+        await mount(Parent, target, { env });
+        assert.equal(
+            target.querySelector(".o_select_menu_toggler_slot").innerText,
+            "A",
+            `The select value shoud be "A"`
+        );
+    });
+
+    QUnit.test("Value with no corresponding choices displays as if no choice was selected", async (assert) => {
+        class Parent extends Component {
+            static components = { SelectMenu };
+            static template = xml`
+                <SelectMenu
+                    choices="this.choices"
+                    value="this.state.value"
+                />
+            `;
+            setup() {
+                this.choices = [
+                    { label: "World", value: "world" },
+                    { label: "Hello", value: "hello" },
+                ];
+                this.state = useState({ value: "coucou"});
+            }
+            setValue(newValue) {
+                this.state.value = newValue;
+            }
+        }
+
+        await mount(Parent, target, { env });
+        assert.equal(getValue(), "", `The toggler should be empty`);
+    });
+
+    QUnit.test("Changing value props properly updates the selected choice", async (assert) => {
+        class Parent extends Component {
+            static components = { SelectMenu };
+            static template = xml`
+                <SelectMenu
+                    choices="this.choices"
+                    value="this.state.value"
+                />
+            `;
+            setup() {
+                this.choices = [
+                    { label: "Z", value: { hello: "world" } },
+                    { label: "A", value: { paper: "company" } },
+                ];
+                this.state = useState({ value: { paper: "company" }});
+            }
+            setValue(newValue) {
+                this.state.value = newValue;
+            }
+        }
+
+        const comp = await mount(Parent, target, { env });
+        assert.equal(
+            getValue(),
+            "A",
+            `The select value shoud be "A"`
+        );
+
+        comp.setValue({ hello: "world" });
+        await nextTick();
+        assert.equal(
+            getValue(),
+            "Z",
+            `After changing the value props, the select value shoud be "Z"`
+        );
+    });
+
     QUnit.test(
-        "Clear button calls 'onSelect' with null value and appears only when value is null",
+        "Clear button calls 'onSelect' with null value and appears only when value is not null",
         async (assert) => {
             class Parent extends Component {
                 setup() {
-                    this.state = useState({ value: "Hello" });
+                    this.state = useState({ value: "hello" });
                     this.choices = [
                         { label: "Hello", value: "hello" },
                         { label: "World", value: "world" },
@@ -211,6 +321,40 @@ QUnit.module("Web Components", (hooks) => {
             await click(target.querySelector(".o_select_menu_toggler_clear"));
             assert.verifySteps(["Cleared"]);
             assert.containsNone(target, ".o_select_menu_toggler_clear");
+        }
+    );
+
+    QUnit.test(
+        "When the \"required\" props is set to true, the clear button is not shown",
+        async (assert) => {
+            class Parent extends Component {
+                setup() {
+                    this.state = useState({ value: null });
+                    this.choices = [
+                        { label: "Hello", value: "hello" },
+                        { label: "World", value: "world" },
+                    ];
+                }
+                setValue(newValue) {
+                    this.state.value = newValue;
+                }
+            }
+            Parent.components = { SelectMenu };
+            Parent.template = xml`
+            <SelectMenu
+                required="true"
+                choices="choices"
+                value="state.value"
+            />
+        `;
+
+            const parent = await mount(Parent, target, { env });
+            assert.containsNone(target, ".o_select_menu_toggler_clear", 'When the value is not set, there is no "clear" button');
+
+            parent.setValue("hello");
+            await nextTick();
+            assert.strictEqual(getValue(), "Hello");
+            assert.containsNone(target, ".o_select_menu_toggler_clear", 'When the value is set, there is no "clear" button');
         }
     );
 
@@ -420,6 +564,160 @@ QUnit.module("Web Components", (hooks) => {
                 elements.length,
                 scrollSettings.defaultCount + scrollSettings.increaseAmount
             );
+        }
+    );
+
+    QUnit.test(
+        "When multiSelect is enable, value is an array of values, mutliple choices should display as selected and tags should be displayed",
+        async (assert) => {
+            class Parent extends Component {
+                setup() {
+                    this.state = useState({ value: [] });
+                    this.choices = [
+                        { label: "A", value: "a" },
+                        { label: "B", value: "b" },
+                        { label: "C", value: "c" },
+                    ];
+                }
+
+                onSelect(newValue) {
+                    assert.step(JSON.stringify(newValue));
+                    this.state.value = newValue;
+                }
+            }
+            Parent.components = { SelectMenu };
+            Parent.template = xml`
+                <SelectMenu
+                    multiSelect="true"
+                    value="this.state.value"
+                    choices="this.choices"
+                    onSelect.bind="this.onSelect"
+                    searchable="false"
+                />
+            `;
+
+            await mount(Parent, target, { env });
+            assert.containsNone(
+                target,
+                ".o_select_menu .o_tag_badge_text",
+                "There should be no selected tags."
+            );
+
+            // Select first choice
+            await open();
+            assert.containsNone(
+                target,
+                ".o_select_menu_item.o_select_active",
+                "No choice should be selected."
+            );
+
+            await click(target, ".o_select_menu_item:nth-child(1)");
+            assert.verifySteps([`["a"]`], "Only A should be in the selection list");
+
+            assert.containsN(
+                target,
+                ".o_select_menu .o_tag_badge_text",
+                1,
+                "There should be one tag."
+            );
+            assert.equal(
+                target.querySelector(".o_select_menu .o_tag_badge_text").innerText.toLowerCase(),
+                "a",
+                `The tag's value shoud be "A"`
+            );
+
+            // Select second choice
+            await open();
+            assert.containsOnce(
+                target,
+                ".o_select_menu_item:nth-child(1).o_select_active",
+                "First choice should be selected."
+            );
+
+            await click(target, ".o_select_menu_item:nth-child(2)");
+            assert.verifySteps([`["a","b"]`], "A and B should be in the selection list");
+
+            assert.containsN(
+                target,
+                ".o_select_menu .o_tag_badge_text",
+                2,
+                "There should be two tags."
+            );
+
+            await open();
+            assert.containsN(
+                target,
+                ".o_select_menu_item.o_select_active",
+                2,
+                "Two choices should be selected."
+            );
+        }
+    );
+
+    QUnit.test(
+        "When multiSelect is enable, allow deselecting elements by clicking the selected choices inside the dropdown or by clicking the tags",
+        async (assert) => {
+            class Parent extends Component {
+                setup() {
+                    this.state = useState({ value: ["a", "b"] });
+                    this.choices = [
+                        { label: "A", value: "a" },
+                        { label: "B", value: "b" },
+                        { label: "C", value: "c" },
+                    ];
+                }
+
+                onSelect(newValue) {
+                    assert.step(JSON.stringify(newValue));
+                    this.state.value = newValue;
+                }
+            }
+            Parent.components = { SelectMenu };
+            Parent.template = xml`
+                <SelectMenu
+                    multiSelect="true"
+                    value="this.state.value"
+                    choices="this.choices"
+                    onSelect.bind="this.onSelect"
+                    searchable="false"
+                />
+            `;
+
+            await mount(Parent, target, { env });
+            assert.containsN(
+                target,
+                ".o_select_menu .o_tag_badge_text",
+                2,
+                "There should be two tags."
+            );
+
+            await open();
+            await click(target, ".o_select_menu_item:nth-child(1)");
+            assert.verifySteps([`["b"]`], "Only B should remain in the selection list");
+
+            assert.containsN(
+                target,
+                ".o_select_menu .o_tag_badge_text",
+                1,
+                "There should only be one tag."
+            );
+            assert.equal(
+                target.querySelector(".o_select_menu .o_tag_badge_text").innerText.toLowerCase(),
+                "b",
+                `The tag's value shoud be "B"`
+            );
+
+            await open();
+            assert.containsOnce(
+                target,
+                ".o_select_menu_item.o_select_active",
+                "Only one choice should be selected."
+            );
+
+            await click(target, ".o_tag .o_delete");
+            assert.verifySteps(["[]"], "The selection list should be empty");
+
+            assert.containsNone(target, ".o_select_menu .o_tag", "There should be no tags.");
         }
     );
 });

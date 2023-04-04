@@ -1,14 +1,13 @@
-odoo.define('website.s_website_form', function (require) {
-    'use strict';
-
-    var core = require('web.core');
-    var time = require('web.time');
-    const {ReCaptcha} = require('google_recaptcha.ReCaptchaV3');
-    const session = require('web.session');
-    var ajax = require('web.ajax');
-    var publicWidget = require('web.public.widget');
-    const dom = require('web.dom');
-    const concurrency = require('web.concurrency');
+/** @odoo-module **/
+    
+    import core from "web.core";
+    import time from "web.time";
+    import {ReCaptcha} from "google_recaptcha.ReCaptchaV3";
+    import session from "web.session";
+    import ajax from "web.ajax";
+    import publicWidget from "web.public.widget";
+    import dom from "web.dom";
+    import concurrency from "web.concurrency";
 
     var _t = core._t;
     var qweb = core.qweb;
@@ -124,7 +123,13 @@ odoo.define('website.s_website_form', function (require) {
             // Data-fill-with attribute is given during registry and is used by
             // to know which user data should be used to prfill fields.
             const dataForEl = document.querySelector(`[data-for='${this.el.id}']`);
-            if (dataForEl || Object.keys(this.preFillValues).length) {
+            this.editTranslations = !!this._getContext(true).edit_translations;
+            // On the "edit_translations" mode, a <span/> with a translated term
+            // will replace the attribute value, leading to some inconsistencies
+            // (setting again the <span> on the attributes after the editor's
+            // cleanup, setting wrong values on the attributes after translating
+            // default values...)
+            if (!this.editTranslations && (dataForEl || Object.keys(this.preFillValues).length)) {
                 const dataForValues = dataForEl ?
                     JSON.parse(dataForEl.dataset.values
                         .replace('False', '""')
@@ -665,4 +670,3 @@ odoo.define('website.s_website_form', function (require) {
             this._updateFieldsVisibility();
         },
     });
-});
