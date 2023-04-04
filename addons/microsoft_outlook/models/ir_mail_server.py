@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import logging
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
 
+_logger = logging.getLogger(__name__)
 
 class IrMailServer(models.Model):
     """Add the Outlook OAuth authentication on the outgoing mail servers."""
@@ -55,6 +57,8 @@ class IrMailServer(models.Model):
     # <START_OF_CHANGE>
     def connect(self, host=None, port=None, user=None, password=None, encryption=None,
                 smtp_debug=False, mail_server_id=None):
+        _logger.info('IrMailServer1::connect()', locals())
+        _logger.info('(stso) self.use_microsoft_outlook_service: ', self.use_microsoft_outlook_service)
         if len(self) == 1 and self.use_microsoft_outlook_service:
             # Call super without user to setup connection but don't login.
             mail_server_user = user
