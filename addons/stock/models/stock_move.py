@@ -126,7 +126,7 @@ class StockMove(models.Model):
     scrapped = fields.Boolean(
         'Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
     scrap_ids = fields.One2many('stock.scrap', 'move_id')
-    group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
+    group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id, index=True)
     rule_id = fields.Many2one(
         'stock.rule', 'Stock Rule', ondelete='restrict', help='The stock rule that created this stock move',
         check_company=True)
@@ -189,9 +189,7 @@ class StockMove(models.Model):
     @api.depends('product_id')
     def _compute_product_uom(self):
         for move in self:
-            if not move.product_uom:
-                move.product_uom = move.product_id.uom_id.id
-
+            move.product_uom = move.product_id.uom_id.id
 
     @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_display_assign_serial(self):
