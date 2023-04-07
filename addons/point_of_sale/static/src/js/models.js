@@ -15,17 +15,41 @@ import { markRaw, reactive } from "@odoo/owl";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
 import { escape } from "@web/core/utils/strings";
 import { Mutex } from "@web/core/utils/concurrency";
+import { memoize } from "@web/core/utils/functions";
+import { _t } from "@web/core/l10n/translation";
+import { renderToString } from "@web/core/utils/render";
 
 var QWeb = core.qweb;
-var _t = core._t;
 var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 const Markup = utils.Markup;
 
-// Container of the product images fetched during rendering
-// of customer display. There is no need to observe it, thus,
-// we are putting it outside of PosGlobalState.
-const PRODUCT_ID_TO_IMAGE_CACHE = {};
+/**
+ * Gets a product image as a base64 string so that it can be sent to the
+ * customer display, as the display won't be able to fetch it, since the image
+ * controller requires the client to be logged. This function is memoized on the
+ * product id, so that we will only do this once per product.
+ *
+ * @param {number} productId id of the product
+ * @param {string} writeDate the write date of the product, used as a cache
+ *  buster in case the product image has been changed
+ * @returns {string} the base64 representation of the product's image
+ */
+const getProductImage = memoize(function getProductImage(productId, writeDate) {
+    return new Promise(function (resolve, reject) {
+        const img = new Image();
+        img.addEventListener("load", () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.height = img.height;
+            canvas.width = img.width;
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg"));
+        });
+        img.addEventListener("error", reject);
+        img.src = `/web/image?model=product.product&field=image_128&id=${productId}&unique=${writeDate}`;
+    });
+});
 
 /**
  * If optimization is needed, then we should implement this
@@ -169,7 +193,7 @@ export class PosGlobalState extends PosModel {
         };
     }
     async load_product_uom_unit() {
-        const uom_id = await this.env.services.orm.call("ir.model.data", "check_object_reference", [
+        const uom_id = await this.orm.call("ir.model.data", "check_object_reference", [
             "uom",
             "product_uom_unit",
         ]);
@@ -180,11 +204,18 @@ export class PosGlobalState extends PosModel {
         await this.load_product_uom_unit();
         await this.load_orders();
         this.set_start_order();
+        Object.assign(this.toRefundLines, this.db.load("TO_REFUND_LINES") || {});
+        window.addEventListener("beforeunload", () =>
+            this.db.save("TO_REFUND_LINES", this.toRefundLines)
+        );
+        const { start_category, iface_start_categ_id } = this.config;
+        this.selectedCategoryId = (start_category && iface_start_categ_id?.[0]) || 0;
+        this.hasBigScrollBars = this.config.iface_big_scrollbars;
         this.markReady();
     }
 
     async load_server_data() {
-        const loadedData = await this.env.services.orm.call("pos.session", "load_pos_data", [
+        const loadedData = await this.orm.silent.call("pos.session", "load_pos_data", [
             [odoo.pos_session_id],
         ]);
         await this._processData(loadedData);
@@ -346,32 +377,28 @@ export class PosGlobalState extends PosModel {
     // updated partners, and fails if not
     async load_new_partners() {
         const search_params = { domain: this.prepare_new_partners_domain() };
-        if (this.env.pos.config.limited_partners_loading) {
+        if (this.config.limited_partners_loading) {
             search_params["order"] = "write_date desc";
-            if (this.env.pos.config.partner_load_background) {
-                search_params["limit"] = this.env.pos.config.limited_partners_amount || 1;
+            if (this.config.partner_load_background) {
+                search_params["limit"] = this.config.limited_partners_amount || 1;
             } else {
                 search_params["limit"] = 1;
             }
         }
         // FIXME POSREF TIMEOUT 3000
-        const partners = await this.env.services.orm.silent.call(
+        const partners = await this.orm.silent.call(
             "pos.session",
             "get_pos_ui_res_partner_by_params",
             [[odoo.pos_session_id], search_params]
         );
-        if (this.env.pos.config.partner_load_background) {
+        if (this.config.partner_load_background) {
             this.loadPartnersBackground(
                 search_params["domain"],
-                this.env.pos.config.limited_partners_amount || 1,
+                this.config.limited_partners_amount || 1,
                 "write_date desc"
             );
         }
-        if (this.addPartners(partners)) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.addPartners(partners);
     }
 
     setSelectedCategoryId(categoryId) {
@@ -533,7 +560,7 @@ export class PosGlobalState extends PosModel {
                 }
             }
         }
-        const products = await this.env.services.orm.call(
+        const products = await this.orm.call(
             "pos.session",
             "get_pos_ui_product_product_by_params",
             [odoo.pos_session_id, { domain: [["id", "in", [...missingProductIds]]] }]
@@ -544,7 +571,7 @@ export class PosGlobalState extends PosModel {
     async _loadPartners(partnerIds) {
         if (partnerIds.length > 0) {
             // FIXME POSREF TIMEOUT
-            const fetchedPartners = await this.env.services.orm.silent.call(
+            const fetchedPartners = await this.orm.silent.call(
                 "pos.session",
                 "get_pos_ui_res_partner_by_params",
                 [[odoo.pos_session_id], { domain: [["id", "in", partnerIds]] }]
@@ -569,7 +596,7 @@ export class PosGlobalState extends PosModel {
         let page = 0;
         let products = [];
         do {
-            products = await this.env.services.orm.silent.call(
+            products = await this.orm.silent.call(
                 "pos.session",
                 "get_pos_ui_product_product_by_params",
                 [
@@ -590,7 +617,7 @@ export class PosGlobalState extends PosModel {
         let i = 0;
         let partners = [];
         do {
-            partners = await this.env.services.orm.silent.call(
+            partners = await this.orm.silent.call(
                 "pos.session",
                 "get_pos_ui_res_partner_by_params",
                 [
@@ -618,7 +645,7 @@ export class PosGlobalState extends PosModel {
 
         this.set_synch("connecting", removedOrdersIds.length);
         try {
-            const removeOrdersResponseData = await this.env.services.orm.silent.call(
+            const removeOrdersResponseData = await this.orm.silent.call(
                 "pos.order",
                 "remove_from_ui",
                 [removedOrdersIds]
@@ -712,7 +739,7 @@ export class PosGlobalState extends PosModel {
         return message;
     }
     async _getOrdersJson() {
-        return await this.env.services.orm.call("pos.order", "get_draft_share_order_ids", [], {
+        return await this.orm.call("pos.order", "get_draft_share_order_ids", [], {
             config_id: this.config.id,
         });
     }
@@ -738,11 +765,10 @@ export class PosGlobalState extends PosModel {
         return message;
     }
     async _getPricelistJson(pricelistsToGet) {
-        return await this.env.services.orm.call(
-            "pos.session",
-            "get_pos_ui_product_pricelists_by_ids",
-            [[odoo.pos_session_id], pricelistsToGet]
-        );
+        return await this.orm.call("pos.session", "get_pos_ui_product_pricelists_by_ids", [
+            [odoo.pos_session_id],
+            pricelistsToGet,
+        ]);
     }
     _addPosPricelists(pricelistsJson) {
         if (!this.config.use_pricelist) {
@@ -781,11 +807,10 @@ export class PosGlobalState extends PosModel {
         return message;
     }
     async _getFiscalPositionJson(fiscalPositionToGet) {
-        return await this.env.services.orm.call(
-            "pos.session",
-            "get_pos_ui_account_fiscal_positions_by_ids",
-            [[odoo.pos_session_id], fiscalPositionToGet]
-        );
+        return await this.orm.call("pos.session", "get_pos_ui_account_fiscal_positions_by_ids", [
+            [odoo.pos_session_id],
+            fiscalPositionToGet,
+        ]);
     }
     _addPosFiscalPosition(fiscalPositionJson) {
         this.fiscal_positions.push(...fiscalPositionJson);
@@ -806,11 +831,12 @@ export class PosGlobalState extends PosModel {
         const order = this.get_order();
         // check back-end method `get_product_info_pos` to see what it returns
         // We do this so it's easier to override the value returned and use it in the component template later
-        const productInfo = await this.env.services.orm.call(
-            "product.product",
-            "get_product_info_pos",
-            [[product.id], product.get_price(order.pricelist, quantity), quantity, this.config.id]
-        );
+        const productInfo = await this.orm.call("product.product", "get_product_info_pos", [
+            [product.id],
+            product.get_price(order.pricelist, quantity),
+            quantity,
+            this.config.id,
+        ]);
 
         const priceWithoutTax = productInfo["all_prices"]["price_without_tax"];
         const margin = priceWithoutTax - product.standard_price;
@@ -841,11 +867,9 @@ export class PosGlobalState extends PosModel {
         };
     }
     async getClosePosInfo() {
-        const closingData = await this.env.services.orm.call(
-            "pos.session",
-            "get_closing_control_data",
-            [[this.pos_session.id]]
-        );
+        const closingData = await this.orm.call("pos.session", "get_closing_control_data", [
+            [this.pos_session.id],
+        ]);
         const ordersDetails = closingData.orders_details;
         const paymentsAmount = closingData.payments_amount;
         const payLaterAmount = closingData.pay_later_amount;
@@ -919,105 +943,31 @@ export class PosGlobalState extends PosModel {
         return this.orders;
     }
 
-    _convert_product_img_to_base64(product, url) {
-        return new Promise(function (resolve, reject) {
-            var img = new Image();
-
-            img.onload = function () {
-                var canvas = document.createElement("CANVAS");
-                var ctx = canvas.getContext("2d");
-
-                canvas.height = this.height;
-                canvas.width = this.width;
-                ctx.drawImage(this, 0, 0);
-
-                var dataURL = canvas.toDataURL("image/jpeg");
-                canvas = null;
-
-                resolve([product, dataURL]);
-            };
-            img.crossOrigin = "use-credentials";
-            img.src = url;
-        });
-    }
-
-    get customer_display() {
-        return this.unwatched.customer_display;
-    }
-
-    set customer_display(value) {
-        this.unwatched.customer_display = markRaw(value);
-    }
-
-    send_current_order_to_customer_facing_display() {
-        var self = this;
-        if (!this.config.iface_customer_facing_display) {
+    /**
+     * Renders the HTML for the customer display and returns it as a string.
+     *
+     * @returns {string}
+     */
+    async customerDisplayHTML() {
+        const order = this.get_order();
+        if (!order) {
             return;
         }
-        this.render_html_for_customer_facing_display().then((rendered_html) => {
-            if (self.env.pos.customer_display) {
-                var $renderedHtml = $("<div>").html(rendered_html);
-                $(self.env.pos.customer_display.document.body).html(
-                    $renderedHtml.find(".pos-customer_facing_display")
-                );
-                var orderlines = $(self.env.pos.customer_display.document.body).find(
-                    ".pos_orderlines_list"
-                );
-                orderlines.scrollTop(orderlines.prop("scrollHeight"));
-            } else if (
-                this.config.iface_customer_facing_display_via_proxy &&
-                this.hardwareProxy.customerDisplayAvailable
-            ) {
-                this.hardwareProxy.updateCustomerDisplay(rendered_html);
-            }
-        });
-    }
+        const orderLines = order.get_orderlines();
+        const productImages = Object.fromEntries(
+            await Promise.all(
+                orderLines.map(async ({ product }) => [
+                    product.id,
+                    await getProductImage(product.id, product.writeDate),
+                ])
+            )
+        );
 
-    /**
-     * @returns {Promise<string>}
-     */
-    render_html_for_customer_facing_display() {
-        var self = this;
-        var order = this.get_order();
-
-        // If we're using an external device like the IoT Box, we
-        // cannot get /web/image?model=product.product because the
-        // IoT Box is not logged in and thus doesn't have the access
-        // rights to access product.product. So instead we'll base64
-        // encode it and embed it in the HTML.
-        var get_image_promises = [];
-
-        if (order) {
-            order.get_orderlines().forEach(function (orderline) {
-                var product = orderline.product;
-                var image_url = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=${product.write_date}`;
-
-                // only download and convert image if we haven't done it before
-                if (!(product.id in PRODUCT_ID_TO_IMAGE_CACHE)) {
-                    get_image_promises.push(
-                        self._convert_product_img_to_base64(product, image_url)
-                    );
-                }
-            });
-        }
-
-        return Promise.all(get_image_promises).then(function (productIdImagePairs) {
-            for (const [product, image] of productIdImagePairs) {
-                PRODUCT_ID_TO_IMAGE_CACHE[product.id] = image;
-            }
-            // Collect the product images that will be used in rendering the customer display template.
-            const productImages = {};
-            if (order) {
-                for (const line of order.get_orderlines()) {
-                    productImages[line.product.id] = PRODUCT_ID_TO_IMAGE_CACHE[line.product.id];
-                }
-            }
-            return QWeb.render("CustomerFacingDisplayOrder", {
-                pos: self,
-                origin: window.location.origin,
-                order: order,
-                productImages,
-            });
+        return renderToString("CustomerFacingDisplayOrder", {
+            pos: this,
+            origin: window.location.origin,
+            order,
+            productImages,
         });
     }
 
@@ -1107,7 +1057,7 @@ export class PosGlobalState extends PosModel {
         }
         // we try to send the order. silent prevents a spinner if it takes too long. (unless we are sending an invoice,
         // then we want to notify the user that we are waiting on something )
-        const orm = options.to_invoice ? this.env.services.orm : this.env.services.orm.silent;
+        const orm = options.to_invoice ? this.orm : this.orm.silent;
         // FIXME POSREF timeout
         // const timeout = typeof options.timeout === "number" ? options.timeout : 30000 * orders.length;
         return orm
@@ -1605,17 +1555,16 @@ export class PosGlobalState extends PosModel {
      */
     async _addProducts(ids, setAvailable = true) {
         if (setAvailable) {
-            await this.env.services.orm.write("product.product", ids, { available_in_pos: true });
+            await this.orm.write("product.product", ids, { available_in_pos: true });
         }
-        const product = await this.env.services.orm.call(
-            "pos.session",
-            "get_pos_ui_product_product_by_params",
-            [odoo.pos_session_id, { domain: [["id", "in", ids]] }]
-        );
+        const product = await this.orm.call("pos.session", "get_pos_ui_product_product_by_params", [
+            odoo.pos_session_id,
+            { domain: [["id", "in", ids]] },
+        ]);
         this._loadProductProduct(product);
     }
     async refreshTotalDueOfPartner(partner) {
-        const partnerWithUpdatedTotalDue = await this.env.services.orm.searchRead(
+        const partnerWithUpdatedTotalDue = await this.orm.searchRead(
             "res.partner",
             [["id", "=", partner.id]],
             ["total_due"]

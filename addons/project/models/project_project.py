@@ -538,6 +538,8 @@ class Project(models.Model):
 
     def _mail_get_message_subtypes(self):
         res = super()._mail_get_message_subtypes()
+        if not self.rating_active:
+            res -= self.env.ref('project.mt_project_task_rating')
         if len(self) == 1:
             dependency_subtype = self.env.ref('project.mt_project_task_dependency_change')
             waiting_subtype = self.env.ref('project.mt_project_task_waiting')
@@ -710,6 +712,9 @@ class Project(models.Model):
         return [('account_id', 'in', self.analytic_account_id.ids)]
 
     def _get_profitability_items(self, with_action=True):
+        return self._get_items_from_aal(with_action)
+
+    def _get_items_from_aal(self, with_action=True):
         return {
             'revenues': {'data': [], 'total': {'invoiced': 0.0, 'to_invoice': 0.0}},
             'costs': {'data': [], 'total': {'billed': 0.0, 'to_bill': 0.0}},

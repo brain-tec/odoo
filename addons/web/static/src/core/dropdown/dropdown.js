@@ -58,14 +58,11 @@ export class Dropdown extends Component {
         });
 
         // Set up dynamic open/close behaviours --------------------------------
-        if (!this.props.manualOnly) {
-            // Close on outside click listener
-            useExternalListener(window, "click", this.onWindowClicked, { capture: true });
-            // Listen to all dropdowns state changes
-            useBus(Dropdown.bus, "state-changed", ({ detail }) =>
-                this.onDropdownStateChanged(detail)
-            );
-        }
+
+        // Close on outside click listener
+        useExternalListener(window, "click", this.onWindowClicked, { capture: true });
+        // Listen to all dropdowns state changes
+        useBus(Dropdown.bus, "state-changed", ({ detail }) => this.onDropdownStateChanged(detail));
 
         // Set up UI active element related behavior ---------------------------
         this.ui = useService("ui");
@@ -224,7 +221,7 @@ export class Dropdown extends Component {
      * @returns {Promise<void>}
      */
     open() {
-        return this.changeStateAndNotify({ open: true, groupIsOpen: true });
+        return this.changeStateAndNotify({ open: true, groupIsOpen: this.props.autoOpen });
     }
 
     /**
@@ -234,7 +231,10 @@ export class Dropdown extends Component {
      */
     toggle() {
         const toggled = !this.state.open;
-        return this.changeStateAndNotify({ open: toggled, groupIsOpen: toggled });
+        return this.changeStateAndNotify({
+            open: toggled,
+            groupIsOpen: toggled && this.props.autoOpen,
+        });
     }
 
     get showCaret() {
@@ -263,8 +263,8 @@ export class Dropdown extends Component {
 
         // Emitted by direct siblings ?
         if (args.emitter.rootRef.el.parentElement === this.rootRef.el.parentElement) {
-            // Sync the group status
-            this.state.groupIsOpen = args.newState.groupIsOpen;
+            // Sync the group status (will not apply if autoOpen is set to false)
+            this.state.groupIsOpen = args.newState.groupIsOpen && this.props.autoOpen;
 
             // Another dropdown is now open ? Close myself without notifying siblings.
             if (this.state.open && args.newState.open) {
@@ -286,7 +286,7 @@ export class Dropdown extends Component {
     }
 
     /**
-     * Opens the dropdown the mouse enters its toggler.
+     * Opens the dropdown when the mouse enters its toggler if its group is open. (see autoOpen prop)
      * NB: only if its siblings dropdown group is opened and if not a sub dropdown.
      */
     onTogglerMouseEnter() {
@@ -328,6 +328,7 @@ export class Dropdown extends Component {
 Dropdown.bus = new EventBus();
 Dropdown.defaultProps = {
     menuDisplay: "d-block",
+    autoOpen: true,
     onOpened: () => {},
     onStateChanged: () => {},
     onScroll: () => {},
@@ -354,7 +355,7 @@ Dropdown.props = {
         type: Boolean,
         optional: true,
     },
-    manualOnly: {
+    autoOpen: {
         type: Boolean,
         optional: true,
     },
