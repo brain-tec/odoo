@@ -46,8 +46,8 @@
                     </div>
                     <div class="w-100" t-att-class="{ 'flex-grow-1': message.composer }">
                         <div t-if="!props.squashed" class="o-mail-Message-header d-flex flex-wrap align-items-baseline">
-                            <span t-if="message.author and shouldDisplayAuthorName" class="o-mail-Message-author" t-att-class="{ 'cursor-pointer o_redirect': hasAuthorClickable }" t-att-title="authorText" t-on-click="ev => this.onClickAuthor(ev)">
-                                <strong class="me-1 text-truncate" t-esc="message.author.name"/>
+                            <span t-if="(message.author or message.email_from) and shouldDisplayAuthorName" class="o-mail-Message-author" t-att-class="{ 'cursor-pointer o_redirect': hasAuthorClickable }" t-att-title="authorText" t-on-click="ev => this.onClickAuthor(ev)">
+                                <strong class="me-1 text-truncate"><t t-if="message.author" t-esc="message.author.name"/><t t-else="" t-esc="message.email_from"/></strong>
                             </span>
                             <small t-if="!message.isTransient" class="o-mail-Message-date text-muted opacity-50" t-att-class="{ 'me-2': !isAlignedRight }" t-att-title="message.datetimeShort">
                                 <t t-if="shouldDisplayAuthorName">- </t>
@@ -150,6 +150,7 @@
                                             <i class="btn px-1 py-0 fa fa-lg fa-ellipsis-h" t-att-class="{ 'order-1': props.isInChatWindow }" tabindex="1"/>
                                         </t>
                                         <t t-set-slot="default">
+                                            <DropdownItem t-if="message.reactions.length" class="'px-2 d-flex align-items-center'" title="'Reactions'" onSelected="() => this.openReactionMenu()"><i class="fa fa-lg fa-smile-o pe-2"/>View Reactions</DropdownItem>
                                             <DropdownItem t-if="isInInbox" class="'px-2 d-flex align-items-center'" title="'Mark as Read'" onSelected="() => messageService.setDone(props.message)"><i class="fa fa-lg fa-check pe-2"/>Mark as Read</DropdownItem>
                                             <DropdownItem t-if="props.thread.model === 'mail.channel'" class="'px-2 d-flex align-items-center'" title="'Mark as Unread'" onSelected="() => this.onClickMarkAsUnread()"><i class="fa fa-lg fa-eye-slash pe-2"/>Mark as Unread</DropdownItem>
                                             <DropdownItem t-if="editable" class="'px-2 d-flex align-items-center'" title="'Edit'" onSelected="() => this.onClickEdit()"><i class="fa fa-lg fa-pencil pe-2"/>Edit</DropdownItem>
@@ -165,7 +166,7 @@
                             unlinkAttachment.bind="onClickAttachmentUnlink"
                             imagesHeight="300"/>
                         <LinkPreviewList t-if="message.linkPreviews.length > 0 and store.hasLinkPreviewFeature" linkPreviews="message.linkPreviews" deletable="deletable"/>
-                        <MessageReactions message="message" t-if="message.reactions.length"/>
+                        <MessageReactions message="message" openReactionMenu="openReactionMenu" t-if="message.reactions.length"/>
                     </div>
                 </div>
             </div>
