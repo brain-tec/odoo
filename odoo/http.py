@@ -137,10 +137,19 @@ from urllib.parse import urlparse
 from zlib import adler32
 
 import babel.core
-import geoip2.database
-import geoip2.models
-import geoip2.errors
-import maxminddb
+
+try:
+    import geoip2.database
+    import geoip2.models
+    import geoip2.errors
+except ImportError:
+    geoip2 = None
+
+try:
+    import maxminddb
+except ImportError:
+    maxminddb = None
+
 import psycopg2
 import werkzeug.datastructures
 import werkzeug.exceptions
@@ -172,6 +181,7 @@ from .tools import (config, consteq, date_utils, file_path, parse_version,
                     profiler, submap, unique, ustr,)
 from .tools.func import filter_kwargs, lazy_property
 from .tools.mimetypes import guess_mimetype
+from .tools.misc import pickle
 from .tools._vendor import sessions
 from .tools._vendor.useragents import UserAgent
 
@@ -228,8 +238,9 @@ def get_default_session():
 # Two empty objects used when the geolocalization failed. They have the
 # sames attributes as real countries/cities except that accessing them
 # evaluates to None.
-GEOIP_EMPTY_COUNTRY = geoip2.models.Country({})
-GEOIP_EMPTY_CITY = geoip2.models.City({})
+if geoip2:
+    GEOIP_EMPTY_COUNTRY = geoip2.models.Country({})
+    GEOIP_EMPTY_CITY = geoip2.models.City({})
 
 # The request mimetypes that transport JSON in their body.
 JSON_MIMETYPES = ('application/json', 'application/json-rpc')
@@ -893,12 +904,13 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
 
 class Session(collections.abc.MutableMapping):
     """ Structure containing data persisted across requests. """
-    __slots__ = ('can_save', 'data', 'is_dirty', 'is_explicit', 'is_new',
+    __slots__ = ('can_save', '_Session__data', 'is_dirty', 'is_explicit', 'is_new',
                  'should_rotate', 'sid')
 
     def __init__(self, data, sid, new=False):
         self.can_save = True
-        self.data = data
+        self.__data = {}
+        self.update(data)
         self.is_dirty = False
         self.is_explicit = False
         self.is_new = new
@@ -912,22 +924,23 @@ class Session(collections.abc.MutableMapping):
         if item == 'geoip':
             warnings.warn('request.session.geoip have been moved to request.geoip', DeprecationWarning)
             return request.geoip if request else {}
-        return self.data[item]
+        return self.__data[item]
 
     def __setitem__(self, item, value):
-        if item not in self.data or self.data[item] != value:
+        value = pickle.loads(pickle.dumps(value))
+        if item not in self.__data or self.__data[item] != value:
             self.is_dirty = True
-        self.data[item] = value
+        self.__data[item] = value
 
     def __delitem__(self, item):
-        del self.data[item]
+        del self.__data[item]
         self.is_dirty = True
 
     def __len__(self):
-        return len(self.data)
+        return len(self.__data)
 
     def __iter__(self):
-        return iter(self.data)
+        return iter(self.__data)
 
     def __getattr__(self, attr):
         return self.get(attr, None)
@@ -939,7 +952,7 @@ class Session(collections.abc.MutableMapping):
             self[key] = val
 
     def clear(self):
-        self.data.clear()
+        self.__data.clear()
         self.is_dirty = True
 
     #
