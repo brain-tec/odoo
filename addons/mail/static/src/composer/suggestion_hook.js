@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 
 export function useSuggestion() {
     const comp = useComponent();
+    /** @type {import('@mail/composer/suggestion_service').SuggestionService} */
     const suggestionService = useService("mail.suggestion");
     const self = {
         clearRawMentions() {
@@ -37,7 +38,6 @@ export function useSuggestion() {
             if (selectionStart > 0) {
                 candidatePositions.push(selectionStart - 1);
             }
-            const suggestionDelimiters = ["@", ":", "#", "/"];
             for (const candidatePosition of candidatePositions) {
                 if (candidatePosition < 0 || candidatePosition >= content.length) {
                     continue;
@@ -46,7 +46,11 @@ export function useSuggestion() {
                 if (candidateChar === "/" && candidatePosition !== 0) {
                     continue;
                 }
-                if (!suggestionDelimiters.includes(candidateChar)) {
+                if (
+                    !suggestionService
+                        .getSupportedDelimiters(comp.props.composer.thread)
+                        .includes(candidateChar)
+                ) {
                     continue;
                 }
                 const charBeforeCandidate = content[candidatePosition - 1];

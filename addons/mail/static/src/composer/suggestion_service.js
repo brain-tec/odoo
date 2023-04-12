@@ -2,11 +2,10 @@
 
 import { cleanTerm } from "@mail/utils/format";
 import { registry } from "@web/core/registry";
-import { _t } from "@web/core/l10n/translation";
 
 const commandRegistry = registry.category("mail.channel_commands");
 
-class SuggestionService {
+export class SuggestionService {
     constructor(env, services) {
         this.orm = services.orm;
         /** @type {import("@mail/core/store_service").Store} */
@@ -15,8 +14,12 @@ class SuggestionService {
         this.threadService = services["mail.thread"];
         /** @type {import("@mail/core/persona_service").PersonaService} */
         this.personaService = services["mail.persona"];
-        /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
+        /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
         this.channelMemberService = services["mail.channel.member"];
+    }
+
+    getSupportedDelimiters(thread) {
+        return ["@", "#", "/"];
     }
 
     async fetchSuggestions({ delimiter, term }, { thread, onFetched } = {}) {
@@ -26,8 +29,6 @@ class SuggestionService {
                 this.fetchPartners(cleanedSearchTerm, thread).then(onFetched);
                 break;
             }
-            case ":":
-                break;
             case "#":
                 this.fetchThreads(cleanedSearchTerm).then(onFetched);
                 break;
@@ -79,7 +80,7 @@ class SuggestionService {
      * Returns suggestions that match the given search term from specified type.
      *
      * @param {Object} [param0={}]
-     * @param {String} [param0.delimiter] can be one one of the following: ["@", ":", "#", "/"]
+     * @param {String} [param0.delimiter] can be one one of the following: ["@", "#", "/"]
      * @param {String} [param0.term]
      * @param {Object} [options={}]
      * @param {Integer} [options.thread] prioritize and/or restrict
@@ -92,8 +93,6 @@ class SuggestionService {
             case "@": {
                 return this.searchPartnerSuggestions(cleanedSearchTerm, thread, sort);
             }
-            case ":":
-                return this.searchCannedResponseSuggestions(cleanedSearchTerm, sort);
             case "#":
                 return this.searchChannelSuggestions(cleanedSearchTerm, thread, sort);
             case "/":
@@ -282,47 +281,6 @@ class SuggestionService {
             type: "Partner",
             mainSuggestions: sort ? mainSuggestionList.sort(sortFunc) : mainSuggestionList,
             extraSuggestions: sort ? extraSuggestionList.sort(sortFunc) : extraSuggestionList,
-        };
-    }
-
-    searchCannedResponseSuggestions(cleanedSearchTerm, sort) {
-        const cannedResponses = this.store.cannedResponses
-            .filter((cannedResponse) => {
-                return cleanTerm(cannedResponse.name).includes(cleanedSearchTerm);
-            })
-            .map(({ id, name, substitution }) => {
-                return {
-                    id,
-                    name,
-                    substitution: _t(substitution),
-                };
-            });
-        const sortFunc = (c1, c2) => {
-            const cleanedName1 = cleanTerm(c1.name ?? "");
-            const cleanedName2 = cleanTerm(c2.name ?? "");
-            if (
-                cleanedName1.startsWith(cleanedSearchTerm) &&
-                !cleanedName2.startsWith(cleanedSearchTerm)
-            ) {
-                return -1;
-            }
-            if (
-                !cleanedName1.startsWith(cleanedSearchTerm) &&
-                cleanedName2.startsWith(cleanedSearchTerm)
-            ) {
-                return 1;
-            }
-            if (cleanedName1 < cleanedName2) {
-                return -1;
-            }
-            if (cleanedName1 > cleanedName2) {
-                return 1;
-            }
-            return c1.id - c2.id;
-        };
-        return {
-            type: "CannedResponse",
-            mainSuggestions: sort ? cannedResponses.sort(sortFunc) : cannedResponses,
         };
     }
 
