@@ -375,27 +375,12 @@ export class PosGlobalState extends PosModel {
     // updated partners, and fails if not
     async load_new_partners() {
         const search_params = { domain: this.prepare_new_partners_domain() };
-        if (this.config.limited_partners_loading) {
-            search_params["order"] = "write_date desc";
-            if (this.config.partner_load_background) {
-                search_params["limit"] = this.config.limited_partners_amount || 1;
-            } else {
-                search_params["limit"] = 1;
-            }
-        }
         // FIXME POSREF TIMEOUT 3000
         const partners = await this.orm.silent.call(
             "pos.session",
             "get_pos_ui_res_partner_by_params",
             [[odoo.pos_session_id], search_params]
         );
-        if (this.config.partner_load_background) {
-            this.loadPartnersBackground(
-                search_params["domain"],
-                this.config.limited_partners_amount || 1,
-                "write_date desc"
-            );
-        }
         return this.addPartners(partners);
     }
 
@@ -589,48 +574,6 @@ export class PosGlobalState extends PosModel {
             }
         }
         await this._loadPartners([...missingPartnerIds]);
-    }
-    async loadProductsBackground() {
-        let page = 0;
-        let products = [];
-        do {
-            products = await this.orm.silent.call(
-                "pos.session",
-                "get_pos_ui_product_product_by_params",
-                [
-                    odoo.pos_session_id,
-                    {
-                        offset: page * this.config.limited_products_amount,
-                        limit: this.config.limited_products_amount,
-                    },
-                ]
-            );
-            this._loadProductProduct(products);
-            page += 1;
-        } while (products.length == this.config.limited_products_amount);
-    }
-    async loadPartnersBackground(domain = [], offset = 0, order = false) {
-        // Start at the first page since the first set of loaded partners are not actually in the
-        // same order as this background loading procedure.
-        let i = 0;
-        let partners = [];
-        do {
-            partners = await this.orm.silent.call(
-                "pos.session",
-                "get_pos_ui_res_partner_by_params",
-                [
-                    [odoo.pos_session_id],
-                    {
-                        order,
-                        domain,
-                        limit: this.config.limited_partners_amount,
-                        offset: offset + this.config.limited_partners_amount * i,
-                    },
-                ]
-            );
-            this.addPartners(partners);
-            i += 1;
-        } while (partners.length);
     }
     setLoadingOrderState(bool) {
         this.loadingOrderState = bool;
@@ -1733,8 +1676,7 @@ export class Product extends PosModel {
     // product.pricelist.item records are loaded with a search_read
     // and were automatically sorted based on their _order by the
     // ORM. After that they are added in this order to the pricelists.
-    get_price(pricelist, quantity, price_extra, recurring = false) {
-        var self = this;
+    get_price(pricelist, quantity, price_extra = 0, recurring = false) {
         var date = moment();
 
         // In case of nested pricelists, it is necessary that all pricelists are made available in
@@ -1751,67 +1693,49 @@ export class Product extends PosModel {
             );
         }
 
-        var category_ids = [];
-        var category = this.categ;
-        while (category) {
-            category_ids.push(category.id);
-            category = category.parent;
+        const rules = !pricelist
+            ? []
+            : _.filter(this.applicablePricelistItems[pricelist.id], (item) =>
+                  this.isPricelistItemUsable(item, date)
+              );
+
+        let price = this.lst_price + (price_extra || 0);
+        const rule = rules.find((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
+        if (!rule) {
+            return price;
         }
 
-        var pricelist_items = [];
-        if (pricelist) {
-            pricelist_items = _.filter(
-                self.applicablePricelistItems[pricelist.id],
-                function (item) {
-                    return self.isPricelistItemUsable(item, date);
-                }
+        if (rule.base === "pricelist") {
+            const base_pricelist = this.pos.pricelists.find(
+                (pricelist) => pricelist.id === rule.base_pricelist_id[0]
             );
+            if (base_pricelist) {
+                price = this.get_price(base_pricelist, quantity, 0, true);
+            }
+        } else if (rule.base === "standard_price") {
+            price = this.standard_price;
         }
 
-        var price = self.lst_price;
-        if (price_extra) {
-            price += price_extra;
+        if (rule.compute_price === "fixed") {
+            price = rule.fixed_price;
+        } else if (rule.compute_price === "percentage") {
+            price = price - price * (rule.percent_price / 100);
+        } else {
+            var price_limit = price;
+            price -= price * (rule.price_discount / 100);
+            if (rule.price_round) {
+                price = round_pr(price, rule.price_round);
+            }
+            if (rule.price_surcharge) {
+                price += rule.price_surcharge;
+            }
+            if (rule.price_min_margin) {
+                price = Math.max(price, price_limit + rule.price_min_margin);
+            }
+            if (rule.price_max_margin) {
+                price = Math.min(price, price_limit + rule.price_max_margin);
+            }
         }
-        pricelist_items.find(function (rule) {
-            if (rule.min_quantity && quantity < rule.min_quantity) {
-                return false;
-            }
-
-            if (rule.base === "pricelist") {
-                const base_pricelist = self.pos.pricelists.find(function (pricelist) {
-                    return pricelist.id === rule.base_pricelist_id[0];
-                });
-                if (base_pricelist) {
-                    price = self.get_price(base_pricelist, quantity, undefined, true);
-                }
-            } else if (rule.base === "standard_price") {
-                price = self.standard_price;
-            }
-
-            if (rule.compute_price === "fixed") {
-                price = rule.fixed_price;
-                return true;
-            } else if (rule.compute_price === "percentage") {
-                price = price - price * (rule.percent_price / 100);
-                return true;
-            } else {
-                var price_limit = price;
-                price = price - price * (rule.price_discount / 100);
-                if (rule.price_round) {
-                    price = round_pr(price, rule.price_round);
-                }
-                if (rule.price_surcharge) {
-                    price += rule.price_surcharge;
-                }
-                if (rule.price_min_margin) {
-                    price = Math.max(price, price_limit + rule.price_min_margin);
-                }
-                if (rule.price_max_margin) {
-                    price = Math.min(price, price_limit + rule.price_max_margin);
-                }
-                return true;
-            }
-        });
 
         // This return value has to be rounded with round_di before
         // being used further. Note that this cannot happen here,
@@ -2190,35 +2114,25 @@ export class Orderline extends PosModel {
             orderline.compute_fixed_price(order_line_price),
             this.pos.currency.decimal_places
         );
-        if (this.get_product().id !== orderline.get_product().id) {
-            //only orderline of the same product can be merged
-            return false;
-        } else if (!this.get_unit() || !this.get_unit().is_pos_groupable) {
-            return false;
-        } else if (this.get_discount() > 0) {
-            // we don't merge discounted orderlines
-            return false;
-        } else if (
-            !utils.float_is_zero(
+        // only orderlines of the same product can be merged
+        return (
+            this.get_product().id === orderline.get_product().id &&
+            this.get_unit() &&
+            this.get_unit().is_pos_groupable &&
+            // don't merge discounted orderlines
+            this.get_discount() === 0 &&
+            utils.float_is_zero(
                 price - order_line_price - orderline.get_price_extra(),
                 this.pos.currency.decimal_places
-            )
-        ) {
-            return false;
-        } else if (
-            this.product.tracking == "lot" &&
-            (this.pos.picking_type.use_create_lots || this.pos.picking_type.use_existing_lots)
-        ) {
-            return false;
-        } else if (this.description !== orderline.description) {
-            return false;
-        } else if (orderline.get_customer_note() !== this.get_customer_note()) {
-            return false;
-        } else if (this.refunded_orderline_id) {
-            return false;
-        } else {
-            return true;
-        }
+            ) &&
+            !(
+                this.product.tracking === "lot" &&
+                (this.pos.picking_type.use_create_lots || this.pos.picking_type.use_existing_lots)
+            ) &&
+            this.description === orderline.description &&
+            orderline.get_customer_note() === this.get_customer_note() &&
+            !this.refunded_orderline_id
+        );
     }
     merge(orderline) {
         this.order.assert_editable();

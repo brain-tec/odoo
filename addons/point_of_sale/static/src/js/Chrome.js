@@ -84,20 +84,6 @@ export class Chrome extends Component {
         // Allow using the app even if not all the images are loaded.
         // Basically, preload the images in the background.
         this._preloadImages();
-        const {
-            limited_partners_loading,
-            partner_load_background,
-            limited_products_loading,
-            product_load_background,
-        } = this.pos.globalState.config;
-        if (limited_partners_loading && partner_load_background) {
-            // Wrap in fresh reactive: none of the reads during loading should subscribe to anything
-            reactive(this.pos.globalState).loadPartnersBackground();
-        }
-        if (limited_products_loading && product_load_background) {
-            // Wrap in fresh reactive: none of the reads during loading should subscribe to anything
-            reactive(this.pos.globalState).loadProductsBackground();
-        }
     }
 
     // MISC METHODS //
@@ -148,7 +134,7 @@ export class Chrome extends Component {
         );
     }
     get showCashMoveButton() {
-        return Boolean(this.pos.globalState?.config?.config?.cash_control);
+        return Boolean(this.pos.globalState?.config?.cash_control);
     }
     /**
      * Unmounts the tempScreen on error and dispatches the error in a separate
