@@ -17,12 +17,15 @@ class AccountInvoiceConfirm(models.TransientModel):
         invoice_ids = self.pool['account.invoice'].search(cr, uid, [('auto_confirm', '=', True)], limit=10)
         invoices = self.pool['account.invoice'].browse(cr, uid, invoice_ids)
         for invoice in invoices:
-            try:
-                invoice.signal_workflow('invoice_open')
-            except Exception, e:
-                pass
-            finally:
-                invoice.auto_confirm = False
+            with api.Environment.manage():
+                with openerp.registry(cr.dbname).cursor() as new_cr:
+                    new_env = api.Environment(new_cr, uid, {})
+                    try:
+                        invoice.with_env(new_env).signal_workflow('invoice_open')
+                    except Exception, e:
+                        pass
+                    finally:
+                        invoice.with_env(new_env).auto_confirm = False
 
     @api.multi
     def invoice_confirm(self):
