@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+from functools import reduce
 import logging
 import re
 
 from datetime import datetime
+from markupsafe import escape
 
 from odoo import api, fields, models, _
 from odoo.tools import float_repr, float_compare
@@ -91,11 +93,17 @@ class AccountMove(models.Model):
                 price_unit = line.price_unit
 
             description = line.name
-            if not is_downpayment:
-                if line.price_subtotal < 0:
-                    moves = line._get_downpayment_lines().move_id
-                    if moves:
-                        description += ', '.join([move.name for move in moves])
+
+            # Down payment lines:
+            # If there was a down paid amount that has been deducted from this move,
+            # we need to put a reference to the down payment invoice in the DatiFattureCollegate tag
+            downpayment_moves = self.env['account.move']
+            if not is_downpayment and line.price_subtotal < 0:
+                downpayment_moves = line._get_downpayment_lines().mapped("move_id")
+                if downpayment_moves:
+                    downpayment_moves_description = ', '.join([m.name for m in downpayment_moves])
+                    sep = ', ' if description else ''
+                    description = f"{description}{sep}{downpayment_moves_description}"
 
             invoice_lines.append({
                 'line': line,
@@ -104,6 +112,7 @@ class AccountMove(models.Model):
                 'unit_price': price_unit,
                 'subtotal_price': price_subtotal,
                 'vat_tax': line.tax_ids._l10n_it_filter_kind('vat'),
+                'downpayment_moves': downpayment_moves,
             })
         return invoice_lines
 
@@ -245,6 +254,10 @@ class AccountMove(models.Model):
         invoice_lines = self._l10n_it_edi_prepare_fatturapa_line_details(reverse_charge_refund, is_downpayment, convert_to_euros)
         tax_lines = self._l10n_it_edi_prepare_fatturapa_tax_details(tax_details, reverse_charge_refund)
 
+        # Reduce downpayment views to a single recordset
+        downpayment_moves = [l.get('downpayment_moves', self.env['account.move']) for l in invoice_lines]
+        downpayment_moves = reduce(lambda x, y: x | y, downpayment_moves)
+
         # Create file content.
         template_values = {
             'record': self,
@@ -277,6 +290,7 @@ class AccountMove(models.Model):
             'pdf': pdf,
             'pdf_name': pdf_name,
             'tax_details': tax_details,
+            'downpayment_moves': downpayment_moves,
             'abs': abs,
             'normalize_codice_fiscale': partner._l10n_it_normalize_codice_fiscale,
             'get_vat_number': get_vat_number,
@@ -339,7 +353,7 @@ class AccountMove(models.Model):
             })
             with other_invoice._get_edi_creation() as other_invoice:
                 self.env['account.edi.format']._import_fattura_pa(tree, other_invoice)
-                other_invoice.message_post(body=_("Created from attachment in %s", invoice._get_html_link()))
+                other_invoice.message_post(body=escape(_("Created from attachment in %s")) % invoice._get_html_link())
 
         return True
 

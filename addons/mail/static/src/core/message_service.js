@@ -125,7 +125,7 @@ export class MessageService {
     createTransient(data) {
         const { body, res_id, model } = data;
         const lastMessageId = this.getLastMessageId();
-        this.insert({
+        return this.insert({
             author: this.store.odoobot,
             body,
             id: lastMessageId + 0.01,
@@ -142,6 +142,13 @@ export class MessageService {
 
     async setDone(message) {
         await this.orm.silent.call("mail.message", "set_message_done", [[message.id]]);
+    }
+
+    setPin(message, pinned) {
+        return this.orm.call("mail.channel", "set_message_pin", [message.originThread.id], {
+            message_id: message.id,
+            pinned,
+        });
     }
 
     async unstarAll() {
@@ -177,17 +184,15 @@ export class MessageService {
 
     updateStarred(message, isStarred) {
         message.isStarred = isStarred;
+        const starred = this.store.discuss.starred;
         if (isStarred) {
-            this.store.discuss.starred.counter++;
-            if (this.store.discuss.starred.messages.length > 0) {
-                this.store.discuss.starred.messages.push(message);
+            starred.counter++;
+            if (!starred.messages.includes(message)) {
+                starred.messages.push(message);
             }
         } else {
-            this.store.discuss.starred.counter--;
-            removeFromArrayWithPredicate(
-                this.store.discuss.starred.messages,
-                ({ id }) => id === message.id
-            );
+            starred.counter--;
+            removeFromArrayWithPredicate(starred.messages, ({ id }) => id === message.id);
         }
     }
 
@@ -224,6 +229,12 @@ export class MessageService {
      * @param {boolean} [fromFetch=false]
      */
     _update(message, data, fromFetch = false) {
+        if (message.pinned_at && data.pinned_at === false) {
+            removeFromArrayWithPredicate(
+                message.originThread.pinnedMessages,
+                ({ id }) => id === message.id
+            );
+        }
         const {
             attachment_ids: attachments = message.attachments,
             default_subject: defaultSubject = message.defaultSubject,
@@ -287,27 +298,11 @@ export class MessageService {
             message.originThread.modelName = data.res_model_name;
         }
         this._updateReactions(message, data.messageReactionGroups);
-        if (message.originThread && !message.originThread.messages.includes(message)) {
-            message.originThread.messages.push(message);
-            this.sortMessages(message.originThread);
-        }
-        if (message.isNeedaction && !this.store.discuss.inbox.messages.includes(message)) {
-            if (!fromFetch) {
-                this.store.discuss.inbox.counter++;
-                if (message.originThread) {
-                    message.originThread.message_needaction_counter++;
-                }
-            }
-            this.store.discuss.inbox.messages.push(message);
-            this.sortMessages(this.store.discuss.inbox);
-        }
-        if (message.isStarred && !this.store.discuss.starred.messages.includes(message)) {
-            this.store.discuss.starred.messages.push(message);
-            this.sortMessages(this.store.discuss.starred);
-        }
-        if (message.isHistory && !this.store.discuss.history.messages.includes(message)) {
-            this.store.discuss.history.messages.push(message);
-            this.sortMessages(this.store.discuss.history);
+        if (message.isNotification && !message.notificationType) {
+            const parser = new DOMParser();
+            const htmlBody = parser.parseFromString(message.body, "text/html");
+            message.notificationType =
+                htmlBody.querySelector(".o_mail_notification")?.dataset.oeType;
         }
     }
 
@@ -472,15 +467,6 @@ export class MessageService {
             }
         }
         group.resIds.add(data.resId);
-    }
-
-    /**
-     * @param {import("@mail/core/thread_model").Thread} thread
-     */
-    sortMessages(thread) {
-        thread.messages.sort((msg1, msg2) => {
-            return msg1.id - msg2.id;
-        });
     }
 
     scheduledDateSimple(message) {

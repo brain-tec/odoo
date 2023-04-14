@@ -7,6 +7,7 @@ from functools import wraps
 from requests import HTTPError
 import pytz
 from dateutil.parser import parse
+from markupsafe import Markup
 
 from odoo import api, fields, models, registry, _
 from odoo.tools import ormcache_context, email_normalize
@@ -210,10 +211,9 @@ class GoogleSync(models.AbstractModel):
                                                                     'reason': reason}
             _logger.error(error_log)
 
-            body = _(
-                "The following event could not be synced with Google Calendar. </br>"
-                "It will not be synced as long at it is not updated.</br>"
-                "%(reason)s", reason=reason)
+            body = _("The following event could not be synced with Google Calendar.") + Markup("<br/>") + \
+                   _("It will not be synced as long at it is not updated.") + Markup("<br/>") + \
+                   reason
 
             if event:
                 event.message_post(
@@ -298,7 +298,11 @@ class GoogleSync(models.AbstractModel):
                      email not in [partner.email_normalized for partner in partners]]
         if remaining:
             partners += self.env['mail.thread']._mail_find_partner_from_emails(remaining, records=self, force_create=True, extra_domain=[('type', '!=', 'private')])
-        return partners
+        unsorted_partners = self.env['res.partner'].browse([p.id for p in partners])
+        # partners needs to be sorted according to the emails order provided by google
+        k = {value: idx for idx, value in enumerate(emails)}
+        result = unsorted_partners.sorted(key=lambda p: k.get(p.email_normalized, -1))
+        return result
 
     @api.model
     def _odoo_values(self, google_event: GoogleEvent, default_reminders=()):

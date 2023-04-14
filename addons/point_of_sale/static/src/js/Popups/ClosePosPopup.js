@@ -12,6 +12,7 @@ import { ConnectionLostError } from "@web/core/network/rpc_service";
 import { identifyError } from "@point_of_sale/app/error_handlers/error_handlers";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/pos_hook";
+import { sprintf } from "@web/core/utils/strings";
 
 export class ClosePosPopup extends AbstractAwaitablePopup {
     static components = { SaleDetailsButton };
@@ -51,7 +52,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
         } else {
             await this.popup.add(ConfirmPopup, {
                 title: this.env._t("Payments Difference"),
-                body: _.str.sprintf(
+                body: sprintf(
                     this.env._t(
                         "The maximum difference allowed is %s.\n\
                         Please contact your manager to accept the closing difference."
@@ -93,7 +94,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
     async downloadSalesReport() {
         await this.action.doAction("point_of_sale.sale_details_report", {
             additionalContext: {
-                active_ids: [this.env.pos.pos_session.id],
+                active_ids: [this.pos.globalState.pos_session.id],
             },
         });
     }
@@ -131,14 +132,13 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
         if (!this.closeSessionClicked) {
             this.closeSessionClicked = true;
 
-            if (this.pos.globalState.config.cashControl) {
+            if (this.cashControl) {
                 const response = await this.orm.call(
                     "pos.session",
-                    "post_closing_cash_details"[this.pos.globalState.pos_session.id],
+                    "post_closing_cash_details",
+                    [this.pos.globalState.pos_session.id],
                     {
-                        counted_cash: this.pos.globalState.config.cashControl
-                            ? this.state.payments[this.defaultCashDetails.id].counted
-                            : 0,
+                        counted_cash: this.state.payments[this.defaultCashDetails.id].counted,
                     }
                 );
 

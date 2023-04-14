@@ -8,6 +8,7 @@ from random import choice
 from string import digits
 from werkzeug.urls import url_encode
 from dateutil.relativedelta import relativedelta
+from markupsafe import Markup
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, AccessError
@@ -84,7 +85,7 @@ class HrEmployeePrivate(models.Model):
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expire Date', groups="hr.group_hr_user", tracking=True)
     work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
-    has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user", tracking=True)
+    has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user")
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     additional_note = fields.Text(string='Additional Note', groups="hr.group_hr_user", tracking=True)
     certificate = fields.Selection([
@@ -367,10 +368,9 @@ class HrEmployeePrivate(models.Model):
                 'active_model': 'hr.employee',
                 'menu_id': hr_root_menu.id,
             })
-            onboarding_notes_bodies[employee.id] = _(
+            onboarding_notes_bodies[employee.id] = Markup(_(
                 '<b>Congratulations!</b> May I recommend you to setup an <a href="%s">onboarding plan?</a>',
-                url,
-            )
+            )) % url
         employees._message_log_batch(onboarding_notes_bodies)
         return employees
 

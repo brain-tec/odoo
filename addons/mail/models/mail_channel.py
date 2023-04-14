@@ -5,7 +5,9 @@ import base64
 import logging
 from collections import defaultdict
 from hashlib import sha512
+from markupsafe import Markup
 from secrets import choice
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, tools, Command
 from odoo.addons.base.models.avatar_mixin import get_hsl_from_seed
@@ -65,6 +67,7 @@ class Channel(models.Model):
     channel_member_ids = fields.One2many(
         'mail.channel.member', 'channel_id', string='Members',
         groups='base.group_user')
+    pinned_message_ids = fields.One2many('mail.message', 'res_id', domain=lambda self: [('model', '=', 'mail.channel'), ('pinned_at', '!=', False)], string='Pinned Messages')
     rtc_session_ids = fields.One2many('mail.channel.rtc.session', 'channel_id', groups="base.group_system")
     is_member = fields.Boolean('Is Member', compute='_compute_is_member', search='_search_is_member')
     member_count = fields.Integer(string="Member Count", compute='_compute_member_count', compute_sudo=True)
@@ -313,7 +316,7 @@ class Channel(models.Model):
         # channel_info is called before actually unpinning the channel
         channel_info['is_pinned'] = False
         self.env['bus.bus']._sendone(partner, 'mail.channel/leave', channel_info)
-        notification = _('<div class="o_mail_notification">left the channel</div>')
+        notification = Markup('<div class="o_mail_notification">%s</div>') % _('left the channel')
         # post 'channel left' message as root since the partner just unsubscribed from the channel
         self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
         self.env['bus.bus']._sendone(self, 'mail.record/insert', {
@@ -385,15 +388,13 @@ class Channel(models.Model):
                 if post_joined_message:
                     # notify existing members with a new message in the channel
                     if member.partner_id == self.env.user.partner_id:
-                        notification = _('<div class="o_mail_notification">joined the channel</div>')
+                        notification = Markup('<div class="o_mail_notification">%s</div>') % _('joined the channel')
                     else:
-                        notification = _(
-                            '<div class="o_mail_notification">invited %s to the channel</div>',
-                            member.partner_id._get_html_link(),
-                        )
+                        notification = (Markup('<div class="o_mail_notification">%s</div>') % _("invited %s to the channel")) % member.partner_id._get_html_link()
                     member.channel_id.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
             for member in new_members.filtered(lambda member: member.guest_id):
-                member.channel_id.message_post(body=_('<div class="o_mail_notification">joined the channel</div>'), message_type="notification", subtype_xmlid="mail.mt_comment")
+                member.channel_id.message_post(body=Markup('<div class="o_mail_notification">%s</div>') % _('joined the channel'),
+                    message_type="notification", subtype_xmlid="mail.mt_comment")
                 guest = member.guest_id
                 if guest:
                     notifications.append((guest, 'mail.channel/joined', {
@@ -732,8 +733,6 @@ class Channel(models.Model):
                 'message': message_format,
             }
             notifications.append((channel, 'mail.channel/new_message', payload))
-            if self.env.user.partner_id == message.author_id:
-                self._channel_seen(last_message_id=message.id)
         return notifications
 
     # ------------------------------------------------------------
@@ -745,6 +744,46 @@ class Channel(models.Model):
     # A message should be broadcasted:
     #   - when a message is posted on a channel (to the channel, using _notify() method)
     # ------------------------------------------------------------
+
+    def set_message_pin(self, message_id, pinned):
+        """ (Un)pin a message on the channel and send a notification to the
+        members.
+        :param message_id: id of the message to be pinned.
+        :param pinned: whether the message should be pinned or unpinned.
+        """
+        self.ensure_one()
+        message_to_update = self.env['mail.message'].search([
+            ['id', '=', message_id],
+            ['model', '=', 'mail.channel'],
+            ['res_id', '=', self.id],
+            ['pinned_at', '=' if pinned else '!=', False]
+        ])
+        if not message_to_update:
+            return
+        message_to_update.write({'pinned_at': fields.datetime.now() if pinned else False})
+        self.env['bus.bus']._sendone(self, 'mail.record/insert', {
+            'Message': {
+                'id': message_id,
+                'pinned_at': fields.Datetime.to_string(message_to_update.pinned_at),
+            }
+        })
+        if pinned:
+            notification_text = '''
+                <div data-oe-type="pin" class="o_mail_notification">
+                    %(user_pinned_a_message_to_this_channel)s
+                    <a href="#" data-oe-type="pin-menu">%(see_all_pins)s</a>
+                </div>
+            '''
+            notification = Markup(notification_text) % {
+                'user_pinned_a_message_to_this_channel': _(
+                    Markup('%(user_name)s pinned a <a href="#" data-oe-type="highlight" data-oe-id="%(message_id)s">message</a> to this channel.') % {
+                        'user_name': self.env.user.display_name,
+                        'message_id': message_id
+                    }
+                ),
+                'see_all_pins': _('See all pinned messages.'),
+            }
+            self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
 
     def channel_info(self):
         """ Get the informations header for the current channels
@@ -808,7 +847,7 @@ class Channel(models.Model):
                 if member:
                     channel_data['channelMembers'] = [('insert', list(member._mail_channel_member_format().values()))]
                     info['state'] = member.fold_state or 'open'
-                    channel_data['serverMessageUnreadCounter'] = member.message_unread_counter
+                    channel_data['message_unread_counter'] = member.message_unread_counter
                     info['is_minimized'] = member.is_minimized
                     info['seen_message_id'] = member.seen_message_id.id
                     channel_data['custom_channel_name'] = member.custom_channel_name
@@ -1095,7 +1134,9 @@ class Channel(models.Model):
         new_channel = self.create(vals)
         group = self.env['res.groups'].search([('id', '=', group_id)]) if group_id else None
         new_channel.group_public_id = group.id if group else None
-        notification = _('<div class="o_mail_notification">created <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>', new_channel.id, new_channel.name)
+        notification = (Markup('<div class="o_mail_notification">%s</div>') % _("created %(link)s")) % {
+            'link': Markup('<a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a>') % (new_channel.id, new_channel.name)
+        }
         new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
         channel_info = new_channel.channel_info()[0]
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.channel/legacy_insert', channel_info)

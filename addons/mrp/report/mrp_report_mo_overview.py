@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 from odoo import _, api, fields, models
 from odoo.tools import float_compare, format_date, float_is_zero
-from datetime import timedelta
+from datetime import datetime, timedelta
 from math import log10
 
 class ReportMoOverview(models.AbstractModel):
@@ -92,7 +92,7 @@ class ReportMoOverview(models.AbstractModel):
             'quantity_free': product.uom_id._compute_quantity(product.free_qty, production.product_uom_id) if product.type == 'product' else False,
             'quantity_on_hand': product.uom_id._compute_quantity(product.qty_available, production.product_uom_id) if product.type == 'product' else False,
             'quantity_reserved': 0.0,
-            'receipt': self._check_planned_start(production.date_start, self._get_replenishment_receipt(production, components)),
+            'receipt': self._check_planned_start(production.date_deadline, self._get_replenishment_receipt(production, components)),
             'mo_cost': company.currency_id.round(mo_cost + operations.get('summary', {}).get('mo_cost', 0.0)),
             'product_cost': company.currency_id.round(product.standard_price * production.product_uom_qty),
             'currency_id': company.currency_id.id,
@@ -186,8 +186,10 @@ class ReportMoOverview(models.AbstractModel):
 
     def _format_component_move(self, production, move_raw, replenishments, company, replenish_data, level, index):
         product = move_raw.product_id
-        mo_cost = sum(rep.get('summary', {}).get('mo_cost', 0.0) for rep in replenishments)
-        product_cost = product.standard_price * move_raw.product_qty
+        replenish_mo_cost = sum(rep.get('summary', {}).get('mo_cost', 0.0) for rep in replenishments)
+        replenish_quantity = sum(rep.get('summary', {}).get('quantity', 0.0) for rep in replenishments)
+        missing_quantity = move_raw.product_uom_qty - replenish_quantity
+        mo_cost = replenish_mo_cost + (product.standard_price * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id))
         component = {
             'level': level,
             'index': index,
@@ -203,8 +205,8 @@ class ReportMoOverview(models.AbstractModel):
             'quantity_on_hand': product.uom_id._compute_quantity(product.qty_available, move_raw.product_uom) if product.type == 'product' else False,
             'quantity_reserved': self._get_reserved_qty(move_raw, production.warehouse_id, replenish_data),
             'receipt': self._check_planned_start(production.date_start, self._get_component_receipt(product, move_raw, production.warehouse_id, replenishments, replenish_data)),
-            'mo_cost': company.currency_id.round(mo_cost if replenishments else product_cost),
-            'product_cost': company.currency_id.round(product_cost),
+            'mo_cost': company.currency_id.round(mo_cost),
+            'product_cost': company.currency_id.round(product.standard_price * move_raw.product_qty),
             'currency_id': company.currency_id.id,
             'currency': company.currency_id,
         }
@@ -218,7 +220,7 @@ class ReportMoOverview(models.AbstractModel):
         return component
 
     def _check_planned_start(self, mo_planned_start, receipt):
-        if receipt.get('date', False) and receipt['date'] > mo_planned_start:
+        if mo_planned_start and receipt.get('date', False) and receipt['date'] > mo_planned_start:
             receipt['decorator'] = 'danger'
         return receipt
 
@@ -251,14 +253,18 @@ class ReportMoOverview(models.AbstractModel):
         product = move_raw.product_id
         currency = (production.company_id or self.env.company).currency_id
         forecast = replenish_data['products'][product.id].get('forecast', [])
-        current_lines = filter(lambda line: line.get('document_in', False) and line.get('document_out', False) and line['document_out'].get('id', False) == production.id, forecast)
+        current_lines = filter(lambda line: line.get('document_in', False) and line.get('document_out', False)
+                               and line['document_out'].get('id', False) == production.id and not line.get('already_used'), forecast)
         total_ordered = 0
         replenishments = []
         for count, forecast_line in enumerate(current_lines):
+            if float_compare(total_ordered, move_raw.product_uom_qty, precision_rounding=move_raw.product_uom.rounding) == 0:
+                # If a same product is used twice in the same MO, don't duplicate the replenishment lines
+                break
             doc_in = self.env[forecast_line['document_in']['_name']].browse(forecast_line['document_in']['id'])
             replenishment_index = f"{current_index}{count}"
             replenishment = {}
-            uom_id = self.env['uom.uom'].browse(forecast_line['uom_id']['id'])
+            forecast_uom_id = forecast_line['uom_id']
             replenishment['summary'] = {
                 'level': level + 1,
                 'index': replenishment_index,
@@ -269,11 +275,11 @@ class ReportMoOverview(models.AbstractModel):
                 'product_id': product.id,
                 'state': doc_in.state,
                 'formatted_state': self._format_state(doc_in),
-                'quantity': forecast_line['quantity'],
-                'uom_name': forecast_line['uom_id']['display_name'],
+                'quantity': min(move_raw.product_uom_qty, forecast_uom_id._compute_quantity(forecast_line['quantity'], move_raw.product_uom)),  # Avoid over-rounding
+                'uom_name': move_raw.product_uom.display_name,
                 'uom_precision': self._get_uom_precision(forecast_line['uom_id']['rounding']),
-                'mo_cost': self._get_replenishment_cost(product, forecast_line['quantity'], uom_id, currency, forecast_line['move_in']),
-                'product_cost': currency.round(uom_id._compute_quantity(forecast_line['quantity'], product.uom_id) * product.standard_price),
+                'mo_cost': forecast_line.get('cost', self._get_replenishment_cost(product, forecast_line['quantity'], forecast_uom_id, currency, forecast_line.get('move_in'))),
+                'product_cost': currency.round(forecast_uom_id._compute_quantity(forecast_line['quantity'], product.uom_id) * product.standard_price),
                 'currency_id': currency.id,
                 'currency': currency,
             }
@@ -283,52 +289,82 @@ class ReportMoOverview(models.AbstractModel):
                 replenishment['summary']['mo_cost'] = currency.round(sum(component.get('summary', {}).get('mo_cost', 0.0) for component in replenishment['components']) + replenishment['operations'].get('summary', {}).get('mo_cost', 0.0))
             replenishment['summary']['receipt'] = self._check_planned_start(production.date_start, self._get_replenishment_receipt(doc_in, replenishment.get('components', [])))
             replenishments.append(replenishment)
+            forecast_line['already_used'] = True
             total_ordered += replenishment['summary']['quantity']
 
+        # Add "In transit" line if necessary
+        in_transit_line = self._add_transit_line(move_raw, forecast, production, level, current_index)
+        if in_transit_line:
+            total_ordered += in_transit_line['summary']['quantity']
+            replenishments.append(in_transit_line)
+
         reserved_quantity = self._get_reserved_qty(move_raw, production.warehouse_id, replenish_data)
-        missing_quantity = move_raw.product_uom_qty - (reserved_quantity + total_ordered)
         # Avoid creating a "to_order" line to compensate for missing stock (i.e. negative free_qty).
         free_qty = max(0, product.uom_id._compute_quantity(product.free_qty, move_raw.product_uom))
-        if product.type == 'product' and float_compare(missing_quantity, free_qty, precision_rounding=move_raw.product_uom.rounding) > 0:
+        missing_quantity = move_raw.product_uom_qty - (reserved_quantity + free_qty + total_ordered)
+        if product.type == 'product' and float_compare(missing_quantity, 0, precision_rounding=move_raw.product_uom.rounding) > 0:
             # Need to order more products to fulfill the need
             resupply_rules = replenish_data['products'][product.id].get('resupply_rules', [])
             rules_delay = sum(rule.delay for rule in resupply_rules)
             resupply_data = self._get_resupply_data(resupply_rules, rules_delay, missing_quantity, move_raw.product_uom, product, production.warehouse_id)
-            if resupply_data:
-                receipt = self._check_planned_start(production.date_start, self._format_receipt_date('estimated', fields.datetime.today() + timedelta(days=resupply_data['delay'])))
-            else:
-                receipt = self._format_receipt_date('unavailable')
 
             to_order_line = {'summary': {
                 'level': level + 1,
-                'index': f"{current_index}{len(replenishments) + 1}",
+                'index': f"{current_index}TO",
                 'name': _("To Order"),
                 'model': "to_order",
                 'product_model': product._name,
                 'product_id': product.id,
                 'quantity': missing_quantity,
+                'replenish_quantity': move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id),
                 'uom_name': move_raw.product_uom.display_name,
                 'uom_precision': self._get_uom_precision(move_raw.product_uom.rounding),
-                'receipt': receipt,
-                'mo_cost': currency.round(resupply_data['cost'] if resupply_data else product.standard_price * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id)),
                 'product_cost': currency.round(product.standard_price * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id)),
                 'currency_id': currency.id,
                 'currency': currency,
             }}
             if resupply_data:
-                to_order_line['mo_cost'] = currency.round(resupply_data['cost'] * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id))
-                to_order_line['receipt'] = self._check_planned_start(production.date_start, self._format_receipt_date('estimated', fields.datetime.today() + timedelta(days=resupply_data['delay']))),
+                to_order_line['summary']['mo_cost'] = currency.round(resupply_data['cost'])
+                to_order_line['summary']['receipt'] = self._check_planned_start(production.date_start, self._format_receipt_date('estimated', fields.datetime.today() + timedelta(days=resupply_data['delay'])))
             else:
-                to_order_line['mo_cost'] = currency.round(product.standard_price * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id))
-                to_order_line['receipt'] = self._format_receipt_date('unavailable')
+                to_order_line['summary']['mo_cost'] = currency.round(product.standard_price * move_raw.product_uom._compute_quantity(missing_quantity, product.uom_id))
+                to_order_line['summary']['receipt'] = self._format_receipt_date('unavailable')
             replenishments.append(to_order_line)
 
         return replenishments
+
+    def _add_transit_line(self, move_raw, forecast, production, level, current_index):
+        in_transit = next(filter(lambda line: line.get('in_transit') and line.get('document_out') and line['document_out'].get('id') == production.id, forecast), None)
+        if not in_transit:
+            return None
+
+        product = move_raw.product_id
+        currency = (production.company_id or self.env.company).currency_id
+        receipt_date = datetime.strptime(in_transit['delivery_date'], '%m/%d/%Y')
+        return {'summary': {
+            'level': level + 1,
+            'index': f"{current_index}IT",
+            'name': _("In Transit"),
+            'model': "in_transit",
+            'product_model': product._name,
+            'product_id': product.id,
+            'quantity': min(move_raw.product_uom_qty, in_transit['uom_id']._compute_quantity(in_transit['quantity'], move_raw.product_uom)),  # Avoid over-rounding
+            'uom_name': move_raw.product_uom.display_name,
+            'uom_precision': self._get_uom_precision(move_raw.product_uom.rounding),
+            'mo_cost': self._get_replenishment_cost(product, in_transit['quantity'], in_transit['uom_id'], currency),
+            'product_cost': currency.round(product.standard_price * in_transit['uom_id']._compute_quantity(in_transit['quantity'], product.uom_id)),
+            'receipt': self._check_planned_start(production.date_start, self._format_receipt_date('expected', receipt_date)),
+            'currency_id': currency.id,
+            'currency': currency,
+        }}
 
     def _get_replenishment_cost(self, product, quantity, uom_id, currency, move_in=False):
         return currency.round(product.standard_price * uom_id._compute_quantity(quantity, product.uom_id))
 
     def _get_replenishment_receipt(self, doc_in, components):
+        if doc_in._name == 'stock.picking':
+            return self._format_receipt_date('expected', doc_in.scheduled_date)
+
         if doc_in._name == 'mrp.production':
             max_date_start = doc_in.date_start
             all_available = True
@@ -346,7 +382,7 @@ class ReportMoOverview(models.AbstractModel):
             if all_available:
                 return self._format_receipt_date('expected', doc_in.date_finished)
 
-            new_date = max_date_start + timedelta(days=doc_in.product_id.produce_delay)
+            new_date = max_date_start + timedelta(days=doc_in.bom_id.produce_delay)
             receipt_state = 'estimated' if some_estimated else 'expected'
             return self._format_receipt_date(receipt_state, new_date)
         return self._format_receipt_date('unavailable')
@@ -363,7 +399,7 @@ class ReportMoOverview(models.AbstractModel):
 
     def _get_replenishments_from_forecast(self, production, replenish_data):
         products = production.move_raw_ids.product_id
-        unknown_products = products.filtered(lambda product: product.id not in replenish_data)
+        unknown_products = products.filtered(lambda product: product.id not in replenish_data.get('products', {}))
         if unknown_products:
             warehouse = production.warehouse_id
             wh_location_ids = self._get_warehouse_locations(warehouse, replenish_data)
@@ -401,7 +437,11 @@ class ReportMoOverview(models.AbstractModel):
                     continue
                 if production_id and extra.get('production_id', False) and extra['production_id'] != production_id:
                     continue
-                taken_from_extra = min(line_qty, extra['quantity'])
+                if 'init_quantity' not in extra:
+                    extra['init_quantity'] = extra['quantity']
+                converted_qty = extra['uom']._compute_quantity(extra['quantity'], forecast_line['uom_id'])
+                taken_from_extra = min(line_qty, converted_qty)
+                ratio = taken_from_extra / extra['uom']._compute_quantity(extra['init_quantity'], forecast_line['uom_id'])
                 line_qty -= taken_from_extra
                 # Create copy of the current forecast line to add a possible replenishment.
                 # Needs to be a copy since it might take multiple replenishment to fulfill a single "out" line.
@@ -411,8 +451,9 @@ class ReportMoOverview(models.AbstractModel):
                     '_name': extra['_name'],
                     'id': extra['id'],
                 }
+                new_extra_line['cost'] = extra['cost'] * ratio
                 lines_with_extras.append(new_extra_line)
-                extra['quantity'] -= taken_from_extra
+                extra['quantity'] -= forecast_line['uom_id']._compute_quantity(taken_from_extra, extra['uom'])
                 if float_compare(extra['quantity'], 0, precision_rounding=product_rounding) <= 0:
                     index_to_remove.append(index)
                 if float_is_zero(line_qty, precision_rounding=product_rounding):
@@ -433,8 +474,11 @@ class ReportMoOverview(models.AbstractModel):
             wh_manufacture_rules = product._get_rules_from_location(product.property_stock_production, route_ids=warehouse.route_ids)
             wh_manufacture_rules -= rules
             rules_delay += sum(rule.delay for rule in wh_manufacture_rules)
+            related_bom = self.env['mrp.bom']._bom_find(product)[product]
+            if not related_bom:
+                return False
             return {
-                'delay': product.produce_delay + rules_delay,
+                'delay': related_bom.produce_delay + rules_delay,
                 'cost': product.standard_price * uom_id._compute_quantity(quantity, product.uom_id),
             }
         return False
@@ -455,12 +499,12 @@ class ReportMoOverview(models.AbstractModel):
             for move in linked_moves:
                 if move.state not in ('partially_available', 'assigned'):
                     continue
-                # count reserved stock.
-                reserved = move.product_uom._compute_quantity(move.reserved_availability, move.product_id.uom_id)
+                # count reserved stock in move_raw's uom
+                reserved = move.product_uom._compute_quantity(move.reserved_availability, move_raw.product_uom)
                 # check if the move reserved qty was counted before (happens if multiple outs share pick/pack)
-                reserved = min(reserved - replenish_data['qty_already_reserved'][move], move_raw.product_qty)
+                reserved = min(reserved - move.product_uom._compute_quantity(replenish_data['qty_already_reserved'][move], move_raw.product_uom), move_raw.product_uom_qty)
                 total_reserved += reserved
-                replenish_data['qty_already_reserved'][move] += reserved
+                replenish_data['qty_already_reserved'][move] += move_raw.product_uom._compute_quantity(reserved, move.product_uom)
                 if float_compare(total_reserved, move_raw.product_qty, precision_rounding=move.product_id.uom_id.rounding) >= 0:
                     break
             replenish_data['qty_reserved'][move_raw] = total_reserved

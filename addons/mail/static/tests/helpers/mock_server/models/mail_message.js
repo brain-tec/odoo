@@ -134,17 +134,34 @@ patch(MockServer.prototype, "mail/models/mail_message", {
      *
      * @private
      * @param {Array[]} domain
-     * @param {integer} [max_id]
-     * @param {integer} [min_id]
+     * @param {integer} [before]
+     * @param {integer} [after]
      * @param {integer} [limit=30]
      * @returns {Object[]}
      */
-    _mockMailMessage_MessageFetch(domain, max_id, min_id, limit = 30) {
-        if (max_id) {
-            domain.push(["id", "<", max_id]);
+    _mockMailMessage_MessageFetch(domain, before, after, around, limit = 30) {
+        if (around) {
+            const messagesBefore = this._mockMailMessage_MessageFetch(
+                domain.concat([["id", "<=", around]]),
+                before,
+                after,
+                false,
+                limit / 2
+            );
+            const messagesAfter = this._mockMailMessage_MessageFetch(
+                domain.concat([["id", ">", around]]),
+                before,
+                after,
+                false,
+                limit / 2
+            );
+            return messagesAfter.concat(messagesBefore.reverse());
         }
-        if (min_id) {
-            domain.push(["id", ">", min_id]);
+        if (before) {
+            domain.push(["id", "<", before]);
+        }
+        if (after) {
+            domain.push(["id", ">", after]);
         }
         const messages = this.getRecords("mail.message", domain);
         // sorted from highest ID to lowest ID (i.e. from youngest to oldest)
@@ -255,8 +272,12 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 attachment_ids: formattedAttachments,
                 author: formattedAuthor,
                 history_partner_ids: historyPartnerIds,
-                default_subject: message.model && message.res_id &&
-                    this.mockMailThread_MessageComputeSubject(message.model, [message.res_id]).get(message.res_id),
+                default_subject:
+                    message.model &&
+                    message.res_id &&
+                    this.mockMailThread_MessageComputeSubject(message.model, [message.res_id]).get(
+                        message.res_id
+                    ),
                 linkPreviews: linkPreviewsFormatted,
                 messageReactionGroups: reactionGroups,
                 needaction_partner_ids: needactionPartnerIds,
@@ -268,6 +289,7 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 record_name:
                     thread && (thread.name !== undefined ? thread.name : thread.display_name),
                 trackingValues: formattedTrackingValues,
+                pinned_at: message.pinned_at,
             });
             delete response["author_id"];
             if (message.subtype_id) {

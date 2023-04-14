@@ -4,13 +4,14 @@ import concurrency from "web.concurrency";
 import core from "web.core";
 import Dialog from "web.Dialog";
 import dom from "web.dom";
-import {Markup, sprintf, confine} from "web.utils";
+import {Markup, confine} from "web.utils";
 import Widget from "web.Widget";
 import options from "web_editor.snippets.options";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
 import SmoothScrollOnDrag from "web.smooth_scroll_on_drag";
 import {getCSSVariableValue} from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
+import { sprintf } from "@web/core/utils/strings";
 const QWeb = core.qweb;
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 
@@ -658,6 +659,15 @@ var SnippetEditor = Widget.extend({
         await Promise.all(editorUIsToUpdate.map(editor => editor.updateOptionsUI()));
         await Promise.all(editorUIsToUpdate.map(editor => editor.updateOptionsUIVisibility()));
 
+        // As the 'd-none' class is added to option sections that have no visible
+        // options with 'updateOptionsUIVisibility', if no option section is
+        // visible, we prevent the activation of the options.
+        const optionsSectionVisible = editorUIsToUpdate.some(
+             editor => !editor.$optionsSection[0].classList.contains('d-none')
+        );
+        if (editorUIsToUpdate.length > 0 && !optionsSectionVisible) {
+            return null;
+        }
         return this._customize$Elements;
     },
     /**
@@ -666,7 +676,7 @@ var SnippetEditor = Widget.extend({
      */
     toggleTargetVisibility: async function (show) {
         show = this._toggleVisibilityStatus(show);
-        var styles = _.values(this.styles);
+        var styles = Object.values(this.styles);
         const proms = _.sortBy(styles, '__order').map(style => {
             return show ? style.onTargetShow() : style.onTargetHide();
         });
@@ -1850,12 +1860,9 @@ var SnippetsMenu = Widget.extend({
         this.$el = this.window.$(this.$el);
         this.$el.data('snippetMenu', this);
 
-        this.folded = !!this.options.foldSnippets;
-
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
-        // adds toolbar if not folded
-        this.setFolded(this.folded);
+        this._addToolbar();
         this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this);
         $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
@@ -2152,8 +2159,6 @@ var SnippetsMenu = Widget.extend({
         this.el.classList.toggle('d-none', foldState);
         this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !foldState);
         this.folded = !!foldState;
-        // "add" toolbar to set it inside the snippet menu/in the body
-        this._addToolbar();
     },
     /**
      * Get the editable area.
@@ -2581,6 +2586,14 @@ var SnippetsMenu = Widget.extend({
                 }
 
                 if (!previewMode) {
+                    // As some options can only be generated using JavaScript
+                    // (e.g. 'SwitchableViews'), it may happen at this point
+                    // that the overlay is activated even though there are no
+                    // options. That's why we disable the overlay if there are
+                    // no options to enable.
+                    if (editorToEnable && !customize$Elements) {
+                        editorToEnable.toggleOverlay(false);
+                    }
                     this._updateRightPanelContent({
                         content: customize$Elements || [],
                         tab: customize$Elements ? this.tabs.OPTIONS : this.tabs.BLOCKS,
@@ -2905,12 +2918,12 @@ var SnippetsMenu = Widget.extend({
                     const btnRenameEl = document.createElement('we-button');
                     btnRenameEl.dataset.snippetId = $snippet.data('oeSnippetId');
                     btnRenameEl.classList.add('o_rename_btn', 'fa', 'fa-pencil', 'btn', 'o_we_hover_success');
-                    btnRenameEl.title = _.str.sprintf(_t("Rename %s"), name);
+                    btnRenameEl.title = sprintf(_t("Rename %s"), name);
                     $snippet.append(btnRenameEl);
                     const btnEl = document.createElement('we-button');
                     btnEl.dataset.snippetId = $snippet.data('oeSnippetId');
                     btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash', 'btn', 'o_we_hover_danger');
-                    btnEl.title = _.str.sprintf(_t("Delete %s"), name);
+                    btnEl.title = sprintf(_t("Delete %s"), name);
                     $snippet.append(btnEl);
                 }
             })
@@ -3733,9 +3746,9 @@ var SnippetsMenu = Widget.extend({
         var moduleID = $snippet.data('moduleId');
         var name = $snippet.attr('name');
         new Dialog(this, {
-            title: _.str.sprintf(_t("Install %s"), name),
+            title: sprintf(_t("Install %s"), name),
             size: 'medium',
-            $content: $('<div/>', {text: _.str.sprintf(_t("Do you want to install the %s App?"), name)}).append(
+            $content: $('<div/>', {text: sprintf(_t("Do you want to install the %s App?"), name)}).append(
                 $('<a/>', {
                     target: '_blank',
                     href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
@@ -3822,7 +3835,7 @@ var SnippetsMenu = Widget.extend({
         new Dialog(this, {
             size: 'medium',
             title: _t('Confirmation'),
-            $content: $('<div><p>' + _.str.sprintf(_t("Are you sure you want to delete the snippet: %s?"), $snippet.attr('name')) + '</p></div>'),
+            $content: $('<div><p>' + sprintf(_t("Are you sure you want to delete the snippet: %s?"), $snippet.attr('name')) + '</p></div>'),
             buttons: [{
                 text: _t("Yes"),
                 close: true,
@@ -4157,7 +4170,6 @@ var SnippetsMenu = Widget.extend({
     },
     _addToolbar(toolbarMode = "text") {
         if (this.folded) {
-            this._addToolbarToOriginalPosition();
             return;
         }
         let titleText = _t("Inline Text");
@@ -4174,34 +4186,23 @@ var SnippetsMenu = Widget.extend({
         }
 
         this.options.wysiwyg.toolbar.el.classList.remove('oe-floating');
-        if (!this._$toolbarContainer) {
-            // Create toolbar custom container.
-            this._$toolbarContainer = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
-            const $title = $("<we-title><span>" + titleText + "</span></we-title>");
-            this._$toolbarContainer.append($title);
-            this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
-            $(this.customizePanel).append(this._$toolbarContainer);
 
-            // Create table-options custom container.
-            const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
-            this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
-            $(this.customizePanel).append($customizeTableBlock);
-            this._$removeFormatButton = this.options.wysiwyg.toolbar.$el.find('#removeFormat');
-            $title.append(this._$removeFormatButton);
-            this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
-        }
+        // Create toolbar custom container.
+        this._$toolbarContainer = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
+        const $title = $("<we-title><span>" + titleText + "</span></we-title>");
+        this._$toolbarContainer.append($title);
+        this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
+        $(this.customizePanel).append(this._$toolbarContainer);
+
+        // Create table-options custom container.
+        const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
+        this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
+        $(this.customizePanel).append($customizeTableBlock);
+        this._$removeFormatButton = this.options.wysiwyg.toolbar.$el.find('#removeFormat');
+        $title.append(this._$removeFormatButton);
+        this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
 
         this._checkEditorToolbarVisibility();
-    },
-    _addToolbarToOriginalPosition: function () {
-        const toolbar = this.options.wysiwyg.toolbar.el;
-        toolbar.classList.add('oe-floating');
-        if (this.options.wysiwyg.odooEditor.isMobile) {
-            const editorEditable = this.options.wysiwyg.odooEditor.editable;
-            editorEditable.before(toolbar);
-        } else if (this.options.autohideToolbar) {
-            document.body.appendChild(toolbar);
-        }
     },
     /**
      * Update editor UI visibility based on the current range.

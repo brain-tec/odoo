@@ -20,7 +20,7 @@ import {
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { useMessaging, useStore } from "../core/messaging_hook";
-import { MessageDeleteDialog } from "./message_delete_dialog";
+import { MessageConfirmDialog } from "./message_confirm_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
 import { MessageReactions } from "./message_reactions";
@@ -58,12 +58,12 @@ export class Message extends Component {
         MessageReactions,
         MessageSeenIndicator,
         ImStatus,
+        Popover: MessageNotificationPopover,
         RelativeTime,
     };
     static defaultProps = {
         hasActions: true,
         isInChatWindow: false,
-        onParentMessageClick: () => {},
     };
     static props = [
         "hasActions?",
@@ -79,7 +79,7 @@ export class Message extends Component {
     static template = "mail.Message";
 
     setup() {
-        this.popover = usePopover();
+        this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
         this.state = useState({
             isEditing: false,
             isHovered: false,
@@ -134,7 +134,7 @@ export class Message extends Component {
             }
         });
         if (this.props.hasActions && this.canAddReaction) {
-            this.emojiPicker = useEmojiPicker("emoji-picker", {
+            this.emojiPicker = useEmojiPicker(useRef("emoji-picker"), {
                 onSelect: (emoji) => {
                     const reaction = this.message.reactions.find(
                         ({ content, personas }) =>
@@ -268,7 +268,9 @@ export class Message extends Component {
 
     get isAlignedRight() {
         return Boolean(
-            this.env.inChatWindow && this.user.partnerId === this.props.message.author?.id
+            !this.env.pinnedPanel &&
+                this.env.inChatWindow &&
+                this.user.partnerId === this.props.message.author?.id
         );
     }
 
@@ -299,7 +301,7 @@ export class Message extends Component {
      * @returns {boolean}
      */
     get shouldDisplayAuthorName() {
-        if (!this.env.inChatWindow) {
+        if (!this.env.inChatWindow || this.env.pinnedPanel) {
             return true;
         }
         if (this.message.isSelfAuthored) {
@@ -312,9 +314,25 @@ export class Message extends Component {
     }
 
     onClickDelete() {
-        this.env.services.dialog.add(MessageDeleteDialog, {
+        this.env.services.dialog.add(MessageConfirmDialog, {
             message: this.message,
             messageComponent: Message,
+            prompt: _t("Are you sure you want to delete this message?"),
+            onConfirm: () => this.messageService.delete(this.message),
+        });
+    }
+
+    onClickPin() {
+        const prompt = this.message.pinned_at
+            ? _t("Are you sure you want to remove this pinned message?")
+            : _t(
+                  "The following message will be pinned to the channel. Are you sure you want to continue?"
+              );
+        this.env.services.dialog.add(MessageConfirmDialog, {
+            message: this.message,
+            messageComponent: Message,
+            prompt,
+            onConfirm: () => this.messageService.setPin(this.message, !this.message.pinned_at),
         });
     }
 
@@ -336,7 +354,7 @@ export class Message extends Component {
     onClickMarkAsUnread() {
         const previousMessageId =
             this.message.originThread.getPreviousMessage(this.message)?.id ?? false;
-        if (this.threadService.lastSeenBySelfMessageId(this.props.thread) === previousMessageId) {
+        if (this.props.thread.seen_message_id === previousMessageId) {
             return;
         }
         return this.rpc("/mail/channel/set_last_seen_message", {
@@ -348,6 +366,10 @@ export class Message extends Component {
 
     get authorText() {
         return this.hasOpenChatFeature ? _t("Open chat") : "";
+    }
+
+    get pinOptionText() {
+        return this.message.pinned_at ? _t("Unpin") : _t("Pin");
     }
 
     openChatAvatar(ev) {
@@ -435,12 +457,7 @@ export class Message extends Component {
     }
 
     onClickNotificationIcon(ev) {
-        this.popover.add(
-            ev.target,
-            MessageNotificationPopover,
-            { message: this.message },
-            { position: "top" }
-        );
+        this.popover.open(ev.target, { message: this.message });
     }
 
     onClickFailure(ev) {

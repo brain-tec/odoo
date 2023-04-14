@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 from datetime import datetime, timedelta
+from markupsafe import Markup
 from psycopg2 import IntegrityError
 from psycopg2.errorcodes import UNIQUE_VIOLATION
 
@@ -213,16 +214,16 @@ class DiscussController(http.Controller):
     # --------------------------------------------------------------------------
 
     @http.route('/mail/inbox/messages', methods=['POST'], type='json', auth='user')
-    def discuss_inbox_messages(self, max_id=None, min_id=None, limit=30, **kwargs):
-        return request.env['mail.message']._message_fetch(domain=[('needaction', '=', True)], max_id=max_id, min_id=min_id, limit=limit).message_format()
+    def discuss_inbox_messages(self, before=None, after=None, limit=30, around=None, **kwargs):
+        return request.env['mail.message']._message_fetch(domain=[('needaction', '=', True)], before=before, after=after, around=around, limit=limit).message_format()
 
     @http.route('/mail/history/messages', methods=['POST'], type='json', auth='user')
-    def discuss_history_messages(self, max_id=None, min_id=None, limit=30, **kwargs):
-        return request.env['mail.message']._message_fetch(domain=[('needaction', '=', False)], max_id=max_id, min_id=min_id, limit=limit).message_format()
+    def discuss_history_messages(self, before=None, after=None, limit=30, **kwargs):
+        return request.env['mail.message']._message_fetch(domain=[('needaction', '=', False)], before=before, after=after, limit=limit).message_format()
 
     @http.route('/mail/starred/messages', methods=['POST'], type='json', auth='user')
-    def discuss_starred_messages(self, max_id=None, min_id=None, limit=30, **kwargs):
-        return request.env['mail.message']._message_fetch(domain=[('starred_partner_ids', 'in', [request.env.user.partner_id.id])], max_id=max_id, min_id=min_id, limit=limit).message_format()
+    def discuss_starred_messages(self, before=None, after=None, limit=30, **kwargs):
+        return request.env['mail.message']._message_fetch(domain=[('starred_partner_ids', 'in', [request.env.user.partner_id.id])], before=before, after=after, limit=limit).message_format()
 
     # --------------------------------------------------------------------------
     # Thread API (channel/chatter common)
@@ -238,6 +239,8 @@ class DiscussController(http.Controller):
             thread = channel_member_sudo.channel_id
         else:
             thread = request.env[thread_model].browse(int(thread_id)).exists()
+        if 'body' in post_data:
+            post_data['body'] = Markup(post_data['body'])  # contains HTML such as @mentions
         message_data = thread.message_post(**{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}).message_format()[0]
         if 'temporary_id' in request.context:
             message_data['temporary_id'] = request.context['temporary_id']
@@ -406,16 +409,22 @@ class DiscussController(http.Controller):
                 raise NotFound()
 
     @http.route('/mail/channel/messages', methods=['POST'], type='json', auth='public')
-    def mail_channel_messages(self, channel_id, max_id=None, min_id=None, limit=30, **kwargs):
+    def mail_channel_messages(self, channel_id, before=None, after=None, limit=30, around=None, **kwargs):
         channel_member_sudo = request.env['mail.channel.member']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
-        messages = channel_member_sudo.env['mail.message']._message_fetch(domain=[
+        domain = [
             ('res_id', '=', channel_id),
             ('model', '=', 'mail.channel'),
             ('message_type', '!=', 'user_notification'),
-        ], max_id=max_id, min_id=min_id, limit=limit)
-        if not request.env.user._is_public():
+        ]
+        messages = channel_member_sudo.env['mail.message']._message_fetch(domain=domain, before=before, after=after, around=around, limit=limit)
+        if not request.env.user._is_public() and not around:
             messages.set_message_done()
-        return messages.message_format()
+        return messages.sorted('id', reverse=True).message_format()
+
+    @http.route('/mail/channel/pinned_messages', methods=['POST'], type='json', auth='public')
+    def mail_channel_pins(self, channel_id, **kwargs):
+        channel_member_sudo = request.env['mail.channel.member']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
+        return channel_member_sudo.channel_id.pinned_message_ids.sorted(key='pinned_at', reverse=True).message_format()
 
     @http.route('/mail/channel/set_last_seen_message', methods=['POST'], type='json', auth='public')
     def mail_channel_mark_as_seen(self, channel_id, last_message_id, allow_older=False, **kwargs):
@@ -451,12 +460,12 @@ class DiscussController(http.Controller):
         return thread._get_mail_thread_data(request_list)
 
     @http.route('/mail/thread/messages', methods=['POST'], type='json', auth='user')
-    def mail_thread_messages(self, thread_model, thread_id, max_id=None, min_id=None, limit=30, **kwargs):
+    def mail_thread_messages(self, thread_model, thread_id, before=None, after=None, around=None, limit=30, **kwargs):
         messages = request.env['mail.message']._message_fetch(domain=[
             ('res_id', '=', int(thread_id)),
             ('model', '=', thread_model),
             ('message_type', '!=', 'user_notification'),
-        ], max_id=max_id, min_id=min_id, limit=limit)
+        ], before=before, after=after, around=around, limit=limit)
         if not request.env.user._is_public():
             messages.set_message_done()
         return messages.message_format()
