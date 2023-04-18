@@ -826,7 +826,7 @@ class SaleOrderLine(models.Model):
                         amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
             line.untaxed_amount_invoiced = amount_invoiced
 
-    @api.depends('state', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered', 'product_uom_qty')
+    @api.depends('state', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered', 'product_uom_qty', 'price_unit')
     def _compute_untaxed_amount_to_invoice(self):
         """ Total of remaining amount to invoice on the sale order line (taxes excl.) as
                 total_sol - amount already invoiced
@@ -940,18 +940,6 @@ class SaleOrderLine(models.Model):
                 }
 
     #=== CRUD METHODS ===#
-    def _add_precomputed_values(self, vals_list):
-        """ In case an editable precomputed field is provided in the create values
-        without being rounded, we have to 'manually' round it otherwise it won't be,
-        because those field values are kept 'as is'.
-
-        This is a temporary fix until the problem is fixed in the ORM.
-        """
-        for vals in vals_list:
-            for fname in ('discount', 'product_uom_qty'):
-                if fname in vals:
-                    vals[fname] = self._fields[fname].convert_to_cache(vals[fname], self)
-        return super()._add_precomputed_values(vals_list)
 
     @api.model_create_multi
     def create(self, vals_list):
