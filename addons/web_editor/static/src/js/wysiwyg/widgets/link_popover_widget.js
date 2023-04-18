@@ -48,6 +48,7 @@ const LinkPopoverWidget = Widget.extend({
                 type: 'success',
                 message: _t("Link copied to clipboard."),
             });
+            this.popover.hide();
         });
 
         // init tooltips & popovers
@@ -76,13 +77,19 @@ const LinkPopoverWidget = Widget.extend({
             container: this.options.wysiwyg.odooEditor.document.body,
         })
         .on('show.bs.popover.link_popover', () => {
+            this.options.wysiwyg.odooEditor.observerUnactive('show.bs.popover');
             this._loadAsyncLinkPreview();
             popoverShown = true;
         })
+        .on('inserted.bs.popover', () => {
+            this.options.wysiwyg.odooEditor.observerActive('show.bs.popover');
+        })
         .on('hide.bs.popover.link_popover', () => {
+            this.options.wysiwyg.odooEditor.observerUnactive('hide.bs.popover');
             popoverShown = false;
         })
         .on('hidden.bs.popover.link_popover', () => {
+            this.options.wysiwyg.odooEditor.observerActive('hide.bs.popover');
             for (const tooltip of tooltips) {
                 tooltip.hide();
             }
@@ -99,6 +106,12 @@ const LinkPopoverWidget = Widget.extend({
                 this.$target.popover('show');
             }
         });
+        this.$target.on('href_changed.link_popover', (e) => {
+            // Do not change shown/hidden state.
+            if (popoverShown) {
+                this._loadAsyncLinkPreview();
+            }
+        });
         const onClickDocument = (e) => {
             if (popoverShown) {
                 const hierarchy = [e.target, ...ancestors(e.target)];
@@ -106,9 +119,11 @@ const LinkPopoverWidget = Widget.extend({
                     !(
                         hierarchy.includes(this.$target[0]) ||
                         (hierarchy.includes(this.$el[0]) &&
-                            !hierarchy.some(x => x.tagName && x.tagName === 'A'))
+                            !hierarchy.some(x => x.tagName && x.tagName === 'A' && (x === this.$urlLink[0] || x === this.$fullUrl[0])))
                     )
                 ) {
+                    // Note: For buttons of the popover, their listeners should
+                    // handle the hide themselves to avoid race conditions.
                     this.popover.hide();
                 }
             }
@@ -154,6 +169,11 @@ const LinkPopoverWidget = Widget.extend({
      */
     async _loadAsyncLinkPreview() {
         let url;
+        if (this.target.href === '') {
+            this._resetPreview('');
+            this.$previewFaviconFa.removeClass('fa-globe').addClass('fa-question-circle-o');
+            return;
+        }
         try {
             url = new URL(this.target.href); // relative to absolute
         } catch (e) {
@@ -180,7 +200,7 @@ const LinkPopoverWidget = Widget.extend({
             // would need to fetch the page through the server (s2s), involving
             // enduser fetching problematic pages such as illicit content.
             this.$previewFaviconImg.attr({
-                'src': `https://www.google.com/s2/favicons?sz=16&domain=${url}`
+                'src': `https://www.google.com/s2/favicons?sz=16&domain=${encodeURIComponent(url)}`
             }).removeClass('d-none');
             this.$previewFaviconFa.addClass('d-none');
         } else {
@@ -215,9 +235,9 @@ const LinkPopoverWidget = Widget.extend({
      */
     _resetPreview(url) {
         this.$previewFaviconImg.addClass('d-none');
-        this.$previewFaviconFa.removeClass('d-none').addClass('fa-globe');
-        this.$urlLink.text(url).attr('href', url);
-        this.$fullUrl.text(url).addClass('d-none').removeClass('o_we_webkit_box');
+        this.$previewFaviconFa.removeClass('d-none fa-question-circle-o fa-envelope-o fa-phone').addClass('fa-globe');
+        this.$urlLink.add(this.$fullUrl).text(url || _t('No URL specified')).attr('href', url || null);
+        this.$fullUrl.addClass('d-none').removeClass('o_we_webkit_box');
     },
 
     //--------------------------------------------------------------------------
@@ -239,6 +259,7 @@ const LinkPopoverWidget = Widget.extend({
             link: this.$target[0],
         });
         ev.stopImmediatePropagation();
+        this.popover.hide();
     },
     /**
      * Removes the link/anchor.
@@ -248,8 +269,9 @@ const LinkPopoverWidget = Widget.extend({
      */
     _onRemoveLinkClick(ev) {
         ev.preventDefault();
-        this.options.wysiwyg.odooEditor.execCommand('unlink');
+        this.options.wysiwyg.removeLink();
         ev.stopImmediatePropagation();
+        this.popover.hide();
     },
 });
 
@@ -261,7 +283,15 @@ LinkPopoverWidget.createFor = async function (parent, targetEl, options) {
         return null;
     }
     const popoverWidget = new this(parent, targetEl, options);
-    return popoverWidget.appendTo(targetEl).then(() => popoverWidget);
+    const wysiwyg = $('#wrapwrap').data('wysiwyg');
+    if (wysiwyg) {
+        wysiwyg.odooEditor.observerUnactive('LinkPopoverWidget');
+    }
+    await popoverWidget.appendTo(targetEl)
+    if (wysiwyg) {
+        wysiwyg.odooEditor.observerActive('LinkPopoverWidget');
+    }
+    return popoverWidget;
 };
 
 export default LinkPopoverWidget;

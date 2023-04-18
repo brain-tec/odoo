@@ -227,7 +227,10 @@ class Http(models.AbstractModel):
         # If the company of the website is not in the allowed companies of the user, set the main
         # company of the user.
         website_company_id = request.website._get_cached('company_id')
-        if website_company_id in request.env.user.company_ids.ids:
+        if request.website.is_public_user():
+            # avoid a read on res_company_user_rel in case of public user
+            context['allowed_company_ids'] = [website_company_id]
+        elif website_company_id in request.env.user.company_ids.ids:
             context['allowed_company_ids'] = [website_company_id]
         else:
             context['allowed_company_ids'] = request.env.user.company_id.ids
@@ -262,13 +265,22 @@ class Http(models.AbstractModel):
     @classmethod
     def _serve_page(cls):
         req_page = request.httprequest.path
-        page_domain = [('url', '=', req_page)] + request.website.website_domain()
 
-        published_domain = page_domain
+        def _search_page(comparator='='):
+            page_domain = [('url', comparator, req_page)] + request.website.website_domain()
+            return request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
+
         # specific page first
-        page = request.env['website.page'].sudo().search(published_domain, order='website_id asc', limit=1)
+        page = _search_page()
 
-        # redirect withtout trailing /
+        # case insensitive search
+        if not page:
+            page = _search_page('=ilike')
+            if page:
+                logger.info("Page %r not found, redirecting to existing page %r", req_page, page.url)
+                return request.redirect(page.url)
+
+        # redirect without trailing /
         if not page and req_page != "/" and req_page.endswith("/"):
             # mimick `_postprocess_args()` redirect
             path = request.httprequest.path[:-1]
@@ -280,6 +292,8 @@ class Http(models.AbstractModel):
 
         if page:
             # prefetch all menus (it will prefetch website.page too)
+            menu_pages_ids = request.website._get_menu_page_ids()
+            page.browse([page.id] + menu_pages_ids).mapped('view_id.name')
             request.website.menu_id
 
         if page and (request.website.is_publisher() or page.is_visible):

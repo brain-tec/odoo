@@ -1,5 +1,11 @@
 # coding: utf-8
+from lxml import html
+
+from odoo.addons.website.tools import MockRequest
 from odoo.tests import common, HttpCase, tagged
+from odoo.tests.common import HOST
+from odoo.tools import config
+from odoo.tools import mute_logger
 
 
 @tagged('-at_install', 'post_install')
@@ -202,7 +208,7 @@ class WithContext(HttpCase):
         super().setUp()
         Page = self.env['website.page']
         View = self.env['ir.ui.view']
-        base_view = View.create({
+        self.base_view = View.create({
             'name': 'Base',
             'type': 'qweb',
             'arch': '''<t name="Homepage" t-name="website.base_view">
@@ -213,7 +219,7 @@ class WithContext(HttpCase):
             'key': 'test.base_view',
         })
         self.page = Page.create({
-            'view_id': base_view.id,
+            'view_id': self.base_view.id,
             'url': '/page_1',
             'is_published': True,
         })
@@ -250,3 +256,38 @@ class WithContext(HttpCase):
             '/page_1',
             [p['loc'] for p in pages],
         )
+
+    @mute_logger('odoo.addons.http_routing.models.ir_http')
+    def test_03_error_page_debug(self):
+        with MockRequest(self.env, website=self.env['website'].browse(1)):
+            self.base_view.arch = self.base_view.arch.replace('I am a generic page', '<t t-esc="15/0"/>')
+            r = self.url_open(self.page.url)
+            self.assertEqual(r.status_code, 500, "15/0 raise a 500 error page")
+            self.assertNotIn('ZeroDivisionError: division by zero', r.text, "Error should not be shown when not in debug.")
+            r = self.url_open(self.page.url + '?debug=1')
+            self.assertEqual(r.status_code, 500, "15/0 raise a 500 error page (2)")
+            self.assertIn('ZeroDivisionError: division by zero', r.text, "Error should be shown in debug.")
+
+    def test_homepage_not_slash_url(self):
+        website = self.env['website'].browse([1])
+        # Set another page (/page_1) as homepage
+        website.write({
+            'homepage_id': self.page.id,
+            'domain': f"http://{HOST}:{config['http_port']}",
+        })
+        assert self.page.url != '/'
+
+        r = self.url_open('/')
+        r.raise_for_status()
+        self.assertEqual(r.status_code, 200,
+                         "There should be no crash when a public user is accessing `/` which is rerouting to another page with a different URL.")
+        root_html = html.fromstring(r.content)
+        canonical_url = root_html.xpath('//link[@rel="canonical"]')[0].attrib['href']
+        self.assertEqual(canonical_url, website.domain + "/")
+
+    def test_page_url_case_insensitive_match(self):
+        r = self.url_open('/page_1')
+        self.assertEqual(r.status_code, 200, "Reaching page URL, common case")
+        r2 = self.url_open('/Page_1', allow_redirects=False)
+        self.assertEqual(r2.status_code, 303, "URL exists only in different casing, should redirect to it")
+        self.assertTrue(r2.headers.get('Location').endswith('/page_1'), "Should redirect /Page_1 to /page_1")

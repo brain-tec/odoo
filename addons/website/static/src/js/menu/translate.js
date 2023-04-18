@@ -77,10 +77,16 @@ var AttributeTranslateDialog = weDialog.extend({
             $input.on('change keyup', function () {
                 var value = $input.val();
                 $node.html(value).trigger('change', node);
-                if ($node.data('attribute')) {
-                    $node.data('$node').attr($node.data('attribute'), value).trigger('translate');
+                const $originalNode = $node.data('$node');
+                const nodeAttribute = $node.data('attribute');
+                if (nodeAttribute) {
+                    $originalNode.attr(nodeAttribute, value);
+                    if (nodeAttribute === 'value') {
+                        $originalNode[0].value = value;
+                    }
+                    $originalNode.trigger('translate');
                 } else {
-                    $node.data('$node').val(value).trigger('translate');
+                    $originalNode.val(value).trigger('translate');
                 }
                 $node.trigger('change');
             });
@@ -178,6 +184,21 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             devicePreview: false,
         };
 
+        const showNotification = ev => {
+            let message = _t('This translation is not editable.');
+            if (ev.target.closest('.s_table_of_content_navbar_wrap')) {
+                message = _t('Translate header in the text. Menu is generated automatically.');
+            }
+            this.displayNotification({
+                type: 'info',
+                message: message,
+                sticky: false,
+            });
+        };
+        for (const translationEl of $('.o_not_editable [data-oe-translation-id]').not(':o_editable')) {
+            translationEl.addEventListener('click', showNotification);
+        }
+
         this.translator = new EditorMenu(this, {
             wysiwygOptions: params,
             savableSelector: savableSelector,
@@ -186,8 +207,14 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     .not('[data-oe-readonly]');
             },
             beforeEditorActive: async () => {
-                var attrs = ['placeholder', 'title', 'alt', 'value'];
                 const $editable = self._getEditableArea();
+                // Remove styles from table of content menu entries.
+                for (const el of $editable.filter('.s_table_of_content_navbar .table_of_content_link span[data-oe-translation-id]')) {
+                    const text = el.textContent; // Get text from el.
+                    el.textContent = text; // Replace all of el's content with that text.
+                }
+
+                var attrs = ['placeholder', 'title', 'alt', 'value'];
                 const translationRegex = /<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/;
                 let $edited = $();
                 _.each(attrs, function (attr) {
@@ -202,6 +229,12 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
                         translation[attr] = $trans[0];
                         $node.attr(attr, match[2]);
+                        // Using jQuery attr() to update the "value" will not change what appears in the
+                        // DOM and will not update the value property on inputs. We need to force the
+                        // right value instead of the original translation <span/>.
+                        if (attr === 'value') {
+                            $node[0].value = match[2];
+                        }
 
                         $node.addClass('o_translatable_attribute').data('translation', translation);
                     });
@@ -219,7 +252,8 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     translation['textContent'] = $trans[0];
                     $node.val(match[2]);
 
-                    $node.addClass('o_translatable_text').data('translation', translation);
+                    $node.addClass('o_translatable_text').removeClass('o_text_content_invisible')
+                        .data('translation', translation);
                 });
                 $edited = $edited.add(textEdit);
 
@@ -245,6 +279,19 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
                 self._markTranslatableNodes();
                 this.$translations.filter('input[type=hidden].o_translatable_input_hidden').prop('type', 'text');
+            },
+            processRecordsCallback(record, el) {
+                const tocMainEl = el.closest('.s_table_of_content_main');
+                const headerEl = el.closest('h1, h2');
+                if (!tocMainEl || !headerEl) {
+                    return;
+                }
+                const headerIndex = [...tocMainEl.querySelectorAll('h1, h2')].indexOf(headerEl);
+                const tocMenuEl = tocMainEl.closest('.s_table_of_content').querySelectorAll('.table_of_content_link > span')[headerIndex];
+                if (tocMenuEl.textContent !== headerEl.textContent) {
+                    tocMenuEl.textContent = headerEl.textContent;
+                    tocMenuEl.classList.add('o_dirty');
+                }
             },
         });
 
@@ -310,13 +357,6 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             var trans = self._getTranlationObject(this);
             trans.value = (trans.value ? trans.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
         });
-        this._getEditableArea().prependEvent('click.translator', function (ev) {
-            if (ev.ctrlKey || !$(ev.target).is(':o_editable')) {
-                return;
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-        });
 
         // attributes
 
@@ -357,4 +397,11 @@ registry.category("website_navbar_widgets").add("TranslatePageMenu", {
     Widget: TranslatePageMenu,
     selector: '.o_menu_systray:has([data-action="translate"])',
 });
+
+return {
+    TranslatorInfoDialog: TranslatorInfoDialog,
+    AttributeTranslateDialog: AttributeTranslateDialog,
+    TranslatePageMenu: TranslatePageMenu,
+};
+
 });

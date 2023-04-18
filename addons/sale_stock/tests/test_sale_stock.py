@@ -794,6 +794,7 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         self.assertEqual(len(sale_order.order_line), 1)
         self.assertEqual(sale_order.order_line.qty_delivered, 0)
         picking = sale_order.picking_ids
+        initial_product = sale_order.order_line.product_id
 
         picking_form = Form(picking)
         with picking_form.move_line_ids_without_package.edit(0) as move:
@@ -818,6 +819,12 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         self.assertEqual(
             so_line_2.price_unit, 0,
             "Shouldn't get the product price as the invoice policy is on qty. ordered")
+
+        # Check the picking didn't change
+        self.assertRecordValues(sale_order.picking_ids.move_lines, [
+            {'product_id': initial_product.id, 'quantity_done': 5},
+            {'product_id': product_inv_on_order.id, 'quantity_done': 5},
+        ])
 
         # Creates a second sale order for 3 product invoiced on qty. ordered.
         sale_order = self._get_new_sale_order(product=product_inv_on_order, amount=3)
@@ -1038,14 +1045,23 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         """Create a SO with lines using packaging, check the packaging propagate
         to its move.
         """
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_pack_ship'
         product = self.env['product.product'].create({
             'name': 'Product with packaging',
             'type': 'product',
         })
 
-        packaging = self.env['product.packaging'].create({
-            'name': 'box',
+        packOf10 = self.env['product.packaging'].create({
+            'name': 'PackOf10',
             'product_id': product.id,
+            'qty': 10
+        })
+
+        packOf20 = self.env['product.packaging'].create({
+            'name': 'PackOf20',
+            'product_id': product.id,
+            'qty': 20
         })
 
         so = self.env['sale.order'].create({
@@ -1053,13 +1069,32 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
             'order_line': [
                 (0, 0, {
                     'product_id': product.id,
-                    'product_uom_qty': 1.0,
+                    'product_uom_qty': 10.0,
                     'product_uom': product.uom_id.id,
-                    'product_packaging_id': packaging.id,
+                    'product_packaging_id': packOf10.id,
                 })],
         })
         so.action_confirm()
-        self.assertEqual(so.order_line.move_ids.product_packaging_id, packaging)
+        pick = so.order_line.move_ids
+        pack = pick.move_orig_ids
+        ship = pack.move_orig_ids
+        self.assertEqual(pick.product_packaging_id, packOf10)
+        self.assertEqual(pack.product_packaging_id, packOf10)
+        self.assertEqual(ship.product_packaging_id, packOf10)
+
+        so.order_line[0].write({
+            'product_packaging_id': packOf20.id,
+            'product_uom_qty': 20
+        })
+        self.assertEqual(so.order_line.move_ids.product_packaging_id, packOf20)
+        self.assertEqual(pick.product_packaging_id, packOf20)
+        self.assertEqual(pack.product_packaging_id, packOf20)
+        self.assertEqual(ship.product_packaging_id, packOf20)
+
+        so.order_line[0].write({'product_packaging_id': False})
+        self.assertFalse(pick.product_packaging_id)
+        self.assertFalse(pack.product_packaging_id)
+        self.assertFalse(ship.product_packaging_id)
 
     def test_15_cancel_delivery(self):
         """ Suppose the option "Lock Confirmed Sales" enabled and a product with the invoicing
@@ -1122,8 +1157,11 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
 
     def test_17_qty_update_propagation(self):
         """ Creates a sale order, then modifies the sale order lines qty and verifies
-        that quantity changes are correctly propagated to the delivery picking.
+        that quantity changes are correctly propagated to the picking and delivery picking.
         """
+        # Set the delivery in two steps.
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_ship'
         # Sell a product.
         product = self.company_data['product_delivery_no']    # storable
         product.type = 'product'    # storable
@@ -1138,8 +1176,10 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         sale_order.action_confirm()
 
         # Check picking created
-        self.assertEqual(len(sale_order.picking_ids), 1, 'A delivery picking should have been created.')
-        move_out = sale_order.picking_ids.move_lines
+        self.assertEqual(len(sale_order.picking_ids), 2, 'A picking and a delivery picking should have been created.')
+        customer_location = self.env.ref('stock.stock_location_customers')
+        move_pick = sale_order.picking_ids.filtered(lambda p: p.location_dest_id.id != customer_location.id).move_lines
+        move_out = sale_order.picking_ids.filtered(lambda p: p.location_dest_id.id == customer_location.id).move_lines
         self.assertEqual(len(move_out), 1, 'Only one move should be created for a single product.')
         self.assertEqual(move_out.product_uom_qty, 50, 'The move quantity should be the same as the quantity sold.')
 
@@ -1149,7 +1189,9 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
                 (1, sale_order.order_line.id, {'product_uom_qty': 30}),
             ]
         })
-        self.assertEqual(move_out.product_uom_qty, 30, 'The move quantity should have been decreased as the sale order line was.')
+        self.assertEqual(move_pick.product_uom_qty, 30, 'The move quantity should have been decreased as the sale order line was.')
+        self.assertEqual(move_out.product_uom_qty, 30, 'The move quantity should have been decreased as the sale order line and the pick line were.')
+        self.assertEqual(len(sale_order.picking_ids), 2, 'No additionnal picking should have been created.')
 
         # Increase the quantity in the sale order and check the move has been updated.
         sale_order.write({
@@ -1157,4 +1199,216 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
                 (1, sale_order.order_line.id, {'product_uom_qty': 40})
             ]
         })
-        self.assertEqual(move_out.product_uom_qty, 40, 'The move quantity should have been increased as the sale order line was.')
+        self.assertEqual(move_pick.product_uom_qty, 40, 'The move quantity should have been increased as the sale order line was.')
+        self.assertEqual(move_out.product_uom_qty, 40, 'The move quantity should have been increased as the sale order line and the pick line were.')
+
+    def test_18_deliver_more_and_multi_uom(self):
+        """
+        Deliver an additional product with a UoM different than its default one
+        This UoM should be the same on the generated SO line
+        """
+        uom_m_id = self.ref("uom.product_uom_meter")
+        uom_km_id = self.ref("uom.product_uom_km")
+        self.product_b.write({
+            'uom_id': uom_m_id,
+            'uom_po_id': uom_m_id,
+        })
+
+        so = self._get_new_sale_order(product=self.product_a)
+        so.action_confirm()
+
+        picking = so.picking_ids
+        self.env['stock.move'].create({
+            'picking_id': picking.id,
+            'location_id': picking.location_id.id,
+            'location_dest_id': picking.location_dest_id.id,
+            'name': self.product_b.name,
+            'product_id': self.product_b.id,
+            'product_uom_qty': 1,
+            'product_uom': uom_km_id,
+        })
+        action = picking.button_validate()
+        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
+        wizard.process()
+
+        self.assertEqual(so.order_line[1].product_id, self.product_b)
+        self.assertEqual(so.order_line[1].qty_delivered, 1)
+        self.assertEqual(so.order_line[1].product_uom.id, uom_km_id)
+
+    def test_multiple_returns(self):
+        # Creates a sale order for 10 products.
+        sale_order = self._get_new_sale_order()
+        # Valids the sale order, then valids the delivery.
+        sale_order.action_confirm()
+        picking = sale_order.picking_ids
+        picking.move_lines.write({'quantity_done': 10})
+        picking.button_validate()
+
+        # Creates a return from the delivery picking.
+        return_picking_form = Form(self.env['stock.return.picking']
+            .with_context(active_ids=picking.ids, active_id=picking.id,
+            active_model='stock.picking'))
+        return_wizard = return_picking_form.save()
+        # Check that the correct quantity is set on the retrun
+        self.assertEqual(return_wizard.product_return_moves.quantity, 10)
+        return_wizard.product_return_moves.quantity = 2
+        # Valids the return picking.
+        res = return_wizard.create_returns()
+        return_picking = self.env['stock.picking'].browse(res['res_id'])
+        return_picking.move_lines.write({'quantity_done': 2})
+        return_picking.button_validate()
+
+        # Creates a second return from the delivery picking.
+        return_picking_form = Form(self.env['stock.return.picking']
+            .with_context(active_ids=picking.ids, active_id=picking.id,
+            active_model='stock.picking'))
+        return_wizard = return_picking_form.save()
+        # Check that the remaining quantity is set on the retrun
+        self.assertEqual(return_wizard.product_return_moves.quantity, 8)
+
+    def test_return_with_mto_and_multisteps(self):
+        """
+        Suppose a product P and a 3-steps delivery.
+        Sell 5 x P, process pick & pack pickings and then decrease the qty on
+        the SO line:
+        - the ship picking should be updated
+        - there should be a return R1 for the pack picking
+        - there should be a return R2 for the pick picking
+        - it should be possible to reserve R1
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse.delivery_steps = 'pick_pack_ship'
+        stock_location = warehouse.lot_stock_id
+        pack_location, out_location, custo_location = warehouse.delivery_route_id.rule_ids.location_id
+
+        product = self.env['product.product'].create({
+            'name': 'SuperProduct',
+            'type': 'product',
+        })
+
+        self.env['stock.quant']._update_available_quantity(product, stock_location, 5)
+
+        so_form = Form(self.env['sale.order'])
+        so_form.partner_id = self.partner_a
+        with so_form.order_line.new() as line:
+            line.product_id = product
+            line.product_uom_qty = 5
+        so = so_form.save()
+        so.action_confirm()
+
+        pick_picking, pack_picking, _ = so.picking_ids
+        (pick_picking + pack_picking).move_lines.quantity_done = 5
+        (pick_picking + pack_picking).button_validate()
+
+        with Form(so) as so_form:
+            with so_form.order_line.edit(0) as line:
+                line.product_uom_qty = 3
+
+        move_lines = so.picking_ids.move_lines.sorted('id')
+        ship_sm, pack_sm, pick_sm, ret_pack_sm, ret_pick_sm = move_lines
+        self.assertRecordValues(move_lines, [
+            {'location_id': out_location.id, 'location_dest_id': custo_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': []},
+            {'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': ship_sm.ids},
+            {'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': pack_sm.ids},
+            {'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': ret_pick_sm.ids},
+            {'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': ret_pack_sm.ids, 'move_dest_ids': []},
+        ])
+
+        ret_pack_sm.picking_id.action_assign()
+        self.assertEqual(ret_pack_sm.state, 'assigned')
+        self.assertEqual(ret_pack_sm.move_line_ids.product_uom_qty, 2)
+
+    def test_mtso_and_qty_decreasing(self):
+        """
+        First, confirm a SO that has a line with the MTO route (the product
+        should already be available in stock). Then, decrease the qty on the SO
+        line:
+        - The delivery should be updated
+        - There should not be any other picking
+        """
+        warehouse = self.company_data['default_warehouse']
+        customer_location = self.env.ref('stock.stock_location_customers')
+        mto_route = self.env.ref('stock.route_warehouse0_mto')
+        mto_route.active = True
+
+        self.product_a.type = 'product'
+        self.env['stock.quant']._update_available_quantity(self.product_a, warehouse.lot_stock_id, 10)
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'warehouse_id': warehouse.id,
+            'order_line': [(0, 0, {
+                'name': self.product_a.name,
+                'product_id': self.product_a.id,
+                'product_uom_qty': 10,
+                'product_uom': self.product_a.uom_id.id,
+                'price_unit': 1,
+                'route_id': mto_route.id,
+            })],
+        })
+        so.action_confirm()
+        self.assertRecordValues(so.picking_ids, [{'location_id': warehouse.lot_stock_id.id, 'location_dest_id': customer_location.id}])
+
+        so.order_line.product_uom_qty = 8
+        self.assertRecordValues(so.picking_ids, [{'location_id': warehouse.lot_stock_id.id, 'location_dest_id': customer_location.id}])
+        self.assertEqual(so.picking_ids.move_lines.product_uom_qty, 8)
+
+    def test_packaging_and_qty_decrease(self):
+        packaging = self.env['product.packaging'].create({
+            'name': "Super Packaging",
+            'product_id': self.product_a.id,
+            'qty': 10.0,
+        })
+
+        so_form = Form(self.env['sale.order'])
+        so_form.partner_id = self.partner_a
+        with so_form.order_line.new() as line:
+            line.product_id = self.product_a
+            line.product_uom_qty = 10
+        so = so_form.save()
+        so.action_confirm()
+
+        self.assertEqual(so.order_line.product_packaging_id, packaging)
+
+        with Form(so) as so_form:
+            with so_form.order_line.edit(0) as line:
+                line.product_uom_qty = 8
+
+        self.assertEqual(so.picking_ids.move_lines.product_uom_qty, 8)
+
+    def test_backorder_and_decrease_sol_qty(self):
+        """
+        2 steps delivery
+        SO with 10 x P
+        Process pickings of 6 x P with backorders
+        Update SO: 7 x P
+        Backorder should be updated: 1 x P
+        """
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_ship'
+        stock_location = warehouse.lot_stock_id
+        out_location = warehouse.wh_output_stock_loc_id
+        customer_location = self.env.ref('stock.stock_location_customers')
+
+        so = self._get_new_sale_order()
+        so.action_confirm()
+        pick01, ship01 = so.picking_ids
+
+        pick01.move_line_ids.qty_done = 6
+        pick01._action_done()
+        pick02 = pick01.backorder_ids
+
+        ship01.move_line_ids[0].qty_done = 6
+        ship01._action_done()
+        ship02 = ship01.backorder_ids
+
+        so.order_line.product_uom_qty = 7
+
+        self.assertRecordValues(so.picking_ids.move_lines.sorted('id'), [
+            {'location_id': out_location.id, 'location_dest_id': customer_location.id, 'product_uom_qty': 6.0, 'quantity_done': 6.0, 'state': 'done'},
+            {'location_id': stock_location.id, 'location_dest_id': out_location.id, 'product_uom_qty': 6.0, 'quantity_done': 6.0, 'state': 'done'},
+            {'location_id': stock_location.id, 'location_dest_id': out_location.id, 'product_uom_qty': 1.0, 'quantity_done': 0.0, 'state': 'assigned'},
+            {'location_id': out_location.id, 'location_dest_id': customer_location.id, 'product_uom_qty': 1.0, 'quantity_done': 0.0, 'state': 'waiting'},
+        ])
+        self.assertEqual(ship01.move_lines.move_orig_ids, (pick01 | pick02).move_lines)
+        self.assertEqual(ship02.move_lines.move_orig_ids, (pick01 | pick02).move_lines)

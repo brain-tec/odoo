@@ -8,6 +8,9 @@
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
 # Robin Chatfield <robin.chatfield@gmail.com>, 2021
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
+# Daniel Löfgren, 2022
+# Robin Calvin, 2022
+# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -15,8 +18,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 13:20+0000\n"
 "PO-Revision-Date: 2021-09-14 12:23+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2021\n"
-"Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
+"Last-Translator: Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023\n"
+"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -34,6 +37,8 @@ msgid ""
 "<b>Don't panic.</b> If you think it's our mistake, please send us a message "
 "on"
 msgstr ""
+"<b>Ingen panik.</b> Om du anser att det är vårt misstag, skicka ett "
+"meddelande till oss på "
 
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.error_message
@@ -70,12 +75,12 @@ msgstr "Hem"
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.404
 msgid "Maybe you were looking for one of these <b>popular pages?</b>"
-msgstr ""
+msgstr "Du kanske letade efter en av dessa <b>populära sidor?</b>"
 
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.400
 msgid "Oops! Something went wrong."
-msgstr ""
+msgstr "Oops! Något gick fel."
 
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.http_error_debug
@@ -95,7 +100,7 @@ msgstr ""
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.403
 msgid "The page you were looking for could not be authorized."
-msgstr ""
+msgstr "Sidan du letade efter kunde inte godkännas."
 
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.http_error_debug
@@ -110,7 +115,7 @@ msgstr "Visa"
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.404
 msgid "We couldn't find the page you're looking for!"
-msgstr ""
+msgstr "Vi kunde inte hitta sidan du letar efter!"
 
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.http_error_debug
@@ -120,4 +125,4 @@ msgstr ""
 #. module: http_routing
 #: model_terms:ir.ui.view,arch_db:http_routing.404
 msgid "this page"
-msgstr ""
+msgstr "den här sidan"

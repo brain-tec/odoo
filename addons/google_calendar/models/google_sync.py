@@ -63,7 +63,7 @@ class GoogleSync(models.AbstractModel):
     def write(self, vals):
         google_service = GoogleCalendarService(self.env['google.service'])
         if 'google_id' in vals:
-            self._from_google_ids.clear_cache(self)
+            self._event_ids_from_google_ids.clear_cache(self)
         synced_fields = self._get_google_synced_fields()
         if 'need_sync' not in vals and vals.keys() & synced_fields and not self.env.user.google_synchronization_stopped:
             vals['need_sync'] = True
@@ -78,7 +78,7 @@ class GoogleSync(models.AbstractModel):
     @api.model_create_multi
     def create(self, vals_list):
         if any(vals.get('google_id') for vals in vals_list):
-            self._from_google_ids.clear_cache(self)
+            self._event_ids_from_google_ids.clear_cache(self)
         if self.env.user.google_synchronization_stopped:
             for vals in vals_list:
                 vals.update({'need_sync': False})
@@ -107,12 +107,15 @@ class GoogleSync(models.AbstractModel):
             return True
         return super().unlink()
 
-    @api.model
-    @ormcache_context('google_ids', keys=('active_test',))
     def _from_google_ids(self, google_ids):
         if not google_ids:
             return self.browse()
-        return self.search([('google_id', 'in', google_ids)])
+        return self.browse(self._event_ids_from_google_ids(google_ids))
+
+    @api.model
+    @ormcache_context('google_ids', keys=('active_test',))
+    def _event_ids_from_google_ids(self, google_ids):
+        return self.search([('google_id', 'in', google_ids)]).ids
 
     def _sync_odoo2google(self, google_service: GoogleCalendarService):
         if not self:
@@ -173,6 +176,12 @@ class GoogleSync(models.AbstractModel):
         # We only handle the most problematic errors of sync events.
         if http_error.response.status_code in (403, 400):
             response = http_error.response.json()
+            if not self.exists():
+                reason = "Google gave the following explanation: %s" % response['error'].get('message')
+                error_log = "Error while syncing record. It does not exists anymore in the database. %s" % reason
+                _logger.error(error_log)
+                return 
+
             if self._name == 'calendar.event':
                 start = self.start and self.start.strftime('%Y-%m-%d at %H:%M') or _("undefined time")
                 event_ids = self.id
@@ -231,7 +240,7 @@ class GoogleSync(models.AbstractModel):
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
-                self.need_sync = False
+                self.exists().with_context(dont_notify=True).need_sync = False
 
     @after_commit
     def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
@@ -240,6 +249,8 @@ class GoogleSync(models.AbstractModel):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
+                    send_updates = self._context.get('send_updates', True)
+                    google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
                     google_id = google_service.insert(values, token=token, timeout=timeout)
                     # Everything went smoothly
                     self.with_context(dont_notify=True).write({
@@ -249,7 +260,7 @@ class GoogleSync(models.AbstractModel):
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
-                        self.need_sync = False
+                        self.with_context(dont_notify=True).need_sync = False
 
     def _get_records_to_sync(self, full_sync=False):
         """Return records that should be synced from Odoo to Google
