@@ -103,13 +103,13 @@ var Dashboard = AbstractAction.extend({
     on_go_to_website: function (ev) {
         ev.preventDefault();
         var website = this.websites.find(website => website.selected);
-        window.location.replace(`/web#action=website.website_preview&website_id=${website.id}`);
+        window.location.replace(`/web#action=website.website_preview&website_id=${encodeURIComponent(website.id)}`);
     },
 
 
     render_dashboards: function() {
         var self = this;
-        _.each(this.dashboards_templates, function(template) {
+        this.dashboards_templates.forEach((template) => {
             self.$('.o_website_dashboard').append(QWeb.render(template, {widget: self}));
         });
     },
@@ -205,7 +205,7 @@ var Dashboard = AbstractAction.extend({
     render_graphs: function() {
         var self = this;
         if (this._isInDom) {
-            _.each(this.graphs, function(e) {
+            this.graphs.forEach((e) => {
                 var renderGraph = self.groups[e.group] &&
                                     self.dashboards_data[e.name].summary.order_count;
                 if (!self.chartIds[e.name]) {

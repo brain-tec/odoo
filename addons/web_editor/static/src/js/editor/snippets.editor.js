@@ -1539,7 +1539,7 @@ var SnippetEditor = Widget.extend({
         // propagated to parent editor
         if (ev.data.optionNames) {
             ev.stopPropagation();
-            _.each(ev.data.optionNames, function (name) {
+            ev.data.optionNames.forEach((name) => {
                 notifyForEachMatchedOption(name);
             });
         }
@@ -3037,7 +3037,7 @@ var SnippetsMenu = Widget.extend({
                     : $els => $els;
 
             var check = false;
-            _.each(self.templateOptions, function (option, k) {
+            self.templateOptions.forEach((option, k) => {
                 if (check || !($snippetBody.is(option.base_selector) && !$snippetBody.is(option.base_exclude))) {
                     return;
                 }
@@ -3751,7 +3751,7 @@ var SnippetsMenu = Widget.extend({
             $content: $('<div/>', {text: sprintf(_t("Do you want to install the %s App?"), name)}).append(
                 $('<a/>', {
                     target: '_blank',
-                    href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
+                    href: '/web#id=' + encodeURIComponent(moduleID) + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
                     text: _t("More info about this app."),
                     class: 'ml4',
                 })

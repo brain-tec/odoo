@@ -4444,13 +4444,13 @@ registry.sizing = SnippetOptionWidget.extend({
                 let current = 0;
                 const cssProperty = resize[2];
                 const cssPropertyValue = parseInt(self.$target.css(cssProperty));
-                _.each(resize[0], function (val, key) {
+                for (const [key, val] of Object.entries(resize[0])) {
                     if (self.$target.hasClass(val)) {
                         current = key;
                     } else if (resize[1][key] === cssPropertyValue) {
                         current = key;
                     }
-                });
+                }
 
                 props.resize = resize;
                 props.current = current;
@@ -4551,9 +4551,9 @@ registry.sizing = SnippetOptionWidget.extend({
             $body.on('mouseup', bodyMouseUp);
         });
 
-        _.each(resizeValues, (value, key) => {
+        for (const [key, value] of Object.entries(resizeValues)) {
             this.$handles.filter('.' + key).toggleClass('readonly', !value);
-        });
+        }
         if (this.$target[0].classList.contains('o_grid_item')) {
             this.$handles.filter('.o_grid_handle').toggleClass('readonly', false);
         }
@@ -4661,7 +4661,7 @@ registry.sizing = SnippetOptionWidget.extend({
         // Adapt the resize handles according to the classes and dimensions
         var resizeValues = this._getSize();
         var $handles = this.$overlay.find('.o_handle');
-        _.each(resizeValues, function (resizeValue, direction) {
+        for (const [direction, resizeValue] of Object.entries(resizeValues)) {
             var classes = resizeValue[0];
             var values = resizeValue[1];
             var cssProperty = resizeValue[2];
@@ -4670,7 +4670,7 @@ registry.sizing = SnippetOptionWidget.extend({
 
             var current = 0;
             var cssPropertyValue = parseInt(self.$target.css(cssProperty));
-            _.each(classes, function (className, key) {
+            classes.forEach((className, key) => {
                 if (self.$target.hasClass(className)) {
                     current = key;
                 } else if (values[key] === cssPropertyValue) {
@@ -4680,7 +4680,7 @@ registry.sizing = SnippetOptionWidget.extend({
 
             $handle.toggleClass('o_handle_start', current === 0);
             $handle.toggleClass('o_handle_end', current === classes.length - 1);
-        });
+        }
 
         // Adapt the handles to fit the left, top and bottom sizes
         var ml = this.$target.css('margin-left');
@@ -4691,7 +4691,7 @@ registry.sizing = SnippetOptionWidget.extend({
         this.$overlay.find('.o_handle.e').css({
             width: 0,
         });
-        _.each(this.$overlay.find(".o_handle.n, .o_handle.s"), function (handle) {
+        this.$overlay.find(".o_handle.n, .o_handle.s").toArray().forEach((handle) => {
             var $handle = $(handle);
             var direction = $handle.hasClass('n') ? 'top' : 'bottom';
             $handle.height(self.$target.css('padding-' + direction));
@@ -5288,7 +5288,7 @@ registry.layout_column = SnippetOptionWidget.extend({
         var colSize = Math.floor(12 / colsLength) || 1;
         var colOffset = Math.floor((12 - colSize * colsLength) / 2);
         var colClass = 'col-lg-' + colSize;
-        _.each($columns, function (column) {
+        $columns.toArray().forEach((column) => {
             var $column = $(column);
             $column.attr('class', $column.attr('class').replace(/\b(col|offset)-lg(-\d+)?\b/g, ''));
             $column.addClass(colClass);
@@ -6128,7 +6128,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         const [module, directory, fileName] = shapeName.split('/');
         let shape = this.shapeCache[fileName];
         if (!shape) {
-            const shapeURL = `/${module}/static/image_shapes/${directory}/${fileName}.svg`;
+            const shapeURL = `/${encodeURIComponent(module)}/static/image_shapes/${encodeURIComponent(directory)}/${encodeURIComponent(fileName)}.svg`;
             shape = await (await fetch(shapeURL)).text();
             this.shapeCache[fileName] = shape;
         }
@@ -6334,7 +6334,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         uiFragment.querySelectorAll('we-select-page we-button[data-set-img-shape]').forEach(btn => {
             const image = document.createElement('img');
             const [moduleName, directory, shapeName] = btn.dataset.setImgShape.split('/');
-            image.src = `/${moduleName}/static/image_shapes/${directory}/${shapeName}.svg`;
+            image.src = `/${encodeURIComponent(moduleName)}/static/image_shapes/${encodeURIComponent(directory)}/${encodeURIComponent(shapeName)}.svg`;
             $(btn).prepend(image);
 
             if (btn.dataset.animated) {
@@ -6411,7 +6411,7 @@ registry.ImageTools = ImageHandlerOption.extend({
                 // attribute.
                 match = match.slice(0, -12);
             }
-            return this._loadImageInfo(`/web/image/${match}`);
+            return this._loadImageInfo(`/web/image/${encodeURIComponent(match)}`);
         }
         return _super(...arguments);
     },
@@ -7163,9 +7163,9 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
                 return `${colorName}=${encodedCol}`;
             });
         if (flip.length) {
-            searchParams.push(`flip=${flip.sort().join('')}`);
+            searchParams.push(`flip=${encodeURIComponent(flip.sort().join(''))}`);
         }
-        return `/web_editor/shape/${shape}.svg?${searchParams.join('&')}`;
+        return `/web_editor/shape/${encodeURIComponent(shape)}.svg?${searchParams.join('&')}`;
     },
     /**
      * Retrieves current shape data from the target's dataset.
