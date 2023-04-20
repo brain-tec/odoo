@@ -164,11 +164,8 @@ class RecurrenceRule(models.Model):
 
     @api.depends('calendar_event_ids.start')
     def _compute_dtstart(self):
-        groups = self.env['calendar.event'].read_group([('recurrence_id', 'in', self.ids)], ['start:min'], ['recurrence_id'])
-        start_mapping = {
-            group['recurrence_id'][0]: group['start']
-            for group in groups
-        }
+        groups = self.env['calendar.event']._read_group([('recurrence_id', 'in', self.ids)], ['recurrence_id'], ['start:min'])
+        start_mapping = {recurrence.id: start_min for recurrence, start_min in groups}
         for recurrence in self:
             recurrence.dtstart = start_mapping.get(recurrence.id)
 
@@ -381,6 +378,16 @@ class RecurrenceRule(models.Model):
             start = dt + relativedelta(day=1)
         else:
             start = dt
+        # Comparaison of DST (to manage the case of going too far back in time).
+        # If we detect a change in the DST between the creation date of an event
+        # and the date used for the occurrence period, we use the creation date of the event.
+        # This is a hack to avoid duplication of events (for example on google calendar).
+        if isinstance(dt, datetime):
+            timezone = self._get_timezone()
+            dst_dt = timezone.localize(dt).dst()
+            dst_start = timezone.localize(start).dst()
+            if dst_dt != dst_start:
+                start = dt
         return start
 
     def _get_first_event(self, include_outliers=False):

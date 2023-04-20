@@ -182,7 +182,6 @@ class Task(models.Model):
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False, recursive=True,
         required=True, copy=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
-    project_color = fields.Integer(related='project_id.color', string='Project Color')
     rating_active = fields.Boolean(string='Project Rating Status', related="project_id.rating_active")
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
         help="Attachments that don't come from a message.")
@@ -440,8 +439,8 @@ class Task(models.Model):
     def _compute_recurring_count(self):
         self.recurring_count = 0
         recurring_tasks = self.filtered(lambda l: l.recurrence_id)
-        count = self.env['project.task']._read_group([('recurrence_id', 'in', recurring_tasks.recurrence_id.ids)], ['id'], 'recurrence_id')
-        tasks_count = {c.get('recurrence_id')[0]: c.get('recurrence_id_count') for c in count}
+        count = self.env['project.task']._read_group([('recurrence_id', 'in', recurring_tasks.recurrence_id.ids)], ['recurrence_id'], ['__count'])
+        tasks_count = {recurrence.id: count for recurrence, count in count}
         for task in recurring_tasks:
             task.recurring_count = tasks_count.get(task.recurrence_id.id, 0)
 
@@ -452,10 +451,10 @@ class Task(models.Model):
         if tasks_with_dependency:
             group_dependent = self.env['project.task']._read_group([
                 ('depend_on_ids', 'in', tasks_with_dependency.ids),
-            ], ['depend_on_ids'], ['depend_on_ids'])
+            ], ['depend_on_ids'], ['__count'])
             dependent_tasks_count_dict = {
-                group['depend_on_ids'][0]: group['depend_on_ids_count']
-                for group in group_dependent
+                depend_on.id: count
+                for depend_on, count in group_dependent
             }
             for task in tasks_with_dependency:
                 task.dependent_tasks_count = dependent_tasks_count_dict.get(task.id, 0)
@@ -523,13 +522,11 @@ class Task(models.Model):
     @api.depends('child_ids')
     def _compute_subtask_count(self):
         total_and_closed_subtask_count_per_parent_id = {
-            group['parent_id'][0]: (
-                group['parent_id_count'],
-                sum(s in CLOSED_STATES for s in group['state']),
-            ) for group in self.env['project.task']._read_group(
+            parent.id: (count, sum(s in CLOSED_STATES for s in states))
+            for parent, states, count in self.env['project.task']._read_group(
                 [('parent_id', 'in', self.ids)],
-                ['state:array_agg', 'parent_id'],
                 ['parent_id'],
+                ['state:array_agg', '__count'],
             )
         }
         for task in self:
@@ -818,16 +815,9 @@ class Task(models.Model):
         return super(Task, self).read(fields=fields, load=load)
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        fields_list = ([f.split(':')[0] for f in fields] or [])
-        if groupby:
-            fields_groupby = [groupby] if isinstance(groupby, str) else groupby
-            # only take field name when having ':' e.g 'date_deadline:week' => 'date_deadline'
-            fields_list += [f.split(':')[0] for f in fields_groupby]
-        if domain:
-            fields_list += [term[0].split('.')[0] for term in domain if isinstance(term, (tuple, list)) and term not in [expression.TRUE_LEAF, expression.FALSE_LEAF]]
-        self._ensure_fields_are_accessible(fields_list)
-        return super(Task, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+    def _read_group_check_field_access_rights(self, field_names):
+        super()._read_group_check_field_access_rights(field_names)
+        self._ensure_fields_are_accessible(field_names)
 
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):

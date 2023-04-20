@@ -2406,7 +2406,7 @@ export class DynamicGroupList extends DynamicList {
     async _loadGroups() {
         const firstGroupByName = this.firstGroupBy.split(":")[0];
         const _orderBy = this.orderBy.filter(
-            (o) => o.name === firstGroupByName || this.fields[o.name].group_operator !== undefined
+            (o) => o.name === firstGroupByName || (this.fieldNames.includes(o.name) && this.fields[o.name].group_operator !== undefined)
         );
         const orderby = orderByToString(_orderBy);
         const { groups, length } = await this.model.orm.webReadGroup(
@@ -2456,7 +2456,7 @@ export class DynamicGroupList extends DynamicList {
                     }
                     // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
                     // we have to get the count from `__count` instead
-                    // see _read_group_raw in models.py
+                    // see _read_group in models.py
                     case `__count`:
                     case `${groupByField.name}_count`: {
                         groupParams.count = value;

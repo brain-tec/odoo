@@ -1403,6 +1403,13 @@ class Integer(Field):
 
     group_operator = 'sum'
 
+    def _get_attrs(self, model_class, name):
+        res = super()._get_attrs(model_class, name)
+        # The default group_operator is None for sequence fields
+        if 'group_operator' not in res and name == 'sequence':
+            res['group_operator'] = None
+        return res
+
     def convert_to_column(self, value, record, values=None, validate=True):
         return int(value or 0)
 
@@ -3072,6 +3079,7 @@ class Many2oneReference(Integer):
     type = 'many2one_reference'
 
     model_field = None
+    group_operator = None
 
     _related_model_field = property(attrgetter('model_field'))
 

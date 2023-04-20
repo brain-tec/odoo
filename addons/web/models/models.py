@@ -98,15 +98,13 @@ class Base(models.AbstractModel):
         if not groups:
             length = 0
         elif limit and len(groups) == limit:
-            # We need to fetch all groups to know the total number
-            # this cannot be done all at once to avoid MemoryError
-            length = limit
-            chunk_size = 100000
-            while True:
-                more = len(self.read_group(domain, ['display_name'], groupby, offset=length, limit=chunk_size, lazy=True))
-                length += more
-                if more < chunk_size:
-                    break
+            length = limit + len(self._read_group(
+                domain,
+                groupby=groupby if not lazy else groupby[0],
+                offset=limit,
+                order=orderby,
+            ))
+
         else:
             length = len(groups) + offset
         return {
@@ -177,7 +175,7 @@ class Base(models.AbstractModel):
         try:
             fname = progress_bar['field']
             return self.read_group(domain, [fname], [group_by, fname], lazy=False)
-        except UserError:
+        except ValueError:
             # possibly failed because of grouping on or aggregating non-stored
             # field; fallback on alternative implementation
             pass

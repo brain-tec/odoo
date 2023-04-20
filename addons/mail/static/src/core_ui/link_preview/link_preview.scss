@@ -20,6 +20,10 @@
     max-width: $o-mail-LinkPreview-width;
 }
 
+.o-mail-ChatWindow-content .o-mail-LinkPreviewImage img {
+    max-width: 100%;
+}
+
 .o-mail-LinkPreviewVideo {
     max-width: $o-mail-LinkPreview-width;
 

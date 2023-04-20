@@ -508,25 +508,6 @@ class IrAttachment(models.Model):
                 continue
         return ret_attachments
 
-    def _read_group_allowed_fields(self):
-        return ['type', 'company_id', 'res_id', 'create_date', 'create_uid', 'name', 'mimetype', 'id', 'url', 'res_field', 'res_model']
-
-    @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """Override read_group to add res_field=False in domain if not present."""
-        if not fields:
-            raise AccessError(_("Sorry, you must provide fields to read on attachments"))
-        groupby = [groupby] if isinstance(groupby, str) else groupby
-        if any('(' in field for field in fields + groupby):
-            raise AccessError(_("Sorry, the syntax 'name:agg(field)' is not available for attachments"))
-        if not any(item[0] in ('id', 'res_field') for item in domain):
-            domain.insert(0, ('res_field', '=', False))
-        allowed_fields = self._read_group_allowed_fields()
-        fields_set = set(field.split(':')[0] for field in fields + groupby)
-        if not self.env.is_system() and (not fields or fields_set.difference(allowed_fields)):
-            raise AccessError(_("Sorry, you are not allowed to access these fields on attachments."))
-        return super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
         # add res_field=False in domain if not present; the arg[0] trick below

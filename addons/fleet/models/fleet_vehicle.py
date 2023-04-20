@@ -88,7 +88,7 @@ class FleetVehicle(models.Model):
     horsepower = fields.Integer(compute='_compute_model_fields', store=True, readonly=False)
     horsepower_tax = fields.Float('Horsepower Taxation', compute='_compute_model_fields', store=True, readonly=False)
     power = fields.Integer('Power', help='Power in kW of the vehicle', compute='_compute_model_fields', store=True, readonly=False)
-    co2 = fields.Float('CO2 Emissions', help='CO2 emissions of the vehicle', compute='_compute_model_fields', store=True, readonly=False, tracking=True)
+    co2 = fields.Float('CO2 Emissions', help='CO2 emissions of the vehicle', compute='_compute_model_fields', store=True, readonly=False, tracking=True, group_operator=None)
     co2_standard = fields.Char(compute='_compute_model_fields', store=True, readonly=False)
     category_id = fields.Many2one('fleet.vehicle.model.category', 'Category', compute='_compute_model_fields', store=True, readonly=False)
     image_128 = fields.Image(related='model_id.image_128', readonly=True)
@@ -167,24 +167,24 @@ class FleetVehicle(models.Model):
         LogService = self.env['fleet.vehicle.log.services'].with_context(active_test=False)
         LogContract = self.env['fleet.vehicle.log.contract'].with_context(active_test=False)
         History = self.env['fleet.vehicle.assignation.log']
-        odometers_data = Odometer.read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id'], ['vehicle_id'])
-        services_data = LogService.read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id', 'active'], ['vehicle_id', 'active'], lazy=False)
-        logs_data = LogContract.read_group([('vehicle_id', 'in', self.ids), ('state', '!=', 'closed')], ['vehicle_id', 'active'], ['vehicle_id', 'active'], lazy=False)
-        histories_data = History.read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id'], ['vehicle_id'])
+        odometers_data = Odometer._read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id'], ['__count'])
+        services_data = LogService._read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id', 'active'], ['__count'])
+        logs_data = LogContract._read_group([('vehicle_id', 'in', self.ids), ('state', '!=', 'closed')], ['vehicle_id', 'active'], ['__count'])
+        histories_data = History._read_group([('vehicle_id', 'in', self.ids)], ['vehicle_id'], ['__count'])
 
         mapped_odometer_data = defaultdict(lambda: 0)
         mapped_service_data = defaultdict(lambda: defaultdict(lambda: 0))
         mapped_log_data = defaultdict(lambda: defaultdict(lambda: 0))
         mapped_history_data = defaultdict(lambda: 0)
 
-        for odometer_data in odometers_data:
-            mapped_odometer_data[odometer_data['vehicle_id'][0]] = odometer_data['vehicle_id_count']
-        for service_data in services_data:
-            mapped_service_data[service_data['vehicle_id'][0]][service_data['active']] = service_data['__count']
-        for log_data in logs_data:
-            mapped_log_data[log_data['vehicle_id'][0]][log_data['active']] = log_data['__count']
-        for history_data in histories_data:
-            mapped_history_data[history_data['vehicle_id'][0]] = history_data['vehicle_id_count']
+        for vehicle, count in odometers_data:
+            mapped_odometer_data[vehicle.id] = count
+        for vehicle, active, count in services_data:
+            mapped_service_data[vehicle.id][active] = count
+        for vehicle, active, count in logs_data:
+            mapped_log_data[vehicle.id][active] = count
+        for vehicle, count in histories_data:
+            mapped_history_data[vehicle.id] = count
 
         for vehicle in self:
             vehicle.odometer_count = mapped_odometer_data[vehicle.id]
@@ -355,12 +355,6 @@ class FleetVehicle(models.Model):
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
         return self.env['fleet.vehicle.state'].search([], order=order)
-
-    @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        if 'co2' in fields:
-            fields.remove('co2')
-        return super(FleetVehicle, self).read_group(domain, fields, groupby, offset, limit, orderby, lazy)
 
     def return_action_to_open(self):
         """ This opens the xml view specified in xml_id for the current vehicle """

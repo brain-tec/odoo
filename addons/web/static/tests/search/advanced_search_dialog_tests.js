@@ -165,8 +165,10 @@ QUnit.module("Search", (hooks) => {
         await makeTestComponent();
         await toggleFilterMenu(target);
         assert.containsNone(target, ".modal");
+        assert.containsOnce(target, ".o_filter_menu .dropdown-menu");
 
         await openAdvancedSearchDialog(target);
+        assert.containsNone(target, ".o_filter_menu .dropdown-menu");
         assert.containsOnce(target, ".modal");
         assert.containsOnce(target, ".modal .modal-header h4");
         assert.strictEqual(target.querySelector(".modal header h4").innerText, "Advanced Search");
@@ -178,14 +180,13 @@ QUnit.module("Search", (hooks) => {
 
         await click(target, ".modal footer button:nth-child(2)");
         assert.containsNone(target, ".modal");
-        assert.containsOnce(target, ".o_filter_menu .dropdown-menu");
 
+        await toggleFilterMenu(target);
         await openAdvancedSearchDialog(target);
         assert.containsOnce(target, ".modal");
 
         await click(target, ".modal footer button:nth-child(1)");
         assert.containsNone(target, ".modal");
-        assert.containsNone(target, ".o_filter_menu .dropdown-menu");
     });
 
     QUnit.test("start with an empty query", async function (assert) {
@@ -234,9 +235,9 @@ QUnit.module("Search", (hooks) => {
         await openAdvancedSearchDialog(target);
         assert.containsOnce(target, ".modal");
         assert.containsOnce(target, ".modal .modal-body .o_domain_selector");
-        assert.containsOnce(target, ".o_field_selector");
+        assert.containsOnce(target, ".o_model_field_selector");
         assert.strictEqual(
-            target.querySelector(".o_field_selector").innerText,
+            target.querySelector(".o_model_field_selector").innerText,
             "Floaty McFloatface"
         );
         assert.containsOnce(target, ".o_domain_leaf_operator_select");
@@ -272,7 +273,7 @@ QUnit.module("Search", (hooks) => {
         await toggleFilterMenu(target);
         await openAdvancedSearchDialog(target);
 
-        assert.strictEqual(target.querySelector(".o_field_selector").innerText, "User");
+        assert.strictEqual(target.querySelector(".o_model_field_selector").innerText, "User");
         assert.strictEqual(target.querySelector(".o_domain_leaf_operator_select").value, "equal");
         assert.strictEqual(target.querySelector(".o_ds_value_cell input").value, "7");
     });
@@ -603,7 +604,7 @@ QUnit.module("Search", (hooks) => {
         await openAdvancedSearchDialog(target);
 
         assert.deepEqual(
-            getNodesTextContent(target.querySelectorAll(".o_field_selector_chain_part")),
+            getNodesTextContent(target.querySelectorAll(".o_model_field_selector_chain_part")),
             ["DateTime", "DateTime", "A date", "A date"]
         ); // 0 not found!
 

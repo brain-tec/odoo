@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+import itertools
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
@@ -131,26 +132,28 @@ class AccountAnalyticAccount(models.Model):
         return super().copy_data(default)
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """
-            Override read_group to calculate the sum of the non-stored fields that depend on the user context
-        """
-        res = super(AccountAnalyticAccount, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        accounts = self.env['account.analytic.account']
-        for line in res:
-            if '__domain' in line:
-                accounts = self.search(line['__domain'])
-            if 'balance' in fields:
-                line['balance'] = sum(accounts.mapped('balance'))
-            if 'debit' in fields:
-                line['debit'] = sum(accounts.mapped('debit'))
-            if 'credit' in fields:
-                line['credit'] = sum(accounts.mapped('credit'))
-        return res
+    def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
+        """ Override _read_group to aggregate no-store compute: balance/debit/credit """
+        SPECIAL = {'balance:sum', 'debit:sum', 'credit:sum'}
+        if SPECIAL.isdisjoint(aggregates):
+            return super()._read_group(domain, groupby, aggregates, having, offset, limit, order)
+
+        base_aggregates = [*(agg for agg in aggregates if agg not in SPECIAL), 'id:recordset']
+        base_result = super()._read_group(domain, groupby, base_aggregates, having, offset, limit, order)
+
+        # base_result = [(a1, b1, records), (a2, b2, records), ...]
+        result = []
+        for *other, records in base_result:
+            for index, spec in enumerate(itertools.chain(groupby, aggregates)):
+                if spec in SPECIAL:
+                    field_name = spec.split(':')[0]
+                    other.insert(index, sum(records.mapped(field_name)))
+            result.append(tuple(other))
+
+        return result
 
     @api.depends('line_ids.amount')
     def _compute_debit_credit_balance(self):
-        Curr = self.env['res.currency']
         analytic_line_obj = self.env['account.analytic.line']
         domain = [
             ('account_id', 'in', self.ids),
@@ -162,27 +165,25 @@ class AccountAnalyticAccount(models.Model):
             domain.append(('date', '<=', self._context['to_date']))
 
         user_currency = self.env.company.currency_id
-        credit_groups = analytic_line_obj.read_group(
+        credit_groups = analytic_line_obj._read_group(
             domain=domain + [('amount', '>=', 0.0)],
-            fields=['account_id', 'currency_id', 'amount'],
             groupby=['account_id', 'currency_id'],
-            lazy=False,
+            aggregates=['amount:sum'],
         )
         data_credit = defaultdict(float)
-        for l in credit_groups:
-            data_credit[l['account_id'][0]] += Curr.browse(l['currency_id'][0])._convert(
-                l['amount'], user_currency, self.env.company, fields.Date.today())
+        for account, currency, amount_sum in credit_groups:
+            data_credit[account.id] += currency._convert(
+                amount_sum, user_currency, self.env.company, fields.Date.today())
 
-        debit_groups = analytic_line_obj.read_group(
+        debit_groups = analytic_line_obj._read_group(
             domain=domain + [('amount', '<', 0.0)],
-            fields=['account_id', 'currency_id', 'amount'],
             groupby=['account_id', 'currency_id'],
-            lazy=False,
+            aggregates=['amount:sum'],
         )
         data_debit = defaultdict(float)
-        for l in debit_groups:
-            data_debit[l['account_id'][0]] += Curr.browse(l['currency_id'][0])._convert(
-                l['amount'], user_currency, self.env.company, fields.Date.today())
+        for account, currency, amount_sum in debit_groups:
+            data_debit[account.id] += currency._convert(
+                amount_sum, user_currency, self.env.company, fields.Date.today())
 
         for account in self:
             account.debit = abs(data_debit.get(account.id, 0.0))

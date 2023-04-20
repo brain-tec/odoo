@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
+from odoo.osv import expression
 
 
 FUEL_TYPES = [
@@ -44,6 +45,14 @@ class FleetVehicleModel(models.Model):
     horsepower_tax = fields.Float('Horsepower Taxation')
     electric_assistance = fields.Boolean(default=False)
 
+    @api.model
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
+        domain = domain or []
+        if operator != 'ilike' or (name or '').strip():
+            name_domain = ['|', ('name', 'ilike', name), ('brand_id.name', 'ilike', name)]
+            domain = expression.AND([name_domain, domain])
+        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
+
     def name_get(self):
         res = []
         for record in self:
@@ -55,9 +64,9 @@ class FleetVehicleModel(models.Model):
 
     def _compute_vehicle_count(self):
         group = self.env['fleet.vehicle']._read_group(
-            [('model_id', 'in', self.ids)], ['id', 'model_id'], groupby='model_id', lazy=False,
+            [('model_id', 'in', self.ids)], ['model_id'], aggregates=['__count'],
         )
-        count_by_model = {entry['model_id'][0]: entry['__count'] for entry in group}
+        count_by_model = {model.id: count for model, count in group}
         for model in self:
             model.vehicle_count = count_by_model.get(model.id, 0)
 

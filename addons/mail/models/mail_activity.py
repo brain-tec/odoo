@@ -404,32 +404,6 @@ class MailActivity(models.Model):
         )
         return activities._as_query(order)
 
-    @api.model
-    def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """ The base _read_group_raw method implementation computes a where based on a given domain
-        (_where_calc) and manually applies ir rules (_apply_ir_rules).
-
-        Meaning that our custom rules enforcing from '_filter_access_rules' and
-        '_filter_access_rules_python' are bypassed in that case.
-
-        This overrides re-uses the _search implementation to force the read group domain to allowed
-        ids only, that are computed based on our custom rules (see _filter_access_rules_remaining
-        for more details). """
-
-        # Rules do not apply to administrator
-        if not self.env.is_superuser():
-            allowed_ids = self._search(domain)
-            if allowed_ids:
-                domain = expression.AND([domain, [('id', 'in', allowed_ids)]])
-            else:
-                # force void result if no allowed ids found
-                domain = expression.AND([domain, [(0, '=', 1)]])
-
-        return super(MailActivity, self)._read_group_raw(
-            domain=domain, fields=fields, groupby=groupby, offset=offset,
-            limit=limit, orderby=orderby, lazy=lazy,
-        )
-
     def name_get(self):
         res = []
         for record in self:
@@ -608,28 +582,26 @@ class MailActivity(models.Model):
         if domain:
             res = self.env[res_model].search(domain)
             activity_domain.append(('res_id', 'in', res.ids))
-        grouped_activities = self.env['mail.activity'].read_group(
+        grouped_activities = self.env['mail.activity']._read_group(
             activity_domain,
-            ['res_id', 'activity_type_id', 'ids:array_agg(id)', 'date_deadline:min(date_deadline)'],
             ['res_id', 'activity_type_id'],
-            lazy=False)
+            ['id:array_agg', 'date_deadline:min', '__count'])
         # filter out unreadable records
         if not domain:
-            res_ids = tuple(a['res_id'] for a in grouped_activities)
-            res = self.env[res_model].search([('id', 'in', res_ids)])
-            grouped_activities = [a for a in grouped_activities if a['res_id'] in res.ids]
+            res_ids = tuple(res_id for res_id, *_ in grouped_activities)
+            res_ids_set = set(self.env[res_model].search([('id', 'in', res_ids)])._ids)
+            grouped_activities = [a for a in grouped_activities if a[0] in res_ids_set]
         res_id_to_deadline = {}
         activity_data = defaultdict(dict)
-        for group in grouped_activities:
-            res_id = group['res_id']
-            activity_type_id = (group.get('activity_type_id') or (False, False))[0]
-            res_id_to_deadline[res_id] = group['date_deadline'] if (res_id not in res_id_to_deadline or group['date_deadline'] < res_id_to_deadline[res_id]) else res_id_to_deadline[res_id]
-            state = self._compute_state_from_date(group['date_deadline'], self.user_id.sudo().tz)
+        for res_id, activity_type, ids, date_deadline, count in grouped_activities:
+            activity_type_id = activity_type.id
+            res_id_to_deadline[res_id] = date_deadline if (res_id not in res_id_to_deadline or date_deadline < res_id_to_deadline[res_id]) else res_id_to_deadline[res_id]
+            state = self._compute_state_from_date(date_deadline, self.user_id.sudo().tz)
             activity_data[res_id][activity_type_id] = {
-                'count': group['__count'],
-                'ids': group['ids'],
+                'count': count,
+                'ids': ids,
                 'state': state,
-                'o_closest_deadline': group['date_deadline'],
+                'o_closest_deadline': date_deadline,
             }
         activity_type_infos = []
         activity_type_ids = self.env['mail.activity.type'].search(
