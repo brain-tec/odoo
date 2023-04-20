@@ -130,7 +130,7 @@ SELECT DISTINCT ON (pid) * FROM (
                           AND users.active
  LEFT JOIN res_groups_users_rel groups_rel ON groups_rel.uid = users.id
       JOIN sub_followers ON sub_followers.partner_id = partner.id
-                        AND NOT (sub_followers.internal AND partner.partner_share)
+                        AND (NOT sub_followers.internal OR partner.partner_share IS NOT TRUE)
         GROUP BY partner.id,
                  users.notification_type
 ) AS x
@@ -143,11 +143,14 @@ ORDER BY pid, notif
             params = []
             query_pid = """
 SELECT partner.id as pid,
-partner.active as active, partner.partner_share as pshare,
-users.notification_type AS notif, NULL AS groups
+    partner.active as active, partner.partner_share as pshare,
+    users.notification_type AS notif,
+    array_agg(groups_rel.gid) FILTER (WHERE groups_rel.gid IS NOT NULL) AS groups
 FROM res_partner partner
-LEFT JOIN res_users users ON users.partner_id = partner.id AND users.active
-WHERE partner.id IN %s"""
+    LEFT JOIN res_users users ON users.partner_id = partner.id AND users.active
+    LEFT JOIN res_groups_users_rel groups_rel ON groups_rel.uid = users.id
+WHERE partner.id IN %s
+GROUP BY partner.id, users.notification_type"""
             params.append(tuple(pids))
             query = 'SELECT DISTINCT ON (pid) * FROM (%s) AS x ORDER BY pid, notif' % query_pid
             self.env.cr.execute(query, tuple(params))

@@ -242,9 +242,16 @@ class AccountAccount(models.Model):
             FROM account_journal journal
             JOIN res_company company on journal.company_id = company.id
             LEFT JOIN account_payment_method_line apml ON journal.id = apml.journal_id
-            WHERE company.account_journal_payment_credit_account_id in %(accounts)s
-            OR company.account_journal_payment_debit_account_id in %(accounts)s
-            OR apml.payment_account_id in %(accounts)s
+            WHERE (
+                company.account_journal_payment_credit_account_id IN %(accounts)s
+                AND company.account_journal_payment_credit_account_id != journal.default_account_id
+                ) OR (
+                company.account_journal_payment_debit_account_id in %(accounts)s
+                AND company.account_journal_payment_debit_account_id != journal.default_account_id
+                ) OR (
+                apml.payment_account_id IN %(accounts)s
+                AND apml.payment_account_id != journal.default_account_id
+            )
         ''', {
             'accounts': tuple(accounts.ids),
         })
@@ -302,7 +309,7 @@ class AccountAccount(models.Model):
         balances = {
             read['account_id'][0]: read['balance']
             for read in self.env['account.move.line'].read_group(
-                domain=[('account_id', 'in', self.ids)],
+                domain=[('account_id', 'in', self.ids), ('parent_state', '=', 'posted')],
                 fields=['balance', 'account_id'],
                 groupby=['account_id'],
             )
@@ -428,7 +435,10 @@ class AccountAccount(models.Model):
         args = args or []
         domain = []
         if name:
-            domain = ['|', ('code', '=ilike', name.split(' ')[0] + '%'), ('name', operator, name)]
+            if operator in ('=', '!='):
+                domain = ['|', ('code', '=', name.split(' ')[0]), ('name', operator, name)]
+            else:
+                domain = ['|', ('code', '=ilike', name.split(' ')[0] + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
                 domain = ['&', '!'] + domain[1:]
         return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
@@ -441,10 +451,6 @@ class AccountAccount(models.Model):
         elif self.internal_group == 'off_balance':
             self.reconcile = False
             self.tax_ids = False
-        elif self.internal_group == 'income' and not self.tax_ids:
-            self.tax_ids = self.company_id.account_sale_tax_id
-        elif self.internal_group == 'expense' and not self.tax_ids:
-            self.tax_ids = self.company_id.account_purchase_tax_id
 
     def name_get(self):
         result = []

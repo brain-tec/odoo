@@ -140,8 +140,8 @@ const baseNotificationMethods = {
         if (clientInfos.iceCandidateBuffer.length) {
             for (const candidate of clientInfos.iceCandidateBuffer) {
                 await this._addIceCandidate(clientInfos, candidate);
-                clientInfos.iceCandidateBuffer.splice(0);
             }
+            clientInfos.iceCandidateBuffer.splice(0);
         }
         if (description.type === 'offer') {
             const answerDescription = await pc.createAnswer();
@@ -169,6 +169,12 @@ export class PeerToPeer {
         this.clientsInfos = {};
         this._lastRequestId = -1;
         this._pendingRequestResolver = {};
+        this._stopped = false;
+    }
+
+    stop() {
+        this._stopped = true;
+        this.closeAllConnections();
     }
 
     getConnectedClientIds() {
@@ -193,7 +199,7 @@ export class PeerToPeer {
         delete this.clientsInfos[clientId];
     }
 
-    async closeAllConnections() {
+    closeAllConnections() {
         for (const clientId of Object.keys(this.clientsInfos)) {
             this.notifyAllClients('ptp_disconnect');
             this.removeClient(clientId);
@@ -201,6 +207,9 @@ export class PeerToPeer {
     }
 
     async notifyAllClients(notificationName, notificationPayload, { transport = 'server' } = {}) {
+        if (this._stopped) {
+            return;
+        }
         const transportPayload = {
             fromClientId: this._currentClientId,
             notificationName,
@@ -220,6 +229,9 @@ export class PeerToPeer {
     }
 
     notifyClient(clientId, notificationName, notificationPayload, { transport = 'server' } = {}) {
+        if (this._stopped) {
+            return;
+        }
         if (debugShowNotifications) {
             if (notificationName === 'ptp_request_result') {
                 console.log(
@@ -267,10 +279,16 @@ export class PeerToPeer {
     }
 
     notifySelf(notificationName, notificationPayload) {
+        if (this._stopped) {
+            return;
+        }
         this.handleNotification({ notificationName, notificationPayload });
     }
 
     handleNotification(notification) {
+        if (this._stopped) {
+            return;
+        }
         const isInternalNotification =
             typeof notification.fromClientId === 'undefined' &&
             typeof notification.toClientId === 'undefined';
@@ -323,6 +341,9 @@ export class PeerToPeer {
     }
 
     requestClient(clientId, requestName, requestPayload, { transport = 'server' } = {}) {
+        if (this._stopped) {
+            return;
+        }
         return new Promise((resolve, reject) => {
             const requestId = this._getRequestId();
 
@@ -351,10 +372,14 @@ export class PeerToPeer {
     }
 
     _createClient(clientId, { makeOffer = true } = {}) {
+        if (this._stopped) {
+            return;
+        }
         if (debugShowLog) console.log('CREATE CONNECTION with client id:', clientId);
         this.clientsInfos[clientId] = {
             makingOffer: false,
             iceCandidateBuffer: [],
+            backoffFactor: 0,
         };
         const pc = new RTCPeerConnection(this.options.peerConnectionConfig);
 
@@ -401,9 +426,12 @@ export class PeerToPeer {
                     break;
                 case 'disconnected':
                     await this._recoverConnection(clientId, {
-                        delay: 1000,
+                        delay: 3000,
                         reason: 'ice connection disconnected',
                     });
+                    break;
+                case 'connected':
+                    this.clientsInfos[clientId].backoffFactor = 0;
                     break;
             }
         };
@@ -418,9 +446,13 @@ export class PeerToPeer {
                     break;
                 case 'disconnected':
                     await this._recoverConnection(clientId, {
-                        delay: 500,
+                        delay: 3000,
                         reason: 'connection disconnected',
                     });
+                    break;
+                case 'connected':
+                case 'completed':
+                    this.clientsInfos[clientId].backoffFactor = 0;
                     break;
             }
         };
@@ -436,7 +468,7 @@ export class PeerToPeer {
                 console.trace(error);
                 console.groupEnd();
             }
-            this._recoverConnection(clientId, { delay: 15000, reason: 'ice candidate error' });
+            this._recoverConnection(clientId, { delay: 3000, reason: 'ice candidate error' });
         };
         const dataChannel = pc.createDataChannel('notifications', { negotiated: true, id: 1 });
         let message = [];
@@ -472,13 +504,16 @@ export class PeerToPeer {
     }
 
     _channelNotify(clientId, transportPayload) {
+        if (this._stopped) {
+            return;
+        }
         const clientInfo = this.clientsInfos[clientId];
         const dataChannel = clientInfo && clientInfo.dataChannel;
 
         if (!dataChannel || dataChannel.readyState !== 'open') {
             if (clientInfo && !clientInfo.zombieTimeout) {
                 if (debugShowLog) console.warn(
-                    `Impossible to communicate with client ${clientId}. The connection be killed in 10 seconds if the datachannel state has not changed.`,
+                    `Impossible to communicate with client ${clientId}. The connection will be killed in 10 seconds if the datachannel state has not changed.`,
                 );
                 this._killPotentialZombie(clientId);
             }
@@ -503,6 +538,9 @@ export class PeerToPeer {
     }
 
     async _onRequest(fromClientId, requestId, requestName, requestPayload, requestTransport) {
+        if (this._stopped) {
+            return;
+        }
         const requestFunction = this.options.onRequest && this.options.onRequest[requestName];
         const result = await requestFunction({
             fromClientId,
@@ -527,8 +565,24 @@ export class PeerToPeer {
      * @param {string} [param1.reason]
      */
     _recoverConnection(clientId, { delay = 0, reason = '' } = {}) {
+        if (this._stopped) {
+            this.removeClient(clientId);
+            return;
+        }
         const clientInfos = this.clientsInfos[clientId];
         if (!clientInfos || clientInfos.fallbackTimeout) return;
+        const backoffFactor = this.clientsInfos[clientId].backoffFactor;
+        const backoffDelay = delay * Math.pow(2, backoffFactor);
+        // Stop trying to recover the connection after 10 attempts.
+        if (backoffFactor > 10) {
+            if (debugShowLog) {
+                console.log(
+                    `%c STOP RTC RECOVERY: impossible to connect to client ${clientId}: ${reason}`,
+                    'background: darkred; color: white;',
+                );
+            }
+            return;
+        }
 
         clientInfos.fallbackTimeout = setTimeout(async () => {
             clientInfos.fallbackTimeout = undefined;
@@ -542,16 +596,21 @@ export class PeerToPeer {
             // hard reset: recreating a RTCPeerConnection
             if (debugShowLog)
                 console.log(
-                    `%c RTC RECOVERY: calling back client ${clientId} to salvage the connection ${pc.iceConnectionState}, reason: ${reason}`,
+                    `%c RTC RECOVERY: calling back client ${clientId} to salvage the connection ${pc.iceConnectionState} after ${backoffDelay}ms, reason: ${reason}`,
                     'background: darkorange; color: white;',
                 );
             this.removeClient(clientId);
-            await this._createClient(clientId);
-        }, delay);
+            const newClientInfos = this._createClient(clientId);
+            newClientInfos.backoffFactor = backoffFactor + 1;
+        }, backoffDelay);
     }
     // todo: do we try to salvage the connection after killing the zombie ?
     // Maybe the salvage should be done when the connection is dropped.
     _killPotentialZombie(clientId) {
+        if (this._stopped) {
+            this.removeClient(clientId);
+            return;
+        }
         const clientInfos = this.clientsInfos[clientId];
         if (!clientInfos || clientInfos.zombieTimeout) {
             return;
