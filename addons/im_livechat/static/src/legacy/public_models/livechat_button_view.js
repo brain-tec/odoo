@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { attr, clear, one, Model } from "@im_livechat/legacy/model";
+import { debounce } from "@web/core/utils/timing";
 
 import { getCookie, deleteCookie } from "web.utils.cookies";
 
@@ -126,7 +127,7 @@ Model({
         },
         /**
          * Called when the visitor leaves the livechat chatter the first time (first click on X button)
-         * this will deactivate the mail_channel, notify operator that visitor has left the channel.
+         * this will deactivate the discuss_channel, notify operator that visitor has left the channel.
          */
         leaveSession() {
             const cookie = getCookie("im_livechat_session");
@@ -480,7 +481,7 @@ Model({
         }),
         openChatDebounced: attr({
             compute() {
-                return _.debounce(this._openChat, 200, true);
+                return debounce(this._openChat, 200, true);
             },
         }),
         publicLivechatGlobalOwner: one("PublicLivechatGlobal", {

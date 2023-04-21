@@ -137,6 +137,14 @@ class TestPerformance(SavepointCaseWithUserDemo):
             # 'name' and 'value' are already in cache
             records.fetch(['name', 'value'])
 
+        with self.assertQueryCount(0):
+            # 'id' should not be fetched
+            records.fetch(['id', 'name', 'partner_id'])
+
+        with self.assertQueryCount(0):
+            # 'display_name' depends on name that should already be fetched
+            records.fetch(['id', 'display_name'])
+
     @warmup
     def test_search_fetch(self):
         """ Search and fetch all at once. """

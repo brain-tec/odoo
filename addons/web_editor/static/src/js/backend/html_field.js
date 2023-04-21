@@ -62,8 +62,9 @@ export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
                 stripHistoryIds(newValue) !== stripHistoryIds(newProps.editingValue) &&
                 stripHistoryIds(lastValue) !== stripHistoryIds(newValue)
             ) ||
-            !_.isEqual(lastRecordInfo, newRecordInfo) ||
-            !_.isEqual(lastCollaborationChannel, newCollaborationChannel))
+            JSON.stringify(lastRecordInfo) !== JSON.stringify(newRecordInfo) ||
+            JSON.stringify(lastCollaborationChannel) !== JSON.stringify(newCollaborationChannel)
+            )
         {
             this.widget.resetEditor(newValue, newProps.widgetArgs[0]);
             this.env.onWysiwygReset && this.env.onWysiwygReset();
@@ -132,7 +133,7 @@ export class HtmlField extends Component {
                 res_model: newProps.record.resModel,
                 res_id: newProps.record.resId,
             };
-            if (!_.isEqual(this._lastRecordInfo, newRecordInfo)) {
+            if (JSON.stringify(this._lastRecordInfo) !== JSON.stringify(newRecordInfo)) {
                 this.currentEditingValue = undefined;
             }
             this._lastRecordInfo = newRecordInfo;
@@ -668,6 +669,10 @@ export const htmlField = {
         };
         if ('collaborative' in options) {
             wysiwygOptions.collaborative = options.collaborative;
+            // Two supported triggers:
+            // 'start': Join the peerToPeer connection immediately
+            // 'focus': Join when the editable has focus
+            wysiwygOptions.collaborativeTrigger = options.collaborative_trigger || 'focus';
         }
         if ('allowCommandImage' in options) {
             // Set the option only if it is explicitly set in the view so a default

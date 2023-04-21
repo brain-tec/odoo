@@ -106,7 +106,7 @@ class Meeting(models.Model):
     videocall_location = fields.Char('Meeting URL', compute='_compute_videocall_location', store=True, copy=True)
     access_token = fields.Char('Invitation Token', store=True, copy=False, index=True)
     videocall_source = fields.Selection([('discuss', 'Discuss'), ('custom', 'Custom')], compute='_compute_videocall_source')
-    videocall_channel_id = fields.Many2one('mail.channel', 'Discuss Channel')
+    videocall_channel_id = fields.Many2one('discuss.channel', 'Discuss Channel')
     # visibility
     privacy = fields.Selection(
         [('public', 'Public'),
@@ -661,7 +661,8 @@ class Meeting(models.Model):
         if not self.env.su and private_fields:
             # display public and confidential events
             domain = AND([domain, ['|', ('privacy', '!=', 'private'), ('user_id', '=', self.env.user.id)]])
-            self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.simple_notification', {
+            self.env['bus.bus']._sendone(self.env.user.partner_id, 'simple_notification', {
+                'type': 'danger',
                 'title': _('Private Event Excluded'),
                 'message': _('Grouping by %s is not allowed on private events.', ', '.join([self._fields[field_name].string for field_name in private_fields]))
             })
@@ -755,7 +756,7 @@ class Meeting(models.Model):
         self.videocall_channel_id.channel_change_description(self.recurrence_id.name if self.recurrency else self.display_time)
 
     def _create_videocall_channel_id(self, name, partner_ids):
-        videocall_channel_id = self.env['mail.channel'].create_group(partner_ids, default_display_mode='video_full_screen', name=name)
+        videocall_channel_id = self.env['discuss.channel'].create_group(partner_ids, default_display_mode='video_full_screen', name=name)
         # if recurrent event, set channel to all other records of the same recurrency
         if self.recurrency:
             recurrent_events_without_channel = self.env['calendar.event'].search([
