@@ -17,16 +17,13 @@ It also enables the "optional products" feature.
     'data': [
         'views/product_template_views.xml',
         'views/sale_order_views.xml',
-        'views/templates.xml',
     ],
     'demo': [
         'data/sale_demo.xml',
     ],
     'assets': {
         'web.assets_backend': [
-            'sale/static/src/js/variant_mixin.js',
-            'sale_product_configurator/static/src/js/product_configurator_modal.js',
-            'sale_product_configurator/static/src/js/sale_product_field.js',
+            'sale_product_configurator/static/src/**/*',
         ],
     },
     'auto_install': True,

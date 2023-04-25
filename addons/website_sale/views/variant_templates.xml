@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="variants">
-        <t t-set="attribute_exclusions" t-value="product._get_attribute_exclusions(parent_combination, parent_name)"/>
+        <t t-set="attribute_exclusions" t-value="product._get_attribute_exclusions(parent_combination)"/>
         <ul t-attf-class="list-unstyled js_add_cart_variants mb-0 #{ul_class}" t-att-data-attribute_exclusions="json.dumps(attribute_exclusions)">
             <t t-foreach="product.valid_product_template_attribute_line_ids" t-as="ptal">
                 <!-- Attributes selection is hidden if there is only one value available and it's not a custom value -->
@@ -30,7 +30,7 @@
                                     t-att-data-is_single="single"
                                     t-att-data-is_single_and_custom="single_and_custom">
                                     <span t-field="ptav.name"/>
-                                    <t t-call="sale.badge_extra_price"/>
+                                    <t t-call="website_sale.badge_extra_price"/>
                                 </option>
                             </t>
                         </select>
@@ -55,7 +55,7 @@
                                                 t-att-data-is_single_and_custom="single_and_custom" />
                                             <div class="radio_input_value form-check-label">
                                                 <span t-field="ptav.name"/>
-                                                <t t-call="sale.badge_extra_price"/>
+                                                <t t-call="website_sale.badge_extra_price"/>
                                             </div>
                                         </div>
                                     </label>
@@ -84,7 +84,7 @@
                                         t-att-autocomplete="off"/>
                                     <div class="radio_input_value o_variant_pills_input_value">
                                         <span t-field="ptav.name"/>
-                                        <t t-call="sale.badge_extra_price"/>
+                                        <t t-call="website_sale.badge_extra_price"/>
                                     </div>
                                 </li>
                             </t>

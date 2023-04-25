@@ -4,7 +4,7 @@ import ajax from 'web.ajax';
 import Dialog from 'web.Dialog';
 import OwlDialog from 'web.OwlDialog';
 import ServicesMixin from 'web.ServicesMixin';
-import VariantMixin from 'sale.VariantMixin';
+import VariantMixin from 'website_sale.SaleVariantMixin';
 
 export const OptionalProductsModal = Dialog.extend(ServicesMixin, VariantMixin, {
     events:  Object.assign({}, Dialog.prototype.events, VariantMixin.events, {
