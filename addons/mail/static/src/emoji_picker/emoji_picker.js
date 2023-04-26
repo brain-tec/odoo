@@ -22,7 +22,7 @@ import { escapeRegExp } from "@web/core/utils/strings";
 
 /**
  *
- * @param {{ el:HTMLElement }} [ref]
+ * @param {import("@web/core/utils/hooks").Ref} [ref]
  * @param {Object} props
  * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
  * @param {function} [props.onSelect]
@@ -42,7 +42,7 @@ export function useEmojiPicker(ref, props, options = {}) {
     };
 
     /**
-     * @param {{ el: HTMLElement }} ref
+     * @param {import("@web/core/utils/hooks").Ref} ref
      */
     function add(ref, onSelect, { show = false } = {}) {
         const toggler = () => toggle(ref, onSelect);
@@ -295,8 +295,10 @@ export class EmojiPicker extends Component {
         this.recent[codepoints]++;
         browser.localStorage.setItem("mail.emoji.frequent", JSON.stringify(this.recent));
         this.gridRef.el.scrollTop = 0;
-        this.props.close();
-        this.props.onClose();
+        if (!ev.shiftKey) {
+            this.props.close();
+            this.props.onClose();
+        }
     }
 
     highlightActiveCategory() {

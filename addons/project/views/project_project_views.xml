@@ -55,7 +55,7 @@
                     <div class="oe_title">
                         <h1 class="d-flex flex-row">
                             <field name="is_favorite" nolabel="1" widget="boolean_favorite" class="me-2"/>
-                            <field name="name" class="o_text_overflow" placeholder="e.g. Office Party"/>
+                            <field name="name" options="{'line_breaks': False}" widget="text" class="o_text_overflow" placeholder="e.g. Office Party"/>
                         </h1>
                     </div>
                     <group>
@@ -191,7 +191,7 @@
                         <filter string="Project Manager" name="Manager" context="{'group_by': 'user_id'}"/>
                         <filter string="Stage" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
                         <filter string="Status" name="status" context="{'group_by': 'last_update_status'}"/>
-                        <filter string="Customer" name="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Tags" name="tags" context="{'group_by': 'tag_ids'}"/>
                         <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
