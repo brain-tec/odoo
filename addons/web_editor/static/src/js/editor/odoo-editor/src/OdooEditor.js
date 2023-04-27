@@ -1874,8 +1874,9 @@ export class OdooEditor extends EventTarget {
         let end = range.endContainer;
         // Let the DOM split and delete the range.
         const doJoin =
-            closestBlock(start) !== closestBlock(range.commonAncestorContainer) ||
-            closestBlock(end) !== closestBlock(range.commonAncestorContainer) ;
+            (closestBlock(start) !== closestBlock(range.commonAncestorContainer) ||
+            closestBlock(end) !== closestBlock(range.commonAncestorContainer))
+            && (closestBlock(start).tagName !== 'TD' && closestBlock(end).tagName !== 'TD');
         let next = nextLeaf(end, this.editable);
         const contents = range.extractContents();
         setSelection(start, nodeSize(start));
@@ -4382,18 +4383,25 @@ export class OdooEditor extends EventTarget {
             if (fragment.hasChildNodes()) {
                 this._applyCommand('insert', fragment);
             }
-        } else if (files.length && targetSupportsHtmlContent) {
-            this.addImagesFiles(files).then(html => {
-                const imageNodes = this._applyCommand('insert', this._prepareClipboardData(html));
-                if (imageNodes && this.options.dropImageAsAttachment) {
-                    // Mark images as having to be saved as attachments.
-                    for (const imageNode of imageNodes) {
-                        imageNode.classList.add('o_b64_image_to_save');
+        } else if ((files.length || clipboardHtml) && targetSupportsHtmlContent) {
+            const clipboardElem = this._prepareClipboardData(clipboardHtml);
+            // When copy pasting a table from the outside, a picture of the
+            // table can be included in the clipboard as an image file. In that
+            // particular case the html table is given a higher priority than
+            // the clipboard picture.
+            if (files.length && !clipboardElem.querySelector('table')) {
+                this.addImagesFiles(files).then(html => {
+                    const imageNodes = this._applyCommand('insert', this._prepareClipboardData(html));
+                    if (imageNodes && this.options.dropImageAsAttachment) {
+                        // Mark images as having to be saved as attachments.
+                        for (const imageNode of imageNodes) {
+                            imageNode.classList.add('o_b64_image_to_save');
+                        }
                     }
-                }
-            });
-        } else if (clipboardHtml && targetSupportsHtmlContent) {
-            this._applyCommand('insert', this._prepareClipboardData(clipboardHtml));
+                });
+            } else {
+                this._applyCommand('insert', clipboardElem);
+            }
         } else {
             const text = ev.clipboardData.getData('text/plain');
             const selectionIsInsideALink = !!closestElement(sel.anchorNode, 'a');
