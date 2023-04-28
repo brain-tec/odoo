@@ -43,6 +43,13 @@ export class MessageService {
         });
         message.body = markup(data.body);
         message.attachments.push(...attachments);
+        if (!message.isEmpty && this.store.hasLinkPreviewFeature) {
+            this.rpc(
+                "/mail/link_preview",
+                { message_id: message.id, clear: true },
+                { silent: true }
+            );
+        }
     }
 
     async delete(message) {
@@ -159,27 +166,27 @@ export class MessageService {
     }
 
     async react(message, content) {
-        const messageData = await this.rpc(
-            "/mail/message/add_reaction",
+        await this.rpc(
+            "/mail/message/reaction",
             {
+                action: "add",
                 content,
                 message_id: message.id,
             },
             { silent: true }
         );
-        this.insert(messageData);
     }
 
     async removeReaction(reaction) {
-        const messageData = await this.rpc(
-            "/mail/message/remove_reaction",
+        await this.rpc(
+            "/mail/message/reaction",
             {
+                action: "remove",
                 content: reaction.content,
                 message_id: reaction.messageId,
             },
             { silent: true }
         );
-        this.insert(messageData);
     }
 
     updateStarred(message, isStarred) {
@@ -356,6 +363,15 @@ export class MessageService {
                 ? rawPartner
                 : ["insert", rawPartner];
             const persona = this.personaService.insert({ ...partnerData, type: "partner" });
+            if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
+                reaction.personaLocalIds.push(persona.localId);
+            } else if (command !== "insert") {
+                personasToUnlink.add(persona.localId);
+            }
+        }
+        for (const rawGuest of data.guests) {
+            const [command, guestData] = Array.isArray(rawGuest) ? rawGuest : ["insert", rawGuest];
+            const persona = this.personaService.insert({ ...guestData, type: "guest" });
             if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
                 reaction.personaLocalIds.push(persona.localId);
             } else if (command !== "insert") {

@@ -282,17 +282,20 @@ class SaleAdvancePaymentInv(models.TransientModel):
         if self.advance_payment_method == 'percentage':
             percentage = self.amount / 100
         else:
-            percentage = self.fixed_amount / order.amount_total
+            percentage = self.fixed_amount / order.amount_total if order.amount_total else 1
 
         order_lines = order.order_line.filtered(lambda l: not l.display_type)
         base_downpayment_lines_values = self._prepare_base_downpayment_line_values(order)
 
-        tax_base_line_dicts = [line._convert_to_tax_base_line_dict(
-            analytic_distribution=line.analytic_distribution) for line in order_lines]
+        tax_base_line_dicts = [
+            line._convert_to_tax_base_line_dict(
+                analytic_distribution=line.analytic_distribution,
+                handle_price_include=False
+            )
+            for line in order_lines
+        ]
         computed_taxes = self.env['account.tax']._compute_taxes(
-            tax_base_line_dicts,
-            handle_price_include=False
-        )
+            tax_base_line_dicts)
         down_payment_values = []
         for line, tax_repartition in computed_taxes['base_lines_to_update']:
             taxes = line['taxes'].flatten_taxes_hierarchy()

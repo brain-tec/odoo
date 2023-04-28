@@ -365,6 +365,36 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_record:contains(gnap)");
     });
 
+    QUnit.test("kanban rendering with class and style attributes", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban class="myCustomClass" style="border: 1px solid red;">
+                    <templates><t t-name="kanban-box">
+                        <field name="foo"/>
+                    </t></templates>
+                </kanban>
+            `,
+        });
+        assert.containsNone(
+            target,
+            ".o_view_controller[style*='border: 1px solid red;'], .o_view_controller [style*='border: 1px solid red;']",
+            "style attribute should not be copied"
+        );
+        assert.containsOnce(
+            target,
+            ".o_view_controller.o_kanban_view.myCustomClass",
+            "class attribute should be passed to the view controller"
+        );
+        assert.containsOnce(
+            target,
+            ".myCustomClass",
+            "class attribute should ONLY be passed to the view controller"
+        );
+    });
+
     QUnit.test("generic tags are case insensitive", async function (assert) {
         await makeView({
             type: "kanban",
@@ -10069,6 +10099,36 @@ QUnit.module("Views", (hooks) => {
             await triggerEvent(firstCard, null, "keydown", { key: "Enter" });
         }
     );
+
+    QUnit.test("keyboard navigation on kanban when the kanban has a oe_kanban_global_click class", async (assert) => {
+        assert.expect(1);
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                `<kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <field name="name"/>
+                            </div>
+                            <a name="action_test" type="object" />
+                        </t>
+                    </templates>
+                </kanban>`,
+            selectRecord(recordId) {
+                assert.strictEqual(
+                    recordId,
+                    1,
+                    "should call its selectRecord prop with the selected record"
+                );
+            },
+        });
+        const firstCard = getCard(0);
+        firstCard.focus();
+        await triggerEvent(firstCard, null, "keydown", { key: "Enter" });
+    });
 
     QUnit.test("set cover image", async (assert) => {
         assert.expect(10);

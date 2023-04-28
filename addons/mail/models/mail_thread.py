@@ -454,6 +454,10 @@ class MailThread(models.AbstractModel):
         if any(message.message_type != 'comment' for message in messages):
             raise exceptions.UserError(_("Only messages type comment can have their content updated"))
 
+    @api.model
+    def _get_from_request_or_raise(self, request, thread_id):
+        return self.search([("id", "=", thread_id)])
+
     # ------------------------------------------------------------
     # FIELDS HELPERS
     # ------------------------------------------------------------
@@ -3951,16 +3955,6 @@ class MailThread(models.AbstractModel):
             self.with_context(lang=lang)._message_auto_subscribe_notify(pids, template)
 
         return True
-
-    # ------------------------------------------------------
-    # DISCORDUSS API
-    # ------------------------------------------------------
-
-    def _message_add_reaction_after_hook(self, message, content):
-        """ Hook to add custom behavior after having added a reaction to a message. """
-
-    def _message_remove_reaction_after_hook(self, message, content):
-        """ Hook to add custom behavior after having removed a reaction from a message. """
 
     # ------------------------------------------------------
     # THREAD MESSAGE UPDATE

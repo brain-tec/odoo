@@ -1222,15 +1222,10 @@ class Task(models.Model):
         if not self:
             return groups
 
-        local_msg_vals = dict(msg_vals or {})
         self.ensure_one()
 
         project_user_group_id = self.env.ref('project.group_project_user').id
         new_group = ('group_project_user', lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'], {})
-        if not self.user_ids and not self.is_closed:
-            take_action = self._notify_get_action_link('assign', **local_msg_vals)
-            project_actions = [{'url': take_action, 'title': _('Assign to me')}]
-            new_group[2]['actions'] = project_actions
         groups = [new_group] + groups
 
         if self.project_privacy_visibility == 'portal':
@@ -1561,3 +1556,10 @@ class Task(models.Model):
             datetime.combine(fields.Date.from_string(date_from), time.min).replace(tzinfo=UTC),
             datetime.combine(fields.Date.from_string(date_to), time.max).replace(tzinfo=UTC)
         )
+
+    def action_redirect_to_project_task_form(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web#model=project.task&id=%s&action=%s&view_type=form' % (self.id, self.env.ref('project.action_view_my_task').id),
+            'target': 'new',
+        }
