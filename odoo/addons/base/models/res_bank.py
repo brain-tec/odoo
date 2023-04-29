@@ -33,19 +33,19 @@ class Bank(models.Model):
     def name_get(self):
         result = []
         for bank in self:
-            name = bank.name + (bank.bic and (' - ' + bank.bic) or '')
+            name = (bank.name or '') + (bank.bic and (' - ' + bank.bic) or '')
             result.append((bank.id, name))
         return result
 
     @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         domain = domain or []
         if name:
             name_domain = ['|', ('bic', '=ilike', name + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
                 name_domain = ['&', '!'] + name_domain[1:]
             domain = domain + name_domain
-        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
+        return self._search(domain, limit=limit, order=order)
 
     @api.onchange('country')
     def _onchange_country_id(self):
