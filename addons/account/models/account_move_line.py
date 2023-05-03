@@ -459,10 +459,13 @@ class AccountMoveLine(models.Model):
     def _compute_name(self):
         for line in self:
             if line.display_type == 'payment_term':
-                if line.move_id.payment_reference:
-                    line.name = line.move_id.payment_reference
-                elif not line.name:
-                    line.name = ''
+                if not line.name:
+                    term_lines = line.move_id.line_ids.filtered(lambda l: l.display_type == 'payment_term') | line
+                    name = line.move_id.payment_reference or ''
+                    if len(term_lines) > 1:
+                        index = term_lines._ids.index(line.id) + 1
+                        name = _('%s installment #%s', name, index).lstrip()
+                    line.name = name
                 continue
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
@@ -852,18 +855,15 @@ class AccountMoveLine(models.Model):
                 tax_ids = self.product_id.taxes_id.filtered(lambda tax: tax.company_id == self.move_id.company_id)
             else:
                 tax_ids = self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'sale')
-            if not tax_ids and self.display_type == 'product':
-                tax_ids = self.move_id.company_id.account_sale_tax_id
+
         elif self.move_id.is_purchase_document(include_receipts=True):
             # In invoice.
             if self.product_id.supplier_taxes_id:
                 tax_ids = self.product_id.supplier_taxes_id.filtered(lambda tax: tax.company_id == self.move_id.company_id)
             else:
                 tax_ids = self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'purchase')
-            if not tax_ids and self.display_type == 'product':
-                tax_ids = self.move_id.company_id.account_purchase_tax_id
+
         else:
-            # Miscellaneous operation.
             tax_ids = self.account_id.tax_ids
 
         if self.company_id and tax_ids:

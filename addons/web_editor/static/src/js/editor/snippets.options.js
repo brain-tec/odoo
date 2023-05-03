@@ -5774,8 +5774,8 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
             1920: '1920px',
         };
         widths[img.naturalWidth] = sprintf(_t("%spx"), img.naturalWidth);
-        widths[optimizedWidth] = sprintf(_t("%dpx (Suggested)"), optimizedWidth);
-        widths[maxWidth] = sprintf(_t("%dpx (Original)"), maxWidth);
+        widths[optimizedWidth] = sprintf(_t("%spx (Suggested)"), optimizedWidth);
+        widths[maxWidth] = sprintf(_t("%spx (Original)"), maxWidth);
         return Object.entries(widths)
             .filter(([width]) => width <= maxWidth)
             .sort(([v1], [v2]) => v1 - v2);
@@ -7314,7 +7314,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
     backgroundType: function (previewMode, widgetValue, params) {
         this.$target.toggleClass('o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
         this.$target.css('background-position', '');
-        this.$target.css('background-size', '');
+        this.$target.css('background-size', widgetValue !== 'repeat-pattern' ? '' : '100px');
     },
     /**
      * Saves current background position and enables overlay.
