@@ -15,10 +15,6 @@ class TestFrontend(odoo.tests.HttpCase):
                                                  'account_type': 'asset_receivable',
                                                  'reconcile': True})
 
-        printer = self.env['restaurant.printer'].create({
-            'name': 'Kitchen Printer',
-            'proxy_ip': 'localhost',
-        })
         drinks_category = self.env['pos.category'].create({'name': 'Drinks'})
 
         main_company = self.env.ref('base.main_company')
@@ -43,7 +39,6 @@ class TestFrontend(odoo.tests.HttpCase):
             'iface_splitbill': True,
             'iface_printbill': True,
             'iface_orderline_notes': True,
-            'printer_ids': [(4, printer.id)],
             'iface_start_categ_id': drinks_category.id,
             'start_category': True,
         })
@@ -198,10 +193,13 @@ class TestFrontend(odoo.tests.HttpCase):
         order2 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0002')])
         order3 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0003')])
         order4 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0004')])
+        order5 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0005')])
+
         self.assertTrue(order1.is_tipped and order1.tip_amount == 0.40)
         self.assertTrue(order2.is_tipped and order2.tip_amount == 1.00)
         self.assertTrue(order3.is_tipped and order3.tip_amount == 1.50)
         self.assertTrue(order4.is_tipped and order4.tip_amount == 1.00)
+        self.assertTrue(order5.is_tipped and order5.tip_amount == 0.00)
 
     def test_06_split_bill_screen(self):
         self.pos_config.with_user(self.env.ref('base.user_admin')).open_ui()
