@@ -13,6 +13,7 @@ import {
     pasteFiles,
     waitUntil,
 } from "@mail/../tests/helpers/test_utils";
+import { Command } from "@mail/../tests/helpers/command";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 const { inputFiles } = file;
@@ -267,21 +268,6 @@ QUnit.test(
     }
 );
 
-QUnit.test('do not send typing notification on typing "/" command', async (assert) => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({ name: "channel" });
-    const { openDiscuss } = await start({
-        async mockRPC(route, args) {
-            if (route === "/discuss/channel/notify_typing") {
-                assert.step(`notify_typing:${args.is_typing}`);
-            }
-        },
-    });
-    await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "/");
-    assert.verifySteps([], "No rpc done");
-});
-
 QUnit.test("composer text input cleared on message post", async (assert) => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "au-secours-aidez-moi" });
@@ -360,49 +346,6 @@ QUnit.test(
     }
 );
 
-QUnit.test(
-    'do not send typing notification on typing after selecting suggestion from "/" command',
-    async (assert) => {
-        const pyEnv = await startServer();
-        const channelId = pyEnv["discuss.channel"].create({ name: "channel" });
-        const { openDiscuss } = await start({
-            async mockRPC(route, args) {
-                if (route === "/discuss/channel/notify_typing") {
-                    assert.step(`notify_typing:${args.is_typing}`);
-                }
-            },
-        });
-        await openDiscuss(channelId);
-        await insertText(".o-mail-Composer-input", "/");
-        await click(".o-mail-Composer-suggestion");
-        await insertText(".o-mail-Composer-input", " is user?");
-        assert.verifySteps([], "No rpc done");
-    }
-);
-
-QUnit.test("add an emoji after a command", async (assert) => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({
-        name: "General",
-        channel_type: "channel",
-    });
-    const { openDiscuss } = await start();
-    await openDiscuss(channelId);
-    assert.containsNone($, ".o-mail-Composer-suggestionList .o-open");
-    assert.strictEqual($(".o-mail-Composer-input").val(), "");
-    await insertText(".o-mail-Composer-input", "/");
-    await click(".o-mail-Composer-suggestion");
-    assert.strictEqual(
-        $(".o-mail-Composer-input").val().replace(/\s/, " "),
-        "/who ",
-        "previous content + used command + additional whitespace afterwards"
-    );
-
-    await click("button[aria-label='Emojis']");
-    await click(".o-mail-Emoji:contains(😊)");
-    assert.strictEqual($(".o-mail-Composer-input").val().replace(/\s/, " "), "/who 😊");
-});
-
 QUnit.test("add an emoji after a partner mention", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({
@@ -412,8 +355,8 @@ QUnit.test("add an emoji after a partner mention", async (assert) => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "Mario Party",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: partnerId }],
+            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: partnerId }),
         ],
     });
     const { openDiscuss } = await start();
@@ -548,8 +491,8 @@ QUnit.test("leave command on chat", async (assert) => {
     const partnerId = pyEnv["res.partner"].create({ name: "Chuck Norris" });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: partnerId }],
+            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
     });
@@ -591,8 +534,8 @@ QUnit.test(
         const partnerId = pyEnv["res.partner"].create({ name: "Marc Demo" });
         const channelId = pyEnv["discuss.channel"].create({
             channel_member_ids: [
-                [0, 0, { partner_id: pyEnv.currentPartnerId }],
-                [0, 0, { partner_id: partnerId }],
+                Command.create({ partner_id: pyEnv.currentPartnerId }),
+                Command.create({ partner_id: partnerId }),
             ],
             channel_type: "chat",
         });
@@ -639,6 +582,19 @@ QUnit.test("quick edit last self-message from UP arrow", async (assert) => {
 
     await afterNextRender(() => triggerHotkey("ArrowUp"));
     assert.containsOnce($, ".o-mail-Message .o-mail-Composer");
+
+    await afterNextRender(() => triggerHotkey("Escape"));
+    assert.containsNone($, ".o-mail-Message .o-mail-Composer");
+    assert.strictEqual(document.activeElement, $(".o-mail-Composer-input")[0]);
+
+    // non-empty composer should not trigger quick edit
+    await insertText(".o-mail-Composer-input", "Shrek");
+    await triggerHotkey("ArrowUp");
+    // Navigable List relies on useEffect, which behaves with 2 animation frames
+    // Wait 2 animation frames to make sure it doesn't show quick edit
+    await nextTick();
+    await nextTick();
+    assert.containsNone($, ".o-mail-Message .o-mail-Composer");
 });
 
 QUnit.test("Select composer suggestion via Enter does not send the message", async (assert) => {
@@ -651,8 +607,8 @@ QUnit.test("Select composer suggestion via Enter does not send the message", asy
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: partnerId }],
+            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: partnerId }),
         ],
     });
     const { openDiscuss } = await start({

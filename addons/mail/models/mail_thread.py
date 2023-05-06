@@ -296,8 +296,9 @@ class MailThread(models.AbstractModel):
                 # based on tracked field to stay consistent with write
                 # we don't consider that a falsy field is a change, to stay consistent with previous implementation,
                 # but we may want to change that behaviour later.
-                thread._message_track_post_template(changes)
-
+                if changes:
+                    self.env.cr.precommit.add(thread._track_post_template_finalize)  # call to _track_post_template_finalize bound to this record
+                    self.env.cr.precommit.data.setdefault(f'mail.tracking.create.{self._name}.{thread.id}', changes)
         return threads
 
     def write(self, values):
@@ -550,6 +551,11 @@ class MailThread(models.AbstractModel):
         for id_ in self.ids:
             authors[id_] = author
 
+    def _track_post_template_finalize(self):
+        """Call the tracking template method with right values from precommit."""
+        self._message_track_post_template(self.env.cr.precommit.data.pop(f'mail.tracking.create.{self._name}.{self.id}', []))
+        self.env.flush_all()
+
     def _track_set_log_message(self, message):
         """ Link tracking to a message logged as body, in addition to subtype
         description (if set) and tracking values that make the core content of
@@ -664,6 +670,7 @@ class MailThread(models.AbstractModel):
                 continue
 
             composition_mode = post_kwargs.pop('composition_mode', default_composition_mode)
+            post_kwargs.setdefault('message_type', 'auto_comment')
             if composition_mode == 'mass_mail':
                 cleaned_self.message_mail_with_source(template, **post_kwargs)
             else:
@@ -1640,16 +1647,23 @@ class MailThread(models.AbstractModel):
                 stored_date = datetime.datetime.now()
             msg_dict['date'] = stored_date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
 
-        parent_message = self._get_parent_message(msg_dict)
-        if parent_message:
-            msg_dict['parent_id'] = parent_message.id
-            msg_dict['is_internal'] = bool(parent_message.subtype_id and parent_message.subtype_id.internal)
-
+        msg_dict.update(self._message_parse_extract_from_parent(self._get_parent_message(msg_dict)))
         msg_dict['is_bounce'] = self._message_parse_is_bounce(message, msg_dict)
         msg_dict.update(self._message_parse_extract_payload(message, msg_dict, save_original=save_original))
         if msg_dict['is_bounce']:
             msg_dict.update(self._message_parse_extract_bounce(message, msg_dict))
         return msg_dict
+
+    def _message_parse_extract_from_parent(self, parent_message):
+        """Derive message values from the parent."""
+        if parent_message:
+            parent_is_internal = bool(parent_message.subtype_id and parent_message.subtype_id.internal)
+            parent_is_auto_comment = parent_message.message_type == 'auto_comment'
+            return {
+                'parent_id': parent_message.id,
+                'is_internal': parent_is_internal and not parent_is_auto_comment
+            }
+        return {}
 
     def _get_bounced_message_data(self, message, message_dict):
         """Find the original <mail.message> and the bounced email references based on an incoming email.

@@ -190,6 +190,9 @@ export class Message extends Component {
         if (this.props.message.type === "notification") {
             return _t("System notification");
         }
+        if (this.props.message.type === "auto_comment") {
+            return _t("Automated message");
+        }
         if (!this.props.message.isDiscussion && this.props.message.type !== "user_notification") {
             return _t("Note");
         }
@@ -456,8 +459,12 @@ export class Message extends Component {
         this.state.isEditing = false;
     }
 
-    onClickNotificationIcon(ev) {
-        this.popover.open(ev.target, { message: this.message });
+    onClickNotification(ev) {
+        if (this.message.failureNotifications.length > 0) {
+            this.onClickFailure(ev);
+        } else {
+            this.popover.open(ev.target, { message: this.message });
+        }
     }
 
     onClickFailure(ev) {

@@ -54,6 +54,14 @@ function _getExtractorFrom(criterion) {
 }
 
 /**
+ * @template T
+ * @param {T | T[]} value
+ */
+export function ensureArray(value) {
+    return value && typeof value === "object" && value[Symbol.iterator] ? [...value] : [value];
+}
+
+/**
  * Returns the array of elements contained in both arrays.
  *
  * @template T
@@ -205,15 +213,16 @@ export function unique(array) {
 }
 
 /**
- * @template T1, T2, T
+ * @template T1, T2
  * @param {T1[]} array1
  * @param {T2[]} array2
- * @returns {T[]}
+ * @param {boolean} [fill=false]
+ * @returns {[T1, T2][]}
  */
-export function zip(array1, array2) {
+export function zip(array1, array2, fill = false) {
     const result = [];
-    const minLength = Math.min(array1.length, array2.length);
-    for (let i = 0; i < minLength; i++) {
+    const getLength = fill ? Math.max : Math.min;
+    for (let i = 0; i < getLength(array1.length, array2.length); i++) {
         result.push([array1[i], array2[i]]);
     }
     return result;
