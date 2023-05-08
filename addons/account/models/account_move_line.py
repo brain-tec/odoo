@@ -456,7 +456,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.currency_id = line.currency_id or line.company_id.currency_id
 
-    @api.depends('product_id', 'journal_id')
+    @api.depends('product_id')
     def _compute_name(self):
         for line in self:
             if line.display_type == 'payment_term':
@@ -1062,6 +1062,8 @@ class AccountMoveLine(models.Model):
                     is_refund = True
                 elif tax_type == {'purchase'} and line.debit == 0:
                     is_refund = True
+                if line.tax_repartition_line_id.factor_percent < 0:
+                    is_refund = not is_refund
             line.is_refund = is_refund
 
     @api.depends('date_maturity')
@@ -1336,6 +1338,21 @@ class AccountMoveLine(models.Model):
             else:
                 vals['balance'] = vals.pop('debit', 0) - vals.pop('credit', 0)
         return vals
+
+    def _prepare_create_values(self, vals_list):
+        result_vals_list = super()._prepare_create_values(vals_list)
+        for init_vals, res_vals in zip(vals_list, result_vals_list):
+            # Allow computing the balance based on the amount_currency if it wasn't specified in the create vals.
+            if (
+                'amount_currency' in init_vals
+                and 'balance' not in init_vals
+                and 'debit' not in init_vals
+                and 'credit' not in init_vals
+            ):
+                res_vals.pop('balance', 0)
+                res_vals.pop('debit', 0)
+                res_vals.pop('credit', 0)
+        return result_vals_list
 
     @contextmanager
     def _sync_invoice(self, container):
@@ -2330,7 +2347,11 @@ class AccountMoveLine(models.Model):
                 raise UserError(_("Entries are not from the same account: %s != %s")
                                 % (account.display_name, line.account_id.display_name))
 
-        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency))
+        if self._context.get('reduced_line_sorting'):
+            sorting_f = lambda line: (line.date_maturity or line.date, line.currency_id)
+        else:
+            sorting_f = lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency)
+        sorted_lines = self.sorted(key=sorting_f)
 
         # ==== Collect all involved lines through the existing reconciliation ====
 
