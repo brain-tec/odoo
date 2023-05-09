@@ -837,14 +837,14 @@ export class PosGlobalState extends PosModel {
         const orderCost = order.get_total_cost();
         const orderMargin = orderPriceWithoutTax - orderCost;
 
-        const costCurrency = this.format_currency(product.standard_price);
-        const marginCurrency = this.format_currency(margin);
+        const costCurrency = this.env.utils.formatCurrency(product.standard_price);
+        const marginCurrency = this.env.utils.formatCurrency(margin);
         const marginPercent = priceWithoutTax
             ? Math.round((margin / priceWithoutTax) * 10000) / 100
             : 0;
-        const orderPriceWithoutTaxCurrency = this.format_currency(orderPriceWithoutTax);
-        const orderCostCurrency = this.format_currency(orderCost);
-        const orderMarginCurrency = this.format_currency(orderMargin);
+        const orderPriceWithoutTaxCurrency = this.env.utils.formatCurrency(orderPriceWithoutTax);
+        const orderCostCurrency = this.env.utils.formatCurrency(orderCost);
+        const orderMarginCurrency = this.env.utils.formatCurrency(orderMargin);
         const orderMarginPercent = orderPriceWithoutTax
             ? Math.round((orderMargin / orderPriceWithoutTax) * 10000) / 100
             : 0;
@@ -886,7 +886,7 @@ export class PosGlobalState extends PosModel {
             otherPaymentMethods.forEach((pm) => {
                 if (pm.type === "bank") {
                     state.payments[pm.id] = {
-                        counted: this.round_decimals_currency(pm.amount),
+                        counted: this.env.utils.roundCurrency(pm.amount),
                         difference: 0,
                         number: pm.number,
                     };
@@ -958,6 +958,7 @@ export class PosGlobalState extends PosModel {
 
         return renderToString("CustomerFacingDisplayOrder", {
             pos: this,
+            formatCurrency: this.env.utils.formatCurrency,
             origin: window.location.origin,
             order,
             productImages,
@@ -1490,63 +1491,6 @@ export class PosGlobalState extends PosModel {
         return floatIsZero(qty, this.dp["Product Unit of Measure"]);
     }
 
-    formatProductQty(qty) {
-        return formatFloat(qty, {
-            digits: [true, this.dp["Product Unit of Measure"]],
-        });
-    }
-
-    format_currency(amount, precision) {
-        amount = this.format_currency_no_symbol(amount, precision, this.currency);
-
-        if (this.currency.position === "after") {
-            return amount + " " + (this.currency.symbol || "");
-        } else {
-            return (this.currency.symbol || "") + " " + amount;
-        }
-    }
-
-    format_currency_no_symbol(amount, precision, currency) {
-        if (!currency) {
-            currency = this.currency;
-        }
-        var decimals = currency.decimal_places;
-
-        if (precision && this.dp[precision] !== undefined) {
-            decimals = this.dp[precision];
-        }
-
-        if (typeof amount === "number") {
-            amount = round_di(amount, decimals).toFixed(decimals);
-            amount = formatFloat(round_di(amount, decimals), {
-                digits: [69, decimals],
-            });
-        }
-
-        return amount;
-    }
-
-    format_pr(value, precision) {
-        var decimals =
-            precision > 0 ? Math.max(0, Math.ceil(Math.log(1.0 / precision) / Math.log(10))) : 0;
-        return value.toFixed(decimals);
-    }
-
-    round_decimals_currency(value) {
-        const decimals = this.currency.decimal_places;
-        return parseFloat(round_di(value, decimals).toFixed(decimals));
-    }
-
-    /**
-     * (value = 1.0000, decimals = 2) => '1'
-     * (value = 1.1234, decimals = 2) => '1.12'
-     * @param {number} value amount to format
-     */
-    formatFixed(value) {
-        const currency = this.currency || { decimal_places: 2 };
-        return `${Number(value.toFixed(currency.decimal_places || 0))}`;
-    }
-
     disallowLineQuantityChange() {
         return false;
     }
@@ -2069,7 +2013,7 @@ export class Orderline extends PosModel {
                             _t(
                                 "The requested quantity to be refunded is higher than the refundable quantity of %s."
                             ),
-                            this.pos.formatProductQty(maxQtyToRefund)
+                            this.pos.env.utils.formatProductQty(maxQtyToRefund)
                         ),
                     });
                     return false;
@@ -2378,8 +2322,8 @@ export class Orderline extends PosModel {
             return this.compute_all(product_taxes, lst_price, 1, this.pos.currency.rounding)
                 .total_included;
         }
-        var digits = this.pos.dp['Product Price'];
-        return lst_price.toFixed(digits)
+        var digits = this.pos.dp["Product Price"];
+        return lst_price.toFixed(digits);
     }
     get_price_without_tax() {
         return this.get_all_prices().priceWithoutTax;
@@ -3399,7 +3343,9 @@ export class Order extends PosModel {
         var self = this;
         this.pricelist = pricelist;
 
-        var lines_to_recompute = this.get_orderlines().filter((line) => !(line.price_manually_set || line.price_automatically_set));
+        var lines_to_recompute = this.get_orderlines().filter(
+            (line) => !(line.price_manually_set || line.price_automatically_set)
+        );
         lines_to_recompute.forEach((line) => {
             line.set_unit_price(
                 line.product.get_price(self.pricelist, line.get_quantity(), line.get_price_extra())
@@ -3650,9 +3596,14 @@ export class Order extends PosModel {
         return [];
     }
     _reduce_total_discount_callback(sum, orderLine) {
-        sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-        if (orderLine.display_discount_policy() === 'without_discount'){
-            sum += ((orderLine.get_taxed_lst_unit_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+        sum +=
+            orderLine.get_unit_price() *
+            (orderLine.get_discount() / 100) *
+            orderLine.get_quantity();
+        if (orderLine.display_discount_policy() === "without_discount") {
+            sum +=
+                (orderLine.get_taxed_lst_unit_price() - orderLine.get_unit_price()) *
+                orderLine.get_quantity();
         }
         return sum;
     }
