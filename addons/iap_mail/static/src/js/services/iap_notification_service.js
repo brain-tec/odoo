@@ -1,21 +1,18 @@
 /** @odoo-module **/
 
 import { Markup } from 'web.utils';
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
 export const iapNotificationService = {
     dependencies: ["bus_service", "notification"],
 
     start(env, { bus_service, notification }) {
-        bus_service.addEventListener('notification', ({ detail: notifications }) => {
-            for (const { payload, type } of notifications) {
-                if (type === 'iap_notification') {
-                    if (payload.error_type == 'success') {
-                        displaySuccessIapNotification(payload);
-                    } else if (payload.error_type == 'danger') {
-                        displayFailureIapNotification(payload);
-                    }
-                }
+        bus_service.subscribe("iap_notification", (payload) => {
+            if (payload.error_type == "success") {
+                displaySuccessIapNotification(payload);
+            } else if (payload.error_type == "danger") {
+                displayFailureIapNotification(payload);
             }
         });
         bus_service.start();
@@ -33,7 +30,10 @@ export const iapNotificationService = {
          * Displays the IAP failure notification on user's screen
          */
         function displayFailureIapNotification(notif) {
-            const message = Markup`<a class='btn btn-link' href='${notif.url}' target='_blank' ><i class='fa fa-arrow-right'></i> ${env._t("Buy more credits")}</a>`;
+            // ℹ️ `_t` can only be inlined directly inside JS template literals
+            // after Babel has been updated to version 2.12.
+            const translatedText = _t("Buy more credits");
+            const message = Markup`<a class='btn btn-link' href='${notif.url}' target='_blank' ><i class='fa fa-arrow-right'></i> ${translatedText}</a>`;
             notification.add(message, {
                 type: notif.error_type,
                 title: notif.title

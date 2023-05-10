@@ -1250,6 +1250,7 @@ class AccountMove(models.Model):
                             is_refund=move.move_type in ('out_refund', 'in_refund'),
                             handle_price_include=False,
                         ))
+                kwargs['is_company_currency_requested'] = move.currency_id != move.company_id.currency_id
                 move.tax_totals = self.env['account.tax']._prepare_tax_totals(**kwargs)
                 rounding_line = move.line_ids.filtered(lambda l: l.display_type == 'rounding')
                 if rounding_line:
@@ -4228,7 +4229,7 @@ class AccountMove(models.Model):
             force_email_company=force_email_company, force_email_lang=force_email_lang
         )
         subtitles = [render_context['record'].name]
-        if self.invoice_date_due:
+        if self.invoice_date_due and self.payment_state not in ('in_payment', 'paid'):
             subtitles.append(_('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
                            amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
                            date=format_date(self.env, self.invoice_date_due, date_format='short', lang_code=render_context.get('lang'))
