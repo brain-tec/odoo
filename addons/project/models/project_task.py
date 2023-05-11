@@ -6,7 +6,7 @@ from pytz import UTC
 from collections import defaultdict
 from datetime import timedelta, datetime, time
 
-from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _
+from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _, _lt
 from odoo.addons.rating.models import rating_data
 from odoo.addons.web_editor.controllers.main import handle_history_divergence
 from odoo.exceptions import UserError, ValidationError, AccessError
@@ -1017,6 +1017,16 @@ class Task(models.Model):
                         task.state = '04_waiting_normal'
             if vals['state'] in CLOSED_STATES:
                 task.date_last_stage_update = now
+            if "stage_id" not in vals:
+                if len(self) > 1:
+                    task_ids_per_stage = defaultdict(list)
+                    for task in self:
+                        task_ids_per_stage[task.stage_id].append(task.id)
+                    for stage, task_ids in task_ids_per_stage.items():
+                        tasks = self.browse(task_ids)
+                        tasks._track_set_log_message(_lt("Current Stage: %s", stage.name))
+                else:
+                    self._track_set_log_message(_("Current Stage: %s", self.stage_id.name))
 
         self._task_message_auto_subscribe_notify({task: task.user_ids - old_user_ids[task] - self.env.user for task in self})
         return result
@@ -1345,12 +1355,6 @@ class Task(models.Model):
         if not self.description and message.subtype_id == self._creation_subtype() and self.partner_id == message.author_id:
             self.description = message.body
         return super(Task, self)._message_post_after_hook(message, msg_vals)
-
-    def action_assign_to_me(self):
-        self.write({'user_ids': [(4, self.env.user.id)]})
-
-    def action_unassign_me(self):
-        self.write({'user_ids': [Command.unlink(self.env.uid)]})
 
     def _get_all_subtasks(self):
         return self.browse(set.union(set(), *self._get_subtask_ids_per_task_id().values()))
