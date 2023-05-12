@@ -97,9 +97,10 @@ class IrAttachment(models.Model):
         """
 
         def is_xml(attachment):
-            # XML attachments received by mail have a 'text/plain' mimetype.
-            # Therefore, if content start with '<?xml', it is considered as XML.
-            is_text_plain_xml = 'text/plain' in attachment.mimetype and attachment.raw.startswith(b'<?xml')
+            # XML attachments received by mail have a 'text/plain' mimetype (cfr. context key:
+            # 'attachments_mime_plainxml'). Therefore, if content start with '<?xml', or if the filename ends with
+            # '.xml', it is considered as XML.
+            is_text_plain_xml = 'text/plain' in attachment.mimetype and (attachment.raw.startswith(b'<?xml') or attachment.name.endswith('.xml'))
             return attachment.mimetype.endswith('/xml') or is_text_plain_xml
 
         return [
@@ -135,7 +136,7 @@ class IrAttachment(models.Model):
         for attachement in self:
             supported_formats = attachement._get_edi_supported_formats()
             for supported_format in supported_formats:
-                if supported_format['check'](self):
+                if supported_format['check'](attachement):
                     to_process += supported_format['decoder'](attachement.name, attachement.raw)
 
         to_process.sort(key=lambda x: x['sort_weight'])

@@ -52,6 +52,7 @@ EAS_MAPPING = {
     'CY': {'9928': 'vat'},
     'CZ': {'9929': 'vat'},
     'DE': {'9930': 'vat'},
+    'DK': {'0198': 'vat'},
     'EE': {'9931': 'vat'},
     'ES': {'9920': 'vat'},
     'FI': {'0213': 'vat'},
@@ -62,6 +63,8 @@ EAS_MAPPING = {
     'HR': {'9934': 'vat'},
     'HU': {'9910': 'vat'},
     'IE': {'9935': 'vat'},
+    'IS': {'0196': 'vat'},
+    'IT': {'0210': 'l10n_it_codice_fiscale'},
     'LI': {'9936': 'vat'},
     'LT': {'9937': 'vat'},
     'LU': {'9938': 'vat'},
@@ -281,7 +284,14 @@ class AccountEdiCommon(models.AbstractModel):
         else:
             return
         if not new and invoice.move_type != move_type:
-            return
+            # with an email alias to create account_move, first the move is created (using alias_defaults, which
+            # contains move_type = 'out_invoice') then the attachment is decoded, if it represents a credit note,
+            # the move type needs to be changed to 'out_refund'
+            types = {move_type, invoice.move_type}
+            if types == {'out_invoice', 'out_refund'} or types == {'in_invoice', 'in_refund'}:
+                invoice.move_type = move_type
+            else:
+                return
 
         # Update the invoice.
         invoice.move_type = move_type
@@ -317,7 +327,7 @@ class AccountEdiCommon(models.AbstractModel):
                 # (Windows or Linux style) and/or the name of the xml instead of the pdf.
                 # Get only the filename with a pdf extension.
                 name = attachment_name.text.split('\\')[-1].split('/')[-1].split('.')[0] + '.pdf'
-                attachments |= self.env['ir.attachment'].create({
+                attachment = self.env['ir.attachment'].create({
                     'name': name,
                     'res_id': invoice.id,
                     'res_model': 'account.move',
@@ -325,6 +335,13 @@ class AccountEdiCommon(models.AbstractModel):
                     'type': 'binary',
                     'mimetype': 'application/pdf',
                 })
+                # Upon receiving an email (containing an xml) with a configured alias to create invoice, the xml is
+                # set as the main_attachment. To be rendered in the form view, the pdf should be the main_attachment.
+                if invoice.message_main_attachment_id and \
+                        invoice.message_main_attachment_id.name.endswith('.xml') and \
+                        'pdf' not in invoice.message_main_attachment_id.mimetype:
+                    invoice.message_main_attachment_id = attachment
+                attachments |= attachment
         if attachments:
             invoice.with_context(no_new_invoice=True).message_post(attachment_ids=attachments.ids)
 
