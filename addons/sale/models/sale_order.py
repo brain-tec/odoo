@@ -1028,6 +1028,16 @@ class SaleOrder(models.Model):
         lines_to_recompute._compute_discount()
         self.show_update_pricelist = False
 
+    def _get_product_catalog_domain(self):
+        """Get the domain to search for products in the catalog.
+
+        For a model that uses products that has to be hidden in the catalog, it must override this
+        method and extend the appropriate domain.
+        :returns: A list of tuples that represents a domain.
+        :rtype: list
+        """
+        return  [('sale_ok', '=', True), ('company_id', 'in', [self.company_id.id, False]),]
+
     # INVOICING #
 
     def _prepare_invoice(self):
@@ -1267,6 +1277,17 @@ class SaleOrder(models.Model):
         return moves
 
     # MAIL #
+
+    def _track_finalize(self):
+        """ Override of `mail` to prevent logging changes when the SO is in a draft state. """
+        if (len(self) == 1
+            # The method _track_finalize is sometimes called too early or too late and it
+            # might cause a desynchronization with the cache, thus this condition is needed.
+            and self.env.cache.contains(self, self._fields['state']) and self.state == 'draft'):
+            self.env.cr.precommit.data.pop(f'mail.tracking.{self._name}', {})
+            self.env.flush_all()
+            return
+        return super()._track_finalize()
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):

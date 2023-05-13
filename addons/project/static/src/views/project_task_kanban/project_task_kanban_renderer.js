@@ -1,20 +1,15 @@
 /** @odoo-module */
 
-import { useService } from '@web/core/utils/hooks';
 import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
-import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { ProjectTaskKanbanRecord } from './project_task_kanban_record';
-
-const { onWillStart } = owl;
+import { ProjectTaskKanbanHeader } from './project_task_kanban_header';
+import { useService } from '@web/core/utils/hooks';
 
 export class ProjectTaskKanbanRenderer extends KanbanRenderer {
     setup() {
         super.setup();
-        this.userService = useService('user');
         this.action = useService('action');
 
-        this.isProjectManager = false;
-        onWillStart(this.onWillStart);
     }
 
     get canMoveRecords() {
@@ -37,65 +32,17 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
         return canResequenceGroups;
     }
 
-    async onWillStart() {
-        if (!this.props.list.isGroupedByPersonalStages) { // no need to check it if the group by is personal stages
-            this.isProjectManager = await this.userService.hasGroup('project.group_project_manager');
-        }
-    }
-
-    isProjectTasksContext() {
-        return this.props.list.context.active_model === "project.project" && this.props.list.context.default_project_id;
-    }
-
     canCreateGroup() {
         return (super.canCreateGroup() && this.isProjectTasksContext() && this.props.list.isGroupedByStage) || this.props.list.isGroupedByPersonalStages;
     }
 
-    canDeleteGroup(group) {
-        return super.canDeleteGroup(group) && (!this.props.list.isGroupedByStage || this.isProjectManager) || this.props.list.isGroupedByPersonalStages;
-    }
-
-    canEditGroup(group) {
-        return super.canEditGroup(group) && (!this.props.list.isGroupedByStage || this.isProjectManager) || this.props.list.isGroupedByPersonalStages;
-    }
-
-    async deleteGroup(group) {
-        if (group && group.groupByField.name === 'stage_id') {
-            const action = await group.model.orm.call(
-                group.resModel,
-                'unlink_wizard',
-                [group.resId],
-                { context: group.context },
-            );
-            this.action.doAction(action);
-            return;
-        }
-        super.deleteGroup(group);
-    }
-
-    editGroup(group) {
-        const groupBy = this.props.list.groupBy;
-        if (groupBy.length !== 1 || groupBy[0] !== 'personal_stage_type_ids') {
-            super.editGroup(group);
-            return;
-        }
-        const context = Object.assign({}, group.context, {
-            form_view_ref: 'project.personal_task_type_edit',
-        });
-        this.dialog.add(FormViewDialog, {
-            context,
-            resId: group.value,
-            resModel: group.resModel,
-            title: this.env._t('Edit Personal Stage'),
-            onRecordSaved: async () => {
-                await this.props.list.load();
-                this.props.list.model.notify();
-            },
-        });
+    isProjectTasksContext() {
+        return this.props.list.context.active_model === "project.project" && this.props.list.context.default_project_id;
     }
 }
 
 ProjectTaskKanbanRenderer.components = {
     ...KanbanRenderer.components,
     KanbanRecord: ProjectTaskKanbanRecord,
+    KanbanHeader: ProjectTaskKanbanHeader,
 };
