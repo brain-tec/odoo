@@ -41,6 +41,9 @@
         selector: '.s_website_form form, form.s_website_form', // !compatibility
         events: {
             'click .s_website_form_send, .o_website_form_send': 'send', // !compatibility
+            "change input[type=file]": "_onFileChange",
+            "click input.o_add_files_button": "_onAddFilesButtonClick",
+            "click .o_file_delete": "_onFileDeleteClick",
         },
 
         /**
@@ -74,7 +77,7 @@
         start: function () {
             // Reset the form first, as it is still filled when coming back
             // after a redirect.
-            this.el.reset();
+            this.resetForm();
 
             // Prepare visibility data and update field visibilities
             const visibilityFunctionsByFieldName = new Map();
@@ -196,6 +199,13 @@
                 this._disabledStates[inputEl] = inputEl.disabled;
             }
 
+            // Add the files zones where the file blocks will be displayed.
+            this.el.querySelectorAll("input[type=file]").forEach(inputEl => {
+                const filesZoneEl = document.createElement("DIV");
+                filesZoneEl.classList.add("o_files_zone", "row", "gx-1");
+                inputEl.parentNode.insertBefore(filesZoneEl, inputEl);
+            });
+
             return this._super(...arguments).then(() => this.__startResolve());
         },
 
@@ -203,8 +213,8 @@
             this._super.apply(this, arguments);
             this.$el.find('button').off('click');
 
-            // Empty imputs
-            this.el.reset();
+            // Empty inputs
+            this.resetForm();
 
             // Apply default values
             const dateTimeFormat = time.getLangDatetimeFormat();
@@ -266,7 +276,19 @@
 
             self.$el.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
             if (!self.check_error_fields({})) {
-                self.update_status('error', _t("Please fill in the form correctly."));
+                if (this.fileInputError) {
+                    const errorMessage = this.fileInputError.type === "number"
+                        ? _.str.sprintf(_t(
+                            "Please fill in the form correctly. You uploaded too many files. (Maximum %s files)"
+                        ), this.fileInputError.limit)
+                        : _.str.sprintf(_t(
+                            "Please fill in the form correctly. The file \"%s\" is too big. (Maximum %s MB)"
+                        ), this.fileInputError.fileName, this.fileInputError.limit);
+                    this.update_status("error", errorMessage);
+                    delete this.fileInputError;
+                } else {
+                    this.update_status("error", _t("Please fill in the form correctly."));
+                }
                 return false;
             }
 
@@ -382,7 +404,7 @@
                         }
                     }
 
-                    self.el.reset();
+                    self.resetForm();
                     self.restoreBtnLoading();
                 }
             })
@@ -391,6 +413,23 @@
                     'error',
                     error.status && error.status === 413 ? _t("Uploaded file is too large.") : "",
                 );
+            });
+        },
+
+        /**
+         * Resets a form.
+         */
+        resetForm() {
+            this.el.reset();
+
+            // For file inputs, remove the files zone, restore the file input
+            // and remove the files list.
+            this.el.querySelectorAll("input[type=file]").forEach(inputEl => {
+                const fieldEl = inputEl.closest(".s_website_form_field");
+                fieldEl.querySelectorAll(".o_files_zone").forEach(el => el.remove());
+                fieldEl.querySelectorAll(".o_add_files_button").forEach(el => el.remove());
+                inputEl.classList.remove("d-none");
+                delete inputEl.fileList;
             });
         },
 
@@ -422,7 +461,7 @@
                         // checking the validity of the group of checkbox is
                         // currently done for each checkbox of that group...
                         var checkboxes = inputs.filter(input => input.required && input.type === 'checkbox');
-                        return !_.any(checkboxes, checkbox => checkbox.checkValidity());
+                        return !checkboxes.some((checkbox) => checkbox.checkValidity());
 
                     // Special cases for dates and datetimes
                     // FIXME this seems like dead code, the inputs do not use
@@ -439,6 +478,8 @@
                         if (!self.is_datetime_valid(input.value, 'datetime')) {
                             return true;
                         }
+                    } else if (input.type === "file" && !self.isFileInputValid(input)) {
+                        return true;
                     }
 
                     // Note that checkValidity also takes care of the case where
@@ -529,6 +570,39 @@
             this.__started.then(() => $result.replaceWith(qweb.render(`website.s_website_form_status_${status}`, {
                 message: message,
             })));
+        },
+
+        /**
+         * Checks if the file input is valid: if the number of files uploaded
+         * and their size do not exceed the limits that were set.
+         *
+         * @param {HTMLElement} inputEl an input of type file
+         * @returns {Boolean} true if the input is valid, false otherwise.
+         */
+        isFileInputValid(inputEl) {
+            // Note: the `maxFilesNumber` and `maxFileSize` data-attributes may
+            // not always be present, if the Form comes from an older version
+            // for example.
+
+            // Checking the number of files.
+            const maxFilesNumber = inputEl.dataset.maxFilesNumber;
+            if (maxFilesNumber && inputEl.files.length > maxFilesNumber) {
+                // Store information to display the error message later.
+                this.fileInputError = {type: "number", limit: maxFilesNumber};
+                return false;
+            }
+            // Checking the files size.
+            const maxFileSize = inputEl.dataset.maxFileSize; // in megabytes.
+            const bytesInMegabyte = 1_000_000;
+            if (maxFileSize) {
+                for (const file of Object.values(inputEl.files)) {
+                    if (file.size / bytesInMegabyte > maxFileSize) {
+                        this.fileInputError = {type: "size", limit: maxFileSize, fileName: file.name};
+                        return false;
+                    }
+                }
+            }
+            return true;
         },
 
         //----------------------------------------------------------------------
@@ -662,6 +736,35 @@
                 inputEl.disabled = !haveToBeVisible;
             }
         },
+        /**
+         * Creates a block containing the file name and a cross to delete it.
+         *
+         * @private
+         * @param {Object} fileDetails the details of the file being uploaded
+         * @param {HTMLElement} filesZoneEl the zone where the file blocks are
+         *      displayed
+         */
+        _createFileBlock(fileDetails, filesZoneEl) {
+            const fileBlockEl = qweb.render("website.file_block", {fileName: fileDetails.name});
+            filesZoneEl.insertAdjacentHTML("beforeend", fileBlockEl);
+            filesZoneEl.lastElementChild.fileDetails = fileDetails;
+        },
+        /**
+         * Creates the file upload button (= a button to replace the file input,
+         * in order to modify its text content more easily).
+         *
+         * @private
+         * @param {HTMLElement} inputEl the file input
+         */
+        _createAddFilesButton(inputEl) {
+            const addFilesButtonEl = document.createElement("INPUT");
+            addFilesButtonEl.classList.add("o_add_files_button", "form-control");
+            addFilesButtonEl.type = "button";
+            addFilesButtonEl.value = inputEl.hasAttribute("multiple")
+                ? _t("Add Files") : _t("Replace File");
+            inputEl.parentNode.insertBefore(addFilesButtonEl, inputEl);
+            inputEl.classList.add("d-none");
+        },
 
         //----------------------------------------------------------------------
         // Handlers
@@ -673,5 +776,97 @@
          */
         _onFieldInput() {
             this._updateFieldsVisibility();
+        },
+        /**
+         * Called when files are uploaded: updates the button text content,
+         * displays the file blocks (containing the files name and a cross to
+         * delete them) and manages the files.
+         *
+         * @private
+         * @param {Event} ev
+         */
+        _onFileChange(ev) {
+            const fileInputEl = ev.currentTarget;
+            const fieldEl = fileInputEl.closest(".s_website_form_field");
+            const uploadedFiles = fileInputEl.files;
+            const addFilesButtonEl = fieldEl.querySelector(".o_add_files_button");
+
+            // The zone where the file blocks are displayed.
+            let filesZoneEl = fieldEl.querySelector(".o_files_zone");
+            // Update the button text content.
+            if (!addFilesButtonEl) {
+                this._createAddFilesButton(fileInputEl);
+            }
+
+            // Create a list to keep track of the files.
+            if (!fileInputEl.fileList) {
+                fileInputEl.fileList = new DataTransfer();
+            }
+
+            // If only one file can be uploaded, delete the previous file.
+            if (!fileInputEl.hasAttribute("multiple") && uploadedFiles.length > 0) {
+                fileInputEl.fileList = new DataTransfer();
+                const fileBlockEl = fieldEl.querySelector(".o_file_block");
+                if (fileBlockEl) {
+                    fileBlockEl.remove();
+                }
+            }
+
+            // Add the uploaded files if they are not already there.
+            for (const newFile of uploadedFiles) {
+                if (![...fileInputEl.fileList.files].some(file => newFile.name === file.name &&
+                    newFile.size === file.size && newFile.type === file.type)) {
+                    fileInputEl.fileList.items.add(newFile);
+                    const fileDetails = {name: newFile.name, size: newFile.size, type: newFile.type};
+                    this._createFileBlock(fileDetails, filesZoneEl);
+                }
+            }
+            // Update the input files.
+            fileInputEl.files = fileInputEl.fileList.files;
+        },
+        /**
+         * Called when a file is deleted by clicking on the cross on the block
+         * describing it.
+         *
+         * @private
+         * @param {Event} ev
+         */
+        _onFileDeleteClick(ev) {
+            const fileBlockEl = ev.target.closest(".o_file_block");
+            const fieldEl = fileBlockEl.closest(".s_website_form_field");
+            const fileInputEl = fieldEl.querySelector("input[type=file]");
+            const fileDetails = fileBlockEl.fileDetails;
+            const addFilesButtonEl = fieldEl.querySelector(".o_add_files_button");
+
+            // Create a new file list containing the remaining files.
+            const newFileList = new DataTransfer();
+            for (const file of Object.values(fileInputEl.fileList.files)) {
+                if (file.name !== fileDetails.name || file.size !== fileDetails.size
+                    || file.type !== fileDetails.type) {
+                    newFileList.items.add(file);
+                }
+            }
+            // Update the input lists and remove the file block.
+            Object.assign(fileInputEl, {fileList: newFileList, files: newFileList.files});
+            fileBlockEl.remove();
+
+            // Restore the file input if there are no files uploaded and update
+            // the fields visibility.
+            if (!newFileList.files.length) {
+                fileInputEl.classList.remove("d-none");
+                addFilesButtonEl.remove();
+                this._updateFieldsVisibility();
+            }
+        },
+        /**
+         * Detects when the fake input file button is clicked to simulate a
+         * click on the real input.
+         *
+         * @private
+         * @param {MouseEvent} ev
+         */
+        _onAddFilesButtonClick(ev) {
+            const fileInputEl = ev.target.parentNode.querySelector("input[type=file]");
+            fileInputEl.click();
         },
     });

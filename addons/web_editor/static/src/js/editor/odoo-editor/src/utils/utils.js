@@ -1358,8 +1358,17 @@ export function isProtected(node) {
     }
     return false;
 }
-export function isVoidElement(node) {
-    return isMediaElement(node) || node.tagName === 'HR';
+
+// https://developer.mozilla.org/en-US/docs/Glossary/Void_element
+const VOID_ELEMENT_NAMES = ['AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG',
+    'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
+
+export function isArtificialVoidElement(node) {
+    return isMediaElement(node) || node.nodeName === 'HR';
+}
+
+export function isNotAllowedContent(node) {
+    return isArtificialVoidElement(node) || VOID_ELEMENT_NAMES.includes(node.nodeName);
 }
 
 export function containsUnremovable(node) {
@@ -1420,7 +1429,7 @@ export function getColumnIndex(td) {
 
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
-const paragraphRelatedElements = [
+export const paragraphRelatedElements = [
     'P',
     'H1',
     'H2',
@@ -2470,7 +2479,7 @@ export function getRangePosition(el, document, options = {}) {
         clonedRange.detach();
     }
 
-    if (!offset || offset.heigh === 0) {
+    if (!offset || offset.height === 0) {
         const clonedRange = range.cloneRange();
         const shadowCaret = document.createTextNode('|');
         clonedRange.insertNode(shadowCaret);

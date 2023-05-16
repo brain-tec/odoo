@@ -18,7 +18,7 @@ class WebsiteSaleDelivery(WebsiteSale):
         order.access_point_address = {}
         carrier_id = int(post['carrier_id'])
         if order and carrier_id != order.carrier_id.id:
-            if any(tx.state not in ('cancel', 'error', 'draft') for tx in order.transaction_ids):
+            if any(tx.sudo().state not in ('cancel', 'error', 'draft') for tx in order.transaction_ids):
                 raise UserError(_('It seems that there is already a transaction for your order, you can not change the delivery method anymore'))
             order._check_carrier_quotation(force_carrier_id=carrier_id)
         return self._update_website_sale_delivery_return(order, **post)
@@ -181,7 +181,7 @@ class WebsiteSaleDelivery(WebsiteSale):
                     product=carrier.product_id,
                     partner=order.partner_shipping_id,
                 )
-                if not is_express_checkout_flow and request.env.company.show_line_subtotals_tax_selection == 'tax_excluded':
+                if not is_express_checkout_flow and request.website.show_line_subtotals_tax_selection == 'tax_excluded':
                     rate['price'] = taxes['total_excluded']
                 else:
                     rate['price'] = taxes['total_included']
