@@ -55,7 +55,7 @@ class StockMove(models.Model):
     product_uom_qty = fields.Float(
         'Demand',
         digits='Product Unit of Measure',
-        default=1.0, required=True, states={'done': [('readonly', True)]},
+        default=0, required=True, states={'done': [('readonly', True)]},
         help="This is the quantity of products from an inventory "
              "point of view. For moves in the state 'done', this is the "
              "quantity of products that were actually moved. For other "
@@ -176,6 +176,7 @@ class StockMove(models.Model):
     package_level_id = fields.Many2one('stock.package_level', 'Package Level', check_company=True, copy=False)
     picking_type_entire_packs = fields.Boolean(related='picking_type_id.show_entire_packs', readonly=True)
     display_assign_serial = fields.Boolean(compute='_compute_display_assign_serial')
+    display_import_lot = fields.Boolean(compute='_compute_display_assign_serial')
     display_clear_serial = fields.Boolean(compute='_compute_display_clear_serial')
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
@@ -193,16 +194,15 @@ class StockMove(models.Model):
         for move in self:
             move.product_uom = move.product_id.uom_id.id
 
-    @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
+    @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots')
     def _compute_display_assign_serial(self):
         for move in self:
-            move.display_assign_serial = (
-                move.has_tracking == 'serial' and
-                move.state in ('partially_available', 'assigned', 'confirmed') and
+            move.display_import_lot = (
+                move.has_tracking != 'none' and
                 move.picking_type_id.use_create_lots and
-                not move.picking_type_id.use_existing_lots
-                and not move.origin_returned_move_id.id
+                not move.origin_returned_move_id.id
             )
+            move.display_assign_serial = move.has_tracking == 'serial' and move.display_import_lot
 
     @api.depends('display_assign_serial', 'move_line_ids', 'move_line_nosuggest_ids')
     def _compute_display_clear_serial(self):
@@ -248,7 +248,6 @@ class StockMove(models.Model):
             else:
                 move.show_details_visible = (((consignment_enabled and move.picking_code != 'incoming') or
                                              show_details_visible or move.has_tracking != 'none') and
-                                             move._show_details_in_draft() and
                                              move.show_operations is False)
 
     def _compute_show_reserved_availability(self):
@@ -392,7 +391,7 @@ class StockMove(models.Model):
 
         def _process_increase(move, quantity):
             moves = move
-            if move.picking_id.immediate_transfer:
+            if move.picking_id and move.picking_id.immediate_transfer:
                 moves = move._action_confirm(merge=False)
             # Kits, already handle in action_explode, should be clean in master
             if len(moves) > 1:
@@ -681,7 +680,10 @@ Please change the quantity done or the rounding precision of your unit of measur
                 (self - move_to_unreserve).filtered(lambda m: m.state == 'assigned').write({'state': 'partially_available'})
                 # When editing the initial demand, directly run again action assign on receipt moves.
                 receipt_moves_to_reassign |= move_to_unreserve.filtered(lambda m: m.location_id.usage == 'supplier')
-                receipt_moves_to_reassign |= (self - move_to_unreserve).filtered(lambda m: m.location_id.usage == 'supplier' and m.state in ('partially_available', 'assigned'))
+                receipt_moves_to_reassign |= (self - move_to_unreserve).filtered(lambda m:
+                     m.location_id.usage == 'supplier'
+                     and m.state in ('partially_available', 'assigned')
+                     and not m.picking_id.immediate_transfer)
                 move_to_recompute_state |= self - move_to_unreserve - receipt_moves_to_reassign
         # propagate product_packaging_id changes in the stock move chain
         if 'product_packaging_id' in vals:
@@ -748,13 +750,45 @@ Please change the quantity done or the rounding precision of your unit of measur
             odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
             doc.message_post(body=msg, author_id=odoobot_id, subject=msg_subject)
 
+
+    def action_open_generate_serial(self):
+        """ Open the modal to generate stock move line with a serial pattern"""
+        if not self.picking_type_id.use_create_lots:
+            raise UserError(_("You cannot create lot/serial numbers in this operation type."))
+        return {
+            'name': _('Generate Serial Numbers'),
+            'res_model': 'stock.generate.serial',
+            'type': 'ir.actions.act_window',
+            'views': [[False, "form"]],
+            'target': 'new',
+            'context': {
+                'default_move_id': self.id,
+                'default_location_dest_id': self.location_dest_id.id,
+            },
+        }
+
+    def action_open_import_lot(self):
+        """ Open the modal to import serial numbers/lots and create stock move line from them"""
+        if not self.picking_type_id.use_create_lots:
+            raise UserError(_("You cannot create lot/serial numbers in this operation type."))
+        return {
+            'name': _('Import Serial/Lots'),
+            'res_model': 'stock.import.lot',
+            'type': 'ir.actions.act_window',
+            'views': [[False, "form"]],
+            'target': 'new',
+            'context': {
+                'default_move_id': self.id,
+                'default_location_dest_id': self.location_dest_id.id,
+            },
+        }
+
     def action_show_details(self):
         """ Returns an action that will open a form view (in a popup) allowing to work on all the
         move lines of a particular move. This form view is used when "show operations" is not
         checked on the picking type.
         """
         self.ensure_one()
-
         # If "show suggestions" is not checked on the picking type, we have to filter out the
         # reserved move lines. We do this by displaying `move_line_nosuggest_ids`. We use
         # different views to display one field or another so that the webclient doesn't have to
@@ -766,7 +800,7 @@ Please change the quantity done or the rounding precision of your unit of measur
 
         if self.product_id.tracking == "serial" and self.state == "assigned":
             self.next_serial = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
-
+        quant_mode = self.picking_type_id.code != 'incoming'
         return {
             'name': _('Detailed Operations'),
             'type': 'ir.actions.act_window',
@@ -778,13 +812,13 @@ Please change the quantity done or the rounding precision of your unit of measur
             'res_id': self.id,
             'context': dict(
                 self.env.context,
-                show_owner=self.picking_type_id.code != 'incoming',
-                show_lots_m2o=self.has_tracking != 'none' and (self.picking_type_id.use_existing_lots or self.state == 'done' or self.origin_returned_move_id.id),  # able to create lots, whatever the value of ` use_create_lots`.
+                show_owner=not quant_mode,
+                show_quant=quant_mode,
+                show_lots_m2o=not quant_mode and self.has_tracking != 'none' and (self.picking_type_id.use_existing_lots or self.state == 'done' or self.origin_returned_move_id.id),  # able to create lots, whatever the value of ` use_create_lots`.
                 show_lots_text=self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots and self.state != 'done' and not self.origin_returned_move_id.id,
-                show_source_location=self.picking_type_id.code != 'incoming',
-                show_destination_location=self.picking_type_id.code != 'outgoing',
-                show_package=not self.location_id.usage == 'supplier',
-                show_reserved_quantity=self.state != 'done' and not self.picking_id.immediate_transfer and self.picking_type_id.code != 'incoming'
+                show_destination_location=not quant_mode,
+                show_package=not quant_mode,
+                show_reserved_quantity=self.state != 'done' and quant_mode
             ),
         }
 
@@ -869,16 +903,66 @@ Please change the quantity done or the rounding precision of your unit of measur
         (moves_to_unreserve - moves_not_to_recompute)._recompute_state()
         return True
 
-    def _generate_serial_numbers(self, next_serial_count=False):
+    def _generate_serial_numbers(self, next_serial, next_serial_count=False, location_id=False):
         """ This method will generate `lot_name` from a string (field
         `next_serial`) and create a move line for each generated `lot_name`.
         """
         self.ensure_one()
-        lot_names = self.env['stock.lot'].generate_lot_names(self.next_serial, next_serial_count or self.next_serial_count)
-        field_data = [{'lot_name': lot_name, 'qty_done': 1} for lot_name in lot_names]
+        if not location_id:
+            location_id = self.location_dest_id
+
+        lot_names = self.env['stock.lot'].generate_lot_names(next_serial, next_serial_count or self.next_serial_count)
+        field_data = [{'lot_name': lot_name[0], 'qty_done': lot_name[1]} for lot_name in lot_names]
         move_lines_commands = self._generate_serial_move_line_commands(field_data)
-        self.write({'move_line_ids': move_lines_commands})
+        if self.picking_type_id.show_reserved:
+            self.move_line_ids = move_lines_commands
+        else:
+            self.move_line_nosuggest_ids = move_lines_commands
         return True
+
+    def _import_lots(self, lots, location_id):
+        if not location_id:
+            location_id = self.location_id
+        breaking_char = '\n'
+        separation_char = '\t'
+        options = False
+
+        if (breaking_char not in lots and separation_char not in lots and ';' not in lots):
+            return   # Skip if the `lot_name` doesn't contain multiple values.
+
+        # Checks the lines and prepares the move lines' values.
+        split_lines = lots.split(breaking_char)
+        split_lines = list(filter(None, split_lines))
+        # Checks the lines and prepares the move lines' values.
+        move_lines_vals = []
+        for lot_text in split_lines:
+            move_line_vals = {
+                'lot_name': lot_text,
+                'qty_done': 1,
+            }
+            # Semicolons are also used for separation but for convenience we
+            # replace them to work only with tabs.
+            lot_text_parts = lot_text.replace(';', separation_char).split(separation_char)
+            options = options or self._get_formating_options(lot_text_parts[1:])
+            for extra_string in lot_text_parts[1:]:
+                field_data = self._convert_string_into_field_data(extra_string, options)
+                if field_data == "ignore":
+                    # Got an unusable data for this move, updates only the lot_name part.
+                    move_line_vals.update(lot_name=lot_text_parts[0])
+                elif field_data:
+                    move_line_vals.update(**field_data, lot_name=lot_text_parts[0])
+                else:
+                    # At least this part of the string is erronous and can't be converted,
+                    # don't try to guess and simply use the full string as the lot name.
+                    move_line_vals['lot_name'] = lot_text
+                    break
+            move_lines_vals.append(move_line_vals)
+        move_lines_commands = self._generate_serial_move_line_commands(move_lines_vals, location_dest_id=location_id)
+        if self.picking_type_id.show_reserved:
+            self.update({'move_line_ids': move_lines_commands})
+        else:
+            self.update({'move_line_nosuggest_ids': move_lines_commands})
+        return
 
     def _push_apply(self):
         new_moves = []
@@ -1098,75 +1182,6 @@ Please change the quantity done or the rounding precision of your unit of measur
                 'warning': {'title': _('Warning'), 'message': _('Existing Serial numbers. Please correct the serial numbers encoded:') + sn_to_location}
             }
 
-    @api.onchange('move_line_ids', 'move_line_nosuggest_ids', 'picking_type_id')
-    def _onchange_move_line_ids(self):
-        if not self.picking_type_id.use_create_lots:
-            # This onchange manages the creation of multiple lot name. We don't
-            # need that if the picking type disallows the creation of new lots.
-            return
-
-        breaking_char = '\n'
-        separation_char = '\t'
-        options = False
-        if self.picking_type_id.show_reserved:
-            move_lines = self.move_line_ids
-        else:
-            move_lines = self.move_line_nosuggest_ids
-
-        for move_line in move_lines:
-            if not move_line.lot_name or (
-                breaking_char not in move_line.lot_name and
-                separation_char not in move_line.lot_name and ';' not in move_line.lot_name):
-                continue  # Skip if the `lot_name` doesn't contain multiple values.
-
-            # Checks the lines and prepares the move lines' values.
-            split_lines = move_line.lot_name.split(breaking_char)
-            split_lines = list(filter(None, split_lines))
-            # Checks the lines and prepares the move lines' values.
-            move_lines_vals = []
-            for lot_text in split_lines:
-                move_line_vals = {
-                    'lot_name': lot_text,
-                    'qty_done': move_line.qty_done or 1
-                }
-                # Semicolons are also used for separation but for convenience we
-                # replace them to work only with tabs.
-                lot_text_parts = lot_text.replace(';', separation_char).split(separation_char)
-                options = options or self._get_formating_options(lot_text_parts[1:])
-                for extra_string in lot_text_parts[1:]:
-                    field_data = self._convert_string_into_field_data(extra_string, options)
-                    if field_data == "ignore":
-                        # Got an unusable data for this move, updates only the lot_name part.
-                        move_line_vals.update(lot_name=lot_text_parts[0])
-                    elif field_data:
-                        move_line_vals.update(**field_data, lot_name=lot_text_parts[0])
-                    else:
-                        # At least this part of the string is erronous and can't be converted,
-                        # don't try to guess and simply use the full string as the lot name.
-                        move_line_vals['lot_name'] = lot_text
-                        break
-                move_lines_vals.append(move_line_vals)
-
-            move_lines_commands = self._generate_serial_move_line_commands(
-                move_lines_vals[1:], move_line,
-            )
-            if move_lines_vals:
-                move_lines_commands.append(Command.update(move_line.id, move_lines_vals[0]))
-            if self.picking_type_id.show_reserved:
-                self.move_line_ids = move_lines_commands
-            else:
-                self.move_line_nosuggest_ids = move_lines_commands
-            existing_lots = self.env['stock.lot'].search([
-                ('company_id', '=', self.company_id.id),
-                ('product_id', '=', self.product_id.id),
-                ('name', 'in', [move_line_vals['lot_name'] for move_line_vals in move_lines_vals]),
-            ])
-            if existing_lots:
-                return {
-                    'warning': {'title': _('Warning'), 'message': _('Existing Serial Numbers (%s). Please correct the serial numbers encoded.') % ','.join(existing_lots.mapped('display_name'))}
-                }
-            break
-
     @api.onchange('product_uom')
     def _onchange_product_uom(self):
         if self.product_uom.factor > self.product_id.uom_id.factor:
@@ -1194,7 +1209,6 @@ Please change the quantity done or the rounding precision of your unit of measur
             ('location_dest_id', '=', self.location_dest_id.id),
             ('picking_type_id', '=', self.picking_type_id.id),
             ('printed', '=', False),
-            ('immediate_transfer', '=', False),
             ('state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned'])]
         if self.partner_id and (self.location_id.usage == 'transit' or self.location_dest_id.usage == 'transit'):
             domain += [('partner_id', '=', self.partner_id.id)]
@@ -1246,7 +1260,7 @@ Please change the quantity done or the rounding precision of your unit of measur
     def _assign_picking_post_process(self, new=False):
         pass
 
-    def _generate_serial_move_line_commands(self, field_data, origin_move_line=None):
+    def _generate_serial_move_line_commands(self, field_data, location_dest_id=False, origin_move_line=None):
         """Return a list of commands to update the move lines (write on
         existing ones or create new ones).
         Called when user want to create and assign multiple serial numbers in
@@ -1261,7 +1275,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         """
         self.ensure_one()
         origin_move_line = origin_move_line or self.env['stock.move.line']
-        loc_dest = origin_move_line.location_dest_id
+        loc_dest = origin_move_line.location_dest_id or location_dest_id
         move_line_vals = {
             'picking_id': self.picking_id.id,
             'location_id': self.location_id.id,
@@ -1328,6 +1342,8 @@ Please change the quantity done or the rounding precision of your unit of measur
             'picking_type_id': self.mapped('picking_type_id').id,
             'location_id': self.mapped('location_id').id,
             'location_dest_id': self.mapped('location_dest_id').id,
+            'state': 'draft',
+            'immediate_transfer': False,
         }
 
     def _should_be_assigned(self):
@@ -1408,8 +1424,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         neg_r_moves._assign_picking()
 
         # call `_action_assign` on every confirmed move which location_id bypasses the reservation + those expected to be auto-assigned
-        moves.filtered(lambda move: not move.picking_id.immediate_transfer
-                       and move.state in ('confirmed', 'partially_available')
+        moves.filtered(lambda move: move.state in ('confirmed', 'partially_available')
                        and (move._should_bypass_reservation()
                             or move.picking_type_id.reservation_method == 'at_confirm'
                             or (move.reservation_date and move.reservation_date <= fields.Date.today())))\
@@ -1676,7 +1691,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                 assigned_moves_ids.add(move.id)
                 moves_to_redirect.add(move.id)
             else:
-                if float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding):
+                if float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding) and not force_qty:
                     assigned_moves_ids.add(move.id)
                 elif not move.move_orig_ids:
                     if move.procure_method == 'make_to_order':
@@ -1876,8 +1891,8 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_draft_or_cancel(self):
-        if any(move.state not in ('draft', 'cancel') for move in self):
-            raise UserError(_('You can only delete draft or cancelled moves.'))
+        if any(move.state not in ('draft', 'cancel') and (move.move_orig_ids or move.move_dest_ids) for move in self):
+            raise UserError(_('You can not delete moves linked to another operation'))
 
     def unlink(self):
         # With the non plannified picking, draft moves could have some move lines.
@@ -2111,10 +2126,6 @@ Please change the quantity done or the rounding precision of your unit of measur
                 mtso_free_qties_by_loc[move.location_id][move.product_id.id] -= needed_qty
             else:
                 move.procure_method = 'make_to_order'
-
-    def _show_details_in_draft(self):
-        self.ensure_one()
-        return self.state != 'draft' or (self.picking_id.immediate_transfer and self.state == 'draft')
 
     def _trigger_scheduler(self):
         """ Check for auto-triggered orderpoints and trigger them. """

@@ -53,6 +53,8 @@ class TestStockValuationCommon(TransactionCase):
                 'picking_type_id': in_move.picking_type_id.id,
                 'location_id': in_move.location_id.id,
                 'location_dest_id': in_move.location_dest_id.id,
+                'state': 'draft',
+                'immediate_transfer': False,
             })
             in_move.write({'picking_id': picking.id})
 
@@ -84,6 +86,8 @@ class TestStockValuationCommon(TransactionCase):
                 'picking_type_id': out_move.picking_type_id.id,
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
+                'state': 'draft',
+                'immediate_transfer': False,
             })
             out_move.write({'picking_id': picking.id})
 
@@ -281,6 +285,8 @@ class TestStockValuationStandard(TestStockValuationCommon):
             'picking_type_id': self.picking_type_in.id,
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
+            'state': 'draft',
+            'immediate_transfer': False,
         })
         for product in (product1, product2):
             product.standard_price = 10
@@ -1144,10 +1150,9 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         self.assertEqual(self.product1.standard_price, 15)
 
         refund_wizard = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice.ids).create({
-            'refund_method': 'refund',
             'journal_id': invoice.journal_id.id,
         })
-        action = refund_wizard.reverse_moves()
+        action = refund_wizard.refund_moves()
         reverse_invoice = self.env['account.move'].browse(action['res_id'])
         with Form(reverse_invoice) as reverse_invoice_form:
             with reverse_invoice_form.invoice_line_ids.edit(0) as line:
