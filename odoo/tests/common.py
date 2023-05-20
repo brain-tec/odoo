@@ -26,7 +26,6 @@ import tempfile
 import threading
 import time
 import unittest
-from . import case
 import warnings
 from collections import defaultdict, deque
 from concurrent.futures import Future, CancelledError, wait
@@ -36,6 +35,7 @@ except ImportError:
     InvalidStateError = NotImplementedError
 from contextlib import contextmanager, ExitStack
 from datetime import datetime
+from functools import lru_cache
 from itertools import zip_longest as izip_longest
 from unittest.mock import patch, _patch
 from xmlrpc import client as xmlrpclib
@@ -53,6 +53,8 @@ from odoo.service import security
 from odoo.sql_db import BaseCursor, Cursor
 from odoo.tools import float_compare, single_email_re, profiler, lower_logging
 from odoo.tools.misc import find_in_path
+
+from . import case
 
 try:
     # the behaviour of decorator changed in 5.0.5 changing the structure of the traceback when
@@ -838,36 +840,37 @@ class ChromeBrowser:
     """ Helper object to control a Chrome headless process. """
     remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
 
-    def __init__(self, test_class):
+    def __init__(self, test_class, headless=True):
         self._logger = test_class._logger
         self.test_class = test_class
         if websocket is None:
             self._logger.warning("websocket-client module is not installed")
             raise unittest.SkipTest("websocket-client module is not installed")
-        self.devtools_port = None
-        self.ws_url = ''  # WebSocketUrl
-        self.ws = None  # websocket
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
-        self.chrome_pid = None
 
         otc = odoo.tools.config
         self.screenshots_dir = os.path.join(otc['screenshots'], get_db_name(), 'screenshots')
-        self.screencasts_dir = None
-        self.screencasts_frames_dir = None
-        if otc['screencasts']:
-            self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
-            self.screencasts_frames_dir = os.path.join(self.screencasts_dir, 'frames')
-            os.makedirs(self.screencasts_frames_dir, exist_ok=True)
-        self.screencast_frames = []
         os.makedirs(self.screenshots_dir, exist_ok=True)
 
-        self.window_size = test_class.browser_size
-        self.touch_enabled = test_class.touch_enabled
-        self.sigxcpu_handler = None
-        self._chrome_start()
-        self._find_websocket()
-        self._logger.info('Websocket url found: %s', self.ws_url)
-        self._open_websocket()
+        self.screencasts_dir = None
+        self.screencast_frames = []
+        if otc['screencasts']:
+            self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
+            os.makedirs(self.screencasts_frames_dir, exist_ok=True)
+
+        if os.name == 'posix':
+            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
+            signal.signal(signal.SIGXCPU, self.signal_handler)
+        else:
+            self.sigxcpu_handler = None
+
+        self.chrome, self.devtools_port = self._chrome_start(
+            user_data_dir=self.user_data_dir,
+            window_size=test_class.browser_size,
+            touch_enabled=test_class.touch_enabled,
+            headless=headless,
+        )
+        self.ws = self._open_websocket()
         self._request_id = itertools.count()
         self._result = Future()
         self.error_checker = None
@@ -892,9 +895,10 @@ class ChromeBrowser:
         self._websocket_send('Runtime.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
-        if os.name == 'posix':
-            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
-            signal.signal(signal.SIGXCPU, self.signal_handler)
+
+    @property
+    def screencasts_frames_dir(self):
+        return os.path.join(self.screencasts_dir, 'frames')
 
     def signal_handler(self, sig, frame):
         if sig == signal.SIGXCPU:
@@ -903,51 +907,41 @@ class ChromeBrowser:
             os._exit(0)
 
     def stop(self):
-        if self.chrome_pid is not None:
-            self._logger.info("Closing chrome headless with pid %s", self.chrome_pid)
+        # only cleanup chrome if it was started before SIGXCPU triggered
+        if self.chrome:
+            self._websocket_send('Page.stopScreencast')
+            if self.screencasts_dir and os.path.isdir(self.screencasts_frames_dir):
+                shutil.rmtree(self.screencasts_frames_dir)
+
+            self._websocket_request('Page.stopLoading')
+            self._websocket_request('Runtime.evaluate', params={'expression': """
+            ('serviceWorker' in navigator) &&
+                navigator.serviceWorker.getRegistrations().then(
+                    registrations => Promise.all(registrations.map(r => r.unregister()))
+                )
+            """, 'awaitPromise': True})
+            # wait for the screenshot or whatever
+            wait(self._responses.values(), 10)
+            self._result.cancel()
+
+            self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
             self._websocket_send('Browser.close')
             self._logger.info("Closing websocket connection")
             self.ws.close()
-            self._logger.info("Terminating chrome headless with pid %s", self.chrome_pid)
-            os.kill(self.chrome_pid, signal.SIGTERM)
+            self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
+            self.chrome.terminate()
+
         if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
             self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
             shutil.rmtree(self.user_data_dir, ignore_errors=True)
+
         # Restore previous signal handler
         if self.sigxcpu_handler and os.name == 'posix':
             signal.signal(signal.SIGXCPU, self.sigxcpu_handler)
 
     @property
     def executable(self):
-        system = platform.system()
-        if system == 'Linux':
-            for bin_ in ['google-chrome', 'chromium', 'chromium-browser', 'google-chrome-stable']:
-                try:
-                    return find_in_path(bin_)
-                except IOError:
-                    continue
-
-        elif system == 'Darwin':
-            bins = [
-                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-                '/Applications/Chromium.app/Contents/MacOS/Chromium',
-            ]
-            for bin_ in bins:
-                if os.path.exists(bin_):
-                    return bin_
-
-        elif system == 'Windows':
-            bins = [
-                '%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe',
-                '%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe',
-                '%LocalAppData%\\Google\\Chrome\\Application\\chrome.exe',
-            ]
-            for bin_ in bins:
-                bin_ = os.path.expandvars(bin_)
-                if os.path.exists(bin_):
-                    return bin_
-
-        raise unittest.SkipTest("Chrome executable not found")
+        return _find_executable()
 
     def _chrome_without_limit(self, cmd):
         if os.name == 'posix' and platform.system() != 'Darwin':
@@ -970,18 +964,17 @@ class ChromeBrowser:
             time.sleep(CHECK_BROWSER_SLEEP)
             if port_file.is_file() and port_file.stat().st_size > 5:
                 with port_file.open('r', encoding='utf-8') as f:
-                    self.devtools_port = int(f.readline())
-                    return proc.pid
+                    return proc, int(f.readline())
         raise unittest.SkipTest(f'Failed to detect chrome devtools port after {BROWSER_WAIT :.1f}s.')
 
-    def _chrome_start(self):
-        if self.chrome_pid is not None:
-            return
-
-        switches = {
+    def _chrome_start(
+            self,
+            user_data_dir: str,
+            window_size: str, touch_enabled: bool,
+            headless=True
+    ):
+        headless_switches = {
             '--headless': '',
-            '--no-default-browser-check': '',
-            '--no-first-run': '',
             '--disable-extensions': '',
             '--disable-background-networking' : '',
             '--disable-background-timer-throttling' : '',
@@ -990,24 +983,29 @@ class ChromeBrowser:
             '--disable-breakpad': '',
             '--disable-client-side-phishing-detection': '',
             '--disable-crash-reporter': '',
-            '--disable-default-apps': '',
             '--disable-dev-shm-usage': '',
-            '--disable-device-discovery-notifications': '',
             '--disable-namespace-sandbox': '',
-            '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
-            # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
-            '--autoplay-policy': 'no-user-gesture-required',
-            '--window-size': self.window_size,
-            '--remote-debugging-address': HOST,
-            '--remote-debugging-port': str(self.remote_debugging_port),
+            '--no-first-run': '',
             '--no-sandbox': '',
             '--disable-gpu': '',
-            '--remote-allow-origins': '*',
+        }
+        switches = {
+            # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
+            '--autoplay-policy': 'no-user-gesture-required',
+            '--disable-default-apps': '',
+            '--disable-device-discovery-notifications': '',
+            '--no-default-browser-check': '',
+            '--remote-debugging-address': HOST,
+            '--remote-debugging-port': str(self.remote_debugging_port),
+            '--user-data-dir': user_data_dir,
+            '--window-size': window_size,
             # '--enable-precise-memory-info': '', # uncomment to debug memory leaks in qunit suite
             # '--js-flags': '--expose-gc', # uncomment to debug memory leaks in qunit suite
         }
-        if self.touch_enabled:
+        if headless:
+            switches.update(headless_switches)
+        if touch_enabled:
             # enable Chrome's Touch mode, useful to detect touch capabilities using
             # "'ontouchstart' in window"
             switches['--touch-events'] = ''
@@ -1017,18 +1015,13 @@ class ChromeBrowser:
         url = 'about:blank'
         cmd.append(url)
         try:
-            self.chrome_pid = self._spawn_chrome(cmd)
+            proc, devtools_port = self._spawn_chrome(cmd)
         except OSError:
             raise unittest.SkipTest("%s not found" % cmd[0])
-        self._logger.info('Chrome pid: %s', self.chrome_pid)
-
-    def _find_websocket(self):
-        version = self._json_command('version')
-        self._logger.info('Browser version: %s', version['Browser'])
-        infos = self._json_command('', get_key=0)  # Infos about the first tab
-        self.ws_url = infos['webSocketDebuggerUrl']
-        self.dev_tools_frontend_url = infos.get('devtoolsFrontendUrl')
+        self._logger.info('Chrome pid: %s', proc.pid)
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
+
+        return proc, devtools_port
 
     def _json_command(self, command, timeout=3, get_key=None):
         """Queries browser state using JSON
@@ -1059,7 +1052,7 @@ class ChromeBrowser:
         message = None
         while timeout > 0:
             try:
-                os.kill(self.chrome_pid, 0)
+                self.chrome.send_signal(0)
             except ProcessLookupError:
                 message = 'Chrome crashed at startup'
                 break
@@ -1092,10 +1085,16 @@ class ChromeBrowser:
         raise unittest.SkipTest("Error during Chrome headless connection")
 
     def _open_websocket(self):
-        self.ws = websocket.create_connection(self.ws_url, enable_multithread=True, suppress_origin=True)
-        if self.ws.getstatus() != 101:
+        version = self._json_command('version')
+        self._logger.info('Browser version: %s', version['Browser'])
+        infos = self._json_command('', get_key=0)  # Infos about the first tab
+        ws_url = infos['webSocketDebuggerUrl']
+        self._logger.info('Websocket url found: %s', ws_url)
+        ws = websocket.create_connection(ws_url, enable_multithread=True, suppress_origin=True)
+        if ws.getstatus() != 101:
             raise unittest.SkipTest("Cannot connect to chrome dev tools")
-        self.ws.settimeout(0.01)
+        ws.settimeout(0.01)
+        return ws
 
     def _receive(self, dbname):
         threading.current_thread().dbname = dbname
@@ -1437,34 +1436,6 @@ which leads to stray network requests and inconsistencies."""))
             self._logger.info('Waiting for frame %r to stop loading', frame_id)
             e.wait(10)
 
-    def clear(self):
-        self._websocket_send('Page.stopScreencast')
-        if self.screencasts_dir and os.path.isdir(self.screencasts_frames_dir):
-            shutil.rmtree(self.screencasts_frames_dir)
-        self.screencast_frames = []
-        self._websocket_request('Page.stopLoading')
-        self._websocket_request('Runtime.evaluate', params={'expression': """
-        ('serviceWorker' in navigator) &&
-            navigator.serviceWorker.getRegistrations().then(
-                registrations => Promise.all(registrations.map(r => r.unregister()))
-            )
-        """, 'awaitPromise': True})
-        # wait for the screenshot or whatever
-        wait(self._responses.values(), 10)
-        self._logger.info('Deleting cookies and clearing local storage')
-        self._websocket_request('Network.clearBrowserCache')
-        self._websocket_request('Network.clearBrowserCookies')
-        self._websocket_request('Runtime.evaluate', params={'expression': 'try {localStorage.clear(); sessionStorage.clear();} catch(e) {}'})
-        self.navigate_to('about:blank', wait_stop=True)
-        # hopefully after navigating to about:blank there's no event left
-        self._frames.clear()
-        # wait for the clearing requests to finish in case the browser is re-used
-        wait(self._responses.values(), 10)
-        self._responses.clear()
-        self._result.cancel()
-        self._result = Future()
-        self.had_failure = False
-
     def _from_remoteobject(self, arg):
         """ attempts to make a CDT RemoteObject comprehensible
         """
@@ -1540,6 +1511,37 @@ which leads to stray network requests and inconsistencies."""))
             return m[0]
         return replacer
 
+@lru_cache(1)
+def _find_executable():
+    system = platform.system()
+    if system == 'Linux':
+        for bin_ in ['google-chrome', 'chromium', 'chromium-browser', 'google-chrome-stable']:
+            try:
+                return find_in_path(bin_)
+            except IOError:
+                continue
+
+    elif system == 'Darwin':
+        bins = [
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            '/Applications/Chromium.app/Contents/MacOS/Chromium',
+        ]
+        for bin_ in bins:
+            if os.path.exists(bin_):
+                return bin_
+
+    elif system == 'Windows':
+        bins = [
+            '%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe',
+            '%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe',
+            '%LocalAppData%\\Google\\Chrome\\Application\\chrome.exe',
+        ]
+        for bin_ in bins:
+            bin_ = os.path.expandvars(bin_)
+            if os.path.exists(bin_):
+                return bin_
+
+    raise unittest.SkipTest("Chrome executable not found")
 
 class Opener(requests.Session):
     """
@@ -1604,19 +1606,6 @@ class HttpCase(TransactionCase):
         # setup an url opener helper
         self.opener = Opener(self.cr)
 
-    @classmethod
-    def start_browser(cls):
-        # start browser on demand
-        if cls.browser is None:
-            cls.browser = ChromeBrowser(cls)
-            cls.addClassCleanup(cls.terminate_browser)
-
-    @classmethod
-    def terminate_browser(cls):
-        if cls.browser:
-            cls.browser.stop()
-            cls.browser = None
-
     def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
             url = self.base_url() + url
@@ -1651,7 +1640,7 @@ class HttpCase(TransactionCase):
         self.session.logout(keep_db=keep_db)
         odoo.http.root.session_store.save(self.session)
 
-    def authenticate(self, user, password):
+    def authenticate(self, user, password, browser: ChromeBrowser = None):
         if getattr(self, 'session', None):
             odoo.http.root.session_store.delete(self.session)
 
@@ -1688,9 +1677,9 @@ class HttpCase(TransactionCase):
         # completely) or clear-ing session.cookies.
         self.opener = Opener(self.cr)
         self.opener.cookies['session_id'] = session.sid
-        if self.browser:
+        if browser:
             self._logger.info('Setting session cookie in browser')
-            self.browser.set_cookie('session_id', session.sid, '/', HOST)
+            browser.set_cookie('session_id', session.sid, '/', HOST)
 
         return session
 
@@ -1700,7 +1689,6 @@ class HttpCase(TransactionCase):
         - load page given by url_path
         - wait for ready object to be available
         - eval(code) inside the page
-        - open another chrome window to watch code execution if watch is True
 
         To signal success test do: console.log('test successful')
         To signal test failure raise an exception or call console.error with a message.
@@ -1714,15 +1702,9 @@ class HttpCase(TransactionCase):
         if any(f.filename.endswith('/coverage/execfile.py') for f in inspect.stack()  if f.filename):
             timeout = timeout * 1.5
 
-        self.start_browser()
-        if watch and self.browser.dev_tools_frontend_url:
-            _logger.warning('watch mode is only suitable for local testing - increasing tour timeout to 3600')
-            timeout = max(timeout*10, 3600)
-            debug_front_end = f'http://127.0.0.1:{self.browser.devtools_port}{self.browser.dev_tools_frontend_url}'
-            self.browser._chrome_without_limit([self.browser.executable, debug_front_end])
-            time.sleep(3)
+        browser = ChromeBrowser(type(self), headless=not watch)
         try:
-            self.authenticate(login, login)
+            self.authenticate(login, login, browser=browser)
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.
@@ -1736,23 +1718,23 @@ class HttpCase(TransactionCase):
                 url = parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
             self._logger.info('Open "%s" in browser', url)
 
-            if self.browser.screencasts_dir:
+            if browser.screencasts_dir:
                 self._logger.info('Starting screencast')
-                self.browser.start_screencast()
+                browser.start_screencast()
             if cookies:
                 for name, value in cookies.items():
-                    self.browser.set_cookie(name, value, '/', HOST)
+                    browser.set_cookie(name, value, '/', HOST)
 
-            self.browser.navigate_to(url, wait_stop=not bool(ready))
+            browser.navigate_to(url, wait_stop=not bool(ready))
 
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
             ready = ready or "document.readyState === 'complete'"
-            self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+            self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
             error = False
             try:
-                self.browser._wait_code_ok(code, timeout, error_checker=error_checker)
+                browser._wait_code_ok(code, timeout, error_checker=error_checker)
             except ChromeBrowserException as chrome_browser_exception:
                 error = chrome_browser_exception
             if error:  # dont keep initial traceback, keep that outside of except
@@ -1763,10 +1745,7 @@ class HttpCase(TransactionCase):
                 self.fail('%s\n\n%s' % (message, error))
 
         finally:
-            # clear browser to make it stop sending requests, in case we call
-            # the method several times in a test method
-            self.browser.delete_cookie('session_id', domain=HOST)
-            self.browser.clear()
+            browser.stop()
             self._wait_remaining_requests()
 
     @classmethod
