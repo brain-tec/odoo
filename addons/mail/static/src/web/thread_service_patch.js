@@ -170,7 +170,7 @@ patch(ThreadService.prototype, "mail/web", {
         thread.suggestedRecipients = recipients;
     },
     open(thread, replaceNewMessageChatWindow) {
-        if (!this.store.discuss.isActive || this.store.isSmall) {
+        if (!this.store.discuss.isActive || this.ui.isSmall) {
             const chatWindow = this.chatWindowService.insert({
                 folded: false,
                 thread,
@@ -198,13 +198,6 @@ patch(ThreadService.prototype, "mail/web", {
             follower.followedThread.followers.splice(index, 1);
         }
         delete this.store.followers[follower.id];
-    },
-
-    async updateAvatar(threadId, data) {
-        return this.rpc("/discuss/channel/update_avatar", {
-            channel_id: threadId,
-            data,
-        });
     },
 });
 

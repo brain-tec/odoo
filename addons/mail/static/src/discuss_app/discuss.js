@@ -62,6 +62,7 @@ export class Discuss extends Component {
         this.state = useState({ activeMode: this.MODES.NONE });
         this.orm = useService("orm");
         this.effect = useService("effect");
+        this.ui = useState(useService("ui"));
         this.prevInboxCounter = this.store.discuss.inbox.counter;
         useChildSubEnv({
             inDiscussApp: true,
@@ -108,7 +109,9 @@ export class Discuss extends Component {
 
     get channelAvatar() {
         return this.props.public
-            ? url(`/discuss/channel/${this.thread.id}/avatar_128`)
+            ? url(
+                  `/discuss/channel/${this.thread.id}/avatar_128?unique=${this.thread?.avatarCacheKey}`
+              )
             : this.thread.imgUrl;
     }
 
@@ -120,7 +123,7 @@ export class Discuss extends Component {
     }
 
     async onFileUploaded(file) {
-        await this.threadService.updateAvatar(this.thread.id, file.data);
+        await this.threadService.notifyThreadAvatarToServer(this.thread.id, file.data);
         this.notification.add(_t("The avatar has been updated!"), { type: "success" });
     }
 
