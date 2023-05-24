@@ -1784,10 +1784,13 @@ class PosSession(models.Model):
     def _get_pos_ui_pos_bill(self, params):
         return self.env['pos.bill'].search_read(**params['search_params'])
 
+    def _get_partners_domain(self):
+        return []
+
     def _loader_params_res_partner(self):
         return {
             'search_params': {
-                'domain': [],
+                'domain': self._get_partners_domain(),
                 'fields': [
                     'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
                     'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist', 'parent_name'
@@ -1914,7 +1917,7 @@ class PosSession(models.Model):
                 'fields': [
                     'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_id', 'taxes_id', 'barcode',
                     'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
-                    'write_date', 'available_in_pos', 'attribute_line_ids', 'active'
+                    'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128'
                 ],
                 'order': 'sequence,default_code,name',
             },
@@ -1934,6 +1937,7 @@ class PosSession(models.Model):
         product_category_by_id = {category['id']: category for category in categories}
         for product in products:
             product['categ'] = product_category_by_id[product['categ_id'][0]]
+            product['image_128'] = bool(product['image_128'])
 
     def _get_pos_ui_product_product(self, params):
         self = self.with_context(**params['context'])
@@ -2019,9 +2023,8 @@ class PosSession(models.Model):
     def get_total_discount(self):
         amount = 0
         for line in self.env['pos.order.line'].search([('order_id', 'in', self.order_ids.ids), ('discount', '>', 0)]):
-            normal_price = line.qty * line.price_unit
-            normal_price = normal_price + (normal_price / 100 * line.tax_ids.amount)
-            amount += normal_price - line.price_subtotal_incl
+            original_price = line.price_subtotal_incl / (1 - line.discount / 100)
+            amount += original_price * line.discount / 100
 
         return amount
 
