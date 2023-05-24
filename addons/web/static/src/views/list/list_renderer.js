@@ -847,7 +847,7 @@ export class ListRenderer extends Component {
         // This is only necessary for some field types, as for the others, we hardcode
         // a minimum column width that should be enough to display the entire value.
         // Also, we don't set title for json fields, because it's not human readable anyway.
-        if (!(fieldType in FIXED_FIELD_COLUMN_WIDTHS) && fieldType != "json") {
+        if (!(fieldType in FIXED_FIELD_COLUMN_WIDTHS) && !['json', 'one2many', 'many2many'].includes(fieldType)) {
             return this.getFormattedValue(column, record);
         }
     }
@@ -1837,20 +1837,6 @@ export class ListRenderer extends Component {
             field: this.fields[column.name],
             fieldInfo: column,
         });
-    }
-
-    /**
-     * Handles the :hover effect on sortable column headers
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    onHoverSortColumn(ev, column) {
-        if (this.props.list.orderBy.length && this.props.list.orderBy[0].name === column.name) {
-            return;
-        } else if (this.isSortable(column) && column.widget !== "handle") {
-            ev.target.classList.toggle("table-active", ev.type == "mouseenter");
-        }
     }
 
     onColumnTitleMouseUp() {
