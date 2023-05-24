@@ -41,7 +41,7 @@ export class Message {
     parentMessage;
     /** @type {MessageReactions[]} */
     reactions = [];
-    /** @type {Notification[]} */
+    /** @type {import("@mail/core/notification_model").Notification[]} */
     notifications = [];
     /** @type {import("@mail/core/persona_model").Persona[]} */
     recipients = [];
@@ -65,8 +65,6 @@ export class Message {
     temporary_id = null;
     /** @type {string|undefined} */
     notificationType;
-    /** @type {string} */
-    pinned_at;
     /** @type {string} */
     create_date;
     /** @type {string} */
@@ -235,13 +233,6 @@ export class Message {
 
     get failureNotifications() {
         return this.notifications.filter((notification) => notification.isFailure);
-    }
-
-    get pinnedAt() {
-        if (!this.pinned_at) {
-            return null;
-        }
-        return luxon.DateTime.fromISO(new Date(this.pinned_at).toISOString());
     }
 
     get editDatetimeHuge() {

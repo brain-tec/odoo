@@ -231,12 +231,12 @@ QUnit.module('MrpDocumentsKanbanView', {
         assert.containsOnce(target, ".o_kanban_previewer");
 
         await click(target.querySelector(".o_kanban_previewer"));
-        await waitUntil('.o-mail-AttachmentViewer');
-        assert.containsOnce(target, '.o-mail-AttachmentViewer');
-        assert.containsOnce(target, '.o-mail-AttachmentViewer-headerButton .fa-times');
+        await waitUntil('.o-FileViewer');
+        assert.containsOnce(target, '.o-FileViewer');
+        assert.containsOnce(target, '.o-FileViewer-headerButton .fa-times');
 
-        await click(target, '.o-mail-AttachmentViewer-headerButton .fa-times');
-        assert.containsNone(target, '.o-mail-AttachmentViewer');
+        await click(target, '.o-FileViewer-headerButton .fa-times');
+        assert.containsNone(target, '.o-FileViewer');
     });
 });
 

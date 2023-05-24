@@ -136,16 +136,16 @@ QUnit.test("view attachments", async (assert) => {
         views: [[false, "form"]],
     });
     await click('.o-mail-AttachmentCard[aria-label="Blah.txt"] .o-mail-AttachmentCard-image');
-    assert.containsOnce($, ".o-mail-AttachmentViewer");
-    assert.containsOnce($, ".o-mail-AttachmentViewer-header:contains(Blah.txt)");
-    assert.containsOnce($, ".o-mail-AttachmentViewer div[aria-label='Next']");
+    assert.containsOnce($, ".o-FileViewer");
+    assert.containsOnce($, ".o-FileViewer-header:contains(Blah.txt)");
+    assert.containsOnce($, ".o-FileViewer div[aria-label='Next']");
 
-    await click(".o-mail-AttachmentViewer div[aria-label='Next']");
-    assert.containsOnce($, ".o-mail-AttachmentViewer-header:contains(Blu.txt)");
-    assert.containsOnce($, ".o-mail-AttachmentViewer div[aria-label='Next']");
+    await click(".o-FileViewer div[aria-label='Next']");
+    assert.containsOnce($, ".o-FileViewer-header:contains(Blu.txt)");
+    assert.containsOnce($, ".o-FileViewer div[aria-label='Next']");
 
-    await click(".o-mail-AttachmentViewer div[aria-label='Next']");
-    assert.containsOnce($, ".o-mail-AttachmentViewer-header:contains(Blah.txt)");
+    await click(".o-FileViewer div[aria-label='Next']");
+    assert.containsOnce($, ".o-FileViewer-header:contains(Blah.txt)");
 });
 
 QUnit.test("scroll to attachment box when toggling on", async (assert) => {

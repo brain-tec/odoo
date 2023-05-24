@@ -218,7 +218,13 @@ class ReportBomStructure(models.AbstractModel):
                                                parent_product=product, index=new_index, product_info=product_info, ignore_stock=ignore_stock)
             else:
                 component = self._get_component_data(bom, product, warehouse, line, line_quantity, level + 1, new_index, product_info, ignore_stock)
-            components.append(component)
+
+            for component_bom in components:
+                if component['product_id'] == component_bom['product_id'] and component['uom'].id == component_bom['uom'].id:
+                    self._merge_components(component_bom, component)
+                    break
+            else:
+                components.append(component)
             bom_report_line['bom_cost'] += component['bom_cost']
         bom_report_line['components'] = components
         bom_report_line['producible_qty'] = self._compute_current_production_capacity(bom_report_line)
@@ -231,7 +237,7 @@ class ReportBomStructure(models.AbstractModel):
             bom_report_line['byproducts_total'] = sum(byproduct['quantity'] for byproduct in byproducts)
             bom_report_line['bom_cost'] *= bom_report_line['cost_share']
 
-        availabilities = self._get_availabilities(product, current_quantity, product_info, bom_key, quantities_info, level, ignore_stock, components)
+        availabilities = self._get_availabilities(product, current_quantity, product_info, bom_key, quantities_info, level, ignore_stock, components, bom_report_line)
         bom_report_line.update(availabilities)
 
         if level == 0:
@@ -508,7 +514,7 @@ class ReportBomStructure(models.AbstractModel):
         return {}
 
     @api.model
-    def _get_availabilities(self, product, quantity, product_info, bom_key, quantities_info, level, ignore_stock=False, components=False):
+    def _get_availabilities(self, product, quantity, product_info, bom_key, quantities_info, level, ignore_stock=False, components=False, report_line=False):
         # Get availabilities according to stock (today & forecasted).
         stock_state, stock_delay = ('unavailable', False)
         if not ignore_stock:
@@ -522,6 +528,10 @@ class ReportBomStructure(models.AbstractModel):
             resupply_state, resupply_delay = ('available', 0)
         elif route_info:
             resupply_state, resupply_delay = self._get_resupply_availability(route_info, components)
+
+        if resupply_state == "unavailable" and route_info == {} and components and report_line:
+            val = self._get_last_availability(report_line)
+            return val
 
         base = {
             'resupply_avail_delay': resupply_delay,
@@ -601,3 +611,30 @@ class ReportBomStructure(models.AbstractModel):
     @api.model
     def _has_attachments(self, data):
         return data['attachment_ids'] or any(self._has_attachments(component) for component in data.get('components', []))
+
+    def _merge_components(self, component_1, component_2):
+        qty = component_2['quantity']
+        component_1["quantity"] = component_1["quantity"] + qty
+        component_1["base_bom_line_qty"] = component_1["quantity"] + qty
+        component_1["prod_cost"] = component_1["prod_cost"] + component_2["prod_cost"]
+        component_1["bom_cost"] = component_1["bom_cost"] + component_2["bom_cost"]
+        if not component_1.get("components"):
+            return
+        for index in range(len(component_1.get("components"))):
+            self._merge_components(component_1["components"][index], component_2["components"][index])
+
+    def _get_last_availability(self, report_line):
+        delay = 0
+        component_max_delay = False
+        for component in report_line["components"]:
+            if component["availability_delay"] is False:
+                component_max_delay = component
+                break
+            elif component["availability_delay"] >= delay:
+                component_max_delay = component
+                delay = component["availability_delay"]
+        return {'resupply_avail_delay': component_max_delay['resupply_avail_delay'],
+                'stock_avail_state': component_max_delay['stock_avail_state'],
+                'availability_display': component_max_delay['availability_display'],
+                'availability_state': component_max_delay['availability_state'],
+                'availability_delay': component_max_delay['availability_delay']}

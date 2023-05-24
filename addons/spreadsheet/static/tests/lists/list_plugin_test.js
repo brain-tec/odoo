@@ -2,6 +2,7 @@
 
 import { session } from "@web/session";
 import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { makeServerError } from "@web/../tests/helpers/mock_server";
 
 import CommandResult from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { createModelWithDataSource, waitForDataSourcesLoaded } from "../utils/model";
@@ -17,7 +18,6 @@ import {
 } from "../utils/getters";
 import { createSpreadsheetWithList } from "../utils/list";
 import { registry } from "@web/core/registry";
-import { RPCError } from "@web/core/network/rpc_service";
 import { getBasicServerData } from "../utils/data";
 
 QUnit.module("spreadsheet > list plugin", {}, () => {
@@ -117,6 +117,22 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
         assert.strictEqual(getEvaluatedCell(model, "F2").format, undefined);
         assert.strictEqual(getEvaluatedCell(model, "G2").format, "#,##0.00[$€]");
         assert.strictEqual(getEvaluatedCell(model, "G3").format, "[$$]#,##0.00");
+    });
+
+    QUnit.test("Json fields are not supported in list formulas", async function (assert) {
+        const { model } = await createSpreadsheetWithList({
+            columns: ["foo", "jsonField"],
+            linesNumber: 2,
+        });
+        setCellContent(model, "A1", `=ODOO.LIST(1,1,"foo")`);
+        setCellContent(model, "A2", `=ODOO.LIST(1,1,"jsonField")`);
+        await waitForDataSourcesLoaded(model);
+        assert.strictEqual(getEvaluatedCell(model, "A1").value, 12);
+        assert.strictEqual(getEvaluatedCell(model, "A2").value, "#ERROR");
+        assert.strictEqual(
+            getEvaluatedCell(model, "A2").error.message,
+            `Fields of type "json" are not supported`
+        );
     });
 
     QUnit.test("can select a List from cell formula", async function (assert) {
@@ -571,9 +587,7 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
                         args.method === "search_read" &&
                         !hasAccessRights
                     ) {
-                        const error = new RPCError();
-                        error.data = { message: "ya done!" };
-                        throw error;
+                        throw makeServerError({ description: "ya done!" });
                     }
                 },
             });
