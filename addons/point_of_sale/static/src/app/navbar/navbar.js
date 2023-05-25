@@ -5,14 +5,13 @@ import { useService } from "@web/core/utils/hooks";
 
 import { CashierName } from "@point_of_sale/js/ChromeWidgets/CashierName";
 import { CustomerFacingDisplayButton } from "@point_of_sale/js/ChromeWidgets/CustomerFacingDisplayButton";
-import { HeaderButton } from "@point_of_sale/js/ChromeWidgets/HeaderButton";
 import { ProxyStatus } from "@point_of_sale/js/ChromeWidgets/ProxyStatus";
 import { SaleDetailsButton } from "@point_of_sale/js/ChromeWidgets/SaleDetailsButton";
 import { SyncNotification } from "@point_of_sale/js/ChromeWidgets/SyncNotification";
-import { BackendButton } from "@point_of_sale/js/ChromeWidgets/BackendButton";
 import { CashMovePopup } from "./cash_move_popup/cash_move_popup";
 import { TicketScreen } from "@point_of_sale/js/Screens/TicketScreen/TicketScreen";
 import { Component, useState, useExternalListener } from "@odoo/owl";
+import { ClosePosPopup } from "@point_of_sale/js/Popups/ClosePosPopup";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";
@@ -20,11 +19,9 @@ export class Navbar extends Component {
         // FIXME POSREF remove some of these components
         CashierName,
         CustomerFacingDisplayButton,
-        HeaderButton,
         ProxyStatus,
         SaleDetailsButton,
         SyncNotification,
-        BackendButton,
     };
     static props = {
         showCashMoveButton: Boolean,
@@ -98,5 +95,10 @@ export class Navbar extends Component {
 
     openMenu() {
         this.state.isMenuOpened = true;
+    }
+
+    async closeSession() {
+        const info = await this.pos.globalState.getClosePosInfo();
+        this.popup.add(ClosePosPopup, { info, keepBehind: true });
     }
 }
