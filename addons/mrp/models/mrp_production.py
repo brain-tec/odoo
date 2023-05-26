@@ -689,15 +689,16 @@ class MrpProduction(models.Model):
         late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
         return ['|', ('move_raw_ids', 'in', late_stock_moves.ids), ('move_finished_ids', 'in', late_stock_moves.ids)]
 
-    @api.depends('company_id', 'date_start', 'is_planned', 'product_id')
+    @api.depends('company_id', 'date_start', 'is_planned', 'product_id', 'workorder_ids.duration_expected')
     def _compute_date_finished(self):
         for production in self:
-            if not production.date_start or production.is_planned:
+            if not production.date_start or production.is_planned or production.state == 'done':
                 continue
             days_delay = production.bom_id.produce_delay
             date_finished = production.date_start + relativedelta(days=days_delay)
             if date_finished == production.date_start:
-                date_finished = date_finished + relativedelta(hours=1)
+                workorder_expected_duration = sum(self.workorder_ids.mapped('duration_expected'))
+                date_finished = date_finished + relativedelta(minutes=workorder_expected_duration or 60)
             production.date_finished = date_finished
 
     @api.depends('company_id', 'bom_id', 'product_id', 'product_qty', 'product_uom_id', 'location_src_id', 'date_start')
@@ -1490,7 +1491,7 @@ class MrpProduction(models.Model):
                 moves_to_do.add(move.id)
                 if move.product_qty == 0.0 and move.quantity_done > 0:
                     move.product_uom_qty = move.quantity_done
-        self.env['stock.move'].browse(moves_to_do)._action_done(cancel_backorder=cancel_backorder)
+        self.with_context(skip_mo_check=True).env['stock.move'].browse(moves_to_do)._action_done(cancel_backorder=cancel_backorder)
         moves_to_do = self.move_raw_ids.filtered(lambda x: x.state == 'done') - self.env['stock.move'].browse(moves_not_to_do)
         # Create a dict to avoid calling filtered inside for loops.
         moves_to_do_by_order = defaultdict(lambda: self.env['stock.move'], [
@@ -1854,8 +1855,6 @@ class MrpProduction(models.Model):
         for production in self:
             if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 raise UserError(_('The quantity to produce must be positive!'))
-            if production.move_raw_ids and not any(production.move_raw_ids.mapped('quantity_done')):
-                raise UserError(_("You must indicate a non-zero amount consumed for at least one of your components"))
 
         consumption_issues = self._get_consumption_issues()
         if consumption_issues:
