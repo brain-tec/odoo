@@ -248,6 +248,7 @@ class StockMove(models.Model):
             else:
                 move.show_details_visible = (((consignment_enabled and move.picking_code != 'incoming') or
                                              show_details_visible or move.has_tracking != 'none') and
+                                             move.state != 'draft' and
                                              move.show_operations is False)
 
     def _compute_show_reserved_availability(self):
@@ -656,6 +657,9 @@ Please change the quantity done or the rounding precision of your unit of measur
         for vals in vals_list:
             if vals.get('quantity_done') and 'lot_ids' in vals:
                 vals.pop('lot_ids')
+            picking_id = self.env['stock.picking'].browse(vals.get('picking_id'))
+            if picking_id and picking_id.immediate_transfer and not vals.get('qty_done'):
+                vals['state'] = 'assigned'
         return super().create(vals_list)
 
     def write(self, vals):
@@ -800,7 +804,7 @@ Please change the quantity done or the rounding precision of your unit of measur
 
         if self.product_id.tracking == "serial" and self.state == "assigned":
             self.next_serial = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
-        quant_mode = self.picking_type_id.code != 'incoming'
+        quant_mode = self.picking_type_id.code != 'incoming' or self.product_id.detailed_type != 'product'
         return {
             'name': _('Detailed Operations'),
             'type': 'ir.actions.act_window',

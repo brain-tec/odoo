@@ -214,16 +214,6 @@ class IrActionsReport(models.Model):
         '''
         return wkhtmltopdf_state
 
-    @api.model
-    def datamatrix_available(self):
-        '''Returns whether or not datamatrix creation is possible.
-        * True: Reportlab seems to be able to create datamatrix without error.
-        * False: Reportlab cannot seem to create datamatrix, most likely due to missing package dependency
-
-        :return: Boolean
-        '''
-        return True
-
     def get_paperformat(self):
         return self.paperformat_id or self.env.company.paperformat_id
 
@@ -300,7 +290,8 @@ class IrActionsReport(models.Model):
                 command_args.extend(['--disable-smart-shrinking'])
 
         # Add extra time to allow the page to render
-        command_args.extend(['--javascript-delay', '1000'])
+        delay = self.env['ir.config_parameter'].sudo().get_param('report.print_delay', '1000')
+        command_args.extend(['--javascript-delay', delay])
 
         if landscape:
             command_args.extend(['--orientation', 'landscape'])
@@ -547,9 +538,6 @@ class IrActionsReport(models.Model):
         elif barcode_type == 'auto':
             symbology_guess = {8: 'EAN8', 13: 'EAN13'}
             barcode_type = symbology_guess.get(len(value), 'Code128')
-        elif barcode_type == 'DataMatrix':
-            # Prevent a crash due to a lib change from pylibdmtx to reportlab
-            barcode_type = 'ECC200DataMatrix'
         elif barcode_type == 'QR':
             # for `QR` type, `quiet` is not supported. And is simply ignored.
             # But we can use `barBorder` to get a similar behaviour.
