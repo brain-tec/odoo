@@ -29,6 +29,14 @@ odoo.define('website.tour.form_editor', function (require) {
         });
     }
 
+    // Replace all `"` character by `&quot;`, all `'` character by `&apos;` and
+    // all "`" character by `&lsquo;`.
+    const getQuotesEncodedName = function (name) {
+            return name.replaceAll(/"/g, character => `&quot;`)
+                       .replaceAll(/'/g, character => `&apos;`)
+                       .replaceAll(/`/g, character => `&lsquo;`);
+    };
+
     const selectButtonByText = function (text) {
         return [{
             content: "Open the select",
@@ -48,7 +56,9 @@ odoo.define('website.tour.form_editor', function (require) {
             trigger: `we-select we-button[${data}]`,
         }];
     };
-    const addField = function (data, name, type, label, required, display = {visibility: VISIBLE, condition: ''}) {
+    const addField = function (name, type, label, required, isCustom,
+                               display = {visibility: VISIBLE, condition: ""}) {
+        const data = isCustom ? `data-custom-field="${name}"` : `data-existing-field="${name}"`;
         const ret = [{
             content: "Select form",
             extra_trigger: '.s_website_form_field',
@@ -81,7 +91,7 @@ odoo.define('website.tour.form_editor', function (require) {
             });
         }
         if (label) {
-            testText += `:has(label:contains("${label}"))`;
+            testText += `:has(label:contains(${label}))`;
             ret.push({
                 content: "Change the label text",
                 trigger: 'we-input[data-set-label-text] input',
@@ -90,7 +100,8 @@ odoo.define('website.tour.form_editor', function (require) {
         }
         if (type !== 'checkbox' && type !== 'radio' && type !== 'select') {
             let inputType = type === 'textarea' ? type : `input[type="${type}"]`;
-            testText += `:has(${inputType}[name="${name}"]${required ? '[required]' : ''})`;
+            const nameAttribute = isCustom && label ? getQuotesEncodedName(label) : name;
+            testText += `:has(${inputType}[name="${nameAttribute}"]${required ? "[required]" : ""})`;
         }
         ret.push({
             content: "Check the resulting field",
@@ -100,10 +111,10 @@ odoo.define('website.tour.form_editor', function (require) {
         return ret;
     };
     const addCustomField = function (name, type, label, required, display) {
-        return addField(`data-custom-field="${name}"`, name, type, label, required, display);
+        return addField(name, type, label, required, true, display);
     };
     const addExistingField = function (name, type, label, required, display) {
-        return addField(`data-existing-field="${name}"`, name, type, label, required, display);
+        return addField(name, type, label, required, false, display);
     };
 
     tour.register("website_form_editor_tour", {
@@ -398,6 +409,9 @@ odoo.define('website.tour.form_editor', function (require) {
             trigger: '[data-field-name="email_to"] input',
             run: 'text test@test.test',
         },
+        ...addCustomField("char", "text", "''", false),
+        ...addCustomField("char", "text", '""', false),
+        ...addCustomField("char", "text", "``", false),
         {
             content: 'Save the page',
             trigger: 'button[data-action=save]',
