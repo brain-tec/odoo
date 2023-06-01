@@ -132,7 +132,7 @@
             <div class="d-flex align-items-center px-3">
                 <i class="fa fa-fw" t-att-class="state.showActivities ? 'fa-caret-down' : 'fa-caret-right'"/>
                 Planned Activities
-                <span t-if="!state.showActivities" class="badge text-bg-success"><t t-esc="activities.length"/></span>
+                <span t-if="!state.showActivities" class="badge rounded-pill ms-2 text-bg-success"><t t-esc="activities.length"/></span>
             </div>
             <hr class="flex-grow-1"/>
         </div>
@@ -145,7 +145,7 @@
 </t>
 
 <t t-name="mail.Chatter.attachFiles" owl="1">
-    <button class="btn btn-link text-action px-1" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-on-click="onClickAddAttachments">
+    <button class="btn btn-link text-action px-1 d-flex" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-on-click="onClickAddAttachments">
         <i class="fa fa-paperclip fa-lg me-1"/>
         <span t-if="attachments.length > 0" t-esc="attachments.length"/>
         <i t-if="!state.thread.areAttachmentsLoaded and state.thread.isLoadingAttachments" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
