@@ -1706,6 +1706,15 @@ class AccountMove(models.Model):
             self.name = '/'
             self._compute_name()
 
+    @api.onchange('invoice_cash_rounding_id')
+    def _onchange_invoice_cash_rounding_id(self):
+        for move in self:
+            if move.invoice_cash_rounding_id and not move.invoice_cash_rounding_id.profit_account_id:
+                return {'warning': {
+                    'title': _("Warning for Cash Rounding Method: %s", move.invoice_cash_rounding_id.name),
+                    'message': _("You must specifiy the Profit Account (company dependent)")
+                }}
+
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
@@ -3369,7 +3378,7 @@ class AccountMove(models.Model):
             reverse_moves += move.with_context(
                 move_reverse_cancel=cancel,
                 include_business_fields=True,
-                skip_invoice_sync=bool(move.tax_cash_basis_origin_move_id),
+                skip_invoice_sync=move.move_type == 'entry',
             ).copy(default_values)
 
         reverse_moves.with_context(skip_invoice_sync=cancel).write({'line_ids': [

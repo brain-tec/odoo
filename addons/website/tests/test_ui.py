@@ -288,6 +288,8 @@ class TestUi(odoo.tests.HttpCase):
     def test_10_website_conditional_visibility(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'conditional_visibility_1', login='admin')
         self.start_tour('/web', 'conditional_visibility_2', login='admin')
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'conditional_visibility_3', login='admin')
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'conditional_visibility_4', login='admin')
 
     def test_11_website_snippet_background_edition(self):
         self.env['ir.attachment'].create({
@@ -407,3 +409,13 @@ class TestUi(odoo.tests.HttpCase):
 
     def test_27_website_clicks(self):
         self.start_tour('/web', 'website_click_tour', login='admin')
+
+    def test_28_hide_chat_window_on_preview(self):
+        session = self.authenticate('admin', 'admin')
+        partner_id = self.env['res.users'].search([('id', '=', session.uid)]).partner_id
+        self.env['discuss.channel'].create({
+            'name': 'Test Channel',
+            'channel_type': 'chat',
+            'channel_member_ids': [odoo.Command.create({'partner_id': partner_id.id, 'is_minimized': True})],
+        })
+        self.start_tour(f'/web#id={partner_id.id}&model=res.partner&view_type=form', 'test_hide_chat_window_on_preview', login='admin')
