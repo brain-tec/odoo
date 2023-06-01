@@ -770,7 +770,6 @@ class Picking(models.Model):
                 vals['immediate_transfer'] = False
             if self.env['ir.config_parameter'].sudo().get_param('stock.no_default_immediate_tranfer'):
                 vals['immediate_transfer'] = False
-
         pickings = super().create(vals_list)
 
         for picking, scheduled_date in zip(pickings, scheduled_dates):
@@ -1610,3 +1609,6 @@ class Picking(models.Model):
             body=message,
         )
         return True
+
+    def _get_report_lang(self):
+        return self.move_ids and self.move_ids[0].partner_id.lang or self.partner_id.lang or self.env.lang
