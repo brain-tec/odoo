@@ -1704,9 +1704,18 @@ class AccountMove(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
-        if not self.quick_edit_mode and self._get_last_sequence():
+        if not self.quick_edit_mode:
             self.name = '/'
             self._compute_name()
+
+    @api.onchange('invoice_cash_rounding_id')
+    def _onchange_invoice_cash_rounding_id(self):
+        for move in self:
+            if move.invoice_cash_rounding_id and not move.invoice_cash_rounding_id.profit_account_id:
+                return {'warning': {
+                    'title': _("Warning for Cash Rounding Method: %s", move.invoice_cash_rounding_id.name),
+                    'message': _("You must specifiy the Profit Account (company dependent)")
+                }}
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
