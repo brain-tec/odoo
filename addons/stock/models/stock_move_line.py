@@ -67,11 +67,11 @@ class StockMoveLine(models.Model):
     location_dest_usage = fields.Selection(string="Destination Location Type", related='location_dest_id.usage')
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
     picking_partner_id = fields.Many2one(related='picking_id.partner_id', readonly=True)
-    picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
+    picking_code = fields.Selection(related='picking_type_id.code', readonly=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation type', compute='_compute_picking_type_id', search='_search_picking_type_id')
-    picking_type_use_create_lots = fields.Boolean(related='picking_id.picking_type_id.use_create_lots', readonly=True)
-    picking_type_use_existing_lots = fields.Boolean(related='picking_id.picking_type_id.use_existing_lots', readonly=True)
+    picking_type_use_create_lots = fields.Boolean(related='picking_type_id.use_create_lots', readonly=True)
+    picking_type_use_existing_lots = fields.Boolean(related='picking_type_id.use_existing_lots', readonly=True)
     picking_type_entire_packs = fields.Boolean(related='picking_id.picking_type_id.show_entire_packs', readonly=True)
     state = fields.Selection(related='move_id.state', store=True, related_sudo=False)
     is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable')
@@ -302,8 +302,8 @@ class StockMoveLine(models.Model):
                 vals['company_id'] = self.env['stock.picking'].browse(vals['picking_id']).company_id.id
             if vals.get('quant_id'):
                 vals.update(self._copy_quant_info(vals))
-            if self.env.context.get('import_file') and vals.get('product_uom_qty') != 0:
-                raise UserError(_("It is not allow to import reserved quantity, you have to use the quantity directly."))
+            if self.env.context.get('import_file') and vals.get('reserved_uom_qty'):
+                raise UserError(_("It is not allowed to import reserved quantity, you have to use the quantity directly."))
 
         mls = super().create(vals_list)
 

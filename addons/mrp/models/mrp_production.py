@@ -71,11 +71,12 @@ class MrpProduction(models.Model):
         readonly=True, required=True, check_company=True,
         states={'draft': [('readonly', False)]})
     product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
+    workcenter_id = fields.Many2one('mrp.workcenter', store=False)  # Only used for search in view_mrp_production_filter
     product_tracking = fields.Selection(related='product_id.tracking')
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
     product_qty = fields.Float(
         'Quantity To Produce', digits='Product Unit of Measure',
-        readonly=False, required=True, tracking=True, default=1.0,
+        readonly=False, required=True, tracking=True, precompute=True,
         compute='_compute_product_qty', store=True, copy=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
@@ -376,6 +377,8 @@ class MrpProduction(models.Model):
                 continue
             if production.bom_id and production._origin.bom_id != production.bom_id:
                 production.product_qty = production.bom_id.product_qty
+            elif not production.bom_id:
+                production.product_qty = 1.0
 
     @api.depends('move_raw_ids')
     def _compute_production_capacity(self):
@@ -1160,6 +1163,25 @@ class MrpProduction(models.Model):
         parent_moves = self.procurement_group_id.stock_move_ids.move_dest_ids
         return (dest_moves | parent_moves).group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
 
+    def _set_lot_producing(self):
+        self.ensure_one()
+        if self.product_id.tracking == 'lot':
+            name = self.env['ir.sequence'].next_by_code('stock.lot.serial')
+            exist_lot = self.env['stock.lot'].search([
+                ('product_id', '=', self.product_id.id),
+                ('company_id', '=', self.company_id.id),
+                ('name', '=', name),
+            ], limit=1)
+            if exist_lot:
+                name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
+        else:
+            name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id) or self.env['ir.sequence'].next_by_code('stock.lot.serial')
+        self.lot_producing_id = self.env['stock.lot'].create({
+            'product_id': self.product_id.id,
+            'company_id': self.company_id.id,
+            'name': name,
+        })
+
     def action_view_mrp_production_childs(self):
         self.ensure_one()
         mrp_production_ids = self._get_children().ids
@@ -1212,22 +1234,7 @@ class MrpProduction(models.Model):
 
     def action_generate_serial(self):
         self.ensure_one()
-        if self.product_id.tracking == 'lot':
-            name = self.env['ir.sequence'].next_by_code('stock.lot.serial')
-            exist_lot = self.env['stock.lot'].search([
-                ('product_id', '=', self.product_id.id),
-                ('company_id', '=', self.company_id.id),
-                ('name', '=', name),
-            ], limit=1)
-            if exist_lot:
-                name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
-        else:
-            name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id) or self.env['ir.sequence'].next_by_code('stock.lot.serial')
-        self.lot_producing_id = self.env['stock.lot'].create({
-            'product_id': self.product_id.id,
-            'company_id': self.company_id.id,
-            'name': name,
-        })
+        self._set_lot_producing()
         if self.product_id.tracking == 'serial':
             self._set_qty_producing()
 
