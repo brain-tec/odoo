@@ -31,6 +31,7 @@ import {
     useState,
     useEffect,
 } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
 const formatters = registry.category("formatters");
 
@@ -605,7 +606,35 @@ export class ListRenderer extends Component {
             if (type !== "integer" && type !== "float" && type !== "monetary") {
                 continue;
             }
+
             const { attrs, widget } = column;
+            let currencyId;
+            if (type === "monetary" || widget === "monetary") {
+                const currencyField =
+                    this.props.list.activeFields[fieldName].options.currency_field ||
+                    this.fields[fieldName].currency_field ||
+                    "currency_id";
+                if (!(currencyField in this.props.list.activeFields)) {
+                    aggregates[fieldName] = {
+                        help: _t("No currency provided"),
+                        value: "—",
+                    };
+                    continue;
+                }
+                currencyId = values[0][currencyField] && values[0][currencyField][0];
+                if (currencyId) {
+                    const sameCurrency = values.every(
+                        (value) => currencyId === value[currencyField][0]
+                    );
+                    if (!sameCurrency) {
+                        aggregates[fieldName] = {
+                            help: _t("Different currencies cannot be aggregated"),
+                            value: "—",
+                        };
+                        continue;
+                    }
+                }
+            }
             const func =
                 (attrs.sum && "sum") ||
                 (attrs.avg && "avg") ||
@@ -629,6 +658,9 @@ export class ListRenderer extends Component {
                     digits: attrs.digits ? JSON.parse(attrs.digits) : undefined,
                     escape: true,
                 };
+                if (currencyId) {
+                    formatOptions.currencyId = currencyId;
+                }
                 aggregates[fieldName] = {
                     help: attrs[func],
                     value: formatter ? formatter(aggregateValue, formatOptions) : aggregateValue,
@@ -640,14 +672,14 @@ export class ListRenderer extends Component {
 
     formatAggregateValue(group, column) {
         const { widget, attrs } = column;
-        const fieldType = this.props.list.fields[column.name].type;
+        const field = this.props.list.fields[column.name];
         const aggregateValue = group.aggregates[column.name];
         if (!(column.name in group.aggregates)) {
             return "";
         }
-        const formatter = formatters.get(widget, false) || formatters.get(fieldType, false);
+        const formatter = formatters.get(widget, false) || formatters.get(field.type, false);
         const formatOptions = {
-            digits: attrs.digits ? JSON.parse(attrs.digits) : undefined,
+            digits: attrs.digits ? JSON.parse(attrs.digits) : field.digits,
             escape: true,
         };
         return formatter ? formatter(aggregateValue, formatOptions) : aggregateValue;
