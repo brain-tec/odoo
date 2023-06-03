@@ -608,11 +608,12 @@ export class ListRenderer extends Component {
             if (type !== "integer" && type !== "float" && type !== "monetary") {
                 continue;
             }
+            const { attrs, widget } = column;
             let currencyId;
-            if (type === "monetary") {
+            if (type === "monetary" || widget === "monetary") {
                 const currencyField =
-                    this.props.list.activeFields[column.name].options.currency_field ||
-                    this.fields[column.name].currency_field ||
+                    this.props.list.activeFields[fieldName].options.currency_field ||
+                    this.fields[fieldName].currency_field ||
                     "currency_id";
                 if (!(currencyField in this.props.list.activeFields)) {
                     aggregates[fieldName] = {
@@ -621,7 +622,7 @@ export class ListRenderer extends Component {
                     };
                     continue;
                 }
-                currencyId = values[0][currencyField]?.[0];
+                currencyId = values[0][currencyField] && values[0][currencyField][0];
                 if (currencyId) {
                     const sameCurrency = values.every(
                         (value) => currencyId === value[currencyField][0]
@@ -635,7 +636,6 @@ export class ListRenderer extends Component {
                     }
                 }
             }
-            const { attrs, widget } = column;
             const func =
                 (attrs.sum && "sum") ||
                 (attrs.avg && "avg") ||
@@ -673,14 +673,14 @@ export class ListRenderer extends Component {
 
     formatAggregateValue(group, column) {
         const { widget, attrs } = column;
-        const fieldType = this.props.list.fields[column.name].type;
+        const field = this.props.list.fields[column.name];
         const aggregateValue = group.aggregates[column.name];
         if (!(column.name in group.aggregates)) {
             return "";
         }
-        const formatter = formatters.get(widget, false) || formatters.get(fieldType, false);
+        const formatter = formatters.get(widget, false) || formatters.get(field.type, false);
         const formatOptions = {
-            digits: attrs.digits ? JSON.parse(attrs.digits) : undefined,
+            digits: attrs.digits ? JSON.parse(attrs.digits) : field.digits,
             escape: true,
         };
         return formatter ? formatter(aggregateValue, formatOptions) : aggregateValue;
