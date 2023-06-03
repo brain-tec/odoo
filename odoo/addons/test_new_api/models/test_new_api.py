@@ -585,6 +585,8 @@ class CompanyDependent(models.Model):
     truth = fields.Boolean(company_dependent=True)
     count = fields.Integer(company_dependent=True)
     phi = fields.Float(company_dependent=True, digits=(2, 5))
+    html1 = fields.Html(company_dependent=True, sanitize=False)
+    html2 = fields.Html(company_dependent=True, sanitize_attributes=True, strip_classes=True, strip_style=True)
 
 
 class CompanyDependentAttribute(models.Model):
@@ -1783,3 +1785,21 @@ class EmptyChar(models.Model):
     _description = 'A model to test emtpy char'
 
     name = fields.Char('Name')
+
+
+class Team(models.Model):
+    _name = 'test_new_api.team'
+    _description = 'Odoo Team'
+
+    name = fields.Char()
+    parent_id = fields.Many2one('test_new_api.team')
+    member_ids = fields.One2many('test_new_api.team.member', 'team_id')
+
+
+class TeamMember(models.Model):
+    _name = 'test_new_api.team.member'
+    _description = 'Odoo Developer'
+
+    name = fields.Char('Name')
+    team_id = fields.Many2one('test_new_api.team')
+    parent_id = fields.Many2one('test_new_api.team', related='team_id.parent_id')
