@@ -1586,7 +1586,7 @@ QUnit.module("Search", (hooks) => {
                 target.querySelector(".o_domain_leaf .o_model_field_selector_chain_part").innerText,
                 "ID"
             );
-            assert.containsNone(target, "button.o_domain_tree_connector_caret");
+            assert.containsOnce(target, "button.o_domain_tree_connector_caret");
 
             await click(target, ".o_domain_add_node_button .fa-plus");
             assert.containsOnce(target, "button.o_domain_tree_connector_caret");
@@ -1640,7 +1640,7 @@ QUnit.module("Search", (hooks) => {
                 "Filter",
                 "ID = 1",
                 "ID = 1",
-                "ID = 1 or ID = 1 or ( ID = 1 and ID = 1 )",
+                "( ID = 1 and ID = 1 ) or ID in ( 1 , 1 )",
             ]);
             assert.deepEqual(getDomain(controlPanel), [
                 "&",
@@ -1678,7 +1678,7 @@ QUnit.module("Search", (hooks) => {
             await editInput(target, ".o_domain_debug_input", `[("foo", "in", [uid, 1, "a"])]`);
             await click(target.querySelector(".modal footer button"));
 
-            assert.deepEqual(getFacetTexts(target), [`Foo in uid or 1 or "a"`]);
+            assert.deepEqual(getFacetTexts(target), [`Foo in ( uid , 1 , a )`]);
             assert.deepEqual(getDomain(controlPanel), [
                 ["foo", "in", [7, 1, "a"]], // uid = 7
             ]);
