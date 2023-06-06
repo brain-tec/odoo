@@ -1713,8 +1713,7 @@ class AccountMove(models.Model):
             'account_payment_id': counterpart_line.payment_id.id,
             'payment_method_name': counterpart_line.payment_id.payment_method_line_id.name,
             'move_id': counterpart_line.move_id.id,
-            'ref': reconciliation_ref,
-        }
+            'ref': reconciliation_ref,        }
 
     @api.depends('move_type', 'line_ids.amount_residual')
     def _compute_payments_widget_reconciled_info(self):
@@ -4774,7 +4773,7 @@ class AccountMoveLine(models.Model):
                 line._check_reconciliation()
 
             # Check switching receivable / payable accounts.
-            if account_to_write:
+            if account_to_write and not self.env.context.get('skip_account_constraints'):
                 account_type = line.account_id.user_type_id.type
                 if line.move_id.is_sale_document(include_receipts=True):
                     if (account_type == 'receivable' and account_to_write.user_type_id.type != account_type) \
