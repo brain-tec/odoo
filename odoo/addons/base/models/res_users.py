@@ -153,6 +153,13 @@ class Groups(models.Model):
     def _check_one_user_type(self):
         self.users._check_one_user_type()
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_settings_group(self):
+        classified = self.env['res.config.settings']._get_classified_fields()
+        for _name, _groups, implied_group in classified['group']:
+            if implied_group.id in self.ids:
+                raise ValidationError(_('You cannot delete a group linked with a settings field.'))
+
     @api.depends('category_id.name', 'name')
     def _compute_full_name(self):
         # Important: value must be stored in environment of group, not group1!
@@ -1684,6 +1691,14 @@ class UsersView(models.Model):
         values = super(UsersView, self).default_get(fields1)
         self._add_reified_groups(group_fields, values)
         return values
+
+    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False):
+        valid_fields = partition(is_reified_group, field_names)[1]
+        return super()._determine_fields_to_fetch(valid_fields, ignore_when_in_cache)
+
+    def _read_format(self, fnames, load='_classic_read'):
+        valid_fields = partition(is_reified_group, fnames)[1]
+        return super()._read_format(valid_fields, load)
 
     def onchange(self, values, field_name, field_onchange):
         # field_name can be either a string, a list or Falsy
