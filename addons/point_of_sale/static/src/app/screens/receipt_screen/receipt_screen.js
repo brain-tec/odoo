@@ -11,7 +11,7 @@ import { useService } from "@web/core/utils/hooks";
 import { BasePrinter } from "@point_of_sale/app/printer/base_printer";
 
 export class ReceiptScreen extends AbstractReceiptScreen {
-    static template = "ReceiptScreen";
+    static template = "point_of_sale.ReceiptScreen";
     static components = { OrderReceipt };
 
     setup() {
@@ -54,6 +54,7 @@ export class ReceiptScreen extends AbstractReceiptScreen {
             }
         });
     }
+
     _addNewOrder() {
         this.pos.globalState.add_new_order();
     }
