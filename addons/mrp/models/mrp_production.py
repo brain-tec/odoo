@@ -477,10 +477,9 @@ class MrpProduction(models.Model):
         ], ['company_id'], ['id:array_agg'])
         location_by_company = {company.id: ids for company, ids in location_by_company}
         for production in self:
-            if production.product_id:
-                production.production_location_id = production.product_id.with_company(production.company_id).property_stock_production
-            else:
-                production.production_location_id = location_by_company.get(production.company_id.id)[0]
+            prod_loc = production.product_id.with_company(production.company_id).property_stock_production
+            comp_locs = location_by_company.get(production.company_id.id)
+            production.production_location_id = prod_loc or (comp_locs and comp_locs[0])
 
     @api.depends('product_id.tracking')
     def _compute_show_lots(self):
@@ -1508,10 +1507,12 @@ class MrpProduction(models.Model):
         for order in self:
             finish_moves = order.move_finished_ids.filtered(lambda m: m.product_id == order.product_id and m.state not in ('done', 'cancel'))
             # the finish move can already be completed by the workorder.
-            if finish_moves and not finish_moves.quantity_done:
-                finish_moves._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
-            if finish_moves.has_tracking != 'none' and order.lot_producing_id:
-                finish_moves.move_line_ids.lot_id = order.lot_producing_id
+            for move in finish_moves:
+                if move.quantity_done:
+                    continue
+                move._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
+                if move.has_tracking != 'none' and order.lot_producing_id:
+                    move.move_line_ids.lot_id = order.lot_producing_id
             # workorder duration need to be set to calculate the price of the product
             for workorder in order.workorder_ids:
                 if workorder.state not in ('done', 'cancel'):
