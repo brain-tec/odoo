@@ -39,11 +39,7 @@
                 </t>
 
                 <t t-set-slot="control-panel-additional-actions">
-                    <CogMenu t-if="!nbSelected">
-                        <DropdownItem t-if="nbTotal and !nbSelected and activeActions.exportXlsx and isExportEnable" onSelected.bind="onDirectExportData">
-                            Export All
-                        </DropdownItem>
-                    </CogMenu>
+                    <CogMenu t-if="!nbSelected"/>
                 </t>
                 <t t-set-slot="control-panel-selection-actions">
                     <div t-if="nbSelected" class="d-flex gap-1">
@@ -102,7 +98,7 @@
                     </a>
                 </t>
                 <a href="#" title="Unselect All" class="o_list_unselect_all btn btn-link py-0 ms-2" t-on-click="onUnselectAll">
-                    <i class="oi oi-close oi-large"/>
+                    <i class="oi oi-close oi-large align-text-bottom"/>
                 </a>
             </span>
         </div>
