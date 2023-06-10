@@ -4,10 +4,10 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { download } from "@web/core/network/download";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { unique } from "@web/core/utils/arrays";
-import { useService } from "@web/core/utils/hooks";
+import { useService, useBus } from "@web/core/utils/hooks";
 import { omit } from "@web/core/utils/objects";
 import { sprintf } from "@web/core/utils/strings";
-import { ActionMenus } from "@web/search/action_menus/action_menus";
+import { ActionMenus, STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
 import { session } from "@web/session";
@@ -22,10 +22,7 @@ import { useSetupView } from "@web/views/view_hook";
 import { ListConfirmationDialog } from "./list_confirmation_dialog";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
-import { ActionMenusItems } from "@web/search/cog_menu/action_menus_items";
 
 import {
     Component,
@@ -158,6 +155,7 @@ export class ListController extends Component {
         onWillPatch(() => {
             this.firstLoad = false;
         });
+        useBus(this.env.searchModel, 'direct-export-data', this.onDirectExportData.bind(this));
     }
 
     get modelParams() {
@@ -294,12 +292,14 @@ export class ListController extends Component {
             export: {
                 isAvailable: () => this.isExportEnable,
                 sequence: 10,
+                icon: "fa fa-upload",
                 description: this.env._t("Export"),
                 callback: () => this.onExportData(),
             },
             archive: {
                 isAvailable: () => this.archiveEnabled && !isM2MGrouped,
                 sequence: 20,
+                icon: "oi oi-archive",
                 description: this.env._t("Archive"),
                 callback: () => {
                     const dialogProps = {
@@ -318,12 +318,14 @@ export class ListController extends Component {
             unarchive: {
                 isAvailable: () => this.archiveEnabled && !isM2MGrouped,
                 sequence: 30,
+                icon: "oi oi-unarchive",
                 description: this.env._t("Unarchive"),
                 callback: () => this.toggleArchiveState(false),
             },
             delete: {
                 isAvailable: () => this.activeActions.delete && !isM2MGrouped,
                 sequence: 40,
+                icon: "fa fa-trash-o",
                 description: this.env._t("Delete"),
                 callback: () => this.onDeleteSelectedRecords(),
             },
@@ -335,7 +337,12 @@ export class ListController extends Component {
         const staticActionItems = Object.entries(this.getStaticActionMenuItems())
             .filter(([key, item]) => item.isAvailable === undefined || item.isAvailable())
             .sort(([k1, item1], [k2, item2]) => (item1.sequence || 0) - (item2.sequence || 0))
-            .map(([key, item]) => Object.assign({ key }, omit(item, "isAvailable", "sequence")));
+            .map(([key, item]) =>
+                Object.assign(
+                    { key, groupNumber: STATIC_ACTIONS_GROUP_NUMBER },
+                    omit(item, "isAvailable")
+                )
+            );
 
         return {
             action: [...staticActionItems, ...(actionMenus.action || [])],
@@ -499,13 +506,13 @@ export class ListController extends Component {
         }
     }
 
-    async onDeleteSelectedRecords() {
+    get deleteConfirmationDialogProps() {
         const root = this.model.root;
         const body =
             root.isDomainSelected || root.selection.length > 1
                 ? this.env._t("Are you sure you want to delete these records?")
                 : this.env._t("Are you sure you want to delete this record?");
-        const dialogProps = {
+        return {
             body,
             confirm: async () => {
                 const total = root.count;
@@ -531,7 +538,10 @@ export class ListController extends Component {
             confirmLabel: this.env._t("Delete"),
             cancel: () => {},
         };
-        this.dialogService.add(ConfirmationDialog, dialogProps);
+    }
+
+    async onDeleteSelectedRecords() {
+        this.dialogService.add(ConfirmationDialog, this.deleteConfirmationDialogProps);
     }
 
     discardSelection() {
@@ -614,10 +624,7 @@ ListController.components = {
     ViewButton,
     MultiRecordViewButton,
     SearchBar,
-    Dropdown,
-    DropdownItem,
     CogMenu,
-    ActionMenusItems,
 };
 ListController.props = {
     ...standardViewProps,
