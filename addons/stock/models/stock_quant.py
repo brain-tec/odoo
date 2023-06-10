@@ -1236,6 +1236,18 @@ class StockQuant(models.Model):
                                     lot_id.name, source_location_id.display_name, ', '.join(sn_locations.mapped('display_name')))
         return message, recommended_location
 
+    def _move_quants(self, location_dest_id=False, message=False):
+        """ Directly move a stock.quant to another location by creating a stock.move. """
+        if not location_dest_id:
+            return
+        for quant in self:
+            move_vals = quant._get_inventory_move_values(quant.quantity, quant.location_id, location_dest_id)
+            move_vals.update({
+                'name': message or 'Quantity Relocated',
+            })
+            moves = self.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
+            moves._action_done()
+
 
 class QuantPackage(models.Model):
     """ Packages containing quants and/or other packages """

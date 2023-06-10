@@ -47,6 +47,7 @@ export class MailAttachments extends Component {
                 name: file.filename,
                 mimetype: file.mimetype,
                 placeholder: false,
+                manual: true,
             });
         }
         this.props.record.update({ [this.props.name]: this.getValue().concat(extraFiles) });
@@ -62,10 +63,10 @@ export class MailAttachments extends Component {
     }
 
     async onWillUnmount(){
-        // Unlink added attachements if the wizard is not saved.
+        // Unlink added attachments if the wizard is not saved.
         if(!this.props.record.data.id){
             this.getValue().forEach((item) => {
-                if(!item.placeholder){
+                if(item.manual){
                     this.attachmentIdsToUnlink.add(item.id);
                 }
             });

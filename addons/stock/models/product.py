@@ -102,6 +102,7 @@ class Product(models.Model):
     show_on_hand_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     valid_ean = fields.Boolean('Barcode is valid EAN', compute='_compute_valid_ean')
+    lot_properties_definition = fields.PropertiesDefinition('Lot Properties')
 
     @api.depends('product_tmpl_id')
     def _compute_show_qty_status_button(self):
@@ -498,12 +499,13 @@ class Product(models.Model):
 
     def action_open_product_lot(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_production_lot_form")
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_product_production_lot_form")
         action['domain'] = [('product_id', '=', self.id)]
         action['context'] = {
             'default_product_id': self.id,
             'set_product_readonly': True,
             'default_company_id': (self.company_id or self.env.company).id,
+            'search_default_group_by_location': True,
         }
         return action
 
@@ -943,11 +945,12 @@ class ProductTemplate(models.Model):
 
     def action_open_product_lot(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_production_lot_form")
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_product_production_lot_form")
         action['domain'] = [('product_id.product_tmpl_id', '=', self.id)]
         action['context'] = {
             'default_product_tmpl_id': self.id,
             'default_company_id': (self.company_id or self.env.company).id,
+            'search_default_group_by_location': True,
         }
         if self.product_variant_count == 1:
             action['context'].update({
