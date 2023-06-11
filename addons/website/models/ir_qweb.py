@@ -18,20 +18,6 @@ _logger = logging.getLogger(__name__)
 re_background_image = re.compile(r"(background-image\s*:\s*url\(\s*['\"]?\s*)([^)'\"]+)")
 
 
-class AssetsBundleMultiWebsite(AssetsBundle):
-    def _get_asset_url_values(self, id, unique, extra, name, sep, extension):
-        website_id = self.env.context.get('website_id')
-        website_id_path = website_id and ('%s/' % website_id) or ''
-        extra = website_id_path + extra
-        res = super(AssetsBundleMultiWebsite, self)._get_asset_url_values(id, unique, extra, name, sep, extension)
-        return res
-
-    def get_debug_asset_url(self, extra='', name='%', extension='%'):
-        website_id = self.env.context.get('website_id')
-        website_id_path = website_id and ('%s/' % website_id) or ''
-        extra = website_id_path + extra
-        return super(AssetsBundleMultiWebsite, self).get_debug_asset_url(extra, name, extension)
-
 class IrQWeb(models.AbstractModel):
     """ IrQWeb object for rendering stuff in the website context """
 
@@ -106,9 +92,6 @@ class IrQWeb(models.AbstractModel):
 
         return irQweb
 
-    def _get_asset_bundle(self, xmlid, files, env=None, css=True, js=True, debug=False):
-        return AssetsBundleMultiWebsite(xmlid, files, env=env, css=css, js=js, debug=debug)
-
     def _post_processing_att(self, tagName, atts):
         if atts.get('data-no-post-process'):
             return atts
@@ -147,46 +130,3 @@ class IrQWeb(models.AbstractModel):
             atts['style'] = re_background_image.sub(lambda m: '%s%s' % (m.group(1), website.get_cdn_url(m.group(2))), atts['style'])
 
         return atts
-
-    def _pregenerate_assets_bundles(self):
-        # website is adding a website_id to the extra part of the attachement url (/1)
-
-        # /web/assets/2224-47bce88/1/web.assets_frontend.min.css
-        # /web/assets/2226-17d3428/1/web.assets_frontend_minimal.min.js
-        # /web/assets/2227-b9cd4ba/1/web.assets_tests.min.js
-        # /web/assets/2229-25b1d52/1/web.assets_frontend_lazy.min.js
-
-        # this means that the previously generated attachment wont be used on the website
-        # the main reason is to avoid invalidating other website attachement, but the
-        # version part combine with the initial extra (rtl) should be enough to ensure they are identical.
-        # we dont expect to have any pregenerated rtl/website attachment so we don't manage assets with extra
-
-        nodes = super()._pregenerate_assets_bundles()
-        website = self.env['website'].search([], order='id', limit=1)
-        if not website:
-            return nodes
-        nb_created = 0
-        for node in nodes:
-            bundle_info = node[1]
-            bundle_url = bundle_info.get('src', '') or bundle_info.get('href', '')
-            if bundle_url.startswith('/web/assets/'):
-                # example: "/web/assets/2152-ee56665/web.assets_frontend_lazy.min.js"
-                _, _, _, id_unique, name = bundle_url.split('/')
-                attachment_id, unique = id_unique.split('-')
-                url_pattern = f'/web/assets/%s-%s/{website.id}/{name}'
-                existing = self.env['ir.attachment'].search([('url', '=like', url_pattern % ('%', '%'))])
-                if existing:
-                    if f'-{unique}/' in existing.url:
-                        continue
-                    _logger.runbot(f'Updating exiting assets {existing.url} for website {website.id}')
-                    # we assume that most of the time the first website bundles will be the same as the base one
-                    # if the unique changes, it is most likely because sources where update since install.
-                    # this is mainly for dev downloading a database from runbot and trying to execute tests locally
-                    existing.unlink()
-                new = self.env['ir.attachment'].browse(int(attachment_id)).copy()
-                new.url = url_pattern % (new.id, unique)
-                nb_created += 1
-        if nb_created:
-            _logger.runbot('%s bundle(s) were copied for website %s', nb_created, website.id)
-
-        return nodes

@@ -36,8 +36,7 @@ class TestQweb(TransactionCaseWithUserDemo):
         html = demo_env['ir.qweb']._render('test_website.test_template', {"user": demo}, website_id=website.id)
         asset_bundle_xmlid = 'test_website.test_bundle'
         qweb = self.env['ir.qweb']
-        files, _ = qweb._get_asset_content(asset_bundle_xmlid)
-        bundle = qweb._get_asset_bundle(asset_bundle_xmlid, files, env=self.env, css=True, js=True)
+        bundle = qweb._get_asset_bundle(asset_bundle_xmlid, css=True, js=True)
 
         asset_version_js = bundle.get_version('js')
         asset_version_css = bundle.get_version('css')
@@ -65,11 +64,11 @@ class TestQweb(TransactionCaseWithUserDemo):
     <head>
         <link type="text/css" rel="stylesheet" href="http://test.external.link/style1.css"/>
         <link type="text/css" rel="stylesheet" href="http://test.external.link/style2.css"/>
-        <link type="text/css" rel="stylesheet" href="http://test.cdn%(css)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version_css)s"/>
+        <link type="text/css" rel="stylesheet" href="http://test.cdn%(css)s"/>
         <meta/>
         <script type="text/javascript" src="http://test.external.link/javascript1.js"></script>
         <script type="text/javascript" src="http://test.external.link/javascript2.js"></script>
-        <script type="text/javascript" src="http://test.cdn%(js)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version_js)s" onerror="__odooAssetError=1"></script>
+        <script type="text/javascript" src="http://test.cdn%(js)s" onerror="__odooAssetError=1"></script>
     </head>
     <body>
         <img src="http://test.external.link/img.png" loading="lazy"/>
