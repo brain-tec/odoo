@@ -64,8 +64,7 @@ class WebsocketController(Controller):
             prevent new worker versions to be loaded from the browser cache.
         """
         bundle = 'bus.websocket_worker_assets'
-        files, _ = request.env["ir.qweb"]._get_asset_content(bundle)
-        asset = AssetsBundle(bundle, files)
+        asset = request.env["ir.qweb"]._get_asset_bundle(bundle)
         stream = request.env['ir.binary']._get_stream_from(asset.js(
             is_minified="assets" not in request.session.debug
         ))
