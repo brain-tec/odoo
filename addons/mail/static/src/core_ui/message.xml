@@ -72,7 +72,7 @@
                                 </span>
                             </div>
                             <div t-if="message.originThread === props.thread and message.notifications.length > 0" t-att-class="{ 'ms-2': !isAlignedRight }">
-                                <span class="o-mail-Message-notification cursor-pointer text-danger" t-att-class="message.failureNotifications.length > 0 ? 'text-danger' : text-600" role="button" tabindex="0" t-on-click="onClickNotification">
+                                <span class="o-mail-Message-notification cursor-pointer" t-att-class="message.failureNotifications.length > 0 ? 'text-danger' : text-600" role="button" tabindex="0" t-on-click="onClickNotification">
                                     <i t-att-class="message.notifications[0].icon" role="img" aria-label="Delivery failure"/> <span t-if="message.notifications[0].label" t-out="message.notifications[0].label"/>
                                 </span>
                             </div>
@@ -98,10 +98,10 @@
                                                 'bg-success-light border border-success opacity-25': message.isSelfAuthored and !message.isNote and !message.isHighlightedFromMention,
                                                 'bg-warning-light border border-warning opacity-50': message.isHighlightedFromMention,
                                                 }" t-attf-class="{{ isAlignedRight ? 'rounded-start-3' : 'rounded-end-3' }}"/>
-                                            <div class="position-relative" t-att-class="{
+                                            <div class="position-relative text-break" t-att-class="{
                                                         'p-1': message.isNote,
                                                         'o-mail-Message-body mb-0 py-2 px-3': !message.isNote,
-                                                        'align-self-start text-break rounded-end-3 rounded-bottom-3': !state.isEditing and !message.isNote,
+                                                        'align-self-start rounded-end-3 rounded-bottom-3': !state.isEditing and !message.isNote,
                                                         'o-mail-Message-editable flex-grow-1': state.isEditing,
                                                         }" t-ref="body">
                                                 <Composer t-if="state.isEditing" autofocus="true" composer="message.composer" messageComponent="constructor" onDiscardCallback.bind="exitEditMode" onPostCallback.bind="exitEditMode" mode="'compact'"/>
