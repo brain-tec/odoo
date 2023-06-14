@@ -38,6 +38,18 @@ class TestOnchange2(SavepointCaseWithUserDemo):
         self.assertEqual(values['name'], f'[] {user.name}')
         self.assertEqual(values['size'], 0)
 
+    def test_default_x2many(self):
+        """ checking default values for x2many fields """
+        tag = self.env['test_new_api.multi.tag'].create({'name': 'alpha'})
+        model = self.env['test_new_api.multi'].with_context(default_tags=[Command.set(tag.ids)])
+
+        values = model.default_get(['tags'])
+        self.assertEqual(values, {'tags': [Command.set(tag.ids)]})
+
+        fields_spec = {'tags': {}}
+        result = model.onchange2({}, [], fields_spec)
+        self.assertEqual(result['value'], {'tags': [(Command.LINK, tag.id, {'id': tag.id})]})
+
     def test_get_field(self):
         """ checking that accessing an unknown attribute does nothing special """
         with self.assertRaises(AttributeError):
@@ -341,6 +353,29 @@ class TestOnchange2(SavepointCaseWithUserDemo):
         result = multi.onchange2(values, ['partner'], fields_spec)
         self.assertEqual(result['value'], expected_value)
 
+    def test_onchange_one2many_default(self):
+        """ test onchange on x2many field with default value in context """
+        default_messages = [Command.create({'body': 'A'})]
+        model = self.Discussion.with_context(default_messages=default_messages)
+
+        # the command CREATE below must be applied on the empty value, instead
+        # of the default value above
+        values = {
+            'name': 'Stuff',
+            'messages': [(Command.CREATE, 'virtual1', {'name': '[] ', 'body': 'B'})],
+        }
+        fields_spec = {
+            'name': {},
+            'messages': {'fields': {
+                'name': {},
+                'body': {},
+            }},
+        }
+        result = model.onchange2(values, ['name'], fields_spec)
+        self.assertEqual(result['value'], {
+            'messages': [Command.update('virtual1', {'name': '[Stuff] OdooBot'})],
+        })
+
     def test_fields_specific(self):
         """ test the effect of field-specific onchange method """
         discussion = self.env.ref('test_new_api.discussion_0')
@@ -364,7 +399,7 @@ class TestOnchange2(SavepointCaseWithUserDemo):
         self.assertIn('participants', result['value'])
         self.assertItemsEqual(
             result['value']['participants'],
-            [(Command.LINK, demo.id, {'display_name': demo.display_name})],
+            [(Command.LINK, demo.id, {'id': demo.id, 'display_name': demo.display_name})],
         )
 
     def test_onchange_default(self):
@@ -821,7 +856,45 @@ class TestOnchange2(SavepointCaseWithUserDemo):
         self.assertEqual(result['value'], {
             'lines': [
                 Command.update(line.id, {
-                    'tags': [(Command.LINK, tag.id, {'display_name': 'tag!'})],
+                    'tags': [(Command.LINK, tag.id, {'id': tag.id, 'display_name': 'tag!'})],
+                }),
+            ],
+        })
+
+    def test_one2many_field_with_many2many_subfield(self):
+        """ test relational fields with a context on their one2many container field """
+        tag1 = self.env['test_new_api.multi.tag'].create({'name': 'a1'})
+        tag2 = self.env['test_new_api.multi.tag'].create({'name': 'a2'})
+        multi = self.env['test_new_api.multi'].create({})
+        line = multi.lines.create({
+            'multi': multi.id,
+            'tags': [Command.set(tag1.ids)],
+        })
+
+        # having 'lines' below force the prefetching of the subfields 'name'
+        # and 'tags'; this test ensures that the ids of 'tags' are "newified"
+        # in the new record
+        values = {
+            'lines': [(Command.CREATE, 'virtual1', {'name': 'X', 'tags': []})],
+            'tags': [Command.link(tag2.id)],
+        }
+        fields_spec = {
+            'name': {},
+            'lines': {'fields': {
+                'name': {},
+                'tags': {},
+            }},
+            'tags': {},
+        }
+        self.env.invalidate_all()
+        result = multi.onchange2(values, ['tags'], fields_spec)
+        self.assertEqual(result['value'], {
+            'lines': [
+                Command.update(line.id, {
+                    'tags': [(Command.LINK, tag2.id, {'id': tag2.id})],
+                }),
+                Command.update('virtual1', {
+                    'tags': [(Command.LINK, tag2.id, {'id': tag2.id})],
                 }),
             ],
         })
