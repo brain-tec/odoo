@@ -270,7 +270,7 @@ class AccountChartTemplate(models.AbstractModel):
                         if (
                             command not in (Command.UPDATE, Command.CREATE)
                             or not self.ref(vals['tax_src_id'], raise_if_not_found=False)
-                            or not self.ref(vals['tax_dest_id'], raise_if_not_found=False)
+                            or (vals.get('tax_dest_id') and not self.ref(vals['tax_dest_id'], raise_if_not_found=False))
                         )
                     ]
                 elif model_name == 'account.tax':
@@ -335,7 +335,8 @@ class AccountChartTemplate(models.AbstractModel):
 
         # Set the currency to the fiscal country's currency
         vals = {key: val for key, val in template_data.items() if filter_properties(key)}
-        vals['currency_id'] = fiscal_country.currency_id.id
+        if not company._existing_accounting():
+            vals['currency_id'] = fiscal_country.currency_id.id
         if not company.country_id:
             vals['country_id'] = fiscal_country.id
 
