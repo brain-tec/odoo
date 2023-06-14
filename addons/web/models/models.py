@@ -957,9 +957,14 @@ class Base(models.AbstractModel):
                 cache = self.env.cache
                 for field_name in sub_fields_spec:
                     field = lines._fields[field_name]
-                    cache.update_raw(
-                        new_lines, field, map(copy.copy, cache.get_values(lines, field)),
-                    )
+                    if field.type in ('one2many', 'many2many'):
+                        line_values = [
+                            tuple(NewId(id_) for id_ in ids)
+                            for ids in cache.get_values(lines, field)
+                        ]
+                    else:
+                        line_values = map(copy.copy, cache.get_values(lines, field))
+                    cache.update_raw(new_lines, field, line_values)
 
         # Isolate changed values, to handle inconsistent data sent from the
         # client side: when a form view contains two one2many fields that
@@ -983,10 +988,8 @@ class Base(models.AbstractModel):
         # values of the move, among which the one2many that contains the line
         # itself, with old values!
         #
-        changed_values = {fname: values[fname] for fname in field_names}
-        # set changed values to null in initial_values; not setting them
-        # triggers default_get() on the new record when creating snapshot0
-        initial_values = dict(values, **dict.fromkeys(field_names, False))
+        initial_values = dict(values)
+        changed_values = {fname: initial_values.pop(fname) for fname in field_names}
 
         # do not force delegate fields to False
         for parent_name in self._inherits.values():
@@ -999,7 +1002,13 @@ class Base(models.AbstractModel):
             # fill in the cache of record with the values of self
             cache_values = {fname: self[fname] for fname in fields_spec}
             record._update_cache(cache_values, validate=False)
-        record._update_cache(initial_values)
+            # apply initial values on top of the values of self
+            record._update_cache(initial_values)
+        else:
+            # set changed values to null in initial_values; not setting them
+            # triggers default_get() on the new record when creating snapshot0
+            initial_values.update(dict.fromkeys(field_names, False))
+            record._update_cache(initial_values, validate=False)
 
         # make parent records match with the form values; this ensures that
         # computed fields on parent records have all their dependencies at
@@ -1016,7 +1025,7 @@ class Base(models.AbstractModel):
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
         # and depends on line.a, but line.b is not in the form view)
-        record._update_cache(changed_values, validate=False)
+        record._update_cache(changed_values)
 
         # update snapshot0 with changed values
         for field_name in field_names:
@@ -1186,32 +1195,47 @@ class RecordSnapshot(dict):
 
         # for x2many fields: serialize value as commands
         for field_name, field_spec in x2many_fields_spec.items():
-            result[field_name] = commands = []
+            commands = []
+
+            self_value = self[field_name]
+            other_value = other.get(field_name) or {}
+            if any(other_value):
+                # other may be a snapshot for a real record, adapt its x2many ids
+                other_value = {NewId(id_): snap for id_, snap in other_value.items()}
+
             # commands for removed lines
             field = self.record._fields[field_name]
             remove = Command.delete if field.type == 'one2many' else Command.unlink
-            for id_, line_snapshot in (other.get(field_name) or {}).items():
-                if id_ not in self[field_name]:
+            for id_ in other_value:
+                if id_ not in self_value:
                     commands.append(remove(id_.origin or id_.ref or 0))
+
             # commands for modified or extra lines
-            for id_, line_snapshot in self[field_name].items():
-                if id_ in other.get(field_name, ()):
-                    # existing line: check diff
-                    line_diff = line_snapshot.diff(other[field_name][id_])
+            for id_, line_snapshot in self_value.items():
+                if not force and id_ in other_value:
+                    # existing line: check diff and send update
+                    line_diff = line_snapshot.diff(other_value[id_])
                     if line_diff:
                         commands.append(Command.update(id_.origin or id_.ref or 0, line_diff))
+
                 elif not id_.origin:
                     # new line: send diff from scratch
                     line_diff = line_snapshot.diff({})
                     commands.append((Command.CREATE, id_.origin or id_.ref or 0, line_diff))
+
                 else:
-                    # link line: send data to client and possible update
-                    line = line_snapshot.record._origin
-                    base_snapshot = RecordSnapshot(line, field_spec.get('fields') or {})
-                    line_data = base_snapshot.diff({})
-                    commands.append((Command.LINK, line.id, line_data))
+                    # link line: send data to client
+                    base_line = line_snapshot.record._origin
+                    [base_data] = base_line.web_read(field_spec.get('fields') or {})
+                    commands.append((Command.LINK, base_line.id, base_data))
+
+                    # check diff and send update
+                    base_snapshot = RecordSnapshot(base_line, field_spec.get('fields') or {})
                     line_diff = line_snapshot.diff(base_snapshot)
                     if line_diff:
                         commands.append(Command.update(id_.origin, line_diff))
+
+            if commands:
+                result[field_name] = commands
 
         return result
