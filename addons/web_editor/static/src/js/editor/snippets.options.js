@@ -2535,7 +2535,10 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     }
 });
 
-const m2oRpcCache = {};
+let m2oRpcCache = {};
+const clearM2oRpcCache = () => {
+    m2oRpcCache = {};
+};
 const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_many2one',
     events: Object.assign({}, SelectUserValueWidget.prototype.events, {
@@ -2730,7 +2733,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             method: 'name_search',
             kwargs: {
                 name: needle,
-                args: this.options.domain.concat(
+                args: (await this._getSearchDomain()).concat(
                     Object.values(this.options.domainComponents).filter(item => item !== null)
                 ),
                 operator: "ilike",
@@ -2813,6 +2816,14 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         if (this.options.nullText && !this.getValue()) {
             this.setValue(0);
         }
+    },
+    /**
+     * Returns the domain to use for the search.
+     *
+     * @private
+     */
+    async _getSearchDomain() {
+        return this.options.domain;
     },
     /**
      * Returns the display name for a given record.
@@ -8206,4 +8217,6 @@ export default {
     // Other names for convenience
     Class: SnippetOptionWidget,
     registry: registry,
+
+    clearM2oRpcCache,
 };
