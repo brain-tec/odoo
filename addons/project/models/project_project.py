@@ -160,7 +160,6 @@ class Project(models.Model):
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, tracking=True,
         help="Date on which this project ends. The timeframe defined on the project is taken into account when viewing its planning.")
-    allow_recurring_tasks = fields.Boolean('Recurring Tasks', default=lambda self: self.env.user.has_group('project.group_project_recurring_tasks'))
     allow_task_dependencies = fields.Boolean('Task Dependencies', default=lambda self: self.env.user.has_group('project.group_project_task_dependencies'))
     allow_milestones = fields.Boolean('Milestones', default=lambda self: self.env.user.has_group('project.group_project_milestone'))
     tag_ids = fields.Many2many('project.tags', relation='project_project_project_tags_rel', string='Tags')
@@ -175,8 +174,8 @@ class Project(models.Model):
     rating_active = fields.Boolean('Customer Ratings', default=lambda self: self.env.user.has_group('project.group_project_rating'))
     allow_rating = fields.Boolean('Allow Customer Ratings', compute="_compute_allow_rating", default=lambda self: self.env.user.has_group('project.group_project_rating'))
     rating_status = fields.Selection(
-        [('stage', 'Rating when changing stage'),
-         ('periodic', 'Periodic rating')
+        [('stage', 'when reaching a given stage'),
+         ('periodic', 'on a periodic basis')
         ], 'Customer Ratings Status', default="stage", required=True,
         help="Collect feedback from your customers by sending them a rating request when a task enters a certain stage. To do so, define a rating email template on the corresponding stages.\n"
              "Rating when changing stage: an email will be automatically sent when the task reaches the stage on which the rating email template is set.\n"
@@ -433,9 +432,6 @@ class Project(models.Model):
             self._change_privacy_visibility(vals['privacy_visibility'])
 
         res = super(Project, self).write(vals) if vals else True
-
-        if 'allow_recurring_tasks' in vals and not vals.get('allow_recurring_tasks'):
-            self.env['project.task'].search([('project_id', 'in', self.ids), ('recurring_task', '=', True)]).write({'recurring_task': False})
 
         if 'allow_task_dependencies' in vals and not vals.get('allow_task_dependencies'):
             self.env['project.task'].search([('project_id', 'in', self.ids), ('state', '=', '04_waiting_normal')]).write({'state': '01_in_progress'})

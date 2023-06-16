@@ -5,7 +5,7 @@ import { htmlToTextContentInline } from "@mail/utils/common/format";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { escape, sprintf, unescapeHTML } from "@web/core/utils/strings";
+import { sprintf, unescapeHTML } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
@@ -47,8 +47,9 @@ export class OutOfFocusService {
                 notificationTitle = author.name;
             }
         }
-        const notificationContent = escape(
-            htmlToTextContentInline(message.body).substr(0, PREVIEW_MSG_MAX_SIZE)
+        const notificationContent = htmlToTextContentInline(message.body).substring(
+            0,
+            PREVIEW_MSG_MAX_SIZE
         );
         this.sendNotification({
             message: notificationContent,
@@ -103,14 +104,7 @@ export class OutOfFocusService {
      */
     async sendOdooNotification(message, options) {
         this.notificationService.add(message, options);
-        if (this.canPlayAudio && this.multiTab.isOnMainTab()) {
-            try {
-                await this.audio.play();
-            } catch {
-                // Ignore errors due to the user not having interracted
-                // with the page before playing the sound.
-            }
-        }
+        this._playSound();
     }
 
     /**
@@ -131,6 +125,18 @@ export class OutOfFocusService {
             window.focus();
             notification.close();
         });
+        this._playSound();
+    }
+
+    async _playSound() {
+        if (this.canPlayAudio && this.multiTab.isOnMainTab()) {
+            try {
+                await this.audio.play();
+            } catch {
+                // Ignore errors due to the user not having interracted
+                // with the page before playing the sound.
+            }
+        }
     }
 
     get canPlayAudio() {
