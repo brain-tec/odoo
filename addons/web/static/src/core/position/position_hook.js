@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { useEffect } from "@web/core/utils/hooks";
+import { onDestroyed, useEffect } from "@web/core/utils/hooks";
 import { throttleForAnimation } from "../utils/timing";
 
-const { onWillUnmount, useComponent, useExternalListener, useRef } = owl;
+const { EventBus, useComponent, useExternalListener, useRef, useSubEnv, onWillUnmount } = owl;
 
 /**
  * @typedef {{
@@ -223,6 +223,8 @@ function reposition(reference, popper, options) {
     popper.style.left = `${left}px`;
 }
 
+const POSITION_BUS = Symbol("position-bus");
+
 /**
  * Makes sure that the `popper` element is always
  * placed at `position` from the `reference` element.
@@ -238,22 +240,23 @@ export function usePosition(reference, options) {
     options = { ...DEFAULTS, ...options };
     const { popper } = options;
     const popperRef = popper ? useRef(popper) : useComponent();
-    const getReference = reference instanceof HTMLElement ? () => reference : reference;
-    let ref;
+    const getReference = typeof reference === "function" ? reference : () => reference;
     const update = () => {
+        const ref = getReference();
         if (popperRef.el && ref) {
             reposition(ref, popperRef.el, options);
         }
     };
-    const throttledUpdate = throttleForAnimation(update);
-    const referenceObserver = new IntersectionObserver(throttledUpdate);
-    useEffect(() => {
-        ref = getReference();
-        referenceObserver.observe(ref);
-        update();
-        return () => referenceObserver.disconnect();
-    });
-    useExternalListener(document, "scroll", throttledUpdate, { capture: true });
-    useExternalListener(window, "resize", throttledUpdate);
-    onWillUnmount(throttledUpdate.cancel);
+    const component = useComponent();
+    const bus = component.env[POSITION_BUS] || new EventBus();
+    bus.on("update", component, update);
+    onDestroyed(() => bus.off("update", component));
+    useEffect(() => bus.trigger("update"));
+    if (!(POSITION_BUS in component.env)) {
+        useSubEnv({ [POSITION_BUS]: bus });
+        const throttledUpdate = throttleForAnimation(() => bus.trigger("update"));
+        useExternalListener(document, "scroll", throttledUpdate, { capture: true });
+        useExternalListener(window, "resize", throttledUpdate);
+        onWillUnmount(throttledUpdate.cancel);
+    }
 }
