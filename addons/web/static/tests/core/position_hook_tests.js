@@ -11,7 +11,7 @@ import {
     triggerEvent,
 } from "../helpers/utils";
 
-const { Component, css, mount, xml } = owl;
+const { Component, css, mount, useRef, xml } = owl;
 
 let container;
 let reference;
@@ -29,8 +29,12 @@ function isWellPositioned(popper, position = "bottom") {
         position,
     };
     const [direction, variant = "middle"] = position.split("-");
-    const d = /** @type {import("@web/core/position/position_hook").DirectionsDataKey} */ (direction[0]);
-    const v = /** @type {import("@web/core/position/position_hook").VariantsDataKey} */ (variant[0]);
+    const d = /** @type {import("@web/core/position/position_hook").DirectionsDataKey} */ (
+        direction[0]
+    );
+    const v = /** @type {import("@web/core/position/position_hook").VariantsDataKey} */ (
+        variant[0]
+    );
     const posSolution = computePositioning(reference, popper, options).get(d, v);
     const hasCorrectClass = popper.classList.contains(posSolution.className);
     const correctLeft = parseFloat(popper.style.left) === posSolution.left;
@@ -119,47 +123,92 @@ QUnit.test("can use a t-ref as popper", async (assert) => {
 
 QUnit.test("has no effect when component is destroyed", async (assert) => {
     const execRegisteredCallbacks = mockAnimationFrame();
-    const observer = new MutationObserver(() => assert.step("mutation observer called"));
+    const originalReference = reference;
+    reference = () => {
+        assert.step("reference called");
+        return originalReference;
+    };
+
     const popper = await mount(TestComp, { target: container });
-    observer.observe(popper.el, { attributes: true });
+    assert.verifySteps(["reference called"], "reference called when component mounted");
 
     triggerEvent(document, null, "scroll");
     await nextTick();
     assert.verifySteps([]);
-
     execRegisteredCallbacks();
-    await nextTick();
-    assert.verifySteps(["mutation observer called"], "mutation observer when document scrolled");
+    assert.verifySteps(["reference called"], "reference called when document scrolled");
 
     triggerEvent(document, null, "scroll");
     await nextTick();
-    assert.verifySteps([]);
-
     popper.destroy();
-    await nextTick();
-    assert.verifySteps([]);
-
     execRegisteredCallbacks();
-    await nextTick();
     assert.verifySteps(
         [],
-        "mutation observer not called even if scroll happened right before the component destroys"
+        "reference not called even if scroll happened right before the component destroys"
     );
 });
 
-QUnit.test("reposition popper when its reference moves", async (assert) => {
-    const popper = await mount(TestComp, { target: container });
-    const popBox1 = popper.el.getBoundingClientRect();
+QUnit.test("popper as child of another", async (assert) => {
+    class Child extends Component {
+        setup() {
+            const ref = useRef("ref");
+            usePosition(() => ref.el, { popper: "popper", container, position: "left" });
+        }
+    }
+    Child.template = /* xml */ xml`
+        <div id="child">
+            <div class="ref" t-ref="ref" />
+            <div class="popper" t-ref="popper" />
+        </div>
+    `;
+    Child.style = /* css */ css`
+        #child .ref {
+            background-color: salmon;
+            height: 100px;
+            width: 10px;
+        }
+        #child .popper {
+            background-color: olive;
+            height: 100px;
+            width: 100px;
+        }
+    `;
+    class Parent extends Component {
+        setup() {
+            usePosition(reference, { container });
+        }
+    }
+    Parent.components = { Child };
+    Parent.template = /* xml */ xml`
+        <div id="popper">
+            <Child/>
+        </div>
+    `;
+    Parent.style = /* css */ css`
+        #popper {
+            background-color: khaki;
+            height: 100px;
+            width: 100px;
+        }
+    `;
+    await mount(Parent, { target: container });
+    const parentPopBox1 = container.querySelector("#popper").getBoundingClientRect();
+    const childPopBox1 = container.querySelector("#child .popper").getBoundingClientRect();
+
     const spacer = document.createElement("div");
     spacer.id = "foo";
     spacer.style.height = "1px";
     spacer.style.width = "100px";
     container.prepend(spacer);
-    await nextTick();
-    const popBox2 = popper.el.getBoundingClientRect();
-    assert.strictEqual(popBox1.top, popBox2.top);
-    // spacer width * 0.5 because of flexbox style (justifyContent: center)
-    assert.strictEqual(popBox1.left, popBox2.left - spacer.offsetWidth * 0.5);
+    await triggerEvent(document, null, "scroll");
+
+    const parentPopBox2 = container.querySelector("#popper").getBoundingClientRect();
+    const childPopBox2 = container.querySelector("#child .popper").getBoundingClientRect();
+
+    assert.strictEqual(parentPopBox1.top, parentPopBox2.top);
+    assert.strictEqual(childPopBox1.top, childPopBox2.top);
+    assert.strictEqual(parentPopBox2.left, parentPopBox1.left + spacer.offsetWidth * 0.5);
+    assert.strictEqual(childPopBox2.left, childPopBox1.left + spacer.offsetWidth * 0.5);
 });
 
 const getPositionTest = (position, positionToCheck) => {
