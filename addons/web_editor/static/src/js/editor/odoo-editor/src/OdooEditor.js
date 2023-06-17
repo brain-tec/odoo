@@ -702,6 +702,59 @@ export class OdooEditor extends EventTarget {
                 this.updateColorpickerLabels();
             });
         }
+        const fontSizeInput = this.toolbar.querySelector('input#fontSizeCurrentValue');
+        this.addDomListener(this.toolbar, 'click', ev => {
+            if (fontSizeInput && ev.target.closest('#font-size .dropdown-toggle')) {
+                // If the click opened the font size dropdown, select the input content.
+                fontSizeInput.select();
+            } else if (!this.isSelectionInEditable()) {
+                // Otherwise, if we lost the selection in the editable, restore it.
+                this.historyResetLatestComputedSelection(true);
+            }
+        })
+        // Handle the font size input.
+        if (fontSizeInput) {
+            const debouncedOnInputChange = (() => {
+                let handle;
+                return () => new Promise(resolve => {
+                    clearTimeout(handle);
+                    handle = setTimeout(() => {
+                        handle = null;
+                        setFontSize(fontSizeInput.value);
+                        resolve();
+                    }, 50);
+                });
+            })();
+            const setFontSize = fontSize => {
+                if (fontSize === 'default' || parseInt(fontSize) > 0) {
+                    if (!this.isSelectionInEditable()) {
+                        this.historyResetLatestComputedSelection(true);
+                    }
+                    this.execCommand('setFontSize', fontSize === 'default' ? undefined : parseInt(fontSize) + 'px');
+                    fontSizeInput.closest('#font-size').querySelectorAll('.show').forEach(el => {
+                        el.classList.remove('show'); // Close the dropdown.
+                        // Remove Popper's styles to ensure proper positioning
+                        // of the dropdown next time it opens.
+                        el.style.removeProperty('inset');
+                        el.style.removeProperty('transform');
+                    });
+                    fontSizeInput.blur();
+                }
+            }
+            this.addDomListener(fontSizeInput, 'change', debouncedOnInputChange);
+            // Handle the font size dropdown.
+            const fontSizeDropdown = this.toolbar.querySelector('#font-size');
+            if (fontSizeDropdown) {
+                fontSizeDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                    this.addDomListener(item, 'mousedown', ev => setFontSize(ev.target.textContent));
+                    this.addDomListener(item, 'keydown', ev => {
+                        if (ev.key === 'Enter') {
+                            setFontSize(ev.target.textContent);
+                        }
+                    });
+                });
+            }
+        }
     }
 
     resetContent(value) {
@@ -1852,13 +1905,13 @@ export class OdooEditor extends EventTarget {
     bindExecCommand(element) {
         for (const buttonEl of element.querySelectorAll('[data-call]')) {
             buttonEl.addEventListener('click', ev => {
-                const sel = this.document.getSelection();
-                if (sel.anchorNode && ancestors(sel.anchorNode).includes(this.editable)) {
-                    this.execCommand(buttonEl.dataset.call, buttonEl.dataset.arg1);
-
-                    ev.preventDefault();
-                    this._updateToolbar();
+                if (!this.isSelectionInEditable()) {
+                    this.historyResetLatestComputedSelection(true);
                 }
+                this.execCommand(buttonEl.dataset.call, buttonEl.dataset.arg1);
+
+                ev.preventDefault();
+                this._updateToolbar();
             });
         }
     }
@@ -2354,12 +2407,12 @@ export class OdooEditor extends EventTarget {
         const selection = this.document.getSelection();
         // Selection could be gone if the document comes from an iframe that has been removed.
         const anchorNode = selection && selection.rangeCount && selection.getRangeAt(0) && selection.anchorNode;
-        if (isProtected(anchorNode) || !ancestors(anchorNode).includes(this.editable)) {
+        if (anchorNode && !ancestors(anchorNode).includes(this.editable)) {
             return false;
         }
         this.deselectTable();
         const traversedNodes = getTraversedNodes(this.editable);
-        if (this._isResizingTable || !traversedNodes.some(node => !!closestElement(node, 'td'))) {
+        if (this._isResizingTable || !traversedNodes.some(node => !!closestElement(node, 'td') && !isProtected(node))) {
             return false;
         }
         let range;
@@ -2385,15 +2438,21 @@ export class OdooEditor extends EventTarget {
         const startTable = ancestors(range.startContainer, this.editable).filter(node => node.nodeName === 'TABLE').pop();
         const endTable = ancestors(range.endContainer, this.editable).filter(node => node.nodeName === 'TABLE').pop();
         if (startTd !== endTd && startTable === endTable) {
-            // The selection goes through at least two different cells -> select
-            // cells.
-            this._selectTableCells(range);
-            appliedCustomSelection = true;
+            if (!isProtected(startTable)) {
+                // The selection goes through at least two different cells ->
+                // select cells.
+                this._selectTableCells(range);
+                appliedCustomSelection = true;
+            }
         } else if (!traversedNodes.every(node => node.parentElement && closestElement(node.parentElement, 'table'))) {
             // The selection goes through a table but also outside of it ->
             // select the whole table.
             this.observerUnactive('handleSelectionInTable');
-            const traversedTables = new Set(traversedNodes.map(node => closestElement(node, 'table')));
+            const traversedTables = new Set(
+                traversedNodes
+                    .map((node) => closestElement(node, "table"))
+                    .filter((node) => !isProtected(node))
+            );
             for (const table of traversedTables) {
                 // Don't apply several nested levels of selection.
                 if (table && !ancestors(table, this.editable).some(node => [...traversedTables].includes(node))) {
@@ -2405,10 +2464,10 @@ export class OdooEditor extends EventTarget {
                 }
             }
             this.observerActive('handleSelectionInTable');
-        } else if (ev) {
+        } else if (ev && startTd && !isProtected(startTd)) {
             // We're redirected from a mousemove event.
             const selectedNodes = getSelectedNodes(this.editable);
-            const areCellContentsFullySelected = !!startTd && descendants(startTd).filter(d => !isBlock(d)).every(child => selectedNodes.includes(child));
+            const areCellContentsFullySelected = descendants(startTd).filter(d => !isBlock(d)).every(child => selectedNodes.includes(child));
             if (areCellContentsFullySelected) {
                 const SENSITIVITY = 5;
                 const rangeRect = range.getBoundingClientRect();
@@ -2895,7 +2954,7 @@ export class OdooEditor extends EventTarget {
 
             const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
             if (fontSizeValue) {
-                fontSizeValue.textContent = /\d+/.exec(selectionStartStyle.fontSize).pop();
+                fontSizeValue.value = /\d+/.exec(selectionStartStyle.fontSize).pop();
             }
             const table = getInSelection(this.document, 'table');
             const toolbarButton = this.toolbar.querySelector('.toolbar-edit-table');
@@ -3693,9 +3752,6 @@ export class OdooEditor extends EventTarget {
             return;
         }
         const anchorNode = selection.anchorNode;
-        if (isProtected(anchorNode)) {
-            return;
-        }
         // Correct cursor if at editable root.
         if (
             selection.isCollapsed &&
@@ -4007,8 +4063,16 @@ export class OdooEditor extends EventTarget {
 
     _fixSelectionOnContenteditableFalse() {
         const selection = this.document.getSelection();
-        const anchorNode = selection.anchorNode;
+        const { anchorNode, anchorOffset } = selection;
+        const selectedPositionNode = anchorNode && anchorNode.nodeType === Node.ELEMENT_NODE &&
+            anchorNode.childNodes[anchorOffset];
         if (isProtected(anchorNode)) {
+            if (!(
+                selectedPositionNode && selectedPositionNode.nodeType === Node.ELEMENT_NODE &&
+                ['INPUT', 'TEXTAREA'].includes(selectedPositionNode.tagName)
+            )) {
+                selection.removeAllRanges();
+            }
             return;
         }
         // When the browser set the selection inside a node that is
