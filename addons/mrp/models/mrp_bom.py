@@ -3,8 +3,9 @@
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv.expression import AND, NEGATIVE_TERM_OPERATORS
+from odoo.osv.expression import AND, OR
 from odoo.tools import float_round
+from odoo.tools.misc import clean_context
 
 from collections import defaultdict
 
@@ -168,7 +169,10 @@ class MrpBom(models.Model):
     @api.onchange('product_tmpl_id')
     def onchange_product_tmpl_id(self):
         if self.product_tmpl_id:
-            self.product_uom_id = self.product_tmpl_id.uom_id.id
+            default_uom_id = self.env.context.get('default_product_uom_id')
+            # Avoids updating the BoM's UoM in case a specific UoM was passed through as a default value.
+            if self.product_uom_id.category_id != self.product_tmpl_id.uom_id.category_id or self.product_uom_id.id != default_uom_id:
+                self.product_uom_id = self.product_tmpl_id.uom_id.id
             if self.product_id.product_tmpl_id != self.product_tmpl_id:
                 self.product_id = False
             self.bom_line_ids.bom_product_template_attribute_value_ids = False
@@ -181,8 +185,38 @@ class MrpBom(models.Model):
             number_of_bom_of_this_product = self.env['mrp.bom'].search_count(domain)
             if number_of_bom_of_this_product:  # add a reference to the bom if there is already a bom for this product
                 self.code = _("%s (new) %s", self.product_tmpl_id.name, number_of_bom_of_this_product)
-            else:
-                self.code = False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        # Checks if the BoM was created from a Manufacturing Order (through Generate BoM action).
+        parent_production_id = self.env.context.get('parent_production_id')
+        if parent_production_id:  # In this case, assign the newly created BoM to the MO.
+            # Clean context to avoid parasitic default values.
+            self.env.context = clean_context(self.env.context)
+            production = self.env['mrp.production'].browse(parent_production_id)
+            production._link_bom(res[0])
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+        relevant_fields = ['bom_line_ids', 'byproduct_ids', 'product_tmpl_id', 'product_id', 'product_qty', 'operation_ids']
+        if any(field_name in vals for field_name in relevant_fields):
+            # Searches for MOs using these BoMs to notify them that their BoM has been updated.
+            list_of_domain_by_bom = []
+            for bom in self:
+                domain_by_products = [('product_id', 'in', bom.product_tmpl_id.product_variant_ids.ids)]
+                if bom.product_id:
+                    domain_by_products = [('product_id', '=', bom.product_id.id)]
+                domain_for_confirmed_mo = AND([[('state', '=', 'confirmed')], domain_by_products])
+                # Avoid confirmed MOs if the BoM's product was changed.
+                domain_by_states = OR([[('state', '=', 'draft')], domain_for_confirmed_mo])
+                list_of_domain_by_bom.append(AND([[('bom_id', '=', bom.id)], domain_by_states]))
+            domain = OR(list_of_domain_by_bom)
+            productions = self.env['mrp.production'].search(domain)
+            if productions:
+                productions.is_outdated_bom = True
+        return res
 
     def copy(self, default=None):
         res = super().copy(default)
