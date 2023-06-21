@@ -9,7 +9,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.osv import expression
-from odoo.tools import float_is_zero, float_compare, float_round
+from odoo.tools import float_is_zero, float_compare, float_round, format_date
 
 
 class SaleOrderLine(models.Model):
@@ -314,6 +314,15 @@ class SaleOrderLine(models.Model):
                     name = _("%(line_description)s (Draft)", line_description=name)
                 elif dp_state == 'cancel':
                     name = _("%(line_description)s (Canceled)", line_description=name)
+                else:
+                    invoice = line._get_invoice_lines().move_id
+                    if len(invoice) == 1 and invoice.payment_reference and invoice.invoice_date:
+                        name = _(
+                            "%(line_description)s (ref: %(reference)s on %(date)s)",
+                            line_description=name,
+                            reference=invoice.payment_reference,
+                            date=format_date(line.env, invoice.invoice_date),
+                        )
                 del context
             line.name = name
 
@@ -496,6 +505,16 @@ class SaleOrderLine(models.Model):
         return self.product_id._get_product_price_context(
             self.product_no_variant_attribute_value_ids,
         )
+
+    def _get_pricelist_price_context(self):
+        """DO NOT USE in new code, this contextual logic should be dropped or heavily refactored soon"""
+        self.ensure_one()
+        return {
+            'pricelist': self.order_id.pricelist_id.id,
+            'uom': self.product_uom.id,
+            'quantity': self.product_uom_qty,
+            'date': self.order_id.date_order,
+        }
 
     def _get_pricelist_price_before_discount(self):
         """Compute the price used as base for the pricelist price computation.

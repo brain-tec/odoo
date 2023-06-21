@@ -294,10 +294,9 @@
                         </button>
                         <button name="action_dependent_tasks" type="object" attrs="{'invisible': [('dependent_tasks_count', '=', 0)]}" class="oe_stat_button" icon="fa-tasks" groups="project.group_project_task_dependencies">
                             <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_text">Blocking</span>
+                                <span class="o_stat_text">Blocking Tasks</span>
                                 <span class="o_stat_value ">
                                     <field name="dependent_tasks_count" widget="statinfo" nolabel="1" />
-                                    Tasks
                                 </span>
                             </div>
                         </button>
@@ -577,7 +576,7 @@
                                         <span t-if="record.partner_id.value" style="display: block; margin-top: 4px;">
                                             <field name="partner_id"/>
                                         </span>
-                                        <span t-if="record.allow_milestones.raw_value and record.milestone_id.raw_value" t-att-class="record.has_late_and_unreached_milestone.raw_value ? 'text-danger' : ''" style="display: block; margin-top: 4px;">
+                                        <span t-if="record.allow_milestones.raw_value and record.milestone_id.raw_value" t-att-class="record.has_late_and_unreached_milestone.raw_value and !record.state.raw_value.startsWith('1_') ? 'text-danger' : ''" style="display: block; margin-top: 4px;">
                                             <field name="milestone_id" options="{'no_open': True}" />
                                         </span>
                                     </div>
