@@ -5,7 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { _t } from "@web/core/l10n/translation";
-import { groupBy } from "@web/core/utils/arrays";
 import { effect } from "@web/core/utils/reactive";
 import { Order } from "./models/order";
 import { Product } from "./models/product";
@@ -24,23 +23,30 @@ export class SelfOrder {
         this.router = router;
         this.rpc = rpc;
         this.orders = [];
-        this.tagList = new Set();
         this.editedOrder = null;
         this.productByIds = {};
         this.priceLoading = false;
         this.currentProduct = 0;
         this.lastEditedProductId = null;
-        this.productsGroupedByTag = {};
+        this.productsGroupedByCategory = {};
         this.notification = notification;
         this.initData();
+        this.categoryList = new Set(
+            this.pos_category
+                .sort((a, b) => a.sequence - b.sequence)
+                .map((c) => c.name)
+                .filter((c) => this.productsGroupedByCategory[c])
+        );
 
         if (this.self_order_mode !== "qr_code") {
             effect((state) => this.saveOrderToLocalStorage(state.orders), [this]);
         }
 
-        if (!this.has_active_session && this.self_order_mode !== "qr_code") {
+        if (!this.has_active_session || this.self_order_mode === "qr_code") {
             this.closeNotification = this.notification.add(
-                _t("The restaurant is closed. You can browse the menu, but ordering is disabled."),
+                _t(
+                    "The restaurant is closed. You can browse the menu, but ordering is not available."
+                ),
                 { type: "warning" }
             );
         }
@@ -48,11 +54,8 @@ export class SelfOrder {
 
     initData() {
         this.products = this.products.map((p) => {
-            const product = new Product(p, this);
-
-            this.tagList.add(...product.tags);
+            const product = new Product(p, this.show_prices_with_tax_included);
             this.productByIds[product.id] = product;
-
             return product;
         });
 
@@ -67,13 +70,13 @@ export class SelfOrder {
             );
         }
 
-        this.productsGroupedByTag = this._getProductsGroupedByTag(this.products);
-    }
-    _getProductsGroupedByTag(products) {
-        const productsDuplicatedSuchThatEachHasOneTag = products.flatMap((product) =>
-            product.tags.map((tag) => ({ ...product, tag }))
-        );
-        return groupBy(productsDuplicatedSuchThatEachHasOneTag, "tag");
+        this.productsGroupedByCategory = this.products.reduce((acc, product) => {
+            product.pos_categ_ids.map((pos_categ_ids) => {
+                acc[pos_categ_ids] = acc[pos_categ_ids] || [];
+                acc[pos_categ_ids].push(product);
+            });
+            return acc;
+        }, {});
     }
 
     saveOrderToLocalStorage(orders) {

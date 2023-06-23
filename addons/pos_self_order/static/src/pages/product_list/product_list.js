@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, useEffect, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/self_order_service";
 import { useAutofocus, useChildRef, useService } from "@web/core/utils/hooks";
 import { NavBar } from "@pos_self_order/components/navbar/navbar";
@@ -24,17 +24,24 @@ export class ProductList extends Component {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
         this.productsList = useRef("productsList");
+        this.categoryList = useRef("categoryList");
         this.currentProductCard = useChildRef();
         this.search = useState({
             isFocused: false,
             input: "",
         });
 
-        useAutofocus({ refName: "input", mobile: true });
+        useAutofocus({ refName: "searchInput", mobile: true });
 
         this.productGroups = Object.fromEntries(
-            Array.from(this.selfOrder.tagList).map((tag) => {
-                return [tag, useRef(`productsWithTag_${tag}`)];
+            Array.from(this.selfOrder.categoryList).map((category) => {
+                return [category, useRef(`productsWithCategory_${category}`)];
+            })
+        );
+
+        this.categoryButton = Object.fromEntries(
+            Array.from(this.selfOrder.categoryList).map((category) => {
+                return [category, useRef(`category_${category}`)];
             })
         );
 
@@ -51,6 +58,22 @@ export class ProductList extends Component {
         this.currentProductGroup = useDetection(this.productsList, this.productGroups, () => [
             this.search.isFocused,
         ]);
+
+        useEffect(
+            () => {
+                const category = this.categoryButton[this.currentProductGroup.name]?.el;
+
+                if (!category) {
+                    return;
+                }
+
+                this.categoryList.el.scroll({
+                    left: category.offsetLeft + category.offsetWidth / 2 - window.innerWidth / 2,
+                    behavior: "smooth",
+                });
+            },
+            () => [this.currentProductGroup.name]
+        );
     }
 
     shouldNavbarBeShown() {
@@ -65,7 +88,7 @@ export class ProductList extends Component {
     scrollTo(ref = null, { behavior = "smooth" } = {}) {
         // it would be convenient to use .scrollIntoView() but it doesn't work if we
         // scroll on multiple elements at the same time. ( when we scroll the productsList
-        // we also scroll the tagList in the header)
+        // we also scroll the categoryList in the header)
         this.productsList.el.scroll({
             top: ref?.el ? ref.el.offsetTop - this.productsList.el.offsetTop : 0,
             behavior,
@@ -89,16 +112,18 @@ export class ProductList extends Component {
     }
 
     /**
-     * This function is called when a tag is clicked;
-     * @param {string} tag_name
+     * This function is called when a category is clicked;
+     * @param {string} category_name
      */
-    tagOnClick(tag_name) {
-        // When the user clicks on a tag, we scroll to the part of the page
-        // where the products with that tag are displayed.
-        // We don't have to manually mark the tag as selected because the
+    categoryOnClick(category_name) {
+        // When the user clicks on a category, we scroll to the part of the page
+        // where the products with that category are displayed.
+        // We don't have to manually mark the category as selected because the
         // useDetection hook will do it for us.
         this.scrollTo(
-            this.currentProductGroup.name != tag_name ? this.productGroups[tag_name] : null
+            this.currentProductGroup.name != category_name
+                ? this.productGroups[category_name]
+                : null
         );
     }
 
