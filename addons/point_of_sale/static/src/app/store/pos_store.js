@@ -13,6 +13,7 @@ import { Reactive } from "@web/core/utils/reactive";
 import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
 import { memoize } from "@web/core/utils/functions";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
+import { ConnectionLostError } from "@web/core/network/rpc_service";
 import { _t } from "@web/core/l10n/translation";
 import { CashOpeningPopup } from "@point_of_sale/app/store/cash_opening_popup/cash_opening_popup";
 import { sprintf } from "@web/core/utils/strings";
@@ -243,6 +244,7 @@ export class PosStore extends Reactive {
         this._loadPosPaymentMethod();
         this.fiscal_positions = loadedData["account.fiscal.position"];
         this.base_url = loadedData["base_url"];
+        this.pos_has_valid_product = loadedData["pos_has_valid_product"];
         await this._loadPictures();
         await this._loadPosPrinters(loadedData["pos.printer"]);
     }
@@ -391,6 +393,53 @@ export class PosStore extends Reactive {
             [[odoo.pos_session_id], search_params]
         );
         return this.addPartners(partners);
+    }
+
+    async updateModelsData(models_data) {
+        const products = models_data["product.product"];
+        const categories = models_data["pos.category"];
+
+        let removed_categories_id;
+        if (categories) {
+            const previous_categories_id = Object.values(this.db.category_by_id).map((c) => c.id);
+            const received_categories_id = new Set(categories.map((c) => c.id));
+            this.db.add_categories(categories);
+            removed_categories_id = previous_categories_id.filter(
+                (p) => !received_categories_id.has(p)
+            );
+        }
+        if (products) {
+            const previous_products_id = Object.values(this.db.product_by_id).map((p) => p.id);
+            const received_products_id = new Set(products.map((p) => p.id));
+            this._loadProductProduct(products);
+
+            const removed_products_id = previous_products_id.filter(
+                (p) => !received_products_id.has(p)
+            );
+            this.db.remove_products(removed_products_id);
+
+            if (
+                Object.values(this.db.product_by_id).some(
+                    (p) => p.available_in_pos && p.lst_price > 0
+                )
+            ) {
+                this.pos_has_valid_product = true;
+            }
+        }
+
+        if (categories) {
+            this.db.remove_categories(removed_categories_id);
+        }
+    }
+
+    /**
+     * @returns true if the POS app (not only this POS config) has at least one valid product.
+     */
+    posHasValidProduct() {
+        return (
+            this.pos_has_valid_product ||
+            Object.values(this.db.product_by_id).some((p) => p.available_in_pos && p.lst_price > 0)
+        );
     }
 
     setSelectedCategoryId(categoryId) {
@@ -958,20 +1007,33 @@ export class PosStore extends Reactive {
 
     // Send validated orders to the backend.
     // Resolves to the backend ids of the synced orders.
-    _flush_orders(orders, options) {
-        var self = this;
-
-        return this._save_to_server(orders, options)
-            .then(function (server_ids) {
-                for (let i = 0; i < server_ids.length; i++) {
-                    self.validated_orders_name_server_id_map[server_ids[i].pos_reference] =
-                        server_ids[i].id;
+    async _flush_orders(orders, options) {
+        try {
+            const server_ids = await this._save_to_server(orders, options);
+            for (let i = 0; i < server_ids.length; i++) {
+                this.validated_orders_name_server_id_map[server_ids[i].pos_reference] =
+                    server_ids[i].id;
+            }
+            return server_ids;
+        } catch (error) {
+            if (error instanceof ConnectionLostError) {
+                Promise.reject(error);
+                return error;
+            } else {
+                for (const order of orders) {
+                    const reactiveOrder = this.orders.find((o) => o.uid === order.id);
+                    reactiveOrder.validation_date = null;
+                    reactiveOrder.formatted_validation_date = null;
+                    reactiveOrder.finalized = false;
+                    this.db.remove_order(reactiveOrder.uid);
+                    this.db.save_unpaid_order(reactiveOrder);
                 }
-                return server_ids;
-            })
-            .finally(function () {
-                self._after_flush_orders(orders);
-            });
+                this.set_synch("connected");
+                throw error;
+            }
+        } finally {
+            this._after_flush_orders(orders);
+        }
     }
     /**
      * Hook method after _flush_orders resolved or rejected.
@@ -1665,7 +1727,6 @@ export class PosStore extends Reactive {
         });
         if (confirmed) {
             currentOrder.set_partner(newPartner);
-            currentOrder.updatePricelist(newPartner);
         }
     }
     // FIXME: POSREF, method exist only to be overrided
@@ -1761,6 +1822,10 @@ export class PosStore extends Reactive {
             this.mainScreen.component === PaymentScreen ||
             (this.mainScreen.component === ProductScreen && this.mobile_pane == "left")
         );
+    }
+
+    doNotAllowRefundAndSales() {
+        return false;
     }
 }
 
