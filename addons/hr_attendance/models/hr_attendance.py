@@ -54,7 +54,7 @@ class HrAttendance(models.Model):
     @api.depends('check_in', 'check_out')
     def _compute_worked_hours(self):
         for attendance in self:
-            if attendance.check_out and attendance.check_in:
+            if attendance.check_out and attendance.check_in and attendance.employee_id:
                 calendar = attendance._get_employee_calendar()
                 resource = attendance.employee_id.resource_id
                 tz = timezone(calendar.tz)
@@ -146,6 +146,9 @@ class HrAttendance(models.Model):
                 attendances_emp[attendance.employee_id].add(check_out_day_start)
         return attendances_emp
 
+    def _get_overtime_leave_domain(self):
+        return []
+
     def _update_overtime(self, employee_attendance_dates=None):
         if employee_attendance_dates is None:
             employee_attendance_dates = self._get_attendances_dates()
@@ -180,7 +183,9 @@ class HrAttendance(models.Model):
                 start, stop, emp.resource_id
             )[emp.resource_id.id]
             # Substract Global Leaves and Employee's Leaves
-            leave_intervals = calendar._leave_intervals_batch(start, stop, emp.resource_id, domain=[])
+            leave_intervals = calendar._leave_intervals_batch(
+                start, stop, emp.resource_id, domain=self._get_overtime_leave_domain()
+            )
             expected_attendances -= leave_intervals[False] | leave_intervals[emp.resource_id.id]
 
             # working_times = {date: [(start, stop)]}
