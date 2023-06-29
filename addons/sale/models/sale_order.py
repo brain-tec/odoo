@@ -295,6 +295,17 @@ class SaleOrder(models.Model):
 
     #=== COMPUTE METHODS ===#
 
+    @api.depends('partner_id')
+    @api.depends_context('sale_show_partner_name')
+    def _compute_display_name(self):
+        if not self._context.get('sale_show_partner_name'):
+            return super()._compute_display_name()
+        for order in self:
+            name = order.name
+            if order.partner_id.name:
+                name = f'{name} - {order.partner_id.name}'
+            order.display_name = name
+
     @api.depends('company_id')
     def _compute_require_signature(self):
         for order in self:
@@ -1556,17 +1567,6 @@ class SaleOrder(models.Model):
 
         upselling_orders = filtered_self.filtered(lambda so: so.invoice_status == 'upselling')
         upselling_orders._create_upsell_activity()
-
-    def name_get(self):
-        if self._context.get('sale_show_partner_name'):
-            res = []
-            for order in self:
-                name = order.name
-                if order.partner_id.name:
-                    name = f'{name} - {order.partner_id.name}'
-                res.append((order.id, name))
-            return res
-        return super().name_get()
 
     #=== BUSINESS METHODS ===#
 

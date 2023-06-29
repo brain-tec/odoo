@@ -25,7 +25,6 @@ class Applicant(models.Model):
     _order = "priority desc, id desc"
     _inherit = ['mail.thread.cc', 'mail.thread.main.attachment', 'mail.activity.mixin', 'utm.mixin']
     _mailing_enabled = True
-    _primary_email = 'email_from'
 
     name = fields.Char("Subject / Application", required=True, help="Email subject for applications sent via email", index='trigram')
     active = fields.Boolean("Active", default=True, help="If the active field is set to false, it will allow you to hide the case without removing it.")
@@ -505,13 +504,13 @@ class Applicant(models.Model):
                 applicant._message_add_suggested_recipient(recipients, email=email_from, reason=_('Contact Email'))
         return recipients
 
-    def name_get(self):
-        if self.env.context.get('show_partner_name'):
-            return [
-                (applicant.id, applicant.partner_name or applicant.name)
-                for applicant in self
-            ]
-        return super().name_get()
+    @api.depends('partner_name')
+    @api.depends_context('show_partner_name')
+    def _compute_display_name(self):
+        if not self.env.context.get('show_partner_name'):
+            return super()._compute_display_name()
+        for applicant in self:
+            applicant.display_name = applicant.partner_name or applicant.name
 
     @api.model
     def message_new(self, msg, custom_values=None):
@@ -527,11 +526,11 @@ class Applicant(models.Model):
         stage = False
         if custom_values and 'job_id' in custom_values:
             stage = self.env['hr.job'].browse(custom_values['job_id'])._get_first_stage()
-        val = msg.get('from').split('<')[0]
+        partner_name, email_from = self.env['res.partner']._parse_partner_name(msg.get('from'))
         defaults = {
             'name': msg.get('subject') or _("No Subject"),
-            'partner_name': val,
-            'email_from': msg.get('from'),
+            'partner_name': partner_name or email_from,
+            'email_from': email_from,
             'partner_id': msg.get('author_id', False),
         }
         if msg.get('priority'):
