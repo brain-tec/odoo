@@ -115,7 +115,7 @@ class Task(models.Model):
 
     active = fields.Boolean(default=True)
     name = fields.Char(string='Title', tracking=True, required=True, index='trigram')
-    description = fields.Html(string='Description')
+    description = fields.Html(string='Description', sanitize_attributes=False)
     priority = fields.Selection([
         ('0', 'Low'),
         ('1', 'High'),
@@ -1090,8 +1090,8 @@ class Task(models.Model):
                 if task.allow_task_dependencies:
                     if task.is_blocked_by_dependences() and vals['state'] not in CLOSED_STATES and vals['state'] != '04_waiting_normal':
                         task.state = '04_waiting_normal'
-            if vals['state'] in CLOSED_STATES:
-                task.date_last_stage_update = now
+                if vals['state'] in CLOSED_STATES:
+                    task.date_last_stage_update = now
 
         self._task_message_auto_subscribe_notify({task: task.user_ids - old_user_ids[task] - self.env.user for task in self})
         return result
