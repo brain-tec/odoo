@@ -75,6 +75,7 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/chat_window/**/*',
             'im_livechat/static/src/composer/**/*',
             'im_livechat/static/src/core/**/*',
+            'im_livechat/static/src/core_ui/**/*',
             'im_livechat/static/src/discuss_app/**/*',
             'im_livechat/static/src/messaging_menu/**/*',
             'im_livechat/static/src/web/**/*',
@@ -96,6 +97,7 @@ Help your customers with this chat, and analyse their feedback.
         'im_livechat.assets_core': [
             'mail/static/src/core/common/**/*',
             'mail/static/src/utils/common/**/*',
+            ('remove', 'mail/static/src/**/*.dark.scss'),
             ('remove', 'mail/static/src/core/common/emoji_data.js'),
 
             'im_livechat/static/src/embed/**/*',
