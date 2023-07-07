@@ -96,6 +96,7 @@ export class ChatWindow extends Component {
         if (ev.target.closest(".o-dropdown")) {
             return;
         }
+        ev.stopPropagation(); // not letting home menu steal my CTRL-C
         switch (ev.key) {
             case "Escape":
                 if (
@@ -193,7 +194,11 @@ export class ChatWindow extends Component {
                 sequence: 20,
             });
         }
-        if (this.thread && this.props.chatWindow.isOpen) {
+        if (
+            this.thread &&
+            this.props.chatWindow.isOpen &&
+            !(this.thread.model === "discuss.channel" && this.ui.isSmall)
+        ) {
             acts.push({
                 id: "expand",
                 name:
