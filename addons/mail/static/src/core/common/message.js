@@ -103,6 +103,7 @@ export class Message extends Component {
         this.attachmentService = useService("mail.attachment");
         this.user = useService("user");
         this.dialog = useService("dialog");
+        this.ui = useState(useService("ui"));
         this.openReactionMenu = this.openReactionMenu.bind(this);
         useChildSubEnv({
             alignedRight: this.isAlignedRight,
@@ -120,8 +121,9 @@ export class Message extends Component {
                 this.root.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
+        this.emojiPickerRef = useRef("emoji-picker");
         if (this.props.hasActions && this.canAddReaction) {
-            this.emojiPicker = useEmojiPicker(useRef("emoji-picker"), {
+            this.emojiPicker = useEmojiPicker(this.emojiPickerRef, {
                 onSelect: (emoji) => {
                     const reaction = this.message.reactions.find(
                         ({ content, personas }) =>
