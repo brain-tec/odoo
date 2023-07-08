@@ -57,21 +57,15 @@ export class DateTimeField extends Component {
         return this.props.endDateField || this.props.name;
     }
 
-    get hasEmptyField() {
-        return this.values.length < 2 || !this.values.every(Boolean);
-    }
-
-    /** @type {string[]} */
-    get refValues() {
-        return this.inputRefs.map((ref) => ref.el?.value);
-    }
-
     get relatedField() {
         return this.props.startDateField || this.props.endDateField;
     }
 
     get showRange() {
-        return this.relatedField && (this.props.required || this.values.filter(Boolean).length);
+        return (
+            this.relatedField &&
+            ((this.props.required && !this.props.readonly) || this.values.some(Boolean))
+        );
     }
 
     get startDateField() {
@@ -92,7 +86,7 @@ export class DateTimeField extends Component {
         this.rootRef = useRef("root");
         this.inputRefs = [useRef("start-date"), useRef("end-date")];
 
-        const state = useDateTimePicker({
+        const dateTimePicker = useDateTimePicker({
             target: "root",
             pickerProps: (props) => this.getPickerProps(props),
             onChange: (value) => {
@@ -129,7 +123,8 @@ export class DateTimeField extends Component {
                 this.props.record.update(toUpdate);
             },
         });
-        this.state = useState(state);
+        this.state = useState(dateTimePicker.state);
+        this.openPicker = dateTimePicker.open;
 
         onWillStart(() => this.triggerIsDirty(this.props));
         onWillUpdateProps((nextProps) => this.triggerIsDirty(nextProps));
@@ -140,16 +135,18 @@ export class DateTimeField extends Component {
     //-------------------------------------------------------------------------
 
     async addDate() {
+        const nextFocusedIndex = this.emptyField === this.startDateField ? 0 : 1;
         const [value] = this.values;
-        this.state.focusedDateIndex = this.emptyField === this.startDateField ? 0 : 1;
         this.state.value = [value, value];
         this.emptyField = null;
+        this.openPicker(nextFocusedIndex);
     }
 
-    formatDisplayValue(value) {
-        if (typeof value === "string") {
-            return value;
-        }
+    /**
+     * @param {number} valueIndex
+     */
+    getFormattedValue(valueIndex) {
+        const value = this.values[valueIndex];
         return value ? (this.type === "date" ? formatDate(value) : formatDateTime(value)) : "";
     }
 
