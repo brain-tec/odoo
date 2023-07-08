@@ -613,12 +613,28 @@ class BaseModel(metaclass=MetaModel):
     def _add_field(self, name, field):
         """ Add the given ``field`` under the given ``name`` in the class """
         cls = type(self)
-        # add field as an attribute and in cls._fields (for reflection)
+
+        # Assert the name is an existing field in the model, or any model in the _inherits
+        # or a custom field (starting by `x_`)
+        is_class_field = any(
+            isinstance(getattr(model, name, None), fields.Field)
+            for model in [cls] + [self.env.registry[inherit] for inherit in cls._inherits]
+        )
+        if not (is_class_field or name.startswith('x_')):
+            raise ValidationError(
+                f"The field `{name}` is not defined in the `{cls._name}` Python class and does not start with 'x_'"
+            )
+
+        # Assert the attribute to assign is a Field
+        if not isinstance(field, fields.Field):
+            raise ValidationError("You can only add `fields.Field` objects to a model fields")
+
         if not isinstance(getattr(cls, name, field), Field):
             _logger.warning("In model %r, field %r overriding existing value", cls._name, name)
         setattr(cls, name, field)
         field._toplevel = True
         field.__set_name__(cls, name)
+        # add field as an attribute and in cls._fields (for reflection)
         cls._fields[name] = field
 
     @api.model
@@ -3320,6 +3336,11 @@ class BaseModel(metaclass=MetaModel):
 
         return translations, context
 
+    def _get_base_lang(self):
+        """ Returns the base language of the record. """
+        self.ensure_one()
+        return 'en_US'
+
     def _read_format(self, fnames, load='_classic_read'):
         """Returns a list of dictionaries mapping field names to their values,
         with one dictionary per record that exists.
@@ -5722,7 +5743,7 @@ class BaseModel(metaclass=MetaModel):
                 matching_ids = set()
                 for record in self:
                     data = record.mapped(key)
-                    if isinstance(data, BaseModel):
+                    if isinstance(data, BaseModel) and comparator not in ('any', 'not any'):
                         v = value
                         if isinstance(value, (list, tuple, set)) and value:
                             v = next(iter(value))
@@ -5768,6 +5789,10 @@ class BaseModel(metaclass=MetaModel):
                     elif comparator == '=ilike':
                         data = [(x or "").lower() for x in data]
                         ok = fnmatch.filter(data, value and value_esc.lower())
+                    elif comparator == 'any':
+                        ok = data.filtered_domain(value)
+                    elif comparator == 'not any':
+                        ok = not data.filtered_domain(value)
                     else:
                         raise ValueError(f"Invalid term domain '{leaf}', operator '{comparator}' doesn't exist.")
 
