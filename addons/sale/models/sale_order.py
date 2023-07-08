@@ -246,7 +246,7 @@ class SaleOrder(models.Model):
         compute='_compute_authorized_transaction_ids',
         copy=False,
         compute_sudo=True)
-    amount_paid = fields.Float(compute='_compute_amount_paid')
+    amount_paid = fields.Float(compute='_compute_amount_paid', compute_sudo=True)
 
     # UTMs - enforcing the fact that we want to 'set null' when relation is unlinked
     campaign_id = fields.Many2one(ondelete='set null')
@@ -332,7 +332,9 @@ class SaleOrder(models.Model):
             order = order.with_company(order.company_id)
             if order.terms_type == 'html' and self.env.company.invoice_terms_html:
                 baseurl = html_keep_url(order._get_note_url() + '/terms')
+                context = {'lang': order.partner_id.lang or self.env.user.lang}
                 order.note = _('Terms & Conditions: %s', baseurl)
+                del context
             elif not is_html_empty(self.env.company.invoice_terms):
                 order.note = order.with_context(lang=order.partner_id.lang).env.company.invoice_terms
 

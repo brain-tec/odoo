@@ -1662,6 +1662,8 @@ class TestFields(TransactionCaseWithUserDemo):
             '!=': (tag1.id, tag2.id, False),
             'in': ([tag1.id, tag2.id], [tag2.id, False], [False], []),
             'not in': ([tag1.id, tag2.id], [tag2.id, False], [False], []),
+            'any': ([('name', '=', tag1.name)], [('name', '=', False)], []),
+            'not any': ([('name', '=', tag1.name)], [('name', '=', False)], []),
         })
 
     def test_30_read(self):
@@ -3868,13 +3870,13 @@ class TestSubqueries(common.TransactionCase):
         with self.assertQueries(["""
             SELECT "test_new_api_multi"."id"
             FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."partner" NOT IN (
+            WHERE (("test_new_api_multi"."partner" NOT IN (
                 SELECT "res_partner"."id"
                 FROM "res_partner"
                 WHERE (("res_partner"."name"::text LIKE %s)
                     AND ("res_partner"."phone"::text LIKE %s)
                 )
-            ))
+            )) OR "test_new_api_multi"."partner" IS NULL)
             ORDER BY "test_new_api_multi"."id"
         """]):
             self.env['test_new_api.multi'].search([
@@ -3887,13 +3889,13 @@ class TestSubqueries(common.TransactionCase):
         with self.assertQueries(["""
             SELECT "test_new_api_multi"."id"
             FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."partner" NOT IN (
+            WHERE (("test_new_api_multi"."partner" NOT IN (
                 SELECT "res_partner"."id"
                 FROM "res_partner"
                 WHERE (("res_partner"."name"::text LIKE %s)
                     OR ("res_partner"."phone"::text LIKE %s)
                 )
-            ))
+            )) OR "test_new_api_multi"."partner" IS NULL)
             ORDER BY "test_new_api_multi"."id"
         """]):
             self.env['test_new_api.multi'].search([
@@ -3929,10 +3931,12 @@ class TestSubqueries(common.TransactionCase):
             LEFT JOIN "res_partner" AS "test_new_api_multi__partner"
                 ON ("test_new_api_multi"."partner" = "test_new_api_multi__partner"."id")
             WHERE (
-                NOT ((
-                    ("test_new_api_multi__partner"."name"::text LIKE %s)
-                    OR ("test_new_api_multi__partner"."phone"::text LIKE %s)
-                ))
+                "test_new_api_multi__partner"."id" IS NULL OR (
+                    NOT ((
+                        ("test_new_api_multi__partner"."name"::text LIKE %s)
+                        OR ("test_new_api_multi__partner"."phone"::text LIKE %s)
+                    ))
+                )
             )
             ORDER BY "test_new_api_multi"."id"
         """]):
@@ -3974,20 +3978,24 @@ class TestSubqueries(common.TransactionCase):
                     (
                         ({many2one} IN (
                             {subselect} WHERE ("res_partner"."function"::text LIKE %s)
-                        )) OR ({many2one} NOT IN (
+                        )) OR (({many2one} NOT IN (
                             {subselect} WHERE (
                                 ("res_partner"."phone"::text LIKE %s)
                                 AND ("res_partner"."mobile"::text LIKE %s)
-                        )))
+                            )))
+                            OR "test_new_api_multi"."partner" IS NULL
+                        )
                     ) AND ({many2one} IN (
                         {subselect} WHERE (
                             ("res_partner"."name"::text LIKE %s)
                             OR ("res_partner"."email"::text LIKE %s)
                         )
                     ))
-                ) AND ({many2one} NOT IN (
+                ) AND (({many2one} NOT IN (
                     {subselect} WHERE ("res_partner"."website"::text LIKE %s)
-                ))
+                    ))
+                    OR "test_new_api_multi"."partner" IS NULL
+                )
             )
             ORDER BY "test_new_api_multi"."id"
         """.format(
