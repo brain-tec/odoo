@@ -330,7 +330,9 @@ class SaleOrder(models.Model):
             order = order.with_company(order.company_id)
             if order.terms_type == 'html' and self.env.company.invoice_terms_html:
                 baseurl = html_keep_url(order._get_note_url() + '/terms')
+                context = {'lang': order.partner_id.lang or self.env.user.lang}
                 order.note = _('Terms & Conditions: %s', baseurl)
+                del context
             elif not is_html_empty(self.env.company.invoice_terms):
                 order.note = order.with_context(lang=order.partner_id.lang).env.company.invoice_terms
 
@@ -599,7 +601,7 @@ class SaleOrder(models.Model):
             order.amount_to_invoice = order.amount_total
             for invoice in order.invoice_ids.filtered(lambda x: x.state == 'posted'):
                 invoice_amount_currency = invoice.currency_id._convert(
-                    invoice.tax_totals['amount_total'],
+                    invoice.tax_totals['amount_total'] * -invoice.direction_sign,
                     order.currency_id,
                     invoice.company_id,
                     invoice.date,
