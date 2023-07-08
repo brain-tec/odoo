@@ -94,7 +94,7 @@ class ProjectTaskType(models.Model):
         domain=[('model', '=', 'project.task')],
         help="If set, an email will be automatically sent to the customer when the task reaches this stage.")
     fold = fields.Boolean(string='Folded in Kanban',
-        help='If enabled, this stage will be displayed as folded in the Kanban view of your tasks. Tasks in a folded stage are considered as closed.')
+        help='If enabled, this stage will be displayed as folded in the Kanban view of your tasks.')
     rating_template_id = fields.Many2one(
         'mail.template',
         string='Rating Email Template',
@@ -1130,7 +1130,7 @@ class Task(models.Model):
         ('03_approved', 'Approved'),
         *CLOSED_STATES.items(),
         ('04_waiting_normal', 'Waiting'),
-    ], string='Status', copy=False, default='01_in_progress', required=True, compute='_compute_state', inverse='_inverse_state', readonly=False, store=True, recursive=True, task_dependency_tracking=True, tracking=True)
+    ], string='Status', copy=False, default='01_in_progress', required=True, compute='_compute_state', inverse='_inverse_state', readonly=False, store=True, index=True, recursive=True, task_dependency_tracking=True, tracking=True)
 
     create_date = fields.Datetime("Created On", readonly=True)
     write_date = fields.Datetime("Last Updated On", readonly=True)
