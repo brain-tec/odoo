@@ -286,6 +286,15 @@ class AccountMove(models.Model):
         index=True,
         copy=False,
     )
+    delivery_date = fields.Date(
+        string='Delivery Date',
+        copy=False,
+        readonly=True,
+        store=True,
+        compute='_compute_delivery_date',
+        states={'draft': [('readonly', False)]},
+    )
+    show_delivery_date = fields.Boolean(compute='_compute_show_delivery_date')
     invoice_payment_term_id = fields.Many2one(
         comodel_name='account.payment.term',
         string='Payment Terms',
@@ -841,6 +850,14 @@ class AccountMove(models.Model):
                 (k['date_maturity'] for k in move.needed_terms.keys() if k),
                 default=False,
             ) or move.invoice_date_due or today
+
+    def _compute_delivery_date(self):
+        pass
+
+    @api.depends('delivery_date')
+    def _compute_show_delivery_date(self):
+        for move in self:
+            move.show_delivery_date = move.delivery_date and move.is_sale_document()
 
     @api.depends('journal_id', 'statement_line_id')
     def _compute_currency_id(self):
@@ -1598,6 +1615,10 @@ class AccountMove(models.Model):
             m.journal_id.currency_id
             and m.journal_id.currency_id != m.currency_id
         ))
+        (self.line_ids | self.invoice_line_ids)._conditional_add_to_compute('currency_id', lambda l: (
+            l.move_id.is_invoice(True)
+            and l.move_id.currency_id != l.currency_id
+        ))
 
     @api.onchange('journal_id')
     def _inverse_journal_id(self):
@@ -1857,6 +1878,8 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     def _is_eligible_for_early_payment_discount(self, currency, reference_date):
         self.ensure_one()
+        if not reference_date:
+            return True
         return self.currency_id == currency \
             and self.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
             and self.invoice_payment_term_id.early_discount \
