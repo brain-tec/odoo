@@ -1608,6 +1608,10 @@ class AccountMove(models.Model):
             m.journal_id.currency_id
             and m.journal_id.currency_id != m.currency_id
         ))
+        (self.line_ids | self.invoice_line_ids)._conditional_add_to_compute('currency_id', lambda l: (
+            l.move_id.is_invoice(True)
+            and l.move_id.currency_id != l.currency_id
+        ))
 
     @api.onchange('journal_id')
     def _inverse_journal_id(self):
@@ -1867,6 +1871,8 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     def _is_eligible_for_early_payment_discount(self, currency, reference_date):
         self.ensure_one()
+        if not reference_date:
+            return True
         return self.currency_id == currency \
             and self.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
             and self.invoice_payment_term_id.early_discount \
