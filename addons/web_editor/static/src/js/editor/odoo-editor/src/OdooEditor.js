@@ -4051,10 +4051,17 @@ export class OdooEditor extends EventTarget {
             ) {
                 this.observerUnactive();
                 hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
+                if (hint.dataset.oeEditPlaceholder) {
+                    hint.setAttribute("placeholder", hint.dataset.oeEditPlaceholder);
+                    if (hint.innerText.trim().length === 0) {
+                        hint.classList.add("oe-hint");
+                    }
+                } else {
+                    hint.removeAttribute("placeholder");
+                }
                 if (hint.classList.length === 0) {
                     hint.removeAttribute('class');
                 }
-                hint.removeAttribute('placeholder');
                 this.observerActive();
             }
         }
@@ -4683,7 +4690,7 @@ export class OdooEditor extends EventTarget {
                         ? splitAroundUrl[i]
                         : 'https://' + splitAroundUrl[i];
                     // Even indexes will always be plain text, and odd indexes will always be URL.
-                    // only allow images emebed inside an existing link. No other url or video embed.
+                    // A url cannot be transformed inside an existing link.
                     if (i % 2 && !selectionIsInsideALink) {
                         this._applyCommand('insert', this._createLink(splitAroundUrl[i], url));
                     } else if (splitAroundUrl[i] !== '') {
@@ -4692,7 +4699,14 @@ export class OdooEditor extends EventTarget {
                         for (const textFragment of textFragments) {
                             this._applyCommand('insert', textFragment);
                             if (textIndex < textFragments.length) {
-                                this._applyCommand('oShiftEnter');
+                                // Break line by inserting new paragraph and
+                                // remove current paragraph's bottom margin.
+                                const p = closestElement(sel.anchorNode, 'p');
+                                if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
+                                    this._applyCommand('oShiftEnter');
+                                } else if (p) {
+                                    p.style.marginBottom = '0px';
+                                }
                             }
                             textIndex++;
                         }
