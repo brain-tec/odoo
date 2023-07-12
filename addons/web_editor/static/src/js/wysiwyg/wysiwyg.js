@@ -342,7 +342,7 @@ const Wysiwyg = Widget.extend({
             window.addEventListener('beforeunload', this._onBeforeUnload);
         }
         if (this.options.getContentEditableAreas) {
-            $(this.options.getContentEditableAreas()).find('*').off('mousedown mouseup click');
+            $(this.options.getContentEditableAreas(this.odooEditor)).find('*').off('mousedown mouseup click');
         }
 
         // The toolbar must be configured after the snippetMenu is loaded
@@ -735,7 +735,7 @@ const Wysiwyg = Widget.extend({
         $body.off('mousemove', this.resizerMousemove);
         $body.off('mouseup', this.resizerMouseup);
         const $wrapwrap = $('#wrapwrap');
-        if ($wrapwrap.length) {
+        if ($wrapwrap.length && this.odooEditor) {
             $('#wrapwrap')[0].removeEventListener('scroll', this.odooEditor.multiselectionRefresh, { passive: true });
         }
         $(this.$root).off('click');
@@ -901,7 +901,7 @@ const Wysiwyg = Widget.extend({
         this.savingContent = true;
         await this.cleanForSave();
 
-        const editables = this.options.getContentEditableAreas();
+        const editables = "getContentEditableAreas" in this.options ? this.options.getContentEditableAreas(this.odooEditor) : [];
         await this.savePendingImages(editables.length ? $(editables) : this.$editable);
         await this._saveViewBlocks();
         this.savingContent = false;
@@ -1837,14 +1837,14 @@ const Wysiwyg = Widget.extend({
         }
         const coloredElements = this.odooEditor.execCommand('applyColor', color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
 
-        const coloredTds = coloredElements && coloredElements.length && coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
+        const coloredTds = coloredElements && coloredElements.length && Array.isArray(coloredElements) && coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
         if (coloredTds.length) {
             const propName = eventName === 'foreColor' ? 'color' : 'background-color';
             for (const td of coloredTds) {
                 // Make it important so it has priority over selection color.
                 td.style.setProperty(propName, td.style[propName], previewMode ? 'important' : '');
             }
-        } else if (!this.lastMediaClicked && coloredElements && coloredElements.length) {
+        } else if (!this.lastMediaClicked && coloredElements && coloredElements.length && Array.isArray(coloredElements)) {
             // Ensure the selection in the fonts tags, otherwise an undetermined
             // race condition could generate a wrong selection later.
             const first = coloredElements[0];
