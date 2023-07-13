@@ -648,6 +648,7 @@ QUnit.module("Fields", (hooks) => {
         await nextTick();
 
         assert.notOk(isHiddenByCSS(target.querySelector(".o_add_date")));
+        assert.containsNone(target, ".o_datetime_picker");
         assert.strictEqual(
             target.querySelector(".o_add_date").innerText.trim().toLowerCase(),
             "add end date"
@@ -657,6 +658,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_add_date"));
 
         const [startInput, endInput] = target.querySelectorAll(".o_field_daterange input");
+        assert.containsOnce(target, ".o_datetime_picker");
         assert.strictEqual(
             startInput.value,
             endInput.value,
@@ -1070,5 +1072,65 @@ QUnit.module("Fields", (hooks) => {
         assert.hasAttrValue(getInputs()[0], "data-field", "datetime_end");
         assert.strictEqual(getInputs()[0].value, "");
         assert.containsNone(target, ".o_add_date");
+    });
+
+    QUnit.test("list daterange with start date and empty end date", async (assert) => {
+        serverData.models.partner.fields.date_end = { string: "Some Date", type: "date" };
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <tree>
+                    <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                </tree>`,
+        });
+
+        const arrowIcon = target.querySelector(".fa-long-arrow-right");
+        const textSiblings = [...arrowIcon.parentNode.childNodes]
+            .map((node) => {
+                if (node === arrowIcon) {
+                    return "->";
+                } else if (node.nodeType === 3) {
+                    return node.nodeValue.trim();
+                } else {
+                    return false;
+                }
+            })
+            .filter(Boolean);
+
+        assert.deepEqual(textSiblings, ["02/03/2017", "->"]);
+    });
+
+    QUnit.test("list daterange with empty start date and end date", async (assert) => {
+        serverData.models.partner.fields.date_end = { string: "Some Date", type: "date" };
+        const [firstRecord] = serverData.models.partner.records;
+        [firstRecord.date, firstRecord.date_end] = [firstRecord.date_end, firstRecord.date];
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <tree>
+                    <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                </tree>`,
+        });
+
+        const arrowIcon = target.querySelector(".fa-long-arrow-right");
+        const textSiblings = [...arrowIcon.parentNode.childNodes]
+            .map((node) => {
+                if (node === arrowIcon) {
+                    return "->";
+                } else if (node.nodeType === 3) {
+                    return node.nodeValue.trim();
+                } else {
+                    return false;
+                }
+            })
+            .filter(Boolean);
+
+        assert.deepEqual(textSiblings, ["->", "02/03/2017"]);
     });
 });
