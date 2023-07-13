@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registerCleanup } from "../../helpers/cleanup";
-import { defaultLocalization } from "../../helpers/mock_services";
+import { defaultLocalization, makeFakeDialogService } from "../../helpers/mock_services";
 import {
     click,
     editInput,
@@ -34,6 +34,7 @@ import {
     selectTimeRange,
     toggleFilter,
     toggleSectionFilter,
+    clickAllDaySlot,
 } from "../../views/calendar/helpers";
 import { makeView, setupViewRegistries } from "../../views/helpers";
 import { createWebClient, doAction } from "../../webclient/helpers";
@@ -2702,6 +2703,23 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
+    QUnit.test("Colors: use available colors when attr is not number", async (assert) => {
+        await makeView({
+            type: "calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar date_start="start" date_stop="stop" color="name">
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" filter_field="partner_checked"  />
+                </calendar>
+            `,
+        });
+        const colorClass = Array.from(findEvent(target, 1).classList).find(className => className.startsWith("o_calendar_color_"));
+        assert.notOk(isNaN(Number(colorClass.split("_").at(-1))));
+        await clickEvent(target, 1);
+        assert.hasClass(target.querySelector(".o_cw_popover"), colorClass);
+    });
+
     QUnit.test(`Add filters and specific color`, async (assert) => {
         serverData.models.event_type.records.push({
             id: 4,
@@ -4720,5 +4738,32 @@ QUnit.module("Views", ({ beforeEach }) => {
         await click(target, ".ui-datepicker-today");
         // test would fail here if we went to week mode
         assert.containsOnce(target, ".fc-dayGridMonth-view");
+    });
+
+    QUnit.test("calendar rendering with form view id being passed in quick_add", async (assert) => {
+        serviceRegistry.add(
+            "dialog",
+            makeFakeDialogService((className, props) => {
+                assert.equal(props.viewId, 2);
+                return () => {};
+            }),
+            { force: true }
+        );
+        await makeView({
+            type: "calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar date_start="start" date_stop="stop" all_day="allday" mode="month" quick_add="2">
+                    <field name="name"/>
+                </calendar>
+            `,
+        });
+        const date = target.querySelector(".fc-day-grid td");
+        await clickAllDaySlot(target, date.dataset.date);
+        const datepicker = document.querySelector("#ui-datepicker-div");
+        if (datepicker) {
+            datepicker.remove();
+        }
     });
 });

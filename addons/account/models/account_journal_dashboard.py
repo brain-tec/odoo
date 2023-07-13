@@ -378,6 +378,7 @@ class account_journal(models.Model):
                 'outstanding_pay_account_balance': currency.format(outstanding_pay_account_balance),
                 'nb_lines_outstanding_pay_account_balance': has_outstanding,
                 'last_balance': currency.format(last_statement.balance_end_real),
+                'last_statement_id': last_statement.id,
                 'bank_statements_source': journal.bank_statements_source,
                 'is_sample_data': journal.has_statement_lines,
             })
@@ -663,9 +664,7 @@ class account_journal(models.Model):
         action['context'] = context
         action['context'].update({
             'default_journal_id': self.id,
-            'search_default_journal_id': self.id,
         })
-
         domain_type_field = action['res_model'] == 'account.move.line' and 'move_id.move_type' or 'move_type' # The model can be either account.move or account.move.line
 
         # Override the domain only if the action was not explicitly specified in order to keep the
@@ -675,7 +674,10 @@ class account_journal(models.Model):
                 action['domain'] = [(domain_type_field, 'in', ('out_invoice', 'out_refund', 'out_receipt'))]
             elif self.type == 'purchase':
                 action['domain'] = [(domain_type_field, 'in', ('in_invoice', 'in_refund', 'in_receipt', 'entry'))]
+        elif action['domain']:
+            action['domain'] = ast.literal_eval(action['domain'])
 
+        action['domain'] = (action['domain'] or []) + [('journal_id', '=', self.id)]
         return action
 
     def open_spend_money(self):
