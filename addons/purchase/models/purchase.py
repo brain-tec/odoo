@@ -669,11 +669,7 @@ class PurchaseOrder(models.Model):
         immediately.
         """
         if not invoices:
-            # Invoice_ids may be filtered depending on the user. To ensure we get all
-            # invoices related to the purchase order, we read them in sudo to fill the
-            # cache.
             self.invalidate_model(['invoice_ids'])
-            self.sudo().fetch(['invoice_ids'])
             invoices = self.invoice_ids
 
         result = self.env['ir.actions.act_window']._for_xml_id('account.action_move_in_invoice_type')
@@ -1337,6 +1333,18 @@ class PurchaseOrderLine(models.Model):
                 line.product_uom_qty = line.product_uom._compute_quantity(line.product_qty, line.product_id.uom_id)
             else:
                 line.product_uom_qty = line.product_qty
+
+    def _get_gross_price_unit(self):
+        self.ensure_one()
+        price_unit = self.price_unit
+        if self.taxes_id:
+            qty = self.product_qty or 1
+            price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
+            price_unit = self.taxes_id.with_context(round=False).compute_all(price_unit, currency=self.order_id.currency_id, quantity=qty)['total_void']
+            price_unit = float_round(price_unit / qty, precision_digits=price_unit_prec)
+        if self.product_uom.id != self.product_id.uom_id.id:
+            price_unit *= self.product_uom.factor / self.product_id.uom_id.factor
+        return price_unit
 
     def action_purchase_history(self):
         self.ensure_one()

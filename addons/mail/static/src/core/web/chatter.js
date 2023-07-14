@@ -7,10 +7,10 @@ import { useDropzone } from "@mail/core/common/dropzone_hook";
 import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { Thread } from "@mail/core/common/thread";
 import { Activity } from "@mail/core/web/activity";
-import { FollowerSubtypeDialog } from "@mail/core/web/follower_subtype_dialog";
 import { SuggestedRecipientsList } from "@mail/core/web/suggested_recipient_list";
 import { useHover, useScrollPosition } from "@mail/utils/common/hooks";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
+import { FollowerList } from "./follower_list";
 
 import {
     Component,
@@ -48,6 +48,7 @@ export class Chatter extends Component {
         Composer,
         Activity,
         FileUploader,
+        FollowerList,
         SuggestedRecipientsList,
     };
     static props = [
@@ -94,6 +95,7 @@ export class Chatter extends Component {
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
+            composerType: false,
             isAttachmentBoxOpened: this.props.isAttachmentBoxVisibleInitially,
             jumpThreadPresent: 0,
             showActivities: true,
@@ -112,7 +114,7 @@ export class Chatter extends Component {
         useDropzone(
             this.rootRef,
             async (ev) => {
-                if (this.state.thread.composer.type) {
+                if (this.state.composerType) {
                     return;
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
@@ -149,7 +151,7 @@ export class Chatter extends Component {
         onWillUpdateProps((nextProps) => {
             this.load(nextProps.threadId, ["followers", "attachments", "suggestedRecipients"]);
             if (nextProps.threadId === false) {
-                this.state.thread.composer.type = false;
+                this.state.composerType = false;
             }
             this.attachmentUploader.thread = this.threadService.getThread(
                 nextProps.threadModel,
@@ -239,47 +241,6 @@ export class Chatter extends Component {
         this.threadService.fetchData(this.state.thread, requestList);
     }
 
-    onClickAddFollowers() {
-        document.body.click(); // hack to close dropdown
-        const action = {
-            type: "ir.actions.act_window",
-            res_model: "mail.wizard.invite",
-            view_mode: "form",
-            views: [[false, "form"]],
-            name: _t("Invite Follower"),
-            target: "new",
-            context: {
-                default_res_model: this.props.threadModel,
-                default_res_id: this.props.threadId,
-            },
-        };
-        this.env.services.action.doAction(action, {
-            onClose: () => {
-                this.load(this.props.threadId, ["followers", "suggestedRecipients"]);
-                if (this.props.hasParentReloadOnFollowersUpdate) {
-                    this.reloadParentView();
-                }
-            },
-        });
-    }
-
-    onClickDetails(ev, follower) {
-        this.messaging.openDocument({ id: follower.partner.id, model: "res.partner" });
-        document.body.click(); // hack to close dropdown
-    }
-
-    /**
-     * @param {MouseEvent} ev
-     * @param {import("@mail/core/common/follower_model").Follower} follower
-     */
-    async onClickEdit(ev, follower) {
-        this.env.services.dialog.add(FollowerSubtypeDialog, {
-            follower,
-            onFollowerChanged: () => this.onFollowerChanged(),
-        });
-        document.body.click(); // hack to close dropdown
-    }
-
     async _follow(threadModel, threadId) {
         await this.orm.call(threadModel, "message_subscribe", [[threadId]], {
             partner_ids: [this.store.self.id],
@@ -302,22 +263,13 @@ export class Chatter extends Component {
         }
     }
 
-    /**
-     * @param {MouseEvent} ev
-     * @param {import("@mail/core/common/follower_model").Follower} follower
-     */
-    async onClickRemove(ev, follower) {
-        await this.threadService.removeFollower(follower);
-        this.onFollowerChanged();
-        document.body.click(); // hack to close dropdown
-    }
-
     async onClickUnfollow() {
         await this.threadService.removeFollower(this.state.thread.followerOfSelf);
         this.onFollowerChanged();
     }
 
     onFollowerChanged() {
+        document.body.click(); // hack to close dropdown
         this.reloadParentView();
         this.load(this.props.threadId, ["followers", "suggestedRecipients"]);
     }
@@ -330,6 +282,13 @@ export class Chatter extends Component {
         this.state.jumpThreadPresent++;
         // Load new messages to fetch potential new messages from other users (useful due to lack of auto-sync in chatter).
         this.load(this.props.threadId, ["followers", "messages", "suggestedRecipients"]);
+    }
+
+    onAddFollowers() {
+        this.load(this.state.thread.id, ["followers", "suggestedRecipients"]);
+        if (this.props.hasParentReloadOnFollowersUpdate) {
+            this.reloadParentView();
+        }
     }
 
     async reloadParentView() {
@@ -345,10 +304,10 @@ export class Chatter extends Component {
 
     toggleComposer(mode = false) {
         const toggle = () => {
-            if (this.state.thread.composer.type === mode) {
-                this.state.thread.composer.type = false;
+            if (this.state.composerType === mode) {
+                this.state.composerType = false;
             } else {
-                this.state.thread.composer.type = mode;
+                this.state.composerType = mode;
             }
         };
         if (this.props.threadId) {

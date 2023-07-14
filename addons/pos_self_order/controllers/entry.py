@@ -31,22 +31,29 @@ class PosQRMenuController(http.Controller):
         auth="public", website=True, sitemap=True,
     )
     def pos_self_order_start(self, config_id=None, access_token=None, table_identifier=None):
-        if config_id.isnumeric():
+        self_order_mode = 'qr_code'
+        table_infos = False
+        pos_config_sudo = False
+        pos_config_access_token = False
+
+        if config_id and config_id.isnumeric() and access_token:
             pos_config_sudo = request.env["pos.config"].sudo().search([
                 ("id", "=", config_id),
                 ('access_token', '=', access_token)], limit=1)
-
-        self_order_mode = 'qr_code'
-        table_infos = False
-        pos_config_access_token = False
 
         if pos_config_sudo and pos_config_sudo.has_active_session and pos_config_sudo.self_order_table_mode:
             self_order_mode = pos_config_sudo.self_order_pay_after
             pos_config_access_token = pos_config_sudo.access_token
             table_sudo = get_table_sudo(identifier=table_identifier)
             table_infos = table_sudo._get_self_order_data() if table_sudo else False
+        elif config_id and config_id.isnumeric():
+            pos_config_sudo = request.env["pos.config"].sudo().search([
+                ("id", "=", config_id), ("self_order_view_mode", "=", True)], limit=1)
         else:
             pos_config_sudo = get_any_pos_config_sudo()
+
+        if not pos_config_sudo:
+            raise werkzeug.exceptions.NotFound()
 
         return request.render(
             'pos_self_order.index',
