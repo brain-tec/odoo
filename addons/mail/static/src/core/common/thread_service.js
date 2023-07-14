@@ -672,6 +672,26 @@ export class ThreadService {
         }
     }
 
+    /**
+     * @param {[number]} partnerIds
+     * @param {boolean} inChatWindow
+     */
+    async startChat(partnerIds, inChatWindow) {
+        const partners_to = [...new Set([this.store.self.id, ...partnerIds])];
+        if (partners_to.length === 1) {
+            const chat = await this.joinChat(partners_to[0]);
+            this.open(chat, inChatWindow);
+        } else if (partners_to.length === 2) {
+            const correspondentId = partners_to.find(
+                (partnerId) => partnerId !== this.store.self.id
+            );
+            const chat = await this.joinChat(correspondentId);
+            this.open(chat, inChatWindow);
+        } else {
+            await this.createGroupChat({ partners_to });
+        }
+    }
+
     async createGroupChat({ default_display_mode, partners_to }) {
         const data = await this.orm.call("discuss.channel", "create_group", [], {
             default_display_mode,
@@ -1006,6 +1026,7 @@ export class ThreadService {
             post_data: {
                 body: await prettifyMessageContent(body, validMentions),
                 attachment_ids: attachments.map(({ id }) => id),
+                attachment_tokens: attachments.map((attachment) => attachment.accessToken),
                 canned_response_ids: cannedResponseIds,
                 message_type: "comment",
                 partner_ids,

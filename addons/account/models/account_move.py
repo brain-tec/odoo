@@ -64,7 +64,7 @@ class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ['portal.mixin', 'mail.thread.main.attachment', 'mail.activity.mixin', 'sequence.mixin']
     _description = "Journal Entry"
-    _order = 'date desc, name desc, id desc'
+    _order = 'date desc, name desc, invoice_date desc, id desc'
     _mail_post_access = 'read'
     _check_company_auto = True
     _sequence_index = "journal_id"
@@ -521,7 +521,8 @@ class AccountMove(models.Model):
         comodel_name='res.users',
         copy=False,
         tracking=True,
-        default=lambda self: self.env.user,
+        compute='_compute_invoice_default_sale_person',
+        store=True,
     )
     # Technical field used to fit the generic behavior in mail templates.
     user_id = fields.Many2one(string='User', related='invoice_user_id')
@@ -627,6 +628,16 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('move_type')
+    def _compute_invoice_default_sale_person(self):
+        # We want to modify the sale person only when we don't have one and if the move type corresponds to this condition
+        # If the move doesn't correspond, we remove the sale person
+        for move in self:
+            if move.is_sale_document(include_receipts=True):
+                move.invoice_user_id = move.invoice_user_id or self.env.user
+            else:
+                move.invoice_user_id = False
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
@@ -1496,12 +1507,12 @@ class AccountMove(models.Model):
 
     @api.depends('ref', 'move_type', 'partner_id', 'invoice_date')
     def _compute_duplicated_ref_ids(self):
-        move_to_duplicate_move = self._fetch_duplicate_supplier_reference()
+        move_to_duplicate_move = self._fetch_duplicate_reference()
         for move in self:
             move.duplicated_ref_ids = move_to_duplicate_move.get(move, self.env['account.move'])
 
-    def _fetch_duplicate_supplier_reference(self, only_posted=False):
-        moves = self.filtered(lambda m: m.is_purchase_document() and m.ref)
+    def _fetch_duplicate_reference(self, only_posted=False):
+        moves = self.filtered(lambda m: m.ref and not m.is_entry())
         if not moves:
             return {}
 
@@ -1879,7 +1890,7 @@ class AccountMove(models.Model):
     @api.constrains('ref', 'move_type', 'partner_id', 'journal_id', 'invoice_date', 'state')
     def _check_duplicate_supplier_reference(self):
         """ Assert the move which is about to be posted isn't a duplicated move from another posted entry"""
-        move_to_duplicate_moves = self.filtered(lambda m: m.state == 'posted')._fetch_duplicate_supplier_reference(only_posted=True)
+        move_to_duplicate_moves = self.filtered(lambda m: m.state == 'posted' and not m.is_sale_document(include_receipts=True))._fetch_duplicate_reference(only_posted=True)
         if any(duplicate_move for duplicate_move in move_to_duplicate_moves.values()):
             duplicate_move_ids = list(set(
                 move_id
@@ -3758,7 +3769,7 @@ class AccountMove(models.Model):
             'views': [(self.env.ref('account.view_move_tree').id, 'tree'), (False, 'form')],
         }
 
-    def open_duplicated_ref_bill_view(self):
+    def open_duplicated_ref_move_view(self):
         moves = self + self.duplicated_ref_ids
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_line_form")
         action['domain'] = [('id', 'in', moves.ids)]
