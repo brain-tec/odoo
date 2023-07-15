@@ -52,7 +52,7 @@ class StockMove(models.Model):
                 layers = layers.filtered(lambda l: float_compare(l.value, 0, precision_rounding=l.product_id.uom_id.rounding) <= 0)
             layers |= layers.stock_valuation_layer_ids
             quantity = sum(layers.mapped("quantity"))
-            return layers.currency_id.round(sum(layers.mapped("value")) / quantity) if not float_is_zero(quantity, precision_rounding=layers.uom_id.rounding) else 0
+            return sum(layers.mapped("value")) / quantity if not float_is_zero(quantity, precision_rounding=layers.uom_id.rounding) else 0
         return price_unit if not float_is_zero(price_unit, precision) or self._should_force_price_unit() else self.product_id.standard_price
 
     @api.model
@@ -413,6 +413,7 @@ class StockMove(models.Model):
         if self.state in ['cancel', 'draft']:
             return False
 
+        amount, unit_amount = 0, 0
         if self.state != 'done':
             unit_amount = self.product_uom._compute_quantity(
                 self.quantity_done, self.product_id.uom_id)
@@ -430,6 +431,9 @@ class StockMove(models.Model):
             amount = sum(self.stock_valuation_layer_ids.mapped('value'))
             unit_amount = - sum(self.stock_valuation_layer_ids.mapped('quantity'))
         if self.analytic_account_line_id:
+            if amount == 0 and unit_amount == 0:
+                self.analytic_account_line_id.unlink()
+                return False
             self.analytic_account_line_id.unit_amount = unit_amount
             self.analytic_account_line_id.amount = amount
             return False
