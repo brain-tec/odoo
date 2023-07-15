@@ -107,6 +107,9 @@
                     <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
                         domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                 </filter>
+                <filter name="unassigned" position="after">
+                    <filter string="Private Tasks" name="private_tasks" domain="[('project_id', '=', False)]" invisible="context.get('default_project_id')"/>
+                </filter>
             </field>
         </record>
 
