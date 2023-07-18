@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Messaging, messagingService } from "@mail/core/common/messaging_service";
-import { createLocalId } from "@mail/utils/common/misc";
 
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
@@ -12,6 +11,7 @@ patch(Messaging.prototype, "mail/core/web", {
         this._super(env, services, initialThreadLocalId);
         /** @type {import("@mail/core/common/chat_window_service").ChatWindow} */
         this.chatWindowService = services["mail.chat_window"];
+        this.notificationService = services.notification;
         this.ui = services["ui"];
         this.bus.subscribe("res.users/connection", async ({ partnerId, username }) => {
             // If the current user invited a new user, and the new user is
@@ -42,20 +42,8 @@ patch(Messaging.prototype, "mail/core/web", {
         }
         this._super(data);
     },
-    async _handleNotificationNewMessage(notif) {
-        await this._super(notif);
-        const channel = this.store.threads[createLocalId("discuss.channel", notif.payload.id)];
-        const message = this.store.messages[notif.payload.message.id];
-        if (
-            !this.ui.isSmall &&
-            channel.correspondent !== this.store.odoobot &&
-            !message.isSelfAuthored
-        ) {
-            this.chatWindowService.insert({ thread: channel });
-        }
-    },
 });
 
 patch(messagingService, "mail/core/web", {
-    dependencies: [...messagingService.dependencies, "mail.chat_window", "ui"],
+    dependencies: [...messagingService.dependencies, "mail.chat_window", "notification", "ui"],
 });

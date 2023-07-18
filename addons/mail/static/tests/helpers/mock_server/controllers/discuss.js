@@ -77,7 +77,7 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
         if (route === "/mail/link_preview") {
             return this._mockRouteMailLinkPreview(args.message_id, args.clear);
         }
-        if (route == "/mail/link_preview/delete") {
+        if (route === "/mail/link_preview/delete") {
             const [linkPreview] = this.pyEnv["mail.link.preview"].searchRead([
                 ["id", "=", args.link_preview_id],
             ]);
@@ -134,6 +134,9 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
                 },
             });
             return this._mockMailMessageMessageFormat([args.message_id])[0];
+        }
+        if (route === "/mail/partner/from_email") {
+            return this._mockRouteMailPartnerFromEmail(args.emails);
         }
         if (route === "/mail/read_subscription_data") {
             const follower_id = args.follower_id;
@@ -362,6 +365,30 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
         return this._mockMailMessageMessageFormat(messages.map((message) => message.id));
     },
     /**
+     * Simulates the `/mail/partner/from_email` route.
+     *
+     * @private
+     * @param {string[]} emails
+     * @returns {Object[]} list of partner data
+     */
+    _mockRouteMailPartnerFromEmail(emails) {
+        const partners = emails.map(
+            (email) => this.pyEnv["res.partner"].search([["email", "=", email]])[0]
+        );
+        for (const index in partners) {
+            if (!partners[index]) {
+                partners[index] = this.pyEnv["res.partner"].create({
+                    email: emails[index],
+                    name: emails[index],
+                });
+            }
+        }
+        return partners.map((partner_id) => {
+            const partner = this.getRecords("res.partner", [["id", "=", partner_id]])[0];
+            return { id: partner_id, name: partner.name, email: partner.email };
+        });
+    },
+    /**
      * Simulates the `/mail/read_subscription_data` route.
      *
      * @private
@@ -516,18 +543,18 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
             }
         }
         if (request_list.includes("followers")) {
-            const followers = this.pyEnv["mail.followers"].searchRead([
-                ["id", "in", thread.message_follower_ids || []],
-            ]);
-            // search read returns many2one relations as an array [id, display_name].
-            // But the original route does not. Thus, we need to change it now.
-            followers.forEach((follower) => {
-                follower.partner_id = follower.partner_id[0];
-                follower.partner = this._mockResPartnerMailPartnerFormat([follower.partner_id]).get(
-                    follower.partner_id
-                );
-            });
-            res["followers"] = followers;
+            const domain = [
+                ["res_id", "=", thread.id],
+                ["res_model", "=", thread_model],
+            ];
+            res["followersCount"] = (thread.message_follower_ids || []).length;
+            const selfFollower = this.pyEnv["mail.followers"].searchRead(
+                domain.concat([["partner_id", "=", this.pyEnv.currentPartnerId]])
+            )[0];
+            res["selfFollower"] = selfFollower
+                ? this._mockMailFollowers_FormatForChatter(selfFollower.id)[0]
+                : false;
+            res["followers"] = this._mockMailThreadMessageGetFollowers(thread_model, [thread_id]);
         }
         if (request_list.includes("suggestedRecipients")) {
             res["suggestedRecipients"] = this._mockMailThread_MessageGetSuggestedRecipients(

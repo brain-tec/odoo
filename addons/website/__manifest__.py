@@ -169,7 +169,6 @@
             'website/static/src/scss/color_palettes.scss',
             'website/static/src/scss/view_hierarchy.scss',
             'website/static/src/scss/website.backend.scss',
-            'website/static/src/xml/website.backend.xml',
             'website/static/src/scss/website_visitor_views.scss',
             'website/static/src/js/backend/**/*',
             'website/static/src/client_actions/*/*',
@@ -198,7 +197,6 @@
             'website/static/src/js/tours/tour_utils.js',
         ],
         'web.qunit_suite_tests': [
-            'website/static/tests/dashboard_tests.js',
             'website/static/tests/redirect_field_tests.js',
         ],
         'web.tests_assets': [

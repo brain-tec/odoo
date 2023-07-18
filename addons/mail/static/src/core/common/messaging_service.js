@@ -4,14 +4,12 @@ import { CannedResponse } from "@mail/core/common/canned_response_model";
 import { LinkPreview } from "@mail/core/common/link_preview_model";
 import { removeFromArray, removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 import { cleanTerm } from "@mail/utils/common/format";
-import { createLocalId } from "@mail/utils/common/misc";
 
 import { markup, reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Deferred } from "@web/core/utils/concurrency";
-import { sprintf } from "@web/core/utils/strings";
 
 /**
  * @typedef {Messaging} Messaging
@@ -27,11 +25,8 @@ export class Messaging {
         this.store = services["mail.store"];
         this.rpc = services.rpc;
         this.orm = services.orm;
-        /** @type {import("@mail/core/common/channel_member_service").ChannelMemberService} */
-        this.channelMemberService = services["discuss.channel.member"];
         /** @type {import("@mail/core/common/attachment_service").AttachmentService} */
         this.attachmentService = services["mail.attachment"];
-        this.notificationService = services.notification;
         /** @type {import("@mail/core/common/user_settings_service").UserSettings} */
         this.userSettingsService = services["mail.user_settings"];
         /** @type {import("@mail/core/common/thread_service").ThreadService} */
@@ -40,11 +35,8 @@ export class Messaging {
         this.messageService = services["mail.message"];
         /** @type {import("@mail/core/common/persona_service").PersonaService} */
         this.personaService = services["mail.persona"];
-        /** @type {import("@mail/core/common/out_of_focus_service").OutOfFocusService} */
-        this.outOfFocusService = services["mail.out_of_focus"];
         this.router = services.router;
         this.bus = services.bus_service;
-        this.presence = services.presence;
         this.isReady = new Deferred();
         this.imStatusService = services.im_status;
         const user = services.user;
@@ -158,14 +150,6 @@ export class Messaging {
     // -------------------------------------------------------------------------
 
     handleNotification(notifications) {
-        const channelsLeft = new Set(
-            notifications.reduce((channelIds, notification) => {
-                if (notification.type === "discuss.channel/leave") {
-                    channelIds.push(notification.payload.id);
-                }
-                return channelIds;
-            }, [])
-        );
         for (const notif of notifications) {
             switch (notif.type) {
                 case "mail.activity/updated":
@@ -176,70 +160,9 @@ export class Messaging {
                         this.store.activityCounter--;
                     }
                     break;
-                case "discuss.channel/new_message":
-                    if (channelsLeft.has(notif.payload.id)) {
-                        // Do not handle new message notification if the channel
-                        // was just left. This issue occurs because the
-                        // "discuss.channel/leave" and the
-                        // "discuss.channel/new_message" notifications come from
-                        // the bus as a batch.
-                        break;
-                    }
-                    this._handleNotificationNewMessage(notif);
-                    break;
-                case "discuss.channel/leave":
-                    {
-                        const thread = this.threadService.insert({
-                            ...notif.payload,
-                            model: "discuss.channel",
-                        });
-                        this.threadService.remove(thread);
-                        if (thread.localId === this.store.discuss.threadLocalId) {
-                            this.store.discuss.threadLocalId = undefined;
-                        }
-                        this.notificationService.add(
-                            sprintf(_t("You unsubscribed from %s."), thread.displayName),
-                            { type: "info" }
-                        );
-                    }
-                    break;
                 case "mail.record/insert":
                     this._handleNotificationRecordInsert(notif);
                     break;
-                case "discuss.channel/joined": {
-                    const { channel, invited_by_user_id: invitedByUserId } = notif.payload;
-                    const thread = this.threadService.insert({
-                        ...channel,
-                        model: "discuss.channel",
-                        channel: channel.channel,
-                        type: channel.channel.channel_type,
-                    });
-                    if (invitedByUserId && invitedByUserId !== this.store.user?.user?.id) {
-                        this.notificationService.add(
-                            sprintf(_t("You have been invited to #%s"), thread.displayName),
-                            { type: "info" }
-                        );
-                    }
-                    break;
-                }
-                case "discuss.channel/legacy_insert":
-                    this.threadService.insert({
-                        id: notif.payload.channel.id,
-                        model: "discuss.channel",
-                        type: notif.payload.channel.channel_type,
-                        ...notif.payload,
-                    });
-                    break;
-                case "discuss.channel/transient_message": {
-                    const channel =
-                        this.store.threads[createLocalId("discuss.channel", notif.payload.res_id)];
-                    const message = this.messageService.createTransient(
-                        Object.assign(notif.payload, { body: markup(notif.payload.body) })
-                    );
-                    channel.messages.push(message);
-                    channel.transientMessages.push(message);
-                    break;
-                }
                 case "mail.link.preview/delete":
                     {
                         const { id, message_id } = notif.payload;
@@ -350,56 +273,6 @@ export class Messaging {
                     }
                     break;
                 }
-                case "discuss.channel.member/seen": {
-                    const { channel_id, last_message_id, partner_id } = notif.payload;
-                    const channel =
-                        this.store.threads[createLocalId("discuss.channel", channel_id)];
-                    if (!channel) {
-                        // for example seen from another browser, the current one has no
-                        // knowledge of the channel
-                        continue;
-                    }
-                    if (partner_id && partner_id === this.store.user?.id) {
-                        this.threadService.updateSeen(channel, last_message_id);
-                    }
-                    const seenInfo = channel.seenInfos.find(
-                        (seenInfo) => seenInfo.partner.id === partner_id
-                    );
-                    if (seenInfo) {
-                        seenInfo.lastSeenMessage = { id: last_message_id };
-                    }
-                    break;
-                }
-
-                case "discuss.channel.member/fetched": {
-                    const { channel_id, last_message_id, partner_id } = notif.payload;
-                    const channel =
-                        this.store.threads[createLocalId("discuss.channel", channel_id)];
-                    if (channel) {
-                        const seenInfo = channel.seenInfos.find(
-                            (seenInfo) => seenInfo.partner.id === partner_id
-                        );
-                        if (seenInfo) {
-                            seenInfo.lastFetchedMessage = { id: last_message_id };
-                        }
-                    }
-                    break;
-                }
-                case "discuss.channel/unpin": {
-                    const thread =
-                        this.store.threads[createLocalId("discuss.channel", notif.payload.id)];
-                    if (thread) {
-                        thread.is_pinned = false;
-                        this.notificationService.add(
-                            sprintf(
-                                _t("You unpinned your conversation with %s"),
-                                thread.displayName
-                            ),
-                            { type: "info" }
-                        );
-                    }
-                    break;
-                }
                 case "mail.message/notification_update":
                     {
                         notif.payload.elements.map((message) => {
@@ -413,9 +286,6 @@ export class Messaging {
                             });
                         });
                     }
-                    break;
-                case "discuss.channel/last_interest_dt_changed":
-                    this._handleNotificationLastInterestDtChanged(notif);
                     break;
                 case "ir.attachment/delete":
                     {
@@ -432,98 +302,6 @@ export class Messaging {
                     }
                     break;
             }
-        }
-    }
-
-    _handleNotificationLastInterestDtChanged(notif) {
-        const { id, last_interest_dt } = notif.payload;
-        const channel = this.store.threads[createLocalId("discuss.channel", id)];
-        if (channel) {
-            this.threadService.update(channel, { last_interest_dt });
-        }
-        if (["chat", "group"].includes(channel?.type)) {
-            this.threadService.sortChannels();
-        }
-    }
-
-    async _handleNotificationNewMessage(notif) {
-        const { id, message: messageData } = notif.payload;
-        let channel = this.store.threads[createLocalId("discuss.channel", id)];
-        if (!channel || !channel.type) {
-            const [channelData] = await this.rpc("/discuss/channel/info", { channel_id: id });
-            channel = this.threadService.insert({
-                model: "discuss.channel",
-                type: channelData.channel.channel_type,
-                ...channelData,
-            });
-        }
-        if (!channel.is_pinned) {
-            this.threadService.pin(channel);
-        }
-
-        removeFromArrayWithPredicate(channel.messages, ({ id }) => id === messageData.temporary_id);
-        delete this.store.messages[messageData.temporary_id];
-        messageData.temporary_id = null;
-        if ("parentMessage" in messageData && messageData.parentMessage.body) {
-            messageData.parentMessage.body = markup(messageData.parentMessage.body);
-        }
-        const data = Object.assign(messageData, {
-            body: markup(messageData.body),
-        });
-        const message = this.messageService.insert({
-            ...data,
-            res_id: channel.id,
-            model: channel.model,
-        });
-        if (!channel.messages.includes(message)) {
-            if (!channel.loadNewer) {
-                channel.messages.push(message);
-            } else if (channel.state === "loading") {
-                channel.pendingNewMessages.push(message);
-            }
-            if (message.isSelfAuthored) {
-                channel.seen_message_id = message.id;
-            } else {
-                if (notif.id > this.store.initBusId) {
-                    channel.message_unread_counter++;
-                }
-                if (message.isNeedaction) {
-                    const inbox = this.store.discuss.inbox;
-                    if (!inbox.messages.includes(message)) {
-                        inbox.messages.push(message);
-                        if (notif.id > this.store.initBusId) {
-                            inbox.counter++;
-                        }
-                    }
-                    if (!channel.needactionMessages.includes(message)) {
-                        channel.needactionMessages.push(message);
-                        if (notif.id > this.store.initBusId) {
-                            channel.message_needaction_counter++;
-                        }
-                    }
-                }
-            }
-        }
-        if (channel.chatPartnerId !== this.store.odoobot?.id) {
-            if (!this.presence.isOdooFocused() && channel.isChatChannel) {
-                this.outOfFocusService.notify(message, channel);
-            }
-
-            if (channel.type !== "channel" && !this.store.guest) {
-                // disabled on non-channel threads and
-                // on "channel" channels for performance reasons
-                this.threadService.markAsFetched(channel);
-            }
-        }
-        if (
-            !channel.loadNewer &&
-            !message.isSelfAuthored &&
-            channel.composer.isFocused &&
-            channel.newestPersistentMessage &&
-            !this.store.guest &&
-            channel.newestPersistentMessage === channel.newestMessage
-        ) {
-            this.threadService.markAsRead(channel);
         }
     }
 
@@ -652,21 +430,17 @@ export class Messaging {
 export const messagingService = {
     dependencies: [
         "mail.store",
-        "discuss.channel.member",
         "rpc",
         "orm",
         "user",
         "router",
         "bus_service",
         "im_status",
-        "notification",
-        "presence",
         "mail.attachment",
         "mail.user_settings",
         "mail.thread",
         "mail.message",
         "mail.persona",
-        "mail.out_of_focus",
     ],
     start(env, services) {
         const messaging = new Messaging(env, services);
