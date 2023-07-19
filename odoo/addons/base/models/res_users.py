@@ -653,10 +653,10 @@ class Users(models.Model):
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
-        # Registry._clear_cache
+        # Registry.clear_cache
         invalidation_fields = self._get_invalidation_fields()
         if (invalidation_fields & values.keys()) or any(key.startswith('context_') for key in values):
-            self.clear_caches()
+            self.env.registry.clear_cache()
 
         return res
 
@@ -666,7 +666,7 @@ class Users(models.Model):
         default_user_template = self.env.ref('base.default_user', False)
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
-        self.clear_caches()
+        self.env.registry.clear_cache()
         if (portal_user_template and portal_user_template in self) or (default_user_template and default_user_template in self):
             raise UserError(_('Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities.'))
 
@@ -848,7 +848,7 @@ class Users(models.Model):
                                 FROM res_users
                                 WHERE id=%%s""" % (session_fields), (self.id,))
         if self.env.cr.rowcount != 1:
-            self.clear_caches()
+            self.env.registry.clear_cache()
             return False
         data_fields = self.env.cr.fetchone()
         # generate hmac key
@@ -962,6 +962,18 @@ class Users(models.Model):
             'target': 'new',
             'res_model': 'change.password.own',
             'view_mode': 'form',
+        }
+
+    def action_revoke_all_devices(self):
+        ctx = dict(self.env.context, dialog_size='medium')
+        return {
+            'name': _('Log out from all devices?'),
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'res_model': 'res.users.identitycheck',
+            'view_mode': 'form',
+            'view_id': self.env.ref('base.res_users_identitycheck_view_form_revokedevices').id,
+            'context': ctx,
         }
 
     @api.model
@@ -1357,7 +1369,7 @@ class GroupsView(models.Model):
         groups = super().create(vals_list)
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return groups
 
     def write(self, values):
@@ -1370,14 +1382,14 @@ class GroupsView(models.Model):
         if view_values0 != view_values1:
             self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return res
 
     def unlink(self):
         res = super(GroupsView, self).unlink()
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return res
 
     def _get_hidden_extra_categories(self):
@@ -1446,6 +1458,9 @@ class GroupsView(models.Model):
                         xml_by_category[category_name].append(E.newline())
                     xml_by_category[category_name].append(E.field(name=field_name, **attrs))
                     xml_by_category[category_name].append(E.newline())
+                    # add duplicate invisible field so default values are saved on create
+                    if attrs.get('groups') == 'base.group_no_one':
+                        xml0.append(E.field(name=field_name, **dict(attrs, invisible="1", groups='!base.group_no_one')))
 
                 else:
                     # application separator with boolean fields
@@ -1872,7 +1887,8 @@ class UsersView(models.Model):
         return res
 
 class CheckIdentity(models.TransientModel):
-    """ Wizard used to re-check the user's credentials (password)
+    """ Wizard used to re-check the user's credentials (password) and eventually
+    revoke access to his account to every device he has an active session on.
 
     Might be useful before the more security-sensitive operations, users might be
     leaving their computer unlocked & unattended. Re-checking credentials mitigates
@@ -1885,13 +1901,15 @@ class CheckIdentity(models.TransientModel):
     request = fields.Char(readonly=True, groups=fields.NO_ACCESS)
     password = fields.Char()
 
-    def run_check(self):
-        assert request, "This method can only be accessed over HTTP"
+    def _check_identity(self):
         try:
             self.create_uid._check_credentials(self.password, {'interactive': True})
         except AccessDenied:
             raise UserError(_("Incorrect Password, try again or click on Forgot Password to reset your password."))
 
+    def run_check(self):
+        assert request, "This method can only be accessed over HTTP"
+        self._check_identity()
         self.password = False
 
         request.session['identity-check-last'] = time.time()
@@ -1899,6 +1917,12 @@ class CheckIdentity(models.TransientModel):
         method = getattr(self.env(context=ctx)[model].browse(ids), method)
         assert getattr(method, '__has_check_identity', False)
         return method()
+
+    def revoke_all_devices(self):
+        self._check_identity()
+        self.env.user._change_password(self.password)
+        self.sudo().unlink()
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
 
 #----------------------------------------------------------
 # change password wizard
@@ -1908,6 +1932,7 @@ class ChangePasswordWizard(models.TransientModel):
     """ A wizard to manage the change of users' passwords. """
     _name = "change.password.wizard"
     _description = "Change Password Wizard"
+    _transient_max_hours = 0.2
 
     def _default_user_ids(self):
         user_ids = self._context.get('active_model') == 'res.users' and self._context.get('active_ids') or []

@@ -3,10 +3,11 @@
 import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 import { createLocalId } from "@mail/utils/common/misc";
 
-import { markup, reactive } from "@odoo/owl";
+import { markup, reactive, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 
 export class DiscussCoreCommon {
@@ -14,6 +15,7 @@ export class DiscussCoreCommon {
         Object.assign(this, {
             busService: services.bus_service,
             env,
+            orm: services.orm,
             presence: services.presence,
             rpc: services.rpc,
         });
@@ -31,7 +33,11 @@ export class DiscussCoreCommon {
     }
 
     setup() {
-        this.messagingService.isReady.then(() => {
+        this.messagingService.isReady.then((data) => {
+            for (const channelData of data.channels) {
+                this.createChannelThread(channelData);
+            }
+            this.threadService.sortChannels();
             this.busService.subscribe("discuss.channel/joined", (payload) => {
                 const { channel, invited_by_user_id: invitedByUserId } = payload;
                 const thread = this.threadService.insert({
@@ -148,6 +154,54 @@ export class DiscussCoreCommon {
         });
     }
 
+    /**
+     * todo: merge this with ThreadService.insert() (?)
+     *
+     * @returns {Thread}
+     */
+    createChannelThread(serverData) {
+        const thread = this.threadService.insert({
+            ...serverData,
+            model: "discuss.channel",
+            type: serverData.channel.channel_type,
+            isAdmin:
+                serverData.channel.channel_type !== "group" &&
+                serverData.create_uid === this.store.user?.user?.id,
+        });
+        return thread;
+    }
+
+    async createGroupChat({ default_display_mode, partners_to }) {
+        const data = await this.orm.call("discuss.channel", "create_group", [], {
+            default_display_mode,
+            partners_to,
+        });
+        const channel = this.createChannelThread(data);
+        this.threadService.sortChannels();
+        this.threadService.open(channel);
+        return channel;
+    }
+
+    /**
+     * @param {[number]} partnerIds
+     * @param {boolean} inChatWindow
+     */
+    async startChat(partnerIds, inChatWindow) {
+        const partners_to = [...new Set([this.store.self.id, ...partnerIds])];
+        if (partners_to.length === 1) {
+            const chat = await this.threadService.joinChat(partners_to[0]);
+            this.threadService.open(chat, inChatWindow);
+        } else if (partners_to.length === 2) {
+            const correspondentId = partners_to.find(
+                (partnerId) => partnerId !== this.store.self.id
+            );
+            const chat = await this.threadService.joinChat(correspondentId);
+            this.threadService.open(chat, inChatWindow);
+        } else {
+            await this.createGroupChat({ partners_to });
+        }
+    }
+
     async _handleNotificationNewMessage(notif) {
         const { id, message: messageData } = notif.payload;
         let channel = this.store.threads[createLocalId("discuss.channel", id)];
@@ -239,6 +293,7 @@ export const discussCoreCommon = {
         "mail.store",
         "mail.thread",
         "notification",
+        "orm",
         "presence",
         "rpc",
     ],
@@ -248,5 +303,12 @@ export const discussCoreCommon = {
         return discussCoreCommon;
     },
 };
+
+/**
+ * @returns {DiscussCoreCommon}
+ */
+export function useDiscussCoreCommon() {
+    return useState(useService("discuss.core.common"));
+}
 
 registry.category("services").add("discuss.core.common", discussCoreCommon);

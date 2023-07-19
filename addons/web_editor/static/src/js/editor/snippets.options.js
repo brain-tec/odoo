@@ -3585,9 +3585,10 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @param {string} name - an identifier for a type of update
      * @param {*} data
-     * @returns {Promise}
      */
     notify: function (name, data) {
+        // We prefer to avoid refactoring this notify mechanism to make it
+        // asynchronous because the upcoming conversion to owl might remove it.
         if (name === 'target') {
             this.setTarget(data);
         }
@@ -8309,15 +8310,20 @@ registry.GalleryHandler = SnippetOptionWidget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Handles reodering of items.
+     * Handles reordering of items.
      *
      * @override
      */
     notify(name, data) {
         this._super(...arguments);
-        if (name === "reoder_items") {
+        if (name === "reorder_items") {
             const itemsEls = this._getItemsGallery();
             const oldPosition = itemsEls.indexOf(data.itemEl);
+            if (oldPosition === 0 && data.position === "prev") {
+                data.position = "last";
+            } else if (oldPosition === itemsEls.length - 1 && data.position === "next") {
+                data.position = "first";
+            }
             itemsEls.splice(oldPosition, 1);
             switch (data.position) {
                 case "first":
@@ -8387,7 +8393,7 @@ registry.CarouselHandler = registry.GalleryHandler.extend({
         this.$target[0].querySelector(`.carousel-indicators li[data-bs-slide-to="${position}"]`)
                     .classList.add("active");
         this.trigger_up("activate_snippet", {
-            $snippet: $(this.$target[0].querySelector(".carousel-item.active")),
+            $snippet: $(this.$target[0].querySelector(".carousel-item.active img")),
             ifInactiveOptions: true,
         });
         carouselEl.classList.add("slide");

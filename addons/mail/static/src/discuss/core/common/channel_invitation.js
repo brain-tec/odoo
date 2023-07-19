@@ -1,7 +1,9 @@
 /* @odoo-module */
 
 import { ImStatus } from "@mail/core/common/im_status";
+import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
+import { useDiscussCoreCommon } from "@mail/discuss/core/common/discuss_core_common_service";
 
 import { Component, onMounted, onWillStart, useRef, useState } from "@odoo/owl";
 
@@ -9,12 +11,13 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
 export class ChannelInvitation extends Component {
-    static components = { ImStatus };
+    static components = { ImStatus, ActionPanel };
     static defaultProps = { hasSizeConstraints: false };
     static props = ["hasSizeConstraints?", "thread", "close", "className?"];
     static template = "discuss.ChannelInvitation";
 
     setup() {
+        this.discussCoreCommonService = useDiscussCoreCommon();
         this.messaging = useMessaging();
         this.store = useStore();
         this.notification = useService("notification");
@@ -99,7 +102,7 @@ export class ChannelInvitation extends Component {
 
     async onClickInvite() {
         if (this.props.thread.type === "chat") {
-            await this.threadService.startChat([
+            await this.discussCoreCommonService.startChat([
                 this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ]);
@@ -139,5 +142,9 @@ export class ChannelInvitation extends Component {
             return _t("Create Group Chat");
         }
         return _t("Invite");
+    }
+
+    get title() {
+        return _t("Invite people");
     }
 }
