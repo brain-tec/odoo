@@ -113,21 +113,24 @@ class Property(models.Model):
         # if any of the records we're writing on has a res_id=False *or*
         # we're writing a res_id=False on any record
         default_set = False
-        if self._ids:
-            self.env.cr.execute(
-                'SELECT EXISTS (SELECT 1 FROM ir_property WHERE id in %s AND res_id IS NULL)', [self._ids])
-            default_set = self.env.cr.rowcount == 1 or any(
-                v.get('res_id') is False
-                for v in values
-            )
-        r = super(Property, self).write(self._update_values(values))
+
+        values = self._update_values(values)
+        default_set = (
+            # turning a record value into a fallback value
+            values.get('res_id') is False and any(record.res_id for record in self)
+        ) or any(
+            # changing a fallback value
+            not record.res_id and any(record[fname] != self._fields[fname].convert_to_record(value, self) for fname, value in values.items())
+            for record in self
+        )
+        r = super().write(values)
         if default_set:
             # DLE P44: test `test_27_company_dependent`
             # Easy solution, need to flush write when changing a property.
             # Maybe it would be better to be able to compute all impacted cache value and update those instead
-            # Then clear_caches must be removed as well.
+            # Then clear_cache must be removed as well.
             self.env.flush_all()
-            self.clear_caches()
+            self.env.registry.clear_cache()
         return r
 
     @api.model_create_multi
@@ -138,7 +141,7 @@ class Property(models.Model):
         if created_default:
             # DLE P44: test `test_27_company_dependent`
             self.env.flush_all()
-            self.clear_caches()
+            self.env.registry.clear_cache()
         return r
 
     def unlink(self):
@@ -151,7 +154,7 @@ class Property(models.Model):
             default_deleted = self.env.cr.rowcount == 1
         r = super().unlink()
         if default_deleted:
-            self.clear_caches()
+            self.env.registry.clear_cache()
         return r
 
     def get_by_record(self):

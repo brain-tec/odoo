@@ -61,23 +61,6 @@ export class ThreadService {
     }
 
     /**
-     * todo: merge this with this.insert() (?)
-     *
-     * @returns {Thread}
-     */
-    createChannelThread(serverData) {
-        const thread = this.insert({
-            ...serverData,
-            model: "discuss.channel",
-            type: serverData.channel.channel_type,
-            isAdmin:
-                serverData.channel.channel_type !== "group" &&
-                serverData.create_uid === this.store.user?.user?.id,
-        });
-        return thread;
-    }
-
-    /**
      * @param {import("@mail/core/common/thread_model").Thread} thread
      * @param {number} id
      * @returns {Promise<Thread>}
@@ -447,16 +430,6 @@ export class ThreadService {
         thread.pendingNewMessages = [];
     }
 
-    async createChannel(name) {
-        const data = await this.orm.call("discuss.channel", "channel_create", [
-            name,
-            this.store.internalUserGroupId,
-        ]);
-        const channel = this.createChannelThread(data);
-        this.sortChannels();
-        this.open(channel);
-    }
-
     unpin(thread) {
         if (this.store.discuss.threadLocalId === thread.localId) {
             this.router.replaceState({ active_id: undefined });
@@ -670,37 +643,6 @@ export class ThreadService {
         if (pushState) {
             this.router.pushState({ active_id: activeId });
         }
-    }
-
-    /**
-     * @param {[number]} partnerIds
-     * @param {boolean} inChatWindow
-     */
-    async startChat(partnerIds, inChatWindow) {
-        const partners_to = [...new Set([this.store.self.id, ...partnerIds])];
-        if (partners_to.length === 1) {
-            const chat = await this.joinChat(partners_to[0]);
-            this.open(chat, inChatWindow);
-        } else if (partners_to.length === 2) {
-            const correspondentId = partners_to.find(
-                (partnerId) => partnerId !== this.store.self.id
-            );
-            const chat = await this.joinChat(correspondentId);
-            this.open(chat, inChatWindow);
-        } else {
-            await this.createGroupChat({ partners_to });
-        }
-    }
-
-    async createGroupChat({ default_display_mode, partners_to }) {
-        const data = await this.orm.call("discuss.channel", "create_group", [], {
-            default_display_mode,
-            partners_to,
-        });
-        const channel = this.createChannelThread(data);
-        this.sortChannels();
-        this.open(channel);
-        return channel;
     }
 
     remove(thread) {

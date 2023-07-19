@@ -93,16 +93,10 @@ export class Messaging {
             ...data.odoobot,
             type: "partner",
         });
-        for (const channelData of data.channels) {
-            this.threadService.createChannelThread(channelData);
-        }
-        this.threadService.sortChannels();
         const settings = data.current_user_settings;
         this.userSettingsService.updateFromCommands(settings);
         this.userSettingsService.id = settings.id;
         this.store.companyName = data.companyName;
-        this.store.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
-        this.store.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
         this.store.discuss.inbox.counter = data.needaction_inbox_counter;
         this.store.internalUserGroupId = data.internalUserGroupId;
         this.store.discuss.starred.counter = data.starred_counter;
@@ -114,24 +108,8 @@ export class Messaging {
         });
         this.store.hasLinkPreviewFeature = data.hasLinkPreviewFeature;
         this.store.initBusId = data.initBusId;
-        this.isReady.resolve();
+        this.isReady.resolve(data);
         this.store.isMessagingReady = true;
-    }
-
-    loadFailures() {
-        this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
-            messages.map((messageData) =>
-                this.messageService.insert({
-                    ...messageData,
-                    body: messageData.body ? markup(messageData.body) : messageData.body,
-                    // implicit: failures are sent by the server at
-                    // initialization only if the current partner is
-                    // author of the message
-                    author: this.store.user,
-                })
-            );
-            this.store.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
-        });
     }
 
     updateImStatusRegistration() {

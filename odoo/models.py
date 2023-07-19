@@ -1788,9 +1788,10 @@ class BaseModel(metaclass=MetaModel):
         """ Clear the caches
 
         This clears the caches associated to methods decorated with
-        ``tools.ormcache`` or ``tools.ormcache_multi``.
+        ``tools.ormcache``.
         """
-        cls.pool._clear_cache()
+        warnings.warn("Deprecated model.clear_cache(), use registry.clear_cache() instead", DeprecationWarning)
+        cls.pool.clear_all_cache()
 
     @api.model
     def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
@@ -3354,7 +3355,7 @@ class BaseModel(metaclass=MetaModel):
         The current method is different from `read` because it retrieves its
         values from the cache without doing a query when it is avoidable.
         """
-        data = [(record, {'id': record._origin.id}) for record in self]
+        data = [(record, {'id': record.id}) for record in self]
         use_display_name = (load == '_classic_read')
         for name in fnames:
             field = self._fields[name]
