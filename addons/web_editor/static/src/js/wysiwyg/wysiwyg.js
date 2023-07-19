@@ -143,8 +143,7 @@ const Wysiwyg = Widget.extend({
         let editorCollaborationOptions;
         if (
             options.collaborationChannel &&
-            // Hack: check if mail module is installed.
-            this.getSession()['notification_type']
+            this._hasICEServers()
         ) {
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
             if (this.options.collaborativeTrigger === 'start') {
@@ -976,7 +975,6 @@ const Wysiwyg = Widget.extend({
             });
             const modifiedProms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
                 const isBackground = !el.matches('img');
-                el.classList.remove('o_modified_image_to_save');
                 // Modifying an image always creates a copy of the original, even if
                 // it was modified previously, as the other modified image may be used
                 // elsewhere if the snippet was duplicated or was saved as a custom one.
@@ -990,6 +988,7 @@ const Wysiwyg = Widget.extend({
                         name: (el.dataset.fileName ? el.dataset.fileName : null),
                     },
                 });
+                el.classList.remove('o_modified_image_to_save');
                 if (isBackground) {
                     const parts = weUtils.backgroundImageCssToParts($(el).css('background-image'));
                     parts.url = `url('${newAttachmentSrc}')`;
@@ -1207,10 +1206,14 @@ const Wysiwyg = Widget.extend({
                     !options.link.textContent.trim() && wysiwygUtils.isImg(this.lastElement)) {
                 // If the link contains a media without text, the link is
                 // editable in the media options instead.
-                this.snippetsMenu._mutex.exec(() => {
+                if (!options.noFocusUrl) {
                     // Wait for the editor panel to be fully updated.
-                    core.bus.trigger('activate_image_link_tool');
-                });
+                    this.snippetsMenu._mutex.exec(() => {
+                        // This is needed to focus the URL input when clicking
+                        // on the "Edit link" of the popover.
+                        core.bus.trigger('activate_image_link_tool');
+                    });
+                }
                 return;
             }
             if (options.forceOpen || !this.linkTools) {
@@ -2679,7 +2682,10 @@ const Wysiwyg = Widget.extend({
     _bindOnBlur() {
         this.$editable.on('blur', this._onBlur);
     },
-
+    _hasICEServers() {
+        // Hack: check if mail module is installed.
+        return !!this.getSession()['notification_type'];
+    },
 });
 Wysiwyg.activeCollaborationChannelNames = new Set();
 Wysiwyg.activeWysiwygs = new Set();
