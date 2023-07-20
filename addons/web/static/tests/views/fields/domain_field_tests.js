@@ -497,6 +497,9 @@ QUnit.module("Fields", (hooks) => {
                 if (method === "search_count") {
                     assert.step(JSON.stringify(args[0]));
                 }
+                if (route === "/web/domain/validate") {
+                    return true;
+                }
             },
         });
 
@@ -561,6 +564,9 @@ QUnit.module("Fields", (hooks) => {
                     }
                     if (method === "write") {
                         throw new Error("should not save");
+                    }
+                    if (route === "/web/domain/validate") {
+                        return false;
                     }
                 },
             });
@@ -735,6 +741,9 @@ QUnit.module("Fields", (hooks) => {
                 if (method === "write") {
                     assert.strictEqual(args[1].foo, rawDomain);
                 }
+                if (route === "/web/domain/validate") {
+                    return true;
+                }
             },
         });
 
@@ -905,6 +914,11 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="display_name" widget="domain" options="{'model': 'partner', 'in_dialog': True}"/>
                 </form>`,
+            mockRPC: (route) => {
+                if (route === "/web/domain/validate") {
+                    return true;
+                }
+            },
         });
         assert.containsNone(target, ".o_domain_leaf");
         assert.containsNone(target, ".modal");
@@ -941,5 +955,114 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_domain_debug_input", "[(0, '=', expr)]");
         await click(target, ".modal-footer .btn-primary");
         assert.containsOnce(target, ".modal", "the domain is invalid: the dialog is not closed");
+    });
+
+    QUnit.test(
+        "quick check on save if domain has been edited via the  debug input",
+        async function (assert) {
+            patchWithCleanup(odoo, { debug: true });
+            serverData.models.partner.fields.display_name.default = "[['id', '=', False]]";
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <field name="display_name" widget="domain" options="{'model': 'partner'}"/>
+                </form>`,
+                mockRPC: (route, args) => {
+                    if (route === "/web/domain/validate") {
+                        assert.step(route);
+                        assert.deepEqual(args, {
+                            domain: [["id", "!=", false]],
+                            model: "partner",
+                        });
+                        return true;
+                    }
+                },
+            });
+            assert.strictEqual(
+                target.querySelector(".o_domain_show_selection_button").textContent.trim(),
+                "0 record(s)"
+            );
+            await editInput(target, ".o_domain_debug_input", "[['id', '!=', False]]");
+            await click(target, "button.o_form_button_save");
+            assert.verifySteps(["/web/domain/validate"]);
+            assert.strictEqual(
+                target.querySelector(".o_domain_show_selection_button").textContent.trim(),
+                "6 record(s)"
+            );
+        }
+    );
+    QUnit.test("domain field can be foldable", async function (assert) {
+        serverData.models.partner.records[0].foo = "[]";
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="foo" widget="domain" options="{'model': 'partner_type', 'foldable': true}" />
+                        </group>
+                    </sheet>
+                </form>`,
+        });
+
+        // As the domain is empty, the "Match all records" span should be visible
+        assert.strictEqual(
+            target.querySelector(".o_field_domain span").textContent,
+            "Match all records"
+        );
+
+        // Unfold the domain
+        await click(target, ".o_field_domain > div > div");
+
+        // As the domain is empty, there should be a button to add the first
+        // domain part
+        assert.containsOnce(target, ".o_domain_add_first_node_button");
+
+        // Clicking on the button should add the [["id", "=", "1"]] domain, so
+        // there should be a field selector in the DOM
+        await click(target, ".o_domain_add_first_node_button");
+        assert.containsOnce(target, ".o_model_field_selector");
+
+        // Focusing the field selector input should open the field selector
+        // popover
+        await click(target, ".o_model_field_selector");
+        assert.containsOnce(document.body, ".o_model_field_selector_popover");
+        assert.containsOnce(document.body, ".o_model_field_selector_popover_search input");
+
+        // The popover should contain the list of partner_type fields and so
+        // there should be the "Color index" field
+        assert.strictEqual(
+            document.body.querySelector(".o_model_field_selector_popover_item_name").textContent,
+            "Color index"
+        );
+
+        // Clicking on this field should close the popover, then changing the
+        // associated value should reveal one matched record
+        await click(document.body.querySelector(".o_model_field_selector_popover_item_name"));
+
+        await editInput(target, ".o_domain_leaf_value_input", 2);
+
+        assert.strictEqual(
+            target.querySelector(".o_domain_show_selection_button").textContent.trim().substr(0, 2),
+            "1 ",
+            "changing color value to 2 should reveal only one record"
+        );
+
+        // Saving the form view should show a readonly domain containing the
+        // "color" field
+        await clickSave(target);
+        assert.ok(target.querySelector(".o_field_domain").textContent.includes("Color index"));
+
+        // Fold domain selector
+        await click(target, ".o_field_domain a i");
+
+        assert.containsOnce(target, ".o_field_domain .o_facet_values:contains('Color index = 2')");
     });
 });

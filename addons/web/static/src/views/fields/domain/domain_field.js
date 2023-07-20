@@ -10,6 +10,8 @@ import { registry } from "@web/core/registry";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { standardFieldProps } from "../standard_field_props";
 import { useBus, useService, useOwnedDialogs } from "@web/core/utils/hooks";
+import { toTree } from "@web/core/domain_tree";
+import { useGetDomainTreeDescription } from "@web/core/domain_selector/utils";
 
 export class DomainField extends Component {
     static template = "web.DomainField";
@@ -21,28 +23,40 @@ export class DomainField extends Component {
         context: { type: Object, optional: true },
         editInDialog: { type: Boolean, optional: true },
         resModel: { type: String, optional: true },
+        isFoldable: { type: Boolean, optional: true },
     };
     static defaultProps = {
         editInDialog: false,
+        isFoldable: false,
     };
 
     setup() {
+        this.rpc = useService("rpc");
         this.orm = useService("orm");
+        this.getDomainTreeDescription = useGetDomainTreeDescription();
         this.addDialog = useOwnedDialogs();
 
         this.state = useState({
             isValid: null,
             recordCount: null,
+            folded: this.props.isFoldable,
+            facets: [],
         });
 
         this.isDebugEdited = false;
         onWillStart(() => {
             this.checkProps(); // not awaited
+            if (this.props.isFoldable) {
+                this.loadFacets();
+            }
         });
         onWillUpdateProps((nextProps) => {
             this.isDebugEdited = this.isDebugEdited && this.props.readonly === nextProps.readonly;
             if (!this.isDebugEdited) {
                 this.checkProps(nextProps); // not awaited
+            }
+            if (nextProps.isFoldable) {
+                this.loadFacets(nextProps);
             }
         });
 
@@ -50,8 +64,12 @@ export class DomainField extends Component {
             if (this.isDebugEdited) {
                 const props = this.props;
                 ev.detail.proms.push(
-                    this.checkProps(props).then(() => {
-                        if (!this.state.isValid) {
+                    this.quickValidityCheck(props).then((isValid) => {
+                        if (isValid) {
+                            this.isDebugEdited = false; // will allow the count to be loaded if needed
+                        } else {
+                            this.state.isValid = false;
+                            this.state.recordCount = 0;
                             props.record.setInvalidField(props.name);
                         }
                     })
@@ -91,6 +109,40 @@ export class DomainField extends Component {
             resModel = props.record.data[resModel];
         }
         return resModel;
+    }
+
+    async loadFacets(props = this.props) {
+        const resModel = this.getResModel(props);
+
+        if (!resModel) {
+            this.state.facets = [];
+            this.state.folded = false;
+            return;
+        }
+
+        if (typeof resModel !== "string") {
+            // we don't want to support invalid models
+            throw new Error(`Invalid model: ${resModel}`);
+        }
+
+        let promises;
+        const domain = this.getDomain(props);
+        try {
+            const tree = toTree(domain, { distributeNot: !this.env.debug });
+            const trees = !tree.negate && tree.value === "&" ? tree.children : [tree];
+            promises = trees.map(async (tree) => {
+                const description = await this.getDomainTreeDescription(resModel, tree);
+                return description;
+            });
+        } catch (error) {
+            if (error.data?.name === "builtins.KeyError" && error.data.message === resModel) {
+                // we don't want to support invalid models
+                throw new Error(`Invalid model: ${resModel}`);
+            }
+            this.state.facets = [];
+            this.state.folded = false;
+        }
+        this.state.facets = await Promise.all(promises);
     }
 
     async checkProps(props = this.props) {
@@ -157,9 +209,25 @@ export class DomainField extends Component {
         });
     }
 
+    async quickValidityCheck(props) {
+        const resModel = this.getResModel(props);
+        if (!resModel) {
+            return false;
+        }
+        const domain = this.getEvaluatedDomain(props);
+        if (domain.isInvalid) {
+            return false;
+        }
+        return this.rpc("/web/domain/validate", { model: resModel, domain });
+    }
+
     update(domain, isDebugEdited = false) {
         this.isDebugEdited = isDebugEdited;
         return this.props.record.update({ [this.props.name]: domain });
+    }
+
+    fold() {
+        this.state.folded = true;
     }
 
     updateState(params = {}) {
@@ -190,6 +258,7 @@ export const domainField = {
     extractProps({ options }, dynamicInfo) {
         return {
             editInDialog: options.in_dialog,
+            isFoldable: options.foldable,
             resModel: options.model,
             context: dynamicInfo.context,
         };

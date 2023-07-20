@@ -82,7 +82,7 @@
                         <page name="settings" string="Settings">
                             <group>
                                 <group>
-                                    <field name="analytic_account_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" context="{'default_partner_id': partner_id}" groups="analytic.group_analytic_accounting"/>
+                                    <field name="analytic_account_id" domain="['|', ('company_id', '=?', company_id), ('company_id', '=', False)]" context="{'default_partner_id': partner_id, 'default_company_id': company_id} " groups="analytic.group_analytic_accounting"/>
                                     <field name="privacy_visibility" widget="radio"/>
                                     <span colspan="2" class="text-muted o_row ps-1" attrs="{'invisible':[('access_instruction_message', '=', '')]}">
                                         <i class="fa fa-lightbulb-o"/>&amp;nbsp;<field class="d-inline" name="access_instruction_message" nolabel="1"/>
@@ -338,7 +338,7 @@
                 <xpath expr="//div[@name='alias_def']" position="after">
                     <footer>
                         <button string="Create project" name="action_view_tasks" type="object" class="btn-primary o_open_tasks" data-hotkey="q"/>
-                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x"/>
                     </footer>
                 </xpath>
             </field>
