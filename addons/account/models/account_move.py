@@ -329,7 +329,7 @@ class AccountMove(models.Model):
         comodel_name='res.partner',
         string='Delivery Address',
         compute='_compute_partner_shipping_id', store=True, readonly=False, precompute=True,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        check_company=True,
         help="The delivery address will be used in the computation of the fiscal position.",
     )
     partner_bank_id = fields.Many2one(
@@ -349,7 +349,6 @@ class AccountMove(models.Model):
         check_company=True,
         compute='_compute_fiscal_position_id', store=True, readonly=False, precompute=True,
         states={'posted': [('readonly', True)], 'cancel': [('readonly', True)]},
-        domain="[('company_id', '=', company_id)]",
         ondelete="restrict",
         help="Fiscal positions are used to adapt taxes and accounts for particular "
              "customers or sales orders/invoices. The default value comes from the customer.",
@@ -589,6 +588,7 @@ class AccountMove(models.Model):
     )
     partner_credit = fields.Monetary(compute='_compute_partner_credit')
     duplicated_ref_ids = fields.Many2many(comodel_name='account.move', compute='_compute_duplicated_ref_ids')
+    need_cancel_request = fields.Boolean(compute='_compute_need_cancel_request')
 
     # used to display the various dates and amount dues on the invoice's PDF
     payment_term_details = fields.Binary(compute="_compute_payment_term_details")
@@ -678,9 +678,8 @@ class AccountMove(models.Model):
     @api.depends('journal_id')
     def _compute_company_id(self):
         for move in self:
-            company_id = move.journal_id.company_id or self.env.company
-            if company_id != move.company_id:
-                move.company_id = company_id
+            if move.journal_id.company_id not in move.company_id.parent_ids:
+                move.company_id = (move.journal_id.company_id or self.env.company)._accessible_branches()[:1]
 
     @api.depends('move_type')
     def _compute_journal_id(self):
@@ -705,15 +704,18 @@ class AccountMove(models.Model):
             return self.statement_line_ids.statement_id.journal_id[:1]
 
         journal_types = self._get_valid_journal_types()
-        company_id = (self.company_id or self.env.company).id
-        domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
+        company = self.company_id or self.env.company
+        domain = [
+            *self.env['account.journal']._check_company_domain(company),
+            ('type', 'in', journal_types),
+        ]
 
         journal = None
         # the currency is not a hard dependence, it triggers via manual add_to_compute
         # avoid computing the currency before all it's dependences are set (like the journal...)
         if self.env.cache.contains(self, self._fields['currency_id']):
             currency_id = self.currency_id.id or self._context.get('default_currency_id')
-            if currency_id and currency_id != self.company_id.currency_id.id:
+            if currency_id and currency_id != company.currency_id.id:
                 currency_domain = domain + [('currency_id', '=', currency_id)]
                 journal = self.env['account.journal'].search(currency_domain, limit=1)
 
@@ -721,8 +723,6 @@ class AccountMove(models.Model):
             journal = self.env['account.journal'].search(domain, limit=1)
 
         if not journal:
-            company = self.env['res.company'].browse(company_id)
-
             error_msg = _(
                 "No journal could be found in company %(company_name)s for any of those types: %(journal_types)s",
                 company_name=company.display_name,
@@ -741,9 +741,11 @@ class AccountMove(models.Model):
     def _compute_suitable_journal_ids(self):
         for m in self:
             journal_type = m.invoice_filter_type_domain or 'general'
-            company_id = m.company_id.id or self.env.company.id
-            domain = [('company_id', '=', company_id), ('type', '=', journal_type)]
-            m.suitable_journal_ids = self.env['account.journal'].search(domain)
+            company = m.company_id or self.env.company
+            m.suitable_journal_ids = self.env['account.journal'].search([
+                *self.env['account.journal']._check_company_domain(company),
+                ('type', '=', journal_type),
+            ])
 
     @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'payment_id')
     def _compute_name(self):
@@ -1176,7 +1178,7 @@ class AccountMove(models.Model):
 
             if move.state == 'posted' and move.is_invoice(include_receipts=True):
                 reconciled_vals = []
-                reconciled_partials = move._get_all_reconciled_invoice_partials()
+                reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials()
                 for reconciled_partial in reconciled_partials:
                     counterpart_line = reconciled_partial['aml']
                     if counterpart_line.move_id.ref:
@@ -1340,6 +1342,20 @@ class AccountMove(models.Model):
                 invoice.show_discount_details = False
                 invoice.show_payment_term_details = False
 
+    def _need_cancel_request(self):
+        """ Hook allowing a localization to prevent the user to reset draft an invoice that has been already sent
+        to the government and thus, must remain untouched except if its cancellation is approved.
+
+        :return: True if the cancel button is displayed instead of draft button, False otherwise.
+        """
+        self.ensure_one()
+        return False
+
+    @api.depends('country_code')
+    def _compute_need_cancel_request(self):
+        for move in self:
+            move.need_cancel_request = move._need_cancel_request()
+
     @api.depends('partner_id', 'invoice_source_email', 'partner_id.name')
     def _compute_invoice_partner_display_info(self):
         for move in self:
@@ -1402,7 +1418,10 @@ class AccountMove(models.Model):
     @api.depends('restrict_mode_hash_table', 'state')
     def _compute_show_reset_to_draft_button(self):
         for move in self:
-            move.show_reset_to_draft_button = not move.restrict_mode_hash_table and move.state in ('posted', 'cancel')
+            move.show_reset_to_draft_button = (
+                not move.restrict_mode_hash_table \
+                and (move.state == 'cancel' or (move.state == 'posted' and not move.need_cancel_request))
+            )
 
     # EXTENDS portal portal.mixin
     def _compute_access_url(self):
@@ -1654,7 +1673,7 @@ class AccountMove(models.Model):
     @api.onchange('company_id')
     def _inverse_company_id(self):
         self._conditional_add_to_compute('journal_id', lambda m: (
-            m.journal_id.company_id != m.company_id
+            not m.journal_id.filtered_domain(self.env['account.journal']._check_company_domain(m.company_id))
         ))
 
     @api.onchange('currency_id')
@@ -2621,9 +2640,9 @@ class AccountMove(models.Model):
                 domain += [('move_type', 'in' if self.move_type in refund_types else 'not in', refund_types)]
             if self.journal_id.payment_sequence:
                 domain += [('payment_id', '!=' if self.payment_id else '=', False)]
-            reference_move_name = self.search(domain + [('date', '<=', self.date)], order='date desc', limit=1).name
+            reference_move_name = self.sudo().search(domain + [('date', '<=', self.date)], order='date desc', limit=1).name
             if not reference_move_name:
-                reference_move_name = self.search(domain, order='date asc', limit=1).name
+                reference_move_name = self.sudo().search(domain, order='date asc', limit=1).name
             sequence_number_reset = self._deduce_sequence_number_reset(reference_move_name)
             if sequence_number_reset == 'year':
                 where_string += " AND date_trunc('year', date::timestamp without time zone) = date_trunc('year', %(date)s) "
@@ -2732,38 +2751,37 @@ class AccountMove(models.Model):
         """
         if not partner_id:
             return 0, False, False
-        where_internal_group = ""
+        domain = [
+            *self.env['account.move.line']._check_company_domain(company_id),
+            ('partner_id', '=', partner_id),
+            ('account_id.deprecated', '=', False),
+            ('date', '>=', date.today() - timedelta(days=365 * 2)),
+        ]
         if move_type in self.env['account.move'].get_inbound_types(include_receipts=True):
-            where_internal_group = "AND account.internal_group = 'income'"
+            domain.append(('account_id.internal_group', '=', 'income'))
         elif move_type in self.env['account.move'].get_outbound_types(include_receipts=True):
-            where_internal_group = "AND account.internal_group = 'expense'"
+            domain.append(('account_id.internal_group', '=', 'expense'))
+
+        query = self.env['account.move.line']._where_calc(domain)
+        from_clause, where_clause, params = query.get_sql()
         self._cr.execute(f"""
-            SELECT
-               COUNT(foo.id), foo.account_id, foo.taxes
-            FROM
-               (
-               SELECT
-                   account.id AS account_id,
-                   account.code,
-                   aml.id,
-                   ARRAY_AGG(tax_rel.account_tax_id) AS taxes
-               FROM account_account account
-                LEFT JOIN account_move_line aml
-                  ON (account.id = aml.account_id
-                   AND aml.partner_id = %s
-                   AND aml.date >= now() - interval '2 years')
-                LEFT JOIN account_move_line_account_tax_rel tax_rel ON (aml.id = tax_rel.account_move_line_id)
-               WHERE
-                   account.company_id = %s
-                   AND account.deprecated = FALSE
-                      {where_internal_group}
-               GROUP BY account.id, account.code, aml.id
-               ) AS foo
-            GROUP BY foo.account_id, foo.code, foo.taxes
-            ORDER BY COUNT(foo.id) DESC, foo.code
-            LIMIT 1
-        """, [partner_id, company_id])
-        return self._cr.fetchone()
+            SELECT COUNT(foo.id), foo.account_id, foo.taxes
+              FROM (
+                         SELECT account_move_line__account_id.id AS account_id,
+                                account_move_line__account_id.code,
+                                account_move_line.id,
+                                ARRAY_AGG(tax_rel.account_tax_id) AS taxes
+                           FROM {from_clause}
+                      LEFT JOIN account_move_line_account_tax_rel tax_rel ON account_move_line.id = tax_rel.account_move_line_id
+                          WHERE {where_clause}
+                       GROUP BY account_move_line__account_id.id,
+                                account_move_line.id
+                   ) AS foo
+          GROUP BY foo.account_id, foo.code, foo.taxes
+          ORDER BY COUNT(foo.id) DESC, foo.code
+             LIMIT 1
+        """, params)
+        return self._cr.fetchone() or (0, False, False)
 
     def _get_quick_edit_suggestions(self):
         """
@@ -3577,16 +3595,16 @@ class AccountMove(models.Model):
         if not self:
             return
         to_reverse = self.env['account.move']
-        to_cancel = self.env['account.move']
+        to_unlink = self.env['account.move']
         lock_date = self.company_id._get_user_fiscal_lock_date()
         for move in self:
             if move.inalterable_hash or move.date <= lock_date:
                 to_reverse += move
             else:
-                to_cancel += move
+                to_unlink += move
         to_reverse._reverse_moves(cancel=True)
-        to_cancel.button_draft()
-        to_cancel.filtered(lambda m: m.state == 'draft').unlink()
+        to_unlink.filtered(lambda m: m.state in ('posted', 'cancel')).button_draft()
+        to_unlink.filtered(lambda m: m.state == 'draft').unlink()
 
     def _post(self, soft=True):
         """Post/Validate the documents.
@@ -3941,6 +3959,9 @@ class AccountMove(models.Model):
             move.to_check = False
 
     def button_draft(self):
+        if any(move.state not in ('cancel', 'posted') for move in self):
+            raise UserError(_("Only posted/cancelled journal entries can be reset to draft."))
+
         exchange_move_ids = set()
         if self:
             self.env['account.full.reconcile'].flush_model(['exchange_move_id'])
@@ -3982,7 +4003,22 @@ class AccountMove(models.Model):
         self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'draft', 'is_move_sent': False})
 
+    def button_request_cancel(self):
+        """ Hook allowing the localizations to request a cancellation from the government before cancelling the invoice. """
+        self.ensure_one()
+        if not self.need_cancel_request:
+            raise UserError(_("You can only request a cancellation for invoice sent to the government."))
+
     def button_cancel(self):
+        # Shortcut to move from posted to cancelled directly. This is useful for E-invoices that must not be changed
+        # when sent to the government.
+        moves_to_reset_draft = self.filtered(lambda x: x.state == 'posted')
+        if moves_to_reset_draft:
+            moves_to_reset_draft.button_draft()
+
+        if any(move.state != 'draft' for move in self):
+            raise UserError(_("Only draft journal entries can be cancelled."))
+
         self.write({'auto_post': 'no', 'state': 'cancel'})
 
     def action_activate_currency(self):
@@ -4550,7 +4586,7 @@ class AccountMove(models.Model):
         """ This method need to be inherit by the localizations if they want to print a custom invoice report instead of
         the default one. For example please review the l10n_ar module """
         self.ensure_one()
-        return 'account.report_invoice_document'
+        return self._context.get('force_report_invoice_template') or 'account.report_invoice_document'
 
     def _is_downpayment(self):
         ''' Return true if the invoice is a downpayment.

@@ -12,6 +12,7 @@ export class QWebPlugin {
             this._editable = this._options.editable;
             this._document = this._options.document || window.document;
         }
+        this._getContextFromParentRect = this._options.editor?.options?.getContextFromParentRect || (() => ({ top: 0, left: 0 }));
         this._editable = this._options.editable || (this._options.editor && this._options.editor.editable);
         this._document = this._options.document || (this._options.editor && this._options.editor.document) || window.document;
         this._tGroupCount = 0;
@@ -43,7 +44,7 @@ export class QWebPlugin {
 
         this._fixInlines(subRoot);
 
-        const demoElements = subRoot.querySelectorAll('[t-esc], [t-raw], [t-out]');
+        const demoElements = subRoot.querySelectorAll('[t-esc], [t-raw], [t-out], [t-field]');
         for (const element of demoElements) {
             element.setAttribute('contenteditable', 'false');
         }
@@ -183,9 +184,13 @@ export class QWebPlugin {
 
         const box = target.getBoundingClientRect();
         const selBox = this._selectElWrapper.getBoundingClientRect();
+        const parentBox = this._getContextFromParentRect();
 
-        this._selectElWrapper.style.left = `${window.scrollX + box.left}px`;
-        this._selectElWrapper.style.top = `${window.scrollY + box.top - selBox.height}px`;
+        const left = parentBox.left + window.scrollX + box.left;
+        const top = parentBox.top + window.scrollY + box.top - selBox.height;
+
+        this._selectElWrapper.style.left = `${left}px`;
+        this._selectElWrapper.style.top = `${top}px`;
     }
     _renderBranchingSelection(target) {
         const selectEl = document.createElement('select');
@@ -196,9 +201,9 @@ export class QWebPlugin {
         for (const element of groupElements) {
             const optionElement = document.createElement('option');
             if (element.hasAttribute('t-if')) {
-                optionElement.innerText = 'if';
+                optionElement.innerText = `if: "${element.getAttribute("t-if")}"`;
             } else if (element.hasAttribute('t-elif')) {
-                optionElement.innerText = 'elif';
+                optionElement.innerText = `elif: "${element.getAttribute("t-elif")}"`;
             } else if (element.hasAttribute('t-else')) {
                 optionElement.innerText = 'else';
             }

@@ -281,6 +281,7 @@ export class PropertiesField extends Component {
      * @param {string} propertyName
      */
     onPropertyDelete(propertyName) {
+        this.popover.close();
         const dialogProps = {
             title: _lt("Delete Property Field"),
             body: sprintf(
@@ -292,15 +293,11 @@ export class PropertiesField extends Component {
             ),
             confirmLabel: _lt("Delete"),
             confirm: () => {
-                this.popover.close();
                 const propertiesDefinitions = this.propertiesList;
-                const foundPropertyDefinition = propertiesDefinitions.find(
+                propertiesDefinitions.find(
                     (property) => property.name === propertyName
-                );
-                if (foundPropertyDefinition) {
-                    foundPropertyDefinition.definition_deleted = true;
-                    this.props.record.update({ [this.props.name]: propertiesDefinitions });
-                }
+                ).definition_deleted = true;
+                this.props.record.update({ [this.props.name]: propertiesDefinitions });
             },
             cancel: () => {},
         };

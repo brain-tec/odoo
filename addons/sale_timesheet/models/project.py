@@ -48,8 +48,9 @@ class Project(models.Model):
             ('detailed_type', '=', 'service'),
             ('invoice_policy', '=', 'delivery'),
             ('service_type', '=', 'timesheet'),
-            '|', ('company_id', '=', False), ('company_id', '=', company_id)]""",
+        ]""",
         help='Service that will be used by default when invoicing the time spent on a task. It can be modified on each task individually by selecting a specific sales order item.',
+        check_company=True,
         compute="_compute_timesheet_product_id", store=True, readonly=False,
         default=_default_timesheet_product_id)
     warning_employee_rate = fields.Boolean(compute='_compute_warning_employee_rate', compute_sudo=True)
@@ -195,7 +196,9 @@ class Project(models.Model):
     def _compute_sale_order_count(self):
         billable_projects = self.filtered('allow_billable')
         super(Project, billable_projects)._compute_sale_order_count()
-        (self - billable_projects).sale_order_count = 0
+        non_billable_projects = self - billable_projects
+        non_billable_projects.sale_order_line_count = 0
+        non_billable_projects.sale_order_count = 0
 
     @api.constrains('sale_line_id')
     def _check_sale_line_type(self):
@@ -534,10 +537,10 @@ class ProjectTask(models.Model):
 
     sale_order_id = fields.Many2one(domain="['|', '|', ('partner_id', '=', partner_id), ('partner_id', 'child_of', commercial_partner_id), ('partner_id', 'parent_of', partner_id)]")
     so_analytic_account_id = fields.Many2one(related='sale_order_id.analytic_account_id', string='Sale Order Analytic Account')
-    pricing_type = fields.Selection(related="project_root_id.pricing_type")
+    pricing_type = fields.Selection(related="project_id.pricing_type")
     is_project_map_empty = fields.Boolean("Is Project map empty", compute='_compute_is_project_map_empty')
     has_multi_sol = fields.Boolean(compute='_compute_has_multi_sol', compute_sudo=True)
-    timesheet_product_id = fields.Many2one(related="project_root_id.timesheet_product_id")
+    timesheet_product_id = fields.Many2one(related="project_id.timesheet_product_id")
     remaining_hours_so = fields.Float('Remaining Hours on SO', compute='_compute_remaining_hours_so', search='_search_remaining_hours_so', compute_sudo=True)
     remaining_hours_available = fields.Boolean(related="sale_line_id.remaining_hours_available")
 

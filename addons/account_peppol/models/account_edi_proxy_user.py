@@ -23,6 +23,21 @@ class AccountEdiProxyClientUser(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
+    def _make_request(self, url, params=False):
+        # extends account_edi_proxy_client to update peppol_proxy_state
+        # of archived users
+        try:
+            result = super()._make_request(url, params)
+        except AccountEdiProxyError as e:
+            if (
+                e.code == 'no_such_user'
+                and not self.active
+                and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
+            ):
+                self.company_id.account_peppol_proxy_state = 'not_registered'
+            raise AccountEdiProxyError(e.code, e.message)
+        return result
+
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         urls['peppol'] = {
@@ -121,10 +136,10 @@ class AccountEdiProxyClientUser(models.Model):
                 # use the first purchase journal if the Peppol journal is not set up
                 # to create the move anyway
                 if not journal_id:
-                    journal_id = self.env['account.journal'].search(
-                        [('company_id', '=', company.id), ('type', '=', 'purchase')],
-                        limit=1,
-                    )
+                    journal_id = self.env['account.journal'].search([
+                        *self.env['account.journal']._check_company_domain(company),
+                        ('type', '=', 'purchase')
+                    ], limit=1)
 
                 attachment_vals = {
                     'name': f'{filename}.xml',
