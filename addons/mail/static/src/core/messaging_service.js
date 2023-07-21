@@ -525,7 +525,11 @@ export class Messaging {
             }
         }
         if (channel.chatPartnerId !== this.store.odoobot?.id) {
-            if (!this.presence.isOdooFocused() && channel.isChatChannel) {
+            if (
+                !this.presence.isOdooFocused() &&
+                channel.isChatChannel &&
+                !message.isSelfAuthored
+            ) {
                 this.outOfFocusService.notify(message, channel);
             }
 
@@ -597,6 +601,7 @@ export class Messaging {
             });
             if (
                 message.pinned_at &&
+                message.originThread &&
                 !message.originThread?.pinnedMessages.some(({ id }) => id === message.id)
             ) {
                 message.originThread.pinnedMessages.unshift(message);
@@ -604,7 +609,7 @@ export class Messaging {
             if (isStarred && message.isEmpty) {
                 this.messageService.updateStarred(message, false);
             }
-            if (message.pinned_at && message.isEmpty) {
+            if (message.pinned_at && message.originThread && message.isEmpty) {
                 message.pinned_at = false;
                 removeFromArrayWithPredicate(
                     message.originThread.pinnedMessages,

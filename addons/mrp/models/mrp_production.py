@@ -573,9 +573,9 @@ class MrpProduction(models.Model):
 
     @api.depends('state', 'move_raw_ids.state')
     def _compute_reservation_state(self):
-        self.reservation_state = False
         for production in self:
             if production.state in ('draft', 'done', 'cancel'):
+                production.reservation_state = False
                 continue
             relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
             # Compute reservation state according to its component's moves.
@@ -586,6 +586,8 @@ class MrpProduction(models.Model):
                     production.reservation_state = 'confirmed'
             elif relevant_move_state != 'draft':
                 production.reservation_state = relevant_move_state
+            else:
+                production.reservation_state = False
 
     @api.depends('move_raw_ids', 'state', 'move_raw_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
@@ -1709,13 +1711,13 @@ class MrpProduction(models.Model):
             move_qty_to_reserve = move.product_qty
 
             for index, (quantity, move_line, ml_vals) in enumerate(ml_by_move):
-                taken_qty = min(quantity, move_qty_to_reserve)
-                taken_qty_uom = min(product_uom._compute_quantity(taken_qty, move_line.product_uom_id), move_line.qty_done)
+                taken_qty = min(quantity, move_qty_to_reserve, move_line.product_uom_id._compute_quantity(move_line.qty_done, product_uom))
+                taken_qty_uom = product_uom._compute_quantity(taken_qty, move_line.product_uom_id)
                 if float_is_zero(taken_qty_uom, precision_rounding=move_line.product_uom_id.rounding):
                     continue
                 move_line.with_context(bypass_reservation_update=True).reserved_uom_qty = taken_qty_uom
-                move_qty_to_reserve -= taken_qty_uom
-                ml_by_move[index] = (quantity - taken_qty_uom, move_line, ml_vals)
+                move_qty_to_reserve -= taken_qty
+                ml_by_move[index] = (quantity - taken_qty, move_line, ml_vals)
 
                 if float_compare(move_qty_to_reserve, 0, precision_rounding=move.product_uom.rounding) <= 0:
                     assigned_moves.add(move.id)
