@@ -60,13 +60,7 @@ class MrpProduction(models.Model):
 
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain="""[
-            ('type', 'in', ['product', 'consu']),
-            '|',
-                ('company_id', '=', False),
-                ('company_id', '=', company_id)
-        ]
-        """,
+        domain="[('type', 'in', ['product', 'consu'])]",
         compute='_compute_product_id', store=True, copy=True, precompute=True,
         readonly=True, required=True, check_company=True,
         states={'draft': [('readonly', False)]})
@@ -84,14 +78,14 @@ class MrpProduction(models.Model):
         domain="[('category_id', '=', product_uom_category_id)]")
     lot_producing_id = fields.Many2one(
         'stock.lot', string='Lot/Serial Number', copy=False,
-        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
+        domain="[('product_id', '=', product_id)]", check_company=True)
     qty_producing = fields.Float(string="Quantity Producing", digits='Product Unit of Measure', copy=False)
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type', copy=True, readonly=False,
         compute='_compute_picking_type_id', store=True, precompute=True,
-        domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]",
+        domain="[('code', '=', 'mrp_operation')]",
         required=True, check_company=True, index=True)
     use_create_components_lots = fields.Boolean(related='picking_type_id.use_create_components_lots')
     use_auto_consume_components_lots = fields.Boolean(related='picking_type_id.use_auto_consume_components_lots')
@@ -99,7 +93,7 @@ class MrpProduction(models.Model):
         'stock.location', 'Components Location',
         compute='_compute_locations', store=True, check_company=True,
         readonly=False, required=True, precompute=True,
-        domain="[('usage','=','internal'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('usage','=','internal')]",
         help="Location where the system will look for components.")
     # this field was added to be passed a default in view for manual raw moves
     warehouse_id = fields.Many2one(related='location_src_id.warehouse_id')
@@ -107,7 +101,7 @@ class MrpProduction(models.Model):
         'stock.location', 'Finished Products Location',
         compute='_compute_locations', store=True, check_company=True,
         readonly=False, required=True, precompute=True,
-        domain="[('usage','=','internal'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('usage','=','internal')]",
         help="Location where the system will stock the finished products.")
     date_deadline = fields.Datetime(
         'Deadline', copy=False, store=True, readonly=True, compute='_compute_date_deadline',
@@ -577,9 +571,9 @@ class MrpProduction(models.Model):
 
     @api.depends('state', 'move_raw_ids.state')
     def _compute_reservation_state(self):
-        self.reservation_state = False
         for production in self:
             if production.state in ('draft', 'done', 'cancel'):
+                production.reservation_state = False
                 continue
             relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
             # Compute reservation state according to its component's moves.
@@ -590,6 +584,8 @@ class MrpProduction(models.Model):
                     production.reservation_state = 'confirmed'
             elif relevant_move_state != 'draft':
                 production.reservation_state = relevant_move_state
+            else:
+                production.reservation_state = False
 
     @api.depends('move_raw_ids', 'state', 'move_raw_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
@@ -647,9 +643,12 @@ class MrpProduction(models.Model):
     def _compute_show_serial_mass_produce(self):
         self.show_serial_mass_produce = False
         for order in self:
-            if order.state == 'confirmed' and order.product_id.tracking == 'serial' and \
+            if order.state in ['confirmed', 'progress', 'to_close'] and order.product_id.tracking == 'serial' and \
                     float_compare(order.product_qty, 1, precision_rounding=order.product_uom_id.rounding) > 0 and \
                     float_compare(order.qty_producing, order.product_qty, precision_rounding=order.product_uom_id.rounding) < 0:
+                moves_with_tracking = order.move_raw_ids.filtered(lambda m: m.has_tracking)
+                if any(len(m.move_line_ids.lot_id) > 1 for m in moves_with_tracking):
+                    continue
                 order.show_serial_mass_produce = True
 
     @api.depends('state', 'move_finished_ids')
@@ -1249,6 +1248,11 @@ class MrpProduction(models.Model):
         parent_moves = self.procurement_group_id.stock_move_ids.move_dest_ids
         return (dest_moves | parent_moves).group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
 
+    def set_qty_producing(self):
+        # This method is used to call `_set_lot_producing` when the onchange doesn't apply.
+        self.ensure_one()
+        self._set_qty_producing()
+
     def _set_lot_producing(self):
         self.ensure_one()
         self.lot_producing_id = self.env['stock.lot'].create(self._prepare_stock_lot_values())
@@ -1791,13 +1795,13 @@ class MrpProduction(models.Model):
             move_qty_to_reserve = move.product_qty
 
             for index, (quantity, move_line, ml_vals) in enumerate(ml_by_move):
-                taken_qty = min(quantity, move_qty_to_reserve)
-                taken_qty_uom = min(product_uom._compute_quantity(taken_qty, move_line.product_uom_id), move_line.qty_done)
+                taken_qty = min(quantity, move_qty_to_reserve, move_line.product_uom_id._compute_quantity(move_line.qty_done, product_uom))
+                taken_qty_uom = product_uom._compute_quantity(taken_qty, move_line.product_uom_id)
                 if float_is_zero(taken_qty_uom, precision_rounding=move_line.product_uom_id.rounding):
                     continue
                 move_line.with_context(bypass_reservation_update=True).reserved_uom_qty = taken_qty_uom
-                move_qty_to_reserve -= taken_qty_uom
-                ml_by_move[index] = (quantity - taken_qty_uom, move_line, ml_vals)
+                move_qty_to_reserve -= taken_qty
+                ml_by_move[index] = (quantity - taken_qty, move_line, ml_vals)
 
                 if float_compare(move_qty_to_reserve, 0, precision_rounding=move.product_uom.rounding) <= 0:
                     assigned_moves.add(move.id)
@@ -1885,7 +1889,7 @@ class MrpProduction(models.Model):
     def button_mark_done(self):
         self._button_mark_done_sanity_checks()
 
-        res = self._pre_button_mark_done()
+        res = self.pre_button_mark_done()
         if res is not True:
             return res
 
@@ -1923,6 +1927,9 @@ class MrpProduction(models.Model):
                 'is_locked': True,
                 'state': 'done',
             })
+
+        if self.env.context.get('skip_redirection'):
+            return True
 
         if not backorders:
             if self.env.context.get('from_workorder'):
@@ -1963,7 +1970,7 @@ class MrpProduction(models.Model):
             })
         return action
 
-    def _pre_button_mark_done(self):
+    def pre_button_mark_done(self):
         for production in self:
             if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 production._set_quantities()
@@ -1995,7 +2002,7 @@ class MrpProduction(models.Model):
             'name': _('Scrap'),
             'view_mode': 'form',
             'res_model': 'stock.scrap',
-            'view_id': self.env.ref('stock.stock_scrap_form_view2').id,
+            'views': [[self.env.ref('stock.stock_scrap_form_view2').id, 'form']],
             'type': 'ir.actions.act_window',
             'context': {'default_production_id': self.id,
                         'product_ids': (self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) | self.move_finished_ids.filtered(lambda x: x.state == 'done')).mapped('product_id').ids,
@@ -2095,14 +2102,14 @@ class MrpProduction(models.Model):
             'target': 'new',
         }
 
-    def action_serial_mass_produce_wizard(self):
+    def action_serial_mass_produce_wizard(self, mark_as_done=False):
         self.ensure_one()
         self._check_company()
-        if self.state != 'confirmed':
+        if self.state not in ['confirmed', 'progress', 'to_close']:
             return
         if self.product_id.tracking != 'serial':
             return
-        if self.reservation_state != 'assigned':
+        if self.state == 'confirmed' and self.reservation_state != 'assigned':
             missing_components = {move.product_id for move in self.move_raw_ids if float_compare(move.reserved_availability, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0}
             message = _("Make sure enough quantities of these components are reserved to do the production:\n")
             message += "\n".join(component.name for component in missing_components)
@@ -2124,6 +2131,7 @@ class MrpProduction(models.Model):
             'default_next_serial_number': next_serial,
             'default_next_serial_count': self.product_qty - self.qty_produced,
             'default_multiple_lot_components_names': ",".join(c.display_name for c in multiple_lot_components) if multiple_lot_components else None,
+            'default_mark_as_done': mark_as_done,
         }
         return action
 

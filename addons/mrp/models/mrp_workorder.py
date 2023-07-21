@@ -24,6 +24,7 @@ class MrpWorkorder(models.Model):
     name = fields.Char(
         'Work Order', required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
         'mrp.workcenter', 'Work Center', required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)], 'progress': [('readonly', True)]},
@@ -272,13 +273,15 @@ class MrpWorkorder(models.Model):
         if not self._check_m2m_recursion('blocked_by_workorder_ids'):
             raise ValidationError(_("You cannot create cyclic dependency."))
 
+    @api.depends('production_id.name')
+    def _compute_barcode(self):
+        for wo in self:
+            wo.barcode = f"{wo.production_id.name}/{wo.id}"
+
     @api.depends('production_id', 'product_id')
     def _compute_display_name(self):
         for wo in self:
-            if len(wo.production_id.workorder_ids) == 1:
-                wo.display_name = f"{wo.production_id.name} - {wo.product_id.name} - {wo.name}"
-            else:
-                wo.display_name = f"{wo.production_id.workorder_ids.ids.index(wo._origin.id) + 1} - {wo.production_id.name} - {wo.product_id.name} - {wo.name}"
+            wo.display_name = f"{wo.production_id.name} - {wo.name}"
 
     def unlink(self):
         # Removes references to workorder to avoid Validation Error

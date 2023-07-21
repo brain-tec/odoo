@@ -25,7 +25,7 @@ class StockMoveLine(models.Model):
         'stock.move', 'Stock Operation',
         check_company=True, index=True)
     company_id = fields.Many2one('res.company', string='Company', readonly=True, required=True, index=True)
-    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade", check_company=True, domain="[('type', '!=', 'service'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", index=True)
+    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade", check_company=True, domain="[('type', '!=', 'service')]", index=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure', required=True, domain="[('category_id', '=', product_uom_category_id)]",
         compute="_compute_product_uom_id", store=True, readonly=False, precompute=True,
@@ -46,7 +46,7 @@ class StockMoveLine(models.Model):
     package_level_id = fields.Many2one('stock.package_level', 'Package Level', check_company=True)
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial Number',
-        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
+        domain="[('product_id', '=', product_id)]", check_company=True)
     lot_name = fields.Char('Lot/Serial Number Name')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
@@ -313,8 +313,6 @@ class StockMoveLine(models.Model):
         # If this picking is already done we should generate an
         # associated done move.
         for move_line in mls:
-            if self.env.context.get('import_file') and move_line.reserved_uom_qty and not move_line._should_bypass_reservation(move_line.location_id):
-                raise UserError(_("It is not allowed to import reserved quantity, you have to use the quantity directly."))
             if move_line.move_id or not move_line.picking_id:
                 continue
             if move_line.picking_id.state != 'done':
@@ -364,6 +362,9 @@ class StockMoveLine(models.Model):
             move.with_context(avoid_putaway_rules=True).product_uom_qty = move.quantity_done
 
         for ml, vals in zip(mls, vals_list):
+            if self.env.context.get('import_file') and ml.reserved_uom_qty and not ml.move_id._should_bypass_reservation():
+                raise UserError(_("It is not allowed to import reserved quantity, you have to use the quantity directly."))
+
             if ml.state == 'done':
                 if ml.product_id.type == 'product' and not self.env.context.get('bypass_reservation_update'):
                     Quant = self.env['stock.quant']

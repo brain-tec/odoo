@@ -105,12 +105,12 @@ class AccountPayment(models.Model):
         string='Destination Account',
         store=True, readonly=False,
         compute='_compute_destination_account_id',
-        domain="[('account_type', 'in', ('asset_receivable', 'liability_payable')), ('company_id', '=', company_id)]",
+        domain="[('account_type', 'in', ('asset_receivable', 'liability_payable'))]",
         check_company=True)
     destination_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Destination Journal',
-        domain="[('type', 'in', ('bank','cash')), ('company_id', '=', company_id), ('id', '!=', journal_id)]",
+        domain="[('type', 'in', ('bank','cash')), ('id', '!=', journal_id)]",
         check_company=True,
     )
 
@@ -458,7 +458,8 @@ class AccountPayment(models.Model):
         Get all journals having at least one payment method for inbound/outbound depending on the payment_type.
         """
         journals = self.env['account.journal'].search([
-            ('company_id', 'in', self.company_id.ids), ('type', 'in', ('bank', 'cash'))
+            *self.env['account.journal']._check_company_domain(self.company_id),
+            ('type', 'in', ('bank', 'cash')),
         ])
         for pay in self:
             if pay.payment_type == 'inbound':
@@ -514,7 +515,7 @@ class AccountPayment(models.Model):
                     pay.destination_account_id = pay.partner_id.with_company(pay.company_id).property_account_receivable_id
                 else:
                     pay.destination_account_id = self.env['account.account'].search([
-                        ('company_id', '=', pay.company_id.id),
+                        *self.env['account.account']._check_company_domain(pay.company_id),
                         ('account_type', '=', 'asset_receivable'),
                         ('deprecated', '=', False),
                     ], limit=1)
@@ -524,7 +525,7 @@ class AccountPayment(models.Model):
                     pay.destination_account_id = pay.partner_id.with_company(pay.company_id).property_account_payable_id
                 else:
                     pay.destination_account_id = self.env['account.account'].search([
-                        ('company_id', '=', pay.company_id.id),
+                        *self.env['account.account']._check_company_domain(pay.company_id),
                         ('account_type', '=', 'liability_payable'),
                         ('deprecated', '=', False),
                     ], limit=1)
@@ -916,6 +917,19 @@ class AccountPayment(models.Model):
                 lambda l: l.account_id == payment.destination_account_id and not l.reconciled)
             lines.reconcile()
 
+    def _get_payment_receipt_report_values(self):
+        """ Get the extra values when rendering the Payment Receipt PDF report.
+
+        :return: A dictionary:
+            * display_invoices: Display the invoices table.
+            * display_payment_method: Display the payment method value.
+        """
+        self.ensure_one()
+        return {
+            'display_invoices': True,
+            'display_payment_method': True,
+        }
+
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
@@ -942,6 +956,9 @@ class AccountPayment(models.Model):
     def action_cancel(self):
         ''' draft -> cancelled '''
         self.move_id.button_cancel()
+
+    def button_request_cancel(self):
+        self.move_id.button_request_cancel()
 
     def action_draft(self):
         ''' posted -> draft '''

@@ -108,7 +108,7 @@
                                     <th name="th_description" class="text-start"><span>Description</span></th>
                                     <th name="th_quantity" class="text-end"><span>Quantity</span></th>
                                     <th name="th_priceunit" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>
-                                    <th name="th_price_unit" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                    <th name="th_discount" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span>Disc.%</span>
                                     </th>
                                     <th name="th_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
@@ -132,23 +132,23 @@
                                     <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                                         <t t-if="line.display_type == 'product'" name="account_invoice_line_accountable">
                                             <td name="account_invoice_line_name"><span t-field="line.name" t-options="{'widget': 'text'}"/></td>
-                                            <td class="text-end">
+                                            <td name="td_quantity" class="text-end">
                                                 <span t-field="line.quantity"/>
                                                 <span t-field="line.product_uom_id"  groups="uom.group_uom"/>
                                             </td>
-                                            <td t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                            <td name="td_price_unit" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                                 <span class="text-nowrap" t-field="line.price_unit"/>
                                             </td>
-                                            <td t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                            <td name="td_discount" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                                 <span class="text-nowrap" t-field="line.discount"/>
                                             </td>
-                                            <td t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                            <td name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                                 <span t-out="', '.join(map(lambda x: (x.invoice_label or x.name), line.tax_ids))" id="line_tax_ids"/>
                                             </td>
-                                            <td class="text-end o_price_total">
+                                            <td name="td_subtotal" class="text-end o_price_total">
                                                 <span class="text-nowrap" t-field="line.price_subtotal"/>
                                             </td>
-                                            <td t-if="o.tax_calculation_rounding_method == 'round_per_line'" class="text-end o_price_total">
+                                            <td t-if="o.tax_calculation_rounding_method == 'round_per_line'" name="td_total" class="text-end o_price_total">
                                                 <span class="text-nowrap" t-field="line.price_total"/>
                                             </td>
                                         </t>
@@ -297,13 +297,13 @@
             -->
             <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
                 <tr class="border-black o_subtotal">
-                    <td><strong t-out="subtotal['name']"/></td>
+                    <td><strong t-out="subtotal['name']">Untaxed Amount</strong></td>
 
                     <td class="text-end">
                         <span
                             t-att-class="oe_subtotal_footer_separator"
                             t-out="subtotal['formatted_amount']"
-                        />
+                        >9</span>
                     </td>
                 </tr>
 
@@ -314,7 +314,7 @@
             <tr t-if="'formatted_rounding_amount' in tax_totals and tax_totals['rounding_amount'] != 0">
                 <td>Rounding</td>
                 <td class="text-end">
-                    <span t-out="tax_totals['formatted_rounding_amount']"/>
+                    <span t-out="tax_totals['formatted_rounding_amount']">9 Eur</span>
                 </td>
             </tr>
             
@@ -322,7 +322,7 @@
             <tr class="border-black o_total">
                 <td><strong>Total</strong></td>
                 <td  class="text-end">
-                    <span t-out="tax_totals['formatted_amount_total']"/>
+                    <span t-out="tax_totals['formatted_amount_total']">10.4 Eur</span>
                 </td>
             </tr>
         </template>
@@ -342,19 +342,19 @@
                 <tr>
                     <t t-if="tax_totals['display_tax_base']">
                         <td>
-                            <span t-out="amount_by_group['tax_group_name']"/>
+                            <span t-out="amount_by_group['tax_group_name']">VAT 21%</span>
                             <span class="text-nowrap"> on
-                                <t t-out="amount_by_group['formatted_tax_group_base_amount']"/>
+                                <t t-out="amount_by_group['formatted_tax_group_base_amount']">9 Eur</t>
                             </span>
                         </td>
                         <td class="text-end o_price_total">
-                            <span class="text-nowrap" t-out="amount_by_group['formatted_tax_group_amount']"/>
+                            <span class="text-nowrap" t-out="amount_by_group['formatted_tax_group_amount']">1.4 Eur</span>
                         </td>
                     </t>
                     <t t-else="">
-                        <td><span class="text-nowrap" t-out="amount_by_group['tax_group_name']"/></td>
+                        <td><span class="text-nowrap" t-out="amount_by_group['tax_group_name']">VAT 21%</span></td>
                         <td class="text-end o_price_total">
-                            <span class="text-nowrap" t-out="amount_by_group['formatted_tax_group_amount']" />
+                            <span class="text-nowrap" t-out="amount_by_group['formatted_tax_group_amount']">1.4 Eur</span>
                         </td>
                     </t>
                 </tr>
@@ -426,20 +426,14 @@
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
                     <t t-set="lang" t-value="o.partner_id.lang"/>
-                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
-                        t-call="account.report_invoice_document" t-lang="lang"/>
+                   <t t-call="{{o._get_name_invoice_report()}}" t-lang="lang"/>
                 </t>
             </t>
         </template>
 
         <template id="report_invoice_with_payments">
-            <t t-call="web.html_container">
-                <t t-foreach="docs" t-as="o">
-                    <t t-set="lang" t-value="o.partner_id.lang"/>
-                    <t t-set="print_with_payments" t-value="True"/>
-                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
-                        t-call="account.report_invoice_document" t-lang="lang"/>
-                </t>
+            <t t-call="account.report_invoice">
+                <t t-set="print_with_payments" t-value="True"/>
             </t>
         </template>
 
