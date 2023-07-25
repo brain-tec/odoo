@@ -195,7 +195,7 @@
         <xpath expr="//th[@name='th_taxes']" position="replace"/>
         <xpath expr="//span[@id='line_tax_ids']/.." position="replace"/>
 
-        <div name="payment_term" position="replace"/>
+        <span name="payment_term" position="replace"/>
         <xpath expr="//span[@t-field='o.payment_reference']/../.." position="replace"/>
 
         <!-- replace information section and usage chilean style -->
@@ -220,5 +220,14 @@
             </div>
         </xpath>
 
+    </template>
+
+    <!-- Workaround for Studio reports, see odoo/odoo#60660 -->
+    <template id="report_invoice" inherit_id="account.report_invoice">
+        <xpath expr='//t[@t-call="account.report_invoice_document"]' position="after">
+            <t t-elif="o._get_name_invoice_report() == 'l10n_cl.report_invoice_document'"
+               t-call="l10n_cl.report_invoice_document"
+               t-lang="lang"/>
+        </xpath>
     </template>
 </odoo>
