@@ -334,22 +334,13 @@ export const editorCommands = {
                     block.nodeName,
                 )
             ) {
-                setSelection(block, 0, block, nodeSize(block));
-                editor.historyPauseSteps();
-                // Keep the alignment and remove rest of the applied styles.
-                const textAlign = block.style.textAlign;
-                editor.execCommand('removeFormat');
-                if (textAlign) {
-                    block.style.textAlign = textAlign;
-                }
-                editor.historyUnpauseSteps();
                 const inLI = block.closest('li');
                 if (inLI && tagName === "P") {
                     inLI.oToggleList(0);
                 } else {
                     setTagName(block, tagName);
                 }
-            }  else {
+            } else {
                 // eg do not change a <div> into a h1: insert the h1
                 // into it instead.
                 const newBlock = editor.document.createElement(tagName);
@@ -499,7 +490,11 @@ export const editorCommands = {
         const li = new Set();
         const blocks = new Set();
 
-        for (const node of getTraversedNodes(editor.editable)) {
+        const selectedBlocks = getTraversedNodes(editor.editable);
+        const deepestSelectedBlocks = selectedBlocks.filter(block => (
+            !descendants(block).some(descendant => selectedBlocks.includes(descendant))
+        ));
+        for (const node of deepestSelectedBlocks) {
             if (node.nodeType === Node.TEXT_NODE && isWhitespace(node) && closestElement(node).isContentEditable) {
                 node.remove();
             } else {
