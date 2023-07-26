@@ -98,7 +98,7 @@ class MailThread(models.AbstractModel):
         help="If checked, new messages require your attention.")
     message_needaction_counter = fields.Integer(
         'Number of Actions', compute='_compute_message_needaction',
-        help="Number of messages which requires an action")
+        help="Number of messages requiring action")
     message_has_error = fields.Boolean(
         'Message Delivery error',
         compute='_compute_message_has_error', search='_search_message_has_error',
@@ -452,7 +452,7 @@ class MailThread(models.AbstractModel):
             raise exceptions.UserError(_("Only messages type comment can have their content updated"))
 
     @api.model
-    def _get_from_request_or_raise(self, request, thread_id):
+    def _get_from_context_or_raise(self, thread_id):
         return self.browse(thread_id).exists()
 
     # ------------------------------------------------------------
