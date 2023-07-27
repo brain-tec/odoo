@@ -91,7 +91,6 @@
 
             'web/static/src/legacy/legacy_service_provider.js',
             'web/static/src/legacy/legacy_dialog.js',
-            'web/static/src/legacy/legacy_load_views.js',
             'web/static/src/legacy/legacy_promise_error_handler.js',
             'web/static/src/legacy/legacy_rpc_error_handler.js',
             'web/static/src/legacy/root_widget.js',
@@ -99,7 +98,6 @@
             'web/static/src/legacy/root_widget.js',
             'web/static/src/legacy/backend_utils.js',
             'web/static/src/legacy/utils.js',
-            'web/static/src/legacy/web_client.js',
             'web/static/src/legacy/js/core/domain.js',
             'web/static/src/legacy/js/core/py_utils.js',
             'web/static/src/legacy/js/core/context.js',
@@ -110,12 +108,10 @@
             'web/static/src/legacy/js/fields/relational_fields.js',
             'web/static/src/legacy/js/fields/field_registry.js',
             'web/static/src/legacy/js/fields/field_utils.js',
-            'web/static/src/legacy/js/services/data_manager.js',
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/js/widgets/date_picker.js',
             'web/static/src/legacy/js/env.js',
             'web/static/src/legacy/js/owl_compatibility.js',
-            'web/static/src/legacy/pseudo_web_client.js',
 
             'mrp_subcontracting/static/src/subcontracting_portal/*',
             'web/static/src/start.js',

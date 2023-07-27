@@ -23,7 +23,6 @@ import session from "web.session";
 import { patchWithCleanup, patchDate } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import { assets } from "@web/core/assets";
-import { processArch } from "@web/legacy/legacy_load_views";
 
 import { Component } from "@odoo/owl";
 import { uniqueId } from "@web/core/utils/functions";
@@ -41,12 +40,9 @@ const DebouncedField = basic_fields.DebouncedField;
  * @private
  * @param {Object} params
  * @param {Bus} [params.bus]
- * @param {boolean} [params.debug]
  * @param {Object} [params.env]
  * @param {Bus} [params.env.bus]
- * @param {Object} [params.env.dataManager]
  * @param {Object} [params.env.services]
- * @param {Object[]} [params.favoriteFilters]
  * @param {Object} [params.services]
  * @param {Object} [params.session]
  * @param {MockServer} [mockServer]
@@ -58,8 +54,6 @@ async function _getMockedOwlEnv(params, mockServer) {
     const database = {parameters: params.translateParameters || {}};
 
     // build the env
-    const favoriteFilters = params.favoriteFilters;
-    const debug = params.debug;
     const services = {};
     const env = Object.assign({}, params.env, {
         _t: params.env && params.env._t || Object.assign((s => s), { database }),
@@ -67,40 +61,6 @@ async function _getMockedOwlEnv(params, mockServer) {
             fetch: (resource, init) => mockServer.performFetch(resource, init),
         }, params.env.browser),
         bus: params.bus || params.env.bus || new Bus(),
-        dataManager: Object.assign({
-            load_action: (actionID, context) => {
-                return mockServer.performRpc('/web/action/load', {
-                    action_id: actionID,
-                    additional_context: context,
-                });
-            },
-            load_views: (params, options) => {
-                return mockServer.performRpc('/web/dataset/call_kw/' + params.model, {
-                    args: [],
-                    kwargs: {
-                        context: params.context,
-                        options: options,
-                        views: params.views_descr,
-                    },
-                    method: 'get_views',
-                    model: params.model,
-                }).then(function (views) {
-                    views = Object.values(views).map((viewParams) => {
-                        return getView(mockServer, viewParams);
-                    });
-                    if (favoriteFilters && 'search' in views) {
-                        views.search.favoriteFilters = favoriteFilters;
-                    }
-                    return views;
-                });
-            },
-            load_filters: params => {
-                if (debug) {
-                    console.log('[mock] load_filters', params);
-                }
-                return Promise.resolve([]);
-            },
-        }, params.env.dataManager),
         services: Object.assign(services, params.env.services),
         session: params.env.session || params.session || {},
     });
@@ -247,35 +207,6 @@ function _observe(widget) {
 //------------------------------------------------------------------------------
 // Public functions
 //------------------------------------------------------------------------------
-
-/**
- * performs a get_view, and mocks the postprocessing done by the
- * data_manager to return an equivalent structure.
- *
- * @param {MockServer} server
- * @param {Object} params
- * @param {string} params.model
- * @returns {Object} an object with 3 keys: arch, fields and viewFields
- */
-function getView(server, params) {
-    var view = server.getView(params);
-    const fields = server.fieldsGet(params.model);
-    // mock the structure produced by the DataManager
-    const models = { [params.model]: fields };
-    for (const modelName of view.models) {
-        models[modelName] = models[modelName] || server.fieldsGet(modelName);
-    }
-    const { arch, viewFields } = processArch(view.arch, view.type, params.model, models);
-    return {
-        arch,
-        fields,
-        model: view.model,
-        toolbar: view.toolbar,
-        type: view.type,
-        viewFields,
-        view_id: view.id,
-    };
-}
 
 /**
  * intercepts an event bubbling up the widget hierarchy. The event intercepted
@@ -529,30 +460,9 @@ async function addMockEnvironment(widget, params) {
             ev.data.callback(result);
         }
     });
-    intercept(widget, 'load_action', async ev => {
-        const action = await env.dataManager.load_action(ev.data.actionID, ev.data.context);
-        ev.data.on_success(action);
-    });
-    intercept(widget, "load_views", async ev => {
-        const params = {
-            model: ev.data.modelName,
-            context: ev.data.context,
-            views_descr: ev.data.views,
-        };
-        const views = await env.dataManager.load_views(params, ev.data.options);
-        if ('search' in views && params.favoriteFilters) {
-            views.search.favoriteFilters = params.favoriteFilters;
-        }
-        ev.data.on_success(views);
-    });
     intercept(widget, "get_session", ev => {
         ev.data.callback(session);
     });
-    intercept(widget, "load_filters", async ev => {
-        const filters = await env.dataManager.load_filters(ev.data);
-        ev.data.on_success(filters);
-    });
-
     // make sure all other Odoo events bubbling up are intercepted
     Object.keys(params.intercepts || {}).forEach(function (name) {
         intercept(widget, name, params.intercepts[name]);
@@ -675,32 +585,11 @@ function unpatch(target) {
     delete target.__patchID;
 }
 
-window.originalSetTimeout = window.setTimeout;
-function patchSetTimeout() {
-    var original = window.setTimeout;
-    var self = this;
-    window.setTimeout = function (handler, delay) {
-        console.log("calling setTimeout on " + (handler.name || "some function") + "with delay of " + delay);
-        console.trace();
-        var handlerArguments = Array.prototype.slice.call(arguments, 1);
-        return original(function () {
-            handler.bind(self, handlerArguments)();
-            console.log('after doing the action of the setTimeout');
-        }, delay);
-    };
-
-    return function () {
-        window.setTimeout = original;
-    };
-}
-
 export default {
     addMockEnvironment: addMockEnvironment,
-    getView: getView,
     addMockEnvironmentOwl: addMockEnvironmentOwl,
     intercept: intercept,
     patchDate: legacyPatchDate,
     patch: patch,
     unpatch: unpatch,
-    patchSetTimeout: patchSetTimeout,
 };
