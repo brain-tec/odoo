@@ -514,6 +514,10 @@ class AccountMove(models.Model):
         tracking=True,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+    is_being_sent = fields.Boolean(
+        help="Is the move being sent asynchronously",
+        compute='_compute_is_being_sent'
+    )
 
     invoice_user_id = fields.Many2one(
         string='Salesperson',
@@ -638,6 +642,25 @@ class AccountMove(models.Model):
                 move.invoice_user_id = move.invoice_user_id or self.env.user
             else:
                 move.invoice_user_id = False
+
+    def _compute_is_being_sent(self):
+        self.is_being_sent = False
+        if self.ids:
+            self.env['account.move.send'].flush_model(['move_ids', 'mode'])
+            self.env.cr.execute(
+                """
+                SELECT move_send_rel.account_move_id
+                  FROM account_move_send send
+                  JOIN account_move_account_move_send_rel move_send_rel
+                    ON move_send_rel.account_move_id in %(move_ids)s
+                   AND send.id = move_send_rel.account_move_send_id
+                 WHERE send.mode != 'done'
+                """,
+                params={'move_ids': tuple(self.ids)}
+            )
+            move_ids = [res[0] for res in self.env.cr.fetchall()]
+            if move_ids:
+                self.env['account.move'].browse(move_ids).is_being_sent = True
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
@@ -3871,6 +3894,9 @@ class AccountMove(models.Model):
     def action_send_and_print(self):
         template = self.env.ref(self._get_mail_template(), raise_if_not_found=False)
 
+        if any(not x.is_sale_document(include_receipts=True) for x in self):
+            raise UserError(_("You can only send sales documents"))
+
         return {
             'name': _("Send"),
             'type': 'ir.actions.act_window',
@@ -3889,21 +3915,8 @@ class AccountMove(models.Model):
             message loaded by default
         """
         self.ensure_one()
-        template = self.env.ref(self._get_mail_template(), raise_if_not_found=False)
 
-        report_action = {
-            'name': _("Send"),
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'account.move.send',
-            'target': 'new',
-            'context': {
-                'active_ids': self.ids,
-                'default_mail_template_id': template.id,
-            },
-        }
-
+        report_action = self.action_send_and_print()
         if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
             return self.env['ir.actions.report']._action_configure_external_report_layout(report_action)
 
