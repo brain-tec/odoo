@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { createLocalId } from "@mail/utils/common/misc";
 import { reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
@@ -59,6 +60,17 @@ export class DiscussCoreWeb {
                 }
             }
         );
+        this.busService.subscribe("mail.record/insert", (payload) => {
+            const { "res.users.settings": settings } = payload;
+            if (settings) {
+                this.store.discuss.chats.isOpen =
+                    settings.is_discuss_sidebar_category_chat_open ??
+                    this.store.discuss.chats.isOpen;
+                this.store.discuss.channels.isOpen =
+                    settings.is_discuss_sidebar_category_channel_open ??
+                    this.store.discuss.channels.isOpen;
+            }
+        });
         this.busService.subscribe("res.users/connection", async ({ partnerId, username }) => {
             // If the current user invited a new user, and the new user is
             // connecting for the first time while the current user is present
@@ -71,6 +83,28 @@ export class DiscussCoreWeb {
             const chat = await this.threadService.getChat({ partnerId });
             if (chat && !this.ui.isSmall) {
                 this.chatWindowService.insert({ thread: chat });
+            }
+        });
+        this.busService.subscribe("mail.record/insert", async (payload) => {
+            if (payload.Thread) {
+                const data = payload.Thread;
+                const thread = this.store.threads[createLocalId(data.model, data.id)];
+                if (data.serverFoldState && thread && data.serverFoldState !== thread.state) {
+                    thread.state = data.serverFoldState;
+                    if (thread.state === "closed") {
+                        const chatWindow = this.store.chatWindows.find(
+                            (chatWindow) => chatWindow.threadLocalId === thread.localId
+                        );
+                        if (chatWindow) {
+                            this.chatWindowService.close(chatWindow);
+                        }
+                    } else {
+                        this.chatWindowService.insert({
+                            thread,
+                            folded: thread.state === "folded",
+                        });
+                    }
+                }
             }
         });
     }

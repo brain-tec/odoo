@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
 import { closestElement } from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 import { Toolbar } from "@web_editor/js/editor/toolbar";
@@ -96,6 +96,18 @@ export class MassMailingWysiwyg extends Wysiwyg {
         }
     }
 
+    /**
+     * @override
+     */
+    setValue(currentValue) {
+        const initialDropZone = this.$editable[0].querySelector('.o_mail_wrapper_td');
+        const parsedHtml = new DOMParser().parseFromString(currentValue, "text/html");
+        if (initialDropZone && !parsedHtml.querySelector('.o_mail_wrapper_td')) {
+            initialDropZone.replaceChildren(currentValue);
+        } else {
+            super.setValue(...arguments);
+        }
+    }
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
