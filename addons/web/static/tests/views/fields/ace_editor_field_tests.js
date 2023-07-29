@@ -1,8 +1,11 @@
 /** @odoo-module **/
+/* global ace */
 
 import { registry } from "@web/core/registry";
 import {
     click,
+    clickSave,
+    editInput,
     getFixture,
     nextTick,
     triggerEvent,
@@ -64,6 +67,96 @@ QUnit.module("Fields", (hooks) => {
         );
 
         assert.ok(target.querySelector(".o_field_code").textContent.includes("yop"));
+    });
+
+    QUnit.test("AceEditorField mark as dirty as soon at onchange", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo" widget="code" />
+                </form>`,
+        });
+
+        assert.ok("ace" in window, "the ace library should be loaded");
+        assert.containsOnce(
+            target,
+            "div.ace_content",
+            "should have rendered something with ace editor"
+        );
+
+        assert.ok(target.querySelector(".o_field_code").textContent.includes("yop"));
+        // edit the foo field
+        const aceEditor = target.querySelector(".ace_editor");
+        ace.edit(aceEditor).setValue("blip");
+        await nextTick();
+        assert.containsOnce(target, ".o_form_status_indicator_buttons");
+        assert.doesNotHaveClass(
+            target.querySelector(".o_form_status_indicator_buttons"),
+            "invisible"
+        );
+
+        // revert edition
+        ace.edit(aceEditor).setValue("yop");
+        await nextTick();
+        assert.containsOnce(target, ".o_form_status_indicator_buttons");
+        assert.hasClass(target.querySelector(".o_form_status_indicator_buttons"), "invisible");
+    });
+
+    QUnit.test("AceEditorField on html fields works", async function (assert) {
+        serverData.models.partner.fields.htmlField = {
+            string: "HTML Field",
+            type: "html",
+        };
+        serverData.models.partner.records.push({
+            id: 3,
+            htmlField: "<p>My little HTML Test</p>",
+        });
+        serverData.models.partner.onchanges = { htmlField: function () {} };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 3,
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo"/>
+                    <field name="htmlField" widget="code" />
+                </form>`,
+            mockRPC(route, args) {
+                if (args.method) {
+                    assert.step(args.method);
+                    if (args.method === "write") {
+                        assert.deepEqual(args.args[1], { foo: "DEF" });
+                    }
+                    if (args.method === "onchange") {
+                        throw new Error("Should not call onchange, htmlField wasn't changed");
+                    }
+                } else if (route.includes("web.ace_lib")) {
+                    assert.step("web.ace_lib");
+                }
+            },
+        });
+
+        assert.ok("ace" in window, "the ace library should be loaded");
+        assert.containsOnce(
+            target,
+            "div.ace_content",
+            "should have rendered something with ace editor"
+        );
+
+        assert.ok(
+            target.querySelector(".o_field_code").textContent.includes("My little HTML Test")
+        );
+
+        // Modify foo and save
+        await editInput(target, ".o_field_widget[name=foo] textarea", "DEF");
+        await clickSave(target);
+
+        assert.verifySteps(["get_views", "read", "web.ace_lib", "write", "read"]);
     });
 
     QUnit.test("AceEditorField doesn't crash when editing", async (assert) => {
