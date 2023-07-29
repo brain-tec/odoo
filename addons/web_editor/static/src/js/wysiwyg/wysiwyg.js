@@ -324,8 +324,7 @@ export class Wysiwyg extends Component {
         let editorCollaborationOptions;
         if (
             options.collaborationChannel &&
-            // Hack: check if mail module is installed.
-            session.notification_type
+            this._hasICEServers()
         ) {
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
             if (this.options.collaborativeTrigger === 'start') {
@@ -2042,6 +2041,10 @@ export class Wysiwyg extends Component {
         }
 
         this.odooEditor.automaticStepSkipStack();
+        // Clear "d-none" for button groups.
+        for (const buttonGroup of this.toolbarEl.querySelectorAll('.btn-group')) {
+            buttonGroup.classList.remove('d-none');
+        }
         // We need to use the editor's window so the tooltip displays in its
         // document even if it's in an iframe.
         const editorWindow = this.odooEditor.document.defaultView;
@@ -2117,6 +2120,9 @@ export class Wysiwyg extends Component {
         if (!range || spansBlocks) {
             this.toolbarEl.querySelector('#create-link')?.classList.toggle('d-none', true);
         }
+        // Toggle unlink button. Always hide it on media.
+        const linkNode = getInSelection(this.odooEditor.document, 'a');
+        this.toolbarEl.querySelector('#unlink')?.classList.toggle('d-none', !linkNode || isInMedia);
         // Toggle the toolbar arrow.
         this.toolbarEl.classList.toggle('noarrow', isInMedia);
         // Unselect all media.
@@ -2129,8 +2135,6 @@ export class Wysiwyg extends Component {
             range.selectNode(this.lastMediaClicked);
             selection.removeAllRanges();
             selection.addRange(range);
-            // Always hide the unlink button on media.
-            this.toolbarEl.querySelector('#unlink')?.classList.toggle('d-none', true);
             // Toggle the 'active' class on the active image tool buttons.
             for (const button of this.toolbarEl.querySelectorAll('#image-shape div, #fa-spin')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
@@ -2158,6 +2162,14 @@ export class Wysiwyg extends Component {
                 this.odooEditor.observerActive();
             }, 400));
         }
+        // Hide button groups that have no visible buttons.
+        for (const buttonGroup of this.toolbarEl.querySelectorAll('.btn-group:not(.d-none)')) {
+            if (!buttonGroup.querySelector('.btn:not(.d-none)')) {
+                buttonGroup.classList.add('d-none');
+            }
+        }
+        // Toolbar might have changed size, update its position.
+        this.odooEditor.updateToolbarPosition();
         // Update color of already opened colorpickers.
         setTimeout(() => {
             for (const colorType in this.colorPalettesProps) {
@@ -2864,6 +2876,12 @@ export class Wysiwyg extends Component {
     _bindOnBlur() {
         this.$editable.on('blur', this._onBlur);
     }
+
+    _hasICEServers() {
+        // Hack: check if mail module is installed.
+        session.notification_type
+    }
+
     /**
      * Saves a base64 encoded image as an attachment.
      * Relies on _saveModifiedImage being called after it for webp.
@@ -2956,11 +2974,11 @@ export class Wysiwyg extends Component {
     }
 
     _getColorpickerTemplate() {
-        return this.orm.call(
+        return this.env.services.orm.call(
             'ir.ui.view',
             'render_public_asset',
             ['web_editor.colorpicker', {}]
-        )
+        );
     }
 
     // -----------------------------------------------------------------------------

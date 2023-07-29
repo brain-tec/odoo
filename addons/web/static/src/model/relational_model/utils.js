@@ -1,8 +1,9 @@
 /* @odoo-module */
 
 import { markup, onWillDestroy, onWillStart, onWillUpdateProps, useComponent } from "@odoo/owl";
-import { makeContext } from "@web/core/context";
+import { evalPartialContext, makeContext } from "@web/core/context";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { Domain } from "@web/core/domain";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { Deferred } from "@web/core/utils/concurrency";
 import { omit } from "@web/core/utils/objects";
@@ -35,7 +36,7 @@ const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that
 export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
         if (field.name in activeFields) {
-            patchActiveFields(activeFields[field.name], field);
+            patchActiveFields(activeFields[field.name], makeActiveField(field));
         } else {
             activeFields[field.name] = makeActiveField(field);
         }
@@ -55,7 +56,7 @@ export function createPropertyActiveField(property) {
     const { type } = property;
 
     const activeField = makeActiveField();
-    if (type === "many2many") {
+    if (type === "one2many" || type === "many2many") {
         activeField.related = {
             fields: {
                 id: { name: "id", type: "integer" },
@@ -70,31 +71,56 @@ export function createPropertyActiveField(property) {
     return activeField;
 }
 
+function combineModifiers(mod1, mod2, operator) {
+    if (operator === "AND") {
+        if (mod1 === false || mod2 === false) {
+            return false;
+        }
+        if (mod1 === true) {
+            return mod2;
+        }
+        if (mod2 === true) {
+            return mod1;
+        }
+        return Domain.and([mod1, mod2]).toString();
+    } else if (operator === "OR") {
+        if (mod1 === true || mod2 === true) {
+            return true;
+        }
+        if (mod1 === false) {
+            return mod2;
+        }
+        if (mod2 === false) {
+            return mod1;
+        }
+        return Domain.or([mod1, mod2]).toString();
+    }
+    throw new Error(
+        `Operator provided to "combineModifiers" must be "AND" or "OR", received ${operator}`
+    );
+}
+
 export function patchActiveFields(activeField, patch) {
-    activeField.invisible = activeField.invisible && patch.invisible;
-    activeField.readonly = activeField.readonly && patch.readonly;
-    activeField.required = activeField.required || patch.required;
+    activeField.invisible = combineModifiers(activeField.invisible, patch.invisible, "AND");
+    activeField.readonly = combineModifiers(activeField.readonly, patch.readonly, "AND");
+    activeField.required = combineModifiers(activeField.required, patch.required, "OR");
     activeField.onChange = activeField.onChange || patch.onChange;
     activeField.forceSave = activeField.forceSave || patch.forceSave;
     activeField.isHandle = activeField.isHandle || patch.isHandle;
     // x2manys
     if (patch.related) {
         const related = activeField.related;
-        if (related) {
-            for (const fieldName in patch.related.activeFields) {
-                if (fieldName in related.activeFields) {
-                    patchActiveFields(
-                        related.activeFields[fieldName],
-                        patch.related.activeFields[fieldName]
-                    );
-                } else {
-                    related.activeFields[fieldName] = { ...patch.related.activeFields[fieldName] };
-                }
+        for (const fieldName in patch.related.activeFields) {
+            if (fieldName in related.activeFields) {
+                patchActiveFields(
+                    related.activeFields[fieldName],
+                    patch.related.activeFields[fieldName]
+                );
+            } else {
+                related.activeFields[fieldName] = { ...patch.related.activeFields[fieldName] };
             }
-            Object.assign(related.fields, patch.related.fields);
-        } else {
-            activeField.related = patch.related;
         }
+        Object.assign(related.fields, patch.related.fields);
     }
     if ("limit" in patch) {
         activeField.limit = patch.limit;
@@ -119,6 +145,10 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
             isHandle: fieldNode.isHandle,
         });
         if (["one2many", "many2many"].includes(fields[fieldName].type)) {
+            activeField.related = {
+                activeFields: {},
+                fields: {},
+            };
             if (fieldNode.views) {
                 const viewDescr = fieldNode.views[fieldNode.viewMode];
                 if (viewDescr) {
@@ -204,49 +234,6 @@ export function getFieldContext(
     };
 }
 
-const SENTINEL = Symbol("sentinel");
-function _getFieldContextSpec(
-    fieldName,
-    activeFields,
-    fields,
-    evalContext,
-    parentActiveFields = null
-) {
-    const rawContext = activeFields[fieldName].context;
-    if (!rawContext || rawContext === "{}") {
-        return fields[fieldName].context;
-    }
-
-    evalContext = {
-        ids: SENTINEL,
-        active_id: SENTINEL,
-        active_ids: SENTINEL,
-        active_model: SENTINEL,
-        ...evalContext,
-        id: SENTINEL,
-    };
-    for (const fieldName in activeFields) {
-        evalContext[fieldName] = SENTINEL;
-    }
-    if (parentActiveFields) {
-        evalContext.parent = {};
-        for (const fieldName in parentActiveFields) {
-            evalContext.parent[fieldName] = SENTINEL;
-        }
-    }
-    const evaluatedContext = makeContext([fields[fieldName].context, rawContext], evalContext);
-    for (const key in evaluatedContext) {
-        if (evaluatedContext[key] === SENTINEL || key.startsWith("default_")) {
-            // FIXME: this isn't perfect, a value might be evaluted to something else
-            // than the symbol because of the symbol
-            delete evaluatedContext[key];
-        }
-    }
-    if (Object.keys(evaluatedContext).length > 0) {
-        return evaluatedContext;
-    }
-}
-
 export function getFieldsSpec(
     activeFields,
     fields,
@@ -283,14 +270,13 @@ export function getFieldsSpec(
             fieldsSpec[fieldName].fields = { display_name: {} };
         }
         if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
-            const context = _getFieldContextSpec(
-                fieldName,
-                activeFields,
-                fields,
-                evalContext,
-                parentActiveFields
-            );
-            if (context) {
+            let context = activeFields[fieldName].context;
+            if (!context || context === "{}") {
+                context = fields[fieldName].context || {};
+            } else {
+                context = evalPartialContext(context, evalContext);
+            }
+            if (Object.keys(context).length > 0) {
                 fieldsSpec[fieldName].context = context;
             }
         }
