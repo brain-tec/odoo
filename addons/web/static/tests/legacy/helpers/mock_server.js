@@ -1,16 +1,16 @@
-/** @odoo-module alias=web.MockServer **/
+/** @odoo-module **/
 
 import { unique } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
-import Class from "web.Class";
-import Domain from "web.Domain";
-import pyUtils from "web.py_utils";
-import { 
-    parseDateTime, 
-    serializeDate, 
-    serializeDateTime, 
-    deserializeDate, 
-    deserializeDateTime 
+import Class from "@web/legacy/js/core/class";
+import Domain from "@web/legacy/js/core/domain";
+import pyUtils from "@web/legacy/js/core/py_utils";
+import {
+    parseDateTime,
+    serializeDate,
+    serializeDateTime,
+    deserializeDate,
+    deserializeDateTime
 } from "@web/core/l10n/dates";
 
 var MockServer = Class.extend({
@@ -1890,26 +1890,10 @@ var MockServer = Class.extend({
      * @param {boolean} kwargs.lazy still mostly ignored
      * @param {integer} [kwargs.limit]
      * @param {integer} [kwargs.offset]
-     * @param {boolean} [kwargs.expand=false] if true, read records inside each
-     *   group
-     * @param {integer} [kwargs.expand_limit]
-     * @param {integer} [kwargs.expand_orderby]
      * @returns {Object[]}
      */
     _mockWebReadGroup: function (model, kwargs) {
-        var self = this;
         var groups = this._mockReadGroup(model, kwargs);
-        if (kwargs.expand && kwargs.groupby.length === 1) {
-            groups.forEach(function (group) {
-                group.__data = self._mockSearchReadController({
-                    domain: group.__domain,
-                    model: model,
-                    fields: kwargs.fields,
-                    limit: kwargs.expand_limit,
-                    order: kwargs.expand_orderby,
-                });
-            });
-        }
         var allGroups = this._mockReadGroup(model, {
             domain: kwargs.domain,
             fields: ['display_name'],
@@ -2093,7 +2077,7 @@ var MockServer = Class.extend({
      * helper function: traverse a tree and apply the function f to each of its
      * nodes.
      *
-     * Note: this should be abstracted somewhere in web.utils, or in
+     * Note: this should be abstracted somewhere in @web/legacy/js/core/utils, or in
      * web.tree_utils
      *
      * @param {Object} tree object with a 'children' key, which contains an

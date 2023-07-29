@@ -1,9 +1,9 @@
-/** @odoo-module alias=website.snippet.editor **/
+/** @odoo-modules **/
 
-import {qweb, _t, _lt} from "web.core";
-import Dialog from "web.Dialog";
-import weSnippetEditor from "web_editor.snippet.editor";
-import wSnippetOptions from "website.editor.snippets.options";
+import {qweb, _t, _lt} from "@web/legacy/js/services/core";
+import Dialog from "@web/legacy/js/core/dialog";
+import weSnippetEditor from "@web_editor/js/editor/snippets.editor";
+import wSnippetOptions from "@website/js/editor/snippets.options";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getTraversedNodes = OdooEditorLib.getTraversedNodes;
@@ -462,18 +462,20 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
      * @private
      */
     _onReloadBundles(ev) {
-        this._mutex.exec(() => {
-            const excludeSelector = this.optionsTabStructure.map(element => element[0]).join(', ');
-            for (const editor of this.snippetEditors) {
-                if (!editor.$target[0].matches(excludeSelector)) {
-                    if (this._currentTab === this.tabs.THEME) {
+        const excludeSelector = this.optionsTabStructure.map(element => element[0]).join(', ');
+        for (const editor of this.snippetEditors) {
+            if (!editor.$target[0].matches(excludeSelector)) {
+                if (this._currentTab === this.tabs.THEME) {
+                    this._mutex.exec(() => {
                         editor.destroy();
-                    } else {
-                        editor.updateOptionsUI(true);
-                    }
+                    });
+                } else {
+                    this._mutex.exec(async () => {
+                        await editor.updateOptionsUI(true);
+                    });
                 }
             }
-        });
+        }
     },
 });
 

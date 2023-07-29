@@ -4,7 +4,7 @@ import { start, startServer } from "@mail/../tests/helpers/test_utils";
 import { click, patchWithCleanup, triggerHotkey, triggerEvent } from "@web/../tests/helpers/utils";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import { nextTick } from "web.test_utils";
+import { nextTick } from "@web/../tests/legacy/helpers/test_utils";
 import { popoverService } from "@web/core/popover/popover_service";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { browser } from "@web/core/browser/browser";
@@ -385,7 +385,7 @@ QUnit.test("avatar card preview", async (assert) => {
     });
     // Open card
     await triggerEvent(document, ".o_m2o_avatar > img", "mouseover");
-    assert.verifySteps(["setTimeout of 350ms", "user read"]);
+    assert.verifySteps(["setTimeout of 350ms", "setTimeout of 250ms", "user read"]);
     assert.containsOnce(document.body, ".o_avatar_card");
     assert.strictEqual(
         document.querySelector(".o_card_user_infos").textContent,

@@ -1,11 +1,11 @@
-/** @odoo-module alias=website_sale_options.website_sale **/
+/** @odoo-module **/
 
-import ajax from "web.ajax";
-import core from "web.core";
-import publicWidget from "web.public.widget";
+import ajax from "@web/legacy/js/core/ajax";
+import core from "@web/legacy/js/services/core";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import { OptionalProductsModal } from "@website_sale_product_configurator/js/sale_product_configurator_modal";
-import "website_sale.website_sale";
-import wsUtils from "website_sale.utils";
+import "@website_sale/js/website_sale";
+import wsUtils from "@website_sale/js/website_sale_utils";
 
 var _t = core._t;
 
@@ -121,7 +121,7 @@ publicWidget.registry.WebsiteSale.include({
                         $quantity.parent().parent().removeClass('d-none');
                         $quantity.text(quantity).hide().fadeIn(600);
                         // find the closest div that has an img tag in it
-                        const imgContainerEl = self.$form.closest('div:has(img)');
+                        const imgContainerEl = self.$form.closest('div:has(.o_wsale_product_images)');
                         wsUtils.animateClone($('header .o_wsale_my_cart').first(), imgContainerEl, 25, 40);
                         sessionStorage.setItem('website_sale_cart_quantity', quantity);
                     }).then(()=>{

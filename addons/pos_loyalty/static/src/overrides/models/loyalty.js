@@ -2,7 +2,7 @@
 
 import { Order, Orderline } from "@point_of_sale/app/store/models";
 import { Mutex } from "@web/core/utils/concurrency";
-import concurrency from "web.concurrency";
+import concurrency from "@web/legacy/js/core/concurrency";
 import { roundDecimals, roundPrecision } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
@@ -803,7 +803,9 @@ patch(Order.prototype, "pos_loyalty.Order", {
                             qtyPerProduct[line.reward_product_id || line.get_product().id] =
                                 lineQty;
                         }
-                        orderedProductPaid += line.get_price_with_tax();
+                        if (!line.is_reward_line) {
+                            orderedProductPaid += line.get_price_with_tax();
+                        }
                     }
                 }
                 if (totalProductQty < rule.minimum_qty) {

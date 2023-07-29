@@ -8,6 +8,7 @@ import { standardFieldProps } from "../standard_field_props";
 import { CodeEditor } from "@web/core/code_editor/code_editor";
 import { Component, useState } from "@odoo/owl";
 import { useRecordObserver } from "@web/model/relational_model/utils";
+import { formatText } from "@web/views/fields/formatters";
 
 export class AceField extends Component {
     static template = "web.AceField";
@@ -25,7 +26,7 @@ export class AceField extends Component {
 
         this.state = useState({});
         useRecordObserver((record) => {
-            this.state.initialValue = record.data[this.props.name];
+            this.state.initialValue = formatText(record.data[this.props.name]);
         });
 
         this.isDirty = false;
@@ -45,8 +46,12 @@ export class AceField extends Component {
     }
 
     handleChange(editedValue) {
-        this.props.record.model.bus.trigger("FIELD_IS_DIRTY", true);
-        this.isDirty = true;
+        if (this.state.initialValue !== editedValue) {
+            this.isDirty = true;
+        } else {
+            this.isDirty = false;
+        }
+        this.props.record.model.bus.trigger("FIELD_IS_DIRTY", this.isDirty);
         this.editedValue = editedValue;
     }
 
