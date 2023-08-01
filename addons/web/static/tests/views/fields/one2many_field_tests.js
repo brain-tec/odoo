@@ -287,6 +287,73 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    QUnit.test("one2many in a list x2many editable use the right context", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="int_field" widget="handle"/>
+                                <field name="trululu" context="{'my_context': 'list'}" />
+                            </tree>
+                            <form>
+                                <field name="trululu"  context="{'my_context': 'form'}"/>
+                            </form>
+                        </field>
+                    </form>`,
+            mockRPC(route, args) {
+                if (args.method === "name_create") {
+                    assert.step(`name_create ${args.kwargs.context.my_context}`);
+                }
+            },
+            resId: 1,
+        });
+
+        await addRow(target, ".o_field_x2many_list");
+        await editInput(target, "[name='trululu'] input", "new partner");
+        await selectDropdownItem(target, "trululu", 'Create "new partner"');
+
+        assert.verifySteps(["name_create list"]);
+    });
+
+    QUnit.test(
+        "one2many in a list x2many non-editable use the right context",
+        async function (assert) {
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree>
+                                <field name="int_field" widget="handle"/>
+                                <field name="trululu" context="{'my_context': 'list'}" />
+                            </tree>
+                            <form>
+                                <field name="trululu"  context="{'my_context': 'form'}"/>
+                            </form>
+                        </field>
+                    </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "name_create") {
+                        assert.step(`name_create ${args.kwargs.context.my_context}`);
+                    }
+                },
+                resId: 1,
+            });
+
+            await addRow(target, ".o_field_x2many_list");
+            await editInput(target, "[name='trululu'] input", "new partner");
+            await selectDropdownItem(target, "trululu", 'Create "new partner"');
+
+            assert.verifySteps(["name_create form"]);
+        }
+    );
+
     QUnit.test("O2M field without relation_field", async function (assert) {
         delete serverData.models.partner.fields.p.relation_field;
 
@@ -418,8 +485,8 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget[name=parent_id] input", "ABC");
         await clickOpenedDropdownItem(target, "parent_id", "Create and edit...");
 
-        await click(target, ".modal:not(.o_inactive_modal) .modal-footer .o_form_button_save");
-        await click(target, ".modal:not(.o_inactive_modal) .o_form_button_save_new");
+        await click(target, ".o_dialog:not(.o_inactive_modal) .modal-footer .o_form_button_save");
+        await click(target, ".o_dialog:not(.o_inactive_modal) .o_form_button_save_new");
 
         assert.containsOnce(
             target,
@@ -479,11 +546,11 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget[name=parent_id] input", "ABC");
         await clickOpenedDropdownItem(target, "parent_id", "Create and edit...");
         await click(
-            target.querySelector(".modal:not(.o_inactive_modal) .modal-footer .o_form_button_save")
+            target.querySelector(".o_dialog:not(.o_inactive_modal) .modal-footer .o_form_button_save")
         );
         assert.strictEqual(
             target
-                .querySelector(".modal:not(.o_inactive_modal) .modal-footer .o_form_button_save")
+                .querySelector(".o_dialog:not(.o_inactive_modal) .modal-footer .o_form_button_save")
                 .getAttribute("disabled"),
             ""
         );
@@ -491,7 +558,7 @@ QUnit.module("Fields", (hooks) => {
         await nextTick();
         // close all dialogs
         await click(
-            target.querySelector(".modal:not(.o_inactive_modal) .modal-footer .o_form_button_save")
+            target.querySelector(".o_dialog:not(.o_inactive_modal) .modal-footer .o_form_button_save")
         );
         await nextTick();
         assert.containsNone(target, ".o_dialog .o_form_view");
@@ -2064,8 +2131,6 @@ QUnit.module("Fields", (hooks) => {
                                         fields: {
                                             turtle_foo: {},
                                         },
-                                        limit: 40,
-                                        order: "",
                                     },
                                 },
                                 limit: 40,
@@ -6738,8 +6803,6 @@ QUnit.module("Fields", (hooks) => {
                                     fields: {
                                         turtle_foo: {},
                                     },
-                                    limit: 40,
-                                    order: "",
                                 },
                             },
                             limit: 40,
