@@ -18,6 +18,8 @@
                     <filter name="my_team" string="My Team" domain="[('parent_id.user_id', '=', uid)]"/>
                     <filter name="my_department" string="My Department" domain="[('member_of_department', '=', True)]"/>
                     <separator/>
+                    <filter name="newly_hired" string="Newly Hired" domain="[('newly_hired', '=', True)]"/>
+                    <separator/>
                     <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter name="group_manager" string="Manager" domain="[]" context="{'group_by':'parent_id'}"/>
@@ -69,6 +71,7 @@
                             </group>
                             <group>
                                 <field name="department_id" context="{'open_employees_kanban': 1}"/>
+                                <field name="job_id"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="parent_id" widget="many2one_avatar_user"/>
                                 <field name="coach_id" widget="many2one_avatar_user"/>
@@ -81,7 +84,7 @@
                                         <group string="Location" name="location">
                                             <field name="address_id"
                                                 context="{'show_address': 1}"
-                                                options='{"always_reload": True, "highlight_first_line": True}'/>
+                                                options='{"highlight_first_line": True}'/>
                                             <field name="work_location_id"/>
                                         </group>
                                         <group name="managers" string="Approvers" invisible="1">
