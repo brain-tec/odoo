@@ -152,7 +152,6 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         this.options.toolbarHandler = $('#web_editor-top-edit');
         // Do not insert a paragraph after each column added by the column commands:
         this.options.insertParagraphAfterColumns = false;
-        this.options.dropImageAsAttachment = true;
 
         const $editableWindow = this.$editable[0].ownerDocument.defaultView;
         // Dropdown menu initialization: handle dropdown openings by hand
@@ -341,12 +340,13 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         this.$root = this.$editable;
     }
     /**
+     * @override
      * @private
      * @return {Object} Params to pass to the wysiwyg widget.
      */
     _getEditorOptions(options) {
         const powerboxItems = this._getSnippetsPowerboxItems();
-        return {
+        return super._getEditorOptions({
             snippets: 'website.snippets',
             recordInfo: {
                 context: this._context,
@@ -378,7 +378,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             getUnremovableElements: this._getUnremovableElements.bind(this),
             direction: this.websiteService.currentWebsite.metadata.direction,
             ...options,
-        };
+        });
     }
     /**
      * Sets the observer so that if any change happen to the body and such
