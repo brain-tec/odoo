@@ -70,6 +70,20 @@ function completeActiveField(activeField, extra) {
     }
 }
 
+export function completeActiveFields(activeFields, extraActiveFields) {
+    for (const fieldName in extraActiveFields) {
+        const extraActiveField = {
+            ...extraActiveFields[fieldName],
+            invisible: true,
+        };
+        if (fieldName in activeFields) {
+            completeActiveField(activeFields[fieldName], extraActiveField);
+        } else {
+            activeFields[fieldName] = extraActiveField;
+        }
+    }
+}
+
 export function createPropertyActiveField(property) {
     const { type } = property;
 
@@ -182,20 +196,10 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                             fieldNode.views.form,
                             fieldNode.views.form.fields
                         );
-                        for (const fieldName in formArchInfo.activeFields) {
-                            const formActiveField = {
-                                ...formArchInfo.activeFields[fieldName],
-                                invisible: true,
-                            };
-                            if (fieldName in activeField.related.activeFields) {
-                                completeActiveField(
-                                    activeField.related.activeFields[fieldName],
-                                    formActiveField
-                                );
-                            } else {
-                                activeField.related.activeFields[fieldName] = formActiveField;
-                            }
-                        }
+                        completeActiveFields(
+                            activeField.related.activeFields,
+                            formArchInfo.activeFields
+                        );
                         Object.assign(activeField.related.fields, formArchInfo.fields);
                     }
                 }
@@ -285,8 +289,11 @@ export function getFieldsSpec(
             properties.push(fieldName);
         }
         // M2O
-        if (fields[fieldName].type === "many2one" && invisible !== true) {
-            fieldsSpec[fieldName].fields = { display_name: {} };
+        if (fields[fieldName].type === "many2one") {
+            fieldsSpec[fieldName].fields = {};
+            if (invisible !== true) {
+                fieldsSpec[fieldName].fields.display_name = {};
+            }
         }
         if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
             let context = activeFields[fieldName].context;
@@ -367,11 +374,8 @@ export function parseServerValue(field, value) {
         }
         case "many2one": {
             if (Array.isArray(value)) {
+                // Used for web_read_group, where the value is an array of [id, display_name]
                 return value;
-            }
-            if (Number.isInteger(value)) {
-                // for always invisible many2ones, unity directly returns the id, not a pair
-                return [value, ""];
             }
             return value ? [value.id, value.display_name] : false;
         }

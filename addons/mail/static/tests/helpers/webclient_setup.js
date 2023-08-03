@@ -37,26 +37,24 @@ export function copyRegistry(source, target) {
     for (const [name, service] of source.getEntries()) {
         target.add(name, service);
     }
-    source.addEventListener("UPDATE", ({ operation, key, value }) => {
-        if (operation === "add") {
-            target.add(key, value);
-        }
-    });
 }
 
 // Copy registries before they are cleared by the test setup in
 // order to restore them during `getWebClientReady`.
 const mailServicesRegistry = registry.category("mail.services");
 const webServicesRegistry = registry.category("services");
-copyRegistry(webServicesRegistry, mailServicesRegistry);
 
 const mailMainComponentsRegistry = registry.category("mail.main_components");
 const webMainComponentsRegistry = registry.category("main_components");
-copyRegistry(webMainComponentsRegistry, mailMainComponentsRegistry);
 
 const mailSystrayRegistry = registry.category("mail.systray");
 const webSystrayRegistry = registry.category("systray");
-copyRegistry(webSystrayRegistry, mailSystrayRegistry);
+
+QUnit.begin(() => {
+    copyRegistry(webServicesRegistry, mailServicesRegistry);
+    copyRegistry(webMainComponentsRegistry, mailMainComponentsRegistry);
+    copyRegistry(webSystrayRegistry, mailSystrayRegistry);
+});
 
 /**
  * @returns function that returns an `XMLHttpRequest`-like object whose response
@@ -70,18 +68,17 @@ function getCreateXHR() {
         let route = "";
         const self = this;
         xhr.status = 200;
-        patch(xhr, "mail", {
+        patch(xhr, {
             open(method, dest) {
                 route = dest;
-                return this._super(method, dest);
+                return super.open(method, dest);
             },
             async send(data) {
-                const _super = this._super;
                 await new Promise(setTimeout);
                 response = JSON.stringify(
                     await self.env.services.rpc(route, { body: data, method: "POST" })
                 );
-                return _super(data);
+                return super.send(data);
             },
             upload: new EventTarget(),
             abort() {
@@ -141,8 +138,7 @@ export const setupManager = {
                     audio.play = () => {};
                     return audio;
                 },
-            },
-            { pure: true }
+            }
         );
         patchWithCleanup(session, { show_effect: true });
         services["messagingValues"] = services["messagingValues"] ?? {
