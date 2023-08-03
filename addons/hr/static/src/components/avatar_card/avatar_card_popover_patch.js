@@ -6,19 +6,26 @@ import { useService } from "@web/core/utils/hooks";
 
 export const patchAvatarCardPopover = {
     setup() {
-        this._super();
+        super.setup();
         this.userInfoTemplate = "hr.avatarCardUserInfos",
         this.actionService = useService("action");
     },
     get fieldNames(){
-        let fields = this._super();
+        let fields = super.fieldNames;
         return fields.concat([
-            "work_phone", 
+            "work_phone",
+            "work_email", 
             "job_title", 
             "department_id", 
             "employee_parent_id",
             "employee_id",
         ])
+    },
+    get email(){
+        return this.user.work_email || this.user.email;
+    },
+    get phone(){
+        return this.user.work_phone || this.user.phone;
     },
     async onClickViewEmployee(){
         const employeeId = this.user.employee_id[0];
@@ -27,4 +34,4 @@ export const patchAvatarCardPopover = {
     }
 };
 
-patch(AvatarCardPopover.prototype, "hr", patchAvatarCardPopover);
+export const unpatchAvatarCardPopover = patch(AvatarCardPopover.prototype, patchAvatarCardPopover);

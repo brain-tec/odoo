@@ -16,7 +16,7 @@ import { loadLanguages } from "@web/core/l10n/translation";
 transitionConfig.disabled = true;
 
 import { patch } from "@web/core/utils/patch";
-import { App, whenReady } from "@odoo/owl";
+import { App, EventBus, whenReady } from "@odoo/owl";
 import { currencies } from "@web/core/currency";
 import "./helpers/session";
 
@@ -100,7 +100,7 @@ function patchOwlApp() {
     patchWithCleanup(App.prototype, {
         destroy() {
             if (!this.destroyed) {
-                this._super(...arguments);
+                super.destroy(...arguments);
                 this.destroyed = true;
             }
         },
@@ -108,7 +108,7 @@ function patchOwlApp() {
             registerCleanup(() => {
                 delete this.constructor.sharedTemplates[name];
             });
-            return this._super(...arguments);
+            return super.addTemplate(...arguments);
         },
     });
 }
@@ -199,8 +199,7 @@ function patchBrowserWithCleanup() {
                     registerCleanup(() => this.close());
                 }
             },
-        },
-        { pure: true }
+        }
     );
 }
 
@@ -226,7 +225,7 @@ function patchLegacyBus() {
     // during a test (e.g. during the deployment of a service)
     patchWithCleanup(LegacyBus.prototype, {
         on() {
-            this._super(...arguments);
+            super.on(...arguments);
             registerCleanup(() => {
                 this.off(...arguments);
             });
@@ -307,7 +306,7 @@ function removeUnwantedAttrsFromTemplates(attrs) {
 
 function patchAssets() {
     const { loadXML, getBundle, loadJS, loadCSS } = assets;
-    patch(assets, "TestAssetsLoadXML", {
+    patch(assets, {
         loadXML: function (templates) {
             console.log("%c[assets] fetch XML ressource", "color: #66e; font-weight: bold;");
             // Clean up new templates that might be added later.
@@ -352,27 +351,38 @@ function patchAssets() {
     });
 }
 
+function patchEventBus() {
+    patchWithCleanup(EventBus.prototype, {
+        addEventListener() {
+            super.addEventListener(...arguments);
+            registerCleanup(() => this.removeEventListener(...arguments));
+        },
+    });
+}
+
 export async function setupTests() {
     // uncomment to debug memory leaks in qunit suite
-    // let memoryBeforeModule;
-    // QUnit.moduleStart(({ tests }) => {
-    //     if (tests.length) {
-    //         window.gc();
-    //         memoryBeforeModule = window.performance.memory.usedJSHeapSize;
-    //     }
-    // });
-    // QUnit.moduleDone(({ name }) => {
-    //     if (memoryBeforeModule) {
-    //         window.gc();
-    //         const afterGc = window.performance.memory.usedJSHeapSize;
-    //         console.log(
-    //             `MEMINFO - After suite "${name}" - after gc: ${afterGc} delta: ${
-    //                 afterGc - memoryBeforeModule
-    //             }`
-    //         );
-    //         memoryBeforeModule = null;
-    //     }
-    // });
+    // if (window.gc) {
+    //     let memoryBeforeModule;
+    //     QUnit.moduleStart(({ tests }) => {
+    //         if (tests.length) {
+    //             window.gc();
+    //             memoryBeforeModule = window.performance.memory.usedJSHeapSize;
+    //         }
+    //     });
+    //     QUnit.moduleDone(({ name }) => {
+    //         if (memoryBeforeModule) {
+    //             window.gc();
+    //             const afterGc = window.performance.memory.usedJSHeapSize;
+    //             console.log(
+    //                 `MEMINFO - After suite "${name}" - after gc: ${afterGc} delta: ${
+    //                     afterGc - memoryBeforeModule
+    //                 }`
+    //             );
+    //             memoryBeforeModule = null;
+    //         }
+    //     });
+    // }
 
     QUnit.testStart(() => {
         checkGlobalObjectsIntegrity();
@@ -381,6 +391,7 @@ export async function setupTests() {
         cleanLoadedLanguages();
         patchBrowserWithCleanup();
         patchBodyAddEventListener();
+        patchEventBus();
         patchLegacyBus();
         patchOdoo();
         patchSessionInfo();
