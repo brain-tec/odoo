@@ -225,12 +225,8 @@
             'web/static/lib/ace/mode-js.js',
             'web/static/lib/ace/mode-qweb.js',
             'web/static/lib/nearest/jquery.nearest.js',
-            'web/static/lib/daterangepicker/daterangepicker.js',
-            'web/static/src/legacy/js/libs/daterangepicker.js',
             'web/static/lib/stacktracejs/stacktrace.js',
             'web/static/lib/Chart/Chart.js',
-
-            '/web/static/lib/daterangepicker/daterangepicker.js',
 
             # 'web/static/tests/legacy/main_tests.js',
             'web/static/tests/helpers/**/*.js',
@@ -242,8 +238,6 @@
             'web/static/tests/main.js',
             'web/static/tests/setup.js',
 
-            ('include', 'web.frontend_legacy'),
-            ("include", "web.assets_backend_legacy_lazy"),
             ## END copy of web.tests_assets
             # pos unit tests
             'point_of_sale/static/tests/unit/**/*',
