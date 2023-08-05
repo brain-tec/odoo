@@ -2,7 +2,7 @@
 
 import { parse } from "web.field_utils";
 import PosComponent from "@point_of_sale/js/PosComponent";
-import { useErrorHandlers } from "@point_of_sale/js/custom_hooks";
+import { useErrorHandlers, useAsyncLockedMethod } from "@point_of_sale/js/custom_hooks";
 import NumberBuffer from "@point_of_sale/js/Misc/NumberBuffer";
 import { useListener } from "@web/core/utils/hooks";
 import Registries from "@point_of_sale/js/Registries";
@@ -27,6 +27,7 @@ class PaymentScreen extends PosComponent {
         useErrorHandlers();
         this.payment_interface = null;
         this.error = false;
+        this.validateOrder = useAsyncLockedMethod(this.validateOrder);
     }
 
     showMaxValueError() {
@@ -206,7 +207,8 @@ class PaymentScreen extends PosComponent {
         if (
             (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
             this.env.pos.config.iface_cashdrawer &&
-            this.env.pos.config.use_proxy
+            this.env.proxy &&
+            this.env.proxy.printer
         ) {
             this.env.proxy.printer.open_cashbox();
         }
