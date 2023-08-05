@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { parse } from "web.field_utils";
-import { useErrorHandlers } from "@point_of_sale/js/custom_hooks";
+import { useErrorHandlers, useAsyncLockedMethod } from "@point_of_sale/js/custom_hooks";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import utils from "web.utils";
@@ -39,6 +39,7 @@ export class PaymentScreen extends Component {
         useErrorHandlers();
         this.payment_interface = null;
         this.error = false;
+        this.validateOrder = useAsyncLockedMethod(this.validateOrder);
     }
 
     showMaxValueError() {
@@ -216,7 +217,8 @@ export class PaymentScreen extends Component {
         if (
             (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
             this.env.pos.config.iface_cashdrawer &&
-            this.env.pos.config.use_proxy
+            this.env.proxy &&
+            this.env.proxy.printer
         ) {
             this.env.proxy.printer.open_cashbox();
         }
