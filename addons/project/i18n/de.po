@@ -978,7 +978,7 @@ msgid ""
 "An analytic account is required in order to use timesheets."
 msgstr ""
 "Kostenstelle, mit dem dieses Projekt, seine Aufgaben und seine Zeiterfassungsbögen verknüpft sind. \n"
-"Verfolgen Sie die Kosten und Einnahmen Ihres Projekts, indem Sie diese Kostenstelle uf Ihre zugehörigen Dokumente (z. B. Verkaufsaufträge, Ausgangsrechnungen, Einkaufsaufträge, Eingangsrechnungen, Spesen usw.) setzen.\n"
+"Verfolgen Sie die Kosten und Einnahmen Ihres Projekts, indem Sie diese Kostenstelle auf Ihre zugehörigen Dokumente (z. B. Verkaufsaufträge, Ausgangsrechnungen, Einkaufsaufträge, Eingangsrechnungen, Spesen usw.) setzen.\n"
 "Diese Kostenstelle kann bei Bedarf für jede Aufgabe einzeln geändert werden.\n"
 "Eine Kostenstelle ist erforderlich, um Zeiterfassungsbögen verwenden zu können."
 
@@ -2511,8 +2511,8 @@ msgid ""
 "Grant portal users access to your project or tasks by adding them as "
 "followers."
 msgstr ""
-"Gewähren Sie Portalnutzern Zugriff auf Ihr Projekt oder Ihre Aufgaben, indem"
-" Sie sie als Follower hinzufügen."
+"Gewähren Sie Portalbenutzern Zugriff auf Ihr Projekt oder Ihre Aufgaben, "
+"indem Sie sie als Follower hinzufügen."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__legend_done
@@ -2623,7 +2623,7 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
-"ID des übergeordneten Alias Datensatz (Beispiel: Projekt welches den Alias "
+"ID des übergeordneten Alias-Datensatz (Beispiel: Projekt welches den Alias "
 "für die Erstellung von Aufgaben beinhaltet)."
 
 #. module: project
@@ -3769,8 +3769,8 @@ msgstr "Anzahl der Fehler"
 #: model:ir.model.fields,help:project.field_project_project__message_needaction_counter
 #: model:ir.model.fields,help:project.field_project_task__message_needaction_counter
 #: model:ir.model.fields,help:project.field_project_update__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_milestone__message_has_error_counter
@@ -3778,7 +3778,7 @@ msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
 #: model:ir.model.fields,help:project.field_project_task__message_has_error_counter
 #: model:ir.model.fields,help:project.field_project_update__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Anzahl der Nachrichten mit Zustellungsfehler."
+msgstr "Anzahl der Nachrichten mit Zustellungsfehler"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_month__october
@@ -4070,7 +4070,8 @@ msgstr ""
 "Richtlinie zum Hinterlassen einer Mitteilung im Dokument über das E-Mail-Gateway.\n"
 "- Jeder: jeder kann eine Nachricht hinterlassen\n"
 "- Partner: nur bestätigte Partner\n"
-"- Follower: nur die Personen, die dem betreffenden Dokument folgen oder Mitglieder von Kanälen sind, die dem Dokument folgen\n"
+"- Follower: nur Follower des entsprechenden Dokuments\n"
+" oder Mitglieder der verfolgten Kanäle\n"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__access_url
@@ -4081,7 +4082,7 @@ msgstr "Portalzugriffs-URL"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__portal_user_names
 msgid "Portal User Names"
-msgstr "Portalnutzernamen"
+msgstr "Portalbenutzernamen"
 
 #. module: project
 #. odoo-python
@@ -4091,7 +4092,7 @@ msgid ""
 "Portal users will be removed from the followers of the project and its "
 "tasks."
 msgstr ""
-"Portalnutzer werden aus den Followern des Projekts und seiner Aufgaben "
+"Portalbenutzer werden aus den Followern des Projekts und seiner Aufgaben "
 "entfernt."
 
 #. module: project
@@ -4333,7 +4334,7 @@ msgstr "Projekt: Projekt abgeschlossen"
 #. module: project
 #: model:mail.template,name:project.mail_template_data_project_task
 msgid "Project: Request Acknowledgment"
-msgstr "Projekt: Erhalt der Anfrage"
+msgstr "Projekt: Eingang der Anfrage"
 
 #. module: project
 #: model:ir.actions.server,name:project.ir_cron_rating_project_ir_actions_server
@@ -5703,7 +5704,7 @@ msgstr "Dritter"
 #: model:project.task.type,name:project.project_personal_stage_demo_3
 #, python-format
 msgid "This Month"
-msgstr "Dieser Monat"
+msgstr "Diesen Monat"
 
 #. module: project
 #. odoo-python

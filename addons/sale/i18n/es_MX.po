@@ -7,6 +7,7 @@
 # Lucia Pacheco, 2022
 # Braulio D. López Vázquez <bdl@odoo.com>, 2022
 # Martin Trigaux, 2023
+# Iran Villalobos López, 2023
 # Fernanda Alvarez, 2023
 # 
 msgid ""
@@ -1417,8 +1418,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"La conversión entre las unidades de medidas solo pueden ocurrir si "
-"pertenecen a la misma categoría. La conversión se basará en las razones "
+"La conversión entre las unidades de medidas solo puede ocurrir si pertenecen"
+" a la misma categoría. La conversión se basará en las proporciones "
 "establecidas."
 
 #. module: sale
@@ -2138,7 +2139,7 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_sale_order__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
-"Si se encuentra seleccionado, algunos mensajes tienen error de entrega."
+"Si se encuentra seleccionado, algunos mensajes presentan un error de envío."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_auto_done_setting
@@ -2782,7 +2783,7 @@ msgstr "Número de errores"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Número de mensajes que requieren una acción"
 
 #. module: sale
@@ -4520,8 +4521,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "This will update all unit prices based on the currently set pricelist."
 msgstr ""
-"Esto actualizará todos los precios unitarios basándose en la lista de "
-"precios actualmente establecida."
+"Esto actualizará todos los precios unitarios según la lista de precios "
+"actualmente establecida."
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice

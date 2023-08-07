@@ -272,18 +272,14 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-user-plus fa-3x\" role=\"img\" aria-label=\"Attended "
 "button\" title=\"Confirm Attendance\"/>"
-msgstr ""
-"<i class=\"fa fa-user-plus fa-3x\" role=\"img\" aria-label=\"Attended "
-"button\" title=\"確認出席\"/>"
+msgstr "<i class=\"fa fa-user-plus fa-3x\" role=\"img\" aria-label=\"已出席按鈕\" title=\"確認出席\"/>"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_registration_view_kanban
 msgid ""
 "<i class=\"fa fa-user-plus\" role=\"img\" aria-label=\"Attended button\" "
 "title=\"Confirm Attendance\"/>"
-msgstr ""
-"<i class=\"fa fa-user-plus\" role=\"img\" aria-label=\"Attended button\" "
-"title=\"確認出席\"/>"
+msgstr "<i class=\"fa fa-user-plus\" role=\"img\" aria-label=\"已出席按鈕\" title=\"確認出席\"/>"
 
 #. module: event
 #: model_terms:event.event,description:event.event_2
@@ -2474,8 +2470,8 @@ msgstr "錯誤數量"
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__message_needaction_counter
 #: model:ir.model.fields,help:event.field_event_registration__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "需要處理的消息數量"
+msgid "Number of messages requiring action"
+msgstr "需要採取行動的訊息數目"
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__message_has_error_counter
@@ -3110,6 +3106,14 @@ msgstr "我們與會者和我們的飛行員的安全是第一位的！"
 msgid ""
 "The stop date cannot be earlier than the start date. Please check ticket "
 "%(ticket_name)s"
+msgstr ""
+
+#. module: event
+#. odoo-python
+#: code:addons/event/models/event_mail.py:0
+#, python-format
+msgid ""
+"The template which is referenced should be coming from %(model_name)s model."
 msgstr ""
 
 #. module: event

@@ -6403,8 +6403,10 @@ registry.ImageTools = ImageHandlerOption.extend({
     async _loadImageInfo() {
         await this._super(...arguments);
         const img = this._getImg();
-        if (img.dataset.shape && img.dataset.mimetype !== 'image/svg+xml') {
-            img.dataset.originalMimetype = img.dataset.mimetype;
+        if (img.dataset.shape) {
+            if (img.dataset.mimetype !== "image/svg+xml") {
+                img.dataset.originalMimetype = img.dataset.mimetype;
+            }
             if (!this._isImageSupportedForProcessing(img)) {
                 delete img.dataset.shape;
                 delete img.dataset.shapeColors;
@@ -6412,9 +6414,12 @@ registry.ImageTools = ImageHandlerOption.extend({
                 delete img.dataset.originalMimetype;
                 return;
             }
-            // Image data-mimetype should be changed to SVG since loadImageInfo()
-            // will set the original attachment mimetype on it.
-            img.dataset.mimetype = 'image/svg+xml';
+            if (img.dataset.mimetype !== "image/svg+xml") {
+                // Image data-mimetype should be changed to SVG since
+                // loadImageInfo() will set the original attachment mimetype on
+                // it.
+                img.dataset.mimetype = "image/svg+xml";
+            }
         }
     },
     /**
@@ -6982,6 +6987,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             this._lastShapePalette = palette;
             this._shapeBackgroundImagePerClass = {};
             for (const styleSheet of this.$target[0].ownerDocument.styleSheets) {
+                if (styleSheet.href && new URL(styleSheet.href).host !== location.host) {
+                    // In some browsers, if a stylesheet is loaded from a different domain
+                    // accessing cssRules results in a SecurityError.
+                    continue;
+                }
                 for (const rule of [...styleSheet.cssRules]) {
                     if (rule.selectorText && rule.selectorText.startsWith(".o_we_shape.")) {
                         this._shapeBackgroundImagePerClass[rule.selectorText] = rule.style.backgroundImage;

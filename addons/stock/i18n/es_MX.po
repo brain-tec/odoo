@@ -8,6 +8,7 @@
 # Braulio D. López Vázquez <bdl@odoo.com>, 2023
 # Lucia Pacheco, 2023
 # Aimée Mendoza Sánchez, 2023
+# Iran Villalobos López, 2023
 # Fernanda Alvarez, 2023
 # 
 msgid ""
@@ -2155,7 +2156,7 @@ msgstr "Conteo cíclico"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
 msgid "DHL Express Connector"
-msgstr "Conector DHL Express"
+msgstr "Conector de DHL Express"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_report_stock_quantity__date
@@ -3256,7 +3257,7 @@ msgstr "Recepciones futuras"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Get a full traceability from vendors to customers"
-msgstr "Obtenga una trazabilidad completa de vendedores a clientes"
+msgstr "Obtenga una trazabilidad completa de proveedores a clientes"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -4093,7 +4094,7 @@ msgstr "Enero"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__json_lead_days
 msgid "Json Lead Days"
-msgstr "JSON de plazo de días"
+msgstr "Plazo de días de Json "
 
 #. module: stock
 #. odoo-javascript
@@ -4105,7 +4106,7 @@ msgstr "Ventana emergente de Json"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__json_replenishment_history
 msgid "Json Replenishment History"
-msgstr "JSON de historial de reabastecimiento"
+msgstr "Historial de reabastecimiento de Json "
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_company__annual_inventory_month__7
@@ -5240,7 +5241,7 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_lot__message_needaction_counter
 #: model:ir.model.fields,help:stock.field_stock_picking__message_needaction_counter
 #: model:ir.model.fields,help:stock.field_stock_scrap__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Número de mensajes que requieren una acción"
 
 #. module: stock

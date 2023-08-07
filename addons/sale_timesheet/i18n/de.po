@@ -3,9 +3,9 @@
 # 	* sale_timesheet
 # 
 # Translators:
+# Friederike Fasterling-Nesselbosch, 2022
 # b4d8887ced18b222d41dc1101b082e15, 2022
 # Andreas Jonderko <a.jonderko@gastronovi.com>, 2022
-# Friederike Fasterling-Nesselbosch, 2022
 # Martin Trigaux, 2023
 # Larissa Manderfeld, 2023
 # 
@@ -148,7 +148,7 @@ msgid ""
 msgstr ""
 "Je nach Produktkonfiguration kann die gelieferte Menge automatisch durch einen Mechanismus berechnet werden:\n"
 "  - Manuell: Die Menge wird manuell auf der Position eingestellt\n"
-"  - Kostenstelle aus Auslagen: Die Menge ist die Mengensumme aus gebuchten Auslagen\n"
+"  - Kostenrechnung aus Auslagen: Die Menge ist die Mengensumme aus gebuchten Auslagen\n"
 "  - Zeiterfassung: Die Menge ist die Summe der Stunden, die für Aufgaben erfasst wurden, die mit dieser Verkaufsposition verbunden sind.\n"
 "  - Lagerbuchungen: Die Menge stammt aus bestätigten Kommissionierungen\n"
 
@@ -409,7 +409,7 @@ msgstr "Kunde"
 #. module: sale_timesheet
 #: model:product.template,name:sale_timesheet.product_service_order_timesheet_product_template
 msgid "Customer Care (Prepaid Hours)"
-msgstr "Kundenbetreuung (Prepaid-Stunden)"
+msgstr "Kundenbetreuung (vorausbezahlte Stunden)"
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_kanban_inherit_sale_timesheet
@@ -951,7 +951,7 @@ msgstr "Projektvorlage"
 #. module: sale_timesheet
 #: model:ir.model,name:sale_timesheet.model_project_update
 msgid "Project Update"
-msgstr "Projekt-Update"
+msgstr "Projektaktualisierung"
 
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_project_create_sale_order__project_id
@@ -1226,7 +1226,7 @@ msgid ""
 "The %s product is required by the Timesheets app and cannot be archived nor "
 "deleted."
 msgstr ""
-"Das Produkt %s wird von der Zeiterfassugs-App benötigt und kann weder "
+"Das Produkt %s wird von der Zeiterfassungsapp benötigt und kann weder "
 "archiviert noch gelöscht werden."
 
 #. module: sale_timesheet
@@ -1455,7 +1455,7 @@ msgstr "Zeiterfassungsanalysebericht"
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.sale_advance_payment_inv_timesheet_view_form
 msgid "Timesheets Period"
-msgstr "Zeitraum der Zeiterfassung"
+msgstr "Zeiterfassungszeitraum"
 
 #. module: sale_timesheet
 #: model:ir.actions.act_window,name:sale_timesheet.timesheet_action_billing_report

@@ -13,18 +13,18 @@
 # ILMIR <karamov@it-projects.info>, 2022
 # Oleg Kuryan <oleg@ventor.tech>, 2022
 # Ivan Kropotkin <yelizariev@itpp.dev>, 2022
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
 # valmasone, 2023
 # Martin Trigaux, 2023
 # Alena Vlasova, 2023
+# Сергей Шебанин <sergey@shebanin.ru>, 2023
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
+"POT-Creation-Date: 2023-05-23 08:22+0000\n"
 "PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Alena Vlasova, 2023\n"
+"Last-Translator: Сергей Шебанин <sergey@shebanin.ru>, 2023\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2266,6 +2266,13 @@ msgstr ""
 "                После периода расчета: Когда расчет завершен (неделя, месяц) и предоставлен, вы переходите на следующий уровень, если дата отсутствия соответствует"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid "Incorrect state for new allocation"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_is_follower
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_is_follower
 msgid "Is Follower"
@@ -2727,7 +2734,7 @@ msgstr "Требуется повторить согласование"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_public__current_leave_state__draft
 #, python-format
 msgid "New"
-msgstr "Новое"
+msgstr "Новый"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2900,8 +2907,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction_counter
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Количество сообщений, требующих действия"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_error_counter

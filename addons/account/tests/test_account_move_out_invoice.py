@@ -2735,6 +2735,36 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             {'amount_currency': 120.0,  'debit': 60.0,  'credit': 0.0,      'account_id': wizard.revenue_accrual_account.id,        'reconciled': True},
         ])
 
+    @freeze_time('2019-01-16')
+    def test_out_invoice_change_period_past_move_date(self):
+        move = self.init_invoice(
+            move_type='out_invoice',
+            partner=self.partner_a,
+            invoice_date=fields.Date.from_string('2019-01-01'),
+            amounts=[1000.0],
+            post=True,
+        )
+
+        context = {
+            'default_move_type': 'out_invoice',
+            'active_model': 'account.move.line',
+            'active_ids': move.mapped('invoice_line_ids').ids
+        }
+        wizard = self.env['account.automatic.entry.wizard'] \
+            .with_context(context) \
+            .create({
+                'action': 'change_period',
+                'journal_id': self.company_data['default_journal_misc'],
+                'revenue_accrual_account': self.company_data['default_account_assets'].id,
+            })
+        wizard_res = wizard.do_action()
+
+        accrual_moves = self.env['account.move'].browse(wizard_res['domain'][0][2])
+        self.assertRecordValues(accrual_moves, [
+            {'state': 'posted', 'date': fields.Date.from_string('2019-01-16')},
+            {'state': 'posted', 'date': fields.Date.from_string('2019-01-16')},
+        ])
+
     def test_out_invoice_multi_date_change_period_accrual(self):
         dates = ['2017-01-01', '2017-01-01', '2017-02-01']
         values = []
@@ -3590,3 +3620,75 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             self.assertEqual(aml.partner_id, self.partner_a)
         for aml in invoice2.line_ids:
             self.assertEqual(aml.partner_id, self.partner_b)
+
+    def test_invoice_journal_account_check_constraints(self):
+        """
+        Test account-journal constraint check is working as expected in a complex write operation
+        Setup:
+          - journal_a accepts account_a but not account_b
+          - journal_b accepts account_b but not account_a
+        We expect that constraints are checked as usual when creating/writing records, and in particular
+        changing account and journal at the same time should work
+        """
+
+        account_a = self.company_data['default_account_revenue'].copy()
+        journal_a = self.company_data['default_journal_sale'].copy({'default_account_id': account_a.id})
+        account_b = account_a.copy()
+        journal_b = journal_a.copy({'default_account_id': account_b.id})
+        journal_a.account_control_ids = account_a | self.company_data['default_account_tax_sale'] | self.company_data['default_account_receivable']
+        journal_b.account_control_ids = account_b | self.company_data['default_account_tax_sale'] | self.company_data['default_account_receivable']
+
+        # Should not raise
+        invoice = self.env['account.move'].with_context(default_move_type='out_invoice').create({
+            'journal_id': journal_a.id,
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'My super product.',
+                    'quantity': 1.0,
+                    'price_unit': 750.0,
+                    'account_id': account_a.id,
+                })
+            ]
+        })
+
+        # Should not raise
+        invoice.write({'journal_id': journal_b.id, 'invoice_line_ids': [Command.update(invoice.invoice_line_ids.id, {'account_id': account_b.id})]})
+
+        with self.assertRaises(UserError), self.cr.savepoint():
+            invoice.write({'journal_id': journal_a.id})
+        with self.assertRaises(UserError), self.cr.savepoint():
+            # we want to test the update of both records in the same write operation
+            invoice.write({'invoice_line_ids': [Command.update(invoice.invoice_line_ids.id, {'account_id': account_a.id})]})
+
+    @freeze_time('2023-01-01')
+    def test_post_valid_invoices_when_auto_post(self):
+        valid_invoice = self.init_invoice(move_type='out_invoice', products=self.product_a, invoice_date='2023-01-01')
+
+        # missing partner
+        invalid_invoice_1 = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2023-01-01',
+            'date': '2023-01-01',
+            'invoice_line_ids': [(0, 0, {
+                'name': 'test line',
+                'price_unit': 10,
+                'quantity': 1,
+                'account_id': self.company_data['default_account_revenue'].id,
+            })],
+        })
+
+        # missing invoice lines
+        invalid_invoice_2 = self.init_invoice(move_type='out_invoice', invoice_date='2023-01-01')
+
+        (valid_invoice + invalid_invoice_1 + invalid_invoice_2).auto_post = 'at_date'
+
+        self.env['account.move']._autopost_draft_entries()
+        self.assertEqual(valid_invoice.state, 'posted')
+        self.assertEqual(invalid_invoice_1.state, 'draft')
+        self.assertEqual(invalid_invoice_1.message_ids[0].body,
+                         "<p>The move could not be posted for the following reason: "
+                         "The field 'Customer' is required, please complete it to validate the Customer Invoice.</p>")
+        self.assertEqual(invalid_invoice_2.state, 'draft')
+        self.assertEqual(invalid_invoice_2.message_ids[0].body,
+                         "<p>The move could not be posted for the following reason: You need to add a line before posting.</p>")

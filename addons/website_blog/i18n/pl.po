@@ -9,6 +9,7 @@
 # Monika Grzelak <m.e.grzelak@gmail.com>, 2022
 # Mariusz, 2022
 # Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
 # Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
 # Piotr Strębski <strebski@gmail.com>, 2022
 # Dariusz Żbikowski <darek@krokus.com.pl>, 2022
@@ -18,12 +19,11 @@
 # Karol Rybak <karolrybak85@gmail.com>, 2022
 # Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
 # Natalia Gros <nag@odoo.com>, 2022
+# Dawid Prus, 2022
 # Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
 # Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
 # Martin Trigaux, 2022
 # Martyna Jakubiszyn <martyna.jakubiszyn@gmail.com>, 2022
-# Dawid Prus, 2022
-# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
 # Paweł Wodyński <pw@myodoo.pl>, 2022
 # Łukasz Grzenkowicz <lukasz.grzenkowicz@gmail.com>, 2023
 # Maksym <ms@myodoo.pl>, 2023
@@ -198,7 +198,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_tags_display
 msgid "<em>No tags defined</em>"
-msgstr "<em>Brak zdefiniowanych znaczników</em>"
+msgstr "<em>Brak zdefiniowanych tagów</em>"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_complete
@@ -386,7 +386,7 @@ msgstr "Wszystko"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.post_breadcrumbs
 msgid "All Blogs"
-msgstr "Wszystkie Blogi"
+msgstr "Wszystkie blogi"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
@@ -409,7 +409,7 @@ msgstr "Jak trudny jest montaż i demontaż?"
 #: code:addons/website_blog/static/src/js/website_blog.js:0
 #, python-format
 msgid "Amazing blog article: %s! Check it live: %s"
-msgstr "Niesamowity artykół: %s! Sprawdź teraz: %s"
+msgstr "Niesamowity artykuł: %s! Sprawdź teraz: %s"
 
 #. module: website_blog
 #: model:blog.post,subtitle:website_blog.blog_post_1
@@ -665,7 +665,7 @@ msgstr "Tag bloga"
 #. module: website_blog
 #: model:ir.model,name:website_blog.model_blog_tag_category
 msgid "Blog Tag Category"
-msgstr "Kategoria znaczników blogów"
+msgstr "Kategoria tagów blogów"
 
 #. module: website_blog
 #: model:ir.actions.act_window,name:website_blog.action_tags
@@ -931,12 +931,12 @@ msgstr "Edytuj '"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "Edit the 'All Blogs' page header."
-msgstr "Edytuj 'Wszystkie Blogi' nagłówka strony."
+msgstr "Edytuj nagłówek strony \"Wszystkie blogi\"."
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "Edit the 'Filter Results' page header."
-msgstr "Edytuj 'Filtruj Wyniki' nagłówka strony."
+msgstr "Edytuj nagłówek strony \"Filtruj wyniki\"."
 
 #. module: website_blog
 #. openerp-web
@@ -1069,7 +1069,7 @@ msgstr "Siatka"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Group By"
-msgstr "Grupuj wg."
+msgstr "Grupuj wg"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__has_message
@@ -1188,7 +1188,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Increase Readability"
-msgstr "Zwiększenie czytelności"
+msgstr "Zwiększ czytelność"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_is_follower
@@ -1270,12 +1270,12 @@ msgstr "Dżungla"
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid "Know what you are looking at"
-msgstr "Wiedzieć, na co się patrzy"
+msgstr "Wiedz, na co się patrzysz"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid "Know when to look"
-msgstr "Wiedzieć, kiedy szukać"
+msgstr "Wiedz, kiedy szukać"
 
 #. module: website_blog
 #. openerp-web
@@ -1457,12 +1457,12 @@ msgstr "Wiadomości"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
 msgid "Meta Description"
-msgstr "Opis Meta"
+msgstr "Meta opis"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
 msgid "Meta Keywords"
-msgstr "Słowa Kluczowe Meta"
+msgstr "Słowa kluczowe meta"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
@@ -1555,7 +1555,7 @@ msgstr "Nie znaleziono wyników dla '"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_tags
 msgid "No tags defined yet."
-msgstr "Brak zdefiniowanych znaczników."
+msgstr "Brak zdefiniowanych tagów."
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
@@ -1610,7 +1610,7 @@ msgstr "Liczba błędów"
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_blog__message_needaction_counter
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Liczba wiadomości wymagających akcji"
 
 #. module: website_blog
@@ -1722,7 +1722,7 @@ msgstr "Wpisy"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Posts List"
-msgstr "Lista postów"
+msgstr "Lista wpisów"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
@@ -1748,7 +1748,7 @@ msgstr "Data publikacji"
 #: model:mail.message.subtype,description:website_blog.mt_blog_blog_published
 #: model:mail.message.subtype,name:website_blog.mt_blog_blog_published
 msgid "Published Post"
-msgstr "Wpis opublikowano"
+msgstr "Opublikowany wpis"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
@@ -1835,14 +1835,14 @@ msgstr "Patrzenie na świat z góry"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_view_form_add
 msgid "Select Blog"
-msgstr "Wybierz Blog"
+msgstr "Wybierz blog"
 
 #. module: website_blog
 #. openerp-web
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Select the blog you want to add the post to."
-msgstr "Wybierz blog do którego chcesz dodać blog."
+msgstr "Wybierz blog do którego chcesz dodać wpis."
 
 #. module: website_blog
 #. openerp-web
@@ -1914,7 +1914,7 @@ msgstr "Udostępnij na Twitter"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_share_links_display
 msgid "Share this post"
-msgstr "Udostępnij ten artykuł"
+msgstr "Udostępnij ten wpis"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -2053,17 +2053,17 @@ msgstr "Podtytuł"
 #: model:ir.ui.menu,name:website_blog.menu_website_blog_tag_category_global
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_tag_category_tree
 msgid "Tag Categories"
-msgstr "Kategorie znaczników"
+msgstr "Kategorie tagów"
 
 #. module: website_blog
 #: model:ir.actions.act_window,name:website_blog.action_tag_category
 msgid "Tag Category"
-msgstr "Kategorie znaczniików"
+msgstr "Kategoria tagu"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_tag_category_form
 msgid "Tag Category Form"
-msgstr " Formularz kategorii znaczników "
+msgstr " Formularz kategorii tagów "
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_tag_form
@@ -2078,12 +2078,12 @@ msgstr "Lista tagów"
 #. module: website_blog
 #: model:ir.model.constraint,message:website_blog.constraint_blog_tag_category_name_uniq
 msgid "Tag category already exists !"
-msgstr "Kategoria znaczników już istnieje!"
+msgstr "Kategoria tagów już istnieje!"
 
 #. module: website_blog
 #: model:ir.model.constraint,message:website_blog.constraint_blog_tag_name_uniq
 msgid "Tag name already exists !"
-msgstr "Nazwa znacznika już istnieje!"
+msgstr "Taki tag już istnieje!"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__tag_ids
@@ -2093,7 +2093,7 @@ msgstr "Nazwa znacznika już istnieje!"
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_tags
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Tags"
-msgstr "Znaczniki"
+msgstr "Tagi"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -2349,7 +2349,7 @@ msgstr "To pole nie będzie widoczne dla odwiedzających"
 #: code:addons/website_blog/static/src/js/options.js:0
 #, python-format
 msgid "This tag already exists"
-msgstr "Ten znacznik już istnieje"
+msgstr "Ten tag już istnieje"
 
 #. module: website_blog
 #. openerp-web
@@ -2517,7 +2517,7 @@ msgstr "Widoczne na obecnej stronie"
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__website_id
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__website_id
 msgid "Website"
-msgstr "Strona WWW"
+msgstr "Strona internetowa"
 
 #. module: website_blog
 #: model:ir.actions.act_url,name:website_blog.action_open_website
@@ -2729,4 +2729,4 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
 msgid "| No comments yet"
-msgstr "| Brak komentarzy na ten moment"
+msgstr "| Brak jeszcze komentarzy"

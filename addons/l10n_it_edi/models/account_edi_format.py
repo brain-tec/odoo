@@ -147,7 +147,7 @@ class AccountEdiFormat(models.Model):
             Can be overridden by submodules like l10n_it_edi_withholding, which also allows for withholding and pension_fund taxes.
         """
         errors = []
-        for invoice_line in invoice.invoice_line_ids.filtered(lambda x: not x.display_type):
+        for invoice_line in invoice.invoice_line_ids.filtered(lambda x: x.display_type == 'product'):
             if len(invoice_line.tax_ids) != 1:
                 errors.append(_("In line %s, you must select one and only one tax.", invoice_line.name))
         return errors
@@ -308,7 +308,7 @@ class AccountEdiFormat(models.Model):
                 params={'recipient_codice_fiscale': proxy_user.company_id.l10n_it_codice_fiscale})
         except AccountEdiProxyError as e:
             res = {}
-            _logger.error('Error while receiving file from SdiCoop: %s', e)
+            _logger.warning('Error while receiving file from SdiCoop: %s', e)
 
         retrigger = False
         proxy_acks = []
@@ -329,7 +329,7 @@ class AccountEdiFormat(models.Model):
                     proxy_user._get_server_url() + '/api/l10n_it_edi/1/ack',
                     params={'transaction_ids': proxy_acks})
             except AccountEdiProxyError as e:
-                _logger.error('Error while receiving file from SdiCoop: %s', e)
+                _logger.warning('Error while receiving file from SdiCoop: %s', e)
 
         if retrigger:
             _logger.info('Retriggering "Receive invoices from the exchange system"...')

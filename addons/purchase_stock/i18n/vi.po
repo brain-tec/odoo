@@ -98,7 +98,7 @@ msgid ""
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
 "Theo cấu hình sản phẩm, số lượng hàng nhận được có thể được tính toán tự động theo cơ chế:\n"
-"  - Thủ công: số lượng được điền tay theo mục\n"
+"  - Thủ công: số lượng được điền tay theo dòng\n"
 "  - Dịch chuyển Tồn kho: số lượng đến từ các phiếu giao hàng đã xác nhận\n"
 
 #. module: purchase_stock
@@ -179,7 +179,7 @@ msgstr "Không tìm thấy biên lai tương ứng."
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_move__created_purchase_line_id
 msgid "Created Purchase Order Line"
-msgstr "Mục đơn mua hàng đã tạo"
+msgstr "Dòng đơn mua hàng đã tạo"
 
 #. module: purchase_stock
 #. odoo-python
@@ -261,7 +261,7 @@ msgstr "Địa chỉ bán hàng trung gian"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_res_config_settings__module_stock_dropshipping
 msgid "Dropshipping"
-msgstr "Bán hàng trung gian"
+msgstr "Dropship"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_report__effective_date
@@ -560,7 +560,7 @@ msgstr "Đơn mua hàng"
 #: model:ir.model,name:purchase_stock.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_move__purchase_line_id
 msgid "Purchase Order Line"
-msgstr "Mục đơn mua hàng"
+msgstr "Dòng đơn mua hàng"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_lot__purchase_order_ids
@@ -766,11 +766,11 @@ msgid ""
 "on-demand flow. The requested delivery address will be the customer delivery"
 " address and not your warehouse."
 msgstr ""
-"Một tuyến bán hàng trung gian được bổ sung để áp dụng cho sản phẩm với mục "
-"đích yêu cầu nhà cung cấp giao hàng cho khách hàng của bạn. Một sản phẩm để "
-"bán trung gian sẽ tạo ra một yêu cầu báo giá khi đơn bán hàng được xác nhận."
-" Đây là một quy trình theo yêu cầu. Địa chỉ giao hàng được yêu cầu sẽ là địa"
-" chỉ giao hàng của khách hàng, không phải là kho hàng của bạn."
+"Một tuyến dropship được bổ sung để áp dụng cho sản phẩm với mục đích yêu cầu"
+" nhà cung cấp giao hàng cho khách hàng của bạn. Một sản phẩm để dropship sẽ "
+"tạo ra một yêu cầu báo giá khi đơn bán hàng được xác nhận. Đây là một quy "
+"trình theo yêu cầu. Địa chỉ giao hàng được yêu cầu sẽ là địa chỉ giao hàng "
+"của khách hàng, không phải là kho hàng của bạn."
 
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order__picking_type_id

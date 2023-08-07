@@ -2914,8 +2914,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction_counter
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_error_counter
@@ -3384,7 +3384,7 @@ msgid ""
 "Select the user responsible for approving \"Time Off\" of this employee.\n"
 "If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
-"Wählen Sie den Benutzer, der für die Genehmigung der „Abwesenheit“ dieses Mitarbeiters zuständig ist.\n"
+"Wählen Sie den Benutzer, der für die Genehmigung der „Abwesenheiten“ dieses Mitarbeiters zuständig ist.\n"
 "Wenn leer, erfolgt die Genehmigung durch einen Administrator oder Genehmiger (festgelegt unter Einstellungen/Benutzer)."
 
 #. module: hr_holidays

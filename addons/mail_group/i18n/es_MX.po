@@ -220,7 +220,7 @@ msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
 msgstr ""
-"Se evaluará un diccionario de Python con el fin de proporcionar valores "
+"Un diccionario de Python que se evaluará con el fin de proporcionar valores "
 "predefinidos cuando se creen nuevos registros para este seudónimo."
 
 #. module: mail_group
@@ -509,7 +509,7 @@ msgstr "El correo %s no es válido"
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 msgid "Email Alias"
-msgstr "Pseudónimo de correo"
+msgstr "Seudónimo de correo electrónico"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__email_from_normalized
@@ -1547,7 +1547,7 @@ msgid ""
 "                        <i class=\"fa fa-fw fa-envelope-o\" role=\"img\" aria-label=\"Traffic\" title=\"Traffic\"/>"
 msgstr ""
 "miembros<br/>\n"
-"                        <i class=\"fa fa-fw fa-envelope-o\" role=\"img\" aria-label=\"Traffic\" title=\"Traffic\"/>"
+"                        <i class=\"fa fa-fw fa-envelope-o\" role=\"img\" aria-label=\"Tráfico \" title=\"Tráfico \"/>"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups

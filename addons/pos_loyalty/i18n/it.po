@@ -29,6 +29,9 @@ msgid ""
 "        Technical field used to link multiple reward lines from the same reward together.\n"
 "    "
 msgstr ""
+"\n"
+"        Campo tecnico utilizzato per collegare più righe ricompensa dalla stessa insieme.\n"
+"    "
 
 #. module: pos_loyalty
 #. odoo-javascript
@@ -128,7 +131,7 @@ msgstr "Codici Coupon"
 #. module: pos_loyalty
 #: model:loyalty.program,portal_point_name:pos_loyalty.15_pc_on_next_order
 msgid "Coupon point(s)"
-msgstr ""
+msgstr "Punto/i buono sconto"
 
 #. module: pos_loyalty
 #. odoo-javascript
@@ -200,7 +203,7 @@ msgstr "Prodotto gratuito-penna semplice"
 #. module: pos_loyalty
 #: model:ir.model.fields.selection,name:pos_loyalty.selection__pos_config__gift_card_settings__create_set
 msgid "Generate PDF cards"
-msgstr ""
+msgstr "Genera carte in PDF"
 
 #. module: pos_loyalty
 #. odoo-javascript
@@ -395,7 +398,7 @@ msgstr "Punti"
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__points_cost
 msgid "Points Cost"
-msgstr ""
+msgstr "Costo punti"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_mail__pos_report_print_id
@@ -443,7 +446,7 @@ msgstr ""
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_program__pos_config_ids
 msgid "Restrict publishing to those shops."
-msgstr ""
+msgstr "Limita la pubblicazione a questi negozi."
 
 #. module: pos_loyalty
 #. odoo-javascript
@@ -456,12 +459,12 @@ msgstr "Premio"
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__reward_identifier_code
 msgid "Reward Identifier Code"
-msgstr ""
+msgstr "Codice identificativo ricompensa"
 
 #. module: pos_loyalty
 #: model:ir.model.fields.selection,name:pos_loyalty.selection__pos_config__gift_card_settings__scan_use
 msgid "Scan existing cards"
-msgstr ""
+msgstr "Scansiona carte esistenti"
 
 #. module: pos_loyalty
 #. odoo-javascript

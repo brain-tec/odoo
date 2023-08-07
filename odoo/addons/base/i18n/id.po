@@ -8168,6 +8168,8 @@ msgid ""
 "All our contractual relations will be governed exclusively by United States "
 "law."
 msgstr ""
+"Semua hubungan kontraktual akan diatur secara eksklusif oleh hukum Amerika "
+"Serikat."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__lang
@@ -9236,7 +9238,7 @@ msgstr "Biner"
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_model_id
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_model_id
 msgid "Binding Model"
-msgstr ""
+msgstr "Binding Model"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__binding_type
@@ -9248,7 +9250,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_type
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_type
 msgid "Binding Type"
-msgstr ""
+msgstr "Binding Type"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_url__binding_view_types
@@ -9260,7 +9262,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__binding_view_types
 #: model:ir.model.fields,field_description:base.field_ir_cron__binding_view_types
 msgid "Binding View Types"
-msgstr ""
+msgstr "Binding View Types"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__layout_background__blank
@@ -9715,7 +9717,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_knowledge
 msgid "Centralize, manage, share and grow your knowledge library"
-msgstr ""
+msgstr "Pusatkan, kelola, bagi dan tumbuhkan pustaka pengetahuan Anda"
 
 #. module: base
 #: model_terms:res.company,invoice_terms_html:base.main_company
@@ -9865,7 +9867,7 @@ msgstr "Checksum/SHA1"
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__child_ids
 #: model:ir.model.fields,field_description:base.field_ir_cron__child_ids
 msgid "Child Actions"
-msgstr ""
+msgstr "Tindakan Turunan"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category__child_ids
@@ -9899,6 +9901,8 @@ msgid ""
 "Child server actions that will be executed. Note that the last return "
 "returned action value will be used as global return value."
 msgstr ""
+"Child server action yang akan dilakukan. Catat bahwa pengembalian terakhir "
+"returned action value akan digunakan sebagai global return value."
 
 #. module: base
 #: model:res.country,name:base.cl
@@ -13093,7 +13097,7 @@ msgstr "Nama Kolom"
 #: model:ir.module.category,name:base.module_category_services_field_service
 #: model:ir.module.module,shortdesc:base.module_industry_fsm
 msgid "Field Service"
-msgstr ""
+msgstr "Layanan Lapangan"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__ttype
@@ -13199,12 +13203,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__datas
 msgid "File Content (base64)"
-msgstr ""
+msgstr "Konten File (base64)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment__raw
 msgid "File Content (raw)"
-msgstr ""
+msgstr "Konten File (raw)"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_export__format
@@ -14978,7 +14982,7 @@ msgstr "Industri"
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_form
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_tree
 msgid "Industry"
-msgstr ""
+msgstr "Industri"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__info
@@ -15213,7 +15217,12 @@ msgid "Invalid 'group by' parameter"
 msgstr ""
 
 #. module: base
-#. odoo-python
+#: code:addons/base/models/ir_default.py:0
+#, python-format
+msgid "Invalid JSON format in Default Value field."
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Invalid aggregation function %r."
@@ -15427,7 +15436,7 @@ msgstr "Penagihan"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hw_posbox_homepage
 msgid "IoT Box Homepage"
-msgstr ""
+msgstr "Beranda IoT Bpx"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_menu_ir_profile
@@ -16129,12 +16138,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_enrich
 msgid "Lead Enrichment"
-msgstr ""
+msgstr "Lead Enrichment"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_mine
 msgid "Lead Generation"
-msgstr ""
+msgstr "Pembuatan Lead"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_iap_reveal
@@ -16258,7 +16267,7 @@ msgstr "Baris"
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__link_field_id
 #: model:ir.model.fields,field_description:base.field_ir_cron__link_field_id
 msgid "Link Field"
-msgstr ""
+msgstr "Link Field"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_link_tracker
@@ -17353,6 +17362,8 @@ msgid ""
 "Model for record creation / update. Set this field only to specify a "
 "different model than the base model."
 msgstr ""
+"Model untuk membuat/update record. Isi field ini hanya untuk menentukan "
+"model yang berbeda dari model dasar."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_act_window__res_model
@@ -17371,7 +17382,7 @@ msgstr ""
 #: model:ir.model.fields,help:base.field_ir_actions_server__model_id
 #: model:ir.model.fields,help:base.field_ir_cron__model_id
 msgid "Model on which the server action runs."
-msgstr ""
+msgstr "Model di mana server action dijalankan."
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_model_model
@@ -20376,6 +20387,8 @@ msgid ""
 "Optional help text for the users with a description of the target view, such"
 " as its usage and purpose."
 msgstr ""
+"Teks bantuan opsional untuk user dengan keterangan tampilan target, seperti "
+"penggunaan dan tujuannya."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_client__res_model
@@ -20789,7 +20802,7 @@ msgstr ""
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_S
 msgid "Other Services"
-msgstr ""
+msgstr "Layanan Lain"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_form
@@ -21969,6 +21982,8 @@ msgid ""
 "Provide the field used to link the newly created record on the record used "
 "by the server action."
 msgstr ""
+"Sediakan field yang digunakan untuk menghubungkan record yang baru saja "
+"dibuat pada record yang digunakan oleh server action."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_edi_proxy_client
@@ -22329,12 +22344,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__readonly
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_search
 msgid "Readonly"
-msgstr ""
+msgstr "Readonly"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_L
 msgid "Real Estate"
-msgstr ""
+msgstr "Real Estate"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_server_object_lines__resource_ref
@@ -23593,7 +23608,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_tree
 msgid "Server Actions"
-msgstr ""
+msgstr "Server Action"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__ir_actions_server_id
@@ -24164,7 +24179,6 @@ msgstr "Mulai konfigurasi"
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
 #: model_terms:ir.ui.view,arch_db:base.view_country_state_form
 #: model_terms:ir.ui.view,arch_db:base.view_country_state_tree
-#: model_terms:ir.ui.view,arch_db:base.view_module_filter
 #: model_terms:ir.ui.view,arch_db:base.view_partner_address_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
@@ -24207,6 +24221,7 @@ msgstr "Status"
 #: model:ir.model.fields,field_description:base.field_ir_module_module__state
 #: model:ir.model.fields,field_description:base.field_ir_module_module_dependency__state
 #: model:ir.model.fields,field_description:base.field_ir_module_module_exclusion__state
+#: model_terms:ir.ui.view,arch_db:base.view_module_filter
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Status"
 msgstr "Status"
@@ -24532,13 +24547,13 @@ msgstr "Target"
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__crud_model_id
 #: model:ir.model.fields,field_description:base.field_ir_cron__crud_model_id
 msgid "Target Model"
-msgstr ""
+msgstr "Target Model"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__crud_model_name
 #: model:ir.model.fields,field_description:base.field_ir_cron__crud_model_name
 msgid "Target Model Name"
-msgstr ""
+msgstr "Nama Target Model"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_act_window__target
@@ -24554,7 +24569,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_timesheet
 msgid "Task Logs"
-msgstr ""
+msgstr "Log Task"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__vat
@@ -24957,7 +24972,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users__company_id
 msgid "The default company for this user."
-msgstr ""
+msgstr "Perusahaan default untuk user ini."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.demo_failures_dialog
@@ -26278,6 +26293,13 @@ msgstr "Tidak dapat menemukan Wkhtmltopdf pada sistem. PDF tidak bisa dibuat."
 
 #. module: base
 #. odoo-python
+#: code:addons/base/models/ir_fields.py:0
+#, python-format
+msgid "Unable to import field type '%s'  "
+msgstr ""
+
+#. module: base
+#. odoo-python
 #: code:addons/base/models/ir_module.py:0
 #, python-format
 msgid ""
@@ -26950,7 +26972,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__fields_lines
 #: model:ir.model.fields,field_description:base.field_ir_cron__fields_lines
 msgid "Value Mapping"
-msgstr ""
+msgstr "Value Mapping"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_property__value_reference
@@ -27374,6 +27396,8 @@ msgid ""
 "When dealing with multiple actions, the execution order is based on the "
 "sequence. Low number means high priority."
 msgstr ""
+"Saat terdapat lebih dari satu action, urutan pelaksanaan berdasarkan "
+"sequence. Nomor yang lebih rendah berarti prioritas lebih tinggi."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_mail_server__sequence
@@ -27633,6 +27657,15 @@ msgstr ""
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "You can not create recursive tags."
+msgstr ""
+
+#. module: base
+#. odoo-python
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid ""
+"Deleting the template users is not allowed. Deleting this profile will "
+"compromise critical functionalities."
 msgstr ""
 
 #. module: base
@@ -27913,6 +27946,8 @@ msgid ""
 "Your lunch has been delivered.\n"
 "Enjoy your meal!"
 msgstr ""
+"Makan siang Anda telah dikirim.\n"
+"Enjoy your meal!"
 
 #. module: base
 #. odoo-python
@@ -27968,7 +28003,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_asset__active
 msgid "active"
-msgstr ""
+msgstr "aktif"
 
 #. module: base
 #. odoo-python
@@ -28157,7 +28192,7 @@ msgstr "misalnya: en_US"
 #: model_terms:ir.ui.view,arch_db:base.view_partner_address_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "e.g. https://www.odoo.com"
-msgstr ""
+msgstr "contoh https://www.odoo.com"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_ebay

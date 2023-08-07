@@ -1639,7 +1639,7 @@ msgstr "Unternehmen"
 #: code:addons/event/models/event_registration.py:0
 #, python-format
 msgid "Compose Email"
-msgstr "E-Mail schreiben"
+msgstr "E-Mail verfassen"
 
 #. module: event
 #: model:event.tag,name:event.event_tag_category_3_tag_2
@@ -2581,7 +2581,7 @@ msgstr "Laufend"
 #: model:ir.model.fields,field_description:event.field_event_mail__interval_nbr
 #: model:ir.model.fields,field_description:event.field_event_type_mail__interval_nbr
 msgid "Interval"
-msgstr "Intervalle"
+msgstr "Intervall"
 
 #. module: event
 #: model_terms:event.event,description:event.event_2
@@ -3016,14 +3016,14 @@ msgstr "Anzahl der Fehler"
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__message_needaction_counter
 #: model:ir.model.fields,help:event.field_event_registration__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__message_has_error_counter
 #: model:ir.model.fields,help:event.field_event_registration__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Anzahl der Nachrichten mit Zustellungsfehler."
+msgstr "Anzahl der Nachrichten mit Zustellungsfehler"
 
 #. module: event
 #: model_terms:event.event,description:event.event_2

@@ -4,8 +4,8 @@
 # 
 # Translators:
 # ТАрас <tratatuta@i.ua>, 2022
-# Martin Trigaux, 2023
 # Bohdan Lisnenko, 2023
+# Martin Trigaux, 2023
 # Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
 # 
 msgid ""
@@ -87,6 +87,7 @@ msgstr "%s Файли"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "%s days ago"
 msgstr "%s днів тому"
@@ -317,15 +318,15 @@ msgstr "<span class=\"text-nowrap\">Tax 15%</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                                   Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"                                               Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                                   Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"                                               Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span id=\"line_tax_ids\">15.00%</span>"
-msgstr "<span id=\"line_tax_ids\">15.00%</span>"
+msgid "<span id=\"line_tax_ids\">Tax 15%</span>"
+msgstr "<span id=\"line_tax_ids\">ПДВ 15%</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -339,8 +340,8 @@ msgstr "<span>$ <span class=\"oe_currency_value\">19,250.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span>5.000</span>"
-msgstr "<span>5.000</span>"
+msgid "<span>5.00</span>"
+msgstr "<span>5.00</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -356,10 +357,10 @@ msgstr "<span>Опис</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>Invoice</span>\n"
-"                           <span>INV/2020/07/0003</span>"
+"                           <span>INV/2023/00003</span>"
 msgstr ""
 "<span>Рахунок</span>\n"
-"                           <span>INV/2020/07/0003</span>"
+"                           <span>INV/2023/00003</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -411,13 +412,13 @@ msgstr "<strong>Дата рахунку:</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<strong>Subtotal</strong>"
-msgstr "<strong>Підсумок</strong>"
+msgid "<strong>Total</strong>"
+msgstr "<strong>Всього</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<strong>Total</strong>"
-msgstr "<strong>Всього</strong>"
+msgid "<strong>Untaxed Amount</strong>"
+msgstr "<strong>Сума без податків</strong>"
 
 #. module: web
 #. odoo-javascript
@@ -843,6 +844,8 @@ msgstr "Застосувати"
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
 #: code:addons/web/static/src/legacy/js/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #, python-format
 msgid "Archive"
@@ -875,15 +878,8 @@ msgstr "Ви впевнені, що хочете архівувати усі в�
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#, python-format
-msgid "Are you sure that you want to archive all this record?"
-msgstr "Ви впевнені, що хочете заархівувати весь цей запис?"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/form/form_controller.js:0
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.js:0
 #, python-format
 msgid "Are you sure that you want to archive this record?"
 msgstr "Ви впевнені, що хочете архівувати цей запис?"
@@ -1318,7 +1314,6 @@ msgstr "Очистити підпис"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/dialog.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_column_examples_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
@@ -1617,12 +1612,7 @@ msgstr "Країна"
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
-#: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 #, python-format
 msgid "Create"
 msgstr "Створити"
@@ -1878,6 +1868,7 @@ msgstr "За замовчуванням:"
 #: code:addons/web/static/src/views/fields/many2many_tags/tags_list.xml:0
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
@@ -1936,6 +1927,20 @@ msgstr "За спаданням"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
+#, python-format
+msgid "Developer Tools"
+msgstr "Інструменти розробника"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_renderer.js:0
+#, python-format
+msgid "Different currencies cannot be aggregated"
+msgstr "Різні валюти не можна агрегувати"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.xml:0
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/legacy/js/views/kanban/kanban_record.js:0
@@ -1946,7 +1951,6 @@ msgstr "За спаданням"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
-#: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
@@ -2304,8 +2308,8 @@ msgid "Exporting grouped data to csv is not supported."
 msgstr "Дані групового експорту у csv не підтримуються."
 
 #. module: web
-#. odoo-javascript
 #. odoo-python
+#. odoo-javascript
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/static/src/legacy/js/widgets/data_export.js:0
@@ -2707,14 +2711,8 @@ msgstr "Зображення"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "In"
-msgstr "В"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "In %s days"
 msgstr "Через %s днів"
@@ -2834,6 +2832,11 @@ msgstr "Залучіть нових користувачів"
 #, python-format
 msgid "Inviting..."
 msgstr "Запрошення..."
+
+#. module: web
+#: model:ir.model.fields,field_description:web.field_base_document_layout__is_company_details_empty
+msgid "Is Company Details Empty"
+msgstr "Деталі компанії пусті"
 
 #. module: web
 #. odoo-javascript
@@ -3323,6 +3326,11 @@ msgstr "НІЧОГО"
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/views/basic/basic_model.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
+#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 #, python-format
 msgid "New"
 msgstr "Новий"
@@ -3998,6 +4006,7 @@ msgstr "Будьте уважні."
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/legacy/js/views/list/list_renderer.js:0
+#: code:addons/web/static/src/views/list/list_renderer.js:0
 #, python-format
 msgid "Please click on the \"save\" button first"
 msgstr "Будь-ласка, спершу натисніть на кнопку \"зберегти\""
@@ -4049,7 +4058,6 @@ msgstr "Виділіть поля для збереження у перелік�
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/xml/base.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
 #, python-format
 msgid "Please update translations of :"
 msgstr "Будь ласка, оновіть переклад:"
@@ -4068,10 +4076,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "Please use the following communication for your payment : <b><span>\n"
-"                           INV/2020/07/0003</span></b>"
+"                           INV/2023/00003</span></b>"
 msgstr ""
-"Використовуйте наступний рефересн для вашого платежу : <b><span>\n"
-"                           INV/2020/07/0003</span></b>"
+"Використовуйте наступні дані для оплати: <b><span>\n"
+"                           INV/2023/00003</span></b>"
 
 #. module: web
 #. odoo-javascript
@@ -4088,7 +4096,7 @@ msgstr "Зроблено %s%s"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_layout
 msgid "Powered by <span>Odoo</span>"
-msgstr "Створено в <span>Odoo</span>"
+msgstr "Зроблено <span>Odoo</span>"
 
 #. module: web
 #. odoo-javascript
@@ -4439,7 +4447,7 @@ msgstr "Залишилось днів"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
-#: code:addons/web/static/src/views/fields/relational_utils.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #, python-format
@@ -4808,7 +4816,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition_selection.xml:0
 #, python-format
 msgid "Select Default"
-msgstr ""
+msgstr "Оберіть за замовчуванням"
 
 #. module: web
 #. odoo-javascript
@@ -4853,7 +4861,7 @@ msgstr "Оберіть поле"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #, python-format
 msgid "Select records"
-msgstr ""
+msgstr "Оберіть записи"
 
 #. module: web
 #. odoo-javascript
@@ -5057,7 +5065,7 @@ msgstr "Почніть набирати..."
 #: code:addons/web/static/src/views/fields/stat_info/stat_info_field.js:0
 #, python-format
 msgid "Stat Info"
-msgstr ""
+msgstr "Стат. інформація"
 
 #. module: web
 #. odoo-javascript
@@ -5078,7 +5086,7 @@ msgstr "Залишайтеся тут"
 #: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
 #, python-format
 msgid "Stay here"
-msgstr ""
+msgstr "Залишайтеся тут"
 
 #. module: web
 #. odoo-javascript
@@ -5137,7 +5145,7 @@ msgstr "Синтаксична помилка"
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "TIP"
-msgstr ""
+msgstr "ПОРАДА"
 
 #. module: web
 #. odoo-javascript
@@ -5276,12 +5284,12 @@ msgstr "Виникла проблема при завантаженні файл
 #: code:addons/web/static/src/views/fields/file_handler.js:0
 #, python-format
 msgid "There was a problem while uploading your file."
-msgstr ""
+msgstr "Виникла проблема під час завантаження вашого файлу."
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.neutralize_banner
 msgid "This database is neutralized."
-msgstr ""
+msgstr "Цю базу даних вимкнено."
 
 #. module: web
 #. odoo-javascript
@@ -5310,14 +5318,14 @@ msgstr "Цей домен не підтримується."
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "This field is already first"
-msgstr ""
+msgstr "Це поле вже перше"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "This field is already last"
-msgstr ""
+msgstr "Це поле вже останнє"
 
 #. module: web
 #. odoo-javascript
@@ -5351,7 +5359,7 @@ msgstr "Це приклад внутрішнього звіту."
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 #, python-format
 msgid "This tag is already available"
-msgstr ""
+msgstr "Цей тег вже доступний"
 
 #. module: web
 #. odoo-javascript
@@ -5394,7 +5402,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Today"
 msgstr "Сьогодні"
@@ -5418,7 +5426,7 @@ msgstr "Переключити меню"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Tomorrow"
 msgstr "Завтра"
@@ -5478,7 +5486,7 @@ msgstr "Вт"
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.xml:0
 #, python-format
 msgid "Type a default text or press ENTER"
-msgstr ""
+msgstr "Введіть типовий текст або натисніть ENTER"
 
 #. module: web
 #. odoo-javascript
@@ -5486,7 +5494,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/name_and_signature.xml:0
 #, python-format
 msgid "Type your name to sign"
-msgstr ""
+msgstr "Введіть ваше ім'я для входу"
 
 #. module: web
 #. odoo-javascript
@@ -5518,7 +5526,7 @@ msgstr ""
 #: code:addons/web/static/src/views/form/form_status_indicator/form_status_indicator.xml:0
 #, python-format
 msgid "Unable to save"
-msgstr ""
+msgstr "Неможливо зберегти"
 
 #. module: web
 #. odoo-javascript
@@ -5560,8 +5568,8 @@ msgid "Uncaught Promise"
 msgstr "Неперехоплена помилка Promise"
 
 #. module: web
-#. odoo-javascript
 #. odoo-python
+#. odoo-javascript
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/static/src/views/calendar/calendar_model.js:0
 #: code:addons/web/static/src/views/graph/graph_model.js:0
@@ -5734,7 +5742,7 @@ msgstr "Завантажується..."
 #: code:addons/web/static/src/core/file_upload/file_upload_progress_record.js:0
 #, python-format
 msgid "Uploading... (%s%)"
-msgstr ""
+msgstr "Завантаження... (%s%)"
 
 #. module: web
 #. odoo-javascript
@@ -5820,7 +5828,7 @@ msgstr "Показати поля"
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #, python-format
 msgid "View In Kanban"
-msgstr ""
+msgstr "Перегляд у Канбані"
 
 #. module: web
 #. odoo-javascript
@@ -5986,7 +5994,7 @@ msgstr "Так"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Yesterday"
 msgstr "Вчора"
@@ -5994,7 +6002,7 @@ msgstr "Вчора"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_successful
 msgid "You are logged in."
-msgstr ""
+msgstr "Ви уввійшли"
 
 #. module: web
 #. odoo-python
@@ -6016,7 +6024,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #, python-format
 msgid "You do not have access to the model \"%s\"."
-msgstr ""
+msgstr "У вас немає доступу до моделі \"%s\"."
 
 #. module: web
 #. odoo-javascript
@@ -6039,6 +6047,8 @@ msgstr "Можете не вірити,<br />але програма дійсн�
 #, python-format
 msgid "You need to be able to edit parent first to add property tags"
 msgstr ""
+"Щоб додати теги властивостей, спершу потрібно мати можливість редагувати "
+"батьківський елемент"
 
 #. module: web
 #. odoo-javascript
@@ -6047,6 +6057,8 @@ msgstr ""
 #, python-format
 msgid "You need to be able to edit parent first to configure property fields"
 msgstr ""
+"Щоб налаштувати поля властивостей, спершу потрібно мати можливість "
+"редагувати батьківський елемент"
 
 #. module: web
 #. odoo-javascript
@@ -6227,6 +6239,7 @@ msgstr "дочірній від"
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "contains"
 msgstr "містить"
@@ -6240,20 +6253,6 @@ msgstr "дата"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "days"
-msgstr "дні"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "days ago"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_operators.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
 #, python-format
@@ -6263,6 +6262,7 @@ msgstr "не містить"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "doesn't contain"
@@ -6353,7 +6353,7 @@ msgstr "є"
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is No"
-msgstr ""
+msgstr "Ні"
 
 #. module: web
 #. odoo-javascript
@@ -6361,7 +6361,7 @@ msgstr ""
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is Yes"
-msgstr ""
+msgstr "Так"
 
 #. module: web
 #. odoo-javascript
@@ -6423,6 +6423,7 @@ msgstr "є між"
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is equal to"
 msgstr "дорівнює"
@@ -6455,6 +6456,7 @@ msgstr "не ="
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is not equal to"
 msgstr "не дорівнює"
@@ -6474,6 +6476,8 @@ msgstr "не дорівнює"
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is not set"
 msgstr "не вказано"
@@ -6488,6 +6492,8 @@ msgstr "не вказано"
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
@@ -6549,7 +6555,7 @@ msgstr "як"
 #: code:addons/web/static/src/webclient/menus/menu_providers.js:0
 #, python-format
 msgid "menus"
-msgstr ""
+msgstr "меню"
 
 #. module: web
 #. odoo-javascript
@@ -6617,7 +6623,7 @@ msgstr "не в"
 #: code:addons/web/static/src/core/domain_selector/domain_selector_operators.js:0
 #, python-format
 msgid "not like"
-msgstr ""
+msgstr "не як"
 
 #. module: web
 #. odoo-javascript
@@ -6648,7 +6654,7 @@ msgstr "від:"
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "on any screen to show shortcut overlays and"
-msgstr ""
+msgstr "на будь-якому екрані, щоб показати накладені гарячі клавіші та"
 
 #. module: web
 #. odoo-javascript
@@ -6751,32 +6757,32 @@ msgstr "встановити (правильно)"
 #: code:addons/web/static/src/core/commands/command_palette.xml:0
 #, python-format
 msgid "to open in new tab"
-msgstr ""
+msgstr "відкрити в новій вкладці"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_palette.xml:0
 #, python-format
 msgid "to open,"
-msgstr ""
+msgstr "відкрити,"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "to trigger a shortcut."
-msgstr ""
+msgstr "запустити грачі клавіші."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "type a default text or press ENTER"
-msgstr ""
+msgstr "напишіть типовий текст або натисніть ENTER"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "— press"
-msgstr ""
+msgstr "— натисніть"

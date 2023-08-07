@@ -21,7 +21,7 @@
 # Martin Trigaux, 2022
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
 # Cristian Cruz, 2022
-# jabelchi, 2022
+# Josep Anton Belchi, 2022
 # Ivan Espinola, 2022
 # jabiri7, 2022
 # 
@@ -2688,8 +2688,8 @@ msgstr "Nombre d'iniciatives i iniciatives assignades aquest últim mes."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Nombre de missatges que requereixen una acció"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_has_error_counter
@@ -3944,6 +3944,11 @@ msgstr ""
 "electrònic a"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
+msgid "Use the <i>New</i> button, or send an email to"
+msgstr ""
+
+#. module: crm
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
@@ -3955,6 +3960,14 @@ msgstr ""
 "per a provar la passarel·la de correu."
 
 #. module: crm
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0
+#, python-format
+msgid ""
+"Use the <i>New</i> button, or send an email to %s to test the email gateway."
+msgstr ""
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
 msgid ""
 "Use the top left Create button, or configure an email alias to test the "
@@ -3962,6 +3975,12 @@ msgid ""
 msgstr ""
 "Utilitzeu el botó Crea a la part superior esquerra, o configureu un àlies de"
 " correu electrònic per a provar la passarel·la de correu electrònic."
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
+msgid ""
+"Use the New button, or configure an email alias to test the email gateway."
+msgstr ""
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action
