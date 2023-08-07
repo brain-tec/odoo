@@ -5220,8 +5220,8 @@ msgstr "Nombre de mouvements entrants au cours des 12 derniers mois"
 #: model:ir.model.fields,help:stock.field_stock_lot__message_needaction_counter
 #: model:ir.model.fields,help:stock.field_stock_picking__message_needaction_counter
 #: model:ir.model.fields,help:stock.field_stock_scrap__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Nombre de messages exigeant une action"
+msgid "Number of messages requiring action"
+msgstr "Nombre de messages nécessitant une action"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_lot__message_has_error_counter
@@ -7556,7 +7556,7 @@ msgid ""
 "Closet location: products/lots closest to the target location will be moved out first.\n"
 "FEFO: products/lots with the closest removal date will be moved out first (the availability of this method depends on the \"Expiration Dates\" setting)."
 msgstr ""
-"Définissez une stratégie de sortie spécifique qui sera utilisée quel que soit l'emplacement d'origine pour cette catégorie de produits.\n"
+"Définissez une stratégie d'enlèvement spécifique qui sera utilisée quel que soit l'emplacement d'origine pour cette catégorie de produits.\n"
 "\n"
 "FIFO : les produits/lots stockés en premier seront sortis en premier.\n"
 "LIFO : les produits/lots stockés en dernier seront sortis en premier.\n"

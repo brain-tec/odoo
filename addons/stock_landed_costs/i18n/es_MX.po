@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2022
 # Braulio D. López Vázquez <bdl@odoo.com>, 2023
+# Iran Villalobos López, 2023
 # Fernanda Alvarez, 2023
 # 
 msgid ""
@@ -461,7 +462,7 @@ msgstr "Diario de costos de envío"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_main_attachment_id
 msgid "Main Attachment"
-msgstr "Archivo adjunto principales"
+msgstr "Archivo adjunto principal"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error
@@ -529,7 +530,7 @@ msgstr "Número de errores"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Número de mensajes que requieren una acción"
 
 #. module: stock_landed_costs

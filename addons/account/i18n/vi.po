@@ -1740,7 +1740,7 @@ msgid ""
 "Account that will be set on lines created in cash basis journal entry and "
 "used to keep track of the tax base amount."
 msgstr ""
-"Tài khoản sẽ được đặt trên các dòng được tạo trong mục nhật ký cơ sở tiền "
+"Tài khoản sẽ được đặt trên các dòng được tạo trong dòng nhật ký cơ sở tiền "
 "mặt và được sử dụng để theo dõi số tiền thuế chính."
 
 #. module: account
@@ -2648,7 +2648,7 @@ msgstr "Chi tiết phân tích"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_form
 msgid "Analytic Lines"
-msgstr "Chi tiết khoản mục"
+msgstr "Chi tiết khoản dòng"
 
 #. module: account
 #: model:ir.model,name:account.model_account_analytic_applicability
@@ -6457,7 +6457,7 @@ msgstr "Chuỗi Hash đầu tiên"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__first_line_index
 msgid "First Line Index"
-msgstr "Chỉ mục dòng đầu tiên"
+msgstr "Chỉ dòng dòng đầu tiên"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_name
@@ -7957,7 +7957,7 @@ msgstr "Hóa đơn và credit note nên có cùng thuế suất."
 #: model:ir.model.fields,field_description:account.field_account_move__invoice_line_ids
 #: model:ir.model.fields,field_description:account.field_account_payment__invoice_line_ids
 msgid "Invoice lines"
-msgstr "Mục hóa đơn"
+msgstr "Dòng hóa đơn"
 
 #. module: account
 #: model:mail.message.subtype,description:account.mt_invoice_paid
@@ -8933,12 +8933,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__show_line_subtotals_tax_selection
 msgid "Line Subtotals Tax Display"
-msgstr "Hiển thị mục thuế tổng phụ"
+msgstr "Hiển thị dòng thuế tổng phụ"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Line subtotals tax display"
-msgstr "Hiển thị mục thuế tổng phụ"
+msgstr "Hiển thị dòng thuế tổng phụ"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__line_ids
@@ -9902,8 +9902,8 @@ msgstr "Số lỗi"
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_company__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_partner_bank__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Số thông báo cần xử lý"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__message_has_error_counter
@@ -14274,6 +14274,13 @@ msgstr ""
 "  ví dụ: .*N°48748 abc123.*"
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The move could not be posted for the following reason: %(error_message)s"
+msgstr ""
+
+#. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 #, python-format
@@ -15063,6 +15070,14 @@ msgstr "Bút toán được cấu hình để vào sổ tự động vào ngày 
 #, python-format
 msgid "This move will be posted at the accounting date: %(date)s"
 msgstr "Bút toán này sẽ được vào sổ vào ngày kế toán: %(date)s"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/account_move_form/account_move_form.js:0
+#: code:addons/account/static/src/components/account_move_list/account_move_list.js:0
+#, python-format
+msgid "This operation will create a gap in the sequence."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_invoice_send__auto_delete
@@ -16589,6 +16604,17 @@ msgstr "Bạn không thể xóa dòng thuế vì nó sẽ ảnh hưởng đến 
 #, python-format
 msgid "You cannot delete an item linked to a posted entry."
 msgstr "Bạn không thể xóa chi tiết bút toán một khi nó đã được đưa vào sổ."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"You cannot delete this entry, as it has already consumed a sequence number "
+"and is not the last one in the chain. You should probably revert it instead."
+msgstr ""
+"Bạn không thể xóa nút toán này, vì nó đã sử dụng một số thứ tự và không phải"
+" là mục cuối cùng trong chuỗi. Bạn có thể nên hoàn nguyên nó để thay thế."
 
 #. module: account
 #. odoo-python

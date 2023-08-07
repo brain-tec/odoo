@@ -501,7 +501,7 @@ class AccountMoveLine(models.Model):
                        AND line.id != ANY(%(current_ids)s)
                 ),
                 properties AS(
-                    SELECT DISTINCT ON (property.company_id, property.name)
+                    SELECT DISTINCT ON (property.company_id, property.name, property.res_id)
                            'res.partner' AS model,
                            SPLIT_PART(property.res_id, ',', 2)::integer AS id,
                            CASE
@@ -514,7 +514,7 @@ class AccountMoveLine(models.Model):
                      WHERE property.name IN ('property_account_receivable_id', 'property_account_payable_id')
                        AND property.company_id = ANY(%(company_ids)s)
                        AND property.res_id = ANY(%(partners)s)
-                  ORDER BY property.company_id, property.name, account_id
+                  ORDER BY property.company_id, property.name, property.res_id, account_id
                 ),
                 default_properties AS(
                     SELECT DISTINCT ON (property.company_id, property.name)
@@ -1028,9 +1028,9 @@ class AccountMoveLine(models.Model):
                         'price_subtotal': 0.0,
                     },
                 )
-                epd_needed_vals['amount_currency'] -= line.amount_currency * percentage * line_percentage
-                epd_needed_vals['balance'] -= line.balance * percentage * line_percentage
-                epd_needed_vals['price_subtotal'] -= line.price_subtotal * percentage * line_percentage
+                epd_needed_vals['amount_currency'] -= line.currency_id.round(line.amount_currency * percentage * line_percentage)
+                epd_needed_vals['balance'] -= line.currency_id.round(line.balance * percentage * line_percentage)
+                epd_needed_vals['price_subtotal'] -= line.currency_id.round(line.price_subtotal * percentage * line_percentage)
                 epd_needed_vals = epd_needed.setdefault(
                     frozendict({
                         'move_id': line.move_id.id,
@@ -1045,9 +1045,9 @@ class AccountMoveLine(models.Model):
                         'tax_ids': [Command.clear()],
                     },
                 )
-                epd_needed_vals['amount_currency'] += line.amount_currency * percentage * line_percentage
-                epd_needed_vals['balance'] += line.balance * percentage * line_percentage
-                epd_needed_vals['price_subtotal'] += line.price_subtotal * percentage * line_percentage
+                epd_needed_vals['amount_currency'] += line.currency_id.round(line.amount_currency * percentage * line_percentage)
+                epd_needed_vals['balance'] += line.currency_id.round(line.balance * percentage * line_percentage)
+                epd_needed_vals['price_subtotal'] += line.currency_id.round(line.price_subtotal * percentage * line_percentage)
             line.epd_needed = {k: frozendict(v) for k, v in epd_needed.items()}
 
     @api.depends('move_id.move_type', 'balance', 'tax_repartition_line_id', 'tax_ids')
@@ -1161,8 +1161,11 @@ class AccountMoveLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('account_id', 'journal_id', 'currency_id')
     def _check_constrains_account_id_journal_id(self):
+        # Avoid using api.constrains here as in case of a write on
+        # account move and account move line in the same operation, the check would be done
+        # before all write are complete, causing a false positive
+        self.flush_recordset()
         for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
             account = line.account_id
             journal = line.move_id.journal_id
@@ -1424,6 +1427,7 @@ class AccountMoveLine(models.Model):
                 line._check_tax_lock_date()
 
         lines.move_id._synchronize_business_models(['line_ids'])
+        lines._check_constrains_account_id_journal_id()
         return lines
 
     def write(self, vals):
@@ -1500,6 +1504,8 @@ class AccountMoveLine(models.Model):
 
             result = super().write(vals)
             self.move_id._synchronize_business_models(['line_ids'])
+            if any(field in vals for field in ['account_id', 'currency_id']):
+                self._check_constrains_account_id_journal_id()
 
             if not self.env.context.get('tracking_disable', False):
                 # Log changes to move lines on each move

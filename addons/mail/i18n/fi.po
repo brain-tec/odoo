@@ -6705,8 +6705,8 @@ msgstr "Virheiden määrä"
 #: model:ir.model.fields,help:mail.field_mail_thread_cc__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_partner__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Toimenpiteitä vaativien viestien määrä"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_has_error_counter
@@ -10134,6 +10134,14 @@ msgstr ""
 "Sähköpostien lähettäminen/vastaanottaminen Community- ja Enterprise-"
 "versioissa edellyttää oman sähköpostipalvelimen käyttöä. Online-käyttäjät "
 "hyötyvät jo valmiista sähköpostipalvelimesta (@mycompany.odoo.com)."
+
+#. module: mail
+#: code:addons/mail/models/mail_alias.py:0
+#, python-format
+msgid ""
+"Value for `mail.catchall.domain.allowed` cannot be validated.\n"
+"It should be a comma separated list of domains e.g. example.com,example.org."
+msgstr ""
 
 #. module: mail
 #. odoo-javascript

@@ -584,7 +584,7 @@ class SaleOrder(models.Model):
             show_warning = order.state in ('draft', 'sent') and \
                            order.company_id.account_use_credit_limit
             if show_warning:
-                updated_credit = order.partner_id.commercial_partner_id.credit + (order.amount_total * order.currency_rate)
+                updated_credit = order.partner_id.commercial_partner_id.credit + (order.amount_total / order.currency_rate)
                 order.partner_credit_warning = self.env['account.move']._build_credit_warning_message(
                     order, updated_credit)
 
@@ -944,15 +944,18 @@ class SaleOrder(models.Model):
     def action_update_taxes(self):
         self.ensure_one()
 
-        lines_to_recompute = self.order_line.filtered(lambda line: not line.display_type)
-        lines_to_recompute._compute_tax_id()
-        self.show_update_fpos = False
+        self._recompute_taxes()
 
         if self.partner_id:
             self.message_post(body=_(
                 "Product taxes have been recomputed according to fiscal position %s.",
                 self.fiscal_position_id._get_html_link() if self.fiscal_position_id else "",
             ))
+
+    def _recompute_taxes(self):
+        lines_to_recompute = self.order_line.filtered(lambda line: not line.display_type)
+        lines_to_recompute._compute_tax_id()
+        self.show_update_fpos = False
 
     def action_update_prices(self):
         self.ensure_one()
@@ -1005,6 +1008,7 @@ class SaleOrder(models.Model):
             'transaction_ids': [Command.set(self.transaction_ids.ids)],
             'company_id': self.company_id.id,
             'invoice_line_ids': [],
+            'user_id': self.user_id.id,
         }
 
     def action_view_invoice(self):

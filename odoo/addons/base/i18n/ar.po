@@ -3,9 +3,9 @@
 # 	* base
 # 
 # Translators:
-# Niyas Raphy, 2022
 # Mustafa J. Kadhem <safi2266@gmail.com>, 2023
 # Martin Trigaux, 2023
+# Niyas Raphy, 2023
 # Malaz Abuidris <msea@odoo.com>, 2023
 # 
 msgid ""
@@ -584,6 +584,12 @@ msgid ""
 "and configs.\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"يتيح هذا التطبيق لأمين الصندوق طباعة تقرير مبيعات X و Z\n"
+"لجلسة محددة أو تفاصيل المبيعات لعدة جلسات\n"
+"وتهيئة الإعدادات.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_epson_printer_restaurant
@@ -1279,6 +1285,11 @@ msgid ""
 "    the account.move form view. If this field is set, it is then read when exporting electronic invoicing formats.\n"
 "    "
 msgstr ""
+"\n"
+"    Some Luxembourg public institutions do not have a VAT number but have been assigned an arbitrary number \n"
+"    (see: https://pch.gouvernement.lu/fr/peppol.html). Thus, this module adds the Peppol Identifier field on \n"
+"    the account.move form view. If this field is set, it is then read when exporting electronic invoicing formats.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ie
@@ -9741,7 +9752,7 @@ msgstr "الباركود - تسمية GS1 "
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode
 msgid "Barcode scanner for warehouses"
-msgstr ""
+msgstr "ماسح الباركود للمستودعات"
 
 #. module: base
 #. odoo-python
@@ -12039,7 +12050,7 @@ msgstr "DLE 26 110 x 220 مم"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_daily_sales_reports
 msgid "Daily X and Z sales reports of a Point of Sale session"
-msgstr ""
+msgstr "تقارير مبيعات X و Z يومية في جلسة نقطة البيع "
 
 #. module: base
 #. odoo-python
@@ -14009,7 +14020,7 @@ msgid ""
 "Technical Details:\n"
 "%s"
 msgstr ""
-"تعذر استيراد الملف %r لعدم تطابق الصيغة أو لأنه لم يتم تكوين الملف بشكل صحيح. (الصيغ الصالحة هي are .csv, .po, .pot)\n"
+"تعذر استيراد الملف %r لعدم تطابق الصيغة أو لأنه لم يتم تكوين الملف بشكل صحيح. (الصيغ الصالحة هي .csv, .po, .pot)\n"
 "\n"
 "التفاصيل التقنية:\n"
 "%s"
@@ -16110,7 +16121,12 @@ msgid "Invalid 'group by' parameter"
 msgstr "معامل 'تجميع حسب' غير صالح"
 
 #. module: base
-#. odoo-python
+#: code:addons/base/models/ir_default.py:0
+#, python-format
+msgid "Invalid JSON format in Default Value field."
+msgstr "تنسيق JSON غير صالح في حقل القيمة الافتراضية. "
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Invalid aggregation function %r."
@@ -17322,7 +17338,7 @@ msgstr "لوكسمبورغ - المحاسبة "
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lu_peppol_id
 msgid "Luxembourg - Peppol Identifier"
-msgstr ""
+msgstr "Luxembourg - Peppol Identifier"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_M
@@ -22172,7 +22188,7 @@ msgstr "الدفعات - الحساب"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_payment_invoice_online_payment_patch
 msgid "Payment - Account / Invoice Online Payment Patch"
-msgstr ""
+msgstr "الدفع - الحساب / تصحيح فواتير الدفع عبر الإنترنت "
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment
@@ -22330,7 +22346,7 @@ msgstr "رقم الهاتف"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_phone_validation
 msgid "Phone Numbers Validation"
-msgstr "اعتماد أرقام الهواتف"
+msgstr "التحقق من أرقام الهواتف "
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -22432,7 +22448,7 @@ msgstr "نقطة البيع - الكوبونات والولاء "
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_daily_sales_reports
 msgid "Point of Sale Daily Sales Reports"
-msgstr ""
+msgstr "تقارير المبيعات اليومية لنقطة البيع "
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_discount
@@ -25135,7 +25151,6 @@ msgstr "بدء التهيئة "
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
 #: model_terms:ir.ui.view,arch_db:base.view_country_state_form
 #: model_terms:ir.ui.view,arch_db:base.view_country_state_tree
-#: model_terms:ir.ui.view,arch_db:base.view_module_filter
 #: model_terms:ir.ui.view,arch_db:base.view_partner_address_form
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
@@ -25178,6 +25193,7 @@ msgstr "الولايات "
 #: model:ir.model.fields,field_description:base.field_ir_module_module__state
 #: model:ir.model.fields,field_description:base.field_ir_module_module_dependency__state
 #: model:ir.model.fields,field_description:base.field_ir_module_module_exclusion__state
+#: model_terms:ir.ui.view,arch_db:base.view_module_filter
 #: model_terms:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Status"
 msgstr "الحالة"
@@ -27362,6 +27378,13 @@ msgstr "تعذّر إيجاد Wkhtmltopdf في نظامك. لا يمكن إنش�
 
 #. module: base
 #. odoo-python
+#: code:addons/base/models/ir_fields.py:0
+#, python-format
+msgid "Unable to import field type '%s'  "
+msgstr "تعذر استيراد نوع الحقل '%s' "
+
+#. module: base
+#. odoo-python
 #: code:addons/base/models/ir_module.py:0
 #, python-format
 msgid ""
@@ -28756,6 +28779,17 @@ msgstr "يمكنك أن ترفع ملفًا من جهازك أو تنسخ وتل
 #, python-format
 msgid "You can not create recursive tags."
 msgstr "لا يمكنك إنشاء علامات تصنيف متداخلة. "
+
+#. module: base
+#. odoo-python
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid ""
+"Deleting the template users is not allowed. Deleting this profile will "
+"compromise critical functionalities."
+msgstr ""
+"لا يُسمح بحذف مستخدمي القالب. سيؤدي حذف هذا الملف التعريفي إلى التأثير سلباً"
+" على الوظائف الأساسية. "
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_users_login_key

@@ -5,10 +5,10 @@
 # Translators:
 # Jeanphy <hzh0292@qq.com>, 2022
 # Benson <Benson.Dr@Gmail.com>, 2023
-# Martin Trigaux, 2023
 # 226408 台北 <226408@so8d.com>, 2023
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2023
 # Yan-Kuan Wu, 2023
+# Martin Trigaux, 2023
+# 敬雲 林 <chingyun@yuanchih-consult.com>, 2023
 # Tony Ng, 2023
 # 
 msgid ""
@@ -213,6 +213,8 @@ msgid ""
 "%s reached an invalid state regarding its related statement line.\n"
 "To be consistent, the journal entry must always have exactly one suspense line."
 msgstr ""
+"%s 就其相關的結單資料行，已達到無效狀態。\n"
+"為保持一致，該日記賬記項必須始終只有一個暫記資料行。"
 
 #. module: account
 #. odoo-python
@@ -2582,7 +2584,7 @@ msgstr "發生了錯誤."
 msgid ""
 "An error occurred when computing the inalterability. Impossible to get the "
 "unique previous posted journal entry."
-msgstr "計算不變性時出錯. 無法獲得之前已過帳的唯一日記帳分錄."
+msgstr "計算不變性時發生錯誤。無法獲取之前過賬的唯一日記賬記項。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__analytic_distribution
@@ -5024,7 +5026,7 @@ msgstr "概覽畫面"
 #. module: account
 #: model:ir.actions.server,name:account.action_check_hash_integrity
 msgid "Data Inalterability Check"
-msgstr "資料不變性檢查"
+msgstr "數據不變性檢查"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
@@ -5121,12 +5123,12 @@ msgstr "天"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__days_after
 msgid "Days after End of month"
-msgstr "月底後的天數"
+msgstr "天(月底後)"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term_line__days_after
 msgid "Days to add after the end of the month"
-msgstr "月底後增加的天數"
+msgstr "月底後加上的天數"
 
 #. module: account
 #. odoo-python
@@ -7317,7 +7319,7 @@ msgstr "未啟用"
 #: model:ir.model.fields,field_description:account.field_account_move__inalterable_hash
 #: model:ir.model.fields,field_description:account.field_account_payment__inalterable_hash
 msgid "Inalterability Hash"
-msgstr "不變性散列"
+msgstr "不變性雜湊值"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
@@ -7329,7 +7331,7 @@ msgstr "不變性檢查"
 #: model:ir.model.fields,field_description:account.field_account_move__secure_sequence_number
 #: model:ir.model.fields,field_description:account.field_account_payment__secure_sequence_number
 msgid "Inalteralbility No Gap Sequence #"
-msgstr "不變性無間隙序列 #"
+msgstr "不變性無間斷序列 #"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_method__payment_type__inbound
@@ -8718,7 +8720,7 @@ msgstr "明細"
 #: code:addons/account/models/account_report.py:0
 #, python-format
 msgid "Line \"%s\" defines itself as its parent."
-msgstr ""
+msgstr "資料行「%s」將自己設為其母項。"
 
 #. module: account
 #. odoo-python
@@ -8727,7 +8729,7 @@ msgstr ""
 msgid ""
 "Line \"%s\" defines line \"%s\" as its parent, but appears before it in the "
 "report. The parent must always come first."
-msgstr ""
+msgstr "資料行「%s」將另一行「%s」設為其母項，但它在報表上出現的位置較前。母項必須先行。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__show_line_subtotals_tax_selection
@@ -8776,7 +8778,7 @@ msgstr "載入更多限制"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__lock_date_message
 msgid "Lock Date Message"
-msgstr ""
+msgstr "鎖定日期訊息"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__restrict_mode_hash_table
@@ -9150,7 +9152,7 @@ msgstr "雜項"
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "Miscellaneous Operations"
-msgstr "其他營運帳項"
+msgstr "一般分錄"
 
 #. module: account
 #. odoo-python
@@ -9676,8 +9678,8 @@ msgstr "錯誤數"
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_company__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_partner_bank__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "需要處理的訊息數"
+msgid "Number of messages requiring action"
+msgstr "需要採取行動的訊息數目"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__message_has_error_counter
@@ -13671,6 +13673,8 @@ msgid ""
 "The date is being set prior to the %(lock_type)s lock date %(lock_date)s. "
 "The Journal Entry will be accounted on %(invoice_date)s upon posting."
 msgstr ""
+"該日期被設置在 %(lock_type)s 類型鎖定日期 %(lock_date)s 之前。過賬後，日記賬記項會隨即在 %(invoice_date)s"
+" 入賬。"
 
 #. module: account
 #. odoo-python
@@ -13898,6 +13902,13 @@ msgstr ""
 "- 要匹配明細開頭(在標籤或註釋中)的文字，只需填寫您的文字.\n"
 "- 要在任何地方匹配文字(在備註或註釋中)，請將文字放在 .* 之間\n"
 "  例如:.*N°48748 abc123.*"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The move could not be posted for the following reason: %(error_message)s"
+msgstr ""
 
 #. module: account
 #. odoo-javascript
@@ -14375,7 +14386,7 @@ msgstr ""
 msgid ""
 "There isn't any journal entry flagged for data inalterability yet for this "
 "journal."
-msgstr "該日記帳還沒有任何標記為不可更改的日記帳分錄."
+msgstr "此日記賬尚未有任何記項，被標記為數據不變。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_invoice_error
@@ -14611,6 +14622,14 @@ msgstr "分錄已設置為自動過帳。過帳的會計日期為 "
 #, python-format
 msgid "This move will be posted at the accounting date: %(date)s"
 msgstr "此傳票將自動過帳於以下日期: %(date)s"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/account_move_form/account_move_form.js:0
+#: code:addons/account/static/src/components/account_move_list/account_move_list.js:0
+#, python-format
+msgid "This operation will create a gap in the sequence."
+msgstr "此操作會造成序列間斷。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_invoice_send__auto_delete
@@ -16033,6 +16052,15 @@ msgstr "您不能刪除連結到已過帳分錄的項目."
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"You cannot delete this entry, as it has already consumed a sequence number "
+"and is not the last one in the chain. You should probably revert it instead."
+msgstr "您不能刪除此分錄，因為它已經消耗了一個序列號並且不是相應鏈中的最後一個. 你可能應該要還原它."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -16154,7 +16182,7 @@ msgstr "您不能修改與已過帳日記帳項目相關的稅費，您應該將
 msgid ""
 "You cannot overwrite the values ensuring the inalterability of the "
 "accounting."
-msgstr "不能改寫數值以確保會計的一致性."
+msgstr "該些數值不可覆寫，以確保會計數據不經刪改。"
 
 #. module: account
 #. odoo-python

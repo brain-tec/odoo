@@ -6,12 +6,12 @@
 # Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2022
 # Tim Siu Lai <tl@roomsfor.hk>, 2022
 # Noma Yuki, 2022
-# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
 # Martin Trigaux, 2023
 # Andy Yiu, 2023
 # 江口和志 <sandwhale1010@gmail.com>, 2023
 # Ryoko Tsuda <ryoko@quartile.co>, 2023
 # Junko Augias, 2023
+# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
 # 
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 10:33+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Junko Augias, 2023\n"
+"Last-Translator: Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9703,8 +9703,8 @@ msgstr "エラー数"
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_company__message_needaction_counter
 #: model:ir.model.fields,help:account.field_res_partner_bank__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "アクションを必要とするメッセージの数"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__message_has_error_counter
@@ -10022,7 +10022,7 @@ msgstr "起源表示ラベル"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_external_value__carryover_origin_report_line_id
 msgid "Origin Line"
-msgstr "元の行"
+msgstr "元の明細"
 
 #. module: account
 #: model:ir.actions.report,name:account.action_account_original_vendor_bill
@@ -10590,7 +10590,7 @@ msgstr "支払条件"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_15days
 msgid "Payment terms: 15 Days"
-msgstr "支払条件: 15日"
+msgstr "支払条件: 15日以内"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_2months
@@ -10636,7 +10636,7 @@ msgstr "支払条件: 45日以内"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_end_following_month
 msgid "Payment terms: End of Following Month"
-msgstr "支払条件:翌月末"
+msgstr "支払条件: 翌月末"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_immediate
@@ -13933,6 +13933,13 @@ msgstr ""
 "例:.*N°48748 abc123.*"
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The move could not be posted for the following reason: %(error_message)s"
+msgstr ""
+
+#. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 #, python-format
@@ -14644,6 +14651,14 @@ msgstr "この仕訳は、会計日に自動的に記帳されるように構成
 #, python-format
 msgid "This move will be posted at the accounting date: %(date)s"
 msgstr "この仕訳は、会計日付で記帳されます:%(date)s"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/account_move_form/account_move_form.js:0
+#: code:addons/account/static/src/components/account_move_list/account_move_list.js:0
+#, python-format
+msgid "This operation will create a gap in the sequence."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_invoice_send__auto_delete
@@ -16072,6 +16087,15 @@ msgstr "記帳済仕訳に紐づいた項目を削除することはできませ
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"You cannot delete this entry, as it has already consumed a sequence number "
+"and is not the last one in the chain. You should probably revert it instead."
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -16553,7 +16577,7 @@ msgstr "例： INV"
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
 "for this customer. You can allocate them to mark this credit note as paid."
-msgstr "があります。割り当ててこのクレジットノートを支払済としてマックできます。"
+msgstr "があります。割り当ててこのクレジットノートを支払済としてマークできます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -16569,7 +16593,7 @@ msgstr "があります。この請求書を支払済としてマークするこ
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
 "for this vendor. You can allocate them to mark this credit note as paid."
-msgstr "があります。割り当ててこのクレジットノートを支払済としてマックできます。"
+msgstr "があります。割り当ててこのクレジットノートを支払済としてマークできます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form

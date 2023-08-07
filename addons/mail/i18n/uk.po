@@ -6668,8 +6668,8 @@ msgstr "Кількість помилок"
 #: model:ir.model.fields,help:mail.field_mail_thread_cc__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_partner__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Кількість повідомлень, які потебують дії"
+msgid "Number of messages requiring action"
+msgstr "Кількість повідомлень, які вимагають дії"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_has_error_counter
@@ -10115,6 +10115,16 @@ msgstr ""
 "отримання електронних листів у версії спільноти та версії Enterprise. "
 "Інтернет-користувачі вже користуються готовим до використання електронним "
 "сервером (@ mycompany.odoo.com)."
+
+#. module: mail
+#: code:addons/mail/models/mail_alias.py:0
+#, python-format
+msgid ""
+"Value for `mail.catchall.domain.allowed` cannot be validated.\n"
+"It should be a comma separated list of domains e.g. example.com,example.org."
+msgstr ""
+"Значення для mail.catchall.domain.allowed не можна перевірити.\n"
+"Це має бути список доменів, розділених комами, наприклад. example.com, example.org."
 
 #. module: mail
 #. odoo-javascript

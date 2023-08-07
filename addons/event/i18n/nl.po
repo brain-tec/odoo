@@ -2089,7 +2089,7 @@ msgid ""
 "                usually based on the types of events you organize (e.g. \"Workshop\",\n"
 "                \"Roadshow\", \"Online Webinar\", etc)."
 msgstr ""
-"Event Templates combineren configuraties die je vaak gebruikt en zijn\n"
+"Evenementsjablonen combineren configuraties die je vaak gebruikt en zijn\n"
 "                meestal gebaseerd op het soort evenementen dat je organiseert (bijv. \"Workshop\",\n"
 "                \"Roadshow\", \"Online Webinar\", enz.)."
 
@@ -3009,7 +3009,7 @@ msgstr "Aantal fouten"
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__message_needaction_counter
 #: model:ir.model.fields,help:event.field_event_registration__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Aantal berichten die actie vereisen"
 
 #. module: event

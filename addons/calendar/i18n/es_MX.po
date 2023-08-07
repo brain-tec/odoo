@@ -5,6 +5,7 @@
 # Translators:
 # Braulio D. López Vázquez <bdl@odoo.com>, 2023
 # Martin Trigaux, 2023
+# Iran Villalobos López, 2023
 # Fernanda Alvarez, 2023
 # 
 msgid ""
@@ -1982,7 +1983,7 @@ msgstr "Número de errores"
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Número de mensajes que requieren una acción"
 
 #. module: calendar
@@ -2060,7 +2061,7 @@ msgstr "Participante"
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__partner_id
 msgid "Partner-related data of the user"
-msgstr "Datos de usuario relacionados con el partner"
+msgstr "Datos relacionados al contacto del usuario"
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__privacy
@@ -2120,7 +2121,7 @@ msgstr "Finalizar recurrencia"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__recurrence_update
 msgid "Recurrence Update"
-msgstr "Actualizar recurrencia"
+msgstr "Actualización de la recurrencia"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__recurrency
@@ -2276,8 +2277,7 @@ msgstr "Fecha de inicio"
 #: model:ir.model.fields,help:calendar.field_calendar_event__start
 msgid "Start date of an event, without time for full days events"
 msgstr ""
-"Fecha de inicio del evento, sin tiempo para eventos que duran un día "
-"completo"
+"Fecha de inicio del evento, sin horas para eventos que duran un día completo"
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form

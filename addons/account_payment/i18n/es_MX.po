@@ -219,7 +219,7 @@ msgstr "Nombre en pantalla"
 msgid ""
 "Done, your online payment has been successfully processed. Thank you for "
 "your order."
-msgstr "Su pago en línea se ha procesado con éxito. Gracias por su orden."
+msgstr "Su pago en línea se procesó con éxito. Gracias por su orden."
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_link_wizard
@@ -253,7 +253,7 @@ msgstr ""
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_transaction_form
 msgid "Invoice(s)"
-msgstr "Factura(s)"
+msgstr "Facturas"
 
 #. module: account_payment
 #. odoo-python
@@ -484,9 +484,7 @@ msgstr "El token de acceso no es válido."
 #, python-format
 msgid ""
 "The amount to be refunded must be positive and cannot be superior to %s."
-msgstr ""
-"El importe que será reembolsado debe ser positivo y no puede ser superior a "
-"%s."
+msgstr "El importe a reembolsar debe ser positivo y no puede ser mayor a %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id

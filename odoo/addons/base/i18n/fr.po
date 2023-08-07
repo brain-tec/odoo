@@ -2059,7 +2059,7 @@ msgstr ""
 "Certification et compétences pour les RH\n"
 "===============================\n"
 "\n"
-"Ce module ajoute la certification au cv des employés.\n"
+"Ce module ajoute la certification au C.V. des employés.\n"
 "        "
 
 #. module: base
@@ -2528,7 +2528,7 @@ msgstr ""
 "E-learning et compétences pour les RH\n"
 "============================\n"
 "\n"
-"Ce module ajoute les cours terminés au cv des employés.\n"
+"Ce module ajoute les cours terminés au C.V. des employés.\n"
 "        "
 
 #. module: base
@@ -4212,10 +4212,10 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"Compétences et cv pour les RH\n"
+"Compétences et C.V. pour les RH\n"
 "========================\n"
 "\n"
-"Ce module introduit la gestion des compétences et des cv des employés.\n"
+"Ce module introduit la gestion des compétences et des C.V. des employés.\n"
 "        "
 
 #. module: base
@@ -5909,7 +5909,7 @@ msgstr ""
 "- date de retrait\n"
 "- date d'alerte\n"
 "\n"
-"Met également en œuvre la stratégie de retrait largement utilisée dans les industries alimentaires : First Expiry First Out (FEFO), Premier Périmé, Premier Sorti (PPPS).\n"
+"Met également en œuvre la stratégie d'enlèvement largement utilisée dans les industries alimentaires : First Expiry First Out (FEFO), Premier Périmé, Premier Sorti (PPPS).\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_transifex
@@ -8344,12 +8344,12 @@ msgstr "Ajoutez des possibilités de certification à vos cours"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_survey
 msgid "Add certification to resume of your employees"
-msgstr "Ajoutez une certification au cv de vos employés"
+msgstr "Ajoutez une certification au C.V. de vos employés"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_slides
 msgid "Add completed courses to resume of your employees"
-msgstr "Ajoutez des cours complétés au cv de vos employés"
+msgstr "Ajoutez des cours complétés au C.V. de vos employés"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
@@ -14491,27 +14491,27 @@ msgstr "GPL-3 ou version ultérieure"
 #. module: base
 #: model:res.country,vat_label:base.sg
 msgid "GST No."
-msgstr "N° TPS"
+msgstr "N° GST"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_pos
 msgid "GST Point of Sale"
-msgstr "TPS point de vente"
+msgstr "GST point de vente"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_purchase
 msgid "GST Purchase Report"
-msgstr "Rapport d'achat TPS"
+msgstr "Rapport d'achat GST"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_sale
 msgid "GST Sale Report"
-msgstr "Rapport de vente TPS"
+msgstr "Rapport de vente GST"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_stock
 msgid "GST Stock Report"
-msgstr "Rapport sur le stock TPS"
+msgstr "Rapport sur le stock GST"
 
 #. module: base
 #: model:res.country,vat_label:base.in
@@ -15866,17 +15866,17 @@ msgstr "Inde - Point de Vente"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_purchase
 msgid "Indian - Purchase Report(GST)"
-msgstr "Inde – Rapport d'achats (TPS)"
+msgstr "Inde – Rapport d'achats (GST)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_sale
 msgid "Indian - Sale Report(GST)"
-msgstr "Inde – Rapport de ventes (TPS)"
+msgstr "Inde – Rapport de ventes (GST)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_stock
 msgid "Indian - Stock Report(GST)"
-msgstr "Inde – Rapport sur le stock (TPS)"
+msgstr "Inde – Rapport sur le stock (GST)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_tcs_tds
@@ -16174,7 +16174,12 @@ msgid "Invalid 'group by' parameter"
 msgstr "Paramètre invalide pour 'group by'"
 
 #. module: base
-#. odoo-python
+#: code:addons/base/models/ir_default.py:0
+#, python-format
+msgid "Invalid JSON format in Default Value field."
+msgstr "Format JSON invalide dans le champ Valeur par défaut."
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Invalid aggregation function %r."
@@ -17624,7 +17629,7 @@ msgstr ""
 "attribuée à chaque poste afin d'acheminer les candidatures vers la bonne offre.\n"
 "\n"
 "Que les candidats vous contactent par email ou via un formulaire en ligne, vous obtenez\n"
-"toutes les données indexées automatiquement (CV, lettre de motivation) et vous pouvez répondre\n"
+"toutes les données indexées automatiquement (C.V., lettre de motivation) et vous pouvez répondre\n"
 "en un seul clic, en réutilisant des modèles de réponses.\n"
 "\n"
 "Personnaliser votre processus de recrutement\n"
@@ -17642,7 +17647,7 @@ msgstr ""
 "Suivez les candidats dans votre processus de recrutement grâce à la vue kanban. Gagnez \n"
 "du temps en automatisant certaines communications grâce à des modèles d'emails.\n"
 "\n"
-"Les documents tels que les CV et les lettres de motivation sont indexés automatiquement,\n"
+"Les documents tels que les C.V. et les lettres de motivation sont indexés automatiquement,\n"
 "vous permettant de rechercher facilement des compétences spécifiques et de constituer une base de\n"
 "données de profils.\n"
 
@@ -17705,7 +17710,7 @@ msgstr "Gérez les compétences de vos employés"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills
 msgid "Manage skills, knowledge and resume of your employees"
-msgstr "Gérez les compétences, les connaissances et le cv de vos employés"
+msgstr "Gérez les compétences, les connaissances et le C.V. de vos employés"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_country
@@ -19654,12 +19659,12 @@ msgstr ""
 "Rationaliser votre processus de recrutement\n"
 "-----------------------------------\n"
 "\n"
-"Indexez les CV, suivez les candidats, recherchez des profils avec <a href=\"https://www.odoo.com/app/employees\">Odoo RH</a>.\n"
+"Indexez les C.V., suivez les candidats, recherchez des profils avec <a href=\"https://www.odoo.com/app/employees\">Odoo RH</a>.\n"
 "\n"
 "Publiez des offres d'emploi et gardez une trace de chaque candidature reçue. Suivez les candidats\n"
 " dans votre processus de recrutement grâce à la vue kanban intelligente.\n"
 "\n"
-"Gagnez du temps en automatisant certaines communications avec des modèles d'emails. Les CV \n"
+"Gagnez du temps en automatisant certaines communications avec des modèles d'emails. Les C.V. \n"
 "sont indexés automatiquement, ce qui vous permet de retrouver facilement des profils spécifiques.\n"
 "\n"
 "Réseau social d'entreprise\n"
@@ -22744,7 +22749,7 @@ msgstr "Gestion de cycle de vie des produits"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_product_matrix
 msgid "Product Matrix"
-msgstr "Matrix produit"
+msgstr "Matrice des produits"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity
@@ -23103,7 +23108,7 @@ msgstr "Conventions d'achat"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_product_matrix
 msgid "Purchase Matrix"
-msgstr "Matrix d'achat"
+msgstr "Matrice d'achat"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase_stock
@@ -24332,7 +24337,7 @@ msgstr "Rechercher un partenaire"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_category_view_search
 msgid "Search Partner Category"
-msgstr "Rechercher une catégorie de partenaire"
+msgstr "Rechercher une catégorie de partenaires"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_search
@@ -27531,6 +27536,13 @@ msgstr ""
 
 #. module: base
 #. odoo-python
+#: code:addons/base/models/ir_fields.py:0
+#, python-format
+msgid "Unable to import field type '%s'  "
+msgstr "Impossible d'importer le champ de type '%s'  "
+
+#. module: base
+#. odoo-python
 #: code:addons/base/models/ir_module.py:0
 #, python-format
 msgid ""
@@ -28963,6 +28975,17 @@ msgstr ""
 #, python-format
 msgid "You can not create recursive tags."
 msgstr "Vous ne pouvez pas créer d'étiquettes récursives."
+
+#. module: base
+#. odoo-python
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid ""
+"Deleting the template users is not allowed. Deleting this profile will "
+"compromise critical functionalities."
+msgstr ""
+"La suppression des utilisateurs du modèle n'est pas autorisée. La "
+"suppression de ce profil compromettra des fonctionnalités essentielles."
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_users_login_key

@@ -62,7 +62,7 @@ msgstr "# Versuche gesamt"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__total_views
 msgid "# Total Views"
-msgstr "# Ansichten gesamt"
+msgstr "# Ansichten insgesamt"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_embed__count_views
@@ -343,7 +343,7 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hallo,<br><br>\n"
-"                        Es gibt neue Inhalte in deinem Kurs <strong t-out=\"object.channel_id.name or ''\">Bäume, Holz und Gärten</strong>:<br><br>\n"
+"                        Es gibt neue Inhalte in Ihrem Kurs <strong t-out=\"object.channel_id.name or ''\">Bäume, Holz und Gärten</strong>:<br><br>\n"
 "                        <center><strong t-out=\"object.name or ''\">Bäume</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
 "                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
@@ -1985,7 +1985,7 @@ msgstr "Abschluss"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__completed_template_id
 msgid "Completion Notification"
-msgstr "Benachrichtigung über den Abschluss"
+msgstr "Benachrichtigung über Abschluss"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -1995,7 +1995,7 @@ msgstr "Zeitaufwand"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 msgid "Compose Email"
-msgstr "E-Mail schreiben"
+msgstr "E-Mail verfassen"
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_res_config_settings
@@ -2881,7 +2881,7 @@ msgstr "Installation von „%s“ fehlgeschlagen."
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__promote_strategy
 msgid "Featured Content"
-msgstr "Ausgewählter Inhalt"
+msgstr "Hervorgehobener Inhalt"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__binary_content
@@ -4199,7 +4199,7 @@ msgstr "Noch keine Teilnehmer!"
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "No Course created yet."
-msgstr "Es sind zur Zeit keine Kurse verfügbar."
+msgstr "Es sind zurzeit keine Kurse verfügbar."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -4343,14 +4343,14 @@ msgstr "Anzahl der Fehler"
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_needaction_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Anzahl der Nachrichten mit Zustellungsfehler."
+msgstr "Anzahl der Nachrichten mit Zustellungsfehler"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__questions_count
@@ -4422,7 +4422,7 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. {{ "
 "object.partner_id.lang }}."
 msgstr ""
-"Optionale Übersetzung (ISO-Code) zur Auswahl beim E-Mailversand. Falls es "
+"Optionale Übersetzung (ISO-Code) zur Auswahl beim E-Mail-Versand. Falls es "
 "keinen Eintrag gibt, wird die englische Version verwendet. Es sollte sich "
 "normalerweise um einen Platzhalterausdruck handeln, der die passende Sprache"
 " enthält, z. B. {{ object.partner_id.lang }}."
@@ -5945,7 +5945,7 @@ msgstr "Ansichten insgesamt"
 #. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__channel_type__training
 msgid "Training"
-msgstr "Training"
+msgstr "Schulung"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_0
@@ -6046,7 +6046,8 @@ msgstr "Aktualisieren"
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Update all your Attendees at once through mass mailings."
 msgstr ""
-"Aktualisieren Sie alle Ihre Teilnehmer auf einmal durch Massenmailings."
+"Bringen Sie alle Ihre Teilnehmer auf einmal durch Massenmailings auf den "
+"neusten Stand."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -6606,7 +6607,7 @@ msgstr "Sie wurden {{ object.channel_id.name }} beizutreten"
 #: code:addons/website_slides/models/slide_channel.py:0
 #, python-format
 msgid "You have to sign in before"
-msgstr "Sie müssen sich zuerst anmelden"
+msgstr "Sie müssen sich anmelden vor"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all

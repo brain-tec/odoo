@@ -618,7 +618,7 @@ msgstr "<i class=\"fa fa-fw fa-check\"/><b>Bezahlt</b>"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<i class=\"fa fa-fw fa-clock-o\"/> <b>Waiting Payment</b>"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/><b>Warte auf Zahlung</b>"
+msgstr "<i class=\"fa fa-fw fa-clock-o\"/><b>Warten auf Zahlung</b>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
@@ -982,7 +982,7 @@ msgid ""
 msgstr ""
 "Je nach Produktkonfiguration kann die gelieferte Menge automatisch durch einen Mechanismus berechnet werden:\n"
 "  - Manuell: Die Menge wird manuell auf der Position eingestellt\n"
-"  - Kostenstelle aus Auslagen: Die Menge ist die Mengensumme aus gebuchten Auslagen\n"
+"  - Kostenrechnung aus Auslagen: Die Menge ist die Mengensumme aus gebuchten Auslagen\n"
 "  - Zeiterfassung: Die Menge ist die Summe der Stunden, die für Aufgaben erfasst wurden, die mit dieser Verkaufsposition verbunden sind.\n"
 "  - Lagerbuchungen: Die Menge stammt aus bestätigten Kommissionierungen\n"
 
@@ -1107,7 +1107,7 @@ msgstr "Suche nach Kostenverteilung"
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__qty_delivered_method__analytic
 msgid "Analytic From Expenses"
-msgstr "Kostenrechnung aus Spesen"
+msgstr "Kostenrechnung aus Auslagen"
 
 #. module: sale
 #: model:ir.model,name:sale.model_account_analytic_line
@@ -1252,7 +1252,7 @@ msgstr "Kann Produkt bearbeiten"
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "Cancel"
-msgstr "Stornieren"
+msgstr "Abbrechen"
 
 #. module: sale
 #. odoo-python
@@ -1290,7 +1290,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.sale_onboarding_order_confirmation_step
 msgid "Choose between electronic signatures or online payments."
 msgstr ""
-"Wählen Sie zwischen elektronischen Unterschrifen oder Online-Zahlungen."
+"Wählen Sie zwischen elektronischen Unterschriften oder Online-Zahlungen."
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_open_sale_payment_provider_onboarding_wizard
@@ -1718,9 +1718,10 @@ msgid ""
 "either use the minimum or maximum lead time of the order lines."
 msgstr ""
 "Liefertermin, den Sie dem Kunden zusagen können, errechnet sich bei "
-"Serviceprodukten aus der minimalen Vorlaufzeit der Auftragspositionen. Bei "
-"Versand wird die Versandbedingung des Auftrags berücksichtigt, um entweder "
-"die minimale oder maximale Vorlaufzeit der Auftragspositionen zu verwenden."
+"Dienstleistungsprodukten aus der minimalen Vorlaufzeit der "
+"Auftragspositionen. Bei Versand wird die Versandbedingung des Auftrags "
+"berücksichtigt, um entweder die minimale oder maximale Vorlaufzeit der "
+"Auftragspositionen zu verwenden."
 
 #. module: sale
 #: model:product.template,name:sale.advance_product_0_product_template
@@ -2791,13 +2792,13 @@ msgstr "Anzahl der Fehler"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Anzahl der Nachrichten mit Zustellungsfehler."
+msgstr "Anzahl der Nachrichten mit Zustellungsfehler"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team__quotations_count
@@ -2884,7 +2885,7 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. {{ "
 "object.partner_id.lang }}."
 msgstr ""
-"Optionale Übersetzung (ISO-Code) zur Auswahl beim E-Mailversand. Falls es "
+"Optionale Übersetzung (ISO-Code) zur Auswahl beim E-Mail-Versand. Falls es "
 "keinen Eintrag gibt, wird die englische Version verwendet. Es sollte sich "
 "normalerweise um einen Platzhalterausdruck handeln, der die passende Sprache"
 " enthält, z. B. {{ object.partner_id.lang }}."
@@ -3940,7 +3941,7 @@ msgstr "Setzen Sie mehrere Preise pro Produkt, automatische Rabatte etc."
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_onboarding_order_confirmation_step
 msgid "Set payments"
-msgstr "Zahlungen festlegen"
+msgstr "Zahlungen einrichten"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -4378,7 +4379,7 @@ msgstr "Der Betrag der Anzahlung muss positiv sein."
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_orders
 msgid "There are currently no orders for your account."
-msgstr "Zur Zeit gibt es keine Aufträge für Ihr Konto."
+msgstr "Zurzeit gibt es keine Aufträge für Ihr Konto."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
@@ -4616,7 +4617,7 @@ msgstr "Transaktionen"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__type_name
 msgid "Type Name"
-msgstr "Artname"
+msgstr "Name des Typs"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.product_form_view_sale_order_button

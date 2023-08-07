@@ -2822,7 +2822,7 @@ msgstr "Baja"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder_line__mrp_production_backorder_id
 msgid "MO Backorder"
-msgstr "Orden de fabricación parcial"
+msgstr "Orden de fabricación pendiente"
 
 #. module: mrp
 #. odoo-python
@@ -3254,7 +3254,7 @@ msgstr "Sin órdenes parciales"
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_bom_form_action
 msgid "No bill of materials found. Let's create one!"
-msgstr "No se encontró ninguna lista de materiales. ¡Vamos a crear una!"
+msgstr "No se encontró ninguna lista de materiales. ¡Creemos una!"
 
 #. module: mrp
 #. odoo-javascript
@@ -3274,7 +3274,7 @@ msgstr "Todavía no hay información"
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_production_action
 msgid "No manufacturing order found. Let's create one."
-msgstr "No se encontró ninguna orden de fabricación. Vamos a crear una."
+msgstr "No se encontró ninguna orden de fabricación, creemos una."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.product_template_action
@@ -3397,7 +3397,7 @@ msgstr "Número de órdenes de fabricación generadas"
 #: model:ir.model.fields,help:mrp.field_mrp_bom__message_needaction_counter
 #: model:ir.model.fields,help:mrp.field_mrp_production__message_needaction_counter
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__message_needaction_counter
-msgid "Number of messages which requires an action"
+msgid "Number of messages requiring action"
 msgstr "Número de mensajes que requieren una acción"
 
 #. module: mrp
@@ -3670,12 +3670,12 @@ msgstr "Elegir componentes"
 #: code:addons/mrp/models/stock_warehouse.py:0
 #, python-format
 msgid "Pick components and then manufacture"
-msgstr "Elija componentes y luego fabrique"
+msgstr "Elegir componentes y luego fabricar"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__stock_warehouse__manufacture_steps__pbm
 msgid "Pick components and then manufacture (2 steps)"
-msgstr "Elija componentes y luego fabrique (2 pasos)"
+msgstr "Elegir componentes y luego fabricar (2 pasos)"
 
 #. module: mrp
 #. odoo-python
@@ -3683,7 +3683,8 @@ msgstr "Elija componentes y luego fabrique (2 pasos)"
 #: model:ir.model.fields.selection,name:mrp.selection__stock_warehouse__manufacture_steps__pbm_sam
 #, python-format
 msgid "Pick components, manufacture and then store products (3 steps)"
-msgstr "Elija componentes, fabrique y luego almacene los productos (3 pasos)"
+msgstr ""
+"Elegir componentes, fabricar y luego almacenar los productos (3 pasos)"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_warehouse__pbm_mto_pull_id
@@ -3747,7 +3748,7 @@ msgstr "Fecha planeada"
 #: code:addons/mrp/models/mrp_workorder.py:0
 #, python-format
 msgid "Planned at the same time as other workorder(s) at %s"
-msgstr "Planeado al mismo tiempo en otros centros de trabajo en %s"
+msgstr "Planeado al mismo tiempo que otras órdenes de trabajo en %s"
 
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.mrp_planning_menu_root
@@ -3851,12 +3852,12 @@ msgstr ""
 #. module: mrp
 #: model:res.groups,name:mrp.group_mrp_byproducts
 msgid "Produce residual products"
-msgstr "Producir subproductos residuales"
+msgstr "Producir productos residuales"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Produce residual products (A + B -&gt; C + D)"
-msgstr "Producción de subproductos (A + B -&gt; C + D)"
+msgstr "Producir productos residuales (A + B -> C + D)"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -4375,7 +4376,7 @@ msgstr "Programar fecha"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Schedule manufacturing orders earlier to avoid delays"
-msgstr "Planee antes las órdenes de fabricación para evitar retrasos"
+msgstr "Planee antes las órdenes de fabricación para evitar atrasos"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__date_planned_start
@@ -5292,13 +5293,13 @@ msgstr "Registro de tiempo: %(user)s"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter_capacity__time_stop
-msgid "Time in minutes for the cleaning."
-msgstr "Tiempo en minutos para la limpieza."
+msgid "Additional time in minutes for the cleaning."
+msgstr "Tiempo adicional para la limpieza en minutos. "
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter_capacity__time_start
-msgid "Time in minutes for the setup."
-msgstr "Tiempo en minutos para la configuración."
+msgid "Additional time in minutes for the setup."
+msgstr "Tiempo adicional para la configuración en minutos. "
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__time_cycle_manual

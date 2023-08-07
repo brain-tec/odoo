@@ -178,7 +178,7 @@ msgstr "<span class=\"o_stat_text\"> Produkte</span>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "<span class=\"o_stat_text\">Related Products</span>"
-msgstr "<span class=\"o_stat_text\">Verknüfte Produkte</span>"
+msgstr "<span class=\"o_stat_text\">Verknüpfte Produkte</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -1590,8 +1590,7 @@ msgid ""
 " some attribute values of optional and accessory products."
 msgstr ""
 "Machen Sie diesen Attributwert nicht kompatibel mit anderen Werten des "
-"Produkts oder einigen Attributwerten von optionalen und zusätzlichen "
-"Produkten."
+"Produkts oder einigen Attributwerten von optionalen und Zubehörprodukten."
 
 #. module: product
 #: model:res.groups,name:product.group_stock_packaging
@@ -1752,14 +1751,14 @@ msgstr "Anzahl der Fehler"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,help:product.field_product_template__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Meldungen, die eine Aktion erfordern"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,help:product.field_product_template__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Anzahl der Nachrichten mit Zustellungsfehler."
+msgstr "Anzahl der Nachrichten mit Zustellungsfehler"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__pricelist_item_count

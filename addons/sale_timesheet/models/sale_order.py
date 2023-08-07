@@ -46,7 +46,7 @@ class SaleOrder(models.Model):
             self.update({'timesheet_total_duration': 0})
             return
         group_data = self.env['account.analytic.line'].sudo()._read_group([
-            ('order_id', 'in', self.ids)
+            ('order_id', 'in', self.ids), ('project_id', '!=', False)
         ], ['order_id', 'unit_amount'], ['order_id'])
         timesheet_unit_amount_dict = defaultdict(float)
         timesheet_unit_amount_dict.update({data['order_id'][0]: data['unit_amount'] for data in group_data})
@@ -109,7 +109,7 @@ class SaleOrder(models.Model):
                 if projects:
                     action['context']['default_project_id'] = projects[0].id
         if self.timesheet_count > 0:
-            action['domain'] = [('so_line', 'in', self.order_line.ids)]
+            action['domain'] = [('so_line', 'in', self.order_line.ids), ('project_id', '!=', False)]
         else:
             action = {'type': 'ir.actions.act_window_close'}
         return action
@@ -131,7 +131,7 @@ class SaleOrderLine(models.Model):
     remaining_hours_available = fields.Boolean(compute='_compute_remaining_hours_available', compute_sudo=True)
     remaining_hours = fields.Float('Remaining Hours on SO', compute='_compute_remaining_hours', compute_sudo=True, store=True)
     has_displayed_warning_upsell = fields.Boolean('Has Displayed Warning Upsell')
-    timesheet_ids = fields.One2many('account.analytic.line', 'so_line', 'Timesheets')
+    timesheet_ids = fields.One2many('account.analytic.line', 'so_line', domain=[('project_id', '!=', False)], string='Timesheets')
 
     def name_get(self):
         res = super(SaleOrderLine, self).name_get()
