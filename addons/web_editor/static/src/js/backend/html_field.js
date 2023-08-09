@@ -17,7 +17,7 @@ import {
     getRangePosition
 } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { toInline } from '@web_editor/js/backend/convert_inline';
-import { loadJS, getBundle } from '@web/core/assets';
+import { getBundle } from '@web/core/assets';
 import {
     Component,
     useRef,
@@ -92,7 +92,6 @@ export class HtmlField extends Component {
                 this.cssReadonlyAsset = await getBundle(this.props.cssReadonlyAssetId);
             }
             if (this.props.cssEditAssetId || this.props.isInlineStyle) {
-                await loadJS('/web_editor/static/lib/html2canvas.js');
                 await getBundle(this.props.cssEditAssetId || 'web_editor.assets_edit_html_field');
             }
         });
@@ -399,7 +398,10 @@ export class HtmlField extends Component {
     _isDirty() {
         const strippedPropValue = stripHistoryIds(String(this.props.record.data[this.props.name]));
         const strippedEditingValue = stripHistoryIds(this.getEditingValue());
-        return !this.props.readonly && (strippedPropValue || '<p><br></p>') !== strippedEditingValue;
+        const domParser = new DOMParser();
+        const parsedPropValue = domParser.parseFromString(strippedPropValue || '<p><br></p>', 'text/html').body;
+        const parsedEditingValue = domParser.parseFromString(strippedEditingValue, 'text/html').body;
+        return !this.props.readonly && parsedPropValue.innerHTML !== parsedEditingValue.innerHTML;
     }
     _getCodeViewEl() {
         return this.state.showCodeView && this.codeViewRef.el;

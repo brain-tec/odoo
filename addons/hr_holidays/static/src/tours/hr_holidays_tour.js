@@ -1,7 +1,6 @@
 /** @odoo-module **/
-import { _t } from "@web/legacy/js/services/core";
-import "@web/legacy/translations_loaded";
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
@@ -62,7 +61,7 @@ registry.category("web_tour.tours").add('hr_holidays_tour', {
         position: 'bottom',
     },
     {
-        trigger: 'button[data-menu-xmlid="hr_holidays.menu_hr_holidays_approvals"]',
+        trigger: 'button[data-menu-xmlid="hr_holidays.menu_hr_holidays_management"]',
         content: _t("Let's go validate it"),
         position: 'bottom'
     },
