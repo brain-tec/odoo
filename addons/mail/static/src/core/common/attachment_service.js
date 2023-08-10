@@ -7,9 +7,16 @@ import { assignDefined, createLocalId } from "@mail/utils/common/misc";
 import { registry } from "@web/core/registry";
 
 export class AttachmentService {
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     * @param {Partial<import("services").Services>} services
+     */
     constructor(env, services) {
+        this.setup(env, services);
+    }
+
+    setup(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/common/store_service").Store} */
         this.store = services["mail.store"];
         this.rpc = services["rpc"];
     }
@@ -69,6 +76,9 @@ export class AttachmentService {
      * @param {Attachment} attachment
      */
     remove(attachment) {
+        if (attachment.tmpUrl) {
+            URL.revokeObjectURL(attachment.tmpUrl);
+        }
         delete this.store.attachments[attachment.id];
         if (attachment.originThread) {
             removeFromArrayWithPredicate(
@@ -115,6 +125,10 @@ export class AttachmentService {
 
 export const attachmentService = {
     dependencies: ["mail.store", "rpc"],
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     * @param {Partial<import("services").Services>} services
+     */
     start(env, services) {
         return new AttachmentService(env, services);
     },

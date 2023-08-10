@@ -4,6 +4,9 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export class SoundEffects {
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     */
     constructor(env) {
         this.soundEffects = {
             "channel-join": { defaultVolume: 0.3, path: "/mail/static/src/audio/channel_01_in" },
@@ -23,6 +26,7 @@ export class SoundEffects {
             unmute: { defaultVolume: 0.2, path: "/mail/static/src/audio/unmute_1" },
         };
     }
+
     /**
      * @param {String} param0 soundEffectName
      * @param {Object} param1
@@ -75,6 +79,9 @@ export class SoundEffects {
 }
 
 export const soundEffects = {
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     */
     start(env) {
         return new SoundEffects(env);
     },

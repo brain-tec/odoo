@@ -693,6 +693,8 @@ var SnippetEditor = Widget.extend({
         this.styles = {};
         this.selectorSiblings = [];
         this.selectorChildren = [];
+        this.selectorLockWithin = new Set();
+        const selectorExcludeAncestor = new Set();
 
         var $element = this.$target.parent();
         while ($element.length) {
@@ -740,6 +742,12 @@ var SnippetEditor = Widget.extend({
             if (val['drop-in']) {
                 this.selectorChildren.push(val['drop-in']);
             }
+            if (val['drop-lock-within']) {
+                this.selectorLockWithin.add(val['drop-lock-within']);
+            }
+            if (val['drop-exclude-ancestor']) {
+                selectorExcludeAncestor.add(val['drop-exclude-ancestor']);
+            }
 
             var optionName = val.option;
             var option = new (options.registry[optionName] || options.Class)(
@@ -773,6 +781,13 @@ var SnippetEditor = Widget.extend({
 
             return option.appendTo(document.createDocumentFragment());
         });
+
+        if (selectorExcludeAncestor.size) {
+            // Prevents dropping an element into another one.
+            // (E.g. ToC inside another ToC)
+            const excludedAncestorSelector = [...selectorExcludeAncestor].join(", ");
+            this.excludeAncestors = (i, el) => !el.closest(excludedAncestorSelector);
+        }
 
         this.isTargetMovable = (this.selectorSiblings.length > 0 || this.selectorChildren.length > 0);
 
@@ -1006,40 +1021,34 @@ var SnippetEditor = Widget.extend({
             width: self.$target.width(),
             height: self.$target.height()
         };
-        const closestFormEl = this.$target[0].closest('form');
-        self.$target.after('<div class="oe_drop_clone" style="display: none;"/>');
+        const dropCloneEl = document.createElement("div");
+        dropCloneEl.classList.add("oe_drop_clone");
+        dropCloneEl.style.setProperty("display", "none");
+        self.$target[0].after(dropCloneEl);
         self.$target.detach();
         self.$el.addClass('d-none');
 
         var $selectorSiblings;
         for (var i = 0; i < self.selectorSiblings.length; i++) {
-            if (!$selectorSiblings) {
-                $selectorSiblings = self.selectorSiblings[i].all();
-            } else {
-                $selectorSiblings = $selectorSiblings.add(self.selectorSiblings[i].all());
+            let $siblings = self.selectorSiblings[i].all();
+            if (this.excludeAncestors) {
+                $siblings = $siblings.filter(this.excludeAncestors);
             }
+            $selectorSiblings = $selectorSiblings ? $selectorSiblings.add($siblings) : $siblings;
         }
         var $selectorChildren;
         for (i = 0; i < self.selectorChildren.length; i++) {
-            if (!$selectorChildren) {
-                $selectorChildren = self.selectorChildren[i].all();
-            } else {
-                $selectorChildren = $selectorChildren.add(self.selectorChildren[i].all());
+            let $children = self.selectorChildren[i].all();
+            if (this.excludeAncestors) {
+                $children = $children.filter(this.excludeAncestors);
             }
+            $selectorChildren = $selectorChildren ? $selectorChildren.add($children) : $children;
         }
-        // TODO In master, do not reference other module class + find a better
-        // system to define such cases + avoid duplicated code (drag & drop from
-        // editor panel + drag & drop from move button of existing block).
-        // Prevent dropping ToC inside another ToC. grep: NO_DOUBLE_TOC
-        if (this.$target[0].classList.contains('s_table_of_content')) {
-            $selectorChildren = $selectorChildren.filter((i, el) => !el.closest('.s_table_of_content'));
-        }
-        // Disallow dropping form fields outside of their form.
-        // TODO this can probably be implemented by reviewing data-drop-near
-        // definitions in master but we should find a better to define those and
-        // such cases.
-        if (this.$target[0].classList.contains('s_website_form_field')) {
-            const filterFunc = (i, el) => el.closest('form') === closestFormEl;
+        // Disallow dropping an element outside a given direct or
+        // indirect parent. (E.g. form field must remain within its own form)
+        for (const lockedParentSelector of this.selectorLockWithin) {
+            const closestLockedParentEl = dropCloneEl.closest(lockedParentSelector);
+            const filterFunc = (i, el) => el.closest(lockedParentSelector) === closestLockedParentEl;
             if ($selectorSiblings) {
                 $selectorSiblings = $selectorSiblings.filter(filterFunc);
             }
@@ -2760,10 +2769,12 @@ var SnippetsMenu = Widget.extend({
     _computeSelectorFunctions: function (selector, exclude, target, noCheck, isChildren, excludeParent) {
         var self = this;
 
-        // TODO the `:not([contenteditable="true"])` part is designed to make
-        // images with such attribute editable even when they are in an
-        // environment where editing is not normally possible. This should be
-        // reviewed if we are to handle more hierarchy of editable nodes being
+        // The `:not(.o_editable_media)` part is handled outside of the selector
+        // (see filterFunc).
+        // Note: the `:not([contenteditable="true"])` part was there for that
+        // same purpose before the implementation of the o_editable_media class.
+        // It still make sense for potential editable areas though. Although it
+        // should be reviewed if we are to handle more hierarchy of nodes being
         // editable despite their non editable environment.
         // Without the `:not(.s_social_media)`, it is no longer possible to edit
         // icons in the social media snippet. This should be fixed in a more
@@ -2771,7 +2782,13 @@ var SnippetsMenu = Widget.extend({
         exclude += `${exclude && ', '}.o_snippet_not_selectable, .o_not_editable:not(.s_social_media) :not([contenteditable="true"])`;
 
         let filterFunc = function () {
-            return !$(this).is(exclude);
+            if (!$(this).is(exclude)) {
+                return true;
+            }
+            if (this.classList.contains('o_editable_media')) {
+                return weUtils.shouldEditableMediaBeEditable(this);
+            }
+            return false;
         };
         if (target) {
             const oldFilter = filterFunc;
@@ -2868,6 +2885,8 @@ var SnippetsMenu = Widget.extend({
                 '$el': $style,
                 'drop-near': $style.data('drop-near') && self._computeSelectorFunctions($style.data('drop-near'), '', false, noCheck, true, excludeParent),
                 'drop-in': $style.data('drop-in') && self._computeSelectorFunctions($style.data('drop-in'), '', false, noCheck),
+                'drop-exclude-ancestor': this.dataset.dropExcludeAncestor,
+                'drop-lock-within': this.dataset.dropLockWithin,
                 'data': Object.assign({string: $style.attr('string')}, $style.data()),
             };
             self.templateOptions.push(option);
@@ -3241,6 +3260,7 @@ var SnippetsMenu = Widget.extend({
                     var $baseBody = $snippet.find('.oe_snippet_body');
                     var $selectorSiblings = $();
                     var $selectorChildren = $();
+                    const selectorExcludeAncestor = [];
                     var temp = self.templateOptions;
                     for (var k in temp) {
                         if ($baseBody.is(temp[k].base_selector) && !$baseBody.is(temp[k].base_exclude)) {
@@ -3250,17 +3270,17 @@ var SnippetsMenu = Widget.extend({
                             if (temp[k]['drop-in']) {
                                 $selectorChildren = $selectorChildren.add(temp[k]['drop-in'].all());
                             }
+                            if (temp[k]['drop-exclude-ancestor']) {
+                                selectorExcludeAncestor.push(temp[k]['drop-exclude-ancestor']);
+                            }
                         }
                     }
 
-                    // TODO In master, do not reference other module class +
-                    // find a better system to define such cases + avoid
-                    // duplicated code (drag & drop from editor panel + drag &
-                    // drop from move button of existing block).
-                    // Prevent dropping ToC inside another ToC.
-                    // grep: NO_DOUBLE_TOC
-                    if ($baseBody[0].classList.contains('s_table_of_content')) {
-                        $selectorChildren = $selectorChildren.filter((i, el) => !el.closest('.s_table_of_content'));
+                    // Prevent dropping an element into another one.
+                    // (E.g. ToC inside another ToC)
+                    for (const excludedAncestorSelector of selectorExcludeAncestor) {
+                        $selectorSiblings = $selectorSiblings.filter((i, el) => !el.closest(excludedAncestorSelector));
+                        $selectorChildren = $selectorChildren.filter((i, el) => !el.closest(excludedAncestorSelector));
                     }
 
                     $toInsert = $baseBody.clone();

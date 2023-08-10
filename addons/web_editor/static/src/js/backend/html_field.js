@@ -398,7 +398,10 @@ export class HtmlField extends Component {
     _isDirty() {
         const strippedPropValue = stripHistoryIds(String(this.props.record.data[this.props.name]));
         const strippedEditingValue = stripHistoryIds(this.getEditingValue());
-        return !this.props.readonly && (strippedPropValue || '<p><br></p>') !== strippedEditingValue;
+        const domParser = new DOMParser();
+        const parsedPropValue = domParser.parseFromString(strippedPropValue || '<p><br></p>', 'text/html').body;
+        const parsedEditingValue = domParser.parseFromString(strippedEditingValue, 'text/html').body;
+        return !this.props.readonly && parsedPropValue.innerHTML !== parsedEditingValue.innerHTML;
     }
     _getCodeViewEl() {
         return this.state.showCodeView && this.codeViewRef.el;
@@ -543,7 +546,7 @@ export class HtmlField extends Component {
         this.props.record.data.attachment_ids.linkTo(attachment.res_id, attachment);
     }
     _onDblClickEditableMedia(ev) {
-        const el = ev.target;
+        const el = ev.currentTarget;
         if (el.nodeName === 'IMG' && el.src) {
             this.wysiwyg.showImageFullscreen(el.src);
         }
