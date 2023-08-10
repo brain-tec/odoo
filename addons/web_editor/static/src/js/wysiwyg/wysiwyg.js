@@ -486,12 +486,26 @@ export class Wysiwyg extends Component {
         this.$editable.on('click', '.o_image, .media_iframe_video', e => e.preventDefault());
         this.showTooltip = true;
         this.$editable.on('dblclick', mediaSelector, ev => {
-            const target = ev.target;
-            if (target.isContentEditable || (target.parentElement && target.parentElement.isContentEditable)) {
+            const targetEl = ev.currentTarget;
+            let isEditable =
+                // TODO that first check is probably useless/wrong: checking if
+                // the media itself has editable content should not be relevant.
+                // In fact the content of all media should be marked as non
+                // editable anyway.
+                targetEl.isContentEditable ||
+                // For a media to be editable, the base case is to be in a
+                // container whose content is editable.
+                (targetEl.parentElement && targetEl.parentElement.isContentEditable);
+
+            if (!isEditable && targetEl.classList.contains('o_editable_media')) {
+                isEditable = weUtils.shouldEditableMediaBeEditable(targetEl);
+            }
+
+            if (isEditable) {
                 this.showTooltip = false;
 
                 if (!isProtected(this.odooEditor.document.getSelection().anchorNode)) {
-                    if (this.options.onDblClickEditableMedia && target.nodeName === 'IMG' && target.src) {
+                    if (this.options.onDblClickEditableMedia && targetEl.nodeName === 'IMG' && targetEl.src) {
                         this.options.onDblClickEditableMedia(ev);
                     } else {
                         this._onDblClickEditableMedia(ev);
@@ -2692,7 +2706,7 @@ export class Wysiwyg extends Component {
         }
     }
     _onDblClickEditableMedia(ev) {
-        const $el = $(ev.target);
+        const $el = $(ev.currentTarget);
         $el.selectElement();
         if (!$el.parent().hasClass('o_stars')) {
             // Waiting for all the options to be initialized before
@@ -2700,7 +2714,7 @@ export class Wysiwyg extends Component {
             // been deleted in the meantime.
             this.waitForEmptyMutexAction().then(() => {
                 if ($el[0].parentElement) {
-                    this.openMediaDialog({ node: ev.target });
+                    this.openMediaDialog({ node: $el[0] });
                 }
             });
         }

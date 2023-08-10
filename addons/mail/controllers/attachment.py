@@ -6,10 +6,12 @@ from odoo import _, http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import consteq
+from ..models.discuss.mail_guest import add_guest_to_context
 
 
 class AttachmentController(http.Controller):
     @http.route("/mail/attachment/upload", methods=["POST"], type="http", auth="public")
+    @add_guest_to_context
     def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
         env = request.env["ir.attachment"]._get_upload_env(thread_model, thread_id)
         vals = {
@@ -32,14 +34,8 @@ class AttachmentController(http.Controller):
             vals["access_token"] = env["ir.attachment"]._generate_access_token()
         try:
             attachment = env["ir.attachment"].create(vals)
-            attachment._post_add_create()
-            attachmentData = {
-                "filename": ufile.filename,
-                "id": attachment.id,
-                "mimetype": attachment.mimetype,
-                "name": attachment.name,
-                "size": attachment.file_size,
-            }
+            attachment._post_add_create(**kwargs)
+            attachmentData = attachment._attachment_format()[0]
             if attachment.access_token:
                 attachmentData["accessToken"] = attachment.access_token
         except AccessError:
@@ -47,6 +43,7 @@ class AttachmentController(http.Controller):
         return request.make_json_response(attachmentData)
 
     @http.route("/mail/attachment/delete", methods=["POST"], type="json", auth="public")
+    @add_guest_to_context
     def mail_attachment_delete(self, attachment_id, access_token=None):
         attachment_sudo = request.env["ir.attachment"].browse(int(attachment_id)).sudo().exists()
         guest = request.env["mail.guest"]._get_guest_from_context()
