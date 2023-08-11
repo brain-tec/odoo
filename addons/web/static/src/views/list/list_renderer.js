@@ -970,11 +970,12 @@ export class ListRenderer extends Component {
 
     getOptionalActiveFields() {
         this.optionalActiveFields = {};
-        const optionalActiveFields = browser.localStorage.getItem(this.keyOptionalFields);
+        let optionalActiveFields = browser.localStorage.getItem(this.keyOptionalFields);
         const optionalColumn = this.allColumns.filter(
             (col) => col.type === "field" && col.optional
         );
         if (optionalActiveFields) {
+            optionalActiveFields = optionalActiveFields.split(",");
             optionalColumn.forEach((col) => {
                 this.optionalActiveFields[col.name] = optionalActiveFields.includes(col.name);
             });
@@ -982,6 +983,9 @@ export class ListRenderer extends Component {
             for (const col of optionalColumn) {
                 this.optionalActiveFields[col.name] = col.optional === "show";
             }
+        }
+        if (this.props.onOptionalFieldsChanged) {
+            this.props.onOptionalFieldsChanged(this.optionalActiveFields);
         }
     }
 
@@ -1769,6 +1773,9 @@ export class ListRenderer extends Component {
 
     async toggleOptionalField(fieldName) {
         this.optionalActiveFields[fieldName] = !this.optionalActiveFields[fieldName];
+        if (this.props.onOptionalFieldsChanged) {
+            this.props.onOptionalFieldsChanged(this.optionalActiveFields);
+        }
         this.state.columns = this.getActiveColumns(this.props.list);
         this.saveOptionalActiveFields(
             this.allColumns.filter((col) => this.optionalActiveFields[col.name] && col.optional)
@@ -2069,6 +2076,7 @@ ListRenderer.props = [
     "editable?",
     "noContentHelp?",
     "nestedKeyOptionalFieldsData?",
+    "onOptionalFieldsChanged?",
 ];
 ListRenderer.defaultProps = { hasSelectors: false, cycleOnTab: true };
 
