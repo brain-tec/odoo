@@ -1137,8 +1137,11 @@ class AccountMoveLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('account_id', 'journal_id', 'currency_id')
     def _check_constrains_account_id_journal_id(self):
+        # Avoid using api.constrains for fields journal_id and account_id as in case of a write on
+        # account move and account move line in the same operation, the check would be done
+        # before all write are complete, causing a false positive
+        self.flush_recordset()
         for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
             account = line.account_id
             journal = line.move_id.journal_id
@@ -1400,6 +1403,7 @@ class AccountMoveLine(models.Model):
                 line._check_tax_lock_date()
 
         lines.move_id._synchronize_business_models(['line_ids'])
+        lines._check_constrains_account_id_journal_id()
         return lines
 
     def write(self, vals):
@@ -1476,6 +1480,8 @@ class AccountMoveLine(models.Model):
 
             result = super().write(vals)
             self.move_id._synchronize_business_models(['line_ids'])
+            if any(field in vals for field in ['account_id', 'currency_id']):
+                self._check_constrains_account_id_journal_id()
 
             if not self.env.context.get('tracking_disable', False):
                 # Log changes to move lines on each move
@@ -2982,6 +2988,35 @@ class AccountMoveLine(models.Model):
             'label': _('Import Template for Journal Items'),
             'template': '/account/static/xls/aml_import_template.xlsx'
         }]
+
+    def _prepare_edi_vals_to_export(self):
+        ''' The purpose of this helper is the same as '_prepare_edi_vals_to_export' but for a single invoice line.
+        This includes the computation of the tax details for each invoice line or the management of the discount.
+        Indeed, in some EDI, we need to provide extra values depending the discount such as:
+        - the discount as an amount instead of a percentage.
+        - the price_unit but after subtraction of the discount.
+
+        :return: A python dict containing default pre-processed values.
+        '''
+        self.ensure_one()
+
+        if self.discount == 100.0:
+            gross_price_subtotal = self.currency_id.round(self.price_unit * self.quantity)
+        else:
+            gross_price_subtotal = self.currency_id.round(self.price_subtotal / (1 - self.discount / 100.0))
+
+        res = {
+            'line': self,
+            'price_unit_after_discount': self.currency_id.round(self.price_unit * (1 - (self.discount / 100.0))),
+            'price_subtotal_before_discount': gross_price_subtotal,
+            'price_subtotal_unit': self.currency_id.round(self.price_subtotal / self.quantity) if self.quantity else 0.0,
+            'price_total_unit': self.currency_id.round(self.price_total / self.quantity) if self.quantity else 0.0,
+            'price_discount': gross_price_subtotal - self.price_subtotal,
+            'price_discount_unit': (gross_price_subtotal - self.price_subtotal) / self.quantity if self.quantity else 0.0,
+            'gross_price_total_unit': self.currency_id.round(gross_price_subtotal / self.quantity) if self.quantity else 0.0,
+            'unece_uom_code': self.product_id.product_tmpl_id.uom_id._get_unece_code(),
+        }
+        return res
 
     # -------------------------------------------------------------------------
     # PUBLIC ACTIONS

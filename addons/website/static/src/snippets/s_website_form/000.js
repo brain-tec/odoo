@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-    import core from "@web/legacy/js/services/core";
     import time from "@web/legacy/js/core/time";
     import {ReCaptcha} from "@google_recaptcha/js/recaptcha";
     import session from "web.session";
@@ -10,8 +9,7 @@
     import concurrency from "@web/legacy/js/core/concurrency";
     import { debounce } from "@web/core/utils/timing";
     import { _t } from "@web/core/l10n/translation";
-
-    var qweb = core.qweb;
+    import { renderToElement } from "@web/core/utils/render";
 
     publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
         selector: '.s_website_form form, form.s_website_form', // !compatibility
@@ -336,13 +334,21 @@
             // force server date format usage for existing fields
             this.$el.find('.s_website_form_field:not(.s_website_form_custom)')
             .find('.s_website_form_date, .s_website_form_datetime').each(function () {
+                const inputEl = this.querySelector('input');
+
+                // Datetimepicker('viewDate') will return `new Date()` if the
+                // input is empty but we want to keep the empty value
+                if (!inputEl.value) {
+                    return;
+                }
+
                 var date = $(this).datetimepicker('viewDate').clone().locale('en');
                 var format = 'YYYY-MM-DD';
                 if ($(this).hasClass('s_website_form_datetime')) {
                     date = date.utc();
                     format = 'YYYY-MM-DD HH:mm:ss';
                 }
-                form_values[$(this).find('input').attr('name')] = date.format(format);
+                form_values[inputEl.getAttribute('name')] = date.format(format);
             });
 
             if (this._recaptchaLoaded) {
@@ -610,7 +616,7 @@
             // before any qweb rendering which depends on xml assets
             // because the event handlers are binded before the call to
             // willStart for public widgets...
-            this.__started.then(() => $result.replaceWith(qweb.render(`website.s_website_form_status_${status}`, {
+            this.__started.then(() => $result.replaceWith(renderToElement(`website.s_website_form_status_${status}`, {
                 message: message,
             })));
         },
@@ -809,9 +815,9 @@
          *      displayed
          */
         _createFileBlock(fileDetails, filesZoneEl) {
-            const fileBlockEl = qweb.render("website.file_block", {fileName: fileDetails.name});
-            filesZoneEl.insertAdjacentHTML("beforeend", fileBlockEl);
-            filesZoneEl.lastElementChild.fileDetails = fileDetails;
+            const fileBlockEl = renderToElement("website.file_block", {fileName: fileDetails.name});
+            fileBlockEl.fileDetails = fileDetails;
+            filesZoneEl.append(fileBlockEl);
         },
         /**
          * Creates the file upload button (= a button to replace the file input,
