@@ -971,9 +971,22 @@ const Wysiwyg = Widget.extend({
                         name: el.dataset.fileName || '',
                         data: el.getAttribute('src').split(',')[1],
                         is_image: true,
+                        ...this.options.recordInfo,
                     },
                 });
-                el.setAttribute('src', attachment.image_src);
+                let src = attachment.image_src;
+                if (!attachment.public) {
+                    let accessToken = attachment.access_token;
+                    if (!accessToken) {
+                        [accessToken] = await this._rpc({
+                            model: 'ir.attachment',
+                            method: 'generate_access_token',
+                            args: [attachment.id],
+                        });
+                    }
+                    src += `?access_token=${encodeURIComponent(accessToken)}`;
+                }
+                el.setAttribute('src', src);
                 el.classList.remove('o_b64_image_to_save');
             });
             const modifiedProms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
@@ -1793,14 +1806,14 @@ const Wysiwyg = Widget.extend({
         }
         const coloredElements = this.odooEditor.execCommand('applyColor', color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
 
-        const coloredTds = coloredElements && coloredElements.length && coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
+        const coloredTds = coloredElements && coloredElements.length && Array.isArray(coloredElements) && coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
         if (coloredTds.length) {
             const propName = eventName === 'foreColor' ? 'color' : 'background-color';
             for (const td of coloredTds) {
                 // Make it important so it has priority over selection color.
                 td.style.setProperty(propName, td.style[propName], previewMode ? 'important' : '');
             }
-        } else if (!this.lastMediaClicked && coloredElements && coloredElements.length) {
+        } else if (!this.lastMediaClicked && coloredElements && coloredElements.length && Array.isArray(coloredElements)) {
             // Ensure the selection in the fonts tags, otherwise an undetermined
             // race condition could generate a wrong selection later.
             const first = coloredElements[0];
@@ -2065,6 +2078,9 @@ const Wysiwyg = Widget.extend({
         finalOptions.autohideToolbar = typeof finalOptions.autohideToolbar === 'boolean'
             ? finalOptions.autohideToolbar
             : !finalOptions.snippets;
+        if (finalOptions.inlineStyle) {
+            finalOptions.dropImageAsAttachment = false;
+        }
 
         return finalOptions;
     },
