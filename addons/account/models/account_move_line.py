@@ -1164,8 +1164,11 @@ class AccountMoveLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('account_id', 'journal_id', 'currency_id')
     def _check_constrains_account_id_journal_id(self):
+        # Avoid using api.constrains for fields journal_id and account_id as in case of a write on
+        # account move and account move line in the same operation, the check would be done
+        # before all write are complete, causing a false positive
+        self.flush_recordset()
         for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
             account = line.account_id
             journal = line.move_id.journal_id
@@ -1427,6 +1430,7 @@ class AccountMoveLine(models.Model):
                 line._check_tax_lock_date()
 
         lines.move_id._synchronize_business_models(['line_ids'])
+        lines._check_constrains_account_id_journal_id()
         return lines
 
     def write(self, vals):
@@ -1503,6 +1507,8 @@ class AccountMoveLine(models.Model):
 
             result = super().write(vals)
             self.move_id._synchronize_business_models(['line_ids'])
+            if any(field in vals for field in ['account_id', 'currency_id']):
+                self._check_constrains_account_id_journal_id()
 
             if not self.env.context.get('tracking_disable', False):
                 # Log changes to move lines on each move
@@ -1709,6 +1715,16 @@ class AccountMoveLine(models.Model):
             credit_rate = get_accounting_rate(credit_vals)
             recon_debit_amount = recon_currency.round(remaining_debit_amount * debit_rate)
             recon_credit_amount = -remaining_credit_amount_curr
+
+            # If there is nothing left after applying the rate to reconcile in foreign currency,
+            # try to fallback on the company currency instead.
+            if recon_currency.is_zero(recon_debit_amount) or recon_currency.is_zero(recon_credit_amount):
+                recon_currency = company_currency
+                debit_rate = 1
+                credit_rate = None
+                recon_debit_amount = remaining_debit_amount
+                recon_credit_amount = -remaining_credit_amount
+
         elif debit_vals['currency'] != company_currency \
                 and is_rec_pay_account \
                 and not has_debit_zero_residual_currency \
@@ -1721,6 +1737,16 @@ class AccountMoveLine(models.Model):
             credit_rate = get_odoo_rate(credit_vals)
             recon_debit_amount = remaining_debit_amount_curr
             recon_credit_amount = recon_currency.round(-remaining_credit_amount * credit_rate)
+
+            # If there is nothing left after applying the rate to reconcile in foreign currency,
+            # try to fallback on the company currency instead.
+            if recon_currency.is_zero(recon_debit_amount) or recon_currency.is_zero(recon_credit_amount):
+                recon_currency = company_currency
+                debit_rate = None
+                credit_rate = 1
+                recon_debit_amount = remaining_debit_amount
+                recon_credit_amount = -remaining_credit_amount
+
         elif debit_vals['currency'] == credit_vals['currency'] \
                 and debit_vals['currency'] != company_currency \
                 and not has_debit_zero_residual_currency \
