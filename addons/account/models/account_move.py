@@ -1657,10 +1657,6 @@ class AccountMove(models.Model):
 
     @api.onchange('currency_id')
     def _inverse_currency_id(self):
-        self._conditional_add_to_compute('journal_id', lambda m: (
-            m.journal_id.currency_id
-            and m.journal_id.currency_id != m.currency_id
-        ))
         (self.line_ids | self.invoice_line_ids)._conditional_add_to_compute('currency_id', lambda l: (
             l.move_id.is_invoice(True)
             and l.move_id.currency_id != l.currency_id
@@ -2454,6 +2450,8 @@ class AccountMove(models.Model):
             for move in self:
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
+        if 'journal_id' in vals:
+            self.line_ids._check_constrains_account_id_journal_id()
 
         return res
 
@@ -3083,6 +3081,35 @@ class AccountMove(models.Model):
         :return a recordset of ir.attachment to export
         """
         return self.env['ir.attachment']
+
+    def _prepare_edi_vals_to_export(self):
+        ''' The purpose of this helper is to prepare values in order to export an invoice through the EDI system.
+        This includes the computation of the tax details for each invoice line that could be very difficult to
+        handle regarding the computation of the base amount.
+
+        :return: A python dict containing default pre-processed values.
+        '''
+        self.ensure_one()
+
+        res = {
+            'record': self,
+            'balance_multiplicator': -1 if self.is_inbound() else 1,
+            'invoice_line_vals_list': [],
+        }
+
+        # Invoice lines details.
+        for index, line in enumerate(self.invoice_line_ids.filtered(lambda line: line.display_type == 'product'), start=1):
+            line_vals = line._prepare_edi_vals_to_export()
+            line_vals['index'] = index
+            res['invoice_line_vals_list'].append(line_vals)
+
+        # Totals.
+        res.update({
+            'total_price_subtotal_before_discount': sum(x['price_subtotal_before_discount'] for x in res['invoice_line_vals_list']),
+            'total_price_discount': sum(x['price_discount'] for x in res['invoice_line_vals_list']),
+        })
+
+        return res
 
 
     # -------------------------------------------------------------------------

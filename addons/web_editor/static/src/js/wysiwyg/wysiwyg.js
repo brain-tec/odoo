@@ -983,9 +983,22 @@ const Wysiwyg = Widget.extend({
                         name: el.dataset.fileName || '',
                         data: el.getAttribute('src').split(',')[1],
                         is_image: true,
+                        ...this.options.recordInfo,
                     },
                 });
-                el.setAttribute('src', attachment.image_src);
+                let src = attachment.image_src;
+                if (!attachment.public) {
+                    let accessToken = attachment.access_token;
+                    if (!accessToken) {
+                        [accessToken] = await this._rpc({
+                            model: 'ir.attachment',
+                            method: 'generate_access_token',
+                            args: [attachment.id],
+                        });
+                    }
+                    src += `?access_token=${encodeURIComponent(accessToken)}`;
+                }
+                el.setAttribute('src', src);
                 el.classList.remove('o_b64_image_to_save');
             });
             const modifiedProms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
@@ -2077,6 +2090,9 @@ const Wysiwyg = Widget.extend({
         finalOptions.autohideToolbar = typeof finalOptions.autohideToolbar === 'boolean'
             ? finalOptions.autohideToolbar
             : !finalOptions.snippets;
+        if (finalOptions.inlineStyle) {
+            finalOptions.dropImageAsAttachment = false;
+        }
 
         return finalOptions;
     },
