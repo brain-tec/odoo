@@ -9,6 +9,7 @@ import itertools
 import logging
 import mimetypes
 import os
+import psycopg2
 import re
 import uuid
 
@@ -174,7 +175,11 @@ class IrAttachment(models.Model):
         # but only attempt to grab the lock for a little bit, otherwise it'd
         # start blocking other transactions. (will be retried later anyway)
         cr.execute("SET LOCAL lock_timeout TO '10s'")
-        cr.execute("LOCK ir_attachment IN SHARE MODE")
+        try:
+            cr.execute("LOCK ir_attachment IN SHARE MODE")
+        except psycopg2.errors.LockNotAvailable:
+            cr.rollback()
+            return False
 
         self._gc_file_store_unsafe()
 
@@ -353,12 +358,9 @@ class IrAttachment(models.Model):
         xml_like = 'ht' in mimetype or ( # hta, html, xhtml, etc.
                 'xml' in mimetype and    # other xml (svg, text/xml, etc)
                 not 'openxmlformats' in mimetype)  # exception for Office formats
-        user = self.env.context.get('binary_field_real_user', self.env.user)
-        if not isinstance(user, self.pool['res.users']):
-            raise UserError(_("binary_field_real_user should be a res.users record."))
         force_text = xml_like and (
             self.env.context.get('attachments_mime_plainxml') or
-            not self.env['ir.ui.view'].with_user(user).check_access_rights('write', False))
+            not self.env['ir.ui.view'].sudo(False).check_access_rights('write', False))
         if force_text:
             values['mimetype'] = 'text/plain'
         if not self.env.context.get('image_no_postprocess'):
