@@ -771,7 +771,7 @@ class BaseModel(metaclass=MetaModel):
                 constraint_key = constraint[0]
                 if len(cls._table) + len(constraint_key) + 1 > 63:
                     _logger.warning(
-                        'Constrains `%s` combined to model table will have more than 63 character '
+                        'Constraint `%s` combined to model table will have more than 63 characters '
                         'and could be truncated leading to unexpected results',
                         constraint_key
                     )
@@ -2378,7 +2378,8 @@ class BaseModel(metaclass=MetaModel):
 
             if field.type in ('many2one', 'many2many') or field_name == 'id':
                 ids = [row[group].id for row in rows_dict if row[group] and isinstance(row[group], BaseModel)]
-                m2x_records = self.env[field.comodel_name].browse(ids)
+                # Use `union()` to uniquify the recordset
+                m2x_records = self.env[field.comodel_name].browse(ids).union()
                 name_get_dict = dict(m2x_records.sudo().name_get())
 
             elif field.type in ('date', 'datetime'):
@@ -2452,8 +2453,8 @@ class BaseModel(metaclass=MetaModel):
                 or a string 'field:granularity'. Right now, the only supported granularities
                 are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
-        :param int offset: optional number of records to skip
-        :param int limit: optional max number of records to return
+        :param int offset: optional number of groups to skip
+        :param int limit: optional max number of groups to return
         :param str orderby: optional ``order by`` specification, for
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
@@ -2826,6 +2827,7 @@ class BaseModel(metaclass=MetaModel):
 
         for (key, definition, message) in self._sql_constraints:
             conname = '%s_%s' % (self._table, key)
+
             current_definition = tools.constraint_definition(cr, self._table, conname)
             if current_definition == definition:
                 continue
