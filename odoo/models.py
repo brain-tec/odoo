@@ -2471,8 +2471,8 @@ class BaseModel(metaclass=MetaModel):
                 or a string 'field:granularity'. Right now, the only supported granularities
                 are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
-        :param int offset: optional number of records to skip
-        :param int limit: optional max number of records to return
+        :param int offset: optional number of groups to skip
+        :param int limit: optional max number of groups to return
         :param str orderby: optional ``order by`` specification, for
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
@@ -4326,19 +4326,6 @@ class BaseModel(metaclass=MetaModel):
             fname
             for fname, field in self._fields.items()
             if field.precompute and field.readonly
-            # ignore `readonly=True` when it's combined with the `states` attribute,
-            # making the field readonly according to the record state.
-            # e.g.
-            # product_uom = fields.Many2one(
-            #     'uom.uom', 'Product Unit of Measure',
-            #     compute='_compute_product_uom', store=True, precompute=True,
-            #     readonly=True, required=True, states={'draft': [('readonly', False)]},
-            # )
-            and (not field.states or not any(
-                modifier == 'readonly'
-                for modifiers in field.states.values()
-                for modifier, _value in modifiers
-            ))
         )
 
         result_vals_list = []
@@ -5781,7 +5768,7 @@ class BaseModel(metaclass=MetaModel):
 
                     if comparator == '=':
                         ok = value in data
-                    elif comparator in ('!=', '<>'):
+                    elif comparator == '!=':
                         ok = value not in data
                     elif comparator == '=?':
                         ok = not value or (value in data)
