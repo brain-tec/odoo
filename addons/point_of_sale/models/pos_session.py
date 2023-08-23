@@ -288,6 +288,7 @@ class PosSession(models.Model):
     def _validate_session(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
         bank_payment_method_diffs = bank_payment_method_diffs or {}
         self.ensure_one()
+        data = {}
         sudo = self.user_has_groups('point_of_sale.group_pos_user')
         if self.order_ids or self.sudo().statement_line_ids:
             self.cash_real_transaction = sum(self.sudo().statement_line_ids.mapped('amount'))
@@ -323,21 +324,27 @@ class PosSession(models.Model):
                 self.env.cr.rollback()
                 return self._close_session_action(balance)
 
-            self.sudo()._post_statement_difference(cash_difference_before_statements)
+            self.sudo()._post_statement_difference(cash_difference_before_statements, False)
             if self.move_id.line_ids:
                 self.move_id.sudo().with_company(self.company_id)._post()
+                #We need to write the price_subtotal and price_total here because if we do it earlier the compute functions will overwrite it here /account/models/account_move_line.py _compute_totals
+                for dummy, amount_data in data['sales'].items():
+                    self.env['account.move.line'].browse(amount_data['move_line_id']).write({
+                        'price_subtotal': abs(amount_data['amount_converted']),
+                        'price_total': abs(amount_data['amount_converted']) + abs(amount_data['tax_amount']),
+                    })
                 # Set the uninvoiced orders' state to 'done'
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
                 self.move_id.sudo().unlink()
             self.sudo().with_company(self.company_id)._reconcile_account_move_lines(data)
         else:
-            self.sudo()._post_statement_difference(self.cash_register_difference)
+            self.sudo()._post_statement_difference(self.cash_register_difference, False)
 
         self.write({'state': 'closed'})
         return True
 
-    def _post_statement_difference(self, amount):
+    def _post_statement_difference(self, amount, is_opening):
         if amount:
             if self.config_id.cash_control:
                 st_line_vals = {
@@ -353,7 +360,7 @@ class PosSession(models.Model):
                         _('Please go on the %s journal and define a Loss Account. This account will be used to record cash difference.',
                           self.cash_journal_id.name))
 
-                st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Loss)")
+                st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Loss)") + (_(' - opening') if is_opening else _(' - closing'))
                 st_line_vals['counterpart_account_id'] = self.cash_journal_id.loss_account_id.id
             else:
                 # self.cash_register_difference  > 0.0
@@ -362,7 +369,7 @@ class PosSession(models.Model):
                         _('Please go on the %s journal and define a Profit Account. This account will be used to record cash difference.',
                           self.cash_journal_id.name))
 
-                st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Profit)")
+                st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Profit)") + (_(' - opening') if is_opening else _(' - closing'))
                 st_line_vals['counterpart_account_id'] = self.cash_journal_id.profit_account_id.id
 
             self.env['account.bank.statement.line'].create(st_line_vals)
@@ -750,9 +757,11 @@ class PosSession(models.Model):
                         line['base_tags'],
                     )
                     sales[sale_key] = self._update_amounts(sales[sale_key], {'amount': line['amount']}, line['date_order'], round=False)
+                    sales[sale_key].setdefault('tax_amount', 0.0)
                     # Combine tax lines
                     for tax in line['taxes']:
                         tax_key = (tax['account_id'] or line['income_account_id'], tax['tax_repartition_line_id'], tax['id'], tuple(tax['tag_ids']))
+                        sales[sale_key]['tax_amount'] += tax['amount']
                         order_taxes[tax_key] = self._update_amounts(
                             order_taxes[tax_key],
                             {'amount': tax['amount'], 'base_amount': tax['base']},
@@ -863,12 +872,15 @@ class PosSession(models.Model):
         if not float_is_zero(rounding_difference['amount'], precision_rounding=self.currency_id.rounding) or not float_is_zero(rounding_difference['amount_converted'], precision_rounding=self.currency_id.rounding):
             rounding_vals = [self._get_rounding_difference_vals(rounding_difference['amount'], rounding_difference['amount_converted'])]
 
+        MoveLine.create(tax_vals)
+        move_line_ids = MoveLine.create([self._get_sale_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in sales.items()])
+        for key, ml_id in zip(sales.keys(), move_line_ids.ids):
+            sales[key]['move_line_id'] = ml_id
         MoveLine.create(
-            tax_vals
-            + [self._get_sale_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in sales.items()]
-            + [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
+            [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
             + rounding_vals
         )
+
         return data
 
     def _create_bank_payment_moves(self, data):
@@ -1494,7 +1506,7 @@ class PosSession(models.Model):
         self.opening_notes = notes
         difference = cashbox_value - self.cash_register_balance_start
         self.cash_register_balance_start = cashbox_value
-        self.sudo()._post_statement_difference(difference)
+        self.sudo()._post_statement_difference(difference, True)
         self._post_cash_details_message('Opening', difference, notes)
 
     def _post_cash_details_message(self, state, difference, notes):
