@@ -2714,7 +2714,7 @@ export class Payment extends PosModel {
             payment_method_id: this.payment_method.id,
             amount: this.get_amount(),
             payment_status: this.payment_status,
-            can_be_reversed: this.can_be_resersed,
+            can_be_reversed: this.can_be_reversed,
             ticket: this.ticket,
             card_type: this.card_type,
             cardholder_name: this.cardholder_name,
@@ -2841,7 +2841,8 @@ export class Order extends PosModel {
             if (fiscal_position) {
                 this.fiscal_position = fiscal_position;
             } else {
-                console.error("ERROR: trying to load a fiscal position not available in the pos");
+                this.fiscal_position_not_found = true;
+                console.error('ERROR: trying to load a fiscal position not available in the pos');
             }
         }
 
