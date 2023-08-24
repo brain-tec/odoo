@@ -77,54 +77,6 @@ async function nextTick() {
 // Public: test lifecycle
 //------------------------------------------------------------------------------
 
-function getAfterEvent({ messagingBus }) {
-    /**
-     * Returns a promise resolved after the expected event is received.
-     *
-     * @param {Object} param0
-     * @param {string} param0.eventName event to wait
-     * @param {function} param0.func function which, when called, is expected to
-     *  trigger the event
-     * @param {string} [param0.message] assertion message
-     * @param {function} [param0.predicate] predicate called with event data.
-     *  If not provided, only the event name has to match.
-     * @param {number} [param0.timeoutDelay=5000] how long to wait at most in ms
-     * @returns {Promise}
-     */
-    return async function afterEvent({ eventName, func, message, predicate, timeoutDelay = 5000 }) {
-        const error = new Error(message || `Timeout: the event ${eventName} was not triggered.`);
-        // Set up the timeout to reject if the event is not triggered.
-        let timeoutNoEvent;
-        const timeoutProm = new Promise((resolve, reject) => {
-            timeoutNoEvent = setTimeout(() => {
-                console.warn(error);
-                reject(error);
-            }, timeoutDelay);
-        });
-        // Set up the promise to resolve if the event is triggered.
-        const eventProm = makeDeferred();
-        const eventHandler = (ev) => {
-            if (!predicate || predicate(ev.detail)) {
-                eventProm.resolve();
-            }
-        };
-        messagingBus.addEventListener(eventName, eventHandler);
-        // Start the function expected to trigger the event after the
-        // promise has been registered to not miss any potential event.
-        const funcRes = func();
-        // Make them race (first to resolve/reject wins).
-        await Promise.race([eventProm, timeoutProm]).finally(() => {
-            // Execute clean up regardless of whether the promise is
-            // rejected or not.
-            clearTimeout(timeoutNoEvent);
-            messagingBus.removeEventListener(eventName, eventHandler);
-        });
-        // If the event is triggered before the end of the async function,
-        // ensure the function finishes its job before returning.
-        return await funcRes;
-    };
-}
-
 function getMouseenter({ afterNextRender }) {
     return async function mouseenter(selector) {
         await afterNextRender(() =>
@@ -382,7 +334,6 @@ async function start(param0 = {}) {
     });
     param0["target"] = target;
     const messagingBus = new EventBus();
-    const afterEvent = getAfterEvent({ messagingBus });
 
     const pyEnv = await getPyEnv();
     patchWithCleanup(sessionInfo, {
@@ -412,7 +363,6 @@ async function start(param0 = {}) {
     };
     return {
         advanceTime,
-        afterEvent,
         afterNextRender,
         env: webClient.env,
         insertText,
@@ -658,31 +608,34 @@ export {
     startServer,
 };
 
+/**
+ * Waits until exactly one element matching the given selector is present in
+ * `options.target` and then clicks on it.
+ *
+ * @param {string} selector
+ * @param {Object} [options={}]
+ * @param {HTMLElement} [options.target=document.body]
+ */
 export async function click(selector, { target = document.body } = {}) {
-    if (typeof selector === "string") {
-        const $e = await contains(selector, 1, { target });
-        $e[0].click();
-        return $($e[0]);
-    } else if (selector instanceof HTMLElement) {
-        selector.click();
-        return Promise.resolve($(selector));
-    } else {
-        // jquery
-        selector[0].click();
-        return Promise.resolve($(selector[0]));
-    }
+    await contains(selector, 1, { click: true, target });
 }
 
 let hasUsedContainsPositively = false;
 QUnit.testStart(() => (hasUsedContainsPositively = false));
 /**
- * Function that waits until a selector is present in the DOM.
+ * Waits until `count` elements matching the given selector are present in
+ * `options.target`.
  *
  * @param {string} selector
  * @param {number} [count=1]
+ * @param {Object} [options={}]
+ * @param {boolean} [options.click] if provided, clicks on the found element
+ * @param {HTMLElement} [options.target=document.body]
+ * @param {string} [options.value] if provided, the input value of the found element(s) must match.
+ *  Note: value changes are not observed directly, another mutation must happen to catch them.
  * @returns {Promise<JQuery<HTMLElement>>}
  */
-export function contains(selector, count = 1, { target = document.body } = {}) {
+export function contains(selector, count = 1, { click, target = document.body, value } = {}) {
     if (count) {
         hasUsedContainsPositively = true;
     } else if (!hasUsedContainsPositively) {
@@ -690,30 +643,29 @@ export function contains(selector, count = 1, { target = document.body } = {}) {
             `Starting a test with "contains" of count 0 for selector "${selector}" is useless because it might immediately resolve. Start the test by checking that an expected element actually exists.`
         );
     }
-    const res = $(target).find(selector);
-    const resMessage = `Found ${count} occurrence(s) of ${selector}`;
-    if (res.length === count) {
-        QUnit.assert.ok(true, resMessage);
-        return Promise.resolve(res);
-    }
     return new Promise((resolve, reject) => {
+        let selectorMessage = `${count} of "${selector}"`;
+        if (value !== undefined) {
+            selectorMessage = `${selectorMessage} with value "${value}"`;
+        }
+        const $res = select();
+        if ($res.length === count) {
+            execute($res, "immediately");
+            return;
+        }
         let done = false;
         const timer = setTimeout(() => {
-            observer.disconnect();
-            const res = $(target).find(selector);
-            const message = `Waited 5 second for ${count} occurrence(s) of ${selector}. Found ${res.length} instead.`;
+            clean();
+            const $res = select();
+            const message = `Waited 5 second for ${selectorMessage}. Found ${$res.length} instead.`;
             QUnit.assert.ok(false, message);
             reject(new Error(message));
-            done = true;
         }, 5000);
         const observer = new MutationObserver(() => {
-            const res = $(target).find(selector);
-            if (res.length === count) {
-                observer.disconnect();
-                QUnit.assert.ok(true, resMessage);
-                resolve(res);
-                clearTimeout(timer);
-                done = true;
+            const $res = select();
+            if ($res.length === count) {
+                clean();
+                execute($res, "after mutations");
             }
         });
         observer.observe(document.body, {
@@ -723,14 +675,30 @@ export function contains(selector, count = 1, { target = document.body } = {}) {
         });
         registerCleanup(() => {
             if (!done) {
-                observer.disconnect();
-                const res = $(target).find(selector);
-                const message = `Test ended while waiting for ${count} occurrence(s) of ${selector}. Found ${res.length} instead.`;
+                clean();
+                const $res = select();
+                const message = `Test ended while waiting for ${selectorMessage}. Found ${$res.length} instead.`;
                 QUnit.assert.ok(false, message);
                 reject(new Error(message));
-                clearTimeout(timer);
-                done = true;
             }
         });
+        function select() {
+            const $res = $(target).find(selector);
+            return value === undefined ? $res : $res.filter((i, el) => el.value === value);
+        }
+        function execute($res, whenMessage) {
+            let message = `Found ${selectorMessage} (${whenMessage})`;
+            if (click) {
+                message = `${message} and clicked it`;
+                $res[0].click();
+            }
+            QUnit.assert.ok(true, message);
+            resolve($res);
+        }
+        function clean() {
+            observer.disconnect();
+            clearTimeout(timer);
+            done = true;
+        }
     });
 }
