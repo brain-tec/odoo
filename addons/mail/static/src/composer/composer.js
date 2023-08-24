@@ -396,7 +396,7 @@ export class Composer extends Component {
     async onClickFullComposer(ev) {
         if (this.props.type !== "note") {
             // auto-create partners of checked suggested partners
-            const emailsWithoutPartners = this.props.composer.thread.suggestedRecipients
+            const emailsWithoutPartners = this.thread.suggestedRecipients
                 .filter((recipient) => recipient.checked && !recipient.persona)
                 .map((recipient) => recipient.email);
             if (emailsWithoutPartners.length !== 0) {
@@ -407,7 +407,7 @@ export class Composer extends Component {
                     const partnerData = partners[index];
                     const persona = this.personaService.insert({ ...partnerData, type: "partner" });
                     const email = emailsWithoutPartners[index];
-                    const recipient = this.props.composer.thread.suggestedRecipients.find(
+                    const recipient = this.thread.suggestedRecipients.find(
                         (recipient) => recipient.email === email
                     );
                     Object.assign(recipient, { persona });
@@ -418,16 +418,16 @@ export class Composer extends Component {
         const context = {
             default_attachment_ids: attachmentIds,
             default_body: escapeAndCompactTextContent(this.props.composer.textInputContent),
-            default_model: this.props.composer.thread.model,
+            default_model: this.thread.model,
             default_partner_ids:
                 this.props.type === "note"
                     ? []
-                    : this.props.composer.thread.suggestedRecipients
+                    : this.thread.suggestedRecipients
                           .filter((recipient) => recipient.checked)
                           .map((recipient) => recipient.persona.id),
-            default_res_ids: [this.props.composer.thread.id],
+            default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
-            mail_post_autofollow: this.props.composer.thread.hasWriteAccess,
+            mail_post_autofollow: this.thread.hasWriteAccess,
         };
         const action = {
             name: this.props.type === "note" ? _t("Log note") : _t("Compose Email"),
@@ -439,10 +439,18 @@ export class Composer extends Component {
             context: context,
         };
         const options = {
-            onClose: () => {
+            onClose: (...args) => {
+                // args === [] : click on 'X'
+                // args === { special: true } : click on 'discard'
+                const isDiscard = args.length === 0 || args[0]?.special;
+                // otherwise message is posted (args === [undefined])
+                if (!isDiscard && this.props.composer.thread.type === "mailbox") {
+                    this.notifySendFromMailbox();
+                }
                 this.clear();
-                if (this.props.composer.thread) {
-                    this.threadService.fetchNewMessages(this.props.composer.thread);
+                this.props.messageToReplyTo?.cancel();
+                if (this.thread) {
+                    this.threadService.fetchNewMessages(this.thread);
                 }
             },
         };
@@ -452,6 +460,15 @@ export class Composer extends Component {
     clear() {
         this.attachmentUploader?.clear();
         this.threadService.clearComposer(this.props.composer);
+    }
+
+    notifySendFromMailbox() {
+        this.env.services.notification.add(
+            sprintf(_t('Message posted on "%s"'), this.thread.displayName),
+            {
+                type: "info",
+            }
+        );
     }
 
     onClickAddEmoji(ev) {
@@ -467,7 +484,7 @@ export class Composer extends Component {
         const el = this.ref.el;
         const attachments = this.props.composer.attachments;
         if (
-            el.value.trim() ||
+            this.props.composer.textInputContent.trim() ||
             (attachments.length > 0 && attachments.every(({ uploading }) => !uploading)) ||
             (this.message && this.message.attachments.length > 0)
         ) {
@@ -475,7 +492,7 @@ export class Composer extends Component {
                 return;
             }
             this.state.active = false;
-            await cb(el.value);
+            await cb(this.props.composer.textInputContent);
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
             }
@@ -498,12 +515,9 @@ export class Composer extends Component {
                 rawMentions: this.props.composer.rawMentions,
                 parentId: this.props.messageToReplyTo?.message?.id,
             };
-            const message = await this.threadService.post(this.thread, value, postData);
+            await this.threadService.post(this.thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
-                this.env.services.notification.add(
-                    sprintf(_t('Message posted on "%s"'), message.originThread.displayName),
-                    { type: "info" }
-                );
+                this.notifySendFromMailbox();
             }
             this.suggestion?.clearRawMentions();
             this.props.messageToReplyTo?.cancel();
@@ -511,7 +525,10 @@ export class Composer extends Component {
     }
 
     async editMessage() {
-        if (this.ref.el.value || this.props.composer.message.attachments.length > 0) {
+        if (
+            this.props.composer.textInputContent ||
+            this.props.composer.message.attachments.length > 0
+        ) {
             await this.processMessage(async (value) =>
                 this.messageService.edit(
                     this.props.composer.message,
@@ -532,7 +549,7 @@ export class Composer extends Component {
     }
 
     addEmoji(str) {
-        const textContent = this.ref.el.value;
+        const textContent = this.props.composer.textInputContent;
         const firstPart = textContent.slice(0, this.props.composer.selection.start);
         const secondPart = textContent.slice(this.props.composer.selection.end, textContent.length);
         this.props.composer.textInputContent = firstPart + str + secondPart;
