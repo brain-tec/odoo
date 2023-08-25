@@ -141,6 +141,7 @@ export class MassMailingHtmlField extends HtmlField {
             const clonedBody = clonedHtmlNode.querySelector('body');
             const clonedIframeTarget = clonedHtmlNode.querySelector('#iframe_target');
             clonedBody.replaceChildren(clonedIframeTarget);
+            clonedBody.querySelector('.iframe-utils-zone').remove();
             clonedHtmlNode.querySelectorAll('script').forEach(script => script.remove()); // Remove scripts.
             iframe.srcdoc = clonedHtmlNode.outerHTML;
             const iframePromise = new Promise((resolve) => {
@@ -535,6 +536,7 @@ export class MassMailingHtmlField extends HtmlField {
         for (const img of $container.find("img")) {
             const $img = $(img);
             const src = $img.attr("src");
+            $img.removeAttr('loading');
 
             let m = src.match(/^\/web\/image\/\w+\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
             if (!m) {
