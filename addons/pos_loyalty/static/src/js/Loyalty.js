@@ -1041,7 +1041,7 @@ patch(Order.prototype, "pos_loyalty.Order", {
                     }
                 }
             }
-            const res = points ? [{ points }] : [];
+            const res = (points || program.program_type === 'coupons') ? [{ points }] : [];
             if (splitPoints.length) {
                 res.push(...splitPoints);
             }
@@ -1462,6 +1462,7 @@ patch(Order.prototype, "pos_loyalty.Order", {
                     points_cost: pointCost,
                     reward_identifier_code: rewardCode,
                     merge: false,
+                    tax_ids: [],
                 },
             ];
         }
