@@ -75,7 +75,7 @@ QUnit.test(
     }
 );
 
-QUnit.test("Message post in chat window of chatter should log a note", async (assert) => {
+QUnit.test("Message post in chat window of chatter should log a note", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "TestPartner" });
     const messageId = pyEnv["mail.message"].create({
@@ -135,7 +135,7 @@ QUnit.test("chat window: basic rendering", async (assert) => {
     await click(".o-mail-NotificationItem");
     await contains(".o-mail-ChatWindow");
     await contains(".o-mail-ChatWindow-header");
-    assert.containsOnce($(".o-mail-ChatWindow-header"), ".o-mail-ChatWindow-threadAvatar");
+    await contains(".o-mail-ChatWindow-header .o-mail-ChatWindow-threadAvatar");
     await contains(".o-mail-ChatWindow-name:contains(General)");
     await contains(".o-mail-ChatWindow-command", 4);
     await contains("[title='Start a Call']");
@@ -463,6 +463,38 @@ QUnit.test("closing hidden chat window", async (assert) => {
     await contains(".o-mail-ChatWindow:contains(Ch_2)", 0);
     await contains(".o-mail-ChatWindowHiddenMenu .o-mail-ChatWindow:contains(Ch_3)");
     await contains(":not(.o-mail-ChatWindowHiddenMenu) .o-mail-ChatWindow:contains(Ch_4)");
+});
+
+QUnit.test("Opening hidden chat window from messaging menu", async (assert) => {
+    const pyEnv = await startServer();
+    pyEnv["discuss.channel"].create([{ name: "Ch_1" }, { name: "Ch_2" }, { name: "Ch_3" }]);
+    patchUiSize({ width: 900 });
+    assert.ok(
+        CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 2 + CHAT_WINDOW_INBETWEEN_WIDTH < 900,
+        "should have enough space to open 2 chat windows simultaneously"
+    );
+    assert.ok(
+        CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 3 + CHAT_WINDOW_INBETWEEN_WIDTH * 2 >
+            900,
+        "should not have enough space to open 3 chat windows simultaneously"
+    );
+    await start();
+    await click("i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem:contains(Ch_1)");
+    await click("i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem:contains(Ch_2)");
+    await click("i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem:contains(Ch_3)");
+    await click(".o-mail-ChatWindowHiddenToggler");
+    await contains(":not(.o-mail-ChatWindowHiddenMenu) .o-mail-ChatWindow:contains(Ch_1)");
+    await contains(".o-mail-ChatWindowHiddenMenu .o-mail-ChatWindow:contains(Ch_2)");
+    await contains(":not(.o-mail-ChatWindowHiddenMenu) .o-mail-ChatWindow:contains(Ch_3)");
+    await click("i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem:contains(Ch_2)");
+    await click(".o-mail-ChatWindowHiddenToggler");
+    await contains(":not(.o-mail-ChatWindowHiddenMenu) .o-mail-ChatWindow:contains(Ch_1)");
+    await contains(":not(.o-mail-ChatWindowHiddenMenu) .o-mail-ChatWindow:contains(Ch_2)");
+    await contains(".o-mail-ChatWindowHiddenMenu .o-mail-ChatWindow:contains(Ch_3)");
 });
 
 QUnit.test(
@@ -841,7 +873,7 @@ QUnit.test(
     }
 );
 
-QUnit.test("chat window: composer state conservation on toggle discuss", async (assert) => {
+QUnit.test("chat window: composer state conservation on toggle discuss", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({});
     const { openDiscuss, openView } = await start();
