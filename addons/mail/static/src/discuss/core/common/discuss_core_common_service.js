@@ -3,11 +3,10 @@
 import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 import { createLocalId } from "@mail/utils/common/misc";
 
-import { markup, reactive, useState } from "@odoo/owl";
+import { markup, reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 export class DiscussCoreCommon {
     /**
@@ -36,7 +35,7 @@ export class DiscussCoreCommon {
             this.threadService.sortChannels();
             this.busService.subscribe("discuss.channel/joined", (payload) => {
                 const { channel, invited_by_user_id: invitedByUserId } = payload;
-                const thread = this.threadService.insert({
+                const thread = this.store.Thread.insert({
                     ...channel,
                     model: "discuss.channel",
                     channel: channel.channel,
@@ -51,7 +50,7 @@ export class DiscussCoreCommon {
             });
             this.busService.subscribe("discuss.channel/last_interest_dt_changed", (payload) => {
                 const { id, last_interest_dt } = payload;
-                const channel = this.store.threads[createLocalId("discuss.channel", id)];
+                const channel = this.store.Thread.records[createLocalId("discuss.channel", id)];
                 if (channel) {
                     this.threadService.update(channel, { last_interest_dt });
                     if (channel.type !== "channel") {
@@ -60,7 +59,7 @@ export class DiscussCoreCommon {
                 }
             });
             this.busService.subscribe("discuss.channel/leave", (payload) => {
-                const thread = this.threadService.insert({
+                const thread = this.store.Thread.insert({
                     ...payload,
                     model: "discuss.channel",
                 });
@@ -73,7 +72,7 @@ export class DiscussCoreCommon {
                 });
             });
             this.busService.subscribe("discuss.channel/legacy_insert", (payload) => {
-                this.threadService.insert({
+                this.store.Thread.insert({
                     id: payload.channel.id,
                     model: "discuss.channel",
                     type: payload.channel.channel_type,
@@ -98,7 +97,7 @@ export class DiscussCoreCommon {
             });
             this.busService.subscribe("discuss.channel/transient_message", (payload) => {
                 const channel =
-                    this.store.threads[createLocalId("discuss.channel", payload.res_id)];
+                    this.store.Thread.records[createLocalId("discuss.channel", payload.res_id)];
                 const message = this.messageService.createTransient(
                     Object.assign(payload, { body: markup(payload.body) })
                 );
@@ -106,7 +105,8 @@ export class DiscussCoreCommon {
                 channel.transientMessages.push(message);
             });
             this.busService.subscribe("discuss.channel/unpin", (payload) => {
-                const thread = this.store.threads[createLocalId("discuss.channel", payload.id)];
+                const thread =
+                    this.store.Thread.records[createLocalId("discuss.channel", payload.id)];
                 if (thread) {
                     thread.is_pinned = false;
                     this.notificationService.add(
@@ -117,7 +117,8 @@ export class DiscussCoreCommon {
             });
             this.busService.subscribe("discuss.channel.member/fetched", (payload) => {
                 const { channel_id, last_message_id, partner_id } = payload;
-                const channel = this.store.threads[createLocalId("discuss.channel", channel_id)];
+                const channel =
+                    this.store.Thread.records[createLocalId("discuss.channel", channel_id)];
                 if (channel) {
                     const seenInfo = channel.seenInfos.find(
                         (seenInfo) => seenInfo.partner.id === partner_id
@@ -129,7 +130,8 @@ export class DiscussCoreCommon {
             });
             this.busService.subscribe("discuss.channel.member/seen", (payload) => {
                 const { channel_id, last_message_id, partner_id } = payload;
-                const channel = this.store.threads[createLocalId("discuss.channel", channel_id)];
+                const channel =
+                    this.store.Thread.records[createLocalId("discuss.channel", channel_id)];
                 if (!channel) {
                     // for example seen from another browser, the current one has no
                     // knowledge of the channel
@@ -154,7 +156,7 @@ export class DiscussCoreCommon {
             });
             this.busService.subscribe("mail.record/insert", (payload) => {
                 if (payload.Channel) {
-                    this.threadService.insert({
+                    this.store.Thread.insert({
                         id: payload.Channel.id,
                         model: "discuss.channel",
                         channel: payload.Channel,
@@ -165,12 +167,12 @@ export class DiscussCoreCommon {
     }
 
     /**
-     * todo: merge this with ThreadService.insert() (?)
+     * todo: merge this with store.Thread.insert() (?)
      *
      * @returns {Thread}
      */
     createChannelThread(serverData) {
-        const thread = this.threadService.insert({
+        const thread = this.store.Thread.insert({
             ...serverData,
             model: "discuss.channel",
             type: serverData.channel.channel_type,
@@ -214,10 +216,10 @@ export class DiscussCoreCommon {
 
     async _handleNotificationNewMessage(notif) {
         const { id, message: messageData } = notif.payload;
-        let channel = this.store.threads[createLocalId("discuss.channel", id)];
+        let channel = this.store.Thread.records[createLocalId("discuss.channel", id)];
         if (!channel || !channel.type) {
             const [channelData] = await this.rpc("/discuss/channel/info", { channel_id: id });
-            channel = this.threadService.insert({
+            channel = this.store.Thread.insert({
                 model: "discuss.channel",
                 type: channelData.channel.channel_type,
                 ...channelData,
@@ -227,7 +229,7 @@ export class DiscussCoreCommon {
             this.threadService.pin(channel);
         }
         removeFromArrayWithPredicate(channel.messages, ({ id }) => id === messageData.temporary_id);
-        delete this.store.messages[messageData.temporary_id];
+        delete this.store.Message.records[messageData.temporary_id];
         messageData.temporary_id = null;
         if ("parentMessage" in messageData && messageData.parentMessage.body) {
             messageData.parentMessage.body = markup(messageData.parentMessage.body);
@@ -235,7 +237,7 @@ export class DiscussCoreCommon {
         const data = Object.assign(messageData, {
             body: markup(messageData.body),
         });
-        const message = this.messageService.insert({
+        const message = this.store.Message.insert({
             ...data,
             res_id: channel.id,
             model: channel.model,
@@ -320,9 +322,5 @@ export const discussCoreCommon = {
         return discussCoreCommon;
     },
 };
-
-export function useDiscussCoreCommon() {
-    return useState(useService("discuss.core.common"));
-}
 
 registry.category("services").add("discuss.core.common", discussCoreCommon);

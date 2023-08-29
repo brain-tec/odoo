@@ -4,7 +4,6 @@ import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { Composer } from "@mail/core/common/composer";
 import { useDropzone } from "@mail/core/common/dropzone_hook";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { Thread } from "@mail/core/common/thread";
 import { Activity } from "@mail/core/web/activity";
 import { SuggestedRecipientsList } from "@mail/core/web/suggested_recipient_list";
@@ -91,10 +90,9 @@ export class Chatter extends Component {
     setup() {
         this.action = useService("action");
         this.attachmentBox = useRef("attachment-box");
-        this.messaging = useMessaging();
         this.activityService = useState(useService("mail.activity"));
         this.threadService = useService("mail.thread");
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
@@ -140,7 +138,7 @@ export class Chatter extends Component {
         onPatched(this.scrollPosition.restore);
         onWillStart(() => {
             if (this.props.threadId) {
-                this.state.thread = this.threadService.insert({
+                this.state.thread = this.store.Thread.insert({
                     id: this.props.threadId,
                     model: this.props.threadModel,
                     name: this.props.webRecord?.data?.display_name || undefined,

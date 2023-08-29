@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { ImStatus } from "@mail/core/common/im_status";
-import { useStore } from "@mail/core/common/messaging_hook";
 import { ThreadIcon } from "@mail/core/common/thread_icon";
 import { discussSidebarItemsRegistry } from "@mail/core/web/discuss_sidebar";
 import { ChannelSelector } from "@mail/discuss/core/web/channel_selector";
@@ -43,7 +42,7 @@ export class DiscussSidebarCategories extends Component {
     static components = { ChannelSelector, ImStatus, ThreadIcon };
 
     setup() {
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.threadService = useState(useService("mail.thread"));
         this.state = useState({
             editing: false,
@@ -82,7 +81,7 @@ export class DiscussSidebarCategories extends Component {
 
     filteredThreads(category) {
         return category.threads.filter((threadLocalId) => {
-            const thread = this.store.threads[threadLocalId];
+            const thread = this.store.Thread.records[threadLocalId];
             return (
                 (thread.is_pinned || thread.group_based_subscription) &&
                 (!this.state.quickSearchVal || thread.name.includes(this.state.quickSearchVal))
@@ -92,7 +91,7 @@ export class DiscussSidebarCategories extends Component {
 
     get hasQuickSearch() {
         return (
-            Object.values(this.store.threads).filter(
+            Object.values(this.store.Thread.records).filter(
                 (thread) => thread.is_pinned && thread.model === "discuss.channel"
             ).length > 19
         );

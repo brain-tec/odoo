@@ -13,7 +13,6 @@ export class ChannelMemberService {
     constructor(env, services) {
         this.env = env;
         this.store = services["mail.store"];
-        this.personaService = services["mail.persona"];
     }
 
     /**
@@ -22,10 +21,10 @@ export class ChannelMemberService {
      */
     insert(data) {
         const memberData = Array.isArray(data) ? data[1] : data;
-        let member = this.store.channelMembers[memberData.id];
+        let member = this.store.ChannelMember.records[memberData.id];
         if (!member) {
-            this.store.channelMembers[memberData.id] = new ChannelMember();
-            member = this.store.channelMembers[memberData.id];
+            this.store.ChannelMember.records[memberData.id] = new ChannelMember();
+            member = this.store.ChannelMember.records[memberData.id];
             member._store = this.store;
         }
         this.update(member, data);
@@ -36,7 +35,7 @@ export class ChannelMemberService {
         const [command, memberData] = Array.isArray(data) ? data : ["insert", data];
         member.id = memberData.id;
         if ("persona" in memberData) {
-            member.persona = this.personaService.insert({
+            member.persona = this.store.Persona.insert({
                 ...(memberData.persona.partner ?? memberData.persona.guest),
                 type: memberData.persona.guest ? "guest" : "partner",
                 country: memberData.persona.partner?.country,
@@ -45,8 +44,7 @@ export class ChannelMemberService {
         }
         member.threadId = memberData.threadId ?? member.threadId ?? memberData.channel?.id;
         if (member.threadId && !member.thread) {
-            // this prevents cyclic dependencies between mail.thread and discuss.channel.member
-            this.env.bus.trigger("mail.thread/insert", {
+            this.store.Thread.insert({
                 id: member.threadId,
                 model: "discuss.channel",
             });
@@ -60,7 +58,7 @@ export class ChannelMemberService {
                 }
                 break;
             case "unlink":
-                removeFromArray(this.store.channelMembers, member);
+                removeFromArray(this.store.ChannelMember.records, member);
             // eslint-disable-next-line no-fallthrough
             case "insert-and-unlink":
                 if (member.thread) {
@@ -80,7 +78,7 @@ export class ChannelMemberService {
 }
 
 export const channelMemberService = {
-    dependencies: ["mail.store", "mail.persona"],
+    dependencies: ["mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

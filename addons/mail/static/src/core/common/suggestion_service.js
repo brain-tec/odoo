@@ -14,9 +14,6 @@ export class SuggestionService {
         this.env = env;
         this.orm = services.orm;
         this.store = services["mail.store"];
-        this.threadService = services["mail.thread"];
-        this.personaService = services["mail.persona"];
-        this.channelMemberService = services["discuss.channel.member"];
     }
 
     getSupportedDelimiters(thread) {
@@ -54,9 +51,9 @@ export class SuggestionService {
             kwargs
         );
         suggestedPartners.map((data) => {
-            this.personaService.insert({ ...data, type: "partner" });
+            this.store.Persona.insert({ ...data, type: "partner" });
             if (data.persona?.channelMembers) {
-                this.channelMemberService.insert(...data.persona.channelMembers);
+                this.store.ChannelMember.insert(...data.persona.channelMembers);
             }
         });
     }
@@ -72,7 +69,7 @@ export class SuggestionService {
             { search: term }
         );
         suggestedThreads.map((data) => {
-            this.threadService.insert({
+            this.store.Thread.insert({
                 model: "discuss.channel",
                 ...data,
             });
@@ -123,7 +120,7 @@ export class SuggestionService {
                 .map((member) => member.persona)
                 .filter((persona) => persona.type === "partner");
         } else {
-            partners = Object.values(this.store.personas).filter(
+            partners = Object.values(this.store.Persona.records).filter(
                 (persona) => persona.type === "partner"
             );
         }
@@ -197,7 +194,7 @@ export class SuggestionService {
             // channel.
             threads = [thread];
         } else {
-            threads = Object.values(this.store.threads);
+            threads = Object.values(this.store.Thread.records);
         }
         const suggestionList = threads.filter(
             (thread) =>
@@ -250,7 +247,7 @@ export class SuggestionService {
 }
 
 export const suggestionService = {
-    dependencies: ["orm", "mail.store", "mail.thread", "mail.persona", "discuss.channel.member"],
+    dependencies: ["orm", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

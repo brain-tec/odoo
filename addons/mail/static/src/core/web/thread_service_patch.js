@@ -20,7 +20,6 @@ patch(ThreadService.prototype, {
     setup(env, services) {
         super.setup(env, services);
         this.action = services.action;
-        this.attachmentService = services["mail.attachment"];
         this.activityService = services["mail.activity"];
         this.chatWindowService = services["mail.chat_window"];
     },
@@ -57,7 +56,7 @@ patch(ThreadService.prototype, {
                 if (activity.note) {
                     activity.note = markup(activity.note);
                 }
-                existingIds.add(this.activityService.insert(activity).id);
+                existingIds.add(this.store.Activity.insert(activity).id);
             }
             for (const activity of thread.activities) {
                 if (!existingIds.has(activity.id)) {
@@ -74,7 +73,7 @@ patch(ThreadService.prototype, {
         }
         if ("mainAttachment" in result) {
             thread.mainAttachment = result.mainAttachment.id
-                ? this.attachmentService.insert(result.mainAttachment)
+                ? this.store.Attachment.insert(result.mainAttachment)
                 : undefined;
         }
         if (!thread.mainAttachment && thread.attachmentsInWebClientView.length > 0) {
@@ -82,14 +81,14 @@ patch(ThreadService.prototype, {
         }
         if ("followers" in result) {
             if (result.selfFollower) {
-                thread.selfFollower = this.insertFollower({
+                thread.selfFollower = this.store.Follower.insert({
                     followedThread: thread,
                     ...result.selfFollower,
                 });
             }
             thread.followersCount = result.followersCount;
             for (const followerData of result.followers) {
-                const follower = this.insertFollower({
+                const follower = this.store.Follower.insert({
                     followedThread: thread,
                     ...followerData,
                 });
@@ -105,12 +104,12 @@ patch(ThreadService.prototype, {
     },
     getThread(resModel, resId) {
         const localId = createLocalId(resModel, resId);
-        if (localId in this.store.threads) {
+        if (localId in this.store.Thread.records) {
             if (resId === false) {
-                return this.store.threads[localId];
+                return this.store.Thread.records[localId];
             }
             // to force a reload
-            this.store.threads[localId].status = "new";
+            this.store.Thread.records[localId].status = "new";
         }
         const thread = this.insert({
             id: resId,
@@ -128,7 +127,7 @@ patch(ThreadService.prototype, {
                 res_id: thread.id,
                 model: thread.model,
             };
-            const message = this.messageService.insert(tmpData);
+            const message = this.store.Message.insert(tmpData);
             thread.messages.push(message);
         }
         return thread;
@@ -138,16 +137,16 @@ patch(ThreadService.prototype, {
      * @returns {import("@mail/core/common/follower_model").Follower}
      */
     insertFollower(data) {
-        let follower = this.store.followers[data.id];
+        let follower = this.store.Follower.records[data.id];
         if (!follower) {
-            this.store.followers[data.id] = new Follower();
-            follower = this.store.followers[data.id];
+            this.store.Follower.records[data.id] = new Follower();
+            follower = this.store.Follower.records[data.id];
         }
         Object.assign(follower, {
             followedThread: data.followedThread,
             id: data.id,
             isActive: data.is_active,
-            partner: this.personaService.insert({ ...data.partner, type: "partner" }),
+            partner: this.store.Persona.insert({ ...data.partner, type: "partner" }),
             _store: this.store,
         });
         return follower;
@@ -168,7 +167,7 @@ patch(ThreadService.prototype, {
                 lang,
                 reason,
                 persona: partner_id
-                    ? this.personaService.insert({
+                    ? this.store.Persona.insert({
                           type: "partner",
                           id: partner_id,
                       })
@@ -179,7 +178,9 @@ patch(ThreadService.prototype, {
         thread.suggestedRecipients = recipients;
     },
     async leaveChannel(channel) {
-        const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === channel.localId);
+        const chatWindow = this.store.ChatWindow.records.find(
+            (c) => c.threadLocalId === channel.localId
+        );
         if (chatWindow) {
             this.chatWindowService.close(chatWindow);
         }
@@ -191,7 +192,7 @@ patch(ThreadService.prototype, {
             Array.from(thread.followers).at(-1).id,
         ]);
         for (const data of followers) {
-            const follower = this.insertFollower({
+            const follower = this.store.Follower.insert({
                 followedThread: thread,
                 ...data,
             });
@@ -234,17 +235,19 @@ patch(ThreadService.prototype, {
         } else {
             thread.followers.delete(follower);
         }
-        delete this.store.followers[follower.id];
+        delete this.store.Follower.records[follower.id];
     },
     unpin(thread) {
-        const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === thread.localId);
+        const chatWindow = this.store.ChatWindow.records.find(
+            (c) => c.threadLocalId === thread.localId
+        );
         if (chatWindow) {
             this.chatWindowService.close(chatWindow);
         }
         super.unpin(...arguments);
     },
     _openChatWindow(thread, replaceNewMessageChatWindow) {
-        const chatWindow = this.chatWindowService.insert({
+        const chatWindow = this.store.ChatWindow.insert({
             folded: false,
             thread,
             replaceNewMessageChatWindow,
@@ -256,7 +259,7 @@ patch(ThreadService.prototype, {
         this.chatWindowService.notifyState(chatWindow);
     },
     getRecentChannels() {
-        return Object.values(this.store.threads)
+        return Object.values(this.store.Thread.records)
             .filter((thread) => thread.model === "discuss.channel")
             .sort((a, b) => {
                 if (!a.lastInterestDateTime && !b.lastInterestDateTime) {
@@ -277,11 +280,5 @@ patch(ThreadService.prototype, {
 });
 
 patch(threadService, {
-    dependencies: [
-        ...threadService.dependencies,
-        "action",
-        "mail.activity",
-        "mail.attachment",
-        "mail.chat_window",
-    ],
+    dependencies: [...threadService.dependencies, "action", "mail.activity", "mail.chat_window"],
 });

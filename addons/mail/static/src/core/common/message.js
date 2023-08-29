@@ -11,7 +11,6 @@ import { MessageNotificationPopover } from "@mail/core/common/message_notificati
 import { MessageReactionMenu } from "@mail/core/common/message_reaction_menu";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { MessageSeenIndicator } from "@mail/core/common/message_seen_indicator";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { RelativeTime } from "@mail/core/common/relative_time";
 import { convertBrToLineBreak, htmlToTextContentInline } from "@mail/utils/common/format";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
@@ -92,8 +91,7 @@ export class Message extends Component {
         this.root = useRef("root");
         this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.rpc = useService("rpc");
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
@@ -333,7 +331,7 @@ export class Message extends Component {
         const id = Number(ev.target.dataset.oeId);
         if (ev.target.closest(".o_channel_redirect")) {
             ev.preventDefault();
-            const thread = this.threadService.insert({ model, id });
+            const thread = this.store.Thread.insert({ model, id });
             this.threadService.open(thread);
             return;
         }

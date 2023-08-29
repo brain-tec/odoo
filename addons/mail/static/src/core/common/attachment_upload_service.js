@@ -18,8 +18,6 @@ export class AttachmentUploadService {
         /** @type {import("@mail/core/common/store_service").Store} */
         this.store = services["mail.store"];
         this.notificationService = services["notification"];
-        /** @type {import("@mail/core/common/thread_service").ThreadService} */
-        this.threadService = services["mail.thread"];
         /** @type {import("@mail/core/common/attachment_service").AttachmentService} */
         this.attachmentService = services["mail.attachment"];
 
@@ -39,12 +37,12 @@ export class AttachmentUploadService {
                 const threadId = parseInt(upload.data.get("thread_id"));
                 const threadModel = upload.data.get("thread_model");
                 const tmpUrl = upload.data.get("tmp_url");
-                const originThread = this.threadService.insert({
+                const originThread = this.store.Thread.insert({
                     model: threadModel,
                     id: threadId,
                 });
                 this.abortByAttachmentId.set(tmpId, upload.xhr.abort.bind(upload.xhr));
-                const attachment = this.attachmentService.insert(
+                const attachment = this.store.Attachment.insert(
                     this._makeAttachmentData(
                         upload,
                         tmpId,
@@ -85,8 +83,9 @@ export class AttachmentUploadService {
                 }
                 const threadId = parseInt(upload.data.get("thread_id"));
                 const threadModel = upload.data.get("thread_model");
-                const originThread = this.store.threads[createLocalId(threadModel, threadId)];
-                const attachment = this.attachmentService.insert({
+                const originThread =
+                    this.store.Thread.records[createLocalId(threadModel, threadId)];
+                const attachment = this.store.Attachment.insert({
                     ...response,
                     extension: upload.title.split(".").pop(),
                     originThread: hooker.composer ? undefined : originThread,
@@ -100,7 +99,7 @@ export class AttachmentUploadService {
                     }
                 }
                 const def = this.deferredByAttachmentId.get(tmpId);
-                this.unlink(this.store.attachments[tmpId]);
+                this.unlink(this.store.Attachment.records[tmpId]);
                 if (def) {
                     def.resolve(attachment);
                     this.deferredByAttachmentId.delete(tmpId);
@@ -181,7 +180,7 @@ export class AttachmentUploadService {
 }
 
 export const attachmentUploadService = {
-    dependencies: ["file_upload", "mail.attachment", "mail.store", "mail.thread", "notification"],
+    dependencies: ["file_upload", "mail.attachment", "mail.store", "notification"],
     start(env, services) {
         return new AttachmentUploadService(env, services);
     },

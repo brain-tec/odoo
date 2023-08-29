@@ -2,8 +2,6 @@
 
 import { ImStatus } from "@mail/core/common/im_status";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
-import { useDiscussCoreCommon } from "@mail/discuss/core/common/discuss_core_common_service";
 
 import { Component, onMounted, onWillStart, useRef, useState } from "@odoo/owl";
 
@@ -18,12 +16,11 @@ export class ChannelInvitation extends Component {
     static template = "discuss.ChannelInvitation";
 
     setup() {
-        this.discussCoreCommonService = useDiscussCoreCommon();
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.discussCoreCommonService = useState(useService("discuss.core.common"));
+        this.orm = useService("orm");
+        this.store = useState(useService("mail.store"));
         this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
-        this.personaService = useService("mail.persona");
         this.suggestionService = useService("mail.suggestion");
         this.ui = useService("ui");
         this.inputRef = useRef("input");
@@ -48,7 +45,7 @@ export class ChannelInvitation extends Component {
 
     async fetchPartnersToInvite() {
         const results = await this.sequential(() =>
-            this.messaging.orm.call("res.partner", "search_for_channel_invite", [
+            this.orm.call("res.partner", "search_for_channel_invite", [
                 this.searchStr,
                 this.props.thread.id,
             ])
@@ -59,7 +56,7 @@ export class ChannelInvitation extends Component {
         const Partners = results["partners"];
         const selectablePartners = [];
         for (const selectablePartner of Partners) {
-            const newPartner = this.personaService.insert({
+            const newPartner = this.store.Persona.insert({
                 type: "partner",
                 ...selectablePartner,
             });
@@ -110,14 +107,9 @@ export class ChannelInvitation extends Component {
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ]);
         } else {
-            await this.messaging.orm.call(
-                "discuss.channel",
-                "add_members",
-                [[this.props.thread.id]],
-                {
-                    partner_ids: this.state.selectedPartners.map((partner) => partner.id),
-                }
-            );
+            await this.orm.call("discuss.channel", "add_members", [[this.props.thread.id]], {
+                partner_ids: this.state.selectedPartners.map((partner) => partner.id),
+            });
         }
         this.props.close();
     }
@@ -133,7 +125,7 @@ export class ChannelInvitation extends Component {
                     return _t("Invite");
                 }
                 if (this.state.selectedPartners.length === 1) {
-                    const alreadyChat = Object.values(this.store.threads).some(
+                    const alreadyChat = Object.values(this.store.Thread.records).some(
                         (thread) => thread.chatPartnerId === this.state.selectedPartners[0].id
                     );
                     if (alreadyChat) {

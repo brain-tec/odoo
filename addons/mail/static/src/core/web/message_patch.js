@@ -14,12 +14,14 @@ import {
 } from "@web/views/fields/formatters";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
+import { useState } from "@odoo/owl";
 
 patch(Message.prototype, {
     setup() {
         super.setup(...arguments);
         this.action = useService("action");
         this.userService = useService("user");
+        this.messaging = useState(useService("mail.messaging"));
     },
     getAuthorText() {
         return this.hasAuthorClickable() ? _t("Open profile") : undefined;

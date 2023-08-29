@@ -1,9 +1,8 @@
 /* @odoo-module */
 
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { ActivityListPopoverItem } from "@mail/core/web/activity_list_popover_item";
 
-import { Component, onWillUpdateProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
@@ -31,17 +30,16 @@ export class ActivityListPopover extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.messaging = useMessaging();
         this.user = useService("user");
         this.activity = useService("mail.activity");
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.updateFromProps(this.props);
         onWillUpdateProps((props) => this.updateFromProps(props));
     }
 
     get activities() {
         /** @type {import("@mail/core/web/activity_model").Activity[]} */
-        const allActivities = Object.values(this.store.activities);
+        const allActivities = Object.values(this.store.Activity.records);
         return allActivities
             .filter((activity) => this.props.activityIds.includes(activity.id))
             .sort(function (a, b) {

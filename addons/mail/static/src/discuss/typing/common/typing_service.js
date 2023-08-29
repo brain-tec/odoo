@@ -1,10 +1,9 @@
 /* @odoo-module */
 
-import { reactive, useState } from "@odoo/owl";
+import { reactive } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 export const OTHER_LONG_TYPING = 60000;
 
@@ -30,7 +29,7 @@ export class Typing {
 
     setup() {
         this.busService.subscribe("discuss.channel.member/typing_status", (payload) => {
-            const member = this.channelMemberService.insert(payload);
+            const member = this.storeService.ChannelMember.insert(payload);
             if (payload.isTyping) {
                 this.addTypingMember(member);
             } else {
@@ -61,7 +60,7 @@ export class Typing {
      */
     getTypingMembers(channel) {
         return [...(this.memberIdsByChannelId.get(channel.id) ?? new Set())]
-            .map((id) => this.channelMemberService.insert({ id }))
+            .map((id) => this.storeService.ChannelMember.insert({ id }))
             .filter((member) => !member.persona?.eq(this.storeService.self));
     }
 
@@ -103,7 +102,3 @@ export const discussTypingService = {
 };
 
 registry.category("services").add("discuss.typing", discussTypingService);
-
-export function useTypingService() {
-    return useState(useService("discuss.typing"));
-}

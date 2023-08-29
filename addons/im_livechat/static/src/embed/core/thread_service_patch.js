@@ -60,7 +60,9 @@ patch(ThreadService.prototype, {
      * @returns {Promise<import("@mail/core/common/message_model").Message}
      */
     async post(thread, body, params) {
-        const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === thread.localId);
+        const chatWindow = this.store.ChatWindow.records.find(
+            (c) => c.threadLocalId === thread.localId
+        );
         if (
             this.livechatService.state !== SESSION_STATE.PERSISTED &&
             thread.localId === this.livechatService.thread?.localId
@@ -98,7 +100,7 @@ patch(ThreadService.prototype, {
         if (!thread) {
             return;
         }
-        const chatWindow = this.chatWindowService.insert({
+        const chatWindow = this.store.ChatWindow.insert({
             thread,
             folded: thread.state === "folded",
         });
@@ -109,14 +111,14 @@ patch(ThreadService.prototype, {
     },
 
     insert(data) {
-        const isUnknown = !(createLocalId(data.model, data.id) in this.store.threads);
+        const isUnknown = !(createLocalId(data.model, data.id) in this.store.Thread.records);
         const thread = super.insert(...arguments);
         if (thread.type === "livechat" && isUnknown) {
             if (
                 this.livechatService.displayWelcomeMessage &&
                 !this.chatbotService.isChatbotThread(thread)
             ) {
-                this.livechatService.welcomeMessage = this.messageService.insert({
+                this.livechatService.welcomeMessage = this.store.Message.insert({
                     id: this.messageService.getNextTemporaryId(),
                     body: this.livechatService.options.default_message,
                     res_id: thread.id,
@@ -125,7 +127,7 @@ patch(ThreadService.prototype, {
                 });
             }
             if (this.chatbotService.isChatbotThread(thread)) {
-                this.chatbotService.typingMessage = this.messageService.insert({
+                this.chatbotService.typingMessage = this.store.Message.insert({
                     id: this.messageService.getNextTemporaryId(),
                     res_id: thread.id,
                     model: thread.model,
@@ -161,7 +163,7 @@ patch(ThreadService.prototype, {
     async update(thread, data) {
         super.update(...arguments);
         if (data.operator_pid) {
-            thread.operator = this.personaService.insert({
+            thread.operator = this.store.Persona.insert({
                 type: "partner",
                 id: data.operator_pid[0],
                 name: data.operator_pid[1],
@@ -197,7 +199,7 @@ patch(ThreadService.prototype, {
             this.notification.add(_t("No available collaborator, please try again later."));
             return;
         }
-        const thread = this.insert({
+        const thread = this.store.Thread.insert({
             ...session,
             id: session.id ?? this.TEMPORARY_ID,
             model: "discuss.channel",
@@ -209,7 +211,7 @@ patch(ThreadService.prototype, {
                     message.parentMessage.body = markup(message.parentMessage.body);
                 }
                 message.body = markup(message.body);
-                return this.messageService.insert(message);
+                return this.store.Message.insert(message);
             });
         }
         return thread;

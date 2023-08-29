@@ -43,23 +43,13 @@ export class ThreadService {
      */
     setup(env, services) {
         this.env = env;
-        this.channelMemberService = services["discuss.channel.member"];
-        this.attachmentsService = services["mail.attachment"];
         this.store = services["mail.store"];
         this.orm = services.orm;
         this.rpc = services.rpc;
         this.notificationService = services.notification;
         this.router = services.router;
         this.ui = services.ui;
-        this.personaService = services["mail.persona"];
         this.messageService = services["mail.message"];
-        // this prevents cyclic dependencies between mail.thread and other services
-        this.env.bus.addEventListener("mail.thread/insert", ({ detail }) => {
-            const model = detail.model;
-            const id = detail.id;
-            const type = detail.type;
-            this.insert({ model, id, type });
-        });
     }
 
     /**
@@ -69,7 +59,7 @@ export class ThreadService {
      */
     async fetchChannel(id) {
         const [channelData] = await this.rpc("/discuss/channel/info", { channel_id: id });
-        return this.insert({
+        return this.store.Thread.insert({
             ...channelData,
             model: "discuss.channel",
             type: channelData.channel.channel_type,
@@ -93,7 +83,7 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona || channelMember.partner) {
-                this.channelMemberService.insert({ ...channelMember, threadId: thread.id });
+                this.store.ChannelMember.insert({ ...channelMember, threadId: thread.id });
             }
         }
     }
@@ -218,7 +208,7 @@ export class ThreadService {
                         ? markup(data.parentMessage.body)
                         : data.parentMessage.body;
                 }
-                return this.messageService.insert(
+                return this.store.Message.insert(
                     Object.assign(data, { body: data.body ? markup(data.body) : data.body })
                 );
             });
@@ -324,7 +314,7 @@ export class ThreadService {
                 if (message.parentMessage?.body) {
                     message.parentMessage.body = markup(message.parentMessage.body);
                 }
-                return this.messageService.insert({
+                return this.store.Message.insert({
                     ...message,
                     body: message.body ? markup(message.body) : message.body,
                 });
@@ -348,7 +338,7 @@ export class ThreadService {
     // This function is like fetchNewMessages but just for a single message at most on all pinned threads
     fetchPreviews = memoize(async () => {
         const ids = [];
-        for (const thread of Object.values(this.store.threads)) {
+        for (const thread of Object.values(this.store.Thread.records)) {
             if (["channel", "group", "chat"].includes(thread.type)) {
                 ids.push(thread.id);
             }
@@ -356,11 +346,12 @@ export class ThreadService {
         if (ids.length) {
             const previews = await this.orm.call("discuss.channel", "channel_fetch_preview", [ids]);
             for (const preview of previews) {
-                const thread = this.store.threads[createLocalId("discuss.channel", preview.id)];
+                const thread =
+                    this.store.Thread.records[createLocalId("discuss.channel", preview.id)];
                 const data = Object.assign(preview.last_message, {
                     body: markup(preview.last_message.body),
                 });
-                const message = this.messageService.insert({
+                const message = this.store.Message.insert({
                     ...data,
                     res_id: thread.id,
                     model: thread.model,
@@ -456,13 +447,13 @@ export class ThreadService {
 
     sortChannels() {
         this.store.discuss.channels.threads.sort((id1, id2) => {
-            const thread1 = this.store.threads[id1];
-            const thread2 = this.store.threads[id2];
+            const thread1 = this.store.Thread.records[id1];
+            const thread2 = this.store.Thread.records[id2];
             return String.prototype.localeCompare.call(thread1.name, thread2.name);
         });
         this.store.discuss.chats.threads.sort((localId_1, localId_2) => {
-            const thread1 = this.store.threads[localId_1];
-            const thread2 = this.store.threads[localId_2];
+            const thread1 = this.store.Thread.records[localId_1];
+            const thread2 = this.store.Thread.records[localId_2];
             return thread2.lastInterestDateTime.ts - thread1.lastInterestDateTime.ts;
         });
     }
@@ -519,7 +510,7 @@ export class ThreadService {
         }
 
         if (partnerId) {
-            const partner = this.personaService.insert({ id: partnerId, type: "partner" });
+            const partner = this.store.Persona.insert({ id: partnerId, type: "partner" });
             if (!partner.user) {
                 const [userId] = await this.orm.silent.search(
                     "res.users",
@@ -547,7 +538,7 @@ export class ThreadService {
         if (!partner) {
             return;
         }
-        return Object.values(this.store.threads).find(
+        return Object.values(this.store.Thread.records).find(
             (thread) => thread.type === "chat" && thread.chatPartnerId === partner.id
         );
     }
@@ -579,7 +570,7 @@ export class ThreadService {
         await this.orm.call("discuss.channel", "add_members", [[id]], {
             partner_ids: [this.store.user.id],
         });
-        const thread = this.insert({
+        const thread = this.store.Thread.insert({
             id,
             model: "discuss.channel",
             name,
@@ -595,7 +586,7 @@ export class ThreadService {
         const data = await this.orm.call("discuss.channel", "channel_get", [], {
             partners_to: [id],
         });
-        return this.insert({
+        return this.store.Thread.insert({
             ...data,
             model: "discuss.channel",
             type: "chat",
@@ -649,7 +640,7 @@ export class ThreadService {
         this.remove(channel);
         this.setDiscussThread(
             this.store.discuss.channels.threads[0]
-                ? this.store.threads[this.store.discuss.channels.threads[0]]
+                ? this.store.Thread.records[this.store.discuss.channels.threads[0]]
                 : this.store.discuss.inbox
         );
     }
@@ -679,7 +670,7 @@ export class ThreadService {
     remove(thread) {
         removeFromArray(this.store.discuss.chats.threads, thread.localId);
         removeFromArray(this.store.discuss.channels.threads, thread.localId);
-        delete this.store.threads[thread.localId];
+        delete this.store.Thread.records[thread.localId];
     }
 
     /**
@@ -693,7 +684,7 @@ export class ThreadService {
             replaceArrayWithCompare(
                 thread.attachments,
                 attachmentsData.map((attachmentData) =>
-                    this.attachmentsService.insert(attachmentData)
+                    this.store.Attachment.insert(attachmentData)
                 )
             );
         }
@@ -736,7 +727,7 @@ export class ThreadService {
                 for (const [command, membersData] of serverData.channel.channelMembers) {
                     const members = Array.isArray(membersData) ? membersData : [membersData];
                     for (const memberData of members) {
-                        const member = this.channelMemberService.insert([command, memberData]);
+                        const member = this.store.ChannelMember.insert([command, memberData]);
                         if (thread.type !== "chat") {
                             continue;
                         }
@@ -761,7 +752,7 @@ export class ThreadService {
                     case "insert":
                         if (members) {
                             for (const member of members) {
-                                const record = this.channelMemberService.insert(member);
+                                const record = this.store.ChannelMember.insert(member);
                                 thread.invitedMemberIds.add(record.id);
                             }
                         }
@@ -780,12 +771,12 @@ export class ThreadService {
                     ({ fetched_message_id, partner_id, seen_message_id }) => {
                         return {
                             lastFetchedMessage: fetched_message_id
-                                ? this.messageService.insert({ id: fetched_message_id })
+                                ? this.store.Message.insert({ id: fetched_message_id })
                                 : undefined,
                             lastSeenMessage: seen_message_id
-                                ? this.messageService.insert({ id: seen_message_id })
+                                ? this.store.Message.insert({ id: seen_message_id })
                                 : undefined,
-                            partner: this.personaService.insert({
+                            partner: this.store.Persona.insert({
                                 id: partner_id,
                                 type: "partner",
                             }),
@@ -823,8 +814,8 @@ export class ThreadService {
             throw new Error("Cannot insert thread: model is missing in data");
         }
         const localId = createLocalId(data.model, data.id);
-        if (localId in this.store.threads) {
-            const thread = this.store.threads[localId];
+        if (localId in this.store.Thread.records) {
+            const thread = this.store.Thread.records[localId];
             this.update(thread, data);
             return thread;
         }
@@ -844,7 +835,7 @@ export class ThreadService {
         this.update(thread, data);
         this.insertComposer({ thread });
         // return reactive version.
-        return this.store.threads[thread.localId];
+        return this.store.Thread.records[thread.localId];
     }
 
     /**
@@ -916,7 +907,7 @@ export class ThreadService {
                 tmpData.guestAuthor = this.store.self;
             }
             if (parentId) {
-                tmpData.parentMessage = this.store.messages[parentId];
+                tmpData.parentMessage = this.store.Message.records[parentId];
             }
             const prettyContent = await prettifyMessageContent(body, params.validMentions);
             const { emojis } = await loadEmoji();
@@ -932,7 +923,7 @@ export class ThreadService {
                 }
             }
             browser.localStorage.setItem("web.emoji.frequent", JSON.stringify(recentEmojis));
-            tmpMsg = this.messageService.insert({
+            tmpMsg = this.store.Message.insert({
                 ...tmpData,
                 body: markup(prettyContent),
                 res_id: thread.id,
@@ -945,7 +936,7 @@ export class ThreadService {
         const data = await this.rpc(this.getMessagePostRoute(thread), params);
         if (thread.type !== "chatter") {
             removeFromArrayWithPredicate(thread.messages, (msg) => msg.eq(tmpMsg));
-            delete this.store.messages[tmpMsg.id];
+            delete this.store.Message.records[tmpMsg.id];
         }
         if (!data) {
             return;
@@ -955,12 +946,10 @@ export class ThreadService {
                 ? markup(data.parentMessage.body)
                 : data.parentMessage.body;
         }
-        if (data.id in this.store.messages) {
+        if (data.id in this.store.Message.records) {
             data.temporary_id = null;
         }
-        const message = this.messageService.insert(
-            Object.assign(data, { body: markup(data.body) })
-        );
+        const message = this.store.Message.insert(Object.assign(data, { body: markup(data.body) }));
         if (message.notIn(thread.messages)) {
             thread.messages.push(message);
         }
@@ -1055,7 +1044,7 @@ export class ThreadService {
 
     getDiscussSidebarCategoryCounter(categoryId) {
         return this.store.discuss[categoryId].threads.reduce((acc, threadLocalId) => {
-            const channel = this.store.threads[threadLocalId];
+            const channel = this.store.Thread.records[threadLocalId];
             if (categoryId === "channels") {
                 return channel.message_needaction_counter > 0 ? acc + 1 : acc;
             } else {
@@ -1159,18 +1148,7 @@ export class ThreadService {
 }
 
 export const threadService = {
-    dependencies: [
-        "discuss.channel.member",
-        "mail.attachment",
-        "mail.store",
-        "orm",
-        "rpc",
-        "notification",
-        "router",
-        "mail.persona",
-        "mail.message",
-        "ui",
-    ],
+    dependencies: ["mail.store", "orm", "rpc", "notification", "router", "mail.message", "ui"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services
