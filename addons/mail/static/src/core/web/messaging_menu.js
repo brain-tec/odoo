@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { ImStatus } from "@mail/core/common/im_status";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { NotificationItem } from "@mail/core/web/notification_item";
 import { onExternalClick } from "@mail/utils/common/hooks";
 import { createLocalId } from "@mail/utils/common/misc";
@@ -20,8 +19,7 @@ export class MessagingMenu extends Component {
     static template = "mail.MessagingMenu";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.hasTouch = hasTouch;
         this.notification = useState(useService("mail.notification.permission"));
         this.chatWindowService = useState(useService("mail.chat_window"));
@@ -81,7 +79,8 @@ export class MessagingMenu extends Component {
     get hasPreviews() {
         return (
             this.threads.length > 0 ||
-            (this.store.notificationGroups.length > 0 && this.store.discuss.activeTab === "all") ||
+            (this.store.NotificationGroup.records.length > 0 &&
+                this.store.discuss.activeTab === "all") ||
             (this.notification.permission === "prompt" && this.store.discuss.activeTab === "all")
         );
     }
@@ -92,7 +91,7 @@ export class MessagingMenu extends Component {
             displayName: _t("%s has a request", this.store.odoobot.name),
             iconSrc: this.threadService.avatarUrl(this.store.odoobot),
             partner: this.store.odoobot,
-            isLast: this.threads.length === 0 && this.store.notificationGroups.length === 0,
+            isLast: this.threads.length === 0 && this.store.NotificationGroup.records.length === 0,
             isShown:
                 this.store.discuss.activeTab === "all" && this.notification.permission === "prompt",
         };
@@ -100,7 +99,7 @@ export class MessagingMenu extends Component {
 
     get threads() {
         /** @type {import("@mail/core/common/thread_model").Thread[]} */
-        let threads = Object.values(this.store.threads).filter(
+        let threads = Object.values(this.store.Thread.records).filter(
             (thread) =>
                 thread.is_pinned || (thread.hasNeedactionMessages && thread.type !== "mailbox")
         );
@@ -239,7 +238,7 @@ export class MessagingMenu extends Component {
             });
             // Close the related chat window as having both the form view
             // and the chat window does not look good.
-            this.store.chatWindows.find(({ thr }) => thr?.eq(thread))?.close();
+            this.store.ChatWindow.records.find(({ thr }) => thr?.eq(thread))?.close();
         } else {
             this.threadService.open(thread);
         }
@@ -286,10 +285,10 @@ export class MessagingMenu extends Component {
         if (
             this.store.discuss.activeTab === "mailbox" &&
             (!this.store.discuss.threadLocalId ||
-                this.store.threads[this.store.discuss.threadLocalId].type !== "mailbox")
+                this.store.Thread.records[this.store.discuss.threadLocalId].type !== "mailbox")
         ) {
             this.threadService.setDiscussThread(
-                Object.values(this.store.threads).find((thread) => thread.id === "inbox")
+                Object.values(this.store.Thread.records).find((thread) => thread.id === "inbox")
             );
         }
         if (this.store.discuss.activeTab !== "mailbox") {
@@ -300,10 +299,10 @@ export class MessagingMenu extends Component {
     get counter() {
         let value =
             this.store.discuss.inbox.counter +
-            Object.values(this.store.threads).filter(
+            Object.values(this.store.Thread.records).filter(
                 (thread) => thread.is_pinned && thread.message_unread_counter > 0
             ).length +
-            Object.values(this.store.notificationGroups).reduce(
+            Object.values(this.store.NotificationGroup.records).reduce(
                 (acc, ng) => acc + parseInt(Object.values(ng.notifications).length),
                 0
             );

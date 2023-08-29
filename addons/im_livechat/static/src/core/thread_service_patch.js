@@ -8,14 +8,14 @@ import { patch } from "@web/core/utils/patch";
 
 patch(ThreadService.prototype, {
     insert(data) {
-        const isUnknown = !(createLocalId(data.model, data.id) in this.store.threads);
+        const isUnknown = !(createLocalId(data.model, data.id) in this.store.Thread.records);
         const thread = super.insert(data);
         if (thread.type === "livechat") {
             if (data?.channel) {
                 assignDefined(thread, data.channel, ["anonymous_name"]);
             }
             if (data?.operator_pid) {
-                thread.operator = this.personaService.insert({
+                thread.operator = this.store.Persona.insert({
                     type: "partner",
                     id: data.operator_pid[0],
                     displayName: data.operator_pid[1],
@@ -68,8 +68,8 @@ patch(ThreadService.prototype, {
         super.sortChannels();
         // Live chats are sorted by most recent interest date time in the sidebar.
         this.store.discuss.livechat.threads.sort((localId_1, localId_2) => {
-            const thread1 = this.store.threads[localId_1];
-            const thread2 = this.store.threads[localId_2];
+            const thread1 = this.store.Thread.records[localId_1];
+            const thread2 = this.store.Thread.records[localId_2];
             return thread2.lastInterestDateTime?.ts - thread1.lastInterestDateTime?.ts;
         });
     },
@@ -79,13 +79,13 @@ patch(ThreadService.prototype, {
      */
     goToOldestUnreadLivechatThread() {
         const oldestUnreadThread =
-            this.store.threads[
+            this.store.Thread.records[
                 Object.values(this.store.discuss.livechat.threads)
-                    .filter((localId) => this.store.threads[localId].isUnread)
+                    .filter((localId) => this.store.Thread.records[localId].isUnread)
                     .sort(
                         (localId_1, localId_2) =>
-                            this.store.threads[localId_1].lastInterestDateTime?.ts -
-                            this.store.threads[localId_2].lastInterestDateTime?.ts
+                            this.store.Thread.records[localId_1].lastInterestDateTime?.ts -
+                            this.store.Thread.records[localId_2].lastInterestDateTime?.ts
                     )[0]
             ];
         if (!oldestUnreadThread) {
@@ -95,7 +95,7 @@ patch(ThreadService.prototype, {
             this.setDiscussThread(oldestUnreadThread);
             return true;
         }
-        const chatWindow = this.chatWindowService.insert({ thread: oldestUnreadThread });
+        const chatWindow = this.store.ChatWindow.insert({ thread: oldestUnreadThread });
         if (chatWindow.hidden) {
             this.chatWindowService.makeVisible(chatWindow);
         } else if (chatWindow.folded) {

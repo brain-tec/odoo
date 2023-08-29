@@ -87,7 +87,7 @@ export class ActivityService {
      * @returns {import("@mail/core/web/activity_model").Activity}
      */
     insert(data, { broadcast = true } = {}) {
-        const activity = this.store.activities[data.id] ?? new Activity(this.store, data.id);
+        const activity = this.store.Activity.records[data.id] ?? new Activity(this.store, data.id);
         if (data.request_partner_id) {
             data.request_partner_id = data.request_partner_id[0];
         }
@@ -102,7 +102,7 @@ export class ActivityService {
     }
 
     delete(activity, { broadcast = true } = {}) {
-        delete this.store.activities[activity.id];
+        delete this.store.Activity.records[activity.id];
         if (broadcast) {
             this.broadcastChannel?.postMessage({ type: "delete", payload: { id: activity.id } });
         }
@@ -111,7 +111,7 @@ export class ActivityService {
     _onBroadcastChannelMessage({ data }) {
         switch (data.type) {
             case "insert":
-                this.insert(data.payload, { broadcast: false });
+                this.store.Activity.insert(data.payload, { broadcast: false });
                 break;
             case "delete":
                 this.delete(data.payload, { broadcast: false });

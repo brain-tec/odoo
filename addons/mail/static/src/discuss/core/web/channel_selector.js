@@ -1,8 +1,6 @@
 /* @odoo-module */
 
-import { useStore } from "@mail/core/common/messaging_hook";
 import { NavigableList } from "@mail/core/common/navigable_list";
-import { useDiscussCoreCommon } from "@mail/discuss/core/common/discuss_core_common_service";
 import { cleanTerm } from "@mail/utils/common/format";
 import { createLocalId } from "@mail/utils/common/misc";
 
@@ -22,10 +20,9 @@ export class ChannelSelector extends Component {
     static template = "discuss.ChannelSelector";
 
     setup() {
-        this.discussCoreCommonService = useDiscussCoreCommon();
-        this.store = useStore();
+        this.discussCoreCommonService = useState(useService("discuss.core.common"));
+        this.store = useState(useService("mail.store"));
         this.threadService = useState(useService("mail.thread"));
-        this.personaService = useService("mail.persona");
         this.suggestionService = useService("mail.suggestion");
         this.orm = useService("orm");
         this.sequential = useSequential();
@@ -123,7 +120,7 @@ export class ChannelSelector extends Component {
                 const suggestions = this.suggestionService
                     .sortPartnerSuggestions(results, cleanedTerm)
                     .map((data) => {
-                        this.personaService.insert({ ...data, type: "partner" });
+                        this.store.Persona.insert({ ...data, type: "partner" });
                         return {
                             classList: "o-discuss-ChannelSelector-suggestion",
                             label: data.name,
@@ -234,7 +231,7 @@ export class ChannelSelector extends Component {
     get tagsList() {
         const res = [];
         for (const partnerId of this.state.selectedPartners) {
-            const partner = this.store.personas[createLocalId("partner", partnerId)];
+            const partner = this.store.Persona.records[createLocalId("partner", partnerId)];
             res.push({
                 id: partner.id,
                 text: partner.name,

@@ -3,7 +3,6 @@
 import { AutoresizeInput } from "@mail/core/common/autoresize_input";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import { Thread } from "@mail/core/common/thread";
 import { useThreadActions } from "@mail/core/common/thread_actions";
 import { ThreadIcon } from "@mail/core/common/thread_icon";
@@ -41,10 +40,9 @@ export class Discuss extends Component {
     static template = "mail.Discuss";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.messaging = useState(useService("mail.messaging"));
+        this.store = useState(useService("mail.store"));
         this.threadService = useState(useService("mail.thread"));
-        this.messageService = useState(useService("mail.message"));
         this.personaService = useService("mail.persona");
         this.messageHighlight = useMessageHighlight();
         this.messageEdition = useMessageEdition();
@@ -85,7 +83,7 @@ export class Discuss extends Component {
     }
 
     get thread() {
-        return this.store.threads[this.store.discuss.threadLocalId];
+        return this.store.Thread.records[this.store.discuss.threadLocalId];
     }
 
     async onFileUploaded(file) {

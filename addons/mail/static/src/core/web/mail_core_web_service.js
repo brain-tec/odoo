@@ -24,7 +24,7 @@ export class MailCoreWeb {
         this.messagingService.isReady.then(() => {
             this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
                 messages.map((messageData) =>
-                    this.messageService.insert({
+                    this.store.Message.insert({
                         ...messageData,
                         body: messageData.body ? markup(messageData.body) : messageData.body,
                         // implicit: failures are sent by the server at
@@ -33,7 +33,7 @@ export class MailCoreWeb {
                         author: this.store.user,
                     })
                 );
-                this.store.notificationGroups.sort(
+                this.store.NotificationGroup.records.sort(
                     (n1, n2) => n2.lastMessage.id - n1.lastMessage.id
                 );
             });
@@ -71,7 +71,7 @@ export class MailCoreWeb {
             });
             this.busService.subscribe("mail.message/inbox", (payload) => {
                 const data = Object.assign(payload, { body: markup(payload.body) });
-                const message = this.messageService.insert(data);
+                const message = this.store.Message.insert(data);
                 const inbox = this.store.discuss.inbox;
                 if (message.notIn(inbox.messages)) {
                     inbox.messages.push(message);
@@ -92,7 +92,7 @@ export class MailCoreWeb {
                     // Furthermore, server should not send back all messageIds marked as read
                     // but something like last read messageId or something like that.
                     // (just imagine you mark 1000 messages as read ... )
-                    const message = this.store.messages[messageId];
+                    const message = this.store.Message.records[messageId];
                     if (!message) {
                         continue;
                     }

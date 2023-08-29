@@ -18,9 +18,7 @@ export class MailCoreCommon {
         this.attachmentService = services["mail.attachment"];
         this.messageService = services["mail.message"];
         this.messagingService = services["mail.messaging"];
-        this.personaService = services["mail.persona"];
         this.store = services["mail.store"];
-        this.threadService = services["mail.thread"];
         this.userSettingsService = services["mail.user_settings"];
     }
 
@@ -29,16 +27,16 @@ export class MailCoreCommon {
             this.busService.subscribe("ir.attachment/delete", (payload) => {
                 const { id: attachmentId, message: messageData } = payload;
                 if (messageData) {
-                    this.messageService.insert({ ...messageData });
+                    this.store.Message.insert({ ...messageData });
                 }
-                const attachment = this.store.attachments[attachmentId];
+                const attachment = this.store.Attachment.records[attachmentId];
                 if (attachment) {
                     this.attachmentService.remove(attachment);
                 }
             });
             this.busService.subscribe("mail.link.preview/delete", (payload) => {
                 const { id, message_id } = payload;
-                const message = this.store.messages[message_id];
+                const message = this.store.Message.records[message_id];
                 if (message) {
                     removeFromArrayWithPredicate(
                         message.linkPreviews,
@@ -48,11 +46,11 @@ export class MailCoreCommon {
             });
             this.busService.subscribe("mail.message/delete", (payload) => {
                 for (const messageId of payload.message_ids) {
-                    const message = this.store.messages[messageId];
+                    const message = this.store.Message.records[messageId];
                     if (!message) {
                         continue;
                     }
-                    delete this.store.messages[messageId];
+                    delete this.store.Message.records[messageId];
                     if (message.originThread) {
                         removeFromArrayWithPredicate(message.originThread.messages, (msg) =>
                             msg.eq(message)
@@ -63,7 +61,7 @@ export class MailCoreCommon {
             });
             this.busService.subscribe("mail.message/notification_update", (payload) => {
                 payload.elements.map((message) => {
-                    this.messageService.insert({
+                    this.store.Message.insert({
                         ...message,
                         body: markup(message.body),
                         // implicit: failures are sent by the server at
@@ -76,13 +74,13 @@ export class MailCoreCommon {
             this.busService.subscribe("mail.message/toggle_star", (payload) => {
                 const { message_ids: messageIds, starred } = payload;
                 for (const messageId of messageIds) {
-                    const message = this.messageService.insert({ id: messageId });
+                    const message = this.store.Message.insert({ id: messageId });
                     this.messageService.updateStarred(message, starred);
                 }
             });
             this.busService.subscribe("mail.record/insert", (payload) => {
                 if (payload.Thread) {
-                    this.threadService.insert(payload.Thread);
+                    this.store.Thread.insert(payload.Thread);
                 }
                 if (payload.Partner) {
                     const partners = Array.isArray(payload.Partner)
@@ -90,28 +88,28 @@ export class MailCoreCommon {
                         : [payload.Partner];
                     for (const partner of partners) {
                         if (partner.im_status) {
-                            this.personaService.insert({ ...partner, type: "partner" });
+                            this.store.Persona.insert({ ...partner, type: "partner" });
                         }
                     }
                 }
                 if (payload.Guest) {
                     const guests = Array.isArray(payload.Guest) ? payload.Guest : [payload.Guest];
                     for (const guest of guests) {
-                        this.personaService.insert({ ...guest, type: "guest" });
+                        this.store.Persona.insert({ ...guest, type: "guest" });
                     }
                 }
                 const { LinkPreview: linkPreviews } = payload;
                 if (linkPreviews) {
                     for (const linkPreview of linkPreviews) {
-                        this.store.messages[linkPreview.message.id]?.linkPreviews.push(
+                        this.store.Message.records[linkPreview.message.id]?.linkPreviews.push(
                             new LinkPreview(linkPreview)
                         );
                     }
                 }
                 const { Message: messageData } = payload;
                 if (messageData) {
-                    const isStarred = this.store.messages[messageData.id]?.isStarred;
-                    const message = this.messageService.insert({
+                    const isStarred = this.store.Message.records[messageData.id]?.isStarred;
+                    const message = this.store.Message.insert({
                         ...messageData,
                         body: messageData.body ? markup(messageData.body) : messageData.body,
                     });
@@ -134,9 +132,7 @@ export const mailCoreCommon = {
         "mail.attachment",
         "mail.message",
         "mail.messaging",
-        "mail.persona",
         "mail.store",
-        "mail.thread",
         "mail.user_settings",
     ],
     /**

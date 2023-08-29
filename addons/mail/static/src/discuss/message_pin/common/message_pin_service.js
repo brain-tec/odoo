@@ -3,18 +3,15 @@
 import { Message } from "@mail/core/common/message";
 import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
 
-import { markup, reactive, useState } from "@odoo/owl";
+import { markup, reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 export const OTHER_LONG_TYPING = 60000;
 
 export class MessagePin {
     busService;
-    /** @type {import("@mail/core/common/message_service").MessageService} */
-    messageService;
     /** @type {Map<number, string>} */
     loadStateByChannelId = new Map();
     /** @type {Map<number, Set<number>>} */
@@ -34,7 +31,6 @@ export class MessagePin {
         this.env = env;
         this.busService = services.bus_service;
         this.dialogService = services.dialog;
-        this.messageService = services["mail.message"];
         this.ormService = services.orm;
         this.rpcService = services.rpc;
         this.storeService = services["mail.store"];
@@ -87,7 +83,7 @@ export class MessagePin {
                     messageData.parentMessage.body = markup(messageData.parentMessage.body);
                 }
                 messageData.body = markup(messageData.body);
-                this.messageService.insert(messageData);
+                this.storeService.Message.insert(messageData);
             });
             this.loadStateByChannelId.set(channel.id, "loaded");
         } catch (e) {
@@ -111,7 +107,7 @@ export class MessagePin {
      */
     getPinnedMessages(channel) {
         return [...(this.messageIdsByChannelId.get(channel.id) ?? new Set())]
-            .map((id) => this.messageService.insert({ id }))
+            .map((id) => this.storeService.Message.insert({ id }))
             .sort((a, b) => {
                 const aPinnedAt = this.pinnedAtByMessageId.get(a.id);
                 const bPinnedAt = this.pinnedAtByMessageId.get(b.id);
@@ -219,7 +215,7 @@ export class MessagePin {
 }
 
 export const messagePinService = {
-    dependencies: ["bus_service", "dialog", "mail.message", "mail.store", "orm", "rpc"],
+    dependencies: ["bus_service", "dialog", "mail.store", "orm", "rpc"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services
@@ -232,7 +228,3 @@ export const messagePinService = {
 };
 
 registry.category("services").add("discuss.message.pin", messagePinService);
-
-export function useMessagePinService() {
-    return useState(useService("discuss.message.pin"));
-}

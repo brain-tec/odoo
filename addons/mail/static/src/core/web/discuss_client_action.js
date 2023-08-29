@@ -1,9 +1,8 @@
 /* @odoo-module */
 
 import { Discuss } from "@mail/core/common/discuss";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 
-import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -24,8 +23,8 @@ export class DiscussClientAction extends Component {
     static template = "mail.DiscussClientAction";
 
     setup() {
-        this.store = useStore();
-        this.messaging = useMessaging();
+        this.store = useState(useService("mail.store"));
+        this.messaging = useState(useService("mail.messaging"));
         this.threadService = useService("mail.thread");
         onWillStart(() => this.restoreDiscussThread(this.props));
         onWillUpdateProps((nextProps) => this.restoreDiscussThread(nextProps));
@@ -58,7 +57,7 @@ export class DiscussClientAction extends Component {
         const activeThreadLocalId = createLocalId(model, id);
         if (activeThreadLocalId !== this.store.discuss.threadLocalId) {
             const thread =
-                this.store.threads[createLocalId(model, id)] ??
+                this.store.Thread.records[createLocalId(model, id)] ??
                 (await this.threadService.fetchChannel(parseInt(id)));
             if (!thread.is_pinned) {
                 await this.threadService.pin(thread);

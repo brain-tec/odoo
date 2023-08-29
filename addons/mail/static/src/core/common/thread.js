@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Message } from "@mail/core/common/message";
-import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import {
     useAutoScroll,
     useScrollPosition,
@@ -56,8 +55,7 @@ export class Thread extends Component {
 
     setup() {
         this.escape = escape;
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.store = useState(useService("mail.store"));
         this.state = useState({ isReplyingTo: false, showJumpPresent: false });
         this.threadService = useState(useService("mail.thread"));
         if (!this.env.inChatter || !this.props.hasScrollAdjust) {
@@ -203,7 +201,7 @@ export class Thread extends Component {
         const { oeType, oeId } = ev.target.dataset;
         if (oeType === "highlight") {
             await this.env.messageHighlight?.highlightMessage(
-                this.store.messages[Number(oeId)],
+                this.store.Message.records[Number(oeId)],
                 this.props.thread
             );
         }

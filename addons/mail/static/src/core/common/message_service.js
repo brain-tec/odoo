@@ -27,8 +27,6 @@ export class MessageService {
         this.rpc = services.rpc;
         this.orm = services.orm;
         this.userService = services.user;
-        this.personaService = services["mail.persona"];
-        this.attachmentService = services["mail.attachment"];
     }
 
     async edit(message, body, attachments = [], rawMentions) {
@@ -47,7 +45,7 @@ export class MessageService {
             message_id: message.id,
             partner_ids: validMentions?.partners?.map((partner) => partner.id),
         });
-        this.insert(
+        this.store.Message.insert(
             Object.assign(messageData, {
                 body: messageData.body ? markup(messageData.body) : messageData.body,
             })
@@ -82,7 +80,7 @@ export class MessageService {
      * @returns {number}
      */
     getLastMessageId() {
-        return Object.values(this.store.messages).reduce(
+        return Object.values(this.store.Message.records).reduce(
             (lastMessageId, message) => Math.max(lastMessageId, message.id),
             0
         );
@@ -103,7 +101,7 @@ export class MessageService {
         const rawMentionedPartnerIds = rawMentions.partnerIds || [];
         const rawMentionedThreadIds = rawMentions.threadIds || [];
         for (const partnerId of rawMentionedPartnerIds) {
-            const partner = this.store.personas[createLocalId("partner", partnerId)];
+            const partner = this.store.Persona.records[createLocalId("partner", partnerId)];
             const index = body.indexOf(`@${partner.name}`);
             if (index === -1) {
                 continue;
@@ -111,7 +109,7 @@ export class MessageService {
             partners.push(partner);
         }
         for (const threadId of rawMentionedThreadIds) {
-            const thread = this.store.threads[createLocalId("discuss.channel", threadId)];
+            const thread = this.store.Thread.records[createLocalId("discuss.channel", threadId)];
             const index = body.indexOf(`#${thread.displayName}`);
             if (index === -1) {
                 continue;
@@ -133,7 +131,7 @@ export class MessageService {
     createTransient(data) {
         const { body, res_id, model } = data;
         const lastMessageId = this.getLastMessageId();
-        return this.insert({
+        return this.store.Message.insert({
             author: this.store.odoobot,
             body,
             id: lastMessageId + 0.01,
@@ -216,19 +214,18 @@ export class MessageService {
     insert(data) {
         let message;
         if (data.res_id) {
-            // this prevents cyclic dependencies between mail.thread and mail.message
-            this.env.bus.trigger("mail.thread/insert", {
+            this.store.Thread.insert({
                 model: data.model,
                 id: data.res_id,
             });
         }
-        if (data.id in this.store.messages) {
-            message = this.store.messages[data.id];
+        if (data.id in this.store.Message.records) {
+            message = this.store.Message.records[data.id];
         } else {
             message = new Message();
             message._store = this.store;
-            this.store.messages[data.id] = message;
-            message = this.store.messages[data.id];
+            this.store.Message.records[data.id] = message;
+            message = this.store.Message.records[data.id];
         }
         this.update(message, data);
         // return reactive version
@@ -268,7 +265,7 @@ export class MessageService {
                 ? message.starred_partner_ids.includes(this.store.user.id)
                 : false,
             isTransient,
-            parentMessage: parentMessage ? this.insert(parentMessage) : undefined,
+            parentMessage: parentMessage ? this.store.Message.insert(parentMessage) : undefined,
             resId,
             resModel,
             subtypeDescription,
@@ -285,7 +282,7 @@ export class MessageService {
         replaceArrayWithCompare(
             message.attachments,
             attachments.map((attachment) =>
-                this.attachmentService.insert({ message, ...attachment })
+                this.store.Attachment.insert({ message, ...attachment })
             )
         );
         if (
@@ -295,13 +292,13 @@ export class MessageService {
             message.author = undefined;
         }
         if (data.author?.id) {
-            message.author = this.personaService.insert({
+            message.author = this.store.Persona.insert({
                 ...data.author,
                 type: "partner",
             });
         }
         if (data.guestAuthor?.id) {
-            message.author = this.personaService.insert({
+            message.author = this.store.Persona.insert({
                 ...data.guestAuthor,
                 type: "guest",
                 channelId: message.originThread.id,
@@ -314,17 +311,17 @@ export class MessageService {
         replaceArrayWithCompare(
             message.notifications,
             notifications.map((notification) =>
-                this.insertNotification({ ...notification, messageId: message.id })
+                this.store.Notification.insert({ ...notification, messageId: message.id })
             )
         );
         replaceArrayWithCompare(
             message.recipients,
             recipients.map((recipient) =>
-                this.personaService.insert({ ...recipient, type: "partner" })
+                this.store.Persona.insert({ ...recipient, type: "partner" })
             )
         );
         if ("user_follower_id" in data && data.user_follower_id && this.store.self) {
-            message.originThread.selfFollower = this.env.services["mail.thread"].insertFollower({
+            message.originThread.selfFollower = this.env.services["mail.store"].Follower.insert({
                 followedThread: message.originThread,
                 id: data.user_follower_id,
                 isActive: true,
@@ -389,7 +386,7 @@ export class MessageService {
      * @returns {MessageReactions}
      */
     insertReactions(data) {
-        let reaction = this.store.messages[data.message.id]?.reactions.find(
+        let reaction = this.store.Message.records[data.message.id]?.reactions.find(
             ({ content }) => content === data.content
         );
         if (!reaction) {
@@ -402,7 +399,7 @@ export class MessageService {
             const [command, partnerData] = Array.isArray(rawPartner)
                 ? rawPartner
                 : ["insert", rawPartner];
-            const persona = this.personaService.insert({ ...partnerData, type: "partner" });
+            const persona = this.store.Persona.insert({ ...partnerData, type: "partner" });
             if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
                 reaction.personaLocalIds.push(persona.localId);
             } else if (command !== "insert") {
@@ -411,7 +408,7 @@ export class MessageService {
         }
         for (const rawGuest of data.guests) {
             const [command, guestData] = Array.isArray(rawGuest) ? rawGuest : ["insert", rawGuest];
-            const persona = this.personaService.insert({ ...guestData, type: "guest" });
+            const persona = this.store.Persona.insert({ ...guestData, type: "guest" });
             if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
                 reaction.personaLocalIds.push(persona.localId);
             } else if (command !== "insert") {
@@ -434,10 +431,10 @@ export class MessageService {
      * @returns {Notification}
      */
     insertNotification(data) {
-        let notification = this.store.notifications[data.id];
+        let notification = this.store.Notification.records[data.id];
         if (!notification) {
-            this.store.notifications[data.id] = new Notification(this.store, data);
-            notification = this.store.notifications[data.id];
+            this.store.Notification.records[data.id] = new Notification(this.store, data);
+            notification = this.store.Notification.records[data.id];
         }
         this.updateNotification(notification, data);
         return notification;
@@ -450,7 +447,7 @@ export class MessageService {
             notification_type: data.notification_type,
             failure_type: data.failure_type,
             persona: data.res_partner_id
-                ? this.personaService.insert({
+                ? this.store.Persona.insert({
                       id: data.res_partner_id[0],
                       displayName: data.res_partner_id[1],
                       type: "partner",
@@ -461,7 +458,7 @@ export class MessageService {
             return;
         }
         const thread = notification.message.originThread;
-        this.insertNotificationGroups({
+        this.store.NotificationGroup.insert({
             modelName: thread?.modelName,
             resId: thread?.id,
             resModel: thread?.model,
@@ -474,7 +471,7 @@ export class MessageService {
     }
 
     insertNotificationGroups(data) {
-        let group = this.store.notificationGroups.find((group) => {
+        let group = this.store.NotificationGroup.records.find((group) => {
             return (
                 group.resModel === data.resModel &&
                 group.type === data.type &&
@@ -486,7 +483,9 @@ export class MessageService {
         }
         this.updateNotificationGroup(group, data);
         if (group.notifications.length === 0) {
-            removeFromArrayWithPredicate(this.store.notificationGroups, (gr) => gr.eq(group));
+            removeFromArrayWithPredicate(this.store.NotificationGroup.records, (gr) =>
+                gr.eq(group)
+            );
         }
         return group;
     }
@@ -534,7 +533,7 @@ export class MessageService {
 }
 
 export const messageService = {
-    dependencies: ["mail.store", "rpc", "orm", "user", "mail.persona", "mail.attachment"],
+    dependencies: ["mail.store", "rpc", "orm", "user"],
     start(env, services) {
         return new MessageService(env, services);
     },

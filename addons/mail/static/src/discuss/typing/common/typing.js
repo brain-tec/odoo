@@ -1,11 +1,9 @@
 /* @odoo-module */
 
-import { useMessaging } from "@mail/core/common/messaging_hook";
-import { useTypingService } from "@mail/discuss/typing/common/typing_service";
-
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} Props
@@ -23,8 +21,7 @@ export class Typing extends Component {
     static template = "discuss.Typing";
 
     setup() {
-        this.messaging = useMessaging();
-        this.typingService = useTypingService();
+        this.typingService = useState(useService("discuss.typing"));
     }
 
     /** @returns {string} */

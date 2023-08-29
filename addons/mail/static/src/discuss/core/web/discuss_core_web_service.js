@@ -32,7 +32,7 @@ export class DiscussCoreWeb {
                     channelData.state !== "closed" &&
                     !this.ui.isSmall
                 ) {
-                    this.chatWindowService.insert({
+                    this.store.ChatWindow.insert({
                         autofocus: 0,
                         folded: channelData.state === "folded",
                         thread,
@@ -56,7 +56,7 @@ export class DiscussCoreWeb {
                     this.store.odoobotOnboarding = false;
                     return;
                 }
-                this.chatWindowService.insert({ thread: channel });
+                this.store.ChatWindow.insert({ thread: channel });
             }
         );
         this.busService.subscribe("mail.record/insert", (payload) => {
@@ -81,24 +81,24 @@ export class DiscussCoreWeb {
             this.notificationService.add(notification, { type: "info" });
             const chat = await this.threadService.getChat({ partnerId });
             if (chat && !this.ui.isSmall) {
-                this.chatWindowService.insert({ thread: chat });
+                this.store.ChatWindow.insert({ thread: chat });
             }
         });
         this.busService.subscribe("mail.record/insert", async (payload) => {
             if (payload.Thread) {
                 const data = payload.Thread;
-                const thread = this.store.threads[createLocalId(data.model, data.id)];
+                const thread = this.store.Thread.records[createLocalId(data.model, data.id)];
                 if (data.serverFoldState && thread && data.serverFoldState !== thread.state) {
                     thread.state = data.serverFoldState;
                     if (thread.state === "closed") {
-                        const chatWindow = this.store.chatWindows.find(
+                        const chatWindow = this.store.ChatWindow.records.find(
                             (chatWindow) => chatWindow.threadLocalId === thread.localId
                         );
                         if (chatWindow) {
                             this.chatWindowService.close(chatWindow);
                         }
                     } else {
-                        this.chatWindowService.insert({
+                        this.store.ChatWindow.insert({
                             thread,
                             folded: thread.state === "folded",
                         });
