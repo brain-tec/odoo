@@ -36,9 +36,6 @@ export class DynamicGroupList extends DynamicList {
     }
 
     get hasData() {
-        if (this.count === 0) {
-            return false;
-        }
         return this.groups.some((group) => group.hasData);
     }
 
@@ -119,10 +116,10 @@ export class DynamicGroupList extends DynamicList {
             sourceGroup._addRecord(record, oldIndex);
         };
         try {
-            await record.update({ [targetGroup.groupByField.name]: value });
-            const res = await record.save({ noReload: true });
+            const changes = { [targetGroup.groupByField.name]: value };
+            const res = await record.update(changes, { save: true });
             if (!res) {
-                revert();
+                return revert();
             }
         } catch (e) {
             // revert changes

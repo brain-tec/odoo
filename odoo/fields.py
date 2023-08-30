@@ -25,10 +25,11 @@ import pytz
 from markupsafe import Markup
 from psycopg2.extras import Json as PsycopgJson, execute_values
 from psycopg2.sql import SQL, Identifier
-from difflib import get_close_matches
+from difflib import get_close_matches, unified_diff
 from hashlib import sha256
 
 from .models import check_property_field_value_name
+from .netsvc import ColoredFormatter, GREEN, RED, DEFAULT, COLOR_PATTERN
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, human_size,
     pg_varchar, ustr, OrderedSet, pycompat, sql, date_utils, unique,
@@ -2024,6 +2025,22 @@ class Html(_String):
                     # sanitized. It means that someone who was part of a group
                     # allowing to bypass the sanitation saved that field
                     # previously.
+
+                    diff = unified_diff(
+                        original_value_sanitized.splitlines(),
+                        original_value_normalized.splitlines(),
+                    )
+
+                    with_colors = isinstance(logging.getLogger().handlers[0].formatter, ColoredFormatter)
+                    diff_str = f'The field ({record._description}, {self.string}) will not be editable:\n'
+                    for line in list(diff)[2:]:
+                        if with_colors:
+                            color = {'-': RED, '+': GREEN}.get(line[:1], DEFAULT)
+                            diff_str += COLOR_PATTERN % (30 + color, 40 + DEFAULT, line.rstrip() + "\n")
+                        else:
+                            diff_str += line.rstrip() + '\n'
+                    _logger.info(diff_str)
+
                     raise UserError(_(
                         "The field value you're saving (%s %s) includes content that is "
                         "restricted for security reasons. It is possible that someone "
@@ -3252,8 +3269,12 @@ class Properties(Field):
     _description_definition_record_field = property(attrgetter('definition_record_field'))
 
     ALLOWED_TYPES = (
-        'boolean', 'integer', 'float', 'char', 'date',
-        'datetime', 'many2one', 'many2many', 'selection', 'tags',
+        # standard types
+        'boolean', 'integer', 'float', 'char', 'date', 'datetime',
+        # relational like types
+        'many2one', 'many2many', 'selection', 'tags',
+        # UI types
+         'separator',
     )
 
     def _setup_attrs(self, model_class, name):
@@ -3724,6 +3745,10 @@ class Properties(Field):
             property_type = property_definition.get('type')
             property_model = property_definition.get('comodel')
 
+            if property_type == 'separator':
+                # "separator" is used as a visual separator in the form view UI
+                # it does not have a value and does not need to be stored on children
+                continue
             if property_type not in ('integer', 'float') or property_value != 0:
                 property_value = property_value or False
             if property_type in ('many2one', 'many2many') and property_model and property_value:

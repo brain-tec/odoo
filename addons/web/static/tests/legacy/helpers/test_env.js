@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
     import Bus from "@web/legacy/js/core/bus";
-    import session from "web.session";
-    import { makeTestEnvServices } from "@web/../tests/legacy/helpers/test_services";
+    import { buildQuery } from "@web/legacy/js/core/rpc";
     import { templates, setLoadXmlDefaultApp } from "@web/core/assets";
     import { renderToString } from "@web/core/utils/render";
     const { App, Component } = owl;
@@ -25,33 +24,31 @@
             setLoadXmlDefaultApp(app);
         }
 
+        function rpc(route, params, options) {
+            if (providedRPC) {
+                return providedRPC(route, params, options);
+            }
+            throw new Error(`No method to perform RPC`);
+        }
+
         const defaultEnv = {
-            browser: Object.assign({
-                setTimeout: window.setTimeout.bind(window),
-                clearTimeout: window.clearTimeout.bind(window),
-                setInterval: window.setInterval.bind(window),
-                clearInterval: window.clearInterval.bind(window),
-                requestAnimationFrame: window.requestAnimationFrame.bind(window),
-                Date: window.Date,
-                fetch: (window.fetch || (() => { })).bind(window),
-            }, env.browser),
             bus: env.bus || new Bus(),
-            device: Object.assign({
-                isMobile: false,
-                SIZES: { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 },
-            }, env.device),
-            isDebug: env.isDebug || (() => false),
-            services: makeTestEnvServices(env),
-            session: Object.assign({
-                rpc(route, params, options) {
-                    if (providedRPC) {
-                        return providedRPC(route, params, options);
-                    }
-                    throw new Error(`No method to perform RPC`);
+            debug: env.debug || false,
+            services: {
+                getCookie() {},
+                httpRequest(/* route, params = {}, readMethod = 'json' */) {
+                    return Promise.resolve('');
                 },
-                url: session.url,
-                getTZOffset: (() => 0),
-            }, env.session),
+                hotkey: { add: () => () => {} }, // fake service
+                notification: { notify() {} },
+                ajax: { rpc },
+                rpc(params, options) {
+                    const query = buildQuery(params);
+                    return rpc(query.route, query.params, options);
+                },
+                ui: { activeElement: document }, // fake service
+                ...env.services,
+            },
         };
         return Object.assign(env, defaultEnv);
     }

@@ -12043,7 +12043,6 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_data_cell").innerText, "leonardo");
 
         await click(target.querySelector(".o_field_widget[name=turtles] .o_pager_next"));
-        await click(target.querySelector(".o_field_widget[name=turtles] .o_pager_next"));
         assert.ok(target.querySelector(".o_field_widget[name=turtles] .o_pager_next").disabled);
 
         readDefs[1].resolve();
@@ -13097,12 +13096,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views partner", "web_read partner"]);
 
         await click(target, ".o_boolean_toggle");
-        assert.verifySteps([
-            "onchange2 turtle",
-            "onchange2 partner",
-            "write turtle",
-            "web_read turtle",
-        ]);
+        assert.verifySteps(["onchange2 partner", "write turtle", "web_read turtle"]);
     });
 
     QUnit.test("create a new record with an x2m invisible", async function (assert) {

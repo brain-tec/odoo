@@ -217,7 +217,7 @@
          * @returns {Promise}
          */
         updateWidget(/*nextProps*/) {
-            if (this.env.isDebug('assets')) {
+            if (odoo.debug.includes("assets")) {
                 console.warn(`ComponentAdapter: Widget could not be updated, maybe override 'updateWidget' function?`);
             }
         }
@@ -228,7 +228,7 @@
          * updated at once. It must be synchronous
          */
         renderWidget() {
-            if (this.env.isDebug('assets')) {
+            if (odoo.debug.includes("assets")) {
                 console.warn(`ComponentAdapter: Widget could not be re-rendered, maybe override 'renderWidget' function?`);
             }
         }
@@ -259,10 +259,6 @@
                          You should probably create a mapper in @web/legacy/utils`
                     );
                 }
-            } else if (evType === 'get_session') {
-                if (payload.callback) {
-                    payload.callback(this.env.session);
-                }
             } else {
                 payload.__targetWidget = ev.target;
                 this.trigger(evType.replace(/_/g, '-'), payload);
@@ -283,7 +279,7 @@
         const app = new App(null, {
             templates,
             env,
-            dev: env.isDebug(),
+            dev: !!odoo.debug,
             translatableAttributes: ["data-tooltip"],
             translateFn: _t,
         });
@@ -539,7 +535,7 @@
             const appConfig = {
                 env,
                 templates,
-                dev: "isDebug" in env ? env.isDebug() : env.debug,
+                dev: env.debug,
                 translatableAttributes: ["data-tooltip"],
                 translateFn: _t,
             };
