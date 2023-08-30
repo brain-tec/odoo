@@ -2,9 +2,8 @@
 
     import publicWidget from '@web/legacy/js/public/public_widget';
     import Dialog from '@web/legacy/js/core/dialog';
-    import  { _t } from "@web/core/l10n/translation";
     import { renderToElement } from "@web/core/utils/render";
-    import session from 'web.session';
+    import { session } from "@web/session";
     import { Markup } from "@web/legacy/js/core/utils";
     import CourseJoin from '@website_slides/js/slides_course_join';
     import QuestionFormWidget from '@website_slides/js/slides_course_quiz_question_form';
@@ -12,6 +11,7 @@
     import { SlideCoursePage } from '@website_slides/js/slides_course_page';
 
     import SlideEnroll from '@website_slides/js/slides_course_enroll_email';
+    import { _t } from "@web/core/l10n/translation";
 
     const CourseJoinWidget = CourseJoin.courseJoinWidget;
     const SlideEnrollDialog = SlideEnroll.slideEnrollDialog;

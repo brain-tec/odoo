@@ -9688,7 +9688,8 @@ QUnit.module("Views", (hooks) => {
 
         click(target.querySelector(".modal-footer button.btn-primary"));
         await Promise.resolve();
-        await click(target.querySelector(".modal-footer button.btn-primary"));
+        assert.ok(target.querySelector(".modal-footer button.btn-primary").disabled);
+        await nextTick();
         assert.verifySteps(["create", "web_read", "execute_action"]);
     });
 
@@ -10295,6 +10296,52 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("Can switch to form view on inline tree", async function (assert) {
+        const id = 2;
+        const actionService = {
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.step("doAction");
+                        assert.deepEqual(action, {
+                            res_id: id,
+                            res_model: "partner",
+                            type: "ir.actions.act_window",
+                            views: [[false, "form"]],
+                        });
+                        assert.deepEqual(options.props, {
+                            resIds: [id],
+                        });
+                    },
+                };
+            },
+        };
+        registry.category("services").add("action", actionService, { force: true });
+
+        serverData.models.partner.records[0].p = [id];
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="top" open_form_view="1">
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+        assert.containsOnce(
+            target,
+            "td.o_list_record_open_form_view",
+            "button to open form view should be present"
+        );
+        await click(target.querySelector("td.o_list_record_open_form_view"));
+        assert.verifySteps(["doAction"]);
+    });
+
     QUnit.test("can toggle column in x2many in sub form view", async function (assert) {
         serverData.models.partner.records[2].p = [1, 2];
         serverData.models.partner.fields.foo.sortable = true;
@@ -10511,7 +10558,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(
             target.querySelector('.o-tooltip--technical > li[data-item="invisible"]').lastChild
                 .textContent,
-            'product_id == 33',
+            "product_id == 33",
             "invisible should be properly stringified"
         );
 
@@ -11126,10 +11173,9 @@ QUnit.module("Views", (hooks) => {
                 resId: 2,
             });
 
+            assert.ok(target.querySelector(".o_form_view button.mybutton").disabled);
             await click(target.querySelector(".o_form_view .o_content button.btn-primary"));
             assert.verifySteps(["doActionButton"]);
-            await click(target.querySelector(".o_form_view button.mybutton"));
-            assert.verifySteps([]);
         }
     );
 
@@ -13734,7 +13780,9 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("containing a nested x2many list view should not overflow", async function (assert) {
         serverData.models.partner_type.records.push({
-            id: 3, display_name: 'very'.repeat(30) + '_long_name', color: 10,
+            id: 3,
+            display_name: "very".repeat(30) + "_long_name",
+            color: 10,
         });
 
         const record = serverData.models.partner.records[0];
@@ -13763,11 +13811,11 @@ QUnit.module("Views", (hooks) => {
             </form>`,
         });
 
-        const table = target.querySelector('table');
-        const group = target.querySelector('.o_inner_group:last-child');
+        const table = target.querySelector("table");
+        const group = target.querySelector(".o_inner_group:last-child");
 
         assert.equal(group.clientWidth, group.scrollWidth);
-        table.style.tableLayout = 'auto';
+        table.style.tableLayout = "auto";
         assert.ok(group.clientWidth < group.scrollWidth);
     });
 });
