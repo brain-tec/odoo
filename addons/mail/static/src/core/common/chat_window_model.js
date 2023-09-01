@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Record, modelRegistry } from "@mail/core/common/record";
+import { Record } from "@mail/core/common/record";
 import { assignDefined } from "@mail/utils/common/misc";
 
 import { _t } from "@web/core/l10n/translation";
@@ -17,7 +17,11 @@ export class ChatWindow extends Record {
     static insert(data = {}) {
         const chatWindow = this.records.find((c) => c.threadLocalId === data.thread?.localId);
         if (!chatWindow) {
-            const chatWindow = new ChatWindow(this.store, data);
+            const chatWindow = new ChatWindow();
+            Object.assign(chatWindow, {
+                thread: data.thread,
+                _store: this.store,
+            });
             assignDefined(chatWindow, data);
             let index;
             const visible = this.env.services["mail.chat_window"].visible;
@@ -56,19 +60,6 @@ export class ChatWindow extends Record {
     folded = false;
     hidden = false;
 
-    /**
-     * @param {import("@mail/core/common/store_service").Store} store
-     * @param {ChatWindowData} data
-     * @returns {ChatWindow}
-     */
-    constructor(store, data) {
-        super();
-        Object.assign(this, {
-            thread: data.thread,
-            _store: store,
-        });
-    }
-
     get thread() {
         return this._store.Thread.records[this.threadLocalId];
     }
@@ -86,4 +77,4 @@ export class ChatWindow extends Record {
     }
 }
 
-modelRegistry.add(ChatWindow.name, ChatWindow);
+ChatWindow.register();

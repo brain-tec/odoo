@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { Composer } from "@mail/core/common/composer_model";
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
 import {
@@ -795,35 +794,6 @@ export class ThreadService {
             thread.type = "chatter";
         }
         this.env.bus.trigger("mail.thread/onUpdate", { thread, data });
-    }
-
-    /**
-     * @param {Object} data
-     * @returns {Composer}
-     */
-    insertComposer(data) {
-        const { message, thread } = data;
-        if (Boolean(message) === Boolean(thread)) {
-            throw new Error("Composer shall have a thread xor a message.");
-        }
-        let composer = (thread ?? message)?.composer;
-        if (!composer) {
-            composer = new Composer(this.store, data);
-        }
-        if ("textInputContent" in data) {
-            composer.textInputContent = data.textInputContent;
-        }
-        if ("selection" in data) {
-            Object.assign(composer.selection, data.selection);
-        }
-        if ("mentions" in data) {
-            for (const mention of data.mentions) {
-                if (mention.type === "partner") {
-                    composer.rawMentions.partnerIds.add(mention.id);
-                }
-            }
-        }
-        return composer;
     }
 
     /**

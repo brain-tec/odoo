@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { LinkPreview } from "@mail/core/common/link_preview_model";
 import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 
 import { markup, reactive } from "@odoo/owl";
@@ -102,7 +101,7 @@ export class MailCoreCommon {
                 if (linkPreviews) {
                     for (const linkPreview of linkPreviews) {
                         this.store.Message.records[linkPreview.message.id]?.linkPreviews.push(
-                            new LinkPreview(linkPreview)
+                            this.store.LinkPreview.insert(linkPreview)
                         );
                     }
                 }
