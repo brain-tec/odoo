@@ -288,7 +288,7 @@ class AccountMove(models.Model):
         states={'posted': [('readonly', True)], 'cancel': [('readonly', True)]},
         check_company=True,
     )
-    needed_terms = fields.Binary(compute='_compute_needed_terms')
+    needed_terms = fields.Binary(compute='_compute_needed_terms', exportable=False)
     needed_terms_dirty = fields.Boolean(compute='_compute_needed_terms')
 
     # === Partner fields === #
@@ -481,7 +481,7 @@ class AccountMove(models.Model):
         help='Use this field to encode the total amount of the invoice.\n'
              'Odoo will automatically create one invoice line with default values to match it.',
     )
-    quick_encoding_vals = fields.Binary(compute='_compute_quick_encoding_vals')
+    quick_encoding_vals = fields.Binary(compute='_compute_quick_encoding_vals', exportable=False)
 
     # === Misc Information === #
     narration = fields.Html(
@@ -551,7 +551,7 @@ class AccountMove(models.Model):
     duplicated_ref_ids = fields.Many2many(comodel_name='account.move', compute='_compute_duplicated_ref_ids')
 
     # used to display the various dates and amount dues on the invoice's PDF
-    payment_term_details = fields.Binary(compute="_compute_payment_term_details")
+    payment_term_details = fields.Binary(compute="_compute_payment_term_details", exportable=False)
     show_payment_term_details = fields.Boolean(compute="_compute_show_payment_term_details")
     show_discount_details = fields.Boolean(compute="_compute_show_payment_term_details")
 
@@ -814,6 +814,7 @@ class AccountMove(models.Model):
             currency = (
                 invoice.statement_line_id.foreign_currency_id
                 or invoice.journal_id.currency_id
+                or invoice.currency_id
                 or invoice.journal_id.company_id.currency_id
             )
             invoice.currency_id = currency
@@ -2207,6 +2208,13 @@ class AccountMove(models.Model):
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
+    def check_field_access_rights(self, operation, fields):
+        result = super().check_field_access_rights(operation, fields)
+        if not fields:
+            weirdos = ['needed_terms', 'quick_encoding_vals', 'payment_term_details']
+            result = [fname for fname in result if fname not in weirdos]
+        return result
+
     def copy_data(self, default=None):
         data_list = super().copy_data(default)
         for move, data in zip(self, data_list):
@@ -3421,23 +3429,12 @@ class AccountMove(models.Model):
                 elif invoice.is_purchase_document(include_receipts=True):
                     raise UserError(_("The Bill/Refund date is required to validate this document."))
 
-        if soft:
-            future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
-            for move in future_moves:
-                if move.auto_post == 'no':
-                    move.auto_post = 'at_date'
-                msg = _('This move will be posted at the accounting date: %(date)s', date=format_date(self.env, move.date))
-                move.message_post(body=msg)
-            to_post = self - future_moves
-        else:
-            to_post = self
-
-        for move in to_post:
+        for move in self:
             if move.state == 'posted':
                 raise UserError(_('The entry %s (id %s) is already posted.') % (move.name, move.id))
             if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
                 raise UserError(_('You need to add a line before posting.'))
-            if move.auto_post != 'no' and move.date > fields.Date.context_today(self):
+            if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
                 raise UserError(_("This move is configured to be auto-posted on %s", date_msg))
             if not move.journal_id.active:
@@ -3454,6 +3451,18 @@ class AccountMove(models.Model):
             if move.line_ids.account_id.filtered(lambda account: account.deprecated):
                 raise UserError(_("A line of this move is using a deprecated account, you cannot post it."))
 
+        if soft:
+            future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
+            for move in future_moves:
+                if move.auto_post == 'no':
+                    move.auto_post = 'at_date'
+                msg = _('This move will be posted at the accounting date: %(date)s', date=format_date(self.env, move.date))
+                move.message_post(body=msg)
+            to_post = self - future_moves
+        else:
+            to_post = self
+
+        for move in to_post:
             affects_tax_report = move._affect_tax_report()
             lock_dates = move._get_violated_lock_dates(move.date, affects_tax_report)
             if lock_dates:
@@ -3849,29 +3858,27 @@ class AccountMove(models.Model):
         It is used to post entries such as those created by the module
         account_asset and recurring entries created in _post().
         '''
-        records = self.search([
+        moves = self.search([
             ('state', '=', 'draft'),
             ('date', '<=', fields.Date.context_today(self)),
             ('auto_post', '!=', 'no'),
             ('to_check', '=', False),
         ], limit=100)
 
-        for ids in self._cr.split_for_in_conditions(records.ids, size=100):
-            moves = self.browse(ids)
-            try:  # try posting in batch
-                with self.env.cr.savepoint():
-                    moves._post()
-            except UserError:  # if at least one move cannot be posted, handle moves one by one
-                for move in moves:
-                    try:
-                        with self.env.cr.savepoint():
-                            move._post()
-                    except UserError as e:
-                        move.to_check = True
-                        msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
-                        move.message_post(body=msg, message_type='comment')
+        try:  # try posting in batch
+            with self.env.cr.savepoint():
+                moves._post()
+        except UserError:  # if at least one move cannot be posted, handle moves one by one
+            for move in moves:
+                try:
+                    with self.env.cr.savepoint():
+                        move._post()
+                except UserError as e:
+                    move.to_check = True
+                    msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
+                    move.message_post(body=msg, message_type='comment')
 
-        if len(records) == 100:  # assumes there are more whenever search hits limit
+        if len(moves) == 100:  # assumes there are more whenever search hits limit
             self.env.ref('account.ir_cron_auto_post_draft_entry')._trigger()
 
     # -------------------------------------------------------------------------
