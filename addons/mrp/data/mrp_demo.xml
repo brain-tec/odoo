@@ -135,6 +135,22 @@
             <field name="tracking">lot</field>
             <field name="image_1920" type="base64" file="mrp/static/img/table_leg.png"/>
         </record>
+        <record id="product_supplierinfo_1" model="product.supplierinfo">
+            <field name="product_tmpl_id" ref="product_product_computer_desk_leg_product_template"/>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="delay">3</field>
+            <field name="min_qty">0</field>
+            <field name="price">8</field>
+            <field name="currency_id" ref="base.USD"/>
+        </record>
+        <record id="product_supplierinfo_2" model="product.supplierinfo">
+            <field name="product_tmpl_id" ref="product_product_computer_desk_leg_product_template"/>
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="delay">2</field>
+            <field name="min_qty">0</field>
+            <field name="price">10</field>
+            <field name="currency_id" ref="base.USD"/>
+        </record>
         <record id="product_product_computer_desk_bolt" model="product.product">
             <field name="name">Bolt</field>
             <field name="categ_id" ref="product.product_category_consumable"/>
@@ -236,6 +252,7 @@
             <field name="product_uom_id" ref="uom.product_uom_unit"/>
             <field name="sequence">3</field>
             <field name="consumption">flexible</field>
+            <field name="days_to_prepare_mo">3</field>
         </record>
         <record id="mrp_routing_workcenter_5" model="mrp.routing.workcenter">
             <field name="bom_id" ref="mrp_bom_desk"/>
@@ -499,12 +516,6 @@
             <field name="company_id" ref="base.main_company"/>
         </record>
 
-        <record id="lot_product_product_leg_0" model="stock.lot">
-            <field name="name">0000000030010</field>
-            <field name="product_id" ref="product_product_computer_desk_leg"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
-
 
         <!-- Initital Inventory -->
 
@@ -547,12 +558,6 @@
             <field name="inventory_quantity">30.0</field>
             <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
         </record>
-        <record id="stock_inventory_product_leg" model="stock.quant">
-            <field name="product_id" ref="product_product_computer_desk_leg"/>
-            <field name="inventory_quantity">10.0</field>
-            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
-            <field name="lot_id" ref="lot_product_product_leg_0"/>
-        </record>
 
         <function model="stock.quant" name="action_apply_inventory">
             <function eval="[[('id', 'in', (ref('stock_inventory_drawer_lot0'),
@@ -562,7 +567,6 @@
                                             ref('stock_inventory_product_wood_panel'),
                                             ref('stock_inventory_product_ply'),
                                             ref('stock_inventory_product_wear'),
-                                            ref('stock_inventory_product_leg'),
                                             ))]]" model="stock.quant" name="search"/>
         </function>
 
@@ -737,6 +741,74 @@
             <value eval="{'use_create_components_lots': True}"/>
         </function>
 
+        <record id="lot_product_product_computer_desk_head_1" model="stock.lot">
+            <field name="name">TT001</field>
+            <field name="product_id" ref="product_product_computer_desk_head"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+        <record id="lot_product_product_computer_desk_head_2" model="stock.lot">
+            <field name="name">TT002</field>
+            <field name="product_id" ref="product_product_computer_desk_head"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
 
+        <record id="lot_product_product_computer_desk_head_3" model="stock.lot">
+            <field name="name">TT003</field>
+            <field name="product_id" ref="product_product_computer_desk_head"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="lot_product_product_computer_desk_head_4" model="stock.lot">
+            <field name="name">TT004</field>
+            <field name="product_id" ref="product_product_computer_desk_head"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="lot_product_product_computer_desk_head_5" model="stock.lot">
+            <field name="name">TT005</field>
+            <field name="product_id" ref="product_product_computer_desk_head"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+
+        <record id="mrp_inventory_1" model="stock.quant">
+            <field name="product_id" ref="mrp.product_product_computer_desk_head"/>
+            <field name="inventory_quantity">1</field>
+            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
+            <field name="lot_id" ref="lot_product_product_computer_desk_head_1"/>
+        </record>
+        <record id="mrp_inventory_2" model="stock.quant">
+            <field name="product_id" ref="mrp.product_product_computer_desk_head"/>
+            <field name="inventory_quantity">1</field>
+            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
+            <field name="lot_id" ref="lot_product_product_computer_desk_head_2"/>
+        </record>
+        <record id="mrp_inventory_3" model="stock.quant">
+            <field name="product_id" ref="mrp.product_product_computer_desk_head"/>
+            <field name="inventory_quantity">1</field>
+            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
+            <field name="lot_id" ref="lot_product_product_computer_desk_head_3"/>
+        </record>
+        <record id="mrp_inventory_4" model="stock.quant">
+            <field name="product_id" ref="mrp.product_product_computer_desk_head"/>
+            <field name="inventory_quantity">1</field>
+            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
+            <field name="lot_id" ref="lot_product_product_computer_desk_head_4"/>
+        </record>
+        <record id="mrp_inventory_5" model="stock.quant">
+            <field name="product_id" ref="mrp.product_product_computer_desk_head"/>
+            <field name="inventory_quantity">1</field>
+            <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
+            <field name="lot_id" ref="lot_product_product_computer_desk_head_5"/>
+        </record>
+
+        <function model="stock.quant" name="action_apply_inventory">
+            <function eval="[[('id', 'in', [ref('mrp_inventory_1'),
+                                             ref('mrp_inventory_2'),
+                                             ref('mrp_inventory_3'),
+                                             ref('mrp_inventory_4'),
+                                             ref('mrp_inventory_5'),
+                ])]]" model="stock.quant" name="search"/>
+        </function>
     </data>
 </odoo>
