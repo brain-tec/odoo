@@ -2519,25 +2519,7 @@ class AccountMove(models.Model):
         for move in self:
             move.display_name = move._get_move_display_name(show_ref=True)
 
-    def onchange(self, values, field_name, field_onchange):
-        if field_name in ('line_ids', 'invoice_line_ids'):
-            # Since only one field can be changed at the same time (the record is saved when changing tabs)
-            # we can avoid building the snapshots for the other field
-            to_del = 'invoice_line_ids' if field_name == 'line_ids' else 'line_ids'
-            for key in list(field_onchange):
-                if key == to_del or key.startswith(f"{to_del}."):
-                    del field_onchange[key]
-            # test_01_account_tour
-            # File "/data/build/odoo/addons/account/models/account_move.py", line 2127, in onchange
-            # del values[to_del]
-            # KeyError: 'line_ids'
-            values.pop(to_del, None)
-        if field_name and not isinstance(field_name, list):
-            field_name = [field_name]
-        with self.env.protecting([self._fields[fname] for fname in field_name or []], self):
-            return super().onchange(values, field_name, field_onchange)
-
-    def onchange2(self, values, field_names, fields_spec):
+    def onchange(self, values, field_names, fields_spec):
         # Since only one field can be changed at the same time (the record is
         # saved when changing tabs) we can avoid building the snapshots for the
         # other field
@@ -2547,7 +2529,7 @@ class AccountMove(models.Model):
         elif 'invoice_line_ids' in field_names:
             values = {key: val for key, val in values.items() if key != 'line_ids'}
             fields_spec = {key: val for key, val in fields_spec.items() if key != 'line_ids'}
-        return super().onchange2(values, field_names, fields_spec)
+        return super().onchange(values, field_names, fields_spec)
 
     # -------------------------------------------------------------------------
     # RECONCILIATION METHODS
@@ -3684,23 +3666,12 @@ class AccountMove(models.Model):
                 elif invoice.is_purchase_document(include_receipts=True):
                     raise UserError(_("The Bill/Refund date is required to validate this document."))
 
-        if soft:
-            future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
-            for move in future_moves:
-                if move.auto_post == 'no':
-                    move.auto_post = 'at_date'
-                msg = _('This move will be posted at the accounting date: %(date)s', date=format_date(self.env, move.date))
-                move.message_post(body=msg)
-            to_post = self - future_moves
-        else:
-            to_post = self
-
-        for move in to_post:
+        for move in self:
             if move.state in ['posted', 'cancel']:
                 raise UserError(_('The entry %s (id %s) must be in draft.') % (move.name, move.id))
             if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
                 raise UserError(_('You need to add a line before posting.'))
-            if move.auto_post != 'no' and move.date > fields.Date.context_today(self):
+            if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
                 raise UserError(_("This move is configured to be auto-posted on %s", date_msg))
             if not move.journal_id.active:
@@ -3717,6 +3688,18 @@ class AccountMove(models.Model):
             if move.line_ids.account_id.filtered(lambda account: account.deprecated):
                 raise UserError(_("A line of this move is using a deprecated account, you cannot post it."))
 
+        if soft:
+            future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
+            for move in future_moves:
+                if move.auto_post == 'no':
+                    move.auto_post = 'at_date'
+                msg = _('This move will be posted at the accounting date: %(date)s', date=format_date(self.env, move.date))
+                move.message_post(body=msg)
+            to_post = self - future_moves
+        else:
+            to_post = self
+
+        for move in to_post:
             affects_tax_report = move._affect_tax_report()
             lock_dates = move._get_violated_lock_dates(move.date, affects_tax_report)
             if lock_dates:
@@ -4089,29 +4072,27 @@ class AccountMove(models.Model):
         It is used to post entries such as those created by the module
         account_asset and recurring entries created in _post().
         '''
-        records = self.search([
+        moves = self.search([
             ('state', '=', 'draft'),
             ('date', '<=', fields.Date.context_today(self)),
             ('auto_post', '!=', 'no'),
             ('to_check', '=', False),
         ], limit=100)
 
-        for ids in self._cr.split_for_in_conditions(records.ids, size=100):
-            moves = self.browse(ids)
-            try:  # try posting in batch
-                with self.env.cr.savepoint():
-                    moves._post()
-            except UserError:  # if at least one move cannot be posted, handle moves one by one
-                for move in moves:
-                    try:
-                        with self.env.cr.savepoint():
-                            move._post()
-                    except UserError as e:
-                        move.to_check = True
-                        msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
-                        move.message_post(body=msg, message_type='comment')
+        try:  # try posting in batch
+            with self.env.cr.savepoint():
+                moves._post()
+        except UserError:  # if at least one move cannot be posted, handle moves one by one
+            for move in moves:
+                try:
+                    with self.env.cr.savepoint():
+                        move._post()
+                except UserError as e:
+                    move.to_check = True
+                    msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
+                    move.message_post(body=msg, message_type='comment')
 
-        if len(records) == 100:  # assumes there are more whenever search hits limit
+        if len(moves) == 100:  # assumes there are more whenever search hits limit
             self.env.ref('account.ir_cron_auto_post_draft_entry')._trigger()
 
     @api.model

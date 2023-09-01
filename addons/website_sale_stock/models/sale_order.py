@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, _
+from odoo import _, models
+from odoo.exceptions import ValidationError
 
 
 class SaleOrder(models.Model):
@@ -27,7 +28,7 @@ class SaleOrder(models.Model):
         product = self.env['product.product'].browse(product_id)
         if product.type == 'product' and not product.allow_out_of_stock_order:
             product_qty_in_cart, available_qty = self._get_cart_and_free_qty(
-                line=order_line, product=product, **kwargs
+                product, line=order_line
             )
 
             old_qty = order_line.product_uom_qty if order_line else 0
@@ -48,24 +49,22 @@ class SaleOrder(models.Model):
                 return allowed_line_qty, order_line.shop_warning or self.shop_warning
         return super()._verify_updated_quantity(order_line, product_id, new_qty, **kwargs)
 
-    def _get_cart_and_free_qty(self, line=None, product=None, **kwargs):
+    def _get_cart_and_free_qty(self, product, line=None):
         """ Get cart quantity and free quantity for given product or line's product.
 
         Note: self.ensure_one()
 
+        :param ProductProduct product: The product
         :param SaleOrderLine line: The optional line
-        :param ProductProduct product: The optional product
         """
         self.ensure_one()
         if not line and not product:
             return 0, 0
-        cart_qty = sum(
-            self._get_common_product_lines(line, product, **kwargs).mapped('product_uom_qty')
-        )
+        cart_qty = sum(self._get_common_product_lines(line, product).mapped('product_uom_qty'))
         free_qty = (product or line.product_id).with_context(warehouse=self.warehouse_id.id).free_qty
         return cart_qty, free_qty
 
-    def _get_common_product_lines(self, line=None, product=None, **kwargs):
+    def _get_common_product_lines(self, line=None, product=None):
         """ Get the lines with the same product or line's product
 
         :param SaleOrderLine line: The optional line
@@ -76,6 +75,18 @@ class SaleOrder(models.Model):
         product = product or line.product_id
         return self.order_line.filtered(lambda l: l.product_id == product)
 
+    def _check_cart_is_ready_to_be_paid(self):
+        values = []
+        for line in self.order_line:
+            if line.product_id.type == 'product' and not line.product_id.allow_out_of_stock_order:
+                cart_qty, avl_qty = self._get_cart_and_free_qty(line.product_id, line=line)
+                if cart_qty > avl_qty:
+                    line._set_shop_warning_stock(cart_qty, max(avl_qty, 0))
+                    values.append(line.shop_warning)
+        if values:
+            raise ValidationError(' '.join(values))
+        return super()._check_cart_is_ready_to_be_paid()
+
     def _set_shop_warning_stock(self, desired_qty, new_qty):
         self.ensure_one()
         self.shop_warning = _(
@@ -84,33 +95,18 @@ class SaleOrder(models.Model):
         )
         return self.shop_warning
 
-    def _get_cache_key_for_line(self, line):
-        return line.product_id
-
-    def _get_context_for_line(self, line):
-        return {
-            'website_sale_stock_get_quantity': True,
-        }
-
     def _filter_can_send_abandoned_cart_mail(self):
         """ Filter sale orders on their product availability. """
-        self = super()._filter_can_send_abandoned_cart_mail()
-        combination_info_cache = {}
+        return super()._filter_can_send_abandoned_cart_mail().filtered(
+            lambda so: so._all_product_available()
+        )
 
-        def _are_all_product_available_for_purchase(sale_order):
-            for line in sale_order.order_line:
-                product = line.product_id
-                if product.type != 'product':
-                    continue
-                cache_key = self._get_cache_key_for_line(line)
-                combination_info = combination_info_cache.get(cache_key)
-                if not combination_info:
-                    combination_info = product.with_context(**self._get_context_for_line(line))._get_combination_info_variant(add_qty=line.product_uom_qty)
-                    combination_info_cache[cache_key] = combination_info
-                if not product.allow_out_of_stock_order and combination_info['free_qty'] == 0:
-                    return False
-            return True
-
-        # If none of the products in the checkout are available for purchase (empty inventory, for example),
-        # then the email won't be sent.
-        return self.filtered(_are_all_product_available_for_purchase)
+    def _all_product_available(self):
+        for line in self.with_context(website_sale_stock_get_quantity=True).order_line:
+            product = line.product_id
+            if product.type != 'product' or product.allow_out_of_stock_order:
+                continue
+            combination_info = product._get_combination_info_variant(add_qty=line.product_uom_qty)
+            if combination_info['free_qty'] == 0:
+                return False
+        return True

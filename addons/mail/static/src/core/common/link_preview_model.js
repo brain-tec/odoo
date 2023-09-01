@@ -3,6 +3,21 @@
 import { Record } from "@mail/core/common/record";
 
 export class LinkPreview extends Record {
+    /**
+     * @param {Object} data
+     * @returns {LinkPreview}
+     */
+    static insert(data) {
+        let linkPreview = data.message.linkPreviews.find((lp) => lp.id === data.id);
+        if (linkPreview) {
+            return Object.assign(linkPreview, data);
+        }
+        linkPreview = new LinkPreview();
+        Object.assign(linkPreview, data);
+        this.store.Message.records[data.message.id]?.linkPreviews.push(linkPreview);
+        return linkPreview;
+    }
+
     /** @type {number} */
     id;
     /** @type {Object} */
@@ -22,15 +37,6 @@ export class LinkPreview extends Record {
     /** @type {string} */
     source_url;
 
-    /**
-     * @param {Object} data
-     * @returns {LinkPreview}
-     */
-    constructor(data) {
-        super();
-        Object.assign(this, data);
-    }
-
     get imageUrl() {
         return this.og_image ? this.og_image : this.source_url;
     }
@@ -47,3 +53,5 @@ export class LinkPreview extends Record {
         return !this.isImage && !this.isVideo;
     }
 }
+
+LinkPreview.register();

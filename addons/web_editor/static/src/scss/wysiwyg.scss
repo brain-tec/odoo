@@ -217,11 +217,6 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
             background: var(--o-we-toolbar-border, #{$o-we-toolbar-border});
             transform: scaleY(.6)
         }
-
-        // Adjust dropdown-menu position, but not when already handled in js
-        .o-dropdown-menu:not([x-placement]) {
-            margin-left: $o-we-toolbar-entries-gap;
-        }
     }
 
     // Main layout of buttons
@@ -608,7 +603,8 @@ img.o_we_selected_image {
 .o_we_crop_widget {
     background-color: rgba(128, 128, 128, 0.5);
     @include o-position-absolute(0, 0, 0, 0);
-    z-index: 1024;
+    /* This value must be higher than dialog z-index in bootstrap */
+    z-index: 1056;
 
     .o_we_cropper_wrapper {
         position: absolute;

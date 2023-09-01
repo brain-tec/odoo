@@ -253,10 +253,6 @@ Files: addons/web/static/lib/jquery.ba-bbq/*
 Copyright: 2010 "Cowboy" Ben Alman
 License: MIT
 
-Files: addons/web/static/lib/jquery.hotkeys/*
-Copyright: 2010 John Resig
-License: MIT
-
 Files: addons/web/static/lib/jquery.mjs.nestedSortable/*
 Copyright: 2010-2016 Manuele J Sarfatti and contributors
 License: MIT
@@ -364,14 +360,6 @@ License: SIL-Open-Font-License
 
 Files: addons/web/static/src/js/core/mixins.js
 Copyright: 2010-2012 Jeremy Ashkenas
-License: MIT
-
-Files: addons/web/static/src/js/libs/content-disposition.js
-Copyright: 2014-2017 Douglas Christopher Wilson
-License: MIT
-
-Files: addons/web/static/src/js/libs/download.js
-Copyright: 2016 dandavis
 License: MIT
 
 Files: addons/website/static/src/libs/zoomodoo/zoomodoo.js
