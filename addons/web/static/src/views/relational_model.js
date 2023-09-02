@@ -720,6 +720,13 @@ export class Record extends DataPoint {
                 delete changes[fieldName];
                 continue;
             }
+            if (
+                fieldName in this.activeFields &&
+                this.activeFields[fieldName].relatedPropertyField
+            ) {
+                delete changes[fieldName];
+                continue;
+            }
             const fieldType = this.fields[fieldName].type;
             if (["one2many", "many2many"].includes(fieldType)) {
                 const staticList = this._cache[fieldName];
@@ -2351,6 +2358,9 @@ export class DynamicGroupList extends DynamicList {
             group.count = group.count - resIds.length;
             allResIds.push(...resIds);
         }
+        if (this.isDomainSelected && allResIds.length > 0) {
+            await this.load();
+        }
         // Return the list of all deleted resIds.
         // Will be used by the calling group to update its count.
         return allResIds;
@@ -2450,6 +2460,13 @@ export class DynamicGroupList extends DynamicList {
             return;
         }
         super.sortBy(fieldName);
+    }
+
+    selectDomain(value) {
+        for (const group of this.groups) {
+            group.list.selectDomain(value);
+        }
+        super.selectDomain(value);
     }
 
     // ------------------------------------------------------------------------
