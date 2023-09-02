@@ -76,7 +76,7 @@ QUnit.test("addLink: linkify inside text node (1 occurrence)", async (assert) =>
     fragment.appendChild(div);
     div.innerHTML = linkified;
     assert.strictEqual(div.textContent, "some text https://somelink.com");
-    await contains("a", 1, { target: div });
+    await contains("a", { target: div });
     assert.strictEqual(div.querySelector(":scope a").textContent, "https://somelink.com");
 });
 
@@ -107,8 +107,8 @@ QUnit.test("url", async () => {
     // see: https://www.ietf.org/rfc/rfc1738.txt
     const messageBody = "https://odoo.com?test=~^|`{}[]#";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(`.o-mail-Message a:contains(${messageBody})`);
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", { text: messageBody });
 });
 
 QUnit.test("url with comma at the end", async () => {
@@ -118,9 +118,9 @@ QUnit.test("url with comma at the end", async () => {
     await openDiscuss(channelId);
     const messageBody = "Go to https://odoo.com, it's great!";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(`.o-mail-Message a:contains(https://odoo.com)`);
-    await contains(`.o-mail-Message:contains(${messageBody})`);
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", { text: "https://odoo.com" });
+    await contains(".o-mail-Message-content", { text: messageBody });
 });
 
 QUnit.test("url with dot at the end", async () => {
@@ -130,9 +130,9 @@ QUnit.test("url with dot at the end", async () => {
     await openDiscuss(channelId);
     const messageBody = "Go to https://odoo.com. It's great!";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(`.o-mail-Message a:contains(https://odoo.com)`);
-    await contains(`.o-mail-Message:contains(${messageBody})`);
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", { text: "https://odoo.com" });
+    await contains(".o-mail-Message-content", { text: messageBody });
 });
 
 QUnit.test("url with semicolon at the end", async () => {
@@ -142,9 +142,9 @@ QUnit.test("url with semicolon at the end", async () => {
     await openDiscuss(channelId);
     const messageBody = "Go to https://odoo.com; it's great!";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(`.o-mail-Message a:contains(https://odoo.com)`);
-    await contains(`.o-mail-Message:contains(${messageBody})`);
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", { text: "https://odoo.com" });
+    await contains(".o-mail-Message-content", { text: messageBody });
 });
 
 QUnit.test("url with ellipsis at the end", async () => {
@@ -154,9 +154,9 @@ QUnit.test("url with ellipsis at the end", async () => {
     await openDiscuss(channelId);
     const messageBody = "Go to https://odoo.com... it's great!";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(`.o-mail-Message a:contains(https://odoo.com)`);
-    await contains(`.o-mail-Message:contains(${messageBody})`);
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", { text: "https://odoo.com" });
+    await contains(".o-mail-Message-content", { text: messageBody });
 });
 
 QUnit.test("url with number in subdomain", async () => {
@@ -166,8 +166,8 @@ QUnit.test("url with number in subdomain", async () => {
     await openDiscuss(channelId);
     const messageBody = "https://www.45017478-master-all.runbot134.odoo.com/web";
     await insertText(".o-mail-Composer-input", messageBody);
-    await click("button:contains(Send):not(:disabled)");
-    await contains(
-        `.o-mail-Message a:contains(https://www.45017478-master-all.runbot134.odoo.com/web)`
-    );
+    await click("button:not(:disabled)", { text: "Send" });
+    await contains(".o-mail-Message a", {
+        text: "https://www.45017478-master-all.runbot134.odoo.com/web",
+    });
 });

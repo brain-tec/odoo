@@ -74,7 +74,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
             'web/static/lib/jquery/jquery.browser.js',
-            'web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js',
             'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',
             'web/static/lib/popper/popper.js',
             'web/static/lib/bootstrap/js/dist/dom/data.js',
@@ -136,8 +135,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/webclient/actions/reports/*.xml',
 
             'web/static/src/libs/pdfjs.js',
-
-            'web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js',
 
             'web/static/src/scss/ace.scss',
             'web/static/src/scss/base_document_layout.scss',
@@ -212,13 +209,12 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/moment/moment.js',
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',
-            'web/static/src/owl2_compatibility/*.js',
+            'web/static/src/libs/owl.js',
             'web/static/src/legacy/js/component_extension.js',
             'web/static/src/legacy/legacy_component.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
             'web/static/lib/jquery/jquery.browser.js',
-            'web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js',
             'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',
             'web/static/lib/popper/popper.js',
             'web/static/lib/bootstrap/js/dist/dom/data.js',
@@ -388,7 +384,7 @@ This module provides the core of the Odoo Web Client.
             # libs
             'web/static/lib/luxon/luxon.js',
             'web/static/lib/owl/owl.js',
-            'web/static/src/owl2_compatibility/*.js',
+            'web/static/src/libs/owl.js',
             'web/static/lib/owl/odoo_module.js',
             # core
             'web/static/src/env.js',
@@ -456,7 +452,7 @@ This module provides the core of the Odoo Web Client.
         # remove this bundle alongside the owl2 compatibility layer
         'web.assets_backend_tests': [
             ('include', 'web.assets_backend'),
-            ('after', 'web/static/src/owl2_compatibility/app.js', 'web/static/tests/owl2_compatibility_app.js'),
+            ('after', 'web/static/src/libs/owl.js', 'web/static/tests/owl2_compatibility_app.js'),
         ],
         'web.tests_assets': [
             'web/static/tests/patch_translations.js',
