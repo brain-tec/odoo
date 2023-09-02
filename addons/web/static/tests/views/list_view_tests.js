@@ -5651,6 +5651,44 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["notify"]);
     });
 
+    QUnit.test("delete all records matching the domain in groupBy", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree ><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["bar"],
+            allowSelectors: true,
+            mockRPC(route, args) {
+                if (args.method === "unlink") {
+                    assert.step(`unlink:${args.args[0]}`);
+                }
+            },
+            actionMenus: {},
+        });
+
+        // unfolding the first group
+        await click(target.querySelector(".o_group_header"));
+
+        // selecting all displayed elements
+        await click(target.querySelector("thead .o_list_record_selector input"));
+
+        // selecting the domain now
+        assert.containsOnce(target, ".o_list_selection_box .o_list_select_domain");
+        await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
+
+        await toggleActionMenu(target);
+        await toggleMenuItem(target, "Delete");
+        assert.hasClass(
+            document.querySelector("body"),
+            "modal-open",
+            "body should have modal-open class"
+        );
+
+        await click(document, "body .modal footer button.btn-primary");
+        assert.verifySteps(["unlink:4", "unlink:1,2,3"]);
+    });
+
     QUnit.test("archiving one record", async function (assert) {
         // add active field on foo model and make all records active
         serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
@@ -18675,6 +18713,46 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsNone(target, ".o_optional_columns_dropdown_toggle");
         assert.verifySteps(["get_views", "web_search_read"]);
+    });
+
+    QUnit.test("Ignore properties created during onchange", async (assert) => {
+        const definition = {
+            type: "integer",
+            name: "property_integer",
+            string: "Property integer",
+        };
+        for (const record of serverData.models.foo.records) {
+            if (record.m2o === 1) {
+                record.properties = [{ ...definition, value: 123 }];
+            }
+        }
+        serverData.models.foo.onchanges = {
+            foo: function () {},
+        };
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="bar"/>
+                    <field name="properties" invisible="1"/>
+                </tree>
+                `,
+            mockRPC(route, args) {
+                if (args.method === 'onchange') {
+                    assert.step("onchange");
+                    const changes_name = Object.keys(args.args[1])
+                    assert.ok(changes_name.includes('properties'))
+                    assert.notOk(changes_name.includes('properties.property_integer'))
+                }
+            }
+        });
+        await click(target.querySelector(".o_data_cell"));
+        assert.hasClass(target.querySelectorAll(".o_data_row")[0], "o_selected_row");
+        await editInput(target, ".o_field_widget[name=foo] input", "abc");
+        assert.verifySteps(["onchange"]);
     });
 
     QUnit.test("header buttons in list view", async function (assert) {
