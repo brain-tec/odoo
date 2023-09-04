@@ -5,6 +5,7 @@ from odoo import Command
 from odoo.api import Environment
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
+from odoo.addons.point_of_sale.tests.common_setup_methods import setup_pos_combo_items
 from datetime import date, timedelta
 
 import odoo.tests
@@ -113,7 +114,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'available_in_pos': True,
             'list_price': 1.98,
             'taxes_id': False,
-            'barcode': '2100002000003',
+            'barcode': '2100005000000',
         })
         cls.small_shelf = env['product.product'].create({
             'name': 'Small Shelf',
@@ -126,7 +127,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'available_in_pos': True,
             'list_price': 1.98,
             'taxes_id': False,
-            'barcode': '2301000000006',
+            'barcode': '2305000000004',
         })
         cls.monitor_stand = env['product.product'].create({
             'name': 'Monitor Stand',
@@ -154,7 +155,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'available_in_pos': True,
             'list_price': 5.10,
             'taxes_id': False,
-            'barcode': '2300001000008',
+            'barcode': '2300002000007',
         })
         configurable_chair = env['product.product'].create({
             'name': 'Configurable Chair',
@@ -860,6 +861,21 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenDiscountWithPricelistTour', login="pos_user")
 
+    def test_07_pos_combo(self):
+        combo_product = setup_pos_combo_items(self)
+        combo_product.write({'lst_price': 50})
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'PosComboPriceTaxIncludedTour', login="pos_user")
+        order = self.env['pos.order'].search([])
+        self.assertEqual(len(order.lines), 4, "There should be 4 order lines - 1 combo parent and 3 combo lines")
+        # check that the combo lines are correctly linked to each other
+        parent_line_id = self.env['pos.order.line'].search([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
+        combo_line_ids = self.env['pos.order.line'].search([('product_id.name', '!=', 'Office Combo'), ('order_id', '=', order.id)])
+        self.assertEqual(parent_line_id.combo_line_ids, combo_line_ids, "The combo parent should have 3 combo lines")
+        # In the future we might want to test also if:
+        #   - the combo lines are correctly stored in and restored from local storage
+        #   - the combo lines are correctly shared between the pos configs ( in cross ordering )
+
     def test_07_pos_barcodes_scan(self):
         barcode_rule = self.env.ref("point_of_sale.barcode_rule_client")
         barcode_rule.pattern = barcode_rule.pattern + "|234"
@@ -924,6 +940,40 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'BarcodeScanningProductPackagingTour', login="pos_user")
+
+    def test_GS1_pos_barcodes_scan(self):
+        barcodes_gs1_nomenclature = self.env.ref("barcodes_gs1_nomenclature.default_gs1_nomenclature")
+        self.main_pos_config.company_id.write({
+            'nomenclature_id': barcodes_gs1_nomenclature.id
+        })
+
+        self.env['product.product'].create({
+            'name': 'Product 1',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'barcode': '08431673020125',
+        })
+
+        self.env['product.product'].create({
+            'name': 'Product 2',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'barcode': '08431673020126',
+        })
+
+        # 3760171283370 can be parsed with GS1 rules but it's not GS1
+        self.env['product.product'].create({
+            'name': 'Product 3',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'barcode': '3760171283370',
+        })
+
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'GS1BarcodeScanningTour', login="accountman")
 
 # This class just runs the same tests as above but with mobile emulation
 class MobileTestUi(TestUi):

@@ -173,7 +173,18 @@ def to_company_ids(companies):
 
 
 def check_company_domain_parent_of(self, companies):
-    return ['|', ('company_id', '=', False), ('company_id', 'parent_of', to_company_ids(companies))]
+    if isinstance(companies, str):
+        return ['|', ('company_id', '=', False), ('company_id', 'parent_of', [companies])]
+
+    companies = [id for id in to_company_ids(companies) if id]
+    if not companies:
+        return [('company_id', '=', False)]
+
+    return ['|', ('company_id', '=', False), ('company_id', 'in', [
+        int(parent)
+        for rec in self.env['res.company'].sudo().browse(companies)
+        for parent in rec.parent_path.split('/')[:-1]
+    ])]
 
 
 class MetaModel(api.Meta):
@@ -4448,7 +4459,7 @@ class BaseModel(metaclass=MetaModel):
                 # in other words, if `parent_id` is not set, no other message `child_ids` are impacted.
                 # + avoid the fetch of fields which are False. e.g. if a boolean field is not passed in vals and as no default set in the field attributes,
                 # then we know it can be set to False in the cache in the case of a create.
-                elif field.name not in set_vals and not field.compute:
+                elif field.store and field.name not in set_vals and not field.compute:
                     self.env.cache.set(record, field, field.convert_to_cache(None, record))
             for fname, value in vals.items():
                 field = self._fields[fname]
