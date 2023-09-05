@@ -3,6 +3,7 @@
 import { Record } from "@mail/core/common/record";
 
 export class CannedResponse extends Record {
+    static id = "id";
     /** @type {Object.<number, CannedResponse>} */
     static records = {};
     /**
@@ -10,11 +11,7 @@ export class CannedResponse extends Record {
      * @returns {CannedResponse}
      */
     static insert(data) {
-        let cannedResponse = this.records[data.id];
-        if (!cannedResponse) {
-            this.records[data.id] = new CannedResponse();
-            cannedResponse = this.records[data.id];
-        }
+        const cannedResponse = this.get(data) ?? this.new(data);
         Object.assign(cannedResponse, {
             id: data.id,
             name: data.source,

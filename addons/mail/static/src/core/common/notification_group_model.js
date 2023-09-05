@@ -7,6 +7,7 @@ import { _t } from "@web/core/l10n/translation";
 
 let nextId = 1;
 export class NotificationGroup extends Record {
+    static id = "id";
     /** @type {NotificationGroup[]} */
     static records = [];
     /**
@@ -22,10 +23,10 @@ export class NotificationGroup extends Record {
             );
         });
         if (!group) {
-            group = new NotificationGroup();
-            group._store = this.store;
+            const id = nextId++;
+            group = this.new({ id });
+            Object.assign(group, { id });
             this.store.NotificationGroup.records.push(group);
-            group.id = nextId++;
             // return reactive
             group = this.store.NotificationGroup.records.find((g) => g.eq(group));
         }
@@ -48,8 +49,6 @@ export class NotificationGroup extends Record {
     resIds = new Set();
     /** @type {'sms' | 'email'} */
     type;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     get iconSrc() {
         return "/mail/static/src/img/smiley/mailfailure.jpg";
@@ -60,7 +59,7 @@ export class NotificationGroup extends Record {
     }
 
     get lastMessage() {
-        return this._store.Message.records[this.lastMessageId];
+        return this._store.Message.get(this.lastMessageId);
     }
 
     get datetime() {

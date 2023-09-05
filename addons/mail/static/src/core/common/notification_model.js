@@ -5,6 +5,7 @@ import { Record } from "@mail/core/common/record";
 import { _t } from "@web/core/l10n/translation";
 
 export class Notification extends Record {
+    static id = "id";
     /** @type {Object.<number, Notification>} */
     static records = {};
     /**
@@ -12,16 +13,8 @@ export class Notification extends Record {
      * @returns {Notification}
      */
     static insert(data) {
-        let notification = this.records[data.id];
-        if (!notification) {
-            notification = new Notification();
-            this.records[data.id] = notification;
-            Object.assign(notification, {
-                id: data.id,
-                _store: this.store,
-            });
-            notification = this.records[data.id];
-        }
+        const notification = this.get(data) ?? this.new(data);
+        Object.assign(notification, { id: data.id });
         this.env.services["mail.message"].updateNotification(notification, data);
         return notification;
     }
@@ -38,11 +31,9 @@ export class Notification extends Record {
     failure_type;
     /** @type {import("@mail/core/common/persona_model").Persona} */
     persona;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     get message() {
-        return this._store.Message.records[this.messageId];
+        return this._store.Message.get(this.messageId);
     }
 
     get isFailure() {

@@ -1,7 +1,6 @@
 /* @odoo-module */
 
-import { Record } from "@mail/core/common/record";
-import { createLocalId } from "@mail/utils/common/misc";
+import { AND, Record } from "@mail/core/common/record";
 
 /**
  * @typedef {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} ImStatus
@@ -14,6 +13,7 @@ import { createLocalId } from "@mail/utils/common/misc";
  */
 
 export class Persona extends Record {
+    static id = AND("type", "id");
     /** @type {Object.<number, Persona>} */
     static records = {};
     /**
@@ -21,17 +21,10 @@ export class Persona extends Record {
      * @returns {Persona}
      */
     static insert(data) {
-        const localId = createLocalId(data.type, data.id);
-        let persona = this.records[localId];
-        if (!persona) {
-            persona = new Persona();
-            persona._store = this.store;
-            persona.localId = localId;
-            this.records[localId] = persona;
-        }
+        const persona = this.get(data) ?? this.new(data);
         this.env.services["mail.persona"].update(persona, data);
         // return reactive version
-        return this.records[localId];
+        return persona;
     }
 
     /** @type {string} */
@@ -55,8 +48,6 @@ export class Persona extends Record {
     /** @type {ImStatus} */
     im_status;
     isAdmin = false;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     get nameOrDisplayName() {
         return this.name || this.displayName;

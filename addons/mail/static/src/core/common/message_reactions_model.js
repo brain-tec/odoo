@@ -1,19 +1,19 @@
 /* @odoo-module */
 
-import { Record } from "@mail/core/common/record";
+import { AND, Record } from "@mail/core/common/record";
 
 export class MessageReactions extends Record {
+    static id = AND("messageId", "content");
     /**
      * @param {Object} data
      * @returns {MessageReactions}
      */
     static insert(data) {
-        let reaction = this.store.Message.records[data.message.id]?.reactions.find(
+        let reaction = this.store.Message.get(data.message.id)?.reactions.find(
             ({ content }) => content === data.content
         );
         if (!reaction) {
-            reaction = new MessageReactions();
-            reaction._store = this.store;
+            reaction = this.new(data);
         }
         const personasToUnlink = new Set();
         const alreadyKnownPersonaIds = new Set(reaction.personaLocalIds);
@@ -56,8 +56,6 @@ export class MessageReactions extends Record {
     personaLocalIds = [];
     /** @type {number} */
     messageId;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     /** @type {import("@mail/core/common/persona_model").Persona[]} */
     get personas() {

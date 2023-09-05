@@ -2,7 +2,6 @@
 
 import { Record } from "@mail/core/common/record";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
-import { createLocalId } from "@mail/utils/common/misc";
 
 import { toRaw } from "@odoo/owl";
 
@@ -14,6 +13,7 @@ import { url } from "@web/core/utils/urls";
 const { DateTime } = luxon;
 
 export class Message extends Record {
+    static id = "id";
     /** @type {Object.<number, Message>} */
     static records = {};
     /**
@@ -21,23 +21,14 @@ export class Message extends Record {
      * @returns {Message}
      */
     static insert(data) {
-        let message;
         if (data.res_id) {
             this.store.Thread.insert({
                 model: data.model,
                 id: data.res_id,
             });
         }
-        if (data.id in this.records) {
-            message = this.records[data.id];
-        } else {
-            message = new Message();
-            message._store = this.store;
-            this.records[data.id] = message;
-            message = this.records[data.id];
-        }
+        const message = this.get(data) ?? this.new(data);
         this.env.services["mail.message"].update(message, data);
-        // return reactive version
         return message;
     }
 
@@ -103,8 +94,6 @@ export class Message extends Record {
      * have them. Message without date like transient message can be missordered
      */
     now = DateTime.now().set({ milliseconds: 0 });
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     /**
      * @returns {boolean}
@@ -196,7 +185,7 @@ export class Message extends Record {
     }
 
     get originThread() {
-        return this._store.Thread.records[createLocalId(this.resModel, this.resId)];
+        return this._store.Thread.get({ model: this.resModel, id: this.resId });
     }
 
     get resUrl() {

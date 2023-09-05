@@ -8,7 +8,7 @@ import {
     replaceArrayWithCompare,
 } from "@mail/utils/common/arrays";
 import { prettifyMessageContent } from "@mail/utils/common/format";
-import { assignDefined, createLocalId, nullifyClearCommands } from "@mail/utils/common/misc";
+import { assignDefined, nullifyClearCommands } from "@mail/utils/common/misc";
 
 import { markup } from "@odoo/owl";
 
@@ -42,6 +42,7 @@ export class ThreadService {
         this.notificationService = services.notification;
         this.router = services.router;
         this.ui = services.ui;
+        this.user = services.user;
         this.messageService = services["mail.message"];
         this.personaService = services["mail.persona"];
     }
@@ -340,8 +341,7 @@ export class ThreadService {
         if (ids.length) {
             const previews = await this.orm.call("discuss.channel", "channel_fetch_preview", [ids]);
             for (const preview of previews) {
-                const thread =
-                    this.store.Thread.records[createLocalId("discuss.channel", preview.id)];
+                const thread = this.store.Thread.get({ model: "discuss.channel", id: preview.id });
                 const data = Object.assign(preview.last_message, {
                     body: markup(preview.last_message.body),
                 });
@@ -664,7 +664,7 @@ export class ThreadService {
     remove(thread) {
         removeFromArray(this.store.discuss.chats.threads, thread.localId);
         removeFromArray(this.store.discuss.channels.threads, thread.localId);
-        delete this.store.Thread.records[thread.localId];
+        thread.delete();
     }
 
     /**
@@ -815,7 +815,7 @@ export class ThreadService {
             thread,
         });
         const tmpId = this.messageService.getNextTemporaryId();
-        params.context = { ...params.context, temporary_id: tmpId };
+        params.context = { ...this.user.context, ...params.context, temporary_id: tmpId };
         if (parentId) {
             params.post_data.parent_id = parentId;
         }
@@ -836,7 +836,7 @@ export class ThreadService {
                 tmpData.guestAuthor = this.store.self;
             }
             if (parentId) {
-                tmpData.parentMessage = this.store.Message.records[parentId];
+                tmpData.parentMessage = this.store.Message.get(parentId);
             }
             const prettyContent = await prettifyMessageContent(body, params.validMentions);
             const { emojis } = await loadEmoji();
@@ -865,7 +865,7 @@ export class ThreadService {
         const data = await this.rpc(this.getMessagePostRoute(thread), params);
         if (thread.type !== "chatter") {
             removeFromArrayWithPredicate(thread.messages, (msg) => msg.eq(tmpMsg));
-            delete this.store.Message.records[tmpMsg.id];
+            tmpMsg.delete();
         }
         if (!data) {
             return;
@@ -1089,6 +1089,7 @@ export const threadService = {
         "mail.message",
         "mail.persona",
         "ui",
+        "user",
     ],
     /**
      * @param {import("@web/env").OdooEnv} env

@@ -34,6 +34,7 @@ import { assignDefined } from "@mail/utils/common/misc";
  */
 
 export class Activity extends Record {
+    static id = "id";
     /** @type {Object.<number, Activity>} */
     static records = {};
 
@@ -44,17 +45,8 @@ export class Activity extends Record {
      * @returns {Activity}
      */
     static insert(data, { broadcast = true } = {}) {
-        let activity = this.records[data.id];
-        if (!activity) {
-            activity = new Activity();
-            Object.assign(activity, {
-                id: data.id,
-                _store: this.store,
-            });
-            this.store.Activity.records[data.id] = activity;
-            // return reactive
-            activity = this.store.Activity.records[data.id];
-        }
+        const activity = this.get(data) ?? this.new(data);
+        Object.assign(activity, { id: data.id });
         if (data.request_partner_id) {
             data.request_partner_id = data.request_partner_id[0];
         }
@@ -122,8 +114,6 @@ export class Activity extends Record {
     write_date;
     /** @type {[number, string]} */
     write_uid;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 }
 
 Activity.register();
