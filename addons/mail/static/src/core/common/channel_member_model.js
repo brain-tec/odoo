@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Record } from "@mail/core/common/record";
-import { createLocalId } from "@mail/utils/common/misc";
 
 /**
  * @class ChannelMember
@@ -11,6 +10,7 @@ import { createLocalId } from "@mail/utils/common/misc";
  * @property {number} threadId
  */
 export class ChannelMember extends Record {
+    static id = "id";
     /** @type {Object.<number, ChannelMember>} */
     static records = {};
     /**
@@ -19,12 +19,7 @@ export class ChannelMember extends Record {
      */
     static insert(data) {
         const memberData = Array.isArray(data) ? data[1] : data;
-        let member = this.records[memberData.id];
-        if (!member) {
-            this.records[memberData.id] = new ChannelMember();
-            member = this.records[memberData.id];
-            member._store = this.store;
-        }
+        const member = this.get(memberData) ?? this.new(memberData);
         this.env.services["discuss.channel.member"].update(member, data);
         return member;
     }
@@ -34,8 +29,6 @@ export class ChannelMember extends Record {
     personaLocalId;
     rtcSessionId;
     threadId;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
 
     get persona() {
         return this._store.Persona.records[this.personaLocalId];
@@ -46,11 +39,11 @@ export class ChannelMember extends Record {
     }
 
     get rtcSession() {
-        return this._store.RtcSession.records[this.rtcSessionId];
+        return this._store.RtcSession.get(this.rtcSessionId);
     }
 
     get thread() {
-        return this._store.Thread.records[createLocalId("discuss.channel", this.threadId)];
+        return this._store.Thread.get({ model: "discuss.channel", id: this.threadId });
     }
 
     /**

@@ -1,9 +1,9 @@
 /* @odoo-module */
 
 import { Record } from "@mail/core/common/record";
-import { createLocalId } from "@mail/utils/common/misc";
 
 export class RtcSession extends Record {
+    static id = "id";
     /** @type {Object.<number, RtcSession>} */
     static records = {};
     /**
@@ -11,13 +11,7 @@ export class RtcSession extends Record {
      * @returns {number, RtcSession}
      */
     static insert(data) {
-        let session;
-        if (this.records[data.id]) {
-            session = this.records[data.id];
-        } else {
-            session = new RtcSession();
-            session._store = this.store;
-        }
+        const session = this.get(data) ?? this.new(data);
         const { channelMember, ...remainingData } = data;
         for (const key in remainingData) {
             session[key] = remainingData[key];
@@ -33,9 +27,7 @@ export class RtcSession extends Record {
                 channelMemberRecord.thread.rtcSessions[session.id] = session;
             }
         }
-        this.records[session.id] = session;
-        // return reactive version
-        return this.records[session.id];
+        return session;
     }
 
     // Server data
@@ -64,8 +56,6 @@ export class RtcSession extends Record {
     videoComponentCount = 0;
     /** @type {MediaStream} */
     videoStream;
-    /** @type {import("@mail/core/common/store_service").Store} */
-    _store;
     // RTC stats
     connectionState;
     localCandidateType;
@@ -79,11 +69,11 @@ export class RtcSession extends Record {
     logStep;
 
     get channelMember() {
-        return this._store.ChannelMember.records[this.channelMemberId];
+        return this._store.ChannelMember.get(this.channelMemberId);
     }
 
     get channel() {
-        return this._store.Thread.records[createLocalId("discuss.channel", this.channelId)];
+        return this._store.Thread.get({ model: "discuss.channel", id: this.channelId });
     }
 
     get isMute() {

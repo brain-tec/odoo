@@ -3,18 +3,20 @@
 import { Record } from "@mail/core/common/record";
 
 export class LinkPreview extends Record {
+    static id = "id";
     /**
      * @param {Object} data
      * @returns {LinkPreview}
      */
     static insert(data) {
-        let linkPreview = data.message.linkPreviews.find((lp) => lp.id === data.id);
+        const message = this.store.Message.get(data.message.id);
+        let linkPreview = message?.linkPreviews.find((lp) => lp.id === data.id);
         if (linkPreview) {
             return Object.assign(linkPreview, data);
         }
-        linkPreview = new LinkPreview();
+        linkPreview = this.new(data);
         Object.assign(linkPreview, data);
-        this.store.Message.records[data.message.id]?.linkPreviews.push(linkPreview);
+        message?.linkPreviews.push(linkPreview);
         return linkPreview;
     }
 

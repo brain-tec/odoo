@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { click, contains, insertText, scroll } from "@bus/../tests/helpers/test_utils";
 import { getPyEnv, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
@@ -8,7 +9,7 @@ import { patchBrowserNotification } from "@mail/../tests/helpers/patch_notificat
 import { getAdvanceTime } from "@mail/../tests/helpers/time_control";
 import { getWebClientReady } from "@mail/../tests/helpers/webclient_setup";
 
-import { App, EventBus } from "@odoo/owl";
+import { EventBus } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
@@ -19,10 +20,8 @@ import {
     registryNamesToCloneWithCleanup,
     prepareRegistriesWithCleanup,
 } from "@web/../tests/helpers/mock_env";
-import { getFixture, makeDeferred, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { doAction, getActionManagerServerData } from "@web/../tests/webclient/helpers";
-
-const { afterNextRender } = App;
 
 // load emoji data and lamejs once, when the test suite starts.
 QUnit.begin(loadEmoji);
@@ -51,42 +50,11 @@ function _createFakeDataTransfer(files) {
 }
 
 //------------------------------------------------------------------------------
-// Public: rendering timers
-//------------------------------------------------------------------------------
-
-/**
- * Returns a promise resolved at the next animation frame.
- *
- * @returns {Promise}
- */
-function nextAnimationFrame() {
-    return new Promise(function (resolve) {
-        setTimeout(() => requestAnimationFrame(() => resolve()));
-    });
-}
-
-/**
- * Wait a task tick, so that anything in micro-task queue that can be processed
- * is processed.
- */
-async function nextTick() {
-    await new Promise(setTimeout);
-}
-
-//------------------------------------------------------------------------------
 // Public: test lifecycle
 //------------------------------------------------------------------------------
 
-function getMouseenter({ afterNextRender }) {
-    return async function mouseenter(selector) {
-        await afterNextRender(() =>
-            document.querySelector(selector).dispatchEvent(new window.MouseEvent("mouseenter"))
-        );
-    };
-}
-
 function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {}) {
-    return async function openDiscuss(pActiveId, { waitUntilMessagesLoaded = true } = {}) {
+    return async function openDiscuss(pActiveId) {
         const actionOpenDiscuss = {
             // hardcoded actionId, required for discuss_container props validation.
             id: 104,
@@ -109,113 +77,18 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
                 id: threadId,
             })
         );
-        if (waitUntilMessagesLoaded) {
-            const messagesLoadedPromise = makeDeferred();
-            const store = webClient.env.services["mail.store"];
-            const thread = store.Thread.records[store.discuss.threadLocalId];
-            if (thread.isLoaded) {
-                messagesLoadedPromise.resolve();
-            }
-            let loadMessageRoute = `/mail/${threadId}/messages`;
-            if (Number.isInteger(threadId)) {
-                loadMessageRoute = "/discuss/channel/messages";
-            }
-            registry.category("mock_server_callbacks").add(
-                loadMessageRoute,
-                ({ channel_id: channelId = threadId }) => {
-                    if (channelId === threadId) {
-                        messagesLoadedPromise.resolve();
-                    }
-                },
-                { force: true }
-            );
-            return afterNextRender(async () => {
-                await doAction(webClient, actionOpenDiscuss, { props });
-                await messagesLoadedPromise;
-            });
-        }
-        return afterNextRender(() => doAction(webClient, actionOpenDiscuss, { props }));
+        await doAction(webClient, actionOpenDiscuss, { props });
     };
-}
-
-/**
- * Wait until the form view corresponding to the given resId/resModel has loaded.
- *
- * @param {Function} func Function expected to trigger form view load.
- * @param {Object} param1
- */
-export function waitFormViewLoaded(
-    func,
-    { resId = false, resModel, waitUntilMessagesLoaded = true, waitUntilDataLoaded = true } = {}
-) {
-    const waitData = (func) => {
-        const dataLoadedPromise = makeDeferred();
-        registry.category("mock_server_callbacks").add(
-            "/mail/thread/data",
-            ({ thread_id: threadId, thread_model: threadModel }) => {
-                if (threadId === resId && threadModel === resModel) {
-                    dataLoadedPromise.resolve();
-                }
-            },
-            { force: true }
-        );
-        return afterNextRender(async () => {
-            await func();
-            await dataLoadedPromise;
-        });
-    };
-    const waitMessages = (func) => {
-        const messagesLoadedPromise = makeDeferred();
-        registry.category("mock_server_callbacks").add(
-            "/mail/thread/messages",
-            ({ thread_id: threadid, thread_model: threadModel }) => {
-                if (threadid === resId && threadModel === resModel) {
-                    messagesLoadedPromise.resolve();
-                }
-            },
-            { force: true }
-        );
-        return afterNextRender(async () => {
-            await func();
-            await messagesLoadedPromise;
-        });
-    };
-    if (waitUntilDataLoaded && waitUntilMessagesLoaded) {
-        return waitData(() => waitMessages(func));
-    }
-    if (waitUntilDataLoaded) {
-        return waitData(func);
-    }
-    if (waitUntilMessagesLoaded) {
-        return waitMessages(func);
-    }
 }
 
 function getOpenFormView(openView) {
-    return async function openFormView(
-        res_model,
-        res_id,
-        {
-            props,
-            waitUntilDataLoaded = Boolean(res_id),
-            waitUntilMessagesLoaded = Boolean(res_id),
-        } = {}
-    ) {
+    return async function openFormView(res_model, res_id, { props } = {}) {
         const action = {
             res_model,
             res_id,
             views: [[false, "form"]],
         };
-        const func = () => openView(action, props);
-        if (waitUntilDataLoaded || waitUntilMessagesLoaded) {
-            return waitFormViewLoaded(func, {
-                resId: res_id,
-                resModel: res_model,
-                waitUntilDataLoaded,
-                waitUntilMessagesLoaded,
-            });
-        }
-        return func();
+        await openView(action, props);
     };
 }
 
@@ -350,23 +223,18 @@ async function start(param0 = {}) {
     param0.serverData = param0.serverData || getActionManagerServerData();
     param0.serverData.models = { ...pyEnv.getData(), ...param0.serverData.models };
     param0.serverData.views = { ...pyEnv.getViews(), ...param0.serverData.views };
-    let webClient;
-    await afterNextRender(async () => {
-        webClient = await getWebClientReady({ ...param0, messagingBus });
-    });
+    const webClient = await getWebClientReady({ ...param0, messagingBus });
     if (webClient.env.services.ui.isSmall) {
         target.style.width = "100%";
     }
     const openView = async (action, options) => {
         action["type"] = action["type"] || "ir.actions.act_window";
-        await afterNextRender(() => doAction(webClient, action, { props: options }));
+        await doAction(webClient, action, { props: options });
     };
     return {
         advanceTime,
-        afterNextRender,
         env: webClient.env,
         insertText,
-        mouseenter: getMouseenter({ afterNextRender }),
         openDiscuss: getOpenDiscuss(webClient, discuss),
         openView,
         openFormView: getOpenFormView(openView),
@@ -459,68 +327,6 @@ function pasteFiles(el, files) {
 }
 
 //------------------------------------------------------------------------------
-// Public: input utilities
-//------------------------------------------------------------------------------
-
-/**
- * @param {string} selector
- * @param {string} content
- * @param {Object} [param2 = {}]
- * @param {boolean} [param2.replace = false]
- */
-export async function insertText(target, content, { replace = false } = {}) {
-    if (typeof target === "string") {
-        target = (await contains(target))[0];
-    }
-    if (replace) {
-        target.value = "";
-    }
-    target.focus();
-    for (const char of content) {
-        document.execCommand("insertText", false, char);
-        target.dispatchEvent(new window.KeyboardEvent("keydown", { key: char }));
-        target.dispatchEvent(new window.KeyboardEvent("keyup", { key: char }));
-        target.dispatchEvent(new window.InputEvent("input"));
-        target.dispatchEvent(new window.InputEvent("change"));
-    }
-    if (!content) {
-        target.dispatchEvent(new window.InputEvent("input"));
-        target.dispatchEvent(new window.InputEvent("change"));
-    }
-    return $(target);
-}
-
-//------------------------------------------------------------------------------
-// Public: DOM utilities
-//------------------------------------------------------------------------------
-
-/**
- * Determine if a DOM element has been totally scrolled
- *
- * A 1px margin of error is given to accomodate subpixel rounding issues and
- * Element.scrollHeight value being either int or decimal
- *
- * @param {DOM.Element} el
- * @returns {boolean}
- */
-function isScrolledToBottom(el) {
-    return Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop) <= 1;
-}
-
-/**
- * Determine if a DOM element is scrolled to the given scroll top position.
- *
- * A 1px margin of error is given to accomodate subpixel rounding issues and
- * Element.scrollHeight value being either int or decimal
- *
- * @param {DOM.Element} el
- * @param {number} scrollTop expected scroll top value.
- * @returns {boolean}
- */
-function isScrolledTo(el, scrollTop) {
-    return Math.abs(el.scrollTop - scrollTop) <= 1;
-}
-//------------------------------------------------------------------------------
 // Public: web API utilities
 //------------------------------------------------------------------------------
 
@@ -596,177 +402,13 @@ export function mockGetMedia() {
 //------------------------------------------------------------------------------
 
 export {
-    afterNextRender,
+    click,
+    contains,
     dragenterFiles,
     dropFiles,
-    nextAnimationFrame,
-    nextTick,
+    insertText,
     pasteFiles,
+    scroll,
     start,
     startServer,
 };
-
-/**
- * Waits until exactly one element matching the given selector is present in
- * `options.target` and then clicks on it.
- *
- * @param {string} selector
- * @param {Object} [options={}] forwarded to `contains`
- */
-export async function click(selector, options) {
-    await contains(selector, { click: true, ...options });
-}
-
-/**
- * Waits until exactly one element matching the given selector is present in
- * `options.target` and then sets its `scrollTop` to the given value.
- *
- * @param {string} selector
- * @param {number|"bottom"} scrollTop
- * @param {Object} [options={}] forwarded to `contains`
- */
-export async function scroll(selector, scrollTop, options) {
-    await contains(selector, { setScroll: scrollTop, ...options });
-}
-
-let hasUsedContainsPositively = false;
-QUnit.testStart(() => (hasUsedContainsPositively = false));
-/**
- * Waits until `count` elements matching the given selector are present in
- * `options.target`.
- *
- * @param {string} selector
- * @param {Object} [options={}]
- * @param {boolean} [options.click] if provided, clicks on the found element
- * @param {number} [count=1]
- * @param {number|"bottom"} [options.scroll] if provided, the scrollTop of the found element(s)
- *  must match.
- *  Note: when using one of the scrollTop options, it is advised to ensure the height is not going
- *  to change soon, by checking with a preceding contains that all the expected elements are in DOM.
- * @param {number|"bottom"} [options.setScroll] if provided, set the scrollTop on the found element
- * @param {HTMLElement} [options.target=getFixture()]
- * @param {string} [options.text] if provided, the textContent of the found element(s) must match.
- * @param {string} [options.value] if provided, the input value of the found element(s) must match.
- *  Note: value changes are not observed directly, another mutation must happen to catch them.
- * @returns {Promise<HTMLElement>}
- */
-export function contains(
-    selector,
-    { click, count = 1, scroll, setScroll, target = getFixture(), text, value } = {}
-) {
-    if (count) {
-        hasUsedContainsPositively = true;
-    } else if (!hasUsedContainsPositively) {
-        throw new Error(
-            `Starting a test with "contains" of count 0 for selector "${selector}" is useless because it might immediately resolve. Start the test by checking that an expected element actually exists.`
-        );
-    }
-    return new Promise((resolve, reject) => {
-        const scrollListeners = new Set();
-        let selectorMessage = `${count} of "${selector}"`;
-        if (text !== undefined) {
-            selectorMessage = `${selectorMessage} with text "${text}"`;
-        }
-        if (value !== undefined) {
-            selectorMessage = `${selectorMessage} with value "${value}"`;
-        }
-        if (scroll !== undefined) {
-            selectorMessage = `${selectorMessage} with scroll "${scroll}"`;
-        }
-        const res = select();
-        if (res.length === count) {
-            execute(res, "immediately");
-            return;
-        }
-        let done = false;
-        const timer = setTimeout(() => {
-            clean();
-            const res = select();
-            const message = `Waited 5 second for ${selectorMessage}. Found ${res.length} instead.`;
-            QUnit.assert.ok(false, message);
-            reject(new Error(message));
-        }, 5000);
-        const observer = new MutationObserver(() => {
-            const res = select();
-            if (res.length === count) {
-                clean();
-                execute(res, "after mutations");
-            }
-        });
-        observer.observe(document.body, {
-            attributes: true,
-            childList: true,
-            subtree: true,
-        });
-        registerCleanup(() => {
-            if (!done) {
-                clean();
-                const res = select();
-                const message = `Test ended while waiting for ${selectorMessage}. Found ${res.length} instead.`;
-                QUnit.assert.ok(false, message);
-                reject(new Error(message));
-            }
-        });
-        function onScroll(ev) {
-            const res = select();
-            if (res.length === count) {
-                clean();
-                execute(res, "after scroll");
-            }
-        }
-        function select() {
-            /** @type HTMLElement[] */
-            let res;
-            try {
-                res = [...target.querySelectorAll(selector)];
-            } catch (error) {
-                if (error.message.includes("Failed to execute 'querySelectorAll'")) {
-                    // keep jquery for backwards compatibility until all tests are converted
-                    res = [...$(target).find(selector)];
-                } else {
-                    throw error;
-                }
-            }
-            const filteredRes = res.filter(
-                (el) =>
-                    (text === undefined || el.textContent.trim() === text) &&
-                    (value === undefined || el.value === value) &&
-                    (scroll === undefined ||
-                        (scroll === "bottom" ? isScrolledToBottom(el) : isScrolledTo(el, scroll)))
-            );
-            if (
-                scroll !== undefined &&
-                !scrollListeners.size &&
-                res.length === count &&
-                filteredRes.length !== count
-            ) {
-                for (const el of res) {
-                    scrollListeners.add(el);
-                    el.addEventListener("scroll", onScroll);
-                }
-            }
-            return filteredRes;
-        }
-        function execute(res, whenMessage) {
-            let message = `Found ${selectorMessage} (${whenMessage})`;
-            if (click) {
-                message = `${message} and clicked it`;
-                res[0].click();
-            }
-            if (setScroll !== undefined) {
-                message = `${message} and set scroll to "${setScroll}"`;
-                res[0].scrollTop = setScroll === "bottom" ? res[0].scrollHeight : setScroll;
-            }
-            QUnit.assert.ok(true, message);
-            resolve(res);
-        }
-        function clean() {
-            observer.disconnect();
-            clearTimeout(timer);
-            for (const el of scrollListeners) {
-                el.removeEventListener("scroll", onScroll);
-            }
-            done = true;
-        }
-    });
-}

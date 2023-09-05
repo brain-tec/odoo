@@ -2,7 +2,6 @@
 
 import { Command } from "@mail/../tests/helpers/command";
 import {
-    afterNextRender,
     click,
     contains,
     mockGetMedia,
@@ -11,7 +10,7 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { browser } from "@web/core/browser/browser";
-import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
 QUnit.module("call");
 
@@ -104,8 +103,7 @@ QUnit.test("should disconnect when closing page while in call", async (assert) =
     await click(".o-mail-Discuss-header button[title='Start a Call']");
     await contains(".o-discuss-Call");
     // simulate page close
-    await afterNextRender(() => window.dispatchEvent(new Event("pagehide"), { bubble: true }));
-    await nextTick();
+    window.dispatchEvent(new Event("pagehide"), { bubble: true });
     assert.verifySteps(["sendBeacon_leave_call"]);
 });
 

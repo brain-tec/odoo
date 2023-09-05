@@ -1,20 +1,8 @@
 /* @odoo-module */
 
-import {
-    afterNextRender,
-    click,
-    contains,
-    insertText,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
+import { click, contains, insertText, start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import {
-    patchWithCleanup,
-    triggerHotkey,
-    mockTimeout,
-    makeDeferred,
-} from "@web/../tests/helpers/utils";
+import { patchWithCleanup, triggerHotkey, makeDeferred } from "@web/../tests/helpers/utils";
 
 QUnit.module("discuss inbox");
 
@@ -619,6 +607,7 @@ QUnit.test("emptying inbox displays rainbow man in inbox", async () => {
     const { openDiscuss } = await start();
     openDiscuss();
     await click("button", { text: "Mark all read" });
+    await contains("button:contains(Inbox) .badge", { count: 0 });
     await contains(".o_reward_rainbow");
 });
 
@@ -647,7 +636,7 @@ QUnit.test("emptying inbox doesn't display rainbow man in another thread", async
         message_ids: [messageId],
         needaction_inbox_counter: 0,
     });
-    await afterNextRender(() => mockTimeout().execRegisteredTimeouts);
     await contains("button:contains(Inbox) .badge", { count: 0 });
+    // weak test, no guarantee that we waited long enough for the potential rainbow man to show
     await contains(".o_reward_rainbow", { count: 0 });
 });
