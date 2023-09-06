@@ -599,7 +599,8 @@
                                         <t t-if="record.project_id.raw_value and record.subtask_count.raw_value">
                                             <a t-if="record.project_id.raw_value and record.subtask_count.raw_value and record.subtask_count.value &gt; record.closed_subtask_count.value"
                                                t-attf-title="{{ record.closed_subtask_count.value }} sub-tasks closed out of {{ record.subtask_count.value }}"
-                                               class="subtask_list_button text-muted">
+                                               class="subtask_list_button btn-link text-dark"
+                                               role="button">
                                                 <span class="fa fa-check-square-o me-1"/>
                                                 <t t-out="record.closed_subtask_count.value + '/' + record.subtask_count.value"/>
                                             </a>
@@ -651,6 +652,7 @@
                     <field name="company_id" column_invisible="True"/>
                     <field name="date_deadline" optional="hide" widget="remaining_days" invisible="state in ['1_done', '1_canceled']"/>
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show" context="{'project_id': project_id}"/>
+                    <field name="date_last_stage_update" optional="hide"/>
                     <field name="stage_id" column_invisible="context.get('set_visible', False)" optional="show"/>
                 </tree>
             </field>
