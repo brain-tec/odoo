@@ -4,12 +4,13 @@ import { ConnectionLostError, RPCError } from "@web/core/network/rpc_service";
 import { _t } from "@web/core/l10n/translation";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { Product } from "@pos_self_order/common/models/product";
+import { Combo } from "@pos_self_order/common/models/combo";
 import { session } from "@web/session";
 import { getColor } from "@web/core/colors/colors";
 import { categorySorter } from "@pos_self_order/common/utils";
 
 export class selfOrderCommon extends Reactive {
-    async setup(env, rpc, notification, router, bus_service, cookie) {
+    async setup(env, { rpc, notification, router, bus_service, cookie, multi_tab }) {
         // services
         this.env = env;
         this.router = router;
@@ -17,6 +18,7 @@ export class selfOrderCommon extends Reactive {
         this.notification = notification;
         this.bus_service = bus_service;
         this.cookie = cookie;
+        this.multi_tab = multi_tab;
 
         // data
         Object.assign(this, {
@@ -25,6 +27,7 @@ export class selfOrderCommon extends Reactive {
         this.color = getColor(this.company_color);
         this.priceLoading = false;
         this.productByIds = {};
+        this.comboByIds = {};
         this.productsGroupedByCategory = {};
         this.currentProduct = 0;
         this.lastEditedProductId = null;
@@ -35,6 +38,11 @@ export class selfOrderCommon extends Reactive {
                 .filter((c) => this.productsGroupedByCategory[c.name])
                 .sort((a, b) => categorySorter(a, b, this.iface_start_categ_id))
         );
+        this.combos = this.combos.map((c) => {
+            const combo = new Combo(c);
+            this.comboByIds[combo.id] = combo;
+            return combo;
+        });
     }
 
     initData() {
