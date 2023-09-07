@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { formatFloat } from "@web/views/fields/formatters";
 import { uuidv4 } from "@point_of_sale/utils";
 // FIXME POSREF - unify use of native parseFloat and web's parseFloat. We probably don't need the native version.
 import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
@@ -9,8 +8,10 @@ import {
     formatDateTime,
     serializeDateTime,
     deserializeDate,
+    deserializeDateTime,
 } from "@web/core/l10n/dates";
 import {
+    formatFloat,
     roundDecimals as round_di,
     roundPrecision as round_pr,
     floatIsZero,
@@ -819,6 +820,7 @@ export class Orderline extends PosModel {
             pack_lot_lines: this.get_lot_lines(),
             customer_note: this.get_customer_note(),
             taxed_lst_unit_price: this.get_taxed_lst_unit_price(),
+            isPartOfCombo: this.isPartOfCombo(),
             unitDisplayPriceBeforeDiscount: this.getUnitDisplayPriceBeforeDiscount(),
         };
     }
@@ -1298,7 +1300,7 @@ export class Order extends PosModel {
         this.selected_paymentline = undefined;
         this.screen_data = {}; // see Gui
         this.temporary = options.temporary || false;
-        this.creation_date = new Date();
+        this.date_order = luxon.DateTime.now();
         this.to_invoice = false;
         this.orderlines = new PosCollection();
         this.paymentlines = new PosCollection();
@@ -1342,7 +1344,6 @@ export class Order extends PosModel {
             this.ticketCode = this._generateTicketCode(); // 5-digits alphanum code shown on the receipt
             this.uid = this.generate_unique_id();
             this.name = _t("Order %s", this.uid);
-            this.validation_date = undefined;
             this.fiscal_position = this.pos.fiscal_positions.find(function (fp) {
                 return fp.id === self.pos.config.default_fiscal_position_id[0];
             });
@@ -1390,7 +1391,7 @@ export class Order extends PosModel {
         } else {
             this.name = _t("Order %s", this.uid);
         }
-        this.validation_date = json.creation_date;
+        this.date_order = deserializeDateTime(json.date_order);
         this.server_id = json.server_id || json.id || false;
         this.user_id = json.user_id;
         this.firstDraft = false;
@@ -1497,7 +1498,7 @@ export class Order extends PosModel {
             user_id: this.pos.user.id,
             uid: this.uid,
             sequence_number: this.sequence_number,
-            creation_date: this.validation_date || this.creation_date, // todo: rename creation_date in master
+            date_order: serializeDateTime(this.date_order),
             fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false,
             server_id: this.server_id ? this.server_id : false,
             to_invoice: this.to_invoice ? this.to_invoice : false,
@@ -1569,8 +1570,8 @@ export class Order extends PosModel {
                 hour: date.getHours(),
                 minute: date.getMinutes(),
                 isostring: date.toISOString(),
-                localestring: this.formatted_validation_date,
-                validation_date: this.validation_date,
+                localestring: formatDateTime(luxon.DateTime.now()),
+                date_order: this.date_order,
             },
             company: {
                 email: company.email,
@@ -1950,11 +1951,6 @@ export class Order extends PosModel {
             }
             return 0;
         }
-    }
-
-    initialize_validation_date() {
-        this.validation_date = new Date();
-        this.formatted_validation_date = formatDateTime(DateTime.fromJSDate(this.validation_date));
     }
 
     set_tip(tip) {
@@ -2666,9 +2662,15 @@ export class Order extends PosModel {
      */
     getOrderReceiptEnv() {
         // Formerly get_receipt_render_env defined in ScreenWidget.
+        const receipt = this.export_for_printing();
+        const isTaxIncluded = Math.abs(receipt.subtotal - receipt.total_with_tax) <= 0.000001;
+        const getOrderlineTaxes = (line) =>
+            Object.keys(line.tax_details).map((taxId) => this.pos.taxes_by_id[taxId]);
         return {
+            getOrderlineTaxes: getOrderlineTaxes,
+            isTaxIncluded: isTaxIncluded,
             order: this,
-            receipt: this.export_for_printing(),
+            receipt: receipt,
             orderlines: this.get_orderlines(),
             paymentlines: this.get_paymentlines(),
             shippingDate: this.shippingDate ? this._exportShippingDateForPrinting() : false,

@@ -12,6 +12,7 @@ from odoo.addons.web_editor.controllers.main import handle_history_divergence
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.osv import expression
 from odoo.tools.misc import get_lang
+from odoo.addons.resource.models.utils import filter_domain_leaf
 
 
 PROJECT_TASK_READABLE_FIELDS = {
@@ -190,7 +191,7 @@ class Task(models.Model):
     # In the domain of displayed_image_id, we couln't use attachment_ids because a one2many is represented as a list of commands so we used res_model & res_id
     displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'project.task'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
 
-    parent_id = fields.Many2one('project.task', string='Parent Task', index=True, domain="['!', ('id', 'child_of', id)]")
+    parent_id = fields.Many2one('project.task', string='Parent Task', index=True, domain="['!', ('id', 'child_of', id)]", tracking=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", domain="[('recurring_task', '=', False)]")
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     closed_subtask_count = fields.Integer("Closed Sub-tasks Count", compute='_compute_subtask_count')
@@ -1122,6 +1123,39 @@ class Task(models.Model):
             return {'date_end': fields.Datetime.now()}
         return {'date_end': False}
 
+    def _search_on_comodel(self, domain, field, comodel, order=None, additional_domain=None):
+
+        def _change_operator(domain):
+            new_domain = []
+            for dom in domain:
+                if len(dom) == 3:
+                    _, op, value = dom
+                    op = "ilike" if op == "child_of" else op
+                    if isinstance(value, list) and all(isinstance(val, int) for val in value):
+                        new_domain.append(("id", op, value))
+                    if isinstance(value, str) or (isinstance(value, list) and not all(isinstance(val, str) for val in value)):
+                        new_domain.append(("name", op, value))
+                    if isinstance(value, int):
+                        new_domain.append(("id", op, [value]))
+                else:
+                    new_domain.append(dom)
+            return new_domain
+
+        filtered_domain = filter_domain_leaf(domain, lambda field_to_check: field_to_check in [
+            field,
+            f"{field}.id",
+            f"{field}.name",
+        ], {
+            field: "name",
+            f"{field}.id": "id",
+            f"{field}.name": "name",
+        })
+        if not filtered_domain:
+            return False
+        if additional_domain:
+            filtered_domain = expression.AND([filtered_domain, additional_domain])
+        return self.env[comodel].search(_change_operator(filtered_domain), order=order)
+
     # ---------------------------------------------------
     # Subtasks
     # ---------------------------------------------------
@@ -1563,6 +1597,26 @@ class Task(models.Model):
     def action_unlink_recurrence(self):
         self.recurrence_id.task_ids.recurring_task = False
         self.recurrence_id.unlink()
+
+    def action_convert_to_subtask(self):
+        self.ensure_one()
+        if self.project_id:
+            return {
+                'name': _('Convert to Task/Sub-Task'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'project.task',
+                'res_id': self.id,
+                'views': [(self.env.ref('project.project_task_convert_to_subtask_view_form', False).id, 'form')],
+                'target': 'new',
+            }
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'danger',
+                'message': _('Private tasks cannot be converted into sub-tasks. Please set a project for the task to gain access to this feature.'),
+            }
+        }
 
     # ---------------------------------------------------
     # Rating business

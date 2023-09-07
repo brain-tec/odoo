@@ -3,7 +3,6 @@ import { useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Order } from "@pos_self_order/common/models/order";
-import { Combo } from "@pos_self_order/common/models/combo";
 import { selfOrderCommon } from "@pos_self_order/common/self_order_service";
 
 export class selfOrder extends selfOrderCommon {
@@ -13,7 +12,6 @@ export class selfOrder extends selfOrderCommon {
     }
 
     async setup(...args) {
-        this.comboByIds = {};
 
         await super.setup(...args);
 
@@ -69,16 +67,6 @@ export class selfOrder extends selfOrderCommon {
         this.currentOrder.updateDataFromServer(order);
     }
 
-    initData() {
-        super.initData();
-
-        this.combos = this.combos.map((c) => {
-            const combo = new Combo(c);
-            this.comboByIds[combo.id] = combo;
-            return combo;
-        });
-    }
-
     isSession() {
         if (!this.pos_session || !this.pos_session.id) {
             this.router.navigate("closed");
@@ -97,7 +85,7 @@ export class selfOrder extends selfOrderCommon {
 export const selfOrderService = {
     dependencies: ["rpc", "notification", "router", "bus_service", "cookie"],
     async start(env, { rpc, notification, router, bus_service, cookie }) {
-        return new selfOrder(env, rpc, notification, router, bus_service, cookie).ready;
+        return new selfOrder(env, { rpc, notification, router, bus_service, cookie }).ready;
     },
 };
 
