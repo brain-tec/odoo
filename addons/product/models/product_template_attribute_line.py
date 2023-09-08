@@ -13,7 +13,7 @@ class ProductTemplateAttributeLine(models.Model):
     _rec_name = 'attribute_id'
     _rec_names_search = ['attribute_id', 'value_ids']
     _description = "Product Template Attribute Line"
-    _order = 'attribute_id, id'
+    _order = 'sequence, attribute_id, id'
 
     active = fields.Boolean(default=True)
     product_tmpl_id = fields.Many2one(
@@ -22,6 +22,7 @@ class ProductTemplateAttributeLine(models.Model):
         ondelete='cascade',
         required=True,
         index=True)
+    sequence = fields.Integer("Sequence", default=10)
     attribute_id = fields.Many2one(
         comodel_name='product.attribute',
         string="Attribute",
@@ -235,7 +236,8 @@ class ProductTemplateAttributeLine(models.Model):
                     # create values that didn't exist yet
                     ptav_to_create.append({
                         'product_attribute_value_id': pav.id,
-                        'attribute_line_id': ptal.id
+                        'attribute_line_id': ptal.id,
+                        'price_extra': pav.default_extra_price,
                     })
             # Handle active at each step in case a following line might want to
             # re-use a value that was archived at a previous step.

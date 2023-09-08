@@ -47,12 +47,12 @@ const tldWhitelist = [
     'ug', 'uk', 'um', 'us', 'uy', 'uz', 'va', 'vc', 've', 'vg', 'vi', 'vn',
     'vu', 'wf', 'ws', 'ye', 'yt', 'yu', 'za', 'zm', 'zr', 'zw', 'co\\.uk'];
 
-const urlRegexBase = `|(?:[-a-zA-Z0-9@:%._\\+~#=]{1,64}\\.))[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-zA-Z][a-zA-Z0-9]{1,62}|(?:[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.(?:${tldWhitelist.join('|')})))\\b(?:(?!\\.)[^\\s]*`;
+const urlRegexBase = `|(?:[-a-zA-Z0-9@:%._\\+~#=]{1,64}\\.))[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-zA-Z][a-zA-Z0-9]{1,62}|(?:[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.(?:${tldWhitelist.join('|')})\\b))(?:(?:[/?#])[^\\s]*(?<![.,})\\]'"]))?`;
 const httpRegex = `(?:https?:\\/\\/)`;
 const httpCapturedRegex= `(https?:\\/\\/)`;
 
-export const URL_REGEX = new RegExp(`((?:(?:${httpRegex}${urlRegexBase}))`, 'gi');
-export const URL_REGEX_WITH_INFOS = new RegExp(`((?:(?:${httpCapturedRegex}${urlRegexBase}))`, 'gi');
+export const URL_REGEX = new RegExp(`((?:(?:${httpRegex}${urlRegexBase})`, 'gi');
+export const URL_REGEX_WITH_INFOS = new RegExp(`((?:(?:${httpCapturedRegex}${urlRegexBase})`, 'gi');
 export const YOUTUBE_URL_GET_VIDEO_ID =
     /^(?:(?:https?:)?\/\/)?(?:(?:www|m)\.)?(?:youtube\.com|youtu\.be)(?:\/(?:[\w-]+\?v=|embed\/|v\/)?)([^\s?&#]+)(?:\S+)?$/i;
 export const EMAIL_REGEX = /^(mailto:)?[\w-.]+@(?:[\w-]+\.)+[\w-]{2,4}$/i;
@@ -285,22 +285,27 @@ export function getFurthestUneditableParent(node, parentLimit) {
     return nonEditableElement;
 }
 /**
- * Returns the closest HTMLElement of the provided Node
- * if a 'selector' is provided, Returns the closest HTMLElement that match the selector
+ * Returns the closest HTMLElement of the provided Node. If the predicate is a
+ * string, returns the closest HTMLElement that match the predicate selector. If
+ * the predicate is a function, returns the closest element that matches the
+ * predicate. Any returned element will be contained within the editable.
  *
  * @param {Node} node
- * @param {string} [selector=undefined]
- * @returns {HTMLElement}
+ * @param {string | Function} [predicate='*']
+ * @returns {HTMLElement|null}
  */
-export function closestElement(node, selector) {
-    let element = node;
-    while (element && element.nodeType !== Node.ELEMENT_NODE) {
-        element = element.parentNode;
+export function closestElement(node, predicate = "*") {
+    if (!node) return null;
+    let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    if (typeof predicate === 'function') {
+        while (element && !predicate(element)) {
+            element = element.parentElement;
+        }
+    } else {
+        element = element?.closest(predicate);
     }
-    if (element && selector) {
-        element = element.closest(selector);
-    }
-    return element && element.querySelector('.odoo-editor-editable') ? null : element;
+
+    return element?.closest('.odoo-editor-editable') && element;
 }
 
 /**
@@ -1469,6 +1474,7 @@ export const paragraphRelatedElements = [
     'H5',
     'H6',
     'PRE',
+    'BLOCKQUOTE',
 ];
 
 /**
@@ -2050,6 +2056,16 @@ export function moveNodes(
     // Return cursor position, but don't change it
     const firstNode = nodes.find(node => !!node.parentNode);
     return firstNode ? leftPos(firstNode) : [destinationEl, destinationOffset];
+}
+/**
+ * Remove ouid of a node and it's descendants in order to allow that tree
+ * to be moved into another parent.
+ */
+export function resetOuids(node) {
+    node.ouid = undefined;
+    for (const descendant of descendants(node)) {
+        descendant.ouid = undefined;
+    }
 }
 
 //------------------------------------------------------------------------------
