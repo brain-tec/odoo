@@ -49,7 +49,7 @@ Odoo Web Editor widget.
             'web/static/src/scss/fontawesome_overridden.scss',
 
             'web/static/src/legacy/js/promise_extension.js',
-            'web/static/src/boot.js',
+            'web/static/src/module_loader.js',
             'web/static/src/session.js',
             'web/static/src/legacy/js/core/cookie_utils.js',
 
@@ -58,7 +58,6 @@ Odoo Web Editor widget.
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',
             'web/static/src/libs/owl.js',
-            'web/static/src/legacy/legacy_component.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
             'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',
@@ -261,7 +260,7 @@ Odoo Web Editor widget.
         ],
         'web_editor.mocha_tests': [
             'web/static/src/legacy/js/promise_extension.js',
-            'web/static/src/boot.js',
+            'web/static/src/module_loader.js',
             # insert module dependencies here
             'web/static/src/core/utils/concurrency.js',
 

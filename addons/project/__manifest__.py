@@ -85,7 +85,6 @@
         ],
         'web.assets_tests': [
             'project/static/tests/tours/**/*',
-            'project/static/tests/views/**/*',
         ],
         'project.webclient': [
             ('include', 'web._assets_helpers'),
@@ -111,7 +110,7 @@
             'web/static/src/scss/fontawesome_overridden.scss',
 
             'web/static/src/legacy/js/promise_extension.js',
-            'web/static/src/boot.js',
+            'web/static/src/module_loader.js',
             'web/static/src/session.js',
             'web/static/src/legacy/js/core/cookie_utils.js',
 
@@ -120,8 +119,6 @@
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',
             'web/static/src/libs/owl.js',
-            'web/static/src/legacy/js/component_extension.js',
-            'web/static/src/legacy/legacy_component.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
             'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',
@@ -215,7 +212,6 @@
             'web/static/src/legacy/backend_utils.js',
             'web/static/src/legacy/utils.js',
             'web/static/src/legacy/js/env.js',
-            'web/static/src/legacy/js/owl_compatibility.js',
 
             'web_editor/static/src/js/editor/odoo-editor/src/base_style.scss',
             'web_editor/static/lib/vkbeautify/**/*',
