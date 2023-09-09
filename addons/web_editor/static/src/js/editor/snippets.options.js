@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
-import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog_wrapper";
+import { attachComponent } from "@web/legacy/utils";
+import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import rpc from "@web/legacy/js/core/rpc";
 import { throttleForAnimation, debounce } from "@web/core/utils/timing";
-import utils from "@web/legacy/js/core/utils";
+import { clamp } from "@web/core/utils/numbers";
 import Widget from "@web/legacy/js/core/widget";
 import { ColorPalette } from "@web_editor/js/wysiwyg/widgets/color_palette";
 import weUtils from "@web_editor/js/common/utils";
@@ -1413,6 +1413,8 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         const _super = this._super.bind(this);
         const args = arguments;
 
+        this.resetTabCount = 0;
+
         if (!this.options.dataAttributes.lazyPalette === 'true') {
             await this._renderColorPalette();
         }
@@ -1444,7 +1446,7 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
             this.colorPaletteWrapper?.update({
                 selectedCC: this._ccValue,
                 selectedColor: this._value,
-                resetTabCount: this.colorPaletteWrapper.node.component.props.props.resetTabCount + 1,
+                resetTabCount: ++this.resetTabCount,
             });
         } else {
             // TODO review in master, this does async stuff. Maybe the open
@@ -1591,9 +1593,10 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      * @private
      * @returns {Promise}
      */
-    _renderColorPalette: function () {
+    _renderColorPalette: async function () {
+        this.resetTabCount = 0;
         const options = {
-            resetTabCount: 0,
+            resetTabCount: this.resetTabCount,
             selectedCC: this._ccValue,
             selectedColor: this._value,
             onSetColorNames: (colorNames) => {
@@ -1636,12 +1639,8 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
             options.document = this.$target[0].ownerDocument;
             options.getTemplate = wysiwyg.getColorpickerTemplate.bind(wysiwyg);
         }
-        if (this.colorPaletteWrapper) {
-            this.colorPaletteWrapper.destroy();
-        }
-        this.colorPaletteWrapper = new ComponentWrapper(this, ColorPalette, options);
-
-        return this.colorPaletteWrapper.mount(this.colorPaletteEl);
+        this.colorPaletteWrapper?.destroy();
+        this.colorPaletteWrapper = await attachComponent(this, this.colorPaletteEl, ColorPalette, options);
     },
     /**
      * @override
@@ -1747,7 +1746,7 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
     _openDialog(el, {images = false, videos = false, save}) {
         el.src = this._value;
         const $editable = this.$target.closest('.o_editable');
-        const mediaDialogWrapper = new ComponentWrapper(this, MediaDialogWrapper, {
+        this.call("dialog", "add", MediaDialog, {
             noImages: !images,
             noVideos: !videos,
             noIcons: true,
@@ -1760,7 +1759,6 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
             save,
             media: el,
         });
-        return mediaDialogWrapper.mount(this.el);
     },
 
     //--------------------------------------------------------------------------
@@ -5873,6 +5871,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
             // Convert to recommended format and width.
             img.dataset.mimetype = 'image/webp';
             img.dataset.resizeWidth = this.optimizedWidth;
+        } else if (img.dataset.shape && img.dataset.originalMimetype !== "image/gif") {
+            img.dataset.originalMimetype = "image/webp";
+            img.dataset.resizeWidth = this.optimizedWidth;
         }
         await this._applyOptions();
         await this.updateUI();
@@ -6018,15 +6019,14 @@ registry.ImageTools = ImageHandlerOption.extend({
         this.trigger_up('disable_loading_effect');
         const img = this._getImg();
         const document = this.$el[0].ownerDocument;
-        const imageCropWrapper = new ComponentWrapper(this, ImageCrop, {
+        const imageCropWrapperElement = document.createElement('div');
+        document.body.append(imageCropWrapperElement);
+        const imageCropWrapper = await attachComponent(this, imageCropWrapperElement, ImageCrop, {
             rpc: this._rpc.bind(this),
             activeOnStart: true,
             media: img,
             mimetype: this._getImageMimetype(img),
         });
-        const imageCropWrapperElement = document.createElement('div');
-        document.body.append(imageCropWrapperElement);
-        await imageCropWrapper.mount(imageCropWrapperElement);
 
         await new Promise(resolve => {
             this.$target.one('image_cropper_destroyed', async () => {
@@ -6035,9 +6035,10 @@ registry.ImageTools = ImageHandlerOption.extend({
                 }
                 await this._reapplyCurrentShape();
                 resolve();
-                imageCropWrapperElement.remove();
             });
         });
+        imageCropWrapperElement.remove();
+        imageCropWrapper.destroy();
         this.trigger_up('enable_loading_effect');
     },
     /**
@@ -6081,18 +6082,17 @@ registry.ImageTools = ImageHandlerOption.extend({
         // Mount the ImageCrop to call the reset method. As we need the state of
         // the component to be mounted before calling reset, mount it
         // temporarily into the body.
-        const imageCropWrapper = new ComponentWrapper(this, ImageCrop, {
+        const imageCropWrapperElement = document.createElement('div');
+        document.body.append(imageCropWrapperElement);
+        const imageCropWrapper = await attachComponent(this, imageCropWrapperElement, ImageCrop, {
             rpc: this._rpc.bind(this),
             activeOnStart: true,
             media: img,
             mimetype: this._getImageMimetype(img),
         });
-        const imageCropWrapperElement = document.createElement('div');
-        document.body.append(imageCropWrapperElement);
-        await imageCropWrapper.mount(imageCropWrapperElement);
-        await imageCropWrapper.componentRef.comp.mountedPromise;
-        await imageCropWrapper.componentRef.comp.reset();
-        imageCropWrapper.unmount();
+        await imageCropWrapper.component.mountedPromise;
+        await imageCropWrapper.component.reset();
+        imageCropWrapper.destroy();
         imageCropWrapperElement.remove();
 
         await this._reapplyCurrentShape();
@@ -6498,7 +6498,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         } else if (img.closest('.container, .o_container_small')) {
             const mdContainerMaxWidth = parseFloat(computedStyles.getPropertyValue('--o-md-container-max-width')) || 720;
             const mdContainerInnerWidth = mdContainerMaxWidth - gutterWidth;
-            return Math.round(utils.confine(displayWidth, mdContainerInnerWidth, this.MAX_SUGGESTED_WIDTH));
+            return Math.round(clamp(displayWidth, mdContainerInnerWidth, this.MAX_SUGGESTED_WIDTH));
         // If the image is displayed in a container-fluid, it might also get
         // bigger on smaller screens. The same way, we suggest the width of the
         // current image unless it is smaller than the max size of the container
@@ -6507,7 +6507,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         } else if (img.closest('.container-fluid')) {
             const lgBp = parseFloat(computedStyles.getPropertyValue('--breakpoint-lg')) || 992;
             const mdContainerFluidMaxInnerWidth = lgBp - gutterWidth;
-            return Math.round(utils.confine(displayWidth, mdContainerFluidMaxInnerWidth, this.MAX_SUGGESTED_WIDTH));
+            return Math.round(clamp(displayWidth, mdContainerFluidMaxInnerWidth, this.MAX_SUGGESTED_WIDTH));
         }
         // If it's not in a container, it's probably not going to change size
         // depending on breakpoints. We still keep a margin safety.

@@ -1,215 +1,11 @@
 /** @odoo-module **/
 
 import options from "@web_editor/js/editor/snippets.options";
-import { WysiwygAdapterComponent } from '@website/components/wysiwyg_adapter/wysiwyg_adapter';
-import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
-import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog_wrapper";
-import { useWowlService } from "@web/legacy/utils";
 import { _t } from "@web/core/l10n/translation";
-import { Markup } from "@web/legacy/js/core/utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import "@website/js/editor/snippets.options";
-import { patch } from "@web/core/utils/patch";
 import { renderToElement } from "@web/core/utils/render";
-
-const { onRendered } = owl;
-patch(WysiwygAdapterComponent.prototype, {
-    /**
-     * @override
-     */
-    async init() {
-        await super.init(...arguments);
-
-        let ribbons = [];
-        if (this._isProductListPage()) {
-            ribbons = await this.orm.searchRead(
-                'product.ribbon',
-                [],
-                ['id', 'html', 'bg_color', 'text_color', 'html_class'],
-            );
-        }
-        this.ribbons = Object.fromEntries(ribbons.map(ribbon => {
-            ribbon.html = Markup(ribbon.html);
-            return [ribbon.id, ribbon];
-        }));
-        this.originalRibbons = Object.assign({}, this.ribbons);
-        this.productTemplatesRibbons = [];
-        this.deletedRibbonClasses = '';
-    },
-    /**
-     * @override
-     */
-    async _saveViewBlocks() {
-        await this._saveRibbons();
-        return super._saveViewBlocks(...arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Saves the ribbons in the database.
-     *
-     * @private
-     */
-    async _saveRibbons() {
-        if (!this._isProductListPage()) {
-            return;
-        }
-        const originalIds = Object.keys(this.originalRibbons).map(id => parseInt(id));
-        const currentIds = Object.keys(this.ribbons).map(id => parseInt(id));
-
-        const ribbons = Object.values(this.ribbons);
-        const created = ribbons.filter(ribbon => !originalIds.includes(ribbon.id));
-        const deletedIds = originalIds.filter(id => !currentIds.includes(id));
-        const modified = ribbons.filter(ribbon => {
-            if (created.includes(ribbon)) {
-                return false;
-            }
-            const original = this.originalRibbons[ribbon.id];
-            return Object.entries(ribbon).some(([key, value]) => value !== original[key]);
-        });
-
-        const proms = [];
-        let createdRibbonIds;
-        if (created.length > 0) {
-            proms.push(this.orm.create(
-                'product.ribbon',
-                created.map(ribbon => {
-                    ribbon = Object.assign({}, ribbon);
-                    delete ribbon.id;
-                    return ribbon;
-                }),
-            ).then(ids => createdRibbonIds = ids));
-        }
-
-        modified.forEach(ribbon => proms.push(this.orm.write(
-            'product.ribbon',
-            [ribbon.id],
-            ribbon,
-        )));
-
-        if (deletedIds.length > 0) {
-            proms.push(this.orm.unlink(
-                'product.ribbon',
-                deletedIds,
-            ));
-        }
-        await Promise.all(proms);
-        const localToServer = Object.assign(
-            this.ribbons,
-            Object.fromEntries(created.map((ribbon, index) => [ribbon.id, {id: createdRibbonIds[index]}])),
-            {'false': {id: false}},
-        );
-
-        // Building the final template to ribbon-id map
-        const finalTemplateRibbons = this.productTemplatesRibbons.reduce((acc, {templateId, ribbonId}) => {
-            acc[templateId] = ribbonId;
-            return acc;
-        }, {});
-        // Inverting the relationship so that we have all templates that have the same ribbon to reduce RPCs
-        const ribbonTemplates = Object.entries(finalTemplateRibbons).reduce((acc, [templateId, ribbonId]) => {
-            if (!acc[ribbonId]) {
-                acc[ribbonId] = [];
-            }
-            acc[ribbonId].push(parseInt(templateId));
-            return acc;
-        }, {});
-        const setProductTemplateRibbons = Object.entries(ribbonTemplates)
-            // If the ribbonId that the template had no longer exists, remove the ribbon (id = false)
-            .map(([ribbonId, templateIds]) => {
-                const id = currentIds.includes(parseInt(ribbonId)) ? ribbonId : false;
-                return [id, templateIds];
-            }).map(([ribbonId, templateIds]) => this.orm.write(
-                'product.template',
-                templateIds,
-                {'website_ribbon_id': localToServer[ribbonId].id},
-            ));
-        return Promise.all(setProductTemplateRibbons);
-    },
-    /**
-     * Checks whether the current page is the product list.
-     *
-     * @private
-     */
-    _isProductListPage() {
-        return this.options.editable && this.options.editable.find('#products_grid').length !== 0;
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * Returns a copy of this.ribbons through a callback.
-     *
-     * @private
-     */
-    _onGetRibbons(ev) {
-        ev.data.callback(Object.assign({}, this.ribbons));
-    },
-    /**
-     * Returns all ribbon classes, current and deleted, so they can be removed.
-     *
-     * @private
-     */
-    _onGetRibbonClasses(ev) {
-        const classes = Object.values(this.ribbons).reduce((classes, ribbon) => {
-            return classes + ` ${ribbon.html_class}`;
-        }, '') + this.deletedRibbonClasses;
-        ev.data.callback(classes);
-    },
-    /**
-     * Deletes a ribbon.
-     *
-     * @private
-     */
-    _onDeleteRibbon(ev) {
-        this.deletedRibbonClasses += ` ${this.ribbons[ev.data.id].html_class}`;
-        delete this.ribbons[ev.data.id];
-    },
-    /**
-     * Sets a ribbon;
-     *
-     * @private
-     */
-    _onSetRibbon(ev) {
-        const {ribbon} = ev.data;
-        const previousRibbon = this.ribbons[ribbon.id];
-        if (previousRibbon) {
-            this.deletedRibbonClasses += ` ${previousRibbon.html_class}`;
-        }
-        this.ribbons[ribbon.id] = ribbon;
-    },
-    /**
-     * Sets which ribbon is used by a product template.
-     *
-     * @private
-     */
-    _onSetProductRibbon(ev) {
-        const {templateId, ribbonId} = ev.data;
-        this.productTemplatesRibbons.push({templateId, ribbonId});
-    },
-    /**
-     * @override
-     */
-    _trigger_up(ev) {
-        const methods = {
-            get_ribbons: this._onGetRibbons.bind(this),
-            get_ribbon_classes: this._onGetRibbonClasses.bind(this),
-            delete_ribbon: this._onDeleteRibbon.bind(this),
-            set_ribbon: this._onSetRibbon.bind(this),
-            set_product_ribbon: this._onSetProductRibbon.bind(this),
-        }
-        if (methods[ev.name]) {
-            return methods[ev.name](ev);
-        } else {
-            return super._trigger_up(...arguments);
-        }
-    }
-});
 
 options.registry.WebsiteSaleGridLayout = options.Class.extend({
 
@@ -655,7 +451,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
     }
 });
 
-// Small override of the MediaDialogWrapper to retrieve the attachment ids instead of img elements
+// Small override of the MediaDialog to retrieve the attachment ids instead of img elements
 class AttachmentMediaDialog extends MediaDialog {
     /**
      * @override
@@ -667,16 +463,6 @@ class AttachmentMediaDialog extends MediaDialog {
             await this.props.extraImageSave(selectedMedia);
         }
         this.props.close();
-    }
-}
-
-class AttachmentMediaDialogWrapper extends MediaDialogWrapper {
-    setup() {
-        this.dialogs = useWowlService('dialog');
-
-        onRendered(() => {
-            this.dialogs.add(AttachmentMediaDialog, this.props);
-        });
     }
 }
 
@@ -790,7 +576,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
             });
         }
         let extraImageEls;
-        const dialog = new ComponentWrapper(this, AttachmentMediaDialogWrapper, {
+        this.call("dialog", "add", AttachmentMediaDialog, {
             multiImages: true,
             onlyImages: true,
             // Kinda hack-ish but the regular save does not get the information we need
@@ -820,7 +606,6 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
                 });
             }
         });
-        dialog.mount(document.body);
     },
 
     async _convertAttachmentToWebp(attachment, imageEl) {

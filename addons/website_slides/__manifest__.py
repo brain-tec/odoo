@@ -149,7 +149,7 @@ Featuring
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
 
             'web/static/src/legacy/js/promise_extension.js',
-            'web/static/src/boot.js',
+            'web/static/src/module_loader.js',
             'web/static/src/session.js',
             'web/static/src/legacy/js/core/cookie_utils.js',
 
@@ -157,8 +157,6 @@ Featuring
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',
             'web/static/src/libs/owl.js',
-            'web/static/src/legacy/js/component_extension.js',
-            'web/static/src/legacy/legacy_component.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
             'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',

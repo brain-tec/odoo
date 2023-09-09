@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
 import { Mutex } from "@web/core/utils/concurrency";
+import { clamp } from "@web/core/utils/numbers";
 import core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
-import { Markup, confine } from "@web/legacy/js/core/utils";
+import { Markup } from "@web/legacy/js/core/utils";
 import Widget from "@web/legacy/js/core/widget";
 import options from "@web_editor/js/editor/snippets.options";
 import { SmoothScrollOnDrag } from "@web_editor/js/editor/smooth_scroll_on_drag";
@@ -16,7 +17,7 @@ import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
-import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
+import { attachComponent } from "@web/legacy/utils";
 import { Toolbar } from "@web_editor/js/editor/toolbar";
 import {
     Component,
@@ -1609,7 +1610,7 @@ var SnippetEditor = Widget.extend({
         let left = ev.pageX - rowElLeft - columnMiddle;
 
         // Horizontal overflow.
-        left = confine(left, 0, rowEl.clientWidth - columnWidth);
+        left = clamp(left, 0, rowEl.clientWidth - columnWidth);
 
         columnEl.style.top = top + 'px';
         columnEl.style.left = left + 'px';
@@ -4296,14 +4297,13 @@ var SnippetsMenu = Widget.extend({
                     wysiwygState: Object,
                 };
             }
-            const toolbarWrapper = new ComponentWrapper(this, WebsiteToolbar, {
-                wysiwygState: this.options.wysiwyg.state,
-            });
             // Add the toolbarWrapperEl to the dom for owl to properly mount the
             // Toolbar.
             document.body.append(this._toolbarWrapperEl);
             this._toolbarWrapperEl.style.display = 'none';
-            await toolbarWrapper.mount(this._toolbarWrapperEl);
+            await attachComponent(this, this._toolbarWrapperEl, WebsiteToolbar, {
+                wysiwygState: this.options.wysiwyg.state,
+            });
             this._toolbarWrapperEl.style.display = 'contents';
 
             const toolbarEl = this._toolbarWrapperEl.firstChild;

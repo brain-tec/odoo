@@ -1,22 +1,16 @@
 /* @odoo-module */
 
 import { Composer } from "@mail/core/common/composer";
-import { Message as MessageModel } from "@mail/core/common/message_model";
 import { Store } from "@mail/core/common/store_service";
 import { threadActionsRegistry } from "@mail/core/common/thread_actions";
 import { Thread } from "@mail/core/common/thread_model";
 import { ThreadService } from "@mail/core/common/thread_service";
 
 import { patch } from "@web/core/utils/patch";
+import { SESSION_STATE } from "./livechat_service";
 
 patch(Composer.prototype, {
     get allowUpload() {
-        return false;
-    },
-});
-
-patch(MessageModel.prototype, {
-    get hasActions() {
         return false;
     },
 });
@@ -32,10 +26,9 @@ patch(Thread.prototype, {
 
 patch(ThreadService.prototype, {
     async fetchNewMessages(thread) {
-        return;
-    },
-    async loadAround() {
-        return;
+        if (thread.type !== "livechat" || this.livechatService.state === SESSION_STATE.PERSISTED) {
+            return super.fetchNewMessages(...arguments);
+        }
     },
 });
 
