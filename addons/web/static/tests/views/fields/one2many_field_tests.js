@@ -8923,7 +8923,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test("display correct value after validation error", async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         /*
          * By-pass QUnit's and test's error handling because the error service needs to be active
@@ -9002,10 +9002,8 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget[name=turtle_foo] input", "pinky");
         await click(target, ".o_form_view");
         assert.strictEqual(target.querySelector(".o_data_row .o_data_cell").textContent, "foo");
-
-        // we make sure here that when we save, the values are the current
-        // values displayed in the field.
-        await clickSave(target);
+        assert.hasClass(target.querySelector(".o_field_widget[name=turtles]"), "o_field_invalid");
+        assert.ok(target.querySelector(".o_form_button_save").disabled);
     });
 
     QUnit.test("propagate context to sub views without default_* keys", async function (assert) {
@@ -14127,4 +14125,50 @@ QUnit.module("Fields", (hooks) => {
             await click(target.querySelector(".o-autocomplete--dropdown-menu li a"));
         }
     );
+
+    QUnit.test("one2many with default_order on id, but id not in view", async function (assert) {
+        serverData.models.partner.records[0].turtles = [1, 2, 3];
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <tree editable="top" default_order="turtle_int,id">
+                            <field name="turtle_int" widget="handle"/>
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                if (args.method === "web_save") {
+                    assert.deepEqual(args.args[1].turtles, [
+                        [1, 3, { turtle_int: 0 }],
+                        [1, 1, { turtle_int: 1 }],
+                        [1, 2, { turtle_int: 2 }],
+                    ]);
+                }
+            },
+            resId: 1,
+        });
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            "yop",
+            "blip",
+            "kawa",
+        ]);
+
+        // drag the third record to top of the list
+        await dragAndDrop("tbody tr:nth-child(3) .o_handle_cell", "tbody tr", "top");
+        await clickSave(target);
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            "kawa",
+            "yop",
+            "blip",
+        ]);
+        assert.verifySteps(["get_views", "web_read", "web_save"]);
+    });
 });

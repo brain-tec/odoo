@@ -20,7 +20,7 @@ from odoo.addons.mail.models.mail_message import Message
 from odoo.addons.mail.models.mail_notification import MailNotification
 from odoo.addons.mail.models.res_users import Users
 from odoo.tests import common, new_test_user
-from odoo.tools import formataddr, mute_logger, pycompat
+from odoo.tools import email_normalize, formataddr, mute_logger, pycompat
 from odoo.tools.translate import code_translations
 
 mail_new_test_user = partial(new_test_user, context={'mail_create_nolog': True,
@@ -575,7 +575,7 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
             raise NotImplementedError('Unsupported %s' % ', '.join(unknown))
 
         if isinstance(author, self.env['res.partner'].__class__):
-            expected['email_from'] = formataddr((author.name, author.email))
+            expected['email_from'] = formataddr((author.name, email_normalize(author.email, strict=False) or author.email))
         else:
             expected['email_from'] = author
 
@@ -585,7 +585,7 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
             email_to_list = []
             for email_to in recipients:
                 if isinstance(email_to, self.env['res.partner'].__class__):
-                    email_to_list.append(formataddr((email_to.name, email_to.email or 'False')))
+                    email_to_list.append(formataddr((email_to.name, email_normalize(email_to.email, strict=False) or email_to.email)))
                 else:
                     email_to_list.append(email_to)
         expected['email_to'] = email_to_list
@@ -1094,6 +1094,9 @@ class MailCommon(common.TransactionCase, MailCase):
         cls.user_root = cls.env.ref('base.user_root')
         cls.partner_root = cls.user_root.partner_id
 
+        # setup MC environment
+        cls._activate_multi_company()
+
         # give default values for all email aliases and domain
         cls._init_mail_gateway()
         cls._init_mail_servers()
@@ -1162,6 +1165,9 @@ class MailCommon(common.TransactionCase, MailCase):
             'currency_id': cls.env.ref('base.CAD').id,
             'email': 'company_2@test.example.com',
             'name': 'Company 2',
+        })
+        cls.company_3 = cls.env['res.company'].create({
+            'name': 'ELIT',
         })
         cls.user_admin.write({'company_ids': [(4, cls.company_2.id)]})
 
