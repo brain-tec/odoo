@@ -78,6 +78,7 @@ import {
     getDeepestPosition,
     leftPos,
     isNotAllowedContent,
+    EMAIL_REGEX,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -3346,7 +3347,7 @@ export class OdooEditor extends EventTarget {
                     // Remove added space
                     textNodeSplitted.pop();
                     const potentialUrl = textNodeSplitted.pop();
-                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS);
+                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS) && !potentialUrl.match(EMAIL_REGEX);
 
                     if (lastWordMatch) {
                         const matches = getUrlsInfosInString(textSliced);
@@ -4462,8 +4463,11 @@ export class OdooEditor extends EventTarget {
         const promises = [];
         for (const imageFile of imageFiles) {
             const imageNode = document.createElement('img');
-            imageNode.style.width = '100%';
             imageNode.classList.add('img-fluid');
+            // Mark images as having to be saved as attachments.
+            if (this.options.dropImageAsAttachment) {
+                imageNode.classList.add('o_b64_image_to_save');
+            }
             imageNode.dataset.fileName = imageFile.name;
             promises.push(getImageUrl(imageFile).then(url => {
                 imageNode.src = url;
@@ -4508,13 +4512,7 @@ export class OdooEditor extends EventTarget {
             // the clipboard picture.
             if (files.length && !clipboardElem.querySelector('table')) {
                 this.addImagesFiles(files).then(html => {
-                    const imageNodes = this._applyCommand('insert', this._prepareClipboardData(html));
-                    if (imageNodes && this.options.dropImageAsAttachment) {
-                        // Mark images as having to be saved as attachments.
-                        for (const imageNode of imageNodes) {
-                            imageNode.classList.add('o_b64_image_to_save');
-                        }
-                    }
+                    this._applyCommand('insert', parseHTML(html));
                 });
             } else {
                 if (closestElement(sel.anchorNode, 'a')) {
@@ -4705,13 +4703,7 @@ export class OdooEditor extends EventTarget {
             this.execCommand('insert', this._prepareClipboardData(html));
         } else if (fileTransferItems.length) {
             this.addImagesFiles(fileTransferItems).then(html => {
-                const imageNodes = this.execCommand('insert', this._prepareClipboardData(html));
-                if (imageNodes && this.options.dropImageAsAttachment) {
-                    // Mark images as having to be saved as attachments.
-                    for (const imageNode of imageNodes) {
-                        imageNode.classList.add('o_b64_image_to_save');
-                    }
-                }
+                this.execCommand('insert', parseHTML(html));
             });
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString(pastedText => {
