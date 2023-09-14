@@ -1031,6 +1031,7 @@ export class Wysiwyg extends Component {
      */
     _replaceElement($el) {
         this.el.replaceWith($el[0]);
+        this.el = $el[0];
         this.$el = $el;
     }
     //--------------------------------------------------------------------------
@@ -1456,6 +1457,8 @@ export class Wysiwyg extends Component {
                         }
                     };
                 }
+                // update the shouldFocusUrl prop to focus on url when double click
+                this.state.linkToolProps.shouldFocusUrl = options.shouldFocusUrl;
                 const _onClick = ev => {
                     if (
                         !ev.target.closest('#create-link') &&
