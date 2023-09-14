@@ -1,9 +1,14 @@
 /** @odoo-module */
 
 import { formatMonetary } from "@web/views/fields/formatters";
-import { formatFloat, roundDecimals } from "@web/core/utils/numbers";
-import { escapeRegExp } from '@web/core/utils/strings';
+import {
+    formatFloat,
+    roundDecimals,
+    floatIsZero as genericFloatIsZero,
+} from "@web/core/utils/numbers";
+import { escapeRegExp } from "@web/core/utils/strings";
 import { registry } from "@web/core/registry";
+import { parseFloat } from "@web/views/fields/parsers";
 
 /**
  * This service introduces `utils` namespace in the `env` which can contain
@@ -21,7 +26,9 @@ export const contextualUtilsService = {
         let floatRegex;
         if (thousandsSep) {
             const escapedThousandsSep = escapeRegExp(thousandsSep);
-            floatRegex = new RegExp(`^-?(?:\\d+(${escapedThousandsSep}\\d+)*)?(?:${escapedDecimalPoint}\\d*)?$`);
+            floatRegex = new RegExp(
+                `^-?(?:\\d+(${escapedThousandsSep}\\d+)*)?(?:${escapedDecimalPoint}\\d*)?$`
+            );
         } else {
             floatRegex = new RegExp(`^-?(?:\\d+)?(?:${escapedDecimalPoint}\\d*)?$`);
         }
@@ -30,11 +37,18 @@ export const contextualUtilsService = {
             return formatFloat(qty, { digits: [true, productUoMDecimals] });
         };
 
+        const formatStrCurrency = (valueStr, hasSymbol = true) => {
+            return formatCurrency(parseFloat(valueStr), hasSymbol);
+        };
+
         const formatCurrency = (value, hasSymbol = true) => {
             return formatMonetary(value, {
                 currencyId: currency.id,
                 noSymbol: !hasSymbol,
             });
+        };
+        const floatIsZero = (value) => {
+            return genericFloatIsZero(value, currency.decimal_places);
         };
 
         const roundCurrency = (value) => {
@@ -47,9 +61,11 @@ export const contextualUtilsService = {
 
         env.utils = {
             formatCurrency,
+            formatStrCurrency,
             roundCurrency,
             formatProductQty,
             isValidFloat,
+            floatIsZero,
         };
     },
 };
