@@ -98,6 +98,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/lib/odoo_ui_icons/style.css',
             'mail/static/src/core/common/**/*',
             'mail/static/src/discuss/core/common/*',
+            'mail/static/src/discuss/call/common/**',
             'mail/static/src/discuss/typing/**/*',
             'mail/static/src/utils/common/**/*',
             ('remove', 'mail/static/src/**/*.dark.scss'),
@@ -132,7 +133,6 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/embed/external/**/*',
         ],
         'im_livechat.embed_test_assets': [
-            ('include', 'web.assets_backend'),
             ('include', 'web.tests_assets'),
             ('remove', 'web/static/tests/mock_server_tests.js'),
             ('remove', 'im_livechat/static/**'),
