@@ -1974,12 +1974,6 @@ var SnippetsMenu = Widget.extend({
                 this.options.wysiwyg.odooEditor.addEventListener('observerApply', () => {
                     $(this.options.wysiwyg.odooEditor.editable).trigger('content_changed');
                 });
-                this.options.wysiwyg.odooEditor.addEventListener('historyRevert', debounce(() => {
-                    this.trigger_up('widgets_start_request', {
-                        $target: this.options.wysiwyg.$editable,
-                        editableMode: true,
-                    });
-                }, 50));
             }
 
             // Trigger a resize event once entering edit mode as the snippets
@@ -2609,32 +2603,6 @@ var SnippetsMenu = Widget.extend({
                 }
 
                 return editorToEnable;
-            }).then(async editor => {
-                // If a link was clicked, the linktools should be focused after
-                // the right panel is shown to the user.
-                // TODO: this should be reviewed to be done another way: we
-                // should avoid focusing something here while it is being
-                // rendered elsewhere.
-                if (this.options.wysiwyg.state.linkToolProps) {
-                    let inputElement = document.querySelector('#o_link_dialog_url_input');
-                    if (!inputElement) {
-                        // Wait for `linkTools` potential in-progress rendering
-                        // before focusing the URL input on `snippetsMenu` (this
-                        // prevents race condition for automated testing).
-                        inputElement = await new Promise((resolve) => {
-                            const observer = new MutationObserver(() => {
-                                const inputElement = document.querySelector('#o_link_dialog_url_input');
-                                if (inputElement) {
-                                    observer.disconnect();
-                                    resolve(inputElement);
-                                }
-                            });
-                            observer.observe(document.body, { childList: true, subtree: true });
-                        });
-                    }
-                    inputElement.focus();
-                }
-                return editor;
             });
         });
     },
