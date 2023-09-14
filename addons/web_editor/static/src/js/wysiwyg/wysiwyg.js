@@ -859,15 +859,26 @@ const Wysiwyg = Widget.extend({
      */
     savePendingImages($editable = this.$editable) {
         const defs = _.map($editable, async editableEl => {
-            const {oeModel: resModel, oeId: resId} = editableEl.dataset;
+            let { oeModel: resModel, oeId: resId } = editableEl.dataset;
+            if (!resModel) {
+                ({ res_model: resModel, res_id: resId } = this.options.recordInfo);
+            }
             const b64Proms = [...editableEl.querySelectorAll('.o_b64_image_to_save')].map(async el => {
+                const dirtyEditable = el.closest(".o_dirty");
+                if (dirtyEditable && dirtyEditable !== editableEl) {
+                    // Do nothing as there is an editableEl closer to the image
+                    // that will perform the rpc call with the correct model and
+                    // id parameters.
+                    return;
+                }
                 const attachment = await this._rpc({
                     route: '/web_editor/attachment/add_data',
                     params: {
                         name: el.dataset.fileName || '',
                         data: el.getAttribute('src').split(',')[1],
                         is_image: true,
-                        ...this.options.recordInfo,
+                        res_model: resModel,
+                        res_id: parseInt(resId),
                     },
                 });
                 let src = attachment.image_src;
@@ -887,7 +898,8 @@ const Wysiwyg = Widget.extend({
             });
             const modifiedProms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
                 const isBackground = !el.matches('img');
-                if (el.closest(".o_dirty") !== editableEl) {
+                const dirtyEditable = el.closest(".o_dirty");
+                if (dirtyEditable && dirtyEditable !== editableEl) {
                     // Do nothing as there is an editableEl closer to the image
                     // that will perform the rpc call with the correct model and
                     // id parameters.
