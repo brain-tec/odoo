@@ -78,6 +78,7 @@ import {
     getDeepestPosition,
     leftPos,
     isNotAllowedContent,
+    EMAIL_REGEX,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -173,7 +174,6 @@ export const CLIPBOARD_WHITELISTS = {
     ],
     attributes: ['class', 'href', 'src', 'target'],
     styledTags: ['SPAN', 'B', 'STRONG', 'I', 'S', 'U', 'FONT', 'TD'],
-    styles: ['text-decoration', 'font-weight', 'background-color', 'color', 'font-style', 'text-decoration-line', 'font-size']
 };
 
 // Commands that don't require a DOM selection but take an argument instead.
@@ -3094,7 +3094,12 @@ export class OdooEditor extends EventTarget {
      * @param {Node} node
      */
     _cleanForPaste(node) {
-        if (!this._isWhitelisted(node) || this._isBlacklisted(node)) {
+        if (
+            !this._isWhitelisted(node) ||
+            this._isBlacklisted(node) ||
+            // Google Docs have their html inside a B tag with custom id.
+            node.id && node.id.startsWith('docs-internal-guid')
+        ) {
             if (!node.matches || node.matches(CLIPBOARD_BLACKLISTS.remove.join(','))) {
                 node.remove();
             } else {
@@ -3131,14 +3136,8 @@ export class OdooEditor extends EventTarget {
             for (const attribute of [...node.attributes]) {
                 // Keep allowed styles on nodes with allowed tags.
                 if (CLIPBOARD_WHITELISTS.styledTags.includes(node.nodeName) && attribute.name === 'style') {
-                    const spanInlineStyles = attribute.value.split(';').map(x => x.trim());
-                    const allowedSpanInlineStyles = spanInlineStyles.filter(rawStyle => {
-                        return CLIPBOARD_WHITELISTS.styles.includes(rawStyle.split(':')[0].trim());
-                    });
                     node.removeAttribute(attribute.name);
-                    if (allowedSpanInlineStyles.length > 0) {
-                        node.setAttribute(attribute.name, allowedSpanInlineStyles.join(';'));
-                    } else if (['SPAN', 'FONT'].includes(node.tagName)) {
+                    if (['SPAN', 'FONT'].includes(node.tagName)) {
                         for (const unwrappedNode of unwrapContents(node)) {
                             this._cleanForPaste(unwrappedNode);
                         }
@@ -3174,12 +3173,11 @@ export class OdooEditor extends EventTarget {
                 okClass instanceof RegExp ? okClass.test(item) : okClass === item,
             );
         } else {
-            const allowedSpanStyles = CLIPBOARD_WHITELISTS.styles.map(s => `span[style*="${s}"]`);
             return (
                 item.nodeType === Node.TEXT_NODE ||
                 (
                     item.matches &&
-                    item.matches([...CLIPBOARD_WHITELISTS.nodes, ...allowedSpanStyles].join(','))
+                    item.matches(CLIPBOARD_WHITELISTS.nodes)
                 )
             );
         }
@@ -3332,7 +3330,7 @@ export class OdooEditor extends EventTarget {
                     // Remove added space
                     textNodeSplitted.pop();
                     const potentialUrl = textNodeSplitted.pop();
-                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS);
+                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS) && !potentialUrl.match(EMAIL_REGEX);
 
                     if (lastWordMatch) {
                         const matches = getUrlsInfosInString(textSliced);
@@ -4433,8 +4431,11 @@ export class OdooEditor extends EventTarget {
         const promises = [];
         for (const imageFile of imageFiles) {
             const imageNode = document.createElement('img');
-            imageNode.style.width = '100%';
             imageNode.classList.add('img-fluid');
+            // Mark images as having to be saved as attachments.
+            if (this.options.dropImageAsAttachment) {
+                imageNode.classList.add('o_b64_image_to_save');
+            }
             imageNode.dataset.fileName = imageFile.name;
             promises.push(getImageUrl(imageFile).then(url => {
                 imageNode.src = url;
@@ -4479,13 +4480,7 @@ export class OdooEditor extends EventTarget {
             // the clipboard picture.
             if (files.length && !clipboardElem.querySelector('table')) {
                 this.addImagesFiles(files).then(html => {
-                    const imageNodes = this._applyCommand('insert', this._prepareClipboardData(html));
-                    if (imageNodes && this.options.dropImageAsAttachment) {
-                        // Mark images as having to be saved as attachments.
-                        for (const imageNode of imageNodes) {
-                            imageNode.classList.add('o_b64_image_to_save');
-                        }
-                    }
+                    this._applyCommand('insert', parseHTML(html));
                 });
             } else {
                 if (closestElement(sel.anchorNode, 'a')) {
@@ -4676,13 +4671,7 @@ export class OdooEditor extends EventTarget {
             this.execCommand('insert', this._prepareClipboardData(html));
         } else if (fileTransferItems.length) {
             this.addImagesFiles(fileTransferItems).then(html => {
-                const imageNodes = this.execCommand('insert', this._prepareClipboardData(html));
-                if (imageNodes && this.options.dropImageAsAttachment) {
-                    // Mark images as having to be saved as attachments.
-                    for (const imageNode of imageNodes) {
-                        imageNode.classList.add('o_b64_image_to_save');
-                    }
-                }
+                this.execCommand('insert', parseHTML(html));
             });
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString(pastedText => {
