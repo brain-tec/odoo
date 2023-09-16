@@ -1,8 +1,11 @@
 /* @odoo-module */
 
-import { contains, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+
+import { start } from "@mail/../tests/helpers/test_utils";
 
 import { dom } from "@web/../tests/legacy/helpers/test_utils";
+import { contains } from "@web/../tests/utils";
 
 QUnit.module("M2XAvatarEmployee");
 
@@ -56,34 +59,34 @@ QUnit.test("many2one_avatar_employee widget in list view", async function (asser
         document.querySelectorAll(".o_data_cell div[name='employee_id']")[2].innerText,
         "Mario"
     );
-
+    // TODO: avatar card employee
     // click on first employee
-    dom.click(document.querySelector(".o_data_cell .o_m2o_avatar > img"));
-    await contains(".o-mail-ChatWindow-name");
-    assert.verifySteps([`read hr.employee.public ${employeeId_1}`]);
-    assert.strictEqual(document.querySelector(".o-mail-ChatWindow-name").textContent, "Mario");
+    // dom.click(document.querySelector(".o_data_cell .o_m2o_avatar > img"));
+    // await contains(".o-mail-ChatWindow-name");
+    // assert.verifySteps([`read hr.employee.public ${employeeId_1}`]);
+    // assert.strictEqual(document.querySelector(".o-mail-ChatWindow-name").textContent, "Mario");
 
-    // click on second employee
-    dom.click(document.querySelectorAll(".o_data_cell .o_m2o_avatar > img")[1]);
-    await contains(".o-mail-ChatWindow-name", { count: 2 });
-    assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
-    assert.strictEqual(
-        document.querySelectorAll(".o-mail-ChatWindow-name")[1].textContent,
-        "Luigi"
-    );
+    // // click on second employee
+    // dom.click(document.querySelectorAll(".o_data_cell .o_m2o_avatar > img")[1]);
+    // await contains(".o-mail-ChatWindow-name", { count: 2 });
+    // assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
+    // assert.strictEqual(
+    //     document.querySelectorAll(".o-mail-ChatWindow-name")[1].textContent,
+    //     "Luigi"
+    // );
 
-    // click on third employee (same as first)
-    dom.click(document.querySelectorAll(".o_data_cell .o_m2o_avatar > img")[2]);
-    assert.containsN(
-        document.body,
-        ".o-mail-ChatWindow-name",
-        2,
-        "should still have only 2 chat windows because third is the same partner as first"
-    );
-    assert.verifySteps(
-        [],
-        "employee should not have been read again because we already know its partner"
-    );
+    // // click on third employee (same as first)
+    // dom.click(document.querySelectorAll(".o_data_cell .o_m2o_avatar > img")[2]);
+    // assert.containsN(
+    //     document.body,
+    //     ".o-mail-ChatWindow-name",
+    //     2,
+    //     "should still have only 2 chat windows because third is the same partner as first"
+    // );
+    // assert.verifySteps(
+    //     [],
+    //     "employee should not have been read again because we already know its partner"
+    // );
 });
 
 QUnit.test("many2one_avatar_employee widget in kanban view", async function (assert) {
@@ -155,10 +158,8 @@ QUnit.test(
         });
         await contains(".o_field_widget[name=employee_id] input", { value: "Mario" });
         await dom.click(document.querySelector(".o_m2o_avatar > img"));
-        await contains(
-            ".o_notification.border-info:contains(You can only chat with employees that have a dedicated user.)"
-        );
         assert.verifySteps([`web_read m2x.avatar.employee ${avatarId}`]);
+        // Nothing should happen
     }
 );
 
@@ -215,12 +216,10 @@ QUnit.test("many2many_avatar_employee widget in form view", async function (asse
     await dom.click(
         document.querySelectorAll(".o_field_many2many_avatar_employee .o_tag .o_m2m_avatar")[1]
     );
+    // TODO: avatar card employee
     assert.verifySteps([
         `web_read m2x.avatar.employee ${avatarId_1}`,
-        `read hr.employee.public ${employeeId_1}`,
-        `read hr.employee.public ${employeeId_2}`,
     ]);
-    await contains(".o-mail-ChatWindow-name", { count: 2 });
 });
 
 QUnit.test("many2many_avatar_employee widget in list view", async function (assert) {
@@ -262,21 +261,21 @@ QUnit.test("many2many_avatar_employee widget in list view", async function (asse
         2,
         "should have two avatar"
     );
+    // TODO: avatar card employee
+    // // click on first employee badge
+    // dom.click(document.querySelector(".o_data_cell .o_m2m_avatar"));
+    // await contains(".o-mail-ChatWindow-name");
+    // assert.verifySteps([`read hr.employee.public ${employeeId_1}`]);
+    // assert.strictEqual(document.querySelector(".o-mail-ChatWindow-name").textContent, "Mario");
 
-    // click on first employee badge
-    dom.click(document.querySelector(".o_data_cell .o_m2m_avatar"));
-    await contains(".o-mail-ChatWindow-name");
-    assert.verifySteps([`read hr.employee.public ${employeeId_1}`]);
-    assert.strictEqual(document.querySelector(".o-mail-ChatWindow-name").textContent, "Mario");
-
-    // click on second employee
-    dom.click(document.querySelectorAll(".o_data_cell .o_m2m_avatar")[1]);
-    await contains(".o-mail-ChatWindow-name", { count: 2 });
-    assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
-    assert.strictEqual(
-        document.querySelectorAll(".o-mail-ChatWindow-name")[1].textContent,
-        "Yoshi"
-    );
+    // // click on second employee
+    // dom.click(document.querySelectorAll(".o_data_cell .o_m2m_avatar")[1]);
+    // await contains(".o-mail-ChatWindow-name", { count: 2 });
+    // assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
+    // assert.strictEqual(
+    //     document.querySelectorAll(".o-mail-ChatWindow-name")[1].textContent,
+    //     "Yoshi"
+    // );
 });
 
 QUnit.test("many2many_avatar_employee widget in kanban view", async function (assert) {
@@ -343,12 +342,9 @@ QUnit.test("many2many_avatar_employee widget in kanban view", async function (as
         `/web/image/hr.employee.public/${employeeId_1}/avatar_128`
     );
 
-    await dom.click(document.querySelectorAll(".o_kanban_record img.o_m2m_avatar")[1]);
-    await dom.click(document.querySelectorAll(".o_kanban_record img.o_m2m_avatar")[0]);
-    assert.verifySteps([
-        `read hr.employee.public ${employeeId_1}`,
-        `read hr.employee.public ${employeeId_2}`,
-    ]);
+    await dom.click(document.querySelectorAll('.o_kanban_record img.o_m2m_avatar')[1]);
+    await dom.click(document.querySelectorAll('.o_kanban_record img.o_m2m_avatar')[0]);
+    // TODO: avatar card employee
 });
 
 QUnit.test(
@@ -397,14 +393,9 @@ QUnit.test(
         await dom.click(
             document.querySelectorAll(".o_field_many2many_avatar_employee .o_tag .o_m2m_avatar")[1]
         );
-        await contains(
-            ".o_notification.border-info:contains(You can only chat with employees that have a dedicated user.)"
-        );
         assert.verifySteps([
             `web_read m2x.avatar.employee ${employeeId_1}`,
-            `read hr.employee.public ${employeeId_1}`,
-            `read hr.employee.public ${employeeId_2}`,
         ]);
-        await contains(".o-mail-ChatWindow-name");
+        // TODO: avtar card employee
     }
 );

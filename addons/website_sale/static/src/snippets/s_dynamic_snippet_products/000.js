@@ -136,12 +136,12 @@ const DynamicSnippetProductsCard = publicWidget.Widget.extend({
             route: "/shop/cart/update_json",
             params: {
                 product_id: $card.find('input[data-product-id]').data('product-id'),
-                add_qty: 1
+                add_qty: 1,
+                display: false,
             },
         });
-        const $navButton = $('header .o_wsale_my_cart').first();
-        await wSaleUtils.animateClone($navButton, $(ev.currentTarget).parents('.card'), 25, 40);
         wSaleUtils.updateCartNavBar(data);
+        wSaleUtils.showCartNotification(this.call.bind(this), data.notification_info);
         if (this.add2cartRerender) {
             this.trigger_up('widgets_start_request', {
                 $target: this.$el.closest('.s_dynamic'),

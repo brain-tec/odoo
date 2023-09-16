@@ -3089,19 +3089,29 @@ class TestMrpOrder(TestMrpCommon):
                 (0, 0, {'product_id': self.product_2.id, 'product_qty': 1.0, 'product_uom_id': self.box250.id}),
             ]
         })
+        self.env['stock.quant'].create({
+            'location_id':self.env.ref('stock.stock_location_stock').id,
+            'product_id': self.product_2.id,
+            'inventory_quantity': 500
+        }).action_apply_inventory()
 
         mo_form = Form(self.env['mrp.production'])
         mo_form.bom_id = test_bom
         mo = mo_form.save()
         mo.action_confirm()
 
+        self.assertEqual(mo.move_raw_ids.product_uom_qty, 1)
+        self.assertEqual(mo.move_raw_ids.move_line_ids.reserved_uom_qty, mo.move_raw_ids.product_uom_qty)
+        self.assertEqual(mo.move_raw_ids.availability, 250)
         update_quantity_wizard = self.env['change.production.qty'].create({
             'mo_id': mo.id,
             'product_qty': 300,
         })
         update_quantity_wizard.change_prod_qty()
 
-        self.assertEqual(mo.move_raw_ids[0].product_uom_qty, 2)
+        self.assertEqual(mo.move_raw_ids.product_uom_qty, 2)
+        self.assertEqual(mo.move_raw_ids.move_line_ids.reserved_uom_qty, mo.move_raw_ids.product_uom_qty)
+        self.assertEqual(mo.move_raw_ids.availability, 0)
 
     def test_update_qty_to_consume_of_component(self):
         """
@@ -3303,3 +3313,47 @@ class TestMrpOrder(TestMrpCommon):
         consumption.action_set_qty()
         self.assertEqual(mo.move_raw_ids[0].product_uom_qty, 30)
         self.assertEqual(mo.move_raw_ids[0].quantity_done, 30)
+
+    def test_exceeded_consumed_qty_and_duplicated_lines(self):
+        """
+        Two components C01, C02. C01 has the MTO route.
+        MO with 1 x C01, 1 x C02, 1 x C02.
+        Process the MO and set a high consumed qty for C01.
+        Ensure that the MO can still be processed and that the consumed quantities
+        are correct.
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        mto_route = warehouse.mto_pull_id.route_id
+        manufacture_route = warehouse.manufacture_pull_id.route_id
+        mto_route.active = True
+
+        product01, product02, product03 = self.env['product.product'].create([{
+            'name': 'Product %s' % (i + 1),
+            'type': 'product',
+        } for i in range(3)])
+
+        product02.route_ids = [(6, 0, (mto_route | manufacture_route).ids)]
+
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.product_id = product01
+        mo_form.product_qty = 1
+        for component in (product02, product03, product03):
+            with mo_form.move_raw_ids.new() as line:
+                line.product_id = component
+                line.product_uom_qty = 1
+        mo = mo_form.save()
+        mo.action_confirm()
+
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1.0
+        mo = mo_form.save()
+
+        mo.move_raw_ids[0].move_line_ids.qty_done = 1.5
+        mo.button_mark_done()
+
+        self.assertEqual(mo.state, 'done')
+
+        p02_raws = mo.move_raw_ids.filtered(lambda m: m.product_id == product02)
+        p03_raws = mo.move_raw_ids.filtered(lambda m: m.product_id == product03)
+        self.assertEqual(sum(p02_raws.mapped('quantity_done')), 1.5)
+        self.assertEqual(sum(p03_raws.mapped('quantity_done')), 2)
