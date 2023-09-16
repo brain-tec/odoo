@@ -28,18 +28,17 @@ export const cartHandlerMixin = {
      * @private
      */
     async _addToCartInPage(params) {
-        params.force_create = true;
         const data = await this._rpc({
             route: "/shop/cart/update_json",
-            params: params,
+            params: {
+                ...params,
+                display: false,
+                force_create: true,
+            },
         })
-        sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
         if (data.cart_quantity && (data.cart_quantity !== parseInt($(".my_cart_quantity").text()))) {
-            // No animation if the product's page images are hidden
-            if ($('div[data-image_width]').data('image_width') !== 'none') {
-                await animateClone($('header .o_wsale_my_cart').first(), this.$itemImgContainer, 25, 40);
-            }
             updateCartNavBar(data);
+            showCartNotification(this.call.bind(this), data.notification_info);
         };
         return data;
     },
@@ -76,7 +75,7 @@ function animateClone($cart, $elem, offsetTop, offsetLeft) {
                     left: $cart.offset().left + offsetLeft,
                     width: 75,
                     height: 75,
-                }, 1000, 'easeInOutExpo');
+                }, 500);
 
             $imgclone.animate({
                 width: 0,
@@ -96,6 +95,7 @@ function animateClone($cart, $elem, offsetTop, offsetLeft) {
  * @param {Object} data
  */
 function updateCartNavBar(data) {
+    sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
     $(".my_cart_quantity")
         .parents('li.o_wsale_my_cart').removeClass('d-none').end()
         .addClass('o_mycart_zoom_animation').delay(300)
@@ -110,6 +110,16 @@ function updateCartNavBar(data) {
 
     $(".js_cart_lines").first().before(data['website_sale.cart_lines']).end().remove();
     $(".js_cart_summary").replaceWith(data['website_sale.short_cart_summary']);
+}
+
+function showCartNotification(callService, props, options = {}) {
+    // Show the notification about the cart
+    if (props.lines) {
+        callService("cartNotificationService", "add", "Item(s) added to your cart", {
+            ...props,
+            ...options,
+        });
+    }
 }
 
 /**
@@ -138,5 +148,6 @@ export default {
     animateClone: animateClone,
     updateCartNavBar: updateCartNavBar,
     cartHandlerMixin: cartHandlerMixin,
+    showCartNotification: showCartNotification,
     showWarning: showWarning,
 };

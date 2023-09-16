@@ -41,7 +41,7 @@ class AccountReport(models.Model):
     country_id = fields.Many2one(string="Country", comodel_name='res.country')
     only_tax_exigible = fields.Boolean(
         string="Only Tax Exigible Lines",
-        compute=lambda x: x._compute_report_option_filter('only_tax_exigible'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('only_tax_exigible'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     availability_condition = fields.Selection(
         string="Availability",
@@ -62,9 +62,11 @@ class AccountReport(models.Model):
             ('last_month', "Last Month"),
             ('last_quarter', "Last Quarter"),
             ('last_year', "Last Year"),
+            ('this_tax_period', "This Tax Period"),
+            ('last_tax_period', "Last Tax Period"),
         ],
         compute=lambda x: x._compute_report_option_filter('default_opening_date_filter', 'last_month'),
-        readonly=False, store=True, depends=['root_report_id'],
+        readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
 
     #  FILTERS =======================================================================================================================================
@@ -73,64 +75,70 @@ class AccountReport(models.Model):
     filter_multi_company = fields.Selection(
         string="Multi-Company",
         selection=[('disabled', "Disabled"), ('selector', "Use Company Selector"), ('tax_units', "Use Tax Units")],
-        compute=lambda x: x._compute_report_option_filter('filter_multi_company', 'disabled'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_multi_company', 'disabled'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_date_range = fields.Boolean(
         string="Date Range",
-        compute=lambda x: x._compute_report_option_filter('filter_date_range', True), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_date_range', True), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_show_draft = fields.Boolean(
         string="Draft Entries",
-        compute=lambda x: x._compute_report_option_filter('filter_show_draft', True), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_show_draft', True), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_unreconciled = fields.Boolean(
         string="Unreconciled Entries",
-        compute=lambda x: x._compute_report_option_filter('filter_unreconciled', False), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_unreconciled', False), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_unfold_all = fields.Boolean(
         string="Unfold All",
-        compute=lambda x: x._compute_report_option_filter('filter_unfold_all'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_unfold_all'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_period_comparison = fields.Boolean(
         string="Period Comparison",
-        compute=lambda x: x._compute_report_option_filter('filter_period_comparison', True), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_period_comparison', True), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_growth_comparison = fields.Boolean(
         string="Growth Comparison",
-        compute=lambda x: x._compute_report_option_filter('filter_growth_comparison', True), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_growth_comparison', True), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_journals = fields.Boolean(
         string="Journals",
-        compute=lambda x: x._compute_report_option_filter('filter_journals'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_journals'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_analytic = fields.Boolean(
         string="Analytic Filter",
-        compute=lambda x: x._compute_report_option_filter('filter_analytic'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_analytic'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_hierarchy = fields.Selection(
         string="Account Groups",
         selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")],
-        compute=lambda x: x._compute_report_option_filter('filter_hierarchy', 'optional'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_hierarchy', 'optional'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_account_type = fields.Boolean(
         string="Account Types",
-        compute=lambda x: x._compute_report_option_filter('filter_account_type'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_account_type'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_partner = fields.Boolean(
         string="Partners",
-        compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
     filter_fiscal_position = fields.Boolean(
         string="Filter Multivat",
-        compute=lambda x: x._compute_report_option_filter('filter_fiscal_position'), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_fiscal_position'), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
 
     def _compute_report_option_filter(self, field_name, default_value=False):
         # We don't depend on the different filter fields on the root report, as we don't want a manual change on it to be reflected on all the reports
         # using it as their root (would create confusion). The root report filters are only used as some kind of default values.
-        for report in self:
+        # When a report is a section, it can also get its default filter values from its parent composite report. This only happens when we're sure
+        # the report is not used as a section of multiple reports, nor as a standalone report.
+        for report in self.sorted(lambda x: not x.section_report_ids):
+            # Reports are sorted in order to first treat the composite reports, in case they need to compute their filters a the same time
+            # as their sections
             if report.root_report_id:
                 report[field_name] = report.root_report_id[field_name]
+            elif len(report.section_main_report_ids) == 1 and not self.env['ir.actions.client'].search_count([('context', 'ilike', f"%'report_id': {report.id}"), ('tag', '=', 'account_report')]):
+                report[field_name] = report.section_main_report_ids[field_name]
             else:
                 report[field_name] = default_value
 
@@ -212,8 +220,18 @@ class AccountReport(models.Model):
         code_mapping = {}
         for line in self.line_ids.filtered(lambda x: not x.parent_id):
             line._copy_hierarchy(copied_report, code_mapping=code_mapping)
+
+        # Replace line codes by their copy in aggregation formulas
+        for expression in copied_report.line_ids.expression_ids:
+            if expression.engine == 'aggregation':
+                copied_formula = f" {expression.formula} " # Add spaces so that the lookahead/lookbehind of the regex can work (we can't do a | in those)
+                for old_code, new_code in code_mapping.items():
+                    copied_formula = re.sub(f"(?<=\\W){old_code}(?=\\W)", new_code, copied_formula)
+                expression.formula = copied_formula.strip() # Remove the spaces introduced for lookahead/lookbehind
+
         for column in self.column_ids:
             column.copy({'report_id': copied_report.id})
+
         return copied_report
 
     @api.ondelete(at_uninstall=False)
@@ -350,13 +368,6 @@ class AccountReportLine(models.Model):
         # Update aggregation expressions, so that they use the copied lines
         for expression in self.expression_ids:
             copy_defaults = {'report_line_id': copied_line.id}
-
-            if expression.engine == 'aggregation':
-                copied_formula = f" {expression.formula} " # Add spaces so that the lookahead/lookbehind of the regex can work (we can't do a | in those)
-                for old_code, new_code in code_mapping.items():
-                    copied_formula = re.sub(f"(?<=\\W){old_code}(?=\\W)", new_code, copied_formula)
-                copy_defaults['formula'] = copied_formula.strip() # Remove the spaces introduced for lookahead/lookbehind
-
             expression.copy(copy_defaults)
 
     def _get_copied_code(self):

@@ -179,7 +179,20 @@ export class PosStore extends Reactive {
         this.showScreen("ProductScreen");
     }
     get productListViewMode() {
-        return this.productListView && this.ui.isSmall ? this.productListView : "grid";
+        const viewMode = this.productListView && this.ui.isSmall ? this.productListView : "grid";
+        if (viewMode === "grid") {
+            return "d-grid gap-1";
+        } else {
+            return "";
+        }
+    }
+    get productViewMode() {
+        const viewMode = this.productListView && this.ui.isSmall ? this.productListView : "grid";
+        if (viewMode === "grid") {
+            return "flex-column";
+        } else {
+            return "flex-row-reverse justify-content-between m-1";
+        }
     }
     getDefaultSearchDetails() {
         return {
@@ -1021,21 +1034,11 @@ export class PosStore extends Reactive {
      * @returns {string}
      */
     async customerDisplayHTML(closeUI = false) {
-        const backgroundImageBase64 =
-            this.config.iface_customer_facing_display_background_image_1920;
-        let backgroundImageCSSValue;
-        if (backgroundImageBase64) {
-            backgroundImageCSSValue = "url('data:image/png;base64," + backgroundImageBase64 + "')";
-        } else {
-            backgroundImageCSSValue = "none";
-        }
-
         const order = this.get_order();
         if (closeUI || !order) {
             return renderToString("point_of_sale.CustomerFacingDisplayNoOrder", {
                 pos: this,
                 origin: window.location.origin,
-                backgroundImageCSSValue,
             });
         }
 
@@ -1053,7 +1056,6 @@ export class PosStore extends Reactive {
             pos: this,
             formatCurrency: this.env.utils.formatCurrency,
             origin: window.location.origin,
-            backgroundImageCSSValue,
             order,
             productImages,
         });

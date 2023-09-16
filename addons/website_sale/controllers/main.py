@@ -328,13 +328,19 @@ class WebsiteSale(http.Controller):
         keep = QueryURL('/shop', **self._shop_get_query_url_kwargs(category and int(category), search, min_price, max_price, **post))
 
         now = datetime.timestamp(datetime.now())
-        pricelist = website.get_current_pricelist()
-        if request.session.get('website_sale_pricelist_time', 0) < now - 60*60: # test: 1 hour in session
-            pricelist = website.pricelist_id
+        pricelist = website.pricelist_id
+        if 'website_sale_pricelist_time' in request.session:
+            # Check if we need to refresh the cached pricelist
+            pricelist_save_time = request.session['website_sale_pricelist_time']
+            if pricelist_save_time < now - 60*60:
+                request.session.pop('website_sale_current_pl', None)
+                website.invalidate_recordset(['pricelist_id'])
+                pricelist = website.pricelist_id
+                request.session['website_sale_pricelist_time'] = now
+                request.session['website_sale_current_pl'] = pricelist.id
+        else:
             request.session['website_sale_pricelist_time'] = now
             request.session['website_sale_current_pl'] = pricelist.id
-
-        request.update_context(pricelist=pricelist.id, partner=request.env.user.partner_id)
 
         filter_by_price_enabled = website.is_view_active('website_sale.filter_products_price')
         if filter_by_price_enabled:
@@ -344,9 +350,9 @@ class WebsiteSale(http.Controller):
         else:
             conversion_rate = 1
 
-        url = "/shop"
+        url = '/shop'
         if search:
-            post["search"] = search
+            post['search'] = search
         if attrib_list:
             post['attrib'] = attrib_list
 
@@ -440,7 +446,9 @@ class WebsiteSale(http.Controller):
                 layout_mode = 'grid'
             request.session['website_sale_shop_layout_mode'] = layout_mode
 
-        products_prices = lazy(lambda: products._get_sales_prices(pricelist))
+        # Try to fetch geoip based fpos or fallback on partner one
+        fiscal_position_sudo = website.fiscal_position_id.sudo()
+        products_prices = lazy(lambda: products._get_sales_prices(pricelist, fiscal_position_sudo))
 
         values = {
             'search': fuzzy_search_term or search,
@@ -451,6 +459,7 @@ class WebsiteSale(http.Controller):
             'attrib_set': attrib_set,
             'pager': pager,
             'pricelist': pricelist,
+            'fiscal_position': fiscal_position_sudo,
             'add_qty': add_qty,
             'products': products,
             'search_product': search_product,
@@ -539,8 +548,7 @@ class WebsiteSale(http.Controller):
             combination = request.env['product.template.attribute.value'].browse(combination_ids)
             product_product = product_template._get_variant_for_combination(combination)
             if not product_product:
-                product_product = request.env['product.product'].browse(
-                    product_template.create_product_variant(combination_ids))
+                product_product = product_template._create_product_variant(combination)
         if product_template.has_configurable_attributes and product_product:
             product_product.write({
                 'product_variant_image_ids': image_create_data
@@ -674,7 +682,7 @@ class WebsiteSale(http.Controller):
         return {
             'search': search,
             'category': category,
-            'pricelist': request.website.get_current_pricelist(),
+            'pricelist': request.website.pricelist_id,
             'attrib_values': attrib_values,
             'attrib_set': attrib_set,
             'keep': keep,
@@ -697,7 +705,7 @@ class WebsiteSale(http.Controller):
                 min_price = args.get('min_price')
                 max_price = args.get('max_price')
                 if min_price or max_price:
-                    previous_price_list = request.website.get_current_pricelist()
+                    previous_price_list = request.website.pricelist_id
                     try:
                         min_price = float(min_price)
                         args['min_price'] = min_price and str(
@@ -790,10 +798,6 @@ class WebsiteSale(http.Controller):
             values['suggested_products'] = order._cart_accessories()
             values.update(self._get_express_shop_payment_values(order))
 
-        if post.get('type') == 'popover':
-            # force no-cache so IE11 doesn't cache this XHR
-            return request.render("website_sale.cart_popover", values, headers={'Cache-Control': 'no-cache'})
-
         values.update(self._cart_values(**post))
         return request.render("website_sale.cart", values)
 
@@ -866,6 +870,7 @@ class WebsiteSale(http.Controller):
             **kw
         )
 
+        values['notification_info'] = self._get_cart_notification_information(order, [values['line_id']])
         request.session['website_sale_cart_quantity'] = order.cart_quantity
 
         if not order.cart_quantity:
@@ -911,6 +916,44 @@ class WebsiteSale(http.Controller):
         order = request.website.sale_get_order()
         for line in order.order_line:
             line.unlink()
+
+    def _get_cart_notification_information(self, order, line_ids):
+        """ Get the information about the sale order line to show in the notification.
+
+        :param recordset order: The sale order containing the lines.
+        :param list(int) line_ids: The ids of the lines to display in the notification.
+        :rtype: dict
+        :return: A dict with the following structure:
+            {
+                'currency_id': int
+                'lines': [{
+                    'id': int
+                    'image_url': int
+                    'quantity': float
+                    'name': str
+                    'description': str
+                    'line_price_total': float
+                }],
+            }
+        """
+        lines = order.order_line.filtered(lambda line: line.id in line_ids)
+        if not lines:
+            return {}
+
+        show_tax = order.website_id.show_line_subtotals_tax_selection == 'tax_included'
+        return {
+            'currency_id': order.currency_id.id,
+            'lines': [
+                { # For the cart_notification
+                    'id': line.id,
+                    'image_url': order.website_id.image_url(line.product_id, 'image_128'),
+                    'quantity': line.product_uom_qty,
+                    'name': line.name_short,
+                    'description': line._get_sale_order_line_multiline_description_variants(),
+                    'line_price_total': line.price_total if show_tax else line.price_subtotal,
+                } for line in lines
+            ],
+        }
 
     # ------------------------------------------------------
     # Checkout
@@ -1881,15 +1924,15 @@ class CustomerPortal(sale_portal.CustomerPortal):
         return {}
 
     @http.route('/my/orders/reorder_modal_content', type='json', auth='public', website=True)
-    def _get_saleorder_reorder_content_modal(self, order_id, access_token):
+    def my_orders_reorder_modal_content(self, order_id, access_token):
         try:
             sale_order = self._document_check_access('sale.order', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        pricelist = request.env['website'].get_current_website().get_current_pricelist()
+        currency = request.env['website'].get_current_website().currency_id
         result = {
-            'currency': pricelist.currency_id.id,
+            'currency': currency.id,
             'products': [],
         }
         for line in sale_order.order_line:
@@ -1921,8 +1964,9 @@ class CustomerPortal(sale_portal.CustomerPortal):
                 'has_image': bool(line.product_id.image_128),
             }
             if res['add_to_cart_allowed']:
-                res['combinationInfo'] = line.product_id.product_tmpl_id.with_context(**self._sale_reorder_get_line_context())\
-                    ._get_combination_info(combination, res['product_id'], res['qty'], pricelist)
+                res['combinationInfo'] = line.product_id.product_tmpl_id.with_context(
+                    **self._sale_reorder_get_line_context()
+                )._get_combination_info(combination, res['product_id'], res['qty'])
             else:
                 res['combinationInfo'] = {}
             result['products'].append(res)
