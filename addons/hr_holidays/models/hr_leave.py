@@ -233,7 +233,7 @@ class HolidaysRequest(models.Model):
         inverse='_inverse_supported_attachment_ids')
     supported_attachment_ids_count = fields.Integer(compute='_compute_supported_attachment_ids')
     # UX fields
-    all_employee_ids = fields.Many2many('hr.employee', compute='_compute_all_employees', compute_sudo=True)
+    all_employee_ids = fields.Many2many('hr.employee', compute='_compute_all_employees', compute_sudo=True, context={'active_test': False})
     leave_type_request_unit = fields.Selection(related='holiday_status_id.request_unit', readonly=True)
     leave_type_support_document = fields.Boolean(related="holiday_status_id.support_document")
     # Interface fields used when not using hour-based computation
@@ -1609,7 +1609,7 @@ class HolidaysRequest(models.Model):
             if holiday.state == 'draft':
                 to_clean |= holiday
             elif holiday.state == 'confirm':
-                if holiday.holiday_status_id.responsible_ids:
+                if holiday.holiday_status_id.leave_validation_type != 'no_validation':
                     user_ids = holiday.sudo()._get_responsible_for_approval().ids or self.env.user.ids
                     for user_id in user_ids:
                         activity_vals.append({
