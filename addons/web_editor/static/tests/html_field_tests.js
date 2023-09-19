@@ -7,6 +7,7 @@ import { HtmlField } from "@web_editor/js/backend/html_field";
 import { parseHTML } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { onRendered } from "@odoo/owl";
 import { wysiwygData } from "web_editor.test_utils";
+import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
 
 // Legacy
 import legacyEnv from 'web.commonEnv';
@@ -291,7 +292,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
     QUnit.module('Save scenarios');
 
     QUnit.test("Ensure that urgentSave works even with modified image to save", async (assert) => {
-        assert.expect(3);
+        assert.expect(5);
         let formController;
         // Patch to get the controller instance.
         patchWithCleanup(FormController.prototype, {
@@ -375,6 +376,8 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
                 route === `/web_editor/modify_image/${imageRecord.id}`
             ) {
                 if (modifyImageCount === 0) {
+                    assert.equal(args.res_model, 'partner');
+                    assert.equal(args.res_id, 1);
                     await modifyImagePromise;
                     return newImageSrc;
                 } else {
@@ -414,7 +417,6 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
 
         // Replace the empty paragraph with a paragrah containing an unsaved
         // modified image
-        editor.editable.classList.add("o_dirty");
         const imageContainerElement = parseHTML(imageContainerHTML).firstChild;
         let paragraph = editor.editable.querySelector(".test_target");
         editor.editable.replaceChild(imageContainerElement, paragraph);
@@ -433,5 +435,121 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         // Simulate the last urgent save, with the modified image.
         await formController.beforeUnload();
         await nextTick();
+    });
+
+    QUnit.test("Pasted/dropped images are converted to attachments on save", async (assert) => {
+        assert.expect(6);
+
+        // Patch to get a promise to get the htmlField component instance when
+        // the wysiwyg is instancied.
+        const htmlFieldPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await this._super(...arguments);
+                await nextTick();
+                htmlFieldPromise.resolve(this);
+            }
+        });
+        // Add a partner record
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p class='test_target'><br></p>",
+        });
+
+        const mockRPC = async function (route, args) {
+            if (route === '/web_editor/attachment/add_data') {
+                // Check that the correct record model and id were sent.
+                assert.equal(args.res_model, 'partner');
+                assert.equal(args.res_id, 1);
+                return {
+                    image_src: '/test_image_url.png',
+                    access_token: '1234',
+                    public: false,
+                }
+            }
+        };
+
+        const pasteImage = async (editor) => {
+            // Create image file.
+            const base64ImageData = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+            const binaryImageData = atob(base64ImageData);
+            const uint8Array = new Uint8Array(binaryImageData.length);
+            for (let i = 0; i < binaryImageData.length; i++) {
+                uint8Array[i] = binaryImageData.charCodeAt(i);
+            }
+            const file = new File([uint8Array], "test_image.png", { type: 'image/png' });
+
+            // Create a promise to get the created img elements
+            const pasteImagePromise = makeDeferred();
+            const observer = new MutationObserver(mutations => {
+                mutations
+                    .filter(mutation => mutation.type === 'childList')
+                    .forEach(mutation => {
+                        mutation.addedNodes.forEach(node => {
+                            if (node instanceof HTMLElement) {
+                                pasteImagePromise.resolve(node);
+                            }
+                        });
+                    });
+            });
+            observer.observe(editor.editable, { subtree: true, childList: true });
+
+            // Simulate paste.
+            editor._onPaste({
+                preventDefault() {},
+                clipboardData: {
+                    getData() {},
+                    items: [{
+                        kind: 'file',
+                        type: 'image/png',
+                        getAsFile: () => file,
+                    }],
+                },
+            });
+
+            const img = await pasteImagePromise;
+            observer.disconnect();
+            return img;
+        }
+
+        // Add the ajax service (legacy), because wysiwyg RPCs use it.
+        patchWithCleanup(legacyEnv, {
+            services: {
+                ...legacyEnv.services,
+                ajax: {
+                    rpc: mockRPC,
+                },
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+            mockRPC: mockRPC,
+        });
+        // Let the htmlField be mounted and recover the Component instance.
+        const htmlField = await htmlFieldPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+
+        const paragraph = editor.editable.querySelector(".test_target");
+        Wysiwyg.setRange(paragraph);
+
+        // Paste image.
+        const img = await pasteImage(editor);
+        // Test environment replaces 'src' by 'data-src'.
+        assert.ok(/^data:image\/png;base64,/.test(img.dataset['src']));
+        assert.ok(img.classList.contains('o_b64_image_to_save'));
+
+        // Save changes.
+        // Restore 'src' attribute so that SavePendingImages can do its job.
+        img.src = img.dataset['src'];
+        await htmlField.commitChanges();
+        assert.equal(img.dataset['src'], '/test_image_url.png?access_token=1234');
+        assert.ok(!img.classList.contains('o_b64_image_to_save'));
     });
 });
