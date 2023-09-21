@@ -36,7 +36,8 @@ class StockMoveLine(models.Model):
         'Real Reserved Quantity', digits=0, copy=False,
         compute='_compute_reserved_qty', inverse='_set_reserved_qty', store=True)
     reserved_uom_qty = fields.Float(
-        'Reserved', default=0.0, digits='Product Unit of Measure', required=True, copy=False)
+        'Reserved', default=0.0, digits='Product Unit of Measure',
+        required=True, copy=False, compute='_compute_qty_reserved', store=True, readonly=False)
     qty_done = fields.Float('Done', digits='Product Unit of Measure', copy=False,
         compute='_compute_qty_done', store=True, readonly=False)
     package_id = fields.Many2one(
@@ -140,7 +141,16 @@ class StockMoveLine(models.Model):
                 if (record.move_id.product_qty - record.move_id.quantity_done):
                     record.qty_done = min(record.quant_id.available_quantity, max(record.move_id.product_qty - record.move_id.quantity_done, 0))
                 else:
-                    record.qty_done = record.quant_id.quantity
+                    record.qty_done = record.quant_id.available_quantity
+
+    @api.depends('quant_id')
+    def _compute_qty_reserved(self):
+        for record in self:
+            if not record.reserved_uom_qty:
+                if (record.move_id.product_qty - record.move_id.quantity_done):
+                    record.reserved_uom_qty = min(record.quant_id.available_quantity, max(record.move_id.product_qty - record.move_id.quantity_done, 0))
+                else:
+                    record.reserved_uom_qty = record.quant_id.available_quantity
 
 
     @api.constrains('lot_id', 'product_id')
@@ -319,7 +329,10 @@ class StockMoveLine(models.Model):
                 moves = move_line.picking_id.move_ids.filtered(lambda x: x.product_id == move_line.product_id)
                 moves = sorted(moves, key=lambda m: m.quantity_done < m.product_qty, reverse=True)
                 if moves:
-                    move_line.move_id = moves[0].id
+                    move_line.write({
+                        'move_id': moves[0].id,
+                        'picking_id': moves[0].picking_id.id,
+                    })
                 else:
                     create_move(move_line)
             else:
@@ -352,11 +365,8 @@ class StockMoveLine(models.Model):
         moves_to_update = mls.filtered(
             lambda ml:
             ml.move_id and
-            ml.qty_done and (
-                ml.move_id.state == 'done' or (
-                    ml.move_id.picking_id and
-                    ml.move_id.picking_id.immediate_transfer
-                ))
+            ml.qty_done and
+            ml.move_id.state == 'done'
         ).move_id
         for move in moves_to_update:
             move.with_context(avoid_putaway_rules=True).product_uom_qty = move.quantity_done
@@ -512,7 +522,6 @@ class StockMoveLine(models.Model):
         # this is what move's `action_done` will do. So, we replicate the behavior here.
         if updates or 'qty_done' in vals:
             moves = self.filtered(lambda ml: ml.move_id.state == 'done').mapped('move_id')
-            moves |= self.filtered(lambda ml: ml.move_id.state not in ('done', 'cancel') and ml.move_id.picking_id.immediate_transfer).mapped('move_id')
             for move in moves:
                 move.product_uom_qty = move.quantity_done
             next_moves._do_unreserve()
@@ -897,6 +906,7 @@ class StockMoveLine(models.Model):
             'restrict_partner_id': self.picking_id.owner_id.id,
             'company_id': self.picking_id.company_id.id,
             'partner_id': self.picking_id.partner_id.id,
+            'package_level_id': self.package_level_id.id,
         }
 
     def _copy_quant_info(self, vals):

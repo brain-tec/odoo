@@ -3,31 +3,33 @@
 import { registry } from "@web/core/registry";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
-import { ViewButton } from "@web/views/view_button/view_button";
 
-class MoveViewButton extends ViewButton {
-    async onClick(ev) {
-        if (this.props.clickParams.name != "action_show_details") {
-            super.onClick(ev);
-        } else {
-            await this.props.record.saveAndOpenDetails();
+export class MovesListRenderer extends ListRenderer {
+    processAllColumn(allColumns, list) {
+        let cols = super.processAllColumn(...arguments);
+        if (list.resModel === "stock.move") {
+            cols.push({
+                type: 'opendetailsop',
+                id: `column_detailOp_${cols.length}`,
+            });
         }
-    }
-
-    get disabled() {
-        if (this.props.clickParams.name == "action_show_details") {
-            return false;
-        }
-        return super.disabled;
+        return cols;
     }
 }
 
-MoveViewButton.props = [...ViewButton.props];
-export class MovesListRenderer extends ListRenderer {}
+MovesListRenderer.props = [ ...ListRenderer.props, 'stockMoveOpen?']
 
-MovesListRenderer.components = { ...ListRenderer.components, ViewButton: MoveViewButton };
+export class StockMoveX2ManyField extends X2ManyField {
+    setup() {
+        super.setup();
+        this.canOpenRecord = true;
+    }
 
-export class StockMoveX2ManyField extends X2ManyField {}
+    get isMany2Many() {
+        return false;
+    }
+}
+
 StockMoveX2ManyField.components = { ...X2ManyField.components, ListRenderer: MovesListRenderer };
 
 export const stockMoveX2ManyField = {
