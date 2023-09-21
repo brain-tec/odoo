@@ -85,10 +85,10 @@ class TestPacking(TestPackingCommon):
         pick_picking.move_line_ids.filtered(lambda ml: ml.product_id == self.productA and ml.qty_done == 0.0).qty_done = 4.0
         pick_picking.move_line_ids.filtered(lambda ml: ml.product_id == self.productB and ml.qty_done == 0.0).qty_done = 3.0
         second_pack = pick_picking.action_put_in_pack()
-        self.assertEqual(len(pick_picking.move_ids_without_package), 0)
+        self.assertEqual(len(pick_picking.move_ids_without_package), 2)
         self.assertEqual(len(packing_picking.move_ids_without_package), 2)
         pick_picking.button_validate()
-        self.assertEqual(len(packing_picking.move_ids_without_package), 0)
+        self.assertEqual(len(packing_picking.move_ids_without_package), 2)
         self.assertEqual(len(first_pack.quant_ids), 2)
         self.assertEqual(len(second_pack.quant_ids), 2)
         packing_picking.action_assign()
@@ -470,10 +470,10 @@ class TestPacking(TestPackingCommon):
         # Add 2 lines
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.productA
-            move_line.quantity_done = 1
+            move_line.product_uom_qty = 1
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.productB
-            move_line.quantity_done = 1
+            move_line.product_uom_qty = 1
         receipt = receipt_form.save()
         receipt.action_reset_draft()
         receipt.action_confirm()
@@ -622,10 +622,10 @@ class TestPacking(TestPackingCommon):
         # Add 2 lines
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.productA
-            move_line.quantity_done = 1
+            move_line.product_uom_qty = 1
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.productB
-            move_line.quantity_done = 1
+            move_line.product_uom_qty = 1
         receipt = receipt_form.save()
         receipt.action_reset_draft()
         receipt.action_confirm()
@@ -906,6 +906,7 @@ class TestPacking(TestPackingCommon):
         self.assertEqual(len(picking.move_ids), 1, 'Should have only 1 stock move')
 
     def test_picking_state_with_null_qty(self):
+        """ Exclude empty stock move of the picking state computation """
         delivery_form = Form(self.env['stock.picking'])
         picking_type_id = self.warehouse.out_type_id
         delivery_form.picking_type_id = picking_type_id

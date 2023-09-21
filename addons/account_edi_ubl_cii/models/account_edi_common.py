@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from odoo import _, models, Command
 from odoo.tools import float_repr
 from odoo.exceptions import UserError, ValidationError
@@ -103,6 +101,10 @@ class AccountEdiCommon(models.AbstractModel):
         if amount is None:
             return None
         return float_repr(float_round(amount, precision_digits), precision_digits)
+
+    def _get_currency_decimal_places(self, currency_id):
+        # Allows other documents to easily override in case there is a flat max precision number
+        return currency_id.decimal_places
 
     def _get_uom_unece_code(self, line):
         """
@@ -225,17 +227,21 @@ class AccountEdiCommon(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _check_required_fields(self, record, field_names, custom_warning_message=""):
-        """
-        This function check that a field exists on a record or dictionaries
-        returns a generic error message if it's not the case or a custom one if specified
+        """Check if at least one of the field_names are set on the record/dict
+
+        :param record: either a recordSet or a dict
+        :param field_names: The field name or list of field name that has to
+                            be checked. If a list is provided, check that at
+                            least one of them is set.
+        :return: an Error message or None
         """
         if not record:
             return custom_warning_message or _("The element %s is required on %s.", record, ', '.join(field_names))
 
-        if not isinstance(field_names, list):
-            field_names = [field_names]
+        if not isinstance(field_names, (list, tuple)):
+            field_names = (field_names,)
 
-        has_values = any(record[field_name] for field_name in field_names)
+        has_values = any((field_name in record and record[field_name]) for field_name in field_names)
         # field is present
         if has_values:
             return
@@ -436,32 +442,6 @@ class AccountEdiCommon(models.AbstractModel):
 
         invoice.write({'invoice_line_ids': line_vals})
         return logs
-
-    def _import_fill_invoice_down_payment(self, invoice, prepaid_node, qty_factor):
-        """
-        DEPRECATED: removed in master
-        Creates a down payment line on the invoice at import if prepaid_node (TotalPrepaidAmount in CII,
-        PrepaidAmount in UBL) exists.
-        qty_factor -1 if the xml is labelled as an invoice but has negative amounts -> conversion into a credit note
-        needed, so we need this multiplier. Otherwise, qty_factor is 1.
-        """
-        if prepaid_node is not None and float(prepaid_node.text) != 0:
-            invoice.write({
-                'invoice_line_ids': [
-                    Command.create({
-                        'display_type': 'line_section',
-                        'sequence': 9998,
-                        'name': _("Down Payments"),
-                    }),
-                    Command.create({
-                        'sequence': 9999,
-                        'name': _("Down Payment"),
-                        'price_unit': float(prepaid_node.text),
-                        'quantity': qty_factor * -1,
-                        'tax_ids': False,
-                    }),
-                ]
-            })
 
     def _import_log_prepaid_amount(self, invoice_form, prepaid_node, qty_factor):
         """

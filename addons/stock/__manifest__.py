@@ -67,8 +67,6 @@
         'wizard/stock_inventory_warning.xml',
         'wizard/stock_label_type.xml',
         'wizard/stock_lot_label_layout.xml',
-        'wizard/stock_generate_serial_views.xml',
-        'wizard/stock_import_lot_views.xml',
 
         'views/res_partner_views.xml',
         'views/product_strategy_views.xml',
@@ -112,7 +110,7 @@
             'stock/static/src/scss/stock_traceability_report.scss',
         ],
         'web.assets_tests': [
-            'stock/static/tests/tours/stock_report_tests.js',
+            'stock/static/tests/tours/*.js',
         ],
         'web.qunit_suite_tests': [
             'stock/static/tests/inventory_report_list_tests.js',
