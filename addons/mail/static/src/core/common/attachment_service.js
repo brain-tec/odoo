@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 import { assignDefined } from "@mail/utils/common/misc";
 
 import { registry } from "@web/core/registry";
@@ -43,11 +42,10 @@ export class AttachmentService {
             const threadData = Array.isArray(data.originThread)
                 ? data.originThread[0][1]
                 : data.originThread;
-            this.store.Thread.insert({
+            attachment.originThread = this.store.Thread.insert({
                 model: threadData.model,
                 id: threadData.id,
             });
-            attachment.originThreadLocalId = this.store.Thread.localId(threadData);
             const thread = attachment.originThread;
             if (attachment.notIn(thread.attachments)) {
                 thread.attachments.push(attachment);
@@ -59,29 +57,13 @@ export class AttachmentService {
     /**
      * Remove the given attachment globally.
      *
-     * @param {Attachment} attachment
+     * @param {import("models").Attachment} attachment
      */
     remove(attachment) {
         if (attachment.tmpUrl) {
             URL.revokeObjectURL(attachment.tmpUrl);
         }
         attachment.delete();
-        if (attachment.originThread) {
-            removeFromArrayWithPredicate(attachment.originThread.attachments, (att) =>
-                att.eq(attachment)
-            );
-        }
-        for (const message of Object.values(this.store.Message.records)) {
-            removeFromArrayWithPredicate(message.attachments, (att) => att.eq(attachment));
-            if (message.composer) {
-                removeFromArrayWithPredicate(message.composer.attachments, (att) =>
-                    att.eq(attachment)
-                );
-            }
-        }
-        for (const thread of Object.values(this.store.Thread.records)) {
-            removeFromArrayWithPredicate(thread.composer.attachments, (att) => att.eq(attachment));
-        }
     }
 
     /**

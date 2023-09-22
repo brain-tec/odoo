@@ -2,11 +2,7 @@
 
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
-import {
-    removeFromArray,
-    removeFromArrayWithPredicate,
-    replaceArrayWithCompare,
-} from "@mail/utils/common/arrays";
+import { removeFromArray, replaceArrayWithCompare } from "@mail/utils/common/arrays";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 import { assignDefined, nullifyClearCommands } from "@mail/utils/common/misc";
 
@@ -48,9 +44,9 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models).Thread} thread
      * @param {number} id
-     * @returns {Promise<Thread>}
+     * @returns {Promise<import("models").Thread>}
      */
     async fetchChannel(id) {
         const [channelData] = await this.rpc("/discuss/channel/info", { channel_id: id });
@@ -78,13 +74,13 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona || channelMember.partner) {
-                this.store.ChannelMember.insert({ ...channelMember, threadId: thread.id });
+                this.store.ChannelMember.insert({ ...channelMember, thread });
             }
         }
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     async markAsRead(thread) {
         if (!thread.isLoaded && thread.status === "loading") {
@@ -147,7 +143,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     async markAsFetched(thread) {
         await this.orm.silent.call("discuss.channel", "channel_fetched", [[thread.id]]);
@@ -181,7 +177,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      * @param {{after: Number, before: Number}}
      */
     async fetchMessages(thread, { after, before } = {}) {
@@ -218,7 +214,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     async fetchNewMessages(thread) {
         if (
@@ -297,7 +293,7 @@ export class ThreadService {
      * messages around the message to jump to if required, and update the thread
      * messages accordingly.
      *
-     * @param {Message} [messageId] if not provided, load around newest message
+     * @param {import("models").Message} [messageId] if not provided, load around newest message
      */
     async loadAround(thread, messageId) {
         if (!thread.messages.some(({ id }) => id === messageId)) {
@@ -364,7 +360,7 @@ export class ThreadService {
     });
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      * @param {"older"|"newer"} epoch
      */
     async fetchMoreMessages(thread, epoch = "older") {
@@ -453,7 +449,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      * @param {boolean} replaceNewMessageChatWindow
      */
     open(thread, replaceNewMessageChatWindow) {
@@ -472,7 +468,7 @@ export class ThreadService {
      * @param {Object} param0
      * @param {number} param0.userId
      * @param {number} param0.partnerId
-     * @returns {Promise<import { Persona } from "@mail/core/common/persona_model";> | undefined}
+     * @returns {Promise<import("models").Persona> | undefined}
      */
     async getPartner({ userId, partnerId }) {
         if (userId) {
@@ -525,15 +521,15 @@ export class ThreadService {
     }
 
     /**
-     * @param {import { Persona } from "@mail/core/common/persona_model";} partner
-     * @returns {Thread | undefined}
+     * @param {import("model ").Persona} partner
+     * @returns {import("models").Thread | undefined}
      */
     searchChat(partner) {
         if (!partner) {
             return;
         }
         return Object.values(this.store.Thread.records).find(
-            (thread) => thread.type === "chat" && thread.chatPartnerId === partner.id
+            (thread) => thread.type === "chat" && thread.chatPartner?.eq(partner)
         );
     }
 
@@ -542,7 +538,7 @@ export class ThreadService {
      * @param {Object} param0
      * @param {number} param0.userId
      * @param {number} param0.partnerId
-     * @returns {Promise<Thread | undefined>}
+     * @returns {Promise<import("models").Thread | undefined>}
      */
     async getChat({ userId, partnerId }) {
         const partner = await this.getPartner({ userId, partnerId });
@@ -594,7 +590,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models).Thread} thread
      * @param {string} name
      */
     async renameThread(thread, name) {
@@ -640,7 +636,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models").Thread} thread
      * @param {boolean} pushState
      */
     setDiscussThread(thread, pushState = true) {
@@ -668,7 +664,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models").Thread} thread
      * @param {Object} data
      */
     update(thread, data) {
@@ -707,7 +703,12 @@ export class ThreadService {
             if (serverData.channel && "message_unread_counter" in serverData.channel) {
                 thread.message_unread_counter = serverData.channel.message_unread_counter;
             }
-            thread.lastServerMessageId = serverData.last_message_id ?? thread.lastServerMessageId;
+            const lastServerMessageId = serverData.last_message_id ?? thread.lastServerMessage?.id;
+            if (thread.lastServerMessage?.id !== lastServerMessageId) {
+                thread.lastServerMessage = this.store.Message.insert({
+                    id: lastServerMessageId,
+                });
+            }
             if (thread.model === "discuss.channel" && serverData.channel) {
                 nullifyClearCommands(serverData.channel);
                 thread.channel = assignDefined(thread.channel ?? {}, serverData.channel);
@@ -730,7 +731,7 @@ export class ThreadService {
                             (serverData.channel.channelMembers[0][1].length === 1 &&
                                 member.persona?.eq(thread._store.user))
                         ) {
-                            thread.chatPartnerId = member.persona.id;
+                            thread.chatPartner = member.persona;
                         }
                     }
                 }
@@ -797,7 +798,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      * @param {string} body
      */
     async post(
@@ -863,10 +864,7 @@ export class ThreadService {
             thread.seen_message_id = tmpMsg.id;
         }
         const data = await this.rpc(this.getMessagePostRoute(thread), params);
-        if (thread.type !== "chatter") {
-            removeFromArrayWithPredicate(thread.messages, (msg) => msg.eq(tmpMsg));
-            tmpMsg.delete();
-        }
+        tmpMsg?.delete();
         if (!data) {
             return;
         }
@@ -934,14 +932,14 @@ export class ThreadService {
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     getMessagePostRoute(thread) {
         return "/mail/message/post";
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     canLeave(thread) {
         return (
@@ -952,14 +950,14 @@ export class ThreadService {
     }
     /**
      *
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     canUnpin(thread) {
         return thread.type === "chat" && this.getCounter(thread) === 0;
     }
 
     /**
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     getCounter(thread) {
         if (thread.type === "mailbox") {
@@ -983,7 +981,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models").Thread} thread
      * @param {number} index
      */
     async setMainAttachmentFromIndex(thread, index) {
@@ -994,7 +992,7 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/composer_model").Composer} composer
+     * @param {import("models").Composer} composer
      */
     clearComposer(composer) {
         composer.attachments.length = 0;
@@ -1007,8 +1005,8 @@ export class ThreadService {
     }
 
     /**
-     * @param {import("@mail/core/common/persona_model").Persona} persona
-     * @param {import("@mail/core/common/thread_model").Thread} [thread]
+     * @param {import("models").Persona} persona
+     * @param {import("models").Thread} [thread]
      */
     avatarUrl(persona, thread) {
         if (!persona) {
@@ -1060,7 +1058,7 @@ export class ThreadService {
      * Transient messages are missing, so this function puts known transient messages at the
      * right place in message list of thread.
      *
-     * @param {Thread} thread
+     * @param {import("models").Thread} thread
      */
     _enrichMessagesWithTransient(thread) {
         for (const message of thread.transientMessages) {

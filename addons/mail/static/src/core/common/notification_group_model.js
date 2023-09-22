@@ -8,19 +8,19 @@ import { _t } from "@web/core/l10n/translation";
 let nextId = 1;
 export class NotificationGroup extends Record {
     static id = "id";
-    /** @type {NotificationGroup[]} */
+    /** @type {import("models").NotificationGroup[]} */
     static records = [];
-    /** @returns {NotificationGroup} */
+    /** @returns {import("models").NotificationGroup} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {NotificationGroup} */
+    /** @returns {import("models").NotificationGroup} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object} data
-     * @returns {NotificationGroup}
+     * @returns {import("models").NotificationGroup}
      */
     static insert(data) {
         let group = this.records.find((group) => {
@@ -45,14 +45,12 @@ export class NotificationGroup extends Record {
         return group;
     }
 
-    /** @type {import("@mail/core/common/notification_model").Notification[]} */
-    notifications = [];
+    notifications = Record.many("Notification");
     /** @type {string} */
     modelName;
     /** @type {string} */
     resModel;
-    /** @type {number} */
-    lastMessageId;
+    lastMessage = Record.one("Message");
     /** @type {Set<number>} */
     resIds = new Set();
     /** @type {'sms' | 'email'} */
@@ -64,10 +62,6 @@ export class NotificationGroup extends Record {
 
     get body() {
         return _t("An error occurred when sending an email");
-    }
-
-    get lastMessage() {
-        return this._store.Message.get(this.lastMessageId);
     }
 
     get datetime() {

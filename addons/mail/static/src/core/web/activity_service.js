@@ -24,7 +24,7 @@ export class ActivityService {
     }
 
     /**
-     * @param {import("@mail/core/web/activity_model").Activity} activity
+     * @param {import("models").Activity} activity
      * @param {number[]} attachmentIds
      */
     async markAsDone(activity, attachmentIds = []) {
@@ -108,6 +108,8 @@ export class ActivityService {
     _serialize(activity) {
         const data = { ...activity };
         delete data._store;
+        delete data.__rels__;
+        delete data.__invs__;
         delete data.Model;
         return JSON.parse(JSON.stringify(data));
     }

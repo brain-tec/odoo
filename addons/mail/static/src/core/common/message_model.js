@@ -14,19 +14,19 @@ const { DateTime } = luxon;
 
 export class Message extends Record {
     static id = "id";
-    /** @type {Object.<number, Message>} */
+    /** @type {Object.<number, import("models").Message>} */
     static records = {};
-    /** @returns {Message} */
+    /** @returns {import("models").Message} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {Message} */
+    /** @returns {import("models").Message} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object} data
-     * @returns {Message}
+     * @returns {import("models").Message}
      */
     static insert(data) {
         if (data.res_id) {
@@ -40,10 +40,8 @@ export class Message extends Record {
         return message;
     }
 
-    /** @type {Object[]} */
-    attachments = [];
-    /** @type {import("@mail/core/common/persona_model").Persona} */
-    author;
+    attachments = Record.many("Attachment");
+    author = Record.one("Persona");
     /** @type {string} */
     body;
     /** @type {string} */
@@ -58,20 +56,15 @@ export class Message extends Record {
     isStarred;
     /** @type {boolean} */
     isTransient;
-    /** @type {LinkPreview[]} */
-    linkPreviews = [];
+    linkPreviews = Record.many("LinkPreview");
     /** @type {number[]} */
     needaction_partner_ids = [];
     /** @type {number[]} */
     history_partner_ids = [];
-    /** @type {Message|undefined} */
-    parentMessage;
-    /** @type {MessageReactions[]} */
-    reactions = [];
-    /** @type {import("@mail/core/common/notification_model").Notification[]} */
-    notifications = [];
-    /** @type {import("@mail/core/common/persona_model").Persona[]} */
-    recipients = [];
+    parentMessage = Record.one("Message");
+    reactions = Record.many("MessageReactions");
+    notifications = Record.many("Notification");
+    recipients = Record.many("Persona");
     /** @type {number|string} */
     resId;
     /** @type {string|undefined} */

@@ -6,24 +6,24 @@ import { Record } from "@mail/core/common/record";
  * @class ChannelMember
  * @typedef Data
  * @property {number} id
- * @property {string} personaLocalId
- * @property {number} threadId
+ * @property {import("models").Persona} persona
+ * @property {import("models").Thread} thread
  */
 export class ChannelMember extends Record {
     static id = "id";
-    /** @type {Object.<number, ChannelMember>} */
+    /** @type {Object.<number, import("models").ChannelMember>} */
     static records = {};
-    /** @returns {ChannelMember} */
+    /** @returns {import("models").ChannelMember} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {ChannelMember} */
+    /** @returns {import("models").ChannelMember} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object|Array} data
-     * @returns {ChannelMember}
+     * @returns {import("models").ChannelMember}
      */
     static insert(data) {
         const memberData = Array.isArray(data) ? data[1] : data;
@@ -34,25 +34,9 @@ export class ChannelMember extends Record {
 
     /** @type {number} */
     id;
-    personaLocalId;
-    rtcSessionId;
-    threadId;
-
-    get persona() {
-        return this._store.Persona.records[this.personaLocalId];
-    }
-
-    set persona(persona) {
-        this.personaLocalId = persona?.localId;
-    }
-
-    get rtcSession() {
-        return this._store.RtcSession.get(this.rtcSessionId);
-    }
-
-    get thread() {
-        return this._store.Thread.get({ model: "discuss.channel", id: this.threadId });
-    }
+    persona = Record.one("Persona");
+    rtcSession = Record.one("RtcSession");
+    thread = Record.one("Thread");
 
     /**
      * @returns {string}

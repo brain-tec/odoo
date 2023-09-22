@@ -7,7 +7,7 @@ import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
-import { modelRegistry } from "./record";
+import { modelRegistry, Record, RecordInverses, RecordList } from "./record";
 
 export class Store {
     /** @type {typeof import("@mail/core/web/activity_model").Activity} */
@@ -40,6 +40,21 @@ export class Store {
     RtcSession;
     /** @type {typeof import("@mail/core/common/thread_model").Thread} */
     Thread;
+
+    /**
+     * @param {string} localId
+     * @returns {Record}
+     */
+    get(localId) {
+        if (typeof localId !== "string") {
+            return undefined;
+        }
+        const modelName = Record.modelFromLocalId(localId);
+        if (Array.isArray(this[modelName].records)) {
+            return this[modelName].records.find((r) => r.localId === localId);
+        }
+        return this[modelName].records[localId];
+    }
 
     /**
      * @param {import("@web/env").OdooEnv} env
@@ -83,13 +98,13 @@ export class Store {
     /**
      * This is the current logged partner
      *
-     * @type {import("@mail/core/common/persona_model").Persona}
+     * @type {import("models").Persona}
      */
     user = null;
     /**
      * This is the current logged guest
      *
-     * @type {import("@mail/core/common/persona_model").Persona}
+     * @type {import("models").Persona}
      */
     guest = null;
 
@@ -111,7 +126,7 @@ export class Store {
 
     companyName = "";
 
-    /** @type {import("@mail/core/common/persona_model").Persona} */
+    /** @type {import("models").Persona} */
     odoobot = null;
     odoobotOnboarding;
     users = {};
@@ -156,11 +171,11 @@ export class Store {
             threads: [], // list of ids
         },
         // mailboxes in sidebar
-        /** @type {import("@mail/core/common/thread_model").Thread} */
+        /** @type {import("models").Thread} */
         inbox: null,
-        /** @type {import("@mail/core/common/thread_model").Thread} */
+        /** @type {import("models").Thread} */
         starred: null,
-        /** @type {import("@mail/core/common/thread_model").Thread} */
+        /** @type {import("models").Thread} */
         history: null,
     };
 
@@ -177,7 +192,9 @@ export const storeService = {
      */
     start(env, services) {
         const res = reactive(new Store(env, services));
-        for (const [name, Model] of modelRegistry.getEntries()) {
+        for (const [name, _Model] of modelRegistry.getEntries()) {
+            /** @type {typeof Record} */
+            const Model = _Model;
             if (res[name]) {
                 throw new Error(
                     `There must be no duplicated Model Names (duplicate found: ${name})`
@@ -187,9 +204,116 @@ export const storeService = {
             // work-around: make an object whose prototype is the class, so that static props become
             // instance props.
             const entry = Object.assign(Object.create(Model), { env, store: res });
-            entry.Class = Model;
+            // Produce another class with changed prototype, so that there are automatic get/set on relational fields
+            let detecting = true;
+            const Class = {
+                [Model.name]: class extends Model {
+                    static __rels__ = new Set();
+                    constructor() {
+                        super();
+                        if (detecting) {
+                            return;
+                        }
+                        for (const name of this.constructor.__rels__) {
+                            // Relational fields contain symbols for detection in original class.
+                            // This constructor is called on genuine records:
+                            // - 'one' fields => undefined
+                            // - 'many' fields => RecordList
+                            let newVal;
+                            if (this[name] === Record.one()) {
+                                newVal = undefined;
+                            }
+                            if (this[name] === Record.many()) {
+                                newVal = new RecordList();
+                                newVal.__store__ = res;
+                                newVal.name = name;
+                                newVal.owner = this;
+                            }
+                            this.__rels__.set(name, newVal);
+                            this.__invs__ = new RecordInverses();
+                            this[name] = newVal;
+                        }
+                        return new Proxy(this, {
+                            /** @param {Record} receiver */
+                            get(target, name, receiver) {
+                                if (name !== "__rels__" && receiver.__rels__.has(name)) {
+                                    const l1 = receiver.__rels__.get(name);
+                                    if (l1 instanceof RecordList) {
+                                        return l1;
+                                    }
+                                    return res.get(l1);
+                                }
+                                return Reflect.get(target, name, receiver);
+                            },
+                            deleteProperty(target, key) {
+                                if (name !== "__rels__" && target.__rels__.has(name)) {
+                                    const r1 = target;
+                                    const l1 = r1.__rels__.get(name);
+                                    const r2 = res.get(l1);
+                                    if (r2) {
+                                        r2.__invs__.delete(r1.localId, name);
+                                    }
+                                }
+                                const ret = Reflect.deleteProperty(target, key);
+                                return ret;
+                            },
+                            /** @param {Record} receiver */
+                            set(target, name, val, receiver) {
+                                if (receiver.__rels__.has(name)) {
+                                    const oldVal = receiver.__rels__.get(name);
+                                    if (oldVal instanceof RecordList) {
+                                        const r1 = receiver;
+                                        /** @type {RecordList<Record>} */
+                                        const l1 = r1.__rels__.get(name);
+                                        /** @type {Record[]|Set<Record>|RecordList<Record>} */
+                                        const collection = val;
+                                        const oldRecords = l1.slice();
+                                        l1.__list__ = [];
+                                        for (const r2 of oldRecords) {
+                                            r2.__invs__.delete(r1.localId, name);
+                                        }
+                                        for (const r3 of collection) {
+                                            l1.__list__.push(r3.localId);
+                                            r3.__invs__.add(r1.localId, name);
+                                        }
+                                    } else {
+                                        const r1 = receiver;
+                                        const l1 = r1.__rels__.get(name);
+                                        const r2 = res.get(l1);
+                                        /** @type {Record} */
+                                        const r3 = val;
+                                        if (r2 && r2.notEq(r3)) {
+                                            r2.__invs__.delete(r1.localId, name);
+                                        }
+                                        r1.__rels__.set(name, r3?.localId);
+                                        if (r3) {
+                                            if (!(r3 instanceof Record)) {
+                                                return true; // not a record, ignored
+                                            }
+                                            r3.__invs__.add(r1.localId, name);
+                                        }
+                                    }
+                                } else {
+                                    Reflect.set(target, name, val, receiver);
+                                }
+                                return true;
+                            },
+                        });
+                    }
+                },
+            }[Model.name];
+            entry.Class = Class;
             entry.records = JSON.parse(JSON.stringify(Model.records));
             res[name] = entry;
+            // Detect relational fields with a dummy record and setup getter/setters on them
+            const obj = new Model();
+            detecting = false;
+            for (const [name, val] of Object.entries(obj)) {
+                if (![Record.one(), Record.many()].includes(val)) {
+                    continue;
+                }
+                Class.__rels__.add(name);
+            }
         }
         onChange(res.Thread, "records", () => res.updateBusSubscription());
         services.ui.bus.addEventListener("resize", () => {

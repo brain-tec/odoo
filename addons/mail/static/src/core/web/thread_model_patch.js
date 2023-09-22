@@ -3,21 +3,22 @@
 import { Thread } from "@mail/core/common/thread_model";
 
 import { patch } from "@web/core/utils/patch";
+import { Record } from "../common/record";
 
 patch(Thread.prototype, {
     /** @type {integer|undefined} */
     recipientsCount: undefined,
     /** @type {Number} */
     mt_comment_id: undefined,
-    recipients: undefined,
     setup() {
-        this.recipients = new Set();
+        super.setup();
+        this.recipients = Record.many("Follower");
     },
     get recipientsFullyLoaded() {
-        return this.recipientsCount === this.recipients.size;
+        return this.recipientsCount === this.recipients.length;
     },
     /**
-     * @returns {import("@mail/core/web/activity_model").Activity[]}
+     * @returns {import("models").Activity[]}
      */
     get activities() {
         return Object.values(this._store.Activity.records)
