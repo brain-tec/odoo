@@ -4,20 +4,22 @@ import { Record } from "@mail/core/common/record";
 
 export class LinkPreview extends Record {
     static id = "id";
-    /** @returns {LinkPreview} */
+    /** @returns {import("models").LinkPreview} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {LinkPreview} */
+    /** @returns {import("models").LinkPreview} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object} data
-     * @returns {LinkPreview}
+     * @returns {import("models").LinkPreview}
      */
     static insert(data) {
         const message = this.store.Message.get(data.message_id);
+        data.message = message;
+        delete data.message_id;
         let linkPreview = message?.linkPreviews.find((lp) => lp.id === data.id);
         if (linkPreview) {
             return Object.assign(linkPreview, data);
@@ -30,8 +32,7 @@ export class LinkPreview extends Record {
 
     /** @type {number} */
     id;
-    /** @type {number} */
-    message_id;
+    message = Record.one("Message");
     /** @type {string} */
     image_mimetype;
     /** @type {string} */

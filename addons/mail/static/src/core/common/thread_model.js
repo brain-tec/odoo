@@ -15,7 +15,7 @@ import { Deferred } from "@web/core/utils/concurrency";
  * @property {{id: number}} partner
  * @typedef SuggestedRecipient
  * @property {string} email
- * @property {import("@mail/core/common/persona_model").Persona|false} persona
+ * @property {import("models").Persona|false} persona
  * @property {string} lang
  * @property {string} reason
  * @property {boolean} checked
@@ -23,18 +23,18 @@ import { Deferred } from "@web/core/utils/concurrency";
 
 export class Thread extends Record {
     static id = AND("model", "id");
-    /** @type {Object.<string, Thread>} */
+    /** @type {Object.<string, import("models").Thread>} */
     static records = {};
-    /** @returns {Thread} */
+    /** @returns {import("models").Thread} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {Thread} */
+    /** @returns {import("models").Thread} */
     static get(data) {
         return super.get(data);
     }
     /**
-     * @param {Thread.localId} localId
+     * @param {string} localId
      * @returns {string}
      */
     static localIdToActiveId(localId) {
@@ -46,7 +46,7 @@ export class Thread extends Record {
     }
     /**
      * @param {Object} data
-     * @returns {Thread}
+     * @returns {import("models").Thread}
      */
     static insert(data) {
         if (!("id" in data)) {
@@ -84,13 +84,6 @@ export class Thread extends Record {
         return thread;
     }
 
-    setup() {}
-
-    constructor() {
-        super();
-        this.setup();
-    }
-
     /** @type {number} */
     id;
     /** @type {string} */
@@ -99,32 +92,25 @@ export class Thread extends Record {
     model;
     /** @type {boolean} */
     areAttachmentsLoaded = false;
-    /** @type {import("@mail/core/common/attachment_model").Attachment[]} */
-    attachments = [];
-    /** @type {integer} */
-    activeRtcSessionId;
+    attachments = Record.many("Attachment");
+    activeRtcSession = Record.one("RtcSession");
     /** @type {object|undefined} */
     channel;
-    /** @type {import("@mail/core/common/channel_member_model").ChannelMember[]} */
-    channelMembers = [];
-    /** @type {Object<number, import("@mail/discuss/call/common/rtc_session_model").RtcSession>} */
+    channelMembers = Record.many("ChannelMember");
+    /** @type {Object<number, import("models").RtcSession>} */
     rtcSessions = {};
-    invitingRtcSessionId;
+    rtcInvitingSession = Record.one("RtcSession");
     /** @type {Set<number>} */
     invitedMemberIds = new Set();
-    /** @type {integer} */
-    chatPartnerId;
-    /** @type {import("@mail/core/common/composer_model").Composer} */
-    composer;
+    chatPartner = Record.one("Persona");
+    composer = Record.one("Composer");
     counter = 0;
     /** @type {string} */
     customName;
     /** @type {string} */
     description;
-    /** @type {Set<import("@mail/core/common/follower_model").Follower>} */
-    followers = new Set();
-    /** @type {import("@mail/core/common/follower_model").Follower} */
-    selfFollower;
+    followers = Record.many("Follower");
+    selfFollower = Record.one("Follower");
     /** @type {integer|undefined} */
     followersCount;
     isAdmin = false;
@@ -133,8 +119,7 @@ export class Thread extends Record {
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = false;
-    /** @type {import("@mail/core/common/attachment_model").Attachment} */
-    mainAttachment;
+    mainAttachment = Record.one("Attachment");
     memberCount = 0;
     message_needaction_counter = 0;
     message_unread_counter = 0;
@@ -146,10 +131,8 @@ export class Thread extends Record {
      * unknown in-between messages.
      *
      * Content should be fetched and inserted in a controlled way.
-     *
-     * @type {import("@mail/core/common/message_model").Message[]}
      */
-    messages = [];
+    messages = Record.many("Message");
     /** @type {string} */
     modelName;
     /** @type {string} */
@@ -158,10 +141,8 @@ export class Thread extends Record {
      * Contains messages received from the bus that are not yet inserted in
      * `messages` list. This is a temporary storage to ensure nothing is lost
      * when fetching newer messages.
-     *
-     * @type {import("@mail/core/common/message_model").Message[]}
      */
-    pendingNewMessages = [];
+    pendingNewMessages = Record.many("Message");
     /**
      * Contains continuous sequence of needaction messages to show in messaging menu.
      * Messages are ordered from older to most recent.
@@ -171,9 +152,9 @@ export class Thread extends Record {
      *
      * Content should be fetched and inserted in a controlled way.
      *
-     * @type {import("@mail/core/common/message_model").Message[]}
+     * @type {import("models").Message[]}
      */
-    needactionMessages = [];
+    needactionMessages = Record.many("Message");
     /** @type {string} */
     name;
     /** @type {number|false} */
@@ -197,8 +178,7 @@ export class Thread extends Record {
     canPostOnReadonly;
     /** @type {String} */
     last_interest_dt;
-    /** @type {number} */
-    lastServerMessageId;
+    lastServerMessage = Record.one("Message");
     /** @type {Boolean} */
     is_editable;
 
@@ -211,14 +191,6 @@ export class Thread extends Record {
         });
     }
 
-    get activeRtcSession() {
-        return this._store.RtcSession.get(this.activeRtcSessionId);
-    }
-
-    set activeRtcSession(session) {
-        this.activeRtcSessionId = session?.id;
-    }
-
     get areAllMembersLoaded() {
         return this.memberCount === this.channelMembers.length;
     }
@@ -226,7 +198,7 @@ export class Thread extends Record {
     get followersFullyLoaded() {
         return (
             this.followersCount ===
-            (this.selfFollower ? this.followers.size + 1 : this.followers.size)
+            (this.selfFollower ? this.followers.length + 1 : this.followers.length)
         );
     }
 
@@ -276,12 +248,8 @@ export class Thread extends Record {
     }
 
     get displayName() {
-        if (this.type === "chat" && this.chatPartnerId) {
-            return (
-                this.customName ||
-                this._store.Persona.get({ type: "partner", id: this.chatPartnerId })
-                    .nameOrDisplayName
-            );
+        if (this.type === "chat" && this.chatPartner) {
+            return this.customName || this.chatPartner.nameOrDisplayName;
         }
         if (this.type === "group" && !this.name) {
             const listFormatter = new Intl.ListFormat(
@@ -295,7 +263,7 @@ export class Thread extends Record {
         return this.name;
     }
 
-    /** @type {import("@mail/core/common/persona_model").Persona[]} */
+    /** @type {import("models").Persona[]} */
     get correspondents() {
         return this.channelMembers
             .map((member) => member.persona)
@@ -306,7 +274,7 @@ export class Thread extends Record {
             );
     }
 
-    /** @type {import("@mail/core/common/persona_model").Persona|undefined} */
+    /** @type {import("models").Persona|undefined} */
     get correspondent() {
         if (this.type === "channel") {
             return undefined;
@@ -349,7 +317,7 @@ export class Thread extends Record {
         return this.isChatChannel ? this.message_unread_counter : this.message_needaction_counter;
     }
 
-    /** @returns {import("@mail/core/common/message_model").Message | undefined} */
+    /** @returns {import("models").Message | undefined} */
     get newestMessage() {
         return [...this.messages].reverse().find((msg) => !msg.isEmpty);
     }
@@ -377,7 +345,7 @@ export class Thread extends Record {
     }
 
     /**
-     * @param {import("@mail/core/common/message_model").Message} message
+     * @param {import("models").Message} message
      */
     hasMessage(message) {
         return message.in(this.messages);
@@ -471,10 +439,6 @@ export class Thread extends Record {
         return this.memberCount - this.channelMembers.length;
     }
 
-    get rtcInvitingSession() {
-        return this._store.RtcSession.get(this.invitingRtcSessionId);
-    }
-
     get hasNeedactionMessages() {
         return this.needactionMessages.length > 0;
     }
@@ -494,7 +458,7 @@ export class Thread extends Record {
 
     /**
      *
-     * @param {import("@mail/core/common/persona_model").Persona} persona
+     * @param {import("models").Persona} persona
      */
     getMemberName(persona) {
         return persona.name;

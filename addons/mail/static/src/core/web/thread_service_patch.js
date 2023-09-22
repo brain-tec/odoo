@@ -22,7 +22,7 @@ patch(ThreadService.prototype, {
         this.chatWindowService = services["mail.chat_window"];
     },
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models").Thread} thread
      * @param {['activities'|'followers'|'attachments'|'messages'|'suggestedRecipients']} requestList
      */
     async fetchData(
@@ -90,18 +90,19 @@ patch(ThreadService.prototype, {
                     followedThread: thread,
                     ...followerData,
                 });
-                if (follower.notEq(thread.selfFollower)) {
-                    thread.followers.add(follower);
+                if (follower.notEq(thread.selfFollower) && follower.notIn(thread.followers)) {
+                    thread.followers.push(follower);
                 }
             }
             thread.recipientsCount = result.recipientsCount;
             for (const recipientData of result.recipients) {
-                thread.recipients.add(
-                    this.store.Follower.insert({
-                        followedThread: thread,
-                        ...recipientData,
-                    })
-                );
+                const recipient = this.store.Follower.insert({
+                    followedThread: thread,
+                    ...recipientData,
+                });
+                if (recipient.notIn(thread.recipients)) {
+                    thread.recipients.push(recipient);
+                }
             }
         }
         if ("suggestedRecipients" in result) {
@@ -140,7 +141,7 @@ patch(ThreadService.prototype, {
         return thread;
     },
     /**
-     * @param {import("@mail/core/common/thread_model").Thread} thread
+     * @param {import("models").Thread} thread
      * @param {import("@mail/core/web/suggested_recipient").SuggestedRecipient[]} dataList
      */
     async insertSuggestedRecipients(thread, dataList) {
@@ -166,26 +167,25 @@ patch(ThreadService.prototype, {
         thread.suggestedRecipients = recipients;
     },
     async leaveChannel(channel) {
-        const chatWindow = this.store.ChatWindow.records.find(
-            (c) => c.threadLocalId === channel.localId
-        );
+        const chatWindow = this.store.ChatWindow.records.find((c) => c.thread?.eq(channel));
         if (chatWindow) {
             this.chatWindowService.close(chatWindow);
         }
         super.leaveChannel(...arguments);
     },
+    /** @param {import("models").Thread} thread */
     async loadMoreFollowers(thread) {
         const followers = await this.orm.call(thread.model, "message_get_followers", [
             [thread.id],
-            Array.from(thread.followers).at(-1).id,
+            thread.followers.at(-1).id,
         ]);
         for (const data of followers) {
             const follower = this.store.Follower.insert({
                 followedThread: thread,
                 ...data,
             });
-            if (follower.notEq(thread.selfFollower)) {
-                thread.followers.add(follower);
+            if (follower.notEq(thread.selfFollower) && follower.notIn(thread.followers)) {
+                thread.followers.push(follower);
             }
         }
     },
@@ -193,16 +193,17 @@ patch(ThreadService.prototype, {
         const recipients = await this.orm.call(
             thread.model,
             "message_get_followers",
-            [[thread.id], Array.from(thread.recipients).at(-1).id],
+            [[thread.id], thread.recipients.at(-1).id],
             { filter_recipients: true }
         );
         for (const data of recipients) {
-            thread.recipients.add(
-                this.store.Follower.insert({
-                    followedThread: thread,
-                    ...data,
-                })
-            );
+            const recipient = this.store.Follower.insert({
+                followedThread: thread,
+                ...data,
+            });
+            if (recipient.notIn(thread.recipients)) {
+                thread.recipients.push(recipient);
+            }
         }
     },
     open(thread, replaceNewMessageChatWindow) {
@@ -225,33 +226,22 @@ patch(ThreadService.prototype, {
         }
         super.open(thread, replaceNewMessageChatWindow);
     },
-    /**
-     * @param {import("@mail/core/common/follower_model").Follower} follower
-     */
+    /** @param {import("models").Follower} recipient */
     removeRecipient(recipient) {
         recipient.followedThread.recipients.delete(recipient);
     },
     /**
-     * @param {import("@mail/core/common/follower_model").Follower} follower
+     * @param {import("models").Follower} follower
      */
     async removeFollower(follower) {
         await this.orm.call(follower.followedThread.model, "message_unsubscribe", [
             [follower.followedThread.id],
             [follower.partner.id],
         ]);
-        const thread = follower.followedThread;
-        if (follower.eq(thread.selfFollower)) {
-            thread.selfFollower = undefined;
-        } else {
-            thread.followers.delete(follower);
-        }
-        this.removeRecipient(follower);
         follower.delete();
     },
     unpin(thread) {
-        const chatWindow = this.store.ChatWindow.records.find(
-            (c) => c.threadLocalId === thread.localId
-        );
+        const chatWindow = this.store.ChatWindow.records.find((c) => c.thread?.eq(thread));
         if (chatWindow) {
             this.chatWindowService.close(chatWindow);
         }

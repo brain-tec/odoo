@@ -6,19 +6,19 @@ import { _t } from "@web/core/l10n/translation";
 
 export class Notification extends Record {
     static id = "id";
-    /** @type {Object.<number, Notification>} */
+    /** @type {Object.<number, import("models").Notification>} */
     static records = {};
-    /** @returns {Notification} */
+    /** @returns {import("models").Notification} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {Notification} */
+    /** @returns {import("models").Notification} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object} data
-     * @returns {Notification}
+     * @returns {import("models").Notification}
      */
     static insert(data) {
         const notification = this.get(data) ?? this.new(data);
@@ -29,20 +29,14 @@ export class Notification extends Record {
 
     /** @type {number} */
     id;
-    /** @type {number} */
-    messageId;
+    message = Record.one("Message");
     /** @type {string} */
     notification_status;
     /** @type {string} */
     notification_type;
     /** @type {string} */
     failure_type;
-    /** @type {import("@mail/core/common/persona_model").Persona} */
-    persona;
-
-    get message() {
-        return this._store.Message.get(this.messageId);
-    }
+    persona = Record.one("Persona");
 
     get isFailure() {
         return ["exception", "bounce"].includes(this.notification_status);

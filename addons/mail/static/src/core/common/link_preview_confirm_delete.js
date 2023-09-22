@@ -7,7 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/core/common/link_preview_model").LinkPreview} linkPreview
+ * @property {import("models").LinkPreview} linkPreview
  * @property {function} close
  * @property {Component} LinkPreviewListComponent
  * @extends {Component<Props, Env>}
@@ -23,7 +23,7 @@ export class LinkPreviewConfirmDelete extends Component {
     }
 
     get message() {
-        return this.store.Message.get(this.props.linkPreview.message_id);
+        return this.props.linkPreview.message;
     }
 
     onClickOk() {

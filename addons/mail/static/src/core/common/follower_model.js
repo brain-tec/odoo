@@ -4,27 +4,27 @@ import { Record } from "@mail/core/common/record";
 
 /**
  * @typedef Data
- * @property {import("@mail/core/common/thread_model").Thread} followedThread
+ * @property {import("models").Thread} followedThread
  * @property {number} id
  * @property {Boolean} is_active
- * @property {import("@mail/core/common/partner_model").Data} partner
+ * @property {import("@mail/core/common/persona_model").Data} partner
  */
 
 export class Follower extends Record {
     static id = "id";
-    /** @type {Object.<number, Follower>} */
+    /** @type {Object.<number, import("models").Follower>} */
     static records = {};
-    /** @returns {Follower} */
+    /** @returns {import("models").Follower} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {Follower} */
+    /** @returns {import("models").Follower} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Data} data
-     * @returns {Follower}
+     * @returns {import("models").Follower}
      */
     static insert(data) {
         const follower = this.get(data) ?? this.new(data);
@@ -37,14 +37,12 @@ export class Follower extends Record {
         return follower;
     }
 
-    /** @type {import("@mail/core/common/thread_model").Thread} */
-    followedThread;
+    followedThread = Record.one("Thread");
     /** @type {number} */
     id;
     /** @type {boolean} */
     isActive;
-    /** @type {import("@mail/core/common/persona_model").Persona} */
-    partner;
+    partner = Record.one("Persona");
 
     /**
      * @returns {boolean}

@@ -5,6 +5,8 @@ import { registry } from "@web/core/registry";
 
 export const modelRegistry = registry.category("discuss.model");
 
+const MANY_SYM = Symbol("many");
+const ONE_SYM = Symbol("one");
 const OR_SYM = Symbol("or");
 const AND_SYM = Symbol("and");
 
@@ -15,11 +17,264 @@ export function OR(...args) {
     return [OR_SYM, ...args];
 }
 
+export class RecordInverses {
+    /**
+     * Track the inverse of a record. Each record contains this map.
+     * - Key: localId of target record
+     * - Value: Map where key is field name, and value is number of
+     *          time current record is present in relation.
+     *
+     * @type {Map<string, Map<string, number>>}}
+     */
+    __map__ = new Map();
+    /**
+     * @param {string} localId
+     * @param {string} name
+     */
+    add(localId, name) {
+        if (!this.__map__.has(localId)) {
+            this.__map__.set(localId, new Map());
+        }
+        const inv = this.__map__.get(localId);
+        if (!inv.get(name)) {
+            inv.set(name, 0);
+        }
+        inv.set(name, inv.get(name) + 1);
+    }
+    /**
+     * @param {string} localId
+     * @param {string} name
+     */
+    delete(localId, name) {
+        if (!this.__map__.has(localId)) {
+            return;
+        }
+        const inv = this.__map__.get(localId);
+        if (!inv.get(name)) {
+            return;
+        }
+        inv.set(name, inv.get(name) - 1);
+        if (inv.get(name) === 0) {
+            inv.delete(name);
+        }
+    }
+}
+
+/**
+ * @template {Record} R
+ */
+export class RecordList extends Array {
+    /** @type {Record} */
+    owner;
+    /** @type {string} */
+    name;
+    /** @type {import("@mail/core/common/store_service").Store} */
+    __store__;
+    /** @param {Record} r3 */
+    __addInverse__(r3) {
+        r3.__invs__.add(this.owner.localId, this.name);
+    }
+    /** @param {Record} r2 */
+    __deleteInverse__(r2) {
+        r2.__invs__.delete(this.owner.localId, this.name);
+    }
+
+    /** @type {string[]} */
+    __list__ = [];
+
+    constructor() {
+        super();
+        return new Proxy(this, {
+            /** @param {RecordList<R>} receiver */
+            get(target, name, receiver) {
+                if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
+                    // support for "array[index]" syntax
+                    const index = parseInt(name);
+                    return receiver.__store__.get(receiver.__list__[index]);
+                }
+                if (name === "length") {
+                    return receiver.__list__.length;
+                }
+                return Reflect.get(target, name, receiver);
+            },
+            /** @param {RecordList<R>} receiver */
+            set(target, name, val, receiver) {
+                if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
+                    // support for "array[index] = r3" syntax
+                    const index = parseInt(name);
+                    /** @type {R} */
+                    const r3 = val;
+                    const r2 = receiver[index];
+                    if (r2 && r2.notEq(r3)) {
+                        receiver.__deleteInverse__(r2);
+                    }
+                    receiver.__list__[index] = r3?.localId;
+                    if (r3) {
+                        receiver.__addInverse__(r3);
+                    }
+                } else if (name === "length") {
+                    const newLength = parseInt(val);
+                    if (newLength < receiver.length) {
+                        receiver.splice(newLength, receiver.length - newLength);
+                    }
+                    receiver.__list__.length = newLength;
+                } else {
+                    Reflect.set(target, name, val, receiver);
+                }
+                return true;
+            },
+        });
+    }
+
+    /**
+     * @param {number} index
+     * @returns {R}
+     */
+    at(index) {
+        return this.__store__.get(this.__list__.at(index));
+    }
+    /** @param {R[]} records */
+    push(...records) {
+        this.__list__.push(...records.map((r3) => r3.localId));
+        for (const r3 of records) {
+            if (r3) {
+                this.__addInverse__(r3);
+            }
+        }
+        return this.__list__.length;
+    }
+    /** @returns {R} */
+    pop() {
+        const r2 = this.__store__.get(this.__list__.pop());
+        if (r2) {
+            this.__deleteInverse__(r2);
+        }
+        return r2;
+    }
+    /** @returns {R} */
+    shift() {
+        const r2 = this.__store__.get(this.__list__.shift());
+        if (r2) {
+            this.__deleteInverse__(r2);
+        }
+        return r2;
+    }
+    /** @param {R[]} records */
+    unshift(...records) {
+        this.__list__.unshift(...records.map((r3) => r3.localId));
+        for (const r3 of records) {
+            if (r3) {
+                this.__addInverse__(r3);
+            }
+        }
+        return this.__list__.length;
+    }
+    /**
+     * @param {(a: R, b: R) => boolean} func
+     * @returns {R[]}
+     */
+    map(func) {
+        return this.__list__.map((localId) => func(this.__store__.get(localId)));
+    }
+    /**
+     * @param {(a: R, b: R) => boolean} predicate
+     * @returns {R[]}
+     */
+    filter(predicate) {
+        return this.__list__
+            .filter((localId) => predicate(this.__store__.get(localId)))
+            .map((localId) => this.__store__.get(localId));
+    }
+    /** @param {(a: R, b: R) => boolean} predicate */
+    some(predicate) {
+        return this.__list__.some((localId) => predicate(this.__store__.get(localId)));
+    }
+    /** @param {(a: R, b: R) => boolean} predicate */
+    every(predicate) {
+        return this.__list__.every((localId) => predicate(this.__store__.get(localId)));
+    }
+    /**
+     * @param {(a: R, b: R) => boolean} predicate
+     * @returns {R}
+     */
+    find(predicate) {
+        return this.__store__.get(
+            this.__list__.find((localId) => predicate(this.__store__.get(localId)))
+        );
+    }
+    /** @param {(a: R, b: R) => boolean} predicate */
+    findIndex(predicate) {
+        return this.__list__.findIndex((localId) => predicate(this.__store__.get(localId)));
+    }
+    /** @param {R} record */
+    indexOf(record) {
+        return this.__list__.indexOf(record?.localId);
+    }
+    /** @param {R} record */
+    includes(record) {
+        return this.__list__.includes(record.localId);
+    }
+    /**
+     * @param {number} [start]
+     * @param {number} [end]
+     * @returns {R[]}
+     */
+    slice(start, end) {
+        return this.__list__.slice(start, end).map((localId) => this.__store__.get(localId));
+    }
+    /**
+     * @param {number} [start]
+     * @param {number} [deleteCount]
+     * @param {...R} [newRecords]
+     */
+    splice(start, deleteCount, ...newRecords) {
+        const oldRecords = this.slice(start, start + deleteCount);
+        this.__list__.splice(start, deleteCount, ...newRecords.map((r) => r.localId));
+        for (const r of oldRecords) {
+            this.__deleteInverse__(r);
+        }
+        for (const r of newRecords) {
+            this.__addInverse__(r);
+        }
+    }
+    /** @param {(a: R, b: R) => boolean} func */
+    sort(func) {
+        this.__list__.sort((a, b) => func(this.__store__.get(a), this.__store__.get(b)));
+    }
+    /** @param {...R[]|...RecordList[R]} collections */
+    concat(...collections) {
+        return this.__list__
+            .map((localId) => this.__store__.get(localId))
+            .concat(...collections.map((c) => [...c]));
+    }
+    /** @param {R}  */
+    delete(r) {
+        const index = this.indexOf(r);
+        if (index === -1) {
+            return;
+        }
+        this.splice(index, 1);
+    }
+    /** @yields {R} */
+    *[Symbol.iterator]() {
+        for (const localId of this.__list__) {
+            yield this.__store__.get(localId);
+        }
+    }
+}
+
 export class Record {
     static id;
+    /** @type {Object<string, Record>} */
     static records = {};
     /** @type {import("@mail/core/common/store_service").Store} */
     static store;
+    /**
+     * Contains tracked relational fields of the model. Value determines
+     *
+     * @type {Map<string, any>}
+     */
+    static __rels__ = new Map();
     static get(data) {
         return this.records[this.localId(data)];
     }
@@ -31,7 +286,7 @@ export class Record {
     }
     static localId(data) {
         let idStr;
-        if (typeof data === "object") {
+        if (typeof data === "object" && data !== null) {
             idStr = this._localId(this.id, data);
         } else {
             idStr = data; // non-object data => single id
@@ -40,6 +295,10 @@ export class Record {
     }
     static _localId(expr, data, { brackets = false } = {}) {
         if (!Array.isArray(expr)) {
+            if (this.Class.__rels__.has(expr)) {
+                // relational field (note: optional when OR)
+                return `(${data[expr]?.localId})`;
+            }
             return data[expr];
         }
         const vals = [];
@@ -79,13 +338,38 @@ export class Record {
         }
         return record;
     }
-
+    /**
+     * @template {keyof import("model ").Models} M
+     * @param {M} modelName
+     * @returns {import("models").Models[M]}
+     */
+    static one(modelName) {
+        return ONE_SYM;
+    }
+    /**
+     * @template {keyof import("model").Models} M
+     * @param {M} modelName
+     * @returns {import("models").Models[M][]}
+     */
+    static many(modelName) {
+        return MANY_SYM;
+    }
     /**
      * @param {Object} data
      * @returns {Record}
      */
     static insert(data) {}
 
+    /**
+     * Raw relational values of the record, each of which contains object id(s)
+     * rather than the record(s). This allows data in store and models being normalized,
+     * which eases handling relations notably in when a record gets deleted.
+     *
+     * @type {Map<string, string|RecordList>}
+     */
+    __rels__ = new Map();
+    /** Track inverse relations of current record. */
+    __invs__ = new RecordInverses();
     /** @type {import("@mail/core/common/store_service").Store} */
     _store;
     /**
@@ -103,9 +387,43 @@ export class Record {
      * @type {typeof Record}
      */
     Model;
+    /** @type {string} */
+    localId;
+
+    constructor() {
+        this.setup();
+    }
+
+    setup() {}
 
     delete() {
-        delete this.Model?.records[this.localId];
+        const r1 = this;
+        for (const [name, l1] of r1.__rels__.entries()) {
+            if (l1 instanceof RecordList) {
+                r1[name] = [];
+            } else {
+                r1[name] = undefined;
+            }
+        }
+        for (const [localId, names] of r1.__invs__.__map__.entries()) {
+            for (const [name2, count] of names.entries()) {
+                const r2 = this._store.get(localId);
+                if (!r2) {
+                    // record already deleted, clean inverses
+                    r1.__invs__.__map__.delete(localId);
+                    continue;
+                }
+                const l2 = r2.__rels__.get(name2);
+                if (l2 instanceof RecordList) {
+                    for (let c = 0; c < count; c++) {
+                        r2[name2].delete(r1);
+                    }
+                } else {
+                    r2[name2] = undefined;
+                }
+            }
+        }
+        delete this.Model?.records[r1.localId];
         this.Model = null;
     }
 
@@ -119,17 +437,21 @@ export class Record {
         return !this.eq(record);
     }
 
-    /** @param {Record[]} list */
-    in(list) {
-        if (!list) {
+    /** @param {Record[]|RecordList} collection */
+    in(collection) {
+        if (!collection) {
             return false;
         }
-        return list.some((record) => record.eq(this));
+        if (collection instanceof RecordList) {
+            return collection.includes(this);
+        }
+        // Array
+        return collection.some((record) => record.eq(this));
     }
 
-    /** @param {Record[]} list */
-    notIn(list) {
-        return !this.in(list);
+    /** @param {Record[]|RecordList} collection */
+    notIn(collection) {
+        return !this.in(collection);
     }
 }
 

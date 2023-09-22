@@ -4,19 +4,19 @@ import { Record } from "@mail/core/common/record";
 
 export class RtcSession extends Record {
     static id = "id";
-    /** @type {Object.<number, RtcSession>} */
+    /** @type {Object.<number, import("models").RtcSession>} */
     static records = {};
-    /** @returns {RtcSession} */
+    /** @returns {import("models").RtcSession} */
     static new(data) {
         return super.new(data);
     }
-    /** @returns {RtcSession} */
+    /** @returns {import("models").RtcSession} */
     static get(data) {
         return super.get(data);
     }
     /**
      * @param {Object} data
-     * @returns {number, RtcSession}
+     * @returns {number, import("models").RtcSession}
      */
     static insert(data) {
         const session = this.get(data) ?? this.new(data);
@@ -29,7 +29,7 @@ export class RtcSession extends Record {
         }
         if (channelMember) {
             const channelMemberRecord = this.store.ChannelMember.insert(channelMember);
-            channelMemberRecord.rtcSessionId = session.id;
+            channelMemberRecord.rtcSession = session;
             session.channelMemberId = channelMemberRecord.id;
             if (channelMemberRecord.thread) {
                 channelMemberRecord.thread.rtcSessions[session.id] = session;
