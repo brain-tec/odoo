@@ -1312,6 +1312,58 @@ class SaleOrder(models.Model):
         if final:
             moves.sudo().filtered(lambda m: m.amount_total < 0).action_switch_move_type()
         for move in moves:
+            if final:
+                # Downpayment might have been determined by a fixed amount set by the user.
+                # This amount is tax included. This can lead to rounding issues.
+                # E.g. a user wants a 100€ DP on a product with 21% tax.
+                # 100 / 1.21 = 82.64, 82.64 * 1,21 = 99.99
+                # This is already corrected by adding/removing the missing cents on the DP invoice,
+                # but must also be accounted for on the final invoice.
+
+                delta_amount = 0
+                for order_line in self.order_line:
+                    if not order_line.is_downpayment:
+                        continue
+                    inv_amt = order_amt = 0
+                    for invoice_line in order_line.invoice_lines:
+                        if invoice_line.move_id == move:
+                            inv_amt += invoice_line.price_total
+                        elif invoice_line.move_id.state != 'cancel':  # filter out canceled dp lines
+                            order_amt += invoice_line.price_total
+                    if inv_amt and order_amt:
+                        # if not inv_amt, this order line is not related to current move
+                        # if no order_amt, dp order line was not invoiced
+                        delta_amount += (inv_amt * (1 if move.is_inbound() else -1)) + order_amt
+
+                if not move.currency_id.is_zero(delta_amount):
+                    receivable_line = move.line_ids.filtered(
+                        lambda aml: aml.account_id.account_type == 'asset_receivable')[:1]
+                    product_lines = move.line_ids.filtered(
+                        lambda aml: aml.display_type == 'product' and aml.is_downpayment)
+                    tax_lines = move.line_ids.filtered(
+                        lambda aml: aml.tax_line_id.amount_type not in (False, 'fixed'))
+                    if tax_lines and product_lines and receivable_line:
+                        line_commands = [Command.update(receivable_line.id, {
+                            'amount_currency': receivable_line.amount_currency + delta_amount,
+                        })]
+                        delta_sign = 1 if delta_amount > 0 else -1
+                        for lines, attr, sign in (
+                            (product_lines, 'price_total', -1 if move.is_inbound() else 1),
+                            (tax_lines, 'amount_currency', 1),
+                        ):
+                            remaining = delta_amount
+                            lines_len = len(lines)
+                            for line in lines:
+                                if move.currency_id.compare_amounts(remaining, 0) != delta_sign:
+                                    break
+                                amt = delta_sign * max(
+                                    move.currency_id.rounding,
+                                    abs(move.currency_id.round(remaining / lines_len)),
+                                )
+                                remaining -= amt
+                                line_commands.append(Command.update(line.id, {attr: line[attr] + amt * sign}))
+                        move.line_ids = line_commands
+
             move.message_post_with_source(
                 'mail.message_origin_link',
                 render_values={'self': move, 'origin': move.line_ids.sale_line_ids.order_id},
