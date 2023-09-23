@@ -859,7 +859,7 @@
                                         </t>
                                     </select>
                                 </t>
-                                <t t-if="a.display_type == 'radio' or a.display_type == 'pills'">
+                                <t t-if="a.display_type in ('radio', 'pills', 'multi')">
                                     <div class="flex-column mb-3">
                                         <t t-foreach="a.value_ids" t-as="v">
                                             <div class="form-check mb-1">
@@ -1033,12 +1033,9 @@
                                         <input type="hidden" class="product_id" name="product_id" t-att-value="product_variant.id" />
                                         <input type="hidden" class="product_template_id" name="product_template_id" t-att-value="product.id" />
                                         <input t-if="product.public_categ_ids.ids" type="hidden" class="product_category_id" name="product_category_id" t-att-value="product.public_categ_ids.ids[0]" />
-                                        <t t-if="combination" t-call="website_sale.variants">
+                                        <t t-call="website_sale.variants">
                                             <t t-set="ul_class" t-valuef="flex-column" />
                                             <t t-set="parent_combination" t-value="None" />
-                                        </t>
-                                        <t t-else="">
-                                            <ul class="d-none js_add_cart_variants mb-0" t-att-data-attribute_exclusions="{'exclusions: []'}"/>
                                         </t>
                                     </t>
                                     <p t-if="True" class="css_not_available_msg alert alert-warning">This combination does not exist.</p>
@@ -2033,7 +2030,7 @@
 
     <template id="payment" name="Payment">
         <t t-call="website.layout">
-            <t t-set="additional_title">Shop - Select Payment Provider</t>
+            <t t-set="additional_title">Shop - Select Payment Method</t>
             <t t-set="no_footer" t-value="1"/>
 
             <div id="wrap">
@@ -2068,11 +2065,9 @@
                                 <div class="mt-3">
                                     <h3 class="mb24">Pay with </h3>
                                 </div>
-                                <div t-if="providers or tokens" id="payment_method">
-                                    <t t-call="payment.checkout">
-                                        <t t-set="footer_template_id" t-value="'website_sale.payment_footer'"/>
-                                        <t t-set="submit_button_label">Pay Now</t>
-                                    </t>
+                                <div t-if="payment_methods_sudo or tokens_sudo" id="payment_method">
+                                    <t t-call="payment.form"/>
+                                    <t t-call="website_sale.payment_footer"/>
                                 </div>
                                 <div t-else="" class="alert alert-warning">
                                     <strong>No suitable payment option could be found.</strong><br/>
@@ -2118,21 +2113,18 @@
     </template>
 
     <template id="payment_footer" name="Payment">
-        <div name="o_checkbox_container"
-             class="form-check mt-2 o_accept_tc_button"/>
+        <!-- Parameters description:
+            - submit_button_label: The label of the submit button; default: 'Pay Now'.
+        -->
+        <t t-set="submit_button_label" t-value="submit_button_label or 'Pay Now'"/>
+        <div name="o_checkbox_container" class="form-check mt-2 o_accept_tc_button"/>
         <div class="float-start mt-2">
             <a role="button" href="/shop/cart" class="btn btn-secondary">
                 <i class="oi oi-chevron-left"/> Return to Cart
             </a>
         </div>
         <div class="float-end mt-2">
-            <button name="o_payment_submit_button"
-                    type="submit"
-                    class="btn btn-primary"
-                    disabled="true"
-                    data-icon-class="oi-chevron-right">
-                <t t-esc="submit_button_label"/> <i class="oi oi-chevron-right"/>
-            </button>
+            <t t-call="payment.submit_button"/>
         </div>
     </template>
 
@@ -2282,7 +2274,7 @@
                                     <tbody>
                                         <tr>
                                             <td colspan="2">
-                                                <t t-esc="tx_sudo.provider_id.display_as or tx_sudo.provider_id.name" />
+                                                <t t-esc="tx_sudo.provider_id.name" />
                                             </td>
                                             <td class="text-end" width="100">
                                                 <strong>Total:</strong>

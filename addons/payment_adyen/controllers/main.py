@@ -25,23 +25,9 @@ class AdyenController(http.Controller):
 
     _webhook_url = '/payment/adyen/notification'
 
-    @http.route('/payment/adyen/provider_info', type='json', auth='public')
-    def adyen_provider_info(self, provider_id):
-        """ Return public information on the provider.
-
-        :param int provider_id: The provider handling the transaction, as a `payment.provider` id
-        :return: Public information on the provider, namely: the state and client key
-        :rtype: str
-        """
-        provider_sudo = request.env['payment.provider'].sudo().browse(provider_id).exists()
-        return {
-            'state': provider_sudo.state,
-            'client_key': provider_sudo.adyen_client_key,
-        }
-
     @http.route('/payment/adyen/payment_methods', type='json', auth='public')
     def adyen_payment_methods(self, provider_id, amount=None, currency_id=None, partner_id=None):
-        """ Query the available payment methods based on the transaction context.
+        """ Query the available payment methods based on the payment context.
 
         :param int provider_id: The provider handling the transaction, as a `payment.provider` id
         :param float amount: The transaction amount
@@ -73,10 +59,7 @@ class AdyenController(http.Controller):
             'channel': 'Web',
         }
         response_content = provider_sudo._adyen_make_request(
-            url_field_name='adyen_checkout_api_url',
-            endpoint='/paymentMethods',
-            payload=data,
-            method='POST'
+            endpoint='/paymentMethods', payload=data, method='POST'
         )
         _logger.info("paymentMethods request response:\n%s", pprint.pformat(response_content))
         return response_content
@@ -126,7 +109,7 @@ class AdyenController(http.Controller):
             'telephoneNumber': tx_sudo.partner_phone,
             'storePaymentMethod': tx_sudo.tokenize,  # True by default on Adyen side
             'additionalData': {
-                'allow3DS2': True
+                'authenticationData.threeDSRequestData.nativeThreeDS': True,
             },
             'channel': 'web',  # Required to support 3DS
             'origin': provider_sudo.get_base_url(),  # Required to support 3DS
@@ -153,10 +136,7 @@ class AdyenController(http.Controller):
 
         # Make the payment request to Adyen
         response_content = provider_sudo._adyen_make_request(
-            url_field_name='adyen_checkout_api_url',
-            endpoint='/payments',
-            payload=data,
-            method='POST'
+            endpoint='/payments', payload=data, method='POST'
         )
 
         # Handle the payment request response
@@ -169,7 +149,7 @@ class AdyenController(http.Controller):
         )
         return response_content
 
-    @http.route('/payment/adyen/payment_details', type='json', auth='public')
+    @http.route('/payment/adyen/payments/details', type='json', auth='public')
     def adyen_payment_details(self, provider_id, reference, payment_details):
         """ Submit the details of the additional actions and handle the notification data.
 
@@ -185,10 +165,7 @@ class AdyenController(http.Controller):
         # Make the payment details request to Adyen
         provider_sudo = request.env['payment.provider'].browse(provider_id).sudo()
         response_content = provider_sudo._adyen_make_request(
-            url_field_name='adyen_checkout_api_url',
-            endpoint='/payments/details',
-            payload=payment_details,
-            method='POST'
+            endpoint='/payments/details', payload=payment_details, method='POST'
         )
 
         # Handle the payment details request response

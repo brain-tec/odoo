@@ -2,13 +2,13 @@
 
 import logging
 import re
-
+import json
 import requests
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.payment_adyen.const import API_ENDPOINT_VERSIONS
+from odoo.addons.payment_adyen import const
 
 _logger = logging.getLogger(__name__)
 
@@ -31,35 +31,35 @@ class PaymentProvider(models.Model):
     adyen_hmac_key = fields.Char(
         string="HMAC Key", help="The HMAC key of the webhook", required_if_provider='adyen',
         groups='base.group_system')
-    adyen_checkout_api_url = fields.Char(
-        string="Checkout API URL", help="The base URL for the Checkout API endpoints",
-        required_if_provider='adyen')
-    adyen_recurring_api_url = fields.Char(
-        string="Recurring API URL", help="The base URL for the Recurring API endpoints",
-        required_if_provider='adyen')
+    adyen_api_url_prefix = fields.Char(
+        string="API URL Prefix",
+        help="The base URL for the API endpoints",
+        required_if_provider='adyen',
+    )
 
     #=== CRUD METHODS ===#
 
     @api.model_create_multi
     def create(self, values_list):
         for values in values_list:
-            self._adyen_trim_api_urls(values)
+            self._adyen_extract_prefix_from_api_url(values)
         return super().create(values_list)
 
     def write(self, values):
-        self._adyen_trim_api_urls(values)
+        self._adyen_extract_prefix_from_api_url(values)
         return super().write(values)
 
     @api.model
-    def _adyen_trim_api_urls(self, values):
-        """ Remove the version and the endpoint from the url of Adyen API fields.
+    def _adyen_extract_prefix_from_api_url(self, values):
+        """ Update the create or write values with the prefix extracted from the API URL.
 
-        :param dict values: The create or write values
+        :param dict values: The create or write values.
         :return: None
         """
-        for field_name in ('adyen_checkout_api_url', 'adyen_recurring_api_url'):
-            if values.get(field_name):  # Test the value in case we're duplicating a provider
-                values[field_name] = re.sub(r'[vV]\d+(/.*)?', '', values[field_name])
+        if values.get('adyen_api_url_prefix'):  # Test if we're duplicating a provider.
+            values['adyen_api_url_prefix'] = re.sub(
+                r'(?:https://)?(\w+-\w+).*', r'\1', values['adyen_api_url_prefix']
+            )
 
     #=== COMPUTE METHODS ===#
 
@@ -72,16 +72,13 @@ class PaymentProvider(models.Model):
             'support_tokenization': True,
         })
 
-    #=== BUSINESS METHODS ===#
+    #=== BUSINESS METHODS - PAYMENT FLOW ===#
 
-    def _adyen_make_request(
-        self, url_field_name, endpoint, endpoint_param=None, payload=None, method='POST'
-    ):
+    def _adyen_make_request(self, endpoint, endpoint_param=None, payload=None, method='POST'):
         """ Make a request to Adyen API at the specified endpoint.
 
         Note: self.ensure_one()
 
-        :param str url_field_name: The name of the field holding the base URL for the request
         :param str endpoint: The endpoint to be reached by the request
         :param str endpoint_param: A variable required by some endpoints which are interpolated with
                                    it if provided. For example, the provider reference of the source
@@ -93,27 +90,28 @@ class PaymentProvider(models.Model):
         :raise: ValidationError if an HTTP error occurs
         """
 
-        def _build_url(_base_url, _version, _endpoint):
+        def _build_url(prefix_, version_, endpoint_):
             """ Build an API URL by appending the version and endpoint to a base URL.
 
             The final URL follows this pattern: `<_base>/V<_version>/<_endpoint>`.
 
-            :param str _base_url: The base of the url prefixed with `https://`
-            :param int _version: The version of the endpoint
-            :param str _endpoint: The endpoint of the URL.
-            :return: The final URL
+            :param str prefix_: The API URL prefix of the account.
+            :param int version_: The version of the endpoint.
+            :param str endpoint_: The endpoint of the URL.
+            :return: The final URL.
             :rtype: str
             """
-            _base = _base_url.rstrip('/')  # Remove potential trailing slash
-            _endpoint = _endpoint.lstrip('/')  # Remove potential leading slash
-            return f'{_base}/V{_version}/{_endpoint}'
+            prefix_ = prefix_.rstrip('/')  # Remove potential trailing slash
+            endpoint_ = endpoint_.lstrip('/')  # Remove potential leading slash
+            test_mode_ = self.state == 'test'
+            prefix_ = f'{prefix_}.adyen' if test_mode_ else f'{prefix_}-checkout-live.adyenpayments'
+            return f'https://{prefix_}.com/checkout/V{version_}/{endpoint_}'
 
         self.ensure_one()
 
-        base_url = self[url_field_name]  # Restrict request URL to the stored API URL fields
-        version = API_ENDPOINT_VERSIONS[endpoint]
+        version = const.API_ENDPOINT_VERSIONS[endpoint]
         endpoint = endpoint if not endpoint_param else endpoint.format(endpoint_param)
-        url = _build_url(base_url, version, endpoint)
+        url = _build_url(self.adyen_api_url_prefix, version, endpoint)
         headers = {'X-API-Key': self.adyen_api_key}
         try:
             response = requests.request(method, url, json=payload, headers=headers, timeout=60)
@@ -143,3 +141,22 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         return f'ODOO_PARTNER_{partner_id}'
+
+    #=== BUSINESS METHODS - GETTERS ===#
+
+    def _adyen_get_inline_form_values(self, pm_code):
+        """ Return a serialized JSON of the required values to render the inline form.
+
+        Note: `self.ensure_one()`
+
+        :param str pm_code: The code of the payment method whose inline form to render.
+        :return: The JSON serial of the required values to render the inline form.
+        :rtype: str
+        """
+        self.ensure_one()
+
+        inline_form_values = {
+            'client_key': self.adyen_client_key,
+            'adyen_pm_code': const.PAYMENT_METHODS_MAPPING.get(pm_code, pm_code),
+        }
+        return json.dumps(inline_form_values)
