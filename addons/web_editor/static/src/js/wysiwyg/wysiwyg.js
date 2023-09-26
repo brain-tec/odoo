@@ -398,7 +398,7 @@ export class Wysiwyg extends Component {
             getContextFromParentRect: options.getContextFromParentRect,
             getScrollContainerRect: () => {
                 if (!this.scrollContainer || !this.scrollContainer.getBoundingClientRect) {
-                    this.scrollContainer = document.querySelector('.o_action_manager');
+                    this.scrollContainer = document.querySelector('.o_action_manager') || document.body;
                 }
                 return this.scrollContainer.getBoundingClientRect();
             },
@@ -1482,7 +1482,7 @@ export class Wysiwyg extends Component {
                 },
             },
         });
-        this.odooEditor.document.getSelection()?.removeAllRanges();
+        this.odooEditor.document.getSelection()?.collapseToEnd();
         this.odooEditor.editable.blur();
     }
     /**
@@ -1946,7 +1946,7 @@ export class Wysiwyg extends Component {
                     closestElement(selection.anchorNode, containerSelector)) ||
                 // In case a suitable container could not be found then the
                 // selection is restricted inside the editable area.
-                this.$editable.find(containerSelector);
+                this.$editable.find(containerSelector)[0];
             if (container) {
                 const range = document.createRange();
                 range.selectNodeContents(container);
