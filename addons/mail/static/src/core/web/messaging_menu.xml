@@ -15,7 +15,7 @@
 </t>
 
 <t t-name="mail.MessagingMenu.content">
-    <t t-set="failures" t-value="store.NotificationGroup.records"/>
+    <t t-set="failures" t-value="store.discuss.notificationGroups"/>
     <div class="o-mail-MessagingMenu d-flex flex-column flex-grow-1" t-att-class="{ 'overflow-auto w-100 mh-100': ui.isSmall }">
         <div class="o-mail-MessagingMenu-header" t-att-class="{'flex-row-reverse text-uppercase': ui.isSmall, 'border-bottom d-flex flex-shrink-0 p-2': !env.inDiscussApp }">
             <t t-if="!ui.isSmall">
@@ -55,7 +55,7 @@
                 </t>
             </t>
             <t t-foreach="threads" t-as="thread" t-key="thread.localId">
-                <t t-set="message" t-value="thread.isChatChannel or (thread.type === 'channel' and !thread.hasNeedactionMessages) ? thread.newestMessage : thread.newestNeedactionMessage"/>
+                <t t-set="message" t-value="thread.isChatChannel or (thread.type === 'channel' and thread.needactionMessages.length === 0) ? thread.newestMessage : thread.needactionMessages.at(-1)"/>
                 <NotificationItem
                     body="message?.inlineBody"
                     counter="thread.needactionCounter"

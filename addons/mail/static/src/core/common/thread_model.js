@@ -2,7 +2,8 @@
 
 import { AND, Record } from "@mail/core/common/record";
 import { ScrollPosition } from "@mail/core/common/scroll_position";
-import { onChange } from "@mail/utils/common/misc";
+import { replaceArrayWithCompare } from "@mail/utils/common/arrays";
+import { assignDefined, onChange } from "@mail/utils/common/misc";
 
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
@@ -57,7 +58,7 @@ export class Thread extends Record {
         }
         let thread = this.get(data);
         if (thread) {
-            this.env.services["mail.thread"].update(thread, data);
+            thread.update(data);
             return thread;
         }
         thread = this.new(data);
@@ -74,14 +75,136 @@ export class Thread extends Record {
         onChange(thread, "isLoaded", () => thread.isLoadedDeferred.resolve());
         onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
         onChange(thread, "is_pinned", () => {
-            if (!thread.is_pinned && this.store.discuss.threadLocalId === thread.localId) {
-                this.store.discuss.threadLocalId = null;
+            if (!thread.is_pinned && thread.eq(this.store.discuss.thread)) {
+                delete this.store.discuss.thread;
             }
         });
-        this.env.services["mail.thread"].update(thread, data);
+        thread.update(data);
         this.store.Composer.insert({ thread });
         // return reactive version.
         return thread;
+    }
+
+    /** @param {Object} data */
+    update(data) {
+        const { id, name, attachments: attachmentsData, description, ...serverData } = data;
+        assignDefined(this, { id, name, description });
+        if (attachmentsData) {
+            replaceArrayWithCompare(
+                this.attachments,
+                attachmentsData
+                    .map((attachmentData) => this._store.Attachment.insert(attachmentData))
+                    .sort((a1, a2) => a2.id - a1.id)
+            );
+        }
+        if (serverData) {
+            assignDefined(this, serverData, [
+                "uuid",
+                "authorizedGroupFullName",
+                "description",
+                "hasWriteAccess",
+                "is_pinned",
+                "isLoaded",
+                "isLoadingAttachments",
+                "mainAttachment",
+                "message_unread_counter",
+                "message_needaction_counter",
+                "name",
+                "seen_message_id",
+                "state",
+                "type",
+                "status",
+                "group_based_subscription",
+                "last_interest_dt",
+                "is_editable",
+                "defaultDisplayMode",
+            ]);
+            if (serverData.channel && "message_unread_counter" in serverData.channel) {
+                this.message_unread_counter = serverData.channel.message_unread_counter;
+            }
+            const lastServerMessageId = serverData.last_message_id ?? this.lastServerMessage?.id;
+            if (this.lastServerMessage?.id !== lastServerMessageId) {
+                this.lastServerMessage = this._store.Message.insert({
+                    id: lastServerMessageId,
+                });
+            }
+            if (this.model === "discuss.channel" && serverData.channel) {
+                this.channel = assignDefined(this.channel ?? {}, serverData.channel);
+            }
+
+            this.memberCount = serverData.channel?.memberCount ?? this.memberCount;
+            if (this.type === "chat" && serverData.channel) {
+                this.customName = serverData.channel.custom_channel_name;
+            }
+            if (serverData.channel?.channelMembers) {
+                for (const [command, membersData] of serverData.channel.channelMembers) {
+                    const members = Array.isArray(membersData) ? membersData : [membersData];
+                    for (const memberData of members) {
+                        const member = this._store.ChannelMember.insert([command, memberData]);
+                        if (this.type !== "chat") {
+                            continue;
+                        }
+                        if (
+                            member.persona.notEq(this._store.user) ||
+                            (serverData.channel.channelMembers[0][1].length === 1 &&
+                                member.persona?.eq(this._store.user))
+                        ) {
+                            this.chatPartner = member.persona;
+                        }
+                    }
+                }
+            }
+            if ("invitedMembers" in serverData) {
+                if (!serverData.invitedMembers) {
+                    this.invitedMembers = [];
+                    return;
+                }
+                const command = serverData.invitedMembers[0][0];
+                const members = serverData.invitedMembers[0][1];
+                switch (command) {
+                    case "ADD":
+                        if (members) {
+                            for (const member of members) {
+                                const record = this._store.ChannelMember.insert(member);
+                                this.invitedMembers.add(record);
+                            }
+                        }
+                        break;
+                    case "DELETE":
+                        for (const member of members) {
+                            const record = this._store.ChannelMember.insert(member);
+                            this.invitedMembers.delete(record);
+                        }
+                        break;
+                }
+            }
+            if ("seen_partners_info" in serverData) {
+                this.seenInfos = serverData.seen_partners_info.map(
+                    ({ fetched_message_id, partner_id, seen_message_id }) => {
+                        return {
+                            lastFetchedMessage: fetched_message_id
+                                ? this._store.Message.insert({ id: fetched_message_id })
+                                : undefined,
+                            lastSeenMessage: seen_message_id
+                                ? this._store.Message.insert({ id: seen_message_id })
+                                : undefined,
+                            partner: this._store.Persona.insert({
+                                id: partner_id,
+                                type: "partner",
+                            }),
+                        };
+                    }
+                );
+            }
+        }
+        if (this.type === "channel") {
+            this._store.discuss.channels.threads.add(this);
+        } else if (this.type === "chat" || this.type === "group") {
+            this._store.discuss.chats.threads.add(this);
+        }
+        if (!this.type && !["mail.box", "discuss.channel"].includes(this.model)) {
+            this.type = "chatter";
+        }
     }
 
     /** @type {number} */
@@ -97,11 +220,9 @@ export class Thread extends Record {
     /** @type {object|undefined} */
     channel;
     channelMembers = Record.many("ChannelMember");
-    /** @type {Object<number, import("models").RtcSession>} */
-    rtcSessions = {};
+    rtcSessions = Record.many("RtcSession");
     rtcInvitingSession = Record.one("RtcSession");
-    /** @type {Set<number>} */
-    invitedMemberIds = new Set();
+    invitedMembers = Record.many("ChannelMember");
     chatPartner = Record.one("Persona");
     composer = Record.one("Composer");
     counter = 0;
@@ -165,7 +286,7 @@ export class Thread extends Record {
     /** @type {ScrollPosition} */
     scrollPosition = new ScrollPosition();
     showOnlyVideo = false;
-    transientMessages = [];
+    transientMessages = Record.many("Message");
     /** @type {'channel'|'chat'|'chatter'|'livechat'|'group'|'mailbox'} */
     type;
     /** @type {string} */
@@ -213,11 +334,7 @@ export class Thread extends Record {
     }
 
     get isUnread() {
-        return this.message_unread_counter > 0 || this.hasNeedactionMessages;
-    }
-
-    get isChannel() {
-        return ["chat", "channel", "group"].includes(this.type);
+        return this.message_unread_counter > 0 || this.needactionMessages.length > 0;
     }
 
     get typesAllowingCalls() {
@@ -241,10 +358,6 @@ export class Thread extends Record {
 
     get isChatChannel() {
         return ["chat", "group"].includes(this.type);
-    }
-
-    get allowSetLastSeenMessage() {
-        return ["chat", "group", "channel"].includes(this.type);
     }
 
     get displayName() {
@@ -322,14 +435,6 @@ export class Thread extends Record {
         return [...this.messages].reverse().find((msg) => !msg.isEmpty);
     }
 
-    get newestNeedactionMessage() {
-        return this.needactionMessages[this.needactionMessages.length - 1];
-    }
-
-    get oldestNeedactionMessage() {
-        return this.needactionMessages[0];
-    }
-
     get newestPersistentMessage() {
         return [...this.messages].reverse().find((msg) => Number.isInteger(msg.id));
     }
@@ -342,13 +447,6 @@ export class Thread extends Record {
         return this.channelMembers.some((channelMember) =>
             channelMember.persona?.eq(this._store.self)
         );
-    }
-
-    /**
-     * @param {import("models").Message} message
-     */
-    hasMessage(message) {
-        return message.in(this.messages);
     }
 
     get invitationLink() {
@@ -439,10 +537,6 @@ export class Thread extends Record {
         return this.memberCount - this.channelMembers.length;
     }
 
-    get hasNeedactionMessages() {
-        return this.needactionMessages.length > 0;
-    }
-
     get videoCount() {
         return Object.values(this._store.RtcSession.records).filter(
             (session) => session.videoStreams.size
@@ -456,10 +550,7 @@ export class Thread extends Record {
         return deserializeDateTime(this.last_interest_dt);
     }
 
-    /**
-     *
-     * @param {import("models").Persona} persona
-     */
+    /** @param {import("models").Persona} persona */
     getMemberName(persona) {
         return persona.name;
     }

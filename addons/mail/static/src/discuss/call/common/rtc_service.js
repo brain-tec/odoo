@@ -2,7 +2,6 @@
 
 import { BlurManager } from "@mail/discuss/call/common/blur_manager";
 import { monitorAudio } from "@mail/discuss/call/common/media_monitoring";
-import { removeFromArray } from "@mail/utils/common/arrays";
 import { closeStream, onChange } from "@mail/utils/common/misc";
 
 import { reactive } from "@odoo/owl";
@@ -136,9 +135,6 @@ export class Rtc {
             sourceScreenStream: null,
         });
         this.blurManager = undefined;
-        this.ringingThreads = reactive([], () => this.onRingingThreadsChange());
-        void this.ringingThreads.length;
-        this.store.ringingThreads = this.ringingThreads;
         onChange(this.userSettingsService, "useBlur", () => {
             if (this.state.sendCamera) {
                 this.toggleVideo("camera", true);
@@ -158,36 +154,8 @@ export class Rtc {
                 await this.resetAudioTrack({ force: true });
             }
         });
-        this.env.bus.addEventListener("mail.thread/onUpdate", ({ detail: { thread, data } }) => {
-            this.onThreadUpdate(thread, data);
-        });
-        this.env.bus.addEventListener(
-            "RTC-SERVICE:UPDATE_RTC_SESSIONS",
-            ({ detail: { commands = [], record, thread } }) => {
-                if (record) {
-                    const session = this.store.RtcSession.insert(record);
-                    thread.rtcSessions[session.id] = session;
-                }
-                for (const command of commands) {
-                    const sessionsData = command[1];
-                    switch (command[0]) {
-                        case "insert-and-unlink":
-                            for (const rtcSessionData of sessionsData) {
-                                this.deleteSession(rtcSessionData.id);
-                            }
-                            break;
-                        case "insert":
-                            for (const rtcSessionData of sessionsData) {
-                                const session = this.store.RtcSession.insert(rtcSessionData);
-                                thread.rtcSessions[session.id] = session;
-                            }
-                            break;
-                    }
-                }
-            }
-        );
         this.env.bus.addEventListener("RTC-SERVICE:PLAY_MEDIA", () => {
-            for (const session of Object.values(this.state.channel.rtcSessions)) {
+            for (const session of this.state.channel.rtcSessions) {
                 session.playAudio();
             }
         });
@@ -284,44 +252,6 @@ export class Rtc {
         );
     }
 
-    onThreadUpdate(thread, data) {
-        if ("rtc_inviting_session" in data) {
-            this.env.bus.trigger("RTC-SERVICE:UPDATE_RTC_SESSIONS", {
-                thread,
-                record: data.rtc_inviting_session,
-            });
-            thread.rtcInvitingSession = this.store.RtcSession.insert({
-                id: data.rtc_inviting_session.id,
-            });
-            if (!this.store.ringingThreads.includes(thread.localId)) {
-                this.store.ringingThreads.push(thread.localId);
-            }
-        }
-        if ("rtcInvitingSession" in data) {
-            if (Array.isArray(data.rtcInvitingSession)) {
-                if (data.rtcInvitingSession[0][0] === "unlink") {
-                    thread.rtcInvitingSession = undefined;
-                    removeFromArray(this.store.ringingThreads, thread.localId);
-                }
-                return;
-            }
-            this.env.bus.trigger("RTC-SERVICE:UPDATE_RTC_SESSIONS", {
-                thread,
-                record: data.rtcInvitingSession,
-            });
-            thread.rtcInvitingSession = this.store.RtcSession.insert({
-                id: data.rtcInvitingSession.id,
-            });
-            this.store.ringingThreads.push(thread.localId);
-        }
-        if ("rtcSessions" in data) {
-            this.env.bus.trigger("RTC-SERVICE:UPDATE_RTC_SESSIONS", {
-                thread,
-                commands: data.rtcSessions,
-            });
-        }
-    }
-
     /**
      * @param {any} id
      */
@@ -350,14 +280,6 @@ export class Rtc {
         }
     }
 
-    onRingingThreadsChange() {
-        if (this.ringingThreads.length > 0) {
-            this.soundEffectsService.play("incoming-call", { loop: true });
-        } else {
-            this.soundEffectsService.stop("incoming-call");
-        }
-    }
-
     async deafen() {
         await this.setDeaf(true);
         this.soundEffectsService.play("deafen");
@@ -365,7 +287,7 @@ export class Rtc {
 
     async handleNotification(sessionId, content) {
         const { event, channelId, payload } = JSON.parse(content);
-        const session = this.state.channel?.rtcSessions[sessionId];
+        const session = this.state.channel?.rtcSessions.find((session) => session.id === sessionId);
         if (
             !session ||
             !IS_CLIENT_RTC_COMPATIBLE ||
@@ -621,10 +543,10 @@ export class Rtc {
     }
 
     call() {
-        if (!this.state.channel.rtcSessions) {
+        if (this.state.channel.rtcSessions.length === 0) {
             return;
         }
-        for (const session of Object.values(this.state.channel.rtcSessions)) {
+        for (const session of this.state.channel.rtcSessions) {
             if (session.peerConnection || session.eq(this.state.selfSession)) {
                 continue;
             }
@@ -654,7 +576,7 @@ export class Rtc {
                     state: peerConnection.iceConnectionState,
                 }
             );
-            if (!this.state.channel.rtcSessions[session.id]) {
+            if (!this.state.channel.rtcSessions.some((s) => s.id === session.id)) {
                 return;
             }
             session.connectionState = peerConnection.iceConnectionState;
@@ -781,13 +703,11 @@ export class Rtc {
             this.notification.add(_t("Your browser does not support webRTC."), { type: "warning" });
             return;
         }
-        const { rtcSessions, iceServers, sessionId, invitedMembers } = await this.rpc(
+        const { rtcSessions, iceServers, sessionId } = await this.rpc(
             "/mail/rtc/channel/join_call",
             {
                 channel_id: channel.id,
-                check_rtc_session_ids: Object.values(channel.rtcSessions).map(
-                    (session) => session.id
-                ),
+                check_rtc_session_ids: channel.rtcSessions.map((session) => session.id),
             },
             { silent: true }
         );
@@ -795,7 +715,7 @@ export class Rtc {
         this.clear();
         this.state.logs.clear();
         this.state.channel = channel;
-        this.onThreadUpdate(this.state.channel, { rtcSessions, invitedMembers });
+        this.state.channel.update({ rtcSessions });
         this.state.selfSession = this.store.RtcSession.get(sessionId);
         this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         this.state.logs.set("channelId", this.state.channel?.id);
@@ -806,19 +726,19 @@ export class Rtc {
                 throw new Error("channel has changed");
             }
             if (this.state.channel) {
-                if (this.state.channel && !channelProxy.rtcSessions[this.state.selfSession.id]) {
+                if (this.state.channel && this.state.selfSession.notIn(channelProxy.rtcSessions)) {
                     // if the current RTC session is not in the channel sessions, this call is no longer valid.
                     this.endCall();
                     return;
                 }
-                for (const session of Object.values(this.state.channel.rtcSessions)) {
-                    if (!channelProxy.rtcSessions[session.id]) {
+                for (const session of this.state.channel.rtcSessions) {
+                    if (session.notIn(channelProxy.rtcSessions)) {
                         this.log(session, "session removed from the server");
                         this.disconnect(session);
                     }
                 }
             }
-            void Object.keys(channelProxy.rtcSessions);
+            void channelProxy.rtcSessions.map((s) => s);
         });
         this.state.updateAndBroadcastDebounce = debounce(
             async () => {
@@ -902,9 +822,7 @@ export class Rtc {
             "/discuss/channel/ping",
             {
                 channel_id: this.state.channel.id,
-                check_rtc_session_ids: Object.values(this.state.channel.rtcSessions).map(
-                    (session) => session.id
-                ),
+                check_rtc_session_ids: this.state.channel.rtcSessions.map((session) => session.id),
                 rtc_session_id: this.state.selfSession.id,
             },
             { silent: true }
@@ -913,7 +831,7 @@ export class Rtc {
             const activeSessionsData = rtcSessions[0][1];
             for (const sessionData of activeSessionsData) {
                 const session = this.store.RtcSession.insert(sessionData);
-                this.state.channel.rtcSessions[session.id] = session;
+                this.state.channel.rtcSessions.add(session);
             }
             const outdatedSessionsData = rtcSessions[1][1];
             for (const sessionData of outdatedSessionsData) {
@@ -1095,7 +1013,7 @@ export class Rtc {
      */
     async setDeaf(isDeaf) {
         this.updateAndBroadcast({ isDeaf });
-        for (const session of Object.values(this.state.channel.rtcSessions)) {
+        for (const session of this.state.channel.rtcSessions) {
             if (!session.audioElement) {
                 continue;
             }
@@ -1120,7 +1038,7 @@ export class Rtc {
             return;
         }
         this.state.selfSession.raisingHand = raise ? new Date() : undefined;
-        await this.notify(Object.values(this.state.channel.rtcSessions), "raise_hand", {
+        await this.notify(this.state.channel.rtcSessions, "raise_hand", {
             active: this.state.selfSession.raisingHand,
         });
     }
@@ -1181,7 +1099,7 @@ export class Rtc {
                 }
             }
         }
-        for (const session of Object.values(this.state.channel.rtcSessions)) {
+        for (const session of this.state.channel.rtcSessions) {
             if (session.eq(this.state.selfSession)) {
                 continue;
             }
@@ -1222,7 +1140,7 @@ export class Rtc {
         }
         this.state.audioTrack.enabled =
             !this.state.selfSession.isMute && this.state.selfSession.isTalking;
-        await this.notify(Object.values(this.state.channel.rtcSessions), "trackChange", {
+        await this.notify(this.state.channel.rtcSessions, "trackChange", {
             type: "audio",
             state: {
                 isTalking: this.state.selfSession.isTalking && !this.state.selfSession.isSelfMuted,
@@ -1423,7 +1341,7 @@ export class Rtc {
             audioTrack.enabled = !this.state.selfSession.isMute && this.state.selfSession.isTalking;
             this.state.audioTrack = audioTrack;
             await this.linkVoiceActivation();
-            for (const session of Object.values(this.state.channel.rtcSessions)) {
+            for (const session of this.state.channel.rtcSessions) {
                 if (session.eq(this.state.selfSession)) {
                     continue;
                 }
@@ -1480,8 +1398,6 @@ export class Rtc {
             if (this.state.selfSession && session.eq(this.state.selfSession)) {
                 this.endCall();
             }
-            delete this.store.Thread.get({ model: "discuss.channel", id: session.channelId })
-                ?.rtcSessions[id];
             this.disconnect(session);
             session.delete();
         }
@@ -1614,21 +1530,21 @@ export class Rtc {
         }
         const oldCount = Object.keys(channel.rtcSessions).length;
         switch (command) {
-            case "insert-and-unlink":
+            case "DELETE":
                 for (const sessionData of sessionsData) {
                     this.deleteSession(sessionData.id);
                 }
                 break;
-            case "insert":
+            case "ADD":
                 for (const sessionData of sessionsData) {
                     const session = this.store.RtcSession.insert(sessionData);
-                    channel.rtcSessions[session.id] = session;
+                    channel.rtcSessions.add(session);
                 }
                 break;
         }
-        if (Object.keys(channel.rtcSessions).length > oldCount) {
+        if (channel.rtcSessions.length > oldCount) {
             this.soundEffectsService.play("channel-join");
-        } else if (Object.keys(channel.rtcSessions).length < oldCount) {
+        } else if (channel.rtcSessions.length < oldCount) {
             this.soundEffectsService.play("member-leave");
         }
     }

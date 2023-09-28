@@ -151,9 +151,7 @@ export class ChatBotService {
                 ...rawMessage,
                 body: markup(rawMessage.body),
             });
-            if (!this.livechatService.thread?.hasMessage(message)) {
-                this.livechatService.thread?.messages.push(message);
-            }
+            this.livechatService.thread?.messages.add(message);
         }
         this.hasPostedWelcomeSteps = true;
     }
@@ -186,9 +184,7 @@ export class ChatBotService {
                     ...stepMessage,
                     body: markup(stepMessage.body),
                 });
-                if (!this.livechatService.thread?.hasMessage(message)) {
-                    this.livechatService.thread?.messages.push(message);
-                }
+                this.livechatService.thread?.messages.add(message);
             }
             this.currentStep = step;
             if (

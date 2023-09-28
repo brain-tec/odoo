@@ -10,7 +10,7 @@ from collections import defaultdict
 from odoo import _, api, Command, fields, models, modules, tools
 from odoo.exceptions import AccessError
 from odoo.osv import expression
-from odoo.tools.misc import clean_context, groupby as tools_groupby
+from odoo.tools import clean_context, groupby as tools_groupby, SQL
 
 _logger = logging.getLogger(__name__)
 _image_dataurl = re.compile(r'(data:image/[a-z]+?);base64,([a-z0-9+/\n]{3,}=*)\n*([\'"])(?: data-filename="([^"]*)")?', re.I)
@@ -294,23 +294,34 @@ class Message(models.Model):
         allowed_ids = set()
         model_ids = defaultdict(lambda: defaultdict(set))
 
-        rel_alias = query.left_join(
-            self._table, 'id', 'mail_message_res_partner_rel', 'mail_message_id', 'partner_ids',
-            '{rhs}.res_partner_id = %s', [pid],
-        )
-        notif_alias = query.left_join(
-            self._table, 'id', 'mail_notification', 'mail_message_id', 'notification_ids',
-            '{rhs}.res_partner_id = %s', [pid],
-        )
-        query_str, params = query.select(
-            f'"{self._table}"."id"',
-            f'"{self._table}"."model"',
-            f'"{self._table}"."res_id"',
-            f'"{self._table}"."author_id"',
-            f'"{self._table}"."message_type"',
-            f'COALESCE("{rel_alias}"."res_partner_id", "{notif_alias}"."res_partner_id")',
-        )
-        self.env.cr.execute(query_str, params)
+        rel_alias = query.make_alias(self._table, 'partner_ids')
+        query.add_join("LEFT JOIN", rel_alias, 'mail_message_res_partner_rel', SQL(
+            "%s = %s AND %s = %s",
+            SQL.identifier(self._table, 'id'),
+            SQL.identifier(rel_alias, 'mail_message_id'),
+            SQL.identifier(rel_alias, 'res_partner_id'),
+            pid,
+        ))
+        notif_alias = query.make_alias(self._table, 'notification_ids')
+        query.add_join("LEFT JOIN", notif_alias, 'mail_notification', SQL(
+            "%s = %s AND %s = %s",
+            SQL.identifier(self._table, 'id'),
+            SQL.identifier(notif_alias, 'mail_message_id'),
+            SQL.identifier(notif_alias, 'res_partner_id'),
+            pid,
+        ))
+        self.env.cr.execute(query.select(
+            SQL.identifier(self._table, 'id'),
+            SQL.identifier(self._table, 'model'),
+            SQL.identifier(self._table, 'res_id'),
+            SQL.identifier(self._table, 'author_id'),
+            SQL.identifier(self._table, 'message_type'),
+            SQL(
+                "COALESCE(%s, %s)",
+                SQL.identifier(rel_alias, 'res_partner_id'),
+                SQL.identifier(notif_alias, 'res_partner_id'),
+            ),
+        ))
         for id_, model, res_id, author_id, message_type, partner_id in self.env.cr.fetchall():
             ids.append(id_)
             if author_id == pid:
@@ -850,9 +861,9 @@ class Message(models.Model):
         # format result
         group_domain = [("message_id", "=", self.id), ("content", "=", content)]
         count = self.env["mail.message.reaction"].search_count(group_domain)
-        group_command = "insert" if count > 0 else "insert-and-unlink"
-        guests = [("insert" if action == "add" else "insert-and-unlink", {"id": guest.id})] if guest else []
-        partners = [("insert" if action == "add" else "insert-and-unlink", {"id": partner.id})] if partner else []
+        group_command = "ADD" if count > 0 else "DELETE"
+        guests = [("ADD" if action == "add" else "DELETE", {"id": guest.id})] if guest else []
+        partners = [("ADD" if action == "add" else "DELETE", {"id": partner.id})] if partner else []
         group_values = {
             "content": content,
             "count": count,
@@ -876,11 +887,11 @@ class Message(models.Model):
                 thread_ids_by_model_name[message.model].add(message.res_id)
         for vals in vals_list:
             message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
-            author = message_sudo.author_id.mail_partner_format({'id': True, 'name': True, 'is_company': True, 'user': {"id": True}}).get(message_sudo.author_id) if message_sudo.author_id else [('clear',)]
+            author = message_sudo.author_id.mail_partner_format({'id': True, 'name': True, 'is_company': True, 'user': {"id": True}}).get(message_sudo.author_id) if message_sudo.author_id else False
             guestAuthor = {
                 'id': message_sudo.author_guest_id.id,
                 'name': message_sudo.author_guest_id.name,
-            } if message_sudo.author_guest_id else [('clear',)]
+            } if message_sudo.author_guest_id else False
             if message_sudo.model and message_sudo.res_id:
                 record_sudo = self.env[message_sudo.model].browse(message_sudo.res_id).sudo()
                 record_name = record_sudo.with_prefetch(thread_ids_by_model_name[message_sudo.model]).display_name

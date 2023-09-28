@@ -88,7 +88,7 @@ export class Call extends Component {
         const sessionCards = [];
         const invitationCards = [];
         const filterVideos = this.props.thread.showOnlyVideo && this.props.thread.videoCount > 0;
-        for (const session of Object.values(this.props.thread.rtcSessions)) {
+        for (const session of this.props.thread.rtcSessions) {
             const target = session.raisingHand ? raisingHandCards : sessionCards;
             const cameraStream = session.videoStreams.get("camera");
             if (!filterVideos || cameraStream) {
@@ -108,10 +108,10 @@ export class Call extends Component {
             }
         }
         if (!filterVideos) {
-            for (const memberId of this.props.thread.invitedMemberIds) {
+            for (const member of this.props.thread.invitedMembers) {
                 invitationCards.push({
-                    key: "member_" + memberId,
-                    member: this.store.ChannelMember.get(memberId),
+                    key: "member_" + member.id,
+                    member,
                 });
             }
         }

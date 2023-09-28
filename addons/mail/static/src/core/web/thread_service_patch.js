@@ -63,7 +63,7 @@ patch(ThreadService.prototype, {
             }
         }
         if ("attachments" in result) {
-            this.update(thread, {
+            thread.update({
                 areAttachmentsLoaded: true,
                 attachments: result.attachments,
                 isLoadingAttachments: false,
@@ -90,8 +90,8 @@ patch(ThreadService.prototype, {
                     followedThread: thread,
                     ...followerData,
                 });
-                if (follower.notEq(thread.selfFollower) && follower.notIn(thread.followers)) {
-                    thread.followers.push(follower);
+                if (follower.notEq(thread.selfFollower)) {
+                    thread.followers.add(follower);
                 }
             }
             thread.recipientsCount = result.recipientsCount;
@@ -100,9 +100,7 @@ patch(ThreadService.prototype, {
                     followedThread: thread,
                     ...recipientData,
                 });
-                if (recipient.notIn(thread.recipients)) {
-                    thread.recipients.push(recipient);
-                }
+                thread.recipients.add(recipient);
             }
         }
         if ("suggestedRecipients" in result) {
@@ -147,8 +145,11 @@ patch(ThreadService.prototype, {
     async insertSuggestedRecipients(thread, dataList) {
         const recipients = [];
         for (const data of dataList) {
-            const [partner_id, emailInfo, lang, reason] = data;
-            const [name, email] = emailInfo && parseEmail(emailInfo);
+            const [partner_id, emailInfo, lang, reason, customerInfo] = data;
+            let [name, email] = emailInfo ? parseEmail(emailInfo) : [];
+            if ((!name || name === email) && customerInfo?.name) {
+                name = customerInfo.name;
+            }
             recipients.push({
                 id: nextId++,
                 name,
@@ -167,9 +168,9 @@ patch(ThreadService.prototype, {
         thread.suggestedRecipients = recipients;
     },
     async leaveChannel(channel) {
-        const chatWindow = this.store.ChatWindow.records.find((c) => c.thread?.eq(channel));
+        const chatWindow = this.store.discuss.chatWindows.find((c) => c.thread?.eq(channel));
         if (chatWindow) {
-            this.chatWindowService.close(chatWindow);
+            await this.chatWindowService.close(chatWindow);
         }
         super.leaveChannel(...arguments);
     },
@@ -184,8 +185,8 @@ patch(ThreadService.prototype, {
                 followedThread: thread,
                 ...data,
             });
-            if (follower.notEq(thread.selfFollower) && follower.notIn(thread.followers)) {
-                thread.followers.push(follower);
+            if (follower.notEq(thread.selfFollower)) {
+                thread.followers.add(follower);
             }
         }
     },
@@ -201,9 +202,7 @@ patch(ThreadService.prototype, {
                 followedThread: thread,
                 ...data,
             });
-            if (recipient.notIn(thread.recipients)) {
-                thread.recipients.push(recipient);
-            }
+            thread.recipients.add(recipient);
         }
     },
     open(thread, replaceNewMessageChatWindow) {
@@ -240,10 +239,10 @@ patch(ThreadService.prototype, {
         ]);
         follower.delete();
     },
-    unpin(thread) {
-        const chatWindow = this.store.ChatWindow.records.find((c) => c.thread?.eq(thread));
+    async unpin(thread) {
+        const chatWindow = this.store.discuss.chatWindows.find((c) => c.thread?.eq(thread));
         if (chatWindow) {
-            this.chatWindowService.close(chatWindow);
+            await this.chatWindowService.close(chatWindow);
         }
         super.unpin(...arguments);
     },

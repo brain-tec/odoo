@@ -49,7 +49,7 @@ export class DiscussCoreCommon {
                 const { id, last_interest_dt } = payload;
                 const channel = this.store.Thread.get({ model: "discuss.channel", id });
                 if (channel) {
-                    this.threadService.update(channel, { last_interest_dt });
+                    channel.update({ last_interest_dt });
                     if (channel.type !== "channel") {
                         this.threadService.sortChannels();
                     }
@@ -60,13 +60,10 @@ export class DiscussCoreCommon {
                     ...payload,
                     model: "discuss.channel",
                 });
-                this.threadService.remove(thread);
-                if (thread.localId === this.store.discuss.threadLocalId) {
-                    this.store.discuss.threadLocalId = undefined;
-                }
                 this.notificationService.add(_t("You unsubscribed from %s.", thread.displayName), {
                     type: "info",
                 });
+                thread.delete();
             });
             this.busService.subscribe("discuss.channel/legacy_insert", (payload) => {
                 this.store.Thread.insert({
@@ -240,7 +237,7 @@ export class DiscussCoreCommon {
         if (message.notIn(channel.messages)) {
             if (!channel.loadNewer) {
                 channel.messages.push(message);
-            } else if (channel.state === "loading") {
+            } else if (channel.status === "loading") {
                 channel.pendingNewMessages.push(message);
             }
             if (message.isSelfAuthored) {

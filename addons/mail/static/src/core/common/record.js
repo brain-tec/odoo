@@ -214,6 +214,10 @@ export class RecordList extends Array {
     includes(record) {
         return this.__list__.includes(record.localId);
     }
+    /** @param {(acc: any, r: R) => any} fn */
+    reduce(fn, init) {
+        return this.__list__.reduce((acc, localId) => fn(acc, this.__store__.get(localId)), init);
+    }
     /**
      * @param {number} [start]
      * @param {number} [end]
@@ -246,6 +250,13 @@ export class RecordList extends Array {
         return this.__list__
             .map((localId) => this.__store__.get(localId))
             .concat(...collections.map((c) => [...c]));
+    }
+    /** @param {R}  */
+    add(r) {
+        if (this.indexOf(r) !== -1) {
+            return;
+        }
+        this.push(r);
     }
     /** @param {R}  */
     delete(r) {
@@ -331,11 +342,9 @@ export class Record {
         const obj = new this.Class();
         let record = Object.assign(obj, { localId: this.localId(data), Model: this });
         Object.assign(record, { _store: this.store });
-        if (!Array.isArray(this.records)) {
-            this.records[record.localId] = record;
-            // return reactive version
-            record = this.records[record.localId];
-        }
+        this.records[record.localId] = record;
+        // return reactive version
+        record = this.records[record.localId];
         return record;
     }
     /**
@@ -423,8 +432,10 @@ export class Record {
                 }
             }
         }
-        delete this.Model?.records[r1.localId];
-        this.Model = null;
+        if (this.Model) {
+            delete this.Model.records[r1.localId];
+            delete this.Model;
+        }
     }
 
     /** @param {Record} record */

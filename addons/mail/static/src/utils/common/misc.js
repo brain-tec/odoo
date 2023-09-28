@@ -2,18 +2,6 @@
 
 import { reactive } from "@odoo/owl";
 
-export function nullifyClearCommands(data) {
-    for (const key in data) {
-        if (!Array.isArray(data[key])) {
-            continue;
-        }
-        data[key] = data[key].filter((val) => val[0] !== "clear");
-        if (data[key].length === 0) {
-            data[key] = null;
-        }
-    }
-}
-
 export function assignDefined(obj, data, keys = Object.keys(data)) {
     for (const key of keys) {
         if (data[key] !== undefined) {
@@ -41,23 +29,28 @@ export function isDragSourceExternalFile(dataTransfer) {
  * @param {Function} callback
  */
 export function onChange(target, key, callback) {
+    let proxy;
+    function _observe() {
+        void proxy[key];
+        if (proxy[key] instanceof Object) {
+            void Object.keys(proxy[key]);
+        }
+        if (proxy[key] instanceof Array) {
+            void proxy[key].length;
+            void proxy[key].forEach((i) => i);
+        }
+    }
     if (Array.isArray(key)) {
         for (const k of key) {
             onChange(target, k, callback);
         }
         return;
     }
-    const proxy = reactive(target, () => {
-        void proxy[key];
-        if (proxy[key] instanceof Object) {
-            void Object.keys(proxy[key]);
-        }
+    proxy = reactive(target, () => {
+        _observe();
         callback();
     });
-    void proxy[key];
-    if (proxy[key] instanceof Object) {
-        void Object.keys(proxy[key]);
-    }
+    _observe();
     return proxy;
 }
 

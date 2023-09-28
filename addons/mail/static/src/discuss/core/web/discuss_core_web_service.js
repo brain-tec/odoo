@@ -83,24 +83,27 @@ export class DiscussCoreWeb {
                 this.store.ChatWindow.insert({ thread: chat });
             }
         });
-        this.busService.subscribe("mail.record/insert", async (payload) => {
+        this.busService.subscribe("mail.record/insert", (payload) => {
             if (payload.Thread) {
                 const data = payload.Thread;
                 const thread = this.store.Thread.get(data);
-                if (data.serverFoldState && thread && data.serverFoldState !== thread.state) {
-                    thread.state = data.serverFoldState;
-                    if (thread.state === "closed") {
-                        const chatWindow = this.store.ChatWindow.records.find((chatWindow) =>
-                            chatWindow.thread?.eq(thread)
-                        );
-                        if (chatWindow) {
-                            this.chatWindowService.close(chatWindow);
+                if (data.serverFoldState && thread && data.foldStateCount > thread.foldStateCount) {
+                    thread.foldStateCount = data.foldStateCount;
+                    if (data.serverFoldState !== thread.state) {
+                        thread.state = data.serverFoldState;
+                        if (thread.state === "closed") {
+                            const chatWindow = this.store.discuss.chatWindows.find((chatWindow) =>
+                                chatWindow.thread?.eq(thread)
+                            );
+                            if (chatWindow) {
+                                this.chatWindowService.close(chatWindow, { notifyState: false });
+                            }
+                        } else {
+                            this.store.ChatWindow.insert({
+                                thread,
+                                folded: thread.state === "folded",
+                            });
                         }
-                    } else {
-                        this.store.ChatWindow.insert({
-                            thread,
-                            folded: thread.state === "folded",
-                        });
                     }
                 }
             }

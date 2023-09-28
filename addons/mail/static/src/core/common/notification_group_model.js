@@ -1,15 +1,14 @@
 /* @odoo-module */
 
 import { Record } from "@mail/core/common/record";
-import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 
 import { _t } from "@web/core/l10n/translation";
 
 let nextId = 1;
 export class NotificationGroup extends Record {
     static id = "id";
-    /** @type {import("models").NotificationGroup[]} */
-    static records = [];
+    /** @type {Object.<number, import("models").NotificationGroup>} */
+    static records = {};
     /** @returns {import("models").NotificationGroup} */
     static new(data) {
         return super.new(data);
@@ -23,7 +22,7 @@ export class NotificationGroup extends Record {
      * @returns {import("models").NotificationGroup}
      */
     static insert(data) {
-        let group = this.records.find((group) => {
+        let group = this.store.discuss.notificationGroups.find((group) => {
             return (
                 group.resModel === data.resModel &&
                 group.type === data.type &&
@@ -34,15 +33,42 @@ export class NotificationGroup extends Record {
             const id = nextId++;
             group = this.new({ id });
             Object.assign(group, { id });
-            this.store.NotificationGroup.records.push(group);
-            // return reactive
-            group = this.store.NotificationGroup.records.find((g) => g.eq(group));
+            this.store.discuss.notificationGroups.add(group);
         }
-        this.env.services["mail.message"].updateNotificationGroup(group, data);
+        group.update(data);
         if (group.notifications.length === 0) {
-            removeFromArrayWithPredicate(this.records, (gr) => gr.eq(group));
+            group.delete();
         }
         return group;
+    }
+
+    update(data) {
+        Object.assign(this, {
+            modelName: data.modelName ?? this.modelName,
+            resModel: data.resModel ?? this.resModel,
+            type: data.type ?? this.type,
+            status: data.status ?? this.status,
+        });
+        const notifications = data.notifications ?? [];
+        const alreadyKnownNotifications = new Set(this.notifications.map(({ id }) => id));
+        const notificationIdsToRemove = new Set();
+        for (const [commandName, notification] of notifications) {
+            if (commandName === "ADD" && !alreadyKnownNotifications.has(notification.id)) {
+                this.notifications.push(notification);
+            } else if (commandName === "DELETE") {
+                notificationIdsToRemove.add(notification.id);
+            }
+        }
+        this.notifications = this.notifications.filter(
+            ({ id }) => !notificationIdsToRemove.has(id)
+        );
+        this.lastMessage = this.notifications[0]?.message;
+        for (const notification of this.notifications) {
+            if (this.lastMessage?.id < notification.message?.id) {
+                this.lastMessage = notification.message;
+            }
+        }
+        this.resIds.add(data.resId);
     }
 
     notifications = Record.many("Notification");
