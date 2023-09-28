@@ -55,7 +55,7 @@ export class MessagingMenu extends Component {
     }
 
     markAsRead(thread) {
-        if (thread.hasNeedactionMessages) {
+        if (thread.needactionMessages.length > 0) {
             this.threadService.markAllMessagesAsRead(thread);
         }
         if (thread.model === "discuss.channel") {
@@ -74,7 +74,7 @@ export class MessagingMenu extends Component {
     get hasPreviews() {
         return (
             this.threads.length > 0 ||
-            (this.store.NotificationGroup.records.length > 0 &&
+            (this.store.discuss.notificationGroups.length > 0 &&
                 this.store.discuss.activeTab === "all") ||
             (this.notification.permission === "prompt" && this.store.discuss.activeTab === "all")
         );
@@ -86,7 +86,7 @@ export class MessagingMenu extends Component {
             displayName: _t("%s has a request", this.store.odoobot.name),
             iconSrc: this.threadService.avatarUrl(this.store.odoobot),
             partner: this.store.odoobot,
-            isLast: this.threads.length === 0 && this.store.NotificationGroup.records.length === 0,
+            isLast: this.threads.length === 0 && this.store.discuss.notificationGroups.length === 0,
             isShown:
                 this.store.discuss.activeTab === "all" && this.notification.permission === "prompt",
         };
@@ -96,7 +96,8 @@ export class MessagingMenu extends Component {
         /** @type {import("models").Thread[]} */
         let threads = Object.values(this.store.Thread.records).filter(
             (thread) =>
-                thread.is_pinned || (thread.hasNeedactionMessages && thread.type !== "mailbox")
+                thread.is_pinned ||
+                (thread.needactionMessages.length > 0 && thread.type !== "mailbox")
         );
         const tab = this.store.discuss.activeTab;
         if (tab !== "all") {
@@ -124,10 +125,10 @@ export class MessagingMenu extends Component {
             ) {
                 return -1;
             }
-            if (a.hasNeedactionMessages && !b.hasNeedactionMessages) {
+            if (a.needactionMessages.length > 0 && b.needactionMessages.length === 0) {
                 return -1;
             }
-            if (b.hasNeedactionMessages && !a.hasNeedactionMessages) {
+            if (b.needactionMessages.length > 0 && a.needactionMessages.length === 0) {
                 return 1;
             }
             if (a.message_unread_counter > 0 && b.message_unread_counter === 0) {
@@ -233,7 +234,7 @@ export class MessagingMenu extends Component {
             });
             // Close the related chat window as having both the form view
             // and the chat window does not look good.
-            this.store.ChatWindow.records.find(({ thr }) => thr?.eq(thread))?.close();
+            this.store.discuss.chatWindows.find(({ thr }) => thr?.eq(thread))?.close();
         } else {
             this.threadService.open(thread);
         }
@@ -279,15 +280,14 @@ export class MessagingMenu extends Component {
         this.store.discuss.activeTab = tabId;
         if (
             this.store.discuss.activeTab === "mailbox" &&
-            (!this.store.discuss.threadLocalId ||
-                this.store.Thread.records[this.store.discuss.threadLocalId].type !== "mailbox")
+            (!this.store.discuss.thread || this.store.discuss.thread.type !== "mailbox")
         ) {
             this.threadService.setDiscussThread(
                 Object.values(this.store.Thread.records).find((thread) => thread.id === "inbox")
             );
         }
         if (this.store.discuss.activeTab !== "mailbox") {
-            this.store.discuss.threadLocalId = null;
+            delete this.store.discuss.thread;
         }
     }
 
@@ -297,7 +297,7 @@ export class MessagingMenu extends Component {
             Object.values(this.store.Thread.records).filter(
                 (thread) => thread.is_pinned && thread.message_unread_counter > 0
             ).length +
-            Object.values(this.store.NotificationGroup.records).reduce(
+            this.store.discuss.notificationGroups.reduce(
                 (acc, ng) => acc + parseInt(ng.notifications.length),
                 0
             );

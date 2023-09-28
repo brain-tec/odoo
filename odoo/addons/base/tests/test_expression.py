@@ -728,8 +728,16 @@ class TestExpression(SavepointCaseWithUserDemo):
         helen = Model.create({'name': 'Hélène'})
         self.assertEqual(helen, Model.search([('name', 'ilike', 'Helene')]))
         self.assertEqual(helen, Model.search([('name', 'ilike', 'hélène')]))
+        self.assertEqual(helen, Model.search([('name', '=ilike', 'Hel%')]))
+        self.assertEqual(helen, Model.search([('name', '=ilike', 'hél%')]))
         self.assertNotIn(helen, Model.search([('name', 'not ilike', 'Helene')]))
         self.assertNotIn(helen, Model.search([('name', 'not ilike', 'hélène')]))
+
+        # =like and like should be case and accent sensitive
+        self.assertEqual(helen, Model.search([('name', '=like', 'Hél%')]))
+        self.assertNotIn(helen, Model.search([('name', '=like', 'Hel%')]))
+        self.assertEqual(helen, Model.search([('name', 'like', 'élè')]))
+        self.assertNotIn(helen, Model.search([('name', 'like', 'ele')]))
 
         hermione, nicostratus = Model.create([
             {'name': 'Hermione', 'parent_id': helen.id},
@@ -1229,7 +1237,7 @@ class TestQueries(TransactionCase):
             SELECT COUNT(*) FROM (
                 SELECT FROM "res_partner"
                 WHERE (("res_partner"."active" = %s) AND ("res_partner"."name"::text LIKE %s))
-                LIMIT 1
+                LIMIT %s
             ) t
         ''']):
             Model.search_count([('name', 'like', 'foo')], limit=1)
@@ -1294,7 +1302,7 @@ class TestQueries(TransactionCase):
                 OR ("ir_model"."model"::text ILIKE %s)
             )
             ORDER BY "ir_model"."model"
-            LIMIT 100
+            LIMIT %s
         ''']):
             Model.name_search('foo')
 
@@ -1306,7 +1314,7 @@ class TestQueries(TransactionCase):
                 AND (("ir_model"."model"::text NOT ILIKE %s) OR "ir_model"."model" IS NULL)
             )
             ORDER BY "ir_model"."model"
-            LIMIT 100
+            LIMIT %s
         ''']):
             Model.name_search('foo', operator='not ilike')
 
@@ -1426,7 +1434,7 @@ class TestMany2one(TransactionCase):
                 FROM "res_company"
                 WHERE (("res_company"."active" = %s) AND ("res_company"."name"::text LIKE %s))
                 ORDER BY "res_company"."id"
-                LIMIT 1
+                LIMIT %s
             ))
             ORDER BY "res_partner"."complete_name"asc,"res_partner"."id"desc
         ''']):

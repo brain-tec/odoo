@@ -5,9 +5,12 @@ import { ChatWindowService } from "@mail/core/common/chat_window_service";
 import { patch } from "@web/core/utils/patch";
 
 patch(ChatWindowService.prototype, {
-    close(chatWindow) {
-        super.close(...arguments);
-        this.notifyState(chatWindow);
+    async _onClose(chatWindow, options) {
+        const { notifyState = true } = options;
+        await super._onClose(...arguments);
+        if (notifyState) {
+            this.notifyState(chatWindow);
+        }
     },
     hide(chatWindow) {
         super.hide(...arguments);
@@ -18,12 +21,14 @@ patch(ChatWindowService.prototype, {
             return;
         }
         if (chatWindow.thread?.model === "discuss.channel") {
+            chatWindow.thread.foldStateCount++;
             return this.orm.silent.call(
                 "discuss.channel",
                 "channel_fold",
                 [[chatWindow.thread.id]],
                 {
                     state: chatWindow.thread.state,
+                    state_count: chatWindow.thread.foldStateCount,
                 }
             );
         }

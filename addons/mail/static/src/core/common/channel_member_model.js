@@ -28,8 +28,39 @@ export class ChannelMember extends Record {
     static insert(data) {
         const memberData = Array.isArray(data) ? data[1] : data;
         const member = this.get(memberData) ?? this.new(memberData);
-        this.env.services["discuss.channel.member"].update(member, data);
+        member.update(data);
         return member;
+    }
+
+    update(data) {
+        const [command, memberData] = Array.isArray(data) ? data : ["ADD", data];
+        this.id = memberData.id;
+        if ("persona" in memberData) {
+            this.persona = this._store.Persona.insert({
+                ...(memberData.persona.partner ?? memberData.persona.guest),
+                type: memberData.persona.guest ? "guest" : "partner",
+                country: memberData.persona.partner?.country,
+                channelId: memberData.persona.guest ? memberData.channel.id : null,
+            });
+        }
+        let thread = memberData.thread ?? this.thread;
+        if (!thread && memberData.channel?.id) {
+            thread = this._store.Thread.insert({
+                id: memberData.channel.id,
+                model: "discuss.channel",
+            });
+        }
+        if (thread && !this.thread) {
+            this.thread = thread;
+        }
+        switch (command) {
+            case "ADD":
+                this.thread?.channelMembers.add(this);
+                break;
+            case "DELETE":
+                this.delete();
+                break;
+        }
     }
 
     /** @type {number} */

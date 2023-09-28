@@ -1036,7 +1036,7 @@ class expression(object):
                     push_result(expr, [right])
 
                 else:
-                    if 'like' in operator:
+                    if operator in ('like', 'ilike', 'not like', 'not ilike'):
                         right = f'%{pycompat.to_text(right)}%'
                         unaccent = self._unaccent(field)
                     else:
@@ -1372,7 +1372,7 @@ class expression(object):
                             expr += f"{_left} {_sql_operator} {_unaccent('%s')} AND "
                             params.append(_right)
 
-                    unaccent = self._unaccent(field) if sql_operator.endswith('like') else lambda x: x
+                    unaccent = self._unaccent(field) if sql_operator.endswith('ilike') else lambda x: x
                     lang = model.env.lang or 'en_US'
                     if lang == 'en_US':
                         left = unaccent(f""""{alias}"."{field.name}"->>'en_US'""")
@@ -1440,12 +1440,14 @@ class expression(object):
             params = []
 
         elif operator == 'inselect':
-            query = '(%s."%s" in (%s))' % (table_alias, left, right[0])
-            params = list(right[1])
+            subquery, subparams = right
+            query = '(%s."%s" in (%s))' % (table_alias, left, subquery)
+            params = list(subparams)
 
         elif operator == 'not inselect':
-            query = '(%s."%s" not in (%s))' % (table_alias, left, right[0])
-            params = list(right[1])
+            subquery, subparams = right
+            query = '(%s."%s" not in (%s))' % (table_alias, left, subquery)
+            params = list(subparams)
 
         elif operator in ['in', 'not in']:
             # Two cases: right is a boolean or a list. The boolean case is an
@@ -1518,7 +1520,7 @@ class expression(object):
             sql_operator = {'=like': 'like', '=ilike': 'ilike'}.get(operator, operator)
             cast = '::text' if sql_operator.endswith('like') else ''
 
-            unaccent = self._unaccent(field) if sql_operator.endswith('like') else lambda x: x
+            unaccent = self._unaccent(field) if sql_operator.endswith('ilike') else lambda x: x
             column = '%s.%s' % (table_alias, _quote(left))
             query = f'({unaccent(column + cast)} {sql_operator} {unaccent("%s")})'
 

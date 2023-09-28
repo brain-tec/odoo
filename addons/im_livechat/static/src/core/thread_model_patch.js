@@ -22,7 +22,7 @@ patch(Thread, {
                 });
             }
             if (isUnknown) {
-                this.store.discuss.livechat.threads.push(thread.localId);
+                this.store.discuss.livechat.threads.push(thread);
                 this.env.services["mail.thread"].sortChannels();
             }
         }
@@ -35,20 +35,12 @@ patch(Thread.prototype, {
         return super.typesAllowingCalls.concat(["livechat"]);
     },
 
-    get isChannel() {
-        return this.type === "livechat" || super.isChannel;
-    },
-
     get hasMemberList() {
         return this.type === "livechat" || super.hasMemberList;
     },
 
     get isChatChannel() {
         return this.type === "livechat" || super.isChatChannel;
-    },
-
-    get allowSetLastSeenMessage() {
-        return this.type === "livechat" || super.allowSetLastSeenMessage;
     },
 
     get correspondents() {

@@ -48,8 +48,15 @@ patch(Thread, {
 patch(Thread.prototype, {
     chatbotScriptId: null,
 
-    get isChannel() {
-        return this.type === "livechat" || super.isChannel;
+    update(data) {
+        super.update(...arguments);
+        if (data.operator_pid) {
+            this.operator = this._store.Persona.insert({
+                type: "partner",
+                id: data.operator_pid[0],
+                name: data.operator_pid[1],
+            });
+        }
     },
 
     get isChatChannel() {
