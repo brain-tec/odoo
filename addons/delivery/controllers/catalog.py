@@ -1,11 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.http import request, Controller
+from odoo.http import request, route
+from odoo.addons.sale.controllers.catalog import CatalogController
 
 
-class CatalogController(Controller):
+class CatalogControllerDelivery(CatalogController):
 
-    def sale_product_catalog_update_sale_order_line_info(self, order_id, product_id, quantity):
+    @route()
+    def sale_product_catalog_update_sale_order_line_info(
+        self, order_id, product_id, quantity, **kwargs
+    ):
         """ Override of `sale` to recompute the delivery prices.
 
         :param int order_id: The sale order, as a `sale.order` id.
@@ -15,8 +19,8 @@ class CatalogController(Controller):
                  the quantity selected.
         :rtype: float
         """
-        price_unit = super.sale_product_catalog_update_sale_order_line_info(
-            order_id, product_id, quantity
+        price_unit = super().sale_product_catalog_update_sale_order_line_info(
+            order_id, product_id, quantity, **kwargs
         )
         order = request.env['sale.order'].browse(order_id)
         if order:
