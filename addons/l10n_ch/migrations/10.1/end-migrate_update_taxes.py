@@ -8,7 +8,6 @@ def migrate(cr, version):
     if new_template_to_tax:
         _, new_tax_ids = zip(*new_template_to_tax)
         env = api.Environment(cr, SUPERUSER_ID, {})
-        ids = [obj.id for obj in new_tax_ids]
-        taxes = env['account.tax'].browse(ids)
+        taxes = env['account.tax'].browse(new_tax_ids)
         for tax in taxes:
             tax.active = True

@@ -94,8 +94,7 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
             _avoid_name_conflict(company, template)
             templates_to_create += template
         new_template2tax_company = templates_to_create._generate_tax(company, templates_to_tax_update, accounts_exist=True)['tax_template_to_tax']
-        return [(env['account.tax.template'].browse(template_id), env['account.tax'].browse(tax_id))
-                for template_id, tax_id in new_template2tax_company.items()]
+        return [(template.id, tax.id) for template, tax in new_template2tax_company.items()]
 
     def _get_template_to_real_xmlid_mapping(model, templates):
         """ This function uses ir_model_data to return a mapping between the templates and the data, using their xmlid
@@ -190,10 +189,8 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
                     langs.append(lang)
         if langs:
             template_ids, tax_ids = zip(*new_template_x_taxes)
-            ids = [obj.id for obj in template_ids]
-            in_ids = env['account.tax.template'].browse(ids)
-            ids = [obj.id for obj in tax_ids]
-            out_ids = env['account.tax'].browse(ids)
+            in_ids = env['account.tax.template'].browse(template_ids)
+            out_ids = env['account.tax'].browse(tax_ids)
             chart_template.process_translations(langs, 'name', in_ids, out_ids)
             chart_template.process_translations(langs, 'description', in_ids, out_ids)
 
@@ -1096,7 +1093,10 @@ class AccountTaxTemplate(models.Model):
         """
         ChartTemplate = self.env['account.chart.template']
         todo_dict = {}
-        tax_template_to_tax = {}
+
+        if not templates_to_tax_update:
+            templates_to_tax_update = []
+        tax_template_to_tax = {template: tax for (template, tax) in templates_to_tax_update}
 
         templates_todo = list(self)
         while templates_todo:
@@ -1106,7 +1106,7 @@ class AccountTaxTemplate(models.Model):
             # create taxes in batch
             template_vals = []
             for template in templates:
-                if all(child.id in tax_template_to_tax for child in template.children_tax_ids):
+                if all(child in tax_template_to_tax for child in template.children_tax_ids):
                     if accounts_exist:
                         vals = template._get_tax_vals_complete(company, tax_template_to_tax)
                     else:
@@ -1119,7 +1119,7 @@ class AccountTaxTemplate(models.Model):
 
             # fill in tax_template_to_tax and todo_dict
             for tax, (template, vals) in pycompat.izip(taxes, template_vals):
-                tax_template_to_tax[template.id] = tax.id
+                tax_template_to_tax[template] = tax
                 # Since the accounts have not been created yet, we have to wait before filling these fields
                 todo_dict[tax.id] = {
                     'account_id': template.account_id.id,
@@ -1127,6 +1127,9 @@ class AccountTaxTemplate(models.Model):
                     'cash_basis_account_id': template.cash_basis_account_id.id,
                     'cash_basis_base_account_id': template.cash_basis_base_account_id.id,
                 }
+                for existing_template in tax_template_to_tax:
+                    if template in existing_template.children_tax_ids and tax not in tax_template_to_tax[existing_template].children_tax_ids:
+                        tax_template_to_tax[existing_template].write({'children_tax_ids': [(4, tax.id, False)]})
 
         if any(template.tax_exigibility == 'on_payment' for template in self):
             # When a CoA is being installed automatically and if it is creating account tax(es) whose field `Use Cash Basis`(tax_exigibility) is set to True by default
