@@ -124,6 +124,13 @@ class PickingType(models.Model):
                     }).id
         return super().create(vals_list)
 
+    def copy(self, default=None):
+        self.ensure_one()
+        default = dict(default or {})
+        if 'name' not in default:
+            default['name'] = _("%s (copy)", self.name)
+        return super().copy(default=default)
+
     def write(self, vals):
         if 'company_id' in vals:
             for picking_type in self:
@@ -506,8 +513,9 @@ class Picking(models.Model):
         for picking in self:
             picking.has_deadline_issue = picking.date_deadline and picking.date_deadline < picking.scheduled_date or False
 
+    @api.depends('state')
     def _compute_hide_picking_type(self):
-        self.hide_picking_type = self.env.context.get('default_picking_type_id', False)
+        self.hide_picking_type = self.state != "draft" and self.ids and 'default_picking_type_id' in self.env.context
 
     @api.depends('move_ids.delay_alert_date')
     def _compute_delay_alert_date(self):

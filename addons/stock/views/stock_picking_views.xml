@@ -208,7 +208,7 @@
                             <field name="partner_id" nolabel="1" readonly="state in ['cancel', 'done']"/>
                             <field name="picking_type_id" options="{'no_open': True}"
                                    invisible="hide_picking_type"
-                                   readonly="id"
+                                   readonly="state != 'draft' and id"
                                    domain="context.get('restricted_picking_type_code') and [('code', '=', context.get('restricted_picking_type_code'))] or [(1,'=',1)]"/>
                             <field name="location_id" groups="!stock.group_stock_multi_locations" invisible="1" readonly="state == 'done'"/>
                             <field name="location_dest_id" groups="!stock.group_stock_multi_locations" invisible="1" readonly="state == 'done'"/>
@@ -343,7 +343,7 @@
                                 <group string="Other Information" name="other_infos">
                                     <field name="picking_type_code" invisible="1"/>
                                     <field name="move_type" invisible="picking_type_code == 'incoming'" readonly="state in ['cancel', 'done']"/>
-                                    <field name="user_id" domain="[('share', '=', False)]" readonly="state in ['cancel', 'done']"/>
+                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" readonly="state in ['cancel', 'done']"/>
                                     <field name="group_id" groups="base.group_no_one"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" force_save="1"/>
                                 </group>
@@ -384,8 +384,6 @@
                     <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]" help="Draft Moves"/>
                     <filter name="waiting" string="Waiting" domain="[('state', 'in', ('confirmed', 'waiting'))]" help="Waiting Moves"/>
                     <filter name="available" string="Ready" domain="[('state', '=', 'assigned')]" help="Assigned Moves"/>
-                    <filter name="done" string="Done" domain="[('state', '=', 'done')]" help="Pickings already processed"/>
-                    <filter name="cancel" string="Cancelled" domain="[('state', '=', 'cancel')]" help="Cancelled Moves"/>
                     <separator/>
                     <filter name="reception" string="Receipts" domain="[('picking_type_code', '=', 'incoming')]"/>
                     <filter name="delivery" string="Deliveries" domain="[('picking_type_code', '=', 'outgoing')]"/>
