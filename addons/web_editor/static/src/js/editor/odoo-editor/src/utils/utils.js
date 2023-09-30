@@ -56,6 +56,7 @@ export const URL_REGEX_WITH_INFOS = new RegExp(`((?:(?:${httpCapturedRegex}${url
 export const YOUTUBE_URL_GET_VIDEO_ID =
     /^(?:(?:https?:)?\/\/)?(?:(?:www|m)\.)?(?:youtube\.com|youtu\.be)(?:\/(?:[\w-]+\?v=|embed\/|v\/)?)([^\s?&#]+)(?:\S+)?$/i;
 export const EMAIL_REGEX = /^(mailto:)?[\w-.]+@(?:[\w-]+\.)+[\w-]{2,4}$/i;
+export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()\/]{3,25}$/;
 
 export const PROTECTED_BLOCK_TAG = ['TR','TD','TABLE','TBODY','UL','OL','LI'];
 
@@ -877,7 +878,7 @@ export function preserveCursor(document) {
         replace = replace || new Map();
         cursorPos[0] = replace.get(cursorPos[0]) || cursorPos[0];
         cursorPos[2] = replace.get(cursorPos[2]) || cursorPos[2];
-        setSelection(...cursorPos);
+        return setSelection(...cursorPos);
     };
 }
 
@@ -1032,8 +1033,13 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
         getDeepRange(editor.editable, { splitText: true, select: true, correctTripleClick: true });
     }
 
-    const selectedTextNodes = getSelectedNodes(editor.editable)
+    // Get selected nodes within td to handle non-p elements like h1, h2...
+    // Targeting <br> to ensure span stays inside its corresponding block node.
+    const selectedNodesInTds = [...editor.editable.querySelectorAll('.o_selected_td')]
+        .map(node => closestElement(node).querySelector('br'));
+    const selectedNodes = getSelectedNodes(editor.editable)
         .filter(n => n.nodeType === Node.TEXT_NODE && closestElement(n).isContentEditable && (isVisibleTextNode(n) || isZWS(n)));
+    const selectedTextNodes = selectedNodes.length ? selectedNodes : selectedNodesInTds;
 
     const formatSpec = formatsSpecs[formatName];
     for (const selectedTextNode of selectedTextNodes) {
@@ -1063,7 +1069,6 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
         }
 
         const firstBlockOrClassHasFormat = formatSpec.isFormatted(parentNode, formatProps);
-
         if (firstBlockOrClassHasFormat && !applyStyle) {
             formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
         } else if (!firstBlockOrClassHasFormat && applyStyle) {
@@ -1305,7 +1310,7 @@ export function isSelectionFormat(editable, format) {
     const selectedNodes = getTraversedNodes(editable)
         .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
     const isFormatted = formatsSpecs[format].isFormatted;
-    return selectedNodes.every(n => isFormatted(n, editable));
+    return selectedNodes && selectedNodes.every(n => isFormatted(n, editable));
 }
 
 export function isUnbreakable(node) {
@@ -1526,7 +1531,7 @@ export function getUrlsInfosInString(string) {
         match;
     while ((match = URL_REGEX_WITH_INFOS.exec(string))) {
         infos.push({
-            url: match[2] ? match[0] : 'https://' + match[0],
+            url: match[2] ? match[0] : 'http://' + match[0],
             label: match[0],
             index: match.index,
             length: match[0].length,

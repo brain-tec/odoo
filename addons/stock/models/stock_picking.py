@@ -319,12 +319,10 @@ class PickingType(models.Model):
     def _check_sequence_code(self):
         domain = expression.OR([[('company_id', '=', record.company_id.id), ('name', '=', record.sequence_id.name)]
                                 for record in self])
-        record_counts = self.env['ir.sequence'].read_group(
-            domain, ['company_id', 'name'], ['company_id', 'name'], lazy=False)
-        duplicate_records = list(filter(
-            lambda r: r['__count'] > 1, record_counts))
+        duplicate_records = self.env['ir.sequence']._read_group(
+            domain, ['company_id', 'name'], having=[('__count', '>', 1)])
         if duplicate_records:
-            duplicate_names = list(map(lambda r: r['name'], duplicate_records))
+            duplicate_names = [name for __, name in duplicate_records]
             raise UserError(_("Sequences %s already exist.",
                             ', '.join(duplicate_names)))
 
@@ -1247,12 +1245,10 @@ class Picking(models.Model):
                 continue
             quantity_todo = {}
             quantity_done = {}
-            for move in picking.move_ids:
-                if move.state == "cancel":
-                    continue
+            for move in picking.move_ids.filtered(lambda m: m.state != "cancel"):
                 quantity_todo.setdefault(move.product_id.id, 0)
                 quantity_done.setdefault(move.product_id.id, 0)
-                quantity_todo[move.product_id.id] += sum(move.move_line_ids.mapped('reserved_qty'))
+                quantity_todo[move.product_id.id] += move.product_uom._compute_quantity(move.product_uom_qty, move.product_id.uom_id, rounding_method='HALF-UP')
                 quantity_done[move.product_id.id] += move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
             if any(
                 float_compare(quantity_done[x], quantity_todo.get(x, 0), precision_digits=prec,) == -1

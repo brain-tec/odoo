@@ -745,7 +745,7 @@ class StockQuant(models.Model):
             domain = expression.AND([[('owner_id', '=', owner_id and owner_id.id or False)], domain])
             domain = expression.AND([[('location_id', '=', location_id.id)], domain])
         if self.env.context.get('with_expiration'):
-            domain = expression.AND([[('expiration_date', '>=', self.env.context['with_expiration'])], domain])
+            domain = expression.AND([['|', ('expiration_date', '>=', self.env.context['with_expiration']), ('expiration_date', '=', False)], domain])
         return domain
 
     def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, qty=0):
@@ -977,12 +977,12 @@ class StockQuant(models.Model):
     def _get_quants_by_products_locations(self, product_ids, location_ids):
         quants_by_product = defaultdict(lambda: self.env['stock.quant'])
         if product_ids and location_ids:
-            needed_quants = self.env['stock.quant'].read_group([('product_id', 'in', product_ids.ids),
+            needed_quants = self.env['stock.quant']._read_group([('product_id', 'in', product_ids.ids),
                                                                 ('location_id', 'child_of', location_ids.ids)],
-                                                            ['ids:array_agg(id)', 'product_id'],
-                                                            ['product_id'])
-            for quant in needed_quants:
-                quants_by_product[quant['product_id'][0]] = self.env['stock.quant'].browse(quant['ids'])
+                                                            ['product_id'],
+                                                            ['id:recordset'])
+            for product, quants in needed_quants:
+                quants_by_product[product.id] = quants
         return quants_by_product
 
     @api.model
