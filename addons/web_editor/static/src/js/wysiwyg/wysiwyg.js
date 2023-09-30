@@ -39,6 +39,7 @@ import {
     onWillDestroy,
     onWillUpdateProps,
     markup,
+    status,
 } from "@odoo/owl";
 import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { isCSSColor } from '@web/core/utils/colors';
@@ -142,6 +143,7 @@ export class Wysiwyg extends Component {
 
     setup() {
         this.orm = this._useService('orm');
+        this.rpc = this._useService('rpc');
         this.getColorPickerTemplateService = this._useService('get_color_picker_template');
         this.notification = this._useService("notification");
         this.popover = this._useService("popover");
@@ -3289,7 +3291,8 @@ export class Wysiwyg extends Component {
         // it was modified previously, as the other modified image may be used
         // elsewhere if the snippet was duplicated or was saved as a custom one.
         let altData = undefined;
-        if (el.dataset.mimetype === 'image/webp') {
+        const isImageField = !!el.closest("[data-oe-type=image]");
+        if (el.dataset.mimetype === 'image/webp' && isImageField) {
             // Generate alternate sizes and format for reports.
             altData = {};
             const image = document.createElement('img');
@@ -3354,13 +3357,16 @@ export class Wysiwyg extends Component {
         payload.callback(result);
     }
     _serviceRpc(route, params, settings = {}) {
+        if (status(this) === "destroyed") {
+            return;
+        }
         if (params && params.kwargs) {
             params.kwargs.context = {
                 ...this.env.services.user.context,
                 ...params.kwargs.context,
             };
         }
-        return this.env.services.rpc(route, params, {
+        return this.rpc(route, params, {
             silent: settings.shadow,
             xhr: settings.xhr,
         });

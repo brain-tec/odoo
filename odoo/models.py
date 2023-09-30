@@ -2455,7 +2455,7 @@ class BaseModel(metaclass=MetaModel):
                 additional_domain = [(field_name, '=', value)]
 
                 if field.type in ('date', 'datetime'):
-                    if value:
+                    if value and isinstance(value, (datetime.date, datetime.datetime)):
                         range_start = value
                         range_end = value + interval
                         if field.type == 'datetime':
@@ -2485,7 +2485,7 @@ class BaseModel(metaclass=MetaModel):
                                 (field_name, '>=', range_start),
                                 (field_name, '<', range_end),
                         ]
-                    else:
+                    elif not value:
                         # Set the __range of the group containing records with an unset
                         # date/datetime field value to False.
                         row.setdefault('__range', {})[group] = False
@@ -5250,10 +5250,6 @@ class BaseModel(metaclass=MetaModel):
             # return the model found by traversing all fields (used in collect_from_domain)
             return model
 
-        # also take into account the fields in the record rules
-        domain = list(domain) + (self.env['ir.rule']._compute_domain(self._name, 'read') or [])
-        collect_from_domain(self, domain)
-
         # flush the order fields
         if order:
             for order_part in order.split(','):
@@ -5265,8 +5261,18 @@ class BaseModel(metaclass=MetaModel):
                         comodel = self.env[field.comodel_name]
                         comodel._flush_search([], order=comodel._order, seen=seen)
 
-        if self._active_name:
+        if self._active_name and self.env.context.get('active_test', True):
             to_flush[self._name].add(self._active_name)
+
+        collect_from_domain(self, domain)
+
+        # Check access of fields with groups
+        for model_name, field_names in to_flush.items():
+            self.env[model_name].check_field_access_rights('read', field_names)
+
+        # also take into account the fields in the record rules
+        if ir_rule_domain := self.env['ir.rule']._compute_domain(self._name, 'read'):
+            collect_from_domain(self, ir_rule_domain)
 
         # flush model dependencies (recursively)
         if self._depends:
