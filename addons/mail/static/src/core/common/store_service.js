@@ -6,9 +6,14 @@ import { reactive } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
-import { modelRegistry, Record, RecordInverses, RecordList } from "./record";
+import { modelRegistry, preinsert, Record, RecordInverses, RecordList } from "./record";
 
-export class Store {
+export class Store extends Record {
+    /** @returns {import("models").Store} */
+    static insert() {
+        return super.insert();
+    }
+
     /** @type {typeof import("@mail/core/web/activity_model").Activity} */
     Activity;
     /** @type {typeof import("@mail/core/common/attachment_model").Attachment} */
@@ -44,6 +49,47 @@ export class Store {
     /** @type {typeof import("@mail/core/common/thread_model").Thread} */
     Thread;
 
+    lastChannelSubscription = "";
+    /** This is the current logged partner */
+    user = Record.one("Persona");
+    /** This is the current logged guest */
+    guest = Record.one("Persona");
+    /**
+     * The last id of bus notification at the time for fetch init_messaging.
+     * When receiving a notification:
+     * - if id greater than this value: the notification is newer than init_messaging state.
+     * - if same id or lower: the notification is older than init_messaging state.
+     * This is useful to determine whether we should increment or decrement a counter based
+     * on init_messaging state.
+     */
+    initBusId = 0;
+    /**
+     * Indicates whether the current user is using the application through the
+     * public page.
+     */
+    inPublicPage = false;
+    companyName = "";
+    odoobot = Record.one("Persona");
+    odoobotOnboarding;
+    users = {};
+    internalUserGroupId = null;
+    registeredImStatusPartners = null;
+    hasLinkPreviewFeature = true;
+    // messaging menu
+    menu = { counter: 0 };
+    discuss = Record.one("DiscussApp");
+    activityCounter = 0;
+    isMessagingReady = false;
+
+    get self() {
+        return this.guest ?? this.user;
+    }
+
+    setup() {
+        super.setup();
+        this.updateBusSubscription = debounce(this.updateBusSubscription, 0); // Wait for thread fully inserted.
+    }
+
     /**
      * @param {string} localId
      * @returns {Record}
@@ -54,22 +100,6 @@ export class Store {
         }
         const modelName = Record.modelFromLocalId(localId);
         return this[modelName].records[localId];
-    }
-
-    /**
-     * @param {import("@web/env").OdooEnv} env
-     */
-    constructor(env) {
-        this.setup(env);
-        this.lastChannelSubscription = "";
-        this.updateBusSubscription = debounce(this.updateBusSubscription, 0); // Wait for thread fully inserted.
-    }
-
-    /**
-     * @param {import("@web/env").OdooEnv} env
-     */
-    setup(env) {
-        this.env = env;
     }
 
     updateBusSubscription() {
@@ -87,64 +117,8 @@ export class Store {
         }
         this.lastChannelSubscription = channels;
     }
-
-    get self() {
-        return this.guest ?? this.user;
-    }
-
-    // base data
-
-    /**
-     * This is the current logged partner
-     *
-     * @type {import("models").Persona}
-     */
-    user = null;
-    /**
-     * This is the current logged guest
-     *
-     * @type {import("models").Persona}
-     */
-    guest = null;
-
-    /**
-     * The last id of bus notification at the time for fetch init_messaging.
-     * When receiving a notification:
-     * - if id greater than this value: the notification is newer than init_messaging state.
-     * - if same id or lower: the notification is older than init_messaging state.
-     * This is useful to determine whether we should increment or decrement a counter based
-     * on init_messaging state.
-     */
-    initBusId = 0;
-
-    /**
-     * Indicates whether the current user is using the application through the
-     * public page.
-     */
-    inPublicPage = false;
-
-    companyName = "";
-
-    /** @type {import("models").Persona} */
-    odoobot = null;
-    odoobotOnboarding;
-    users = {};
-    internalUserGroupId = null;
-    registeredImStatusPartners = null;
-
-    hasLinkPreviewFeature = true;
-
-    // messaging menu
-    menu = {
-        counter: 0,
-    };
-
-    discuss = Record.one("DiscussApp");
-
-    activityCounter = 0;
-
-    isMessagingReady = false;
 }
+Store.register();
 
 export const storeService = {
     dependencies: ["bus_service", "ui"],
@@ -153,11 +127,19 @@ export const storeService = {
      * @param {Partial<import("services").Services>} services
      */
     start(env, services) {
-        const res = reactive(new Store(env, services));
-        for (const [name, _Model] of modelRegistry.getEntries()) {
+        const res = {
+            // fake store for now, until it becomes a model
+            /** @type {Store} */
+            store: {
+                env,
+                get: (...args) => Store.prototype.get.call(this, ...args),
+            },
+        };
+        const Models = {};
+        for (const [name, _OgClass] of modelRegistry.getEntries()) {
             /** @type {typeof Record} */
-            const Model = _Model;
-            if (res[name]) {
+            const OgClass = _OgClass;
+            if (res.store[name]) {
                 throw new Error(
                     `There must be no duplicated Model Names (duplicate found: ${name})`
                 );
@@ -165,29 +147,24 @@ export const storeService = {
             // classes cannot be made reactive because they are functions and they are not supported.
             // work-around: make an object whose prototype is the class, so that static props become
             // instance props.
-            const entry = Object.assign(Object.create(Model), { env, store: res });
+            const Model = Object.assign(Object.create(OgClass), { env, store: res.store });
             // Produce another class with changed prototype, so that there are automatic get/set on relational fields
-            let detecting = true;
             const Class = {
-                [Model.name]: class extends Model {
-                    static __rels__ = new Set();
+                [OgClass.name]: class extends OgClass {
                     constructor() {
                         super();
-                        if (detecting) {
-                            return;
-                        }
-                        for (const name of this.constructor.__rels__) {
+                        for (const name of Model.__rels__.keys()) {
                             // Relational fields contain symbols for detection in original class.
                             // This constructor is called on genuine records:
                             // - 'one' fields => undefined
                             // - 'many' fields => RecordList
                             let newVal;
-                            if (this[name] === Record.one()) {
+                            if (this[name]?.[0] === Record.one()[0]) {
                                 newVal = undefined;
                             }
-                            if (this[name] === Record.many()) {
+                            if (this[name]?.[0] === Record.many()[0]) {
                                 newVal = new RecordList();
-                                newVal.__store__ = res;
+                                newVal.__store__ = res.store;
                                 newVal.name = name;
                                 newVal.owner = this;
                             }
@@ -203,7 +180,7 @@ export const storeService = {
                                     if (l1 instanceof RecordList) {
                                         return l1;
                                     }
-                                    return res.get(l1);
+                                    return res.store.get(l1);
                                 }
                                 return Reflect.get(target, name, receiver);
                             },
@@ -211,7 +188,7 @@ export const storeService = {
                                 if (name !== "__rels__" && target.__rels__.has(name)) {
                                     const r1 = target;
                                     const l1 = r1.__rels__.get(name);
-                                    const r2 = res.get(l1);
+                                    const r2 = res.store.get(l1);
                                     if (r2) {
                                         r2.__invs__.delete(r1.localId, name);
                                     }
@@ -222,75 +199,89 @@ export const storeService = {
                             },
                             /** @param {Record} receiver */
                             set(target, name, val, receiver) {
-                                if (receiver.__rels__.has(name)) {
-                                    const oldVal = receiver.__rels__.get(name);
-                                    if (oldVal instanceof RecordList) {
-                                        const r1 = receiver;
-                                        /** @type {RecordList<Record>} */
-                                        const l1 = r1.__rels__.get(name);
-                                        /** @type {Record[]|Set<Record>|RecordList<Record>} */
-                                        const collection = val;
-                                        const oldRecords = l1.slice();
-                                        l1.__list__ = [];
-                                        for (const r2 of oldRecords) {
-                                            r2.__invs__.delete(r1.localId, name);
-                                        }
-                                        for (const r3 of collection) {
+                                if (!receiver.__rels__.has(name)) {
+                                    Reflect.set(target, name, val, receiver);
+                                    return true;
+                                }
+                                const oldVal = receiver.__rels__.get(name);
+                                if (oldVal instanceof RecordList) {
+                                    // [Record.many] =
+                                    const r1 = receiver;
+                                    /** @type {RecordList<Record>} */
+                                    const l1 = r1.__rels__.get(name);
+                                    /** @type {Record[]|Set<Record>|RecordList<Record>} */
+                                    const collection = val;
+                                    const oldRecords = l1.slice();
+                                    for (const r2 of oldRecords) {
+                                        r2.__invs__.delete(r1.localId, name);
+                                    }
+                                    l1.clear();
+                                    if ([null, false, undefined].includes(val)) {
+                                        return true;
+                                    }
+                                    for (const v of collection) {
+                                        preinsert(v, r1, name, (r3) => {
                                             l1.__list__.push(r3.localId);
                                             r3.__invs__.add(r1.localId, name);
-                                        }
-                                    } else {
-                                        const r1 = receiver;
-                                        const l1 = r1.__rels__.get(name);
-                                        const r2 = res.get(l1);
-                                        /** @type {Record} */
-                                        const r3 = val;
-                                        if (r2 && r2.notEq(r3)) {
-                                            r2.__invs__.delete(r1.localId, name);
-                                        }
-                                        if (r3) {
-                                            r1.__rels__.set(name, r3?.localId);
-                                            if (!(r3 instanceof Record)) {
-                                                return true; // not a record, ignored
-                                            }
-                                            r3.__invs__.add(r1.localId, name);
-                                        } else {
-                                            delete r1[name];
-                                        }
+                                        });
                                     }
                                 } else {
-                                    Reflect.set(target, name, val, receiver);
+                                    // [Record.one] =
+                                    const r1 = receiver;
+                                    const l1 = r1.__rels__.get(name);
+                                    const r2 = res.store.get(l1);
+                                    if (r2) {
+                                        r2.__invs__.delete(r1.localId, name);
+                                    }
+                                    if ([null, false, undefined].includes(val)) {
+                                        delete receiver[name];
+                                        return true;
+                                    }
+                                    preinsert(val, r1, name, (r3) => {
+                                        r1.__rels__.set(name, r3?.localId);
+                                    });
                                 }
                                 return true;
                             },
                         });
                     }
                 },
-            }[Model.name];
-            entry.Class = Class;
-            entry.records = JSON.parse(JSON.stringify(Model.records));
-            res[name] = entry;
+            }[OgClass.name];
+            Object.assign(Model, {
+                Class,
+                records: JSON.parse(JSON.stringify(OgClass.records)),
+                __rels__: new Map(),
+            });
+            Models[name] = Model;
+            res.store[name] = Model;
             // Detect relational fields with a dummy record and setup getter/setters on them
-            const obj = new Model();
-            detecting = false;
+            const obj = new OgClass();
             for (const [name, val] of Object.entries(obj)) {
-                if (![Record.one(), Record.many()].includes(val)) {
+                if (![Record.one()[0], Record.many()[0]].includes(val?.[0])) {
                     continue;
                 }
-                Class.__rels__.add(name);
+                Model.__rels__.set(name, { targetModel: val[1] });
             }
         }
-        res.discuss = res.DiscussApp.insert();
-        res.discuss.activeTab = env.services.ui.isSmall ? "mailbox" : "all";
-        onChange(res.Thread, "records", () => res.updateBusSubscription());
+        // Make true store (as a model)
+        res.store = reactive(res.store.Store.insert());
+        res.store.env = env;
+        for (const Model of Object.values(Models)) {
+            Model.store = res.store;
+            res.store[Model.name] = Model;
+        }
+        const store = res.store;
+        store.discuss = {};
+        store.discuss.activeTab = env.services.ui.isSmall ? "mailbox" : "all";
+        onChange(store.Thread, "records", () => store.updateBusSubscription());
         services.ui.bus.addEventListener("resize", () => {
             if (!services.ui.isSmall) {
-                res.discuss.activeTab = "all";
+                store.discuss.activeTab = "all";
             } else {
-                res.discuss.activeTab = res.discuss.thread?.type ?? "all";
+                store.discuss.activeTab = store.discuss.thread?.type ?? "all";
             }
         });
-        return res;
+        return store;
     },
 };
 
