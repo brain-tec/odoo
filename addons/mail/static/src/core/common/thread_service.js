@@ -11,6 +11,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { memoize } from "@web/core/utils/functions";
 import { url } from "@web/core/utils/urls";
+import { escapeHTML } from "@web/core/utils/strings";
 
 const FETCH_LIMIT = 30;
 
@@ -72,7 +73,7 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona || channelMember.partner) {
-                this.store.ChannelMember.insert({ ...channelMember, thread });
+                thread.channelMembers.add({ ...channelMember, thread });
             }
         }
     }
@@ -185,7 +186,7 @@ export class ThreadService {
         }
         try {
             // ordered messages received: newest to oldest
-            const rawMessages = await this.rpc(this.getFetchRoute(thread), {
+            const { messages: rawMessages } = await this.rpc(this.getFetchRoute(thread), {
                 ...this.getFetchParams(thread),
                 limit: FETCH_LIMIT,
                 after,
@@ -295,7 +296,7 @@ export class ThreadService {
      */
     async loadAround(thread, messageId) {
         if (!thread.messages.some(({ id }) => id === messageId)) {
-            const messages = await this.rpc(this.getFetchRoute(thread), {
+            const { messages } = await this.rpc(this.getFetchRoute(thread), {
                 ...this.getFetchParams(thread),
                 around: messageId,
             });
@@ -658,7 +659,14 @@ export class ThreadService {
     async post(
         thread,
         body,
-        { attachments = [], isNote = false, parentId, rawMentions = {}, cannedResponseIds } = {}
+        {
+            attachments = [],
+            isNote = false,
+            parentId,
+            mentionedChannels = [],
+            mentionedPartners = [],
+            cannedResponseIds,
+        } = {}
     ) {
         let tmpMsg;
         const params = await this.getMessagePostParams({
@@ -666,7 +674,8 @@ export class ThreadService {
             body,
             cannedResponseIds,
             isNote,
-            rawMentions,
+            mentionedChannels,
+            mentionedPartners,
             thread,
         });
         const tmpId = this.messageService.getNextTemporaryId();
@@ -746,12 +755,16 @@ export class ThreadService {
         body,
         cannedResponseIds,
         isNote,
-        rawMentions,
+        mentionedChannels,
+        mentionedPartners,
         thread,
     }) {
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions = this.store.user
-            ? this.messageService.getMentionsFromText(rawMentions, body)
+            ? this.messageService.getMentionsFromText(body, {
+                  mentionedChannels,
+                  mentionedPartners,
+              })
             : undefined;
         const partner_ids = validMentions?.partners.map((partner) => partner.id);
         let recipientEmails = [];
@@ -925,6 +938,32 @@ export class ThreadService {
                 thread.messages.splice(afterIndex - 1, 0, message);
             }
         }
+    }
+
+    /**
+     * @param {string} searchTerm
+     * @param {Thread} thread
+     * @param {number|false} [before]
+     */
+    async search(searchTerm, thread, before = false) {
+        const { messages, count } = await this.rpc(this.getFetchRoute(thread), {
+            ...this.getFetchParams(thread),
+            search_term: escapeHTML(searchTerm),
+            before,
+        });
+        return {
+            count,
+            loadMore: messages.length === FETCH_LIMIT,
+            messages: messages.map((message) => {
+                message.body = markup(message.body);
+                if (message.parentMessage) {
+                    message.parentMessage.body = message.parentMessage.body
+                        ? markup(message.parentMessage.body)
+                        : message.parentMessage.body;
+                }
+                return this.store.Message.insert(message);
+            }),
+        };
     }
 }
 

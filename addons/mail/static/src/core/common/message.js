@@ -34,6 +34,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 import { useMessageActions } from "./message_actions";
+import { cookie } from "@web/core/browser/cookie";
 
 /**
  * @typedef {Object} Props
@@ -44,6 +45,8 @@ import { useMessageActions } from "./message_actions";
  * @property {import("@mail/utils/common/hooks").MessageToReplyTo} [messageToReplyTo]
  * @property {boolean} [squashed]
  * @property {import("models").Thread} [thread]
+ * @property {ReturnType<import('@mail/core/common/message_search_hook').useMessageSearch>} [messageSearch]
+ * @property {String} [className]
  * @extends {Component<Props, Env>}
  */
 export class Message extends Component {
@@ -78,6 +81,8 @@ export class Message extends Component {
         "messageToReplyTo?",
         "squashed?",
         "thread?",
+        "messageSearch?",
+        "className?",
     ];
     static template = "mail.Message";
 
@@ -152,8 +157,7 @@ export class Message extends Component {
                 const body = document.createElement("span");
                 body.innerHTML = this.message.body;
                 this.insertReadMoreLess($(body));
-                const color =
-                    this.env.services.cookie?.current.color_scheme === "dark" ? "white" : "black";
+                const color = cookie.get("color_scheme") === "dark" ? "white" : "black";
                 this.shadowStyle = document.createElement("style");
                 this.shadowStyle.innerHTML = `
                     * {
@@ -180,16 +184,17 @@ export class Message extends Component {
 
     get attClass() {
         return {
+            [this.props.className]: true,
             "o-highlighted bg-view shadow-lg": this.props.highlighted,
-            "o-selfAuthored": this.message.isSelfAuthored,
+            "o-selfAuthored": this.message.isSelfAuthored && !this.env.messageCard,
             "o-selected": this.props.messageToReplyTo?.isSelected(
                 this.props.thread,
                 this.props.message
             ),
             "o-squashed pb-1": this.props.squashed,
             "py-1": !this.props.squashed,
-            "mt-2": !this.props.squashed && this.props.thread,
-            "px-3": !this.props.isInChatWindow,
+            "mt-2": !this.props.squashed && this.props.thread && !this.env.messageCard,
+            "px-3": !this.props.isInChatWindow && !this.env.messageCard,
             "px-2": this.props.isInChatWindow,
             "opacity-50": this.props.messageToReplyTo?.isNotSelected(
                 this.props.thread,

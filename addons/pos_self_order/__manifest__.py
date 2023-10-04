@@ -18,6 +18,7 @@
         "views/pos_config_view.xml",
         "views/pos_session_view.xml",
         "views/custom_link_views.xml",
+        "views/product_views.xml",
         "data/init_access.xml",
         "views/res_config_settings_views.xml",
         "views/point_of_sale_dashboard.xml",
@@ -25,6 +26,9 @@
     ],
     "assets": {
         # Assets
+        'point_of_sale._assets_pos': [
+            'pos_self_order/static/src/overrides/**/*',
+        ],
         'web.assets_backend': [
             "pos_self_order/static/src/upgrade_selection_field.js",
         ],
@@ -59,6 +63,8 @@
             'web/static/lib/bootstrap/js/dist/scrollspy.js',
             "pos_self_order/static/src/app/**/*",
             "point_of_sale/static/src/app/store/models/product_custom_attribute.js",
+            'web_editor/static/src/js/editor/odoo-editor/src/base_style.scss',
+            'web_editor/static/src/scss/web_editor.common.scss',
         ],
         # Assets tests
         "pos_self_order.assets_tests": [

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { Reactive } from "@web/core/utils/reactive";
+import { markup } from "@odoo/owl";
 
 export class Product extends Reactive {
     constructor(
@@ -9,11 +10,12 @@ export class Product extends Reactive {
             attributes,
             name,
             id,
-            description_sale,
+            description_ecommerce,
             pos_categ_ids,
             pos_combo_ids,
             is_pos_groupable,
             write_date,
+            self_order_available,
         },
         showPriceTaxIncluded
     ) {
@@ -28,11 +30,14 @@ export class Product extends Reactive {
         this.has_image = product.has_image;
         this.attributes = product.attributes;
         this.name = product.name;
-        this.description_sale = product.description_sale;
+        this.description_ecommerce = product.description_ecommerce
+            ? markup(product.description_ecommerce)
+            : false;
         this.pos_categ_ids = product.pos_categ_ids;
         this.pos_combo_ids = product.pos_combo_ids;
         this.is_pos_groupable = product.is_pos_groupable;
         this.write_date = product.write_date;
+        this.self_order_available = product.self_order_available;
 
         // data
         this.showPriceTaxIncluded = showPriceTaxIncluded;

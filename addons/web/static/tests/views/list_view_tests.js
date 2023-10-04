@@ -20,7 +20,6 @@ import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { actionService } from "@web/webclient/actions/action_service";
 import { getPickerApplyButton, getPickerCell } from "../core/datetime/datetime_test_helpers";
 import { makeFakeLocalizationService, makeFakeUserService } from "../helpers/mock_services";
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import {
     addRow,
     click,
@@ -65,6 +64,7 @@ import {
 } from "../search/helpers";
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, makeViewInDialog, setupViewRegistries } from "./helpers";
+import { makeServerError } from "../helpers/mock_server";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -18361,10 +18361,6 @@ QUnit.module("Views", (hooks) => {
         "edit a record then select another record with a throw error when saving",
         async function (assert) {
             serviceRegistry.add("error", errorService);
-            // need to preventDefault to remove error from console (so python test pass)
-            const handler = (ev) => ev.preventDefault();
-            window.addEventListener("unhandledrejection", handler);
-            registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
 
             await makeView({
                 type: "list",
@@ -18376,7 +18372,7 @@ QUnit.module("Views", (hooks) => {
                     </tree>`,
                 mockRPC(route, args) {
                     if (args.method === "web_save") {
-                        throw new Error("Can't write");
+                        throw makeServerError({ message: "Can't write" });
                     }
                 },
             });
@@ -18736,6 +18732,11 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
 
         assert.strictEqual(target.querySelector(".o_field_cell.o_integer_cell").textContent, "321");
+        assert.strictEqual(
+            target.querySelector(".o_list_footer .o_list_number").textContent,
+            "567",
+            "First property is 321, second is zero because it has a different parent and the 2 others are 123 so the total should be 321 + 123 * 2 = 567"
+        );
     });
 
     QUnit.test("Properties: float", async (assert) => {
@@ -18784,6 +18785,11 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
 
         assert.strictEqual(target.querySelector(".o_field_cell.o_float_cell").textContent, "3.21");
+        assert.strictEqual(
+            target.querySelector(".o_list_footer .o_list_number").textContent,
+            "250.11",
+            "First property is 3.21, second is zero because it has a different parent and the 2 others are 123.45 so the total should be 3.21 + 123.45 * 2 = 250.11"
+        );
     });
 
     QUnit.test("Properties: date", async (assert) => {
