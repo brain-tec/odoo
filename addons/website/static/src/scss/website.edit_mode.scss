@@ -1,8 +1,11 @@
 $-editor-messages-margin-x: 2%;
 %o-editor-messages {
-    border: 2px dashed #999999;
+    background: rgba(lighten($o-we-handles-accent-color, 50%), .95);
     text-align: center;
-    color: white;
+    color: $o-we-handles-accent-color;
+    outline: $o-we-dropzone-border-width dashed $o-we-handles-accent-color;
+    outline-offset: -$o-we-dropzone-border-width;
+    backdrop-filter: blur(2px);
 
     &:before {
         content: attr(data-editor-message);
@@ -38,7 +41,8 @@ $-editor-messages-margin-x: 2%;
     &:not(:empty), &[data-oe-type] {
         &:not([data-oe-model="ir.ui.view"]):not([data-oe-type="html"]):not(.o_editable_no_shadow):not([data-oe-type="image"]):hover,
         &.o_editable_date_field_linked {
-            box-shadow: $o-brand-odoo 0 0 5px 2px inset;
+            outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
+            outline-offset: $o-we-handle-border-width;
         }
         &[data-oe-type="image"]:not(.o_editable_no_shadow):hover {
             position: relative;
@@ -48,7 +52,8 @@ $-editor-messages-margin-x: 2%;
                 pointer-events: none;
                 @include o-position-absolute(0, 0, 0, 0);
                 z-index: 1;
-                box-shadow: $o-brand-odoo 0 0 5px 2px inset;
+                outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
+                outline-offset: $o-we-handle-border-width;
             }
         }
     }
@@ -87,7 +92,6 @@ $-editor-messages-margin-x: 2%;
         > .oe_drop_zone.oe_insert:not(.oe_vertical) {
             @extend %o-editor-messages;
             height: auto;
-            text-shadow: -1px -1px 0 $o-brand-odoo, 1px -1px 0 $o-brand-odoo, -1px 1px 0 $o-brand-odoo, 1px 1px 0 $o-brand-odoo;
 
             // Empty editable element during drag & drop
             &:only-child {
@@ -111,13 +115,12 @@ $-editor-messages-margin-x: 2%;
             @extend %o-editor-messages;
             padding: 112px 0px;
             margin: 20px $-editor-messages-margin-x;
-            color: #999999;
+            border-radius: $border-radius-lg;
         }
 
         // Exception 2: empty wrap during drag & drop (override of base case)
         &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
             padding: 112px 0px;
-            color: #999999;
             text-shadow: none;
         }
 

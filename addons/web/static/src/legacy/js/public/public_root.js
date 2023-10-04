@@ -2,7 +2,7 @@
 
 import dom from '@web/legacy/js/core/dom';
 import legacyEnv from '@web/legacy/js/public/public_env';
-import {getCookie} from '@web/legacy/js/core/cookie_utils';
+import { cookie } from "@web/core/browser/cookie";
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { registry } from '@web/core/registry';
 
@@ -18,11 +18,9 @@ import { makeEnv, startServices } from "@web/env";
 import { loadJS, templates } from '@web/core/assets';
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { browser } from '@web/core/browser/browser';
-import { jsonrpc } from '@web/core/network/rpc_service';
 import { renderToString } from "@web/core/utils/render";
 import { _t } from "@web/core/l10n/translation";
 import { App, whenReady } from "@odoo/owl";
-import { getOrigin } from '@web/core/utils/urls';
 
 const { Settings } = luxon;
 
@@ -34,7 +32,7 @@ function getLang() {
     var html = document.documentElement;
     return (html.getAttribute('lang') || 'en_US').replace('-', '_');
 }
-const lang = getCookie('frontend_lang') || getLang(); // FIXME the cookie value should maybe be in the ctx?
+const lang = cookie.get('frontend_lang') || getLang(); // FIXME the cookie value should maybe be in the ctx?
 // momentjs don't have config for en_US, so avoid useless RPC
 var localeDef = lang !== 'en_US' ? loadJS('/web/webclient/locale/' + lang.replace('-', '_')) : Promise.resolve();
 
@@ -334,35 +332,6 @@ export async function createPublicRoot(RootWidget) {
         serviceRegistry.add(legacyServiceName, wowlToLegacyServiceMapper(legacyEnv));
     }
     await whenReady();
-
-    // Patch browser.fetch and the rpc service to use the correct base url when
-    // embeded in an external page
-    const baseUrl = getOrigin();
-    const { fetch } = browser;
-    browser.fetch = function(url, ...args) {
-        if (!url.match(/^(?:https?:)?\/\//)) {
-            url = baseUrl + url;
-        }
-        return fetch(url, ...args);
-    }
-    serviceRegistry.add("rpc", {
-        async: true,
-        start(env) {
-            return function rpc(route, params = {}, settings = {}) {
-                if (!route.match(/^(?:https?:)?\/\//)) {
-                    route = baseUrl + route;
-                }
-                if (String(route).includes("/web/dataset/call_kw/")) {
-                    params.kwargs.context = {
-                        ...publicRoot._getContext(),
-                        ...params.kwargs.context,
-                    };
-                }
-                return jsonrpc(route, params, { bus: env.bus, ...settings });
-            };
-        },
-    }, { force: true });
-
     const wowlEnv = makeEnv();
 
     await startServices(wowlEnv);

@@ -13,6 +13,7 @@ import { batched } from "@web/core/utils/timing";
 import { useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
+import { cookie } from "@web/core/browser/cookie";
 
 export class SelfOrder extends Reactive {
     constructor(...args) {
@@ -20,11 +21,10 @@ export class SelfOrder extends Reactive {
         this.ready = this.setup(...args).then(() => this);
     }
 
-    async setup(env, { rpc, notification, router, cookie }) {
+    async setup(env, { rpc, notification, router }) {
         // services
         this.notification = notification;
         this.router = router;
-        this.cookie = cookie;
         this.env = env;
         this.rpc = rpc;
 
@@ -80,14 +80,14 @@ export class SelfOrder extends Reactive {
 
     initData() {
         this.currentLanguage = this.config.self_ordering_available_language_ids.find(
-            (l) => l.code === this.cookie.current.frontend_lang
+            (l) => l.code === cookie.get("frontend_lang")
         );
 
         if (this.config.self_ordering_default_language_id && !this.currentLanguage) {
             this.currentLanguage = this.config.self_ordering_default_language_id;
         }
 
-        this.cookie.setCookie("frontend_lang", this.currentLanguage.code);
+        cookie.set("frontend_lang", this.currentLanguage.code);
 
         this.products = this.products.map((p) => {
             const product = new Product(p, this.config.iface_tax_included);
@@ -382,12 +382,64 @@ export class SelfOrder extends Reactive {
     formatMonetary(price) {
         return formatMonetary(price, { currencyId: this.currency_id });
     }
+
+    handleProductChanges(payload) {
+        const product = new Product(payload.product, this.show_prices_with_tax_included);
+        this.productByIds[payload.product.id] = product;
+        for (const categ_name of payload.product.pos_categ_ids) {
+            if (!this.pos_category.map((c) => c.name).includes(categ_name)) {
+                continue;
+            }
+            const index = this.productsGroupedByCategory[categ_name].findIndex(
+                (p) => p.id === product.id
+            );
+            if (index >= 0) {
+                this.productsGroupedByCategory[categ_name][index] = product;
+            } else {
+                this.productsGroupedByCategory[categ_name].push(product);
+            }
+        }
+    }
+
+    verifyCart() {
+        let result = true;
+        for (const line of this.currentOrder.hasNotAllLinesSent()) {
+            if (line.combo_parent_uuid) {
+                continue;
+            }
+            const alreadySent = this.currentOrder.lastChangesSent
+                ? this.currentOrder.lastChangesSent[line.uuid]
+                : false;
+            const wrongChild = line.child_lines.find(
+                (l) => !this.productByIds[l.product_id]?.self_order_available
+            );
+            if (wrongChild || !this.productByIds[line.product_id]?.self_order_available) {
+                if (alreadySent) {
+                    line.qty = alreadySent.qty;
+                    line.customer_note = alreadySent.customer_note;
+                    line.selected_attributes = alreadySent.selected_attributes;
+                } else {
+                    this.currentOrder.removeLine(line.uuid);
+                }
+                this.notification.add(
+                    _t(
+                        "%s is not available anymore, it has thus been removed from your order. Please review your order and validate it again.",
+                        line.full_product_name
+                    ),
+                    { type: "danger" }
+                );
+                result = false;
+            }
+        }
+
+        return result;
+    }
 }
 
 export const selfOrderService = {
-    dependencies: ["rpc", "notification", "router", "cookie"],
-    async start(env, { rpc, notification, router, cookie }) {
-        return new SelfOrder(env, { rpc, notification, router, cookie }).ready;
+    dependencies: ["rpc", "notification", "router"],
+    async start(env, { rpc, notification, router }) {
+        return new SelfOrder(env, { rpc, notification, router }).ready;
     },
 };
 

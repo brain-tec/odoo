@@ -46,9 +46,7 @@ import {
     isUnremovable,
     fillEmpty,
     isEmptyBlock,
-    getUrlsInfosInString,
     URL_REGEX,
-    URL_REGEX_WITH_INFOS,
     isSelectionFormat,
     YOUTUBE_URL_GET_VIDEO_ID,
     unwrapContents,
@@ -180,7 +178,7 @@ export const CLIPBOARD_WHITELISTS = {
 };
 
 // Commands that don't require a DOM selection but take an argument instead.
-const SELECTIONLESS_COMMANDS = ['addRow', 'addColumn', 'removeRow', 'removeColumn'];
+const SELECTIONLESS_COMMANDS = ['addRow', 'addColumn', 'removeRow', 'removeColumn', 'resetSize'];
 
 function defaultOptions(defaultObject, object) {
     const newObject = Object.assign({}, defaultObject, object);
@@ -443,6 +441,11 @@ export class OdooEditor extends EventTarget {
                 `, 'text/html').body.firstChild)
                 this.addDomListener(uiMenu.querySelector('.o_delete_row'), 'click', this._onTableDeleteRowClick);
             }
+
+            // Reset the size of the table
+            uiMenu.append(parser.parseFromString(`<div class="o_reset_table_size"><span class="fa fa-table"></span>` + this.options._t('Reset Size') + `</div>
+                `, 'text/html').body.firstChild)
+            this.addDomListener(uiMenu.querySelector('.o_reset_table_size'), 'click', () => this.execCommand('resetSize', this._tableUiTarget));
 
             this[`_${direction}Ui`] = ui;
             this.document.body.append(ui);
@@ -2790,8 +2793,8 @@ export class OdooEditor extends EventTarget {
             this._columnUi.style.visibility = 'hidden';
         }
         if (row || column) {
-            const table = closestElement(row || column, 'table');
-            table && table.addEventListener('mouseleave', () => this._toggleTableUi(), { once: true });
+            this._tableUiTarget = closestElement(row || column, 'table');
+            this._tableUiTarget && this._tableUiTarget.addEventListener('mouseleave', () => this._toggleTableUi(), { once: true });
         }
     }
     /**
@@ -2812,7 +2815,13 @@ export class OdooEditor extends EventTarget {
             xy: {left: 'x', top: 'y'},
             size: {left: 'width', top: 'height'}
         };
-
+        const table = getInSelection(this.document, 'table');
+        const resetTableSize = ui.querySelector('.o_reset_table_size');
+        if (table && !table.hasAttribute('style')) {
+            resetTableSize.classList.add('d-none');
+        } else {
+            resetTableSize.classList.remove('d-none');
+        }
         const side1 = isRow ? 'left' : 'top';
         ui.style[side1] = (isRow ? elementRect : tableRect)[props.xy[side1]] - togglerRect[props.size[side1]] + 'px';
         ui.style[props.size[side1]] = !isRow && togglerRect[props.size[side1]] + 'px';
@@ -4594,16 +4603,15 @@ export class OdooEditor extends EventTarget {
         ) {
             const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
             const textNodeSplitted = textSliced.split(/\s/);
-            let potentialUrl = textNodeSplitted.pop();
-            const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS) && !potentialUrl.match(EMAIL_REGEX);
+            const potentialUrl = textNodeSplitted.pop();
+            const match = potentialUrl.match(URL_REGEX);
 
-            if (lastWordMatch) {
-                const matches = getUrlsInfosInString(textSliced);
-                const match = matches[matches.length - 1];
+            if (match && match[0] === potentialUrl && !EMAIL_REGEX.test(potentialUrl)) {
+                const url = match[2] ? match[0] : 'http://' + match[0];
                 const range = this.document.createRange();
-                range.setStart(selection.anchorNode, match.index);
-                range.setEnd(selection.anchorNode, match.index + match.length);
-                const link = this._createLink(range.extractContents().textContent, match.url);
+                range.setStart(selection.anchorNode, selection.anchorOffset - match[0].length);
+                range.setEnd(selection.anchorNode, selection.anchorOffset);
+                const link = this._createLink(range.extractContents().textContent, url);
                 range.insertNode(link);
                 const container = link.parentElement;
                 const offset = childNodeIndex(link) + 1;
@@ -4705,6 +4713,9 @@ export class OdooEditor extends EventTarget {
             // Avoid transforming dynamic placeholder pattern to url.
             if(!text.match(/\${.*}/gi)) {
                 splitAroundUrl = text.split(URL_REGEX);
+                // Remove 'http(s)://' capturing group from the result (indexes
+                // 2, 5, 8, ...).
+                splitAroundUrl = splitAroundUrl.filter((_, index) => ((index + 1) % 3));
             }
             if (splitAroundUrl.length === 3 && !splitAroundUrl[0] && !splitAroundUrl[2]) {
                 // Pasted content is a single URL.

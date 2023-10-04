@@ -19,8 +19,8 @@ import {
     isArtificialVoidElement,
     ancestors,
     EMAIL_REGEX,
-    URL_REGEX_WITH_INFOS,
     PHONE_REGEX,
+    URL_REGEX,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -94,11 +94,7 @@ export function deduceURLfromText(text, link) {
        return match[1] ? match[0] : 'mailto:' + match[0];
    }
    // Check for http link.
-   // Regex with 'g' flag is stateful, reset lastIndex before and after using
-   // exec.
-   URL_REGEX_WITH_INFOS.lastIndex = 0;
-   match = URL_REGEX_WITH_INFOS.exec(label);
-   URL_REGEX_WITH_INFOS.lastIndex = 0;
+   match = label.match(URL_REGEX);
    if (match && match[0] === label) {
        const currentHttpProtocol = (link?.href.match(/^http(s)?:\/\//gi) || [])[0];
        if (match[2]) {

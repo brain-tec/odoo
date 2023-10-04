@@ -112,7 +112,6 @@
             'web/static/src/legacy/js/promise_extension.js',
             'web/static/src/module_loader.js',
             'web/static/src/session.js',
-            'web/static/src/legacy/js/core/cookie_utils.js',
 
             'web/static/lib/luxon/luxon.js',
             'web/static/lib/owl/owl.js',
@@ -120,7 +119,6 @@
             'web/static/src/libs/owl.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
-            'web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js',
             'web/static/lib/popper/popper.js',
             'web/static/lib/bootstrap/js/dist/dom/data.js',
             'web/static/lib/bootstrap/js/dist/dom/event-handler.js',
