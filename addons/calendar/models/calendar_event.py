@@ -477,9 +477,11 @@ class Meeting(models.Model):
             update_alarms = True
 
         time_fields = self.env['calendar.event']._get_time_fields()
-        if any([values.get(key) for key in time_fields]) or 'alarm_ids' in values:
+        if any([values.get(key) for key in time_fields]):
             update_alarms = True
             update_time = True
+        if 'alarm_ids' in values:
+            update_alarms = True
 
         if (not recurrence_update_setting or recurrence_update_setting == 'self_only' and len(self) == 1) and 'follow_recurrence' not in values:
             if any({field: values.get(field) for field in time_fields if field in values}):
@@ -931,7 +933,8 @@ class Meeting(models.Model):
             events = self
         attendee = events.attendee_ids.filtered(lambda x: x.partner_id == self.env.user.partner_id)
         if status == 'accepted':
-            return attendee.do_accept()
+            all_events = recurrence_update_setting == 'all_events'
+            return attendee.with_context(all_events=all_events).do_accept()
         if status == 'declined':
             return attendee.do_decline()
         return attendee.do_tentative()
