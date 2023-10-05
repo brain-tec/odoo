@@ -327,7 +327,7 @@ class TestChannelInternals(MailCommon):
         # `channel_get` should return a new channel the first time a partner is given
         initial_channel_info = self.env['discuss.channel'].channel_get(partners_to=self.test_partner.ids)
         # shape of channelMembers is [('ADD', data...)], [0][1] accesses the data
-        self.assertEqual(set(m['persona']['partner']['id'] for m in initial_channel_info['channel']['channelMembers'][0][1]), {self.partner_employee_nomail.id, self.test_partner.id})
+        self.assertEqual(set(m['persona']['id'] for m in initial_channel_info['channel']['channelMembers'][0][1]), {self.partner_employee_nomail.id, self.test_partner.id})
 
         # `channel_get` should return the existing channel every time the same partner is given
         same_channel_info = self.env['discuss.channel'].channel_get(partners_to=self.test_partner.ids)
@@ -342,7 +342,7 @@ class TestChannelInternals(MailCommon):
         solo_channel_info = self.env['discuss.channel'].channel_get(partners_to=self.partner_employee_nomail.ids)
         self.assertNotEqual(solo_channel_info['id'], initial_channel_info['id'])
         # shape of channelMembers is [('ADD', data...)], [0][1] accesses the data
-        self.assertEqual(set(m['persona']['partner']['id'] for m in solo_channel_info['channel']['channelMembers'][0][1]), {self.partner_employee_nomail.id})
+        self.assertEqual(set(m['persona']['id'] for m in solo_channel_info['channel']['channelMembers'][0][1]), {self.partner_employee_nomail.id})
 
         # `channel_get` should return the existing channel every time the current partner is given
         same_solo_channel_info = self.env['discuss.channel'].channel_get(partners_to=self.partner_employee_nomail.ids)
@@ -503,6 +503,25 @@ class TestChannelInternals(MailCommon):
 
         test_channel.image_128 = base64.b64encode(("<svg/>").encode())
         self.assertEqual(test_channel.avatar_128, test_channel.image_128)
+
+    def test_channel_write_should_send_notification(self):
+        channel = self.env['discuss.channel'].create({"name": "test", "description": "test"})
+        # do the operation once before the assert to grab the value to expect
+        with self.assertBus(
+            [(self.cr.dbname, 'discuss.channel', channel.id)],
+            [{
+                "type": "mail.record/insert",
+                "payload": {
+                    'Thread': {
+                        "id": channel.id,
+                        "model": "discuss.channel",
+                        "name": "test test",
+                    }
+                },
+            }]
+        ):
+            channel.name = "test test"
+            channel.description = "test"
 
     def test_channel_write_should_send_notification_if_image_128_changed(self):
         channel = self.env['discuss.channel'].create({'name': '', 'uuid': 'test-uuid'})

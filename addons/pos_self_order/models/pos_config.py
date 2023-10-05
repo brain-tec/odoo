@@ -133,10 +133,23 @@ class PosConfig(models.Model):
                 })
                 pos_config_id.self_ordering_image_home_ids = [(4, attachment.id)]
 
+            self.env['pos_self_order.custom_link'].create({
+                'name': 'Order Now',
+                'url': f'/pos-self/{pos_config_id.id}/products',
+                'pos_config_ids': [(4, pos_config_id.id)],
+            })
+
             if pos_config_id.module_pos_restaurant:
                 pos_config_id.self_ordering_mode = 'mobile'
 
         return pos_config_ids
+
+    def write(self, vals):
+        for record in self:
+            if vals.get('self_ordering_mode') == 'kiosk' or record.self_ordering_mode == 'kiosk':
+                vals['self_ordering_pay_after'] = 'each'
+
+        return super().write(vals)
 
     @api.depends("module_pos_restaurant")
     def _compute_self_order(self):
@@ -145,11 +158,11 @@ class PosConfig(models.Model):
                 record.self_ordering_mode = 'nothing'
 
     def _compute_selection_pay_after(self):
-        selection = [("meal", "Meal"), ("each", "Each Order")]
+        selection_each_label = _("Each Order")
         version_info = service.common.exp_version()['server_version_info']
         if version_info[-1] == '':
-            selection[0] = (selection[0][0], selection[0][1] + ' (require Odoo Enterprise)')
-        return selection
+            selection_each_label = f"{selection_each_label} {_('(require Odoo Enterprise)')}"
+        return [("meal", _("Meal")), ("each", selection_each_label)]
 
     @api.constrains('self_ordering_default_user_id')
     def _check_default_user(self):
@@ -299,7 +312,7 @@ class PosConfig(models.Model):
 
         return {
             "pos_config_id": self.id,
-            "pos_session": self.current_session_id.read(["id", "access_token"])[0] if self.current_session_id else False,
+            "pos_session": self.current_session_id.read(["id", "access_token"])[0] if self.current_session_id and self.current_session_id.state == 'opened' else False,
             "company_name": self.company_id.name,
             "company_color": self.company_id.color,
             "custom_links": self._get_self_order_custom_links(),
