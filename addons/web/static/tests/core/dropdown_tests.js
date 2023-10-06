@@ -18,6 +18,7 @@ import {
     makeDeferred,
     mount,
     mouseEnter,
+    mouseLeave,
     nextTick,
     patchWithCleanup,
     triggerEvent,
@@ -224,6 +225,44 @@ QUnit.module("Components", ({ beforeEach }) => {
         await click(target, "button.dropdown-toggle");
         await click(target, ".dropdown-menu .dropdown-item");
         assert.containsNone(target, ".dropdown-menu");
+    });
+
+    QUnit.test("hold position on hover", async (assert) => {
+        let parentState;
+        class Parent extends Component {
+            setup() {
+                this.state = useState({ filler: false });
+                parentState = this.state;
+            }
+            static template = xml`
+                <div t-if="state.filler" class="filler" style="height: 100px;"/>
+                <Dropdown holdOnHover="true">
+                </Dropdown>
+            `;
+            static components = { Dropdown };
+        }
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu");
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox1 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+
+        // Pointer enter the dropdown menu
+        await mouseEnter(target, ".dropdown-menu");
+
+        // Add a filler to the parent
+        assert.containsNone(target, ".filler");
+        parentState.filler = true;
+        await nextTick();
+        assert.containsOnce(target, ".filler");
+        const menuBox2 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox2.top - menuBox1.top, 0);
+
+        // Pointer leave the dropdown menu
+        await mouseLeave(target, ".dropdown-menu");
+        const menuBox3 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox3.top - menuBox1.top, 100);
     });
 
     QUnit.test("payload received on item selection", async (assert) => {
@@ -1229,8 +1268,8 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("Dropdown with a tooltip", async (assert) => {
         assert.expect(2);
 
-        class MyComponent extends owl.Component {}
-        MyComponent.template = owl.xml`
+        class MyComponent extends Component {}
+        MyComponent.template = xml`
             <Dropdown tooltip="'My tooltip'">
                 <DropdownItem/>
             </Dropdown>`;
@@ -1246,8 +1285,8 @@ QUnit.module("Components", ({ beforeEach }) => {
         "Dropdown with a date picker inside do not close when a click occurs in date picker",
         async (assert) => {
             registry.category("services").add("datetime_picker", datetimePickerService);
-            class MyComponent extends owl.Component {}
-            MyComponent.template = owl.xml`
+            class MyComponent extends Component {}
+            MyComponent.template = xml`
                 <Dropdown>
                     <t t-set-slot="toggler">
                         Dropdown toggler

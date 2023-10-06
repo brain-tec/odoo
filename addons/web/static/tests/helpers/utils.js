@@ -10,7 +10,20 @@ import { isVisible } from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { registerCleanup } from "./cleanup";
 
-import { App, onMounted, onPatched, useComponent } from "@odoo/owl";
+import {
+    App,
+    onError,
+    onMounted,
+    onPatched,
+    onRendered,
+    onWillDestroy,
+    onWillPatch,
+    onWillRender,
+    onWillStart,
+    onWillUnmount,
+    onWillUpdateProps,
+    useComponent,
+} from "@odoo/owl";
 
 /**
  * @typedef {keyof HTMLElementEventMap | keyof WindowEventMap} EventType
@@ -525,7 +538,7 @@ export async function clickDiscard(htmlElement) {
 }
 
 /**
- * Triggers a mouseenter event on the given target. If no
+ * Trigger pointerenter and mouseenter events on the given target. If no
  * coordinates are given, the event is located by default
  * in the middle of the target to simplify the test process
  *
@@ -539,7 +552,18 @@ export async function mouseEnter(el, selector, coordinates) {
         clientX: target.getBoundingClientRect().left + target.getBoundingClientRect().width / 2,
         clientY: target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2,
     };
-    return triggerEvent(target, null, "mouseenter", atPos);
+    return triggerEvents(target, null, ["pointerenter", "mouseenter"], atPos);
+}
+
+/**
+ * Trigger pointerleave and mouseleave events on the given target.
+ *
+ * @param {Element} el
+ * @param {string} selector
+ */
+export async function mouseLeave(el, selector) {
+    const target = el.querySelector(selector) || el;
+    return triggerEvents(target, null, ["pointerleave", "mouseleave"]);
 }
 
 export async function editInput(el, selector, value) {
@@ -775,29 +799,42 @@ export function useChild() {
     onPatched(setChild);
 }
 
-const lifeCycleHooks = [
-    "onError",
-    "onMounted",
-    "onPatched",
-    "onRendered",
-    "onWillDestroy",
-    "onWillPatch",
-    "onWillRender",
-    "onWillStart",
-    "onWillUnmount",
-    "onWillUpdateProps",
-];
 export function useLogLifeCycle(logFn, name = "") {
-    const component = owl.useComponent();
+    const component = useComponent();
     let loggedName = `${component.constructor.name}`;
     if (name) {
         loggedName = `${component.constructor.name} ${name}`;
     }
-    for (const hook of lifeCycleHooks) {
-        owl[hook](() => {
-            logFn(`${hook} ${loggedName}`);
-        });
-    }
+    onError(() => {
+        logFn(`onError ${loggedName}`);
+    });
+    onMounted(() => {
+        logFn(`onMounted ${loggedName}`);
+    });
+    onPatched(() => {
+        logFn(`onPatched ${loggedName}`);
+    });
+    onRendered(() => {
+        logFn(`onRendered ${loggedName}`);
+    });
+    onWillDestroy(() => {
+        logFn(`onWillDestroy ${loggedName}`);
+    });
+    onWillPatch(() => {
+        logFn(`onWillPatch ${loggedName}`);
+    });
+    onWillRender(() => {
+        logFn(`onWillRender ${loggedName}`);
+    });
+    onWillStart(() => {
+        logFn(`onWillStart ${loggedName}`);
+    });
+    onWillUnmount(() => {
+        logFn(`onWillUnmount ${loggedName}`);
+    });
+    onWillUpdateProps(() => {
+        logFn(`onWillUpdateProps ${loggedName}`);
+    });
 }
 
 /**
