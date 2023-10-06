@@ -15,6 +15,7 @@ import {
     closestElement,
     getUrlsInfosInString,
     isVoidElement,
+    unwrapContents,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -192,8 +193,26 @@ class Sanitize {
                 node.setAttribute('contenteditable', 'false');
             }
 
-            if (node.firstChild) {
-                this._parse(node.firstChild);
+            // Remove empty class/style attributes.
+            for (const attributeName of ['class', 'style']) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute(attributeName) && !node.getAttribute(attributeName)) {
+                    node.removeAttribute(attributeName);
+                }
+            }
+
+            let firstChild = node.firstChild;
+            // Unwrap the contents of SPAN and FONT elements without attributes.
+            if (['SPAN', 'FONT'].includes(node.nodeName) && !node.hasAttributes()) {
+                getDeepRange(this.root, { select: true });
+                const restoreCursor = node.isConnected && preserveCursor(this.root.ownerDocument);
+                firstChild = unwrapContents(node)[0];
+                if (restoreCursor) {
+                    restoreCursor();
+                }
+            }
+
+            if (firstChild) {
+                this._parse(firstChild);
             }
 
             // Update link URL if label is a new valid link.
