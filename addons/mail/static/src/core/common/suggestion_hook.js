@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { useSequential } from "@mail/utils/common/hooks";
-import { useComponent, useEffect, useState } from "@odoo/owl";
+import { status, useComponent, useEffect, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
@@ -133,11 +133,10 @@ export function useSuggestion() {
             if (!self.search.delimiter) {
                 return;
             }
-            const suggestions = suggestionService.searchSuggestions(
-                self.search,
-                { thread: self.thread },
-                true
-            );
+            const suggestions = suggestionService.searchSuggestions(self.search, {
+                thread: self.thread,
+                sort: true,
+            });
             const { type, mainSuggestions, extraSuggestions = [] } = suggestions;
             if (!mainSuggestions.length && !extraSuggestions.length) {
                 self.state.items = undefined;
@@ -171,7 +170,7 @@ export function useSuggestion() {
                 await suggestionService.fetchSuggestions(self.search, {
                     thread: self.thread,
                 });
-                if (owl.status(comp) === "destroyed") {
+                if (status(comp) === "destroyed") {
                     return;
                 }
                 self.update();

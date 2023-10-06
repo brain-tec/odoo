@@ -7,7 +7,7 @@ import { Picker, usePicker } from "@mail/core/common/picker";
 import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
 import { NavigableList } from "@mail/core/common/navigable_list";
 import { useSuggestion } from "@mail/core/common/suggestion_hook";
-import { escapeAndCompactTextContent } from "@mail/utils/common/format";
+import { prettifyMessageContent } from "@mail/utils/common/format";
 import { useSelection } from "@mail/utils/common/hooks";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
@@ -96,7 +96,6 @@ export class Composer extends Component {
         this.fakeTextarea = useRef("fakeTextarea");
         this.emojiButton = useRef("emoji-button");
         this.state = useState({
-            autofocus: 0,
             active: true,
         });
         this.selection = useSelection({
@@ -135,12 +134,12 @@ export class Composer extends Component {
                     this.ref.el.focus();
                 }
             },
-            () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
+            () => [this.props.autofocus + this.props.composer.autofocus, this.props.placeholder]
         );
         useEffect(
             (rThread, cThread) => {
                 if (cThread && cThread.eq(rThread)) {
-                    this.state.autofocus++;
+                    this.props.composer.autofocus++;
                 }
             },
             () => [this.props.messageToReplyTo?.thread, this.props.composer.thread]
@@ -172,7 +171,7 @@ export class Composer extends Component {
             buttons: [this.emojiButton],
             close: () => {
                 if (!this.ui.isSmall) {
-                    this.state.autofocus++;
+                    this.props.composer.autofocus++;
                 }
             },
             pickers: { emoji: (emoji) => this.addEmoji(emoji) },
@@ -392,7 +391,7 @@ export class Composer extends Component {
 
     onClickAddAttachment(ev) {
         markEventHandled(ev, "composer.clickOnAddAttachment");
-        this.state.autofocus++;
+        this.props.composer.autofocus++;
     }
 
     async onClickFullComposer(ev) {
@@ -417,9 +416,16 @@ export class Composer extends Component {
             }
         }
         const attachmentIds = this.props.composer.attachments.map((attachment) => attachment.id);
+        const body = this.props.composer.textInputContent;
+        const validMentions = this.store.user
+            ? this.messageService.getMentionsFromText(body, {
+                  mentionedChannels: this.props.composer.mentionedChannels,
+                  mentionedPartners: this.props.composer.mentionedPartners,
+              })
+            : undefined;
         const context = {
             default_attachment_ids: attachmentIds,
-            default_body: escapeAndCompactTextContent(this.props.composer.textInputContent),
+            default_body: await prettifyMessageContent(body, validMentions),
             default_model: this.thread.model,
             default_partner_ids:
                 this.props.type === "note"
@@ -576,7 +582,7 @@ export class Composer extends Component {
         this.props.composer.textInputContent = firstPart + str + secondPart;
         this.selection.moveCursor((firstPart + str).length);
         if (!this.ui.isSmall) {
-            this.state.autofocus++;
+            this.props.composer.autofocus++;
         }
     }
 
