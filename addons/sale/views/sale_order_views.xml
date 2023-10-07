@@ -166,6 +166,8 @@
                     widget="badge"
                     optional="show"/>
                 <field name="amount_to_invoice" optional="hide"/>
+                <field name="client_order_ref" optional="hide"/>
+                <field name="validity_date" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -559,7 +561,7 @@
                                     context="{'active_test': True}"
                                     readonly="qty_invoiced &gt; 0 or is_downpayment"
                                     optional="show"/>
-                                <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line" optional="show" widget="sol_discount"/>
+                                <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line" optional="show"/>
                                 <field name="is_downpayment" column_invisible="True"/>
                                 <field name="price_subtotal" string="Tax excl." invisible="is_downpayment"/>
                                 <field name="price_total"
@@ -635,6 +637,14 @@
                                                                 <strong class="float-end text-end" t-out="line_price" />
                                                             </div>
                                                         </div>
+                                                        <t t-if="record.discount?.raw_value">
+                                                            <div class="row">
+                                                                <div class="col-12 text-muted">
+                                                                    Discount:
+                                                                    <t t-out="record.discount.value"/>%
+                                                                </div>
+                                                            </div>
+                                                        </t>
                                                     </div>
                                                 </div>
                                             </t>
@@ -651,8 +661,12 @@
                             </kanban>
                         </field>
                         <div class="oe_right d-flex gap-1 mb-2 ms-1"
-                             invisible="1"
                              name="so_button_below_order_lines">
+                            <button string="Discount"
+                                    name="action_open_discount_wizard"
+                                    type="object"
+                                    class="btn btn-secondary"
+                                    groups="product.group_discount_per_so_line"/>
                         </div>
                         <group name="note_group" col="6" class="mt-2 mt-md-0">
                             <group colspan="4">
@@ -719,8 +733,8 @@
                     </page>
                     <page groups="base.group_no_one" string="Customer Signature" name="customer_signature" invisible="not require_signature and not signed_by and not signature and not signed_on">
                         <group>
-                            <field name="signed_by"/>
-                            <field name="signed_on"/>
+                            <field name="signed_by" readonly="signature"/>
+                            <field name="signed_on" readonly="signature"/>
                             <field name="signature" widget="image"/>
                         </group>
                     </page>
