@@ -261,7 +261,7 @@ class TestAccountComposerPerformance(AccountTestInvoicingCommon, MailCommon):
         # tracking: is_move_sent
         self.assertEqual(track_msg.author_id, self.env.user.partner_id)
         self.assertEqual(track_msg.email_from, self.env.user.email_formatted)
-        self.assertTrue('is_move_sent' in track_msg.tracking_value_ids.field.mapped('name'))
+        self.assertTrue('is_move_sent' in track_msg.tracking_value_ids.field_id.mapped('name'))
         # sent email
         self.assertMailMail(
             test_customer,
@@ -348,7 +348,7 @@ class TestAccountComposerPerformance(AccountTestInvoicingCommon, MailCommon):
         # tracking: is_move_sent
         self.assertEqual(track_msg.author_id, self.env.user.partner_id)
         self.assertEqual(track_msg.email_from, self.env.user.email_formatted)
-        self.assertTrue('is_move_sent' in track_msg.tracking_value_ids.field.mapped('name'))
+        self.assertTrue('is_move_sent' in track_msg.tracking_value_ids.field_id.mapped('name'))
         # sent email
         self.assertMailMail(
             test_customer,
@@ -854,7 +854,7 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.assertTrue(wizard.exists())
 
         # If cron is triggered one day or later than the creation it should be garbage collected.
-        with freeze_time(fields.Date.today() + relativedelta(days=1)):
+        with freeze_time(fields.Datetime.now() + relativedelta(hours=24)):
             self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()
             self.assertFalse(wizard.exists())
 

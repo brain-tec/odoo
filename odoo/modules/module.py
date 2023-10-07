@@ -196,14 +196,11 @@ def get_resource_path(module, *args):
     :rtype: str
     :return: absolute path to the resource
     """
+    warnings.warn(
+        f"Since 17.0: use tools.misc.file_path instead of get_resource_path({module}, {args})",
+        DeprecationWarning,
+    )
     resource_path = opj(module, *args)
-    try:
-        return file_path(resource_path)
-    except (FileNotFoundError, ValueError):
-        return False
-
-def check_resource_path(mod_path, *args):
-    resource_path = opj(mod_path, *args)
     try:
         return file_path(resource_path)
     except (FileNotFoundError, ValueError):
@@ -211,6 +208,7 @@ def check_resource_path(mod_path, *args):
 
 # backwards compatibility
 get_module_resource = get_resource_path
+check_resource_path = get_resource_path
 
 def get_resource_from_path(path):
     """Tries to extract the module name and the resource's relative path
@@ -245,17 +243,18 @@ def get_resource_from_path(path):
     return None
 
 def get_module_icon(module):
-    iconpath = ['static', 'description', 'icon.png']
-    if get_module_resource(module, *iconpath):
-        return ('/' + module + '/') + '/'.join(iconpath)
-    return '/base/'  + '/'.join(iconpath)
+    fpath = f"{module}/static/description/icon.png"
+    try:
+        file_path(fpath)
+        return "/" + fpath
+    except FileNotFoundError:
+        return "/base/static/description/icon.png"
 
 def get_module_icon_path(module):
-    iconpath = ['static', 'description', 'icon.png']
-    path = get_module_resource(module.name, *iconpath)
-    if not path:
-        path = get_module_resource('base', *iconpath)
-    return path
+    try:
+        return file_path(f"{module}/static/description/icon.png")
+    except FileNotFoundError:
+        return file_path("base/static/description/icon.png")
 
 def module_manifest(path):
     """Returns path to module manifest if one can be found under `path`, else `None`."""
