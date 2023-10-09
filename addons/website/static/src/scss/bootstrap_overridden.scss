@@ -13,6 +13,12 @@ $gray-900: #212529 !default;
 $white: #FFF !default;
 $black: #000 !default;
 
+// This coupling allows to control the appearance of some app components (and
+// more). Note that it is still possible to have more than 2 "bright" main
+// colors by using them in color combinations config instead of as theme colors.
+$light: o-color('o-color-3');
+$dark: o-color('o-color-5');
+
 // The contrast ratio to reach against white, to determine if color changes from "light" to "dark". Acceptable values for WCAG 2.0 are 3, 4.5 and 7.
 // See https://www.w3.org/TR/WCAG20/#visual-audio-contrast-contrast
 
@@ -38,6 +44,14 @@ $color-contrast-light: o-color('white') !default;
 // You can add more entries to the $spacers map, should you need more variation.
 
 $spacer: 1rem !default; // Need to predefine as used below
+$spacers: (
+    0: 0,
+    1: $spacer * .25,
+    2: $spacer * .5,
+    3: $spacer,
+    4: $spacer * 1.5,
+    5: $spacer * 3,
+) !default; // BS default
 
 // Body
 //
@@ -66,19 +80,15 @@ $link-hover-color: auto-contrast(darken($link-color, 15%), $body-bg, 'o-cc1-link
 $link-decoration: if(o-website-value('link-underline') == 'always', underline, none) !default;
 $link-hover-decoration: if(o-website-value('link-underline') != 'never', underline, none) !default;
 
-// Table
-$table-striped-bg-factor: .01 !default;
-$table-cell-padding-x: .75rem !default;
-$table-cell-padding-y: .75rem !default;
-$table-cell-padding-x-sm: .3rem !default;
-$table-cell-padding-y-sm: .3rem !default;
-
 // Grid
 $grid-gutter-width: 30px !default;
 
 // Components
 //
 // Define common padding and border radius sizes and more.
+
+// Allow dynamic border-color adaptations
+$border-color: var(--o-border-color) !default;
 
 // Note: for the 'active' color, color preset edition is not really flexible but
 // this could come in a future update.
@@ -134,9 +144,25 @@ $h6-margin-bottom: o-website-value('h6-margin-bottom') or $headings-margin-botto
 
 $headings-color: o-color('o-cc1-headings') !default;
 
-$lead-font-size: 1.125rem !default;
+$lead-font-size: $font-size-base * $o-lead-ratio !default;
+// Note that we currently load only 700 for Google fonts, we may consider trying
+// to load more or this one only instead. Meanwhile, this fallbacks on 700
+// if 600 is not available anyway.
+$font-weight-bold: 600 !default;
 
 $text-muted: mute-color($body-color) !default;
+
+// Tables
+//
+// Customizes the `.table` component with basic values, each used across all table variations.
+
+$table-striped-bg-factor: .01 !default;
+$table-cell-padding-x: .75rem !default;
+$table-cell-padding-y: .75rem !default;
+$table-cell-padding-x-sm: .3rem !default;
+$table-cell-padding-y-sm: .3rem !default;
+$table-border-color: $border-color !default;
+$table-group-separator-color: $table-border-color !default;
 
 // Buttons
 //
@@ -179,6 +205,16 @@ $input-border-width: o-website-value('input-border-width') !default;
 $input-border-radius: o-website-value('input-border-radius') !default;
 $input-border-radius-lg: o-website-value('input-border-radius-lg') !default;
 $input-border-radius-sm: o-website-value('input-border-radius-sm') !default;
+
+$input-bg: var(--o-input-bg, #{$light}) !default;
+$input-border-color: var(--o-input-border-color, #{$light}) !default;
+$input-color: color-contrast($light) !default;
+$input-focus-bg: $body-bg !default;
+$input-focus-color: $body-color !default;
+$input-placeholder-color: var(--o-input-placeholder-color, #{rgba($input-color, .5)}) !default;
+
+$form-check-input-border: ($input-border-width or 1px) solid $input-border-color !default;
+$form-range-track-bg: $light !default;
 
 // Badge
 $badge-padding-y: 0.25em !default;
@@ -224,6 +260,74 @@ $o-btn-outline-border-width-defaults: () !default;
 $o-navbar-nav-pills-link-padding-x: if(o-website-value('header-links-style') == 'pills', 1rem * 1.5, null) !default;
 $o-navbar-nav-pills-link-border-radius: if(o-website-value('header-links-style') == 'pills', 10rem, null) !default;
 
+// Borders
+$border-radius-sm: .3rem !default;
+$border-radius: .4rem !default;
+$border-radius-lg: .6rem !default;
+$border-radius-pill: 50rem !default; // BS Default
+
 // Accordion
 $accordion-color: inherit !default;
 $accordion-bg: inherit !default;
+$accordion-padding-x: 1.5rem !default;
+$accordion-border-width: 1px !default;
+$accordion-border-color: $border-color !default;
+$accordion-button-active-bg: $light !default;
+$accordion-button-active-color: color-contrast($light) !default;
+$accordion-button-focus-box-shadow: none !default;
+$accordion-icon-color: $body-color !default;
+$accordion-icon-active-color: $accordion-button-active-color !default;
+
+// Popovers
+$popover-bg: $body-bg !default;
+$popover-border-color: $border-color !default;
+$popover-arrow-color: $body-bg !default;
+$popover-arrow-outer-color: $border-color !default;
+
+// Shadows
+$box-shadow: 0px 4px 16px rgba($black, 0.12) !default;
+$box-shadow-sm: 0px 1px 3px rgba($black, .1) !default;
+$box-shadow-lg: 0px 12px 32px rgba($black, .175) !default;
+
+// Cards
+$card-border-color: $border-color !default;
+
+// Modals
+$modal-header-border-width: 0 !default;
+$modal-footer-border-width: 0 !default;
+
+// HR Separator
+$hr-color: $border-color !default;
+
+// Pagination
+
+// Arbitrary values to get a circle for 1 digit numbers
+$pagination-padding-y: 0.4ch !default;
+$pagination-padding-x: 1.2ch !default;
+
+$pagination-border-radius: $border-radius-pill !default;
+$pagination-margin-start: map-get($map: $spacers, $key: 1) !default;
+$pagination-border-color: transparent !default;
+$pagination-bg: $body-bg !default;
+$pagination-color: color-contrast($pagination-bg) !default;
+$pagination-transition: none !default;
+
+$pagination-focus-bg: $light !default;
+$pagination-focus-color: color-contrast($light) !default;
+$pagination-focus-box-shadow: 0 0 0 1px $pagination-focus-bg !default;
+
+$pagination-hover-bg: $light !default;
+$pagination-hover-color: color-contrast($light) !default;
+$pagination-hover-border-color: $light !default;
+
+$pagination-disabled-color: rgba(color-contrast($pagination-bg), 0.5) !default;
+$pagination-disabled-border-color: transparent !default;
+$pagination-disabled-bg: $pagination-bg !default;
+
+$pagination-padding-y-sm: $pagination-padding-y !default;
+$pagination-padding-x-sm: $pagination-padding-x !default;
+$pagination-padding-y-lg: $pagination-padding-y !default;
+$pagination-padding-x-lg: $pagination-padding-x !default;
+
+$pagination-border-radius-lg: $pagination-border-radius !default;
+$pagination-border-radius-sm: $pagination-border-radius !default;

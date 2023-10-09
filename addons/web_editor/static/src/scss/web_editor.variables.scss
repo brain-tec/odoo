@@ -287,11 +287,11 @@ $o-base-color-palette: (
 ) !default;
 $o-color-palettes: (
     'base-1': (
-        'o-color-1': scale-color($o-enterprise-action-color, $saturation: -50%, $lightness: 20%),
-        'o-color-2': scale-color($o-enterprise-color, $saturation: -50%),
-        'o-color-3': #F6F6F6,
+        'o-color-1': $o-enterprise-color,
+        'o-color-2': #8595A2,
+        'o-color-3': #F3F2F2,
         'o-color-4': #FFFFFF,
-        'o-color-5': #383E45,
+        'o-color-5': #111827,
     ),
     'base-2': (
         'o-color-1': #337ab7,
@@ -375,7 +375,7 @@ $o-color-combinations-presets: (
         ),
         (
             'bg': 'o-color-3',
-            'headings': 'o-color-1',
+            'headings': 'o-color-5',
         ),
         (
             'bg': 'o-color-2',
@@ -439,8 +439,8 @@ $o-color-extras-nesting-selector: '&, .o_colored_level &';
     $lightness-c1: lightness($color1);
     $lightness-inc: if($luma-c1 < $luma-c2, -1%, 1%);
     $i: 0;
-    // Max 15% lightness change even if not contrasted enough
-    @while ($lightness-c1 > 0.1% and $lightness-c1 < 99.9% and $i < 15 and not has-enough-contrast($color1, $color2)) {
+    // Max 25% lightness change even if not contrasted enough
+    @while ($lightness-c1 > 0.1% and $lightness-c1 < 99.9% and $i < 25 and not has-enough-contrast($color1, $color2)) {
         $color1: adjust-color($color1, $lightness: $lightness-inc);
         $lightness-c1: $lightness-c1 + $lightness-inc;
         $i: $i + 1;
