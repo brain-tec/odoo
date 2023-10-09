@@ -27,6 +27,13 @@ $-seen-urls: ();
         --#{$variable-prefix}body-bg: #{$-boxed-layout-body-bg};
     }
 
+    // Border color
+    // Let borders color adapt according to body and CCs. Also, set a fallback
+    // value for browsers that don't support the color-mix function (used by
+    // 'fade-currentColor').
+    --o-border-color: #{o-color('300')};
+    --o-border-color: #{fade-currentColor()};
+
     // The theme customize modal JS will need to know the value of some scss
     // variables used to render the user website, and those may have been
     // customized by themes, the user or anything else (so there is no file to
@@ -568,13 +575,13 @@ font[class*='bg-'] {
     background-color: #f5f5f5;
     border: 1px solid #dddddd;
     color: #666666;
-    font-size: 14px;
+    @include font-size(14px);
     padding: 4px;
 }
 table.table_desc tr td {
     text-align: left;
     padding: 5px;
-    font-size: 13px;
+    @include font-size(13px);
     &:first-child {
         width: 25%;
         font-weight: bold;
@@ -680,7 +687,7 @@ table.table_desc tr td {
         .carousel-control-prev-icon:before,
         .carousel-control-next-icon:before {
             background-color: rgba(0,0,0,0);
-            font-size: 2rem;
+            @include font-size(2rem);
             color: #fff;
             text-shadow: $box-shadow-sm;
         }
@@ -708,7 +715,7 @@ table.table_desc tr td {
             width: 2rem;
             height: 6rem;
             line-height: 6rem;
-            font-size: 1.5rem;
+            @include font-size(1.5rem);
         }
         // Indicators
         .carousel-indicators li {
@@ -735,7 +742,7 @@ table.table_desc tr td {
             height: 4rem;
             line-height: 4rem;
             border-radius: 50%;
-            font-size: 1.25rem;
+            @include font-size(1.25rem);
         }
         // Indicators
         .carousel-indicators li {
@@ -767,7 +774,7 @@ table.table_desc tr td {
             width: 2rem;
             height: 2rem;
             line-height: 2rem;
-            font-size: 1.25rem;
+            @include font-size(1.25rem);
         }
         // Indicators
         .carousel-indicators li {
@@ -897,7 +904,7 @@ $-transition-duration: 200ms;
 
     &.o_header_is_scrolled {
         .navbar-brand {
-            font-size: $o-theme-navbar-fixed-logo-height / $line-height-base;
+            @include font-size($o-theme-navbar-fixed-logo-height / $line-height-base);
 
             img {
                 height: $o-theme-navbar-fixed-logo-height;
@@ -1633,7 +1640,7 @@ span.list-inline-item.o_add_language:last-child {
 $ribbon-padding: 100px;
 .o_ribbon {
     margin: 0;
-    font-size: 1rem;
+    @include font-size(1rem);
     font-weight: bold;
     white-space: nowrap;
     text-align: center;
@@ -2485,4 +2492,9 @@ input[value*="data-oe-translation-initial-sha"] {
 // Odoo dropdown menu
 .o_dropdown_menu {
     @extend .dropdown-menu;
+}
+
+// Override web_editor's rules
+.o_table tr {
+    border-color: $table-border-color;
 }
