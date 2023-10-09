@@ -230,8 +230,7 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Indicate that the given domain has been used with the given measure
      */
     markAsValueUsed(domain, measure) {
-        const toTag = [measure, ...domain];
-        this._usedValueDomains.add(toTag.join());
+        this._usedValueDomains.add(measure + ",", domain.join());
     }
 
     /**
