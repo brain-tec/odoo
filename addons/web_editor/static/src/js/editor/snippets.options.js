@@ -2008,6 +2008,14 @@ const ListUserValueWidget = UserValueWidget.extend({
         }
     },
 
+    /**
+     * @override
+     */
+    destroy() {
+        this.bindedSortable?.cleanup();
+        this._super(...arguments);
+    },
+
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -2170,16 +2178,18 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.el.dataset.unsortable) {
             return;
         }
-        $(this.listTable).sortable({
-            axis: 'y',
-            handle: '.o_we_drag_handle',
-            items: 'tr',
-            cursor: 'move',
-            opacity: 0.6,
-            stop: (event, ui) => {
-                this._notifyCurrentState();
+        this.bindedSortable = this.call(
+            "sortable",
+            "create",
+            {
+                ref: { el: this.listTable },
+                elements: "tr",
+                followingElementClasses: ["opacity-50"],
+                handle: ".o_we_drag_handle",
+                onDrop: () => this._notifyCurrentState(),
+                applyChangeOnDrop: true,
             },
-        });
+        ).enable();
     },
     /**
      * @private
@@ -5463,9 +5473,8 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async replaceMedia() {
-        // TODO for now, this simulates a double click on the media,
-        // to be refactored when the new editor is merged
-        this.$target.dblclick();
+        // open mediaDialog and replace the media.
+        await this.options.wysiwyg.openMediaDialog({ node:this.$target[0] });
     },
     /**
      * Makes the image a clickable link by wrapping it in an <a>.
