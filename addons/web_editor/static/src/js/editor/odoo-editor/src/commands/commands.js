@@ -51,8 +51,8 @@ import {
     getCursorDirection,
 } from '../utils/utils.js';
 
-const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
-const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/g;
+const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
+const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
 
 function align(editor, mode) {
     const sel = editor.document.getSelection();
@@ -148,17 +148,16 @@ export const editorCommands = {
     insert: (editor, content) => {
         if (!content) return;
         const selection = editor.document.getSelection();
-        const range = selection.getRangeAt(0);
         let startNode;
         let insertBefore = false;
-        if (selection.isCollapsed) {
-            if (range.startContainer.nodeType === Node.TEXT_NODE) {
-                insertBefore = !range.startOffset;
-                splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
-                startNode = range.startContainer;
-            }
-        } else {
+        if (!selection.isCollapsed) {
             editor.deleteRange(selection);
+        }
+        const range = selection.getRangeAt(0);
+        if (range.startContainer.nodeType === Node.TEXT_NODE) {
+            insertBefore = !range.startOffset;
+            splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
+            startNode = range.startContainer;
         }
 
         const container = document.createElement('fake-element');
@@ -615,7 +614,7 @@ export const editorCommands = {
         const fontsSet = new Set(fonts);
         for (const font of fontsSet) {
             colorElement(font, color, mode);
-            if (!hasColor(font, mode) && !font.hasAttribute('style')) {
+            if ((!hasColor(font, 'color') && !hasColor(font,'backgroundColor')) && (!font.hasAttribute('style') || !color)) {
                 for (const child of [...font.childNodes]) {
                     font.parentNode.insertBefore(child, font);
                 }
