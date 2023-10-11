@@ -32,8 +32,8 @@ import { escapeRegExp } from "@web/core/utils/strings";
 export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
     constructor(config) {
         super(config);
-        /** @type {Object.<string, GlobalFilter>} */
-        this.globalFilters = {};
+        /** @type {Array.<GlobalFilter>} */
+        this.globalFilters = [];
     }
 
     /**
@@ -44,9 +44,9 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
     allowDispatch(cmd) {
         switch (cmd.type) {
             case "EDIT_GLOBAL_FILTER":
-                if (!this.getGlobalFilter(cmd.id)) {
+                if (!this.getGlobalFilter(cmd.filter.id)) {
                     return CommandResult.FilterNotFound;
-                } else if (this._isDuplicatedLabel(cmd.id, cmd.filter.label)) {
+                } else if (this._isDuplicatedLabel(cmd.filter.id, cmd.filter.label)) {
                     return CommandResult.DuplicatedFilterLabel;
                 }
                 return checkFiltersTypeValueCombination(cmd.filter.type, cmd.filter.defaultValue);
@@ -56,10 +56,21 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
                 }
                 break;
             case "ADD_GLOBAL_FILTER":
-                if (this._isDuplicatedLabel(cmd.id, cmd.filter.label)) {
+                if (this._isDuplicatedLabel(cmd.filter.id, cmd.filter.label)) {
                     return CommandResult.DuplicatedFilterLabel;
                 }
                 return checkFiltersTypeValueCombination(cmd.filter.type, cmd.filter.defaultValue);
+            case "MOVE_GLOBAL_FILTER": {
+                const index = this.globalFilters.findIndex((filter) => filter.id === cmd.id);
+                if (index === -1) {
+                    return CommandResult.FilterNotFound;
+                }
+                const targetIndex = index + cmd.delta;
+                if (targetIndex < 0 || targetIndex >= this.globalFilters.length) {
+                    return CommandResult.InvalidFilterMove;
+                }
+                break;
+            }
         }
         return CommandResult.Success;
     }
@@ -72,13 +83,18 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
     handle(cmd) {
         switch (cmd.type) {
             case "ADD_GLOBAL_FILTER":
-                this.history.update("globalFilters", cmd.filter.id, cmd.filter);
+                this.history.update("globalFilters", [...this.globalFilters, cmd.filter]);
                 break;
             case "EDIT_GLOBAL_FILTER":
-                this._editGlobalFilter(cmd.id, cmd.filter);
+                this._editGlobalFilter(cmd.filter);
                 break;
-            case "REMOVE_GLOBAL_FILTER":
-                this.history.update("globalFilters", cmd.id, undefined);
+            case "REMOVE_GLOBAL_FILTER": {
+                const filters = this.globalFilters.filter((filter) => filter.id !== cmd.id);
+                this.history.update("globalFilters", filters);
+                break;
+            }
+            case "MOVE_GLOBAL_FILTER":
+                this._onMoveFilter(cmd.id, cmd.delta);
                 break;
         }
     }
@@ -94,7 +110,7 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      * @returns {GlobalFilter|undefined} Global filter
      */
     getGlobalFilter(id) {
-        return this.globalFilters[id];
+        return this.globalFilters.find((filter) => filter.id === id);
     }
 
     /**
@@ -105,7 +121,7 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      * @returns {GlobalFilter|undefined}
      */
     getGlobalFilterLabel(label) {
-        return this.getGlobalFilters().find((filter) => _t(filter.label) === _t(label));
+        return this.globalFilters.find((filter) => _t(filter.label) === _t(label));
     }
 
     /**
@@ -114,7 +130,7 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      * @returns {Array<GlobalFilter>} Array of Global filters
      */
     getGlobalFilters() {
-        return Object.values(this.globalFilters);
+        return [...this.globalFilters];
     }
 
     /**
@@ -169,12 +185,14 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      * @param {string} id Id of the filter to update
      * @param {GlobalFilter} newFilter
      */
-    _editGlobalFilter(id, newFilter) {
+    _editGlobalFilter(newFilter) {
+        const id = newFilter.id;
         const currentLabel = this.getGlobalFilter(id).label;
-        const globalFilters = { ...this.globalFilters };
-        newFilter.id = id;
-        globalFilters[id] = newFilter;
-        this.history.update("globalFilters", globalFilters);
+        const index = this.globalFilters.findIndex((filter) => filter.id === id);
+        if (index === -1) {
+            return;
+        }
+        this.history.update("globalFilters", index, newFilter);
         const newLabel = this.getGlobalFilter(id).label;
         if (currentLabel !== newLabel) {
             this._updateFilterLabelInFormulas(currentLabel, newLabel);
@@ -192,7 +210,7 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      */
     import(data) {
         for (const globalFilter of data.globalFilters || []) {
-            this.globalFilters[globalFilter.id] = globalFilter;
+            this.globalFilters.push(globalFilter);
         }
     }
     /**
@@ -201,7 +219,7 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      * @param {Object} data
      */
     export(data) {
-        data.globalFilters = this.getGlobalFilters().map((filter) => ({
+        data.globalFilters = this.globalFilters.map((filter) => ({
             ...filter,
         }));
     }
@@ -250,10 +268,22 @@ export class GlobalFiltersCorePlugin extends spreadsheet.CorePlugin {
      */
     _isDuplicatedLabel(filterId, label) {
         return (
-            this.getGlobalFilters().findIndex(
+            this.globalFilters.findIndex(
                 (filter) => (!filterId || filter.id !== filterId) && filter.label === label
             ) > -1
         );
+    }
+
+    _onMoveFilter(filterId, delta) {
+        const filters = [...this.globalFilters];
+        const currentIndex = filters.findIndex((s) => s.id === filterId);
+        const filter = filters[currentIndex];
+        const targetIndex = currentIndex + delta;
+
+        filters.splice(currentIndex, 1);
+        filters.splice(targetIndex, 0, filter);
+
+        this.history.update("globalFilters", filters);
     }
 }
 

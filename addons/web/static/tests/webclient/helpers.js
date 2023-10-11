@@ -5,7 +5,6 @@ import { notificationService } from "@web/core/notifications/notification_servic
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
-import { legacyServiceProvider } from "@web/legacy/legacy_service_provider";
 import { viewService } from "@web/views/view_service";
 import { actionService } from "@web/webclient/actions/action_service";
 import { effectService } from "@web/core/effects/effect_service";
@@ -20,6 +19,7 @@ import {
     makeFakeLocalizationService,
     makeFakeRouterService,
     makeFakeHTTPService,
+    makeFakeBarcodeService,
     makeFakeUserService,
 } from "../helpers/mock_services";
 import { getFixture, mount, nextTick } from "../helpers/utils";
@@ -58,13 +58,13 @@ export function setupWebClientRegistries() {
     }
     const services = {
         action: () => actionService,
+        barcode: () => makeFakeBarcodeService(),
         command: () => commandService,
         dialog: () => dialogService,
         effect: () => effectService,
         field: () => fieldService,
         hotkey: () => hotkeyService,
         http: () => makeFakeHTTPService(),
-        legacy_service_provider: () => legacyServiceProvider,
         localization: () => makeFakeLocalizationService(),
         menu: () => menuService,
         name: () => nameService,
