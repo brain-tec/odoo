@@ -4,7 +4,6 @@ import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
 import { sprintf } from "@web/core/utils/strings";
 import { PivotModel } from "@web/views/pivot/pivot_model";
-import { computeReportMeasures } from "@web/views/utils";
 
 import * as spreadsheet from "@odoo/o-spreadsheet";
 import { PERIODS } from "@spreadsheet/pivot/pivot_helpers";
@@ -42,7 +41,13 @@ const { DEFAULT_LOCALE } = spreadsheet.constants;
  * @returns {{field: Field, aggregateOperator: string, isPositional: boolean}}
  */
 function parseGroupField(allFields, groupFieldString) {
-    let [fieldName, aggregateOperator] = groupFieldString.split(":");
+    let fieldName = groupFieldString;
+    let aggregateOperator = undefined;
+    const index = groupFieldString.indexOf(":");
+    if (index !== -1) {
+        fieldName = groupFieldString.slice(0, index);
+        aggregateOperator = groupFieldString.slice(index + 1);
+    }
     const isPositional = fieldName.startsWith("#");
     fieldName = isPositional ? fieldName.substring(1) : fieldName;
     const field = allFields[fieldName];
@@ -195,10 +200,6 @@ export class SpreadsheetPivotModel extends PivotModel {
         return field.string + (aggregateOperator ? ` (${PERIODS[aggregateOperator]})` : "");
     }
 
-    getReportMeasures() {
-        return computeReportMeasures(this.metaData.fields, this.metaData.fieldAttrs, []);
-    }
-
     //--------------------------------------------------------------------------
     // Cell missing
     //--------------------------------------------------------------------------
@@ -215,8 +216,7 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Check if the given domain with the given measure has been used
      */
     isUsedValue(domain, measure) {
-        const tag = [measure, ...domain];
-        return this._usedValueDomains.has(tag.join());
+        return this._usedValueDomains.has(measure + "," + domain.join());
     }
 
     /**
@@ -230,8 +230,7 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Indicate that the given domain has been used with the given measure
      */
     markAsValueUsed(domain, measure) {
-        const toTag = [measure, ...domain];
-        this._usedValueDomains.add(toTag.join());
+        this._usedValueDomains.add(measure + "," + domain.join());
     }
 
     /**

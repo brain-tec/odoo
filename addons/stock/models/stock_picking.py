@@ -467,6 +467,8 @@ class Picking(models.Model):
                                'changing the done quantities.')
     # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_ids.product_id', readonly=True)
+    lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', related='move_line_ids.lot_id', readonly=True)
+
     show_operations = fields.Boolean(compute='_compute_show_operations')
     show_reserved = fields.Boolean(related='picking_type_id.show_reserved')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
@@ -1091,7 +1093,7 @@ class Picking(models.Model):
 
         if not self._should_show_transfers():
             if pickings_without_moves:
-                raise UserError(_('Please add some items to move.'))
+                raise UserError(_("You can’t validate an empty transfer. Please add some products to move before proceeding."))
             if pickings_without_quantities:
                 raise UserError(self._get_without_quantities_error_message())
             if pickings_without_lots:
@@ -1588,7 +1590,7 @@ class Picking(models.Model):
             if move.state not in ('draft', 'cancel') and move.product_id.type in ('product', 'consu'):
                 products |= move.product_id
         return {
-            'name': _('Scrap'),
+            'name': _('Scrap Products'),
             'view_mode': 'form',
             'res_model': 'stock.scrap',
             'view_id': view.id,

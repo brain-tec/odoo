@@ -21,6 +21,7 @@ const {
 coreTypes.add("ADD_GLOBAL_FILTER");
 coreTypes.add("EDIT_GLOBAL_FILTER");
 coreTypes.add("REMOVE_GLOBAL_FILTER");
+coreTypes.add("MOVE_GLOBAL_FILTER");
 
 invalidateEvaluationCommands.add("ADD_GLOBAL_FILTER");
 invalidateEvaluationCommands.add("EDIT_GLOBAL_FILTER");
@@ -51,7 +52,7 @@ inverseCommandRegistry
         return [
             {
                 type: "REMOVE_GLOBAL_FILTER",
-                id: cmd.id,
+                id: cmd.filter.id,
             },
         ];
     })
@@ -59,7 +60,6 @@ inverseCommandRegistry
         return [
             {
                 type: "ADD_GLOBAL_FILTER",
-                id: cmd.id,
                 filter: {},
             },
         ];
