@@ -64,7 +64,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/views/fields/translation_dialog.scss',
             'web/static/src/legacy/scss/ui.scss',
             'web/static/src/legacy/scss/modal.scss',
-            'web/static/src/legacy/scss/name_and_signature.scss',
 
             'web/static/src/legacy/js/promise_extension.js',
 
@@ -90,11 +89,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/bootstrap/js/dist/toast.js',
             'web/static/lib/select2/select2.js',
             'web/static/lib/clipboard/clipboard.js',
-            'web/static/lib/jSignature/jSignatureCustom.js',
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',
-            'web/static/src/legacy/js/libs/jSignatureCustom.js',
             'web/static/src/legacy/js/core/bus.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/dialog.js',
@@ -106,8 +103,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/widget.js',
             'web/static/src/legacy/js/services/core.js',
             'web/static/src/legacy/js/common_env.js',
-            'web/static/src/legacy/js/widgets/name_and_signature.js',
-            'web/static/src/legacy/xml/name_and_signature.xml',
 
             'base/static/src/css/modules.css',
 
@@ -191,7 +186,6 @@ This module provides the core of the Odoo Web Client.
 
             'web/static/src/legacy/scss/ui.scss',
             'web/static/src/legacy/scss/modal.scss',
-            'web/static/src/legacy/scss/name_and_signature.scss',
 
             'web/static/src/legacy/scss/lazyloader.scss',
 
@@ -221,11 +215,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/bootstrap/js/dist/toast.js',
             'web/static/lib/select2/select2.js',
             'web/static/lib/clipboard/clipboard.js',
-            'web/static/lib/jSignature/jSignatureCustom.js',
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',
-            'web/static/src/legacy/js/libs/jSignatureCustom.js',
             'web/static/src/legacy/js/core/bus.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/dialog.js',
@@ -237,8 +229,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/widget.js',
             'web/static/src/legacy/js/services/core.js',
             'web/static/src/legacy/js/common_env.js',
-            'web/static/src/legacy/js/widgets/name_and_signature.js',
-            'web/static/src/legacy/xml/name_and_signature.xml',
 
             'web/static/src/env.js',
             'web/static/src/core/utils/transitions.scss',  # included early because used by other files
@@ -461,8 +451,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/stacktracejs/stacktrace.js',
             'web/static/lib/Chart/Chart.js',
             'web/static/lib/chartjs-adapter-luxon/chartjs-adapter-luxon.js',
+            'web/static/lib/jSignature/jSignatureCustom.js',
+            'web/static/src/libs/jSignatureCustom.js',
 
-            # 'web/static/tests/legacy/main_tests.js',
             'web/static/tests/helpers/**/*.js',
             'web/static/tests/views/helpers.js',
             'web/static/tests/search/helpers.js',

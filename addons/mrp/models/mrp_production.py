@@ -1478,10 +1478,10 @@ class MrpProduction(models.Model):
 
     def button_unplan(self):
         if any(wo.state == 'done' for wo in self.workorder_ids):
-            raise UserError(_("Some work orders have already been done, so you cannot unplan this manufacturing order.\n\n"
+            raise UserError(_("Some work orders are already done, so you cannot unplan this manufacturing order.\n\n"
                 "It’d be a shame to waste all that progress, right?"))
         elif any(wo.state == 'progress' for wo in self.workorder_ids):
-            raise UserError(_("Some work orders have already been started, so you cannot unplan this manufacturing order.\n\n"
+            raise UserError(_("Some work orders have already started, so you cannot unplan this manufacturing order.\n\n"
                 "It’d be a shame to waste all that progress, right?"))
 
         self.workorder_ids.leave_id.unlink()
@@ -2314,6 +2314,13 @@ class MrpProduction(models.Model):
                         break
             if operation and workorder.operation_id != operation:
                 workorder.operation_id = operation
+            elif operation and workorder.operation_id == operation:
+                if workorder.workcenter_id != operation.workcenter_id:
+                    workorder.workcenter_id = operation.workcenter_id
+                if workorder.name != operation.name:
+                    workorder.name = operation.name
+            elif workorder.operation_id and workorder.operation_id not in operations_by_id:
+                workorders_to_unlink |= workorder
         # Creates a workorder for each remaining operation.
         workorders_values = []
         for operation in operations_by_id.values():
@@ -2403,6 +2410,7 @@ class MrpProduction(models.Model):
 
         moves_to_unlink._action_cancel()
         moves_to_unlink.unlink()
+        workorders_to_unlink.unlink()
         self.bom_id = bom
 
     @api.model
