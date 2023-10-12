@@ -372,8 +372,7 @@
                         </group>
                     </group>
                     <div class="d-flex">
-                        <field name="task_properties" nolabel="1" columns="2"
-                            hideKanbanOption="1" hideAddButton="1"/>
+                        <field name="task_properties" nolabel="1" columns="2" hideKanbanOption="1"/>
                     </div>
                     <notebook>
                         <page name="description_page" string="Description">
@@ -749,7 +748,7 @@
             <field name="arch" type="xml">
                 <calendar date_start="date_deadline" string="Tasks" mode="month"
                           color="stage_id" event_limit="5" hide_time="true"
-                          event_open_popup="true" quick_add="false" show_unusual_days="True"
+                          event_open_popup="true" quick_create="0" show_unusual_days="True"
                           js_class="project_task_calendar"
                           scales="month,year">
                     <field name="allow_milestones" invisible="1" />
