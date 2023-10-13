@@ -41,7 +41,6 @@ import {
     markup,
     status,
 } from "@odoo/owl";
-import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { isCSSColor } from '@web/core/utils/colors';
 import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
 
@@ -273,6 +272,7 @@ export class Wysiwyg extends Component {
         onHistoryResetFromSteps: () => {},
         autostart: true,
         dropImageAsAttachment: true,
+        editorPlugins: [],
     }
     init() {
         this.id = ++id;
@@ -356,6 +356,7 @@ export class Wysiwyg extends Component {
 
         let editorCollaborationOptions;
         if (this._isCollaborationEnabled(options)) {
+            this._currentClientId = this._generateClientId();
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
             if (this.options.collaborativeTrigger === 'start') {
                 this._joinPeerToPeer();
@@ -692,7 +693,6 @@ export class Wysiwyg extends Component {
             this.busService.deleteChannel(this._collaborationChannelName);
         }
 
-        this._currentClientId = this._generateClientId();
         this._startCollaborationTime = new Date().getTime();
 
         this._checkConnectionChange = () => {
@@ -1048,10 +1048,7 @@ export class Wysiwyg extends Component {
      */
     savePendingImages($editable = this.$editable) {
         const defs = Array.from($editable).map(async (editableEl) => {
-            let { oeModel: resModel, oeId: resId } = editableEl.dataset;
-            if (!resModel) {
-                ({ res_model: resModel, res_id: resId } = this.options.recordInfo);
-            }
+            const { resModel, resId } = this._getRecordInfo(editableEl);
             // When saving a webp, o_b64_image_to_save is turned into
             // o_modified_image_to_save by _saveB64Image to request the saving
             // of the pre-converted webp resizes and all the equivalent jpgs.
@@ -1512,16 +1509,13 @@ export class Wysiwyg extends Component {
         // selection when the modal is closed.
         const restoreSelection = preserveCursor(this.odooEditor.document);
 
-        const $editable = $(OdooEditorLib.closestElement(params.node || range.startContainer, '.o_editable') || this.odooEditor.editable);
-        const model = $editable.data('oe-model');
-        const field = $editable.data('oe-field');
-        const type = $editable.data('oe-type');
+        const editable = OdooEditorLib.closestElement(params.node || range.startContainer, '.o_editable') || this.odooEditor.editable;
+        const { resModel, resId, field, type } = this._getRecordInfo(editable);
 
         this.env.services.dialog.add(MediaDialog, {
-            resModel: model,
-            resId: $editable.data('oe-id'),
-            domain: $editable.data('oe-media-domain'),
-            useMediaLibrary: !!(field && (model === 'ir.ui.view' && field === 'arch' || type === 'html')),
+            resModel,
+            resId,
+            useMediaLibrary: !!(field && (resModel === 'ir.ui.view' && field === 'arch' || type === 'html')),
             media: params.node,
             save: this._onMediaDialogSave.bind(this, {
                 node: params.node,
@@ -1644,6 +1638,10 @@ export class Wysiwyg extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    _getRecordInfo() {
+        const { res_model: resModel, res_id: resId } = this.options.recordInfo;
+        return { resModel, resId };
+    }
     /**
      * Returns an instance of the snippets menu.
      *
@@ -1651,7 +1649,7 @@ export class Wysiwyg extends Component {
      * @returns {widget}
      */
     async _createSnippetsMenuInstance(options={}) {
-        const snippetsEditor = await requireWysiwygLegacyModule('@web_editor/js/editor/snippets.editor');
+        const snippetsEditor = await odoo.loader.modules.get('@web_editor/js/editor/snippets.editor')[Symbol.for('default')];
         const { SnippetsMenu } = snippetsEditor;
         return new SnippetsMenu(this, Object.assign({
             wysiwyg: this,
@@ -3165,12 +3163,14 @@ export class Wysiwyg extends Component {
         this._rulesCache = undefined; // Reset the cache of rules.
         // If there is no collaborationResId, the record has been deleted.
         if (!this._isCollaborationEnabled(this.options)) {
+            this._currentClientId = undefined;
             this.resetValue(value);
             return;
         }
+        this._currentClientId = this._generateClientId();
+        this.odooEditor.collaborationSetClientId(this._currentClientId);
         this.resetValue(value);
         this.setupCollaboration(collaborationChannel);
-        this.odooEditor.collaborationSetClientId(this._currentClientId);
         if (this.options.collaborativeTrigger === 'start') {
             this._joinPeerToPeer();
         } else if (this.options.collaborativeTrigger === 'focus') {

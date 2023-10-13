@@ -6,7 +6,6 @@ import legacyEnv from '@web/legacy/js/common_env';
 import { useService, useBus } from "@web/core/utils/hooks";
 import { useHotkey } from '@web/core/hotkeys/hotkey_hook';
 import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
-import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import weUtils from '@web_editor/js/common/utils';
 import { isMediaElement } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 
@@ -14,6 +13,7 @@ import { EditMenuDialog, MenuDialog } from "../dialog/edit_menu";
 import { WebsiteDialog } from '../dialog/dialog';
 import { PageOption } from "./page_options";
 import { onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
+import { EditHeadBodyDialog } from "../edit_head_body_dialog/edit_head_body_dialog";
 
 /**
  * Show/hide the dropdowns associated to the given toggles and allows to wait
@@ -323,13 +323,12 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         // destroy, options will have wrong social media values).
         // It would also survive (multi) website switch, not fetching the values
         // from the accessed website.
-        const mod = await requireWysiwygLegacyModule('@website/snippets/s_social_media/options');
+        const mod = await odoo.loader.modules.get('@website/snippets/s_social_media/options')[Symbol.for('default')];
         mod.clearDbSocialValuesCache();
 
-        const formOptionsMod = await requireWysiwygLegacyModule('@website/snippets/s_website_form/options');
+        const formOptionsMod = await odoo.loader.modules.get('@website/snippets/s_website_form/options')[Symbol.for('default')];
         formOptionsMod.clearAllFormsInfo();
 
-        this._restoreMegaMenus();
         return super.destroy(...arguments);
     }
 
@@ -778,6 +777,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             'menu_dialog': this._onMenuDialogRequest.bind(this),
             'request_mobile_preview': this._onMobilePreviewRequest.bind(this),
             'get_switchable_related_views': this._onGetSwitchableRelatedViews.bind(this),
+            'open_edit_head_body_dialog': this._onOpenEditHeadBodyDialog.bind(this),
         };
 
 
@@ -851,7 +851,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      * @override
      */
     async _createSnippetsMenuInstance(options = {}) {
-        const snippetsEditor = await requireWysiwygLegacyModule('@website/js/editor/snippets.editor');
+        const snippetsEditor = await odoo.loader.modules.get('@website/js/editor/snippets.editor')[Symbol.for('default')];
         const { SnippetsMenu } = snippetsEditor;
         return new SnippetsMenu(this, Object.assign({
             wysiwyg: this,
@@ -924,6 +924,18 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         }
         megaMenuEl.classList.add('o_no_parent_editor');
         return this.snippetsMenu.activateSnippet($(megaMenuEl));
+    }
+    /**
+     * @override
+     */
+    _getRecordInfo(editable) {
+        const $editable = $(editable);
+        return {
+            resModel: $editable.data('oe-model'),
+            resId: $editable.data('oe-id'),
+            field: $editable.data('oe-field'),
+            type: $editable.data('oe-type'),
+        };
     }
 
     //--------------------------------------------------------------------------
@@ -998,6 +1010,15 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      */
     _onContextGet(event) {
         return event.data.callback(this._context);
+    }
+    /**
+     * @param {OdooEvent}
+     * @private
+     */
+    _onOpenEditHeadBodyDialog(ev) {
+        this.dialogs.add(EditHeadBodyDialog, {}, {
+            onClose: ev.data.onSuccess,
+        });
     }
     /**
      * Retrieves the website service context.
