@@ -359,6 +359,7 @@ export class Wysiwyg extends Component {
             options.collaborationChannel &&
             this._hasICEServers()
         ) {
+            this._currentClientId = this._generateClientId();
             editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
             if (this.options.collaborativeTrigger === 'start') {
                 this._joinPeerToPeer();
@@ -695,7 +696,6 @@ export class Wysiwyg extends Component {
             this.busService.deleteChannel(this._collaborationChannelName);
         }
 
-        this._currentClientId = this._generateClientId();
         this._startCollaborationTime = new Date().getTime();
 
         this._checkConnectionChange = () => {
@@ -1051,10 +1051,7 @@ export class Wysiwyg extends Component {
      */
     savePendingImages($editable = this.$editable) {
         const defs = Array.from($editable).map(async (editableEl) => {
-            let { oeModel: resModel, oeId: resId } = editableEl.dataset;
-            if (!resModel) {
-                ({ res_model: resModel, res_id: resId } = this.options.recordInfo);
-            }
+            const { resModel, resId } = this._getRecordInfo(editableEl);
             // When saving a webp, o_b64_image_to_save is turned into
             // o_modified_image_to_save by _saveB64Image to request the saving
             // of the pre-converted webp resizes and all the equivalent jpgs.
@@ -1513,16 +1510,13 @@ export class Wysiwyg extends Component {
         // selection when the modal is closed.
         const restoreSelection = preserveCursor(this.odooEditor.document);
 
-        const $editable = $(OdooEditorLib.closestElement(params.node || range.startContainer, '.o_editable') || this.odooEditor.editable);
-        const model = $editable.data('oe-model');
-        const field = $editable.data('oe-field');
-        const type = $editable.data('oe-type');
+        const editable = OdooEditorLib.closestElement(params.node || range.startContainer, '.o_editable') || this.odooEditor.editable;
+        const { resModel, resId, field, type } = this._getRecordInfo(editable);
 
         this.env.services.dialog.add(MediaDialog, {
-            resModel: model,
-            resId: $editable.data('oe-id'),
-            domain: $editable.data('oe-media-domain'),
-            useMediaLibrary: !!(field && (model === 'ir.ui.view' && field === 'arch' || type === 'html')),
+            resModel,
+            resId,
+            useMediaLibrary: !!(field && (resModel === 'ir.ui.view' && field === 'arch' || type === 'html')),
             media: params.node,
             save: this._onMediaDialogSave.bind(this, {
                 node: params.node,
@@ -1645,6 +1639,10 @@ export class Wysiwyg extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    _getRecordInfo() {
+        const { res_model: resModel, res_id: resId } = this.options.recordInfo;
+        return { resModel, resId };
+    }
     /**
      * Returns an instance of the snippets menu.
      *
@@ -2688,19 +2686,11 @@ export class Wysiwyg extends Component {
         this._isOnline = true;
         if (!this.ptp) return;
 
-        // Ask for potential missing steps from all peers.
-        return Promise.all(this._getPtpClients().map(client => {
-            return this.requestClient(
-                client.id,
-                'get_missing_steps', {
-                    fromStepId: peek(this.odooEditor.historyGetBranchIds()).id,
-                },
-                { transport: 'rtc' }
-            ).then(missingSteps => {
-                if (missingSteps === REQUEST_ERROR) return;
-                this._processMissingSteps(missingSteps);
-            });
-        }));
+        // If it was disconnected to some peers, send the join signal again.
+        this.ptp.notifyAllClients('ptp_join');
+        // Send last step to all peers. If the peers cannot add the step, they
+        // will ask for missing steps.
+        this.ptp.notifyAllClients('oe_history_step', peek(this.odooEditor.historyGetSteps()), { transport: 'rtc' });
     }
     /**
      * Process missing steps received from a peer.
@@ -2823,9 +2813,10 @@ export class Wysiwyg extends Component {
                             }
                             this._historySyncFinished = true;
                         } else {
-                            const currentStep = this.odooEditor._historySteps[this.odooEditor._historySteps.length - 1];
+                            // Make both send their last step to each other to
+                            // ensure they are in sync.
+                            this.ptp.notifyAllClients('oe_history_step', peek(this.odooEditor.historyGetSteps()), { transport: 'rtc' });
                             this._setCollaborativeSelection(fromClientId);
-                            this.ptp.notifyClient(fromClientId, 'oe_history_step', currentStep, { transport: 'rtc' });
                         }
 
                         this.requestClient(fromClientId, 'get_client_name', undefined, { transport: 'rtc' }).then((clientName) => {
@@ -3166,12 +3157,14 @@ export class Wysiwyg extends Component {
         this._rulesCache = undefined; // Reset the cache of rules.
         // If there is no collaborationResId, the record has been deleted.
         if (!collaborationChannel || !collaborationChannel.collaborationResId) {
+            this._currentClientId = undefined;
             this.resetValue(value);
             return;
         }
+        this._currentClientId = this._generateClientId();
+        this.odooEditor.collaborationSetClientId(this._currentClientId);
         this.resetValue(value);
         this.setupCollaboration(collaborationChannel);
-        this.odooEditor.collaborationSetClientId(this._currentClientId);
         if (this.options.collaborativeTrigger === 'start') {
             this._joinPeerToPeer();
         } else if (this.options.collaborativeTrigger === 'focus') {

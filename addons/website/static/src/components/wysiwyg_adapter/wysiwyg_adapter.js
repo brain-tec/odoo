@@ -329,7 +329,6 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         const formOptionsMod = await requireWysiwygLegacyModule('@website/snippets/s_website_form/options');
         formOptionsMod[Symbol.for('default')].clearAllFormsInfo();
 
-        this._restoreMegaMenus();
         return super.destroy(...arguments);
     }
 
@@ -937,6 +936,18 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         }
         megaMenuEl.classList.add('o_no_parent_editor');
         return this.snippetsMenu.activateSnippet($(megaMenuEl));
+    }
+    /**
+     * @override
+     */
+    _getRecordInfo(editable) {
+        const $editable = $(editable);
+        return {
+            resModel: $editable.data('oe-model'),
+            resId: $editable.data('oe-id'),
+            field: $editable.data('oe-field'),
+            type: $editable.data('oe-type'),
+        };
     }
 
     //--------------------------------------------------------------------------
