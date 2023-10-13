@@ -135,7 +135,7 @@ class PosConfig(models.Model):
                 pos_config_id.self_ordering_image_home_ids = [(4, attachment.id)]
 
             self.env['pos_self_order.custom_link'].create({
-                'name': 'Order Now',
+                'name': _('Order Now'),
                 'url': f'/pos-self/{pos_config_id.id}/products',
                 'pos_config_ids': [(4, pos_config_id.id)],
             })
@@ -147,7 +147,7 @@ class PosConfig(models.Model):
 
     def write(self, vals):
         for record in self:
-            if vals.get('self_ordering_mode') == 'kiosk' or record.self_ordering_mode == 'kiosk':
+            if vals.get('self_ordering_mode') == 'kiosk' or (vals.get('pos_self_ordering_mode') == 'mobile' and vals.get('pos_self_ordering_service_mode') == 'counter'):
                 vals['self_ordering_pay_after'] = 'each'
 
             if (not vals.get('module_pos_restaurant') and not record.module_pos_restaurant) and vals.get('self_ordering_mode') == 'mobile':
@@ -170,6 +170,11 @@ class PosConfig(models.Model):
 
                 vals['self_ordering_image_home_ids'] = unlink_commands + vals['self_ordering_image_home_ids']
 
+            if vals.get('self_ordering_mode') == 'mobile' and vals.get('self_ordering_pay_after') == 'meal':
+                vals['self_ordering_service_mode'] = 'table'
+
+            if (vals.get('self_ordering_service_mode') == 'counter' or record.self_ordering_service_mode == 'counter') and vals.get('self_ordering_mode') == 'mobile':
+                vals['self_ordering_pay_after'] = 'each'
         return super().write(vals)
 
     @api.depends("module_pos_restaurant")
@@ -215,7 +220,7 @@ class PosConfig(models.Model):
             # Here we use "range" to determine the number of QR codes to generate from
             # this list, which will then be inserted into a PDF.
             table_qr_code.extend([{
-                'name': 'Generic',
+                'name': _('Generic'),
                 'type': 'default',
                 'tables': [{
                     'id': i,
