@@ -1,14 +1,11 @@
 /** @odoo-module **/
 
-import { browser } from "../core/browser/browser";
-import { useService } from "@web/core/utils/hooks";
 import {
     App,
     Component,
     onMounted,
     onWillStart,
     onWillUnmount,
-    useComponent,
     useEnv,
     useRef,
     useState,
@@ -16,20 +13,6 @@ import {
 } from "@odoo/owl";
 import { templates } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
-
-export const wowlServicesSymbol = Symbol("wowlServices");
-
-/**
- * Deploys a service allowing legacy to add/remove commands.
- *
- * @param {object} legacyEnv
- * @returns a wowl deployable service
- */
-export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
-    // store wowl services on the legacy env (used by the 'useWowlService' hook)
-    legacyEnv[wowlServicesSymbol] = wowlEnv.services;
-    Object.setPrototypeOf(legacyEnv.services, wowlEnv.services);
-}
 
 const reBSTooltip = /^bs-.*$/;
 
@@ -43,86 +26,6 @@ export function cleanDomFromBootstrap() {
             tt.parentNode.removeChild(tt);
         }
     }
-}
-
-export function makeLegacyNotificationService(legacyEnv) {
-    return {
-        dependencies: ["notification"],
-        start(env, { notification }) {
-            let notifId = 0;
-            const idsToRemoveFn = {};
-
-            function notify({
-                title,
-                message,
-                subtitle,
-                buttons = [],
-                sticky,
-                type,
-                className,
-                onClose,
-            }) {
-                if (subtitle) {
-                    title = [title, subtitle].filter(Boolean).join(" ");
-                }
-                if (!message && title) {
-                    message = title;
-                    title = undefined;
-                }
-
-                buttons = buttons.map((button) => {
-                    return {
-                        name: button.text,
-                        icon: button.icon,
-                        primary: button.primary,
-                        onClick: button.click,
-                    };
-                });
-
-                const removeFn = notification.add(message, {
-                    sticky,
-                    title,
-                    type,
-                    className,
-                    onClose,
-                    buttons,
-                });
-                const id = ++notifId;
-                idsToRemoveFn[id] = removeFn;
-                return id;
-            }
-
-            function close(id, _, wait) {
-                //the legacy close method had 3 arguments : the notification id, silent and wait.
-                //the new close method only has 2 arguments : the notification id and wait.
-                const removeFn = idsToRemoveFn[id];
-                delete idsToRemoveFn[id];
-                if (wait) {
-                    browser.setTimeout(() => {
-                        removeFn(id);
-                    }, wait);
-                } else {
-                    removeFn(id);
-                }
-            }
-
-            legacyEnv.services.notification = { notify, close, add: notification.add };
-        },
-    };
-}
-
-/**
- * This hook allows legacy owl Components to use services coming from the wowl env.
- * @param {string} serviceName
- * @returns {any}
- */
-export function useWowlService(serviceName) {
-    const component = useComponent();
-    const env = component.env;
-    component.env = { services: env[wowlServicesSymbol] };
-    const service = useService(serviceName);
-    component.env = env;
-    return service;
 }
 
 export function createWidgetParent(env) {

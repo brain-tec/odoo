@@ -3,7 +3,6 @@
 import {
     click,
     editInput,
-    editSelect,
     getFixture,
     getNodesTextContent,
     patchDate,
@@ -31,6 +30,7 @@ import { registry } from "@web/core/registry";
 import { Component, onWillUpdateProps, xml } from "@odoo/owl";
 import { createWebClient, doAction } from "../webclient/helpers";
 import { openModelFieldSelectorPopover } from "@web/../tests/core/model_field_selector_tests";
+import * as dsHelpers from "@web/../tests/core/domain_selector_tests";
 
 function getDomain(searchable) {
     return searchable.env.searchModel.domain;
@@ -476,6 +476,55 @@ QUnit.module("Search", (hooks) => {
                 assert.deepEqual(getFacetTexts(target), ["My favorite"]);
             }
         );
+
+        QUnit.test("edit a favorite with a groupby", async function (assert) {
+            const irFilters = [
+                {
+                    context: "{ 'some_key': 'some_value', 'group_by': ['bar'] }",
+                    domain: "[('foo', 'ilike', 'abc')]",
+                    id: 1,
+                    is_default: true,
+                    name: "My favorite",
+                    sort: "[]",
+                    user_id: [2, "Mitchell Admin"],
+                },
+            ];
+            await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: SearchBar,
+                searchMenuTypes: ["groupBy"], // we need it to have facet (see facets getter in search_model)
+                searchViewId: false,
+                searchViewArch: `<search/>`,
+                irFilters,
+                mockRPC(route) {
+                    if (route === "/web/domain/validate") {
+                        return true;
+                    }
+                },
+            });
+            assert.deepEqual(getFacetTexts(target), ["My favorite"]);
+
+            await toggleSearchBarMenu(target);
+            assert.containsNone(
+                target,
+                ".o_group_by_menu .o_menu_item:not(.o_add_custom_group_menu)"
+            );
+
+            await click(target, ".o_searchview_facet_label");
+            assert.containsOnce(target, ".modal");
+
+            await dsHelpers.editValue(target, "abcde");
+            await click(target.querySelector(".modal footer button"));
+            assert.containsNone(target, ".modal");
+            assert.deepEqual(getFacetTexts(target), ["Bar", "Foo contains abcde"]);
+
+            await toggleSearchBarMenu(target);
+            assert.containsNone(
+                target,
+                ".o_group_by_menu .o_menu_item:not(.o_add_custom_group_menu)"
+            );
+        });
 
         QUnit.module("Group by");
         QUnit.test(
@@ -1536,7 +1585,7 @@ QUnit.module("Search", (hooks) => {
                 "Add Custom Filter"
             );
             assert.containsOnce(target, ".modal .o_domain_selector");
-            assert.containsOnce(target, ".modal .o_domain_selector .o_domain_leaf");
+            assert.containsOnce(target, ".modal .o_domain_selector .o_domain_selector_condition");
             assert.deepEqual(getNodesTextContent(target.querySelectorAll(".modal footer button")), [
                 "Add",
                 "Cancel",
@@ -1554,13 +1603,15 @@ QUnit.module("Search", (hooks) => {
                 });
                 await toggleSearchBarMenu(target);
                 await openAddCustomFilterDialog(target);
-                assert.containsOnce(target, ".modal .o_domain_selector .o_domain_leaf");
-                assert.containsOnce(target, ".o_domain_leaf .o_model_field_selector_chain_part");
-                assert.strictEqual(
-                    target.querySelector(".o_domain_leaf .o_model_field_selector_chain_part")
-                        .innerText,
-                    "ID"
+                assert.containsOnce(
+                    target,
+                    ".modal .o_domain_selector .o_domain_selector_condition"
                 );
+                assert.containsOnce(
+                    target,
+                    ".o_domain_selector_condition .o_model_field_selector_chain_part"
+                );
+                assert.strictEqual(dsHelpers.getCurrentPath(target), "ID");
             }
         );
 
@@ -1580,13 +1631,15 @@ QUnit.module("Search", (hooks) => {
                 });
                 await toggleSearchBarMenu(target);
                 await openAddCustomFilterDialog(target);
-                assert.containsOnce(target, ".modal .o_domain_selector .o_domain_leaf");
-                assert.containsOnce(target, ".o_domain_leaf .o_model_field_selector_chain_part");
-                assert.strictEqual(
-                    target.querySelector(".o_domain_leaf .o_model_field_selector_chain_part")
-                        .innerText,
-                    "Country"
+                assert.containsOnce(
+                    target,
+                    ".modal .o_domain_selector .o_domain_selector_condition"
                 );
+                assert.containsOnce(
+                    target,
+                    ".o_domain_selector_condition .o_model_field_selector_chain_part"
+                );
+                assert.strictEqual(dsHelpers.getCurrentPath(target), "Country");
             }
         );
 
@@ -1599,21 +1652,21 @@ QUnit.module("Search", (hooks) => {
             });
             await toggleSearchBarMenu(target);
             await openAddCustomFilterDialog(target);
-            assert.containsOnce(target, ".modal .o_domain_selector .o_domain_leaf");
-            assert.containsOnce(target, ".o_domain_leaf .o_model_field_selector_chain_part");
-            assert.strictEqual(
-                target.querySelector(".o_domain_leaf .o_model_field_selector_chain_part").innerText,
-                "ID"
+            assert.containsOnce(target, ".modal .o_domain_selector .o_domain_selector_condition");
+            assert.containsOnce(
+                target,
+                ".o_domain_selector_condition .o_model_field_selector_chain_part"
             );
-            assert.containsOnce(target, "button.o_domain_tree_connector_caret");
+            assert.strictEqual(dsHelpers.getCurrentPath(target), "ID");
+            assert.containsOnce(target, ".o_domain_selector .o_domain_selector_connector");
 
-            await click(target, ".o_domain_add_node_button .fa-plus");
-            assert.containsOnce(target, "button.o_domain_tree_connector_caret");
+            await dsHelpers.clickOnButtonAddNewRule(target);
+            assert.containsOnce(target, ".o_domain_selector .dropdown-toggle");
             assert.strictEqual(
-                target.querySelector("button.o_domain_tree_connector_caret").innerText,
+                target.querySelector(".o_domain_selector .dropdown-toggle").innerText,
                 "any"
             );
-            assert.containsN(target, ".modal .o_domain_selector .o_domain_leaf", 2);
+            assert.containsN(target, ".modal .o_domain_selector .o_domain_selector_condition", 2);
         });
 
         QUnit.test("Add a custom filter", async function (assert) {
@@ -1641,23 +1694,16 @@ QUnit.module("Search", (hooks) => {
             assert.deepEqual(getDomain(controlPanel), [["foo", "=", "abc"]]);
 
             await toggleSearchBarMenu(target);
+            assert.containsOnce(target, ".o_filter_menu .o_menu_item:not(.o_add_custom_filter)");
+
             await openAddCustomFilterDialog(target);
-            await click(target, ".o_domain_add_node_button .fa-plus");
+            await dsHelpers.clickOnButtonAddNewRule(target);
 
-            const connectorEl = target.querySelector(".o_domain_tree_connector_selector");
-            await click(connectorEl.querySelector("button.o_domain_tree_connector_caret"));
-            await click(
-                [
-                    ...target.querySelectorAll(".o_domain_tree_connector_selector .dropdown-item"),
-                ].find((el) => el.innerText === "all")
-            );
+            await click(target.querySelector(".o_domain_selector .dropdown .dropdown-toggle"));
+            await click(target.querySelector(".o_domain_selector .dropdown .dropdown-item"));
 
-            await click(
-                [...target.querySelectorAll(".o_domain_add_node_button .fa-sitemap")].at(-1)
-            );
-            await click(
-                [...target.querySelectorAll(".o_domain_add_node_button .fa-sitemap")].at(-1)
-            );
+            await dsHelpers.clickOnButtonAddBranch(target, -1);
+            await dsHelpers.clickOnButtonAddBranch(target, -1);
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), [
@@ -1681,6 +1727,10 @@ QUnit.module("Search", (hooks) => {
                 ["id", "=", 1],
                 ["id", "=", 1],
             ]);
+
+            // open again the search menu -> the custom filter should not be displayed
+            await toggleSearchBarMenu(target);
+            assert.containsOnce(target, ".o_filter_menu .o_menu_item:not(.o_add_custom_filter)");
         });
 
         QUnit.test("Add a custom filter containing an expression", async function (assert) {
@@ -1704,7 +1754,11 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
             await openAddCustomFilterDialog(target);
-            await editInput(target, ".o_domain_debug_input", `[("foo", "in", [uid, 1, "a"])]`);
+            await editInput(
+                target,
+                dsHelpers.SELECTORS.debugArea,
+                `[("foo", "in", [uid, 1, "a"])]`
+            );
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), [`Foo is in ( uid , 1 , "a" )`]);
@@ -1734,7 +1788,7 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
             await openAddCustomFilterDialog(target);
-            await editInput(target, ".o_domain_debug_input", `[("id", "between", [0, 10])]`);
+            await editInput(target, dsHelpers.SELECTORS.debugArea, `[("id", "between", [0, 10])]`);
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), [`ID is between 0 and 10`]);
@@ -1761,11 +1815,11 @@ QUnit.module("Search", (hooks) => {
             await openAddCustomFilterDialog(target);
             await editInput(
                 target,
-                ".o_domain_debug_input",
+                dsHelpers.SELECTORS.debugArea,
                 `["!", "|", ("foo", "=", 1 ), ("id", "=", 2)]`
             );
             assert.strictEqual(
-                target.querySelector(".o_domain_tree_connector_caret").textContent,
+                target.querySelector(".o_domain_selector_row .dropdown-toggle").textContent,
                 "none"
             );
 
@@ -1797,14 +1851,14 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
             await openAddCustomFilterDialog(target);
-            await editSelect(target, ".o_domain_leaf_operator_select", "not_set");
+            await dsHelpers.selectOperator(target, "not_set");
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), ["ID is not set"]);
             assert.deepEqual(getDomain(controlPanel), [["id", "=", false]]);
 
             await click(target, ".o_searchview_facet_label");
-            await editSelect(target, ".o_domain_leaf_operator_select", "set");
+            await dsHelpers.selectOperator(target, "set");
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), ["ID is set"]);
@@ -1819,21 +1873,21 @@ QUnit.module("Search", (hooks) => {
             assert.deepEqual(getDomain(controlPanel), [["boolean", "=", true]]);
 
             await click(target, ".o_searchview_facet_label");
-            await editSelect(target, ".o_domain_leaf_value_input", false);
+            await dsHelpers.selectValue(target, false);
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), ["Boolean is not set"]);
             assert.deepEqual(getDomain(controlPanel), [["boolean", "=", false]]);
 
             await click(target, ".o_searchview_facet_label");
-            await editSelect(target, ".o_domain_leaf_operator_select", "is_not");
+            await dsHelpers.selectOperator(target, "is_not");
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), ["Boolean is not not set"]);
             assert.deepEqual(getDomain(controlPanel), [["boolean", "!=", false]]);
 
             await click(target, ".o_searchview_facet_label");
-            await editSelect(target, ".o_domain_leaf_value_input", true);
+            await dsHelpers.selectValue(target, true);
             await click(target.querySelector(".modal footer button"));
 
             assert.deepEqual(getFacetTexts(target), ["Boolean is not set"]);
@@ -1871,7 +1925,7 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
             await openAddCustomFilterDialog(target);
-            await editInput(target, ".o_domain_debug_input", "[(uid, uid, uid)]");
+            await editInput(target, dsHelpers.SELECTORS.debugArea, "[(uid, uid, uid)]");
             await click(target.querySelector(".modal footer button"));
             assert.containsOnce(target, ".modal .o_domain_selector");
         });
@@ -1903,7 +1957,7 @@ QUnit.module("Search", (hooks) => {
             await openAddCustomFilterDialog(target);
             await editInput(
                 target,
-                ".o_domain_debug_input",
+                dsHelpers.SELECTORS.debugArea,
                 `[("bar", "=", 1 ), ("bar", "in", [2, 5555]), ("bar", "!=", false), ("id", "=", 2)]`
             );
             await click(target.querySelector(".modal footer button"));
@@ -1923,6 +1977,55 @@ QUnit.module("Search", (hooks) => {
                 ["bar", "!=", false],
                 ["id", "=", 2],
             ]);
+        });
+
+        QUnit.test("display names in facets (with a property)", async function (assert) {
+            patchWithCleanup(odoo, { debug: true });
+            serverData.models.partner = {
+                fields: {},
+                records: [{ id: 1, display_name: "John" }],
+            };
+
+            async function mockRPC(route, { method, model }) {
+                if (route === "/web/domain/validate") {
+                    return true;
+                }
+                if (method === "web_search_read" && model === "parentModel") {
+                    return {
+                        records: [
+                            {
+                                id: 1337,
+                                display_name: "First Parent",
+                                properties_definition: [
+                                    {
+                                        name: "m2o",
+                                        type: "many2one",
+                                        string: "M2O",
+                                        comodel: "partner",
+                                    },
+                                ],
+                            },
+                        ],
+                    };
+                }
+            }
+
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: SearchBar,
+                searchMenuTypes: ["filter"],
+                searchViewId: false,
+                searchViewArch: `<search />`,
+                mockRPC,
+            });
+            await toggleSearchBarMenu(target);
+            await openAddCustomFilterDialog(target);
+            await editInput(target, dsHelpers.SELECTORS.debugArea, `[("properties.m2o", "=", 1)]`);
+            await click(target.querySelector(".modal footer button"));
+
+            assert.deepEqual(getFacetTexts(target), ["Properties 🠒 M2O = John"]);
+            assert.deepEqual(getDomain(controlPanel), [["properties.m2o", "=", 1]]);
         });
 
         QUnit.test("group by properties", async function (assert) {

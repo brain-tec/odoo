@@ -5,6 +5,7 @@ import { TagsList } from "@web/core/tags_list/tags_list";
 import { useService } from "@web/core/utils/hooks";
 import { RecordAutocomplete } from "./record_autocomplete";
 import { _t } from "@web/core/l10n/translation";
+import { useTagNavigation } from "./tag_navigation_hook";
 
 export class MultiRecordSelector extends Component {
     static props = {
@@ -14,12 +15,14 @@ export class MultiRecordSelector extends Component {
         domain: { type: Array, optional: true },
         context: { type: Object, optional: true },
         fieldString: { type: String, optional: true },
+        placeholder: { type: String, optional: true },
     };
     static components = { RecordAutocomplete, TagsList };
     static template = "web.MultiRecordSelector";
 
     setup() {
         this.nameService = useService("name");
+        this.onTagKeydown = useTagNavigation("multiRecordSelector", this.deleteTag.bind(this));
         onWillStart(() => this.computeDerivedParams());
         onWillUpdateProps((nextProps) => this.computeDerivedParams(nextProps));
     }
@@ -32,6 +35,15 @@ export class MultiRecordSelector extends Component {
     async getDisplayNames(props) {
         const ids = this.getIds(props);
         return this.nameService.loadDisplayNames(props.resModel, ids);
+    }
+
+    /**
+     * Placeholder should be empty if there is at least one tag. We cannot use
+     * the default behavior of the input placeholder because even if there is
+     * a tag, the input is still empty.
+     */
+    get placeholder() {
+        return this.getIds().length ? "" : this.props.placeholder;
     }
 
     getIds(props = this.props) {
@@ -47,13 +59,18 @@ export class MultiRecordSelector extends Component {
             return {
                 text,
                 onDelete: () => {
-                    this.props.update([
-                        ...this.props.resIds.slice(0, index),
-                        ...this.props.resIds.slice(index + 1),
-                    ]);
+                    this.deleteTag(index);
                 },
+                onKeydown: this.onTagKeydown,
             };
         });
+    }
+
+    deleteTag(index) {
+        this.props.update([
+            ...this.props.resIds.slice(0, index),
+            ...this.props.resIds.slice(index + 1),
+        ]);
     }
 
     update(resIds) {
