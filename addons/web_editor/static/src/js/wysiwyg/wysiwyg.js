@@ -141,11 +141,11 @@ export class Wysiwyg extends Component {
     });
 
     setup() {
-        this.orm = this._useService('orm');
-        this.rpc = this._useService('rpc');
-        this.getColorPickerTemplateService = this._useService('get_color_picker_template');
-        this.notification = this._useService("notification");
-        this.popover = this._useService("popover");
+        this.orm = useService('orm');
+        this.rpc = useService('rpc');
+        this.getColorPickerTemplateService = useService('get_color_picker_template');
+        this.notification = useService("notification");
+        this.popover = useService("popover");
         this.busService = this.env.services.bus_service;
 
         const getColorPickedHandler = (colorType) => {
@@ -1496,6 +1496,7 @@ export class Wysiwyg extends Component {
      * @param {object} params
      * @param {Node} [params.node] Optionnal
      * @param {Node} [params.htmlClass] Optionnal
+     * @param {Class} [params.MediaDialog] Optional
      */
     openMediaDialog(params = {}) {
         const sel = this.odooEditor.document.getSelection();
@@ -1512,7 +1513,7 @@ export class Wysiwyg extends Component {
         const editable = OdooEditorLib.closestElement(params.node || range.startContainer, '.o_editable') || this.odooEditor.editable;
         const { resModel, resId, field, type } = this._getRecordInfo(editable);
 
-        this.env.services.dialog.add(MediaDialog, {
+        this.env.services.dialog.add(params.MediaDialog || MediaDialog, {
             resModel,
             resId,
             useMediaLibrary: !!(field && (resModel === 'ir.ui.view' && field === 'arch' || type === 'html')),
@@ -3376,9 +3377,6 @@ export class Wysiwyg extends Component {
     }
     _rpc({ route,  params }) {
         return this._serviceRpc(route, params)
-    }
-    _useService(serviceName) {
-        return useService(serviceName);
     }
 }
 Wysiwyg.activeCollaborationChannelNames = new Set();

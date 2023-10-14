@@ -39,6 +39,13 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
     /**
      * @override
      */
+    init() {
+        this._super(...arguments);
+        this.notification = this.bindService("notification");
+    },
+    /**
+     * @override
+     */
     async start() {
         await this._super(...arguments);
 
@@ -46,6 +53,19 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
             this._toggleAnimatedTextButton();
         };
         this.$body[0].ownerDocument.addEventListener('selectionchange', this.__onSelectionChange);
+
+        // Even if we prevented the drag via the css, we have to override the
+        // dragstart event because if one of the image ancestor has a dragstart
+        // listener, the dragstart handler can be called with the image as
+        // target. So we didn't prevent the drag with the css but with the
+        // following handler.
+        this.__onDragStart = ev => {
+            if (ev.target.nodeName === "IMG") {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        };
+        this.$body[0].addEventListener("dragstart", this.__onDragStart);
 
         // editor_has_snippets is, amongst other things, in charge of hiding the
         // backend navbar with a CSS animation. But we also need to make it
@@ -63,6 +83,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
     destroy() {
         this._super(...arguments);
         this.$body[0].ownerDocument.removeEventListener('selectionchange', this.__onSelectionChange);
+        this.$body[0].removeEventListener("dragstart", this.__onDragStart);
         this.$body[0].classList.remove('o_animated_text_highlighted');
         clearTimeout(this._hideBackendNavbarTimeout);
         this.el.ownerDocument.body.classList.remove('editor_has_snippets_hide_backend_navbar');
@@ -428,11 +449,10 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
                 });
                 this.options.wysiwyg.odooEditor.historyStep();
             } else {
-                this.displayNotification({
-                    message: _t("The current text selection cannot be animated. Try clearing the format and try again."),
-                    type: 'danger',
-                    sticky: true,
-                });
+                this.notification.add(
+                    _t("The current text selection cannot be animated. Try clearing the format and try again."),
+                    { type: 'danger', sticky: true }
+                );
             }
         }
     },
