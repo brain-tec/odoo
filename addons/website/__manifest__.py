@@ -95,6 +95,7 @@
         'views/snippets/s_embed_code.xml',
         'views/snippets/s_website_form.xml',
         'views/snippets/s_searchbar.xml',
+        'views/new_page_template_templates.xml',
         'views/website_views.xml',
         'views/website_pages_views.xml',
         'views/website_visitor_views.xml',
@@ -305,6 +306,61 @@
             # Don't include dark mode files in light mode
             ('remove', 'website/static/src/components/dialog/*.dark.scss'),
         ],
+    },
+    'new_page_templates': {
+        'basic': {
+            '1': ['s_text_block_h1', 's_text_block', 's_image_text', 's_text_image'],
+            '2': ['s_text_block_h1', 's_picture', 's_text_block'],
+            '3': ['s_parallax', 's_text_block_h1', 's_text_block', 's_three_columns'],
+            '4': ['s_text_cover'],
+            '5': ['s_text_block_h1', 's_text_block', 's_features', 's_quotes_carousel'],
+            '6': ['s_text_block_h1', 's_table_of_content'],
+        },
+        'about': {
+            'full': ['s_text_block_h1', 's_image_text', 's_text_image', 's_numbers', 's_picture', 's_quotes_carousel', 's_references'],
+            'full_1': ['s_text_block_h1', 's_three_columns', 's_text_block_h2', 's_company_team', 's_references', 's_quotes_carousel', 's_call_to_action'],
+            'mini': ['s_cover', 's_text_block_h2', 's_text_block_2nd', 's_picture_only', 's_text_block_h2_contact', 's_website_form'],
+            'personal': ['s_text_cover', 's_image_text', 's_text_block_h2', 's_numbers', 's_features', 's_call_to_action_about'],
+            'map': ['s_text_block_h1', 's_text_block', 's_numbers', 's_text_image', 's_text_block_h2', 's_text_block_2nd', 's_map', 's_images_wall'],
+            'timeline': ['s_banner', 's_text_block_h2', 's_text_block', 's_timeline', 's_call_to_action_about'],
+        },
+        'landing': {
+            '0': ['s_cover'],
+            '1': ['s_banner', 's_features', 's_masonry_block', 's_call_to_action_digital', 's_references', 's_quotes_carousel'],
+            '2': ['s_cover', 's_text_image', 's_text_block_h2', 's_three_columns', 's_call_to_action'],
+            '3': ['s_text_cover', 's_text_block_h2', 's_three_columns', 's_showcase', 's_color_blocks_2', 's_quotes_carousel', 's_call_to_action'],
+            '4': ['s_cover', 's_text_block_h2', 's_text_block', 's_text_block_h2_contact', 's_website_form'],
+            '5': ['s_banner'],
+        },
+        'gallery': {
+            '0': ['s_text_block_h2', 's_images_wall'],
+            '1': ['s_text_block_h2', 's_image_text', 's_text_image', 's_image_text_2nd'],
+            '2': ['s_banner', 's_text_block_2nd', 's_image_gallery', 's_picture_only'],
+            '3': ['s_text_block_h2', 's_text_block', 's_three_columns', 's_three_columns_2nd'],
+            '4': ['s_cover', 's_media_list'],
+        },
+        'services': {
+            '0': ['s_text_block_h1', 's_text_block_2nd', 's_three_columns', 's_text_block_h2_contact', 's_website_form'],
+            '1': ['s_text_block_h1', 's_features_grid', 's_text_block_h2', 's_faq_collapse', 's_call_to_action'],
+            '2': ['s_text_cover', 's_image_text', 's_text_image', 's_image_text_2nd', 's_call_to_action_digital'],
+            '3': ['s_text_block_h1', 's_parallax', 's_table_of_content', 's_call_to_action'],
+        },
+        'pricing': {
+            '0': ['s_text_block_h1', 's_comparisons', 's_text_block_2nd', 's_showcase', 's_text_block_h2', 's_faq_collapse', 's_call_to_action'],
+            '1': ['s_text_block_h1', 's_comparisons', 's_call_to_action'],
+            '2': ['s_cover', 's_comparisons', 's_call_to_action', 's_features_grid', 's_color_blocks_2'],
+            '3': ['s_carousel', 's_product_catalog', 's_call_to_action_menu'],  # should be s_call_to_action - but let's create that snippet
+            '4': ['s_text_block_h1', 's_image_text', 's_text_image', 's_image_text_2nd', 's_call_to_action'],
+            '5': ['s_text_block_h1', 's_text_block', 's_product_catalog', 's_three_columns_menu', 's_call_to_action'],  # was s_call_to_action_menu
+        },
+        'team': {
+            '0': ['s_text_block_h1', 's_three_columns'],
+            '1': ['s_text_block_h1', 's_image_text', 's_text_image', 's_image_text_2nd'],
+            '2': ['s_text_block_h1', 's_company_team'],
+            '3': ['s_text_block_h1', 's_media_list'],
+            '4': ['s_text_block_h1', 's_text_block', 's_images_wall'],
+            '5': ['s_text_block_h1', 's_text_block', 's_image_gallery', 's_picture'],
+        },
     },
     'license': 'LGPL-3',
 }

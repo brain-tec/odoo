@@ -341,6 +341,32 @@
         data-allow-delete="true" data-fakem2m="true"/>
 </template>
 
+<!-- Column count option -->
+<template id="column_count_option">
+    <we-select t-att-string="not with_grid and 'Columns'" t-att-class="with_grid and 'o_grid'" data-no-preview="true" data-name="column_count_opt" t-att-data-dependencies="with_grid and 'normal_mode'">
+        <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
+        <we-button data-select-count="1">1</we-button>
+        <we-button data-select-count="2">2</we-button>
+        <we-button data-select-count="3">3</we-button>
+        <we-button data-select-count="4">4</we-button>
+        <we-button data-select-count="5">5</we-button>
+        <we-button data-select-count="6">6</we-button>
+    </we-select>
+</template>
+
+<!-- Grid layout options -->
+<template id="grid_layout_options">
+    <we-button-group t-att-class="indent and 'o_we_sublevel_1'" string="Add Elements" data-no-preview="true" data-dependencies="grid_mode">
+        <we-button class="o_we_bg_brand_primary o_grid" data-add-element="image" title="Image" data-name="image">Image</we-button>
+        <we-button class="o_we_bg_brand_primary o_grid" data-add-element="text" title="Text" data-name="text">Text</we-button>
+        <we-button class="o_we_bg_brand_primary o_grid" data-add-element="button" title="Button" data-name="button">Button</we-button>
+    </we-button-group>
+    <we-row t-att-class="indent and 'o_we_sublevel_1'" string="Spacing (Y, X)">
+        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="row-gap" data-unit="px" data-prevent-important="true" data-apply-to=".row"/>
+        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="column-gap" data-unit="px" data-max="60" data-prevent-important="true" data-apply-to=".row"/>
+    </we-row>
+</template>
+
 <template id="snippet_options" inherit_id="web_editor.snippet_options" primary="True">
     <!-- =================================================================== -->
     <!-- Modify generic snippet options                                      -->
@@ -519,30 +545,14 @@
     <div data-js="layout_column"
         data-selector="section.s_features_grid, section.s_process_steps"
         data-target="> *:has(> .row), > .s_allow_columns">
-        <we-select string="Columns" data-no-preview="true" data-name="column_count_opt">
-            <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
-            <we-button data-select-count="1">1</we-button>
-            <we-button data-select-count="2">2</we-button>
-            <we-button data-select-count="3">3</we-button>
-            <we-button data-select-count="4">4</we-button>
-            <we-button data-select-count="5">5</we-button>
-            <we-button data-select-count="6">6</we-button>
-        </we-select>
+        <t t-call="website.column_count_option"/>
     </div>
 
     <!-- Grid only -->
     <div data-js="layout_column"
         data-selector="section.s_masonry_block"
         data-target="> *:has(> .row)">
-        <we-button-group class="o_grid" string="Add Elements" data-no-preview="true" data-dependencies="grid_mode">
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="image" title="Image" data-name="image">Image</we-button>
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="text" title="Text" data-name="text">Text</we-button>
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="button" title="Button" data-name="button">Button</we-button>
-        </we-button-group>
-        <we-row string="Padding (Y, X)">
-            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-y" data-unit="px" data-apply-to=".row"/>
-            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-x" data-unit="px" data-apply-to=".row"/>
-        </we-row>
+        <t t-call="website.grid_layout_options"/>
     </div>
 
     <!-- Grid and columns -->
@@ -555,25 +565,13 @@
                 <we-button data-select-layout="grid" data-name="grid_mode">Grid</we-button>
                 <we-button data-select-layout="normal" data-name="normal_mode">Cols</we-button>
             </we-button-group>
-            <we-select class="o_grid" data-no-preview="true" data-name="column_count_opt" data-dependencies="normal_mode">
-                <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
-                <we-button data-select-count="1">1</we-button>
-                <we-button data-select-count="2">2</we-button>
-                <we-button data-select-count="3">3</we-button>
-                <we-button data-select-count="4">4</we-button>
-                <we-button data-select-count="5">5</we-button>
-                <we-button data-select-count="6">6</we-button>
-            </we-select>
+            <t t-call="website.column_count_option">
+                <t t-set="with_grid" t-value="True"/>
+            </t>
         </we-row>
-        <we-button-group class="o_grid o_we_sublevel_1" string="Add Elements" data-no-preview="true" data-dependencies="grid_mode">
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="image" title="Image" data-name="image">Image</we-button>
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="text" title="Text" data-name="text">Text</we-button>
-            <we-button class="o_we_bg_brand_primary o_grid" data-add-element="button" title="Button" data-name="button">Button</we-button>
-        </we-button-group>
-        <we-row class="o_we_sublevel_1" string="Padding (Y, X)">
-            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-y" data-unit="px" data-apply-to=".row"/>
-            <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="--grid-item-padding-x" data-unit="px" data-apply-to=".row"/>
-        </we-row>
+        <t t-call="website.grid_layout_options">
+            <t t-set="indent" t-value="True"/>
+        </t>
     </div>
 
     <!--  Vertical Alignment -->
@@ -646,6 +644,15 @@
         <t t-set="with_videos" t-value="True"/>
         <t t-set="with_shapes" t-value="True"/>
     </t>
+
+    <!-- Grid mode columns -->
+    <div data-js="GridColumns"
+         data-selector=".row > div">
+        <we-row string="Padding (Y, X)">
+            <we-input data-select-style="" data-css-property="--grid-item-padding-y" data-unit="px" data-name="grid_padding_y_opt"/>
+            <we-input data-select-style="" data-css-property="--grid-item-padding-x" data-unit="px" data-name="grid_padding_x_opt"/>
+        </we-row>
+    </div>
 
     <!-- Border | Columns -->
     <div data-js="Box"

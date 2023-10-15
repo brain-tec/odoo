@@ -1286,7 +1286,38 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
      * @param {Event} ev
      */
     _onInputInput: function (ev) {
+        // First record the input value as the new current value and bound it if
+        // necessary (min / max params).
         this._value = this.inputEl.value;
+
+        const params = this._methodsParams;
+        const hasMin = ('min' in params);
+        const hasMax = ('max' in params);
+        if (hasMin || hasMax) {
+            // Bounding the value in [min, max] if specified.
+            const boundedValue = this._value.split(/\s+/g).map(v => {
+                let numValue = parseFloat(v);
+                if (isNaN(numValue)) {
+                    return hasMin ? params.min : v;
+                } else {
+                    numValue = hasMin ? Math.max(params.min, numValue) : numValue;
+                    numValue = hasMax ? Math.min(numValue, params.max) : numValue;
+                    return numValue;
+                }
+            }).join(" ");
+
+            // If the bounded version is different from the value, forget about
+            // the old value so that we properly update the UI in any case.
+            this._oldValue = undefined;
+
+            // Note: we do not change the input's value because we want the user
+            // to be able to enter anything without it being auto-fixed. For
+            // example, just emptying the input to enter new numbers: you don't
+            // want the min value to pop up unexpectedly. The next UI update
+            // will take care of showing the user that the value was bound.
+            this._value = boundedValue;
+        }
+
         // When the value changes as a result of a arrow up/down, the change
         // event is not called, unless a real user input has been triggered.
         // This event handler holds a variable for this in order to not call
@@ -1336,8 +1367,27 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
                 if (isNaN(step)) {
                     step = 1.0;
                 }
-                value += (ev.which === $.ui.keyCode.UP ? step : -step);
+
+                const increasing = ev.which === $.ui.keyCode.UP;
+                const hasMin = ('min' in params);
+                const hasMax = ('max' in params);
+
+                // If value already at min and trying to decrease, do nothing
+                if (!increasing && hasMin && Math.abs(value - params.min) < 0.001) {
+                    return;
+                }
+                // If value already at max and trying to increase, do nothing
+                if (increasing && hasMax && Math.abs(value - params.max) < 0.001) {
+                    return;
+                }
+
+                // If trying to decrease/increase near min/max, we still need to
+                // bound the produced value and immediately show the user.
+                value += (increasing ? step : -step);
+                value = hasMin ? Math.max(params.min, value) : value;
+                value = hasMax ? Math.min(value, params.max) : value;
                 input.value = this._floatToStr(value);
+
                 // We need to know if the change event will be triggered or not.
                 // Change is triggered if there has been a "natural" input event
                 // from the user. Since we are triggering a "fake" input event,
@@ -3256,6 +3306,15 @@ const SnippetOptionWidget = Widget.extend({
      */
     cleanForSave: async function () {},
     /**
+     * Called when the associated snippet UI needs to be cleaned (e.g. from
+     * visual effects like previews).
+     * TODO this function will replace `cleanForSave` in the future.
+     *
+     * @abstract
+     * @return {Promise|undefined}
+     */
+    cleanUI: async function () {},
+    /**
      * Adds the given widget to the known list of user value widgets
      *
      * @param {UserValueWidget} widget
@@ -5055,11 +5114,8 @@ registry.layout_column = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    cleanForSave() {
-        // Remove the padding highlights.
-        this.$target[0].querySelectorAll('.o_we_padding_highlight').forEach(highlightedEl => {
-            highlightedEl._removePaddingPreview();
-        });
+    cleanUI() {
+        this._removeGridPreview();
     },
 
     //--------------------------------------------------------------------------
@@ -5211,18 +5267,24 @@ registry.layout_column = SnippetOptionWidget.extend({
      * @override
      */
     async selectStyle(previewMode, widgetValue, params) {
-        await this._super(...arguments);
-        if (params.cssProperty.startsWith('--grid-item-padding')) {
-            // Reset the animations.
-            this._removePaddingPreview();
-            void this.$target[0].offsetWidth; // Trigger a DOM reflow.
+        await this._super(previewMode, widgetValue, params);
 
-            // Highlight the padding when changing it, by adding a pseudo-
-            // element with an animated colored border inside the grid items.
-            const rowEl = this.$target[0];
-            rowEl.classList.add('o_we_padding_highlight');
-            rowEl._removePaddingPreview = this._removePaddingPreview.bind(this);
-            rowEl.addEventListener('animationend', rowEl._removePaddingPreview);
+        const rowEl = this.$target[0];
+        const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
+        const isMobileView = rowEl.ownerDocument.defaultView.frameElement.clientWidth < mobileViewThreshold;
+        if (["row-gap", "column-gap"].includes(params.cssProperty) && !isMobileView) {
+            // Reset the animation.
+            this._removeGridPreview();
+            void rowEl.offsetWidth; // Trigger a DOM reflow.
+
+            // Add an animated grid preview.
+            this.options.wysiwyg.odooEditor.observerUnactive("addGridPreview");
+            this.gridPreviewEl = gridUtils._addBackgroundGrid(rowEl, 0);
+            this.gridPreviewEl.classList.add("o_we_grid_preview");
+            gridUtils._setElementToMaxZindex(this.gridPreviewEl, rowEl);
+            this.options.wysiwyg.odooEditor.observerActive("addGridPreview");
+            this.removeGridPreview = this._removeGridPreview.bind(this);
+            rowEl.addEventListener("animationend", this.removeGridPreview);
         }
     },
 
@@ -5322,36 +5384,106 @@ registry.layout_column = SnippetOptionWidget.extend({
      * @private
      * @param {Element} rowEl
      */
-    _toggleNormalMode(rowEl) {
+    async _toggleNormalMode(rowEl) {
         // Removing the grid class
         rowEl.classList.remove('o_grid_mode');
         const columnEls = rowEl.children;
+        // Removing the grid previews (if any).
+        await new Promise(resolve => {
+            this.trigger_up("clean_ui_request", {
+                targetEl: this.$target[0].closest("section"),
+                onSuccess: resolve,
+            });
+        });
+
         for (const columnEl of columnEls) {
             // Reloading the images.
             gridUtils._reloadLazyImages(columnEl);
-
             // Removing the grid properties.
-            const gridSizeClasses = columnEl.className.match(/(g-col-lg|g-height)-[0-9]+/g);
-            columnEl.classList.remove('o_grid_item', 'o_grid_item_image', 'o_grid_item_image_contain', ...gridSizeClasses);
-            columnEl.style.removeProperty('grid-area');
-            columnEl.style.removeProperty('z-index');
+            gridUtils._convertToNormalColumn(columnEl);
         }
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;
+        // Kept for compatibility.
         rowEl.style.removeProperty('--grid-item-padding-x');
         rowEl.style.removeProperty('--grid-item-padding-y');
+        rowEl.style.removeProperty("gap");
+    },
+    /**
+     * Removes the grid preview that was added when changing the grid gaps.
+     *
+     * @private
+     */
+    _removeGridPreview() {
+        this.options.wysiwyg.odooEditor.observerUnactive("removeGridPreview");
+        this.$target[0].removeEventListener("animationend", this.removeGridPreview);
+        if (this.gridPreviewEl) {
+            this.gridPreviewEl.remove();
+            delete this.gridPreviewEl;
+        }
+        delete this.removeGridPreview;
+        this.options.wysiwyg.odooEditor.observerActive("removeGridPreview");
+    },
+});
+
+registry.GridColumns = SnippetOptionWidget.extend({
+    /**
+     * @override
+     */
+    cleanUI() {
+        // Remove the padding highlights.
+        this._removePaddingPreview();
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async selectStyle(previewMode, widgetValue, params) {
+        await this._super(...arguments);
+        if (["--grid-item-padding-y", "--grid-item-padding-x"].includes(params.cssProperty)) {
+            // Reset the animation.
+            this._removePaddingPreview();
+            void this.$target[0].offsetWidth; // Trigger a DOM reflow.
+
+            // Highlight the padding when changing it, by adding a pseudo-
+            // element with an animated colored border inside the grid item.
+            this.options.wysiwyg.odooEditor.observerUnactive("addPaddingPreview");
+            this.$target[0].classList.add("o_we_padding_highlight");
+            this.options.wysiwyg.odooEditor.observerActive("addPaddingPreview");
+            this.removePaddingPreview = this._removePaddingPreview.bind(this);
+            this.$target[0].addEventListener("animationend", this.removePaddingPreview);
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetVisibility(widgetName, params) {
+        if (["grid_padding_y_opt", "grid_padding_x_opt"].includes(widgetName)) {
+            return this.$target[0].parentElement.classList.contains("o_grid_mode");
+        }
+        return this._super(...arguments);
     },
     /**
      * Removes the padding highlights that were added when changing the grid
-     * items padding.
+     * item padding.
      *
      * @private
      */
     _removePaddingPreview() {
-        const rowEl = this.$target[0];
-        rowEl.removeEventListener('animationend', rowEl._removePaddingPreview);
-        rowEl.classList.remove('o_we_padding_highlight');
-        delete rowEl._removePaddingPreview;
+        this.options.wysiwyg.odooEditor.observerUnactive("removePaddingPreview");
+        this.$target[0].removeEventListener("animationend", this.removePaddingPreview);
+        this.$target[0].classList.remove("o_we_padding_highlight");
+        delete this.removePaddingPreview;
+        this.options.wysiwyg.odooEditor.observerActive("removePaddingPreview");
     },
 });
 

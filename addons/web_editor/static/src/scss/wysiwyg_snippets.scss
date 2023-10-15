@@ -2603,10 +2603,6 @@ we-select.o_grid we-toggler {
     width: fit-content !important;
 }
 
-we-button-group.o_grid we-selection-items {
-    width: fit-content !important;
-}
-
 // Background grid.
 .o_we_background_grid {
     padding: 0 !important;
@@ -2617,6 +2613,23 @@ we-button-group.o_grid we-selection-items {
         stroke: $o-we-bg-darkest;
         stroke-opacity: .2;
         stroke-width: 1px;
+        filter: drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.3));
+    }
+
+    &.o_we_grid_preview {
+        pointer-events: none;
+
+        .o_we_cell {
+            animation: gridPreview 2s 0.5s;
+        }
+    }
+}
+
+// Grid preview.
+@keyframes gridPreview {
+    to {
+        fill-opacity: 0;
+        stroke-opacity: 0;
     }
 }
 
@@ -2638,7 +2651,7 @@ we-button-group.o_grid we-selection-items {
     }
 }
 
-.o_we_padding_highlight > .o_grid_item {
+.o_we_padding_highlight.o_grid_item {
     position: relative;
 
     &::after {

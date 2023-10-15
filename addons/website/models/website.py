@@ -350,10 +350,10 @@ class Website(models.Model):
         return {'cta_btn_text': False, 'cta_btn_href': '/contactus'}
 
     @api.model
-    def get_theme_snippet_lists(self, theme_name):
+    def get_theme_configurator_snippets(self, theme_name):
         return {
-            **get_manifest('theme_default')['snippet_lists'],
-            **get_manifest(theme_name).get('snippet_lists', {}),
+            **get_manifest('theme_default')['configurator_snippets'],
+            **get_manifest(theme_name).get('configurator_snippets', {}),
         }
 
     def configurator_set_menu_links(self, menu_company, module_data):
@@ -427,6 +427,7 @@ class Website(models.Model):
         website = self.get_current_website()
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
+        theme._generate_primary_snippet_templates()
         redirect_url = theme.button_choose_theme()
 
         # Force to refresh env after install of module
@@ -585,7 +586,7 @@ class Website(models.Model):
 
         # Generate text for the pages
         requested_pages = set(pages_views.keys()).union({'homepage'})
-        snippet_lists = website.get_theme_snippet_lists(theme_name)
+        configurator_snippets = website.get_theme_configurator_snippets(theme_name)
         industry = kwargs['industry_name']
 
         IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
@@ -612,9 +613,9 @@ class Website(models.Model):
 
         generated_content = {}
         for page_code in requested_pages - {'privacy_policy'}:
-            snippet_list = snippet_lists.get(page_code, [])
+            snippet_list = configurator_snippets.get(page_code, [])
             for snippet in snippet_list:
-                render, placeholders = _render_snippet(f'website.{snippet}')
+                render, placeholders = _render_snippet(f'website.configurator_{page_code}_{snippet}')
                 for placeholder in placeholders:
                     generated_content[placeholder] = ''
         try:
@@ -633,7 +634,7 @@ class Website(models.Model):
 
         # Configure the pages
         for page_code in requested_pages:
-            snippet_list = snippet_lists.get(page_code, [])
+            snippet_list = configurator_snippets.get(page_code, [])
             if page_code == 'homepage':
                 page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
             else:
@@ -642,7 +643,7 @@ class Website(models.Model):
             nb_snippets = len(snippet_list)
             for i, snippet in enumerate(snippet_list, start=1):
                 try:
-                    render, placeholders = _render_snippet(f'website.{snippet}')
+                    render, placeholders = _render_snippet(f'website.configurator_{page_code}_{snippet}')
 
                     # Fill rendered block with AI text
                     render = xml_translate(
@@ -764,7 +765,7 @@ class Website(models.Model):
                 copy_menu(submenu, new_top_menu)
 
     @api.model
-    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, page_values=None, menu_values=None):
+    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, page_values=None, menu_values=None, sections_arch=None):
         """ Create a new website page, and assign it a xmlid based on the given one
             :param name: the name of the page
             :param add_menu: if True, add a menu for that page
@@ -772,6 +773,7 @@ class Website(models.Model):
             :param namespace: module part of the xml_id if none, the template module name is used
             :param page_values: default values for the page to be created
             :param menu_values: default values for the menu to be created
+            :param sections_arch: HTML content of sections
         """
         if namespace:
             template_module = namespace
@@ -787,12 +789,19 @@ class Website(models.Model):
             page_key = 'home'
 
         template_record = self.env.ref(template)
+        arch = template_record.arch
+        if sections_arch:
+            tree = html.fromstring(arch)
+            wrap = tree.xpath('//div[@id="wrap"]')[0]
+            for section in html.fromstring(f'<wrap>{sections_arch}</wrap>'):
+                wrap.append(section)
+            arch = etree.tostring(tree, encoding="unicode")
         website_id = self._context.get('website_id')
         key = self.get_unique_key(page_key, template_module)
         view = template_record.copy({'website_id': website_id, 'key': key})
 
         view.with_context(lang=None).write({
-            'arch': template_record.arch.replace(template, key),
+            'arch': arch.replace(template, key),
             'name': name,
         })
         result['view_id'] = view.id
