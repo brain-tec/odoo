@@ -32,6 +32,7 @@ _DEFAULT_MANIFEST = {
     'author': 'Odoo S.A.',
     'auto_install': False,
     'category': 'Uncategorized',
+    'configurator_snippets': {},  # website themes
     'countries': [],
     'data': [],
     'demo': [],
@@ -46,12 +47,12 @@ _DEFAULT_MANIFEST = {
     'images_preview_theme': {},  # website themes
     #license, mandatory
     'live_test_url': '',  # website themes
+    'new_page_templates': {},  # website themes
     #name, mandatory
     'post_init_hook': '',
     'post_load': None,
     'pre_init_hook': '',
     'sequence': 100,
-    'snippet_lists': {},  # website themes
     'summary': '',
     'test': [],
     'update_xml': [],
