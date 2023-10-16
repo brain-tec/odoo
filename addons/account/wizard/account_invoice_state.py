@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from openerp import models, api, _
 from openerp.exceptions import UserError
-import logging
-import openerp
+import threading
 
+import openerp
+import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -15,42 +16,53 @@ class AccountInvoiceConfirm(models.TransientModel):
     _name = "account.invoice.confirm"
     _description = "Confirm the selected invoices"
 
-    def cron_signal_workflow(self, cr, uid):
-        """This cron is needed to confirm the invoices with auto_confirm = True"""
-        invoice_ids = self.pool['account.invoice'].search(cr, uid, [('auto_confirm', '=', True)], limit=10)
-        invoices = self.pool['account.invoice'].browse(cr, uid, invoice_ids)
-        for invoice in invoices:
-            try:
-                invoice.signal_workflow('invoice_open')
-            except Exception, e:
-                pass
-            finally:
-                invoice.auto_confirm = False
+    def signal_workflow_with_cr(self):
+        """ This function is needed to confirm invoices and don't break the progress
+        """
+        context = dict(self._context or {})
+        active_ids = context.get('active_ids', []) or []
+        proc_obj = self.env['account.invoice'].browse(active_ids)
+        # As this function is in a new thread, I need to open new cursors, because the old one
+        # may be closed
+        for record in proc_obj:
+            with api.Environment.manage():
+                with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
+                    new_env = api.Environment(new_cr, self._uid, self._context)
+                    try:
+                        if record.state not in ('draft', 'proforma', 'proforma2'):
+                            _logger.debug("Selected invoice(s) cannot be confirmed as "
+                                          "they are not in 'Draft' or 'Pro-Forma' state. %s",
+                                          record.id)
+                            continue
+                        record.with_env(new_env).signal_workflow('invoice_open')
+
+                        new_env.cr.commit()
+                    except Exception, e:
+                        new_env.cr.rollback()
+                        _logger.debug("Selected invoice cannot be confirmed: %s", record.id)
+        return {}
 
     @api.multi
     def invoice_confirm(self):
-        """ Sometimes, more than 500 invoices must be confirmed at once.
+        """ Sometimes, more than 500 invoices are confirmed at once.
         Since QR-Bill where added to this project, some error appears in the GUI because of some timeout.
-        We cannot find the reason, but at least we have a solution: a cron are now implemented.
-        The invoices which can be confirmed, will be confirmed during cron execution.
+        We cannot find the reason, but at least we have a solution: an independent thread and cursors are
+        now implemented. The invoices which are possible to be confirmed, will be confirmed
+        on the background
         """
         context = dict(self._context or {})
-        # Getting not confirmable invoices does not need long time, and we can spare some time
-        all_invoices = self.env['account.invoice'].browse(context.get('active_ids', []) or [])
-        not_confirmable_invoices = all_invoices.filtered(lambda x: x.state not in ('draft', 'proforma', 'proforma2'))
-        to_confirm_invoice_ids = list(set(all_invoices.ids) - set(not_confirmable_invoices.ids))
-        invoices = self.env['account.invoice'].browse(to_confirm_invoice_ids)
-
-        # We use a new cursor to ensure that auto_confirm is set, also if UserError raised
-        with api.Environment.manage():
-            with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
-                new_env = api.Environment(new_cr, self._uid, self._context)
-                for invoice in invoices:
-                    invoice.with_env(new_env).write({'auto_confirm': True})
-
-        if not_confirmable_invoices:
-            raise UserError(_("Some of the selected invoice(s) will not be confirmed as they are not in"
-                              " 'Draft' or 'Pro-Forma' state: %s \n" % not_confirmable_invoices.ids))
+        active_ids = context.get('active_ids', []) or []
+        records = self.env['account.invoice'].browse(active_ids)
+        if len(records) < 5:
+            for record in self.env['account.invoice'].browse(active_ids):
+                if record.state not in ('draft', 'proforma', 'proforma2'):
+                    raise UserError(_("Selected invoice(s) cannot be confirmed as "
+                                      "they are not in 'Draft' or 'Pro-Forma' state."))
+                record.signal_workflow('invoice_open')
+        else:
+            for i in range(0, len(active_ids), 50):
+                context['active_ids'] = active_ids[i:i + 50]
+                threading.Thread(target=self.with_context(context).signal_workflow_with_cr).start()
         return {'type': 'ir.actions.act_window_close'}
 
 

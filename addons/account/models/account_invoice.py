@@ -320,7 +320,6 @@ class AccountInvoice(models.Model):
     outstanding_credits_debits_widget = fields.Text(compute='_get_outstanding_info_JSON')
     payments_widget = fields.Text(compute='_get_payment_info_JSON')
     has_outstanding = fields.Boolean(compute='_get_outstanding_info_JSON')
-    auto_confirm = fields.Boolean(help='Auto-confirm invoices if flag set during next cron execution')
 
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
