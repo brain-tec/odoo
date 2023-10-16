@@ -22,8 +22,7 @@ class AccountInvoiceConfirm(models.TransientModel):
         context = dict(self._context or {})
         active_ids = context.get('active_ids', []) or []
         proc_obj = self.env['account.invoice'].browse(active_ids)
-        # As this function is in a new thread, I need to open new cursors, because the old one
-        # may be closed
+        # As this function is in a new thread, I need to open new cursors, because the old one may be closed
         for record in proc_obj:
             with api.Environment.manage():
                 with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
@@ -31,8 +30,7 @@ class AccountInvoiceConfirm(models.TransientModel):
                     try:
                         if record.state not in ('draft', 'proforma', 'proforma2'):
                             _logger.debug("Selected invoice(s) cannot be confirmed as "
-                                          "they are not in 'Draft' or 'Pro-Forma' state. %s",
-                                          record.id)
+                                          "they are not in 'Draft' or 'Pro-Forma' state. %s", record.id)
                             continue
                         record.with_env(new_env).signal_workflow('invoice_open')
 
@@ -41,6 +39,7 @@ class AccountInvoiceConfirm(models.TransientModel):
                         new_env.cr.rollback()
                         _logger.debug("Selected invoice cannot be confirmed: %s", record.id)
         return {}
+
 
     @api.multi
     def invoice_confirm(self):
