@@ -31,7 +31,6 @@ class AccountInvoiceConfirm(models.TransientModel):
                         if record.state not in ('draft', 'proforma', 'proforma2'):
                             _logger.debug("Selected invoice(s) cannot be confirmed as "
                                           "they are not in 'Draft' or 'Pro-Forma' state. %s", record.id)
-                            continue
                         record.with_env(new_env).signal_workflow('invoice_open')
 
                         new_env.cr.commit()
@@ -44,7 +43,7 @@ class AccountInvoiceConfirm(models.TransientModel):
     @api.multi
     def invoice_confirm(self):
         """ Sometimes, more than 500 invoices are confirmed at once.
-        Since QR-Bill where added to this project, some error appears in the GUI because of some timeout.
+        Since QR-Bill where added to this project, some error appears in the GUI because of any timeout.
         We cannot find the reason, but at least we have a solution: an independent thread and cursors are
         now implemented. The invoices which are possible to be confirmed, will be confirmed
         on the background
@@ -59,9 +58,7 @@ class AccountInvoiceConfirm(models.TransientModel):
                                       "they are not in 'Draft' or 'Pro-Forma' state."))
                 record.signal_workflow('invoice_open')
         else:
-            for i in range(0, len(active_ids), 50):
-                context['active_ids'] = active_ids[i:i + 50]
-                threading.Thread(target=self.with_context(context).signal_workflow_with_cr).start()
+            threading.Thread(target=self.signal_workflow_with_cr).start()
         return {'type': 'ir.actions.act_window_close'}
 
 
