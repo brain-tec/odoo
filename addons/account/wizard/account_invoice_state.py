@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from openerp import models, api, _
 from openerp.exceptions import UserError
+import logging
 import openerp
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountInvoiceConfirm(models.TransientModel):
