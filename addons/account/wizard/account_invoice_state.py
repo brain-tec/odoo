@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import models, api, _
 from openerp.exceptions import UserError
-import threading
-
-import openerp
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class AccountInvoiceConfirm(models.TransientModel):
@@ -16,49 +11,15 @@ class AccountInvoiceConfirm(models.TransientModel):
     _name = "account.invoice.confirm"
     _description = "Confirm the selected invoices"
 
-    def signal_workflow_with_cr(self):
-        """ This function is needed to confirm invoices and don't break the progress
-        """
-        context = dict(self._context or {})
-        active_ids = context.get('active_ids', []) or []
-        proc_obj = self.env['account.invoice'].browse(active_ids)
-        # As this function is in a new thread, I need to open new cursors, because the old one may be closed
-        for record in proc_obj:
-            with api.Environment.manage():
-                with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
-                    new_env = api.Environment(new_cr, self._uid, self._context)
-                    try:
-                        if record.state not in ('draft', 'proforma', 'proforma2'):
-                            _logger.debug("Selected invoice(s) cannot be confirmed as "
-                                          "they are not in 'Draft' or 'Pro-Forma' state. %s", record.id)
-                        record.with_env(new_env).signal_workflow('invoice_open')
-
-                        new_env.cr.commit()
-                    except Exception, e:
-                        new_env.cr.rollback()
-                        _logger.debug("Selected invoice cannot be confirmed: %s", record.id)
-        return {}
-
-
     @api.multi
     def invoice_confirm(self):
-        """ Sometimes, more than 500 invoices are confirmed at once.
-        Since QR-Bill where added to this project, some error appears in the GUI because of any timeout.
-        We cannot find the reason, but at least we have a solution: an independent thread and cursors are
-        now implemented. The invoices which are possible to be confirmed, will be confirmed
-        on the background
-        """
         context = dict(self._context or {})
         active_ids = context.get('active_ids', []) or []
-        records = self.env['account.invoice'].browse(active_ids)
-        if len(records) < 5:
-            for record in self.env['account.invoice'].browse(active_ids):
-                if record.state not in ('draft', 'proforma', 'proforma2'):
-                    raise UserError(_("Selected invoice(s) cannot be confirmed as "
-                                      "they are not in 'Draft' or 'Pro-Forma' state."))
-                record.signal_workflow('invoice_open')
-        else:
-            threading.Thread(target=self.signal_workflow_with_cr).start()
+
+        for record in self.env['account.invoice'].browse(active_ids):
+            if record.state not in ('draft', 'proforma', 'proforma2'):
+                raise UserError(_("Selected invoice(s) cannot be confirmed as they are not in 'Draft' or 'Pro-Forma' state."))
+            record.signal_workflow('invoice_open')
         return {'type': 'ir.actions.act_window_close'}
 
 
