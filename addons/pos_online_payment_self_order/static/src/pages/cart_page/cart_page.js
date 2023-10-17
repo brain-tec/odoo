@@ -24,21 +24,19 @@ patch(CartPage.prototype, {
             return;
         }
 
-        if (mode === "meal" && isOnlinePayment) {
-            if (!order) {
-                this.selfOrder.notification.add(_t("The current order is invalid."), {
-                    type: "danger",
-                });
-                return;
-            }
-            if (!order.isSavedOnServer) {
-                this.sendInProgress = true;
-                await this.selfOrder.sendDraftOrderToServer();
-                this.sendInProgress = false;
-            } else {
-                this.checkAndOpenPaymentPage(order);
-            }
+        if (mode === "meal" && isOnlinePayment && order.isSavedOnServer) {
+            this.checkAndOpenPaymentPage(order);
+        } else if (mode === "meal" && !isOnlinePayment && order.isSavedOnServer) {
+            this.router.navigate("confirmation", {
+                orderAccessToken: order.access_token,
+                screenMode: "pay",
+            });
+            return;
         } else if (mode === "each") {
+            this.sendInProgress = true;
+            const order = await this.selfOrder.sendDraftOrderToServer();
+            this.sendInProgress = false;
+
             this.checkAndOpenPaymentPage(order);
         } else {
             return super.pay(...arguments);
@@ -50,10 +48,11 @@ patch(CartPage.prototype, {
         if (order) {
             if (order.state === "draft") {
                 if (!isOnlinePayment) {
-                    this.selfOrder.notification.add(
-                        _t("The current order cannot be paid (no online payment method)."),
-                        { type: "danger" }
-                    );
+                    // if no payment method is available -> pay at cashier
+                    this.router.navigate("confirmation", {
+                        orderAccessToken: order.access_token,
+                        screenMode: "pay",
+                    });
                     return;
                 }
 
