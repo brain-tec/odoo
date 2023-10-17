@@ -25,7 +25,9 @@ import types
 import unicodedata
 import werkzeug.utils
 import zipfile
-from collections import defaultdict, Iterable, Mapping, MutableMapping, MutableSet, OrderedDict
+from collections import defaultdict, OrderedDict
+from collections.abc import Iterable, Mapping, MutableMapping, MutableSet
+
 from itertools import islice, groupby as itergroupby, repeat
 from lxml import etree
 
@@ -1124,13 +1126,25 @@ def ignore(*exc):
     except exc:
         pass
 
-# Avoid DeprecationWarning while still remaining compatible with werkzeug pre-0.9
-if parse_version(getattr(werkzeug, '__version__', '0.0')) < parse_version('0.9.0'):
-    def html_escape(text):
-        return werkzeug.utils.escape(text, quote=True)
-else:
-    def html_escape(text):
-        return werkzeug.utils.escape(text)
+def html_escape(text):
+    """ Vendored from werkzeug.utils.escape which is deprecated in 2.0
+    Replace special characters "&", "<", ">" and (") to HTML-safe sequences.
+    There is a special handling for `None` which escapes to an empty string.
+    :param s: the string to escape.
+    """
+    if  text is None:
+        return ""
+    elif hasattr(text, "__html__"):
+        return str(text.__html__())
+    elif not isinstance(text, str):
+        text = str(text)
+    text = (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+    return text
 
 def babel_locale_parse(lang_code):
     try:
@@ -1158,9 +1172,9 @@ def formatLang(env, value, digits=None, grouping=True, monetary=False, dp=False,
         elif currency_obj:
             digits = currency_obj.decimal_places
         elif (hasattr(value, '_field') and getattr(value._field, 'digits', None)):
-                digits = value._field.digits[1]
-                if not digits and digits is not 0:
-                    digits = DEFAULT_DIGITS
+            digits = value._field.digits[1]
+            if not digits and digits != 0:
+                digits = DEFAULT_DIGITS
 
     if isinstance(value, pycompat.string_types) and not value:
         return ''
