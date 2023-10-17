@@ -50,12 +50,8 @@ from odoo.service import db, security
 
 _logger = logging.getLogger(__name__)
 
-if hasattr(sys, 'frozen'):
-    # When running on compiled windows binary, we don't have access to package loader.
-    path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
-    loader = jinja2.FileSystemLoader(path)
-else:
-    loader = jinja2.PackageLoader('odoo.addons.web', "views")
+path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
+loader = jinja2.FileSystemLoader(path)
 
 env = jinja2.Environment(loader=loader, autoescape=True)
 env.filters["json"] = json.dumps
@@ -222,7 +218,7 @@ def concat_xml(file_list):
         #elif root.tag != xml.tag:
         #    raise ValueError("Root tags missmatch: %r != %r" % (root.tag, xml.tag))
 
-        for child in xml.getchildren():
+        for child in list(xml):
             root.append(child)
     return ElementTree.tostring(root, 'utf-8'), checksum.hexdigest()
 
@@ -886,7 +882,7 @@ class Session(http.Controller):
             'state': json.dumps({'d': request.db, 'u': ICP.get_param('web.base.url')}),
             'scope': 'userinfo',
         }
-        return 'https://accounts.odoo.com/oauth2/auth?' + werkzeug.url_encode(params)
+        return 'https://accounts.odoo.com/oauth2/auth?' + werkzeug.urls.url_encode(params)
 
     @http.route('/web/session/destroy', type='json', auth="user")
     def destroy(self):
@@ -1169,7 +1165,7 @@ class Binary(http.Controller):
             try:
                 attachment = Model.create({
                     'name': filename,
-                    'datas': base64.encodestring(ufile.read()),
+                    'datas': base64.encodebytes(ufile.read()),
                     'datas_fname': filename,
                     'res_model': model,
                     'res_id': int(id)
