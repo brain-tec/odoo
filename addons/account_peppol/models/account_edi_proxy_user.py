@@ -4,8 +4,9 @@
 import logging
 
 from odoo import _, fields, models, modules, tools
-from odoo.exceptions import UserError
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo.addons.account_peppol.tools.demo_utils import handle_demo
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class AccountEdiProxyClientUser(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
+    @handle_demo
     def _make_request(self, url, params=False):
         # extends account_edi_proxy_client to update peppol_proxy_state
         # of archived users
@@ -47,21 +49,21 @@ class AccountEdiProxyClientUser(models.Model):
         urls['peppol'] = {
             'prod': 'https://peppol.api.odoo.com',
             'test': 'https://peppol.test.odoo.com',
+            'demo': 'demo',
         }
         return urls
 
-    def _get_server_url(self, proxy_type=None, edi_mode=None):
-        proxy_type = proxy_type or self.proxy_type
-        if not proxy_type == 'peppol':
-            return super()._get_server_url(proxy_type, edi_mode)
+    # -------------------------------------------------------------------------
+    # CRONS
+    # -------------------------------------------------------------------------
 
-        peppol_param = self.env['ir.config_parameter'].sudo().get_param(
-            'account_peppol.edi.mode', False
-        )
-        if peppol_param == 'test':
-            edi_mode = 'test'
+    def _cron_peppol_get_new_documents(self):
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
+        edi_users._peppol_get_new_documents()
 
-        return super()._get_server_url(proxy_type, edi_mode)
+    def _cron_peppol_get_message_status(self):
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
+        edi_users._peppol_get_message_status()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
@@ -75,12 +77,8 @@ class AccountEdiProxyClientUser(models.Model):
             return f'{company.peppol_eas}:{company.peppol_endpoint}'
         return super()._get_proxy_identification(company, proxy_type)
 
-    def _cron_peppol_get_new_documents(self):
-        # Retrieve all new Peppol documents for every edi user in the database
-        edi_users = self.env['account_edi_proxy_client.user'].search(
-            [('company_id.account_peppol_proxy_state', '=', 'active')])
-
-        for edi_user in edi_users:
+    def _peppol_get_new_documents(self):
+        for edi_user in self:
             proxy_acks = []
             try:
                 # request all messages that haven't been acknowledged
@@ -186,11 +184,8 @@ class AccountEdiProxyClientUser(models.Model):
                     {'message_uuids': proxy_acks},
                 )
 
-    def _cron_peppol_get_message_status(self):
-        edi_users = self.env['account_edi_proxy_client.user'].search(
-            [('company_id.account_peppol_proxy_state', '=', 'active')])
-
-        for edi_user in edi_users:
+    def _peppol_get_message_status(self):
+        for edi_user in self:
             edi_user_moves = self.env['account.move'].search([
                 ('peppol_move_state', '=', 'processing'),
                 ('company_id', '=', edi_user.company_id.id),
