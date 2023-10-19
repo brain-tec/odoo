@@ -6,7 +6,6 @@ import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { PopupTable } from "@pos_self_order/app/components/popup_table/popup_table";
 import { _t } from "@web/core/l10n/translation";
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
-import { attributeFormatter } from "@pos_self_order/app/utils";
 
 export class CartPage extends Component {
     static template = "pos_self_order.CartPage";
@@ -49,17 +48,14 @@ export class CartPage extends Component {
     }
 
     async pay() {
-        if (this.sendInProgress) {
-            return;
-        }
-
         const orderingMode = this.selfOrder.config.self_ordering_service_mode;
         const type = this.selfOrder.config.self_ordering_mode;
         const takeAway = this.selfOrder.currentOrder.take_away;
         const mode = this.selfOrder.config.self_ordering_pay_after;
         const order = this.selfOrder.currentOrder;
+        const isPaymentMethod = this.selfOrder.pos_payment_methods.length > 0;
 
-        if (!this.selfOrder.verifyCart()) {
+        if (this.sendInProgress || !this.selfOrder.verifyCart()) {
             return;
         }
 
@@ -68,18 +64,24 @@ export class CartPage extends Component {
             return;
         }
 
-        if (mode === "meal" && !order.isSavedOnServer) {
-            this.sendInProgress = true;
-            await this.selfOrder.sendDraftOrderToServer();
-            if (type !== "kiosk") {
-                this.router.navigate("confirmation", {
-                    orderAccessToken: order.access_token,
-                    screenMode: "order",
-                });
-                return;
+        // in case of no payment methods available -> pay at cashier
+        if (!isPaymentMethod) {
+            let screenMode = "pay";
+
+            if (!order.isSavedOnServer) {
+                this.sendInProgress = true;
+                await this.selfOrder.sendDraftOrderToServer();
+                this.sendInProgress = false;
+                screenMode = mode === "meal" ? "order" : "pay";
             }
-            this.sendInProgress = false;
+
+            this.router.navigate("confirmation", {
+                orderAccessToken: order.access_token,
+                screenMode: screenMode,
+            });
+            return;
         }
+
         if (orderingMode === "table" && !takeAway) {
             if (type === "kiosk") {
                 this.router.navigate("stand_number");
@@ -186,11 +188,5 @@ export class CartPage extends Component {
                 type: "danger",
             });
         }
-    }
-
-    getSelectedAttributes(line) {
-        const attributeValues = line.attribute_value_ids;
-        const customAttr = line.custom_attribute_value_ids;
-        return attributeFormatter(this.selfOrder.attributeById, attributeValues, customAttr);
     }
 }

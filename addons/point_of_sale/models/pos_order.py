@@ -291,7 +291,7 @@ class PosOrder(models.Model):
     session_id = fields.Many2one(
         'pos.session', string='Session', required=True, index=True,
         domain="[('state', '=', 'opened')]")
-    config_id = fields.Many2one('pos.config', related='session_id.config_id', string="Point of Sale", readonly=False)
+    config_id = fields.Many2one('pos.config', related='session_id.config_id', string="Point of Sale", readonly=False, store=True)
     currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency")
     currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=0, readonly=True,
         help='The rate of the currency to the currency of rate applicable at the date of the order')
@@ -328,7 +328,7 @@ class PosOrder(models.Model):
     has_refundable_lines = fields.Boolean('Has Refundable Lines', compute='_compute_has_refundable_lines')
     refunded_orders_count = fields.Integer(compute='_compute_refund_related_fields')
     ticket_code = fields.Char(help='5 digits alphanumeric code to be used by portal user to request an invoice')
-    tracking_number = fields.Char(string="Tracking Number", compute='_compute_tracking_number')
+    tracking_number = fields.Char(string="Short order number", compute='_compute_tracking_number')
 
     @api.depends('lines.refund_orderline_ids', 'lines.refunded_orderline_id')
     def _compute_refund_related_fields(self):
