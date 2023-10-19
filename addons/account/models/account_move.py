@@ -510,6 +510,7 @@ class AccountMove(models.Model):
         tracking=True,
         compute='_compute_invoice_default_sale_person',
         store=True,
+        readonly=False,
     )
     # Technical field used to fit the generic behavior in mail templates.
     user_id = fields.Many2one(string='User', related='invoice_user_id')
@@ -1737,7 +1738,7 @@ class AccountMove(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        self = self.with_company(self.journal_id.company_id)
+        self = self.with_company(self.journal_id.company_id._accessible_branches()[:1])
 
         warning = {}
         if self.partner_id:
