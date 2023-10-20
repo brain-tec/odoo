@@ -39,7 +39,7 @@
     </t>
 
     <t t-name="account.TaxTotalsField">
-        <table t-if="totals" class="oe_right">
+        <table t-if="totals">
             <tbody>
                 <t t-foreach="totals.subtotals" t-as="subtotal" t-key="subtotal['name']">
                     <tr>
@@ -85,7 +85,7 @@
                             name="amount_total"
                             t-att-class="Object.keys(totals.groups_by_subtotal).length > 0 ? 'oe_subtotal_footer_separator' : ''"
                             t-out="totals.formatted_amount_total"
-                            style="'font-size: 1.3em; font-weight: bold; white-space: nowrap;'"
+                            style="font-size: 1.3em; font-weight: bold; white-space: nowrap;"
                         />
                     </td>
                 </tr>

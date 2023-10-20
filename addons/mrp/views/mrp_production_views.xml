@@ -19,6 +19,24 @@
             <field name="target">fullscreen</field>
         </record>
 
+        <record id="mrp_production_view_activity" model="ir.ui.view">
+            <field name="name">mrp.production.view.activity</field>
+            <field name="model">mrp.production</field>
+            <field name="arch" type="xml">
+                <activity string="Manufacturing Orders">
+                    <templates>
+                        <div t-name="activity-box" class="d-flex w-100">
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <div class="flex-grow-1">
+                                <field name="name" class="o_text_block"/>
+                                <field name="date_start" widget="date" class="d-block"/>
+                            </div>
+                        </div>
+                    </templates>
+                </activity>
+            </field>
+        </record>
+
         <record id="mrp_production_tree_view" model="ir.ui.view">
             <field name="name">mrp.production.tree</field>
             <field name="model">mrp.production</field>
@@ -584,7 +602,7 @@
                     <filter string="To Close" name="filter_to_close" domain="[('state', '=', 'to_close')]"/>
                     <separator/>
                     <filter string="Awaiting Components" name="waiting" domain="[('reservation_state', 'in', ('waiting', 'confirmed'))]"/>
-                    <filter string="Ready to Start" name="filter_ready" domain="[('reservation_state', '=', 'assigned')]"/>
+                    <filter string="MO Ready" name="filter_ready" domain="[('reservation_state', '=', 'assigned')]"/>
                     <separator/>
                     <filter string="Delays" name="planning_issues" help="Late MO or Late delivery of components"
                         domain="['|', ('delay_alert_date', '!=', False), '&amp;', ('date_deadline', '&lt;', current_date), ('state', '=', 'confirmed')]"/>
@@ -616,7 +634,7 @@
         <record id="mrp_production_action" model="ir.actions.act_window">
             <field name="name">Manufacturing Orders</field>
             <field name="res_model">mrp.production</field>
-            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="view_mrp_production_filter"/>
             <field name="context">{'search_default_todo': True, 'default_company_id': allowed_company_ids[0]}</field>

@@ -25,7 +25,7 @@
     width: 77px;
     background-color: $o-we-sidebar-blocks-content-snippet-bg;
 
-    &.ui-draggable-dragging {
+    &.o_draggable_dragging {
         transform: rotate(-3deg) scale(1.2);
         box-shadow: 0 5px 25px -10px black;
         transition: transform 0.3s, box-shadow 0.3s;
@@ -514,6 +514,33 @@
                 @extend %we-generic-button;
                 display: flex;
                 padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2.5);
+            }
+
+            .dropdown-menu {
+                border-color: $o-we-sidebar-content-field-dropdown-border-color;
+                padding: 0;
+
+                > li ~ li {
+                    border-top: $o-we-sidebar-content-field-dropdown-item-spacing solid transparent;
+                }
+            }
+
+            .dropdown-item {
+                @include we-icon-button('', $align: left); // Always a padding on the left
+                background-color: $o-we-sidebar-content-field-dropdown-item-bg;
+                color: $o-we-sidebar-content-field-dropdown-item-color;
+                border-radius: 0;
+                padding-top: 5px;
+                padding-bottom: 5px;
+
+                &:hover, &:focus {
+                    background: $o-we-dropdown-item-bg-hover;
+                    color: $o-we-dropdown-item-hover-color;
+                }
+            }
+
+            .o_we_font_size_badge {
+                opacity: 0.6;
             }
 
             #font-size > button {
@@ -2440,7 +2467,7 @@ we-select.o_we_border_preview_aligned_select {
         pointer-events: auto;
     }
 }
-.oe_overlay.ui-draggable-dragging .o_handles {
+.oe_overlay.o_draggable_dragging .o_handles {
     display: none;
 }
 

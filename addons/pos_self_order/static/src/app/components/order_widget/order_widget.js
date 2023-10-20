@@ -41,19 +41,21 @@ export class OrderWidget extends Component {
         const payAfter = this.selfOrder.config.self_ordering_pay_after;
         const kioskPayment = this.selfOrder.pos_payment_methods;
         const isNoLine = this.selfOrder.currentOrder.lines.length === 0;
+        const hasNotAllLinesSent = this.selfOrder.currentOrder.hasNotAllLinesSent();
+        const isMobilePayment = this.selfOrder.pos_payment_methods.find((p) => p.is_mobile_payment);
 
         let label = "";
         let disabled = false;
 
         if (currentPage === "product_list") {
             label = _t("Order");
-            disabled = isNoLine;
+            disabled = isNoLine || hasNotAllLinesSent.length == 0;
         } else if (payAfter === "meal" && !this.selfOrder.currentOrder.isSavedOnServer) {
             label = _t("Order");
             disabled = isNoLine;
         } else {
-            label = kioskPayment ? _t("Pay") : _t("Pay at cashier");
-            disabled = false;
+            label = kioskPayment ? _t("Pay") : _t("Order");
+            disabled = !kioskPayment && !isMobilePayment;
         }
 
         return { label, disabled };
@@ -61,15 +63,8 @@ export class OrderWidget extends Component {
 
     get lineNotSend() {
         const order = this.selfOrder.currentOrder;
-
-        if (order.isSavedOnServer) {
-            return {
-                price: order.amount_total,
-                count: order.totalQuantity,
-            };
-        }
-
         const lineNotSend = order.hasNotAllLinesSent();
+
         return lineNotSend.reduce(
             (acc, line) => {
                 const currentQty = line.qty;
